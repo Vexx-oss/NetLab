@@ -31,6 +31,8 @@ Spiel.ticketBauen = function(spec){
     const w = bauen();
     if (spec.umbau) spec.umbau(w.netz, w.rollen, Zufall(vSeed + 99));
     for (const g of gewaehlt) g.inj.anwenden(w.netz, g.k, g.param, Zufall(vSeed + 5));
+    /* Startzustand ist gespeichert (running = startup): Der Fehler übersteht einen Neustart, ungespeichert ist nur, was der Spieler ändert */
+    for (const g of Object.values(w.netz.geraete)) if (Modell.IOS[g.typ] && (g.startup || !spec.werkszustand?.includes(g.id))) Modell.speichern(g);
     return w.netz;
   };
   const kaputt = fabrik();
@@ -55,7 +57,11 @@ Spiel.ticketBauen = function(spec){
   const endZiele = spec.alleZiele ? ziele : gebrochen;
   endZiele.push(...zusatz);
   /* Lösung, Hilfen, Texte */
-  const loesung = spec.loesung || (spec.loesungFn ? spec.loesungFn(gesund.netz, gesund.rollen) : null) || [...gewaehlt.flatMap(g => g.inj.loesung(gesund.netz, g.k, g.param, gesund.rollen)), ...(spec.loesungExtra || [])];
+  const loesung = (spec.loesung || (spec.loesungFn ? spec.loesungFn(gesund.netz, gesund.rollen) : null) || [...gewaehlt.flatMap(g => g.inj.loesung(gesund.netz, g.k, g.param, gesund.rollen)), ...(spec.loesungExtra || [])]).slice();
+  /* Zum Schluss speichern, was an IOS-Geräten geändert wurde (im Betrieb Pflicht, bei AP2 prüft es der Neustart-Test) */
+  const gespeichert = new Set(loesung.filter(x => x.aktion === "speichern" || /copy running-config startup-config|write memory/.test(x.cli || "")).map(x => x.geraet));
+  const iosGeaendert = [...new Set(loesung.filter(x => (x.cli || x.setzen) && Modell.IOS[kaputt.geraete[x.geraet]?.typ]).map(x => x.geraet))].filter(id => !gespeichert.has(id));
+  for (const id of iosGeaendert) loesung.push({aktion: "speichern", geraet: id, text: `${kaputt.geraete[id].name}: Konfiguration speichern (copy running-config startup-config) – sonst ist die Änderung nach dem nächsten Neustart weg.`});
   const hilfen = {frage: [], bereich: [], konkret: []};
   for (const g of gewaehlt) { const x = g.inj.hilfen ? g.inj.hilfen(gesund.netz, g.k, g.param, gesund.rollen) : {}; for (const f of ["frage", "bereich", "konkret"]) hilfen[f].push(...(x[f] || [])); }
   if (spec.hilfen) for (const f of ["frage", "bereich", "konkret"]) if (spec.hilfen[f]) hilfen[f] = spec.hilfen[f];

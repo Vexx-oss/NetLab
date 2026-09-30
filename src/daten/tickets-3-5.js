@@ -144,7 +144,7 @@
     lohn: {euro: 130, ruf: 2}});
 
   t({id: "autohaus-projekt", reihe: 7, kunde: "autohaus", karriere: 4, stufe: "AP1", art: "projekt", vorlage: "standorte", vSeed: 57, minuten: 20,
-    injektoren: [], alleZiele: true,
+    injektoren: [], alleZiele: true, werkszustand: ["r2"],
     umbau(n){
       n.geraete.r2.running = Modell.werkszustand("router", n.geraete.r2.name);
       n.geraete.r1.running.routen = n.geraete.r1.running.routen.filter(r => r.netz === "0.0.0.0");
