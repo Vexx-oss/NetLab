@@ -1,0 +1,47 @@
+/* ---------- Die Leiste (kompakte Ansicht) ----------
+   Im Leistenmodus ist das Fenster transparent und rahmenlos: nur die Karte hat einen (leicht durchscheinenden) Hintergrund. */
+html[data-modus="leiste"], html[data-modus="leiste"] body, html[data-modus="tray"], html[data-modus="tray"] body{background:transparent !important}
+html[data-modus="leiste"] body{overflow:hidden}
+.leiste-wurzel{position:fixed; inset:0; pointer-events:none}
+.leiste-karte{pointer-events:auto; position:absolute; left:0; top:0; width:300px; height:56px; display:flex; flex-direction:column; overflow:hidden;
+  border-radius:14px; background:var(--leiste-bg); border:1px solid var(--line-2); color:var(--ink);
+  opacity:var(--leiste-deckkraft, .55); transition:opacity .25s ease, height .2s ease, width .2s ease, box-shadow .2s; user-select:none; -webkit-user-select:none}
+.leiste-karte.hover{opacity:1}
+.leiste-karte.auf{width:320px; height:220px}
+.im-browser .leiste-karte{box-shadow:var(--schatten)}
+.im-browser[data-ecke="ol"] .leiste-karte{left:12px; top:12px}
+.im-browser[data-ecke="or"] .leiste-karte{left:auto; right:12px; top:12px}
+.im-browser[data-ecke="ul"] .leiste-karte{top:auto; left:12px; bottom:12px}
+.im-browser[data-ecke="ur"] .leiste-karte{top:auto; left:auto; right:12px; bottom:12px}
+.lk-zeile{display:flex; align-items:center; gap:8px; height:54px; flex:0 0 auto; padding:0 6px 0 2px}
+.lk-griff{display:flex; align-items:center; justify-content:center; width:18px; align-self:stretch; color:var(--faint); cursor:grab}
+.lk-griff .sym{pointer-events:none}
+.lk-ampeln{display:flex; align-items:center; gap:5px; min-width:0; flex:0 1 auto}
+.lk-ampel{display:inline-flex}
+.lk-ampel-sym.f-ok{fill:var(--ok)} .lk-ampel-sym.f-warn{fill:var(--warn)} .lk-ampel-sym.f-bad{fill:var(--bad)}
+.lk-keine{font:700 12px/1 var(--display); color:var(--muted); white-space:nowrap}
+.lk-mehr{font:600 11px/1 var(--body); color:var(--muted)}
+.lk-werte{display:flex; align-items:center; gap:9px; margin-left:auto; font:700 13px/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap}
+.lk-werte > *, .lk-werte .sym{pointer-events:none}
+.lk-euro{color:var(--geld)}
+.lk-ruf{display:inline-flex; align-items:center; gap:3px; color:var(--ink)}
+.lk-ruf .sym{color:var(--ruf)}
+.lk-offen{display:inline-flex; align-items:center; gap:4px; color:var(--muted)}
+.lk-punkt{width:8px; height:8px; border-radius:50%; background:var(--faint)}
+.lk-offen.hat{color:var(--ink)}
+.lk-offen.hat .lk-punkt{background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.lk-oeffnen{display:inline-flex; align-items:center; gap:4px; height:40px; min-width:44px; padding:0 8px; border-radius:10px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink);
+  font:700 12px/1 var(--body); flex:0 0 auto}
+.lk-oeffnen:hover{border-color:var(--accent); color:var(--accent)}
+.lk-oeffnen span{display:none}
+.leiste-karte.auf .lk-oeffnen span{display:inline}
+.lk-auf{display:flex; flex-direction:column; gap:8px; flex:1 1 auto; min-height:0; padding:0 12px 10px; opacity:0; transition:opacity .15s}
+.leiste-karte.auf .lk-auf{opacity:1; transition-delay:.08s}
+.lk-text{font-size:13px; color:var(--muted); line-height:1.35}
+.lk-text:empty{display:none}
+.lk-mini{flex:1 1 auto; min-height:0; overflow:auto; border-radius:10px}
+.lk-mini:empty{display:none}
+.lk-fuss{display:flex; align-items:center; margin-top:auto}
+.lk-marke{font:700 11px/1 var(--display); color:var(--faint); letter-spacing:.02em}
+.lk-klein{margin-left:auto; min-height:28px; padding:0 8px; border-radius:7px; border:1px solid var(--line); background:none; color:var(--muted); font:600 11.5px/1 var(--body)}
+.lk-klein:hover{color:var(--ink); border-color:var(--line-2)}

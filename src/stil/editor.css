@@ -1,0 +1,221 @@
+/* ---------- Labor-Ansicht: Geräteleiste, Fläche (SVG), Ebenen, Andockbereiche ----------
+   Nur Tokens aus basis.css. Gerätetyp-Farbe über --g. */
+.typ-router{--g:var(--typ-router)} .typ-switch{--g:var(--typ-switch)} .typ-firewall{--g:var(--typ-firewall)} .typ-pc{--g:var(--typ-host)}
+.typ-server{--g:var(--typ-server)} .typ-nas{--g:var(--typ-nas)} .typ-internet{--g:var(--typ-internet)}
+.gb-kachel{fill:var(--panel-2); fill:color-mix(in srgb, var(--g) 9%, var(--panel-2)); stroke:var(--line-2); stroke-width:1.5; transition:fill var(--dauer), stroke var(--dauer)}
+.gb-internet .gb-kachel{stroke:var(--g); stroke-opacity:.6}
+.gb-glyph path{fill:none; stroke:var(--g); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
+
+.labor{display:grid; grid-template-columns:auto minmax(0,1fr) auto; height:100%; min-height:0; background:var(--bg)}
+
+/* ---- Geräteleiste ---- */
+.lb-geraete{display:flex; flex-direction:column; align-items:center; gap:2px; width:84px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; overflow-x:hidden; scrollbar-width:thin}
+.lb-geraete-titel{font:700 10.5px/1 var(--body); letter-spacing:.1em; text-transform:uppercase; color:var(--faint); padding:6px 0 8px}
+.lb-teil{display:flex; flex-direction:column; align-items:center; gap:1px; width:70px; min-height:60px; padding:4px 2px 5px; border:1px solid transparent; border-radius:12px; background:none; color:var(--muted);
+  font:600 11px/1.1 var(--body); cursor:grab; touch-action:none; user-select:none; transition:background var(--dauer), border-color var(--dauer), color var(--dauer)}
+.lb-teil:hover{background:var(--panel-3); color:var(--ink)}
+.lb-teil:hover .gb-kachel{stroke:var(--g)}
+.lb-teil.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.lb-teil svg{pointer-events:none; overflow:visible}
+.lb-geist{position:fixed; left:0; top:0; z-index:70; pointer-events:none; opacity:.6; filter:drop-shadow(0 8px 14px rgba(0,0,0,.4)); transition:opacity .1s}
+.lb-geist.drin{opacity:.95}
+.lb-geist svg{overflow:visible}
+
+/* ---- Mitte: Auftrag, Fläche, Simulation ---- */
+.lb-mitte{display:flex; flex-direction:column; min-width:0; min-height:0}
+.lb-auftrag{flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}
+.lb-auftrag:empty{display:none}
+.lb-auftrag-standard{display:flex; align-items:center; min-height:44px; padding:0 16px; font:700 15px/1 var(--display)}
+.auftrag-sandbox{display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 12px 8px 14px; background:linear-gradient(90deg, var(--accent-soft), transparent 55%)}
+.as-sym{display:inline-flex; flex:0 0 auto; width:38px; height:38px; align-items:center; justify-content:center; border-radius:11px; background:var(--panel-2); border:1px solid var(--line-2); color:var(--accent)}
+.as-text{display:flex; flex-direction:column; gap:2px; min-width:0}
+.as-text strong{font:800 17px/1.1 var(--display)}
+.as-text span{color:var(--muted); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.auftrag-sandbox .knopf{margin-left:auto; flex:0 0 auto}
+
+.lb-leinwand{position:relative; flex:1 1 auto; min-height:120px; overflow:hidden}
+.lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--bg); touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
+.lb-svg:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
+.lb-svg.greift{cursor:grabbing}
+.lb-svg.zieht, .lb-svg.zieht .ger{cursor:grabbing}
+.labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg{cursor:crosshair}
+.labor[data-werkzeug="platzieren"] .lb-svg{cursor:copy}
+.lb-raster-punkt{fill:var(--line)}
+.lb-raster.fein{opacity:.35}
+
+/* schwebende Werkzeugleisten */
+.lb-leiste-oben{position:absolute; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
+.lb-leiste-unten{position:absolute; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
+.lb-luecke{flex:1 1 auto}
+.lb-gruppe{display:flex; align-items:center; gap:2px; padding:3px; border-radius:12px; background:var(--glas); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.18);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); pointer-events:auto}
+.lb-wz, .lb-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:40px; height:40px; padding:0 8px; border:0; border-radius:9px; background:none; color:var(--muted);
+  transition:background var(--dauer), color var(--dauer)}
+.lb-wz:hover, .lb-knopf:hover:not([disabled]){background:var(--panel-3); color:var(--ink)}
+.lb-wz.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.lb-knopf[disabled]{opacity:.35; cursor:default}
+.lb-knopf-text span{font:600 13px/1 var(--body)}
+.lb-zoomtext{min-width:56px; height:40px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 12.5px/1 var(--mono); font-variant-numeric:tabular-nums}
+.lb-zoomtext:hover{background:var(--panel-3); color:var(--ink)}
+.lb-ebenen{display:flex; gap:2px}
+.lb-ebene{height:40px; padding:0 12px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap; transition:background var(--dauer), color var(--dauer)}
+.lb-ebene:hover{background:var(--panel-3); color:var(--ink)}
+.lb-ebene.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.lb-hinweis{position:absolute; left:12px; bottom:12px; max-width:calc(100% - 440px); padding:7px 12px; border-radius:10px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
+  font-size:12.5px; line-height:1.35; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.lb-hinweis:empty{display:none}
+@media (max-width:1100px){ .lb-hinweis{display:none} }
+.lb-leer{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); text-align:center; color:var(--muted); pointer-events:none; max-width:360px}
+.lb-leer strong{display:block; font:800 22px/1.2 var(--display); color:var(--ink); margin-bottom:6px}
+
+/* ---- Geräte ---- */
+.ger{cursor:grab}
+.ger-treffer{fill:transparent}
+.ger-auswahl{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4; opacity:0; transition:opacity var(--dauer)}
+.ger.gewaehlt .ger-auswahl{opacity:1}
+.ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.4}
+.ger.hover .gb-kachel{fill:var(--panel-3); stroke:var(--g)}
+.ger-name{font:700 12.5px/1 var(--body); fill:var(--ink); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
+.ger-ip{font:500 11px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
+.ger-ip.schwach{fill:var(--faint); font-style:italic}
+.ger.aus .gb{opacity:.38}
+.ger.aus .ger-name{fill:var(--muted)}
+.labor[data-ebene="ip"] .ger.ohne-ip .gb-kachel{stroke:var(--faint); stroke-dasharray:4 3; fill:var(--panel)}
+.labor[data-ebene="ip"] .ger.ohne-ip .gb-glyph path{stroke:var(--faint)}
+.ger.blitz-ok .gb-kachel{stroke:var(--ok); stroke-width:3; fill:var(--ok-soft)}
+.ger.blitz-fehler .gb-kachel{stroke:var(--bad); stroke-width:3; fill:var(--bad-soft)}
+.ger.blitz-fehler .gb{animation:wackeln .42s ease-in-out}
+@keyframes wackeln{20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)}}
+.badge{cursor:help}
+.badge-warn circle{fill:var(--warn); stroke:var(--bg); stroke-width:2}
+.badge-warn path{stroke:var(--accent-ink); stroke-width:2.4; stroke-linecap:round; fill:none}
+.badge-ungespeichert circle{fill:var(--info); stroke:var(--bg); stroke-width:2}
+.badge-aus rect{fill:var(--panel-3); stroke:var(--line-2)}
+.badge-aus text{font:700 10px/1 var(--body); fill:var(--muted); letter-spacing:.05em}
+
+/* ---- Kabel ---- */
+.kabel{--kf:var(--ok)}
+.kabel.k-aus{--kf:var(--warn)}
+.kabel.k-unten{--kf:var(--bad)}
+.kabel.vlan-trunk{--kf:var(--ink)}
+.kabel-treffer{stroke:transparent; stroke-width:14; cursor:pointer}
+.kabel-linie{stroke:var(--kf); stroke-width:2.6; stroke-linecap:round; stroke-opacity:.9}
+.kabel-trunk-aussen{stroke:var(--kf); stroke-width:7.5; stroke-linecap:round; stroke-opacity:.9}
+.kabel-trunk-innen{stroke:var(--bg); stroke-width:2.6; stroke-linecap:round}
+.k-unten .kabel-linie, .k-unten .kabel-trunk-aussen{stroke-dasharray:8 6}
+.k-aus .kabel-linie, .k-aus .kabel-trunk-aussen{stroke-dasharray:2 6}
+.kabel:hover .kabel-treffer{stroke:var(--panel-3); stroke-opacity:.7}
+.kabel.gewaehlt .kabel-treffer{stroke:var(--accent-soft); stroke-opacity:1}
+.kabel.gewaehlt .kabel-linie{stroke-width:3.4}
+.ps-grund{fill:var(--bg); stroke:var(--line-2); stroke-width:1}
+.ps-oben path{fill:var(--ok)} .ps-unten path{fill:var(--bad)} .ps-aus rect{fill:var(--warn)}
+.ps{cursor:help}
+.kabel-port{font:600 10px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round; pointer-events:none}
+.lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip{display:none}
+.vlan-schild rect{fill:var(--kf); stroke:var(--bg); stroke-width:1.5}
+.vlan-schild text{font:700 10.5px/1 var(--mono); fill:var(--accent-ink)}
+.vlan-schild.trunk rect{fill:var(--panel-2); stroke:var(--ink)}
+.vlan-schild.trunk text{fill:var(--ink)}
+.vlan-schild{pointer-events:none}
+
+/* ---- Zonen (Ebene IP-Netze) ---- */
+.zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
+.zone-d{--zf:var(--zone-d); --zl:var(--zone-d-linie)} .zone-e{--zf:var(--zone-e); --zl:var(--zone-e-linie)}
+.zone{pointer-events:none}
+.zone-flaeche{fill:var(--zf); stroke:var(--zl); stroke-width:1.5; stroke-linejoin:round}
+.zone-schild{fill:var(--panel); stroke:var(--zl); stroke-width:1.5}
+.zone-text{font:700 11px/1 var(--mono); fill:var(--ink)}
+
+/* ---- Kärtchen (MAC/ARP/Routen) ---- */
+.karte, .gw-schild{pointer-events:none}
+.karte-rahmen{fill:var(--panel); stroke:var(--line-2); stroke-width:1}
+.karte-titel{font:700 11px/1 var(--body); fill:var(--accent)}
+.karte-zeile{font:500 10.5px/1 var(--mono); fill:var(--ink); white-space:pre}
+.karte-zeile.leer{fill:var(--faint); font-style:italic; font-family:var(--body)}
+.gw-schild rect{fill:var(--panel-2); stroke:var(--line-2)}
+.gw-schild text{font:600 10.5px/1 var(--mono); fill:var(--muted)}
+.gw-schild.fehlt rect{stroke:var(--warn)} .gw-schild.fehlt text{fill:var(--warn)}
+
+/* ---- Hover: Ports und Kabelgriff ---- */
+.ports-platte{fill:var(--panel); stroke:var(--line-2); stroke-width:1; opacity:.96}
+.pd{stroke:var(--bg); stroke-width:1.5; cursor:crosshair; transition:stroke-width .1s}
+.pd-frei{fill:var(--panel-3); stroke:var(--muted)}
+.pd-oben{fill:var(--ok)} .pd-unten{fill:var(--bad)} .pd-aus{fill:var(--warn)}
+.pd:hover, .pd.ziel{stroke:var(--accent); stroke-width:3}
+.pd-name{font:600 8.5px/1 var(--mono); fill:var(--muted); pointer-events:none}
+.griff{cursor:crosshair}
+.griff circle{fill:var(--accent); stroke:var(--bg); stroke-width:2.5}
+.griff path{stroke:var(--accent-ink); stroke-width:2.2; stroke-linecap:round; fill:none}
+.griff:hover circle{stroke:var(--accent-soft); stroke-width:4}
+
+/* ---- Gummiband, Vorschau ---- */
+.band{stroke:var(--accent); stroke-width:2.4; stroke-dasharray:7 5; stroke-linecap:round; animation:band-laufen .5s linear infinite; pointer-events:none}
+.band-ping{stroke:var(--p-icmp)}
+@keyframes band-laufen{to{stroke-dashoffset:-12}}
+.band-paket{fill:var(--p-icmp); stroke:var(--bg); stroke-width:2; pointer-events:none}
+.band-stecker{fill:var(--accent); stroke:var(--bg); stroke-width:2; pointer-events:none}
+.band-text{font:700 10px/1 var(--mono); fill:var(--p-icmp); paint-order:stroke; stroke:var(--bg); stroke-width:3px; pointer-events:none}
+.vorschau{opacity:.5; pointer-events:none}
+.lb-s-band, .lb-s-pakete{pointer-events:none}
+
+/* ---- Pakete und Effekte ---- */
+.paket{pointer-events:none}
+.paket-schein{fill:var(--pf); opacity:.28}
+.paket-kern{fill:var(--pf); stroke:var(--bg); stroke-width:2}
+.paket-text{font:700 10px/1 var(--mono); fill:var(--pf); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round}
+.puls{fill:none; stroke:var(--pf); stroke-width:2}
+.ring-ok{fill:none; stroke:var(--ok); stroke-width:3}
+.ring-fehler{fill:none; stroke:var(--bad); stroke-width:3}
+.splitter{fill:var(--bad)}
+.platz-schild rect{fill:var(--bad-soft); stroke:var(--bad); stroke-width:1.5}
+.platz-schild text{font:700 11.5px/1 var(--body); fill:var(--bad)}
+.hl-ring{fill:none; stroke:var(--accent); stroke-width:3; animation:hl-puls 1s ease-in-out infinite}
+.hl-port{fill:none; stroke:var(--accent); stroke-width:2.5}
+@keyframes hl-puls{50%{stroke-opacity:.35; stroke-width:6}}
+
+/* ---- Simulation unten ---- */
+.lb-sim{position:relative; flex:0 0 auto; height:var(--sim-h, 250px); display:flex; flex-direction:column; border-top:1px solid var(--line); background:var(--panel); transition:height .2s ease}
+.labor.sim-zu .lb-sim{height:38px}
+.labor.sim-zieht .lb-sim{transition:none}
+.labor.sim-zieht{cursor:ns-resize; user-select:none}
+.lb-sim-griff{position:absolute; top:-5px; left:0; right:0; height:10px; cursor:ns-resize; z-index:2}
+.lb-sim-griff::after{content:""; position:absolute; left:50%; top:3px; width:44px; height:4px; margin-left:-22px; border-radius:2px; background:var(--line-2); opacity:0; transition:opacity var(--dauer)}
+.lb-sim:hover .lb-sim-griff::after{opacity:1}
+.labor.sim-zu .lb-sim-griff{display:none}
+.lb-sim-kopf{display:flex; align-items:center; gap:8px; width:100%; height:38px; flex:0 0 auto; padding:0 14px; border:0; background:none; color:var(--muted); font:700 13px/1 var(--body); text-align:left; min-width:0}
+.lb-sim-kopf:hover{color:var(--ink); background:var(--panel-2)}
+.lb-sim-titel-text{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.lb-sim-pfeil{margin-left:auto; display:inline-flex; transition:transform .2s}
+.labor:not(.sim-zu) .lb-sim-pfeil{transform:rotate(180deg)}
+.lb-sim-inhalt{flex:1 1 auto; min-height:0; overflow:auto}
+.labor.sim-zu .lb-sim-inhalt{display:none}
+.lb-sim-platz{padding:12px 16px; color:var(--muted)}
+.lb-sim-platz strong{display:block; color:var(--ink); margin-bottom:4px}
+
+/* ---- Inspektor rechts ---- */
+.lb-insp-huelle{position:relative; width:360px; display:flex; flex-direction:column; min-height:0; background:var(--panel); border-left:1px solid var(--line); transition:width .2s ease}
+.labor.insp-zu .lb-insp-huelle{width:0; border-left:0}
+.lb-inspektor{flex:1 1 auto; min-height:0; min-width:0; overflow:auto}
+.labor.insp-zu .lb-inspektor{display:none}
+.lb-lasche{position:absolute; right:100%; top:50%; transform:translateY(-50%); z-index:4; display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 8px; border:1px solid var(--line); border-right:0; border-radius:10px 0 0 10px;
+  background:var(--glas); color:var(--muted); font:600 12.5px/1 var(--body); white-space:nowrap; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.lb-lasche:hover{color:var(--ink); background:var(--panel-3)}
+.labor.insp-zu .lb-lasche{color:var(--accent)}
+.lb-insp-leer{display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:48px 24px; color:var(--muted)}
+.lb-insp-leer strong{color:var(--ink); font:800 18px/1.2 var(--display)}
+.lb-insp-leer-sym{display:inline-flex; width:56px; height:56px; align-items:center; justify-content:center; border-radius:16px; background:var(--panel-2); border:1px solid var(--line); color:var(--accent); margin-bottom:4px}
+.lb-tipps{list-style:none; padding:0; margin:14px 0 0; display:flex; flex-direction:column; gap:8px; text-align:left; font-size:13.5px}
+.lb-tipps kbd{margin-right:2px}
+.lb-insp-platz{padding:16px; display:flex; flex-direction:column; gap:10px}
+.lb-insp-kopf{display:flex; align-items:center; gap:12px}
+.lb-insp-kopf h3{font-size:20px}
+.lb-insp-art{color:var(--muted); font-size:13px}
+.lb-insp-hinweis{color:var(--muted); font-size:13px}
+.lb-insp-ports{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:13px}
+.lb-st.st-oben{color:var(--ok)} .lb-st.st-unten{color:var(--bad)} .lb-st.st-aus{color:var(--warn)}
+.lb-konsole-kopf{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line)}
+.lb-knopf-klein{margin-left:auto; min-height:32px; padding:0 10px; border-radius:8px; border:1px solid var(--line-2); background:var(--panel-2); font:600 12.5px/1 var(--body)}
+.lb-knopf-klein:hover{border-color:var(--accent)}
+.lb-konsole{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; height:calc(100% - 54px)}
+
+@media (max-width:1100px){ .lb-insp-huelle{width:320px} .lb-ebene{padding:0 9px} }

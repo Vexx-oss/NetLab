@@ -201,7 +201,9 @@ const CLI = (() => {
     return k.filter(c => (!c.nur || c.nur(s, ctx)) && (!c.nurNo || ctx.no) && (!ctx.no || c.nein !== false));
   }
   C.kinder = kinder;
-  function fertig(node, ctx){ return !!(node && (node.f || node.cr || (ctx.no && node.noCr))); }
+  /* Hier darf der Befehl enden: Blatt (keine Kinder), cr:true, oder in der no-Form noCr:true.
+     Der Handler ist der letzte Knoten mit f auf dem Pfad (ein Befehl, viele Argumente). */
+  function fertig(node, ctx){ return !!(node && (node.cr || !node.k || (ctx.no && node.noCr))); }
   /* Ein Schritt: welches Kind passt auf Wort i? */
   function schritt(s, kids, T, i, ctx){
     const t = T[i].text.toLowerCase();
@@ -286,11 +288,11 @@ const CLI = (() => {
     const k = h.konfig(s), con = (k.lines || {}).con || {};
     const teile = [];
     if (k.banner) teile.push(k.banner);
+    s.modus = s.art === "fw" ? "fwUser" : "user";
     if (con.login && con.passwort) {
       teile.push("", "User Access Verification", "");
-      s.modus = "user";
       s.rueckfrage = {prompt: "Password: ", verdeckt: true, versuche: 0, weiter: loginPruefen};
-    } else s.modus = "user";
+    }
     s.kontext = {};
     s.begruessung = teile.join("\n");
     return mitText ? s.begruessung : "";
@@ -351,6 +353,7 @@ const CLI = (() => {
     if (r.fehler) e.fehler = true;
     if (r.leeren) e.leeren = true;
     if (r.zeile != null) e.zeile = r.zeile;
+    if (r.trace) e.trace = r.trace;                 /* ping/traceroute: Trace für die Animation (UI entscheidet) */
     if (s.rueckfrage && s.rueckfrage.verdeckt) e.verdeckt = true;
     return e;
   }
@@ -467,6 +470,8 @@ const CLI = (() => {
     const g = h.geraet(s);
     if (!g) return {ausgabe: "% Dieses Gerät gibt es nicht mehr.", prompt: "", geaendert: false, befehl: "", fehler: true};
     if (!g.an) return {ausgabe: "(Das Gerät ist ausgeschaltet. Schalte es im Inspektor ein.)", prompt: C.prompt(s), geaendert: false, befehl: "", fehler: true};
+    /* Strg+C (): laufende Rückfrage abbrechen */
+    if (zeile === "") { C.abbrechen(s); return antwort(s, "", "", false); }
     /* laufende Rückfrage (Destination filename, [confirm], Password, Banner-Text …) */
     if (s.rueckfrage) {
       const rf = s.rueckfrage; s.rueckfrage = null;
@@ -519,6 +524,9 @@ const CLI = (() => {
     if (pipe != null && !e.fehler) e = Object.assign({}, e, {ausgabe: C.filtern(e.ausgabe, pipe)});
     return antwort(s, e, r.befehl, geaendert);
   };
+
+  /* Rückfrage abbrechen (Strg+C in der Oberfläche); liefert true, wenn eine offen war */
+  C.abbrechen = function(s){ const offen = !!s.rueckfrage; s.rueckfrage = null; return offen; };
 
   function iosFehler(s, zeile, r, T){
     const modus = s.modus;
