@@ -48,6 +48,7 @@ UI.spiel = (() => {
     const inst = S.inst;
     if (!inst || !Spiel.instanz(inst.iid)) { el.append(h("div", {class: "lb-auftrag-standard"}, h("strong", {}, "Kein offenes Ticket"))); return; }
     const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde), niveau = Spiel.niveauVon(inst);
+    if (inst.quelle === "pruefung") return pruefungsLeiste(el, inst, def);
     const live = niveau !== "AP2";
     const stand = S.live || {status: (def.ziele || []).map(z => ({ziel: z, ok: null}))};
     const erfuellt = stand.status.filter(s => s.ok).length;
@@ -76,6 +77,20 @@ UI.spiel = (() => {
         niveau === "AP2" ? " – die Abnahme startet die Geräte neu!" : " – nach einem Neustart wäre die Änderung weg.") : null,
       S.coach ? coachLeiste() : null,
       S.hilfeOffen ? hilfePanel(inst, def, naechste) : null));
+  }
+  /* Prüfungstag: keine Hilfe, keine Live-Ziele, Restzeit sichtbar */
+  function pruefungsLeiste(el, inst, def){
+    const p = Spiel.pruefung && Spiel.pruefung.aktiv();
+    const rest = p ? Spiel.pruefung.restMs(p) : 0, mm = Math.floor(rest / 60000), ss = String(Math.floor(rest / 1000) % 60).padStart(2, "0");
+    const nr = p ? p.aufgaben.indexOf(inst.iid) + 1 : 0;
+    el.append(h("div", {class: "sp-auftrag pruefung"},
+      h("div", {class: "sp-auftrag-kopf"}, h("span", {class: "sp-kunde-sym"}, "🎓"),
+        h("div", {class: "sp-auftrag-titel"}, h("strong", {}, def.titel), h("span", {}, `Prüfung ${p ? p.art : ""} · Aufgabe ${nr}/${p ? p.aufgaben.length : "?"} · Restzeit ${mm}:${ss}`)),
+        h("div", {class: "sp-auftrag-knoepfe"}, h("button", {type: "button", class: "knopf primaer", onclick: () => UI.karriere?.pruefungUebersicht?.()}, "Zur Prüfungsübersicht"))),
+      h("div", {class: "sp-auftrag-mitte"}, h("p", {class: "sp-symptom"}, h("b", {}, "Aufgabe: "), def.symptom || ""),
+        h("ul", {class: "sp-ziele"}, (def.ziele || []).map(z => h("li", {class: "neutral"}, h("span", {class: "sp-haken"}, "•"), h("span", {}, z.text || z.typ)))))));
+    clearTimeout(S.pruefTimer);
+    if (p) S.pruefTimer = setTimeout(() => { if (Spiel.pruefung.aktiv() && S.inst === inst) UI.labor.auftragNeu(); else if (!Spiel.pruefung.aktiv()) UI.toast("Die Prüfungszeit ist abgelaufen – die Prüfung wurde abgegeben.", "info"); }, 1000);
   }
   function menue(e, inst, def){
     const r = e.currentTarget.getBoundingClientRect();
