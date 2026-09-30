@@ -1,0 +1,165 @@
+/* ---------- Spiel-Oberfläche (ui/spiel.js): Postfach, Auftragsleiste, Hilfe, Ergebnis, Onboarding ---------- */
+.knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.knopf.primaer:hover{background:var(--accent); filter:brightness(1.08)}
+.knopf.geist{background:none; border-color:transparent; color:var(--muted)}
+.knopf.geist:hover{color:var(--ink); background:var(--panel-3)}
+.knopf.klein{min-height:30px; padding:0 10px; font-size:13px}
+.knopf.gross{min-height:48px; padding:0 22px; font-size:16px}
+.sp-leise{color:var(--muted); font-size:13px}
+.sp-ok{color:var(--ok); font-weight:600}
+
+/* ---- Kundensymbol ---- */
+.sp-kunde-sym{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; width:36px; height:36px; border-radius:11px; font-size:19px;
+  background:color-mix(in srgb, var(--k, var(--accent)) 18%, var(--panel-2)); border:1px solid color-mix(in srgb, var(--k, var(--accent)) 45%, transparent)}
+.sp-kunde-sym.gross{width:52px; height:52px; font-size:27px; border-radius:15px}
+
+/* ---- Auftragsleiste ---- */
+.sp-auftrag{display:flex; flex-direction:column; gap:8px; padding:10px 14px 12px; border-left:4px solid var(--k, var(--accent));
+  background:linear-gradient(90deg, color-mix(in srgb, var(--k, var(--accent)) 9%, var(--panel)), var(--panel) 60%)}
+.sp-auftrag-kopf{display:flex; align-items:center; gap:12px; min-width:0}
+.sp-auftrag-titel{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
+.sp-auftrag-titel strong{font:800 18px/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.sp-auftrag-titel span{color:var(--muted); font-size:12.5px}
+.sp-auftrag-knoepfe{display:flex; gap:6px; flex:0 0 auto}
+.sp-hilfe-knopf.an{border-color:var(--accent); background:var(--accent-soft)}
+.sp-abnahme.bereit{animation:sp-puls 1.6s ease-in-out infinite; box-shadow:0 0 0 0 var(--accent)}
+@keyframes sp-puls{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent)} 50%{box-shadow:0 0 0 8px transparent}}
+.sp-auftrag-mitte{display:flex; align-items:flex-start; gap:10px 18px; flex-wrap:wrap}
+.sp-symptom{flex:1 1 260px; font-size:13.5px; color:var(--ink); margin:0}
+.sp-symptom b{color:var(--muted); font-weight:600}
+.sp-ziele{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3px; flex:2 1 320px}
+.sp-ziele li{display:flex; align-items:baseline; gap:8px; font-size:13.5px; line-height:1.35}
+.sp-haken{display:inline-flex; width:20px; height:20px; flex:0 0 auto; align-items:center; justify-content:center; border-radius:6px; font-weight:800; font-size:12px;
+  border:1.5px solid var(--line-2); color:var(--faint); transform:translateY(3px)}
+.sp-ziele li.ok{color:var(--muted)}
+.sp-ziele li.ok .sp-haken{background:var(--ok); border-color:var(--ok); color:var(--bg)}
+.sp-ziele li.frisch .sp-haken{animation:sp-hop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes sp-hop{0%{transform:translateY(3px) scale(.4)} 100%{transform:translateY(3px) scale(1)}}
+.sp-ziele li.neutral .sp-haken{border-style:dotted}
+.sp-blockiert{color:var(--warn); font-weight:600}
+.sp-fortschritt{font:600 12px/1.3 var(--mono); color:var(--faint); align-self:center}
+.sp-ungespeichert{margin:0; padding:6px 10px; border-radius:8px; background:var(--warn-soft); color:var(--warn); font-size:13px}
+
+/* ---- Coach (Onboarding) ---- */
+.sp-coach{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:var(--accent-soft); border:1px solid var(--accent); animation:sp-rein .3s ease-out}
+.sp-coach p{margin:0; flex:1 1 auto; font-size:14px; font-weight:600}
+.sp-coach-sym{font-size:22px}
+@keyframes sp-rein{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
+
+/* ---- Hilfeleiter ---- */
+.sp-hilfe{display:flex; flex-direction:column; gap:10px; padding:10px 12px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line); max-height:42vh; overflow:auto; animation:sp-rein .2s ease-out}
+.sp-hilfe-kopf{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.sp-leiter{list-style:none; margin:0; padding:0; display:flex; gap:4px; flex-wrap:wrap}
+.sp-leiter li{display:flex; align-items:center; gap:4px; font-size:11.5px; color:var(--faint)}
+.sp-leiter li span{display:none}
+.sp-leiter li.an span{display:inline; color:var(--ink); font-weight:600}
+.sp-leiter button{width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line-2); background:var(--panel); color:var(--faint); font:700 12px var(--mono)}
+.sp-leiter li.frei button{border-color:var(--accent); color:var(--accent)}
+.sp-leiter li.an button{background:var(--accent); color:var(--accent-ink)}
+.sp-leiter button:disabled{cursor:default; opacity:.6}
+.sp-hilfe-inhalt p{margin:0 0 6px; font-size:14px; line-height:1.5}
+.sp-hilfe-fuss{display:flex; gap:8px; align-items:center}
+.sp-hilfe-fuss small{opacity:.8}
+.sp-check{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px}
+.sp-check label{display:flex; gap:8px; align-items:flex-start; font-size:13.5px; cursor:pointer}
+.sp-check input{margin-top:3px; accent-color:var(--accent)}
+.sp-check small{display:block; color:var(--faint); font-size:12px}
+.sp-senior{display:flex; gap:12px; align-items:flex-start}
+.sp-senior p{font-style:italic; font-size:15px}
+.sp-senior-sym{font-size:28px; line-height:1}
+.sp-senior-sym.gross{font-size:56px}
+.sp-demo{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px}
+.sp-demo li{font-size:13.5px; color:var(--faint)}
+.sp-demo li.jetzt{color:var(--ink)}
+.sp-demo li.fertig{color:var(--ok)}
+.sp-demo li.fertig::marker{content:"✓ "}
+.sp-demo-cli{margin:6px 0 0; padding:8px 10px; border-radius:8px; background:var(--bg); color:var(--ok); font:500 12.5px/1.5 var(--mono); white-space:pre-wrap}
+.sp-demo-felder{margin:6px 0 0; padding-left:16px; font-size:13px}
+
+/* ---- Overlays: Ergebnis, Willkommen, Vorhersage ---- */
+.sp-overlay{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(6,10,16,.55); backdrop-filter:blur(3px); opacity:0; transition:opacity .18s ease}
+.sp-overlay.da{opacity:1}
+.sp-overlay.vorhersage{align-items:flex-end; background:transparent; backdrop-filter:none; pointer-events:none; padding-bottom:88px}
+.sp-overlay.vorhersage .sp-karte{pointer-events:auto}
+.sp-karte{width:min(620px, 100%); max-height:calc(100vh - 48px); overflow:auto; padding:24px 26px; border-radius:18px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
+  transform:translateY(12px) scale(.98); transition:transform .22s cubic-bezier(.2,.9,.3,1.2)}
+.sp-overlay.da .sp-karte{transform:none}
+.sp-ergebnis, .sp-willkommen{display:flex; flex-direction:column; gap:14px}
+.sp-ergebnis h2, .sp-willkommen h2{font:800 26px/1.1 var(--display)}
+.sp-ergebnis h3{font:700 13px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin:0 0 8px}
+.sp-erg-kopf{display:flex; gap:14px; align-items:center}
+.sp-erg-kopf .sp-leise{display:block; margin-bottom:2px}
+.sp-sterne{display:flex; gap:6px; font-size:40px; line-height:1}
+.sp-sterne span{color:var(--line-2); transform:scale(.3); opacity:0; animation:sp-stern .45s cubic-bezier(.3,1.7,.5,1) forwards; animation-delay:calc(var(--i) * 120ms + 150ms)}
+.sp-sterne span.voll{color:var(--geld); text-shadow:0 0 18px color-mix(in srgb, var(--geld) 50%, transparent)}
+.sp-sterne span.halb{background:linear-gradient(90deg, var(--geld) 50%, var(--line-2) 50%); -webkit-background-clip:text; background-clip:text; color:transparent}
+@keyframes sp-stern{to{transform:none; opacity:1}}
+.sp-dank{margin:0; padding:12px 16px; border-radius:14px; background:var(--panel-2); border-left:3px solid var(--accent); font-size:15.5px; line-height:1.5}
+.sp-dank cite{display:block; margin-top:6px; color:var(--muted); font-size:13px; font-style:normal}
+.sp-lohn{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
+.sp-geld{font:800 28px/1 var(--display); color:var(--geld)}
+.sp-ruf{font:800 20px/1 var(--display); color:var(--ruf)}
+.sp-abzuege{margin:0; padding-left:18px; color:var(--muted); font-size:13px}
+.sp-lernen{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.sp-lernen li{display:flex; align-items:center; gap:10px}
+.sp-lernen b{display:block; font-size:14px}
+.sp-lernen small{color:var(--muted); font-size:12.5px}
+.sp-ring{width:30px; height:30px; flex:0 0 auto; border-radius:50%; --p:var(--nach);
+  background:conic-gradient(var(--ok) calc(var(--p) * 360deg), var(--line) 0); mask:radial-gradient(circle, transparent 58%, #000 60%); -webkit-mask:radial-gradient(circle, transparent 58%, #000 60%);
+  animation:sp-ring 1s ease-out}
+@keyframes sp-ring{from{--p:var(--von)}}
+@property --p{syntax:"<number>"; inherits:false; initial-value:0}
+.sp-erklaerung p{margin:0; font-size:14px; line-height:1.55}
+.sp-knoepfe{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px}
+.sp-pruefliste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.sp-pruefliste li{display:flex; gap:10px; align-items:flex-start}
+.sp-pruefliste li > span{font-weight:800; width:18px}
+.sp-pruefliste li.ok > span{color:var(--ok)}
+.sp-pruefliste li.offen > span{color:var(--bad)}
+.sp-pruefliste p{margin:2px 0 0; color:var(--muted); font-size:13.5px; line-height:1.45}
+.sp-willkommen{align-items:center; text-align:center}
+.sp-willkommen p{max-width:46ch; font-size:15.5px}
+.sp-vorhersage{display:flex; flex-direction:column; gap:10px; text-align:center}
+.sp-vorhersage h3{font:800 20px/1.2 var(--display)}
+.sp-vorhersage .sp-knoepfe{justify-content:center}
+
+/* ---- Postfach ---- */
+.sp-postfach{display:flex; flex-direction:column; height:100%; min-height:0; padding:18px 22px 0; gap:14px; background:var(--bg)}
+.sp-pf-kopf{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.sp-pf-kopf h2{font:800 28px/1 var(--display)}
+.sp-pf-aktionen{display:flex; gap:8px; align-items:center}
+.sp-pf-teile{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(280px, 400px) minmax(0, 1fr); gap:16px; padding-bottom:18px}
+.sp-pf-liste{display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; padding:2px 4px 8px 2px; scrollbar-width:thin}
+.sp-mail{display:flex; gap:11px; text-align:left; padding:11px 12px; border-radius:14px; border:1px solid var(--line); background:var(--panel); color:var(--ink); position:relative;
+  transition:border-color var(--dauer), background var(--dauer), transform var(--dauer)}
+.sp-mail:hover{border-color:var(--line-2); transform:translateX(2px)}
+.sp-mail.an{border-color:var(--k, var(--accent)); background:color-mix(in srgb, var(--k, var(--accent)) 8%, var(--panel))}
+.sp-mail.neu::after{content:""; position:absolute; top:12px; right:12px; width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--panel)}
+.sp-mail.eilig{border-color:var(--warn)}
+.sp-mail-text{display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 auto}
+.sp-mail-von{color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:14px}
+.sp-mail b{font:700 15px/1.25 var(--body)}
+.sp-mail.neu b{font-weight:800}
+.sp-mail-vorschau{color:var(--faint); font-size:12.5px; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.sp-chips{display:flex; gap:4px; flex-wrap:wrap; margin-top:4px}
+.sp-chip{padding:1px 7px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:600 11px/1.6 var(--body)}
+.sp-chip.niv-E{background:var(--ok-soft); color:var(--ok)}
+.sp-chip.niv-AP1{background:var(--accent-soft); color:var(--accent)}
+.sp-chip.niv-AP2{background:var(--info-soft); color:var(--info)}
+.sp-chip.geld{color:var(--geld)}
+.sp-chip.frist{background:var(--warn-soft); color:var(--warn)}
+.sp-chip.wartung{background:var(--info-soft); color:var(--info)}
+.sp-chip.wdh{background:var(--ok-soft); color:var(--ok)}
+.sp-chip.projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
+.sp-leser{min-height:0; overflow:auto; scrollbar-width:thin}
+.sp-brief{display:flex; flex-direction:column; gap:16px; padding:22px 24px; border-radius:18px; background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--k, var(--accent))}
+.sp-brief header{display:flex; gap:14px; align-items:center}
+.sp-brief h3{font:800 24px/1.15 var(--display)}
+.sp-brief-text{display:flex; flex-direction:column; gap:10px; font-size:16px; line-height:1.6; max-width:62ch}
+.sp-brief-text p{margin:0}
+.sp-brief-info{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px}
+.sp-brief-info > div{padding:10px 12px; border-radius:12px; background:var(--panel-2)}
+.sp-brief-info small{color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
+.sp-brief-info p{margin:4px 0 0; font-size:14px}
+.sp-leer{display:flex; flex-direction:column; gap:12px; align-items:flex-start; padding:20px; border-radius:14px; border:1px dashed var(--line-2); color:var(--muted)}
+@media (max-width: 900px){ .sp-pf-teile{grid-template-columns:1fr} .sp-leser{display:none} }
