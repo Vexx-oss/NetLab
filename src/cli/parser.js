@@ -377,11 +377,17 @@ const CLI = (() => {
     const breite = Math.max(0, ...eintraege.map(e => e.l.length)) + 2;
     return eintraege.map(e => ("  " + h.links(e.l, breite) + e.h + (s.einstieg && e.d ? (e.h ? "  – " : "") + e.d : "")).replace(/\s+$/, "")).join("\n");
   }
+  /* IOS: Was im Untermodus unbekannt ist, versucht es im übergeordneten Modus („interface ?“ in config-if) */
   function hilfe(s, zeile){
+    let r = hilfeIn(s, zeile, s.modus), m = MODI[s.modus];
+    while (r.fehler && m && m.eltern) { const r2 = hilfeIn(s, zeile, m.eltern); if (!r2.fehler) return r2; m = MODI[m.eltern]; }
+    return r;
+  }
+  function hilfeIn(s, zeile, modusName){
     const vor = zeile.replace(/\?\s*$/, "");
     const teilweise = vor.length > 0 && !/\s$/.test(vor);
     const T = zerlegen(vor);
-    const modus = MODI[s.modus]; const wurzel = C.baum(modus.baum);
+    const modus = MODI[modusName]; const wurzel = C.baum(modus.baum);
     const vorT = teilweise ? T.slice(0, -1) : T;
     const ctx = {zeile: vor, no: false};
     let node = wurzel;
@@ -414,14 +420,14 @@ const CLI = (() => {
     }
     const kids = kinder(s, node, ctx);
     if (node !== wurzel && kids.length === 0 && !fertig(node, ctx)) return {ausgabe: "% Unrecognized command", fehler: true, zeile: vor};
-    const zeigtPipe = node !== wurzel && fertig(node, ctx) && pfadZeigt(s, vorT);
+    const zeigtPipe = node !== wurzel && fertig(node, ctx) && pfadZeigt(s, vorT, modusName);
     const liste = kids.slice();
     let text = hilfeZeilen(s, liste, node !== wurzel && fertig(node, ctx));
     if (zeigtPipe) text = text.replace(/(\n?  <cr>.*)$/, "\n  |  Output modifiers" + (s.einstieg ? "  – Ausgabe filtern (include, exclude, begin, section)" : "") + "$1");
     return {ausgabe: text, zeile: vor};
   }
-  function pfadZeigt(s, T){
-    const r = parse(s, C.baum(MODI[s.modus].baum), T, {zeile: T.map(t => t.text).join(" "), no: false});
+  function pfadZeigt(s, T, modusName){
+    const r = parse(s, C.baum(MODI[modusName || s.modus].baum), T, {zeile: T.map(t => t.text).join(" "), no: false});
     return r.status === "ok" && r.pfad.some(n => n.zeigen);
   }
 
@@ -552,6 +558,7 @@ const CLI = (() => {
   C.tipp = function(s, zeile, r, T){
     const erstes = T[0] ? T[0].text.toLowerCase() : "";
     const m = s.modus, konfig = MODI[m] && MODI[m].konfig;
+    if (m === "priv" && passt(erstes, KONFIG_WOERTER)) return "Konfigurationsbefehle gehen erst nach „configure terminal“ (kurz: conf t).";
     if (r.unbekannt) return "Ein unbekanntes erstes Wort hält IOS für einen Rechnernamen und fragt dafür den DNS. „?“ zeigt die Befehle, die es hier gibt." +
       (h.konfig(s).domainLookup !== false ? " Mit „no ip domain-lookup“ (Konfigurationsmodus) entfällt die Wartezeit." : "");
     if (m === "user" && r.i === 0) return "Dafür brauchst du den privilegierten Modus: erst „enable“.";
