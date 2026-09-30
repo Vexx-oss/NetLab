@@ -103,3 +103,24 @@ DATEN.beispiele.praxis = function(){
   for (const id of ["r1", "sw1"]) Modell.speichern(n.geraete[id]);
   return n;
 };
+
+/* Handgeschriebene Tickets als Bauplan (Vorlage + Fehler + Texte). Netz, Ziele, Lösung und Hilfen werden erst beim
+   ersten Zugriff über Spiel.ticketBauen berechnet (die Spielschicht lädt nach den Daten) und dann gemerkt.
+   Statische Felder (id, art, stufe, karriere, kunde, titel, reihe, skills, lohn, minuten) stehen sofort bereit. */
+DATEN.ticketSpec = function(spec){
+  let gebaut = null;
+  const bau = () => {
+    if (gebaut) return gebaut;
+    try { gebaut = Spiel.ticketBauen(spec); } catch (e) { gebaut = null; typeof console !== "undefined" && console.error("Ticket " + spec.id, e); }
+    if (!gebaut) gebaut = {entwurf: true, ziele: [], loesung: [], hilfen: {frage: [], bereich: [], konkret: []}, netz: () => Modell.neu(), erklaerung: "", briefing: spec.briefing || "", symptom: spec.symptom || ""};
+    return gebaut;
+  };
+  const def = {id: spec.id, art: spec.art || "stoerung", stufe: spec.stufe || "E", karriere: spec.karriere || 1, kunde: spec.kunde, titel: spec.titel,
+               reihe: spec.reihe, spec};
+  for (const f of ["skills", "lohn", "minuten", "vorhersage"]) if (spec[f] !== undefined) def[f] = spec[f];
+  for (const f of ["netz", "ziele", "loesung", "hilfen", "erklaerung", "briefing", "symptom", "quelle", "vorlage", "injektoren", "gruende", "regression", "regressionOhne", "skills", "lohn", "minuten", "vorhersage", "entwurf"]) {
+    if (Object.prototype.hasOwnProperty.call(def, f)) continue;
+    Object.defineProperty(def, f, {enumerable: true, configurable: true, get(){ return bau()[f]; }});
+  }
+  return def;
+};

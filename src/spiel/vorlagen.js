@@ -206,7 +206,7 @@ Spiel.vorlagen = (() => {
       Modell.setzen(n, "r1", "nat", {statisch: [], dynamisch: [{acl: "1", aus: "Gi0/2", overload: true}]});
       speichernAlle(n);
       return {netz: n, rollen: {clients: ["verkauf", "werkstatt", "annahme"], hosts: ["srv", "verkauf", "werkstatt", "annahme"], server: "srv", router: "r1", router2: "r2",
-        switches: ["sw1", "sw2"], netzA: A + "0", netzB: B + "0", transfer: T + "0", maske: m, a, wanIf: "Gi0/2", inetIp: w.inetIp},
+        switches: ["sw1", "sw2"], netzA: A + "0", netzB: B + "0", transfer: T + "0", maske: m, a, lanIf: "Gi0/0", wanIf: "Gi0/2", inetIp: w.inetIp},
         ziele: [
           {typ: "erreichbar", von: "werkstatt", nach: "srv", proto: "tcp", port: 445, text: "Die Werkstatt öffnet die Auftragsdaten in der Zentrale"},
           {typ: "erreichbar", von: "annahme", nach: "verkauf", proto: "icmp", text: "Filiale und Zentrale erreichen sich"},

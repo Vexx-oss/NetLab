@@ -4,7 +4,7 @@
      spec: {id, vorlage, vSeed, kunde, injektoren:[{name, ziel?:key, wahl?:zahl}], stufe, karriere, art,
             titel, briefing, symptom, erklaerung, quelle, hilfen, lohn, minuten, skills, vorhersage,
             ziele? (ersetzt die Vorlagen-Ziele), zusatzZiele?, maxZiele?, umbau?(netz, rollen, z), loesungExtra?[],
-            loesung? (ersetzt die berechnete), alleZiele?}
+            loesung? (ersetzt die berechnete), loesungFn?(gesund, rollen), alleZiele?}
    Die Netz-Fabrik baut die Vorlage mit vSeed immer gleich und setzt dieselben Fehler: deterministisch.
    Spiel.generiere(skill, seed, {stufe, kunde, art}) → generiertes Ticket, registriert in Spiel.generierte. */
 Spiel.generierte = Spiel.generierte || {};
@@ -36,8 +36,10 @@ Spiel.ticketBauen = function(spec){
   const kaputt = fabrik();
   /* Ziele: Vorlage (oder eigene) + Zusatzziele der Injektoren; nur gebrochene zählen, außer alleZiele */
   let basis = spec.ziele ? spec.ziele.slice() : gesund.ziele.slice();
+  if (spec.zieleFn) basis = spec.zieleFn(gesund.netz, gesund.rollen);
   for (const g of gewaehlt) if (g.inj.ziele) basis = g.inj.ziele(gesund.netz, g.k, gesund.rollen);
   if (spec.ziele) basis = spec.ziele.slice();
+  if (spec.zieleFn) basis = spec.zieleFn(gesund.netz, gesund.rollen);
   const zusatz = [...(spec.zusatzZiele || []), ...gewaehlt.flatMap(g => g.inj.zusatzZiele ? g.inj.zusatzZiele(gesund.netz, g.k, gesund.rollen) : [])];
   const ziele = [];
   for (const z of basis) {
@@ -53,7 +55,7 @@ Spiel.ticketBauen = function(spec){
   const endZiele = spec.alleZiele ? ziele : gebrochen;
   endZiele.push(...zusatz);
   /* Lösung, Hilfen, Texte */
-  const loesung = spec.loesung || [...gewaehlt.flatMap(g => g.inj.loesung(gesund.netz, g.k, g.param, gesund.rollen)), ...(spec.loesungExtra || [])];
+  const loesung = spec.loesung || (spec.loesungFn ? spec.loesungFn(gesund.netz, gesund.rollen) : null) || [...gewaehlt.flatMap(g => g.inj.loesung(gesund.netz, g.k, g.param, gesund.rollen)), ...(spec.loesungExtra || [])];
   const hilfen = {frage: [], bereich: [], konkret: []};
   for (const g of gewaehlt) { const x = g.inj.hilfen ? g.inj.hilfen(gesund.netz, g.k, g.param, gesund.rollen) : {}; for (const f of ["frage", "bereich", "konkret"]) hilfen[f].push(...(x[f] || [])); }
   if (spec.hilfen) for (const f of ["frage", "bereich", "konkret"]) if (spec.hilfen[f]) hilfen[f] = spec.hilfen[f];
