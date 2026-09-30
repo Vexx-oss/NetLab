@@ -148,6 +148,9 @@
   }
 
   /* ---------- DNS-Client ---------- */
+  /* Ist der DNS-Server aus einem tieferen Grund unerreichbar (kein Gateway, NAT fehlt, Link unten …), zählt dieser Grund:
+     Er ist die eigentliche Ursache und der nächste Prüfschritt. Ist der Weg frei und nur der DNS-Dienst stumm, bleibt es DNS_NO_SERVER. */
+  const tiefer = u => u && !["TIMEOUT", "SERVICE_OFF", "PORT_CLOSED"].includes(u) ? u : "DNS_NO_SERVER";
   function dnsAufloesen(L, g, name){
     const idx0 = L.ev.length;
     if (IP.gueltig(name)) return {ok: true, ip: name};
@@ -163,7 +166,7 @@
                             app: {proto: "DNS", info: `DNS-Anfrage: Wer ist ${name}?`, felder: {name, typ: "A"}}});
       const r = anfrage(L, g, f, {timeout: Sim.T.DNS_TIMEOUT, passt: fr => !!((fr.udp && fr.udp.dst === sport && fr.app && fr.app.proto === "DNS") || (fr.icmp && fr.icmp.orig && fr.icmp.orig.id === f.ip.id)),
                                   sendOpt: {text: `${g.name} fragt den DNS-Server ${server}: „Wer ist ${name}?“`}});
-      if (r.sofort) return {ok: false, grund: "DNS_NO_SERVER", ursache: r.grund, ip: null, text: `DNS-Server ${server} nicht erreichbar: ${r.text}`, stelle: stelle(L, idx0, r.grund)};
+      if (r.sofort) return {ok: false, grund: tiefer(r.grund), ursache: r.grund, ip: null, text: `DNS-Server ${server} nicht erreichbar: ${r.text}`, stelle: stelle(L, idx0, r.grund)};
       if (r.antwort && r.antwort.app && r.antwort.app.proto === "DNS") {
         const a = r.antwort.app.felder;
         if (a.ip) { Sim._log(L, "empfangen", g.id, null, r.antwort, `${g.name} hat die Antwort: ${name} ist ${a.ip}.`); return {ok: true, ip: a.ip, grund: null}; }
@@ -172,13 +175,13 @@
       }
       if (r.antwort && r.antwort.icmp) {
         const u = L.icmpGrund[r.antwort.ip.id] || null;
-        return {ok: false, grund: "DNS_NO_SERVER", ursache: u, ip: null, text: `Der DNS-Server ${server} antwortet nicht auf Port 53.`, stelle: stelle(L, idx0, u)};
+        return {ok: false, grund: tiefer(u), ursache: u, ip: null, text: `Der DNS-Server ${server} antwortet nicht auf Port 53.`, stelle: stelle(L, idx0, u)};
       }
-      if (r.fehler) { const u = genauer(L, r.idx, r.fehler.grund); return {ok: false, grund: "DNS_NO_SERVER", ursache: u, ip: null, text: `DNS-Server ${server} nicht erreichbar: ${r.fehler.text}`, stelle: stelle(L, idx0, u)}; }
+      if (r.fehler) { const u = genauer(L, r.idx, r.fehler.grund); return {ok: false, grund: tiefer(u), ursache: u, ip: null, text: `DNS-Server ${server} nicht erreichbar: ${r.fehler.text}`, stelle: stelle(L, idx0, u)}; }
     }
     const u = timeoutGrund(L, idx0);
     const e = stelle(L, idx0, u) || Sim._log(L, "info", g.id, null, null, `Der DNS-Server ${server} antwortet nicht.`, {grund: "DNS_NO_SERVER", proto: "DNS"});
-    return {ok: false, grund: "DNS_NO_SERVER", ursache: u === "TIMEOUT" ? null : u, ip: null, text: `Der DNS-Server ${server} antwortet nicht.`, stelle: e};
+    return {ok: false, grund: tiefer(u === "TIMEOUT" ? null : u), ursache: u === "TIMEOUT" ? null : u, ip: null, text: `Der DNS-Server ${server} antwortet nicht.`, stelle: e};
   }
 
   /* ---------- Ping ---------- */
