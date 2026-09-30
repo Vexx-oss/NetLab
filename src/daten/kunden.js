@@ -1,0 +1,266 @@
+"use strict";
+/* ---------- Kunden der Karriere (Konzept § 3.3) und die Mentorfigur „Senior“ ----------
+   DATEN.kunden[id] = {id, name, branche, stufe, ansprechpartner:{name, rolle}, ton, beschreibung,
+                       vertrag:{euroProStunde}, farbe (CSS-Token aus stil/basis.css), symbol, saetze:{dank, dringend, lob}}
+   Alle Kunden und Personen sind erfunden. Die Sätze sind Bausteine für Postfach, Abnahme und Leiste:
+   ohne Platzhalter, jeder Satz steht für sich. Kunden duzen dich (Anrede „du“ wie im ganzen Spiel).
+   DATEN.senior = Satzlisten der Mentorfigur: ruhig, fragt statt vorzusagen. */
+Object.assign(DATEN.kunden, {
+  salon: {
+    id: "salon",
+    name: "Salon Lockenwerk",
+    branche: "Friseursalon",
+    stufe: 1,
+    ansprechpartner: {name: "Mira Kaya", rolle: "Inhaberin"},
+    ton: "Schreibt zwischen zwei Kundinnen vom Tablet am Empfang: kurz, herzlich, duzt vom ersten Satz an. Beschreibt Technik so, wie sie sie sieht („das Lämpchen am Kasten blinkt orange“), und schließt fast jede Nachricht mit „Liebe Grüße aus dem Salon“.",
+    beschreibung: "Drei Geräte im Laden: die Kasse am Empfang, ein Büro-PC für Termine und Buchhaltung und ein Netzwerkdrucker für die Belege. Ein Switch verbindet sie, ein Router bringt alles per NAT ins Internet. Kleines Netz, aber wenn am Samstag die Kasse nicht druckt, steht der ganze Laden.",
+    vertrag: {euroProStunde: 4},
+    farbe: "--vlan-5",
+    symbol: "✂️",
+    saetze: {
+      dank: [
+        "Du bist ein Schatz, die Kasse druckt wieder! Liebe Grüße aus dem Salon",
+        "Danke dir! Wenn du mal einen Termin brauchst, ich halte dir einen frei.",
+        "Perfekt, alles läuft. Ich sag's gleich dem Team.",
+        "Vielen Dank, das ging schneller als einmal Waschen und Föhnen.",
+      ],
+      dringend: [
+        "Hilfe, Samstag, volle Bude, und die Kasse findet den Drucker nicht!",
+        "Kannst du heute noch schauen? Um neun kommt die erste Kundin.",
+        "Das Lämpchen am Kasten blinkt orange und nichts geht mehr. Was mach ich?",
+        "Der Büro-PC kommt nicht ins Internet, und ich muss die Bestellung für die Farben abschicken.",
+      ],
+      lob: [
+        "Seit du da warst, läuft alles. Ich empfehle dich weiter!",
+        "Meine Schwester hat auch einen Laden. Darf ich ihr deine Nummer geben?",
+        "Endlich kein Stress mehr mit dem Drucker. Du bist Gold wert.",
+      ],
+    },
+  },
+  baeckerei: {
+    id: "baeckerei",
+    name: "Bäckerei Kornblume",
+    branche: "Bäckerei mit kleinem Café",
+    stufe: 1,
+    ansprechpartner: {name: "Heinz Kowalski", rolle: "Bäckermeister"},
+    ton: "Schreibt um halb fünf morgens, bevor die ersten Bleche in den Ofen gehen: knapp, ohne Anrede, ohne Smileys. Nennt den Router nur „die Kiste“ und misstraut allem, was blinkt. Wird spürbar warm, sobald etwas funktioniert.",
+    beschreibung: "Theke mit Kassen-PC, ein Laptop im Café für die Bestellungen der Kantinen, ein Drucker im Backraum für die Backzettel. Alles hängt an einem kleinen Switch und einem Router. Wenn um sechs die Tür aufgeht, muss die Kasse laufen.",
+    vertrag: {euroProStunde: 3},
+    farbe: "--vlan-7",
+    symbol: "🥐",
+    saetze: {
+      dank: [
+        "Läuft. Danke. Morgen liegt ein Streuselkuchen für dich bereit.",
+        "Na also. Hätte ich der Kiste gar nicht mehr zugetraut.",
+        "Danke. Jetzt kann ich wieder backen statt telefonieren.",
+        "Hat geklappt. Schreib's auf die Rechnung, die zahle ich gern.",
+      ],
+      dringend: [
+        "Kasse geht nicht. Wir öffnen um sechs.",
+        "Die Kiste blinkt wieder. Backzettel kommen nicht raus.",
+        "Kantinen bestellen bis zehn. Laptop kommt nicht ins Netz. Bitte schnell.",
+      ],
+      lob: [
+        "Seit du da warst, blinkt nichts mehr. Also nur noch grün.",
+        "Meine Frau sagt, ich soll dir danken. Also: danke.",
+        "Hab dich beim Innungstreffen erwähnt. Nur Gutes.",
+      ],
+    },
+  },
+  schreibbuero: {
+    id: "schreibbuero",
+    name: "Schreibbüro Wortgenau",
+    branche: "Schreib- und Übersetzungsbüro",
+    stufe: 2,
+    ansprechpartner: {name: "Konrad Albers", rolle: "Büroleiter"},
+    ton: "Beginnt jede Nachricht mit „Guten Tag“, nummeriert seine Anliegen und setzt Semikolons, wo sie hingehören. Hat dir beim ersten Termin das Du angeboten und bleibt dabei, schreibt aber sonst förmlich wie ein Brief. Führt ein Wartungsbuch und hängt gern ein „P.S.“ an.",
+    beschreibung: "Zehn Schreibplätze, ein Server für Dateiablage, DNS und DHCP, dazu ein großer Netzwerkdrucker. Die Aufträge haben feste Abgabetermine, Ausfälle kosten hier echtes Geld. Hier geht es um Adresspläne, DHCP, DNS, Ports und den TCP-Handshake.",
+    vertrag: {euroProStunde: 7},
+    farbe: "--vlan-2",
+    symbol: "📝",
+    saetze: {
+      dank: [
+        "Guten Tag, vielen Dank. Punkt 1 ist damit erledigt; ich habe es im Wartungsbuch vermerkt.",
+        "Besten Dank. Frau Petersen kann ihren Abgabetermin halten.",
+        "Danke dir. P.S.: Der Drucker grüßt, er druckt wieder.",
+        "Tadellos. Ich trage Datum und Uhrzeit der Lösung ein.",
+      ],
+      dringend: [
+        "Guten Tag. 1. Das Laufwerk ist weg. 2. Um 14 Uhr ist Abgabe. 3. Bitte melde dich.",
+        "Dringend: Die neuen Rechner bekommen keine Adresse; zwei Kolleginnen sitzen untätig.",
+        "Der Server ist per Name nicht zu finden, per Nummer schon. Ich verstehe es nicht, aber es eilt.",
+      ],
+      lob: [
+        "Seit deiner Umstellung keine einzige Störung. Seite 3 im Wartungsbuch ist leer geblieben.",
+        "Sauber dokumentiert; so habe ich mir das vorgestellt.",
+        "Die Kolleginnen fragen, ob du auch Kaffeemaschinen kannst. Ich habe verneint.",
+      ],
+    },
+  },
+  praxis: {
+    id: "praxis",
+    name: "Hausarztpraxis Dr. Müller",
+    branche: "Allgemeinmedizinische Praxis",
+    stufe: 3,
+    ansprechpartner: {name: "Sabine Krämer", rolle: "Praxismanagerin"},
+    ton: "Strukturiert und freundlich, schreibt in der Mittagspause. Denkt bei jeder Änderung zuerst an den Datenschutz („Kommen die Gäste dann an die Patientendaten?“) und fragt nach, bis sie es erklären kann. Bittet nach jeder Lösung um zwei Sätze für das Praxisprotokoll.",
+    beschreibung: "Empfang, zwei Behandlungsräume, ein Server mit Patientendaten und ein Gästenetz im Wartezimmer. Drei VLANs für Verwaltung, Behandlung und Gäste, verbunden über Router-on-a-Stick; eine Access-Liste hält die Gäste von den Praxisnetzen fern. Hier geht es um VLAN, Trunk, Router-on-a-Stick und ACL.",
+    vertrag: {euroProStunde: 12},
+    farbe: "--vlan-3",
+    symbol: "🩺",
+    saetze: {
+      dank: [
+        "Vielen Dank! Ich habe es Dr. Müller gleich erzählt.",
+        "Danke dir, das Gästenetz läuft, und trotzdem sieht niemand etwas von uns. Genau so.",
+        "Super, der Empfang ist wieder am Server. Das Wartezimmer atmet auf.",
+        "Danke! Schreibst du mir noch zwei Sätze, was du geändert hast? Für unser Protokoll.",
+      ],
+      dringend: [
+        "Wir kommen am Empfang nicht auf den Server, und das Wartezimmer ist voll.",
+        "Ein Patient hat im Gästenetz unsere Freigabe gesehen. Bitte sofort anschauen!",
+        "Behandlungsraum 2 ist offline, ab 14 Uhr haben wir Sprechstunde.",
+      ],
+      lob: [
+        "Die Datenschutzbeauftragte war da und hatte nichts zu beanstanden. Danke!",
+        "Seit der Trennung in VLANs fühlt sich alles viel sicherer an.",
+        "Dr. Müller fragt, ob du auch die Praxis ihres Kollegen betreuen möchtest.",
+      ],
+    },
+  },
+  autohaus: {
+    id: "autohaus",
+    name: "Autohaus Brenner",
+    branche: "Autohaus mit Werkstatt, zwei Standorte",
+    stufe: 4,
+    ansprechpartner: {name: "Timo Brenner", rolle: "Juniorchef"},
+    ton: "Schreibt vom Handy zwischen zwei Probefahrten, gern mit Autovergleichen („Das Netz stottert wie ein Diesel im Winter“). Locker, ungeduldig bei Stillstand, großzügig mit Lob. Sagt immer „Standort Süd“, nie „Filiale“.",
+    beschreibung: "Verkauf im Hauptsitz, Werkstatt am Standort Süd. Jeder Standort hat sein eigenes Netz, die Router sind miteinander verbunden, und ins Internet geht es per NAT. Die Werkstatt braucht das Teilelager im Hauptsitz, das Kundenportal soll von außen erreichbar sein. Hier geht es um statische Routen, Rückrouten, NAT/PAT und Port-Weiterleitung.",
+    vertrag: {euroProStunde: 18},
+    farbe: "--vlan-4",
+    symbol: "🚗",
+    saetze: {
+      dank: [
+        "Läuft wie frisch vom Band. Danke!",
+        "Top! Standort Süd sieht das Teilelager wieder.",
+        "Danke dir, der ganze Hof ist wieder online.",
+        "Sauber. Das war ein Boxenstopp unter zehn Sekunden.",
+      ],
+      dringend: [
+        "Standort Süd kommt nicht an die Teiledatenbank. Drei Autos stehen auf der Bühne!",
+        "Internet weg im ganzen Verkauf. Die Kunden wollen ihre Finanzierung sehen.",
+        "Das Netz stottert wie ein Diesel im Winter. Kannst du mal reinhören?",
+      ],
+      lob: [
+        "Du bist der TÜV für unser Netz: keine Mängel.",
+        "Mein Vater sagt, so ruhig war es seit Jahren nicht.",
+        "Nächstes Jahr kommt ein dritter Standort. Du bist gesetzt.",
+      ],
+    },
+  },
+  mittelstand: {
+    id: "mittelstand",
+    name: "Kessler Feinmechanik GmbH",
+    branche: "Metallverarbeitung, rund 60 Beschäftigte",
+    stufe: 5,
+    ansprechpartner: {name: "Dr. Ines Kessler", rolle: "Geschäftsführerin"},
+    ton: "Präzise wie ihre Bauteile: will zu jeder Änderung eine Begründung und eine Zeile für das Betriebshandbuch. Schreibt abends, kurz und sachlich. Lobt selten, dann aber ausdrücklich.",
+    beschreibung: "Verwaltung, Fertigung und Konstruktion im internen Netz, dazu ein Kundenportal in der DMZ hinter einer Firewall. Von außen darf nur HTTPS zum Portal, aus der DMZ nichts ins interne Netz. Die Dosen in der Halle sind mit Port-Security gesichert. Hier geht es um Firewall-Zonen, DMZ, Regelwerk und Port-Security.",
+    vertrag: {euroProStunde: 28},
+    farbe: "--vlan-6",
+    symbol: "⚙️",
+    saetze: {
+      dank: [
+        "Danke. Bitte die Änderung mit Begründung ins Betriebshandbuch.",
+        "Erledigt und dokumentiert. So soll es sein.",
+        "Danke für die schnelle Reaktion. Die Fertigung läuft wieder.",
+      ],
+      dringend: [
+        "Das Kundenportal ist von außen nicht erreichbar. Zwei Großkunden haben angerufen.",
+        "An einer Dose in der Halle ist ein fremdes Gerät aufgefallen. Bitte prüfen.",
+        "Die Konstruktion kommt nicht mehr an den Dateiserver. Liefertermin ist morgen früh.",
+      ],
+      lob: [
+        "Das Audit ist bestanden. Ein guter Teil davon ist deine Arbeit.",
+        "Eine so saubere Regeltabelle habe ich selten gesehen.",
+        "Wir verlängern den Vertrag. Ohne Verhandlung.",
+      ],
+    },
+  },
+  storage: {
+    id: "storage",
+    name: "Planwerk Architekten",
+    branche: "Architekturbüro mit großen Plan- und Bilddaten",
+    stufe: 6,
+    ansprechpartner: {name: "Jana Wolff", rolle: "Partnerin"},
+    ton: "Denkt in Bildern und schickt statt langer Texte Skizzen und Bildschirmfotos. Wird nervös, sobald es um Datenverlust geht („Die Wettbewerbspläne gibt es nirgends sonst!“), und ist entspannt, sobald sie weiß, wo was liegt.",
+    beschreibung: "Viele große Dateien (Pläne, Visualisierungen), an denen mehrere Arbeitsplätze gleichzeitig arbeiten. Ein NAS dient als zentrale Ablage, später kommt vielleicht ein kleines Speichernetz dazu. Hier geht es um NAS, Freigaben und Speichernetze.",
+    vertrag: {euroProStunde: 36},
+    farbe: "--vlan-8",
+    symbol: "🗄️",
+    saetze: {
+      dank: [
+        "Danke! Die Pläne sind wieder da, ich kann wieder atmen.",
+        "Super, alle kommen wieder an die Ablage. Ich schick dir ein Foto vom Modell.",
+        "Danke dir, das Team arbeitet wieder am selben Stand.",
+      ],
+      dringend: [
+        "Das Laufwerk mit den Wettbewerbsplänen ist weg. Abgabe ist Freitag!",
+        "Zwei Rechner sehen die Ablage nicht mehr. Ich schick dir ein Bildschirmfoto.",
+        "Das Öffnen der großen Pläne dauert plötzlich ewig. Kannst du schauen?",
+      ],
+      lob: [
+        "Seit alles zentral liegt, suche ich keine Dateien mehr. Danke!",
+        "Ich weiß jetzt endlich, wo was liegt. Das beruhigt ungemein.",
+        "Unsere Partnerbüros fragen, wer uns betreut. Ich habe deinen Namen genannt.",
+      ],
+    },
+  },
+});
+
+DATEN.senior = {
+  begruessung: [
+    "Morgen. Was liegt im Postfach, und womit fängst du an?",
+    "Kaffee steht. Welches Ticket führt am schnellsten zum ersten Erfolg?",
+    "Schön, dass du da bist. Erst lesen, dann klicken: Was ist das Symptom?",
+    "Guten Morgen. Was willst du heute besser können als gestern?",
+    "Da bist du ja. Ein Kunde wartet schon, die anderen haben Zeit.",
+    "Fang ruhig mit etwas Kleinem an. Der Rest läuft dir nicht weg.",
+  ],
+  lob: [
+    "Sauber gelöst. Woran hast du gemerkt, wo der Fehler saß?",
+    "Gut. Du hast erst gemessen und dann geändert. Genau so.",
+    "Das war die richtige Stelle. Würdest du beim nächsten Mal anders anfangen?",
+    "Stark. Der Kunde merkt davon nur, dass es läuft, und so soll es sein.",
+    "Gut gemacht. Hast du auch gespeichert?",
+    "Ordentlich. Kannst du es in einem Satz erklären? Dann sitzt es.",
+  ],
+  fehlerTrost: [
+    "Macht nichts. Was hat dir der letzte Ping verraten?",
+    "Ein Fehlschlag ist auch ein Messwert. Welche Schicht hast du schon ausgeschlossen?",
+    "Kein Drama, jede Änderung lässt sich rückgängig machen. Was war deine Vermutung?",
+    "Das passiert jedem. Fang unten an: Link, dann IP, dann Gateway.",
+    "Knapp daneben. Schau in die Simulation: Wo verschwindet das Paket?",
+    "Gut, dass es hier passiert und nicht beim Kunden. Was nimmst du mit?",
+  ],
+  pause: [
+    "Du sitzt schon eine Weile dran. Fünf Minuten Pause, dann sieht man manches schneller.",
+    "Steh mal kurz auf. Das Netz läuft dir nicht weg.",
+    "Die Tickets warten, versprochen. Hol dir was zu trinken.",
+    "Ein Blick aus dem Fenster, dann geht es leichter weiter.",
+    "Wenn du feststeckst, erklär das Problem laut. Oft hört man die Lösung dabei.",
+  ],
+  tagesende: [
+    "Guter Tag. Welcher Fehler hat dich heute am meisten überrascht?",
+    "Feierabend. Was heute schwer war, kommt bald als Wiederholung, dann bleibt es.",
+    "Für heute reicht es. Die Kunden sind zufrieden, und du kannst mehr als heute Morgen.",
+    "Schluss für heute. Was würdest du einem Neuling über das heutige Problem erzählen?",
+    "Gute Arbeit. Die Leiste hält die Stellung, du darfst gehen.",
+  ],
+  stufeAufstieg: [
+    "Neue Kunden, größere Netze. Das Prinzip bleibt: von unten nach oben prüfen.",
+    "Glückwunsch. Ab jetzt wird es kniffliger, aber du hast das Werkzeug dafür.",
+    "Dein Kundenstamm wächst mit dir. Nimm dir Zeit für die neuen Geräte.",
+    "Stufe geschafft. Was davon hättest du vor einem Monat noch nicht gekonnt?",
+    "Größere Kunden erwarten Dokumentation. Schreib mit, was du änderst und warum.",
+  ],
+};

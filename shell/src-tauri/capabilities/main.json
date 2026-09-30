@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "Hauptfenster: Ereignisse, Fenster ziehen (data-tauri-drag-region). Eigene Befehle sind ohne Freigabe erlaubt.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging"
+  ]
+}

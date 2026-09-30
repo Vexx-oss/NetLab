@@ -1,0 +1,74 @@
+/* ---------- Netzwerk-Labor: Gestaltungs-Grundlage („Leitstand“) ----------
+   Alle Farben als Tokens. Dunkel ist Standard (Leitstand), Hell über data-theme="light"
+   oder prefers-color-scheme: light. Andere Stildateien nutzen NUR diese Tokens. */
+:root{
+  color-scheme:dark;
+  --bg:#0E131B;            /* Fläche hinter allem */
+  --bg-raster:#16202D;     /* Rasterlinien der Arbeitsfläche */
+  --panel:#141B26;         /* Paneele, Inspektor, Dock */
+  --panel-2:#1B2433;       /* abgesetzte Felder, Karten */
+  --panel-3:#233047;       /* Hover, aktive Reiter */
+  --line:#2A3649;          /* Rahmen */
+  --line-2:#3A4A62;
+  --ink:#E6ECF5;           /* Text */
+  --muted:#93A1B8;         /* Nebentext */
+  --faint:#6A7890;
+  --accent:#4FC3F7;        /* Hauptakzent: Signal-Cyan */
+  --accent-ink:#06121C;
+  --accent-soft:#12324A;
+  --ok:#4ADE80;  --ok-soft:#0F3322;
+  --warn:#FBBF24; --warn-soft:#3A2D0B;
+  --bad:#F87171; --bad-soft:#3B1515;
+  --info:#A78BFA; --info-soft:#271D45;
+  --geld:#FCD34D;          /* Euro */
+  --ruf:#F472B6;           /* Ruf */
+  /* Paketfarben je Protokoll (immer mit Beschriftung verwenden) */
+  --p-arp:#FBBF24; --p-icmp:#4FC3F7; --p-tcp:#A78BFA; --p-udp:#34D399; --p-dhcp:#F472B6; --p-dns:#FB923C; --p-http:#60A5FA;
+  /* VLAN-Farben 1..8 (zyklisch), immer zusammen mit der Nummer zeigen */
+  --vlan-1:#94A3B8; --vlan-2:#4FC3F7; --vlan-3:#4ADE80; --vlan-4:#FBBF24; --vlan-5:#F472B6; --vlan-6:#A78BFA; --vlan-7:#FB923C; --vlan-8:#2DD4BF;
+  /* Subnetz-Zonen (Ebene IP-Netze), halbtransparent */
+  --zone-a:rgba(79,195,247,.10); --zone-b:rgba(74,222,128,.10); --zone-c:rgba(251,191,36,.10); --zone-d:rgba(244,114,182,.10); --zone-e:rgba(167,139,250,.10);
+  --schatten:0 10px 30px rgba(0,0,0,.45);
+  --radius:10px; --radius-s:6px;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+  --dauer:160ms;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme:light;
+    --bg:#EEF2F6; --bg-raster:#DCE3EB; --panel:#FFFFFF; --panel-2:#F4F7FA; --panel-3:#E6EDF5; --line:#CBD5E1; --line-2:#AAB8C9;
+    --ink:#142033; --muted:#526179; --faint:#7B889C; --accent:#0B7FB5; --accent-ink:#FFFFFF; --accent-soft:#DCEFF8;
+    --ok:#15803D; --ok-soft:#DCF5E5; --warn:#B45309; --warn-soft:#FDF0D5; --bad:#B91C1C; --bad-soft:#FBE3E3; --info:#6D28D9; --info-soft:#EDE7FB;
+    --geld:#A16207; --ruf:#BE185D;
+    --p-arp:#B45309; --p-icmp:#0B7FB5; --p-tcp:#6D28D9; --p-udp:#047857; --p-dhcp:#BE185D; --p-dns:#C2410C; --p-http:#1D4ED8;
+    --vlan-1:#64748B; --vlan-2:#0B7FB5; --vlan-3:#15803D; --vlan-4:#B45309; --vlan-5:#BE185D; --vlan-6:#6D28D9; --vlan-7:#C2410C; --vlan-8:#0F766E;
+    --zone-a:rgba(11,127,181,.09); --zone-b:rgba(21,128,61,.09); --zone-c:rgba(180,83,9,.09); --zone-d:rgba(190,24,93,.09); --zone-e:rgba(109,40,217,.09);
+    --schatten:0 10px 30px rgba(20,32,51,.15);
+  }
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#EEF2F6; --bg-raster:#DCE3EB; --panel:#FFFFFF; --panel-2:#F4F7FA; --panel-3:#E6EDF5; --line:#CBD5E1; --line-2:#AAB8C9;
+  --ink:#142033; --muted:#526179; --faint:#7B889C; --accent:#0B7FB5; --accent-ink:#FFFFFF; --accent-soft:#DCEFF8;
+  --ok:#15803D; --ok-soft:#DCF5E5; --warn:#B45309; --warn-soft:#FDF0D5; --bad:#B91C1C; --bad-soft:#FBE3E3; --info:#6D28D9; --info-soft:#EDE7FB;
+  --geld:#A16207; --ruf:#BE185D;
+  --p-arp:#B45309; --p-icmp:#0B7FB5; --p-tcp:#6D28D9; --p-udp:#047857; --p-dhcp:#BE185D; --p-dns:#C2410C; --p-http:#1D4ED8;
+  --vlan-1:#64748B; --vlan-2:#0B7FB5; --vlan-3:#15803D; --vlan-4:#B45309; --vlan-5:#BE185D; --vlan-6:#6D28D9; --vlan-7:#C2410C; --vlan-8:#0F766E;
+  --zone-a:rgba(11,127,181,.09); --zone-b:rgba(21,128,61,.09); --zone-c:rgba(180,83,9,.09); --zone-d:rgba(190,24,93,.09); --zone-e:rgba(109,40,217,.09);
+  --schatten:0 10px 30px rgba(20,32,51,.15);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--body); -webkit-font-smoothing:antialiased; overflow:hidden}
+h1,h2,h3,h4{font-family:var(--display); margin:0; line-height:1.15; text-wrap:balance}
+p{margin:0}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--mono)}
+code{font-size:.92em; background:var(--panel-3); padding:0 .3em; border-radius:4px}
+kbd{font-size:.8em; border:1px solid var(--line-2); border-bottom-width:2px; border-radius:4px; padding:0 .35em; background:var(--panel-2)}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+::selection{background:var(--accent-soft)}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:1ms !important; animation-iteration-count:1 !important; transition-duration:1ms !important} }

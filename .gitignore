@@ -1,0 +1,5 @@
+web/
+shell/src-tauri/target/
+shell/src-tauri/gen/
+*.log
+__pycache__/
