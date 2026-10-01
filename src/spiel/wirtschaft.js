@@ -48,9 +48,11 @@ Spiel.shop.liste = function(){
     if ((s.stufe || 1) > st.stufe && p.zustand === "gesperrt") continue;
     liste.push(Spiel.shop.eintrag({
       id: "playbook:" + p.skill, art: "playbook", gruppe: "Automatisierung", skill: p.skill,
-      titel: "Playbook: " + p.name, text: p.text, preis: p.preis ?? Spiel.playbooks.preis(p.skill),
+      titel: "Playbook: " + p.name, preis: p.preis ?? Spiel.playbooks.preis(p.skill),
+      /* Karte: oben, was es tut; unten nur noch der kurze Grund – nicht zweimal derselbe Satz */
+      text: p.zustand === "aktiv" || p.zustand === "veraltet" ? p.text : "Erledigt Wartungs-Tickets dieser Fertigkeit von selbst (60 % Ertrag, ohne Lernwirkung). Automatisieren darf nur, was du sicher beherrschst.",
       zustand: p.zustand === "aktiv" || p.zustand === "veraltet" ? p.zustand : p.zustand === "kaufbar" ? "kaufbar" : "gesperrt",
-      grund: p.zustand === "kaufbar" ? null : p.text,
+      grund: p.zustand === "kaufbar" ? null : p.zustand === "gesperrt" ? `ab „sicher“ (jetzt: ${Spiel.karriere.stufeName(p.skill)})` : p.text,
     }));
   }
   /* Wartungsverträge */

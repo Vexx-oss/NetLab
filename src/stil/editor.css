@@ -65,6 +65,9 @@
   font-size:12.5px; line-height:1.35; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .lb-hinweis:empty{display:none}
 @media (max-width:1100px){ .lb-hinweis{display:none} }
+/* Auch wenn die Fläche selbst schmal ist (z. B. breite Konsole im Inspektor): Hinweis weg statt schmaler Säule */
+.lb-leinwand{container-type:inline-size}
+@container (max-width:760px){ .lb-hinweis{display:none} }
 .lb-leer{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); text-align:center; color:var(--muted); pointer-events:none; max-width:360px}
 .lb-leer strong{display:block; font:800 22px/1.2 var(--display); color:var(--ink); margin-bottom:6px}
 

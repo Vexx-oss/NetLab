@@ -16,11 +16,11 @@
 /* ---- Auftragsleiste ---- */
 .sp-auftrag{display:flex; flex-direction:column; gap:8px; padding:10px 14px 12px; border-left:4px solid var(--k, var(--accent));
   background:linear-gradient(90deg, color-mix(in srgb, var(--k, var(--accent)) 9%, var(--panel)), var(--panel) 60%)}
-.sp-auftrag-kopf{display:flex; align-items:center; gap:12px; min-width:0}
-.sp-auftrag-titel{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
+.sp-auftrag-kopf{display:flex; align-items:center; gap:8px 12px; min-width:0; flex-wrap:wrap}   /* schmale Fläche: Knöpfe rutschen unter den Titel */
+.sp-auftrag-titel{flex:1 1 auto; min-width:min(15em, 70%); display:flex; flex-direction:column}
 .sp-auftrag-titel strong{font:800 18px/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .sp-auftrag-titel span{color:var(--muted); font-size:12.5px}
-.sp-auftrag-knoepfe{display:flex; gap:6px; flex:0 0 auto}
+.sp-auftrag-knoepfe{display:flex; gap:6px; flex:0 0 auto; margin-left:auto}
 .sp-hilfe-knopf.an{border-color:var(--accent); background:var(--accent-soft)}
 .sp-abnahme.bereit{animation:sp-puls 1.6s ease-in-out infinite; box-shadow:0 0 0 0 var(--accent)}
 @keyframes sp-puls{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent)} 50%{box-shadow:0 0 0 8px transparent}}

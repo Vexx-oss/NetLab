@@ -1,0 +1,54 @@
+/* ---------- Konsole (IOS-ähnlich) und Eingabeaufforderung (Windows-artig) ----------
+   Immer ein dunkles Terminal – auch im hellen Thema –, damit Geräteausgabe, Prompt und Fehler
+   auf einen Blick als „Blick ins Gerät“ erkennbar sind. Ausgaben bleiben einzeilig wie am echten
+   Gerät (Tabellen wie „show ip interface brief“ sind ~80 Zeichen breit) und scrollen waagerecht;
+   Hinweise und Fehler brechen um. */
+.ko-huelle{
+  --ko-bg:#0A0F16; --ko-ink:#D6E1EE; --ko-dim:#8A9BB2; --ko-prompt:#4FC3F7; --ko-bad:#FF8A8A; --ko-log:#D9B26A; --ko-echo:#FFFFFF; --ko-sel:rgba(79,195,247,.30);
+  display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+.ko-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px 8px 12px; border-bottom:1px solid var(--line)}
+.ko-titel{display:flex; align-items:center; gap:8px; min-width:0; font:700 13.5px/1.2 var(--body); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ko-art{flex:0 0 auto; font:600 11px/1 var(--body); color:var(--muted); padding:3px 7px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line)}
+.ko-knopf{flex:0 0 auto; min-height:28px; padding:0 10px; border-radius:8px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 12px/1 var(--body); cursor:pointer}
+.ko-knopf:hover{border-color:var(--accent); color:var(--accent)}
+
+.ko-schirm{flex:1 1 auto; min-height:140px; overflow:auto; padding:10px 12px 14px; background:var(--ko-bg); color:var(--ko-ink);
+  font:12px/1.5 var(--mono); cursor:text; overscroll-behavior:contain; scrollbar-color:#2A3649 transparent}
+.ko-schirm ::selection{background:var(--ko-sel)}
+.ko-schirm:focus{outline:none}
+.ko-ausgabe{display:flex; flex-direction:column; gap:3px}
+.ko-block{margin:0; font:inherit; white-space:pre; tab-size:8}
+.ko-host .ko-block{white-space:pre-wrap}   /* Windows-artig: Zeilen brechen am Rand um */
+.ko-block.info{white-space:pre-wrap; color:var(--ko-dim)}
+.ko-block.fehler{white-space:pre-wrap; color:var(--ko-bad)}
+.ko-fehlerzeile{color:var(--ko-bad)}
+.ko-syslog{color:var(--ko-log)}
+.ko-echo{white-space:pre-wrap; word-break:break-all; color:var(--ko-echo); margin-top:4px}
+.ko-echo-prompt, .ko-prompt{color:var(--ko-prompt)}
+
+.ko-notiz{margin:6px 0 2px; padding:6px 8px; border-left:2px solid var(--ko-prompt); color:var(--ko-dim); font:12.5px/1.45 var(--body); white-space:normal}
+.ko-notiz kbd{background:transparent; color:var(--ko-ink); border-color:#3A4A62}
+.ko-sym{margin-right:6px; color:var(--ko-prompt)}
+.ko-zeile{display:flex; align-items:flex-start; margin-top:4px}
+.ko-prompt{flex:0 0 auto; white-space:pre}
+.ko-eingabe{flex:1 1 auto; min-width:6ch; margin:0; padding:0; border:0; outline:0; background:transparent; color:var(--ko-echo);
+  font:inherit; line-height:inherit; resize:none; overflow:hidden; caret-color:var(--ko-prompt); white-space:pre}
+.ko-eingabe:focus, .ko-eingabe:focus-visible{outline:none; box-shadow:none}   /* der blinkende Cursor reicht */
+.ko-eingabe:disabled{opacity:.5}
+.ist-aus .ko-schirm{filter:grayscale(1); opacity:.65}
+
+.ko-vorschlag, .ko-notiz{transition:none}
+.ko-vorschlag[hidden], .ko-notiz[hidden]{display:none}
+.ko-vorschlag{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:8px 12px; border-top:1px solid var(--line); background:var(--accent-soft); font-size:13px}
+.ko-vorschlag-titel{font-weight:700; color:var(--accent)}
+.ko-vorschlag-knopf{border:1px solid var(--accent); background:var(--panel); color:var(--ink); border-radius:7px; padding:3px 8px; cursor:pointer}
+.ko-vorschlag-knopf code{font:600 12.5px/1.3 var(--mono)}
+.ko-vorschlag-knopf:hover{background:var(--accent); color:var(--accent-ink)}
+.ko-vorschlag-text{color:var(--muted); flex-basis:100%; line-height:1.4}
+.ko-hilfe{padding:7px 12px 9px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; line-height:1.7}
+.ko-hilfe code{font:12px var(--mono); color:var(--ink)}
+.ko-leer{padding:16px; color:var(--muted)}
+
+/* Die Konsole braucht Breite: IOS-Tabellen sind ~80 Zeichen breit (bei 12 px ≈ 600 px). Der Inspektor wächst,
+   solange die Konsole offen ist; die Zeichenfläche passt sich an (bleibt eingepasst). */
+.lb-insp-huelle:has(.in-konsole){width:clamp(360px, 48vw, 700px)}

@@ -24,7 +24,7 @@
 .kr-ware.veraltet{border-color:var(--warn)}
 .kr-ware.gesperrt, .kr-ware.teuer{opacity:.7}
 .kr-ware-fuss{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
-.kr-preis{font:800 16px/1 var(--display); color:var(--geld)}
+.kr-preis{font:800 16px/1 var(--display); color:var(--geld); white-space:nowrap; flex:0 0 auto}
 .kr-status{color:var(--muted); font-size:12px; text-align:right}
 .kr-fuss{max-width:70ch}
 .kr-karriere, .kr-abzeichen, .kr-pruefung, .kr-stufe, .kr-zwei > div{padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px}

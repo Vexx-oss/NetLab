@@ -48,6 +48,7 @@ UI.konsole = (() => {
     if (!K) { K = {container}; KZ.set(container, K); }
     K.netz = netz; K.id = id; K.host = !!(g && Modell.HOST[g.typ]);
     container.classList.add("ko-huelle");
+    container.classList.toggle("ko-host", K.host);   /* Eingabeaufforderung bricht lange Zeilen um wie Windows */
     container.replaceChildren();
     if (!g) { container.append(h("p", {class: "ko-leer"}, "Dieses Gerät gibt es nicht mehr.")); return; }
     K.S = sitzungHolen(netz, id, verlauf || UI.labor?.verlauf || null);
@@ -122,7 +123,8 @@ UI.konsole = (() => {
     const el = h("pre", {class: "ko-block " + b.art});
     for (const [i, z] of b.text.split("\n").entries()) {
       if (i) el.append("\n");
-      el.append(/^\s*%/.test(z) ? h("span", {class: "ko-fehlerzeile"}, z) : z);
+      /* %SYS-5-CONFIG_I: … ist eine Protokollmeldung, kein Fehler – eigene, ruhigere Farbe */
+      el.append(/^\s*%[A-Z0-9_]+-\d-[A-Z0-9_]+:/.test(z) ? h("span", {class: "ko-syslog"}, z) : /^\s*%/.test(z) ? h("span", {class: "ko-fehlerzeile"}, z) : z);
     }
     return el;
   }
