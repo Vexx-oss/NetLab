@@ -1,0 +1,44 @@
+Netzwerk-Labor – Lernspiel für Fachinformatiker Systemintegration (AP1/AP2)
+===========================================================================
+
+WAS IST DAS?
+  Du führst ein Ein-Mann-Systemhaus. Kunden schicken Tickets („Die Kasse druckt
+  nicht mehr“), du löst sie in einem Netzwerk-Simulator: Geräte verkabeln, IP,
+  VLAN, Routen, ACL, NAT, DHCP, DNS, Firewall – per Klick im Inspektor oder in
+  einer IOS-ähnlichen Konsole. Jedes Paket ist in der Simulation wirklich unterwegs;
+  du siehst Schritt für Schritt, wo und warum es verworfen wird.
+
+STARTEN – WINDOWS
+  Doppelklick auf „Netzwerk-Labor.exe“. Nichts installieren, kein Internet nötig.
+  Windows 10/11 bringt die nötige WebView2-Laufzeit mit.
+  Erscheint „Der Computer wurde durch Windows geschützt“ (SmartScreen, weil das
+  Programm nicht signiert ist): „Weitere Informationen“ → „Trotzdem ausführen“.
+
+STARTEN – LINUX
+  Siehe Ordner „linux“ (falls vorhanden) und die Datei PLATTFORM.md.
+
+SO SPIELST DU
+  • Postfach: Kundenmails öffnen, „Auftrag annehmen“ → das Netz erscheint im Labor.
+  • Labor: Gerät anklicken → rechts der Inspektor (Adressen, Ports, VLAN, Routen,
+    ACL, NAT …) und der Reiter „Konsole“. Taste P = Ping von Gerät A nach B ziehen.
+  • Oben stehen die Ziele des Tickets; im Einstieg springen sie live auf ✓.
+  • „✓ Abnahme anfordern“ prüft alles nach – auch, ob du dabei etwas anderes kaputt
+    gemacht hast. AP2: Die Abnahme startet Router und Switches neu – nur Gespeichertes
+    (copy running-config startup-config) überlebt.
+  • 🛟 Hilfe: Checkliste, Werkzeugtipp und eine Frage vom Senior sind gratis; danach
+    kostet Hilfe Sterne – bis zur vorgeführten Lösung. Fehler kosten nichts.
+  • Lernstand: deine Fertigkeiten als Ringe, Fehlerheft, Prüfungstag (Note nach
+    IHK-Schlüssel). Wiederholungen kommen im richtigen Abstand zurück.
+  • Leiste: Knopf „Leiste“ oben rechts → kleines Fenster am Bildschirmrand mit
+    Kunden-Ampeln und Mini-Tickets (nur Maus, kein Ton). Tray-Symbol unten rechts:
+    Klick = Leiste ein/aus, Rechtsklick = Menü (Ruhe 1 h, Immer oben, Beenden).
+    Tastenkürzel: Strg+Alt+L.
+
+DEIN SPIELSTAND
+  Liegt in %APPDATA%\de.fisi.netzwerklabor\spielstand.json (Linux:
+  ~/.local/share/de.fisi.netzwerklabor/). Täglich eine Sicherung, 5 werden behalten.
+  Einstellungen → Spielstand → Exportieren/Importieren für einen anderen Rechner.
+
+Inhalte nach bestem Wissen aus den Lernnotizen einer FISI-Umschulung geprüft.
+Die Konsole ist „IOS-ähnlich“ – kein Cisco-Produkt. Im Zweifel gilt euer Unterricht.
+Schriften: Atkinson Hyperlegible, Bricolage Grotesque, JetBrains Mono (SIL OFL 1.1).

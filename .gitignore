@@ -3,3 +3,11 @@ shell/src-tauri/target/
 shell/src-tauri/gen/
 *.log
 __pycache__/
+# fertige Programme (groß, liegen im Ordner Programm/, nicht im Git)
+Programm/**/*.exe
+Programm/**/*.AppImage
+Programm/**/*.deb
+Programm/**/*.tar.gz
+Programm/**/*.zip
+Programm/linux/netzwerk-labor
+Programm/Endversion-*/linux/netzwerk-labor
