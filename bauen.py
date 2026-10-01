@@ -23,7 +23,7 @@ HIER = Path(__file__).resolve().parent
 SRC = HIER / "src"
 WEB = HIER / "web"
 LERNMOTOR = HIER.parent / "FISI-Spielhalle" / "src" / "lernmotor.js"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 # (Ordner, Kopfdateien, Schlussdateien, headless)
 SCHICHTEN = [

@@ -13,6 +13,7 @@ rm -rf "$ARBEIT"; mkdir -p "$ARBEIT"
 cp -r "$QUELLE/shell" "$QUELLE/web" "$ARBEIT/"
 rm -rf "$ARBEIT/shell/src-tauri/gen" "$ARBEIT/shell/src-tauri/target"
 export CARGO_TARGET_DIR=/root/netzwerk-labor-target
+rm -rf "$CARGO_TARGET_DIR/release/bundle"                          # alte Pakete (frühere Versionen) nicht mitkopieren
 cd "$ARBEIT/shell/src-tauri"
 if command -v cargo-tauri >/dev/null 2>&1; then
   cargo tauri build --bundles deb,appimage || cargo tauri build --bundles deb || cargo tauri build --no-bundle
