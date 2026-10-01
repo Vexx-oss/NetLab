@@ -219,7 +219,8 @@ UI.labor = (() => {
     let ziel;
     if (!b) ziel = {k: 1, tx: r.width / 2 - 400, ty: r.height / 2 - 260};
     else {
-      const randOben = 64, randUnten = 84;
+      /* Ränder für die schwebenden Leisten oben/unten – auf niedriger Fläche (Hilfe/Simulation offen) anteilig kleiner */
+      const randOben = Math.min(64, Math.round(r.height * 0.13)), randUnten = Math.min(84, Math.round(r.height * 0.15));
       const bw = b.x2 - b.x1, bh = b.y2 - b.y1, hNutz = Math.max(100, r.height - randOben - randUnten);
       const k = klemme(Math.min((r.width - 40) / bw, hNutz / bh), 0.25, 1.1);
       ziel = {k, tx: (r.width - bw * k) / 2 - b.x1 * k, ty: randOben + (hNutz - bh * k) / 2 - b.y1 * k};

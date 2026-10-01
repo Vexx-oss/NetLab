@@ -132,7 +132,8 @@ UI.karriere = (() => {
     const karte = h("div", {class: "sp-ergebnis"},
       h("h2", {}, `Prüfung ${p.art}`), h("p", {class: "sp-leise"}, `Restzeit ${mm}:${ss} · Keine Hilfe, keine Live-Ziele. Löse die Aufgaben in beliebiger Reihenfolge.`),
       h("ol", {class: "kr-aufgaben"}, p.aufgaben.map((iid, i) => { const inst = Spiel.instanz(iid); const def = inst && Spiel.defVon(inst);
-        return def ? h("li", {}, h("div", {}, h("b", {}, def.titel), h("p", {class: "sp-leise"}, def.symptom)),
+        const kd = Spiel.karriere.kunde(inst.kunde || def.kunde), ziele = (def.ziele || []).length;
+        return def ? h("li", {}, h("div", {}, h("b", {}, def.titel), h("p", {class: "sp-leise"}, `${kd ? kd.name : "Kunde"} · ${ziele} ${ziele === 1 ? "Ziel" : "Ziele"} · etwa ${def.minuten || 5} min`)),
           h("button", {type: "button", class: "knopf klein", onclick: () => { pruefZu?.(); UI.spiel.oeffnen(iid); }}, `Aufgabe ${i + 1} öffnen`)) : null; })),
       h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer", onclick: () => { pruefZu?.(); pruefungAbgeben(); }}, "Prüfung abgeben"),
         h("button", {type: "button", class: "knopf geist", onclick: () => pruefZu?.()}, "Weiterarbeiten")));

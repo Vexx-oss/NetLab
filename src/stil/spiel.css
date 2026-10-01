@@ -47,7 +47,7 @@
 @keyframes sp-rein{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
 
 /* ---- Hilfeleiter ---- */
-.sp-hilfe{display:flex; flex-direction:column; gap:10px; padding:10px 12px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line); max-height:42vh; overflow:auto; animation:sp-rein .2s ease-out}
+.sp-hilfe{display:flex; flex-direction:column; gap:10px; padding:10px 12px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line); max-height:min(32vh, 290px); overflow:auto; animation:sp-rein .2s ease-out}   /* Fläche bleibt nutzbar; Inhalt scrollt */
 .sp-hilfe-kopf{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
 .sp-leiter{list-style:none; margin:0; padding:0; display:flex; gap:4px; flex-wrap:wrap}
 .sp-leiter li{display:flex; align-items:center; gap:4px; font-size:11.5px; color:var(--faint)}
@@ -58,7 +58,7 @@
 .sp-leiter li.an button{background:var(--accent); color:var(--accent-ink)}
 .sp-leiter button:disabled{cursor:default; opacity:.6}
 .sp-hilfe-inhalt p{margin:0 0 6px; font-size:14px; line-height:1.5}
-.sp-hilfe-fuss{display:flex; gap:8px; align-items:center}
+.sp-hilfe-fuss{display:flex; gap:8px; align-items:center; position:sticky; bottom:-10px; margin:0 -12px -10px; padding:8px 12px 10px; background:linear-gradient(transparent, var(--panel-2) 10px)}   /* nächste Stufe immer erreichbar */
 .sp-hilfe-fuss small{opacity:.8}
 .sp-check{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px}
 .sp-check label{display:flex; gap:8px; align-items:flex-start; font-size:13.5px; cursor:pointer}
