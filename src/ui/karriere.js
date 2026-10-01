@@ -296,11 +296,24 @@ UI.karriere = (() => {
   function festZeigen(f){
     if (!f || f.gesehen) return;
     const kunden = (f.kunden || []).map(kd);
-    const zu = overlay(h("div", {class: "sp-willkommen"}, h("span", {class: "sp-senior-sym gross"}, "🎉"),
+    const zu = overlay(h("div", {class: "sp-willkommen sp-fest"}, h("span", {class: "sp-senior-sym gross"}, "🎉"),
+      h("small", {class: "sp-leise"}, "Aufstieg"),
       h("h2", {}, `Stufe ${f.stufe}: ${f.name}`), h("p", {}, "„" + f.satz + "“"),
       kunden.length ? h("p", {}, "Neue Kunden: ", kunden.map(k => `${k.symbol} ${k.name}`).join(", ")) : null,
+      (f.geraete || []).length ? h("p", {}, "Neu in der Gerätepalette: " + f.geraete.join(", ")) : null,
       (f.themen || []).length ? h("p", {class: "sp-leise"}, "Neue Themen: " + f.themen.map(s => Spiel.karriere.skillName(s)).join(" · ")) : null,
       h("button", {type: "button", class: "knopf primaer gross", onclick: () => { zu(); Spiel.karriere.festGesehen(); UI.app.ansicht("postfach"); }}, "Weiter ▸")));
+  }
+  /* Die Feier kommt erst, wenn kein anderes Fenster offen ist (Ergebnis, Offline-Bericht, Willkommen) – nie gestapelt */
+  let festTimer = null;
+  function festPlanen(ms){
+    clearTimeout(festTimer);
+    festTimer = setTimeout(() => {
+      const f = Spiel._st ? Spiel.karriere.daten().fest : null;
+      if (!f || f.gesehen) return;
+      if (document.querySelector(".sp-overlay:not(.vorhersage)")) { festPlanen(900); return; }
+      festZeigen(f);
+    }, ms);
   }
   function takt(){
     if (!Spiel._st) return;
@@ -333,14 +346,14 @@ UI.karriere = (() => {
       try {
         takt(); offlineZeigen();
         miniZeichnen(UI.leiste.miniBereich);
-        const f = Spiel.karriere.daten().fest; if (f && !f.gesehen) festZeigen(f);
+        festPlanen(600);
       } catch (e) { console.error("Karriere-Start", e); }
     }, 300);
     setInterval(takt, 60000);
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") takt(); });
   });
   Bus.an("zustand-geaendert", () => leisteStatus());
-  Bus.an("aufstieg", f => setTimeout(() => festZeigen(f), 1200));
+  Bus.an("aufstieg", () => festPlanen(1200));
   Bus.an("mini", () => { if (!K.mini.ergebnis) miniZeichnen(UI.leiste.miniBereich); });
 
   return {kundenAnsicht, shopAnsicht, lernstandAnsicht, wikiAnsicht, wikiOeffnen, miniZeichnen, miniDialog, pruefungUebersicht, pruefungAbgeben, leisteStatus, tagKarte, training};

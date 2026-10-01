@@ -184,3 +184,11 @@
 .sp-feierabend h3{margin:0 0 4px}
 .sp-feierabend p{margin:4px 0}
 .sp-bilanz{font-weight:700}
+
+/* Aufstieg: kleine Feier (respektiert „Bewegung reduzieren“) */
+.sp-fest{background:radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--geld) 20%, transparent), transparent 62%)}
+.sp-fest .sp-senior-sym{animation:sp-fest-pop .8s cubic-bezier(.3,1.6,.5,1) both}
+.sp-fest h2{animation:sp-fest-rein .5s .15s ease-out both}
+@keyframes sp-fest-pop{from{transform:scale(.2) rotate(-30deg); opacity:0} to{transform:none; opacity:1}}
+@keyframes sp-fest-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
+@media (prefers-reduced-motion: reduce){.sp-fest .sp-senior-sym, .sp-fest h2{animation:none}}
