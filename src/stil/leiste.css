@@ -7,7 +7,9 @@ html[data-modus="leiste"] body{overflow:hidden}
   border-radius:14px; background:var(--leiste-bg); border:1px solid var(--line-2); color:var(--ink);
   opacity:var(--leiste-deckkraft, .55); transition:opacity .25s ease, height .2s ease, width .2s ease, box-shadow .2s; user-select:none; -webkit-user-select:none}
 .leiste-karte.hover{opacity:1}
-.leiste-karte.auf{width:320px; height:220px}
+.leiste-karte.auf{width:320px; height:300px}
+/* Mit Mini-Ticket: Infozeile weg, damit Frage und Antworten ohne Scrollen passen */
+.leiste-karte:has(.lk-mini .mk) .lk-text{display:none}
 .im-browser .leiste-karte{box-shadow:var(--schatten)}
 .im-browser[data-ecke="ol"] .leiste-karte{left:12px; top:12px}
 .im-browser[data-ecke="or"] .leiste-karte{left:auto; right:12px; top:12px}
@@ -35,7 +37,7 @@ html[data-modus="leiste"] body{overflow:hidden}
 .lk-oeffnen:hover{border-color:var(--accent); color:var(--accent)}
 .lk-oeffnen span{display:none}
 .leiste-karte.auf .lk-oeffnen span{display:inline}
-.lk-auf{display:flex; flex-direction:column; gap:8px; flex:1 1 auto; min-height:0; padding:0 12px 10px; opacity:0; transition:opacity .15s}
+.lk-auf{display:flex; flex-direction:column; gap:6px; flex:1 1 auto; min-height:0; padding:0 10px 8px; opacity:0; transition:opacity .15s}
 .leiste-karte.auf .lk-auf{opacity:1; transition-delay:.08s}
 .lk-text{font-size:13px; color:var(--muted); line-height:1.35}
 .lk-text:empty{display:none}

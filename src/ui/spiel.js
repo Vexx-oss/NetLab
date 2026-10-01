@@ -17,9 +17,21 @@ UI.spiel = (() => {
     if (!Spiel._st) return;
     const st = Spiel.st, offen = Spiel.offen();
     const eph = typeof Spiel.euroProStunde === "function" ? Spiel.euroProStunde() : 0;
-    UI.app.status({euro: st.euro, ruf: st.ruf, stufe: st.stufe, offen});
+    UI.app.status({euro: st.euro, ruf: st.ruf, stufe: st.stufe, offen, fortschritt: stufeFortschritt()});
     try { Plattform.abzeichen(offen, `${offen} ${offen === 1 ? "Ticket" : "Tickets"}${eph ? ` · ${eur(eph)} €/h` : ""}`); } catch (e) { /* Plattform ohne Abzeichen */ }
     UI.app.aktualisieren?.();
+  }
+
+  /* Kopfzeile: wie weit bis zur nächsten Stufe? Beide Bedingungen zählen, der knappere Anteil bestimmt den Balken. */
+  function stufeFortschritt(){
+    try {
+      const i = Spiel.stufeInfo();
+      if (i.max) return {anteil: 1, text: `Stufe ${i.stufe} · ${i.name} – höchste Stufe erreicht`};
+      const r = i.ruf.soll ? Math.min(1, i.ruf.ist / i.ruf.soll) : 1;
+      const k = i.koennen.sollSumme ? Math.min(1, i.koennen.summe / i.koennen.sollSumme) : 1;
+      const text = `Stufe ${i.stufe} · ${i.name} → ${i.naechste.name}: Ruf ${zahlDe(Math.round(i.ruf.ist))}/${i.ruf.soll} · Können ${i.koennen.summe}/${i.koennen.sollSumme}` + (i.bereit ? " – bereit zum Aufstieg!" : " (Klick: Lernstand)");
+      return {anteil: Math.min(r, k), text, bereit: i.bereit};
+    } catch (e) { return null; }
   }
 
   /* ---------- Ticket öffnen ---------- */
@@ -115,7 +127,7 @@ UI.spiel = (() => {
     if (vorher && r.neuOk.length) {
       for (const i of r.neuOk) { const li = document.querySelector(`.sp-ziele li[data-i="${i}"]`); li?.classList.add("frisch"); }
       if (r.alle) {
-        UI.toast("Alle Ziele erfüllt! Jetzt „Abnahme anfordern“ – der Kunde prüft selbst nach.", "ok", {id: "ziele", titel: "Geschafft"});
+        if (!S.coach) UI.toast("Alle Ziele erfüllt! Jetzt „Abnahme anfordern“ – der Kunde prüft selbst nach.", "ok", {id: "ziele", titel: "Geschafft"});   /* mit Coach sagt die Coach-Leiste das schon */
         if (S.coach && S.coach.schritt < 1) coachWeiter(1);
       } else UI.toast(`Ziel erfüllt: ${r.status[r.neuOk[0]].ziel.text}`, "ok", {id: "ziele", dauer: 2600});
     }
@@ -240,6 +252,10 @@ UI.spiel = (() => {
       return;
     }
     const sterne = erg.sterne;
+    /* Tagesziel gerade erreicht? Dann gehört die Feierabend-Bilanz ins Ergebnis – einmal am Tag */
+    const tagStand = erg.inst.quelle !== "pruefung" ? Spiel.tag.heute() : null;
+    const feierabend = !!(tagStand && tagStand.fertig && !tagStand.abschlussGezeigt);
+    if (feierabend) Spiel.tag.abschlussGesehen();
     const sternEl = h("div", {class: "sp-sterne", "aria-label": `${sterne} von 5 Sternen`}, [1, 2, 3, 4, 5].map(i => h("span", {class: i <= sterne ? "voll" : i - 0.5 <= sterne ? "halb" : "leer", style: {"--i": i}}, "★")));
     const euroEl = h("b", {class: "sp-geld"}, "+0,00 €");
     const lernen = (erg.lernen || []).map(l => {
@@ -254,11 +270,14 @@ UI.spiel = (() => {
       h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`), erg.lohn.tempo ? h("small", {}, `inkl. ${fmtEuro(erg.lohn.tempo)} Tempo-Bonus`) : null),
       erg.abnahme.abzuege.length ? h("ul", {class: "sp-abzuege"}, erg.abnahme.abzuege.map(a => h("li", {}, `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`))) : null,
       lernen.length ? h("section", {}, h("h3", {}, "Was du geübt hast"), h("ul", {class: "sp-lernen"}, lernen)) : null,
+      abzeichenBlock(),
+      feierabend ? feierabendBlock() : null,
       def.erklaerung ? h("section", {class: "sp-erklaerung"}, h("h3", {}, "Was war los?"), h("p", {}, def.erklaerung),
         def.quelle ? h("small", {class: "sp-leise"}, "Nachlesen: " + def.quelle) : null) : null,
       h("div", {class: "sp-knoepfe"},
         erg.naechstes ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); oeffnen(erg.naechstes); }}, "Nächstes Ticket ▸") : null,
         h("button", {type: "button", class: "knopf" + (erg.naechstes ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Zum Postfach"),
+        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, "🌙 Feierabend: zur Leiste") : null,
         typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0] ? h("button", {type: "button", class: "knopf geist", onclick: () => { zu(); UI.wiki.oeffnen(def.skills[0]); }}, "📖 Nachschlagen") : null)), "erfolg");
     zaehlen(euroEl, erg.euro);
   }
@@ -326,23 +345,26 @@ UI.spiel = (() => {
 
   /* ---------- Onboarding: erstes Ticket mit Coach-Hinweisen ---------- */
   const COACH = [
-    {text: "① Die Kasse hat kein Kabel. Fahr mit der Maus über die Kasse und zieh vom ⊕ zum Switch – oder nimm das Kabel-Werkzeug (Taste K).", zeigen: ["kasse", "sw1"]},
-    {text: "② Stark, das Ziel ist grün! Prüf es wie ein Profi: Ping-Werkzeug (Taste P), dann von der Kasse auf den Drucker ziehen.", zeigen: ["kasse", "drucker"]},
-    {text: "③ Paket angekommen. Jetzt „Abnahme anfordern“ – der Kunde prüft selbst nach.", zeigen: []},
+    {text: "① Die Kasse hat kein Kabel. Das Kabel-Werkzeug ist schon gewählt: Zieh mit der Maus von der Kasse zum Switch.", taste: "K", werkzeug: "kabel", zeigen: ["kasse", "sw1"]},
+    {text: "② Stark, das Ziel ist grün! Prüf es wie ein Profi – das Ping-Werkzeug ist gewählt: Zieh von der Kasse auf den Drucker.", taste: "P", werkzeug: "ping", zeigen: ["kasse", "drucker"]},
+    {text: "③ Paket angekommen. Jetzt „Abnahme anfordern“ – der Kunde prüft selbst nach.", werkzeug: "auswahl", zeigen: []},
   ];
   function coachStart(){
     if (Spiel.einst.coach === false) return;
     S.coach = {schritt: 0};
     coachZeigen();
+    UI.labor.auftragNeu();          /* Leiste sofort zeigen – vor dem Einpassen im nächsten Frame */
   }
   function coachWeiter(n){ if (!S.coach) return; S.coach.schritt = Math.max(S.coach.schritt, n); coachZeigen(); UI.labor.auftragNeu(); }
   function coachZeigen(){
     const c = S.coach && COACH[S.coach.schritt]; if (!c) return;
+    /* Einsteiger ziehen sonst Geräte herum statt zu verkabeln: passendes Werkzeug vorwählen */
+    if (c.werkzeug && UI.labor.werkzeugName !== c.werkzeug) UI.labor.werkzeug(c.werkzeug);
     if (c.zeigen.length) setTimeout(() => UI.labor.hervorheben(c.zeigen.map(g => ({geraet: g})), 4500), 250);
   }
   function coachLeiste(){
     const c = COACH[S.coach.schritt];
-    return h("div", {class: "sp-coach"}, h("span", {class: "sp-coach-sym"}, "🧑‍🔧"), h("p", {}, c.text),
+    return h("div", {class: "sp-coach"}, h("span", {class: "sp-coach-sym"}, "🧑‍🔧"), h("p", {}, c.text, c.taste ? h("span", {class: "sp-leise"}, ` (Taste ${c.taste})`) : null),
       h("button", {type: "button", class: "knopf geist klein", onclick: () => { S.coach = null; Spiel.einstSetzen("coach", false); UI.labor.auftragNeu(); }}, "Hinweise aus"));
   }
   function einstiegStarten(){
@@ -381,7 +403,7 @@ UI.spiel = (() => {
         const ok = (r.antworten || []).some(a => a && a.ok);
         const richtig = tipp === ok;
         if (typeof L !== "undefined") { Spiel.skillsRegistrieren(); L.ueben("lab.ping", richtig); }
-        if (richtig) Spiel.gutschreiben(2, 0, "Richtig vorhergesagt");
+        if (richtig) { Spiel.abzeichen.zaehlen("vorhersageRichtig"); Spiel.gutschreiben(2, 0, "Richtig vorhergesagt"); }
         setTimeout(() => UI.toast(richtig ? "Richtig vorhergesagt! +2 €" : `Knapp daneben: Du hast auf „${tipp ? "klappt" : "klappt nicht"}“ getippt. Die Simulation zeigt, warum.`,
           richtig ? "ok" : "info", {id: "vorhersage", titel: "Vorhersage"}), 1600);
       };
@@ -398,9 +420,37 @@ UI.spiel = (() => {
     F.ping = huelle;
   }
 
+  /* ---------- Abzeichen: im Ergebnisfenster oder als Toast – nie unsichtbar hinter einem Dialog ---------- */
+  let abzTimer = null;
+  function abzeichenPlanen(ms){ clearTimeout(abzTimer); abzTimer = setTimeout(abzeichenZeigen, ms); }
+  function abzeichenZeigen(){
+    if (document.querySelector(".sp-overlay:not(.vorhersage)")) { abzeichenPlanen(1500); return; }
+    const neu = Spiel.abzeichen.abholen(); if (!neu.length) return;
+    const ansehen = {text: "Ansehen", fn: () => UI.app.ansicht("lernstand")};
+    if (neu.length > 2) UI.toast(neu.map(a => a.sym + " " + a.titel).join(" · "), "ok", {titel: `${neu.length} neue Abzeichen`, aktion: ansehen});
+    else for (const a of neu) UI.toast(`${a.sym} ${a.titel} – ${a.text}`, "ok", {titel: "Neues Abzeichen", aktion: ansehen});
+  }
+  function feierabendBlock(){
+    const b = Spiel.tag.bilanz();
+    const namen = b.morgenFaellig.slice(0, 3).map(id => Spiel.skill(id).name);
+    return h("section", {class: "sp-feierabend"},
+      h("h3", {}, `🎉 Tagesziel geschafft – ${b.tickets} Tickets heute`),
+      h("p", {class: "sp-bilanz"}, `+${fmtEuro(b.euro)} · +${zahlDe(b.ruf)} Ruf · ${b.uebungen} ${b.uebungen === 1 ? "Übung" : "Übungen"} · 🔥 ${b.serie} ${b.serie === 1 ? "Tag" : "Tage"} Serie`
+        + (b.ohneHilfe ? ` · ${b.ohneHilfe} ohne Hilfe` : "")),
+      h("p", {class: "sp-leise"}, namen.length
+        ? `Morgen fällig: ${namen.join(", ")}${b.morgenFaellig.length > 3 ? ` und ${b.morgenFaellig.length - 3} weitere` : ""} – kurz wiederholen, kurz bevor du es vergisst, dann sitzt es.`
+        : "Weiterspielen geht immer. Am meisten bringt dir aber die Wiederholung an einem anderen Tag – bis morgen!"));
+  }
+  function abzeichenBlock(){
+    Spiel.abzeichen.pruefen();
+    const neu = Spiel.abzeichen.abholen(); if (!neu.length) return null;
+    return h("section", {class: "sp-abzeichen-neu"}, h("h3", {}, neu.length === 1 ? "Neues Abzeichen" : "Neue Abzeichen"),
+      neu.map(a => h("div", {class: "sp-abz"}, h("span", {class: "sp-abz-sym"}, a.sym), h("div", {}, h("b", {}, a.titel), h("small", {}, a.lehrt)))));
+  }
+
   /* ---------- Bus ---------- */
   Bus.an("netz-geaendert", d => { if (S.inst && d && d.netz === S.inst.netz) livePlanen(); });
-  Bus.an("zustand-geaendert", () => status());
+  Bus.an("zustand-geaendert", () => { status(); if (Spiel.abzeichen.pruefen().length) abzeichenPlanen(400); });
   Bus.an("ticket-neu", () => { status(); if (UI.app.aktuell === "postfach") { const c = document.querySelector(".sp-postfach")?.parentElement; if (c) postfachAnsicht(c); } });
   Bus.an("trace", d => { if (S.coach && S.coach.schritt === 1 && d && d.quelle === "ping" && d.ergebnis && (d.ergebnis.antworten || []).some(a => a.ok)) coachWeiter(2); });
 

@@ -1,5 +1,5 @@
 "use strict";
-/* ---------- Toasts: kurze Rückmeldungen unten mittig ----------
+/* ---------- Toasts: kurze Rückmeldungen unten mittig (im Labor: oben rechts auf der Zeichenfläche) ----------
    UI.toast(text, art = "info"|"ok"|"warn"|"fehler", {aktion:{text, fn}|[…], dauer, titel, id})
      → {schliessen()}   Maus darüber hält den Toast an. Mit Aktion bleibt er länger stehen.
    Gleiche id ersetzt einen noch sichtbaren Toast (z. B. wiederholte Pings). */
@@ -12,9 +12,22 @@ UI.toast = (() => {
     document.body.append(stapel);
     return stapel;
   }
+  /* In der Laboransicht schmal oben rechts auf der Zeichenfläche (unter Rückgängig/Wiederholen): Dort liegen meist
+     Router und Internet, selten das, was man gerade anklickt. Unten mittig verdeckten die Meldungen genau die PCs,
+     die man als Nächstes anpingen soll; rechts daneben liegt der Inspektor mit Konfig und „entspricht“. */
+  function ausrichten(st){
+    const m = document.querySelector(".lb-leinwand");
+    const r = m && m.getClientRects().length ? m.getBoundingClientRect() : null;
+    const labor = !!(r && r.width > 300 && r.height > 200);
+    st.classList.toggle("im-labor", labor);
+    if (labor) Object.assign(st.style, {left: "auto", right: `${Math.round(innerWidth - r.right + 14)}px`, top: `${Math.round(r.top + 78)}px`, bottom: "auto",
+      width: `min(400px, ${Math.round(r.width - 28)}px)`});
+    else for (const k of ["left", "right", "top", "bottom", "width"]) st.style[k] = "";
+  }
   function toast(text, art = "info", o = {}){
     if (typeof document === "undefined") return {schliessen(){}};
     const st = stapelHolen();
+    ausrichten(st);
     if (o.id) for (const alt of $$(".toast", st)) if (alt.dataset.id === o.id) alt._schliessen?.(true);
     const aktionen = (Array.isArray(o.aktion) ? o.aktion : o.aktion ? [o.aktion] : []).filter(Boolean);
     const el = h("div", {class: `toast toast-${art}`, "data-id": o.id || ""});

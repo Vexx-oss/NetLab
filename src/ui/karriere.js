@@ -83,8 +83,19 @@ UI.karriere = (() => {
     const beh = typeof L !== "undefined" ? L.behalten() : null;
     const quote = k => beh && beh[k][1] ? `${Math.round(100 * beh[k][0] / beh[k][1])} %` : "–";
     const p = Spiel.pruefung.aktiv();
+    Spiel.abzeichen.pruefen();
+    const abz = Spiel.abzeichen.liste(), abzHat = abz.filter(a => a.erhalten).length;
+    const abzeichen = h("section", {class: "kr-abzeichen"},
+      h("h3", {}, "Abzeichen ", h("small", {}, `${abzHat} von ${abz.length}`)),
+      h("p", {class: "sp-leise"}, "Jedes Abzeichen steht für eine Arbeitsweise, die im Beruf zählt. Fahr mit der Maus darüber, um zu sehen, welche."),
+      h("div", {class: "kr-abz-raster"}, abz.map(a => h("div", {class: "kr-abz" + (a.erhalten ? " hat" : ""), title: a.lehrt},
+        h("span", {class: "kr-abz-sym", "aria-hidden": "true"}, a.sym),
+        h("div", {class: "kr-abz-text"}, h("b", {}, a.titel), h("small", {}, a.text),
+          a.erhalten ? h("small", {class: "kr-abz-datum"}, "✓ erhalten am " + datumDe(heute(new Date(a.erhalten))))
+            : a.soll === 1 ? h("small", {class: "kr-abz-offen"}, "noch offen")   /* erreicht oder nicht – ein halber Balken wäre gelogen */
+            : h("span", {class: "kr-abz-stand"}, h("span", {class: "kr-bar"}, h("i", {style: {width: Math.round(100 * a.ist / a.soll) + "%"}})), h("small", {}, `${zahlDe(a.ist)} / ${zahlDe(a.soll)}`)))))));
     c.replaceChildren(h("div", {class: "kr-seite"},
-      h("header", {class: "kr-kopf"}, h("h2", {}, "Lernstand"), h("p", {class: "sp-leise"}, `Serie: ${typeof L !== "undefined" ? L.serie() : 0} Tage · heute ${typeof L !== "undefined" ? L.heuteZahl() : 0} Übungen`)),
+      h("header", {class: "kr-kopf"}, h("h2", {}, "Lernstand"), h("p", {class: "sp-leise"}, (n => `Serie: ${n} ${n === 1 ? "Tag" : "Tage"}`)(typeof L !== "undefined" ? L.serie() : 0) + (n => ` · heute ${n} ${n === 1 ? "Übung" : "Übungen"}`)(typeof L !== "undefined" ? L.heuteZahl() : 0))),
       h("section", {class: "kr-karriere"},
         h("div", {}, h("small", {}, "Karriere"), h("h3", {}, `Stufe ${info.stufe} · ${info.name}`)),
         info.naechste ? h("div", {class: "kr-balken"},
@@ -92,6 +103,7 @@ UI.karriere = (() => {
           h("label", {}, `Können Stufe ${info.stufe}: ${info.koennen.summe} / ${info.koennen.sollSumme}`, h("span", {class: "kr-bar koennen"}, h("i", {style: {width: Math.min(100, 100 * info.koennen.summe / Math.max(1, info.koennen.sollSumme)) + "%"}})))) : h("p", {}, "Höchste Stufe erreicht."),
         info.fehlt.length ? h("ul", {class: "kr-fehlt"}, info.fehlt.map(f => h("li", {}, f))) : info.naechste ? h("p", {class: "sp-ok"}, "Bereit für den Aufstieg!") : null,
         h("p", {class: "sp-leise"}, info.hinweis)),
+      abzeichen,
       h("section", {class: "kr-pruefung"}, h("h3", {}, "Zertifizierung (Prüfungstag)"),
         h("p", {class: "sp-leise"}, `3 Aufgaben, ${Spiel.PRUEFUNG.MINUTEN} Minuten, keine Hilfe – Note nach IHK-Punkteschlüssel. Die erste Prüfung ist gebührenfrei.`),
         p ? h("button", {type: "button", class: "knopf primaer", onclick: () => pruefungUebersicht()}, `Laufende Prüfung ${p.art} öffnen`) :
@@ -178,7 +190,8 @@ UI.karriere = (() => {
     const offen = Spiel.offen();
     const text = Spiel.einst.unterricht ? "Unterricht: " + Spiel.karriere.skillName(Spiel.einst.unterricht)
       : ampeln.length ? "" : offen ? `${offen} ${offen === 1 ? "Auftrag wartet" : "Aufträge warten"} im Postfach. Verträge (Shop) bringen €/h.` : "Alles erledigt. Löse ein Mini-Ticket oder gönn dir eine Pause.";
-    UI.leiste.status({ampeln, euroProStunde: Spiel.euroProStunde(), ruf: Spiel.st.ruf, offen, text});
+    const sd = Spiel.karriere.stufeDef(Spiel.st.stufe);
+    UI.leiste.status({ampeln, euroProStunde: Spiel.euroProStunde(), ruf: Spiel.st.ruf, offen, text, titel: `Stufe ${Spiel.st.stufe} · ${sd ? sd.name : ""}`});
   }
   function miniZeichnen(el, {gross = false} = {}){
     if (!el || !Spiel._st) return;

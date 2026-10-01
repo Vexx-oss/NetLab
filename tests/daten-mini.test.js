@@ -1,5 +1,5 @@
 "use strict";
-/* Mini-Tickets: Form, Längen (Leiste 320×220), gültige Antworten, Verteilung und Gegenrechnung der Zahlen */
+/* Mini-Tickets: Form, Längen (Leiste 320×300), gültige Antworten, Verteilung und Gegenrechnung der Zahlen */
 gruppe("Mini", () => {
   const alle = DATEN.mini;
   const skillIds = new Set(DATEN.skills.map(s => s.id));

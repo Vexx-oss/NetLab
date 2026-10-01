@@ -120,7 +120,7 @@ pub fn bewegt(app: &AppHandle) {
     m.monitor = Some(k);
 }
 
-/// Größe der Leiste ändern (aufklappen 320×220, zuklappen 300×56), die anliegende Kante bleibt stehen.
+/// Größe der Leiste ändern (aufklappen 320×300, zuklappen 300×56), die anliegende Kante bleibt stehen.
 pub fn groesse(app: &AppHandle, b: f64, h: f64) -> Result<(), String> {
     let w = haupt(app)?;
     let st = app.state::<Labor>();

@@ -3,6 +3,7 @@
   python tools/cdp.py start [exe] [--frisch]   Programm mit Fernsteuerungs-Port starten (eigener Datenordner, echter Spielstand bleibt unberührt)
   python tools/cdp.py eval "<js>"              JavaScript im Programm auswerten (await erlaubt), Ergebnis als JSON
   python tools/cdp.py shot bild.png            Bildschirmfoto der Seite
+  python tools/cdp.py klick X Y | zeigen X Y | ziehen X1 Y1 X2 Y2 | taste P   echte Maus/Tastatur (CSS-Pixel; zeigen = nur darüberfahren)
   python tools/cdp.py stop                     Programm beenden
 
 Umgebung: WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222, LABOR_DATEN=<Testordner>.
@@ -138,6 +139,46 @@ def foto(datei):
     print(datei)
 
 
+def maus(art, punkte, taste="left"):
+    """Echte Mausereignisse (wie ein Mensch): klick x y · ziehen x1 y1 x2 y2 (mit Zwischenschritten)."""
+    ws = WS(seite())
+    def ev(typ, x, y, knoepfe=0, anzahl=0):
+        ws.rufen("Input.dispatchMouseEvent", {"type": typ, "x": x, "y": y, "button": taste if typ != "mouseMoved" else ("left" if knoepfe else "none"),
+                                              "buttons": knoepfe, "clickCount": anzahl, "pointerType": "mouse"})
+    if art == "klick":
+        x, y = punkte
+        ev("mouseMoved", x, y); ev("mousePressed", x, y, 1, 1); ev("mouseReleased", x, y, 0, 1)
+    elif art == "zeigen":
+        ev("mouseMoved", *punkte)
+    elif art == "ziehen":
+        x1, y1, x2, y2 = punkte
+        ev("mouseMoved", x1, y1); time.sleep(0.15)
+        ev("mousePressed", x1, y1, 1, 1)
+        for i in range(1, 13):
+            ev("mouseMoved", x1 + (x2 - x1) * i / 12, y1 + (y2 - y1) * i / 12, 1); time.sleep(0.02)
+        ev("mouseReleased", x2, y2, 0, 1)
+    print(json.dumps({art: punkte}))
+
+
+SONDER = {"Enter": 13, "Escape": 27, "Backspace": 8, "Tab": 9, "Delete": 46}
+
+
+def taste(name):
+    ws = WS(seite())
+    vk = SONDER.get(name, ord(name.upper()) if len(name) == 1 else 0)
+    for typ in ("rawKeyDown" if name in SONDER else "keyDown", "keyUp"):
+        ws.rufen("Input.dispatchKeyEvent", {"type": typ, "key": name, "code": ("Key" + name.upper()) if len(name) == 1 else name,
+                                            "text": (chr(13) if name == "Enter" else name) if (typ in ("keyDown", "rawKeyDown") and (len(name) == 1 or name == "Enter")) else "",
+                                            "windowsVirtualKeyCode": vk, "nativeVirtualKeyCode": vk})
+    print(json.dumps({"taste": name}))
+
+
+def tippen(text):
+    ws = WS(seite())
+    ws.rufen("Input.insertText", {"text": text})
+    print(json.dumps({"getippt": text}))
+
+
 def stop():
     subprocess.run(["taskkill", "/IM", "netzwerk-labor.exe", "/F"], capture_output=True)
     subprocess.run(["taskkill", "/IM", "Netzwerk-Labor.exe", "/F"], capture_output=True)
@@ -154,6 +195,16 @@ if __name__ == "__main__":
         auswerten(a[1])
     elif a[0] == "shot":
         foto(a[1] if len(a) > 1 else "programm.png")
+    elif a[0] == "klick":
+        maus("klick", [float(a[1]), float(a[2])])
+    elif a[0] == "ziehen":
+        maus("ziehen", [float(x) for x in a[1:5]])
+    elif a[0] == "zeigen":
+        maus("zeigen", [float(a[1]), float(a[2])])
+    elif a[0] == "taste":
+        taste(a[1])
+    elif a[0] == "tippen":
+        tippen(a[1])
     elif a[0] == "stop":
         stop()
     else:

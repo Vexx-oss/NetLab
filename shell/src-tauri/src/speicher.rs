@@ -1,4 +1,5 @@
-//! Spielstand als Datei: atomar schreiben, täglich sichern (5 rotierend), beschädigte Datei erkennen.
+//! Spielstand als Datei: atomar schreiben, täglich sichern (5 rotierend), dazu ein „vorheriger Stand“
+//! (spätestens alle 15 min erneuert), beschädigte Datei erkennen.
 //! Dateiform: {"format":"netzwerk-labor","v":1,"gespeichert":"…Z","daten":{…store…}}
 
 use serde_json::Value;
@@ -12,6 +13,9 @@ use std::{
 pub const DATEI: &str = "spielstand.json";
 const SICHERUNGEN: &str = "sicherungen";
 const ANZAHL: usize = 5;
+/// Liegt bewusst NICHT im Ordner „sicherungen“ (der zählt nur Tagessicherungen mit Datum im Namen).
+const VORHER: &str = "spielstand.vorher.json";
+const VORHER_ALLE_S: u64 = 15 * 60;
 pub const MAX_BYTES: usize = 64 * 1024 * 1024;
 
 pub struct Geladen {
@@ -97,6 +101,15 @@ pub fn laden(ordner: &Path) -> Geladen {
     // Beschädigt: aufheben (nicht löschen), letzte gültige Sicherung laden und sofort zur Hauptdatei machen
     let kaputt = ordner.join(format!("spielstand.beschaedigt-{}.json", zeit_iso().replace(':', "-")));
     let _ = fs::rename(&pfad, &kaputt);
+    // Zuerst der vorherige Stand (höchstens etwa 15 min Spielzeit zurück), dann die Tagessicherungen
+    let vorher = ordner.join(VORHER);
+    if let (Ok(d), Ok(roh)) = (lesen(&vorher), fs::read(&vorher)) {
+        let _ = atomar_schreiben(&pfad, &roh);
+        return Geladen {
+            daten: Some(d),
+            meldung: Some("Dein Spielstand war beschädigt; der vorherige Stand wurde geladen (höchstens etwa eine Viertelstunde Spielzeit zurück).".into()),
+        };
+    }
     for s in sicherungen(ordner) {
         if let (Ok(d), Ok(roh)) = (lesen(&s), fs::read(&s)) {
             let _ = atomar_schreiben(&pfad, &roh);
@@ -125,6 +138,22 @@ fn sichern(ordner: &Path, pfad: &Path) {
     }
 }
 
+/// Den bisherigen (gültigen) Stand als „vorherigen Stand“ aufheben – höchstens alle 15 Minuten,
+/// damit er bei einem Fehler am selben Tag nicht schon vom fehlerhaften Stand überschrieben ist.
+fn vorher_sichern(ordner: &Path, pfad: &Path) {
+    let ziel = ordner.join(VORHER);
+    let frisch = fs::metadata(&ziel)
+        .and_then(|m| m.modified())
+        .map(|t| t.elapsed().map(|d| d.as_secs() < VORHER_ALLE_S).unwrap_or(false))
+        .unwrap_or(false);
+    if frisch || lesen(pfad).is_err() {
+        return;
+    }
+    if let Ok(roh) = fs::read(pfad) {
+        let _ = atomar_schreiben(&ziel, &roh); // neue Datei → Änderungszeit = jetzt
+    }
+}
+
 pub fn speichern(ordner: &Path, json: &str) -> Result<(), String> {
     if json.len() > MAX_BYTES {
         return Err("Spielstand zu groß".into());
@@ -136,6 +165,7 @@ pub fn speichern(ordner: &Path, json: &str) -> Result<(), String> {
     fs::create_dir_all(ordner).map_err(|e| e.to_string())?;
     let pfad = ordner.join(DATEI);
     sichern(ordner, &pfad);
+    vorher_sichern(ordner, &pfad);
     let inhalt = format!("{{\"format\":\"netzwerk-labor\",\"v\":1,\"gespeichert\":\"{}\",\"daten\":{json}}}", zeit_iso());
     atomar_schreiben(&pfad, inhalt.as_bytes())
 }

@@ -65,7 +65,7 @@ Bewusst **nur 7 Gerätetypen**: PC (auch als Laptop/Drucker-Skin), Server, Switc
 
 **Offline-Bericht.** Beim Öffnen: „Während du weg warst: 3 Wartungen automatisch, 2 Tickets warten, Kunde Praxis Müller ist rot.“ Zeit zählt höchstens 8 h.
 
-**Leiste.** Die Leiste ist die Kompaktansicht des Programms: rahmenlos, klein (etwa 300 × 56 px, aufgeklappt 320 × 220 px), am Bildschirmrand, halbdurchsichtig. Sie zeigt Kunden-Ampeln, Euro pro Stunde, Ruf und die Zahl offener Tickets, aufgeklappt ein Mini-Ticket. Neue Tickets erscheinen **nur als Zähler und Punkt** (Leiste und Tray-Symbol), ohne Ton, ohne Pop-up, ohne Fokus. Ausführlich in § 9.7.
+**Leiste.** Die Leiste ist die Kompaktansicht des Programms: rahmenlos, klein (etwa 300 × 56 px, aufgeklappt 320 × 300 px – 220 px reichten im Test für ein Mini-Ticket nicht), am Bildschirmrand, halbdurchsichtig. Sie zeigt Kunden-Ampeln, Euro pro Stunde, Ruf und die Zahl offener Tickets, aufgeklappt ein Mini-Ticket. Neue Tickets erscheinen **nur als Zähler und Punkt** (Leiste und Tray-Symbol), ohne Ton, ohne Pop-up, ohne Fokus. Ausführlich in § 9.7.
 
 **Unterrichtsmodus.** Ein Schalter „Heute im Unterricht: …“ (Thema aus `L.THEMEN`/Fertigkeiten, z. B. VLAN oder TCP). Mini-Tickets und Ereignisse ziehen dann bevorzugt dazu passende Fertigkeiten, ruhige Darstellung, keine Animation und kein Ton.
 

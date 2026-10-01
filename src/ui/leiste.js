@@ -4,10 +4,10 @@
    UI.leiste.status({ampeln:[{name, farbe:"gruen"|"gelb"|"rot", zustand}], euroProStunde, ruf, offen, text})
    UI.leiste.miniBereich   DOM-Element für ein Mini-Ticket (Inhalt kommt vom Spiel; bleibt über Umbauten erhalten)
    Regeln: nur Maus, keine Tastatur, kein Ton, kein Fokusklau. 55 % deckend ohne Maus (einstellbar), voll deckend mit Maus,
-   klappt bei Maus darüber auf (320×220) und 5 s nach dem Verlassen wieder zu (300×56). Ziehbar über die Griffleiste. */
+   klappt bei Maus darüber auf (320×300) und 5 s nach dem Verlassen wieder zu (300×56). Ziehbar über die Griffleiste. */
 UI.leiste = (() => {
-  const ZU = [300, 56], AUF = [320, 220];
-  const zustand = {ampeln: [], euroProStunde: null, ruf: null, offen: 0, text: ""};
+  const ZU = [300, 56], AUF = [320, 300];     /* aufgeklappt: Platz für ein ganzes Mini-Ticket ohne Scrollen */
+  const zustand = {ampeln: [], euroProStunde: null, ruf: null, offen: 0, text: "", titel: ""};
   let root = null, karte = null, el = {}, auf = false, zuTimer = null, aufTimer = null, groesseMarke = 0;
   let mini = null;                 /* erst bei Bedarf anlegen (keine Aufrufe beim Laden) */
   const miniEl = () => mini ||= h("div", {class: "lk-mini", "aria-label": "Mini-Ticket"});
@@ -97,7 +97,7 @@ UI.leiste = (() => {
     if (z.ampeln && z.ampeln.length) {
       for (const a of z.ampeln.slice(0, 6)) el.ampeln.append(h("span", {class: "lk-ampel", title: `${a.name}: ${a.zustand || ""}`.trim(), "data-tauri-drag-region": ""}, ampelSymbol(a.farbe)));
       if (z.ampeln.length > 6) el.ampeln.append(h("span", {class: "lk-mehr"}, `+${z.ampeln.length - 6}`));
-    } else el.ampeln.append(h("span", {class: "lk-keine", "data-tauri-drag-region": ""}, "Freies Labor"));
+    } else el.ampeln.append(h("span", {class: "lk-keine", "data-tauri-drag-region": ""}, z.titel || "Netzwerk-Labor"));
     el.euro.textContent = euroText(z.euroProStunde);
     el.ruf.replaceChildren(UI.symbol("stern", 13), h("span", {}, z.ruf == null ? "–" : zahlDe(z.ruf)));
     const n = +z.offen || 0;

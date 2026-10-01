@@ -198,7 +198,7 @@ UI.laborWerkzeuge = (() => {
     });
     function bewegen(e){
       const dx = e.clientX - G.x0, dy = e.clientY - G.y0;
-      if (G.art === "pan") { Z.view.tx = G.view.tx + dx; Z.view.ty = G.view.ty + dy; F.ansichtSetzen(); return; }
+      if (G.art === "pan") { Z.eingepasst = false; Z.view.tx = G.view.tx + dx; Z.view.ty = G.view.ty + dy; F.ansichtSetzen(); return; }
       if (G.art === "geraet") {
         const p = {x: F.raster(G.start.x + dx / Z.view.k), y: F.raster(G.start.y + dy / Z.view.k)};
         const alt = Z.pos.get(G.id);
@@ -291,7 +291,7 @@ UI.laborWerkzeuge = (() => {
     /* ---------- Mausrad: Zoom um den Zeiger ---------- */
     svg.addEventListener("wheel", e => {
       e.preventDefault();
-      if (e.shiftKey && !e.ctrlKey) { Z.view.tx -= e.deltaY; F.ansichtSetzen(); return; }
+      if (e.shiftKey && !e.ctrlKey) { Z.eingepasst = false; Z.view.tx -= e.deltaY; F.ansichtSetzen(); return; }
       const d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
       F.zoomUm(Math.exp(-d * (e.ctrlKey ? 0.01 : 0.0016)), e.clientX, e.clientY);
     }, {passive: false});
@@ -457,7 +457,7 @@ UI.laborWerkzeuge = (() => {
           if (sel) {
             const g = Z.netz.geraete[sel], s = e.shiftKey ? 100 : 20;
             F.aendern(`${g.name} verschoben`, n => { n.geraete[sel].x = F.raster(g.x + dx * s); n.geraete[sel].y = F.raster(g.y + dy * s); });
-          } else { Z.view.tx -= dx * 80; Z.view.ty -= dy * 80; F.ansichtSetzen(); }
+          } else { Z.eingepasst = false; Z.view.tx -= dx * 80; Z.view.ty -= dy * 80; F.ansichtSetzen(); }
           return true;
         }
       }

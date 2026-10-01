@@ -198,7 +198,7 @@ Spiel.stufeInfo = function(){
   if (naechsteDef && !ruf.ok) fehlt.push(`Noch ${ruf.fehlt} Ruf (${ruf.ist} von ${ruf.soll}). Ruf gibt es für gelöste Kundentickets.`);
   if (naechsteDef && !koennen.ok) {
     const teile = koennen.fehlend.slice(0, 4).map(s => `${s.name} (${s.stufeName} → geübt)`);
-    fehlt.push(`Noch ${koennen.fehltPunkte} Können-Schritt${koennen.fehltPunkte === 1 ? "" : "e"} auf Stufe ${nr}: ${teile.join(", ")}${koennen.fehlend.length > 4 ? " …" : ""}.`);
+    fehlt.push(`Noch ${koennen.fehltPunkte} Können-Schritt${koennen.fehltPunkte === 1 ? "" : "e"} auf Stufe ${nr}: ${teile.join(", ")}${koennen.fehlend.length > 4 ? " …" : "."}`);
   }
   return {
     stufe: nr, name: def.name, geraete: def.geraete,

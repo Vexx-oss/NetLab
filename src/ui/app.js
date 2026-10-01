@@ -2,7 +2,7 @@
 /* ---------- App-Rahmen: Kopfzeile, Andock-Leiste, Ansichten, Einstellungen, Modi (Architektur § 9) ----------
    UI.app.registrieren(name, {titel, symbol, zeigen(container), wieder?(container), verlassen?(), zaehler?()})
    UI.app.ansicht(name)                  Ansicht wechseln (jede Ansicht füllt die Fläche; kein Fenstersystem)
-   UI.app.status({euro, ruf, stufe, offen})   Werte der Kopfzeile (leuchten bei Änderung kurz auf, Zahlen zählen hoch)
+   UI.app.status({euro, ruf, stufe, offen, fortschritt?:{anteil, text, bereit}})   Werte der Kopfzeile (leuchten bei Änderung kurz auf, Zahlen zählen hoch)
    UI.app.einstellungen()                Dialog; UI.app.einstellungAbschnitt(titel, renderFn(container)) ergänzt Abschnitte
    UI.app.hilfe()                        Tastenkürzel      UI.app.aktualisieren()  Zähler der Andock-Leiste neu lesen
    UI.app.liste()                        [{name, titel, symbol}]   UI.app.aktuell  Name der aktiven Ansicht
@@ -126,6 +126,14 @@ UI.app = (() => {
     offen: x => x == null ? "0 offen" : `${zahlDe(x)} offen`,
   };
   function status(s = {}){
+    /* Fortschritt zur nächsten Stufe als feiner Balken unter „Stufe N“ (Ruf UND Können zählen, der kleinere Anteil bestimmt) */
+    if ("fortschritt" in s && el.werte?.stufe) {
+      const f = s.fortschritt, b = el.werte.stufe.b;
+      b.classList.toggle("mit-fortschritt", !!f);
+      b.classList.toggle("bereit", !!f?.bereit);
+      b.style.setProperty("--fortschritt", f ? Math.round(klemme(f.anteil || 0, 0, 1) * 100) + "%" : "0%");
+      b.title = f?.text || "Karriere-Stufe";
+    }
     for (const k of Object.keys(FORMAT)) {
       if (!(k in s)) continue;
       const alt = wert[k], neu = s[k];
@@ -159,7 +167,7 @@ UI.app = (() => {
     el.werte = {
       euro: wertEl("wert-euro", "euro", "Kontostand deines Systemhauses"),
       ruf: wertEl("wert-ruf", "stern", "Ruf bei deinen Kunden"),
-      stufe: wertEl("wert-stufe", "stufe", "Karriere-Stufe"),
+      stufe: wertEl("wert-stufe", "stufe", "Karriere-Stufe", () => ansicht("lernstand")),
       offen: wertEl("wert-offen", "postfach", "Offene Tickets im Postfach", () => ansicht("postfach")),
     };
     el.thema = knopf("sonne", "Hell/Dunkel", themaUmschalten);

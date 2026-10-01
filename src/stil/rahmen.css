@@ -20,6 +20,9 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym{color:var(--accent)} .wert-offen .sym{color:var(--muted)}
 .wert-offen.hat{border-color:var(--accent); background:var(--accent-soft)} .wert-offen.hat .sym{color:var(--accent)}
 .wert.leer .wert-zahl{color:var(--faint)}
+.wert.mit-fortschritt{position:relative; overflow:hidden}
+.wert.mit-fortschritt::after{content:""; position:absolute; left:0; bottom:0; height:3px; width:var(--fortschritt, 0%); background:var(--accent); border-radius:0 3px 3px 0; transition:width .6s ease}
+.wert-stufe.bereit{border-color:var(--ok)} .wert-stufe.bereit::after{background:var(--ok)}
 .wert.leuchtet{animation:wert-leuchten 1.1s ease-out}
 .wert.leuchtet.runter{animation-name:wert-leuchten-runter}
 @keyframes wert-leuchten{0%{box-shadow:0 0 0 0 var(--ok); border-color:var(--ok)} 35%{box-shadow:0 0 0 5px transparent; background:var(--ok-soft)} 100%{box-shadow:0 0 0 0 transparent}}
@@ -69,6 +72,11 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
   opacity:0; transform:translateY(10px) scale(.98); transition:opacity .2s ease, transform .2s ease}
 .toast.da{opacity:1; transform:none}
 .toast.weg{opacity:0; transform:translateY(6px)}
+/* im Labor: oben rechts, neueste unten angehängt, kompakter */
+.toast-stapel.im-labor{transform:none; flex-direction:column; align-items:stretch}
+.toast-stapel.im-labor .toast{padding:8px 6px 8px 10px; gap:10px}
+.toast-stapel.im-labor .toast-text{font-size:13.5px}
+.toast-stapel.im-labor .toast-sym{width:26px; height:26px}
 .toast-sym{display:inline-flex; flex:0 0 auto; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--panel-3); color:var(--muted)}
 .toast-ok{border-color:var(--ok)} .toast-ok .toast-sym{background:var(--ok-soft); color:var(--ok)}
 .toast-warn{border-color:var(--warn)} .toast-warn .toast-sym{background:var(--warn-soft); color:var(--warn)}

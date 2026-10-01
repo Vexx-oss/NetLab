@@ -106,7 +106,11 @@ UI.labor = (() => {
       let alt = null;
       new ResizeObserver(() => {
         const r = Z.svg.getBoundingClientRect();
-        if (alt && alt.w && alt.h && r.width && r.height) { Z.view.tx += (r.width - alt.w) / 2; Z.view.ty += (r.height - alt.h) / 2; ansichtSetzen(); }
+        /* Solange niemand selbst gezoomt oder verschoben hat, bleibt das Netz eingepasst (Coach-, Ziel- und Simulationszeilen ändern die Höhe) */
+        if (alt && alt.w && alt.h && r.width && r.height) {
+          if (Z.eingepasst && Z.netz) einpassen(false);
+          else { Z.view.tx += (r.width - alt.w) / 2; Z.view.ty += (r.height - alt.h) / 2; ansichtSetzen(); }
+        }
         else if (r.width && Z.einpassenAusstehend && Z.netz) { Z.einpassenAusstehend = false; einpassen(false); }
         alt = {w: r.width, h: r.height};
       }).observe(leinwand);
@@ -174,13 +178,14 @@ UI.labor = (() => {
     const r = Z.svg.getBoundingClientRect();
     const mx = cx - r.left, my = cy - r.top, alt = Z.view.k;
     const k = klemme(alt * faktor, 0.25, 3);
+    Z.eingepasst = false;
     Z.view.tx = mx - (mx - Z.view.tx) * (k / alt);
     Z.view.ty = my - (my - Z.view.ty) * (k / alt);
     Z.view.k = k;
     ansichtSetzen();
   }
-  function zoomSchritt(f){ const r = Z.svg.getBoundingClientRect(); ansichtAnimieren(zielZoom(Z.view.k * f, r.left + r.width / 2, r.top + r.height / 2)); }
-  function zoomAuf(k){ const r = Z.svg.getBoundingClientRect(); ansichtAnimieren(zielZoom(k, r.left + r.width / 2, r.top + r.height / 2)); }
+  function zoomSchritt(f){ const r = Z.svg.getBoundingClientRect(); Z.eingepasst = false; ansichtAnimieren(zielZoom(Z.view.k * f, r.left + r.width / 2, r.top + r.height / 2)); }
+  function zoomAuf(k){ const r = Z.svg.getBoundingClientRect(); Z.eingepasst = false; ansichtAnimieren(zielZoom(k, r.left + r.width / 2, r.top + r.height / 2)); }
   function zielZoom(kNeu, cx, cy){
     const r = Z.svg.getBoundingClientRect(), mx = cx - r.left, my = cy - r.top, k = klemme(kNeu, 0.25, 3);
     return {k, tx: mx - (mx - Z.view.tx) * (k / Z.view.k), ty: my - (my - Z.view.ty) * (k / Z.view.k)};
@@ -220,6 +225,7 @@ UI.labor = (() => {
       ziel = {k, tx: (r.width - bw * k) / 2 - b.x1 * k, ty: randOben + (hNutz - bh * k) / 2 - b.y1 * k};
     }
     ansichtAnimieren(ziel, animiert ? 320 : 0);
+    Z.eingepasst = true;
   }
   /* Gerät in den sichtbaren Bereich holen (sanft), ohne Zoom zu ändern */
   function sichtbarMachen(id, mittig){
@@ -227,6 +233,7 @@ UI.labor = (() => {
     const r = Z.svg.getBoundingClientRect(), {tx, ty, k} = Z.view;
     const sx = p.x * k + tx, sy = p.y * k + ty, rand = 90;
     if (!mittig && sx > rand && sx < r.width - rand && sy > rand && sy < r.height - rand) return;
+    Z.eingepasst = false;
     ansichtAnimieren({k, tx: r.width / 2 - p.x * k, ty: r.height / 2 - p.y * k});
   }
 

@@ -14,7 +14,7 @@ Getestet am 30.09./01.10.2026 auf diesem Rechner (Windows 11 Pro, 1920×1200, Sk
 | Funktion | Windows 11 | WSLg X11 (`GDK_BACKEND=x11`) | WSLg Wayland |
 |---|---|---|---|
 | Programm startet, Spiel lädt, keine JS-Fehler | ✅ | ✅ | ✅ |
-| Leiste: rahmenlos, 300×56 / 320×220 | ✅ gemessen | ✅ (gemeldet) | ✅ (gemeldet) |
+| Leiste: rahmenlos, 300×56 / 320×300 (bis 1.0: 320×220) | ✅ gemessen | ✅ (gemeldet) | ✅ (gemeldet) |
 | Leiste ohne Fokus, ohne Ton, ohne Pop-up | ✅ (Fokus und Vordergrund nachgeprüft: nein) | – nicht geprüft | – nicht geprüft |
 | Immer im Vordergrund | ✅ | ✅ | ❌ Wayland erlaubt es Programmen nicht |
 | Leiste selbst positionieren (unten rechts, je Monitor gemerkt) | ✅ | – nicht geprüft | ❌ der Compositor platziert |

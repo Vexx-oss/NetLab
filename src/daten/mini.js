@@ -1,6 +1,6 @@
 "use strict";
 /* ---------- Mini-Tickets für die Leiste (Konzept § 3.2 „Mini“) ----------
-   Nur mit der Maus lösbar, 30–120 s, 320×220 px: Frage ≤ 140 Zeichen, Option ≤ 60, Schnappschuss ≤ 7 Zeilen à ≤ 44.
+   Nur mit der Maus lösbar, 30–120 s, Leiste aufgeklappt 320×300 px: Frage ≤ 140 Zeichen, Option ≤ 60, Schnappschuss ≤ 7 Zeilen à ≤ 44.
    Arten: wahl/vorhersage (richtig = Index), reihenfolge (richtig = Indexliste), zuordnen (richtig = Paare [links, rechts]).
    pruef: Gegenrechnung im Test (tests/daten-mini.test.js) mit den IP-Helfern. Quellen: Vault-Notizen in
    20-Bereiche/Umschulung/Netzwerk/ (Network – Lernfassung, VLAN – Lernfassung, TCP – Lernfassung, 04-AP1-Netzwerk,
