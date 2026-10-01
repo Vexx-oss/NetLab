@@ -49,6 +49,15 @@ fn schluessel(m: &Monitor) -> String {
     format!("{}|{}x{}|{},{}", m.name().map(String::as_str).unwrap_or("?"), s.width, s.height, p.x, p.y)
 }
 
+/// Programmgesteuerte Fensteränderungen lösen verspätete Moved-Ereignisse aus. Die dürfen nicht als
+/// „Nutzer hat die Leiste verschoben“ gemerkt werden: kurz danach werden Bewegungen ignoriert.
+pub fn jetzt_ms() -> u64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0)
+}
+fn beruhigen(st: &Labor) {
+    st.ruhig_bis.store(jetzt_ms() + 900, SeqCst);
+}
+
 fn px(v: f64, skala: f64) -> i32 {
     (v * skala).round() as i32
 }
@@ -85,6 +94,7 @@ fn leiste_platzieren(w: &WebviewWindow, st: &Labor) {
         .unwrap_or(standard);
     st.merker.lock().unwrap().monitor = Some(k);
     *st.groesse.lock().unwrap() = LEISTE;
+    beruhigen(st);
     let _ = w.set_position(PhysicalPosition::new(pos[0], pos[1]));
     let _ = w.set_size(PhysicalSize::new(b as u32, h as u32));
 }
@@ -93,7 +103,7 @@ fn leiste_platzieren(w: &WebviewWindow, st: &Labor) {
 /// verankert an der Kante, an der sie liegt (rechts/unten), damit Auf-/Zuklappen sie nicht wandern lässt.
 pub fn bewegt(app: &AppHandle) {
     let Some(st) = app.try_state::<Labor>() else { return };
-    if *st.modus.lock().unwrap() != "leiste" {
+    if *st.modus.lock().unwrap() != "leiste" || jetzt_ms() < st.ruhig_bis.load(SeqCst) {
         return;
     }
     let Ok(w) = haupt(app) else { return };
@@ -116,9 +126,12 @@ pub fn groesse(app: &AppHandle, b: f64, h: f64) -> Result<(), String> {
     let st = app.state::<Labor>();
     let (b, h) = (b.clamp(120.0, 4000.0), h.clamp(32.0, 3000.0));
     if *st.modus.lock().unwrap() != "leiste" {
-        return w.set_size(LogicalSize::new(b, h)).map_err(|e| e.to_string());
+        /* Nur die Leiste ändert ihre Größe selbst. Ein verspäteter Aufruf (Zuklappen beim Wechsel zur Vollansicht)
+           darf das große Fenster nicht auf Leistengröße schrumpfen. */
+        return Ok(());
     }
     *st.groesse.lock().unwrap() = (b, h);
+    beruhigen(&st);
     let (Ok(pos), Ok(gr), Ok(Some(mon))) = (w.outer_position(), w.outer_size(), w.current_monitor()) else {
         return w.set_size(LogicalSize::new(b, h)).map_err(|e| e.to_string());
     };
@@ -153,7 +166,9 @@ fn voll_merken(w: &WebviewWindow, st: &Labor) {
     let mut m = st.merker.lock().unwrap();
     m.voll_max = max;
     if let (false, Some(g)) = (max, groesse) {
-        m.voll = Some(g);
+        if g[0] >= 880.0 && g[1] >= 560.0 {
+            m.voll = Some(g);
+        }
     }
 }
 
@@ -162,6 +177,7 @@ pub fn modus(app: &AppHandle, neu: &str, melden: bool) -> Result<(), String> {
     let w = haupt(app)?;
     let st = app.state::<Labor>();
     let alt = st.modus.lock().unwrap().clone();
+    beruhigen(&st);
     match neu {
         "tray" => {
             if alt == "voll" {
@@ -214,7 +230,7 @@ pub fn modus(app: &AppHandle, neu: &str, melden: bool) -> Result<(), String> {
                     let m = st.merker.lock().unwrap();
                     (m.voll, m.voll_max)
                 };
-                let (mut b, mut h) = gemerkt.map(|g| (g[0], g[1])).unwrap_or(VOLL);
+                let (mut b, mut h) = gemerkt.filter(|g| g[0] >= 880.0 && g[1] >= 560.0).map(|g| (g[0], g[1])).unwrap_or(VOLL);
                 if let Ok(Some(mon)) = w.current_monitor().or_else(|_| w.primary_monitor()) {
                     let (_, _, fb, fh) = flaeche(&mon);
                     b = b.min(fb as f64 / mon.scale_factor() * 0.95);

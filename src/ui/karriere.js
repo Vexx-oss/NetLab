@@ -175,7 +175,10 @@ UI.karriere = (() => {
   function leisteStatus(){
     if (!Spiel._st) return;
     const ampeln = Spiel.karriere.vertragskunden().map(id => ({name: kd(id).name, farbe: Spiel.wartung.ampelBei(id), zustand: AMPEL[Spiel.wartung.ampelBei(id)]?.[2] || ""}));
-    UI.leiste.status({ampeln, euroProStunde: Spiel.euroProStunde(), ruf: Spiel.st.ruf, offen: Spiel.offen(), text: Spiel.einst.unterricht ? "Unterricht: " + Spiel.karriere.skillName(Spiel.einst.unterricht) : ""});
+    const offen = Spiel.offen();
+    const text = Spiel.einst.unterricht ? "Unterricht: " + Spiel.karriere.skillName(Spiel.einst.unterricht)
+      : ampeln.length ? "" : offen ? `${offen} ${offen === 1 ? "Auftrag wartet" : "Aufträge warten"} im Postfach. Verträge (Shop) bringen €/h.` : "Alles erledigt. Löse ein Mini-Ticket oder gönn dir eine Pause.";
+    UI.leiste.status({ampeln, euroProStunde: Spiel.euroProStunde(), ruf: Spiel.st.ruf, offen, text});
   }
   function miniZeichnen(el, {gross = false} = {}){
     if (!el || !Spiel._st) return;

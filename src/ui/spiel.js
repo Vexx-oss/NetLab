@@ -346,7 +346,7 @@ UI.spiel = (() => {
       h("button", {type: "button", class: "knopf geist klein", onclick: () => { S.coach = null; Spiel.einstSetzen("coach", false); UI.labor.auftragNeu(); }}, "Hinweise aus"));
   }
   function einstiegStarten(){
-    const satz = (DATEN.senior?.begruessung || [])[0] || "Willkommen im Systemhaus. Dein erster Kunde wartet schon.";
+    const satz = "Schön, dass du da bist. Ich bin der Senior hier. Ich sag dir selten, was falsch ist – ich frag dich so lange, bis du es selbst findest. Dein erster Kunde wartet schon.";
     const zu = overlay(h("div", {class: "sp-willkommen"},
       h("span", {class: "sp-senior-sym gross"}, "🧑‍🔧"),
       h("h2", {}, "Willkommen im Systemhaus"),
@@ -413,6 +413,8 @@ UI.spiel = (() => {
     try {
       Spiel.laden();
       vorhersageEinrichten();
+      /* Desktop: Rust hat das Fenster umgeschaltet (Tray-Klick, Strg+Alt+L, Ruhe) – Ansicht nachziehen */
+      Plattform.an("modus-extern", m => { if (UI.modus() !== m) UI.modus(m); });
       status();
       aktiveLaden();
       if (!Spiel.st.einstieg.fertig && !Spiel.st.erledigt.length) einstiegStarten();

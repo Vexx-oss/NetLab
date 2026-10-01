@@ -19,6 +19,7 @@ const Plattform = (() => {
       zeigen: () => p.impl.fenster.zeigen?.(),
       verstecken: () => p.impl.fenster.verstecken?.(),
       beenden: () => p.impl.fenster.beenden?.(),
+      zustand: () => p.impl.fenster.zustand ? p.impl.fenster.zustand() : Promise.resolve(null),
     },
     abzeichen: (n, text) => p.impl.abzeichen(n, text),
     benachrichtigen: text => p.impl.benachrichtigen(text),

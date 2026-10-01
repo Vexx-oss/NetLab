@@ -1,0 +1,335 @@
+"use strict";
+/* ---------- Mini-Tickets für die Leiste (Konzept § 3.2 „Mini“) ----------
+   Nur mit der Maus lösbar, 30–120 s, 320×220 px: Frage ≤ 140 Zeichen, Option ≤ 60, Schnappschuss ≤ 7 Zeilen à ≤ 44.
+   Arten: wahl/vorhersage (richtig = Index), reihenfolge (richtig = Indexliste), zuordnen (richtig = Paare [links, rechts]).
+   pruef: Gegenrechnung im Test (tests/daten-mini.test.js) mit den IP-Helfern. Quellen: Vault-Notizen in
+   20-Bereiche/Umschulung/Netzwerk/ (Network – Lernfassung, VLAN – Lernfassung, TCP – Lernfassung, 04-AP1-Netzwerk,
+   Fragen – Netzwerk-Grundlagen, Fragen – Subnetting, Fragen – Netzwerke planen) und RFC 1918/792/2131. */
+(() => {
+  const NW = "Network – Lernfassung", VL = "VLAN – Lernfassung", TC = "TCP – Lernfassung", AP = "04-AP1-Netzwerk", SU = "Fragen – Subnetting", PL = "Fragen – Netzwerke planen";
+  const m = (id, skill, stufe, art, frage, optionen, richtig, erklaerung, quelle, schnappschuss, pruef) =>
+    Object.assign({id: "mini-" + id, skill, stufe, art, frage, schnappschuss: schnappschuss ? {typ: schnappschuss[0], inhalt: schnappschuss[1]} : null,
+      optionen, richtig, erklaerung, quelle}, pruef ? {pruef} : {});
+  DATEN.mini.push(
+    /* ---- lab.link ---- */
+    m("link-1", "lab.link", "E", "wahl", "Ein PC meldet „Netzwerkkabel nicht angeschlossen“. Was prüfst du zuerst?",
+      ["Kabel und Port-LED", "DNS-Server", "Standardgateway", "Firewall-Regeln"], 0,
+      "Fehlersuche beginnt auf Schicht 1: Ohne Link helfen keine Einstellungen. DNS, Gateway und Firewall kommen erst dran, wenn überhaupt Bits fließen.", PL),
+    m("link-2", "lab.link", "AP1", "vorhersage", "Antwortet 10.0.0.1 auf einen Ping aus dem LAN?",
+      ["Ja – die IP ist ja gesetzt", "Nein – die Schnittstelle ist abgeschaltet", "Ja, aber erst beim zweiten Versuch"], 1,
+      "„administratively down“ heißt: shutdown ist konfiguriert. Eine IP auf einer abgeschalteten Schnittstelle nützt nichts – erst „no shutdown“.", NW,
+      ["config", "R1#show ip int brief\nInterface  IP-Address  Status\nGi0/1      10.0.0.1    administratively down"]),
+    m("link-3", "lab.link", "AP1", "zuordnen", "Ordne den Status aus „show ip interface brief“ seiner Bedeutung zu.",
+      {links: ["up / up", "administratively down", "down / down"], rechts: ["kein Link (Kabel/Gegenstelle)", "läuft", "per shutdown abgeschaltet"]}, [[0, 1], [1, 2], [2, 0]],
+      "up/up = Link und Protokoll laufen. „administratively down“ = jemand hat shutdown gesetzt. down/down = eingeschaltet, aber kein Link: Kabel fehlt oder die Gegenstelle ist aus.", NW),
+
+    /* ---- lab.ip ---- */
+    m("ip-1", "lab.ip", "E", "wahl", "Welche Adresse darf ein PC im Netz 192.168.1.0/24 bekommen?",
+      ["192.168.1.0", "192.168.1.255", "192.168.1.77", "192.168.2.10"], 2,
+      ".0 ist die Netzadresse, .255 der Broadcast – beide sind keine Hostadressen. 192.168.2.10 liegt in einem anderen Netz. Bleibt .77.", SU, null,
+      {art: "host", ip: "192.168.1.77", maske: "255.255.255.0", erwartet: true}),
+    m("ip-2", "lab.ip", "AP1", "wahl", "Windows meldet beim Start einen Adresskonflikt. Was ist passiert?",
+      ["Zwei Geräte haben dieselbe IP-Adresse", "Das Gateway fehlt", "Die Maske ist zu groß", "Der DHCP-Server ist aus"], 0,
+      "Ein Konflikt heißt: Auf die eigene Adresse antwortet per ARP ein anderes Gerät. Ein fehlendes Gateway oder eine falsche Maske melden sich anders.", NW),
+    m("ip-3", "lab.ip", "AP2", "vorhersage", "Du trägst am PC 192.168.10.256 mit /24 ein. Was passiert?",
+      ["Windows lehnt die Eingabe ab", "Ping geht nur lokal", "Der PC nimmt eine APIPA-Adresse"], 0,
+      "Jedes Oktett reicht von 0 bis 255 – 256 ist keine gültige IPv4-Zahl. Die Eingabe ist schon syntaktisch falsch, das hat mit APIPA (DHCP) nichts zu tun.", SU),
+
+    /* ---- lab.netz ---- */
+    m("netz-1", "lab.netz", "E", "wahl", "Liegen PC-A und PC-B im selben Netz?",
+      ["Ja", "Nein – das dritte Oktett unterscheidet sich", "Nur, wenn ein Gateway eingetragen ist"], 1,
+      "Bei /24 zählen die ersten drei Oktette zum Netz: 192.168.1 und 192.168.2 sind verschiedene Netze. Ein Gateway verbindet Netze, macht sie aber nicht gleich.", SU,
+      ["text", "PC-A  192.168.1.10/24\nPC-B  192.168.2.10/24"], {art: "gleich", ip: "192.168.1.10", ip2: "192.168.2.10", maske: "255.255.255.0", erwartet: false}),
+    m("netz-2", "lab.netz", "AP1", "vorhersage", "A: 10.1.1.10/16, B: 10.1.200.5/16. Erreichen sie sich ohne Router?",
+      ["Ja – beide liegen in 10.1.0.0/16", "Nein – das dritte Oktett ist verschieden", "Nur mit DHCP"], 0,
+      "Bei /16 zählen nur die ersten zwei Oktette: beide 10.1 → gleiches Netz. Das dritte Oktett ist hier schon Hostteil.", SU, null,
+      {art: "gleich", ip: "10.1.1.10", ip2: "10.1.200.5", maske: "255.255.0.0", erwartet: true}),
+    m("netz-3", "lab.netz", "AP2", "wahl", "172.16.5.130/25 und 172.16.5.100/25 – gleiches Netz?",
+      ["Ja – beide 172.16.5.x", "Nein – .130 liegt in .128/25, .100 in .0/25"], 1,
+      "/25 teilt das letzte Oktett in zwei Hälften: 0–127 und 128–255. .100 und .130 liegen in verschiedenen Hälften, also in verschiedenen Netzen.", SU, null,
+      {art: "gleich", ip: "172.16.5.130", ip2: "172.16.5.100", maske: "255.255.255.128", erwartet: false}),
+
+    /* ---- lab.subnetz ---- */
+    m("sub-1", "lab.subnetz", "E", "wahl", "Wie lautet die Netzadresse von 192.168.1.70/26?",
+      ["192.168.1.0", "192.168.1.64", "192.168.1.70", "192.168.1.128"], 1,
+      "/26 → Blockgröße 64: Netze bei .0, .64, .128, .192. 70 liegt im Block 64–127, also Netz .64. .70 selbst ist ein Host.", SU, null,
+      {art: "netz", ip: "192.168.1.70", maske: "255.255.255.192", erwartet: "192.168.1.64"}),
+    m("sub-2", "lab.subnetz", "AP1", "wahl", "Wie lautet die Broadcastadresse von 10.0.0.50/27?",
+      ["10.0.0.31", "10.0.0.63", "10.0.0.255", "10.0.0.64"], 1,
+      "/27 → Blockgröße 32: Blöcke 0–31, 32–63 … 50 liegt in 32–63, Broadcast ist die letzte Adresse: .63. .64 ist schon das nächste Netz.", SU, null,
+      {art: "broadcast", ip: "10.0.0.50", maske: "255.255.255.224", erwartet: "10.0.0.63"}),
+    m("sub-3", "lab.subnetz", "AP2", "wahl", "Wie viele Hosts passen in ein /28-Netz?",
+      ["16", "14", "30", "12"], 1,
+      "/28 → 4 Hostbits → 2⁴ = 16 Adressen, minus Netz- und Broadcastadresse = 14 Hosts. 16 vergisst die beiden reservierten Adressen, 30 wäre /27.", SU, null,
+      {art: "hosts", maske: "255.255.255.240", erwartet: 14}),
+    m("sub-4", "lab.subnetz", "AP1", "reihenfolge", "Sortiere die Präfixe nach Anzahl der Hosts – die meisten zuerst.",
+      ["/26", "/24", "/30", "/28"], [1, 0, 3, 2],
+      "Je kleiner der Präfix, desto mehr Hostbits: /24 (254) > /26 (62) > /28 (14) > /30 (2).", SU),
+
+    /* ---- lab.gateway ---- */
+    m("gw-1", "lab.gateway", "E", "wahl", "Im LAN geht alles, ins Internet nicht. Warum?",
+      ["Das Standardgateway fehlt", "Der DNS-Server fehlt", "Das Kabel fehlt", "Die Maske ist falsch"], 0,
+      "Ohne Gateway kennt der PC nur sein eigenes Netz. Ein fehlendes Kabel würde auch das LAN stören; DNS-Probleme zeigen sich nur bei Namen.", NW,
+      ["text", "IPv4-Adresse . : 192.168.1.10\nSubnetzmaske  . : 255.255.255.0\nStandardgateway :"]),
+    m("gw-2", "lab.gateway", "AP1", "vorhersage", "PC 192.168.5.20/24 mit Gateway 192.168.6.1. Klappt ein Ping ins Internet?",
+      ["Ja", "Nein – das Gateway liegt nicht im eigenen Netz", "Ja, nur langsamer"], 1,
+      "Das Gateway muss im eigenen Netz liegen, sonst kann der PC es nicht per ARP erreichen. Windows meldet hier „Allgemeiner Fehler“.", NW),
+    m("gw-3", "lab.gateway", "AP2", "wahl", "Was trägst du an einem PC als Standardgateway ein?",
+      ["Router-Schnittstelle im eigenen Netz", "Öffentliche IP des Routers", "Adresse des DNS-Servers", "Broadcastadresse des Netzes"], 0,
+      "Das Gateway ist die Adresse, unter der der Router im eigenen Netz erreichbar ist. Die öffentliche IP liegt im Netz des Providers, nicht im LAN.", NW),
+
+    /* ---- lab.arp ---- */
+    m("arp-1", "lab.arp", "E", "reihenfolge", "Erster Ping im eigenen Netz: Bring die Pakete in die richtige Reihenfolge.",
+      ["Echo Reply", "ARP-Request (Broadcast)", "Echo Request", "ARP-Reply (Unicast)"], [1, 3, 2, 0],
+      "Ohne MAC-Adresse kein Frame: Erst fragt ARP per Broadcast „Wer hat …?“, das Ziel antwortet per Unicast. Dann laufen Echo Request und Echo Reply.", NW),
+    m("arp-2", "lab.arp", "AP1", "wahl", "PC 10.0.0.5 (Gateway 10.0.0.1) pingt 198.51.100.10. Nach welcher IP fragt er per ARP?",
+      ["198.51.100.10", "10.0.0.1", "10.0.0.255", "Gar nicht – Ziel ist fremd"], 1,
+      "ARP gibt es nur im eigenen Netz. Liegt das Ziel woanders, braucht der PC die MAC des Gateways – also fragt er nach 10.0.0.1.", NW),
+    m("arp-3", "lab.arp", "AP2", "wahl", "Was speichert diese Tabelle?",
+      ["IP → MAC im eigenen Netz", "MAC → Switchport", "Routen zu fremden Netzen", "Namen → IP"], 0,
+      "Das ist der ARP-Cache: Zuordnung IP- zu MAC-Adresse. MAC → Port steht in der MAC-Tabelle des Switches, Namen kennt DNS.", NW,
+      ["text", "C:\\>arp -a\n10.0.0.1   00-1a-2b-3c-4d-5e  dynamisch"]),
+
+    /* ---- lab.ping ---- */
+    m("ping-1", "lab.ping", "AP1", "zuordnen", "Was bedeutet die Ping-Meldung?",
+      {links: ["Zeitüberschreitung", "Zielhost nicht erreichbar", "Antwort von …"], rechts: ["Ziel hat geantwortet", "still verworfen", "jemand meldet: kein Weg"]}, [[0, 1], [1, 2], [2, 0]],
+      "Timeout heißt: Niemand hat geantwortet – das Paket verschwand still (z. B. fehlende Rückroute). „Nicht erreichbar“ kommt aktiv von einem Router oder dem eigenen PC.", NW),
+    m("ping-2", "lab.ping", "E", "wahl", "Ein Router-Ping zeigt „.!!!!“. Was bedeutet der Punkt?",
+      ["Erstes Paket verloren, weil ARP lief", "Leitung defekt", "Ziel war ausgeschaltet"], 0,
+      "Cisco-Router verwerfen das erste Paket, während sie die MAC des nächsten Hops per ARP holen. Danach klappt es – das ist normal.", NW),
+    m("ping-3", "lab.ping", "AP2", "vorhersage", "Der Router-Ping zeigt „U.U.U“. Was ist los?",
+      ["Ein Router meldet: kein Weg zum Ziel", "Alles in Ordnung", "Das Ziel antwortet nur langsam"], 0,
+      "U steht für ICMP „Destination unreachable“. IOS drosselt solche Meldungen, deshalb wechseln sich U und Punkt ab.", NW),
+    m("ping-4", "lab.ping", "E", "reihenfolge", "Fehlersuche von unten nach oben: In welcher Reihenfolge prüfst du?",
+      ["Gateway anpingen", "Kabel und Link", "IP-Konfiguration (ipconfig)", "Namen testen (nslookup)"], [1, 2, 0, 3],
+      "Schicht für Schicht: Link → eigene Adresse → Gateway → DNS. Wer oben anfängt, sucht im DNS, obwohl das Kabel fehlt.", PL),
+
+    /* ---- lab.switch ---- */
+    m("sw-1", "lab.switch", "E", "wahl", "Ein Switch erhält einen Frame an eine MAC, die er nicht kennt. Was tut er?",
+      ["Flutet ihn an alle Ports im VLAN", "Verwirft ihn", "Fragt per ARP nach", "Schickt ihn zum Router"], 0,
+      "Unbekannte Unicasts flutet der Switch an alle Ports desselben VLANs (außer dem Eingang). ARP ist Sache der Endgeräte, nicht des Switches.", NW),
+    m("sw-2", "lab.switch", "AP1", "wahl", "Woher kennt der Switch diesen Eintrag?",
+      ["Aus der Quell-MAC eines Frames", "Vom DHCP-Server", "Vom Router", "Aus der Konfiguration"], 0,
+      "DYNAMIC heißt: gelernt. Der Switch merkt sich bei jedem eingehenden Frame die Absender-MAC mit Port und VLAN.", NW,
+      ["config", "SW1#show mac address-table\nVlan Mac Address     Type    Ports\n   1 0060.2f3a.1b01 DYNAMIC Fa0/3"]),
+    m("sw-3", "lab.switch", "AP2", "reihenfolge", "Was macht ein Switch mit jedem Frame? Bring die Schritte in Reihenfolge.",
+      ["Quell-MAC lernen", "Ziel-MAC nachschlagen", "Weiterleiten oder fluten", "Frame empfangen"], [3, 0, 1, 2],
+      "Empfangen → Absender lernen → Ziel suchen → gezielt weiterleiten (bekannt) oder fluten (unbekannt/Broadcast).", NW),
+
+    /* ---- lab.dhcp ---- */
+    m("dhcp-1", "lab.dhcp", "E", "reihenfolge", "DHCP: Bring die vier Nachrichten in die richtige Reihenfolge.",
+      ["Request", "Offer", "Ack", "Discover"], [3, 1, 0, 2],
+      "DORA: Discover (Client sucht), Offer (Server bietet an), Request (Client nimmt), Ack (Server bestätigt).", NW),
+    m("dhcp-2", "lab.dhcp", "AP1", "wahl", "Ein PC hat die Adresse 169.254.12.7. Was ist passiert?",
+      ["Kein DHCP-Server hat geantwortet", "Doppelte IP-Adresse", "Gateway ist falsch", "DNS-Server fehlt"], 0,
+      "169.254.0.0/16 ist APIPA: Windows vergibt sie sich selbst, wenn auf das DHCP-Discover keine Antwort kam.", NW),
+    m("dhcp-3", "lab.dhcp", "AP2", "wahl", "Der DHCP-Server steht in einem anderen Netz. Was braucht der Router?",
+      ["ip helper-address an der Client-Seite", "ip route 0.0.0.0 0.0.0.0", "ip nat inside", "Nichts – DHCP geht über Router"], 0,
+      "Router leiten Broadcasts nicht weiter. Das DHCP-Relay (ip helper-address) schickt das Discover als Unicast zum Server.", NW),
+
+    /* ---- lab.dns ---- */
+    m("dns-1", "lab.dns", "E", "wahl", "ping 198.51.100.10 klappt, ping www.beispiel.de nicht. Woran liegt es?",
+      ["Namensauflösung (DNS)", "Standardgateway", "Kabel", "Subnetzmaske"], 0,
+      "Per Adresse geht es, also stimmen Kabel, Maske und Gateway. Nur die Übersetzung Name → IP scheitert.", NW),
+    m("dns-2", "lab.dns", "AP1", "wahl", "Was sagt dir diese Ausgabe?",
+      ["Server antwortet, kennt den Namen nicht", "Kein DNS-Server erreichbar", "Das Kabel fehlt"], 0,
+      "Der Server ist erreichbar und antwortet – nur der Name steht nicht in seiner Zone. Ein unerreichbarer Server liefert eine Zeitüberschreitung.", NW,
+      ["log", "C:\\>nslookup intranet.local\nServer:  srv.buero.local\nAddress: 10.1.10.10\n*** intranet.local wurde\n    nicht gefunden"]),
+    m("dns-3", "lab.dns", "AP2", "zuordnen", "Welcher Dienst nutzt welchen Port?",
+      {links: ["DNS", "DHCP (Server)", "HTTPS"], rechts: ["TCP 443", "UDP 53", "UDP 67"]}, [[0, 1], [1, 2], [2, 0]],
+      "DNS-Anfragen laufen über UDP 53, der DHCP-Server lauscht auf UDP 67 (Client 68), HTTPS auf TCP 443.", NW),
+
+    /* ---- lab.ports ---- */
+    m("port-1", "lab.ports", "E", "zuordnen", "Ordne den Diensten ihren Standardport zu.",
+      {links: ["HTTP", "SSH", "SMB", "HTTPS"], rechts: ["22", "445", "443", "80"]}, [[0, 3], [1, 0], [2, 1], [3, 2]],
+      "HTTP 80, HTTPS 443, SSH 22, SMB (Dateifreigabe) 445 – die Klassiker der AP1.", NW),
+    m("port-2", "lab.ports", "AP1", "wahl", "Ping zum Server geht, der Browser meldet „Verbindung abgelehnt“. Wo liegt das Problem?",
+      ["Dienst lauscht nicht (Schicht 4–7)", "Kabel (Schicht 1)", "MAC (Schicht 2)", "Routing (Schicht 3)"], 0,
+      "Ping beweist: Schicht 1–3 funktionieren. „Abgelehnt“ heißt, der Server hat mit RST geantwortet – auf dem Port lauscht kein Dienst.", TC),
+    m("port-3", "lab.ports", "AP2", "wahl", "Was sendet ein Rechner zurück, wenn auf einem TCP-Port nichts lauscht?",
+      ["RST", "SYN/ACK", "FIN", "Gar nichts"], 0,
+      "Ein geschlossener Port beantwortet ein SYN mit RST (Reset). SYN/ACK käme nur von einem lauschenden Dienst, gar nichts von einer Firewall, die verwirft.", TC),
+
+    /* ---- lab.tcp ---- */
+    m("tcp-1", "lab.tcp", "E", "reihenfolge", "TCP-Verbindungsaufbau: Welche Reihenfolge?",
+      ["ACK", "SYN", "SYN/ACK"], [1, 2, 0],
+      "Drei-Wege-Handshake: Client SYN → Server SYN/ACK → Client ACK. Erst danach fließen Daten.", TC),
+    m("tcp-2", "lab.tcp", "AP1", "wahl", "Wozu dient der Drei-Wege-Handshake?",
+      ["Verbindung aufbauen, Sequenznummern abstimmen", "IP-Adressen vergeben", "Namen auflösen", "Fehler an den Absender melden"], 0,
+      "Beide Seiten bestätigen, dass sie bereit sind, und legen ihre Startnummern fest. Adressen vergibt DHCP, Fehler meldet ICMP.", TC),
+    m("tcp-3", "lab.tcp", "AP2", "zuordnen", "TCP oder UDP?",
+      {links: ["TCP", "UDP"], rechts: ["verbindungslos, z. B. DNS", "verbindungsorientiert, z. B. HTTP"]}, [[0, 1], [1, 0]],
+      "TCP baut eine Verbindung auf und bestätigt jedes Segment, UDP schickt einfach los – schneller, aber ohne Garantie.", TC),
+
+    /* ---- lab.cli ---- */
+    m("cli-1", "lab.cli", "E", "reihenfolge", "In welcher Reihenfolge erreichst du die Modi von IOS?",
+      ["Router(config-if)#", "Router>", "Router(config)#", "Router#"], [1, 3, 2, 0],
+      "User-Modus (>) → enable → privilegiert (#) → configure terminal → (config)# → interface … → (config-if)#.", VL),
+    m("cli-2", "lab.cli", "AP1", "wahl", "Du bist im Konfigurationsmodus und willst die Schnittstellen sehen. Wie?",
+      ["do show ip interface brief", "show ip interface brief", "exit show", "config show"], 0,
+      "show-Befehle gehören in den privilegierten Modus. Im Konfigurationsmodus stellst du „do“ voran – ohne „do“ meldet IOS „Invalid input“.", VL),
+    m("cli-3", "lab.cli", "AP2", "wahl", "IOS meldet „% Ambiguous command“. Was heißt das?",
+      ["Abkürzung passt auf mehrere Befehle", "Befehl unbekannt", "Befehl unvollständig", "Keine Berechtigung"], 0,
+      "Die Abkürzung ist nicht eindeutig (z. B. „co“ = configure oder copy). Unbekannt wäre „Invalid input“, unvollständig „Incomplete command“.", VL),
+
+    /* ---- lab.speichern ---- */
+    m("save-1", "lab.speichern", "E", "wahl", "Wo liegt die running-config?",
+      ["Im Arbeitsspeicher (RAM)", "Im NVRAM", "In flash:vlan.dat", "Auf dem DHCP-Server"], 0,
+      "running-config = laufende Konfiguration im RAM. Gespeichert wird sie als startup-config im NVRAM; ohne Speichern ist sie nach dem Neustart weg.", VL),
+    m("save-2", "lab.speichern", "AP1", "wahl", "Welcher Befehl sichert deine Änderungen dauerhaft?",
+      ["copy running-config startup-config", "reload", "show startup-config", "erase startup-config"], 0,
+      "copy running-config startup-config (oder write memory) schreibt ins NVRAM. reload startet neu, erase löscht die gespeicherte Fassung.", VL),
+    m("save-3", "lab.speichern", "AP2", "vorhersage", "Switch: VLAN 20 angelegt, dann „write erase“ und „reload“. Gibt es VLAN 20 danach noch?",
+      ["Ja – VLANs liegen in flash:vlan.dat", "Nein – alles ist gelöscht", "Nur bis zum ersten Ping"], 0,
+      "write erase löscht nur die startup-config. Die VLAN-Datenbank liegt auf Cisco-Switches in flash:vlan.dat – weg ist sie erst mit „delete flash:vlan.dat“.", VL),
+
+    /* ---- lab.vlan ---- */
+    m("vlan-1", "lab.vlan", "E", "vorhersage", "Am selben Switch: Fa0/1 in VLAN 10, Fa0/2 in VLAN 20. Erreichen sich die PCs direkt?",
+      ["Nein – verschiedene Broadcast-Domänen", "Ja – gleicher Switch", "Nur per Broadcast"], 0,
+      "Jedes VLAN ist ein eigenes Netz, auch auf demselben Switch. Ohne Router (oder L3-Switch) gibt es keinen Weg dazwischen – auch nicht für Broadcasts.", VL),
+    m("vlan-2", "lab.vlan", "AP1", "wahl", "Welcher Befehl setzt den Port Fa0/5 in VLAN 30?",
+      ["switchport access vlan 30", "vlan 30 access", "ip vlan 30", "encapsulation dot1Q 30"], 0,
+      "Im Schnittstellenmodus von Fa0/5: switchport access vlan 30. encapsulation dot1Q gehört auf Router-Subinterfaces.", VL),
+    m("vlan-3", "lab.vlan", "AP2", "wahl", "Ein Access-Port steht in VLAN 40, das es in der VLAN-Datenbank nicht gibt. Folge?",
+      ["Port ist inaktiv, kein Verkehr", "Port fällt in VLAN 1 zurück", "Port wird zum Trunk"], 0,
+      "Ein Port in einem nicht existierenden VLAN ist inaktiv. Er fällt nicht von selbst in VLAN 1 zurück – das VLAN muss angelegt werden.", VL),
+
+    /* ---- lab.trunk ---- */
+    m("trunk-1", "lab.trunk", "E", "wahl", "Was unterscheidet einen Trunk-Port von einem Access-Port?",
+      ["Trägt mehrere VLANs mit 802.1Q-Tag", "Ist schneller", "Hat eine IP-Adresse", "Verbindet nur PCs"], 0,
+      "Ein Trunk transportiert mehrere VLANs über ein Kabel; jedes Frame bekommt einen 802.1Q-Tag mit der VLAN-Nummer. Access-Ports gehören genau einem VLAN.", VL),
+    m("trunk-2", "lab.trunk", "AP1", "wahl", "Welche Frames laufen auf einem 802.1Q-Trunk ohne Tag?",
+      ["Die des Native VLAN", "Die von VLAN 1002", "Alle", "Keine"], 0,
+      "Nur das Native VLAN (Standard VLAN 1) läuft ungetaggt. Beide Enden müssen dasselbe Native VLAN haben, sonst landen Frames im falschen VLAN.", VL),
+    m("trunk-3", "lab.trunk", "AP2", "wahl", "PCs in VLAN 20 erreichen den Router nicht. Warum?",
+      ["VLAN 20 ist auf dem Trunk nicht erlaubt", "Das Native VLAN ist falsch", "Gi0/1 ist ein Access-Port"], 0,
+      "„allowed“ zeigt 1 und 10 – VLAN 20 fehlt. Der Port ist sehr wohl ein Trunk (er steht in der Liste). Abhilfe: switchport trunk allowed vlan add 20.", VL,
+      ["config", "SW1#show interfaces trunk\nPort   Vlans allowed on trunk\nGi0/1  1,10"]),
+
+    /* ---- lab.rostick ---- */
+    m("ros-1", "lab.rostick", "E", "wahl", "Was ist Router-on-a-Stick?",
+      ["Ein Router verbindet VLANs über einen Trunk", "Ein Router mit WLAN-Antenne", "Zwei Router hintereinander"], 0,
+      "Ein Kabel, mehrere VLANs: Der Router hat je VLAN ein Subinterface (Gi0/0.10, Gi0/0.20 …) und routet zwischen ihnen.", VL),
+    m("ros-2", "lab.rostick", "AP1", "reihenfolge", "Subinterface für VLAN 10 anlegen: Reihenfolge der Befehle?",
+      ["ip address 192.168.10.1 255.255.255.0", "interface Gi0/0.10", "encapsulation dot1Q 10"], [1, 2, 0],
+      "Erst das Subinterface wählen, dann das VLAN zuordnen (encapsulation dot1Q), dann die Gateway-Adresse – ohne dot1Q verweigert IOS die IP.", VL),
+    m("ros-3", "lab.rostick", "AP2", "wahl", "Gi0/0.20 hat „encapsulation dot1Q 21“. Was passiert mit den PCs in VLAN 20?",
+      ["Sie kommen nicht über den Router", "Alles funktioniert", "Sie landen in VLAN 21"], 0,
+      "Frames mit Tag 20 finden kein passendes Subinterface und werden verworfen. Die Nummer hinter dem Punkt ist nur ein Name – entscheidend ist dot1Q.", VL),
+
+    /* ---- lab.acl ---- */
+    m("acl-1", "lab.acl", "E", "wahl", "Wie wird eine Access-Liste ausgewertet?",
+      ["Oben nach unten, erste Treffer-Regel gilt", "Alle Regeln, die strengste gilt", "Von unten nach oben"], 0,
+      "First match: Die erste passende Regel entscheidet, danach wird nicht weitergelesen. Deshalb gehören spezielle Regeln nach oben.", NW),
+    m("acl-2", "lab.acl", "AP1", "wahl", "Was steht unsichtbar am Ende jeder ACL?",
+      ["deny any", "permit any", "Nichts", "log"], 0,
+      "Am Ende jeder ACL steht implizit „deny any“. Eine ACL nur mit deny-Regeln sperrt deshalb alles.", NW),
+    m("acl-3", "lab.acl", "AP2", "zuordnen", "Welche Wildcard bedeutet was?",
+      {links: ["0.0.0.0", "0.0.0.255", "255.255.255.255"], rechts: ["any", "ein /24-Netz", "genau ein Host"]}, [[0, 2], [1, 1], [2, 0]],
+      "Wildcard-Bits mit 1 sind egal. 0.0.0.0 = alles muss passen (host), 0.0.0.255 = letztes Oktett egal (/24), 255.255.255.255 = alles egal (any).", NW),
+    m("acl-4", "lab.acl", "AP2", "vorhersage", "Wird 192.168.30.5 von dieser ACL gesperrt?",
+      ["Nein – permit any trifft zuerst", "Ja – die deny-Regel ist genauer"], 0,
+      "Die erste passende Regel gewinnt, nicht die genaueste. „permit any“ oben lässt alles durch – die deny-Zeile wird nie erreicht.", NW,
+      ["config", "access-list 10 permit any\naccess-list 10 deny 192.168.30.0 0.0.0.255"]),
+
+    /* ---- lab.route ---- */
+    m("route-1", "lab.route", "E", "wahl", "Was ist die Default-Route?",
+      ["0.0.0.0/0 – für alle Ziele ohne genauere Route", "Die Route zum eigenen LAN", "Die Route zum DNS-Server"], 0,
+      "0.0.0.0/0 passt auf jedes Ziel, aber mit dem kürzesten Präfix – sie greift nur, wenn keine genauere Route passt.", AP),
+    m("route-2", "lab.route", "AP1", "wahl", "Welcher Befehl schickt 10.2.0.0/16 über 10.255.0.2?",
+      ["ip route 10.2.0.0 255.255.0.0 10.255.0.2", "ip route 10.255.0.2 10.2.0.0", "route add 10.2.0.0", "ip default-gateway 10.2.0.0"], 0,
+      "ip route <Zielnetz> <Maske> <Next Hop>. ip default-gateway gibt es nur auf Switches ohne Routing.", AP),
+    m("route-3", "lab.route", "AP2", "vorhersage", "Hinweg klappt, der Ziel-Router hat keine Rückroute. Was zeigt der Ping?",
+      ["Zeitüberschreitung", "Destination unreachable", "Erfolg"], 0,
+      "Die Anfrage kommt an, die Antwort findet keinen Rückweg und wird verworfen. Beim Absender kommt keine Meldung an – nur Timeout.", AP),
+    m("route-4", "lab.route", "AP2", "wahl", "Routen: 10.0.0.0/8 über A, 10.1.0.0/16 über B. Wohin geht 10.1.5.5?",
+      ["Über B – längster Präfix gewinnt", "Über A – zuerst eingetragen", "Abwechselnd über beide"], 0,
+      "Passen mehrere Routen, nimmt der Router die genaueste (längster Präfix). /16 ist genauer als /8.", AP, null,
+      {art: "gleich", ip: "10.1.5.5", ip2: "10.1.0.0", maske: "255.255.0.0", erwartet: true}),
+
+    /* ---- lab.ttl ---- */
+    m("ttl-1", "lab.ttl", "E", "wahl", "Was passiert, wenn die TTL eines Pakets 0 erreicht?",
+      ["Router verwirft es, meldet Time exceeded", "Es wird schneller weitergeleitet", "Es kommt trotzdem an"], 0,
+      "Jeder Router zieht 1 ab. Bei 0 wird das Paket verworfen und der Absender bekommt ICMP Time exceeded – so sterben Pakete in Schleifen.", NW),
+    m("ttl-2", "lab.ttl", "AP1", "wahl", "Wie findet traceroute die Router auf dem Weg?",
+      ["TTL 1, 2, 3 … – jeder meldet Time exceeded", "Per DNS-Abfrage", "Per ARP"], 0,
+      "traceroute schickt Pakete mit steigender TTL. Der Router, bei dem sie 0 wird, meldet sich – Hop für Hop.", NW),
+    m("ttl-3", "lab.ttl", "AP2", "wahl", "Was zeigt dieser traceroute?",
+      ["Eine Routing-Schleife", "Ein langsamer Link", "Alles in Ordnung"], 0,
+      "Dieselben zwei Router wechseln sich ab: Sie schicken sich das Paket gegenseitig zu, bis die TTL abläuft.", NW,
+      ["log", "1  10.1.255.1\n2  10.1.255.2\n3  10.1.255.1\n4  10.1.255.2\n5  10.1.255.1"]),
+
+    /* ---- lab.nat ---- */
+    m("nat-1", "lab.nat", "E", "wahl", "Warum braucht ein LAN mit 192.168.x.x NAT für das Internet?",
+      ["Private Adressen werden dort nicht geroutet", "NAT macht die Leitung schneller", "NAT vergibt die Adressen"], 0,
+      "192.168.0.0/16 ist privat (RFC 1918). Provider verwerfen solche Absender, deshalb ersetzt NAT sie durch die öffentliche Adresse.", AP),
+    m("nat-2", "lab.nat", "AP1", "wahl", "Was macht PAT (NAT-Overload)?",
+      ["Viele interne Adressen teilen eine öffentliche", "Jede interne bekommt eine eigene öffentliche", "Es verschlüsselt den Verkehr"], 0,
+      "Bei PAT unterscheidet der Router die Verbindungen über die Portnummern – so reicht eine öffentliche Adresse für das ganze LAN.", AP),
+    m("nat-3", "lab.nat", "AP2", "zuordnen", "Wohin gehören die NAT-Rollen?",
+      {links: ["ip nat inside", "ip nat outside"], rechts: ["Schnittstelle zum Provider", "Schnittstelle zum LAN"]}, [[0, 1], [1, 0]],
+      "inside = Seite mit den privaten Adressen (LAN), outside = Seite zum Internet. Vertauscht, übersetzt NAT in die falsche Richtung.", AP),
+    m("nat-4", "lab.nat", "AP1", "wahl", "Welche Adresse ist privat nach RFC 1918?",
+      ["172.20.1.1", "172.32.1.1", "11.0.0.1", "192.169.1.1"], 0,
+      "Privat sind 10.0.0.0/8, 172.16.0.0/12 (172.16–172.31) und 192.168.0.0/16. 172.32 liegt knapp außerhalb, 192.169 ebenso.", AP, null,
+      {art: "privat", ip: "172.20.1.1", erwartet: true}),
+
+    /* ---- lab.portfwd ---- */
+    m("fwd-1", "lab.portfwd", "E", "wahl", "Wozu dient eine Port-Weiterleitung?",
+      ["Dienst im LAN/DMZ von außen erreichbar machen", "Mehr Ports am Switch", "Schnelleres WLAN"], 0,
+      "Anfragen an einen Port der öffentlichen Adresse werden an einen inneren Server weitergereicht (statisches NAT mit Port).", AP),
+    m("fwd-2", "lab.portfwd", "AP1", "wahl", "Weiterleitung außen TCP 443 → 172.16.0.10:443 ist da. Was braucht die Firewall noch?",
+      ["Regel: außen → DMZ, TCP 443 erlauben", "Nichts weiter", "Einen DNS-Eintrag im LAN"], 0,
+      "NAT übersetzt nur die Adresse. Ob das Paket durch darf, entscheiden die Regeln – ohne Erlaubnis verwirft die Firewall.", AP),
+    m("fwd-3", "lab.portfwd", "AP2", "vorhersage", "Weiterleitung zeigt auf 172.16.0.10:80, der Server lauscht nur auf 443. Was sieht der Kunde?",
+      ["Verbindung abgelehnt", "Die Seite lädt", "DNS-Fehler"], 0,
+      "Die Anfrage landet auf Port 80, dort lauscht nichts: Der Server antwortet mit RST. DNS hat damit nichts zu tun.", TC),
+
+    /* ---- lab.fw ---- */
+    m("fw-1", "lab.fw", "E", "wahl", "Welcher Grundsatz gilt für eine Firewall?",
+      ["Was nicht erlaubt ist, ist verboten", "Was nicht verboten ist, ist erlaubt", "Alles unter Port 1024 ist erlaubt"], 0,
+      "Am Ende jedes Regelwerks steht implizit „verwerfen“. Nur ausdrücklich Erlaubtes kommt durch.", PL),
+    m("fw-2", "lab.fw", "AP1", "wahl", "Zustandsbehaftete Firewall: Musst du Antworten eigens erlauben?",
+      ["Nein – Rückverkehr geht automatisch", "Ja – jede Richtung braucht eine Regel"], 0,
+      "Die Firewall merkt sich erlaubte Verbindungen und lässt die Antworten dazu durch. Neue Verbindungen von der anderen Seite bleiben zu.", PL),
+    m("fw-3", "lab.fw", "AP2", "vorhersage", "Erreicht ein PC von innen den Webshop in der DMZ?",
+      ["Nein – Regel 1 trifft zuerst", "Ja – Regel 2 ist genauer"], 0,
+      "Auch Firewall-Regeln gelten first match. Die allgemeine Sperre steht oben und trifft, bevor die Erlaubnis gelesen wird.", PL,
+      ["tabelle", "1 innen→dmz  ip      verwerfen\n2 innen→dmz  tcp/443 erlauben"]),
+
+    /* ---- lab.dmz ---- */
+    m("dmz-1", "lab.dmz", "E", "wahl", "Was ist eine DMZ?",
+      ["Zone für öffentlich erreichbare Server", "Ein zweites WLAN", "Ein VPN-Tunnel"], 0,
+      "Die DMZ liegt zwischen Internet und LAN. Dort stehen Server, die von außen erreichbar sein müssen – getrennt vom internen Netz.", PL),
+    m("dmz-2", "lab.dmz", "AP1", "wahl", "Was darf aus der DMZ ins interne LAN?",
+      ["Möglichst nichts", "Alles", "Nur Ping"], 0,
+      "Wird ein DMZ-Server übernommen, soll der Angreifer nicht ins LAN kommen. Deshalb sperrt man DMZ → innen grundsätzlich.", PL),
+    m("dmz-3", "lab.dmz", "AP2", "zuordnen", "Was gehört in welche Zone?",
+      {links: ["innen", "DMZ", "außen"], rechts: ["Webshop, Mailserver", "Arbeitsplätze, Dateiserver", "Internet"]}, [[0, 1], [1, 0], [2, 2]],
+      "Intern: Arbeitsplätze und Dateiserver. DMZ: alles, was von außen erreichbar sein muss. Außen: das Internet.", PL),
+
+    /* ---- lab.portsec ---- */
+    m("psec-1", "lab.portsec", "E", "wahl", "Was macht Port-Security am Switch?",
+      ["Erlaubt nur bestimmte MAC-Adressen", "Verschlüsselt den Port", "Gibt dem Port eine IP"], 0,
+      "Port-Security begrenzt, welche (und wie viele) MAC-Adressen an einem Port senden dürfen – gegen fremde Geräte an Netzwerkdosen.", NW),
+    m("psec-2", "lab.portsec", "AP1", "wahl", "Verstoß bei „violation shutdown“: In welchem Zustand ist der Port?",
+      ["err-disabled", "up/up", "administratively down"], 0,
+      "Der Switch schaltet den Port in den Fehlerzustand err-disabled. „administratively down“ wäre ein von Hand gesetztes shutdown.", NW),
+    m("psec-3", "lab.portsec", "AP2", "wahl", "Wie holst du einen err-disabled Port von Hand zurück?",
+      ["shutdown, dann no shutdown", "PC neu starten", "clear arp"], 0,
+      "Auf der Schnittstelle erst shutdown, dann no shutdown – vorher die Ursache beheben, sonst geht er sofort wieder in err-disabled.", NW),
+
+    /* ---- lab.stp ---- */
+    m("stp-1", "lab.stp", "AP2", "vorhersage", "Zwei Switches sind doppelt verbunden, Spanning Tree ist aus. Was passiert?",
+      ["Broadcast-Sturm", "Doppelte Bandbreite", "Nichts Besonderes"], 0,
+      "Ohne STP kreisen Broadcasts endlos zwischen den Switches und vervielfachen sich – das Netz steht. Für doppelte Bandbreite braucht es Link-Aggregation.", NW),
+    m("stp-2", "lab.stp", "AP2", "wahl", "Was macht Spanning Tree?",
+      ["Blockiert redundante Wege gegen Schleifen", "Verteilt IP-Adressen", "Verschlüsselt Frames"], 0,
+      "STP schaltet überzählige Verbindungen in Blocking. Fällt ein Weg aus, gibt es den Ersatzweg frei.", NW),
+
+    /* ---- lab.storage ---- */
+    m("sto-1", "lab.storage", "AP2", "wahl", "Was unterscheidet NAS und SAN?",
+      ["NAS: Dateien übers LAN; SAN: Blockspeicher im eigenen Netz", "Beides ist dasselbe", "SAN gibt es nur per WLAN"], 0,
+      "Ein NAS stellt Dateien bereit (z. B. SMB/NFS). Ein SAN stellt Blockspeicher bereit, den Server wie eine lokale Platte nutzen – meist in einem eigenen Speichernetz.", "SNIA-Begriffe NAS/SAN")
+  );
+})();
