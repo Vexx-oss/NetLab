@@ -270,8 +270,8 @@ UI.app = (() => {
       zeile("Wie ausführlich sollen Konsole und Simulation erklären?", "Einstieg erklärt jeden Schritt, AP1 knapp, AP2 zeigt nur, was ein echtes Gerät melden würde.",
         wahl("Erklärtiefe", [["E", "Einstieg"], ["AP1", "AP1"], ["AP2", "AP2"]], e.niveau || "E", v => { einstSetzen({niveau: v}); Bus.senden("niveau", v); })))});
     l.push({titel: "Leiste", fn: c => {
-      const le = Object.assign({deckkraft: 0.55, ecke: "ol"}, e.leiste);
-      const setzeLeiste = teil => { const x = einst(); x.leiste = Object.assign({deckkraft: 0.55, ecke: "ol"}, x.leiste, teil); store.set("einst", x); UI.leiste?.darstellen?.(); };
+      const le = Object.assign({deckkraft: 0.55, ecke: "ur"}, e.leiste);
+      const setzeLeiste = teil => { const x = einst(); x.leiste = Object.assign({deckkraft: 0.55, ecke: "ur"}, x.leiste, teil); store.set("einst", x); UI.leiste?.darstellen?.(); };
       const kannL = Plattform.kann("leiste");
       const prozent = h("output", {class: "einst-wert"}, Math.round(le.deckkraft * 100) + " %");
       const regler = h("input", {type: "range", min: "30", max: "100", step: "5", value: String(Math.round(le.deckkraft * 100)), "aria-label": "Deckkraft der Leiste ohne Maus",
@@ -302,7 +302,7 @@ UI.app = (() => {
   }
   const KUERZEL = [
     ["Überall", [["Strg+K", "Befehlspalette: Gerät springen, „ping A B“, Ebene, Ansicht"], ["?", "diese Übersicht"], ["Esc", "abbrechen, Menü schließen, Auswahl aufheben"]]],
-    ["Labor – Werkzeuge", [["V", "Auswählen und verschieben"], ["K", "Kabel verlegen"], ["P", "Ping-Gummiband (mit Auswahl: Ping von diesem Gerät)"], ["1 … 5", "Ebene: Physik · VLAN · IP-Netze · MAC · Routen"]]],
+    ["Labor – Werkzeuge", [["V", "Auswählen und verschieben"], ["K", "Kabel verlegen"], ["P", "Ping-Werkzeug (mit Auswahl: Ping von diesem Gerät)"], ["1 … 5", "Ebene: Physik · VLAN · IP-Netze · MAC · Routen"]]],
     ["Labor – Ansicht", [["F", "alles einpassen"], ["A", "aufräumen (Auto-Layout)"], ["+  −  0", "Zoom größer, kleiner, 100 %"], ["Pfeiltasten", "Ansicht verschieben (mit Auswahl: Gerät verschieben, Shift = weiter)"], ["I / S", "Inspektor / Simulation ein- und ausklappen"]]],
     ["Labor – Bearbeiten", [["Entf", "Gerät oder Kabel löschen (Rückgängig statt Nachfrage)"], ["Strg+Z", "rückgängig"], ["Strg+Y", "wiederholen"], ["C", "Konsole des gewählten Geräts"], ["Enter", "Inspektor des gewählten Geräts"]]],
     ["Maus", [["Ziehen", "Gerät verschieben · leere Fläche: Ansicht verschieben"], ["⊕ oder Port-Punkt ziehen", "Kabel (Shift beim Loslassen: Port wählen)"], ["Mausrad", "Zoom um den Mauszeiger"], ["Doppelklick", "leere Fläche: Gerät einsetzen · Gerät: Inspektor"], ["Rechtsklick", "Konsole, Ping, Strom, Neustart, Löschen"]]],

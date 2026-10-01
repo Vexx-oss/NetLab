@@ -46,7 +46,7 @@ UI.palette = (() => {
       {gruppe: "Labor", text: "Wiederholen", taste: "Strg+Y", sym: "vor", aus: !v?.kannVor, aktion: nachLabor(() => UI.labor.wiederholen())},
       {gruppe: "Labor", text: "Alles einpassen", taste: "F", sym: "einpassen", aktion: nachLabor(() => UI.labor.einpassen())},
       {gruppe: "Labor", text: "Aufräumen (Auto-Layout)", taste: "A", sym: "aufraeumen", aktion: nachLabor(() => UI.labor.aufraeumen())},
-      {gruppe: "Werkzeug", text: "Ping-Gummiband", taste: "P", sym: "ping", stichworte: "ping werkzeug", aktion: nachLabor(() => UI.labor.werkzeug("ping"))},
+      {gruppe: "Werkzeug", text: "Ping-Werkzeug", taste: "P", sym: "ping", stichworte: "ping werkzeug", aktion: nachLabor(() => UI.labor.werkzeug("ping"))},
       {gruppe: "Werkzeug", text: "Kabel verlegen", taste: "K", sym: "kabel", aktion: nachLabor(() => UI.labor.werkzeug("kabel"))},
       {gruppe: "Werkzeug", text: "Auswählen", taste: "V", sym: "zeiger", aktion: nachLabor(() => UI.labor.werkzeug("auswahl"))},
       {gruppe: "Labor", text: "Inspektor ein-/ausklappen", taste: "I", sym: "inspektor", aktion: nachLabor(() => UI.labor.inspektor())},

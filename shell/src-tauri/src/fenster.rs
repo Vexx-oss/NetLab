@@ -147,17 +147,39 @@ pub fn groesse(app: &AppHandle, b: f64, h: f64) -> Result<(), String> {
     w.set_size(PhysicalSize::new(nb as u32, nh as u32)).map_err(|e| e.to_string())
 }
 
-/// Leiste in eine Ecke der Arbeitsfläche setzen ("unten-rechts", "unten-links", "oben-rechts", "oben-links")
+/// Leiste in eine Ecke der Arbeitsfläche setzen. Versteht die Kürzel der Oberfläche ("ol", "or", "ul", "ur")
+/// ebenso wie "oben-links" usw. Der Platz wird für diesen Monitor gemerkt (wie beim Ziehen). In der
+/// Vollansicht bewegt sich das große Fenster NICHT – die Leiste erscheint beim nächsten Wechsel dort.
 pub fn ecke(app: &AppHandle, ecke: &str) -> Result<(), String> {
+    let st = app.try_state::<Labor>().ok_or("Zustand fehlt")?;
     let w = haupt(app)?;
     let mon = w.current_monitor().ok().flatten().ok_or("Kein Monitor bekannt")?;
-    let gr = w.outer_size().map_err(|e| e.to_string())?;
     let s = mon.scale_factor();
     let (x, y, fb, fh) = flaeche(&mon);
     let r = px(RAND, s);
-    let nx = if ecke.ends_with("links") { x + r } else { x + fb - gr.width as i32 - r };
-    let ny = if ecke.starts_with("oben") { y + r } else { y + fh - gr.height as i32 - r };
-    w.set_position(PhysicalPosition::new(nx, ny)).map_err(|e| e.to_string())
+    let links = matches!(ecke, "ol" | "ul") || ecke.ends_with("links");
+    let oben = matches!(ecke, "ol" | "or") || ecke.starts_with("oben");
+    let (b, h) = (px(LEISTE.0, s), px(LEISTE.1, s));
+    // gemerkt wird die ZUGEKLAPPTE Leiste (wie in `bewegt`)
+    let lx = if links { x + r } else { x + fb - b - r };
+    let ly = if oben { y + r } else { y + fh - h - r };
+    {
+        let mut m = st.merker.lock().unwrap();
+        let k = schluessel(&mon);
+        m.leiste.insert(k.clone(), [lx, ly]);
+        m.monitor = Some(k);
+    }
+    merker_schreiben(app);
+    let ist_leiste = *st.modus.lock().unwrap() == "leiste";
+    if ist_leiste {
+        // aufgeklappt ist das Fenster größer: an der anliegenden Kante ausrichten
+        let gr = w.outer_size().map_err(|e| e.to_string())?;
+        let nx = if links { lx } else { x + fb - gr.width as i32 - r };
+        let ny = if oben { ly } else { y + fh - gr.height as i32 - r };
+        beruhigen(&st);
+        w.set_position(PhysicalPosition::new(nx, ny)).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 fn voll_merken(w: &WebviewWindow, st: &Labor) {

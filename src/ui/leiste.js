@@ -12,7 +12,7 @@ UI.leiste = (() => {
   let mini = null;                 /* erst bei Bedarf anlegen (keine Aufrufe beim Laden) */
   const miniEl = () => mini ||= h("div", {class: "lk-mini", "aria-label": "Mini-Ticket"});
 
-  const einstLeiste = () => Object.assign({deckkraft: 0.55, ecke: "ol"}, (store.get("einst", {}) || {}).leiste);
+  const einstLeiste = () => Object.assign({deckkraft: 0.55, ecke: "ur"}, (store.get("einst", {}) || {}).leiste);
   const FARBE = {gruen: "ok", ok: "ok", green: "ok", gelb: "warn", warn: "warn", yellow: "warn", orange: "warn", rot: "bad", bad: "bad", red: "bad"};
   function ampelSymbol(farbe){
     const f = FARBE[farbe] || "ok";
@@ -88,7 +88,7 @@ UI.leiste = (() => {
     if (!root) return;
     const e = einstLeiste();
     root.style.setProperty("--leiste-deckkraft", String(klemme(+e.deckkraft || 0.55, 0.3, 1)));
-    root.dataset.ecke = ["ol", "or", "ul", "ur"].includes(e.ecke) ? e.ecke : "ol";
+    root.dataset.ecke = ["ol", "or", "ul", "ur"].includes(e.ecke) ? e.ecke : "ur";
   }
   function zeichnen(){
     if (!root) return;

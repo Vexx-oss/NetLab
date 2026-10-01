@@ -70,7 +70,7 @@ UI.labor = (() => {
     Z.el.zoomText = h("button", {type: "button", class: "lb-zoomtext", title: "Zoom 100 %", onclick: () => zoomAuf(1)}, "100 %");
     const oben = h("div", {class: "lb-leiste-oben"},
       h("div", {class: "lb-gruppe lb-werkzeuge", role: "toolbar", "aria-label": "Werkzeuge"},
-        wz("auswahl", "zeiger", "Auswählen und verschieben (V)"), wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen"), wz("ping", "ping", "Ping-Gummiband (P): von Gerät A auf Gerät B ziehen")),
+        wz("auswahl", "zeiger", "Auswählen und verschieben (V)"), wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen")),
       h("div", {class: "lb-gruppe"}, ebenenKnoepfe),
       h("div", {class: "lb-luecke"}),
       h("div", {class: "lb-gruppe"}, Z.el.zurueck, Z.el.vor));
@@ -446,7 +446,7 @@ UI.labor = (() => {
       h("strong", {}, "Nichts ausgewählt"),
       h("p", {}, "Klick ein Gerät an, um es hier einzustellen."),
       h("ul", {class: "lb-tipps"},
-        h("li", {}, h("kbd", {}, "P"), " Ping-Gummiband: von A nach B ziehen"),
+        h("li", {}, h("kbd", {}, "P"), " Ping: von A nach B ziehen"),
         h("li", {}, h("kbd", {}, "K"), " Kabel verlegen"),
         h("li", {}, h("kbd", {}, "Strg"), "+", h("kbd", {}, "K"), " Befehlspalette"),
         h("li", {}, h("kbd", {}, "?"), " alle Tastenkürzel"))));
