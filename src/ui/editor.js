@@ -36,7 +36,7 @@ UI.labor = (() => {
     Z.el.inspektor = h("div", {id: "labor-inspektor", class: "lb-inspektor"});
     Z.el.sim = h("div", {id: "labor-sim", class: "lb-sim-inhalt"});
     const el = einst().labor || {};
-    Z.inspektorZu = !!el.inspektorZu; Z.simZu = el.simZu !== false; Z.simHoehe = klemme(+el.simHoehe || 250, 140, 900);
+    Z.inspektorZu = !!el.inspektorZu; Z.simZu = el.simZu !== false; Z.simHoehe = klemme(+el.simHoehe || 290, 140, 900);   /* 290: Kopf + Steuerung + einige Ereigniszeilen */
 
     /* Geräteleiste */
     const leiste = h("aside", {class: "lb-geraete", "aria-label": "Geräte"},

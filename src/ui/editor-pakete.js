@@ -62,7 +62,8 @@ UI.laborPakete = (() => {
     }
     function animiere(e, o = {}){
       const s = schicht(); if (!s || !e || !Z.netz) return Promise.resolve();
-      if (e.art === "verwerfen") return platzen(e.geraet, e.grund);
+      /* Verwerfen MIT Grund ist ein Fehler (rot); ohne Grund ignoriert ein Gerät nur, was nicht für es bestimmt ist */
+      if (e.art === "verwerfen") { if (e.grund) return platzen(e.geraet, e.grund); if (e.geraet) puls(e.geraet, "var(--faint)"); return Promise.resolve(); }
       if (e.art !== "senden" || !e.nach) { if (e.geraet) puls(e.geraet, farbe(e.proto)); return Promise.resolve(); }
       const w = weg(e); if (!w) return Promise.resolve();
       const [x1, y1, x2, y2] = w, ms = o.ms ?? 620, bw = bewegung();
@@ -143,7 +144,8 @@ UI.laborPakete = (() => {
         const ziel = o.ziel || [...trace.ereignisse].reverse().find(e => e.art === "empfangen" || e.art === "antworten")?.geraet;
         if (ziel) await erfolg(ziel);
       } else {
-        const v = [...trace.ereignisse].reverse().find(e => e.art === "verwerfen");
+        const rueck = [...trace.ereignisse].reverse();
+        const v = rueck.find(e => e.art === "verwerfen" && e.grund) || rueck.find(e => e.art === "verwerfen");   /* die echte Fehlerstelle zuerst */
         const letzt = sends[sends.length - 1];
         const ort = v?.geraet || o.ziel || letzt?.nach?.geraet;
         if (ort) await platzen(ort, v?.grund || o.grund || (trace.abbruch ? "STORM" : "TIMEOUT"));
@@ -197,7 +199,10 @@ UI.laborPakete = (() => {
       else { text = `✗ ${gemeldet ? "Ziel nicht erreichbar" : "Zeitüberschreitung"}${grund ? " – " + F.grundText(grund) : ""}`; art = "fehler"; }
       const aktion = r.trace ? {text: "In Simulation öffnen", fn: () => zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping"})} : null;
       Bus.senden("trace", {trace: r.trace, quelle: "ping", von: vonId, nach: nachId, ergebnis: r});
-      const melden = () => UI.toast(text, art, {id: "ping", titel, aktion});
+      /* Ist das Simulations-Panel offen, zeigt es den neuen Ping selbst – dann keine Meldung über der (kleinen) Fläche */
+      const panelOffen = !!Z.root && !Z.root.classList.contains("sim-zu");
+      const melden = () => panelOffen && r.trace ? zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping", abspielen: false})
+        : UI.toast(text, art, {id: "ping", titel, aktion});
       if (r.trace && bewegung() === "voll") {
         let gemeldetSchon = false;
         const t = setTimeout(() => { gemeldetSchon = true; melden(); }, 4800);

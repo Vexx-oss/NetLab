@@ -1,0 +1,149 @@
+/* ---------- Simulations-Panel (UI.simpanel, Präfix si-) und PDU-Inspektor (UI.pdu, Präfix pdu-) ----------
+   Das Panel sitzt unten in der Laborfläche (Höhe ziehbar, Standard 250 px). Darum kompakt:
+   eine Kopfzeile (✓/✗, Zusammenfassung, Ansicht), eine Zeile Steuerung + Filter, darunter
+   Ereignisliste und PDU nebeneinander, beide scrollen für sich. Farben nur über Tokens. */
+
+/* ---- Rahmen ---- */
+.si{display:flex; flex-direction:column; overflow:hidden; font-size:13px}
+.si-leer{padding:12px 16px; color:var(--muted)}
+.si-leer strong{display:block; color:var(--ink); margin-bottom:4px}
+.si-veraltet{display:flex; align-items:center; gap:8px; margin:0; padding:6px 14px; background:var(--warn-soft); color:var(--ink); font-size:12.5px; border-bottom:1px solid var(--line)}
+.si-veraltet[hidden]{display:none}
+.si-sym{display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; font:800 11px/1 var(--body); background:var(--warn); color:var(--accent-ink); flex:0 0 auto}
+.si-sym.bad{background:var(--bad); color:#fff}
+
+/* ---- Kopf: Ergebnis auf einen Blick ---- */
+.si-kopf{display:flex; align-items:center; gap:12px; padding:6px 14px; border-bottom:1px solid var(--line); flex:0 0 auto}
+.si-gross{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; flex:0 0 auto; font:800 17px/1 var(--body)}
+.si-kopf.ok .si-gross{background:var(--ok-soft); color:var(--ok)}
+.si-kopf.bad .si-gross{background:var(--bad-soft); color:var(--bad)}
+/* Ergebniswort links, Zusammenfassung rechts daneben (höchstens 2 Zeilen), darunter Kennung ODER Statistik */
+.si-zus{flex:1 1 auto; min-width:0; display:grid; grid-template-columns:auto minmax(0, 1fr); align-items:baseline; column-gap:10px; row-gap:1px}
+.si-zus strong{font:800 14px/1.3 var(--display); white-space:nowrap}
+.si-kopf.ok .si-zus strong{color:var(--ok)} .si-kopf.bad .si-zus strong{color:var(--bad)}
+.si-zus p{margin:0; font-size:13px; line-height:1.4}
+.si-zus > p:first-of-type{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.si-zeile2, .si-statistik{grid-column:1 / -1}
+.si-statistik{color:var(--faint); font-size:11.5px !important}
+.si-zus:has(.si-zeile2) .si-statistik{display:none}
+
+/* Umschalter (Ansicht, Tempo, MAC-Format): kleine Segmentknöpfe */
+.si-modus, .si-tempo, .pdu-format{display:inline-flex; flex:0 0 auto; padding:2px; gap:2px; border-radius:9px; background:var(--panel-2); border:1px solid var(--line)}
+.si-modus button, .si-tempo button, .pdu-format button{min-height:26px; padding:0 8px; border:0; border-radius:7px; background:none; color:var(--muted); font:700 12px/1 var(--body); cursor:pointer; white-space:nowrap}
+.si-modus button:hover, .si-tempo button:hover, .pdu-format button:hover{color:var(--ink); background:var(--panel-3)}
+.si-modus button.an, .si-tempo button.an, .pdu-format button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+
+/* ---- Steuerung + Filter (eine Zeile, bricht bei Bedarf um) ---- */
+.si-leiste{display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; padding:5px 12px; border-bottom:1px solid var(--line); flex:0 0 auto}
+.si-steuer, .si-filter{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.si-steuer-knopf{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); cursor:pointer}
+.si-steuer-knopf:hover{border-color:var(--accent); color:var(--accent)}
+.si-steuer-knopf svg path{fill:currentColor; stroke:currentColor; stroke-width:1.4; stroke-linejoin:round}
+.si-pos{min-width:5.5em; color:var(--muted); font:600 12px/1 var(--mono); font-variant-numeric:tabular-nums; padding:0 4px}
+.si-filter-titel{color:var(--muted); font-size:12px; font-weight:700}
+.si-filter-knopf{display:inline-flex; align-items:center; gap:5px; min-height:26px; padding:0 8px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:600 12px/1 var(--body); cursor:pointer; opacity:.5}
+.si-filter-knopf.an, .si-filter-knopf:hover{opacity:1}
+.si-filter-knopf.probleme{color:var(--bad)}
+.si-filter-knopf.probleme.an{border-color:var(--bad); background:var(--bad-soft)}
+.si-anzahl{color:var(--muted); font:600 11px/1 var(--mono)}
+
+/* ---- Liste + PDU nebeneinander ---- */
+.si-haupt{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(250px, 1fr)}
+.si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr)}
+.si[data-breite="schmal"] .si-pdu{display:none}
+.si-liste{min-height:0; overflow:auto; padding:4px 6px 8px; outline:none}
+.si-liste:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
+.si-pdu{min-height:0; overflow:auto; border-left:1px solid var(--line); background:var(--panel)}
+.si-hinweis{margin:6px 8px; color:var(--muted); font-size:12.5px}
+
+/* Ereigniszeile: Nr · Zeit · Gerät/Port · Art · Protokoll, darunter der Text (schmale Liste);
+   ab 640 px Listenbreite alles in einer Zeile */
+.si-liste{container-type:inline-size}
+.si-zeile{display:grid; grid-template-columns:2.4em 5.2em minmax(0, 1fr) auto auto; grid-template-areas:"n t g a p" ". . x x x"; align-items:center; column-gap:6px; row-gap:1px;
+  padding:3px 6px; border-radius:6px; border-left:3px solid transparent; cursor:pointer; font-size:12.5px; line-height:1.35}
+.si-n{grid-area:n} .si-t{grid-area:t} .si-g{grid-area:g} .si-zeile > .si-art{grid-area:a} .si-p{grid-area:p} .si-x{grid-area:x}
+@container (min-width:640px){
+  .si-zeile{grid-template-columns:2.4em 5.4em minmax(7em, 10em) 7.6em 4.4em minmax(0, 1fr); grid-template-areas:"n t g a p x"}
+}
+.si-zeile:hover{background:var(--panel-2)}
+.si-zeile.aktuell{background:var(--accent-soft); border-left-color:var(--accent)}
+.si-zeile.leise{color:var(--muted)}
+.si-zeile.drop{border-left-color:var(--bad); background:color-mix(in srgb, var(--bad) 7%, transparent)}
+.si-zeile.drop.aktuell{background:color-mix(in srgb, var(--bad) 14%, transparent)}
+.si-n{color:var(--faint); font:600 11px/1 var(--mono); text-align:right}
+.si-t{color:var(--muted); font:500 11.5px/1 var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.si-g{font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.si-port{color:var(--muted); font:500 11.5px var(--mono)}
+.si-p{display:flex}
+.si-x{min-width:0}
+.si-art{display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-size:12px; color:var(--muted)}
+.si-art svg path{fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+.si-art[data-art="senden"]{color:var(--accent)}
+.si-art[data-art="empfangen"], .si-art[data-art="antworten"]{color:var(--ok)}
+.si-art[data-art="fluten"]{color:var(--warn)}
+.si-art[data-art="verwerfen"]{color:var(--bad); font-weight:700}
+.si-art[data-art="lernen"]{color:var(--info)}
+.si-grundzeile{grid-column:3 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; padding:2px 0 3px; font-size:12px; color:var(--ink)}
+.si-grund{font:700 10.5px/1.6 var(--mono); padding:0 6px; border-radius:5px; background:var(--bad-soft); color:var(--bad)}
+.si-erklaerung{color:var(--ink)}
+.si-kennung{font-size:12px; font-weight:700}
+.si-kennung.gemeldet{color:var(--info)}
+.si-kennung.still{color:var(--warn)}
+.si-kennung.bad{color:var(--bad)}
+.si-skill, .si-quelle{color:var(--faint); font-size:11.5px}
+
+/* ---- Ansicht „Ergebnis“: wo es hängt ---- */
+.si-ergebnis{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:10px 14px 12px}
+.si-ergebnis h4{margin:0; font:800 13px/1.2 var(--display); color:var(--bad)}
+.si-problem{align-self:stretch; display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-radius:10px; border:1px solid color-mix(in srgb, var(--bad) 40%, var(--line)); background:color-mix(in srgb, var(--bad) 6%, var(--panel))}
+.si-problem p{margin:0}
+.si-problem-kopf{display:flex; align-items:center; flex-wrap:wrap; gap:8px}
+.si-problem .si-knopf{align-self:flex-start}
+.si-knopf{min-height:28px; padding:0 12px; border-radius:8px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:700 12.5px/1 var(--body); cursor:pointer}
+.si-knopf:hover{border-color:var(--accent); color:var(--accent)}
+.si-knopf.haupt{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.si-knopf.haupt:hover{filter:brightness(1.08); color:var(--accent-ink)}
+
+/* ---- Protokoll-Chip (Farbe UND Text) ---- */
+.pdu-chip{display:inline-flex; align-items:center; padding:0 6px; border-radius:5px; font:700 10.5px/1.6 var(--mono); letter-spacing:.02em;
+  color:var(--c, var(--muted)); background:color-mix(in srgb, var(--c, var(--muted)) 15%, transparent); border:1px solid color-mix(in srgb, var(--c, var(--muted)) 45%, transparent)}
+
+/* ---- PDU-Inspektor ---- */
+.pdu{padding:8px 12px 12px; font-size:12.5px}
+.pdu-leer{padding:10px 4px; color:var(--muted)}
+.pdu-leer p{margin:0 0 4px}
+.pdu-klein{font-size:12px; color:var(--faint)}
+.pdu-kopf{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:6px}
+.pdu-titel{min-width:0; line-height:1.4}
+.pdu-titel strong{font:800 13px/1.3 var(--display)}
+.pdu-nach{color:var(--muted)}
+.pdu-kopf-rechts{display:flex; align-items:center; gap:6px; flex:0 0 auto}
+.pdu-format button{font-family:var(--mono); font-size:11px}
+.pdu-text{margin:0 0 6px; color:var(--muted)}
+.pdu-bilanz{display:block; margin:0 0 6px; padding:5px 8px; border-radius:8px; background:var(--warn-soft); font-size:12.5px; line-height:1.45}
+.pdu-bilanz .pdu-sym{margin-right:6px}
+.pdu-bilanz.ruhig{background:var(--panel-2); color:var(--muted)}
+.pdu-sym{font-weight:800; color:var(--warn)}
+.pdu-schicht{border:1px solid var(--line); border-radius:8px; margin-top:6px; background:var(--panel)}
+.pdu-schicht > summary{display:flex; align-items:center; gap:8px; padding:5px 8px; cursor:pointer; list-style:none}
+.pdu-schicht > summary::-webkit-details-marker{display:none}
+.pdu-schicht > summary:hover{background:var(--panel-2); border-radius:8px}
+.pdu-nr{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:6px; background:var(--panel-3); color:var(--muted); font:700 11px/1 var(--mono); flex:0 0 auto}
+.pdu-schicht-titel{font-weight:700; white-space:nowrap}
+.pdu-kurz{color:var(--muted); font:500 11.5px var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+.pdu-mark{margin-left:auto; flex:0 0 auto; padding:0 6px; border-radius:5px; background:var(--warn-soft); color:var(--warn); font:700 11px/1.6 var(--body)}
+.pdu-felder{padding:2px 10px 8px}
+.pdu-satz{margin:4px 0 6px; color:var(--muted); font-size:12px}
+.pdu-liste{margin:0; display:flex; flex-direction:column; gap:1px}
+.pdu-feld{display:grid; grid-template-columns:minmax(6em, 9.5em) minmax(0, 1fr); gap:8px; padding:2px 6px; border-radius:5px; border-left:2px solid transparent}
+.pdu-feld dt{color:var(--muted)}
+.pdu-feld dd{margin:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; min-width:0}
+.pdu-feld.geaendert{background:var(--warn-soft); border-left-color:var(--warn)}
+.pdu-wert{flex:0 1 auto; font:600 12px/1.45 var(--mono); overflow-wrap:anywhere}   /* MAC/IP bleiben ganz; der Zusatz rutscht darunter */
+.pdu-zusatz{color:var(--muted); font-size:11.5px}
+.pdu-vorher{color:var(--warn); font-size:11.5px}
+.pdu-vorher s{color:var(--muted)}
+/* schmale PDU-Spalte: Feldname über dem Wert, damit MAC und IP ungebrochen in eine Zeile passen */
+.si-pdu{container-type:inline-size}
+@container (max-width:400px){ .pdu-feld{grid-template-columns:minmax(0, 1fr); gap:0; padding:3px 6px} .pdu-feld dt{font-size:11.5px} }
+.pdu-warum{margin:6px 0 0; padding:5px 8px; border-radius:7px; background:var(--info-soft); font-size:12px; line-height:1.45}

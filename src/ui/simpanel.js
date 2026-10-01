@@ -34,7 +34,7 @@ UI.simpanel = (() => {
   };
   function artSymbol(art){
     const a = ART[art] || ART.info;
-    return h("span", {class: "sp-art", "data-art": art},
+    return h("span", {class: "si-art", "data-art": art},
       sv("svg", {viewBox: "0 0 16 16", width: 14, height: 14, "aria-hidden": "true"}, sv("path", {d: a.d})),
       h("span", {}, a.text));
   }
@@ -54,6 +54,10 @@ UI.simpanel = (() => {
     return !(t.ereignisse || []).some(e => e.art === "verwerfen" && e.grund);
   }
   const istMeldung = e => { const c = e.frame?.icmp; return !!c && (c.typ === "unreachable" || c.typ === "time-exceeded") && (e.art === "senden" || e.art === "antworten"); };
+  /* Verwerfen ohne Grund-Code ist normales Verhalten (Host ignoriert fremden Broadcast, Router verwirft das erste
+     Paket während ARP). Echte Probleme tragen einen Grund. Gibt es keine mit Grund, zählen alle Verwerfungen. */
+  const mitGrund = ev => ev.some(e => e.art === "verwerfen" && e.grund);
+  const istProblem = (z, e) => z.hatGrund ? ((e.art === "verwerfen" && !!e.grund) || istMeldung(e)) : e.art === "verwerfen";
   /* Meldet jemand den Verlust (ICMP-Fehler), oder wird still verworfen? */
   function meldungZu(liste, i){
     const ev = liste[i];
@@ -88,7 +92,7 @@ UI.simpanel = (() => {
       Z.set(container, z);
       z.abmelden = Bus.an("netz-geaendert", () => {
         if (!container.isConnected) { z.abmelden?.(); Z.delete(container); anhalten(z); return; }
-        if (z.trace && !z.veraltet) { z.veraltet = true; const b = $(".sp-veraltet", container); if (b) b.hidden = false; }
+        if (z.trace && !z.veraltet) { z.veraltet = true; const b = $(".si-veraltet", container); if (b) b.hidden = false; }
       });
       if (typeof ResizeObserver !== "undefined") {
         z.ro = new ResizeObserver(() => { container.dataset.breite = container.clientWidth < 720 ? "schmal" : "breit"; });
@@ -99,42 +103,43 @@ UI.simpanel = (() => {
     z.ereignisse = (trace && Array.isArray(trace.ereignisse)) ? trace.ereignisse : [];
     z.idx = new Map(z.ereignisse.map((e, i) => [e, i]));
     z.filter = new Set(); z.nurProbleme = false; z.pos = -1; z.gewaehlt = null; z.spielt = false; z.veraltet = false;
+    z.hatGrund = mitGrund(z.ereignisse);
     z.modus = modusMerk;
-    container.classList.add("sp");
+    container.classList.add("si");   /* eigenes Präfix si- (sp- gehört dem Spiel: .sp-ergebnis, .sp-erklaerung …) */
     container.dataset.breite = container.clientWidth && container.clientWidth < 720 ? "schmal" : "breit";
     bauen(z);
   }
 
   function sichtbar(z){
     const f = z.filter;
-    return z.ereignisse.filter(e => (!f.size || f.has(e.proto)) && (!z.nurProbleme || e.art === "verwerfen" || istMeldung(e) || e.grund));
+    return z.ereignisse.filter(e => (!f.size || f.has(e.proto)) && (!z.nurProbleme || istProblem(z, e)));
   }
 
   function bauen(z){
     const c = z.container;
     c.replaceChildren();
     if (!z.trace) {
-      c.append(h("div", {class: "sp-leer"},
+      c.append(h("div", {class: "si-leer"},
         h("strong", {}, "Noch keine Aufzeichnung."),
         h("p", {}, "Starte einen Ping oder eine Prüfung. Hier siehst du dann jedes Paket: wer sendet, wer weiterleitet, wo etwas verworfen wird – und warum.")));
       return;
     }
     const ok = erfolg(z.trace), ev = z.ereignisse;
-    c.append(h("p", {class: "sp-veraltet", hidden: !z.veraltet, role: "status"},
-      h("span", {class: "sp-sym", "aria-hidden": "true"}, "!"), "Das Netz wurde seitdem geändert – diese Aufzeichnung zeigt den Stand davor. Starte die Prüfung neu."));
+    c.append(h("p", {class: "si-veraltet", hidden: !z.veraltet, role: "status"},
+      h("span", {class: "si-sym", "aria-hidden": "true"}, "!"), "Das Netz wurde seitdem geändert – diese Aufzeichnung zeigt den Stand davor. Starte die Prüfung neu."));
     c.append(kopf(z, ok));
     if (z.modus === "ergebnis") { c.append(ergebnisAnsicht(z, ok)); return; }
     z.liste = sichtbar(z);
-    c.append(steuerung(z), filterLeiste(z));
-    const liste = h("div", {class: "sp-liste", role: "listbox", tabindex: "0", "aria-label": "Ereignisliste der Simulation"});
+    c.append(h("div", {class: "si-leiste"}, steuerung(z), filterLeiste(z)));   /* eine Zeile: Platz für die Liste */
+    const liste = h("div", {class: "si-liste", role: "listbox", tabindex: "0", "aria-label": "Ereignisliste der Simulation"});
     z.listeEl = liste;
     const zeig = z.liste.slice(0, MAX_ZEILEN);
     zeig.forEach((e, i) => liste.append(zeile(z, e, i)));
-    if (z.liste.length > MAX_ZEILEN) liste.append(h("p", {class: "sp-hinweis"}, `… ${zahlDe(z.liste.length - MAX_ZEILEN)} weitere Ereignisse nicht angezeigt (Filter eingrenzen).`));
-    if (!z.liste.length) liste.append(h("p", {class: "sp-hinweis"}, ev.length ? "Kein Ereignis passt zum Filter." : "Die Aufzeichnung ist leer."));
+    if (z.liste.length > MAX_ZEILEN) liste.append(h("p", {class: "si-hinweis"}, `… ${zahlDe(z.liste.length - MAX_ZEILEN)} weitere Ereignisse nicht angezeigt (Filter eingrenzen).`));
+    if (!z.liste.length) liste.append(h("p", {class: "si-hinweis"}, ev.length ? "Kein Ereignis passt zum Filter." : "Die Aufzeichnung ist leer."));
     liste.addEventListener("keydown", e => listenTaste(z, e));
-    z.pduEl = h("div", {class: "sp-pdu", "aria-label": "PDU-Inspektor"});
-    c.append(h("div", {class: "sp-haupt"}, liste, z.pduEl));
+    z.pduEl = h("div", {class: "si-pdu", "aria-label": "PDU-Inspektor"});
+    c.append(h("div", {class: "si-haupt"}, liste, z.pduEl));
     UI.pdu.zeigen(z.pduEl, null, null);
     c.onkeydown = e => panelTaste(z, e);
     if (z.pos >= 0) markieren(z, z.pos, {leise: true});
@@ -144,68 +149,70 @@ UI.simpanel = (() => {
     const t = z.trace, ev = z.ereignisse;
     const zeile2 = [];
     const meldung = ev.find(istMeldung), drops = ev.filter(e => e.art === "verwerfen");
-    if (t.abbruch === "STORM") zeile2.push(h("span", {class: "sp-kennung bad"}, "Broadcast-Sturm: nach ", zahlDe(ev.length), " Ereignissen abgebrochen"));
-    else if (meldung) zeile2.push(h("span", {class: "sp-kennung gemeldet"}, h("span", {"aria-hidden": "true"}, "↩ "),
+    if (t.abbruch === "STORM") zeile2.push(h("span", {class: "si-kennung bad"}, "Broadcast-Sturm: nach ", zahlDe(ev.length), " Ereignissen abgebrochen"));
+    else if (meldung) zeile2.push(h("span", {class: "si-kennung gemeldet"}, h("span", {"aria-hidden": "true"}, "↩ "),
       `Gemeldet: ${ICMPTEXT[meldung.frame.icmp.typ]} von ${geraetName(meldung.geraet)}`));
-    else if (!ok && drops.length) zeile2.push(h("span", {class: "sp-kennung still"}, h("span", {"aria-hidden": "true"}, "… "),
+    else if (!ok && drops.length) zeile2.push(h("span", {class: "si-kennung still"}, h("span", {"aria-hidden": "true"}, "… "),
       "Still verworfen: keine Fehlermeldung zurück – der Absender wartet vergeblich (Timeout)"));
     const dauer = ev.length ? (ev[ev.length - 1].t ?? 0) - (ev[0].t ?? 0) : 0;
     const geraete = new Set(ev.map(e => e.geraet)).size;
-    return h("div", {class: "sp-kopf " + (ok ? "ok" : "bad")},
-      h("div", {class: "sp-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
-      h("div", {class: "sp-zus"},
+    return h("div", {class: "si-kopf " + (ok ? "ok" : "bad")},
+      h("div", {class: "si-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
+      h("div", {class: "si-zus"},
         h("strong", {}, ok ? "Hat geklappt" : "Hat nicht geklappt"),
         h("p", {}, t.zusammenfassung || (ok ? "Die Pakete sind angekommen." : "Unterwegs ist etwas verworfen worden.")),
-        zeile2.length ? h("p", {class: "sp-zeile2"}, zeile2) : null,
-        h("p", {class: "sp-statistik"}, `${zahlDe(ev.length)} Ereignisse · ${geraete} Geräte · ${zeit(dauer)} virtuelle Zeit`)),
-      h("div", {class: "sp-modus", role: "radiogroup", "aria-label": "Ansicht"},
+        zeile2.length ? h("p", {class: "si-zeile2"}, zeile2) : null,
+        h("p", {class: "si-statistik"}, `${zahlDe(ev.length)} Ereignisse · ${geraete} Geräte · ${zeit(dauer)} virtuelle Zeit`)),
+      h("div", {class: "si-modus", role: "radiogroup", "aria-label": "Ansicht"},
         modusKnopf(z, "ergebnis", "Ergebnis"), modusKnopf(z, "schritt", "Schritt für Schritt")));
   }
   function modusKnopf(z, m, text){
     const an = z.modus === m;
     return h("button", {type: "button", role: "radio", "aria-checked": String(an), class: an ? "an" : "", tabindex: an ? "0" : "-1",
-      onclick: () => { if (z.modus === m) return; anhalten(z); z.modus = modusMerk = m; bauen(z); $(`.sp-modus [aria-checked="true"]`, z.container)?.focus(); },
-      onkeydown: e => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const n = m === "ergebnis" ? "schritt" : "ergebnis"; anhalten(z); z.modus = modusMerk = n; bauen(z); $(`.sp-modus [aria-checked="true"]`, z.container)?.focus(); } }}, text);
+      onclick: () => { if (z.modus === m) return; anhalten(z); z.modus = modusMerk = m; bauen(z); $(`.si-modus [aria-checked="true"]`, z.container)?.focus(); },
+      onkeydown: e => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const n = m === "ergebnis" ? "schritt" : "ergebnis"; anhalten(z); z.modus = modusMerk = n; bauen(z); $(`.si-modus [aria-checked="true"]`, z.container)?.focus(); } }}, text);
   }
 
   function ergebnisAnsicht(z, ok){
-    const ev = z.ereignisse, box = h("div", {class: "sp-ergebnis"});
-    const drops = ev.map((e, i) => ({e, i})).filter(x => x.e.art === "verwerfen");
+    const ev = z.ereignisse, box = h("div", {class: "si-ergebnis"});
+    const alle = ev.map((e, i) => ({e, i})).filter(x => x.e.art === "verwerfen");
+    const drops = z.hatGrund ? alle.filter(x => x.e.grund) : ok ? [] : alle;
     if (z.trace.abbruch === "STORM") box.append(problem(z, {art: "verwerfen", grund: "STORM", geraet: null, text: "Die Simulation hat das Ereignis-Budget überschritten."}, null));
     if (drops.length) {
       box.append(h("h4", {}, drops.length === 1 ? "Hier hängt es" : `Hier hängt es (${drops.length} Stellen)`));
       for (const {e, i} of drops.slice(0, 4)) box.append(problem(z, e, meldungZu(ev, i)));
-      if (drops.length > 4) box.append(h("p", {class: "sp-hinweis"}, `… und ${drops.length - 4} weitere. Alle stehen in der Schritt-für-Schritt-Ansicht.`));
-    } else if (ok) box.append(h("p", {class: "sp-hinweis"}, "Kein Paket wurde verworfen. In der Schritt-für-Schritt-Ansicht siehst du den Weg jedes einzelnen Rahmens."));
-    box.append(h("button", {type: "button", class: "sp-knopf haupt", onclick: () => { z.modus = modusMerk = "schritt"; bauen(z); }}, "Schritt für Schritt ansehen"));
+      if (drops.length > 4) box.append(h("p", {class: "si-hinweis"}, `… und ${drops.length - 4} weitere. Alle stehen in der Schritt-für-Schritt-Ansicht.`));
+    } else if (ok && alle.length) box.append(h("p", {class: "si-hinweis"}, `Das Ziel wurde erreicht. Unterwegs wurden ${alle.length} Rahmen verworfen, ohne dass etwas kaputt ist: Geräte ignorieren Rahmen, die nicht für sie bestimmt sind (z. B. fremde ARP- und DHCP-Broadcasts), und ein Router verwirft das erste Paket, solange er per ARP nachfragt.`));
+    else if (ok) box.append(h("p", {class: "si-hinweis"}, "Kein Paket wurde verworfen. In der Schritt-für-Schritt-Ansicht siehst du den Weg jedes einzelnen Rahmens."));
+    box.append(h("button", {type: "button", class: "si-knopf haupt", onclick: () => { z.modus = modusMerk = "schritt"; bauen(z); }}, "Schritt für Schritt ansehen"));
     return box;
   }
   function problem(z, e, meldung){
     const nv = niveau();
-    const karte = h("div", {class: "sp-problem"},
-      h("div", {class: "sp-problem-kopf"},
-        h("span", {class: "sp-sym bad", "aria-hidden": "true"}, "✕"),
+    const karte = h("div", {class: "si-problem"},
+      h("div", {class: "si-problem-kopf"},
+        h("span", {class: "si-sym bad", "aria-hidden": "true"}, "✕"),
         h("strong", {}, e.geraet ? `${geraetName(e.geraet)}${e.port ? " " + e.port : ""} verwirft` : "Abbruch"),
         e.proto ? UI.pdu.chip(e.proto) : null,
-        e.grund && nv !== "AP2" ? h("code", {class: "sp-grund"}, e.grund) : null),
+        e.grund && nv !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null),
       e.text ? h("p", {}, e.text) : null,
-      e.grund ? h("p", {class: "sp-erklaerung"}, erklaerung(e.grund)) : null,
-      e.geraet ? h("p", {class: meldung ? "sp-kennung gemeldet" : "sp-kennung still"}, meldung
+      e.grund ? h("p", {class: "si-erklaerung"}, erklaerung(e.grund)) : null,
+      e.geraet ? h("p", {class: meldung ? "si-kennung gemeldet" : "si-kennung still"}, meldung
         ? `${geraetName(meldung.geraet)} meldet es zurück: ${ICMPTEXT[meldung.frame.icmp.typ]}`
         : "Still verworfen – niemand schickt eine Fehlermeldung zurück.") : null);
-    if (e.geraet) karte.append(h("button", {type: "button", class: "sp-knopf", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen"));
+    if (e.geraet) karte.append(h("button", {type: "button", class: "si-knopf", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen"));
     return karte;
   }
 
   function steuerung(z){
-    const k = (name, label, fn, taste) => h("button", {type: "button", class: "sp-steuer-knopf", "aria-label": label, title: `${label}${taste ? " (" + taste + ")" : ""}`, onclick: fn}, icon(name));
+    const k = (name, label, fn, taste) => h("button", {type: "button", class: "si-steuer-knopf", "aria-label": label, title: `${label}${taste ? " (" + taste + ")" : ""}`, onclick: fn}, icon(name));
     z.playEl = k(z.spielt ? "pause" : "play", z.spielt ? "Pause" : "Abspielen", () => umschalten(z), "Leertaste");
-    z.posEl = h("span", {class: "sp-pos", "aria-live": "off"});
-    const tempo = h("div", {class: "sp-tempo", role: "radiogroup", "aria-label": "Tempo"},
+    z.posEl = h("span", {class: "si-pos", "aria-live": "off"});
+    const tempo = h("div", {class: "si-tempo", role: "radiogroup", "aria-label": "Tempo"},
       TEMPI.map(t => h("button", {type: "button", role: "radio", "aria-checked": String(tempoMerk === t), class: tempoMerk === t ? "an" : "",
         onclick: ev => { tempoMerk = t; for (const b of $$("button", ev.currentTarget.parentNode)) { const an = b === ev.currentTarget; b.classList.toggle("an", an); b.setAttribute("aria-checked", String(an)); } if (z.spielt) { anhalten(z, true); planen(z); } }},
         `${String(t).replace(".", ",")}×`)));
-    const leiste = h("div", {class: "sp-steuer"},
+    const leiste = h("div", {class: "si-steuer"},
       k("anfang", "An den Anfang", () => { anhalten(z); z.pos = -1; markieren(z, -1); }, "Pos1"),
       k("zurueck", "Schritt zurück", () => { anhalten(z); schritt(z, -1); }, "←"),
       z.playEl,
@@ -217,45 +224,46 @@ UI.simpanel = (() => {
   function filterLeiste(z){
     const protos = [...new Set(z.ereignisse.map(e => e.proto).filter(Boolean))];
     const anzahl = p => z.ereignisse.filter(e => e.proto === p).length;
-    const drops = z.ereignisse.filter(e => e.art === "verwerfen").length;
-    const leiste = h("div", {class: "sp-filter", role: "group", "aria-label": "Filter"},
-      h("span", {class: "sp-filter-titel"}, "Filter:"),
+    const drops = z.ereignisse.filter(e => istProblem(z, e)).length;
+    const leiste = h("div", {class: "si-filter", role: "group", "aria-label": "Filter"},
+      h("span", {class: "si-filter-titel"}, "Filter:"),
       protos.map(p => {
         const an = !z.filter.size || z.filter.has(p);
-        const b = h("button", {type: "button", class: "sp-filter-knopf" + (an ? " an" : ""), "aria-pressed": String(z.filter.has(p)), title: `Nur ${p} zeigen (mehrere wählbar)`,
+        const b = h("button", {type: "button", class: "si-filter-knopf" + (an ? " an" : ""), "aria-pressed": String(z.filter.has(p)), title: `Nur ${p} zeigen (mehrere wählbar)`,
           onclick: () => { anhalten(z); if (z.filter.has(p)) z.filter.delete(p); else z.filter.add(p); if (z.filter.size === protos.length) z.filter.clear(); z.pos = -1; bauen(z); }},
-          UI.pdu.chip(p), h("span", {class: "sp-anzahl"}, String(anzahl(p))));
+          UI.pdu.chip(p), h("span", {class: "si-anzahl"}, String(anzahl(p))));
         return b;
       }),
-      z.filter.size ? h("button", {type: "button", class: "sp-filter-knopf", onclick: () => { z.filter.clear(); z.pos = -1; bauen(z); }}, "alle") : null,
-      drops ? h("button", {type: "button", class: "sp-filter-knopf probleme" + (z.nurProbleme ? " an" : ""), "aria-pressed": String(z.nurProbleme),
+      z.filter.size ? h("button", {type: "button", class: "si-filter-knopf", onclick: () => { z.filter.clear(); z.pos = -1; bauen(z); }}, "alle") : null,
+      drops ? h("button", {type: "button", class: "si-filter-knopf" + (z.hatGrund ? " probleme" : "") + (z.nurProbleme ? " an" : ""), "aria-pressed": String(z.nurProbleme),
         onclick: () => { anhalten(z); z.nurProbleme = !z.nurProbleme; z.pos = -1; bauen(z); }},
-        h("span", {class: "sp-sym bad", "aria-hidden": "true"}, "✕"), `nur Probleme (${drops})`) : null);
+        z.hatGrund ? h("span", {class: "si-sym bad", "aria-hidden": "true"}, "✕") : null, z.hatGrund ? `nur Probleme (${drops})` : `nur verworfene (${drops})`) : null);
     return leiste;
   }
 
   function zeile(z, e, i){
     const nv = niveau();
-    const drop = e.art === "verwerfen";
-    const el = h("div", {class: `sp-zeile art-${e.art}${drop ? " drop" : ""}${e.art === "lernen" || e.art === "info" ? " leise" : ""}`,
+    const drop = e.art === "verwerfen" && istProblem(z, e);       /* normales Ignorieren ist kein „Drop“ im Sinne eines Fehlers */
+    const ignoriert = e.art === "verwerfen" && !drop;
+    const el = h("div", {class: `si-zeile art-${e.art}${drop ? " drop" : ""}${ignoriert || e.art === "lernen" || e.art === "info" ? " leise" : ""}`,
       role: "option", id: `sp-${zid(z)}-${i}`, "aria-selected": "false", "data-i": i,
       onclick: () => { anhalten(z); markieren(z, i, {klick: true}); }},
-      h("span", {class: "sp-n"}, String(e.n ?? i + 1)),
-      h("span", {class: "sp-t"}, zeit(e.t)),
-      h("span", {class: "sp-g"}, geraetName(e.geraet), e.port ? h("span", {class: "sp-port"}, " " + e.port) : null),
+      h("span", {class: "si-n"}, String(e.n ?? i + 1)),
+      h("span", {class: "si-t"}, zeit(e.t)),
+      h("span", {class: "si-g"}, geraetName(e.geraet), e.port ? h("span", {class: "si-port"}, " " + e.port) : null),
       artSymbol(e.art),
-      h("span", {class: "sp-p"}, e.proto ? UI.pdu.chip(e.proto) : null),
-      h("span", {class: "sp-x"}, e.text || ""));
+      h("span", {class: "si-p"}, e.proto ? UI.pdu.chip(e.proto) : null),
+      h("span", {class: "si-x"}, e.text || ""));
     if (drop || (e.grund && e.art !== "lernen")) {
       const m = drop ? meldungZu(z.ereignisse, z.idx.get(e)) : null;
       const sk = nv === "E" ? skillName(e.grund) : null;
       const lt = typeof DATEN !== "undefined" ? DATEN.lehrtexte?.[e.grund] : null;
-      el.append(h("div", {class: "sp-grundzeile"},
-        e.grund && nv !== "AP2" ? h("code", {class: "sp-grund"}, e.grund) : null,
-        h("span", {class: "sp-erklaerung"}, erklaerung(e.grund) || ""),
-        drop ? h("span", {class: m ? "sp-kennung gemeldet" : "sp-kennung still"}, m ? `↩ gemeldet von ${geraetName(m.geraet)}` : "still verworfen") : null,
-        sk ? h("span", {class: "sp-skill"}, `Fertigkeit: ${sk}`) : null,
-        lt?.quelle && nv !== "AP2" ? h("span", {class: "sp-quelle"}, `Quelle: ${lt.quelle}`) : null));
+      el.append(h("div", {class: "si-grundzeile"},
+        e.grund && nv !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null,
+        h("span", {class: "si-erklaerung"}, erklaerung(e.grund) || ""),
+        drop ? h("span", {class: m ? "si-kennung gemeldet" : "si-kennung still"}, m ? `↩ gemeldet von ${geraetName(m.geraet)}` : "still verworfen") : null,
+        sk ? h("span", {class: "si-skill"}, `Fertigkeit: ${sk}`) : null,
+        lt?.quelle && nv !== "AP2" ? h("span", {class: "si-quelle"}, `Quelle: ${lt.quelle}`) : null));
     }
     return el;
   }
@@ -271,7 +279,7 @@ UI.simpanel = (() => {
     z.pos = Math.max(-1, Math.min(i, liste.length - 1));
     posText(z);
     if (z.listeEl) {
-      for (const el of $$(".sp-zeile.aktuell", z.listeEl)) { el.classList.remove("aktuell"); el.setAttribute("aria-selected", "false"); }
+      for (const el of $$(".si-zeile.aktuell", z.listeEl)) { el.classList.remove("aktuell"); el.setAttribute("aria-selected", "false"); }
       const el = z.pos >= 0 ? $(`[data-i="${z.pos}"]`, z.listeEl) : null;
       if (el) {
         el.classList.add("aktuell"); el.setAttribute("aria-selected", "true");
