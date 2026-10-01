@@ -73,7 +73,7 @@ Spiel.ticketBauen = function(spec){
   const symptom = spec.symptom || Spiel.symptomText(gebrochen[0], gesund.netz);
   return {
     id: spec.id, art: spec.art || "stoerung", stufe, karriere, kunde, reihe: spec.reihe,
-    titel: spec.titel || (erster ? erster.titel : "Störung"),
+    titel: spec.titel || Spiel.titelAusZiel(gebrochen[0]) || (erster ? erster.titel : "Störung"),   /* Kundensicht – der Injektor-Titel verriete die Ursache */
     briefing: spec.briefing || Spiel.briefingText(kunde, symptom, Zufall(vSeed + 3)),
     symptom, skills, netz: fabrik, ziele: endZiele, hilfen, loesung,
     erklaerung: spec.erklaerung || gewaehlt.map(g => g.inj.erklaerung).filter(Boolean).join(" "),
@@ -86,6 +86,23 @@ Spiel.ticketBauen = function(spec){
 };
 
 Spiel.lohnFuer = (karriere, stufe) => ({euro: 20 + 15 * (karriere || 1) + ({E: 0, AP1: 10, AP2: 25}[stufe] || 0), ruf: karriere >= 3 ? 2 : 1});
+
+/* Tickettitel aus Kundensicht: das erste gebrochene Ziel, verneint. Nie die Ursache („Falsche Subnetzmaske“) –
+   die herauszufinden ist die Aufgabe, gerade am Prüfungstag. null, wenn kein Muster passt (dann Rückfall). */
+Spiel.titelAusZiel = function(ziel){
+  if (!ziel || !ziel.text) return null;
+  const t = String(ziel.text).trim();
+  if (ziel.typ === "gespeichert") return "Nach dem Stromausfall ist etwas weg";
+  if (ziel.typ === "dhcp") { const m = t.match(/^(.+?) bekommt (automatisch )?eine Adresse/); return m ? `${m[1]} bekommt keine Adresse` : null; }
+  if (ziel.typ === "blockiert") return "Sicherheitslücke: " + t.replace(/ NICHT\b/, "").replace(/\bniemand\b/, "jemand");
+  if (ziel.typ !== "erreichbar") return null;
+  let m;
+  if ((m = t.match(/^(.+?) (kommt|kommen) ins (.+)$/))) return `${m[1]} ${m[2]} nicht ins ${m[3]}`;
+  if ((m = t.match(/^(.+?) druckt Belege(.*)$/))) return `${m[1]} druckt keine Belege${m[2]}`;
+  if ((m = t.match(/^(.+?) druckt(.*)$/))) return `${m[1]} druckt nicht${m[2]}`;
+  if ((m = t.match(/^(.+?) (erreicht|erreichen|öffnet|öffnen) (.+)$/))) return `${m[1]} ${m[2]} ${m[3]} nicht`;
+  return null;
+};
 
 /* Laien-Symptom aus einem gebrochenen Ziel */
 Spiel.symptomText = function(ziel, netz){

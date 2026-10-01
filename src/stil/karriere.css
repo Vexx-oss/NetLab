@@ -73,7 +73,9 @@
 .kr-wiki-liste h2{font:800 28px/1 var(--display)}
 .kr-wiki-liste nav{display:flex; flex-direction:column; gap:2px}
 .kr-wiki-punkt{display:flex; justify-content:space-between; gap:8px; text-align:left; padding:7px 10px; border:0; border-radius:9px; background:none; color:var(--ink); font-size:14px}
-.kr-wiki-punkt small{color:var(--faint)}
+.kr-wiki-punkt small{color:var(--faint); white-space:nowrap; flex:0 0 auto}
+.kr-wiki-liste input[type=search]{min-height:36px; padding:0 12px; border-radius:10px; border:1px solid var(--line-2); background:var(--panel); color:var(--ink); font:500 14px/1 var(--body)}
+.kr-wiki-liste input[type=search]:focus{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--accent-soft)}
 .kr-wiki-punkt:hover{background:var(--panel-2)}
 .kr-wiki-punkt.an{background:var(--accent-soft); color:var(--accent)}
 .kr-artikel{overflow:auto; padding:22px 30px 40px; display:flex; flex-direction:column; gap:14px; max-width:860px; font-size:15.5px; line-height:1.6}

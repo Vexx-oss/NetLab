@@ -186,6 +186,15 @@ gruppe("CLI: Grundlagen", () => {
     erwarte.gleich(e(s, "\u0003").prompt, "R1#");
     erwarte.gleich(n.geraete.r1.startup, null);
   });
+  pruefe("CLI.abbrechen (Strg+C aus der Konsole): die nächste Zeile ist wieder ein Befehl", () => {
+    const n = netz(), s = CLI.sitzung(n, "r1");
+    e(s, "en");
+    e(s, "copy running-config startup-config");
+    erwarte.wahr(CLI.abbrechen(s), "eine Rückfrage war offen");
+    const r = e(s, "show clock");
+    erwarte.gleich(r.prompt, "R1#");
+    erwarte.gleich(n.geraete.r1.startup, null, "nichts gespeichert – „show clock“ war kein Dateiname");
+  });
   pruefe("Verlauf der Eingaben (Pfeil hoch/runter)", () => {
     const s = CLI.sitzung(netz(), "r1");
     e(s, "en", "show version", "show clock");

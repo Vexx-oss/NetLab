@@ -476,8 +476,8 @@ const CLI = (() => {
     const g = h.geraet(s);
     if (!g) return {ausgabe: "% Dieses Gerät gibt es nicht mehr.", prompt: "", geaendert: false, befehl: "", fehler: true};
     if (!g.an) return {ausgabe: "(Das Gerät ist ausgeschaltet. Schalte es im Inspektor ein.)", prompt: C.prompt(s), geaendert: false, befehl: "", fehler: true};
-    /* Strg+C (): laufende Rückfrage abbrechen */
-    if (zeile === "") { C.abbrechen(s); return antwort(s, "", "", false); }
+    /* Strg+C (^C): laufende Rückfrage abbrechen */
+    if (zeile === "\x03" || zeile === "^C") { C.abbrechen(s); return antwort(s, "", "", false); }
     /* laufende Rückfrage (Destination filename, [confirm], Password, Banner-Text …) */
     if (s.rueckfrage) {
       const rf = s.rueckfrage; s.rueckfrage = null;

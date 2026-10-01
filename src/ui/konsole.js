@@ -224,7 +224,10 @@ UI.konsole = (() => {
     const S = K.S, zeile = K.eingabeEl.value, p = promptText(K);
     block(K, "echo", zeile + zeichen, p);
     K.eingabeEl.value = S.entwurf = ""; K.notizEl.hidden = true; groesse(K);
-    if (S.frage != null) { S.frage = null; }                                /* Rückfrage abgebrochen */
+    if (S.frage != null) {                                                  /* Rückfrage abgebrochen – auch in der CLI-Sitzung, */
+      S.frage = null;                                                       /* sonst schluckt sie die nächste Zeile als Antwort */
+      try { const c = cli(); if (c && S.sitzung && typeof c.abbrechen === "function") c.abbrechen(S.sitzung); } catch (e) { console.error(e); }
+    }
     else if (/\(config[^)]*\)#\s*$/.test(p) && cli() && S.sitzung) {       /* Strg+C/Strg+Z im Konfig-Modus = end */
       try { const r = cli().eingabe(S.sitzung, "end"); if (r && r.ausgabe) block(K, "aus", r.ausgabe); } catch (e) { console.error(e); }
     }
