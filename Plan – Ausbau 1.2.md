@@ -25,7 +25,10 @@ status: Phase 0 und A gebaut (04.10.2026, Zweig ausbau-1.2) – Haltepunkt, du s
 | DHCP, DNS, „wie bei Cisco“ ausbauen | DHCP/DNS gibt es in Grundform (Pools, Relay, Einträge); IOS-Konsole hat wenige `show`-Befehle; kein STP/OSPF | **Phase D:** Funktionstiefe nach Prüfungsrelevanz, jede Funktion komplett (Modell → Sim → CLI → Oberfläche → Lehrtext → Fehler → Ticket → Test) |
 | Loop zu stumpf, Zufallsevents | Postfach → Netz reparieren → Sterne; dazu Wartungs-Timer und Mini-Quiz | **Phase E:** 6 Auftragsformen, Ticket-Mischer, Zufallsereignisse mit Lerninhalt |
 
-**Reihenfolge:** 0 Bestand klären → A Aufräumen → B Netzplan → C Terminal → D DHCP/DNS (mit CLI) → E Loop & Events → D-Rest (STP, IOS-`show`) → F Abschluss. **Eine Phase je Opus-Sitzung**, nach A, B und C spielst du kurz an und sagst, ob es stimmt (Haltepunkte).
+**Reihenfolge (überholt am 04.10.2026 abends):** ~~0 → A → B → C → D → E → F~~. **Gilt jetzt:** 0 ✔ → A ✔ → **S1 Sofortgefühl → S2 Bogen** → B Netzplan (+ Dock, Akte, Verdacht) → C Terminal → D DHCP/DNS → E Formen/Ereignisse (+ Kundenakte, Kompetenzkarte) → G Meisterschaft & Klasse → F Abschluss. Begründung, Befunde, Scorecard (Ist 26,0 → Ziel 39,0, +50 %) und Startblock für S1: [[Design – Spielspaß 2.0]]. Dort stehen auch die zusätzlichen Leitplanken R1–R8 (u. a. **Platzbudget**: Labor-Start bleibt ≤ 12 Bedienelemente und ≤ 40 Wörter). **Eine Phase je Opus-Sitzung**, nach jeder Welle spielst du kurz an und sagst, ob es stimmt (Haltepunkte).
+
+> [!note] Änderungen an den Phasen B–E durch das Spielspaß-Konzept
+> **B** bekommt zusätzlich das gemeinsame **Dock** (Inspektor | Simulation | Terminal | Plan | Akte; Fläche ≥ 60 % Breite), die **Akte** (Beweiskarten) und den **Verdacht**. **C**: Terminalbefehle legen Beweiskarten in die Akte. **D**: neue Fehlerarten werden automatisch Fehlerdex-Einträge. **E** wird um *Postfach als Wahl*, die Entscheidung „Provisorium oder sauber?“ und die Kundenakte (Atlas, Vertrauen, Geschichten) erweitert. Aus Phase A bleiben offen: Leiste-Modus separat prüfen (K3), Kopfzeile verdichten (K4).
 
 ---
 

@@ -31,6 +31,7 @@ Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Man
 
 ## Aufbau
 - [[Konzept – Netzwerk-Labor]] (Spezifikation) · [[Architektur]] (Vertrag zwischen den Bausteinen) · [[Opus-Auftrag – Netzwerk-Labor]] (ursprünglicher Bauauftrag)
+- **Ausbau 1.2 (läuft):** [[Plan – Ausbau 1.2]] (Phasen, Stand) · [[Design – Spielspaß 2.0]] (Befunde, 12 Hebel, Scorecard, Startblöcke für Opus)
 - `src/` Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · `shell/src-tauri/` Rust-Hülle · `tests/` (124 Tests, `sh tools/test.sh`) · `tools/` (bauen, testen, messen) · `Programm/` fertige Programme
 - Versionen: Git im Projektordner (Tags `endversion-1.0`, `v1.1`); die Endversion 1.0 liegt zusätzlich unter `Programm/Endversion-1.0/`.
 
