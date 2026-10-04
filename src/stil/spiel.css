@@ -143,16 +143,27 @@
 .sp-geld{font:800 28px/1 var(--display); color:var(--geld)}
 .sp-ruf{font:800 20px/1 var(--display); color:var(--ruf)}
 .sp-abzuege{margin:0; padding-left:18px; color:var(--muted); font-size:13px}
-.sp-lernen{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
-.sp-lernen li{display:flex; align-items:center; gap:10px}
-.sp-lernen b{display:block; font-size:14px}
-.sp-lernen small{color:var(--muted); font-size:12.5px}
+/* Nachbesprechung in höchstens drei Blöcken: ① Sterne + Lohn · ② Dein Weg · ③ Merke */
+.sp-block{display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:14px; background:var(--panel-2); border:1px solid var(--line)}
+.sp-block-lohn{padding:0; background:none; border:0}
+.sp-block h3{margin:0; color:var(--muted); font:800 12px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
+.sp-lohn-reihe{display:flex; align-items:center; gap:10px 22px; flex-wrap:wrap}
+.sp-zeile{margin:0; font-size:13.5px; line-height:1.45}
+.sp-zeile.leise{color:var(--muted)}
+.sp-weg{gap:8px}
+.sp-weg-chips{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; align-items:center; gap:6px 4px}
+.sp-weg-chips li{display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:var(--panel); border:1px solid var(--line-2); font-size:13px}
+.sp-weg-chips li.sp-pfeil{padding:0; border:0; background:none; color:var(--faint)}
+.am-fertig .am-titel strong{color:var(--ok)}
+.sp-weg-chips li.ok{border-color:var(--ok); color:var(--ok); font-weight:700}
+.sp-weg-chips li.nicht{border-color:var(--warn)}
+.sp-merke p{margin:0; font-size:15px; line-height:1.55}
+.sp-merke-fuss{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
 .sp-ring{width:30px; height:30px; flex:0 0 auto; border-radius:50%; --p:var(--nach);
   background:conic-gradient(var(--ok) calc(var(--p) * 360deg), var(--line) 0); mask:radial-gradient(circle, transparent 58%, #000 60%); -webkit-mask:radial-gradient(circle, transparent 58%, #000 60%);
   animation:sp-ring 1s ease-out}
 @keyframes sp-ring{from{--p:var(--von)}}
 @property --p{syntax:"<number>"; inherits:false; initial-value:0}
-.sp-erklaerung p{margin:0; font-size:14px; line-height:1.55}
 .sp-knoepfe{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px}
 /* Langes Ergebnis (Abzeichen, Feierabend): die Knöpfe bleiben unten im Fenster sichtbar */
 .sp-ergebnis > .sp-knoepfe{position:sticky; bottom:-24px; margin:4px -26px -24px; padding:12px 26px 16px; background:linear-gradient(transparent, var(--panel) 14px); z-index:1}
@@ -213,21 +224,7 @@
 .sp-leer{display:flex; flex-direction:column; gap:12px; align-items:flex-start; padding:20px; border-radius:14px; border:1px dashed var(--line-2); color:var(--muted)}
 @media (max-width: 900px){ .sp-pf-teile{grid-template-columns:1fr} .sp-leser{display:none} }
 
-/* Abzeichen im Ergebnisfenster */
-.sp-abzeichen-neu{border:1px solid color-mix(in srgb, var(--geld) 45%, var(--line)); background:color-mix(in srgb, var(--geld) 8%, var(--panel)); border-radius:14px; padding:10px 14px}
-.sp-abzeichen-neu h3{margin:0 0 6px}
-.sp-abz{display:flex; align-items:center; gap:12px; padding:4px 0}
-.sp-abz b{display:block}
-.sp-abz small{color:var(--muted)}
-.sp-abz-sym{font-size:28px; line-height:1; animation:sp-abz-rein .6s cubic-bezier(.3,1.6,.5,1) both}
-@keyframes sp-abz-rein{from{transform:scale(.3) rotate(-25deg); opacity:0} to{transform:none; opacity:1}}
-@media (prefers-reduced-motion: reduce){.sp-abz-sym{animation:none}}
 
-/* Feierabend-Bilanz im Ergebnisfenster */
-.sp-feierabend{border:1px solid color-mix(in srgb, var(--ok) 45%, var(--line)); background:color-mix(in srgb, var(--ok) 8%, var(--panel)); border-radius:14px; padding:10px 14px}
-.sp-feierabend h3{margin:0 0 4px}
-.sp-feierabend p{margin:4px 0}
-.sp-bilanz{font-weight:700}
 
 /* Aufstieg: kleine Feier (respektiert „Bewegung reduzieren“) */
 .sp-fest{background:radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--geld) 20%, transparent), transparent 62%)}

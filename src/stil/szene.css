@@ -1,0 +1,35 @@
+/* ---------- Funktionsprobe (ui/szene.js, Präfix sz-): 2–6 s nach bestandener Abnahme, auf der Zeichenfläche ---------- */
+.sz-buehne{position:absolute; inset:0; z-index:12; cursor:pointer; overflow:hidden; animation:sz-rein .2s ease-out}
+.sz-buehne.weg{opacity:0; transition:opacity .18s ease}
+.sz-weiter{position:absolute; left:50%; top:12px; transform:translateX(-50%); padding:6px 11px; border-radius:999px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
+  font:600 12px/1 var(--body); pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.sz-reaktion{position:absolute; transform:translate(-50%, -100%); display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border-radius:12px; background:var(--panel);
+  border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); font:700 13px/1.2 var(--body); white-space:nowrap; pointer-events:none; animation:sz-pop .32s cubic-bezier(.3,1.6,.5,1) both}
+.sz-reaktion.sz-gesperrt{border-color:var(--warn)}
+.sz-reaktion.sz-druckt, .sz-reaktion.sz-seite, .sz-reaktion.sz-adresse, .sz-reaktion.sz-haken, .sz-reaktion.sz-sicherung{border-color:var(--ok)}
+.sz-sym{font-size:16px; line-height:1}
+.sz-druckt .sz-sym{animation:sz-beleg .7s .1s ease-out both}
+.sz-sicherung .sz-sym, .sz-haken .sz-sym{color:var(--ok)}
+.sz-balken{display:inline-block; width:48px; height:6px; border-radius:3px; background:var(--panel-3); overflow:hidden}
+.sz-balken i{display:block; width:0; height:100%; background:var(--ok); animation:sz-laden .9s .1s ease-out forwards}
+.sz-blase{position:absolute; transform:translate(-50%, -100%); max-width:min(360px, 72%); display:flex; gap:9px; align-items:flex-start; padding:10px 14px; border-radius:16px;
+  background:var(--panel); border:2px solid var(--k, var(--accent)); box-shadow:var(--schatten); color:var(--ink); font-size:14px; line-height:1.4; pointer-events:none;
+  animation:sz-pop .35s cubic-bezier(.3,1.6,.5,1) both}
+.sz-blase::after{content:""; position:absolute; left:50%; bottom:-9px; width:14px; height:14px; margin-left:-7px; background:var(--panel);
+  border-right:2px solid var(--k, var(--accent)); border-bottom:2px solid var(--k, var(--accent)); transform:rotate(45deg)}
+.sz-kunde{font-size:20px; line-height:1.1}
+.sz-rest{display:block; margin-top:4px; color:var(--ok); font-size:12px; font-weight:700}
+/* reduzierte Bewegung: ruhige Haken-Liste statt fahrender Pakete */
+.sz-ruhig{background:color-mix(in srgb, var(--bg) 55%, transparent)}
+.sz-liste{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:min(440px, calc(100% - 32px)); padding:16px 18px; border-radius:16px; background:var(--panel);
+  border:1px solid var(--line-2); box-shadow:var(--schatten)}
+.sz-liste ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:14.5px}
+.sz-liste li{display:flex; gap:8px; align-items:baseline}
+.sz-haken{color:var(--ok); font-weight:800}
+.sz-satz{margin:12px 0 0; color:var(--ink); font-size:14px; font-style:italic}
+.sz-satz small{color:var(--muted); font-style:normal}
+@keyframes sz-rein{from{opacity:0} to{opacity:1}}
+@keyframes sz-pop{from{opacity:0; transform:translate(-50%, -70%) scale(.6)} to{opacity:1; transform:translate(-50%, -100%) scale(1)}}
+@keyframes sz-beleg{from{transform:translateY(9px); opacity:0} to{transform:none; opacity:1}}
+@keyframes sz-laden{to{width:100%}}
+@media (prefers-reduced-motion: reduce){ .sz-buehne, .sz-reaktion, .sz-blase, .sz-druckt .sz-sym, .sz-balken i{animation:none} .sz-balken i{width:100%} }

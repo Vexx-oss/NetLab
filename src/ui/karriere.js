@@ -311,7 +311,7 @@ UI.karriere = (() => {
     festTimer = setTimeout(() => {
       const f = Spiel._st ? Spiel.karriere.daten().fest : null;
       if (!f || f.gesehen) return;
-      if (document.querySelector(".sp-overlay:not(.vorhersage)")) { festPlanen(900); return; }
+      if (!UI.buehneFrei()) { festPlanen(900); return; }
       festZeigen(f);
     }, ms);
   }

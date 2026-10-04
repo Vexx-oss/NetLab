@@ -29,4 +29,6 @@ function sv(tag, attrs = {}, ...kids){
   for (const kid of kids.flat(Infinity)) if (kid) el.append(kid.nodeType ? kid : document.createTextNode(kid));
   return el;
 }
+/* Ist die Bühne frei für eine Meldung (Abzeichen, Kundenpost, Aufstiegsfeier)? Nicht während Dialogen und der Funktionsprobe */
+UI.buehneFrei = () => !document.querySelector(".sp-overlay:not(.vorhersage), .sz-buehne");
 const wenigBewegung = () => typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;

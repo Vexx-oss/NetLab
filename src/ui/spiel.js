@@ -5,7 +5,8 @@
    Die Logik liegt in spiel/*.js; hier nur Anzeige und Bedienung. Start über Bus „ui-bereit“ (ui/start.js). */
 UI.spiel = (() => {
   const S = {inst: null, live: null, liveTimer: null, hilfeOffen: false, hilfeAnsicht: null, demo: null, seniorTimer: null, coach: null, vorhersageGefragt: new Set(),
-    mappe: {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false}};
+    mappe: {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false},
+    weg: {iid: null, liste: []}, probe: false};
   const kunde = id => (Spiel.kundenDaten ? Spiel.kundenDaten(id) : (DATEN.kunden || {})[id]) || {name: id || "Kunde", symbol: "✉", farbe: "--accent", ansprechpartner: {name: ""}};
   const NIV = {E: "Einstieg", AP1: "AP1", AP2: "AP2"};
   const sterneText = s => "★".repeat(Math.floor(s)) + (s % 1 ? "½" : "") + "☆".repeat(Math.max(0, 5 - Math.ceil(s)));
@@ -69,7 +70,14 @@ UI.spiel = (() => {
      Genau ein Hauptknopf: die Abnahme – außer ein offenes Feld (Mappe, Hilfeleiter) hat einen eigenen. */
   function auftrag(el){
     const inst = S.inst;
-    if (!inst || !Spiel.instanz(inst.iid)) { el.append(h("div", {class: "lb-auftrag-standard"}, h("strong", {}, "Kein offenes Ticket"))); return; }
+    if (!inst || !Spiel.instanz(inst.iid)) {
+      /* gerade abgenommen (Funktionsprobe läuft): Titel bleibt stehen, mit Haken */
+      const f = S.fertig;
+      el.append(f ? h("div", {class: "am-zeile am-fertig"}, h("span", {class: "sp-kunde-sym", style: {"--k": `var(${f.farbe || "--accent"})`}}, f.symbol || "✉"),
+          h("div", {class: "am-titel"}, h("strong", {}, "✓ " + f.titel), h("span", {class: "am-kunde"}, "abgenommen – Funktionsprobe")))
+        : h("div", {class: "lb-auftrag-standard"}, h("strong", {}, "Kein offenes Ticket")));
+      return;
+    }
     const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde), niveau = Spiel.niveauVon(inst);
     if (inst.quelle === "pruefung") return pruefungsLeiste(el, inst, def);
     const regel = Spiel.regeln(inst), live = regel.liveHaken;
@@ -264,13 +272,50 @@ UI.spiel = (() => {
   }
 
   /* ---------- Abnahme und Ergebnis ---------- */
-  function abnahmeAnfordern(){
-    const inst = S.inst; if (!inst) return;
+  async function abnahmeAnfordern(){
+    const inst = S.inst; if (!inst || S.probe) return;
     const ab = Spiel.abnahme(inst);
+    /* vor dem Abschluss lesen: danach ist die Laufzeit (Startnetz, Verlauf) der Instanz weg */
+    const geaendert = ab.bestanden ? Spiel.geaenderteGeraete(inst) : [];
+    const weg = ab.bestanden ? wegChips(inst) : null;
+    if (!ab.bestanden) wegMerken(inst, {art: "abnahme", ok: false});
     const erg = Spiel.abschliessen(inst, ab);
-    if (erg.bestanden) { S.coach = null; ticketFertig(); }
-    ergebnisZeigen(erg);
     status();
+    if (!erg.bestanden) { UI.klang?.spielen("nochnicht"); ergebnisZeigen(erg); return; }
+    S.coach = null; ticketFertig();
+    const kd = kunde(erg.inst.kunde || erg.def.kunde);
+    S.fertig = {titel: erg.def.titel, symbol: kd.symbol, farbe: kd.farbe};
+    UI.labor.werkzeug("auswahl");
+    UI.labor.auftragNeu();
+    erg.weg = weg;
+    erg.wahl = Spiel.st.erledigt.length === 1;        /* nach dem ersten Auftrag: Postfach mit zwei Angeboten zur Wahl */
+    if (S.mess) S.mess.erfolg ??= Math.round(performance.now() - S.mess.t0);
+    const k = kunde(erg.inst.kunde || erg.def.kunde);
+    S.probe = true;
+    try {
+      await UI.szene.abspielen(Spiel.szene(erg.inst, ab), {geaendert, satz: erg.dank, kurz: ab.niveau !== "E",
+        kunde: {name: k.ansprechpartner?.name || k.name, symbol: k.symbol, farbe: k.farbe}});
+    } catch (e) { console.error("Funktionsprobe", e); }
+    finally { S.probe = false; S.fertig = null; }
+    ergebnisZeigen(erg);
+  }
+  /* „Dein Weg“: was der Spieler getan hat – Diagnose (Ping), Eingriffe (Verlauf), Probe */
+  function wegMerken(inst, eintrag){
+    if (S.weg.iid !== inst.iid) S.weg = {iid: inst.iid, liste: []};
+    S.weg.liste.push(eintrag);
+    if (S.weg.liste.length > 40) S.weg.liste.shift();
+  }
+  function wegChips(inst){
+    const eig = S.weg.iid === inst.iid ? S.weg.liste : [];
+    const chips = [];
+    const diag = eig.find(e => e.art === "ping");
+    if (diag) chips.push({text: diag.text, ok: diag.ok});
+    const fehl = eig.filter(e => e.art === "abnahme" && !e.ok).length;
+    const eingriffe = (Spiel.verlaufVon(inst).liste || []).filter(t => !/verschoben|zurückgesetzt|Aufgeräumt/.test(t));
+    for (const t of eingriffe.slice(-2)) chips.push({text: t.length > 46 ? t.slice(0, 45) + "…" : t, ok: null});
+    if (eingriffe.length > 2) chips.splice(chips.length - 2, 0, {text: `+${eingriffe.length - 2} Schritte`, ok: null});
+    chips.push({text: fehl ? `Probe ✓ im ${fehl + 1}. Versuch` : "Probe ✓", ok: true});
+    return chips.slice(-4);
   }
   function ticketFertig(){
     clearInterval(S.seniorTimer); S.seniorTimer = null;
@@ -306,35 +351,59 @@ UI.spiel = (() => {
           h("button", {type: "button", class: "knopf", onclick: () => { zu(); S.hilfeOffen = true; UI.labor.auftragNeu(); }}, "🛟 Hilfe"))));
       return;
     }
+    /* Nachbesprechung in höchstens drei Blöcken (Design – Spielspaß 2.0, Hebel 1):
+       ① Sterne + Lohn (Abzüge, Abzeichen, Tagesziel, Fertigkeit nur als kurze Zeile, wenn es sie gibt) · ② Dein Weg · ③ Merke */
     const sterne = erg.sterne;
-    /* Tagesziel gerade erreicht? Dann gehört die Feierabend-Bilanz ins Ergebnis – einmal am Tag */
     const tagStand = erg.inst.quelle !== "pruefung" ? Spiel.tag.heute() : null;
     const feierabend = !!(tagStand && tagStand.fertig && !tagStand.abschlussGezeigt);
     if (feierabend) Spiel.tag.abschlussGesehen();
     const sternEl = h("div", {class: "sp-sterne", "aria-label": `${sterne} von 5 Sternen`}, [1, 2, 3, 4, 5].map(i => h("span", {class: i <= sterne ? "voll" : i - 0.5 <= sterne ? "halb" : "leer", style: {"--i": i}}, "★")));
     const euroEl = h("b", {class: "sp-geld"}, "+0,00 €");
-    const lernen = (erg.lernen || []).map(l => {
-      const r = h("span", {class: "sp-ring", style: {"--von": l.vorher / 5, "--nach": l.nachher / 5}});
-      return h("li", {}, r, h("div", {}, h("b", {}, l.name), h("small", {}, l.nachher > l.vorher ? `Stufe ${l.vorher} → ${l.nachher} · ${l.stufe}` : l.stufe)));
-    });
+    Spiel.abzeichen.pruefen();
+    const abz = Spiel.abzeichen.abholen();
+    const besser = (erg.lernen || []).find(l => l.nachher > l.vorher);
+    const zeilen = [
+      erg.abnahme.abzuege.length ? h("p", {class: "sp-zeile leise"}, erg.abnahme.abzuege.map(a => `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`).join(" · ")) : null,
+      abz.length ? h("p", {class: "sp-zeile"}, "🏅 ", h("b", {}, abz.length === 1 ? "Neues Abzeichen: " : "Neue Abzeichen: "), abz.map(a => `${a.sym} ${a.titel}`).join(" · ")) : null,
+      besser ? h("p", {class: "sp-zeile"}, "📈 ", h("b", {}, besser.name + ": "), `Stufe ${besser.vorher} → ${besser.nachher}`) : null,
+      feierabend ? feierabendZeile() : null,
+    ].filter(Boolean);
+    const merke = merkeText(def, erg.abnahme.niveau);
+    const skill = (def.skills || [])[0];
+    const weiterKnopf = erg.wahl
+      ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Nächsten Auftrag wählen ▸")
+      : erg.naechstes ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); oeffnen(erg.naechstes); }}, "Nächstes Ticket ▸") : null;
     const zu = overlay(h("div", {class: "sp-ergebnis"},
-      h("div", {class: "sp-erg-kopf"}, h("span", {class: "sp-kunde-sym gross", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
-        h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"))),
-      sternEl,
-      h("blockquote", {class: "sp-dank"}, "„" + erg.dank + "“", h("cite", {}, "— " + (k.ansprechpartner?.name || k.name))),
-      h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`), erg.lohn.tempo ? h("small", {}, `inkl. ${fmtEuro(erg.lohn.tempo)} Tempo-Bonus`) : null),
-      erg.abnahme.abzuege.length ? h("ul", {class: "sp-abzuege"}, erg.abnahme.abzuege.map(a => h("li", {}, `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`))) : null,
-      lernen.length ? h("section", {}, h("h3", {}, "Was du geübt hast"), h("ul", {class: "sp-lernen"}, lernen)) : null,
-      abzeichenBlock(),
-      feierabend ? feierabendBlock() : null,
-      def.erklaerung ? h("section", {class: "sp-erklaerung"}, h("h3", {}, "Was war los?"), h("p", {}, def.erklaerung),
-        def.quelle ? h("small", {class: "sp-leise"}, "Nachlesen: " + def.quelle) : null) : null,
+      h("section", {class: "sp-block sp-block-lohn"},
+        h("div", {class: "sp-erg-kopf"}, h("span", {class: "sp-kunde-sym gross", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
+          h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"))),
+        h("div", {class: "sp-lohn-reihe"}, sternEl,
+          h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`), erg.lohn.tempo ? h("small", {}, `inkl. ${fmtEuro(erg.lohn.tempo)} Tempo-Bonus`) : null)),
+        ...zeilen),
+      erg.weg && erg.weg.length ? h("section", {class: "sp-block sp-weg"}, h("h3", {}, "Dein Weg"),
+        h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
+          h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)]))) : null,
+      merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
+        h("div", {class: "sp-merke-fuss"},
+          def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
+          typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, "📖 Nachlesen") : null)) : null,
       h("div", {class: "sp-knoepfe"},
-        erg.naechstes ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); oeffnen(erg.naechstes); }}, "Nächstes Ticket ▸") : null,
-        h("button", {type: "button", class: "knopf" + (erg.naechstes ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Zum Postfach"),
-        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, "🌙 Feierabend: zur Leiste") : null,
-        typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0] ? h("button", {type: "button", class: "knopf geist", onclick: () => { zu(); UI.wiki.oeffnen(def.skills[0]); }}, "📖 Nachschlagen") : null)), "erfolg");
+        weiterKnopf,
+        h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Zum Postfach"),
+        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, "🌙 Feierabend: zur Leiste") : null)), "erfolg");
     zaehlen(euroEl, erg.euro);
+    UI.klang?.spielen("sterne");
+  }
+  /* Tagesziel: eine Zeile mit offenem Faden für morgen (die ausführliche Bilanz kommt mit dem Hub, S2) */
+  function feierabendZeile(){
+    const b = Spiel.tag.bilanz(), morgen = b.morgenFaellig[0] ? Spiel.skill(b.morgenFaellig[0]).name : null;
+    return h("p", {class: "sp-zeile"}, "🎉 ", h("b", {}, "Tagesziel geschafft"), ` – ${b.tickets} Aufträge heute` + (morgen ? ` · morgen fällig: ${morgen}` : ""));
+  }
+  /* Merke: Einstieg erklärt (bis drei Sätze), AP1/AP2 bekommen nur die Regel – den letzten Satz der Erklärung */
+  function merkeText(def, niveau){
+    const saetze = String(def.erklaerung || "").split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ„])/).map(s => s.trim()).filter(Boolean);
+    if (!saetze.length) return "";
+    return niveau === "E" ? saetze.slice(0, 3).join(" ") : saetze[saetze.length - 1];
   }
   /* Stufenregeln: Einstieg probiert frei; AP1/AP2 zählen den ersten Versuch wie in der Prüfung */
   function versuchText(inst, niveau){
@@ -518,36 +587,19 @@ UI.spiel = (() => {
   let abzTimer = null;
   function abzeichenPlanen(ms){ clearTimeout(abzTimer); abzTimer = setTimeout(abzeichenZeigen, ms); }
   function abzeichenZeigen(){
-    if (document.querySelector(".sp-overlay:not(.vorhersage)")) { abzeichenPlanen(1500); return; }
+    if (!UI.buehneFrei()) { abzeichenPlanen(1500); return; }
     const neu = Spiel.abzeichen.abholen(); if (!neu.length) return;
     const ansehen = {text: "Ansehen", fn: () => UI.app.ansicht("lernstand")};
     if (neu.length > 2) UI.toast(neu.map(a => a.sym + " " + a.titel).join(" · "), "ok", {titel: `${neu.length} neue Abzeichen`, aktion: ansehen});
     else for (const a of neu) UI.toast(`${a.sym} ${a.titel} – ${a.text}`, "ok", {titel: "Neues Abzeichen", aktion: ansehen});
   }
-  function feierabendBlock(){
-    const b = Spiel.tag.bilanz();
-    const namen = b.morgenFaellig.slice(0, 3).map(id => Spiel.skill(id).name);
-    return h("section", {class: "sp-feierabend"},
-      h("h3", {}, `🎉 Tagesziel geschafft – ${b.tickets} Tickets heute`),
-      h("p", {class: "sp-bilanz"}, `+${fmtEuro(b.euro)} · +${zahlDe(b.ruf)} Ruf · ${b.uebungen} ${b.uebungen === 1 ? "Übung" : "Übungen"} · 🔥 ${b.serie} ${b.serie === 1 ? "Tag" : "Tage"} Serie`
-        + (b.ohneHilfe ? ` · ${b.ohneHilfe} ohne Hilfe` : "")),
-      h("p", {class: "sp-leise"}, namen.length
-        ? `Morgen fällig: ${namen.join(", ")}${b.morgenFaellig.length > 3 ? ` und ${b.morgenFaellig.length - 3} weitere` : ""} – kurz wiederholen, kurz bevor du es vergisst, dann sitzt es.`
-        : "Weiterspielen geht immer. Am meisten bringt dir aber die Wiederholung an einem anderen Tag – bis morgen!"));
-  }
   /* Neue Kundenpost: leiser Hinweis in der Vollansicht, erst wenn kein Dialog offen ist (die Leiste zeigt nur den Zähler) */
   function postMelden(neu, versuch = 0){
     if (UI.modus() !== "voll") return;
-    if (document.querySelector(".sp-overlay:not(.vorhersage)") && versuch < 40) { setTimeout(() => postMelden(neu, versuch + 1), 1500); return; }
+    if (!UI.buehneFrei() && versuch < 40) { setTimeout(() => postMelden(neu, versuch + 1), 1500); return; }
     const n = neu[neu.length - 1], a = postAbsender(n);
     UI.toast(neu.length > 1 ? `${neu.length} neue Nachrichten im Postfach.` : `${a.name}: ${String(n.text).split("\n")[0].slice(0, 90)}${String(n.text).length > 90 ? " …" : ""}`, "info",
       {titel: "✉ Neue Nachricht", id: "post", aktion: {text: "Lesen", fn: () => { S.postfachWahl = n.id; UI.app.ansicht("postfach"); }}});
-  }
-  function abzeichenBlock(){
-    Spiel.abzeichen.pruefen();
-    const neu = Spiel.abzeichen.abholen(); if (!neu.length) return null;
-    return h("section", {class: "sp-abzeichen-neu"}, h("h3", {}, neu.length === 1 ? "Neues Abzeichen" : "Neue Abzeichen"),
-      neu.map(a => h("div", {class: "sp-abz"}, h("span", {class: "sp-abz-sym"}, a.sym), h("div", {}, h("b", {}, a.titel), h("small", {}, a.lehrt)))));
   }
 
   document.addEventListener("keydown", e => {
@@ -564,7 +616,13 @@ UI.spiel = (() => {
     if (neuePost.length) { status(); postMelden(neuePost); }
   });
   Bus.an("ticket-neu", () => { status(); if (UI.app.aktuell === "postfach") { const c = document.querySelector(".sp-postfach")?.parentElement; if (c) postfachAnsicht(c); } });
-  Bus.an("trace", d => { if (S.coach && S.coach.schritt === 1 && d && d.quelle === "ping" && d.ergebnis && (d.ergebnis.antworten || []).some(a => a.ok)) coachWeiter(2); });
+  Bus.an("trace", d => {
+    if (S.inst && d && d.quelle === "ping" && d.ergebnis && UI.labor.netz === S.inst.netz) {
+      const ok = (d.ergebnis.antworten || []).some(a => a.ok), n = id => UI.labor.netz.geraete[id]?.name || id;
+      wegMerken(S.inst, {art: "ping", ok, text: `Ping ${n(d.von)} → ${n(d.nach)} ${ok ? "✓" : "✗"}`});
+    }
+    if (S.coach && S.coach.schritt === 1 && d && d.quelle === "ping" && d.ergebnis && (d.ergebnis.antworten || []).some(a => a.ok)) coachWeiter(2);
+  });
 
   /* ---------- Start ---------- */
   (UI.startHaken ||= []).push(() => {
