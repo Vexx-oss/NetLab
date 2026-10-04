@@ -334,7 +334,14 @@ UI.labor = (() => {
     const netz = Z.netz, geo = kabelGeo(k);
     const g = sv("g", {class: "kabel", "data-kabel": k.id});
     if (!geo) return g;
-    const {sa, sb, klasse} = kabelZustand(k);
+    let {sa, sb, klasse} = kabelZustand(k);
+    /* R1: Die Ursache steht am Kabel nur, wo das Niveau Hinweise zeigt (Einstieg, AP1 ab Hilfestufe 2, Netzprüfer).
+       Sonst zeigt es, was eine Port-LED zeigt: Link oder kein Link – ob „shutdown“, err-disabled oder Gegenstelle aus,
+       klärt erst die Diagnose (show ip interface brief, Inspektor). */
+    if (!warnungenAn()) {
+      const led = s => ({status: s.status === "aus" ? "unten" : s.status, grund: null});
+      sa = led(sa); sb = led(sb); if (klasse === "aus") klasse = "unten";
+    }
     const ebene = UI.ebenen.aktuell;
     const va = UI.ebenen.vlanPort(netz, k.a.geraet, k.a.port), vb = UI.ebenen.vlanPort(netz, k.b.geraet, k.b.port);
     const trunk = va?.art === "trunk" || vb?.art === "trunk";
@@ -348,7 +355,8 @@ UI.labor = (() => {
     }
     const {ax, ay, bx, by, ux, uy, nx, ny, len} = geo;
     const na = netz.geraete[k.a.geraet]?.name || k.a.geraet, nb = netz.geraete[k.b.geraet]?.name || k.b.geraet;
-    const titel = `${na} ${k.a.port} ↔ ${nb} ${k.b.port}\n${klasse === "oben" ? "Link oben" : klasse === "aus" ? "Port abgeschaltet: " + grundText((sa.status !== "oben" ? sa : sb).grund) : "Link unten: " + grundText((sa.status !== "oben" ? sa : sb).grund)}` +
+    const grund = (sa.status !== "oben" ? sa : sb).grund;
+    const titel = `${na} ${k.a.port} ↔ ${nb} ${k.b.port}\n${klasse === "oben" ? "Link oben" : (klasse === "aus" ? "Port abgeschaltet" : "Link unten") + (grund ? ": " + grundText(grund) : "")}` +
       (trunk ? `\nTrunk (802.1Q), erlaubt: ${UI.ebenen.erlaubtText((va?.art === "trunk" ? va : vb).erlaubt)}` : "");
     g.append(sv("line", {class: "kabel-treffer", x1: ax, y1: ay, x2: bx, y2: by}, sv("title", {text: titel + "\nKlicken zum Auswählen, Entf trennt."})));
     if (trunk) {

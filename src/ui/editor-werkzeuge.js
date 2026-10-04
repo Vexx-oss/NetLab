@@ -87,7 +87,8 @@ UI.laborWerkzeuge = (() => {
       const grp = sv("g", {class: "ports", "data-id": id, transform: `translate(${p.x} ${p.y})`});
       const ports = Modell.ports(g), n = ports.length;
       const eintrag = (port, cx, cy, r) => {
-        const s = Modell.portStatus(Z.netz, id, port), ka = Modell.kabelAn(Z.netz, id, port);
+        const echt = Modell.portStatus(Z.netz, id, port), ka = Modell.kabelAn(Z.netz, id, port);
+        const s = echt.status === "aus" && !UI.labor.warnungenAn() ? {status: "unten"} : echt;   /* R1: im AP-Niveau wie eine Port-LED */
         const gegen = ka ? `${Z.netz.geraete[ka.gegen.geraet]?.name || "?"} ${ka.gegen.port}` : "";
         const c = sv("circle", {class: `pd pd-${s.status}` + (G?.art === "kabel" && G.zielPort === port && G.zielId === id ? " ziel" : ""), cx, cy, r, "data-port": port});
         c.append(sv("title", {text: `${port} – ${ka ? "verbunden mit " + gegen + " (" + (F.STATUS_TEXT[s.status] || s.status) + ")" : "frei"}${ka ? "" : "\nZiehen: Kabel von genau diesem Port"}`}));
