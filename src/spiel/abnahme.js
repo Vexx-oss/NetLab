@@ -54,6 +54,8 @@ Spiel.sterneBerechnen = function(inst, {niveau, neustartVerlust} = {}){
   if (neustartVerlust && niveau === "AP1") abzuege.push({text: "Nicht gespeichert: Nach einem Neustart wäre die Änderung weg", sterne: 0.5});
   const versuch = (inst.abnahmen || 0) + 1, abzug = Spiel.regeln(inst).versuchAbzug;
   if (abzug && versuch >= 2) abzuege.push({text: `${versuch}. Abnahmeversuch – im ${niveau || "AP"}-Niveau zählt der erste wie in der Prüfung`, sterne: abzug});
+  const vAbzug = Spiel.regeln(inst).verdachtAbzug;
+  if (vAbzug && !inst.verdacht && Spiel.verdacht && Spiel.verdacht.noetig(inst)) abzuege.push({text: `Ohne Verdacht – im ${niveau || "AP"}-Niveau gehört die Hypothese vor den Eingriff`, sterne: vAbzug});
   const summe = abzuege.reduce((s, a) => s + a.sterne, 0);
   return {sterne: Math.max(1, 5 - summe), abzuege};
 };
@@ -93,6 +95,13 @@ Spiel.abschliessen = function(inst, abnahme){
   const st = Spiel.st;
   const sterne = abnahme.sterne;
   const lohn = Spiel.lohnBerechnen(inst, def, sterne);
+  /* Verdacht (Phase B): bewerten, solange Start- und Soll-Netz der Instanz noch da sind; Volltreffer vor dem Eingriff +10 % */
+  const verdacht = Spiel.verdacht ? Spiel.verdacht.bewerten(inst) : null;
+  if (verdacht && verdacht.treffer === "voll" && verdacht.vorEingriff) {
+    lohn.verdacht = Math.max(1, Math.round(lohn.grund * Spiel.VERDACHT.BONUS));
+    lohn.euro += lohn.verdacht;
+    Spiel.abzeichen.zaehlen("verdachtTreffer");
+  }
   st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0, kunde: inst.kunde || def.kunde || null});
   if (st.erledigt.length > 2000) st.erledigt.splice(0, st.erledigt.length - 2000);
   if (inst.kunde) {
@@ -113,7 +122,7 @@ Spiel.abschliessen = function(inst, abnahme){
     bestanden: true, abnahme, lernen, def, inst, sterne, euro: lohn.euro, ruf: lohn.ruf, lohn,
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
-    dex, raetsel,
+    dex, raetsel, verdacht,
   };
   Spiel.geaendert("ticket-geloest");
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});

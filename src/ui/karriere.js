@@ -45,7 +45,7 @@ UI.karriere = (() => {
     for (const e of liste) (gruppen[e.gruppe || "Sonstiges"] ||= []).push(e);
     const ZUSTAND = {kaufbar: "", "zu-teuer": "teuer", gekauft: "gekauft", aktiv: "gekauft", veraltet: "veraltet", gesperrt: "gesperrt"};
     c.replaceChildren(h("div", {class: "kr-seite"},
-      h("header", {class: "kr-kopf"}, h("h2", {}, "Shop"), h("p", {class: "sp-leise"}, `Du hast ${eur(Spiel.st.euro)} €. Werkzeuge, Simulation und Hilfe sind immer frei – hier gibt es Automatisierung, Verträge und Aussehen.`)),
+      h("header", {class: "kr-kopf"}, h("h2", {}, "Shop"), h("p", {class: "sp-leise"}, `Du hast ${eur(Spiel.st.euro)} €. Simulation, Inspektor, Hilfe und Wiki sind immer frei – hier gibt es Zusatzwerkzeuge, Automatisierung, Verträge und Aussehen.`)),
       ...Object.entries(gruppen).map(([g, es]) => h("section", {class: "kr-gruppe"}, h("h3", {}, g),
         h("div", {class: "kr-raster klein"}, es.map(e => h("article", {class: "kr-ware " + (ZUSTAND[e.zustand] ?? "")},
           h("b", {}, e.titel), h("p", {}, e.text || ""),

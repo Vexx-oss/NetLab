@@ -17,9 +17,10 @@ gruppe("Spiel: Netzplan", () => {
     const fehler = [];
     let start, soll;
     try { start = Spiel.startNetz(def, 1); soll = Spiel.plan.sollNetzVon(def, 1); } catch (e) { return [`${wo}: ${e.message}`]; }
-    for (const art of ["netzplan", "skizze", "tabelle"]) {
-      const p = Spiel.plan.aus(soll, {art, verdeckt: art === "tabelle" ? "hosts-gw-dns" : null});
-      if (JSON.stringify(p) !== JSON.stringify(Spiel.plan.aus(Spiel.plan.sollNetzVon(def, 1), {art, verdeckt: art === "tabelle" ? "hosts-gw-dns" : null}))) fehler.push(`${wo}/${art}: nicht deterministisch`);
+    for (const [art, breite] of [["netzplan", null], ["netzplan", 400], ["skizze", null], ["skizze", 300], ["tabelle", null]]) {
+      const p = Spiel.plan.aus(soll, {art, verdeckt: art === "tabelle" ? "hosts-gw-dns" : null, breite});
+      if (breite && p.breite / breite > 1.6) fehler.push(`${wo}/${art}/${breite}: Plan ${p.breite} px breit`);
+      if (JSON.stringify(p) !== JSON.stringify(Spiel.plan.aus(Spiel.plan.sollNetzVon(def, 1), {art, verdeckt: art === "tabelle" ? "hosts-gw-dns" : null, breite}))) fehler.push(`${wo}/${art}: nicht deterministisch`);
       if (art !== "tabelle") {
         const k = p.knoten.map(kasten);
         for (let i = 0; i < k.length; i++) for (let j = i + 1; j < k.length; j++) if (ueberlappt(k[i], k[j])) fehler.push(`${wo}/${art}: ${p.knoten[i].id} überlappt ${p.knoten[j].id}`);

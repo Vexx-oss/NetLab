@@ -156,14 +156,13 @@ UI.laborPakete = (() => {
     }
     function zeigeTrace(trace, o = {}){
       if (!trace) return;
-      F.simUmschalten(false);
+      if (o.wechseln !== false) F.simUmschalten(false);           /* Dock: zum Reiter Simulation (außer nur auffrischen) */
       const c = Z.el.sim;
       if (c) {
         if (typeof UI.simpanel?.zeigen === "function") { try { UI.simpanel.zeigen(c, trace); } catch (e) { console.error("Simulations-Panel", e); } }
         else c.replaceChildren(h("div", {class: "lb-sim-platz"}, h("strong", {}, trace.zusammenfassung || "Aufzeichnung"),
           h("p", {}, `${(trace.ereignisse || []).length} Ereignisse. Das ausführliche Simulations-Panel wird gerade eingebaut.`)));
       }
-      if (Z.el.simTitel) Z.el.simTitel.textContent = "Simulation" + (trace.zusammenfassung ? " · " + trace.zusammenfassung : "");
       Bus.senden("trace", {trace, quelle: o.quelle || "labor"});
       if (o.abspielen !== false) abspielen(trace, o);
     }
@@ -204,11 +203,14 @@ UI.laborPakete = (() => {
       Bus.senden("trace", {trace: r.trace, quelle: "ping", von: vonId, nach: nachId, ergebnis: r});
       /* Ist das Simulations-Panel offen, zeigt es den neuen Ping selbst – dann keine Meldung über der (kleinen) Fläche.
          Der erste Ping in diesem Netz öffnet das Panel einmal (es war bis dahin unsichtbar). */
-      const panelOffen = !!Z.root && (!Z.root.classList.contains("sim-zu") || !!Z.simWartet);
+      /* Dock: Ist der Reiter Simulation offen (oder war noch nie eine da), zeigt er den Ping selbst. Sonst wird er nur
+         aufgefrischt – der Reiter bleibt, wo er ist (Plan, Akte, Inspektor), und eine kurze Meldung sagt, was rauskam. */
+      const panelOffen = !!Z.root && (F.dockOffen("sim") || !!Z.simWartet);
       const melden = () => {
         UI.klang?.spielen(ok > 0 ? "ping" : "nochnicht");
-        return panelOffen && r.trace ? zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping", abspielen: false})
-          : UI.toast(text, art, {id: "ping", titel, aktion});
+        if (panelOffen && r.trace) return zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping", abspielen: false});
+        if (r.trace) zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping", abspielen: false, wechseln: false});
+        return UI.toast(text, art, {id: "ping", titel, aktion});
       };
       if (r.trace && bewegung() === "voll") {
         let gemeldetSchon = false;

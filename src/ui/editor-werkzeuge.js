@@ -367,17 +367,7 @@ UI.laborWerkzeuge = (() => {
 
     /* Geräteleiste (ziehen oder anklicken): editor-fach.js */
 
-    /* ---------- Simulation: Höhe ziehen ---------- */
-    Z.el.simGriff.addEventListener("pointerdown", e => {
-      if (Z.simZu) return;
-      e.preventDefault();
-      const y0 = e.clientY, h0 = Z.simHoehe;
-      Z.el.simGriff.setPointerCapture(e.pointerId);
-      Z.root.classList.add("sim-zieht");
-      const mv = ev => F.simHoeheSetzen(h0 - (ev.clientY - y0));
-      const up = ev => { Z.el.simGriff.removeEventListener("pointermove", mv); Z.el.simGriff.removeEventListener("pointerup", up); Z.root.classList.remove("sim-zieht"); F.simHoeheSetzen(h0 - (ev.clientY - y0), true); };
-      Z.el.simGriff.addEventListener("pointermove", mv); Z.el.simGriff.addEventListener("pointerup", up);
-    });
+    /* Simulation liegt seit Phase B im Dock (Reiter) – kein Höhengriff mehr */
 
     /* ---------- Tastatur (von UI.app weitergereicht, nie in Eingabefeldern) ---------- */
     function taste(e){

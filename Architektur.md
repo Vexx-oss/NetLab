@@ -341,9 +341,10 @@ Spiel.plan.abweichungen(inst) → [geraeteId]          // Plan ↔ Labor, für �
 inst.akte     = [ {n, t, art:"ping"|"trace"|"kabel"|"befehl"|"plan", von, nach, befund, schicht:null|1..7, grund:null|code, ok, wichtig:false} ]
 Spiel.akte.ausPing(inst, {von, nach, ergebnis}) · .ausKabeltest(inst, {kabel, oben, grund}) · .stern(inst, n) · .liste(inst)
   // befund = was ein echtes Werkzeug zeigt („Zeitüberschreitung“, „Zielhost nicht erreichbar“); Grund/Schicht nur im Einstieg sichtbar
-inst.verdacht = { schicht, grund, geraet, t, vorEingriff:bool, treffer:null|"schicht"|"voll" }
-Spiel.verdacht.optionen(inst) → { schichten:[1..7], gruende:[{code, titel, schicht}] (4, eine richtig), geraete:[{id, name}] }
-Spiel.verdacht.setzen(inst, {schicht, grund, geraet}) · .bewerten(inst) → {treffer, richtig:{grund, schicht, geraete}, text}
+inst.verdacht = { schicht, ursache:injektor, geraet, t, vorEingriff:bool, treffer:null|"schicht"|"ursache"|"voll" }
+Spiel.verdacht.optionen(inst) → { schichten:[{n, name, text}], ursachen:[{id, titel, schicht}] (4 Fehlerarten, eine richtig), geraete:[{id, name}] } | null
+Spiel.verdacht.setzen(inst, {schicht, ursache, geraet}) · .bewerten(inst) → {treffer, gesetzt, vorEingriff, richtig:{ursache, schicht, geraete}, text}
+  // Ursachen sind Fehlerarten (= Fehlerdex-Einträge), nicht Simulationsgründe: „Falsches Standardgateway“ statt „Gateway antwortet nicht“
   // E freiwillig (+10 % Lohn bei vollem Treffer vor dem Eingriff), AP1 ohne Verdacht −½ ★, AP2 −1 ★ (Spiel.regeln(inst).verdacht)
 st.werkzeuge  = { kabeltester:bool, netzpruefer:bool }   // Shop „Werkzeuge“; inst.netzpruefer = true schaltet die „!“ im AP-Niveau zu
 ```

@@ -117,12 +117,16 @@ UI.spiel = (() => {
   function mappe(def, k, stand, live, mitGrund){
     const m = S.mappe, n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length;
     const reiter = h("div", {class: "am-reiter", role: "tablist"},
-      [["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"]].map(([id, titel]) =>
+      [["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"], ["plan", "Plan"]].map(([id, titel]) =>
         h("button", {type: "button", role: "tab", class: "am-tab" + (m.reiter === id ? " an" : ""), "aria-selected": String(m.reiter === id),
           onclick: () => { m.reiter = id; UI.labor.auftragNeu(); }}, titel)),
       h("button", {type: "button", class: "am-zu", title: "Schließen (Esc)", "aria-label": "Mappe schließen", onclick: () => mappeZu()}, UI.symbol("schliessen", 15)));
     let inhalt;
-    if (m.reiter === "ziele") {
+    if (m.reiter === "plan") {
+      /* Netzplan (Phase B): aus dem Soll-Netz; „Neben das Labor heften“ legt ihn als Reiter ins Dock */
+      inhalt = h("div", {class: "am-plan"});
+      UI.netzplan.zeichnen(inhalt, S.inst, {mappe: true});
+    } else if (m.reiter === "ziele") {
       inhalt = h("div", {class: "am-ziele-liste"},
         h("ul", {class: "sp-ziele"}, stand.status.map((s, i) => h("li", {class: live ? (s.ok ? "ok" : s.ok === false ? "offen" : "") : "neutral", "data-i": i},
           h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
@@ -168,6 +172,7 @@ UI.spiel = (() => {
       {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfe", sym: "hilfe", info: stufe ? `Stufe ${stufe}/6` : "vom Hinweis bis zur Lösung",
         fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
+    eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});
     if (Spiel.niveauVon(inst) !== "AP2" && typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0])
       eintraege.push({text: "Nachschlagen: " + Spiel.skill(def.skills[0]).name, sym: "wiki", fn: () => UI.wiki.oeffnen(def.skills[0])});
     eintraege.push("-",

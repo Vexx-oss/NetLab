@@ -6,7 +6,7 @@
 .gb-internet .gb-kachel{stroke:var(--g); stroke-opacity:.6}
 .gb-glyph path{fill:none; stroke:var(--g); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
 
-.labor{display:grid; grid-template-columns:auto minmax(0,1fr) auto; height:100%; min-height:0; background:var(--bg)}
+.labor{display:grid; grid-template-columns:auto minmax(0,1fr) var(--dock-b, 0px); height:100%; min-height:0; background:var(--bg)}
 
 /* ---- Geräteleiste ---- */
 .lb-geraete{position:relative; z-index:6; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
@@ -252,3 +252,34 @@
 /* Ruhe beim Start: Inspektor erst mit der ersten Auswahl, Simulation erst mit der ersten Aufzeichnung */
 .labor.insp-wartet .lb-insp-huelle{display:none}
 .labor.sim-wartet .lb-sim{display:none}
+
+/* ---- Dock rechts (K1, Phase B): Inspektor · Simulation · Plan · Akte als Reiter ----
+   Breite aus der Laborbreite: höchstens 40 % − Geräteleiste, so behält die Fläche ≥ 60 %. Eingeklappt: schmale Reiterleiste. */
+.labor.dock-da{--dock-b:clamp(250px, calc(40% - 88px), 440px)}
+.labor.dock-da.dock-zu{--dock-b:48px}
+.lb-dock{display:none; min-width:0; min-height:0; flex-direction:column; background:var(--panel); border-left:1px solid var(--line); container-type:inline-size}
+.labor.dock-da .lb-dock{display:flex}
+.lb-dock-reiter{display:flex; align-items:flex-end; gap:2px; padding:6px 6px 0; border-bottom:1px solid var(--line); flex:0 0 auto; overflow-x:auto; scrollbar-width:none}
+.lb-dock-tab{position:relative; display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 10px; border:1px solid transparent; border-bottom:0;
+  border-radius:9px 9px 0 0; background:none; color:var(--muted); font:700 12.5px/1 var(--body); white-space:nowrap; cursor:pointer}
+.lb-dock-tab:hover{color:var(--ink); background:var(--panel-2)}
+.lb-dock-tab.an{color:var(--ink); background:var(--panel-2); border-color:var(--line); margin-bottom:-1px; padding-bottom:1px}
+.lb-dock-zahl{min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:var(--accent-ink); font:800 11px/18px var(--body); text-align:center}
+.lb-dock-einklappen{margin-left:auto; align-self:center; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--muted)}
+.lb-dock-einklappen:hover{background:var(--panel-3); color:var(--ink)}
+.lb-dock-inhalt{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
+.lb-dock-inhalt > *{flex:1 1 auto; min-height:0}
+.lb-dock-inhalt > [hidden]{display:none !important}
+.lb-plan, .lb-akte{overflow:auto}
+@container (max-width:380px){ .lb-dock-tab:not(.an) .lb-dock-titel{display:none} .lb-dock-tab{padding:0 8px} }
+.labor.dock-zu .lb-dock-reiter{flex-direction:column; align-items:center; border-bottom:0; padding:8px 0; gap:4px}
+.labor.dock-zu .lb-dock-tab{justify-content:center; width:38px; padding:0; border-radius:9px; border:1px solid transparent; margin:0}
+.labor.dock-zu .lb-dock-titel{display:none}
+.labor.dock-zu .lb-dock-zahl{position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; font-size:10px; line-height:16px; padding:0 4px}
+.labor.dock-zu .lb-dock-inhalt{display:none}
+/* Simulation im Dock: Liste oben, PDU darunter (statt nebeneinander) */
+.lb-dock .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(0, 1.4fr) minmax(0, 1fr)}
+.lb-dock .si[data-breite="schmal"] .si-pdu{display:block; border-left:0; border-top:1px solid var(--line)}
+.lb-dock .si-kopf{flex-wrap:wrap; row-gap:6px}
+.lb-dock .si-zus{flex:1 1 190px}
+.lb-dock .si-zus strong{white-space:normal}

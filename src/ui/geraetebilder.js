@@ -111,6 +111,8 @@ UI.symbol = (() => {
     inspektor: ["M4 4h16v16H4z", "M14 4v16"],
     mappe:     ["M9 3.5h6v3H9z", "M15 5h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3", "M8.5 11h7", "M8.5 15h5"],
     sim:       ["M4 4h16v16H4z", "M4 14h16"],
+    plan:      ["M4 5h5v4H4z", "M15 5h5v4h-5z", "M9.5 17h5v3h-5z", "M6.5 9v3.5h11V9", "M12 12.5V17"],
+    akte:      ["M5 3.5h10l4 4V20.5H5z", "M15 3.5v4h4", "M8.5 12h7", "M8.5 15.5h7", "M8.5 8.5h3"],
   };
   return function symbol(name, groesse = 20){
     const el = sv("svg", {viewBox: "0 0 24 24", width: groesse, height: groesse, class: "sym", "aria-hidden": "true", fill: "none",

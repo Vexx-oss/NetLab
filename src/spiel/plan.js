@@ -6,7 +6,7 @@
    (Adresstabelle, im AP2 mit Lücken). Die Zeichnung wird automatisch in Ebenen ausgerichtet, nicht von der Laborfläche
    übernommen: Internet → Router/Firewall → Switches → Endgeräte. Headless (kein DOM). */
 Spiel.plan = {};
-Spiel.PLAN = {SPALTE_MIN: 120, ZEILE: 132, RAND: 40, ZEICHEN_PX: 7.6, ZEILE_PX: 17, SYMBOL: 44};
+Spiel.PLAN = {SPALTE_MIN: 120, ZEILE: 118, RAND: 36, ZEICHEN_PX: 8.8, ZEILE_PX: 18, SYMBOL: 44};   /* ZEICHEN_PX: 15-px-Schrift (Mono 14 px ≈ 8,4 px je Zeichen) */
 (() => {
 
 /* Startnetz + Referenzlösung (gecacht je Instanz) */
@@ -27,13 +27,10 @@ Spiel.plan.art = function(inst){
   if (def && def.plan && def.plan.art) return def.plan.art;
   return {E: "netzplan", AP1: "skizze", AP2: "tabelle"}[Spiel.niveauVon(inst)] || "netzplan";
 };
-Spiel.plan.fuer = function(inst){
-  const lz = Spiel.laufzeit(inst), art = Spiel.plan.art(inst);
-  if (!lz.plan || lz.plan.art !== art) {
-    const verdeckt = art === "tabelle" ? "hosts-gw-dns" : null;
-    lz.plan = Spiel.plan.aus(Spiel.plan.sollNetz(inst), {art, verdeckt});
-  }
-  return lz.plan;
+/* breite (px, optional): verfügbarer Platz – lange Ebenen brechen dann um, statt die Schrift zu verkleinern */
+Spiel.plan.fuer = function(inst, {breite} = {}){
+  const art = Spiel.plan.art(inst);
+  return Spiel.plan.aus(Spiel.plan.sollNetz(inst), {art, verdeckt: art === "tabelle" ? "hosts-gw-dns" : null, breite});
 };
 
 const PLAN_HOST = {pc: true, server: true, nas: true};
@@ -89,7 +86,7 @@ Spiel.plan.adressen = function(netz, g){
 const planCidr = (ip, maske) => { try { return IP.gueltig(ip) && IP.maskeGueltig(maske) ? IP.cidr(ip, maske) : ""; } catch (e) { return ""; } };
 const planPraefix = maske => { try { return IP.maskeGueltig(maske) ? "/" + IP.praefix(maske) : ""; } catch (e) { return ""; } };
 
-Spiel.plan.aus = function(netz, {art = "netzplan", verdeckt = null} = {}){
+Spiel.plan.aus = function(netz, {art = "netzplan", verdeckt = null, breite: platz = null} = {}){
   const P = Spiel.PLAN, g = netz.geraete;
   const {ebene, nachbarn} = Spiel.plan.ebenen(netz);
   /* Beschriftung je Knoten (was die Zeichnung unter dem Namen zeigt) */
@@ -112,16 +109,27 @@ Spiel.plan.aus = function(netz, {art = "netzplan", verdeckt = null} = {}){
     reihen[e].sort((a, b) => vater(a) - vater(b) || a.name.localeCompare(b.name, "de"));
     reihen[e].forEach((k, i) => { index[k.id] = i; });
   }
-  /* Spaltenbreite aus der längsten Beschriftung – so überlappt nichts */
+  /* Spaltenbreite und Zeilenhöhe je Reihe aus den Beschriftungen – so überlappt nichts. Höchstens so viele Geräte
+     nebeneinander, wie bei ≥ 92 % Maßstab in den Platz passen; der Rest bricht (versetzt) in eine weitere Reihe um. */
   const textBreite = k => Math.max(k.name.length, ...k.zeigen.map(z => z.length)) * P.ZEICHEN_PX + 16;
-  const spalte = Math.max(P.SPALTE_MIN, ...knoten.map(textBreite)) + 18;
-  const maxN = Math.max(1, ...stufen.map(e => reihen[e].length));
-  const breite = maxN * spalte + 2 * P.RAND;
-  stufen.forEach((e, zeile) => {
-    const r = reihen[e], links = P.RAND + (maxN - r.length) * spalte / 2;
-    r.forEach((k, i) => { k.x = Math.round(links + i * spalte + spalte / 2); k.y = Math.round(P.RAND + zeile * P.ZEILE + P.SYMBOL / 2); });
-  });
-  const hoehe = P.RAND * 2 + Math.max(1, stufen.length) * P.ZEILE;
+  const textHoehe = k => P.SYMBOL + (1 + k.zeigen.length) * P.ZEILE_PX;
+  const reihenListe = [];
+  for (const e of stufen) {
+    const spalte = Math.max(P.SPALTE_MIN, ...reihen[e].map(textBreite)) + 18;
+    const maxReihe = platz ? Math.max(2, Math.floor((platz / 0.92 - 2 * P.RAND) / spalte)) : Infinity;
+    for (let i = 0; i < reihen[e].length; i += maxReihe) {
+      const teil = reihen[e].slice(i, i + maxReihe), versetzt = (i / maxReihe) % 2 === 1;
+      reihenListe.push({teil, spalte, versetzt, hoehe: Math.max(P.ZEILE, ...teil.map(textHoehe)) + 22, breite: teil.length * spalte + (versetzt ? spalte / 2 : 0)});
+    }
+  }
+  const breite = Math.round(Math.max(...reihenListe.map(r => r.breite), P.SPALTE_MIN) + 2 * P.RAND);
+  let y = P.RAND + P.SYMBOL / 2;
+  for (const r of reihenListe) {
+    const links = (breite - r.breite) / 2 + (r.versetzt ? r.spalte / 2 : 0);
+    r.teil.forEach((k, i) => { k.x = Math.round(links + i * r.spalte + r.spalte / 2); k.y = Math.round(y); });
+    y += r.hoehe;
+  }
+  const hoehe = Math.round(y - P.SYMBOL / 2 - 22 + P.RAND);
   /* Linien, Netze, Tabelle */
   const linien = netz.kabel.filter(k => g[k.a.geraet] && g[k.b.geraet]).map(k => {
     const port = (id, p) => g[id].typ === "switch" ? ((g[id].running.ports || {})[p] || {}) : null;

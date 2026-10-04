@@ -5,11 +5,13 @@
      AP1       Warnungen erst ab Hilfestufe 2, Live-Haken ohne Grund, −½ ★ ab dem 2. Abnahmeversuch (einmal)
      AP2       keine Warnungen, Haken erst bei der Abnahme, −1 ★ ab dem 2. Abnahmeversuch (einmal)
    Prüfung: keine Warnungen, keine Live-Haken, kein Versuchsabzug (sie hat eigene Regeln, spiel/pruefung.js).
-   Spiel.regeln(inst) → {niveau, warnungen, liveHaken, liveGrund, versuchAbzug} */
+   Verdacht (Phase B): Einstieg freiwillig, AP1 ohne Verdacht −½ ★, AP2 −1 ★. Netzprüfer (Werkzeug aus dem Shop, am
+   Auftrag eingeschaltet): „!“-Warnungen auch im AP-Niveau – bezahlte Hilfe im Sinne von R1.
+   Spiel.regeln(inst) → {niveau, warnungen, liveHaken, liveGrund, versuchAbzug, verdachtAbzug} */
 Spiel.REGELN = {
-  E:   {warnungenAbHilfe: 0,    liveHaken: true,  liveGrund: true,  versuchAbzug: 0},
-  AP1: {warnungenAbHilfe: 2,    liveHaken: true,  liveGrund: false, versuchAbzug: 0.5},
-  AP2: {warnungenAbHilfe: null, liveHaken: false, liveGrund: false, versuchAbzug: 1},
+  E:   {warnungenAbHilfe: 0,    liveHaken: true,  liveGrund: true,  versuchAbzug: 0,   verdachtAbzug: 0},
+  AP1: {warnungenAbHilfe: 2,    liveHaken: true,  liveGrund: false, versuchAbzug: 0.5, verdachtAbzug: 0.5},
+  AP2: {warnungenAbHilfe: null, liveHaken: false, liveGrund: false, versuchAbzug: 1,   verdachtAbzug: 1},
 };
 
 Spiel.regeln = function(inst){
@@ -17,11 +19,13 @@ Spiel.regeln = function(inst){
   const r = Spiel.REGELN[niveau] || Spiel.REGELN.E;
   const pruefung = !!inst && inst.quelle === "pruefung";
   const hilfe = (inst && inst.hilfeStufe) || 0;
+  const pruefer = !!inst && !!inst.netzpruefer && !!Spiel.werkzeug && Spiel.werkzeug.hat("netzpruefer");
   return {
     niveau,
-    warnungen: !pruefung && r.warnungenAbHilfe != null && hilfe >= r.warnungenAbHilfe,
+    warnungen: !pruefung && ((r.warnungenAbHilfe != null && hilfe >= r.warnungenAbHilfe) || pruefer),
     liveHaken: !pruefung && r.liveHaken,
     liveGrund: !pruefung && r.liveGrund,
     versuchAbzug: pruefung ? 0 : r.versuchAbzug,
+    verdachtAbzug: pruefung ? 0 : r.verdachtAbzug,
   };
 };

@@ -1,7 +1,8 @@
 "use strict";
 /* ---------- Spiel: Wirtschaft und Shop (Konzept § 3.5 „Wirtschaft bewusst dünn“) ----------
-   Euro kaufen: Playbook-Slots und Playbooks, Wartungsvertrag anbieten (ab genug Sternen bei diesem Kunden),
-   Prüfungsanmeldung (Gebühr) und Aussehen. NIE Kernwerkzeuge (Simulation, Inspektor, Konsole, Hilfe, Wiki).
+   Euro kaufen: Zusatzwerkzeuge (Kabeltester, Netzprüfer – spiel/werkzeuge.js), Playbook-Slots und Playbooks,
+   Wartungsvertrag anbieten (ab genug Sternen bei diesem Kunden), Prüfungsanmeldung (Gebühr) und Aussehen.
+   NIE Kernwerkzeuge (Simulation, Inspektor, Konsole, Hilfe, Wiki).
    Ruf ist kein Zahlungsmittel.
 
    Spiel.shop.liste() → [{id, art, titel, text, preis, zustand:"kaufbar"|"gesperrt"|"gekauft"|"aktiv"|"zu-teuer", grund, gruppe}]
@@ -35,6 +36,12 @@ Spiel.shop.eintrag = function(e){
 
 Spiel.shop.liste = function(){
   const st = Spiel.st, k = Spiel.karriere.daten(), W = Spiel.WIRTSCHAFT, liste = [];
+  /* Werkzeuge (Hebel 8): Fähigkeiten statt Automatisierung */
+  for (const [id, w] of Object.entries(Spiel.WERKZEUGE || {})) {
+    const hat = Spiel.werkzeug.hat(id);
+    liste.push(Spiel.shop.eintrag({id: "werkzeug:" + id, art: "werkzeug", gruppe: "Werkzeuge", titel: w.titel, text: w.text, preis: w.preis,
+      zustand: hat ? "gekauft" : st.stufe < w.ab ? "gesperrt" : "kaufbar", grund: hat ? null : st.stufe < w.ab ? `Ab Stufe ${w.ab}.` : null}));
+  }
   /* Slots */
   const slotPreis = Spiel.playbooks.slotPreis();
   liste.push(Spiel.shop.eintrag({
@@ -99,6 +106,7 @@ Spiel.shop.liste = function(){
 Spiel.shop.kaufen = function(id){
   const [art, was] = String(id).split(":");
   const k = Spiel.karriere.daten(), W = Spiel.WIRTSCHAFT;
+  if (art === "werkzeug") return Spiel.werkzeug.kaufen(was);
   if (art === "slot") return Spiel.playbooks.slotKaufen();
   if (art === "playbook") return Spiel.playbooks.kaufen(was);
   if (art === "vertrag") {

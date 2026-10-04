@@ -329,7 +329,7 @@ UI.app = (() => {
       if (dialog || UI.palette.offen) return;
       if (eingabe || e.defaultPrevented) return;
       if (e.key === "?" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); hilfe(); return; }
-      if (aktiv === "labor" && t.closest?.(".labor, body") && !t.closest?.(".lb-inspektor, .lb-sim-inhalt")) {
+      if (aktiv === "labor" && t.closest?.(".labor, body") && !t.closest?.(".lb-inspektor, .lb-sim-inhalt, .lb-dock")) {
         if (UI.labor.taste(e)) e.preventDefault();
       } else if (aktiv === "labor" && (e.ctrlKey || e.metaKey) && /^[zyZY]$/.test(e.key)) {
         if (UI.labor.taste(e)) e.preventDefault();

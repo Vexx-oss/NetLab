@@ -5,7 +5,9 @@
                 animiere(ereignis, {ms}?), zeigeTrace(trace), neuZeichnen(),
                 einpassen(), aufraeumen(), werkzeug(name), zentrieren(id), ping(vonId, nachId), konsole(id),
                 zeigen(container)  (von UI.app), el:{auftrag, inspektor, sim} }
-   Andockbereiche (für andere Bausteine): #labor-auftrag (oben), #labor-inspektor (rechts), #labor-sim (unten).
+   Andockbereiche (für andere Bausteine): #labor-auftrag (oben) und das Dock rechts (K1, Phase B) mit den Reitern
+   #labor-inspektor · #labor-sim · #labor-plan · #labor-akte – ein Reiter erscheint erst, wenn er Inhalt hat.
+   UI.labor.dock(id|null) zeigt einen Reiter (oder klappt ein), UI.labor.dockReiter(id, verfuegbar) gibt Plan/Akte frei.
    Ruhe beim Start (Ausbau 1.2, A3): Inspektor erscheint erst mit der ersten Auswahl, die Simulation erst mit der ersten
    Aufzeichnung (und klappt dann einmal auf). laden(netz, {ebene, ansichtMenue:false}) – das Ticket legt die Ebene fest.
    Geräte-Fächer: editor-fach.js (UI.laborFach).
@@ -40,9 +42,10 @@ UI.labor = (() => {
     Z.el.auftrag = h("div", {id: "labor-auftrag", class: "lb-auftrag"});
     Z.el.inspektor = h("div", {id: "labor-inspektor", class: "lb-inspektor"});
     Z.el.sim = h("div", {id: "labor-sim", class: "lb-sim-inhalt"});
-    const el = einst().labor || {};
-    Z.inspektorZu = !!el.inspektorZu; Z.simZu = true; Z.simHoehe = klemme(+el.simHoehe || 290, 140, 900);   /* 290: Kopf + Steuerung + einige Ereigniszeilen */
+    Z.el.plan = h("div", {id: "labor-plan", class: "lb-plan"});
+    Z.el.akte = h("div", {id: "labor-akte", class: "lb-akte"});
     Z.inspWartet = Z.inspWartet ?? true; Z.simWartet = Z.simWartet ?? true;
+    Z.dock ||= {reiter: "inspektor", zu: false}; Z.dockDa ||= {};
 
     /* Geräteleiste: vier Kategorien, Klick öffnet ein Fach (editor-fach.js) */
     const leiste = h("aside", {class: "lb-geraete", "aria-label": "Geräte"});
@@ -84,19 +87,14 @@ UI.labor = (() => {
     const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer);
     Z.el.leinwand = leinwand;
 
-    /* Simulation unten */
-    Z.el.simTitel = h("span", {class: "lb-sim-titel-text"}, "Simulation");
-    Z.el.simKnopf = h("button", {type: "button", class: "lb-sim-kopf", "aria-expanded": "false", onclick: () => simUmschalten()},
-      UI.symbol("sim", 16), Z.el.simTitel, h("span", {class: "lb-sim-pfeil"}, UI.symbol("pfeilOben", 16)));
-    Z.el.simGriff = h("div", {class: "lb-sim-griff", title: "Höhe ziehen", role: "separator", "aria-orientation": "horizontal"});
-    Z.el.simHuelle = h("section", {class: "lb-sim", "aria-label": "Simulation"}, Z.el.simGriff, Z.el.simKnopf, Z.el.sim);
+    /* Dock rechts (K1): Inspektor · Simulation · Plan · Akte in EINEM Bereich mit Reitern – die Fläche behält die volle Höhe
+       und ≥ 60 % der Breite (CSS: clamp(250px, 40 % − 88px, 440px)). Die Simulation liegt nicht mehr unten. */
+    Z.el.dockReiter = h("div", {class: "lb-dock-reiter", role: "tablist", "aria-label": "Dock"});
+    Z.el.dockInhalt = h("div", {class: "lb-dock-inhalt"}, Z.el.inspektor, Z.el.sim, Z.el.plan, Z.el.akte);
+    Z.el.dock = h("aside", {class: "lb-dock", "aria-label": "Dock"}, Z.el.dockReiter, Z.el.dockInhalt);
 
-    /* Inspektor rechts */
-    Z.el.lasche = h("button", {type: "button", class: "lb-lasche", onclick: () => inspektorUmschalten()});
-    Z.el.inspHuelle = h("aside", {class: "lb-insp-huelle", "aria-label": "Inspektor"}, Z.el.lasche, Z.el.inspektor);
-
-    const mitte = h("div", {class: "lb-mitte"}, Z.el.auftrag, leinwand, Z.el.simHuelle);
-    Z.root.append(leiste, mitte, Z.el.inspHuelle);
+    const mitte = h("div", {class: "lb-mitte"}, Z.el.auftrag, leinwand);
+    Z.root.append(leiste, mitte, Z.el.dock);
     container.replaceChildren(Z.root);
 
     if (typeof ResizeObserver !== "undefined") {
@@ -125,34 +123,52 @@ UI.labor = (() => {
   /* Wiederanzeige nach Ansichtswechsel (DOM blieb erhalten) */
   function wieder(){ if (Z.netz) zeichnen(); }
 
+  /* ---------- Dock (K1) ---------- */
+  const DOCK = [
+    {id: "inspektor", titel: "Inspektor", symbol: "inspektor", el: () => Z.el.inspektor, da: () => !Z.inspWartet},
+    {id: "sim", titel: "Simulation", symbol: "sim", el: () => Z.el.sim, da: () => !Z.simWartet},
+    {id: "plan", titel: "Plan", symbol: "plan", el: () => Z.el.plan, da: () => !!Z.dockDa?.plan},
+    {id: "akte", titel: "Akte", symbol: "akte", el: () => Z.el.akte, da: () => !!Z.dockDa?.akte},
+  ];
+  const dockOffen = id => !!Z.root && !Z.dock.zu && Z.dock.reiter === id && DOCK.some(r => r.id === id && r.da());
   function layoutAnwenden(){
     if (!Z.root) return;
-    Z.root.classList.toggle("insp-zu", !!Z.inspektorZu);
-    Z.root.classList.toggle("insp-wartet", !!Z.inspWartet);
-    Z.root.classList.toggle("sim-zu", !!Z.simZu);
-    Z.root.classList.toggle("sim-wartet", !!Z.simWartet);
-    Z.root.style.setProperty("--sim-h", Z.simHoehe + "px");
-    Z.el.simKnopf.setAttribute("aria-expanded", String(!Z.simZu));
-    Z.el.simKnopf.title = Z.simZu ? "Simulation aufklappen" : "Simulation einklappen";
-    laschenText();
+    const da = DOCK.filter(r => r.da());
+    if (da.length && !da.some(r => r.id === Z.dock.reiter)) Z.dock.reiter = da[0].id;
+    Z.inspektorZu = !dockOffen("inspektor"); Z.simZu = !dockOffen("sim");
+    Z.root.classList.toggle("dock-da", da.length > 0);
+    Z.root.classList.toggle("dock-zu", !!Z.dock.zu);
+    Z.root.classList.toggle("sim-zu", Z.simZu);              /* ältere Abfragen (Paketanzeige) */
+    for (const r of DOCK) { const el = r.el(); if (el) el.hidden = !r.da() || Z.dock.zu || r.id !== Z.dock.reiter; }
+    if (!Z.el.dockReiter) return;
+    Z.el.dockReiter.replaceChildren(...da.map(r => {
+      const an = !Z.dock.zu && r.id === Z.dock.reiter, z = Z.dockZahl?.[r.id];
+      return h("button", {type: "button", role: "tab", class: "lb-dock-tab" + (an ? " an" : ""), "data-reiter": r.id, "aria-selected": String(an),
+        title: an ? `${r.titel} einklappen` : r.titel, onclick: () => an ? dockZu() : dockZeigen(r.id)},
+        UI.symbol(r.symbol, 17), h("span", {class: "lb-dock-titel"}, r.titel), z ? h("b", {class: "lb-dock-zahl"}, z > 99 ? "99+" : String(z)) : null);
+    }), da.length && !Z.dock.zu ? h("button", {type: "button", class: "lb-dock-einklappen", title: "Dock einklappen", "aria-label": "Dock einklappen", onclick: () => dockZu()}, UI.symbol("pfeil", 16)) : null);
   }
-  function laschenText(){
-    if (!Z.el.lasche) return;
-    const g = Z.auswahl && Z.netz?.geraete[Z.auswahl.geraet];
-    Z.el.lasche.replaceChildren(UI.symbol(Z.inspektorZu ? "pfeilLinks" : "pfeil", 16),
-      h("span", {}, Z.inspektorZu ? (g ? `Inspektor · ${g.name}` : "Inspektor") : ""));
-    Z.el.lasche.title = Z.inspektorZu ? "Inspektor aufklappen" : "Inspektor einklappen";
-    Z.el.lasche.setAttribute("aria-expanded", String(!Z.inspektorZu));
+  function dockZeigen(id){
+    if (!DOCK.some(r => r.id === id)) return;
+    if (id === "inspektor") Z.inspWartet = false;
+    if (id === "sim") Z.simWartet = false;
+    Z.dock.reiter = id; Z.dock.zu = false;
+    layoutAnwenden();
+    Bus.senden("dock", {reiter: id});
   }
-  function inspektorUmschalten(zu = Z.inspWartet ? false : !Z.inspektorZu){ Z.inspWartet = false; Z.inspektorZu = zu; einstLabor({inspektorZu: zu}); layoutAnwenden(); }
-  /* Simulation: startet in jedem geladenen Netz zu und unsichtbar; die erste Aufzeichnung macht sie sichtbar */
-  function simUmschalten(zu = Z.simWartet ? false : !Z.simZu){ if (!zu) Z.simWartet = false; Z.simZu = zu; layoutAnwenden(); }
-  function simHoeheSetzen(px, merken){
-    const max = Math.max(160, (Z.root?.clientHeight || 800) * 0.72);
-    Z.simHoehe = klemme(Math.round(px), 140, max);
-    Z.root?.style.setProperty("--sim-h", Z.simHoehe + "px");
-    if (merken) einstLabor({simHoehe: Z.simHoehe});
+  function dockZu(){ Z.dock.zu = true; layoutAnwenden(); Bus.senden("dock", {reiter: null}); }
+  /* Reiter freigeben/sperren (Plan, Akte); zahl = kleine Zählmarke am Reiter */
+  function dockReiter(id, verfuegbar, {zahl} = {}){
+    Z.dockDa ||= {}; Z.dockZahl ||= {};
+    if (verfuegbar != null) Z.dockDa[id] = !!verfuegbar;
+    if (zahl !== undefined) Z.dockZahl[id] = zahl;
+    layoutAnwenden();
   }
+  function laschenText(){}
+  function inspektorUmschalten(zu = dockOffen("inspektor")){ if (zu) { if (dockOffen("inspektor")) dockZu(); } else dockZeigen("inspektor"); }
+  /* Simulation: startet in jedem geladenen Netz unsichtbar; die erste Aufzeichnung zeigt sie einmal im Dock */
+  function simUmschalten(zu = dockOffen("sim")){ if (zu) { if (dockOffen("sim")) dockZu(); } else dockZeigen("sim"); }
+  function simHoeheSetzen(){}
 
   function auftragZeichnen(){
     const el = Z.el.auftrag; if (!el) return;
@@ -428,8 +444,9 @@ UI.labor = (() => {
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
     Bus.senden("auswahl", {geraet: id || null, port: port || null});
     if (alt !== id) inspektorZeigen();
-    if (id && Z.inspWartet) { Z.inspWartet = false; layoutAnwenden(); }
-    laschenText();
+    /* Auswahl zeigt den Inspektor – außer Plan oder Akte sind gerade offen (dort gehört die Auswahl zum Vergleich) */
+    if (id && alt !== id && !(dockOffen("plan") || dockOffen("akte"))) dockZeigen("inspektor");
+    else if (id && Z.inspWartet) { Z.inspWartet = false; layoutAnwenden(); }
   }
   function kabelWaehlen(kid){
     Z.kabelWahl = kid || null;
@@ -702,6 +719,7 @@ UI.labor = (() => {
     if (Z.werkzeug !== "auswahl") Z.werkzeug = "auswahl";
     Z.einpassenAusstehend = true;
     Z.inspWartet = true; Z.simWartet = true; Z.simZu = true;
+    Z.dock = {reiter: "inspektor", zu: false}; Z.dockDa = {}; Z.dockZahl = {};
     F.fachZu?.();
     UI.ebenen.setzen(opt.ebene || UI.ebenen.gemerkt(), {merken: false});
     if (Z.el.ansichtGruppe) Z.el.ansichtGruppe.hidden = opt.ansichtMenue === false;
@@ -715,7 +733,6 @@ UI.labor = (() => {
     const c = Z.el.sim; if (!c) return;
     if (typeof UI.simpanel?.zeigen === "function") { try { UI.simpanel.zeigen(c, null); } catch (e) { console.error(e); } }
     else c.replaceChildren(h("p", {class: "lb-sim-platz"}, "Hier erscheint die Aufzeichnung eines Pings: jedes Paket, jede Station, und warum etwas verworfen wird."));
-    if (Z.el.simTitel) Z.el.simTitel.textContent = "Simulation";
   }
   function zentrieren(id){ if (!Z.netz?.geraete[id]) return; auswaehlen(id); sichtbarMachen(id, true); F.hervorheben?.([{geraet: id}], 1400); }
   function konsole(id){
@@ -735,14 +752,14 @@ UI.labor = (() => {
   Object.assign(F, {pos, raster, weltPunkt, zoomUm, ansichtSetzen, ansichtAnimieren, einpassen, sichtbarMachen, zeichnen, neuZeichnen,
     geraetBewegt, zonenNeu, kabelGeo, kabelGruppe, auswaehlen, kabelWaehlen, inspektorZeigen, inspektorUmschalten, simUmschalten, simHoeheSetzen,
     aendern, rueckgaengig, wiederholen, werkzeug, werkzeugAnzeigen, platzEnde, geraetAnlegen, einsetzen, loeschen, kabelTrennen, verbinden, aufraeumen, konsole,
-    grundText, layoutAnwenden, STATUS_TEXT, zoomSchritt});
+    grundText, layoutAnwenden, STATUS_TEXT, zoomSchritt, dockZeigen, dockZu, dockOffen, dockReiter});
 
   const api = {
     get netz(){ return Z.netz; },
     get verlauf(){ return Z.verlauf; },
     get auswahl(){ return Z.auswahl ? {...Z.auswahl} : null; },
     get titel(){ return Z.titel; },
-    get el(){ return {auftrag: Z.el.auftrag || null, inspektor: Z.el.inspektor || null, sim: Z.el.sim || null}; },
+    get el(){ return {auftrag: Z.el.auftrag || null, inspektor: Z.el.inspektor || null, sim: Z.el.sim || null, plan: Z.el.plan || null, akte: Z.el.akte || null}; },
     get werkzeugName(){ return Z.werkzeug; },
     zeigen, wieder, laden, auswaehlen, neuZeichnen, einpassen, aufraeumen, werkzeug, zentrieren, konsole, einsetzen,
     rueckgaengig, wiederholen, loeschen,
@@ -753,6 +770,10 @@ UI.labor = (() => {
     taste: e => F.taste ? F.taste(e) : false,
     inspektor: zu => inspektorUmschalten(zu),
     simulation: zu => simUmschalten(zu),
+    dock: id => id ? dockZeigen(id) : dockZu(),
+    dockReiter: (id, verfuegbar, o) => dockReiter(id, verfuegbar, o),
+    dockOffen: id => dockOffen(id),
+    get dockStand(){ return {reiter: Z.dock?.reiter || null, zu: !!Z.dock?.zu, da: DOCK.filter(r => r.da()).map(r => r.id)}; },
     auftragNeu: () => auftragZeichnen(),
     warnungenAn,
     auffrischen: () => { zeichnen(); inspektorZeigen(); },

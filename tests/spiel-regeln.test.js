@@ -47,14 +47,18 @@ gruppe("Spiel: Stufenregeln", () => {
     }
   }));
 
+  /* mit Verdacht (Phase B), damit nur der Versuchsabzug zählt */
+  const verdacht = inst => { const o = Spiel.verdacht.optionen(inst); Spiel.verdacht.setzen(inst, {schicht: 1, ursache: "kabel-fehlt", geraet: "kasse"}); return o; };
   pruefe("Abnahme: erster Versuch voll, zweiter kostet in AP1 ½ und in AP2 1 Stern, Einstieg nichts", kapsel(() => {
     for (const [niveau, sterne] of [["E", 5], ["AP1", 4.5], ["AP2", 4]]) {
       /* gleich richtig: volle Sterne */
       const a = instanz(niveau);
+      verdacht(a);
       Spiel.loesung(a.netz, Spiel.defVon(a).loesung);
       erwarte.gleich(Spiel.abnahme(a).sterne, 5, `${niveau}, erster Versuch`);
       /* erst daneben, dann richtig */
       const b = instanz(niveau);
+      verdacht(b);
       const fehl = Spiel.abnahme(b);
       erwarte.falsch(fehl.bestanden, `${niveau}: Start-Netz besteht nicht`);
       Spiel.loesung(b.netz, Spiel.defVon(b).loesung);
@@ -63,5 +67,22 @@ gruppe("Spiel: Stufenregeln", () => {
       erwarte.gleich(ab.sterne, sterne, `${niveau}, zweiter Versuch`);
       erwarte.gleich(ab.abzuege.some(x => /Abnahmeversuch/.test(x.text)), sterne < 5, `${niveau}: Abzug benannt`);
     }
+  }));
+
+  pruefe("Verdacht: ohne Verdacht kostet AP1 ½ und AP2 1 Stern, Einstieg und Prüfung nichts; Projekte brauchen keinen", kapsel(() => {
+    for (const [niveau, sterne] of [["E", 5], ["AP1", 4.5], ["AP2", 4]]) {
+      const a = instanz(niveau);
+      Spiel.loesung(a.netz, Spiel.defVon(a).loesung);
+      const ab = Spiel.abnahme(a);
+      erwarte.gleich(ab.sterne, sterne, `${niveau} ohne Verdacht`);
+      erwarte.gleich(ab.abzuege.some(x => /Ohne Verdacht/.test(x.text)), sterne < 5, `${niveau}: Abzug benannt`);
+      erwarte.gleich(Spiel.regeln(a).verdachtAbzug, {E: 0, AP1: 0.5, AP2: 1}[niveau]);
+    }
+    const p = instanz("AP2", {quelle: "pruefung"});
+    erwarte.gleich(Spiel.regeln(p).verdachtAbzug, 0, "Prüfung");
+    const proj = instanz("AP2", {ticketId: "salon-projekt"});
+    erwarte.falsch(Spiel.verdacht.noetig(proj), "Projekt: kein Verdacht");
+    Spiel.loesung(proj.netz, Spiel.defVon(proj).loesung);
+    erwarte.falsch(Spiel.abnahme(proj).abzuege.some(x => /Ohne Verdacht/.test(x.text)), "Projekt: kein Abzug");
   }));
 });
