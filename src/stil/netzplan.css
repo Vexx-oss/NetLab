@@ -50,6 +50,7 @@
 .np-linien{pointer-events:none}
 /* Plan-Audit (E1): Werte als Knöpfe, markiert = „stimmt nicht“ */
 .np-audit-hinweis{margin:0 0 8px; font-size:13px; color:var(--muted)}
+.np-tabelle.np-audit td{cursor:default}
 .np-wert{all:unset; cursor:pointer; padding:1px 4px; border-radius:4px; font:inherit}
 .np-wert:hover, .np-wert:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 .np-pruef.markiert .np-wert{background:var(--warn-soft); color:var(--warn); font-weight:700; text-decoration:line-through}
