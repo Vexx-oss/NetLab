@@ -82,6 +82,14 @@ gruppe("Spiel: Akte und Verdacht", () => {
     erwarte.wahr(e2.bestanden && !e2.lohn.verdacht && e2.verdacht.treffer === "voll", "kein Bonus nach dem Eingriff");
   }));
 
+  pruefe("Hilfestufe 2 nennt echte Werkzeugtipps (Shop-Werkzeuge überschreiben sie nicht)", kapsel(() => {
+    for (const id of ["salon-01", "baeckerei-01", "buero-01", "praxis-04"]) {
+      const inst = instanz(id);
+      const r = Spiel.hilfeInhalt(inst, 2);
+      erwarte.wahr(r.werkzeuge.length && r.werkzeuge.every(w => typeof w === "string" && w.length > 10), id + ": " + JSON.stringify(r.werkzeuge));
+    }
+  }));
+
   pruefe("Werkzeuge: im Shop kaufbar (Kabeltester ab Stufe 1, Netzprüfer ab 2), Netzprüfer schaltet „!“ im AP-Niveau zu", kapsel(() => {
     Spiel.st.stufe = 1; Spiel.st.euro = 1000;
     const shop = Spiel.shop.liste().filter(e => e.art === "werkzeug");

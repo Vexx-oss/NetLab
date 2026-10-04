@@ -37,7 +37,7 @@ Spiel.shop.eintrag = function(e){
 Spiel.shop.liste = function(){
   const st = Spiel.st, k = Spiel.karriere.daten(), W = Spiel.WIRTSCHAFT, liste = [];
   /* Werkzeuge (Hebel 8): Fähigkeiten statt Automatisierung */
-  for (const [id, w] of Object.entries(Spiel.WERKZEUGE || {})) {
+  for (const [id, w] of Object.entries(Spiel.SHOP_WERKZEUGE || {})) {
     const hat = Spiel.werkzeug.hat(id);
     liste.push(Spiel.shop.eintrag({id: "werkzeug:" + id, art: "werkzeug", gruppe: "Werkzeuge", titel: w.titel, text: w.text, preis: w.preis,
       zustand: hat ? "gekauft" : st.stufe < w.ab ? "gesperrt" : "kaufbar", grund: hat ? null : st.stufe < w.ab ? `Ab Stufe ${w.ab}.` : null}));

@@ -6,7 +6,7 @@
                   bezahlte Hilfe im Sinne von R1, ohne Sternabzug
    st.werkzeuge = {kabeltester:bool, netzpruefer:bool} */
 Spiel.werkzeug = {};
-Spiel.WERKZEUGE = {
+Spiel.SHOP_WERKZEUGE = {
   kabeltester: {titel: "Kabeltester", preis: 40, ab: 1, text: "Rechtsklick auf ein Kabel: Hat es Link? Das Ergebnis landet als Beweis in der Akte."},
   netzpruefer: {titel: "Netzprüfer", preis: 150, ab: 2, text: "Schaltet im AP-Niveau die „!“-Hinweise an den Geräten zu (⋯-Menü im Auftrag) – Hilfe gegen Euro statt gegen Sterne."},
 };
@@ -16,7 +16,7 @@ Spiel.werkzeug.daten = function(st = Spiel.st){
 };
 Spiel.werkzeug.hat = id => !!(Spiel._st && Spiel.werkzeug.daten()[id]);
 Spiel.werkzeug.kaufen = function(id){
-  const w = Spiel.WERKZEUGE[id];
+  const w = Spiel.SHOP_WERKZEUGE[id];
   if (!w) return {ok: false, grund: "Unbekanntes Werkzeug."};
   if (Spiel.werkzeug.hat(id)) return {ok: false, grund: "Hast du schon."};
   if (Spiel.st.stufe < w.ab) return {ok: false, grund: `Ab Stufe ${w.ab}.`};
