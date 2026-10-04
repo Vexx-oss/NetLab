@@ -3,7 +3,7 @@
    Nur Zeigerereignisse (kein HTML5-Drag-and-Drop). Wird von UI.labor beim Aufbau eingerichtet:
    UI.laborWerkzeuge.einrichten(Z, F)  (Z = Zustand, F = Helfer aus editor.js)
    Außerdem allgemein nutzbar:
-   UI.menue(x, y, eintraege, {titel})  Kontextmenü: eintraege = [{text, sym?, taste?, fn, aus?, gefahr?} | "-"]
+   UI.menue(x, y, eintraege, {titel, oben?})  Kontextmenü: eintraege = [{text, sym?, taste?, fn, aus?, gefahr?} | "-"]; oben: Menü endet bei y
    UI.menueZu()                        offenes Menü/Popover schließen */
 UI.menue = (() => {
   let offen = null;
@@ -34,7 +34,7 @@ UI.menue = (() => {
     document.body.append(el);
     const r = el.getBoundingClientRect(), W = innerWidth, H = innerHeight;
     el.style.left = Math.max(6, Math.min(x, W - r.width - 6)) + "px";
-    el.style.top = Math.max(6, Math.min(y, H - r.height - 6)) + "px";
+    el.style.top = Math.max(6, Math.min(o.oben ? y - r.height : y, H - r.height - 6)) + "px";
     const aussen = ev => { if (!el.contains(ev.target)) zu(); };
     offen = {el, aussen, zurueck: document.activeElement};
     setTimeout(() => document.addEventListener("pointerdown", aussen, true), 0);
@@ -162,7 +162,7 @@ UI.laborWerkzeuge = (() => {
       else if (Z.werkzeug === "platzieren" && Z.platz) {
         const pl = Z.platz;
         F.geraetAnlegen(pl.typ, pl.skin, w.x, w.y);
-        if (!e.shiftKey) F.werkzeug("auswahl"); else F.werkzeugAnzeigen();
+        if (!e.shiftKey) F.platzEnde(); else F.werkzeugAnzeigen();
         bandLeeren();
         return;
       }
@@ -363,49 +363,7 @@ UI.laborWerkzeuge = (() => {
     }
     F.strom = strom; F.neustart = neustart;
 
-    /* ---------- Geräteleiste: ziehen oder anklicken ---------- */
-    Z.el.geraete.addEventListener("pointerdown", e => {
-      const b = e.target.closest(".lb-teil"); if (!b || e.button !== 0) return;
-      e.preventDefault();
-      const platz = {typ: b.dataset.typ, skin: b.dataset.skin || null};
-      let geist = null, bewegt = false;
-      const x0 = e.clientX, y0 = e.clientY;
-      const mv = ev => {
-        if (!bewegt && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 5) {
-          bewegt = true;
-          geist = h("div", {class: "lb-geist typ-" + platz.typ}, sv("svg", {viewBox: "-34 -30 68 60", width: 64, height: 56}, UI.geraetebild(platz.typ, platz.skin)));
-          document.body.append(geist);
-        }
-        if (geist) {
-          geist.style.transform = `translate(${ev.clientX - 32}px, ${ev.clientY - 28}px)`;
-          const r = svg.getBoundingClientRect(), drin = ev.clientX > r.left && ev.clientX < r.right && ev.clientY > r.top && ev.clientY < r.bottom;
-          geist.classList.toggle("drin", drin);
-        }
-      };
-      const up = ev => {
-        document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); document.removeEventListener("pointercancel", up);
-        geist?.remove();
-        if (!bewegt) {
-          if (Z.werkzeug === "platzieren" && Z.platz && Z.platz.typ === platz.typ && Z.platz.skin === platz.skin) F.werkzeug("auswahl");
-          else { F.werkzeug("platzieren", {platz}); }
-          return;
-        }
-        if (ev.type === "pointercancel") return;
-        const r = svg.getBoundingClientRect();
-        if (ev.clientX > r.left && ev.clientX < r.right && ev.clientY > r.top && ev.clientY < r.bottom) {
-          const w = F.weltPunkt(ev.clientX, ev.clientY);
-          F.geraetAnlegen(platz.typ, platz.skin, w.x, w.y);
-        }
-      };
-      document.addEventListener("pointermove", mv); document.addEventListener("pointerup", up); document.addEventListener("pointercancel", up);
-    });
-    Z.el.geraete.addEventListener("keydown", e => {
-      const b = e.target.closest(".lb-teil"); if (!b || (e.key !== "Enter" && e.key !== " ")) return;
-      e.preventDefault();
-      /* Tastatur: in der Mitte der sichtbaren Fläche einsetzen */
-      const r = svg.getBoundingClientRect(), w = F.weltPunkt(r.left + r.width / 2, r.top + r.height / 2);
-      F.geraetAnlegen(b.dataset.typ, b.dataset.skin || null, w.x, w.y);
-    });
+    /* Geräteleiste (ziehen oder anklicken): editor-fach.js */
 
     /* ---------- Simulation: Höhe ziehen ---------- */
     Z.el.simGriff.addEventListener("pointerdown", e => {
@@ -429,10 +387,15 @@ UI.laborWerkzeuge = (() => {
       }
       if (e.altKey) return false;
       const sel = Z.auswahl?.geraet;
+      /* Umschalt+1…5: Ebene (Ansicht-Menü); 1–4: Geräte-Fach, im offenen Fach 1…n: Gerät */
+      if (e.shiftKey && /^Digit[1-5]$/.test(e.code || "")) { UI.ebenen.setzen(UI.ebenen.LISTE[+e.code.slice(5) - 1].id); return true; }
+      if (!e.shiftKey && /^[1-9]$/.test(k)) return !!F.fachTaste?.(+k);
       switch (k) {
         case "Escape":
           if (UI.menue.offen()) { UI.menue.zu(); return true; }
+          if (F.fachOffen?.()) { F.fachZu(); return true; }
           if (G) { ende(e, true); return true; }
+          if (Z.werkzeug === "platzieren") { F.platzEnde(); return true; }
           if (Z.werkzeug !== "auswahl") { F.werkzeug("auswahl"); return true; }
           if (Z.auswahl || Z.kabelWahl) { F.auswaehlen(null); F.kabelWaehlen(null); return true; }
           return false;
@@ -461,7 +424,6 @@ UI.laborWerkzeuge = (() => {
           return true;
         }
       }
-      if (/^[1-5]$/.test(k)) { UI.ebenen.setzen(UI.ebenen.LISTE[+k - 1].id); return true; }
       return false;
     }
 

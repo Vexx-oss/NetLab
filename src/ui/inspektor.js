@@ -3,6 +3,7 @@
    UI.inspektor.zeigen(container, netz, geraetId, verlauf)   Gerät einstellen (Reiter je Gerätetyp)
    UI.inspektor.leeren(container)                             nichts ausgewählt
    UI.inspektor.reiter(container, name, {eingabe})            Reiter wechseln (z. B. "konsole" mit Befehlsvorschlag)
+   Ausbau 1.2 (A3): Standardreiter „Übersicht“; Terminal/Konsole ist kein Reiter mehr, sondern ein Knopf im Kopf.
    Regeln: Jede Änderung ist genau ein Rückgängig-Schritt (verlauf.aendern → Modell). Eingaben werden beim Tippen
    geprüft (rot = so nicht möglich, gelb = möglich, aber vermutlich falsch) und bei Enter oder beim Verlassen des
    Feldes übernommen. Unter jeder Änderung zeigt „entspricht:“ den passenden Konsolenbefehl (CLI.entspricht). */
@@ -20,14 +21,14 @@ UI.inspektor = (() => {
   function reiterListe(g){
     if (!g) return [];
     if (g.typ === "internet") return [["uebersicht", "Übersicht"]];
-    if (g.typ === "switch") return [["ports", "Ports"], ["vlan", "VLAN"], ["uebersicht", "Übersicht"], ["konsole", "Konsole"]];
-    if (g.typ === "router") return [["schnitt", "Schnittstellen"], ["routing", "Routing"], ["acl", "ACL"], ["dienste", "NAT/DHCP"], ["uebersicht", "Übersicht"], ["konsole", "Konsole"]];
-    if (g.typ === "firewall") return [["schnitt", "Schnittstellen"], ["regeln", "Regeln"], ["routing", "Routing"], ["fwnat", "NAT"], ["uebersicht", "Übersicht"], ["konsole", "Konsole"]];
-    const r = [["adresse", "Adresse"]];
+    if (g.typ === "switch") return [["uebersicht", "Übersicht"], ["ports", "Ports"], ["vlan", "VLAN"]];
+    if (g.typ === "router") return [["uebersicht", "Übersicht"], ["schnitt", "Schnittstellen"], ["routing", "Routing"], ["acl", "ACL"], ["dienste", "NAT/DHCP"]];
+    if (g.typ === "firewall") return [["uebersicht", "Übersicht"], ["schnitt", "Schnittstellen"], ["regeln", "Regeln"], ["routing", "Routing"], ["fwnat", "NAT"]];
+    const r = [["uebersicht", "Übersicht"], ["adresse", "Adresse"]];
     if (g.typ !== "pc" || g.skin === "drucker" || Object.values(g.running.dienste || {}).some(d => d && d.an)) r.push(["dienste", "Dienste"]);
-    r.push(["uebersicht", "Übersicht"], ["konsole", "Terminal"]);
     return r;
   }
+  const terminalName = g => HOST(g) ? "Terminal" : "Konsole";
 
   /* ---------- Öffentliche Aufrufe ---------- */
   function zeigen(container, netz, id, verlauf){
@@ -40,7 +41,7 @@ UI.inspektor = (() => {
     if (neu) {
       K.letzte = null; K.offen = new Set(); K.eingabe = null;
       const liste = reiterListe(g).map(r => r[0]);
-      K.reiter = liste.includes(LETZTER_REITER[g?.typ]) && LETZTER_REITER[g?.typ] !== "konsole" ? LETZTER_REITER[g.typ] : liste[0];
+      K.reiter = liste.includes(LETZTER_REITER[g?.typ]) ? LETZTER_REITER[g.typ] : liste[0];   /* liste[0] = Übersicht */
     }
     OFFEN.add(container);
     zeichnen(K);
@@ -62,6 +63,7 @@ UI.inspektor = (() => {
   function reiter(container, name, o = {}){
     const K = ST.get(container);
     if (!K) { const lab = UI.labor; if (lab?.auswahl?.geraet) { zeigen(container, lab.netz, lab.auswahl.geraet, lab.verlauf); return reiter(container, name, o); } return; }
+    if (name === "konsole" && K.reiter !== "konsole") K.vorKonsole = K.reiter;
     K.reiter = name; K.eingabe = o.eingabe || null;
     zeichnen(K);
   }
@@ -93,9 +95,10 @@ UI.inspektor = (() => {
       if (a && c.contains(a) && a.dataset.key) { fokus = a.dataset.key; try { auswahlStart = a.selectionStart; auswahlEnde = a.selectionEnd; } catch (e) {} }
       scroll = inhaltAlt ? inhaltAlt.scrollTop : 0;
     }
-    LETZTER_REITER[g.typ] = K.reiter;
+    if (K.reiter !== "konsole") LETZTER_REITER[g.typ] = K.reiter;
     c.classList.add("in");
     K.kopfEl = h("div", {class: "in-kopf"});
+    if (K.reiter === "konsole" && g.typ === "internet") K.reiter = "uebersicht";
     const reiterEl = h("div", {class: "in-reiter", role: "tablist"}, reiterListe(g).map(([name, titel]) =>
       h("button", {type: "button", role: "tab", class: "in-tab" + (K.reiter === name ? " an" : ""), "aria-selected": String(K.reiter === name),
         onclick: () => { K.reiter = name; K.eingabe = null; zeichnen(K); }}, titel)));
@@ -135,13 +138,17 @@ UI.inspektor = (() => {
     const warn = Modell.pruefen(K.netz).filter(w => w.geraet === g.id);
     if (warn.length) chips.push(h("span", {class: "in-chip warn", title: warn.map(w => w.text).join("\n")}, `▲ ${warn.length} Hinweis${warn.length > 1 ? "e" : ""}`));
     const ungespeichert = IOS(g) && Modell.ungespeichert(g);
+    const term = g.typ === "internet" ? null : h("button", {type: "button", class: "in-knopf klein in-terminal" + (K.reiter === "konsole" ? " an" : ""),
+      "aria-pressed": String(K.reiter === "konsole"), title: `${terminalName(g)} von ${g.name} (Taste C)`,
+      onclick: () => { if (K.reiter === "konsole") K.reiter = K.vorKonsole || "uebersicht"; else { K.vorKonsole = K.reiter; K.reiter = "konsole"; } K.eingabe = null; zeichnen(K); }},
+      UI.symbol("konsole", 15), terminalName(g));
     K.kopfEl.replaceChildren(...[
       h("div", {class: "in-kopf-zeile"}, bild,
         h("div", {class: "in-kopf-text"}, h("h3", {}, g.name), h("span", {}, art.titel + (g.typ === "internet" ? " · Kulisse" : ""))),
-        h("div", {class: "in-chips"}, chips)),
+        h("div", {class: "in-chips"}, chips, term)),
       ungespeichert ? h("div", {class: "in-speichern"},
         h("span", {}, h("b", {}, "Nicht gespeichert. "), "Die Änderungen stehen nur in der running-config (RAM). Nach einem Neustart wären sie weg."),
-        h("button", {type: "button", class: "in-knopf klein primaer", onclick: () => speichern(K)}, "Speichern")) : null].filter(Boolean));
+        h("button", {type: "button", class: "in-knopf klein warn", onclick: () => speichern(K)}, "Speichern")) : null].filter(Boolean));
   }
   function speichern(K){
     const g = K.netz.geraete[K.id];
@@ -155,7 +162,7 @@ UI.inspektor = (() => {
     return h("div", {class: "in-entspricht"},
       h("div", {class: "in-ent-kopf"}, h("span", {}, "entspricht:"),
         h("button", {type: "button", class: "in-knopf klein", title: "Befehl in der Konsole vorbereiten (Enter führt ihn aus)",
-          onclick: () => { K.reiter = "konsole"; K.eingabe = l.text; K.letzte = null; zeichnen(K); }}, HOST(g) ? "Im Terminal zeigen" : "In Konsole übernehmen")),
+          onclick: () => { K.vorKonsole = K.reiter; K.reiter = "konsole"; K.eingabe = l.text; K.letzte = null; zeichnen(K); }}, HOST(g) ? "Im Terminal zeigen" : "In Konsole übernehmen")),
       h("pre", {class: "in-ent-code"}, l.text));
   }
 

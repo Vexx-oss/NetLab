@@ -2,7 +2,9 @@
 /* ---------- Ebenen der Netz-Fläche (Konzept § 7 „Ebenen“) ----------
    Physik · VLAN · IP-Netze (Standard) · MAC-Tabellen · Routen.
    UI.ebenen.aktuell            "physik"|"vlan"|"ip"|"mac"|"routen"
-   UI.ebenen.setzen(id)         umschalten (merkt sich die Wahl, zeichnet neu, Bus „ebene“)
+   UI.ebenen.setzen(id, {merken}) umschalten (merkt sich die Wahl, außer merken:false – Ticket-Vorgabe), zeichnet neu, Bus „ebene“
+   UI.ebenen.gemerkt()          zuletzt selbst gewählte Ebene (Freies Labor)
+   UI.ebenen.fuerSkills(skills) Standardansicht eines Tickets (Skill → Ebene)
    UI.ebenen.zonen(netz)        → {zonen:[{cidr, netz, praefix, ids, farbe, apipa}], ohne:Set(ids ohne gültige Adresse)}
    UI.ebenen.adresse(netz, g)   → {ip, maske, text, gueltig, quelle}  erste Adresse für Beschriftung und Ping
    UI.ebenen.vlanPort(netz, id, port) → {art:"access", vlan} | {art:"trunk", erlaubt, nativ} | null
@@ -21,14 +23,21 @@ UI.ebenen = (() => {
   let aktuell = null;
 
   function einstEbene(){ try { return (store.get("einst", {}) || {}).labor?.ebene; } catch { return null; } }
-  function holen(){ if (!aktuell) { const e = einstEbene(); aktuell = LISTE.some(l => l.id === e) ? e : "ip"; } return aktuell; }
-  function setzen(id){
+  function gemerkt(){ const e = einstEbene(); return LISTE.some(l => l.id === e) ? e : "ip"; }
+  function holen(){ if (!aktuell) aktuell = gemerkt(); return aktuell; }
+  function setzen(id, o = {}){
     if (!LISTE.some(l => l.id === id)) return;
+    const neu = aktuell !== id;
     aktuell = id;
-    const e = store.get("einst", {}) || {}; e.labor = Object.assign({}, e.labor, {ebene: id}); store.set("einst", e);
+    if (o.merken !== false) { const e = store.get("einst", {}) || {}; e.labor = Object.assign({}, e.labor, {ebene: id}); store.set("einst", e); }
+    if (!neu) return;
     Bus.senden("ebene", id);
     UI.labor?.neuZeichnen?.();
   }
+  /* Ticket → Standardansicht: der erste Skill, der eine eigene Ebene hat, entscheidet; sonst IP-Netze */
+  const SKILL_EBENE = {"lab.link": "physik", "lab.ports": "physik", "lab.portsec": "physik", "lab.stp": "physik", "lab.switch": "physik",
+    "lab.vlan": "vlan", "lab.trunk": "vlan", "lab.rostick": "vlan", "lab.arp": "mac", "lab.route": "routen", "lab.ttl": "routen"};
+  function fuerSkills(skills){ for (const s of skills || []) if (SKILL_EBENE[s]) return SKILL_EBENE[s]; return "ip"; }
 
   /* ---------- Adressen ---------- */
   function lease(netz, id, port){ const d = netz.zustand?.[id]?.dhcp?.[port]; return d && IP.gueltig(d.ip) ? d : null; }
@@ -216,6 +225,6 @@ UI.ebenen = (() => {
     }
   }
 
-  return {LISTE, get aktuell(){ return holen(); }, setzen, adresse, alleAdressen, zonen, zeichneZonen, vlanPort, vlanFarbe, erlaubtText,
+  return {LISTE, get aktuell(){ return holen(); }, setzen, gemerkt, fuerSkills, adresse, alleAdressen, zonen, zeichneZonen, vlanPort, vlanFarbe, erlaubtText,
           zeichneKarten, platzieren, huelle};
 })();

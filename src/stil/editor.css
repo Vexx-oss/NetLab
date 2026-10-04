@@ -9,21 +9,47 @@
 .labor{display:grid; grid-template-columns:auto minmax(0,1fr) auto; height:100%; min-height:0; background:var(--bg)}
 
 /* ---- Geräteleiste ---- */
-.lb-geraete{display:flex; flex-direction:column; align-items:center; gap:2px; width:84px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; overflow-x:hidden; scrollbar-width:thin}
+.lb-geraete{position:relative; z-index:6; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
 .lb-geraete-titel{font:700 10.5px/1 var(--body); letter-spacing:.1em; text-transform:uppercase; color:var(--faint); padding:6px 0 8px}
-.lb-teil{display:flex; flex-direction:column; align-items:center; gap:1px; width:70px; min-height:60px; padding:4px 2px 5px; border:1px solid transparent; border-radius:12px; background:none; color:var(--muted);
-  font:600 11px/1.1 var(--body); cursor:grab; touch-action:none; user-select:none; transition:background var(--dauer), border-color var(--dauer), color var(--dauer)}
-.lb-teil:hover{background:var(--panel-3); color:var(--ink)}
-.lb-teil:hover .gb-kachel{stroke:var(--g)}
-.lb-teil.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
-.lb-teil svg{pointer-events:none; overflow:visible}
+
+/* ---- Geräte-Fächer (editor-fach.js, Präfix pa-) ---- */
+.pa-kat{display:flex; flex-direction:column; align-items:center; gap:2px; width:66px; min-height:62px; padding:5px 2px 6px; border:1px solid transparent; border-radius:12px; background:none; color:var(--muted);
+  font:600 11px/1.1 var(--body); transition:background var(--dauer), border-color var(--dauer), color var(--dauer)}
+.pa-kat:hover{background:var(--panel-3); color:var(--ink)}
+.pa-kat:hover .gb-kachel{stroke:var(--g)}
+.pa-kat.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.pa-kat svg, .pa-teil svg{pointer-events:none; overflow:visible; flex:0 0 auto}
+.pa-fach{position:absolute; left:calc(100% + 6px); top:8px; z-index:40; width:268px; max-height:calc(100vh - 140px); overflow:auto; display:flex; flex-direction:column; gap:6px;
+  padding:8px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten, 0 12px 32px rgba(0,0,0,.35)); animation:pa-rein .14s ease-out}
+.pa-fach[hidden]{display:none}
+.pa-fach.zieht{opacity:.35; pointer-events:none}
+@keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
+.pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:2px 2px 4px 6px}
+.pa-kopf strong{font:800 15px/1.2 var(--display)}
+.pa-zu{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border:0; border-radius:8px; background:none; color:var(--muted)}
+.pa-zu:hover{background:var(--panel-3); color:var(--ink)}
+.pa-zuletzt{display:flex; flex-direction:column; gap:4px; padding:0 2px 6px; border-bottom:1px solid var(--line)}
+.pa-zuletzt small{color:var(--faint); font:700 10.5px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; padding:2px 4px}
+.pa-zuletzt-reihe{display:flex; gap:4px}
+.pa-liste{display:flex; flex-direction:column; gap:2px}
+.pa-teil{display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:4px 8px 4px 4px; border:1px solid transparent; border-radius:10px; background:none; color:var(--ink);
+  text-align:left; cursor:grab; touch-action:none; user-select:none; transition:background var(--dauer), border-color var(--dauer)}
+.pa-teil:hover{background:var(--panel-3)}
+.pa-teil:hover .gb-kachel{stroke:var(--g)}
+.pa-teil.an{background:var(--accent-soft); border-color:var(--accent)}
+.pa-teil.klein{flex-direction:column; gap:1px; width:auto; min-width:64px; min-height:0; padding:4px 6px; font:600 11px/1.1 var(--body); color:var(--muted)}
+.pa-teil kbd{margin-left:auto; flex:0 0 auto}
+.pa-text{display:flex; flex-direction:column; gap:1px; min-width:0}
+.pa-text b{font:700 14px/1.2 var(--body)}
+.pa-text small{color:var(--muted); font-size:12px; line-height:1.3}
+.pa-name{white-space:nowrap}
 .lb-geist{position:fixed; left:0; top:0; z-index:70; pointer-events:none; opacity:.6; filter:drop-shadow(0 8px 14px rgba(0,0,0,.4)); transition:opacity .1s}
 .lb-geist.drin{opacity:.95}
 .lb-geist svg{overflow:visible}
 
 /* ---- Mitte: Auftrag, Fläche, Simulation ---- */
 .lb-mitte{display:flex; flex-direction:column; min-width:0; min-height:0}
-.lb-auftrag{flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}
+.lb-auftrag{position:relative; z-index:5; flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}   /* trägt die Auftragsmappe (spiel.css, am-) */
 .lb-auftrag:empty{display:none}
 .lb-auftrag-standard{display:flex; align-items:center; min-height:44px; padding:0 16px; font:700 15px/1 var(--display)}
 .auftrag-sandbox{display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 12px 8px 14px; background:linear-gradient(90deg, var(--accent-soft), transparent 55%)}
@@ -55,12 +81,13 @@
 .lb-wz.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
 .lb-knopf[disabled]{opacity:.35; cursor:default}
 .lb-knopf-text span{font:600 13px/1 var(--body)}
-.lb-zoomtext{min-width:56px; height:40px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 12.5px/1 var(--mono); font-variant-numeric:tabular-nums}
+.lb-zoomtext{min-width:64px; height:40px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 12.5px/1 var(--mono); font-variant-numeric:tabular-nums}
 .lb-zoomtext:hover{background:var(--panel-3); color:var(--ink)}
-.lb-ebenen{display:flex; gap:2px}
-.lb-ebene{height:40px; padding:0 12px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap; transition:background var(--dauer), color var(--dauer)}
-.lb-ebene:hover{background:var(--panel-3); color:var(--ink)}
-.lb-ebene.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+/* Ansicht-Menü (ein Knopf statt fünf Ebenen-Reitern) */
+.lb-ansicht{display:inline-flex; align-items:center; gap:7px; height:40px; padding:0 10px 0 11px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
+.lb-ansicht:hover{background:var(--panel-3); color:var(--ink)}
+.lb-ansicht-text{color:var(--ink)}
+.lb-gruppe[hidden]{display:none}
 .lb-hinweis{position:absolute; left:12px; bottom:12px; max-width:calc(100% - 440px); padding:7px 12px; border-radius:10px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
   font-size:12.5px; line-height:1.35; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .lb-hinweis:empty{display:none}
@@ -221,4 +248,7 @@
 .lb-knopf-klein:hover{border-color:var(--accent)}
 .lb-konsole{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; height:calc(100% - 54px)}
 
-@media (max-width:1100px){ .lb-insp-huelle{width:320px} .lb-ebene{padding:0 9px} }
+@media (max-width:1100px){ .lb-insp-huelle{width:320px} }
+/* Ruhe beim Start: Inspektor erst mit der ersten Auswahl, Simulation erst mit der ersten Aufzeichnung */
+.labor.insp-wartet .lb-insp-huelle{display:none}
+.labor.sim-wartet .lb-sim{display:none}

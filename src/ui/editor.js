@@ -6,6 +6,9 @@
                 einpassen(), aufraeumen(), werkzeug(name), zentrieren(id), ping(vonId, nachId), konsole(id),
                 zeigen(container)  (von UI.app), el:{auftrag, inspektor, sim} }
    Andockbereiche (für andere Bausteine): #labor-auftrag (oben), #labor-inspektor (rechts), #labor-sim (unten).
+   Ruhe beim Start (Ausbau 1.2, A3): Inspektor erscheint erst mit der ersten Auswahl, die Simulation erst mit der ersten
+   Aufzeichnung (und klappt dann einmal auf). laden(netz, {ebene, ansichtMenue:false}) – das Ticket legt die Ebene fest.
+   Geräte-Fächer: editor-fach.js (UI.laborFach).
    Änderungen laufen nur über verlauf.aendern(); gezeichnet wird nach Bus „netz-geaendert“ (gebündelt per rAF).
    Werkzeuge/Zeiger: editor-werkzeuge.js (UI.laborWerkzeuge), Pakete/Ping: editor-pakete.js (UI.laborPakete). */
 UI.labor = (() => {
@@ -36,16 +39,11 @@ UI.labor = (() => {
     Z.el.inspektor = h("div", {id: "labor-inspektor", class: "lb-inspektor"});
     Z.el.sim = h("div", {id: "labor-sim", class: "lb-sim-inhalt"});
     const el = einst().labor || {};
-    Z.inspektorZu = !!el.inspektorZu; Z.simZu = el.simZu !== false; Z.simHoehe = klemme(+el.simHoehe || 290, 140, 900);   /* 290: Kopf + Steuerung + einige Ereigniszeilen */
+    Z.inspektorZu = !!el.inspektorZu; Z.simZu = true; Z.simHoehe = klemme(+el.simHoehe || 290, 140, 900);   /* 290: Kopf + Steuerung + einige Ereigniszeilen */
+    Z.inspWartet = Z.inspWartet ?? true; Z.simWartet = Z.simWartet ?? true;
 
-    /* Geräteleiste */
-    const leiste = h("aside", {class: "lb-geraete", "aria-label": "Geräte"},
-      h("div", {class: "lb-geraete-titel"}, "Geräte"),
-      UI.GERAETE.map(a => {
-        const bild = sv("svg", {viewBox: "-34 -30 68 60", width: 44, height: 38, "aria-hidden": "true"}, UI.geraetebild(a.typ, a.skin));
-        return h("button", {type: "button", class: `lb-teil typ-${a.typ}`, "data-typ": a.typ, "data-skin": a.skin || "",
-          title: `${a.titel}: ${a.text}\nZiehen oder anklicken und auf die Fläche klicken.`}, bild, h("span", {}, a.titel));
-      }));
+    /* Geräteleiste: vier Kategorien, Klick öffnet ein Fach (editor-fach.js) */
+    const leiste = h("aside", {class: "lb-geraete", "aria-label": "Geräte"});
     Z.el.geraete = leiste;
 
     /* Fläche */
@@ -59,31 +57,28 @@ UI.labor = (() => {
     for (const n of ["zonen", "kabel", "geraete", "karten", "ueber", "pakete", "band"]) Z.welt.append(Z.s[n] = sv("g", {class: "lb-s-" + n}));
     Z.svg.append(defs, Z.raster, Z.welt);
 
-    const ebenenKnoepfe = h("div", {class: "lb-ebenen", role: "radiogroup", "aria-label": "Ebene"},
-      UI.ebenen.LISTE.map(l => h("button", {type: "button", role: "radio", class: "lb-ebene", "data-ebene": l.id,
-        title: `${l.name} (Taste ${l.taste}): ${l.text}`, onclick: () => UI.ebenen.setzen(l.id)}, l.id === "mac" ? "MAC" : l.name)));
+    Z.el.ansicht = h("button", {type: "button", class: "lb-ansicht", "aria-haspopup": "menu", title: "Ansicht: welche Ebene die Fläche zeigt (Umschalt+1 … 5)",
+      onclick: e => ansichtMenue(e.currentTarget)}, UI.symbol("ebenen", 17), h("span", {class: "lb-ansicht-text"}), UI.symbol("pfeilUnten", 14));
     const wz = (name, sym, titel) => h("button", {type: "button", class: "lb-wz", "data-wz": name, title: titel, "aria-label": titel,
       onclick: () => werkzeug(name)}, UI.symbol(sym, 19));
     const knopf = (sym, titel, fn, cls = "") => h("button", {type: "button", class: "lb-knopf " + cls, title: titel, "aria-label": titel, onclick: fn}, UI.symbol(sym, 18));
     Z.el.zurueck = knopf("zurueck", "Rückgängig (Strg+Z)", () => rueckgaengig());
     Z.el.vor = knopf("vor", "Wiederholen (Strg+Y)", () => wiederholen());
-    Z.el.zoomText = h("button", {type: "button", class: "lb-zoomtext", title: "Zoom 100 %", onclick: () => zoomAuf(1)}, "100 %");
+    Z.el.zoomText = h("button", {type: "button", class: "lb-zoomtext", "aria-haspopup": "menu", title: "Zoom und Anordnung (Mausrad zoomt, F passt ein)",
+      onclick: e => zoomMenue(e.currentTarget)}, "100 %");
+    Z.el.ansichtGruppe = h("div", {class: "lb-gruppe"}, Z.el.ansicht);
+    Z.el.verlaufGruppe = h("div", {class: "lb-gruppe", hidden: true}, Z.el.zurueck, Z.el.vor);   /* erst sichtbar, wenn es etwas rückgängig zu machen gibt */
     const oben = h("div", {class: "lb-leiste-oben"},
       h("div", {class: "lb-gruppe lb-werkzeuge", role: "toolbar", "aria-label": "Werkzeuge"},
         wz("auswahl", "zeiger", "Auswählen und verschieben (V)"), wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen")),
-      h("div", {class: "lb-gruppe"}, ebenenKnoepfe),
+      Z.el.ansichtGruppe,
       h("div", {class: "lb-luecke"}),
-      h("div", {class: "lb-gruppe"}, Z.el.zurueck, Z.el.vor));
-    const unten = h("div", {class: "lb-leiste-unten"},
-      h("div", {class: "lb-gruppe"},
-        knopf("minus", "Verkleinern (−)", () => zoomSchritt(1 / 1.25)), Z.el.zoomText, knopf("plus", "Vergrößern (+)", () => zoomSchritt(1.25)),
-        knopf("einpassen", "Alles einpassen (F)", () => einpassen(true))),
-      h("div", {class: "lb-gruppe"}, h("button", {type: "button", class: "lb-knopf lb-knopf-text", title: "Aufräumen: Geräte nach Schichten anordnen (A)", onclick: () => aufraeumen()},
-        UI.symbol("aufraeumen", 18), h("span", {}, "Aufräumen"))));
+      Z.el.verlaufGruppe);
+    const unten = h("div", {class: "lb-leiste-unten"}, h("div", {class: "lb-gruppe"}, Z.el.zoomText));
     Z.el.hinweis = h("div", {class: "lb-hinweis", "aria-live": "polite"});
     Z.el.leer = h("div", {class: "lb-leer", hidden: true},
       h("strong", {}, "Die Fläche ist leer."),
-      h("p", {}, "Zieh ein Gerät aus der Leiste links hierher – oder doppelklicke auf die Fläche."));
+      h("p", {}, "Öffne links ein Fach und zieh ein Gerät hierher – oder doppelklicke auf die Fläche."));
     const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer);
     Z.el.leinwand = leinwand;
 
@@ -115,6 +110,7 @@ UI.labor = (() => {
         alt = {w: r.width, h: r.height};
       }).observe(leinwand);
     }
+    UI.laborFach?.einrichten(Z, F);
     UI.laborWerkzeuge?.einrichten(Z, F);
     bereit();
     layoutAnwenden();
@@ -130,7 +126,9 @@ UI.labor = (() => {
   function layoutAnwenden(){
     if (!Z.root) return;
     Z.root.classList.toggle("insp-zu", !!Z.inspektorZu);
+    Z.root.classList.toggle("insp-wartet", !!Z.inspWartet);
     Z.root.classList.toggle("sim-zu", !!Z.simZu);
+    Z.root.classList.toggle("sim-wartet", !!Z.simWartet);
     Z.root.style.setProperty("--sim-h", Z.simHoehe + "px");
     Z.el.simKnopf.setAttribute("aria-expanded", String(!Z.simZu));
     Z.el.simKnopf.title = Z.simZu ? "Simulation aufklappen" : "Simulation einklappen";
@@ -144,8 +142,9 @@ UI.labor = (() => {
     Z.el.lasche.title = Z.inspektorZu ? "Inspektor aufklappen" : "Inspektor einklappen";
     Z.el.lasche.setAttribute("aria-expanded", String(!Z.inspektorZu));
   }
-  function inspektorUmschalten(zu = !Z.inspektorZu){ Z.inspektorZu = zu; einstLabor({inspektorZu: zu}); layoutAnwenden(); }
-  function simUmschalten(zu = !Z.simZu){ Z.simZu = zu; einstLabor({simZu: zu}); layoutAnwenden(); }
+  function inspektorUmschalten(zu = Z.inspWartet ? false : !Z.inspektorZu){ Z.inspWartet = false; Z.inspektorZu = zu; einstLabor({inspektorZu: zu}); layoutAnwenden(); }
+  /* Simulation: startet in jedem geladenen Netz zu und unsichtbar; die erste Aufzeichnung macht sie sichtbar */
+  function simUmschalten(zu = Z.simWartet ? false : !Z.simZu){ if (!zu) Z.simWartet = false; Z.simZu = zu; layoutAnwenden(); }
   function simHoeheSetzen(px, merken){
     const max = Math.max(160, (Z.root?.clientHeight || 800) * 0.72);
     Z.simHoehe = klemme(Math.round(px), 140, max);
@@ -156,7 +155,7 @@ UI.labor = (() => {
   function auftragZeichnen(){
     const el = Z.el.auftrag; if (!el) return;
     el.replaceChildren();
-    if (typeof Z.opt.auftrag === "function") { try { Z.opt.auftrag(el); return; } catch (e) { console.error("Auftragsleiste", e); } }
+    if (typeof Z.opt.auftrag === "function") { try { Z.opt.auftrag(el); werkzeugAnzeigen(); return; } catch (e) { console.error("Auftragsleiste", e); } }
     el.append(h("div", {class: "lb-auftrag-standard"}, h("strong", {}, Z.titel || "Labor")));
   }
 
@@ -248,7 +247,8 @@ UI.labor = (() => {
     if (!Z.svg || !Z.netz || !Z.root?.isConnected) return;
     const netz = Z.netz, ebene = UI.ebenen.aktuell;
     Z.root.dataset.ebene = ebene;
-    for (const b of $$(".lb-ebene", Z.root)) { const an = b.dataset.ebene === ebene; b.classList.toggle("an", an); b.setAttribute("aria-checked", String(an)); }
+    const eb = UI.ebenen.LISTE.find(l => l.id === ebene), et = Z.el.ansicht?.querySelector(".lb-ansicht-text");
+    if (et) et.textContent = eb ? eb.name : ebene;
     Z.warn = new Map();
     try { for (const w of Modell.pruefen(netz)) { if (!Z.warn.has(w.geraet)) Z.warn.set(w.geraet, []); const l = Z.warn.get(w.geraet); if (!l.includes(w.text)) l.push(w.text); } }
     catch (e) { console.error("Modell.pruefen", e); }
@@ -269,6 +269,7 @@ UI.labor = (() => {
     const v = Z.verlauf; if (!v || !Z.el.zurueck) return;
     const l = v.liste || [];
     Z.el.zurueck.disabled = !v.kannZurueck; Z.el.vor.disabled = !v.kannVor;
+    if (Z.el.verlaufGruppe) Z.el.verlaufGruppe.hidden = !v.kannZurueck && !v.kannVor;
     Z.el.zurueck.title = v.kannZurueck ? `Rückgängig: ${l[l.length - 1]} (Strg+Z)` : "Nichts rückgängig zu machen";
     Z.el.vor.title = v.kannVor ? "Wiederholen (Strg+Y)" : "Nichts zu wiederholen";
   }
@@ -425,6 +426,7 @@ UI.labor = (() => {
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
     Bus.senden("auswahl", {geraet: id || null, port: port || null});
     if (alt !== id) inspektorZeigen();
+    if (id && Z.inspWartet) { Z.inspWartet = false; layoutAnwenden(); }
     laschenText();
   }
   function kabelWaehlen(kid){
@@ -491,28 +493,33 @@ UI.labor = (() => {
   });
 
   /* ---------- Werkzeug ---------- */
+  /* Textdiät (A4): Auswählen braucht keinen Dauertext; spricht gerade der Coach (data-hinweisquelle), schweigt die Fläche */
   const HINWEISE = {
-    auswahl: "Gerät ziehen = verschieben · Port-Punkt oder ⊕ ziehen = Kabel · leere Fläche ziehen = Ansicht verschieben · Mausrad = Zoom",
-    kabel: "Kabel: vom Gerät zum Zielgerät ziehen. Der nächste freie passende Port wird genommen – Shift beim Loslassen fragt nach dem Port.",
-    ping: "Ping: von Gerät A auf Gerät B ziehen (oder A und dann B anklicken). Esc beendet.",
-    platzieren: "Auf die Fläche klicken, um das Gerät abzulegen. Shift hält das Werkzeug fest, Esc bricht ab.",
+    auswahl: "",
+    kabel: "Kabel: vom Gerät zum Zielgerät ziehen – Umschalt beim Loslassen wählt den Port.",
+    ping: "Ping: von Gerät A auf Gerät B ziehen. Esc beendet.",
+    platzieren: "auf die Fläche klicken – Umschalt hält das Gerät fest, Esc bricht ab.",
   };
   function werkzeug(name, o = {}){
-    if (!HINWEISE[name]) name = "auswahl";
+    if (!(name in HINWEISE)) name = "auswahl";
+    if (name === "platzieren" && Z.werkzeug !== "platzieren") Z.vorPlatz = Z.werkzeug;   /* Platzieren ist ein Zwischenschritt */
     Z.werkzeug = name;
     if (name !== "platzieren") Z.platz = null; else Z.platz = o.platz || Z.platz;
     if (name !== "ping") Z.pingVon = null; else if (o.von) Z.pingVon = o.von;
     werkzeugAnzeigen();
     F.bandLeeren?.();
   }
+  /* nach dem Platzieren (oder Esc) zurück zum Werkzeug davor – z. B. Kabel, wenn der Coach es gewählt hatte */
+  function platzEnde(){ const v = Z.vorPlatz && Z.vorPlatz !== "platzieren" ? Z.vorPlatz : "auswahl"; Z.vorPlatz = null; werkzeug(v); }
   function werkzeugAnzeigen(text){
     if (!Z.root) return;
     Z.root.dataset.werkzeug = Z.werkzeug;
     for (const b of $$(".lb-wz", Z.root)) { const an = b.dataset.wz === Z.werkzeug; b.classList.toggle("an", an); b.setAttribute("aria-pressed", String(an)); }
-    for (const b of $$(".lb-teil", Z.root)) b.classList.toggle("an", Z.werkzeug === "platzieren" && Z.platz && b.dataset.typ === Z.platz.typ && (b.dataset.skin || null) === (Z.platz.skin || null));
+    F.fachMarkieren?.();
     let t = text || HINWEISE[Z.werkzeug];
     if (!text && Z.werkzeug === "ping" && Z.pingVon) t = `Ping von ${Z.netz?.geraete[Z.pingVon]?.name || Z.pingVon}: jetzt das Ziel anklicken. Esc bricht ab.`;
     if (!text && Z.werkzeug === "platzieren" && Z.platz) t = `${UI.geraeteArt(Z.platz.typ, Z.platz.skin).titel}: ` + t;
+    if (!text && Z.el.auftrag?.querySelector("[data-hinweisquelle]")) t = "";
     Z.el.hinweis.textContent = t;
   }
 
@@ -535,8 +542,14 @@ UI.labor = (() => {
     if (skin && SKIN_NAME[skin]) o.name = freierName(SKIN_NAME[skin]);
     else if (TYP_NAME[typ]) { const namen = new Set(Object.values(Z.netz.geraete).map(g => g.name)); let i = 1; while (namen.has(TYP_NAME[typ] + i)) i++; o.name = TYP_NAME[typ] + i; }
     aendern(`${o.name || UI.geraeteArt(typ, skin).titel} hinzugefügt`, n => { neu = Modell.geraet(n, typ, o); });
-    if (neu) auswaehlen(neu.id);
+    if (neu) { auswaehlen(neu.id); F.zuletztMerken?.(typ, skin); }
     return neu;
+  }
+  /* in die Mitte der sichtbaren Fläche (Tastatur, Befehlspalette) */
+  function einsetzen(typ, skin){
+    if (!Z.svg) return null;
+    const r = Z.svg.getBoundingClientRect(), w = weltPunkt(r.left + r.width / 2, r.top + r.height / 2);
+    return geraetAnlegen(typ, skin || null, w.x, w.y);
   }
   function loeschen(id){
     const g = Z.netz?.geraete[id]; if (!g) return;
@@ -652,6 +665,24 @@ UI.labor = (() => {
     requestAnimationFrame(schritt);
   }
 
+  /* ---------- Ansicht- und Zoom-Menü (je ein Knopf statt fünf Ebenen-Reitern und fünf Zoomknöpfen) ---------- */
+  function ansichtMenue(knopf){
+    const r = knopf.getBoundingClientRect(), jetzt = UI.ebenen.aktuell;
+    UI.menue(r.left, r.bottom + 6, UI.ebenen.LISTE.map(l => ({text: l.name, sym: l.id === jetzt ? "ok" : null, taste: "⇧" + l.taste, titel: l.text, fn: () => UI.ebenen.setzen(l.id)})),
+      {titel: "Ansicht"});
+  }
+  function zoomMenue(knopf){
+    const r = knopf.getBoundingClientRect();
+    UI.menue(r.right - 230, r.top - 6, [
+      {text: "Vergrößern", sym: "plus", taste: "+", fn: () => zoomSchritt(1.25)},
+      {text: "Verkleinern", sym: "minus", taste: "−", fn: () => zoomSchritt(1 / 1.25)},
+      {text: "Zoom 100 %", sym: "suche", taste: "0", fn: () => zoomAuf(1)},
+      "-",
+      {text: "Alles einpassen", sym: "einpassen", taste: "F", fn: () => einpassen(true)},
+      {text: "Aufräumen", sym: "aufraeumen", taste: "A", fn: () => aufraeumen()},
+    ], {titel: "Zoom", oben: true});
+  }
+
   /* ---------- Laden ---------- */
   function laden(netz, opt = {}){
     Z.netz = netz;
@@ -661,8 +692,12 @@ UI.labor = (() => {
     Z.auswahl = null; Z.kabelWahl = null; Z.pos.clear(); Z.hover = null; Z.pingVon = null;
     if (Z.werkzeug !== "auswahl") Z.werkzeug = "auswahl";
     Z.einpassenAusstehend = true;
+    Z.inspWartet = true; Z.simWartet = true; Z.simZu = true;
+    F.fachZu?.();
+    UI.ebenen.setzen(opt.ebene || UI.ebenen.gemerkt(), {merken: false});
+    if (Z.el.ansichtGruppe) Z.el.ansichtGruppe.hidden = opt.ansichtMenue === false;
     if (Z.root?.isConnected) {
-      auftragZeichnen(); werkzeugAnzeigen(); zeichnen(); inspektorZeigen(); simLeer();
+      layoutAnwenden(); auftragZeichnen(); werkzeugAnzeigen(); zeichnen(); inspektorZeigen(); simLeer();
       requestAnimationFrame(() => { einpassen(false); Z.einpassenAusstehend = false; });
     }
     Bus.senden("labor-geladen", {netz, titel: Z.titel});
@@ -690,7 +725,7 @@ UI.labor = (() => {
 
   Object.assign(F, {pos, raster, weltPunkt, zoomUm, ansichtSetzen, ansichtAnimieren, einpassen, sichtbarMachen, zeichnen, neuZeichnen,
     geraetBewegt, zonenNeu, kabelGeo, kabelGruppe, auswaehlen, kabelWaehlen, inspektorZeigen, inspektorUmschalten, simUmschalten, simHoeheSetzen,
-    aendern, rueckgaengig, wiederholen, werkzeug, werkzeugAnzeigen, geraetAnlegen, loeschen, kabelTrennen, verbinden, aufraeumen, konsole,
+    aendern, rueckgaengig, wiederholen, werkzeug, werkzeugAnzeigen, platzEnde, geraetAnlegen, einsetzen, loeschen, kabelTrennen, verbinden, aufraeumen, konsole,
     grundText, layoutAnwenden, STATUS_TEXT, zoomSchritt});
 
   const api = {
@@ -700,7 +735,7 @@ UI.labor = (() => {
     get titel(){ return Z.titel; },
     get el(){ return {auftrag: Z.el.auftrag || null, inspektor: Z.el.inspektor || null, sim: Z.el.sim || null}; },
     get werkzeugName(){ return Z.werkzeug; },
-    zeigen, wieder, laden, auswaehlen, neuZeichnen, einpassen, aufraeumen, werkzeug, zentrieren, konsole,
+    zeigen, wieder, laden, auswaehlen, neuZeichnen, einpassen, aufraeumen, werkzeug, zentrieren, konsole, einsetzen,
     rueckgaengig, wiederholen, loeschen,
     hervorheben: (liste, ms) => bereit().hervorheben?.(liste, ms),
     animiere: (e, o) => bereit().animiere ? F.animiere(e, o) : Promise.resolve(),

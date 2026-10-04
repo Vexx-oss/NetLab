@@ -1,21 +1,29 @@
 "use strict";
 /* ---------- Gerätebilder und Bedien-Symbole (eigene, flache Zeichnungen – keine Herstellersymbole) ----------
    UI.geraetebild(typ, skin)  → SVG-<g> um (0,0), ca. 52×52 (Internet: Wolke ~66×46), Farbe über --g
-   UI.GERAETE                 → Liste der Geräteleiste: [{typ, skin, titel, text, taste}]
+   UI.GERAETE                 → alle Geräte: [{typ, skin, titel, kurz, text, kategorie}] (Reihenfolge = Reihenfolge im Fach)
+   UI.KATEGORIEN              → Fächer der Geräteleiste: [{id, titel, kurz, typ, skin, taste, text}] (Taste 1–4 öffnet das Fach)
    UI.geraeteArt(typ, skin)   → Eintrag aus UI.GERAETE (Titel, Beschreibung)
    UI.symbol(name, groesse)   → kleines Strich-Symbol (<svg>) für Knöpfe, Dock, Menüs */
 UI.GERAETE = [
-  {typ: "pc",       skin: null,      titel: "PC",        text: "Arbeitsplatzrechner mit einer Netzwerkkarte (eth0)."},
-  {typ: "pc",       skin: "laptop",  titel: "Laptop",    text: "Wie ein PC, nur mobil – eine Netzwerkkarte (eth0)."},
-  {typ: "pc",       skin: "drucker", titel: "Drucker",   text: "Netzwerkdrucker. Technisch ein Host mit einer Adresse."},
-  {typ: "pc",       skin: "kasse",   titel: "Kasse",     text: "Kassensystem. Technisch ein Host mit einer Adresse."},
-  {typ: "pc",       skin: "tablet",  titel: "Tablet",    text: "Mobiles Gerät. Technisch ein Host mit einer Adresse."},
-  {typ: "server",   skin: null,      titel: "Server",    text: "Bietet Dienste an: Web, DNS, DHCP, Dateien, SSH, Druck."},
-  {typ: "nas",      skin: null,      titel: "NAS",       text: "Netzwerkspeicher mit zwei Anschlüssen (eth0, eth1)."},
-  {typ: "switch",   skin: null,      titel: "Switch",    text: "Verbindet Geräte im selben Netz (Schicht 2). 24 × Fa, 2 × Gi, VLANs."},
-  {typ: "router",   skin: null,      titel: "Router",    text: "Verbindet verschiedene Netze (Schicht 3). Gi0/0 bis Gi0/2, Routen, NAT, ACL."},
-  {typ: "firewall", skin: null,      titel: "Firewall",  text: "Trennt Zonen (innen, außen, DMZ) und filtert nach Regeln."},
-  {typ: "internet", skin: null,      titel: "Internet",  text: "Kulisse: der Provider und das Internet dahinter."},
+  {typ: "pc",       skin: null,      kategorie: "endgeraete", titel: "PC",       kurz: "Arbeitsplatz, eine Netzwerkkarte", text: "Arbeitsplatzrechner mit einer Netzwerkkarte (eth0)."},
+  {typ: "pc",       skin: "laptop",  kategorie: "endgeraete", titel: "Laptop",   kurz: "wie ein PC, nur mobil",            text: "Wie ein PC, nur mobil – eine Netzwerkkarte (eth0)."},
+  {typ: "pc",       skin: "tablet",  kategorie: "endgeraete", titel: "Tablet",   kurz: "mobiles Gerät",                    text: "Mobiles Gerät. Technisch ein Host mit einer Adresse."},
+  {typ: "pc",       skin: "kasse",   kategorie: "endgeraete", titel: "Kasse",    kurz: "Kassensystem",                     text: "Kassensystem. Technisch ein Host mit einer Adresse."},
+  {typ: "pc",       skin: "drucker", kategorie: "endgeraete", titel: "Drucker",  kurz: "Netzwerkdrucker",                  text: "Netzwerkdrucker. Technisch ein Host mit einer Adresse."},
+  {typ: "server",   skin: null,      kategorie: "server",     titel: "Server",   kurz: "Web, DNS, DHCP, Dateien",          text: "Bietet Dienste an: Web, DNS, DHCP, Dateien, SSH, Druck."},
+  {typ: "nas",      skin: null,      kategorie: "server",     titel: "NAS",      kurz: "Speicher, zwei Anschlüsse",        text: "Netzwerkspeicher mit zwei Anschlüssen (eth0, eth1)."},
+  {typ: "switch",   skin: null,      kategorie: "netzwerk",   titel: "Switch",   kurz: "ein Netz, Schicht 2, VLANs",       text: "Verbindet Geräte im selben Netz (Schicht 2). 24 × Fa, 2 × Gi, VLANs."},
+  {typ: "router",   skin: null,      kategorie: "netzwerk",   titel: "Router",   kurz: "zwischen Netzen, Schicht 3",       text: "Verbindet verschiedene Netze (Schicht 3). Gi0/0 bis Gi0/2, Routen, NAT, ACL."},
+  {typ: "firewall", skin: null,      kategorie: "netzwerk",   titel: "Firewall", kurz: "Zonen und Regeln",                 text: "Trennt Zonen (innen, außen, DMZ) und filtert nach Regeln."},
+  {typ: "internet", skin: null,      kategorie: "aussen",     titel: "Internet", kurz: "Provider und alles dahinter",      text: "Kulisse: der Provider und das Internet dahinter."},
+];
+/* Später dazu: Drahtlos (Access Point), Zubehör (Kabeltester) – ein Eintrag hier und die Geräte mit dieser kategorie */
+UI.KATEGORIEN = [
+  {id: "endgeraete", titel: "Endgeräte",         kurz: "Endgeräte", typ: "pc",       skin: null, taste: "1", text: "PC, Laptop, Tablet, Kasse, Drucker"},
+  {id: "server",     titel: "Server & Speicher", kurz: "Server",    typ: "server",   skin: null, taste: "2", text: "Server, NAS"},
+  {id: "netzwerk",   titel: "Netzwerk",          kurz: "Netzwerk",  typ: "switch",   skin: null, taste: "3", text: "Switch, Router, Firewall"},
+  {id: "aussen",     titel: "Außenwelt",         kurz: "Außenwelt", typ: "internet", skin: null, taste: "4", text: "Internet (Provider)"},
 ];
 UI.geraeteArt = (typ, skin) => UI.GERAETE.find(a => a.typ === typ && (a.skin || null) === (skin || null)) || UI.GERAETE.find(a => a.typ === typ) || {typ, titel: typ, text: ""};
 
@@ -100,6 +108,7 @@ UI.symbol = (() => {
     euro:      ["M18 6.5A7 7 0 1 0 18 17.5", "M4 10h10", "M4 14h9"],
     stufe:     ["M4 19h5v-5h5V9h5V4"],
     inspektor: ["M4 4h16v16H4z", "M14 4v16"],
+    mappe:     ["M9 3.5h6v3H9z", "M15 5h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3", "M8.5 11h7", "M8.5 15h5"],
     sim:       ["M4 4h16v16H4z", "M4 14h16"],
   };
   return function symbol(name, groesse = 20){

@@ -302,7 +302,8 @@ UI.app = (() => {
   }
   const KUERZEL = [
     ["Überall", [["Strg+K", "Befehlspalette: Gerät springen, „ping A B“, Ebene, Ansicht"], ["?", "diese Übersicht"], ["Esc", "abbrechen, Menü schließen, Auswahl aufheben"]]],
-    ["Labor – Werkzeuge", [["V", "Auswählen und verschieben"], ["K", "Kabel verlegen"], ["P", "Ping-Werkzeug (mit Auswahl: Ping von diesem Gerät)"], ["1 … 5", "Ebene: Physik · VLAN · IP-Netze · MAC · Routen"]]],
+    ["Labor – Werkzeuge", [["V", "Auswählen und verschieben"], ["K", "Kabel verlegen"], ["P", "Ping-Werkzeug (mit Auswahl: Ping von diesem Gerät)"],
+      ["1 … 4", "Geräte-Fach öffnen: Endgeräte · Server · Netzwerk · Außenwelt (im offenen Fach: 1 … n wählt das Gerät)"], ["⇧1 … ⇧5", "Ebene: Physik · VLAN · IP-Netze · MAC · Routen"]]],
     ["Labor – Ansicht", [["F", "alles einpassen"], ["A", "aufräumen (Auto-Layout)"], ["+  −  0", "Zoom größer, kleiner, 100 %"], ["Pfeiltasten", "Ansicht verschieben (mit Auswahl: Gerät verschieben, Shift = weiter)"], ["I / S", "Inspektor / Simulation ein- und ausklappen"]]],
     ["Labor – Bearbeiten", [["Entf", "Gerät oder Kabel löschen (Rückgängig statt Nachfrage)"], ["Strg+Z", "rückgängig"], ["Strg+Y", "wiederholen"], ["C", "Konsole des gewählten Geräts"], ["Enter", "Inspektor des gewählten Geräts"]]],
     ["Maus", [["Ziehen", "Gerät verschieben · leere Fläche: Ansicht verschieben"], ["⊕ oder Port-Punkt ziehen", "Kabel (Shift beim Loslassen: Port wählen)"], ["Mausrad", "Zoom um den Mauszeiger"], ["Doppelklick", "leere Fläche: Gerät einsetzen · Gerät: Inspektor"], ["Rechtsklick", "Konsole, Ping, Strom, Neustart, Löschen"]]],

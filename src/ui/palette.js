@@ -38,7 +38,12 @@ UI.palette = (() => {
       l.push({gruppe: "Gerät", text: g.name, info: `${UI.geraeteArt(g.typ, g.skin).titel}${a.ip ? " · " + a.ip : ""}`, sym: "labor",
         stichworte: `${g.id} ${a.ip || ""} ${g.typ}`, aktion: nachLabor(() => UI.labor.zentrieren(g.id))});
     }
-    for (const e of UI.ebenen.LISTE) l.push({gruppe: "Ebene", text: `Ebene: ${e.name}`, info: e.text, taste: e.taste, sym: "ebenen", aktion: nachLabor(() => UI.ebenen.setzen(e.id))});
+    for (const e of UI.ebenen.LISTE) l.push({gruppe: "Ebene", text: `Ebene: ${e.name}`, info: e.text, taste: "⇧" + e.taste, sym: "ebenen", aktion: nachLabor(() => UI.ebenen.setzen(e.id))});
+    if (netz) for (const a of UI.GERAETE) {
+      const k = UI.KATEGORIEN.find(x => x.id === a.kategorie);
+      l.push({gruppe: "Einsetzen", text: `${a.titel} einsetzen`, info: `${k ? k.titel + " · " : ""}${a.kurz}`, sym: "plus", stichworte: `gerät neu ${a.typ} ${a.skin || ""}`,
+        aktion: nachLabor(() => UI.labor.einsetzen(a.typ, a.skin))});
+    }
     for (const a of (UI.app?.liste?.() || [])) l.push({gruppe: "Ansicht", text: `Ansicht: ${a.titel}`, sym: a.symbol, aktion: () => UI.app.ansicht(a.name)});
     const v = UI.labor?.verlauf;
     l.push(

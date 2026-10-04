@@ -199,8 +199,9 @@ UI.laborPakete = (() => {
       else { text = `✗ ${gemeldet ? "Ziel nicht erreichbar" : "Zeitüberschreitung"}${grund ? " – " + F.grundText(grund) : ""}`; art = "fehler"; }
       const aktion = r.trace ? {text: "In Simulation öffnen", fn: () => zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping"})} : null;
       Bus.senden("trace", {trace: r.trace, quelle: "ping", von: vonId, nach: nachId, ergebnis: r});
-      /* Ist das Simulations-Panel offen, zeigt es den neuen Ping selbst – dann keine Meldung über der (kleinen) Fläche */
-      const panelOffen = !!Z.root && !Z.root.classList.contains("sim-zu");
+      /* Ist das Simulations-Panel offen, zeigt es den neuen Ping selbst – dann keine Meldung über der (kleinen) Fläche.
+         Der erste Ping in diesem Netz öffnet das Panel einmal (es war bis dahin unsichtbar). */
+      const panelOffen = !!Z.root && (!Z.root.classList.contains("sim-zu") || !!Z.simWartet);
       const melden = () => panelOffen && r.trace ? zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping", abspielen: false})
         : UI.toast(text, art, {id: "ping", titel, aktion});
       if (r.trace && bewegung() === "voll") {

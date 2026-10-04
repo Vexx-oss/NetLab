@@ -78,6 +78,11 @@
 .in-knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
 .in-knopf.primaer:hover{filter:brightness(1.08)}
 .in-knopf.geist{background:none; border-color:transparent; color:var(--muted)}
+.in-knopf.warn{background:var(--warn); border-color:var(--warn); color:var(--accent-ink)}
+.in-knopf.warn:hover{filter:brightness(1.08)}
+/* Terminal/Konsole: Knopf im Kopf statt Reiter (Ausbau 1.2, A3) */
+.in-terminal{gap:5px}
+.in-terminal.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 .in-knopf.geist:hover{color:var(--ink); background:var(--panel-3)}
 .in-knopf.versteckt{visibility:hidden}
 
