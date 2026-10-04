@@ -13,6 +13,8 @@ UI.inspektor = (() => {
   const LETZTER_REITER = {};         /* Gerätetyp → zuletzt benutzter Reiter */
 
   const IOS = g => !!g && (g.typ === "router" || g.typ === "switch");
+  /* Stufenregeln: dieselben „!“-Warnungen wie auf der Fläche (AP-Niveaus zeigen sie nicht oder erst mit Hilfe) */
+  const warnAn = () => (UI.labor && typeof UI.labor.warnungenAn === "function") ? UI.labor.warnungenAn() : true;
   const HOST = g => !!g && Modell.HOST[g.typ];
   const cidrZuMaske = t => { const m = /^\/?\s*(\d{1,2})$/.exec(String(t).trim()); return m && +m[1] <= 32 ? IP.maske(+m[1]) : null; };
   const kurzMaske = m => IP.maskeGueltig(m) ? "/" + IP.praefix(m) : "";
@@ -135,7 +137,7 @@ UI.inspektor = (() => {
     const bild = sv("svg", {viewBox: "-34 -30 68 60", width: 40, height: 36, class: "typ-" + g.typ, "aria-hidden": "true"}, UI.geraetebild ? UI.geraetebild(g.typ, g.skin) : null);
     const chips = [];
     chips.push(g.an ? h("span", {class: "in-chip ok"}, "● an") : h("span", {class: "in-chip aus"}, "○ aus"));
-    const warn = Modell.pruefen(K.netz).filter(w => w.geraet === g.id);
+    const warn = warnAn() ? Modell.pruefen(K.netz).filter(w => w.geraet === g.id) : [];
     if (warn.length) chips.push(h("span", {class: "in-chip warn", title: warn.map(w => w.text).join("\n")}, `▲ ${warn.length} Hinweis${warn.length > 1 ? "e" : ""}`));
     const ungespeichert = IOS(g) && Modell.ungespeichert(g);
     const term = g.typ === "internet" ? null : h("button", {type: "button", class: "in-knopf klein in-terminal" + (K.reiter === "konsole" ? " an" : ""),
@@ -236,6 +238,7 @@ UI.inspektor = (() => {
     function pruefen(){
       let f = pruefeWert(o.art || "text", inp.value, o);
       if (!f && inp.value.trim() === start) { const w = modellWarn(); if (w) f = {art: "warn", text: w.text}; }
+      if (f && f.art === "warn" && !warnAn()) f = null;          /* gelbe Vermutung nur, wo die Stufe Warnungen zeigt */
       inp.classList.toggle("bad", f?.art === "bad"); inp.classList.toggle("warn", f?.art === "warn");
       meldung.hidden = !f; meldung.className = "in-meldung " + (f?.art || ""); meldung.textContent = f ? f.text : "";
       return f;
@@ -300,7 +303,7 @@ UI.inspektor = (() => {
       h("div", {class: "in-zeile"},
         IOS(g) ? knopf("Speichern (copy run start)", () => speichern(K), Modell.ungespeichert(g) ? "primaer" : "") : null,
         knopf("Neustart", () => neustart(K), "", IOS(g) ? "Lädt die startup-config. Ungespeichertes geht verloren – wie beim echten Gerät." : "Leert ARP-Cache und DHCP-Lease."))));
-    const warn = Modell.pruefen(K.netz).filter(w => w.geraet === g.id);
+    const warn = warnAn() ? Modell.pruefen(K.netz).filter(w => w.geraet === g.id) : [];
     if (warn.length) el.append(abschnitt("Hinweise", h("ul", {class: "in-warnliste"}, warn.map(w => h("li", {}, w.text)))));
     const ports = Modell.ports(g), belegt = ports.filter(p => Modell.kabelAn(K.netz, g.id, p));
     const zeigen = g.typ === "switch" ? belegt : ports;

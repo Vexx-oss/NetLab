@@ -43,7 +43,8 @@ UI.spiel = (() => {
     S.mappe = {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false};
     const niveau = Spiel.niveauVon(r.inst);
     UI.labor.laden(r.netz, {titel: r.def.titel, verlauf: r.verlauf, auftrag: el => auftrag(el),
-      ebene: UI.ebenen.fuerSkills(r.def.skills), ansichtMenue: niveau !== "E"});
+      ebene: UI.ebenen.fuerSkills(r.def.skills), ansichtMenue: niveau !== "E",
+      warnungen: () => Spiel.regeln(r.inst).warnungen});          /* Stufenregeln: „!“ je Niveau und Hilfestufe */
     if (ansicht) UI.app.ansicht("labor");
     liveJetzt();
     seniorPlanen();
@@ -71,7 +72,7 @@ UI.spiel = (() => {
     if (!inst || !Spiel.instanz(inst.iid)) { el.append(h("div", {class: "lb-auftrag-standard"}, h("strong", {}, "Kein offenes Ticket"))); return; }
     const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde), niveau = Spiel.niveauVon(inst);
     if (inst.quelle === "pruefung") return pruefungsLeiste(el, inst, def);
-    const live = niveau !== "AP2";
+    const regel = Spiel.regeln(inst), live = regel.liveHaken;
     const stand = S.live || {status: (def.ziele || []).map(z => ({ziel: z, ok: null}))};
     const n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length, alle = live && n > 0 && erfuellt === n;
     const naechste = Spiel.naechsteHilfe(inst);
@@ -92,7 +93,7 @@ UI.spiel = (() => {
         niveau === "AP2" ? " – die Abnahme startet die Geräte neu!" : " – nach einem Neustart wäre die Änderung weg.") : null,
       S.coach ? coachLeiste() : null,
       S.hilfeOffen ? hilfePanel(inst, def, naechste) : null));
-    if (S.mappe.offen) el.append(mappe(def, k, stand, live));
+    if (S.mappe.offen) el.append(mappe(def, k, stand, live, regel.liveGrund));
     if (el.querySelectorAll(".primaer").length > 1) abnahme.classList.remove("primaer");
     S.mappe.rein = false;
   }
@@ -105,7 +106,7 @@ UI.spiel = (() => {
     S.mappe.offen = false; S.mappe.erstes = false;
     UI.labor.auftragNeu();
   }
-  function mappe(def, k, stand, live){
+  function mappe(def, k, stand, live, mitGrund){
     const m = S.mappe, n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length;
     const reiter = h("div", {class: "am-reiter", role: "tablist"},
       [["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"]].map(([id, titel]) =>
@@ -117,7 +118,8 @@ UI.spiel = (() => {
       inhalt = h("div", {class: "am-ziele-liste"},
         h("ul", {class: "sp-ziele"}, stand.status.map((s, i) => h("li", {class: live ? (s.ok ? "ok" : s.ok === false ? "offen" : "") : "neutral", "data-i": i},
           h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
-          h("span", {}, s.ziel.text || s.ziel.typ),
+          h("span", {}, s.ziel.text || s.ziel.typ,
+            mitGrund && s.ok === false && s.grund ? h("small", {class: "am-grund"}, Spiel.grundTitel(s.grund)) : null),
           s.ziel.typ === "blockiert" ? h("small", {class: "sp-blockiert"}, " darf nicht gehen") : null))),
         live ? null : h("p", {class: "sp-leise"}, "AP2: Ob die Ziele erreicht sind, prüfst du selbst – die Abnahme sagt, ob es reicht."));
     } else {
@@ -169,12 +171,11 @@ UI.spiel = (() => {
   /* ---------- Live-Prüfung (Einstieg und AP1) ---------- */
   function liveJetzt(){
     if (!S.inst) return;
-    const niveau = Spiel.niveauVon(S.inst);
     const r = Spiel.zieleLive(S.inst);
     const vorher = S.live;
     S.live = r;
     UI.labor.auftragNeu();
-    if (niveau === "AP2") return;
+    if (!Spiel.regeln(S.inst).liveHaken) return;            /* AP2: Haken erst bei der Abnahme */
     if (vorher && r.neuOk.length) {
       for (const i of r.neuOk) { const li = document.querySelector(`.sp-ziele li[data-i="${i}"]`); li?.classList.add("frisch"); }
       document.querySelector(".am-ziele")?.classList.add("frisch");
@@ -202,6 +203,7 @@ UI.spiel = (() => {
     else inhalt.append(hilfeInhalt(inst, Spiel.hilfeInhalt(inst, zeigen)));
     const knopf = naechste ? h("button", {type: "button", class: "knopf" + (naechste.kosten ? "" : " primaer"), onclick: () => {
         const r = Spiel.hilfe(inst); S.hilfeAnsicht = r.stufe;
+        UI.labor.auffrischen?.();                              /* AP1: ab Hilfestufe 2 erscheinen die „!“-Warnungen */
         if (r.stufe === 4 && r.bereich?.length) UI.labor.hervorheben(r.bereich, 6000);
         if (r.stufe === 6) S.demo = {i: 0, schritte: r.schritte};
         UI.labor.auftragNeu();
@@ -257,7 +259,7 @@ UI.spiel = (() => {
       Spiel.seniorAngeboten(inst);
       const satz = (DATEN.senior?.fehlerTrost || [])[inst.seed % Math.max(1, (DATEN.senior?.fehlerTrost || []).length)] || "Kleiner Tipp gefällig?";
       UI.toast(`„${satz}“ Magst du eine Frage von mir als Denkanstoß?`, "info", {titel: "Der Senior", dauer: 12000, id: "senior",
-        aktion: {text: "Ja, gern", fn: () => { S.hilfeOffen = true; while ((inst.hilfeStufe || 0) < 3) Spiel.hilfe(inst); S.hilfeAnsicht = 3; UI.labor.auftragNeu(); }}});
+        aktion: {text: "Ja, gern", fn: () => { S.hilfeOffen = true; while ((inst.hilfeStufe || 0) < 3) Spiel.hilfe(inst); S.hilfeAnsicht = 3; UI.labor.auftragNeu(); UI.labor.auffrischen?.(); }}});
     }, 30000);
   }
 
@@ -289,7 +291,7 @@ UI.spiel = (() => {
       const ab = erg.abnahme;
       const zu = overlay(h("div", {class: "sp-ergebnis nicht"},
         h("h2", {}, "Noch nicht ganz"),
-        h("p", {class: "sp-leise"}, "Die Abnahme hat nachgemessen. Kein Abzug – du kannst weiterarbeiten."),
+        h("p", {class: "sp-leise"}, versuchText(erg.inst, niveau)),
         h("ul", {class: "sp-pruefliste"},
           ab.ergebnisse.map(e => h("li", {class: e.ok ? "ok" : "offen"}, h("span", {}, e.ok ? "✓" : "✗"), h("div", {},
             h("b", {}, e.ziel.text || e.ziel.typ),
@@ -333,6 +335,12 @@ UI.spiel = (() => {
         feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, "🌙 Feierabend: zur Leiste") : null,
         typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0] ? h("button", {type: "button", class: "knopf geist", onclick: () => { zu(); UI.wiki.oeffnen(def.skills[0]); }}, "📖 Nachschlagen") : null)), "erfolg");
     zaehlen(euroEl, erg.euro);
+  }
+  /* Stufenregeln: Einstieg probiert frei; AP1/AP2 zählen den ersten Versuch wie in der Prüfung */
+  function versuchText(inst, niveau){
+    const abzug = Spiel.regeln(inst).versuchAbzug;
+    if (!abzug) return "Die Abnahme hat nachgemessen. Kein Abzug – du kannst weiterarbeiten.";
+    return `Die Abnahme hat nachgemessen. Jetzt kein Abzug – die bestandene Abnahme kostet dann ${abzug === 0.5 ? "½ Stern" : "1 Stern"} (${niveau}: Der erste Versuch zählt wie in der Prüfung). Prüf vorher selbst nach.`;
   }
   function zaehlen(el, ziel){
     if (UI.bewegung() !== "voll") { el.textContent = `+${fmtEuro(ziel)}`; return; }

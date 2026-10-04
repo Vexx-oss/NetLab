@@ -49,6 +49,7 @@
 .am-symptom b{color:var(--muted); font-weight:600}
 .am-ziele-liste{display:flex; flex-direction:column; gap:10px; padding-bottom:6px}
 .am-ziele-liste .sp-ziele li{font-size:14.5px}
+.am-grund{display:block; margin-top:1px; color:var(--warn); font-size:12.5px; font-weight:600}   /* Einstieg: warum das Ziel noch offen ist */
 .am-fuss{display:flex; justify-content:flex-end; gap:8px; padding:10px 14px 12px; border-top:1px solid var(--line)}
 
 /* ---- Auftragsleiste (Prüfungstag) ---- */

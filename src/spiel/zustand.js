@@ -20,7 +20,7 @@ Spiel._einst = null;
 Spiel._trocken = false;          /* Testlauf: keine Bus-Ereignisse, kein Speichern, kein Lernmotor */
 Spiel._hoererAn = false;
 
-Spiel.EINST_STANDARD = {wahl: "auto", niveau: "E", unterricht: null, vorhersage: true, animationen: true, coach: true};
+Spiel.EINST_STANDARD = {wahl: "auto", niveau: "E", unterricht: null, vorhersage: true, animationen: true, coach: true, ton: "leise"};
 
 Spiel.leererStand = function(){
   return {
@@ -136,7 +136,9 @@ Spiel.einstSetzen = function(k, v){
   const e = Spiel.einst;
   if (e[k] === v) return;
   e[k] = v;
-  if (!Spiel._trocken) store.set("einst", e);
+  /* in einen frischen Stand schreiben: „einst“ teilen sich Spiel und Oberfläche (Thema, Labor, Leiste …);
+     der Zwischenspeicher Spiel._einst wäre dafür zu alt */
+  if (!Spiel._trocken) { const frisch = store.get("einst", {}) || {}; frisch[k] = v; store.set("einst", frisch); }
   Spiel.melden("einst-geaendert", {k, v});
   if (k === "wahl" && Spiel._st && Spiel._st.aktiv && typeof Spiel.niveauAktualisieren === "function") Spiel.niveauAktualisieren();
 };

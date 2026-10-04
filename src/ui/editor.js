@@ -30,6 +30,8 @@ UI.labor = (() => {
   const pos = id => Z.pos.get(id) || Z.netz?.geraete[id] || null;
   const raster = v => Math.round(v / RASTER) * RASTER;
   const einst = () => store.get("einst", {}) || {};
+  /* „!“-Warnungen der Live-Prüfung (Modell.pruefen): Stufenregeln entscheiden je Ticket (laden-Option warnungen) */
+  const warnungenAn = () => { const w = Z.opt && Z.opt.warnungen; return typeof w === "function" ? !!w() : w !== false; };
   function einstLabor(teil){ const e = einst(); e.labor = Object.assign({}, e.labor, teil); store.set("einst", e); }
 
   /* ---------- Aufbau ---------- */
@@ -379,7 +381,7 @@ UI.labor = (() => {
     el.append(sv("text", {class: "ger-name", x: 0, y: g.typ === "internet" ? 38 : 44, "text-anchor": "middle", text: g.name}));
     if (a.text) el.append(sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: g.typ === "internet" ? 52 : 58, "text-anchor": "middle", text: a.text}));
     el.append(sv("title", {text: `${g.name} – ${art.titel}${g.an ? "" : " (ausgeschaltet)"}\n${a.text || ""}\nZiehen = verschieben · Doppelklick = Inspektor · Rechtsklick = Menü`.trim()}));
-    const w = Z.warn.get(g.id);
+    const w = warnungenAn() ? Z.warn.get(g.id) : null;
     if (w && w.length) {
       const b = sv("g", {class: "badge badge-warn", transform: "translate(24 -24)"});
       b.append(sv("circle", {r: 9.5}), sv("path", {d: "M0 -4.5v5M0 3.6v.1"}), sv("title", {text: "Prüfung meldet:\n• " + w.join("\n• ")}));
@@ -745,6 +747,15 @@ UI.labor = (() => {
     inspektor: zu => inspektorUmschalten(zu),
     simulation: zu => simUmschalten(zu),
     auftragNeu: () => auftragZeichnen(),
+    warnungenAn,
+    auffrischen: () => { zeichnen(); inspektorZeigen(); },
+    /* für Szenen (ui/szene.js): Weltposition, Bildschirmposition auf der Leinwand, Paket zwischen zwei Geräten */
+    pos: id => { const p = pos(id); return p ? {x: p.x, y: p.y} : null; },
+    bildschirm: id => { const p = pos(id); return p ? {x: p.x * Z.view.k + Z.view.tx, y: p.y * Z.view.k + Z.view.ty, k: Z.view.k} : null; },
+    get leinwand(){ return Z.el.leinwand || null; },
+    get geraetEl(){ return id => Z.gEl.get(id) || null; },
+    paket: (von, nach, o = {}) => bereit().animiere ? F.animiere({art: "senden", geraet: von, port: null, nach: {geraet: nach}, proto: o.proto || "TCP", frame: {}}, {ms: o.ms, beschriften: false}) : Promise.resolve(),
+    erfolg: id => bereit().erfolgEffekt ? F.erfolgEffekt(id) : Promise.resolve(),
     _: Z, _f: F,
   };
   return api;

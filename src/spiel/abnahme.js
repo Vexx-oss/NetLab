@@ -41,7 +41,8 @@ Spiel.abnahme = function(inst, {neustartTest = true} = {}){
   return abnahme;
 };
 
-/* Sterne: 5, minus Hilfen (Stufe 4: −½, 5: −½, 6: −1), minus ½ bei AP1, wenn ein Neustart die Lösung löschen würde. Mindestens 1. */
+/* Sterne: 5, minus Hilfen (Stufe 4: −½, 5: −½, 6: −1), minus ½ bei AP1, wenn ein Neustart die Lösung löschen würde,
+   minus Versuchsabzug ab dem 2. Abnahmeversuch (Stufenregeln: AP1 −½, AP2 −1, je einmal). Mindestens 1. */
 Spiel.sterneBerechnen = function(inst, {niveau, neustartVerlust} = {}){
   const abzuege = [];
   const h = inst.hilfeStufe || 0;
@@ -49,6 +50,8 @@ Spiel.sterneBerechnen = function(inst, {niveau, neustartVerlust} = {}){
   if (h >= 5) abzuege.push({text: "Hilfe: konkreter Hinweis", sterne: 0.5});
   if (h >= 6) abzuege.push({text: "Hilfe: Lösung vorgeführt", sterne: 1});
   if (neustartVerlust && niveau === "AP1") abzuege.push({text: "Nicht gespeichert: Nach einem Neustart wäre die Änderung weg", sterne: 0.5});
+  const versuch = (inst.abnahmen || 0) + 1, abzug = Spiel.regeln(inst).versuchAbzug;
+  if (abzug && versuch >= 2) abzuege.push({text: `${versuch}. Abnahmeversuch – im ${niveau || "AP"}-Niveau zählt der erste wie in der Prüfung`, sterne: abzug});
   const summe = abzuege.reduce((s, a) => s + a.sterne, 0);
   return {sterne: Math.max(1, 5 - summe), abzuege};
 };

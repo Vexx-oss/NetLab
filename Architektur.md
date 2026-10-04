@@ -273,3 +273,23 @@ Rust-Befehle (Tauri `invoke`): `speichern{json}`, `fenster_modus{modus}`, `immer
 - **Eine Quelle für Hinweise**: Ein Element mit `data-hinweisquelle` in der Auftragszeile (Coach) schaltet den Werkzeug-Hinweis der Fläche stumm. Toasts: höchstens einer gleichzeitig; ein verdrängter Toast mit Aktion kommt einmal nach.
 - **Lehrtexte auf Klick**: `UI.erklaeren(code, niveau)` (Präfix `ex-`) zeigt `DATEN.lehrtexte[code]` erst auf „Erklär mir das“, dann auf Wunsch ausführlicher (AP1 → E), zuletzt die Quelle.
 - **Inspektor**: Reiter beginnen mit „Übersicht“; Terminal/Konsole ist ein Knopf im Kopf (`K.reiter = "konsole"` bleibt der interne Zustand, `UI.inspektor.reiter(c, "konsole")` gilt weiter).
+
+### 9.2 Welle 1, Sitzung S1 „Sofortgefühl“ (Design – Spielspaß 2.0)
+
+```js
+Spiel.regeln(inst) → { niveau, warnungen:bool, liveHaken:bool, liveGrund:bool, versuchAbzug:0|0.5|1 }
+  // Stufenregeln (Design § 6): E: Warnungen an, Haken mit Grund, Versuche frei
+  //   AP1: Warnungen erst ab Hilfestufe 2, Haken ohne Grund, −½ ★ ab dem 2. Abnahmeversuch (einmalig)
+  //   AP2: keine Warnungen, Haken erst bei der Abnahme, −1 ★ ab dem 2. Versuch (einmalig). Prüfung: wie AP2, ohne Abzug.
+inst.abnahmen                     // Zahl der Abnahmeversuche (gab es schon); Spiel.abnahme zählt hoch
+Spiel.szene(inst, abnahme) → [ { ziel, art:"druckt"|"seite"|"adresse"|"gesperrt"|"haken"|"sicherung",
+                                  pfad:[geraeteId], von, ende:geraeteId, text } ]   // headless, aus der Trace der Abnahme
+Spiel.geaenderteGeraete(inst) → [geraeteId]   // Diff gegen das Startnetz: Konfig, Strom, startup, Kabel, neu
+Spiel.tonPegel(ton, {modus, fokus}) → 0..1    // "aus"→0; Leiste oder ohne Fokus → 0; "leise" 0.18, "normal" 0.4
+store "einst".ton = "aus"|"leise"|"normal"    // Standard "leise" (Spiel.EINST_STANDARD)
+Spiel.postfachZiel() → 2 | 3                  // bis zum 2. erledigten Auftrag zwei Angebote verschiedener Kunden (erste Wahl), dann 3
+```
+
+- **Funktionsprobe** (`ui/szene.js`, Präfix `sz-`): nach bestandener Abnahme 2–6 s im Labor – geänderte Geräte pulsieren, je Ziel (max. 4, AP1/AP2 max. 2) fährt ein Paket den Pfad, das Endgerät reagiert, der Kunde spricht an seinem Gerät. Überspringbar (Esc, Klick, Leertaste); bei reduzierter Bewegung eine Haken-Liste (1,2 s). Danach der Ergebnisdialog mit höchstens drei Blöcken (`.sp-block`): Sterne + Lohn · Dein Weg · Merke.
+- **`UI.labor.laden(…, {warnungen: () => bool})`**: steuert die „!“-Warnungen auf der Fläche und im Inspektor (Kopf-Chip, Abschnitt Hinweise, gelbe Feldwarnungen). Ohne Angabe: an.
+- **Spielgefühl**: `UI.juice(el, art)` setzt kurz die Klasse `jc-<art>` (nichts bei Bewegung „aus“); `UI.klang.spielen(name)` (`ui/klang.js`, WebAudio, keine Dateien) → `true`, wenn hörbar gespielt.
