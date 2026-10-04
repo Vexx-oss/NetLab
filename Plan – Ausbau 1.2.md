@@ -1,12 +1,18 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Plan]
 erstellt: 2026-10-04
-status: Plan (2 Iterationen), noch nichts gebaut – Grundlage für die Opus-Sitzungen
+status: Phase 0 und A gebaut (04.10.2026, Zweig ausbau-1.2) – Haltepunkt, du spielst an; B–F offen
 ---
 
 # 🗺️ Plan – Ausbau 1.2 „Übersichtlich, abwechslungsreich, mit echtem Terminal"
 
 ⬆️ [[10-Projekte/Lernprojekte/Netzwerk-Labor/Liesmich|Netzwerk-Labor]] · Vertrag: [[Architektur]] · Spezifikation: [[Konzept – Netzwerk-Labor]]
+
+> [!success] Stand 04.10.2026: Phase 0 und A fertig, im echten Programm durchgespielt
+> **Programm:** `Programm/Netzwerk-Labor.exe` (gebaut 04.10. 13:58, Versionsnummer noch 1.1.0, die kommt in F). Die bisherige 1.1-.exe liegt als Rückfall in `Programm/Endversion-1.1/`.
+> **Git:** Zweig `ausbau-1.2`, 4 Commits (Kundenpost-Reparatur, Messwerkzeug, A1+A3, A2+A4). **Tests:** 126 grün (124 + 2 neue für die Kundenpost).
+> **Abnahme A:** Startzustand „Kasse ohne Netz“ **12 Bedienelemente** (vorher 30), **32 Wörter** (vorher 120), **1 Hauptknopf**, in 1366×768 und schmal (960 px, Inspektor 320 px). Szenario bis zur bestandenen Abnahme ohne JS-Fehler. Einzelheiten: [[#Ergebnis Phase 0 und A]].
+> **Haltepunkt:** Bitte anspielen und sagen, ob es stimmt. Phase B beginnt erst danach.
 
 ## 0 · Auf einen Blick
 
@@ -41,6 +47,8 @@ Aus dem Projekt und aus früheren Fehlschlägen – Opus liest das zuerst:
 
 ## Phase 0 · Bestand klären (halbe Stunde)
 
+> [!check] Erledigt 04.10.2026 – Ergebnis und Ist-Werte: [[#Ergebnis Phase 0 und A]]
+
 - Im Git liegen ungespeicherte Änderungen: `src/spiel/abnahme.js`, `postfach.js`, `ui/spiel.js` geändert, `src/spiel/post.js` neu und nicht in Git. Erst prüfen, ob das ein angefangenes Stück ist (Diff lesen, Tests laufen lassen), dann committen oder sauber zurücknehmen. Nicht darauf weiterbauen, ohne es zu verstehen.
 - Die Datei `Programm/Endversion-1.0/Cisco Packet Tracer 2 - Keine Viren.rar` gehört nicht ins Projekt-Git (nicht anfassen, nur aus dem Commit heraushalten).
 - Basislinie festhalten: 124 Tests grün, Tag `v1.1`. Neuer Zweig `ausbau-1.2`.
@@ -49,6 +57,8 @@ Aus dem Projekt und aus früheren Fehlschlägen – Opus liest das zuerst:
 ---
 
 ## Phase A · Aufräumen: weniger auf einmal, klarer Blick
+
+> [!check] Gebaut 04.10.2026, Abnahme erfüllt (12 Elemente, 32 Wörter, 1 Hauptknopf) – [[#Ergebnis Phase 0 und A]]. **Haltepunkt: du spielst an.**
 
 **Ziel:** Beim Öffnen eines Auftrags weiß man in 5 Sekunden, was zu tun ist.
 
@@ -74,6 +84,79 @@ Aus dem Projekt und aus früheren Fehlschlägen – Opus liest das zuerst:
 - Sichtbare Bedienelemente im Labor-Startzustand: von *Ist* auf höchstens **12**; Wörter oberhalb der Falz höchstens **40**; genau **ein** hervorgehobener Primärknopf je Zustand (per `cdp.py eval` zählen, Wert in die Notiz).
 - Szenario: Neuer Spielstand → Erster Auftrag → Fach „Endgeräte“ öffnen → PC platzieren → Mappe öffnen/schließen → Abnahme. Bildschirmfotos vorher/nachher in 1366×768 **und** schmal (Leiste 320 px).
 - 124 Tests bleiben grün. **Haltepunkt: du spielst an.**
+
+---
+
+## Ergebnis Phase 0 und A
+
+*Gebaut und geprüft am 04.10.2026. Alles unten ist im echten Programm gesehen (`python tools/cdp.py start --frisch` + `lauf`), nicht nur getestet.*
+
+### Phase 0 · Bestand
+
+- **Ungespeicherte Änderungen** waren ein fast fertiges Stück „Kundenpost“ (Lob vom Kunden nach dem 2. und 5. Ticket, Notiz vom Senior bei neuem Kunden). **Behalten und repariert:** In `ui/spiel.js` stand ein `"\n"` als echter Zeilenumbruch im String → Syntaxfehler, das Programm wäre gar nicht gestartet (die Tests laden `ui/` nicht, deshalb waren sie trotzdem grün). Dazu fehlten zwei CSS-Regeln. Zwei Tests ergänzt. Im Programm gesehen: Hinweis „✉ Neue Nachricht“, Abschnitt „Nachrichten“ im Postfach.
+- Die `.rar` bleibt per `.gitignore` draußen (nicht angefasst). Zweig `ausbau-1.2` angelegt.
+- **Neues Messwerkzeug:** `python tools/cdp.py lauf schritte.txt [mess.json]` spielt ein Szenario in einer Sitzung (feste Fenstergröße per Emulation, Klick/Ziehen per CSS-Selektor, `messen`, `shot`) und meldet JS-Fehler. Dazu `python tools/klassen.py` (Abgleich Klassen im JS ↔ CSS; 11 bekannte Altfälle, alles IDs/Bus-Namen).
+
+**So wird gemessen** (Abnahme A): *Bedienelemente* = sichtbare, nicht gesperrte, wirklich anklickbare Knöpfe/Felder/Reiter; *Wörter* = sichtbarer Text im Fenster ohne Scrollen. Bereich **„Labor“** = alles außer Kopfzeile, Andock-Leiste und der Zeichnung selbst (Gerätenamen, IPs); in Klammern das **ganze Fenster**. Kopfzeile und Andock-Leiste (13 Knöpfe) hat Phase A nicht angefasst.
+
+### Messwerte vorher → nachher
+
+| Zustand („Kasse ohne Netz“, neuer Spielstand) | Bedienelemente Labor (Fenster) | Wörter Labor (Fenster) | Hauptknöpfe |
+|---|---|---|---|
+| **Ist 1.1**, Start, 1366×768 | 30 (43) | 120 (160) | 1 |
+| **Ist 1.1**, Start, 960×768 | 30 (42) | 100 (121) | 1 |
+| **Nachher**, Start, 1366×768 | **12** (25) | **32** (70) | **1** – Abnahme |
+| **Nachher**, Start, 960×768 | **12** (24) | **32** (65) | **1** – Abnahme |
+| Fach „Endgeräte“ offen | 15 | 55 | 1 |
+| PC platziert (Inspektor erscheint) | 19 | 50 | 1 |
+| Mappe offen | 20 | 112 | 1 – „Zurück ins Labor“ |
+| Simulation offen (nach dem ersten Ping) | 34 | 168 | 1 |
+| 2. Auftrag: Mappe klappt von selbst auf | 12 | 76 | 1 – „Los geht’s“ |
+| 2. Auftrag nach dem Schließen | 11 | 17 | 1 |
+
+Die Grenzen (≤ 12, ≤ 40, genau 1) gelten für den **Startzustand** und sind erfüllt. Fach, Mappe und Simulation sind Zustände zum Auswählen bzw. Lesen und haben mehr – aber auch dort genau einen Hauptknopf. Ehrlich dazu: Das **Freie Labor** hat keinen Hauptknopf (kein Ziel, also keine Abnahme).
+
+### Was gebaut ist
+
+- **A1 Geräte-Fächer:** 4 Kategorien links, Klick öffnet ein Fach (Symbol, Name, Kurzzeile, Taste), ziehen oder anklicken, Umschalt hält das Fach offen, „Zuletzt benutzt“ (max. 3), Tasten **1–4** öffnen Fächer, im Fach **1…n** wählt das Gerät; Befehlspalette kann „… einsetzen“.
+- **A2 Auftragszeile + Mappe:** eine Zeile (Kunde · Titel · Ziele x/y · *Auftrag lesen* · *Abnahme* · ⋯). Hilfe steckt im ⋯-Menü (Hilfeleiter unverändert). Mappe mit **Brief** (max. ~60 Wörter, Rest „mehr lesen“, Symptom) und **Ziele** (Live-Haken); klappt beim ersten Öffnen eines Auftrags einmal auf.
+- **A3:** Ebenen-Reiter → **Ansicht-Menü** (Ticket legt die Ebene fest, Einstieg zeigt das Menü nicht); Zoom → **ein** Knopf mit Menü; Rückgängig erst sichtbar, wenn es etwas gibt; **Inspektor** erscheint mit der ersten Auswahl, beginnt mit „Übersicht“, **Terminal/Konsole ist ein Knopf im Kopf**; **Simulation** bleibt unsichtbar bis zum ersten Ping und klappt dann einmal auf.
+- **A4 Textdiät:** Coach = ein Satz + „Hinweise aus“; Werkzeughinweis schweigt, solange der Coach spricht; **höchstens ein Toast** gleichzeitig; Lehrtexte in Simulation und „Noch nicht ganz“ erst auf **„Erklär mir das“** (dann ausführlicher, zuletzt die Quelle).
+
+### Entscheidungen, die du kennen solltest
+
+- **Tastenkürzel geändert:** 1–4 öffnen jetzt die Fächer, die Ebenen liegen auf **Umschalt+1…5**.
+- **Erster Auftrag ohne Mappe:** Willkommen + Coach übernehmen dort; ab dem 2. Auftrag klappt sie auf (Brief, oder Ziele, wenn du den Brief im Postfach schon gelesen hast). In der Prüfung keine Mappe.
+- **Platzieren** kehrt danach zum vorherigen Werkzeug zurück (im Szenario gefunden: Sonst verschob der Coach-Schritt „Kabel ziehen“ nach dem Platzieren die Kasse).
+- **Nicht gebaut, weil es keinen Auslöser gibt:** Puls auf eine Kategorie (kein Ticket verlangt ein neues Gerät) und ausgegraute „im Shop gesperrte“ Geräte (der Shop sperrt keine Geräte). Kommt, sobald es das gibt.
+- **Terminal-Knopf** öffnet vorerst die bisherige Konsole im Inspektor; das eigene Terminal unten ist Phase C.
+
+### Noch offen / aufgefallen
+
+- Mit offener Simulation **und** Inspektor wird die Zeichenfläche in 1366×768 klein (Zoom ~35 %). Das war vorher genauso; passt gut zu Phase C (Terminal und Simulation unten als Reiter).
+- Kopfzeile und Andock-Leiste sind unverändert (zusammen 13 Knöpfe im ganzen Fenster).
+- Versionsnummer, Liesmich und Wiki kommen in Phase F.
+
+### Bildschirmfotos
+
+Vorher (1.1) und nachher, Startzustand – 1366×768:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/vorher-1366-start.png|640]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-1-start.png|640]]
+
+Schmal (960 px, Inspektor 320 px) – vorher und nachher:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/vorher-960-start.png|480]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-960-1-start.png|480]]
+
+Szenario (1366×768): Fach → PC platziert → Mappe → „Erklär mir das“ → Simulation → bestanden:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-2-fach.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-3-pc.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-4-mappe.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-6-erklaer.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-8-sim.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-9-ergebnis.png|420]]
+
+Außerdem gesehen: 2. Auftrag mit aufgeklappter Mappe, Terminal-Knopf, Kundenpost im Postfach, Ansicht-Menü im Freien Labor:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-10-ticket2-mappe.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-12-terminal.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-14-postfach-post.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-Phase-A/nachher-1366-16-sandbox-ansicht.png|420]]
+
+Alle Bilder und Messdateien (`*.json`): `Nachweise/1.2-Phase-A/` (liegt im Vault, nicht im Git).
 
 ---
 
