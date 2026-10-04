@@ -168,11 +168,13 @@ CLI.baeumeBauen = function(){
       S("arp", "IP ARP table", "ARP-Tabelle", s => Z().arp(s)),
       W("dhcp", "Show items in the DHCP database", "DHCP-Server", {nur: istRouter, k: [
         S("binding", "DHCP address bindings", "vergebene Adressen (Leases)", s => Z().dhcpBinding(s)),
+        S("conflict", "DHCP address conflicts", "Adresskonflikte (vor der Vergabe per Ping erkannt)", s => Z().dhcpKonflikt(s)),
         S("pool", "DHCP pools information", "Pools und Auslastung", s => Z().dhcpPool(s))]}),
       W("interface", "IP interface status and configuration", "Schnittstellen auf Schicht 3", {k: [
         S("brief", "Brief summary of IP status and configuration", "Kurzübersicht: Adresse und Status jeder Schnittstelle", s => Z().ipIntBrief(s))]}),
       W("nat", "IP NAT information", "NAT", {nur: istRouter, k: [
-        S("translations", "Translation entries", "aktuelle Übersetzungen innen ↔ außen", s => Z().natTrans(s))]}),
+        S("translations", "Translation entries", "aktuelle Übersetzungen innen ↔ außen", s => Z().natTrans(s)),
+        S("statistics", "Translation statistics", "Zähler, innen/außen-Schnittstellen, Regeln", s => Z().natStatistik(s))]}),
       S("route", "IP routing table", "Routingtabelle", s => Z().ipRoute(s)),
     ]}),
     W("mac", "MAC configuration", "MAC-Adressen", {nur: istSwitch, k: [
@@ -183,6 +185,7 @@ CLI.baeumeBauen = function(){
     S("running-config", "Current operating configuration", "aktuelle Konfiguration im RAM", (s, a) => Z().showRun(s, a.if), {nur: priv, privOnly: true, cr: true, k: [
       W("interface", "Show interface configuration", "nur eine Schnittstelle", {k: [P("IF", "if", "if", "", "", {arten: ["phys", "sub", "svi"]})]})]}),
     S("startup-config", "Contents of startup configuration", "gesicherte Konfiguration im NVRAM", s => Z().showStart(s), {nur: priv, privOnly: true}),
+    S("users", "Display information about terminal lines", "wer ist angemeldet (Konsole, SSH)", s => Z().benutzer(s)),
     S("version", "System hardware and software status", "Software, Laufzeit, Speicher, Config-Register", s => Z().version(s)),
     S("vlan", "VTP VLAN status", "VLANs und ihre Ports", s => Z().vlan(s, false), {nur: istSwitch, cr: true, k: [
       S("brief", "VTP all VLAN status in brief", "Kurzübersicht", s => Z().vlan(s, true))]}),
@@ -237,6 +240,39 @@ CLI.baeumeBauen = function(){
   function secret(s, a){
     if (a.no) { h.setzen(s, "enableSecret", null); return ""; }
     h.setzen(s, "enableSecret", a.pw); return "";
+  }
+  /* SSH-Zugang (Phase C): ip domain-name, crypto key generate rsa, username, line vty … transport input ssh / login local.
+     IOS-ähnlich: Schlüssel werden nur vermerkt (keine echte Kryptografie), Bits 360–4096. */
+  function domainName(s, a){
+    if (a.no) { h.setzen(s, "domainName", ""); return ""; }
+    if (!/^[A-Za-z0-9.-]+$/.test(a.name || "")) return fehler("% Invalid domain name", "z. B. labor.local");
+    h.setzen(s, "domainName", a.name); return "";
+  }
+  function rsaErzeugen(s, bits){
+    const k = K(s);
+    h.setzen(s, "sshSchluessel", {bits});
+    return [`The name for the keys will be: ${k.hostname}.${k.domainName}`, "",
+      `% The key modulus size is ${bits} bits`, `% Generating ${bits} bit RSA keys, keys will be non-exportable...`, "[OK] (elapsed time was 1 seconds)", "",
+      "%SSH-5-ENABLED: SSH 1.99 has been enabled"].join("\n");
+  }
+  function crypto(s, a){
+    const g = G(s), k = K(s);
+    if (a.zeroize) { h.setzen(s, "sshSchluessel", null); return "% All keys will be removed.\n%SSH-5-DISABLED: SSH 1.99 has been disabled"; }
+    if (!k.hostname || k.hostname === Modell.NAMEN[g.typ]) return fehler(`% Please define a hostname other than ${Modell.NAMEN[g.typ]}.`, "Erst „hostname …“ setzen – der Schlüssel heißt nach Name und Domäne.");
+    if (!k.domainName) return fehler("% Please define a domain-name first.", "„ip domain-name labor.local“ – dann noch einmal.");
+    if (a.bits != null) return rsaErzeugen(s, a.bits);
+    return {ausgabe: `The name for the keys will be: ${k.hostname}.${k.domainName}\nChoose the size of the key modulus in the range of 360 to 4096 for your\n  General Purpose Keys. Choosing a key modulus greater than 512 may take\n  a few minutes.\n`,
+      rueckfrage: {prompt: "How many bits in the modulus [512]: ", auto: "", weiter(s, z){
+        const n = z.trim() ? parseInt(z, 10) : 512;
+        if (!(n >= 360 && n <= 4096)) return fehler("% Invalid modulus size (360–4096).", "1024 oder 2048 sind üblich; SSH Version 2 braucht mindestens 768 Bit.");
+        return rsaErzeugen(s, n).split("\n").slice(2).join("\n");
+      }}};
+  }
+  function username(s, a){
+    const b = tief(K(s).benutzer || {});
+    if (a.no) { delete b[a.name]; h.setzen(s, "benutzer", b); return ""; }
+    b[a.name] = {pw: a.pw, art: a.art || "secret"};
+    h.setzen(s, "benutzer", b); return "";
   }
   /* interface X: Subinterfaces und SVIs entstehen beim ersten Aufruf (wie IOS) */
   function ifWaehlen(s, a){
@@ -482,6 +518,10 @@ CLI.baeumeBauen = function(){
         W("excluded-address", "Prevent DHCP from assigning certain addresses", "Adressen nicht vergeben (Router, Server, Drucker)", {f: excluded, k: [
           IPN("von", "Low IP address", "erste Adresse", {cr: true, k: [IPN("bis", "High IP address", "letzte Adresse")]})]}),
         W("pool", "Configure DHCP address pools", "DHCP-Pool anlegen oder bearbeiten", {k: [P("WORD", "wort", "pool", "Pool name", "Name, z. B. LAN", {f: poolWaehlen})]})]}),
+      W("domain-name", "Define the default domain name", "Domänenname (für SSH-Schlüssel und Namen)", {noCr: true, f: domainName, k: [
+        P("WORD", "wort", "name", "Default domain name", "z. B. labor.local")]}),
+      W("routing", "Enable IP routing", "IP-Routing (beim Router immer an)", {nur: istRouter, f: (s, a) => a.no
+        ? fehler("% Im Labor routet ein Router immer – „no ip routing“ ist nicht nachgebaut.", "Ein Router ohne Routing wäre ein Host; dafür gibt es hier PCs und Server.") : ""}),
       W("domain-lookup", "Enable IP Domain Name System hostname translation", "unbekannte Wörter per DNS auflösen (no = Tippfehler kosten keine Wartezeit)",
         {f: (s, a) => { h.setzen(s, "domainLookup", !a.no); return ""; }}),
       W("nat", "NAT configuration commands", "NAT (Adressübersetzung)", {nur: istRouter, k: [
@@ -503,6 +543,17 @@ CLI.baeumeBauen = function(){
                     P("IF", "if", "aus", "", "", {arten: ["phys", "sub"], cr: true, k: [IPN("nh", "Forwarding router's address", "Next Hop", {cr: true, k: [AD]}), AD]})];
           }})]})]}),
     ]}),
+    W("crypto", "Encryption module", "Schlüssel (für SSH)", {nein: false, k: [W("key", "Long term key operations", "RSA-Schlüssel", {k: [
+      W("generate", "Generate new keys", "neu erzeugen", {k: [W("rsa", "Generate RSA keys", "RSA-Schlüsselpaar – schaltet SSH ein", {cr: true, f: crypto, k: [
+        W("general-keys", "Generate a general purpose RSA key pair", "Mehrzweck-Schlüssel", {cr: true, f: crypto, k: [
+          W("modulus", "Provide number of modulus bits on the command line", "Schlüssellänge direkt angeben", {k: [P("<360-4096>", "zahl", "bits", "size of the key modulus", "z. B. 1024", {min: 360, max: 4096, f: crypto})]})]}),
+        W("modulus", "Provide number of modulus bits on the command line", "Schlüssellänge direkt angeben", {k: [P("<360-4096>", "zahl", "bits", "size of the key modulus", "z. B. 1024", {min: 360, max: 4096, f: crypto})]})]})]}),
+      W("zeroize", "Remove keys", "Schlüssel löschen", {k: [W("rsa", "Remove RSA keys", "RSA-Schlüssel löschen – SSH aus", {n: "zeroize", v: true, f: crypto})]})]})]}),
+    W("username", "Establish User Name Authentication", "lokaler Benutzer (für „login local“, SSH)", {k: [P("WORD", "wort", "name", "User name", "z. B. admin", {noCr: true, f: username, k: [
+      W("secret", "Specify the secret for the user", "Passwort (verschlüsselt gespeichert)", {n: "art", v: "secret", k: [P("WORD", "wort", "pw", "The UNENCRYPTED (cleartext) user secret", "Passwort im Klartext", {f: username})]}),
+      W("password", "Specify the password for the user", "Passwort (Klartext, Typ 0/7)", {n: "art", v: "password", k: [P("WORD", "wort", "pw", "The UNENCRYPTED (cleartext) user password", "Passwort im Klartext", {f: username})]})]})]}),
+    W("service", "Modify use of network based services", "Dienste des Geräts", {k: [
+      W("password-encryption", "Encrypt system passwords", "Passwörter in der Konfiguration verschleiern (Typ 7)", {f: (s, a) => { h.setzen(s, "pwVerschluesseln", !a.no); return ""; }})]}),
     W("line", "Configure a terminal line", "Zugang konfigurieren (Konsole, Fernzugang)", {k: [
       W("console", "Primary terminal line", "Konsolenanschluss", {k: [P("<0-0>", "zahl", "nr", "First Line number", "", {min: 0, max: 0, f: lineWaehlen("con")})]}),
       W("vty", "Virtual terminal", "Fernzugang (Telnet/SSH)", {k: [P("<0-15>", "zahl", "von", "First Line number", "erste Leitung", {min: 0, max: 15, cr: true, f: lineWaehlen("vty"), k: [
@@ -728,10 +779,15 @@ CLI.baeumeBauen = function(){
   line.k.push(doN, ende, exitSub,
     W("logging", "Modify message logging facilities", "Meldungen", {k: [
       W("synchronous", "Synchronized message output", "Meldungen unterbrechen die Eingabe nicht", {f: (s, a) => lineAendern(s, l => { if (a.no) delete l.logsync; else l.logsync = true; })})]}),
-    W("login", "Enable password checking", "beim Anmelden nach dem Passwort fragen", {f: (s, a) => lineAendern(s, (l, art) => {
+    W("login", "Enable password checking", "beim Anmelden nach dem Passwort fragen", {cr: true, f: (s, a) => lineAendern(s, (l, art) => {
       l.login = !a.no;
       if (!a.no && !l.passwort && art === "con") return {ausgabe: "% Login disabled on line 0, until 'password' is set", hinweis: "Erst „password …“ setzen, sonst fragt die Konsole nicht."};
-    })}),
+    }), k: [W("local", "Local password checking", "Benutzername + Passwort aus „username …“ (für SSH nötig)", {f: (s, a) => lineAendern(s, l => { l.login = a.no ? true : "local"; })})]}),
+    W("transport", "Define transport protocols for line", "Protokolle für den Fernzugang", {k: [W("input", "Define which protocols to use when connecting to the terminal server", "erlaubte Protokolle eingehend", {k: [
+      W("ssh", "TCP/IP SSH protocol", "nur SSH (verschlüsselt) – empfohlen", {n: "proto", v: "ssh", f: (s, a) => lineAendern(s, l => { l.transport = a.no ? null : "ssh"; })}),
+      W("telnet", "TCP/IP Telnet protocol", "nur Telnet (unverschlüsselt)", {n: "proto", v: "telnet", f: (s, a) => lineAendern(s, l => { l.transport = a.no ? null : "telnet"; })}),
+      W("all", "All protocols", "SSH und Telnet", {n: "proto", v: "all", f: (s, a) => lineAendern(s, l => { l.transport = a.no ? null : "all"; })}),
+      W("none", "No protocols", "kein Fernzugang", {n: "proto", v: "none", f: (s, a) => lineAendern(s, l => { l.transport = a.no ? null : "none"; })})]})]}),
     noN(() => line.k),
     W("password", "Set a password", "Passwort für diesen Zugang", {noCr: true, f: (s, a) => lineAendern(s, l => { if (a.no) delete l.passwort; else l.passwort = a.pw; }), k: [
       P("LINE", "rest", "pw", "The UNENCRYPTED (cleartext) line password", "Passwort im Klartext")]}),

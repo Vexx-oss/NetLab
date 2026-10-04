@@ -25,7 +25,7 @@ UI.konsole = (() => {
     if (verlauf) S.verlauf = verlauf;
     const c = cli();
     if (c && !S.sitzung && typeof c.sitzung === "function") {
-      try { S.sitzung = c.sitzung(netz, id, {verlauf: S.verlauf, einstieg: niveau() === "E"}); S.fehler = null; }
+      try { S.sitzung = c.sitzung(netz, id, {verlauf: S.verlauf, einstieg: niveau() === "E", tipps: {E: "alle", AP1: "fehler", AP2: "keine"}[niveau()] || "alle"}); S.fehler = null; }
       catch (e) { console.error("CLI.sitzung", e); S.fehler = String(e && e.message || e); }
     }
     return S;
@@ -120,6 +120,8 @@ UI.konsole = (() => {
   /* ---------- Ausgabe ---------- */
   function blockEl(b){
     if (b.art === "echo") return h("div", {class: "ko-echo"}, h("span", {class: "ko-echo-prompt"}, b.prompt), b.text);
+    if (b.art === "pakete") return h("div", {class: "ko-pakete"}, h("button", {type: "button", class: "ko-pakete-knopf", title: "Die Aufzeichnung dieses Befehls in der Simulation ansehen",
+      onclick: () => { UI.labor.zeigeTrace?.(b.trace, {quelle: "terminal", abspielen: false}); UI.labor.dock?.("sim"); }}, "Pakete ansehen ▸"));
     const el = h("pre", {class: "ko-block " + b.art});
     for (const [i, z] of b.text.split("\n").entries()) {
       if (i) el.append("\n");
@@ -129,7 +131,7 @@ UI.konsole = (() => {
     return el;
   }
   function block(K, art, text, prompt){
-    const b = art === "echo" ? {art, text, prompt} : {art, text: String(text).replace(/\n$/, "")};
+    const b = art === "echo" ? {art, text, prompt} : art === "pakete" ? {art, trace: text} : {art, text: String(text).replace(/\n$/, "")};
     K.S.bloecke.push(b);
     if (K.S.bloecke.length > MAX_BLOECKE) { K.S.bloecke.splice(0, K.S.bloecke.length - MAX_BLOECKE); K.ausgabeEl.firstChild?.remove(); }
     K.ausgabeEl.append(blockEl(b));
@@ -159,6 +161,9 @@ UI.konsole = (() => {
       S.frage = aus.slice(i + 1); aus = aus.slice(0, i + 1);
     }
     if (aus.replace(/\n+$/, "")) block(K, "aus", aus);
+    /* Phase C: Paket auf der Fläche abspielen (die Simulation frischt sich nur auf), Link zur Aufzeichnung, Beweis für die Akte */
+    if (r && r.trace && UI.labor.netz === K.netz) { try { UI.labor.zeigeTrace(r.trace, {quelle: "terminal", wechseln: false}); } catch (e) { console.error(e); } block(K, "pakete", r.trace); }
+    if (r && zeile.trim()) Bus.senden("befehl", {netz: K.netz, id: K.id, befehl: zeile.trim(), ergebnis: r});
   }
   function ausfuehrenAlles(K, text){
     const zeilen = String(text).replace(/\r/g, "").split("\n");

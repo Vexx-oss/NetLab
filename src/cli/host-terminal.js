@@ -75,22 +75,76 @@
   /* Webseite im Labor (curl): kleine, erkennbare Seite */
   H.seite = (host, ip) => `<!DOCTYPE html>\n<html><head><title>${host}</title></head>\n<body><h1>${host}</h1><p>Webserver ${ip} antwortet (Labor).</p></body></html>`;
 
+  /* ---------- SSH vom Terminal auf Router/Switch (Phase C, C3) ----------
+     ssh -l BENUTZER ZIEL | ssh BENUTZER@ZIEL. Klappt nur, wenn das Gerät erreichbar ist und für SSH eingerichtet:
+     hostname + ip domain-name, crypto key generate rsa, username … secret …, line vty … login local + transport input ssh.
+     Danach laufen die Eingaben in einer IOS-Sitzung des Zielgeräts (exit/logout beendet die Verbindung). */
+  function sshStarten(s, t){
+    const w = t.split(/\s+/).slice(1), lin = os(s) === "linux";
+    let user = null, ziel = null;
+    for (let i = 0; i < w.length; i++) { if (w[i] === "-l") user = w[++i]; else if (w[i] === "-p") i++; else if (w[i][0] !== "-") ziel = w[i]; }
+    if (ziel && ziel.includes("@")) [user, ziel] = ziel.split("@");
+    if (!ziel) return {ausgabe: "usage: ssh [-l login_name] [-p port] destination", fehler: true};
+    user = user || (lin ? "admin" : "azubi");
+    const n = H.aufloesen(s, ziel);
+    if (n.fehlt) return {ausgabe: `ssh: Could not resolve hostname ${ziel}: ${lin ? "Name or service not known" : "Der angegebene Host ist unbekannt."}`, fehler: true, trace: n.trace, befund: `SSH: Name „${ziel}“ unbekannt`, ok: false};
+    const sim = h.sim(); if (!sim || typeof sim.ping !== "function") return {ausgabe: "(Die Simulation ist noch nicht geladen.)", fehler: true};
+    const p = sim.ping(s.netz, s.id, n.ip, {anzahl: 1}) || {};
+    if (!(p.antworten || []).some(a => a.ok)) return {ausgabe: `ssh: connect to host ${ziel} port 22: Connection timed out`, fehler: true, trace: p.trace, befund: `SSH zu ${ziel}: keine Verbindung`, ok: false,
+      tipp: "Das Gerät antwortet nicht einmal auf Ping. Erst die Erreichbarkeit klären (Adresse, Gateway, Kabel)."};
+    const z = Object.values(s.netz.geraete).find(g => Modell.IOS[g.typ] && g.typ !== "firewall" && Modell.adressen(g).some(a => a.ip === n.ip));
+    if (!z) return {ausgabe: `ssh: connect to host ${ziel} port 22: Connection refused`, fehler: true, trace: p.trace, befund: `SSH zu ${ziel}: abgelehnt`, ok: false,
+      tipp: "SSH-Anmeldung ist im Labor für Router und Switches nachgebaut. Das Terminal eines Servers öffnest du per Doppelklick."};
+    const k = z.running, vty = (k.lines || {}).vty || {login: true};
+    if (!k.sshSchluessel || vty.transport === "telnet" || vty.transport === "none")
+      return {ausgabe: `ssh: connect to host ${ziel} port 22: Connection refused`, fehler: true, trace: p.trace, befund: `SSH zu ${z.name}: abgelehnt (kein SSH eingerichtet)`, ok: false,
+        tipp: `${z.name} ist erreichbar, nimmt aber kein SSH an: Es fehlt „crypto key generate rsa“ (dafür hostname und ip domain-name) oder „transport input ssh“ unter line vty.`};
+    if (vty.login !== "local") return {ausgabe: `Connection closed by ${n.ip} port 22`, fehler: true, trace: p.trace, befund: `SSH zu ${z.name}: keine Anmeldung möglich`, ok: false,
+      tipp: "SSH braucht Benutzer und Passwort: „username admin secret …“ und unter line vty „login local“."};
+    s.ssh = {ziel: z.id, name: ziel, ip: n.ip, user, phase: "passwort", versuche: 0, von: H.adresse(s, "eth0").ip || "?"};
+    return {ausgabe: "", trace: p.trace, befund: `SSH zu ${z.name}: Anmeldung läuft`, ok: true};
+  }
+  function sshEingabe(s, zeile){
+    const v = s.ssh, z = s.netz.geraete[v.ziel];
+    if (!z) { s.ssh = null; return {ausgabe: `Connection to ${v.name} closed.`, fehler: true}; }
+    if (v.phase === "passwort") {
+      const b = (z.running.benutzer || {})[v.user];
+      if (b && zeile === b.pw) {
+        v.phase = "an";
+        v.sitzung = C.sitzung(s.netz, z.id, {verlauf: s.verlauf, einstieg: s.einstieg, tipps: s.tipps});
+        v.sitzung.rueckfrage = null; v.sitzung.modus = "user"; v.sitzung.ueberSsh = {user: v.user, von: v.von};
+        return {ausgabe: z.running.banner ? "\n" + z.running.banner + "\n" : "", befund: `SSH als ${v.user} auf ${z.name} angemeldet`, ok: true};
+      }
+      v.versuche++;
+      if (v.versuche >= 3) { s.ssh = null; return {ausgabe: `${v.user}@${v.name}: Permission denied (publickey,keyboard-interactive,password).`, fehler: true, tipp: "Benutzer oder Passwort stimmen nicht – „show running-config | include username“ auf dem Gerät zeigt die Benutzer."}; }
+      return {ausgabe: "Permission denied, please try again.", fehler: true};
+    }
+    const r = C.eingabe(v.sitzung, zeile);
+    if (v.sitzung.modus === "abgemeldet") { s.ssh = null; return Object.assign({}, r, {ausgabe: `Connection to ${v.name} closed.`, prompt: C.prompt(s)}); }
+    return r;
+  }
+
   /* ---------- Dispatcher ---------- */
   const os = s => s.os || Modell.osVon(G(s)) || "windows";
   C.hostPrompt = function(s){
     const g = G(s);
+    if (s.ssh) return s.ssh.phase === "passwort" ? `${s.ssh.user}@${s.ssh.name}'s password:` : C.prompt(s.ssh.sitzung);
     if (os(s) === "linux") return `${s.root ? "root" : "admin"}@${String(g.running.hostname || g.name).toLowerCase()}:~${s.root ? "#" : "$"}`;
     return s.ps ? "PS C:\\>" : "C:\\>";
   };
   C.hostBegruessung = s => os(s) === "linux" ? "Linux-ähnliche Shell (bash) – „help“ zeigt die Befehle." : "Eingabeaufforderung (Windows-artig) – „help“ zeigt die Befehle.";
   const IOS_WOERTER = /^(show|sh|enable|en|conf|configure|interface|int|vlan|switchport|no|copy|write|wr|reload)$/i;
   C.hostEingabe = function(s, zeile){
+    if (s.ssh) {                                   /* SSH-Sitzung: Eingaben gehen ans Zielgerät */
+      const r = sshEingabe(s, String(zeile).trim());
+      return r && typeof r.prompt === "string" ? r : C.antwort(s, r, "", !!(r && r.geaendert));
+    }
     const t = String(zeile).trim();
     if (!t) return C.antwort(s, "", "", false);
     s.historie.push(t); if (s.historie.length > 50) s.historie.shift(); s.hIndex = null;
     const tabelle = C.HOST_BEFEHLE[os(s)] || {};
     let r;
-    try { r = tabelle._eingabe ? tabelle._eingabe(s, t) : {ausgabe: "(kein Terminal für dieses Betriebssystem)", fehler: true}; }
+    try { r = /^ssh(\s|$)/i.test(t) ? sshStarten(s, t) : tabelle._eingabe ? tabelle._eingabe(s, t) : {ausgabe: "(kein Terminal für dieses Betriebssystem)", fehler: true}; }
     catch (e) { r = {ausgabe: "Interner Fehler des Terminals: " + (e && e.message || e), fehler: true}; }
     if (r && typeof r === "object" && r.unbekannt) {
       const wort = t.split(/\s+/)[0];

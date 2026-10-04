@@ -44,6 +44,7 @@ UI.labor = (() => {
     Z.el.sim = h("div", {id: "labor-sim", class: "lb-sim-inhalt"});
     Z.el.plan = h("div", {id: "labor-plan", class: "lb-plan"});
     Z.el.akte = h("div", {id: "labor-akte", class: "lb-akte"});
+    Z.el.terminal = h("div", {id: "labor-terminal", class: "lb-terminal"});
     Z.inspWartet = Z.inspWartet ?? true; Z.simWartet = Z.simWartet ?? true;
     Z.dock ||= {reiter: "inspektor", zu: false}; Z.dockDa ||= {};
 
@@ -90,7 +91,7 @@ UI.labor = (() => {
     /* Dock rechts (K1): Inspektor · Simulation · Plan · Akte in EINEM Bereich mit Reitern – die Fläche behält die volle Höhe
        und ≥ 60 % der Breite (CSS: clamp(250px, 40 % − 88px, 440px)). Die Simulation liegt nicht mehr unten. */
     Z.el.dockReiter = h("div", {class: "lb-dock-reiter", role: "tablist", "aria-label": "Dock"});
-    Z.el.dockInhalt = h("div", {class: "lb-dock-inhalt"}, Z.el.inspektor, Z.el.sim, Z.el.plan, Z.el.akte);
+    Z.el.dockInhalt = h("div", {class: "lb-dock-inhalt"}, Z.el.inspektor, Z.el.sim, Z.el.terminal, Z.el.plan, Z.el.akte);
     Z.el.dock = h("aside", {class: "lb-dock", "aria-label": "Dock"}, Z.el.dockReiter, Z.el.dockInhalt);
 
     const mitte = h("div", {class: "lb-mitte"}, Z.el.auftrag, leinwand);
@@ -127,6 +128,7 @@ UI.labor = (() => {
   const DOCK = [
     {id: "inspektor", titel: "Inspektor", symbol: "inspektor", el: () => Z.el.inspektor, da: () => !Z.inspWartet},
     {id: "sim", titel: "Simulation", symbol: "sim", el: () => Z.el.sim, da: () => !Z.simWartet},
+    {id: "terminal", titel: "Terminal", symbol: "konsole", el: () => Z.el.terminal, da: () => !!Z.dockDa?.terminal},
     {id: "plan", titel: "Plan", symbol: "plan", el: () => Z.el.plan, da: () => !!Z.dockDa?.plan},
     {id: "akte", titel: "Akte", symbol: "akte", el: () => Z.el.akte, da: () => !!Z.dockDa?.akte},
   ];
@@ -737,6 +739,7 @@ UI.labor = (() => {
   function zentrieren(id){ if (!Z.netz?.geraete[id]) return; auswaehlen(id); sichtbarMachen(id, true); F.hervorheben?.([{geraet: id}], 1400); }
   function konsole(id){
     const g = Z.netz?.geraete[id]; if (!g) return;
+    if (UI.terminal) { auswaehlen(id); UI.terminal.oeffnen(id); return; }          /* Phase C: Terminal im Dock */
     auswaehlen(id);
     if (Z.inspektorZu) inspektorUmschalten(false);
     const c = Z.el.inspektor;
@@ -759,7 +762,7 @@ UI.labor = (() => {
     get verlauf(){ return Z.verlauf; },
     get auswahl(){ return Z.auswahl ? {...Z.auswahl} : null; },
     get titel(){ return Z.titel; },
-    get el(){ return {auftrag: Z.el.auftrag || null, inspektor: Z.el.inspektor || null, sim: Z.el.sim || null, plan: Z.el.plan || null, akte: Z.el.akte || null}; },
+    get el(){ return {auftrag: Z.el.auftrag || null, inspektor: Z.el.inspektor || null, sim: Z.el.sim || null, plan: Z.el.plan || null, akte: Z.el.akte || null, terminal: Z.el.terminal || null}; },
     get werkzeugName(){ return Z.werkzeug; },
     zeigen, wieder, laden, auswaehlen, neuZeichnen, einpassen, aufraeumen, werkzeug, zentrieren, konsole, einsetzen,
     rueckgaengig, wiederholen, loeschen,

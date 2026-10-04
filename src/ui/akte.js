@@ -83,6 +83,13 @@ UI.akte = (() => {
     Spiel.akte.ausPing(i, {von: d.von, nach: d.nach, ergebnis: d.ergebnis, netz: i.netz});
     freigeben(false);
   });
+  /* Terminal (Phase C): Diagnosebefehle mit Befund werden Beweiskarten; jeder Befehl zählt für Ziele „befehl“ */
+  Bus.an("befehl", d => {
+    const i = inst();
+    if (!i || !d || d.netz !== i.netz) return;
+    Spiel.befehle.merken(i, {geraet: d.id, befehl: d.befehl, ok: !(d.ergebnis && d.ergebnis.fehler)});
+    if (d.ergebnis && d.ergebnis.befund) { Spiel.akte.ausBefehl(i, {geraet: d.id, befehl: d.befehl, befund: d.ergebnis.befund, ok: d.ergebnis.ok !== false, netz: i.netz}); freigeben(false); }
+  });
   Bus.an("kabeltest", d => {
     const i = inst(); if (!i || !d) return;
     Spiel.akte.ausKabeltest(i, {a: d.a, b: d.b, oben: d.oben, grund: d.grund, netz: i.netz});

@@ -45,6 +45,24 @@ Spiel.akte.ausPing = function(inst, {von, nach, ergebnis, netz}){
   return Spiel.akte.hinzu(inst, {art: "ping", von, nach, titel: `Ping ${name(von)} → ${ziel}`, befund, ok: ok > 0 && ok === n,
     grund: ok === n ? null : grund, schicht: ok === n ? null : Spiel.akte.schicht(grund)});
 };
+/* Terminalbefehl (Phase C) → Karte: „PC-Kasse: ipconfig“ · Befund aus der CLI */
+Spiel.akte.ausBefehl = function(inst, {geraet, befehl, befund, ok, netz}){
+  netz = netz || inst.netz;
+  const name = (netz.geraete[geraet] && netz.geraete[geraet].name) || geraet;
+  const kurz = String(befehl).replace(/\s+/g, " ").slice(0, 48);
+  return Spiel.akte.hinzu(inst, {art: "befehl", von: geraet, nach: kurz, titel: `${name}: ${kurz}`, befund, ok: !!ok});
+};
+/* Ausgeführte Terminalbefehle je Auftrag (Ziel „befehl“, Abzeichen „Von unten nach oben“) */
+Spiel.befehle = {};
+Spiel.befehle.liste = inst => { if (!Array.isArray(inst.befehle)) inst.befehle = []; return inst.befehle; };
+Spiel.befehle.merken = function(inst, {geraet, befehl, ok}){
+  const l = Spiel.befehle.liste(inst);
+  l.push({t: jetzt(), geraet, befehl: String(befehl).slice(0, 120), ok: ok !== false});
+  if (l.length > 100) l.splice(0, l.length - 100);
+  Spiel.speichern();
+  Spiel.melden("befehl-gemerkt", {inst});
+  return l;
+};
 /* Kabeltester (Werkzeug aus dem Shop) → Karte */
 Spiel.akte.ausKabeltest = function(inst, {a, b, oben, grund, netz}){
   netz = netz || inst.netz;

@@ -142,7 +142,7 @@ UI.inspektor = (() => {
     const ungespeichert = IOS(g) && Modell.ungespeichert(g);
     const term = g.typ === "internet" ? null : h("button", {type: "button", class: "in-knopf klein in-terminal" + (K.reiter === "konsole" ? " an" : ""),
       "aria-pressed": String(K.reiter === "konsole"), title: `${terminalName(g)} von ${g.name} (Taste C)`,
-      onclick: () => { if (K.reiter === "konsole") K.reiter = K.vorKonsole || "uebersicht"; else { K.vorKonsole = K.reiter; K.reiter = "konsole"; } K.eingabe = null; zeichnen(K); }},
+      onclick: () => { if (UI.terminal) { UI.terminal.oeffnen(K.id); return; } if (K.reiter === "konsole") K.reiter = K.vorKonsole || "uebersicht"; else { K.vorKonsole = K.reiter; K.reiter = "konsole"; } K.eingabe = null; zeichnen(K); }},
       UI.symbol("konsole", 15), terminalName(g));
     K.kopfEl.replaceChildren(...[
       h("div", {class: "in-kopf-zeile"}, bild,
@@ -164,7 +164,7 @@ UI.inspektor = (() => {
     return h("div", {class: "in-entspricht"},
       h("div", {class: "in-ent-kopf"}, h("span", {}, "entspricht:"),
         h("button", {type: "button", class: "in-knopf klein", title: "Befehl in der Konsole vorbereiten (Enter führt ihn aus)",
-          onclick: () => { K.vorKonsole = K.reiter; K.reiter = "konsole"; K.eingabe = l.text; K.letzte = null; zeichnen(K); }}, HOST(g) ? "Im Terminal zeigen" : "In Konsole übernehmen")),
+          onclick: () => { if (UI.terminal) { const text = l.text; K.letzte = null; zeichnen(K); UI.terminal.oeffnen(K.id, {eingabe: text}); return; } K.vorKonsole = K.reiter; K.reiter = "konsole"; K.eingabe = l.text; K.letzte = null; zeichnen(K); }}, HOST(g) ? "Im Terminal zeigen" : "In Konsole übernehmen")),
       h("pre", {class: "in-ent-code"}, l.text));
   }
 
@@ -291,6 +291,19 @@ UI.inspektor = (() => {
     return gg ? `${gg.name} ${k.gegen.port}` : null;
   }
 
+  /* Betriebssystem eines Endgeräts (Phase C): bestimmt das Terminal (Windows-cmd oder Linux-bash) */
+  function betriebssystem(K, g){
+    const jetzt = Modell.osVon(g);
+    const wahl = os => aendern(K, `${g.name}: Betriebssystem ${os === "linux" ? "Linux" : "Windows"}`, n => {
+      const d = n.geraete[K.id];
+      if (os === Modell.OS_STANDARD[d.typ]) delete d.os; else d.os = os;
+    });
+    return h("div", {class: "in-zeile in-os"}, h("span", {class: "in-os-titel"}, "Betriebssystem"),
+      h("div", {class: "wahl", role: "radiogroup", "aria-label": "Betriebssystem"}, [["windows", "Windows"], ["linux", "Linux"]].map(([os, text]) =>
+        h("button", {type: "button", role: "radio", class: "wahl-knopf" + (os === jetzt ? " an" : ""), "aria-checked": String(os === jetzt),
+          onclick: () => { if (os === Modell.osVon(K.netz.geraete[K.id])) return; wahl(os); UI.konsole?.zuruecksetzen?.(K.netz, K.id, `— Betriebssystem jetzt ${text} —`); }}, text))));
+  }
+
   /* ---------- Übersicht ---------- */
   function uebersicht(K, g, el){
     if (g.typ === "internet") return internet(K, g, el);
@@ -298,6 +311,7 @@ UI.inspektor = (() => {
       h("div", {class: "in-raster"},
         feld(K, {key: "name", titel: IOS(g) ? "Name (hostname)" : "Name", wert: g.name, mono: false, pflicht: true,
           uebernehmen: w => aendern(K, `Umbenannt in ${w}`, n => Modell.geraetSetzen(n, K.id, "name", w), IOS(g) ? {text: `hostname ${w}`} : null)})),
+      HOST(g) ? betriebssystem(K, g) : null,
       schalter(K, {key: "strom", titel: "Strom", an: g.an, hilfe: g.an ? "Eingeschaltet" : "Ausgeschaltet – das Gerät sendet und antwortet nicht.",
         aendern: an => { aendern(K, `${g.name}: Strom ${an ? "an" : "aus"}`, n => Modell.geraetSetzen(n, K.id, "an", an)); UI.konsole?.zuruecksetzen?.(K.netz, K.id, an ? "— Gerät eingeschaltet —" : "— Gerät ausgeschaltet —"); }}),
       h("div", {class: "in-zeile"},

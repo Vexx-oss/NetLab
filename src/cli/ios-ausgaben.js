@@ -253,6 +253,25 @@
     return [zeile("Pro", "Inside global", "Inside local", "Outside local", "Outside global"), ...zeilen].join("\n");
   };
 
+  Z.natStatistik = s => {
+    const k = K(s), sim = h.sim(), liste = (sim && typeof sim.natTabelle === "function" ? sim.natTabelle(s.netz, s.id) : (zustand(s.netz, s.id).nat || [])) || [];
+    const dyn = liste.filter(e => e && e.typ !== "statisch").length, stat = ((k.nat && k.nat.statisch) || []).length;
+    const ifs = rolle => Object.entries(k.if || {}).filter(([, i]) => i && i.nat === rolle).map(([n]) => "  " + h.langName(n));
+    const z = [`Total active translations: ${dyn + stat} (${stat} static, ${dyn} dynamic; ${liste.filter(e => e && e.proto).length} extended)`,
+      "Outside interfaces:", ...ifs("outside"), "Inside interfaces:", ...ifs("inside"), `Hits: ${dyn}  Misses: 0`, "Expired translations: 0", "Dynamic mappings:"];
+    for (const [i, d] of ((k.nat && k.nat.dynamisch) || []).entries())
+      z.push("-- Inside Source", `[Id: ${i + 1}] access-list ${d.acl} interface ${h.langName(d.aus)} refcount ${dyn}`);
+    return z.join("\n");
+  };
+  Z.dhcpKonflikt = () => "IP address        Detection method   Detection time          VRF";
+  Z.benutzer = s => {
+    const z = ["    Line       User       Host(s)              Idle       Location"];
+    z.push(s.ueberSsh ? `   0 con 0                idle                 00:01:12` : "*  0 con 0                idle                 00:00:00");
+    if (s.ueberSsh) z.push(`*  2 vty 0     ${links(s.ueberSsh.user, 10)} idle                 00:00:00 ${s.ueberSsh.von}`);
+    z.push("", "  Interface    User               Mode         Idle     Peer Address");
+    return z.join("\n");
+  };
+
   /* ---------- ACL ---------- */
   function adrText(a, standard, art){
     if (!a || (a.ip === "0.0.0.0" && a.wc === "255.255.255.255")) return "any";
@@ -401,6 +420,9 @@
     return "$1$" + o.slice(0, 4).join("") + "$" + o.slice(4).join("");
   }
   C.scheinHash = scheinHash;
+  /* Typ-7-Verschleierung (IOS-ähnlich: Form wie echt, Verfahren nur angedeutet – Typ 7 ist ohnehin umkehrbar und kein Schutz) */
+  function typ7(pw){ let x = "08"; for (const [i, c] of [...String(pw)].entries()) x += ((c.charCodeAt(0) ^ "dsfd;kfoA,.iyewrkldJKD".charCodeAt((i + 8) % 22)) & 0xff).toString(16).toUpperCase().padStart(2, "0"); return x; }
+  C.typ7 = typ7;
   function psZeilen(k){
     const ps = k.portSecurity || k.psVorgabe; if (!ps) return [];
     const z = [];
@@ -439,7 +461,8 @@
   };
   function lineZeilen(g, k){
     const l = k.lines || {}, con = l.con || {}, vty = l.vty || {login: true}, z = [];
-    const block = (kopf, x) => { z.push(kopf); if (x.passwort) z.push(` password ${x.passwort}`); if (x.logsync) z.push(" logging synchronous"); if (x.login) z.push(" login"); };
+    const block = (kopf, x) => { z.push(kopf); if (x.passwort) z.push(` password ${k.pwVerschluesseln ? "7 " + typ7(x.passwort) : x.passwort}`); if (x.logsync) z.push(" logging synchronous");
+      if (x.login === "local") z.push(" login local"); else if (x.login) z.push(" login"); if (x.transport) z.push(` transport input ${x.transport}`); };
     block("line con 0", con);
     if (g.typ === "router") z.push("line aux 0");
     block("line vty 0 4", vty);
@@ -470,9 +493,11 @@
     const r = g.typ === "router", z = [];
     z.push("!", `version ${r ? "15.1" : "15.0"}`);
     if (!r) z.push("no service pad");
-    z.push("service timestamps debug datetime msec", "service timestamps log datetime msec", "no service password-encryption", "!",
+    z.push("service timestamps debug datetime msec", "service timestamps log datetime msec", k.pwVerschluesseln ? "service password-encryption" : "no service password-encryption", "!",
            `hostname ${k.hostname}`, "!", "boot-start-marker", "boot-end-marker", "!");
     if (k.enableSecret) z.push(`enable secret 5 ${scheinHash(k.enableSecret)}`, "!");
+    for (const [n, b] of Object.entries(k.benutzer || {})) z.push(b.art === "password" ? `username ${n} password ${k.pwVerschluesseln ? "7 " + typ7(b.pw) : "0 " + b.pw}` : `username ${n} secret 5 ${scheinHash(b.pw)}`);
+    if (Object.keys(k.benutzer || {}).length) z.push("!");
     z.push("no aaa new-model");
     if (!r) z.push("system mtu routing 1500");
     z.push("!");
@@ -482,6 +507,8 @@
       for (const p of d.pools || []) z.push(...C.poolZeilen(p), "!");
     }
     if (k.domainLookup === false) z.push("no ip domain lookup", "!");
+    if (k.domainName) z.push(`ip domain-name ${k.domainName}`, "!");
+    if (k.sshSchluessel) z.push("ip ssh version 2", "!");
     if (!r) z.push("spanning-tree mode pvst", "spanning-tree extend system-id", "!", "vlan internal allocation policy ascending", "!");
     const namen = r ? h.ifSortieren(Object.keys(k.if || {})) : [...Modell.PORTS.switch, ...h.ifSortieren(Object.keys(k.svi || {}).map(v => "Vlan" + v))];
     for (const n of namen) {

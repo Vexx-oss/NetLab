@@ -298,10 +298,10 @@ UI.laborWerkzeuge = (() => {
       F.zoomUm(Math.exp(-d * (e.ctrlKey ? 0.01 : 0.0016)), e.clientX, e.clientY);
     }, {passive: false});
 
-    /* ---------- Doppelklick: Schnellauswahl bzw. Inspektor ---------- */
+    /* ---------- Doppelklick: Schnellauswahl bzw. Terminal des Geräts (Phase C; Internet: Inspektor) ---------- */
     svg.addEventListener("dblclick", e => {
       const t = ziel(e.target);
-      if (t.id) { F.auswaehlen(t.id); F.inspektorUmschalten(false); return; }
+      if (t.id) { F.auswaehlen(t.id); if (Z.netz.geraete[t.id]?.typ === "internet") F.inspektorUmschalten(false); else F.konsole(t.id); return; }
       if (t.art === "leer") schnellwahl(e.clientX, e.clientY, F.weltPunkt(e.clientX, e.clientY));
     });
     function schnellwahl(x, y, w){
@@ -411,7 +411,7 @@ UI.laborWerkzeuge = (() => {
         case "p": case "P": F.werkzeug(Z.werkzeug === "ping" ? "auswahl" : "ping", sel ? {von: sel} : {}); return true;
         case "f": case "F": F.einpassen(true); return true;
         case "a": case "A": F.aufraeumen(); return true;
-        case "c": case "C": if (sel) { F.konsole(sel); return true; } return false;
+        case "c": case "C": case "t": case "T": if (sel) { F.konsole(sel); return true; } return false;
         case "i": case "I": F.inspektorUmschalten(); return true;
         case "s": case "S": F.simUmschalten(); return true;
         case "+": case "=": F.zoomSchritt(1.25); return true;
