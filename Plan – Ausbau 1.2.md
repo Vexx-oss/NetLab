@@ -10,7 +10,7 @@ status: Phase 0 und A gebaut (04.10.2026, Zweig ausbau-1.2) – Haltepunkt, du s
 
 > [!success] Stand 04.10.2026: Phase 0 und A fertig, im echten Programm durchgespielt
 > **Programm:** `Programm/Netzwerk-Labor.exe` (gebaut 04.10. 13:58, Versionsnummer noch 1.1.0, die kommt in F). Die bisherige 1.1-.exe liegt als Rückfall in `Programm/Endversion-1.1/`.
-> **Git:** Zweig `ausbau-1.2`, 4 Commits (Kundenpost-Reparatur, Messwerkzeug, A1+A3, A2+A4). **Tests:** 126 grün (124 + 2 neue für die Kundenpost).
+> **Git:** Zweig `ausbau-1.2`, 5 Commits (Kundenpost-Reparatur, Messwerkzeug, A1+A3, A2+A4, diese Notiz); `master` unverändert. **Tests:** 126 grün (124 + 2 neue für die Kundenpost).
 > **Abnahme A:** Startzustand „Kasse ohne Netz“ **12 Bedienelemente** (vorher 30), **32 Wörter** (vorher 120), **1 Hauptknopf**, in 1366×768 und schmal (960 px, Inspektor 320 px). Szenario bis zur bestandenen Abnahme ohne JS-Fehler. Einzelheiten: [[#Ergebnis Phase 0 und A]].
 > **Haltepunkt:** Bitte anspielen und sagen, ob es stimmt. Phase B beginnt erst danach.
 
