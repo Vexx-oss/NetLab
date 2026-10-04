@@ -35,8 +35,9 @@ gruppe("Spiel-Fluss: Zustand", () => {
   pruefe("leerer Stand hat die Felder aus Architektur § 7.2", kapsel(() => {
     const st = Spiel.st;
     for (const f of ["v", "euro", "ruf", "stufe", "kunden", "postfach", "aktiv", "erledigt", "playbooks", "tag", "zuletzt"]) erwarte.wahr(f in st, "Feld " + f);
-    erwarte.gleich(st.v, 1); erwarte.gleich(st.euro, 0); erwarte.gleich(st.stufe, 1);
+    erwarte.gleich(st.v, Spiel.VERSION); erwarte.gleich(st.euro, 0); erwarte.gleich(st.stufe, 1);
     erwarte.wahr(Array.isArray(st.playbooks.aktiv));
+    erwarte.gleich([st.dex, st.tagesraetsel, st.tagebuch], [{}, {serie: 0}, []], "v:2-Felder (§ 9.3)");
   }));
 
   pruefe("Migration repariert kaputte Stände und behält Unbekanntes", kapsel(() => {
@@ -50,7 +51,11 @@ gruppe("Spiel-Fluss: Zustand", () => {
     erwarte.wahr(st.postfach.every(i => i.iid && Array.isArray(i.hilfen) && i.hilfeStufe === 0 && i.quelle === "postfach"));
     erwarte.gleich(st.kunden.salon.sterne, []);
     erwarte.gleich(st.erledigt.length, 1);
-    erwarte.gleich(Spiel.migrieren(null).v, 1);
+    erwarte.gleich(Spiel.migrieren(null).v, Spiel.VERSION);
+    erwarte.gleich(st.v, 2, "v:1 wird zu v:2");
+    erwarte.gleich([st.dex, st.tagesraetsel, st.tagebuch], [{}, {serie: 0}, []], "v:2-Felder ergänzt");
+    const kaputt = Spiel.migrieren({v: 2, dex: [1], tagesraetsel: "x", tagebuch: {a: 1}});
+    erwarte.gleich([kaputt.dex, kaputt.tagesraetsel, kaputt.tagebuch], [{}, {serie: 0}, []], "kaputte v:2-Felder repariert");
     erwarte.gleich(Spiel.migrieren([1, 2]).postfach, []);
   }));
 

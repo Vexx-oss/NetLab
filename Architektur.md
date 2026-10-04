@@ -294,3 +294,30 @@ Spiel.postfachZiel() → 2 | 3                  // bis zum 2. erledigten Auftrag
 - **`UI.labor.laden(…, {warnungen: () => bool})`**: steuert die „!“-Warnungen auf der Fläche und im Inspektor (Kopf-Chip, Abschnitt Hinweise, gelbe Feldwarnungen). Ohne Angabe: an.
 - **Spielgefühl**: `UI.juice(el, art)` setzt kurz die Klasse `jc-<art>` (nichts bei Bewegung „aus“); `UI.klang.spielen(name)` (`ui/klang.js`, WebAudio, keine Dateien) → `true`, wenn hörbar gespielt.
 - **Bühne frei?** `UI.buehneFrei()` – Abzeichen, Kundenpost und Aufstiegsfeier warten, solange ein Dialog (`.sp-overlay`) oder die Funktionsprobe (`.sz-buehne`) läuft. `UI.toast.zu(id)` schließt eine Meldung. Einstieg: `UI.spiel.mess` = `{t0, ersteHandlung, erfolg}` (ms seit Seitenstart).
+
+### 9.3 Welle 1, Sitzung S2 „Bogen“ (Hub, Tagesrätsel, Fehlerdex, Spieltagebuch)
+
+Spielstand **`v:2`** (Migration: fehlende Felder bekommen ihren Standardwert, ein `v:1`-Stand lädt unverändert weiter).
+
+```js
+st.dex          = { [injektor]: { gesehen:"2026-10-04", verstanden:null|"2026-10-05" } }
+                  // gesehen = Auftrag mit dieser Fehlerart bestanden; verstanden = bestanden ohne bezahlte Hilfe (Hilfestufe < 4).
+                  // Erst beim Abschluss erfasst – ein offener Auftrag verrät seine Ursache nie über den Dex (R1).
+st.tagesraetsel = { serie:0, [tag]: { nr, niveau, sterne, sek, hilfe, versuche, ziele:["g"|"y"|"w"], zeile } }
+st.tagebuch     = [ { t, art:"sitzung", bis } | { t, art:"auftrag-ende", id, form, quelle, niveau, sek, sterne, hilfe, versuche, weiter:null|bool } ]  // höchstens 500
+st.tag.aufwaermen = 0..n                                   // Mini-Karten im Aufwärmen heute
+inst.zielErst   = [ versuchNr|null ]                       // je Ziel: in welchem Abnahmeversuch zuerst erfüllt (Spiel.abnahme)
+inst.quelle     = … | "raetsel"                            // Tagesrätsel: nicht im Postfach, verfällt am Folgetag
+
+Spiel.dex.liste() → [ {id, titel, gruppe, zustand:"unbekannt"|"gesehen"|"verstanden", ab:stufe, symptom, erkennen:[text], erklaerung, quelle, gesehen, verstanden} ]
+Spiel.dex.gruppen() → [ {id, titel, ehrentitel, ids:[injektor], verstanden, gesamt, fertig} ]
+Spiel.dex.erfassen(inst, def) → {neu:[{id, titel, zustand}], titel:[ehrentitel]}      // aus Spiel.abschliessen
+Spiel.tagebuch.sitzung() · .auftragEnde(inst, def, abnahme) · .weiter() · .aktiv() · .auswertung() → Text (zum Kopieren)
+Spiel.raetsel.nummer(tag) · .def(tag, niveau) · .heute() · .starten() → inst · .teilen(tag) → Text
+Spiel.hub.stand() → { tag, serie:{tage, urlaub, frei, zurueck}, naechster, aufwaermen:{ziel, erledigt}, raetsel, post, tagesziel, feierabend:null|{bilanz, ausblick} }
+Spiel.hub.serie(tageSet, heute) → { tage, urlaub, frei }   // Serie mit Urlaubstagen: 2 Tage je Kalenderwoche fehlen erlaubt
+```
+
+- **Tagesrätsel:** Fertigkeit und Netz hängen nur an Datum und Niveau: `Spiel.generiere(skill, seed, {stufe})` mit `skill = Zufall("raetsel:"+tag+":"+niveau).wahl(Spiel.RAETSEL.SKILLS[niveau])` und festem Seed je Tag/Niveau – alle in der Klasse bekommen dasselbe Netz, ohne Server. Nummer = Tage seit 01.10.2026 + 1. Teilen-Text verrät die Ursache nicht (🟩 erster Versuch, 🟨 späterer, ⬜ nicht erreicht – je Ziel).
+- **Hub „Heute“** (`ui/hub.js`, Präfix `hb-`): Startansicht (außer im allerersten Auftrag). Datumszeile + Serie, eine Karte „Dein nächster Auftrag“ mit dem einzigen Hauptknopf, drei Kacheln (Aufwärmen · Tagesrätsel · Post bzw. Fehlerdex), nach dem Tagesziel Feierabend mit Bilanz und einem Ausblick auf morgen. Platzbudget: ≤ 40 Wörter, 1 Hauptknopf.
+- **Fehlerdex** im Lernstand (Abschnitt `#dex`); **Spieltagebuch** zum Kopieren in Einstellungen und Lernstand. `UI.kopieren(text) → Promise<bool>` (Zwischenablage mit Rückfall).

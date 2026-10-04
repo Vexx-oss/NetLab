@@ -38,6 +38,8 @@ Spiel.abnahme = function(inst, {neustartTest = true} = {}){
   const {sterne, abzuege} = Spiel.sterneBerechnen(inst, {niveau, neustartVerlust: neustart.verlust});
   const abnahme = {def, niveau, ergebnisse, regression, kollateral, neustart, bestanden, sterne: bestanden ? sterne : 0, abzuege, zeit: jetzt()};
   inst.abnahmen = (inst.abnahmen || 0) + 1;
+  /* je Ziel: in welchem Versuch zuerst erfüllt (Tagesrätsel-Zeile 🟩/🟨) */
+  inst.zielErst = ergebnisse.map((e, i) => (inst.zielErst || [])[i] ?? (e.ok ? inst.abnahmen : null));
   return abnahme;
 };
 
@@ -100,6 +102,10 @@ Spiel.abschliessen = function(inst, abnahme){
   }
   Spiel.instanzEntfernen(inst.iid);
   if (!st.einstieg.fertig && def.id === Spiel.EINSTIEG_TICKET) st.einstieg.fertig = true;
+  /* S2: Fehlerdex (erst jetzt – ein offener Auftrag verrät nichts), Tagesrätsel, Spieltagebuch */
+  const dex = Spiel.dex.erfassen(inst, def);
+  const raetsel = inst.quelle === "raetsel" ? Spiel.raetsel.ergebnis(inst, abnahme) : null;
+  Spiel.tagebuch.auftragEnde(inst, def, abnahme);
   Spiel.gutschreiben(lohn.euro, lohn.ruf, `Ticket „${def.titel}“ (${"★".repeat(Math.floor(sterne))}${sterne % 1 ? "½" : ""})`);
   Spiel.postfachAuffuellen();
   const naechstes = Spiel.postfach()[0] || null;
@@ -107,6 +113,7 @@ Spiel.abschliessen = function(inst, abnahme){
     bestanden: true, abnahme, lernen, def, inst, sterne, euro: lohn.euro, ruf: lohn.ruf, lohn,
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
+    dex, raetsel,
   };
   Spiel.geaendert("ticket-geloest");
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});

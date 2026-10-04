@@ -28,6 +28,7 @@ Spiel.niveauFuer = function(def){
 /* Niveau einer Instanz; beim Öffnen einmal bestimmt und an der Instanz gemerkt (damit es sich
    mitten im Ticket nicht verschiebt), außer die Wahl wurde geändert */
 Spiel.niveauVon = function(inst){
+  if (inst && inst.raetsel && Spiel.NIVEAUS.includes(inst.raetsel.niveau)) return inst.raetsel.niveau;   /* Tagesrätsel: für alle gleich */
   const def = Spiel.defVon(inst);
   const soll = Spiel.niveauFuer(def);
   if (!inst.niveau || inst.niveauWahl !== Spiel.einst.wahl) { inst.niveau = soll; inst.niveauWahl = Spiel.einst.wahl; }

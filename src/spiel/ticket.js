@@ -48,6 +48,7 @@ Spiel.oeffnen = function(iid){
   inst.fortschritt ||= jetzt();
   const lz = Spiel.laufzeit(inst);
   lz.letzteArbeit = jetzt();
+  Spiel.tagebuch.weiter();                    /* Weiterspiel-Rate: nächster Auftrag binnen 2 min? */
   Spiel.niveauAktualisieren();
   if (!inst.basis) Spiel.basisMessen(inst);
   Spiel.geaendert("ticket-geoeffnet");
@@ -163,6 +164,7 @@ Spiel.hoererAnmelden = function(){
     const luecke = lz.letzteArbeit ? t - lz.letzteArbeit : 0;
     inst.zeitMs = (inst.zeitMs || 0) + Math.min(luecke, Spiel.ARBEIT_LUECKE_MS);
     lz.letzteArbeit = t;
+    Spiel.tagebuch.aktiv();
     Spiel.autospeichern();
   });
 };

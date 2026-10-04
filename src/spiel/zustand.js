@@ -12,7 +12,7 @@
    (wird nach der Migration aufgerufen; so bleibt die Migration an einer Stelle). */
 const Spiel = {};
 
-Spiel.VERSION = 1;
+Spiel.VERSION = 2;                 /* v:2 (S2): dex, tagesraetsel, tagebuch – Migration ergänzt Standardwerte */
 Spiel.EINSTIEG_TICKET = "salon-01";   /* erstes Ticket des Onboardings (Kabel fehlt) */
 Spiel.ergaenzer = {};
 Spiel._st = null;
@@ -31,6 +31,9 @@ Spiel.leererStand = function(){
     buch: [],                                  /* letzte Gutschriften {t, euro, ruf, grund} */
     einstieg: {fertig: false, coach: {}},      /* Onboarding und einmalige Coach-Hinweise */
     angebot: [],                               /* Ticket-IDs, die schon einmal angeboten wurden */
+    dex: {},                                   /* Fehlerdex: {[injektor]: {gesehen, verstanden}} */
+    tagesraetsel: {serie: 0},                  /* {serie, [tag]: {nr, niveau, sterne, sek, hilfe, versuche, ziele, zeile}} */
+    tagebuch: [],                              /* Spieltagebuch, höchstens 500 Einträge */
   };
 };
 
@@ -49,7 +52,9 @@ Spiel.migrieren = function(roh){
     if (!Array.isArray(k.sterne)) k.sterne = [];
     k.ampel ||= "gruen";
   }
-  for (const f of ["postfach", "erledigt", "buch", "angebot"]) if (!Array.isArray(st[f])) st[f] = [];
+  for (const f of ["postfach", "erledigt", "buch", "angebot", "tagebuch"]) if (!Array.isArray(st[f])) st[f] = [];
+  for (const f of ["dex", "tagesraetsel"]) if (!st[f] || typeof st[f] !== "object" || Array.isArray(st[f])) st[f] = f === "tagesraetsel" ? {serie: 0} : {};
+  if (st.tagebuch.length > 500) st.tagebuch = st.tagebuch.slice(-500);
   if (!st.playbooks || typeof st.playbooks !== "object") st.playbooks = {slots: 1, aktiv: []};
   if (!Array.isArray(st.playbooks.aktiv)) st.playbooks.aktiv = [];
   if (!st.tag || typeof st.tag !== "object") st.tag = {};

@@ -94,7 +94,7 @@ Spiel.defVon = inst => inst ? Spiel.ticketDef(inst.ticketId, inst) : null;
 /* Sichtbare Tickets, sortiert: Fristen zuerst (früheste oben), dann Ungelesenes, dann nach Eingang */
 Spiel.postfach = function(){
   const t = jetzt();
-  return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung").slice().sort((a, b) => {
+  return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung" && i.quelle !== "raetsel").slice().sort((a, b) => {
     const fa = a.frist ?? Infinity, fb = b.frist ?? Infinity;
     if (fa !== fb) return fa - fb;
     if (!!a.gelesen !== !!b.gelesen) return a.gelesen ? 1 : -1;
