@@ -74,7 +74,7 @@ Spiel.arbeitszieleErfuellen = function(inst){
       const s = CLI.sitzung(inst.netz, z.geraet, {verlauf: Spiel.verlaufVon(inst)});
       let r = null;
       for (const zeile of String(z.beispiel).split("\n").filter(x => x.trim())) r = CLI.eingabe(s, zeile);
-      Spiel.befehle.merken(inst, {geraet: z.geraet, befehl: String(z.beispiel).split("\n").pop(), ok: !(r && r.fehler)});
+      Spiel.befehle.merken(inst, {geraet: z.geraet, befehl: String(z.beispiel).split("\n").pop(), ok: Spiel.befehle.gelaufen(r)});
     }
     if (z.typ === "antwort") (inst.antworten ||= {})[Spiel.antwortSchluessel(z)] = Spiel.antwortSoll(inst.netz, z) || "";
   }

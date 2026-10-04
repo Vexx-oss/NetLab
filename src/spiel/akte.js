@@ -55,6 +55,8 @@ Spiel.akte.ausBefehl = function(inst, {geraet, befehl, befund, ok, netz}){
 /* Ausgeführte Terminalbefehle je Auftrag (Ziel „befehl“, Abzeichen „Von unten nach oben“) */
 Spiel.befehle = {};
 Spiel.befehle.liste = inst => { if (!Array.isArray(inst.befehle)) inst.befehle = []; return inst.befehle; };
+/* Lief der Befehl? Tippfehler und unbekannte Befehle nicht; ein Diagnosebefehl mit negativem Befund schon (er hat etwas gezeigt) */
+Spiel.befehle.gelaufen = r => !(r && r.fehler && !r.befund);
 Spiel.befehle.merken = function(inst, {geraet, befehl, ok}){
   const l = Spiel.befehle.liste(inst);
   l.push({t: jetzt(), geraet, befehl: String(befehl).slice(0, 120), ok: ok !== false});

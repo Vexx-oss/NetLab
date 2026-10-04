@@ -87,7 +87,7 @@ UI.akte = (() => {
   Bus.an("befehl", d => {
     const i = inst();
     if (!i || !d || d.netz !== i.netz) return;
-    Spiel.befehle.merken(i, {geraet: d.id, befehl: d.befehl, ok: !(d.ergebnis && d.ergebnis.fehler)});
+    Spiel.befehle.merken(i, {geraet: d.id, befehl: d.befehl, ok: Spiel.befehle.gelaufen(d.ergebnis)});
     if (d.ergebnis && d.ergebnis.befund) { Spiel.akte.ausBefehl(i, {geraet: d.id, befehl: d.befehl, befund: d.ergebnis.befund, ok: d.ergebnis.ok !== false, netz: i.netz}); freigeben(false); }
   });
   Bus.an("kabeltest", d => {

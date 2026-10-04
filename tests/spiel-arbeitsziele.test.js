@@ -128,4 +128,13 @@ gruppe("Spiel: Arbeitsziele", () => {
     srv.netz.geraete.pc1.os = "linux";
     erwarte.passt(Spiel.naechsteDiagnose(srv), /mit ip a /);
   }));
+
+  pruefe("Gelaufen: Tippfehler zählen nicht, ein Diagnosebefehl mit negativem Befund schon (nslookup ohne Antwort)", kapsel(() => {
+    const inst = instanz("baeckerei-terminal", "AP1");
+    const s = CLI.sitzung(inst.netz, "buero", {});
+    const tipp = CLI.eingabe(s, "nslokup www.beispiel.de"), zeit = CLI.eingabe(s, "nslookup www.beispiel.de");
+    erwarte.falsch(Spiel.befehle.gelaufen(tipp), "Tippfehler");
+    erwarte.wahr(zeit.fehler && Spiel.befehle.gelaufen(zeit), "Zeitüberschreitung ist ein Befund");
+    erwarte.enthaelt(zeit.ausgabe, "Server:  UnKnown", "wie Windows: Name des unerreichbaren Servers unbekannt");
+  }));
 });

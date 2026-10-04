@@ -206,7 +206,7 @@
     if (d.ok) { (s.dnsCache ||= {})[name.toLowerCase()] = d.ip; return {ausgabe: [...kopf, "Nicht autorisierende Antwort:", `Name:    ${name}`, `Address:  ${d.ip}`, ""].join("\n"), trace: d.trace || null, befund: `${name} → ${d.ip}`, ok: true}; }
     if (d.grund === "DNS_FAIL") return {ausgabe: [...kopf, `*** ${sname} kann ${name} nicht finden: Non-existent domain`].join("\n"), trace: d.trace || null, fehler: true,
       befund: `${name}: Name nicht gefunden (Server antwortet)`, ok: false, tipp: "Der DNS-Server antwortet, kennt den Namen aber nicht. Tippfehler? Oder fehlt der Eintrag auf dem Server?"};
-    return {ausgabe: ["Zeitüberschreitung bei DNS-Anforderung.", "    Das Zeitlimit beträgt 2 Sekunden.", ...kopf, `*** Zeitüberschreitung bei Anforderung an ${sname}.`].join("\n"),
+    return {ausgabe: ["Zeitüberschreitung bei DNS-Anforderung.", "    Das Zeitlimit beträgt 2 Sekunden.", "Server:  UnKnown", `Address:  ${dns}`, "", "*** Zeitüberschreitung bei Anforderung an UnKnown."].join("\n"),
       trace: d.trace || null, fehler: true, befund: `${name}: DNS-Server ${dns} antwortet nicht`, ok: false, tipp: "Der DNS-Server antwortet nicht. Ist er per ping erreichbar? Läuft dort der DNS-Dienst?"};
   }
   function nslookup(s, args){
