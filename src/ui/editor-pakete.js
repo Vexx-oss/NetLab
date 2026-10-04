@@ -101,7 +101,8 @@ UI.laborPakete = (() => {
       /* sanftes Wackeln statt Rotflackern; ohne volle Bewegung bleibt die ruhige Markierung */
       const el = Z.gEl.get(id);
       if (!UI.juice?.(el, "wackeln", 700)) { el?.classList.add("blitz-fehler"); setTimeout(() => el?.classList.remove("blitz-fehler"), 1400); }
-      const titel = grund ? F.grundText(grund) : "";
+      /* R1: Den Grund nennt das Schild nur, wo das Niveau Hinweise zeigt; sonst nur die Stelle (Einzelheiten: Simulation) */
+      const titel = grund ? (UI.labor.warnungenAn() ? F.grundText(grund) : "verworfen") : "";
       if (titel) {
         const t = sv("g", {class: "platz-schild"});
         const b = titel.length * 6.6 + 30;
@@ -193,12 +194,13 @@ UI.laborPakete = (() => {
       const antw = Array.isArray(r.antworten) ? r.antworten : [];
       const n = antw.length || 4, ok = antw.filter(a => a && a.ok).length;
       const grund = antw.find(a => a && !a.ok && a.grund)?.grund || [...(r.trace?.ereignisse || [])].reverse().find(e => e.grund)?.grund || null;
+      const grundSichtbar = grund && UI.labor.warnungenAn() ? grund : null;     /* R1: Meldung wie ein echtes Werkzeug, Grund nur mit Hinweisen */
       const gemeldet = (r.trace?.ereignisse || []).some(e => e.frame?.icmp?.typ === "unreachable" || e.frame?.icmp?.typ === "time-exceeded");
       const titel = B.frei ? `Ping ${A.name} → ${ip}` : `Ping ${A.name} → ${B.name} (${ip})`;
       let text, art;
       if (ok === n && ok > 0) { text = `✓ ${ok}/${n} Antworten`; art = "ok"; }
-      else if (ok > 0) { text = `▲ ${ok}/${n} Antworten${grund ? " – " + F.grundText(grund) : ""}`; art = "warn"; }
-      else { text = `✗ ${gemeldet ? "Ziel nicht erreichbar" : "Zeitüberschreitung"}${grund ? " – " + F.grundText(grund) : ""}`; art = "fehler"; }
+      else if (ok > 0) { text = `▲ ${ok}/${n} Antworten${grundSichtbar ? " – " + F.grundText(grundSichtbar) : ""}`; art = "warn"; }
+      else { text = `✗ ${gemeldet ? "Ziel nicht erreichbar" : "Zeitüberschreitung"}${grundSichtbar ? " – " + F.grundText(grundSichtbar) : ""}`; art = "fehler"; }
       const aktion = r.trace ? {text: "In Simulation öffnen", fn: () => zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping"})} : null;
       Bus.senden("trace", {trace: r.trace, quelle: "ping", von: vonId, nach: nachId, ergebnis: r});
       /* Ist das Simulations-Panel offen, zeigt es den neuen Ping selbst – dann keine Meldung über der (kleinen) Fläche.
