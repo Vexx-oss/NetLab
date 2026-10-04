@@ -21,6 +21,10 @@ Spiel.ticketDef = function(id, inst){
   const d = (DATEN.tickets || []).find(t => t.id === id);
   if (d) return d;
   if (Spiel.generierte[id]) return Spiel.generierte[id];
+  if (/-folge$/.test(id) && Spiel.varianten) {                 /* Folgeauftrag nach einem Provisorium (E1) */
+    const basis = (DATEN.tickets || []).find(t => t.id === id.replace(/-folge$/, ""));
+    if (basis) return Spiel.varianten.folgeDef(basis);
+  }
   const gen = inst && inst.gen;
   if (gen && gen.form) {                                      /* generierte Form (E1): Fernwartung, Plan-Audit, Adressplan */
     try { return Spiel.generiereForm(gen.form, gen.seed, gen.opts || {}); }

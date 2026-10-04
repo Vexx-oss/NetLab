@@ -135,7 +135,7 @@ UI.spiel = (() => {
           h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
           h("span", {class: "am-ziel-text"}, s.ziel.typ === "antwort" ? s.ziel.frage : s.ziel.text || s.ziel.typ,
             mitGrund && s.ok === false && s.grund ? h("small", {class: "am-grund"}, Spiel.grundTitel(s.grund)) : null,
-            s.ziel.typ === "antwort" ? antwortFeld(s.ziel) : null),
+            s.ziel.typ === "antwort" ? antwortFeld(s.ziel) : null, s.ziel.typ === "notiz" ? notizFeld(s.ziel) : null),
           s.ziel.typ === "blockiert" ? h("small", {class: "sp-blockiert"}, " darf nicht gehen") : null,
           s.ziel.typ === "befehl" && !s.ok ? h("button", {type: "button", class: "knopf geist klein am-terminal", title: "Terminal dieses Geräts öffnen (Doppelklick auf das Gerät geht auch)",
             onclick: () => { mappeZu(); UI.terminal.oeffnen(s.ziel.geraet); }}, "Terminal ▸") : null))),
@@ -152,11 +152,30 @@ UI.spiel = (() => {
           h("span", {}, h("b", {}, ap.name || k.name), ap.rolle ? `, ${ap.rolle}` : "", ` · ${k.name}`)),
         h("div", {class: "am-text"}, absaetze(sichtbar)),
         kurz ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { m.mehr = true; UI.labor.auftragNeu(); }}, "mehr lesen") : null,
-        def.symptom ? h("p", {class: "am-symptom"}, h("b", {}, "Symptom: "), def.symptom) : null);
+        def.symptom ? h("p", {class: "am-symptom"}, h("b", {}, "Symptom: "), def.symptom) : null,
+        variantenWahl(def));
     }
     const fuss = h("div", {class: "am-fuss"},
       h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s ▸" : "Zurück ins Labor"));
     return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
+  }
+  /* E1 „Provisorium oder sauber?“: zwei Karten im Brief; nach der Wahl eine Zeile (bis zur ersten Abnahme änderbar) */
+  function variantenWahl(def){
+    const inst = S.inst, v = Spiel.varianten.fuer(def);
+    if (!v || !inst) return null;
+    const gewaehlt = inst.variante && Spiel.VARIANTE[inst.variante], aenderbar = !(inst.abnahmen > 0);
+    const waehlen = id => { Spiel.varianten.waehlen(inst, id); liveJetzt(); };
+    if (gewaehlt && !S.mappe.wahlOffen) return h("div", {class: "am-variante gewaehlt"}, h("span", {}, `${gewaehlt.sym} ${gewaehlt.titel}: `, h("small", {}, gewaehlt.text)),
+      aenderbar ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { S.mappe.wahlOffen = true; UI.labor.auftragNeu(); }}, "ändern") : null);
+    return h("div", {class: "am-variante"}, h("p", {class: "am-variante-frage"}, h("b", {}, "Wie gehst du vor?")),
+      h("div", {class: "am-variante-karten"}, v.map(x => h("button", {type: "button", class: "am-variante-karte" + (inst.variante === x.id ? " an" : ""),
+        onclick: () => { S.mappe.wahlOffen = false; waehlen(x.id); }}, h("b", {}, `${x.sym} ${x.titel}`), h("small", {}, x.text)))));
+  }
+  /* Änderungsnotiz (Zielart „notiz“, Variante „sauber“) */
+  function notizFeld(ziel){
+    const inst = S.inst;
+    return h("textarea", {class: "am-notiz", rows: "2", placeholder: "Was hast du an welchem Gerät geändert – und warum?", "aria-label": ziel.text,
+      onkeydown: e => e.stopPropagation(), onchange: e => { Spiel.notizSetzen(inst, e.target.value); liveJetzt(); }}, (inst && inst.notiz) || "");
   }
   /* Hotline (E1): Anruf als Gesprächsverlauf, drei Rückfragen zur Wahl, nach dem Auflegen die Bewertung mit Begründung */
   function anrufAnsicht(def, k){
@@ -425,14 +444,16 @@ UI.spiel = (() => {
           h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"))),
         h("div", {class: "sp-lohn-reihe"}, sternEl,
           h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`),
-            erg.lohn.tempo || erg.lohn.verdacht ? h("small", {}, "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "", erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : ""].filter(Boolean).join(" und ")) : null)),
+            erg.lohn.tempo || erg.lohn.verdacht || erg.lohn.variante ? h("small", {}, "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "", erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : "",
+              erg.lohn.variante ? `${erg.lohn.variante.id === "sauber" ? "Aufschlag für saubere Arbeit" : "Abschlag fürs Provisorium"} (× ${String(erg.lohn.variante.faktor).replace(".", ",")})` : ""].filter(Boolean).join(" und ")) : null)),
         ...zeilen),
       erg.weg && erg.weg.length ? h("section", {class: "sp-block sp-weg"}, h("h3", {}, "Dein Weg"),
         h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
           h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])),
         erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
           {voll: "🎯 ", ursache: "🔎 ", schicht: "🔎 "}[erg.verdacht.treffer] || "💭 ", erg.verdacht.text) : null,
-        erg.hotline ? h("p", {class: "sp-hotline"}, "☎ " + erg.hotline.text) : null) : null,
+        erg.hotline ? h("p", {class: "sp-hotline"}, "☎ " + erg.hotline.text) : null,
+        erg.schuld ? h("p", {class: "sp-schuld"}, `🩹 Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null) : null,
       merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
         h("div", {class: "sp-merke-fuss"},
           def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
@@ -549,6 +570,8 @@ UI.spiel = (() => {
           (def.skills || [])[0] ? h("span", {class: "sp-chip uebt", title: "Das übst du dabei"}, "Übt: " + Spiel.skill(def.skills[0]).name) : null,
           inst.quelle === "wartung" ? h("span", {class: "sp-chip wartung"}, "Wartung") : null,
           inst.quelle === "wiederholung" ? h("span", {class: "sp-chip wdh"}, "Wiederholung") : null,
+          inst.quelle === "folge" ? h("span", {class: "sp-chip folge", title: "Ein Provisorium von neulich hat nicht gehalten"}, "↩ Folgeauftrag") : null,
+          Spiel.varianten.fuer(def) ? h("span", {class: "sp-chip wahl", title: "Du entscheidest: Provisorium (schnell, 60 % Lohn, kommt wieder) oder sauber (gesichert und dokumentiert, 120 %)"}, "🩹/🧰 Wahl") : null,
 
           frist != null ? h("span", {class: "sp-chip frist"}, frist > 0 ? `⏱ ${frist} min` : "⏱ überfällig") : null)));
   }

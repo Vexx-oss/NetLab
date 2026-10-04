@@ -79,6 +79,11 @@ Spiel.simDa = () => typeof Sim !== "undefined" && typeof Sim.pruefeZiel === "fun
    („befehl“, „antwort“) hängen am Auftrag, nicht am Netz – ohne inst bleiben sie offen (ok: null). */
 Spiel.zielPruefen = function(netz, ziel, inst){
   if (Spiel.istArbeitsziel(ziel)) return inst ? Spiel.arbeitsziel(inst, ziel, netz) : {ok: null, grund: null, trace: null, text: "Wird im Auftrag geprüft"};
+  /* „Änderung gesichert“ (E1, Variante sauber/Folgeauftrag): gespeichert UND die startup-config ist nicht mehr die vom Start */
+  if (ziel.typ === "gespeichert" && ziel.nachAenderung && inst) {
+    const g = netz.geraete[ziel.geraet], s = Spiel.startNetzVon(inst).geraete[ziel.geraet];
+    if (g && s && Modell.gleich(g.startup, s.startup)) return {ok: false, grund: "UNSAVED", trace: null, text: `${g.name}: Noch ist keine Änderung gesichert.`};
+  }
   if (ziel.typ === "konfig" || ziel.typ === "gespeichert") {
     if (Spiel.simDa()) { try { const r = Sim.pruefeZiel(netz, ziel); if (r && typeof r.ok === "boolean") return r; } catch (e) { /* Rückfall */ } }
     const g = netz.geraete[ziel.geraet];
@@ -99,7 +104,8 @@ Spiel.zielPruefen = function(netz, ziel, inst){
 Spiel.zieleStatus = function(inst, netz){
   const def = Spiel.defVon(inst);
   netz = netz || inst.netz;
-  return (def.ziele || []).map(ziel => { const r = Spiel.zielPruefen(netz, ziel, inst) || {}; return {ziel, ok: r.ok, grund: r.grund || null, text: r.text || "", trace: r.trace || null}; });
+  const ziele = Spiel.varianten ? Spiel.varianten.ziele(inst, def) : (def.ziele || []);      /* E1: Provisorium/sauber ändern die Ziele */
+  return ziele.map(ziel => { const r = Spiel.zielPruefen(netz, ziel, inst) || {}; return {ziel, ok: r.ok, grund: r.grund || null, text: r.text || "", trace: r.trace || null}; });
 };
 
 /* Live-Stand merken; meldet, wenn mehr Ziele erfüllt sind als vorher (Fortschritt, für Senior-Angebot und ✓-Animation) */

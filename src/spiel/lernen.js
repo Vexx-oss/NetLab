@@ -139,6 +139,12 @@ Spiel.EIGENE_GRUENDE = {
     AP1: "Eingetragener Wert weicht von der Ausgabe des Geräts ab.",
     AP2: "Antwort falsch.",
   },
+  NOTIZ_FEHLT: {
+    titel: "Änderungsnotiz fehlt",
+    E: "Zur sauberen Arbeit gehört eine kurze Notiz für den Kunden: was du geändert hast, an welchem Gerät und warum. Das Feld steht in der Auftragsmappe unter „Ziele“.",
+    AP1: "Änderungsnotiz fehlt oder ist zu knapp.",
+    AP2: "Dokumentation fehlt.",
+  },
   AUDIT_OFFEN: {
     titel: "Plan noch nicht vollständig geprüft",
     E: "Noch sind nicht alle falschen Werte markiert – oder ein richtiger ist versehentlich markiert. Vergleiche Gerät für Gerät: Was zeigt das Gerät selbst (Inspektor, ipconfig), was steht im Plan?",

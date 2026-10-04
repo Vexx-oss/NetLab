@@ -12,6 +12,7 @@ Spiel.geraetName = (netz, id) => (netz && netz.geraete[id] && netz.geraete[id].n
 /* Spiel.abnahme(inst, {neustartTest}) → {ergebnisse, bestanden, regression, kollateral, neustart, sterne, abzuege, niveau, def} */
 Spiel.abnahme = function(inst, {neustartTest = true} = {}){
   const def = Spiel.defVon(inst);
+  if (inst.variante === "provisorium") neustartTest = false;       /* Provisorium: der Kunde nimmt es so – die Folge kommt später */
   const niveau = Spiel.niveauVon(inst);
   const netz = inst.netz;
   const ergebnisse = Spiel.zieleStatus(inst, netz);
@@ -95,6 +96,9 @@ Spiel.abschliessen = function(inst, abnahme){
   const st = Spiel.st;
   const sterne = abnahme.sterne;
   const lohn = Spiel.lohnBerechnen(inst, def, sterne);
+  /* E1: Provisorium × 0,6, sauber × 1,2 – auf Grundlohn und Tempo-Bonus */
+  const vf = Spiel.varianten ? Spiel.varianten.faktor(inst) : 1;
+  if (vf !== 1) { const vorher = lohn.euro; lohn.euro = Math.max(1, Math.round(lohn.euro * vf)); lohn.variante = {id: inst.variante, faktor: vf, differenz: lohn.euro - vorher}; }
   /* Verdacht (Phase B): bewerten, solange Start- und Soll-Netz der Instanz noch da sind; Volltreffer vor dem Eingriff +10 % */
   const verdacht = Spiel.verdacht ? Spiel.verdacht.bewerten(inst) : null;
   if (verdacht && verdacht.treffer === "voll" && verdacht.vorEingriff) {
@@ -114,18 +118,21 @@ Spiel.abschliessen = function(inst, abnahme){
   }
   Spiel.instanzEntfernen(inst.iid);
   if (!st.einstieg.fertig && def.id === Spiel.EINSTIEG_TICKET) st.einstieg.fertig = true;
+  const schuld = inst.variante === "provisorium" ? Spiel.varianten.schuldAnlegen(inst, def) : null;   /* E1: Folge in drei Aufträgen */
+  if (def.folgeVon) Spiel.varianten.folgeErledigt(def);
   /* S2: Fehlerdex (erst jetzt – ein offener Auftrag verrät nichts), Tagesrätsel, Spieltagebuch */
   const dex = Spiel.dex.erfassen(inst, def);
   const raetsel = inst.quelle === "raetsel" ? Spiel.raetsel.ergebnis(inst, abnahme) : null;
   Spiel.tagebuch.auftragEnde(inst, def, abnahme);
   Spiel.gutschreiben(lohn.euro, lohn.ruf, `Ticket „${def.titel}“ (${"★".repeat(Math.floor(sterne))}${sterne % 1 ? "½" : ""})`);
   Spiel.postfachAuffuellen();
+  if (Spiel.varianten) Spiel.varianten.faelligeAusloesen();
   const naechstes = Spiel.postfach()[0] || null;
   const ergebnis = {
     bestanden: true, abnahme, lernen, def, inst, sterne, euro: lohn.euro, ruf: lohn.ruf, lohn,
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
-    dex, raetsel, verdacht, hotline,
+    dex, raetsel, verdacht, hotline, schuld,
   };
   Spiel.geaendert("ticket-geloest");
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});

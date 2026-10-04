@@ -249,3 +249,15 @@
 @keyframes sp-fest-pop{from{transform:scale(.2) rotate(-30deg); opacity:0} to{transform:none; opacity:1}}
 @keyframes sp-fest-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
 @media (prefers-reduced-motion: reduce){.sp-fest .sp-senior-sym, .sp-fest h2{animation:none}}
+/* E1: Provisorium oder sauber? (Brief), Änderungsnotiz (Ziele), Marken, Ergebnis */
+.am-variante{margin-top:12px; padding-top:10px; border-top:1px solid var(--line)}
+.am-variante.gewaehlt{display:flex; gap:8px; align-items:baseline; justify-content:space-between; font-size:14px}
+.am-variante-frage{margin:0 0 6px}
+.am-variante-karten{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.am-variante-karte{all:unset; cursor:pointer; display:flex; flex-direction:column; gap:3px; padding:9px 11px; border:1px solid var(--line); border-radius:10px; background:var(--panel); font-size:14px}
+.am-variante-karte small{color:var(--muted); font-size:12.5px; line-height:1.35}
+.am-variante-karte:hover, .am-variante-karte:focus-visible, .am-variante-karte.an{border-color:var(--accent); background:var(--accent-soft); outline:none}
+.am-notiz{display:block; width:100%; margin-top:5px; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--text); font:13.5px/1.4 var(--body); resize:vertical}
+.sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
+.sp-chip.wahl{background:var(--accent-soft); color:var(--accent)}
+.sp-schuld{margin:8px 0 0; font-size:14px; color:var(--warn)}

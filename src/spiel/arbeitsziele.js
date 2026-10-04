@@ -7,7 +7,7 @@
      {typ:"antwort", id, frage, pruefen:{art:"ip"|"maske"|"gw"|"dns"|"mac", geraet, port?}, text}
    Die richtige Antwort kommt immer aus dem aktuellen Netz (so, wie ipconfig sie zeigt) – nie als fester Wert aus dem
    Ticket. Ein falscher Wert verrät die richtige Antwort nicht (R1). */
-Spiel.ARBEITSZIELE = {befehl: true, antwort: true, tabelle: true, audit: true};
+Spiel.ARBEITSZIELE = {befehl: true, antwort: true, tabelle: true, audit: true, notiz: true};
 Spiel.ANTWORT_ARTEN = {ip: "IP-Adresse", maske: "Subnetzmaske", gw: "Standardgateway", dns: "DNS-Server", mac: "MAC-Adresse"};
 Spiel.istArbeitsziel = z => !!(z && Spiel.ARBEITSZIELE[z.typ]);
 Spiel.antwortSchluessel = z => String(z.id || z.frage || z.text || "antwort");
@@ -48,6 +48,10 @@ Spiel.arbeitsziel = function(inst, ziel, netz){
     return {ok, grund: ok ? null : "ANTWORT_FALSCH", trace: null,
       text: ok ? (ziel.text || "Antwort stimmt") : `„${String(wert).trim()}“ passt nicht zu dem, was das Gerät gerade zeigt.`};
   }
+  if (ziel.typ === "notiz") {                                 /* Änderungsnotiz (E1, Variante „sauber“) */
+    const n = String((inst && inst.notiz) || "").trim().length, ok = n >= (ziel.min || 20);
+    return {ok, grund: ok ? null : "NOTIZ_FEHLT", trace: null, text: ok ? (ziel.text || "Notiz geschrieben") : n ? "Die Notiz ist noch zu knapp – ein ganzer Satz: was, wo, warum." : "Noch keine Notiz geschrieben."};
+  }
   if (ziel.typ === "audit") {                                 /* Plan-Audit (E1, spiel/audit.js) */
     const p = Spiel.audit.pruefen(inst, ziel);
     return {ok: p.ok, grund: p.ok ? null : "AUDIT_OFFEN", trace: null,
@@ -77,7 +81,7 @@ Spiel.antwortSetzen = function(inst, ziel, wert){
    (über den Verlauf, also rückgängig machbar) und jede Antwort so eintragen, wie das Netz sie zeigt. */
 Spiel.arbeitszieleErfuellen = function(inst){
   const def = Spiel.defVon(inst);
-  for (const z of def.ziele || []) {
+  for (const z of Spiel.varianten ? Spiel.varianten.ziele(inst, def) : def.ziele || []) {
     if (z.typ === "befehl" && !Spiel.arbeitsziel(inst, z).ok) {
       if (!z.beispiel) throw new Error(`Ziel „${z.text}“: beispiel fehlt`);
       const s = CLI.sitzung(inst.netz, z.geraet, {verlauf: Spiel.verlaufVon(inst)});
@@ -87,6 +91,7 @@ Spiel.arbeitszieleErfuellen = function(inst){
     }
     if (z.typ === "antwort") (inst.antworten ||= {})[Spiel.antwortSchluessel(z)] = Spiel.antwortSoll(inst.netz, z) || "";
     if (z.typ === "audit") inst.audit = (z.fehler || []).slice();
+    if (z.typ === "notiz") inst.notiz = "Geändert und gesichert (copy running-config startup-config), Grund im Auftrag beschrieben.";
     if (z.typ === "tabelle") { const soll = Spiel.beratung.soll(z); inst.tabelle ||= {}; for (const r of z.zeilen) for (const s of z.spalten) inst.tabelle[r.name + "." + s] = soll[r.name][s]; }
   }
   return inst;
