@@ -92,7 +92,7 @@ UI.konsole = (() => {
       K.eingabeEl.value = K.S.entwurf = block;
       K.notizEl.hidden = false;
       K.notizEl.replaceChildren(h("span", {class: "ko-sym", "aria-hidden": "true"}, "↳"),
-        "Aus dem Inspektor übernommen. ", h("kbd", {}, "Enter"), " führt alle Zeilen aus, ", h("kbd", {}, "Esc"), " verwirft.");
+        (opt.notiz || "Aus dem Inspektor übernommen.") + " ", h("kbd", {}, "Enter"), " führt alle Zeilen aus, ", h("kbd", {}, "Esc"), " verwirft.");
     }
     groesse(K); vorschlag(K); runter(K);
     if (opt.fokus !== false && !K.eingabeEl.disabled) setTimeout(() => { if (K.eingabeEl.isConnected) { K.eingabeEl.focus({preventScroll: true}); const n = K.eingabeEl.value.length; K.eingabeEl.setSelectionRange(n, n); } }, 0);

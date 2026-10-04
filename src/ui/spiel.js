@@ -130,9 +130,12 @@ UI.spiel = (() => {
       inhalt = h("div", {class: "am-ziele-liste"},
         h("ul", {class: "sp-ziele"}, stand.status.map((s, i) => h("li", {class: live ? (s.ok ? "ok" : s.ok === false ? "offen" : "") : "neutral", "data-i": i},
           h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
-          h("span", {}, s.ziel.text || s.ziel.typ,
-            mitGrund && s.ok === false && s.grund ? h("small", {class: "am-grund"}, Spiel.grundTitel(s.grund)) : null),
-          s.ziel.typ === "blockiert" ? h("small", {class: "sp-blockiert"}, " darf nicht gehen") : null))),
+          h("span", {class: "am-ziel-text"}, s.ziel.typ === "antwort" ? s.ziel.frage : s.ziel.text || s.ziel.typ,
+            mitGrund && s.ok === false && s.grund ? h("small", {class: "am-grund"}, Spiel.grundTitel(s.grund)) : null,
+            s.ziel.typ === "antwort" ? antwortFeld(s.ziel) : null),
+          s.ziel.typ === "blockiert" ? h("small", {class: "sp-blockiert"}, " darf nicht gehen") : null,
+          s.ziel.typ === "befehl" && !s.ok ? h("button", {type: "button", class: "knopf geist klein am-terminal", title: "Terminal dieses Geräts öffnen (Doppelklick auf das Gerät geht auch)",
+            onclick: () => { mappeZu(); UI.terminal.oeffnen(s.ziel.geraet); }}, "Terminal ▸") : null))),
         live ? null : h("p", {class: "sp-leise"}, "AP2: Ob die Ziele erreicht sind, prüfst du selbst – die Abnahme sagt, ob es reicht."));
     } else {
       /* höchstens ~60 Wörter sichtbar, der Rest auf „mehr“ */
@@ -151,6 +154,14 @@ UI.spiel = (() => {
     const fuss = h("div", {class: "am-fuss"},
       h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s ▸" : "Zurück ins Labor"));
     return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
+  }
+  /* Zielart „antwort“ (C4): Wert aus der Terminal-Ausgabe eintragen; geprüft wird gegen das Netz (Haken nur, wo das Niveau ihn zeigt) */
+  function antwortFeld(ziel){
+    const inst = S.inst, wert = ((inst && inst.antworten) || {})[Spiel.antwortSchluessel(ziel)] || "";
+    const eintragen = () => { if (!S.inst) return; Spiel.antwortSetzen(S.inst, ziel, feld.value); liveJetzt(); };
+    const feld = h("input", {type: "text", class: "am-antwort", value: wert, placeholder: "Wert aus der Ausgabe", spellcheck: "false", autocomplete: "off", "aria-label": ziel.frage,
+      onkeydown: e => { e.stopPropagation(); if (e.key === "Enter") { e.preventDefault(); eintragen(); } }});
+    return h("span", {class: "am-antwort-zeile"}, feld, h("button", {type: "button", class: "knopf klein", onclick: eintragen}, wert ? "Ändern" : "Eintragen"));
   }
   /* Prüfungstag: keine Hilfe, keine Live-Ziele, Restzeit sichtbar */
   function pruefungsLeiste(el, inst, def){
@@ -250,7 +261,7 @@ UI.spiel = (() => {
     const alle = d.schritte;
     const liste = h("ol", {class: "sp-demo"}, alle.map((s, i) => h("li", {class: i < d.i ? "fertig" : i === d.i ? "jetzt" : ""},
       h("div", {class: "sp-demo-kopf"}, h("b", {}, s.geraetName ? s.geraetName + ": " : ""), s.text),
-      i === d.i && s.art === "cli" ? h("pre", {class: "sp-demo-cli"}, s.zeilen.join("\n")) : null,
+      i === d.i && (s.art === "cli" || s.art === "terminal") ? h("pre", {class: "sp-demo-cli"}, s.zeilen.join("\n")) : null,
       i === d.i && s.art === "setzen" ? h("ul", {class: "sp-demo-felder"}, s.felder.map(f => h("li", {}, h("code", {}, f.pfad), " = ", h("b", {}, JSON.stringify(f.wert)),
         f.entspricht ? h("pre", {class: "sp-demo-cli"}, f.entspricht) : null))) : null)));
     const weiter = d.i < alle.length
@@ -263,7 +274,8 @@ UI.spiel = (() => {
     const s = d.schritte[d.i];
     if (s.geraet) { UI.labor.auswaehlen(s.geraet); UI.labor.hervorheben([{geraet: s.geraet}], 2400); }
     if (s.schritt && s.schritt.a) UI.labor.hervorheben([{geraet: s.schritt.a.geraet}, {geraet: s.schritt.b?.geraet}].filter(x => x.geraet), 2400);
-    try { Spiel.vorfuehrenSchritt(inst, d.i); } catch (e) { UI.toast("Dieser Schritt ging nicht: " + e.message, "fehler"); return; }
+    if (s.art === "terminal") UI.terminal.oeffnen(s.geraet, {eingabe: s.zeilen.join("\n"), notiz: "Aus der Vorführung übernommen."});
+    else try { Spiel.vorfuehrenSchritt(inst, d.i); } catch (e) { UI.toast("Dieser Schritt ging nicht: " + e.message, "fehler"); return; }
     d.i++;
     UI.labor.auftragNeu();
   }
@@ -319,7 +331,7 @@ UI.spiel = (() => {
   function wegChips(inst){
     const eig = S.weg.iid === inst.iid ? S.weg.liste : [];
     const chips = [];
-    const diag = eig.find(e => e.art === "ping");
+    const diag = eig.find(e => e.art === "ping" || e.art === "befehl");   /* erste Diagnose: Ping-Werkzeug oder Terminalbefehl */
     if (diag) chips.push({text: diag.text, ok: diag.ok});
     const fehl = eig.filter(e => e.art === "abnahme" && !e.ok).length;
     const eingriffe = (Spiel.verlaufVon(inst).liste || []).filter(t => !/verschoben|zurückgesetzt|Aufgeräumt/.test(t));
@@ -515,6 +527,7 @@ UI.spiel = (() => {
           inst.quelle === "wartung" ? h("span", {class: "sp-chip wartung"}, "Wartung") : null,
           inst.quelle === "wiederholung" ? h("span", {class: "sp-chip wdh"}, "Wiederholung") : null,
           def.art === "projekt" ? h("span", {class: "sp-chip projekt"}, "Projekt") : null,
+          def.art === "terminal" ? h("span", {class: "sp-chip terminal", title: "Die Arbeit passiert im Terminal des Rechners"}, ">_ Terminal") : null,
           frist != null ? h("span", {class: "sp-chip frist"}, frist > 0 ? `⏱ ${frist} min` : "⏱ überfällig") : null)));
   }
   function leserZeigen(el, inst){
@@ -652,6 +665,12 @@ UI.spiel = (() => {
   Bus.an("netz-geaendert", d => {
     if (S.inst && d && d.netz === S.inst.netz) livePlanen();
     if (S.mess && S.mess.ersteHandlung == null) S.mess.ersteHandlung = Math.round(performance.now());
+  });
+  Bus.an("befehl-gemerkt", d => {
+    if (!S.inst || !d || d.inst !== S.inst) return;
+    const b = (S.inst.befehle || []).slice(-1)[0], name = b && (S.inst.netz.geraete[b.geraet]?.name || b.geraet);
+    if (b) wegMerken(S.inst, {art: "befehl", ok: b.ok, text: `${name}> ${b.befehl.length > 28 ? b.befehl.slice(0, 27) + "…" : b.befehl}`});
+    livePlanen();
   });
   Bus.an("zustand-geaendert", () => {
     status();

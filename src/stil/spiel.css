@@ -49,6 +49,11 @@
 .am-symptom b{color:var(--muted); font-weight:600}
 .am-ziele-liste{display:flex; flex-direction:column; gap:10px; padding-bottom:6px}
 .am-ziele-liste .sp-ziele li{font-size:14.5px}
+.am-ziel-text{flex:1 1 auto; min-width:0}
+.am-antwort-zeile{display:flex; gap:6px; margin-top:5px; align-items:center}
+.am-antwort{flex:1 1 140px; max-width:220px; min-width:0; padding:4px 8px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--text); font:14px var(--mono)}
+.am-antwort:focus{outline:2px solid var(--accent); outline-offset:1px}
+.am-terminal{flex:none; align-self:center; font-family:var(--mono)}
 .am-grund{display:block; margin-top:1px; color:var(--warn); font-size:12.5px; font-weight:600}   /* Einstieg: warum das Ziel noch offen ist */
 .am-fuss{display:flex; justify-content:flex-end; gap:8px; padding:10px 14px 12px; border-top:1px solid var(--line)}
 
@@ -219,6 +224,7 @@
 .sp-chip.wartung{background:var(--info-soft); color:var(--info)}
 .sp-chip.wdh{background:var(--ok-soft); color:var(--ok)}
 .sp-chip.projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
+.sp-chip.terminal{background:var(--panel-3); color:var(--text); font-family:var(--mono)}
 .sp-leser{min-height:0; overflow:auto; scrollbar-width:thin}
 .sp-brief{display:flex; flex-direction:column; gap:16px; padding:22px 24px; border-radius:18px; background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--k, var(--accent))}
 .sp-brief header{display:flex; gap:14px; align-items:center}
