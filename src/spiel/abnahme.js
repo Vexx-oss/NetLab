@@ -108,6 +108,8 @@ Spiel.abschliessen = function(inst, abnahme){
   }
   if (Spiel.befehle.leiter(inst).vollstaendig) Spiel.abzeichen.zaehlen("leiterVonUnten");   /* C5: Diagnoseleiter im Terminal */
   const hotline = def.hotline ? Spiel.hotline.bewertung(inst) : null;                       /* E1: Fragetechnik am Telefon */
+  /* E1 Notfall-Anruf: Frist gehalten → +25 % und +1 Ruf; zu spät kostet nichts außer dem Bonus */
+  if (inst.quelle === "notfall" && inst.frist && jetzt() <= inst.frist) { lohn.notfall = Math.max(1, Math.round(lohn.grund * Spiel.NOTFALL_BONUS)); lohn.euro += lohn.notfall; lohn.ruf += 1; }
   if (hotline && hotline.bonus) { lohn.ruf += 1; lohn.hotline = 1; }
   st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0, kunde: inst.kunde || def.kunde || null, form: Spiel.formVon(def)});
   if (st.erledigt.length > 2000) st.erledigt.splice(0, st.erledigt.length - 2000);

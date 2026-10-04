@@ -171,6 +171,7 @@ Spiel.hoererAnmelden = function(){
     const lz = Spiel.laufzeit(inst), t = jetzt();
     const luecke = lz.letzteArbeit ? t - lz.letzteArbeit : 0;
     inst.zeitMs = (inst.zeitMs || 0) + Math.min(luecke, Spiel.ARBEIT_LUECKE_MS);
+    if (Spiel.ereignisse) Spiel.ereignisse.aktivZaehlen(Math.min(luecke, Spiel.ARBEIT_LUECKE_MS));   /* Ereignis-Takt zählt nur aktive Zeit */
     lz.letzteArbeit = t;
     Spiel.tagebuch.aktiv();
     Spiel.autospeichern();

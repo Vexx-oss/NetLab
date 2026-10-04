@@ -20,7 +20,7 @@ Spiel._einst = null;
 Spiel._trocken = false;          /* Testlauf: keine Bus-Ereignisse, kein Speichern, kein Lernmotor */
 Spiel._hoererAn = false;
 
-Spiel.EINST_STANDARD = {wahl: "auto", niveau: "E", unterricht: null, vorhersage: true, animationen: true, coach: true, ton: "leise"};
+Spiel.EINST_STANDARD = {wahl: "auto", niveau: "E", unterricht: null, vorhersage: true, animationen: true, coach: true, ton: "leise", ereignisse: "selten"};
 
 Spiel.leererStand = function(){
   return {

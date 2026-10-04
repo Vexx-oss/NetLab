@@ -221,6 +221,7 @@ UI.spiel = (() => {
         fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
     if (!def.fernwartung && !def.blatt) eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});
+    if (inst.providerStoerung) eintraege.push({text: "Provider anrufen", sym: "warnung", info: "Störung melden", fn: () => { if (Spiel.ereignisse.providerAnrufen(inst)) UI.toast("Störung gemeldet – das Internet ist wieder da. +1 Ruf fürs Erkennen.", "ok", {dauer: 3800}); UI.labor.auftragNeu(); }});
     if (Spiel.verdacht.noetig(inst)) eintraege.push({text: "Akte und Verdacht", sym: "akte", info: inst.verdacht ? "festgehalten" : null, fn: () => UI.akte.freigeben(true)});
     if (Spiel.werkzeug.hat("netzpruefer") && Spiel.niveauVon(inst) !== "E")
       eintraege.push({text: inst.netzpruefer ? "Netzprüfer ausschalten" : "Netzprüfer einschalten", sym: "warnung", info: "Werkzeug",

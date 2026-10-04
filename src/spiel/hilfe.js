@@ -101,7 +101,7 @@ Spiel.hilfeInhalt = function(inst, stufe){
     case 3: r.fragen = (h.frage && h.frage.length ? h.frage : [Spiel.SENIOR_FRAGEN[erster] || "Wo auf dem Weg vom Absender zum Ziel bleibt das Paket hängen?"]).slice(); break;
     case 4: r.bereich = (h.bereich && h.bereich.length ? h.bereich : (def.fehler || []).filter(f => f.auf).map(f => ({geraet: f.auf}))).slice();
             r.namen = r.bereich.map(b => Spiel.geraetName(inst.netz, b.geraet) + (b.port ? " " + b.port : "")); break;
-    case 5: r.konkret = (h.konkret && h.konkret.length ? h.konkret : (def.loesung || []).map(s => s.text).filter(Boolean)).slice(); break;
+    case 5: r.konkret = [...(h.konkret && h.konkret.length ? h.konkret : (def.loesung || []).map(s => s.text).filter(Boolean)), ...(inst.ereignisLoesung || []).map(s => s.text)]; break;
     case 6: r.schritte = Spiel.vorfuehren(inst); break;
   }
   return r;
@@ -131,7 +131,7 @@ Spiel.leiterHaken = function(inst, id, an){
 /* Lösungsschritte für die Vorführung aufbereiten */
 Spiel.vorfuehren = function(inst){
   const def = Spiel.defVon(inst);
-  return (def.loesung || []).map((s, i) => {
+  return [...(def.loesung || []), ...(inst.ereignisLoesung || [])].map((s, i) => {
     const art = s.cli ? "cli" : s.terminal ? "terminal" : s.setzen ? "setzen" : "aktion";
     const r = {nr: i + 1, art, schritt: s, geraet: s.geraet || null, geraetName: s.geraet ? Spiel.geraetName(inst.netz, s.geraet) : "", text: s.text || ""};
     if (art === "cli" || art === "terminal") r.zeilen = String(s.cli || s.terminal).split("\n").map(z => z.trimEnd()).filter(z => z.length);

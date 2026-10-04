@@ -268,7 +268,9 @@ UI.app = (() => {
       zeile("Animationen", "Pakete fliegen, Zahlen zählen hoch. „Reduziert“ blendet nur kurz ein, „Aus“ zeigt Ergebnisse sofort. Die Systemeinstellung „Bewegung reduzieren“ wird immer beachtet.",
         wahl("Animationen", [["an", "An"], ["reduziert", "Reduziert"], ["aus", "Aus"]], e.bewegung || "an", v => { einstSetzen({bewegung: v}); themaAnwenden(); })),
       zeile("Ton", "Leise Klänge bei Kabel, Ping, Haken und Sternen – alles bleibt auch ohne Ton verständlich. Die Leiste und ein Fenster im Hintergrund sind immer stumm.",
-        wahl("Ton", [["aus", "Aus"], ["leise", "Leise"], ["normal", "Normal"]], e.ton || "leise", v => { einstSetzen({ton: v}); UI.klang?.spielen("haken"); })))});
+        wahl("Ton", [["aus", "Aus"], ["leise", "Leise"], ["normal", "Normal"]], e.ton || "leise", v => { einstSetzen({ton: v}); UI.klang?.spielen("haken"); })),
+      zeile("Ereignisse", "Stromausfall, Kabelschaden, Notfall-Anruf … höchstens eines je 30 (selten) oder 15 Minuten Arbeit (normal), immer mit Erklärung. Fortschritt geht nie verloren.",
+        wahl("Ereignisse", [["aus", "Aus"], ["selten", "Selten"], ["normal", "Normal"]], e.ereignisse || "selten", v => { einstSetzen({ereignisse: v}); if (Spiel._einst) Spiel._einst.ereignisse = v; })))});
     l.push({titel: "Erklärtiefe", fn: c => c.append(
       zeile("Wie ausführlich sollen Konsole und Simulation erklären?", "Einstieg erklärt jeden Schritt, AP1 knapp, AP2 zeigt nur, was ein echtes Gerät melden würde.",
         wahl("Erklärtiefe", [["E", "Einstieg"], ["AP1", "AP1"], ["AP2", "AP2"]], e.niveau || "E", v => { einstSetzen({niveau: v}); Bus.senden("niveau", v); })))});
