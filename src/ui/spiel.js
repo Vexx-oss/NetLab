@@ -603,7 +603,7 @@ UI.spiel = (() => {
   let abzTimer = null;
   function abzeichenPlanen(ms){ clearTimeout(abzTimer); abzTimer = setTimeout(abzeichenZeigen, ms); }
   function abzeichenZeigen(){
-    if (!UI.buehneFrei()) { abzeichenPlanen(1500); return; }
+    if (!UI.buehneFrei() || S.probe) { abzeichenPlanen(1500); return; }
     const neu = Spiel.abzeichen.abholen(); if (!neu.length) return;
     const ansehen = {text: "Ansehen", fn: () => UI.app.ansicht("lernstand")};
     if (neu.length > 2) UI.toast(neu.map(a => a.sym + " " + a.titel).join(" · "), "ok", {titel: `${neu.length} neue Abzeichen`, aktion: ansehen});
@@ -612,7 +612,7 @@ UI.spiel = (() => {
   /* Neue Kundenpost: leiser Hinweis in der Vollansicht, erst wenn kein Dialog offen ist (die Leiste zeigt nur den Zähler) */
   function postMelden(neu, versuch = 0){
     if (UI.modus() !== "voll") return;
-    if (!UI.buehneFrei() && versuch < 40) { setTimeout(() => postMelden(neu, versuch + 1), 1500); return; }
+    if ((!UI.buehneFrei() || S.probe) && versuch < 40) { setTimeout(() => postMelden(neu, versuch + 1), 1500); return; }
     const n = neu[neu.length - 1], a = postAbsender(n);
     UI.toast(neu.length > 1 ? `${neu.length} neue Nachrichten im Postfach.` : `${a.name}: ${String(n.text).split("\n")[0].slice(0, 90)}${String(n.text).length > 90 ? " …" : ""}`, "info",
       {titel: "✉ Neue Nachricht", id: "post", aktion: {text: "Lesen", fn: () => { S.postfachWahl = n.id; UI.app.ansicht("postfach"); }}});
@@ -632,7 +632,7 @@ UI.spiel = (() => {
     status();
     if (Spiel.abzeichen.pruefen().length) abzeichenPlanen(400);
     const neuePost = Spiel.post.pruefen();
-    if (neuePost.length) { status(); postMelden(neuePost); }
+    if (neuePost.length) { status(); setTimeout(() => postMelden(neuePost), 400); }   /* erst nach dem Start der Probe prüfen, ob die Bühne frei ist */
   });
   Bus.an("ticket-neu", () => { status(); if (UI.app.aktuell === "postfach") { const c = document.querySelector(".sp-postfach")?.parentElement; if (c) postfachAnsicht(c); } });
   Bus.an("trace", d => {
