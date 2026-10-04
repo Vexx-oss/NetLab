@@ -132,7 +132,7 @@ Spiel.postfachAuffuellen = function({still = false} = {}){
   const ziel = Spiel.postfachZiel(), wahl = ziel === Spiel.POSTFACH_WAHL;
   /* Nach der ersten Wahl: Postfach als Wahl – verschiedene Formen und Kunden (Mischer, E1) */
   if (!wahl && Spiel.mischer && regulaer() < ziel) {
-    const offen = st.postfach.filter(i => i.quelle === "postfach" || i.quelle === "generiert").map(i => ({form: Spiel.formVon(Spiel.defVon(i)), kunde: i.kunde}));
+    const offen = st.postfach.filter(i => i.quelle === "postfach" || i.quelle === "generiert").map(i => ({form: Spiel.formVon(Spiel.defVon(i)), kunde: i.kunde, story: !i.gen}));
     const auswahl = Spiel.mischer.waehlen({kandidaten: Spiel.mischer.kandidaten(st), offen, verlauf: Spiel.formVerlauf(), n: ziel - regulaer(), z: Zufall(Spiel.neuerSeed("mischer"))});
     const niveau = Spiel.einst.wahl === "auto" ? undefined : Spiel.einst.wahl;
     for (const k of auswahl) {

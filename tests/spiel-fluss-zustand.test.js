@@ -105,10 +105,14 @@ gruppe("Spiel-Fluss: Zustand", () => {
     } finally { ab(); }
   }));
 
-  pruefe("Postfach: nächste 3 ungelöste Tickets bis zur Karriere-Stufe, keine Entwürfe (ab dem 2. erledigten Auftrag)", kapsel(() => {
+  pruefe("Postfach als Wahl (ab dem 2. erledigten Auftrag): 3 Angebote, der nächste Story-Auftrag ist dabei, keine Entwürfe, nichts über der Stufe", kapsel(() => {
     Spiel.st.erledigt.push({id: "x1", sterne: 5, tag: heute(), hilfe: 0}, {id: "x2", sterne: 5, tag: heute(), hilfe: 0});
     Spiel.st.postfach = []; Spiel.postfachAuffuellen();
-    erwarte.gleich(Spiel.postfach().map(i => i.ticketId), ["t1", "t2", "t3"]);
+    const l = Spiel.postfach().map(i => i.ticketId);
+    erwarte.gleich(l.length, 3, l.join(", "));
+    erwarte.wahr(l.includes("t1"), "nächster Story-Auftrag: " + l.join(", "));
+    erwarte.falsch(l.some(id => ["t0", "t5", "m1", "t2", "t3"].includes(id)), "keine Entwürfe, nichts über der Stufe, je Form nur der nächste: " + l.join(", "));
+    erwarte.wahr(new Set(Spiel.postfach().map(i => Spiel.formVon(Spiel.defVon(i)))).size >= 2, "verschiedene Formen");
   }, {tickets: () => [ticket("t1"), ticket("t2"), ticket("t3"), ticket("t4"), ticket("t5", {karriere: 2}), ticket("t0", {entwurf: true, karriere: 0}), ticket("m1", {art: "mini"})]}));
 
   pruefe("Postfach: erste Wahl – zwei Angebote, verschiedene Kunden zuerst (vorher und nach dem ersten Auftrag)", kapsel(() => {
@@ -126,7 +130,7 @@ gruppe("Spiel-Fluss: Zustand", () => {
     erwarte.gleich(Spiel.postfach().map(i => i.ticketId), ["t2"]);
     Spiel.st.erledigt.push({id: "t2", sterne: 3, tag: heute(), hilfe: 0});
     Spiel.st.postfach = []; Spiel.postfachAuffuellen();
-    erwarte.gleich(Spiel.postfach().length, 1, "nie leer");
+    erwarte.wahr(Spiel.postfach().length >= 1, "nie leer");
   }, {tickets: () => [ticket("t1"), ticket("t2"), ticket("t9", {karriere: 3})]}));
 
   pruefe("Postfach: Fristen zuerst, dann Ungelesenes; spätere (ab) unsichtbar", kapsel(() => {

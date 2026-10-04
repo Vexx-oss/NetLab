@@ -95,6 +95,11 @@
 /* Auch wenn die Fläche selbst schmal ist (z. B. breite Konsole im Inspektor): Hinweis weg statt schmaler Säule */
 .lb-leinwand{container-type:inline-size}
 @container (max-width:760px){ .lb-hinweis{display:none} }
+/* Fernwartung (E1): Fläche, Werkzeuge und Geräteleiste verdeckt */
+.labor.lb-fern .lb-svg, .labor.lb-fern .lb-leiste-oben, .labor.lb-fern .lb-leiste-unten, .labor.lb-fern .lb-geraete > *{visibility:hidden}
+.lb-fern-schild{position:absolute; left:50%; top:46%; transform:translate(-50%, -50%); width:min(380px, 80%); text-align:center; color:var(--muted)}
+.lb-fern-schild strong{display:block; font:800 22px/1.2 var(--display); color:var(--ink); margin:8px 0 6px}
+.lb-fern-sym{font-size:44px; line-height:1}
 .lb-leer{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); text-align:center; color:var(--muted); pointer-events:none; max-width:360px}
 .lb-leer strong{display:block; font:800 22px/1.2 var(--display); color:var(--ink); margin-bottom:6px}
 

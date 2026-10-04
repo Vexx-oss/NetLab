@@ -44,4 +44,18 @@ gruppe("Spiel: Mischer", () => {
     }
     erwarte.gleich(Spiel.mischer.gesperrt(["audit", "stoerung"]), null);
   });
+
+  pruefe("Story stockt nie: Liegt kein Story-Auftrag im Postfach, ist der nächste (kleinster Rang, nicht gesperrt) dabei", () => {
+    const formen = ["stoerung", "projekt", "terminal", "forensik", "audit", "beratung", "hotline"];
+    for (let s = 1; s <= 200; s++) {
+      const z = Zufall("story" + s);
+      const kand = formen.map((f, i) => ({form: f, kunde: "k" + (i % 3), schluessel: f, story: i < 3, rang: (i * 7 + s) % 11}));
+      const verlauf = [z.wahl(formen), z.wahl(formen)];
+      const w = Spiel.mischer.waehlen({kandidaten: kand, offen: [], verlauf, n: 3, z});
+      const sperre = Spiel.mischer.gesperrt(verlauf);
+      const erwartet = kand.filter(k => k.story && k.form !== sperre).sort((a, b) => a.rang - b.rang)[0];
+      erwarte.gleich(w[0] && w[0].schluessel, erwartet.schluessel, "Seed " + s);
+      erwarte.gleich(new Set(w.map(k => k.form)).size, 3, "drei Formen");
+    }
+  });
 });

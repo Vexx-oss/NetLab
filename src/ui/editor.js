@@ -85,7 +85,9 @@ UI.labor = (() => {
     Z.el.leer = h("div", {class: "lb-leer", hidden: true},
       h("strong", {}, "Die Fläche ist leer."),
       h("p", {}, "Öffne links ein Fach und zieh ein Gerät hierher – oder doppelklicke auf die Fläche."));
-    const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer);
+    /* Fernwartung (E1): Die Fläche ist verdeckt – man sieht nur, was die Befehle des einen Rechners zeigen */
+    Z.el.fern = h("div", {class: "lb-fern-schild", hidden: true});
+    const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer, Z.el.fern);
     Z.el.leinwand = leinwand;
 
     /* Dock rechts (K1): Inspektor · Simulation · Plan · Akte in EINEM Bereich mit Reitern – die Fläche behält die volle Höhe
@@ -733,11 +735,25 @@ UI.labor = (() => {
     F.fachZu?.();
     UI.ebenen.setzen(opt.ebene || UI.ebenen.gemerkt(), {merken: false});
     if (Z.el.ansichtGruppe) Z.el.ansichtGruppe.hidden = opt.ansichtMenue === false;
+    fernwartung(opt.fernwartung && netz.geraete[opt.fernwartung] ? opt.fernwartung : null);
     if (Z.root?.isConnected) {
       layoutAnwenden(); auftragZeichnen(); werkzeugAnzeigen(); zeichnen(); inspektorZeigen(); simLeer();
       requestAnimationFrame(() => { einpassen(false); Z.einpassenAusstehend = false; });
     }
     Bus.senden("labor-geladen", {netz, titel: Z.titel});
+    if (Z.fern) setTimeout(() => { if (Z.fern && Z.netz === netz) UI.terminal?.oeffnen(Z.fern); }, 0);
+  }
+  /* Fernwartung an (Geräte-ID) oder aus (null): Fläche, Werkzeuge und Geräteleiste verdeckt, Schild in der Mitte.
+     Nach bestandener Abnahme hebt das Spiel sie auf – dann sieht man das Netz, das man blind repariert hat. */
+  function fernwartung(id){
+    Z.fern = id || null;
+    Z.root?.classList.toggle("lb-fern", !!Z.fern);
+    const el = Z.el.fern; if (!el) return;
+    el.hidden = !Z.fern;
+    if (!Z.fern) return el.replaceChildren();
+    const g = Z.netz.geraete[Z.fern];
+    el.replaceChildren(h("span", {class: "lb-fern-sym", "aria-hidden": "true"}, "🛰"), h("strong", {}, `Fernwartung · ${g.name}`),
+      h("p", {}, "Das Netz siehst du von hier aus nicht – nur, was die Befehle dieses Rechners zeigen."));
   }
   function simLeer(){
     const c = Z.el.sim; if (!c) return;
@@ -787,6 +803,8 @@ UI.labor = (() => {
     get dockStand(){ return {reiter: Z.dock?.reiter || null, zu: !!Z.dock?.zu, da: DOCK.filter(r => r.da()).map(r => r.id)}; },
     auftragNeu: () => auftragZeichnen(),
     warnungenAn,
+    fernwartung: id => { fernwartung(id); if (!id) { zeichnen(); einpassen(false); } },
+    get fern(){ return Z.fern || null; },
     auffrischen: () => { zeichnen(); inspektorZeigen(); },
     /* für Szenen (ui/szene.js): Weltposition, Bildschirmposition auf der Leinwand, Paket zwischen zwei Geräten */
     pos: id => { const p = pos(id); return p ? {x: p.x, y: p.y} : null; },

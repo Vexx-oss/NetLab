@@ -3,6 +3,7 @@
    Aus Kandidaten – je Form der nächste Story-Auftrag und die generierten Formen je Kunde – wählt der Mischer die neuen
    Angebote: zuerst neue Form UND neuer Kunde, dann neue Form, dann neuer Kunde. Formen, die lange nicht dran waren, wiegen
    mehr. Waren die letzten zwei Abschlüsse dieselbe Form, ist sie gesperrt: nie dieselbe Form mehr als zweimal in Folge.
+   Liegt kein Story-Auftrag im Postfach, ist der nächste (nach Reihe, nicht gesperrt) immer dabei – die Geschichte stockt nie.
    Spiel.mischer.waehlen ist rein (kein Ticketbau) – so lässt sich die Vielfalt an tausend Postfächern prüfen. */
 Spiel.mischer = {};
 Spiel.mischer.gesperrt = verlauf => { const n = (verlauf || []).length; return n >= 2 && verlauf[n - 1] === verlauf[n - 2] ? verlauf[n - 1] : null; };
@@ -13,7 +14,11 @@ Spiel.mischer.waehlen = function({kandidaten, offen = [], verlauf = [], n = 1, z
   const gewicht = k => (k.gewicht || 1) * (1 + Math.min(6, seit(k.form)));
   const gewaehlt = [];
   let pool = (kandidaten || []).filter(k => k.form !== sperre);
-  for (let i = 0; i < n && pool.length; i++) {
+  if (n > 0 && !offen.some(o => o.story)) {
+    const story = pool.filter(k => k.story).sort((a, b) => a.rang - b.rang)[0];
+    if (story) { gewaehlt.push(story); pool = pool.filter(x => x.schluessel !== story.schluessel); }
+  }
+  for (let i = gewaehlt.length; i < n && pool.length; i++) {
     const formen = new Set([...offen.map(o => o.form), ...gewaehlt.map(g => g.form)]);
     const kunden = new Set([...offen.map(o => o.kunde), ...gewaehlt.map(g => g.kunde)]);
     const stufen = [k => !formen.has(k.form) && !kunden.has(k.kunde), k => !formen.has(k.form), k => !kunden.has(k.kunde), () => true];
@@ -33,12 +38,12 @@ Spiel.mischer.waehlen = function({kandidaten, offen = [], verlauf = [], n = 1, z
 Spiel.mischer.kandidaten = function(st = Spiel.st){
   const imPostfach = new Set(st.postfach.map(i => i.ticketId));
   const liste = [], erste = {};
-  for (const t of Spiel.ticketReihe()) {
+  for (const [rang, t] of Spiel.ticketReihe().entries()) {
     if ((t.karriere || 1) > st.stufe || Spiel.istErledigt(t.id) || imPostfach.has(t.id)) continue;
     const f = Spiel.formVon(t);
     if (erste[f]) continue;
     erste[f] = t;
-    liste.push({form: f, kunde: t.kunde, gewicht: 3, schluessel: "t:" + t.id, ticketId: t.id});
+    liste.push({form: f, kunde: t.kunde, gewicht: 3, schluessel: "t:" + t.id, ticketId: t.id, story: true, rang});
   }
   const kunden = Object.values(DATEN.kunden || {}).filter(k => (k.stufe || 1) <= st.stufe && Spiel.vorlagen._fuerKunde[k.id] && k.id !== "storage").map(k => k.id);
   for (const form of Object.keys(Spiel.formGeneratoren)) {
