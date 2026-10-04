@@ -173,6 +173,10 @@ UI.spiel = (() => {
         fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
     eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});
+    if (Spiel.verdacht.noetig(inst)) eintraege.push({text: "Akte und Verdacht", sym: "akte", info: inst.verdacht ? "festgehalten" : null, fn: () => UI.akte.freigeben(true)});
+    if (Spiel.werkzeug.hat("netzpruefer") && Spiel.niveauVon(inst) !== "E")
+      eintraege.push({text: inst.netzpruefer ? "Netzprüfer ausschalten" : "Netzprüfer einschalten", sym: "warnung", info: "Werkzeug",
+        fn: () => { Spiel.werkzeug.netzpruefer(inst); UI.labor.auffrischen?.(); UI.labor.auftragNeu(); }});
     if (Spiel.niveauVon(inst) !== "AP2" && typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0])
       eintraege.push({text: "Nachschlagen: " + Spiel.skill(def.skills[0]).name, sym: "wiki", fn: () => UI.wiki.oeffnen(def.skills[0])});
     eintraege.push("-",
@@ -388,11 +392,14 @@ UI.spiel = (() => {
         h("div", {class: "sp-erg-kopf"}, h("span", {class: "sp-kunde-sym gross", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
           h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"))),
         h("div", {class: "sp-lohn-reihe"}, sternEl,
-          h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`), erg.lohn.tempo ? h("small", {}, `inkl. ${fmtEuro(erg.lohn.tempo)} Tempo-Bonus`) : null)),
+          h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`),
+            erg.lohn.tempo || erg.lohn.verdacht ? h("small", {}, "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "", erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : ""].filter(Boolean).join(" und ")) : null)),
         ...zeilen),
       erg.weg && erg.weg.length ? h("section", {class: "sp-block sp-weg"}, h("h3", {}, "Dein Weg"),
         h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
-          h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)]))) : null,
+          h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])),
+        erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
+          {voll: "🎯 ", ursache: "🔎 ", schicht: "🔎 "}[erg.verdacht.treffer] || "💭 ", erg.verdacht.text) : null) : null,
       merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
         h("div", {class: "sp-merke-fuss"},
           def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,

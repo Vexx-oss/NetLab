@@ -317,6 +317,17 @@ UI.laborWerkzeuge = (() => {
       UI.menue.popover(x - 20, y - 20, raster, {titel: "Gerät hier einsetzen"});
     }
 
+    /* ---------- Kabeltester (Werkzeug aus dem Shop, Phase B): Link oben? → Meldung und Beweiskarte (Bus „kabeltest“) ---------- */
+    function kabelTest(kid){
+      const k = Z.netz?.kabel.find(x => x.id === kid); if (!k) return;
+      const l = Modell.linkOben(Z.netz, k), n = id => Z.netz.geraete[id]?.name || id;
+      if (l.oben) UI.juice?.(Z.kEl.get(kid), "einrasten", 1200);
+      UI.klang?.spielen(l.oben ? "link" : "nochnicht");
+      UI.toast(`${n(k.a.geraet)} ${k.a.port} ↔ ${n(k.b.geraet)} ${k.b.port}: ${l.oben ? "Link oben" : "kein Link"}`, l.oben ? "ok" : "warn", {id: "kabeltest", titel: "Kabeltest", dauer: 3500});
+      Bus.senden("kabeltest", {kabel: kid, a: k.a, b: k.b, oben: !!l.oben, grund: l.grund || null});
+    }
+    F.kabelTest = kabelTest;
+
     /* ---------- Rechtsklick-Menü ---------- */
     svg.addEventListener("contextmenu", e => {
       e.preventDefault();
@@ -335,7 +346,11 @@ UI.laborWerkzeuge = (() => {
         ], {titel: g.name});
       } else if (t.art === "kabel") {
         F.kabelWaehlen(t.kabel);
-        UI.menue(e.clientX, e.clientY, [{text: "Kabel trennen", sym: "trennen", taste: "Entf", gefahr: true, fn: () => F.kabelTrennen(t.kabel)}], {titel: "Kabel"});
+        const tester = typeof Spiel !== "undefined" && Spiel.werkzeug && Spiel.werkzeug.hat("kabeltester");
+        UI.menue(e.clientX, e.clientY, [
+          {text: "Kabel testen", sym: "kabel", aus: !tester, info: tester ? "Kabeltester" : "Werkzeug im Shop", fn: () => kabelTest(t.kabel)},
+          "-",
+          {text: "Kabel trennen", sym: "trennen", taste: "Entf", gefahr: true, fn: () => F.kabelTrennen(t.kabel)}], {titel: "Kabel"});
       } else {
         const w = F.weltPunkt(e.clientX, e.clientY);
         UI.menue(e.clientX, e.clientY, [

@@ -1,0 +1,37 @@
+/* ---------- Akte und Verdacht im Dock (ak-, Phase B) ---------- */
+.ak{display:flex; flex-direction:column; gap:12px; padding:12px 14px 16px}
+.ak h3{font:800 15px/1.2 var(--display); margin:0}
+.ak h3 small{color:var(--muted); font:600 12px/1 var(--body)}
+.ak-verdacht{display:flex; flex-direction:column; gap:6px; padding:12px; border-radius:12px; border:1px solid color-mix(in srgb, var(--info) 45%, var(--line)); background:color-mix(in srgb, var(--info) 7%, var(--panel))}
+.ak-verdacht.gesetzt{border-color:color-mix(in srgb, var(--ok) 40%, var(--line)); background:color-mix(in srgb, var(--ok) 6%, var(--panel))}
+.ak-verdacht.ruhig{border-style:dashed; background:none}
+.ak-v-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.ak-v-kopf small{color:var(--muted); font-size:12px}
+.ak-v-satz{font-weight:700; margin:0}
+.ak-v-zeit{color:var(--muted); font-size:12px}
+.ak-v-zeit.gut{color:var(--ok)}
+.ak-schritt{margin:6px 0 0; color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em}
+.ak-chips{display:flex; flex-wrap:wrap; gap:6px}
+.ak-chip{min-height:30px; padding:4px 10px; border-radius:999px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 12.5px/1.2 var(--body); cursor:pointer; text-align:left}
+.ak-chip:hover{border-color:var(--accent)}
+.ak-chip.an{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.ak-ursachen .ak-chip{border-radius:10px}
+.ak-geraet{width:100%}
+.ak-v-fuss{display:flex; justify-content:flex-end; gap:8px; margin-top:6px}
+.ak-karten h3{margin-bottom:6px}
+.ak-liste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+.ak-karte{display:grid; grid-template-columns:auto minmax(0, 1fr) auto; gap:8px; align-items:start; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); border-left:3px solid var(--line-2)}
+.ak-karte.ok{border-left-color:var(--ok)}
+.ak-karte.nicht{border-left-color:var(--bad)}
+.ak-karte.wichtig{border-color:color-mix(in srgb, var(--geld) 55%, var(--line))}
+.ak-sym{font-size:17px; line-height:1.3}
+.ak-text{display:flex; flex-direction:column; gap:2px; min-width:0}
+.ak-text b{font-size:13.5px}
+.ak-text b small{color:var(--muted); font-weight:600}
+.ak-befund{font-size:13px}
+.ak-grund{color:var(--info); font-size:12px}
+.ak-stern{border:0; background:none; color:var(--faint); font-size:18px; line-height:1; cursor:pointer; padding:2px}
+.ak-stern.an, .ak-stern:hover{color:var(--geld)}
+.ak-leer{color:var(--muted); font-size:13px; margin:0}
+.sp-verdacht{margin:10px 0 0; font-size:14px; line-height:1.45}
+.sp-verdacht.voll{color:var(--ok)}
