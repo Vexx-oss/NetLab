@@ -131,9 +131,9 @@ Spiel.leiterHaken = function(inst, id, an){
 Spiel.vorfuehren = function(inst){
   const def = Spiel.defVon(inst);
   return (def.loesung || []).map((s, i) => {
-    const art = s.cli ? "cli" : s.setzen ? "setzen" : "aktion";
+    const art = s.cli ? "cli" : s.terminal ? "terminal" : s.setzen ? "setzen" : "aktion";
     const r = {nr: i + 1, art, schritt: s, geraet: s.geraet || null, geraetName: s.geraet ? Spiel.geraetName(inst.netz, s.geraet) : "", text: s.text || ""};
-    if (art === "cli") r.zeilen = String(s.cli).split("\n").map(z => z.trimEnd()).filter(z => z.length);
+    if (art === "cli" || art === "terminal") r.zeilen = String(s.cli || s.terminal).split("\n").map(z => z.trimEnd()).filter(z => z.length);
     if (art === "setzen") r.felder = Object.entries(s.setzen).map(([pfad, wert]) => {
       let entspricht = null;
       try { const g = inst.netz.geraete[s.geraet]; if (g && typeof CLI !== "undefined" && CLI.entspricht) entspricht = CLI.entspricht(g, pfad, wert); } catch (e) { /* nur Anzeige */ }

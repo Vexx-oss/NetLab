@@ -10,7 +10,7 @@ gruppe("Spiel: Netzplan", () => {
     return {x1: k.x - w / 2, x2: k.x + w / 2, y1: k.y - P().SYMBOL / 2, y2: k.y - P().SYMBOL / 2 + h};
   };
   const ueberlappt = (a, b) => a.x1 < b.x2 && b.x1 < a.x2 && a.y1 < b.y2 && b.y1 < a.y2;
-  const loesungsGeraete = def => [...new Set((def.loesung || []).filter(s => s.aktion !== "speichern")
+  const loesungsGeraete = def => [...new Set((def.loesung || []).filter(s => s.aktion !== "speichern" && !s.nurLesen)
     .flatMap(s => s.aktion === "verbinden" ? [s.a.geraet, s.b.geraet] : s.geraet ? [s.geraet] : []))].sort();
 
   function planPruefen(def, wo, {streng = true} = {}){
@@ -34,7 +34,7 @@ gruppe("Spiel: Netzplan", () => {
       }
     }
     const abw = Spiel.plan.geraeteAus(Spiel.plan.diff(soll, start));
-    if (!abw.length) fehler.push(`${wo}: Plan und Startnetz sind gleich`);
+    if (!abw.length && def.ziele.some(z => z.erwartet)) fehler.push(`${wo}: Plan und Startnetz sind gleich`);   /* reine Terminal-Übung: kein Fehler im Netz */
     if (streng && JSON.stringify(abw) !== JSON.stringify(loesungsGeraete(def))) fehler.push(`${wo}: Abweichungen ${abw} ≠ Lösung ${loesungsGeraete(def)}`);
     return fehler;
   }

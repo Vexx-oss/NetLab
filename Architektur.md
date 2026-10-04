@@ -362,8 +362,21 @@ CLI.eingabe(s, zeile) → { …, befund?:"eine Zeile für die Akte", ok?:bool } 
 CLI.host.*                                // gemeinsame Helfer (cli/host-terminal.js); Befehle: cli/host-windows.js, cli/host-linux.js
 CLI.traceMerken(netz, trace)              // letzte Aufzeichnung je Netz – tcpdump zeigt sie
 inst.befehle = [ {t, geraet, befehl, ok} ]                      // ausgeführte Terminalbefehle (für Zielart „befehl“, Abzeichen „Von unten nach oben“)
-Ziel {typ:"befehl", geraet, muster:"^ipconfig( /all)?$", text}   // erfüllt, wenn der Befehl im Auftrag auf dem Gerät lief
-Ziel {typ:"antwort", frage, pruefen:{art:"gw"|"ip"|"dns"|"mac", geraet}, text}   // Eingabe in der Mappe, geprüft gegen die echte Simulation
+inst.antworten = { [ziel.id]: "eingetragener Wert" }             // Zielart „antwort“ (Eingabe in der Mappe)
+```
+
+**Arbeitsziele (C4, `spiel/arbeitsziele.js`):** Netzziele prüft die Simulation am Netz; Arbeitsziele prüfen, was der Spieler im Auftrag *getan* hat. `Sim.pruefeZiel` kennt sie nicht – nur `Spiel.zielPruefen(netz, ziel, inst)`.
+
+```js
+Ziel {typ:"befehl", geraet, muster:"^ipconfig( /all)?$", beispiel:"ipconfig", text}
+     // erfüllt, wenn ein passender Befehl (Regex, ohne Groß/klein) im Auftrag auf dem Gerät fehlerfrei lief
+Ziel {typ:"antwort", id:"ip", frage:"Welche IP-Adresse hat die Kasse?", pruefen:{art:"ip"|"maske"|"gw"|"dns"|"mac", geraet, port?:"eth0"}, text}
+     // Soll kommt immer aus dem aktuellen Netz (Sim.adresse bzw. hw.macs) – nie aus dem Ticket; MAC in jeder Schreibweise
+Spiel.istArbeitsziel(ziel) · Spiel.arbeitsziel(inst, ziel, netz?) → {ok, grund:null|"BEFEHL_FEHLT"|"ANTWORT_FEHLT"|"ANTWORT_FALSCH", text}
+Spiel.antwortSoll(netz, ziel) → "192.168.1.10" | null · Spiel.antwortGleich(art, a, b) · Spiel.antwortSetzen(inst, ziel, wert) → Prüfergebnis (Bus „antwort“)
+Spiel.arbeitszieleErfuellen(inst)            // Durchspiel-Test: Befehle aus ziel.beispiel im Terminal ausführen, Antworten aus dem Netz eintragen
+Lösungsschritt {geraet, terminal:"netsh interface ip set address …", text}   // läuft in einer Terminal-Sitzung (Windows/Linux) auf dem Gerät
+ticket.art = … | "terminal"                  // Terminal-Auftrag: Arbeitsziele + ggf. ein Netzziel; ohne Fehler im Netz erlaubt (nur Arbeitsziele)
 ```
 
 - **Windows (cmd):** ipconfig (/all /release /renew /flushdns /displaydns) · ping (-n -l -t) · tracert · pathping · arp -a/-d · nslookup (auch interaktiv) · getmac · route print/add/delete · netstat -an · curl · telnet · netsh interface ip show config / set address … static|dhcp / set dns · hostname · whoami · systeminfo · type …\hosts · **powershell** (Test-NetConnection, Resolve-DnsName, Get-NetIPConfiguration).

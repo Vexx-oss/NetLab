@@ -74,9 +74,11 @@ Spiel.aendern = function(inst, beschreibung, fn){ return Spiel.verlaufVon(inst).
 /* ---- Ziele ---- */
 Spiel.simDa = () => typeof Sim !== "undefined" && typeof Sim.pruefeZiel === "function";
 
-/* Ein Ziel prüfen. Sim.pruefeZiel deckt alle Zieltypen ab; „konfig“ und „gespeichert“ haben hier einen
-   eigenen Rückfall (reine Konfigurationsprüfung), falls die Simulation sie (noch) nicht kennt. */
-Spiel.zielPruefen = function(netz, ziel){
+/* Ein Ziel prüfen. Sim.pruefeZiel deckt alle Netz-Zieltypen ab; „konfig“ und „gespeichert“ haben hier einen
+   eigenen Rückfall (reine Konfigurationsprüfung), falls die Simulation sie (noch) nicht kennt. Arbeitsziele
+   („befehl“, „antwort“) hängen am Auftrag, nicht am Netz – ohne inst bleiben sie offen (ok: null). */
+Spiel.zielPruefen = function(netz, ziel, inst){
+  if (Spiel.istArbeitsziel(ziel)) return inst ? Spiel.arbeitsziel(inst, ziel, netz) : {ok: null, grund: null, trace: null, text: "Wird im Auftrag geprüft"};
   if (ziel.typ === "konfig" || ziel.typ === "gespeichert") {
     if (Spiel.simDa()) { try { const r = Sim.pruefeZiel(netz, ziel); if (r && typeof r.ok === "boolean") return r; } catch (e) { /* Rückfall */ } }
     const g = netz.geraete[ziel.geraet];
@@ -97,7 +99,7 @@ Spiel.zielPruefen = function(netz, ziel){
 Spiel.zieleStatus = function(inst, netz){
   const def = Spiel.defVon(inst);
   netz = netz || inst.netz;
-  return (def.ziele || []).map(ziel => { const r = Spiel.zielPruefen(netz, ziel) || {}; return {ziel, ok: r.ok, grund: r.grund || null, text: r.text || "", trace: r.trace || null}; });
+  return (def.ziele || []).map(ziel => { const r = Spiel.zielPruefen(netz, ziel, inst) || {}; return {ziel, ok: r.ok, grund: r.grund || null, text: r.text || "", trace: r.trace || null}; });
 };
 
 /* Live-Stand merken; meldet, wenn mehr Ziele erfüllt sind als vorher (Fortschritt, für Senior-Angebot und ✓-Animation) */

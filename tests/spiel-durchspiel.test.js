@@ -20,7 +20,8 @@ gruppe("Durchspiel", () => {
     for (const def of DATEN.tickets) {
       const n = def.netz(Zufall(1));
       for (const g of Object.values(n.geraete)) if (Modell.IOS[g.typ]) Modell.neustart(n, g.id);
-      if (def.ziele.filter(z => z.erwartet).every(z => Sim.pruefeZiel(n, z).ok)) schlecht.push(def.id);
+      const erwartet = def.ziele.filter(z => z.erwartet);              /* reine Terminal-Aufträge haben keinen Netzfehler */
+      if (erwartet.length && erwartet.every(z => Sim.pruefeZiel(n, z).ok)) schlecht.push(def.id);
     }
     erwarte.gleich(schlecht, []);
   });

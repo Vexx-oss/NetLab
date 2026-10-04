@@ -169,6 +169,7 @@ Spiel.testlauf = function({ids, niveau, gen} = {}){
         r.startVerletzt = vorher.some(e => e.ok === false);
         if (!r.startVerletzt) r.fehler.push("Das Start-Netz erfüllt schon alle Ziele.");
         Spiel.loesung(inst.netz, def.loesung);
+        Spiel.arbeitszieleErfuellen(inst);
         const ab = Spiel.abnahme(inst);
         r.bestanden = ab.bestanden; r.sterne = ab.sterne; r.niveau = ab.niveau;
         if (!ab.bestanden) for (const f of Spiel.fehlschlaege(ab)) r.fehler.push(f.text);

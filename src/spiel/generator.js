@@ -3,7 +3,7 @@
    Spiel.ticketBauen(spec) → Ticket-Definition (Architektur § 7.1) oder null (Fehler bricht kein Ziel).
      spec: {id, vorlage, vSeed, kunde, injektoren:[{name, ziel?:key, wahl?:zahl}], stufe, karriere, art,
             titel, briefing, symptom, erklaerung, quelle, hilfen, lohn, minuten, skills, vorhersage,
-            ziele? (ersetzt die Vorlagen-Ziele), zusatzZiele?, maxZiele?, umbau?(netz, rollen, z), loesungExtra?[],
+            ziele? (ersetzt die Vorlagen-Ziele), zusatzZiele? (auch Arbeitsziele befehl/antwort), maxZiele?, umbau?(netz, rollen, z), loesungExtra?[],
             loesung? (ersetzt die berechnete), loesungFn?(gesund, rollen), alleZiele?}
    Die Netz-Fabrik baut die Vorlage mit vSeed immer gleich und setzt dieselben Fehler: deterministisch.
    Spiel.generiere(skill, seed, {stufe, kunde, art}) → generiertes Ticket, registriert in Spiel.generierte. */
@@ -49,7 +49,8 @@ Spiel.ticketBauen = function(spec){
     if (!r.ok) ziele.push(Object.assign({}, z, {erwartet: z.typ === "blockiert" ? "OFFEN" : (r.grund || "TIMEOUT")}));
     else if (spec.alleZiele) ziele.push(Object.assign({}, z));
   }
-  if (!ziele.some(z => z.erwartet)) return null;
+  /* Terminal-Aufträge (C4) dürfen ohne Fehler im Netz auskommen: dann tragen allein die Arbeitsziele den Auftrag */
+  if (!ziele.some(z => z.erwartet) && !zusatz.some(z => Spiel.istArbeitsziel(z))) return null;
   const max = spec.maxZiele || 3;
   /* Ziele mit dem direkten Grund des Fehlers zuerst (das ist das Symptom, das der Kunde meldet) */
   const direkt = new Set(gewaehlt.flatMap(g => g.inj.gruende));

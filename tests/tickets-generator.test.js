@@ -9,7 +9,13 @@ function ticketPruefen(def, gruende){
   for (const s of def.skills || []) if (!skillIds.has(s)) fehler.push("unbekannte Fertigkeit " + s);
   const start = def.netz(Zufall(1));
   const erwartet = def.ziele.filter(z => z.erwartet);
-  if (!erwartet.length && !def.ziele.some(z => !Sim.pruefeZiel(start, z).ok)) fehler.push("Start-Netz bricht kein Ziel");
+  const netzZiele = def.ziele.filter(z => !Spiel.istArbeitsziel(z));
+  /* Arbeitsziele (befehl/antwort) sind am Start immer offen – ein Terminal-Auftrag darf ohne Fehler im Netz auskommen */
+  if (!erwartet.length && netzZiele.length === def.ziele.length && !def.ziele.some(z => !Sim.pruefeZiel(start, z).ok)) fehler.push("Start-Netz bricht kein Ziel");
+  for (const z of def.ziele.filter(Spiel.istArbeitsziel)) {
+    if (z.typ === "befehl" && !(z.geraet && z.muster && z.beispiel && new RegExp(z.muster, "i").test(z.beispiel))) fehler.push(`Befehlsziel unvollständig oder Beispiel passt nicht zum Muster: ${z.text}`);
+    if (z.typ === "antwort" && !(z.id && z.frage && Spiel.antwortSoll(start, z))) fehler.push(`Antwortziel ohne id/frage oder ohne Wert im Netz: ${z.text}`);
+  }
   const gesehen = [];
   for (const z of erwartet) {
     const r = Sim.pruefeZiel(start, z);
@@ -20,7 +26,7 @@ function ticketPruefen(def, gruende){
   if (gruende && erwartet.length && !gruende.includes(gesehen[0])) fehler.push(`erstes Ziel zeigt ${gesehen[0]} statt ${gruende.join("/")}`);
   const netz = def.netz(Zufall(1));
   try { Spiel.loesungAnwenden(netz, def.loesung); } catch (e) { fehler.push("Lösung wirft: " + e.message); return fehler; }
-  for (const z of def.ziele) { const r = Sim.pruefeZiel(netz, z); if (!r.ok) fehler.push(`nach Lösung offen: ${z.text} (${r.grund}: ${r.text})`); }
+  for (const z of netzZiele) { const r = Sim.pruefeZiel(netz, z); if (!r.ok) fehler.push(`nach Lösung offen: ${z.text} (${r.grund}: ${r.text})`); }
   if (def.vorlage) {
     const V = Spiel.vorlagen[def.vorlage];
     for (const z of V.bauen(Zufall(1), {}).ziele) {

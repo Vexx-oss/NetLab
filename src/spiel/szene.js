@@ -84,7 +84,7 @@ Spiel.szeneArt = function(netz, ziel, ende){
   if (ziel.typ === "blockiert") return "gesperrt";
   if (ziel.typ === "dhcp" || ziel.proto === "dns") return "adresse";
   if (ziel.typ === "gespeichert") return "sicherung";
-  if (ziel.typ === "konfig") return "haken";
+  if (ziel.typ === "konfig" || Spiel.istArbeitsziel(ziel)) return "haken";
   const g = netz.geraete[ende];
   if (g && g.skin === "drucker" && ziel.proto !== "icmp") return "druckt";
   if (+ziel.port === 9100) return "druckt";
@@ -103,7 +103,7 @@ Spiel.szeneText = function(netz, ziel, art, ende, ereignis){
       return `${ziel.name || ziel.nach} gefunden`;
     case "gesperrt": return "Gesperrt – wie gewünscht";
     case "sicherung": return "Konfiguration gesichert";
-    default: return ziel.typ === "konfig" ? "Einstellung passt" : `${name(ende)} antwortet`;
+    default: return ziel.typ === "konfig" ? "Einstellung passt" : ziel.typ === "befehl" ? "Befehl ausgeführt" : ziel.typ === "antwort" ? "Antwort stimmt" : `${name(ende)} antwortet`;
   }
 };
 
@@ -116,6 +116,7 @@ Spiel.szene = function(instOderNetz, abnahme){
     const z = e.ziel;
     let pfad, ende, ereignis = null;
     if (z.typ === "konfig" || z.typ === "gespeichert") { pfad = netz.geraete[z.geraet] ? [z.geraet] : []; ende = z.geraet; }
+    else if (Spiel.istArbeitsziel(z)) { ende = z.geraet || (z.pruefen || {}).geraet; pfad = netz.geraete[ende] ? [ende] : []; }
     else ({pfad, ende, ereignis} = Spiel.szenePfad(netz, z, e.trace));
     if (!pfad.length || !netz.geraete[ende]) continue;
     const art = Spiel.szeneArt(netz, z, ende);

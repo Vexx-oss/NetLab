@@ -9,7 +9,7 @@ gruppe("Spiel: Funktionsprobe", () => {
     const fehler = [];
     const netz = def.netz(Zufall(1));
     try { Spiel.loesungAnwenden(netz, def.loesung); } catch (e) { return [`${wo}: Lösung wirft ${e.message}`]; }
-    const ergebnisse = def.ziele.map(z => Object.assign({ziel: z}, Sim.pruefeZiel(netz, z)));
+    const ergebnisse = def.ziele.map(z => Object.assign({ziel: z}, Spiel.istArbeitsziel(z) ? {ok: true} : Sim.pruefeZiel(netz, z)));
     if (ergebnisse.some(e => !e.ok)) return [];          /* Lösbarkeit prüfen andere Tests; hier nur bestandene Abnahmen */
     const zeilen = Spiel.szene(netz, {ergebnisse});
     if (zeilen.length !== def.ziele.length) fehler.push(`${wo}: ${zeilen.length} Szenenzeilen für ${def.ziele.length} Ziele`);

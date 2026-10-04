@@ -20,6 +20,15 @@ Spiel.schrittAnwenden = function(netz, s){
     const r = CLI.anwenden(netz, s.geraet, s.cli);
     if (r && r.ok === false) throw new Error(`CLI auf ${s.geraet}: ` + (r.fehler || []).map(f => `${f.zeile}: ${f.meldung}`).join("; "));
   }
+  if (s.terminal) {
+    /* Terminal-Schritt (C4): Befehle in einer Windows-/Linux-Sitzung auf dem Gerät, z. B. netsh oder sudo systemctl */
+    if (typeof CLI === "undefined" || typeof CLI.sitzung !== "function") throw new Error("Terminal (CLI.sitzung) fehlt");
+    const sitzung = CLI.sitzung(netz, s.geraet, {});
+    for (const zeile of String(s.terminal).split("\n").filter(z => z.trim())) {
+      const r = CLI.eingabe(sitzung, zeile);
+      if (r && r.fehler) throw new Error(`Terminal auf ${s.geraet}: ${zeile} → ${String(r.ausgabe || "").split("\n")[0]}`);
+    }
+  }
   switch (s.aktion) {
     case undefined: case null: break;
     case "verbinden": {
@@ -59,6 +68,7 @@ Spiel.schrittText = function(netz, s){
   const n = id => netz.geraete[id]?.name || id;
   if (s.setzen) return `${n(s.geraet)}: ` + Object.entries(s.setzen).map(([p, w]) => `${p} = ${JSON.stringify(w)}`).join(", ");
   if (s.cli) return `${n(s.geraet)}: ${s.cli.split("\n").length} Befehle in der Konsole`;
+  if (s.terminal) return `${n(s.geraet)}: im Terminal ${s.terminal.split("\n")[0]}`;
   if (s.aktion === "verbinden") return `Kabel von ${n(s.a.geraet)} zu ${n(s.b.geraet)}`;
   return `${s.aktion} ${n(s.geraet)}`;
 };

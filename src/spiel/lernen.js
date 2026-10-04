@@ -121,5 +121,23 @@ Spiel.EIGENE_GRUENDE = {
     AP1: "Konfigurationswert weicht von der Vorgabe ab.",
     AP2: "Vorgabe nicht erfüllt.",
   },
+  BEFEHL_FEHLT: {
+    titel: "Befehl fehlt",
+    E: "Dieses Ziel prüft deine Arbeit im Terminal: Doppelklick auf das Gerät (oder Taste T) öffnet es. Tipp den geforderten Befehl ein – jeder fehlerfrei ausgeführte Befehl zählt.",
+    AP1: "Der geforderte Befehl lief im Terminal des Geräts noch nicht.",
+    AP2: "Befehl nicht ausgeführt.",
+  },
+  ANTWORT_FEHLT: {
+    titel: "Antwort fehlt",
+    E: "Lies den Wert im Terminal ab (zum Beispiel mit ipconfig) und trag ihn in der Auftragsmappe unter „Ziele“ ein.",
+    AP1: "Wert noch nicht in der Mappe eingetragen.",
+    AP2: "Antwort fehlt.",
+  },
+  ANTWORT_FALSCH: {
+    titel: "Antwort stimmt nicht",
+    E: "Der eingetragene Wert passt nicht zu dem, was das Gerät gerade zeigt. Schau die Ausgabe noch einmal an: Steht der Wert in der richtigen Zeile (IPv4-Adresse, Subnetzmaske, Standardgateway)?",
+    AP1: "Eingetragener Wert weicht von der Ausgabe des Geräts ab.",
+    AP2: "Antwort falsch.",
+  },
   FEHLER: {titel: "Prüfung nicht möglich", E: "Die Prüfung konnte nicht laufen.", AP1: "Prüfung nicht möglich.", AP2: "Prüfung nicht möglich."},
 };
