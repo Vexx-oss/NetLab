@@ -330,6 +330,40 @@
     /* ---- lab.storage ---- */
     m("sto-1", "lab.storage", "AP2", "wahl", "Was unterscheidet NAS und SAN?",
       ["NAS: Dateien übers LAN; SAN: Blockspeicher im eigenen Netz", "Beides ist dasselbe", "SAN gibt es nur per WLAN"], 0,
-      "Ein NAS stellt Dateien bereit (z. B. SMB/NFS). Ein SAN stellt Blockspeicher bereit, den Server wie eine lokale Platte nutzen – meist in einem eigenen Speichernetz.", "SNIA-Begriffe NAS/SAN")
+      "Ein NAS stellt Dateien bereit (z. B. SMB/NFS). Ein SAN stellt Blockspeicher bereit, den Server wie eine lokale Platte nutzen – meist in einem eigenen Speichernetz.", "SNIA-Begriffe NAS/SAN"),
+
+    /* ---- Terminal (Phase C4): Ausgaben deuten, Befehl wählen – an der Fertigkeit, um die es inhaltlich geht ---- */
+    m("cli-ipconfig-1", "lab.gateway", "E", "wahl", "Wohin schickt dieser PC ein Paket an 8.8.8.8?",
+      ["An 192.168.1.1 (Standardgateway)", "Direkt an 8.8.8.8", "An 255.255.255.0", "Gar nicht – es fehlt ein DNS-Server"], 0,
+      "8.8.8.8 liegt nicht im eigenen Netz 192.168.1.0/24. Alles außerhalb des eigenen Netzes schickt der PC an sein Standardgateway – den Router. Die Maske ist keine Adresse, und für eine IP-Adresse braucht es kein DNS.", "Microsoft Learn: ipconfig · " + NW,
+      ["log", "C:\\>ipconfig\nIPv4-Adresse  . . . : 192.168.1.50\nSubnetzmaske  . . . : 255.255.255.0\nStandardgateway . . : 192.168.1.1"]),
+    m("cli-befehle-1", "lab.ip", "E", "zuordnen", "Welcher Windows-Befehl hilft wobei?",
+      {links: ["Eigene Adresse ansehen", "Weg zum Ziel verfolgen", "Namen in Adresse auflösen"], rechts: ["nslookup", "ipconfig", "tracert"]}, [[0, 1], [1, 2], [2, 0]],
+      "ipconfig zeigt Adresse, Maske und Gateway. tracert listet jeden Router auf dem Weg. nslookup fragt den DNS-Server nach der Adresse zu einem Namen.", "Microsoft Learn: ipconfig, tracert, nslookup"),
+    m("cli-linux-1", "lab.ip", "AP1", "zuordnen", "Ordne jedem Windows-Befehl sein Linux-Gegenstück zu.",
+      {links: ["ipconfig", "tracert", "route print"], rechts: ["ip route", "ip addr", "traceroute"]}, [[0, 1], [1, 2], [2, 0]],
+      "ip addr (kurz ip a) zeigt die Adressen wie ipconfig, traceroute verfolgt den Weg wie tracert, ip route (ip r) zeigt die Routen wie route print. ping und nslookup heißen auf beiden Systemen gleich.", "man ip-address, ip-route (iproute2) · Microsoft Learn: route"),
+    m("cli-ping-1", "lab.ping", "E", "wahl", "„Zeitüberschreitung der Anforderung“ – was steht damit sicher fest?",
+      ["Es kam keine Antwort zurück", "Das Ziel ist ausgeschaltet", "Der Name ist unbekannt", "Das Kabel ist defekt"], 0,
+      "Zeitüberschreitung heißt nur: Innerhalb der Wartezeit kam nichts zurück. Ursachen gibt es viele – Ziel aus, Firewall, fehlender Rückweg. Ein unbekannter Name meldet sich vorher mit „Host nicht gefunden“.", "Microsoft Learn: ping · " + NW),
+    m("cli-ping-2", "lab.ping", "AP1", "wahl", "PC 192.168.1.50 pingt sein Gateway. Was bedeutet diese Antwort?",
+      ["Keine ARP-Antwort: Ziel im eigenen LAN stumm", "Das Gateway filtert Ping", "Der DNS-Server ist falsch", "Der Router hat keine Route"], 0,
+      "Die Meldung kommt von der EIGENEN Adresse: Der PC hat selbst aufgegeben, weil auf seine ARP-Anfrage niemand geantwortet hat – unter dieser Adresse ist im LAN kein Gerät. Ein filterndes Ziel führt eher zu „Zeitüberschreitung“, eine fehlende Route meldet der Router mit seiner Adresse.", "RFC 792 (ICMP) · RFC 826 (ARP) · " + NW,
+      ["log", "C:\\>ping 192.168.1.1\nAntwort von 192.168.1.50:\n  Zielhost nicht erreichbar."]),
+    m("cli-tracert-1", "lab.ttl", "AP1", "wahl", "Wo endet der Weg?",
+      ["Hinter dem eigenen Router (192.168.1.1)", "Schon am eigenen PC", "Erst am Ziel"], 0,
+      "Hop 1 antwortet – der eigene Router ist erreichbar. Danach kommen nur Sternchen: Dahinter antwortet niemand mehr, etwa weil eine Route fehlt, der Provider gestört ist oder ICMP gefiltert wird.", "Microsoft Learn: tracert · " + NW,
+      ["log", "C:\\>tracert 198.51.100.10\n  1    <1 ms    <1 ms    <1 ms  192.168.1.1\n  2     *        *        *\n  3     *        *        *"]),
+    m("cli-nslookup-1", "lab.dns", "AP1", "wahl", "Die Webseite lädt nicht. Was zeigt diese Ausgabe sicher?",
+      ["Der Name wird aufgelöst", "Der Webserver läuft", "Port 80 ist offen", "Die Seite lädt gleich wieder"], 0,
+      "nslookup testet nur die Namensauflösung: Der DNS-Server kennt den Namen. Ob der Webserver läuft und der Port offen ist, zeigt erst ein Verbindungstest (curl oder Test-NetConnection -Port 80).", "Microsoft Learn: nslookup · " + NW,
+      ["log", "C:\\>nslookup www.beispiel.de\nServer:  dns.beispiel.de\nAddress: 198.51.100.53\nName:    www.beispiel.de\nAddress: 198.51.100.10"]),
+    m("cli-netsh-1", "lab.gateway", "AP2", "wahl", "Wie setzt du unter Windows per Befehl das Standardgateway 192.168.1.1?",
+      ["netsh interface ip set address … 192.168.1.1", "ipconfig /gateway 192.168.1.1", "route print 192.168.1.1", "ping -g 192.168.1.1"], 0,
+      "netsh setzt Adresse, Maske und Gateway eines Adapters in einem Befehl: netsh interface ip set address \"Ethernet\" static IP Maske Gateway. ipconfig zeigt nur an (und erneuert DHCP), route print listet Routen, ping -g gibt es nicht.", "Microsoft Learn: netsh interface ip"),
+    m("cli-systemctl-1", "lab.ports", "AP1", "wahl", "Das Intranet lädt nicht. Welcher Befehl behebt das?",
+      ["sudo systemctl start apache2", "systemctl status apache2", "ping apache2", "sudo ip link set eth0 up"], 0,
+      "„inactive (dead)“ heißt: Der Webserver-Dienst läuft nicht. systemctl start startet ihn (mit Root-Rechten, daher sudo); status zeigt nur an. Mit systemctl enable startet er künftig auch nach einem Neustart.", "systemctl(1), freedesktop.org",
+      ["log", "$ systemctl status apache2\n○ apache2.service - Apache HTTP Server\n     Active: inactive (dead)"])
   );
 })();

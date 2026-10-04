@@ -98,4 +98,34 @@ gruppe("Spiel: Arbeitsziele", () => {
     erwarte.gleich(zeilen.filter(z => Spiel.istArbeitsziel(z.ziel)).map(z => [z.art, z.ende, z.text]),
       [["haken", "srv", "Befehl ausgeführt"], ["haken", "srv", "Befehl ausgeführt"]]);
   }));
+
+  pruefe("C5 Diagnoseleiter: Adresse → Weg → Name in Reihenfolge; Hilfestufe 2 nennt die nächste Diagnose, nie die Lösung; Abzeichen zählt", kapsel(() => {
+    const inst = instanz("baeckerei-terminal", "AP1");
+    const merke = b => Spiel.befehle.merken(inst, {geraet: "buero", befehl: b, ok: true});
+    erwarte.gleich(Spiel.befehle.leiter(inst).naechste, "adresse");
+    erwarte.passt(Spiel.hilfeInhalt(inst, 2).naechste, /ipconfig/);
+    merke("nslookup www.beispiel.de");                                 /* Name zuerst zählt nicht – erst unten */
+    merke("ipconfig /all");
+    erwarte.gleich(Spiel.befehle.leiter(inst).erreicht, ["adresse"]);
+    erwarte.passt(Spiel.naechsteDiagnose(inst), /Gateway/);
+    merke("ping -n 2 192.168.10.254");
+    erwarte.passt(Spiel.naechsteDiagnose(inst), /nslookup/);
+    merke("ping www.beispiel.de");                                     /* Name per ping zählt auch */
+    const l = Spiel.befehle.leiter(inst);
+    erwarte.wahr(l.vollstaendig, JSON.stringify(l));
+    const texte = ["adresse", "weg", "name", null].map(() => Spiel.naechsteDiagnose(inst)).join(" ");
+    erwarte.falsch(/192\.168\.10\.254|netsh|172/.test(texte), "verrät weder Router-Adresse noch Lösung: " + texte);
+    Spiel.aendern(inst, "Lösung", n => Spiel.loesung(n, Spiel.defVon(inst).loesung));
+    Spiel.arbeitszieleErfuellen(inst);
+    const vorher = Spiel.abzeichen.liste().find(a => a.id === "von-unten").ist;
+    Spiel._trocken = false;                                            /* Zähler zählen nur im echten Spielstand (kapsel stellt zurück) */
+    erwarte.wahr(Spiel.abschliessen(inst, Spiel.abnahme(inst)).bestanden);
+    Spiel._trocken = true;
+    erwarte.gleich(Spiel.abzeichen.liste().find(a => a.id === "von-unten").ist, vorher + 1, "Zähler „Von unten nach oben“");
+    /* Diagnose beginnt beim betroffenen Client; Befehle passend zu dessen System */
+    const srv = instanz("buero-terminal");
+    erwarte.passt(Spiel.naechsteDiagnose(srv), /PC-Albers.*ipconfig/);
+    srv.netz.geraete.pc1.os = "linux";
+    erwarte.passt(Spiel.naechsteDiagnose(srv), /mit ip a /);
+  }));
 });

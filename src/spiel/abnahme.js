@@ -102,6 +102,7 @@ Spiel.abschliessen = function(inst, abnahme){
     lohn.euro += lohn.verdacht;
     Spiel.abzeichen.zaehlen("verdachtTreffer");
   }
+  if (Spiel.befehle.leiter(inst).vollstaendig) Spiel.abzeichen.zaehlen("leiterVonUnten");   /* C5: Diagnoseleiter im Terminal */
   st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0, kunde: inst.kunde || def.kunde || null});
   if (st.erledigt.length > 2000) st.erledigt.splice(0, st.erledigt.length - 2000);
   if (inst.kunde) {

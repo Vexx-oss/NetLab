@@ -50,6 +50,7 @@
 .am-ziele-liste{display:flex; flex-direction:column; gap:10px; padding-bottom:6px}
 .am-ziele-liste .sp-ziele li{font-size:14.5px}
 .am-ziel-text{flex:1 1 auto; min-width:0}
+.sp-naechste{padding:6px 10px; border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 6px 6px 0}
 .am-antwort-zeile{display:flex; gap:6px; margin-top:5px; align-items:center}
 .am-antwort{flex:1 1 140px; max-width:220px; min-width:0; padding:4px 8px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--text); font:14px var(--mono)}
 .am-antwort:focus{outline:2px solid var(--accent); outline-offset:1px}

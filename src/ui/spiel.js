@@ -246,7 +246,8 @@ UI.spiel = (() => {
         h("ul", {class: "sp-check"}, r.leiter.map(s => h("li", {}, h("label", {},
           h("input", {type: "checkbox", checked: s.erledigt, onchange: e => Spiel.leiterHaken(inst, s.id, e.target.checked)}),
           h("span", {}, h("b", {}, s.titel + ": "), s.frage, h("small", {}, " Werkzeug: " + s.werkzeug)))))));
-      case 2: return h("div", {}, ...r.werkzeuge.map(w => h("p", {}, "🔧 ", w)), h("p", {class: "sp-leise"}, r.simulation));
+      case 2: return h("div", {}, r.naechste ? h("p", {class: "sp-naechste"}, h("b", {}, "Nächste Diagnose: "), r.naechste) : null,
+        ...r.werkzeuge.map(w => h("p", {}, "🔧 ", w)), h("p", {class: "sp-leise"}, r.simulation));
       case 3: return h("div", {class: "sp-senior"}, h("span", {class: "sp-senior-sym"}, "🧑‍🔧"), h("div", {}, ...r.fragen.map(f => h("p", {}, "„" + f + "“")), h("small", {}, "— der Senior")));
       case 4: return h("div", {}, h("p", {}, "Schau dir diese Stelle genauer an: ", h("b", {}, r.namen.join(", ") || "—")),
         h("button", {type: "button", class: "knopf klein", onclick: () => UI.labor.hervorheben(r.bereich, 5000)}, "Noch einmal zeigen"));

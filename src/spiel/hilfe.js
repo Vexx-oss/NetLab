@@ -96,7 +96,8 @@ Spiel.hilfeInhalt = function(inst, stufe){
     case 1: r.leiter = Spiel.LEITER.map(s => Object.assign({}, s, {erledigt: !!(inst.leiter && inst.leiter[s.id])})); break;
     case 2: r.werkzeuge = [...new Set((def.skills || []).map(s => Spiel.WERKZEUGE[s]).filter(Boolean))];
             if (!r.werkzeuge.length) r.werkzeuge = [Spiel.WERKZEUGE["lab.ping"]];
-            r.simulation = "Die Simulation zeigt jede Etappe eines Pakets mit Grund, wenn es verworfen wird."; break;
+            r.simulation = "Die Simulation zeigt jede Etappe eines Pakets mit Grund, wenn es verworfen wird.";
+            r.naechste = Spiel.naechsteDiagnose(inst); break;
     case 3: r.fragen = (h.frage && h.frage.length ? h.frage : [Spiel.SENIOR_FRAGEN[erster] || "Wo auf dem Weg vom Absender zum Ziel bleibt das Paket hängen?"]).slice(); break;
     case 4: r.bereich = (h.bereich && h.bereich.length ? h.bereich : (def.fehler || []).filter(f => f.auf).map(f => ({geraet: f.auf}))).slice();
             r.namen = r.bereich.map(b => Spiel.geraetName(inst.netz, b.geraet) + (b.port ? " " + b.port : "")); break;

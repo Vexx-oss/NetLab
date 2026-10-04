@@ -63,6 +63,35 @@ Spiel.befehle.merken = function(inst, {geraet, befehl, ok}){
   Spiel.melden("befehl-gemerkt", {inst});
   return l;
 };
+/* Diagnoseleiter im Terminal (C5): Adresse → Weg → Name, in dieser Reihenfolge. Zählt nur fehlerfrei gelaufene Befehle.
+   Für das Abzeichen „Von unten nach oben“ und den Hinweis der Hilfestufe 2 – nie ein Zwang. */
+Spiel.LEITER_BEFEHLE = {
+  adresse: /^(ipconfig|ifconfig|ip (a|addr|address)( show)?|get-netipconfiguration)\b/i,
+  weg: /^(ping|tracert|traceroute|pathping|test-netconnection)\s+(-\S+\s+(\d+\s+)?)*\d+\.\d+\.\d+\.\d+$/i,
+  name: /^(nslookup|dig|host|resolve-dnsname)\b|^(ping|test-netconnection)\s+(\S+\s+)*[a-z][\w-]*(\.[\w-]+)+$/i,
+};
+Spiel.befehle.leiter = function(inst){
+  const stufen = ["adresse", "weg", "name"], erreicht = [];
+  for (const b of Spiel.befehle.liste(inst)) {
+    const s = stufen[erreicht.length];
+    if (s && b.ok !== false && Spiel.LEITER_BEFEHLE[s].test(Spiel.befehlNorm(b.befehl))) erreicht.push(s);
+  }
+  return {erreicht, vollstaendig: erreicht.length === stufen.length, naechste: stufen[erreicht.length] || null};
+};
+/* Hilfestufe 2: die nächste sinnvolle Diagnose im Terminal – nie die Lösung. Bezugsgerät: das erste Ziel mit einem Rechner als Absender. */
+Spiel.naechsteDiagnose = function(inst){
+  const def = Spiel.defVon(inst), netz = inst.netz;
+  const host = id => id && netz.geraete[id] && Modell.HOST[netz.geraete[id].typ];
+  const z = (def.ziele || []).find(x => host(x.von) || host(x.geraet));
+  if (!z) return null;
+  const g = netz.geraete[host(z.von) ? z.von : z.geraet], win = Modell.osVon(g) !== "linux";
+  switch (Spiel.befehle.leiter(inst).naechste) {
+    case "adresse": return `Fang unten an: Öffne das Terminal von ${g.name} (Doppelklick) und sieh dir mit ${win ? "ipconfig" : "ip a"} Adresse, Maske und Gateway an.`;
+    case "weg": return `Eine Stufe höher: Antwortet das Standardgateway? ${win ? "ping" : "ping -c 4"} mit der Gateway-Adresse aus ${win ? "ipconfig" : "ip r"}.`;
+    case "name": return `Der Weg ist geprüft – jetzt der Name: ${win ? "nslookup" : "dig"} mit dem Namen zeigt, ob DNS antwortet.`;
+    default: return "Adresse, Weg und Name sind geprüft. Jetzt das Ziel selbst: Läuft der Dienst, lässt eine Regel durch? Die Frage des Seniors (Stufe 3) hilft weiter.";
+  }
+};
 /* Kabeltester (Werkzeug aus dem Shop) → Karte */
 Spiel.akte.ausKabeltest = function(inst, {a, b, oben, grund, netz}){
   netz = netz || inst.netz;

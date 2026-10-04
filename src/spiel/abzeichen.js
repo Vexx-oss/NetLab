@@ -22,6 +22,8 @@ Spiel.ABZEICHEN = (() => {
       lehrt: "Erst eine Erwartung bilden, dann messen – so findet man Fehler schneller.", soll: 10, ist: (st, z) => z.vorhersageRichtig || 0},
     {id: "spuernase", sym: "🔎", titel: "Spürnase", text: "3 Verdachte voll getroffen – vor dem Eingriff.",
       lehrt: "Erst ermitteln, dann eine Hypothese aufschreiben, dann eingreifen: So arbeiten Profis.", soll: 3, ist: (st, z) => z.verdachtTreffer || 0},
+    {id: "von-unten", sym: "🪜", titel: "Von unten nach oben", text: "In 3 Aufträgen im Terminal von unten diagnostiziert: Adresse, dann Weg, dann Name.",
+      lehrt: "Erst die eigene Adresse (ipconfig), dann der Weg (ping), dann der Name (nslookup) – so grenzt man ein, statt oben zu raten.", soll: 3, ist: (st, z) => z.leiterVonUnten || 0},
     {id: "pausenprofi", sym: "🧩", titel: "Pausenprofi", text: "25 Mini-Tickets richtig gelöst.",
       lehrt: "Kurze Wiederholungen zwischendurch halten Wissen frisch.", soll: 25, ist: st => (st.mini && st.mini.richtig) || 0},
     {id: "tagwerk", sym: "✅", titel: "Tagwerk", text: "An einem Tag das Tagesziel geschafft (3 Tickets).",
