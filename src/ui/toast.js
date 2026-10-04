@@ -1,7 +1,7 @@
 "use strict";
 /* ---------- Toasts: kurze Rückmeldungen unten mittig (im Labor: oben rechts auf der Zeichenfläche) ----------
    UI.toast(text, art = "info"|"ok"|"warn"|"fehler", {aktion:{text, fn}|[…], dauer, titel, id})
-     → {schliessen()}   Maus darüber hält den Toast an. Mit Aktion bleibt er länger stehen.
+     → {schliessen()}   Maus darüber hält den Toast an. Mit Aktion bleibt er länger stehen.  UI.toast.zu(id) schließt.
    Gleiche id ersetzt einen noch sichtbaren Toast (z. B. wiederholte Pings).
    Ausbau 1.2 (A4): höchstens EIN Toast gleichzeitig – der neue ersetzt den alten. Ein verdrängter Toast mit Aktion
    (z. B. „Rückgängig“) kommt danach noch einmal kurz, damit die Aktion nicht verloren geht. */
@@ -74,5 +74,7 @@ UI.toast = (() => {
     starten();
     return {schliessen, el};
   }
+  /* Meldung mit dieser id schließen (z. B. „Alle Ziele erfüllt“, sobald die Abnahme läuft) */
+  toast.zu = id => { if (stapel) for (const alt of $$(".toast", stapel)) if (alt.dataset.id === id) alt._schliessen?.(false, true); };
   return toast;
 })();

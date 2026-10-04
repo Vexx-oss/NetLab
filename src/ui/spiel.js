@@ -284,6 +284,7 @@ UI.spiel = (() => {
     status();
     if (!erg.bestanden) { UI.klang?.spielen("nochnicht"); ergebnisZeigen(erg); return; }
     S.coach = null; ticketFertig();
+    UI.toast.zu?.("ziele");                                /* „Alle Ziele erfüllt – jetzt die Abnahme“ ist erledigt */
     const kd = kunde(erg.inst.kunde || erg.def.kunde);
     S.fertig = {titel: erg.def.titel, symbol: kd.symbol, farbe: kd.farbe};
     UI.labor.werkzeug("auswahl");
