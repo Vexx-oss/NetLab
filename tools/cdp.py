@@ -4,6 +4,7 @@
   python tools/cdp.py eval "<js>"              JavaScript im Programm auswerten (await erlaubt), Ergebnis als JSON
   python tools/cdp.py shot bild.png            Bildschirmfoto der Seite
   python tools/cdp.py klick X Y | zeigen X Y | ziehen X1 Y1 X2 Y2 | taste P   echte Maus/Tastatur (CSS-Pixel; zeigen = nur darüberfahren)
+  python tools/cdp.py lauf schritte.txt [mess.json]   Szenario in einer Sitzung (groesse B H, klick-auf SELEKTOR, messen, shot …; siehe lauf())
   python tools/cdp.py stop                     Programm beenden
 
 Umgebung: WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222, LABOR_DATEN=<Testordner>.
@@ -103,6 +104,11 @@ class WS:
                 if "error" in m:
                     raise SystemExit(json.dumps(m["error"], ensure_ascii=False))
                 return m.get("result", {})
+            if m.get("method") == "Runtime.exceptionThrown":
+                d = m["params"]["exceptionDetails"]
+                getattr(self, "fehler", []).append((d.get("exception", {}).get("description") or d.get("text") or "?")[:300])
+            elif m.get("method") == "Runtime.consoleAPICalled" and m["params"].get("type") == "error":
+                getattr(self, "fehler", []).append(" ".join(str(a.get("value", a.get("description", ""))) for a in m["params"].get("args", []))[:300])
 
 
 def start(exe=None, frisch=False):
@@ -179,6 +185,135 @@ def tippen(text):
     print(json.dumps({"getippt": text}))
 
 
+MESSEN = r"""(() => {
+  /* Abnahme A: sichtbare Bedienelemente, Wörter oberhalb der Falz, Primärknöpfe.
+     Bereich „labor“ = alles außer Kopfzeile, Andock-Leiste und Zeichnung (SVG-Fläche); „fenster“ = alles. */
+  const W = innerWidth, H = innerHeight;
+  const sichtbar = (el, treffer = true) => {
+    const r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2 || r.bottom <= 0 || r.right <= 0 || r.top >= H || r.left >= W) return false;
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || +cs.opacity === 0) return false; }
+    if (!treffer) return true;   /* Text zählt auch auf Flächen ohne Mausereignisse (pointer-events:none) */
+    const x = Math.min(W - 1, Math.max(0, r.left + r.width / 2)), y = Math.min(H - 1, Math.max(0, r.top + r.height / 2));
+    const t = document.elementFromPoint(x, y);
+    return !!t && (el === t || el.contains(t) || t.contains(el));
+  };
+  const chrom = el => !!el.closest(".kopf, .dock");
+  const zeichnung = el => !!el.closest("svg.lb-svg");
+  const SEL = "button, a[href], input:not([type=hidden]), select, textarea, [role=button], [role=tab], [role=radio], [role=menuitem], [role=switch], [tabindex]:not([tabindex='-1'])";
+  const bedien = [...document.querySelectorAll(SEL)].filter(el => !el.disabled && el.getAttribute("aria-disabled") !== "true" && !el.matches("svg.lb-svg") && !zeichnung(el) && sichtbar(el));
+  const name = el => (el.getAttribute("aria-label") || el.title || el.textContent || el.className || el.tagName).replace(/\s+/g, " ").trim().slice(0, 40);
+  const woerter = filter => {
+    let n = 0; const proben = [];
+    const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let t = tw.nextNode(); t; t = tw.nextNode()) {
+      const el = t.parentElement; if (!el || !t.nodeValue.trim() || !filter(el)) continue;
+      if (el.closest("script, style, title")) continue;
+      const rg = document.createRange(); rg.selectNodeContents(t);
+      const r = rg.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1 || r.top >= H || r.bottom <= 0 || r.left >= W || r.right <= 0 || !sichtbar(el, false)) continue;
+      const w = t.nodeValue.split(/\s+/).filter(x => /[\p{L}\p{N}]/u.test(x));
+      n += w.length; if (w.length) proben.push(w.join(" ").slice(0, 60));
+    }
+    return {n, proben};
+  };
+  const labor = bedien.filter(el => !chrom(el));
+  const wl = woerter(el => !chrom(el) && !zeichnung(el)), wf = woerter(() => true);
+  const primaer = [...document.querySelectorAll(".primaer, .knopf-haupt")].filter(el => sichtbar(el));
+  return {viewport: W + "x" + H, bedienLabor: labor.length, bedienFenster: bedien.length, woerterLabor: wl.n, woerterFenster: wf.n,
+    primaer: primaer.length, primaerNamen: primaer.map(name), bedienListe: labor.map(name), woerterProben: wl.proben};
+})()"""
+
+
+def lauf(datei, ausgabe=None):
+    """Szenario in EINER Sitzung (Fenstergröße per Emulation gilt nur, solange die Sitzung offen ist).
+    Zeilen: groesse B H · eval JS · klick X Y · klick-auf[?] SEL[@fx,fy] · ziehen-auf SEL | SEL · zeigen X Y · ziehen X1 Y1 X2 Y2 ·
+            taste NAME · tippen TEXT · warte MS · shot DATEI · messen [NAME] · navigiere URL · # Kommentar"""
+    ws = WS(seite())
+    ws.fehler = []
+    ws.rufen("Runtime.enable")
+    ergebnisse = {}
+    def js(ausdruck):
+        r = ws.rufen("Runtime.evaluate", {"expression": f"(async () => {{ return {ausdruck} }})()" if "return" not in ausdruck and "\n" not in ausdruck and ";" not in ausdruck
+                                          else f"(async () => {{ {ausdruck} }})()", "awaitPromise": True, "returnByValue": True})
+        if "exceptionDetails" in r:
+            raise SystemExit("JS-Fehler: " + json.dumps(r["exceptionDetails"].get("exception", {}).get("description") or r["exceptionDetails"].get("text"), ensure_ascii=False))
+        return r.get("result", {}).get("value")
+    def ev(typ, x, y, knoepfe=0, anzahl=0, mod=0):
+        ws.rufen("Input.dispatchMouseEvent", {"type": typ, "x": x, "y": y, "button": "left" if typ != "mouseMoved" or knoepfe else "none",
+                                              "buttons": knoepfe, "clickCount": anzahl, "pointerType": "mouse", "modifiers": mod})
+    def klick(x, y, mod=0):
+        ev("mouseMoved", x, y); ev("mousePressed", x, y, 1, 1, mod); ev("mouseReleased", x, y, 0, 1, mod)
+    def punkt(ziel):
+        """CSS-Selektor, optional @fx,fy (Anteil im Element, Standard Mitte) → [x, y] oder None"""
+        sel, _, anteil = ziel.partition("@")
+        fx, fy = (float(v) for v in anteil.split(",")) if anteil else (0.5, 0.5)
+        return js(f"return (() => {{ const e = [...document.querySelectorAll({json.dumps(sel.strip())})].find(e => e.getClientRects().length); if (!e) return null; "
+                  f"if (!(e instanceof SVGElement)) e.scrollIntoView({{block: 'nearest'}}); const r = e.getBoundingClientRect(); return [r.left + r.width * {fx}, r.top + r.height * {fy}]; }})()")
+    for zeile in Path(datei).read_text(encoding="utf-8").splitlines():
+        zeile = zeile.strip()
+        if not zeile or zeile.startswith("#"):
+            continue
+        befehl, _, rest = zeile.partition(" ")
+        if befehl == "groesse":
+            b, h = (int(x) for x in rest.split())
+            ws.rufen("Emulation.setDeviceMetricsOverride", {"width": b, "height": h, "deviceScaleFactor": 1, "mobile": False})
+            time.sleep(0.4)
+        elif befehl == "eval":
+            print(json.dumps({"eval": rest[:60], "wert": js(rest)}, ensure_ascii=False))
+        elif befehl == "navigiere":
+            ws.rufen("Page.navigate", {"url": rest}); time.sleep(2.5)
+        elif befehl == "klick":
+            x, y = (float(v) for v in rest.split()); klick(x, y)
+        elif befehl in ("klick-auf", "klick-auf?"):
+            p = punkt(rest)
+            if not p:
+                if befehl == "klick-auf?":
+                    print(json.dumps({"übersprungen": rest}, ensure_ascii=False)); continue
+                raise SystemExit(f"Nicht gefunden: {rest}")
+            klick(*p)
+        elif befehl == "ziehen-auf":
+            von, _, nach = rest.partition("|")
+            a, b = punkt(von.strip()), punkt(nach.strip())
+            if not a or not b:
+                raise SystemExit(f"Nicht gefunden: {von if not a else nach}")
+            ev("mouseMoved", *a); time.sleep(0.1); ev("mousePressed", *a, 1, 1)
+            for i in range(1, 13):
+                ev("mouseMoved", a[0] + (b[0] - a[0]) * i / 12, a[1] + (b[1] - a[1]) * i / 12, 1); time.sleep(0.02)
+            ev("mouseReleased", *b, 0, 1)
+        elif befehl == "zeigen":
+            ev("mouseMoved", *(float(v) for v in rest.split()))
+        elif befehl == "ziehen":
+            x1, y1, x2, y2 = (float(v) for v in rest.split())
+            ev("mouseMoved", x1, y1); time.sleep(0.1); ev("mousePressed", x1, y1, 1, 1)
+            for i in range(1, 13):
+                ev("mouseMoved", x1 + (x2 - x1) * i / 12, y1 + (y2 - y1) * i / 12, 1); time.sleep(0.02)
+            ev("mouseReleased", x2, y2, 0, 1)
+        elif befehl == "taste":
+            vk = SONDER.get(rest, ord(rest.upper()) if len(rest) == 1 else 0)
+            for typ in ("rawKeyDown" if rest in SONDER else "keyDown", "keyUp"):
+                ws.rufen("Input.dispatchKeyEvent", {"type": typ, "key": rest, "code": ("Key" + rest.upper()) if len(rest) == 1 else rest,
+                                                    "text": rest if typ == "keyDown" and len(rest) == 1 else "", "windowsVirtualKeyCode": vk, "nativeVirtualKeyCode": vk})
+        elif befehl == "tippen":
+            ws.rufen("Input.insertText", {"text": rest})
+        elif befehl == "warte":
+            time.sleep(int(rest) / 1000)
+        elif befehl == "shot":
+            r = ws.rufen("Page.captureScreenshot", {"format": "png"})
+            Path(rest).write_bytes(base64.b64decode(r["data"]))
+            print(json.dumps({"shot": rest}, ensure_ascii=False))
+        elif befehl == "messen":
+            m = js("return " + MESSEN)
+            ergebnisse[rest or f"messung{len(ergebnisse) + 1}"] = m
+            print(json.dumps({"messen": rest, **{k: v for k, v in m.items() if k not in ("bedienListe", "woerterProben")}}, ensure_ascii=False))
+        else:
+            raise SystemExit(f"Unbekannter Schritt: {zeile}")
+    ws.rufen("Emulation.clearDeviceMetricsOverride")
+    print(json.dumps({"js-fehler": ws.fehler}, ensure_ascii=False))
+    if ausgabe:
+        Path(ausgabe).write_text(json.dumps(ergebnisse, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
 def stop():
     subprocess.run(["taskkill", "/IM", "netzwerk-labor.exe", "/F"], capture_output=True)
     subprocess.run(["taskkill", "/IM", "Netzwerk-Labor.exe", "/F"], capture_output=True)
@@ -205,6 +340,8 @@ if __name__ == "__main__":
         taste(a[1])
     elif a[0] == "tippen":
         tippen(a[1])
+    elif a[0] == "lauf":
+        lauf(a[1], a[2] if len(a) > 2 else None)
     elif a[0] == "stop":
         stop()
     else:

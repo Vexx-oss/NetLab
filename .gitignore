@@ -13,3 +13,6 @@ Programm/linux/netzwerk-labor
 Programm/Endversion-*/linux/netzwerk-labor
 # fremde Archive im Programm-Ordner (nicht Teil des Projekts)
 Programm/**/*.rar
+
+# Bildschirmfotos und Messwerte der Abnahmen (liegen im Vault, nicht im Git)
+Nachweise/
