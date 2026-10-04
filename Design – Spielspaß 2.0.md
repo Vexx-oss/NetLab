@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2) gebaut 04.10.2026, Zweig ausbau-1.2; weiter mit Welle 2 (B, C) bis 50 %
+status: Welle 1 (S1 + S2) und Phase B gebaut 04.10.2026, Zweig ausbau-1.2; Phase C folgt (Ende Welle 2 = 50 %)
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -528,3 +528,50 @@ Tagesrätsel im Labor · Ergebnis mit 🟩 und „Ergebnis kopieren“:
 
 Fehlerdex im Lernstand · Feierabend mit Ausblick:
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-8-fehlerdex.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-11-feierabend.png|420]]
+
+---
+
+## 16 · Stand nach Phase B (Welle 2, erster Teil)
+
+*Gebaut und abgenommen am 04.10.2026 (Zweig `ausbau-1.2`, 6 Commits). Im echten Programm per `cdp.py lauf` in drei Teilen gespielt, keine JS-Fehler. Bilder und Messdateien: `Nachweise/1.2-B/`. Die Scorecard wird nach Phase C (Ende Welle 2) neu bewertet.*
+
+### Abnahme
+
+| Messung | Soll | Ergebnis |
+|---|---|---|
+| Labor-Start „Kasse ohne Netz“ (R5) | ≤ 12 Elemente, ≤ 40 Wörter, 1 Hauptknopf | **12 · 30 · 1** – unverändert, das Dock erscheint erst mit Inhalt |
+| Fläche bei offenem Dock | ≥ 60 % der Laborbreite | **60,8 %** (1366 px, Reiter Simulation + Akte) · **61,1 %** (960 px, Dock 266 px) – vorher lief die Funktionsprobe bei offener Simulation auf ~53 % Zoom (K1) |
+| Plan zum Auftrag | Plan neben dem Labor, Unterschied ohne Hilfe sichtbar | „Kartenzahlung tot“ (AP1): Mappe → Reiter Plan → „Neben das Labor heften“ → Klick auf die Kasse: **Plan 192.168.20.1 · Labor 192.168.20.105** (Hilfestufe 0; im AP1 ohne Markierung) → im Inspektor korrigiert → bestanden |
+| Akte füllt sich | aus Ping (und Kabeltest) | Ping Kasse → Internet: Karte „Zeitüberschreitung – keine Antwort“ (Grund im AP1 verborgen) · Kabeltest: „Link oben – Signal auf beiden Seiten“ |
+| Verdacht trifft / verfehlt, mit Erklärung | gesehen | Treffer vor dem Eingriff: **„🎯 Volltreffer: Falsches Standardgateway an Kasse-Theke – genau das war es.“**, Lohn „inkl. 5,00 € für den Verdacht“ · Fehlschuss: **„Du hattest Schicht 1 vermutet (…). Tatsächlich: Zahlendreher in der IP-Adresse an PC-Kasse (Schicht 3). Woran man es erkennt: Gateway im falschen Netz.“** |
+| Werkzeuge v1 | im Shop, im Spiel wirksam | Kabeltester für 40 € gekauft → Rechtsklick auf ein Kabel „Kabel testen“ → Beweiskarte; Netzprüfer (150 €, ab Stufe 2) im Test |
+
+**Tests:** 153 grün (vorher 144): Netzplan für alle 37 Hand- und 60+ generierten Aufträge (deterministisch, keine überlappenden Beschriftungen – auch umgebrochen auf 300/400 px –, kein injizierter Fehlerwert im Plan, Abweichung Plan ↔ Start = genau die Geräte der Lösung), Akte, Verdacht (vier Ursachen, genau eine richtig, passend zum Netztyp; Treffer-Stufen; Bonus nur vor dem Eingriff), Stufenregeln um den Verdacht ergänzt, Werkzeuge im Shop.
+
+### Entscheidungen
+
+- **Ursachen im Verdacht sind Fehlerarten** (= Fehlerdex-Einträge wie „Falsches Standardgateway“), nicht Simulationsgründe („Gateway antwortet nicht“): Ein Grund ist ein Symptom, gefragt ist die Ursache. Die drei falschen kommen aus derselben Gruppe oder einer Nachbarschicht und können im selben Netztyp vorkommen.
+- **Stufenregeln für den Verdacht:** Einstieg freiwillig (+10 % Lohn bei Volltreffer vor dem Eingriff), AP1 ohne Verdacht −½ ★, AP2 −1 ★ – ein fester Abzug statt „★★★ nur mit Verdacht“, wie beim Versuchsabzug. Projekte (keine Ursache) und die Prüfung kennen keinen Verdacht.
+- **Plan aus Startnetz + Referenzlösung** statt aus einer eigenen „gesund“-Fabrik: gilt ohne Handarbeit für Störungen (gesund) *und* Projekte (Ziel). Plan-Art je Niveau: Einstieg Netzplan, AP1 Skizze + Tabelle, AP2 Tabelle mit Lücken bei Gateway/DNS der Rechner.
+- **„Plan ↔ Labor“** steht für das gewählte Gerät nebeneinander; markiert wird ein Unterschied nur im Einstieg (R1). „Abweichungen markieren“ gibt es auch – es zählt wie Hilfestufe 4 (−½ ★).
+- **Dock-Verhalten:** Auswahl zeigt den Inspektor, außer Plan oder Akte sind offen (dort gehört die Auswahl zum Vergleich bzw. füllt das Gerät im Verdacht vor). Ein Ping bei anderem Reiter frischt die Simulation nur auf und meldet sich kurz.
+- **Kabeltester im Kabelmenü** (Rechtsklick) statt als viertes Werkzeug: keine dauerhafte Schaltfläche (R5); ohne Kauf steht er ausgegraut mit „Werkzeug im Shop“ da.
+- **Akte-Befund wie ein echtes Werkzeug** („Zeitüberschreitung“, „Zielhost nicht erreichbar“); Grund und Schicht zeigt die Karte nur im Einstieg.
+
+### Offen (ehrlich)
+
+- **B4 nur teilweise:** Projekte haben ihren Soll-Plan (der Plan zeigt das Ziel), aber noch keine eigenen Zielarten `topologie`/`adresse` und keinen Geisterplan auf der Fläche. **B5 (Plan-Audit-Aufträge)** kommt mit den Auftragsformen in Phase E.
+- Im Zustand „Mappe offen“ zählt die Messung jetzt 13 statt 12 Elemente (dritter Reiter „Plan“); der Labor-Start ohne Mappe bleibt bei 12.
+- Traceroute als Beweiskarte und Terminal-Befehle in der Akte folgen in Phase C.
+- Der Kabel-Tooltip (Mauszeiger über dem Kabel) nennt den Grund weiterhin auch im AP-Niveau – Altbestand aus 1.0, gehört mit R1 in Phase C/D aufgeräumt.
+
+### Bildschirmfotos
+
+Plan neben dem Labor – Plan 192.168.20.1, Labor 192.168.20.105 · Akte mit Verdacht vor dem Eingriff:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-1366-3-plan-vergleich.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-1366-5-verdacht.png|420]]
+
+Nachbesprechung: Volltreffer · Fehlschuss mit Erklärung:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-1366-6-ergebnis-volltreffer.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-1366-10-ergebnis-daneben.png|420]]
+
+Kabeltester im Kabelmenü · schmal (960 px) mit Dock:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-1366-8-kabelmenue.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-960-akte.png|320]]

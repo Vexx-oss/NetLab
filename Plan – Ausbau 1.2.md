@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Plan]
 erstellt: 2026-10-04
-status: Phase 0 und A gebaut; Welle 1 (S1 + S2, Spielspaß 2.0) gebaut 04.10.2026; B und C (Welle 2) in Arbeit
+status: Phase 0, A, Welle 1 (S1 + S2) und B gebaut 04.10.2026; C in Arbeit
 ---
 
 # 🗺️ Plan – Ausbau 1.2 „Übersichtlich, abwechslungsreich, mit echtem Terminal"
@@ -167,6 +167,8 @@ Alle Bilder und Messdateien (`*.json`): `Nachweise/1.2-Phase-A/` (liegt im Vault
 ---
 
 ## Phase B · Netzwerkplan zum Auftrag
+
+> [!check] Gebaut 04.10.2026 (zusammen mit Dock, Akte, Verdacht und Werkzeugen aus Welle 2) – B1–B3 fertig, B4 teilweise (Soll-Plan ja, neue Zielarten/Geisterplan nein), B5 → Phase E. Messwerte und Bilder: [[Design – Spielspaß 2.0#16 · Stand nach Phase B (Welle 2, erster Teil)]]
 
 **Kernidee:** Das Ticket baut schon heute ein *gesundes* Netz (`netz(z)`) und wendet danach die Fehler an. Aus dem gesunden Netz entsteht der **Plan** – ohne neue Handarbeit pro Ticket. Was im Labor vom Plan abweicht, ist der Fehler. Der Plan verrät die Ursache nie, weil er *vor* der Fehlerinjektion entsteht.
 
