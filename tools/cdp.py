@@ -227,7 +227,7 @@ MESSEN = r"""(() => {
 
 def lauf(datei, ausgabe=None):
     """Szenario in EINER Sitzung (Fenstergröße per Emulation gilt nur, solange die Sitzung offen ist).
-    Zeilen: groesse B H · eval JS · klick X Y · klick-auf[?] SEL[@fx,fy] · ziehen-auf SEL | SEL · zeigen X Y · ziehen X1 Y1 X2 Y2 ·
+    Zeilen: groesse B H · eval JS · klick X Y · klick-auf[?] SEL[@fx,fy] · rechtsklick-auf SEL · ziehen-auf SEL | SEL · zeigen X Y · ziehen X1 Y1 X2 Y2 ·
             taste NAME · tippen TEXT · warte MS · shot DATEI · messen [NAME] · navigiere URL · # Kommentar"""
     ws = WS(seite())
     ws.fehler = []
@@ -244,6 +244,10 @@ def lauf(datei, ausgabe=None):
                                               "buttons": knoepfe, "clickCount": anzahl, "pointerType": "mouse", "modifiers": mod})
     def klick(x, y, mod=0):
         ev("mouseMoved", x, y); ev("mousePressed", x, y, 1, 1, mod); ev("mouseReleased", x, y, 0, 1, mod)
+    def rechtsklick(x, y):
+        ws.rufen("Input.dispatchMouseEvent", {"type": "mouseMoved", "x": x, "y": y, "button": "none", "buttons": 0, "pointerType": "mouse"})
+        for typ in ("mousePressed", "mouseReleased"):
+            ws.rufen("Input.dispatchMouseEvent", {"type": typ, "x": x, "y": y, "button": "right", "buttons": 2 if typ == "mousePressed" else 0, "clickCount": 1, "pointerType": "mouse"})
     def punkt(ziel):
         """CSS-Selektor, optional @fx,fy (Anteil im Element, Standard Mitte) → [x, y] oder None"""
         sel, _, anteil = ziel.partition("@")
@@ -274,6 +278,11 @@ def lauf(datei, ausgabe=None):
                     print(json.dumps({"übersprungen": rest}, ensure_ascii=False)); continue
                 raise SystemExit(f"Nicht gefunden: {rest}")
             klick(*p)
+        elif befehl == "rechtsklick-auf":
+            p = punkt(rest)
+            if not p:
+                raise SystemExit(f"Nicht gefunden: {rest}")
+            rechtsklick(*p)
         elif befehl == "ziehen-auf":
             von, _, nach = rest.partition("|")
             a, b = punkt(von.strip()), punkt(nach.strip())

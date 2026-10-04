@@ -64,7 +64,7 @@ Spiel.verdacht.bewerten = function(inst){
   const inj = Spiel.INJEKTOREN[r.ursachen[0]];
   const geraete = r.geraete.filter(id => netz.geraete[id] && netz.geraete[id].typ !== "internet").map(name);
   const ort = geraete.length ? ` an ${geraete.slice(0, 2).join(" und ")}` : "";
-  const erkennen = (Spiel.dex.erkennen(inj)[0] || "").replace(/^./, c => c.toLowerCase());
+  const erkennen = Spiel.dex.erkennen(inj)[0] || "–";
   const richtig = {ursache: {id: inj.name, titel: inj.titel}, schicht: r.schichten[0], geraete};
   const v = inst.verdacht;
   if (!v) return {treffer: null, gesetzt: false, richtig, text: `Ohne Verdacht abgeschlossen. Es war: ${inj.titel}${ort} (Schicht ${r.schichten[0]}).`};
