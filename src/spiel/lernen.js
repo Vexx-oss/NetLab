@@ -139,6 +139,12 @@ Spiel.EIGENE_GRUENDE = {
     AP1: "Eingetragener Wert weicht von der Ausgabe des Geräts ab.",
     AP2: "Antwort falsch.",
   },
+  AUDIT_OFFEN: {
+    titel: "Plan noch nicht vollständig geprüft",
+    E: "Noch sind nicht alle falschen Werte markiert – oder ein richtiger ist versehentlich markiert. Vergleiche Gerät für Gerät: Was zeigt das Gerät selbst (Inspektor, ipconfig), was steht im Plan?",
+    AP1: "Markierung stimmt noch nicht (fehlende oder zu viele).",
+    AP2: "Audit unvollständig.",
+  },
   TABELLE_OFFEN: {
     titel: "Adressplan noch nicht fertig",
     E: "Noch nicht alle Felder stimmen. Rechne Zeile für Zeile: Geräte + 2 Adressen, aufrunden auf eine Zweierpotenz – das ist die Blockgröße. Das nächste Netz beginnt direkt nach dem Broadcast des vorigen.",

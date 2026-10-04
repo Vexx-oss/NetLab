@@ -65,6 +65,32 @@ gruppe("Spiel: Auftragsformen", () => {
     erwarte.wahr(Spiel.beratung.gleich("praefix", "255.255.255.192", "/26") && Spiel.beratung.gleich("praefix", " 26", "/26") && !Spiel.beratung.gleich("praefix", "/25", "/26"), "Präfix-Schreibweisen");
   }));
 
+  pruefe("Plan-Audit: 1/2/3 Fehler je Niveau, nur im Plan (nie im Netz), je Gerät einer; markiert = bestanden, zu viel = nicht", kapsel(() => {
+    const fehler = [];
+    for (const kunde of KUNDEN) for (const [stufe, n] of [["E", 1], ["AP1", 2], ["AP2", 3]]) {
+      const seed = 300 + KUNDEN.indexOf(kunde) * 7 + n;
+      let def;
+      try { def = Spiel.generiereForm("audit", seed, {kunde, stufe}); } catch (e) { fehler.push(`${kunde}/${stufe}: ${e.message}`); continue; }
+      if (def.planFehler.length !== n || new Set(def.planFehler.map(f => f.geraet)).size !== n) fehler.push(`${def.id}: ${def.planFehler.length} Fehler`);
+      const start = Spiel.startNetz(def, 1), soll = Spiel.plan.sollNetzVon(def, 1);
+      for (const f of def.planFehler) {
+        const echt = Modell.lesen(start.geraete[f.geraet].running, `if.${f.port}.${f.feld}`), plan = Modell.lesen(soll.geraete[f.geraet].running, `if.${f.port}.${f.feld}`);
+        if (echt === f.wert || plan !== f.wert) fehler.push(`${def.id}: ${f.geraet} ${f.feld} Netz ${echt} Plan ${plan}`);
+      }
+      if (Spiel.plan.geraeteAus(Spiel.plan.diff(soll, start)).length !== n) fehler.push(`${def.id}: Plan weicht nicht genau an ${n} Geräten ab`);
+      const r = Spiel.testlauf({ids: [def.id], niveau: stufe})[0];
+      if (!r.bestanden) fehler.push(`${def.id}: Durchspiel ${r.fehler.join("; ")}`);
+      const inst = Spiel.instanzErstellen({gen: {form: "audit", seed, opts: {kunde, stufe}}, quelle: "generiert"});
+      Spiel.oeffnen(inst.iid);
+      for (const k of def.ziele[0].fehler) Spiel.audit.markieren(inst, k);
+      if (!Spiel.abnahme(inst).ergebnisse[0].ok) fehler.push(`${def.id}: alle markiert, trotzdem offen`);
+      const richtig = Object.values(inst.netz.geraete).find(g => g.running && g.running.if && g.running.if.eth0 && g.running.if.eth0.ip && !def.ziele[0].fehler.includes(g.id + ".eth0.ip"));
+      Spiel.audit.markieren(inst, richtig.id + ".eth0.ip");
+      if (Spiel.abnahme(inst).ergebnisse[0].ok) fehler.push(`${def.id}: zu viel markiert, trotzdem ok`);
+    }
+    erwarte.gleich(fehler.slice(0, 8), []);
+  }));
+
   pruefe("Instanz einer generierten Form überlebt Speichern und Laden (inst.gen = {form, seed, opts})", kapsel(() => {
     const inst = Spiel.instanzErstellen({gen: {form: "forensik", seed: 4242, opts: {kunde: "praxis"}}, quelle: "generiert"});
     const id = inst.ticketId;

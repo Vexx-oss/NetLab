@@ -13,6 +13,8 @@ Spiel.PLAN = {SPALTE_MIN: 120, ZEILE: 118, RAND: 36, ZEICHEN_PX: 8.8, ZEILE_PX: 
 Spiel.plan.sollNetzVon = function(def, seed){
   const n = Spiel.startNetz(def, seed);
   Spiel.loesung(n, def.loesung || []);
+  /* Plan-Audit (E1): Die Kundendoku hat Fehler – sie stehen nur im Plan, nie im Netz */
+  for (const f of def.planFehler || []) if (n.geraete[f.geraet]) Modell.setzen(n, f.geraet, `if.${f.port}.${f.feld}`, f.wert);
   return n;
 };
 Spiel.plan.sollNetz = function(inst){

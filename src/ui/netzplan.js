@@ -20,12 +20,15 @@ UI.netzplan = (() => {
     const wahl = (id, text) => h("button", {type: "button", class: ansicht === id ? "an" : "", "aria-pressed": String(ansicht === id),
       onclick: () => { S.ansicht = id; zeichnen(c, inst, {mappe}); }}, text);
     const kopf = h("div", {class: "np-kopf"},
-      h("div", {class: "np-titel"}, h("strong", {}, ART[art][0]), h("small", {}, ART[art][1])),
-      art !== "tabelle" ? h("div", {class: "np-wahl", role: "group", "aria-label": "Plan-Ansicht"}, wahl("zeichnung", "Zeichnung"), wahl("tabelle", "Tabelle")) : null);
+      h("div", {class: "np-titel"}, ...(auditZiel(inst) ? [h("strong", {}, "Netzplan des Kunden"), h("small", {}, "Seine Dokumentation – ob sie stimmt, zeigt nur das Netz.")]
+        : [h("strong", {}, ART[art][0]), h("small", {}, ART[art][1])])),
+      art !== "tabelle" && !auditZiel(inst) ? h("div", {class: "np-wahl", role: "group", "aria-label": "Plan-Ansicht"}, wahl("zeichnung", "Zeichnung"), wahl("tabelle", "Tabelle")) : null);
     const auswahl = !mappe && UI.labor.netz === inst.netz ? UI.labor.auswahl?.geraet : null;
-    const inhalt = ansicht === "zeichnung" ? zeichnung(plan, art, auswahl) : tabelle(plan, auswahl);
+    const audit = auditZiel(inst);
+    const inhalt = ansicht === "zeichnung" && !audit ? zeichnung(plan, art, auswahl) : tabelle(plan, auswahl, audit ? {inst, ziel: audit, c, mappe} : null);
     /* Ist ein Gerät gewählt, steht „Plan ↔ Labor“ oben – das ist der Vergleich, um den es geht */
-    const teile = [kopf, !mappe && auswahl ? vergleich(inst, plan, auswahl) : null, h("div", {class: "np-flaeche"}, inhalt)].filter(Boolean);
+    const teile = [kopf, auditZiel(inst) ? h("p", {class: "np-audit-hinweis"}, "Klick auf jeden Wert, der nicht zum Netz passt (✗). Noch ein Klick nimmt die Markierung zurück.") : null,
+      !mappe && auswahl ? vergleich(inst, plan, auswahl) : null, h("div", {class: "np-flaeche"}, inhalt)].filter(Boolean);
     if (mappe) teile.push(h("div", {class: "np-fuss"}, h("button", {type: "button", class: "knopf", onclick: () => anheften(inst)}, "Neben das Labor heften ▸")));
     else {
       if (!auswahl) teile.push(h("p", {class: "np-hinweis"}, "Klick im Labor oder hier auf ein Gerät: Plan und Labor stehen dann nebeneinander."));
@@ -70,13 +73,22 @@ UI.netzplan = (() => {
     return svg;
   }
 
-  function tabelle(plan, auswahl){
+  /* Plan-Audit: das Arbeitsziel des Auftrags (oder null) */
+  function auditZiel(inst){ const def = Spiel.defVon(inst); return def ? (def.ziele || []).find(z => z.typ === "audit") || null : null; }
+  function tabelle(plan, auswahl, audit){
     const zelle = (w, kl = "") => h("td", {class: (w === "?" ? "np-luecke " : "") + kl}, w === "" || w == null ? "–" : String(w));
-    return h("table", {class: "np-tabelle"},
+    /* Audit: Werte sind Knöpfe – markiert = „stimmt nicht“ */
+    const pruef = (r, feld, w) => {
+      if (!audit || w === "" || w == null || w === "?") return zelle(w, "mono");
+      const key = `${r.id}.${r.port}.${feld}`, an = (audit.inst.audit || []).includes(key);
+      return h("td", {class: "mono np-pruef" + (an ? " markiert" : "")}, h("button", {type: "button", class: "np-wert", "aria-pressed": String(an), title: an ? "Als falsch markiert – noch ein Klick nimmt es zurück" : "Als falsch markieren",
+        onclick: e => { e.stopPropagation(); Spiel.audit.markieren(audit.inst, key); zeichnen(audit.c, audit.inst, {mappe: audit.mappe}); }}, an ? "✗ " + w : String(w)));
+    };
+    return h("table", {class: "np-tabelle" + (audit ? " np-audit" : "")},
       h("thead", {}, h("tr", {}, ["Gerät", "Anschluss", "IP-Adresse", "Maske", "Gateway", "DNS", "VLAN"].map(t => h("th", {}, t)))),
       h("tbody", {}, plan.tabelle.map(r => h("tr", {class: r.id === auswahl ? "gewaehlt" : "", onclick: () => waehlen(r.id)},
-        h("th", {scope: "row"}, r.name), zelle(r.port, "mono"), zelle(r.ip, "mono"), zelle(r.maske, "mono"),
-        zelle(HOST[r.typ] ? r.gw : "", "mono"), zelle(HOST[r.typ] ? r.dns : "", "mono"), zelle(r.vlan ?? "")))));
+        h("th", {scope: "row"}, r.name), zelle(r.port, "mono"), pruef(r, "ip", r.ip), pruef(r, "maske", r.maske),
+        HOST[r.typ] ? pruef(r, "gw", r.gw) : zelle("", "mono"), HOST[r.typ] ? pruef(r, "dns", r.dns) : zelle("", "mono"), zelle(r.vlan ?? "")))));
   }
 
   /* Plan ↔ Labor für das gewählte Gerät: nebeneinander, ohne zu sagen, was falsch ist – außer im Einstieg (R1) */

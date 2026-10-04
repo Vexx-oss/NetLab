@@ -7,7 +7,7 @@
      {typ:"antwort", id, frage, pruefen:{art:"ip"|"maske"|"gw"|"dns"|"mac", geraet, port?}, text}
    Die richtige Antwort kommt immer aus dem aktuellen Netz (so, wie ipconfig sie zeigt) – nie als fester Wert aus dem
    Ticket. Ein falscher Wert verrät die richtige Antwort nicht (R1). */
-Spiel.ARBEITSZIELE = {befehl: true, antwort: true, tabelle: true};
+Spiel.ARBEITSZIELE = {befehl: true, antwort: true, tabelle: true, audit: true};
 Spiel.ANTWORT_ARTEN = {ip: "IP-Adresse", maske: "Subnetzmaske", gw: "Standardgateway", dns: "DNS-Server", mac: "MAC-Adresse"};
 Spiel.istArbeitsziel = z => !!(z && Spiel.ARBEITSZIELE[z.typ]);
 Spiel.antwortSchluessel = z => String(z.id || z.frage || z.text || "antwort");
@@ -48,6 +48,11 @@ Spiel.arbeitsziel = function(inst, ziel, netz){
     return {ok, grund: ok ? null : "ANTWORT_FALSCH", trace: null,
       text: ok ? (ziel.text || "Antwort stimmt") : `„${String(wert).trim()}“ passt nicht zu dem, was das Gerät gerade zeigt.`};
   }
+  if (ziel.typ === "audit") {                                 /* Plan-Audit (E1, spiel/audit.js) */
+    const p = Spiel.audit.pruefen(inst, ziel);
+    return {ok: p.ok, grund: p.ok ? null : "AUDIT_OFFEN", trace: null,
+      text: p.ok ? (ziel.text || "Alle Fehler markiert") : `${p.gefunden} von ${p.gesamt} falschen Werten markiert${p.zuviel ? `, ${p.zuviel} richtige${p.zuviel === 1 ? "r Wert" : " Werte"} zu Unrecht markiert` : ""}.`};
+  }
   if (ziel.typ === "tabelle") {                               /* Adressplan (E1, spiel/beratung.js) */
     const p = Spiel.beratung.pruefen(inst, ziel), ok = p.richtig === p.gesamt;
     return {ok, grund: ok ? null : "TABELLE_OFFEN", trace: null, text: ok ? (ziel.text || "Tabelle stimmt") : `${p.richtig} von ${p.gesamt} Feldern richtig.`};
@@ -81,6 +86,7 @@ Spiel.arbeitszieleErfuellen = function(inst){
       Spiel.befehle.merken(inst, {geraet: z.geraet, befehl: String(z.beispiel).split("\n").pop(), ok: Spiel.befehle.gelaufen(r)});
     }
     if (z.typ === "antwort") (inst.antworten ||= {})[Spiel.antwortSchluessel(z)] = Spiel.antwortSoll(inst.netz, z) || "";
+    if (z.typ === "audit") inst.audit = (z.fehler || []).slice();
     if (z.typ === "tabelle") { const soll = Spiel.beratung.soll(z); inst.tabelle ||= {}; for (const r of z.zeilen) for (const s of z.spalten) inst.tabelle[r.name + "." + s] = soll[r.name][s]; }
   }
   return inst;

@@ -106,7 +106,8 @@ gruppe("Spiel-Fluss: Zustand", () => {
   }));
 
   pruefe("Postfach als Wahl (ab dem 2. erledigten Auftrag): 3 Angebote, der nächste Story-Auftrag ist dabei, keine Entwürfe, nichts über der Stufe", kapsel(() => {
-    Spiel.st.erledigt.push({id: "x1", sterne: 5, tag: heute(), hilfe: 0}, {id: "x2", sterne: 5, tag: heute(), hilfe: 0});
+    /* zwei verschiedene Formen zuletzt – sonst wäre „Störung“ gesperrt (nie dreimal dieselbe Form) */
+    Spiel.st.erledigt.push({id: "x1", sterne: 5, tag: heute(), hilfe: 0, form: "audit"}, {id: "x2", sterne: 5, tag: heute(), hilfe: 0, form: "stoerung"});
     Spiel.st.postfach = []; Spiel.postfachAuffuellen();
     const l = Spiel.postfach().map(i => i.ticketId);
     erwarte.gleich(l.length, 3, l.join(", "));
