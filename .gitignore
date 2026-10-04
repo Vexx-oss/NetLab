@@ -11,3 +11,5 @@ Programm/**/*.tar.gz
 Programm/**/*.zip
 Programm/linux/netzwerk-labor
 Programm/Endversion-*/linux/netzwerk-labor
+# fremde Archive im Programm-Ordner (nicht Teil des Projekts)
+Programm/**/*.rar

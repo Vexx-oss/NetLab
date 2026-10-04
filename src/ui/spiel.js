@@ -291,11 +291,14 @@ UI.spiel = (() => {
   /* ---------- Postfach ---------- */
   function postfachAnsicht(c){
     const st = Spiel.st;
-    const liste = Spiel.postfach();
-    const aktiv = S.postfachWahl && liste.find(i => i.iid === S.postfachWahl) ? S.postfachWahl : (liste[0] ? liste[0].iid : null);
+    const liste = Spiel.postfach(), post = Spiel.post.liste();
+    const gibt = id => liste.some(i => i.iid === id) || post.some(n => n.id === id);
+    const aktiv = S.postfachWahl && gibt(S.postfachWahl) ? S.postfachWahl : (liste[0] ? liste[0].iid : post[0] ? post[0].id : null);
     S.postfachWahl = aktiv;
     const leser = h("div", {class: "sp-leser"});
     const karten = liste.map(inst => mailKarte(inst, inst.iid === aktiv, () => { S.postfachWahl = inst.iid; postfachAnsicht(c); }));
+    if (post.length) karten.push(h("div", {class: "sp-pf-trenner", role: "presentation"}, "Nachrichten"),
+      ...post.map(n => postKarte(n, n.id === aktiv, () => { S.postfachWahl = n.id; postfachAnsicht(c); })));
     const kopf = h("header", {class: "sp-pf-kopf"},
       h("div", {}, h("h2", {}, "Postfach"), h("p", {class: "sp-leise"}, liste.length ? `${liste.length} ${liste.length === 1 ? "Auftrag wartet" : "Aufträge warten"} · Stufe ${st.stufe} · ${st.erledigt.length} erledigt` : "Alles erledigt.")),
       h("div", {class: "sp-pf-aktionen"},
@@ -305,7 +308,35 @@ UI.spiel = (() => {
       h("p", {}, "Keine offenen Aufträge. Gönn dir eine Pause – oder hol dir neue Arbeit."),
       h("button", {type: "button", class: "knopf primaer", onclick: () => { Spiel.nachschub(); status(); postfachAnsicht(c); }}, "Neuen Auftrag holen")));
     c.replaceChildren(h("div", {class: "sp-postfach"}, kopf, h("div", {class: "sp-pf-teile"}, links, leser)));
-    if (aktiv) leserZeigen(leser, Spiel.instanz(aktiv));
+    if (aktiv && String(aktiv).startsWith("post-")) postLesen(leser, Spiel.post.von(aktiv), c);
+    else if (aktiv) leserZeigen(leser, Spiel.instanz(aktiv));
+  }
+  /* Kundenpost: Nachricht ohne Auftrag (Lob vom Kunden oder Notiz vom Senior) */
+  function postAbsender(n){
+    const k = kunde(n.kunde);
+    return n.art === "senior" ? {sym: "🧑‍🔧", name: "Der Senior", zusatz: "Notiz", farbe: "--accent"}
+      : {sym: k.symbol || "✉", name: k.ansprechpartner?.name || k.name, zusatz: k.name, farbe: k.farbe || "--accent"};
+  }
+  function postKarte(n, an, wahl){
+    const a = postAbsender(n), text = String(n.text).replace(/\s+/g, " ");
+    return h("button", {type: "button", role: "listitem", class: "sp-mail sp-post" + (an ? " an" : "") + (n.gelesen ? "" : " neu"), style: {"--k": `var(${a.farbe})`}, onclick: wahl},
+      h("span", {class: "sp-kunde-sym"}, a.sym),
+      h("span", {class: "sp-mail-text"},
+        h("span", {class: "sp-mail-von"}, `${a.name} · ${a.zusatz}`),
+        h("span", {class: "sp-mail-vorschau"}, text.slice(0, 110) + (text.length > 110 ? " …" : "")),
+        h("span", {class: "sp-chips"}, h("span", {class: "sp-chip"}, n.art === "senior" ? "Notiz" : "Nachricht"))));
+  }
+  function postLesen(el, n, c){
+    if (!n) return;
+    if (!n.gelesen) { Spiel.post.gelesen(n.id); status(); }
+    const a = postAbsender(n);
+    el.replaceChildren(h("article", {class: "sp-brief", style: {"--k": `var(${a.farbe})`}},
+      h("header", {}, h("span", {class: "sp-kunde-sym gross"}, a.sym),
+        h("div", {}, h("span", {class: "sp-leise"}, a.zusatz), h("h3", {}, a.name))),
+      h("div", {class: "sp-brief-text"}, absaetze(n.text)),
+      h("div", {class: "sp-knoepfe"},
+        n.art === "senior" ? h("button", {type: "button", class: "knopf", onclick: () => UI.app.ansicht("kunden")}, "Zu den Kunden") : null,
+        h("button", {type: "button", class: "knopf geist", onclick: () => { Spiel.post.ablegen(n.id); S.postfachWahl = null; postfachAnsicht(c); }}, "Ablegen"))));
   }
   function mailKarte(inst, an, wahl){
     const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde);
@@ -441,6 +472,14 @@ UI.spiel = (() => {
         ? `Morgen fällig: ${namen.join(", ")}${b.morgenFaellig.length > 3 ? ` und ${b.morgenFaellig.length - 3} weitere` : ""} – kurz wiederholen, kurz bevor du es vergisst, dann sitzt es.`
         : "Weiterspielen geht immer. Am meisten bringt dir aber die Wiederholung an einem anderen Tag – bis morgen!"));
   }
+  /* Neue Kundenpost: leiser Hinweis in der Vollansicht, erst wenn kein Dialog offen ist (die Leiste zeigt nur den Zähler) */
+  function postMelden(neu, versuch = 0){
+    if (UI.modus() !== "voll") return;
+    if (document.querySelector(".sp-overlay:not(.vorhersage)") && versuch < 40) { setTimeout(() => postMelden(neu, versuch + 1), 1500); return; }
+    const n = neu[neu.length - 1], a = postAbsender(n);
+    UI.toast(neu.length > 1 ? `${neu.length} neue Nachrichten im Postfach.` : `${a.name}: ${String(n.text).split("\n")[0].slice(0, 90)}${String(n.text).length > 90 ? " …" : ""}`, "info",
+      {titel: "✉ Neue Nachricht", id: "post", aktion: {text: "Lesen", fn: () => { S.postfachWahl = n.id; UI.app.ansicht("postfach"); }}});
+  }
   function abzeichenBlock(){
     Spiel.abzeichen.pruefen();
     const neu = Spiel.abzeichen.abholen(); if (!neu.length) return null;
@@ -450,7 +489,12 @@ UI.spiel = (() => {
 
   /* ---------- Bus ---------- */
   Bus.an("netz-geaendert", d => { if (S.inst && d && d.netz === S.inst.netz) livePlanen(); });
-  Bus.an("zustand-geaendert", () => { status(); if (Spiel.abzeichen.pruefen().length) abzeichenPlanen(400); });
+  Bus.an("zustand-geaendert", () => {
+    status();
+    if (Spiel.abzeichen.pruefen().length) abzeichenPlanen(400);
+    const neuePost = Spiel.post.pruefen();
+    if (neuePost.length) { status(); postMelden(neuePost); }
+  });
   Bus.an("ticket-neu", () => { status(); if (UI.app.aktuell === "postfach") { const c = document.querySelector(".sp-postfach")?.parentElement; if (c) postfachAnsicht(c); } });
   Bus.an("trace", d => { if (S.coach && S.coach.schritt === 1 && d && d.quelle === "ping" && d.ergebnis && (d.ergebnis.antworten || []).some(a => a.ok)) coachWeiter(2); });
 

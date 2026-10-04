@@ -97,7 +97,7 @@ Spiel.postfach = function(){
     return a.start - b.start;
   });
 };
-Spiel.ungelesen = () => Spiel.postfach().filter(i => !i.gelesen).length;
+Spiel.ungelesen = () => Spiel.postfach().filter(i => !i.gelesen).length + (Spiel.post ? Spiel.post.ungelesen() : 0);   /* Tickets + Kundenpost */
 
 /* Instanzen ohne auflösbare Definition (Ticket gelöscht, Generator fehlt) entfernen */
 Spiel.instanzenPruefen = function(){

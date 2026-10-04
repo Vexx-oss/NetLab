@@ -88,7 +88,7 @@ Spiel.abschliessen = function(inst, abnahme){
   const st = Spiel.st;
   const sterne = abnahme.sterne;
   const lohn = Spiel.lohnBerechnen(inst, def, sterne);
-  st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0});
+  st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0, kunde: inst.kunde || def.kunde || null});
   if (st.erledigt.length > 2000) st.erledigt.splice(0, st.erledigt.length - 2000);
   if (inst.kunde) {
     const k = Spiel.kunde(inst.kunde);

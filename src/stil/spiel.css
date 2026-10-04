@@ -141,6 +141,10 @@
 .sp-mail.an{border-color:var(--k, var(--accent)); background:color-mix(in srgb, var(--k, var(--accent)) 8%, var(--panel))}
 .sp-mail.neu::after{content:""; position:absolute; top:12px; right:12px; width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--panel)}
 .sp-mail.eilig{border-color:var(--warn)}
+/* Kundenpost (Nachrichten ohne Auftrag): ruhiger als Aufträge, unter einem Trenner */
+.sp-pf-trenner{margin:10px 2px 0; color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
+.sp-post{background:var(--panel-2); border-style:dashed}
+.sp-post.an{border-style:solid}
 .sp-mail-text{display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 auto}
 .sp-mail-von{color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:14px}
 .sp-mail b{font:700 15px/1.25 var(--body)}
