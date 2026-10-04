@@ -112,6 +112,8 @@ gruppe("Spiel: Bogen (S2)", () => {
     erwarte.gleich(s(["2026-10-07", "2026-10-06"]).tage, 2, "heute noch nicht aktiv: kein Fehltag");
     erwarte.gleich(s(["2026-10-08", "2026-10-04", "2026-10-03", "2026-10-02"]).tage, 1, "Mo–Mi dieser Woche fehlen: der dritte Fehltag reißt");
     erwarte.gleich(s([]), {tage: 0, urlaub: 0, frei: 2});
+    erwarte.gleich(s(["2026-10-08"]), {tage: 1, urlaub: 0, frei: 2}, "Fehltage vor dem Beginn der Serie verbrauchen keinen Urlaub");
+    erwarte.gleich(s(["2026-10-06"], "2026-10-08"), {tage: 1, urlaub: 1, frei: 1}, "gestern gefehlt, heute noch offen: Serie lebt mit einem Urlaubstag");
     erwarte.gleich(Spiel.hub.wochenstart("2026-10-11"), "2026-10-05", "Sonntag gehört zur Woche ab Montag");
     erwarte.wahr(Spiel.hub.zurueck(new Set(["2026-10-05"]), "2026-10-08"), "drei Tage weg → Willkommen zurück");
     erwarte.falsch(Spiel.hub.zurueck(new Set(["2026-10-07"]), "2026-10-08"), "gestern da → nichts");

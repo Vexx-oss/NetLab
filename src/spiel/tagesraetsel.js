@@ -63,7 +63,6 @@ Spiel.raetsel.starten = function(){
   if (!w) return null;
   const inst = Spiel.instanzErstellen({gen: {skill: w.skill, seed: w.seed, opts: {stufe: w.niveau}}, quelle: "raetsel"});
   inst.raetsel = {tag, nr: w.nr, niveau: w.niveau};
-  inst.gelesen = true;
   Spiel.speichern();
   return inst;
 };
@@ -87,7 +86,7 @@ Spiel.raetsel.teilen = function(tag){
   const e = Spiel.raetsel.daten()[tag || heute()]; if (!e) return "";
   const s = e.sterne || 0, sterne = "★".repeat(Math.floor(s)) + (s % 1 ? "½" : "") + "☆".repeat(Math.max(0, 5 - Math.ceil(s)));
   const zeit = `${Math.floor(e.sek / 60)}:${String(e.sek % 60).padStart(2, "0")}`;
-  return `Netzwerk-Labor · Tagesrätsel #${e.nr} · ${e.niveau}\n${sterne} · ${zeit} · Hilfe ${e.hilfe} · ${e.versuche} ${e.versuche === 1 ? "Versuch" : "Versuche"}\n${e.zeile}`;
+  return `Netzwerk-Labor · Tagesrätsel #${e.nr} · ${Spiel.NIVEAU_NAME[e.niveau] || e.niveau}\n${sterne} · ${zeit} · Hilfe ${e.hilfe} · ${e.versuche} ${e.versuche === 1 ? "Versuch" : "Versuche"}\n${e.zeile}`;
 };
 /* Programmstart: Rätsel von gestern (nicht gelöst) verfallen still – kein Verlust, morgen gibt es ein neues */
 Spiel.raetsel.aufraeumen = function(st){

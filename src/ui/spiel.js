@@ -87,7 +87,7 @@ UI.spiel = (() => {
     const abnahme = h("button", {type: "button", class: "knopf primaer sp-abnahme" + (alle ? " bereit" : ""), title: "Abnahme anfordern: Der Kunde prüft selbst nach.", onclick: abnahmeAnfordern}, "✓ Abnahme");
     const zeile = h("div", {class: "am-zeile"},
       h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}, title: k.name}, k.symbol || "✉"),
-      h("div", {class: "am-titel"}, h("strong", {}, def.titel), h("span", {class: "am-kunde"}, k.name)),
+      h("div", {class: "am-titel"}, h("strong", {}, def.titel), h("span", {class: "am-kunde"}, inst.raetsel ? `🧩 Tagesrätsel #${inst.raetsel.nr} · ${Spiel.NIVEAU_NAME[inst.raetsel.niveau] || inst.raetsel.niveau}` : k.name)),
       h("span", {class: "am-ziele" + (alle ? " fertig" : ""), title: live ? "Erfüllte Ziele – Liste in der Mappe" : "AP2: Ziele prüfst du selbst"},
         live ? `Ziele ${erfuellt}/${n}` : `${n} ${n === 1 ? "Ziel" : "Ziele"}`),
       h("div", {class: "am-knoepfe"},
@@ -369,6 +369,9 @@ UI.spiel = (() => {
       abz.length ? h("p", {class: "sp-zeile"}, "🏅 ", h("b", {}, abz.length === 1 ? "Neues Abzeichen: " : "Neue Abzeichen: "), abz.map(a => `${a.sym} ${a.titel}`).join(" · ")) : null,
       besser ? h("p", {class: "sp-zeile"}, "📈 ", h("b", {}, besser.name + ": "), `Stufe ${besser.vorher} → ${besser.nachher}`) : null,
       feierabend ? feierabendZeile() : null,
+      ...dexZeilen(erg.dex),
+      erg.raetsel ? h("p", {class: "sp-zeile sp-raetsel"}, "🧩 ", h("b", {}, `Tagesrätsel #${erg.raetsel.nr}: `), h("span", {class: "sp-raetsel-zeile"}, erg.raetsel.zeile), " ",
+        h("button", {type: "button", class: "knopf klein", onclick: () => UI.hub.kopieren(Spiel.raetsel.teilen(), "Ergebnis kopiert – einfach einfügen.")}, "Ergebnis kopieren")) : null,
     ].filter(Boolean);
     const merke = merkeText(def, erg.abnahme.niveau);
     const skill = (def.skills || [])[0];
@@ -391,12 +394,21 @@ UI.spiel = (() => {
           typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, "📖 Nachlesen") : null)) : null,
       h("div", {class: "sp-knoepfe"},
         weiterKnopf,
-        h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Zum Postfach"),
+        h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("heute"); }}, "Übersicht"),
         feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, "🌙 Feierabend: zur Leiste") : null)), "erfolg");
     zaehlen(euroEl, erg.euro);
     UI.klang?.spielen("sterne");
   }
-  /* Tagesziel: eine Zeile mit offenem Faden für morgen (die ausführliche Bilanz kommt mit dem Hub, S2) */
+  /* Fehlerdex: neu gesehen/verstanden und Ehrentitel – je eine kurze Zeile (Abschluss, also kein Verraten) */
+  function dexZeilen(dex){
+    if (!dex) return [];
+    const neu = dex.neu || [], z = [];
+    if (neu.length) z.push(h("p", {class: "sp-zeile"}, "📕 ", h("b", {}, "Fehlerdex: "),
+      neu.map(d => `${d.titel} – ${d.zustand === "verstanden" ? "verstanden" : "gesehen"}`).join(" · ")));
+    if ((dex.titel || []).length) z.push(h("p", {class: "sp-zeile"}, "🏆 ", h("b", {}, "Ehrentitel: "), dex.titel.join(" · ")));
+    return z;
+  }
+  /* Tagesziel: eine Zeile mit offenem Faden für morgen (die ausführliche Bilanz steht im Hub „Heute“) */
   function feierabendZeile(){
     const b = Spiel.tag.bilanz(), morgen = b.morgenFaellig[0] ? Spiel.skill(b.morgenFaellig[0]).name : null;
     return h("p", {class: "sp-zeile"}, "🎉 ", h("b", {}, "Tagesziel geschafft"), ` – ${b.tickets} Aufträge heute` + (morgen ? ` · morgen fällig: ${morgen}` : ""));
@@ -652,13 +664,14 @@ UI.spiel = (() => {
   Bus.an("ui-bereit", () => {
     try {
       Spiel.laden();
+      Spiel.tagebuch.sitzung();                     /* Spieltagebuch: eine Sitzung je Programmstart */
       vorhersageEinrichten();
       /* Desktop: Rust hat das Fenster umgeschaltet (Tray-Klick, Strg+Alt+L, Ruhe) – Ansicht nachziehen */
       Plattform.an("modus-extern", m => { if (UI.modus() !== m) UI.modus(m); });
       status();
       aktiveLaden();
       if (!Spiel.st.einstieg.fertig && !Spiel.st.erledigt.length) { if (!S.inst) einstiegStarten(); else UI.app.ansicht("labor"); }
-      else if (!S.inst) UI.app.ansicht("postfach");
+      else UI.app.ansicht("heute");                /* Hub „Heute“ ist die Startansicht (S2); ein offener Auftrag wartet dort */
     } catch (e) { console.error("Spielstart", e); UI.toast("Das Spiel konnte nicht starten: " + e.message, "fehler"); }
   });
 

@@ -31,7 +31,7 @@ Spiel.DEX_SYMPTOM = {
   "drucker-umgezogen":  "„Der Drucker ist an und hat Papier, aber niemand kann mehr drucken.“",
   "dns-fehlt":          "„Webseiten laden nicht – aber der Techniker sagt, die Leitung steht.“",
   "dns-eintrag-fehlt":  "„Das Intranet geht nur noch über die Zahlenadresse, nicht über den Namen.“",
-  "dienst-aus":         "„Der Server ist an und antwortet, aber die Anwendung startet nicht.“",
+  "dienst-aus":         "„Das Gerät ist an und antwortet – aber Drucken, Webseite oder Freigabe gehen nicht.“",
   "dhcp-aus":           "„Neu gestartete Rechner haben plötzlich eine komische 169er-Adresse.“",
   "helper-fehlt":       "„Im Server-Raum klappt alles, in der anderen Abteilung bekommt keiner eine Adresse.“",
   "vlan-falsch":        "„Der neue Platz sieht die falschen Kollegen und kommt nicht ins Internet.“",

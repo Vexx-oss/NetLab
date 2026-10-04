@@ -95,7 +95,8 @@ UI.karriere = (() => {
             : a.soll === 1 ? h("small", {class: "kr-abz-offen"}, "noch offen")   /* erreicht oder nicht – ein halber Balken wäre gelogen */
             : h("span", {class: "kr-abz-stand"}, h("span", {class: "kr-bar"}, h("i", {style: {width: Math.round(100 * a.ist / a.soll) + "%"}})), h("small", {}, `${zahlDe(a.ist)} / ${zahlDe(a.soll)}`)))))));
     c.replaceChildren(h("div", {class: "kr-seite"},
-      h("header", {class: "kr-kopf"}, h("h2", {}, "Lernstand"), h("p", {class: "sp-leise"}, (n => `Serie: ${n} ${n === 1 ? "Tag" : "Tage"}`)(typeof L !== "undefined" ? L.serie() : 0) + (n => ` · heute ${n} ${n === 1 ? "Übung" : "Übungen"}`)(typeof L !== "undefined" ? L.heuteZahl() : 0))),
+      h("header", {class: "kr-kopf"}, h("h2", {}, "Lernstand"), h("p", {class: "sp-leise"}, (n => `Serie: ${n} ${n === 1 ? "Tag" : "Tage"}`)(typeof L !== "undefined" ? L.serie() : 0) + (n => ` · heute ${n} ${n === 1 ? "Übung" : "Übungen"}`)(typeof L !== "undefined" ? L.heuteZahl() : 0),
+        " ", h("button", {type: "button", class: "knopf klein geist", title: "Spieltagebuch: kurze Auswertung zum Einfügen in einen Chat", onclick: () => UI.hub.tagebuchKopieren()}, "📋 Auswertung kopieren"))),
       h("section", {class: "kr-karriere"},
         h("div", {}, h("small", {}, "Karriere"), h("h3", {}, `Stufe ${info.stufe} · ${info.name}`)),
         info.naechste ? h("div", {class: "kr-balken"},
@@ -103,6 +104,7 @@ UI.karriere = (() => {
           h("label", {}, `Können Stufe ${info.stufe}: ${info.koennen.summe} / ${info.koennen.sollSumme}`, h("span", {class: "kr-bar koennen"}, h("i", {style: {width: Math.min(100, 100 * info.koennen.summe / Math.max(1, info.koennen.sollSumme)) + "%"}})))) : h("p", {}, "Höchste Stufe erreicht."),
         info.fehlt.length ? h("ul", {class: "kr-fehlt"}, info.fehlt.map(f => h("li", {}, f))) : info.naechste ? h("p", {class: "sp-ok"}, "Bereit für den Aufstieg!") : null,
         h("p", {class: "sp-leise"}, info.hinweis)),
+      UI.hub ? UI.hub.dexAbschnitt() : null,
       abzeichen,
       h("section", {class: "kr-pruefung"}, h("h3", {}, "Zertifizierung (Prüfungstag)"),
         h("p", {class: "sp-leise"}, `3 Aufgaben, ${Spiel.PRUEFUNG.MINUTEN} Minuten, keine Hilfe – Note nach IHK-Punkteschlüssel. Die erste Prüfung ist gebührenfrei.`),

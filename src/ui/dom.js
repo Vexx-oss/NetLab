@@ -31,4 +31,13 @@ function sv(tag, attrs = {}, ...kids){
 }
 /* Ist die Bühne frei für eine Meldung (Abzeichen, Kundenpost, Aufstiegsfeier)? Nicht während Dialogen und der Funktionsprobe */
 UI.buehneFrei = () => !document.querySelector(".sp-overlay:not(.vorhersage), .sz-buehne");
+/* Text in die Zwischenablage (Teilen-Text, Auswertung) – mit Rückfall für ältere WebViews. Nur auf Klick des Spielers (R8). */
+UI.kopieren = async function(text){
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(String(text)); return true; } } catch (e) { /* Rückfall */ }
+  try {
+    const t = h("textarea", {readonly: true, style: {position: "fixed", left: "-9999px", top: "0", opacity: "0"}});
+    t.value = String(text); document.body.append(t); t.select();
+    const ok = document.execCommand("copy"); t.remove(); return !!ok;
+  } catch (e) { return false; }
+};
 const wenigBewegung = () => typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;

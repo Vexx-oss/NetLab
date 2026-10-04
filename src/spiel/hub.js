@@ -19,23 +19,25 @@ Spiel.hub.aktiveTage = function(){
   for (const k of Object.keys(Spiel.st.tagesraetsel || {})) if (/^\d{4}-\d\d-\d\d$/.test(k)) s.add(k);
   return s;
 };
-/* Serie rückwärts zählen: aktive Tage zählen, fehlende Tage verbrauchen Urlaub ihrer Woche; der heutige Tag
-   zählt nur, wenn er schon aktiv ist (er ist ja noch nicht vorbei). */
+/* Serie rückwärts zählen: aktive Tage zählen; ein fehlender Tag ist ein Urlaubstag seiner Woche, aber nur, wenn
+   davor (rückwärts) wieder ein aktiver Tag kommt – er also eine Lücke in der Serie überbrückt. Fehltage vor dem
+   Beginn der Serie verbrauchen nichts. Der heutige Tag zählt nur, wenn er schon aktiv ist (er ist ja noch nicht vorbei).
+   → {tage, urlaub: überbrückte Fehltage dieser Woche, frei: davon noch übrig} */
 Spiel.hub.serie = function(tage, tag = heute()){
   tage = tage instanceof Set ? tage : new Set(tage || []);
-  const urlaub = {};
+  const MAX = Spiel.HUB.URLAUB_PRO_WOCHE, genutzt = {}, offen = [];
   let n = 0, d = tag;
   if (tage.has(d)) n++;
   for (let i = 0; i < 800; i++) {
     d = plusTage(d, -1);
-    if (tage.has(d)) { n++; continue; }
+    if (tage.has(d)) { n++; for (const w of offen) genutzt[w] = (genutzt[w] || 0) + 1; offen.length = 0; continue; }
     const w = Spiel.hub.wochenstart(d);
-    urlaub[w] = (urlaub[w] || 0) + 1;
-    if (urlaub[w] > Spiel.HUB.URLAUB_PRO_WOCHE) break;
+    if ((genutzt[w] || 0) + offen.filter(x => x === w).length + 1 > MAX) break;
+    offen.push(w);
   }
-  if (!n) return {tage: 0, urlaub: 0, frei: Spiel.HUB.URLAUB_PRO_WOCHE};
-  const diese = Math.min(Spiel.HUB.URLAUB_PRO_WOCHE, urlaub[Spiel.hub.wochenstart(tag)] || 0);
-  return {tage: n, urlaub: diese, frei: Spiel.HUB.URLAUB_PRO_WOCHE - diese};
+  if (!n) return {tage: 0, urlaub: 0, frei: MAX};
+  const diese = genutzt[Spiel.hub.wochenstart(tag)] || 0;
+  return {tage: n, urlaub: diese, frei: MAX - diese};
 };
 /* Zurück nach einer Pause (zwei und mehr Tage ohne Aktivität)? */
 Spiel.hub.zurueck = function(tage, tag = heute()){
@@ -47,7 +49,9 @@ Spiel.hub.zurueck = function(tage, tag = heute()){
 /* Der nächste Auftrag: angefangener zuerst, sonst der oberste im Postfach (Frist, ungelesen, Eingang) */
 Spiel.hub.naechster = function(){
   const aktiv = Spiel.aktiveInstanz && Spiel.aktiveInstanz();
-  const inst = aktiv && aktiv.quelle !== "raetsel" && aktiv.quelle !== "pruefung" ? aktiv : Spiel.postfach()[0] || null;
+  const liste = Spiel.postfach();
+  const angefangen = liste.filter(i => i.geoeffnet).sort((a, b) => b.geoeffnet - a.geoeffnet)[0] || null;   /* zuletzt angefangener */
+  const inst = aktiv && aktiv.quelle !== "raetsel" && aktiv.quelle !== "pruefung" ? aktiv : angefangen || liste[0] || null;
   if (!inst) return {art: "leer"};
   const def = Spiel.defVon(inst), k = Spiel.kundenDaten(inst.kunde || def.kunde);
   return {art: inst === aktiv || inst.geoeffnet ? "weiter" : "neu", iid: inst.iid, titel: def.titel,

@@ -55,7 +55,7 @@ Spiel.tagebuch.auswertung = function(){
   const zeilen = ["Netzwerk-Labor · Spieltagebuch"];
   if (!tb.length) return zeilen.concat("Noch keine Einträge.").join("\n");
   const von = tag(tb[0].t), bis = tag(tb[tb.length - 1].t), tage = tageZwischen(von, bis) + 1;
-  zeilen[0] += ` · ${datumKurz(von)}–${datumKurz(bis)} (${tage} ${tage === 1 ? "Tag" : "Tage"})`;
+  zeilen[0] += von === bis ? ` · ${datumKurz(von)}` : ` · ${datumKurz(von)}–${datumKurz(bis)} (${tage} Tage)`;
   const minuten = sitz.map(s => Math.max(0, ((s.bis || s.t) - s.t) / 60000));
   zeilen.push(`Sitzungen ${sitz.length} · Median ${Math.round(median(minuten))} min · ${zahl(sitz.length / Math.max(1, tage / 7))} pro Woche`);
   const formen = {}, niveaus = {};

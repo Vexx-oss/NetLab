@@ -1,0 +1,55 @@
+/* ---------- Hub „Heute“ (hb-) und Fehlerdex (dx-) – Design – Spielspaß 2.0, Hebel 3/4 ---------- */
+.hb-seite{height:100%; overflow:auto; padding:32px 22px 28px; display:flex; flex-direction:column; align-items:center; gap:16px; background:var(--bg); scrollbar-width:thin}
+.hb-seite > *{width:min(660px, 100%)}
+.hb-kopf h2{font:800 30px/1.1 var(--display)}
+.hb-serie{margin-top:6px; color:var(--muted); font-size:14px}
+.hb-auftrag{display:grid; grid-template-columns:auto 1fr; gap:14px 16px; align-items:center; padding:20px 22px; border-radius:16px; background:var(--panel);
+  border:1px solid var(--line); border-left:4px solid var(--k, var(--accent))}
+.hb-auftrag-text small, .hb-auftrag > small{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.06em}
+.hb-auftrag h3{font:700 22px/1.2 var(--display); margin:3px 0 4px}
+.hb-auftrag p{color:var(--muted); font-size:14px}
+.hb-annehmen{grid-column:1 / -1; justify-self:start}
+.hb-auftrag.leer{grid-template-columns:1fr}
+.hb-kacheln{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px}
+.hb-kachel{display:flex; align-items:center; gap:10px; min-height:58px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--panel-2);
+  color:var(--ink); text-align:left; cursor:pointer; font:inherit}
+.hb-kachel:hover{border-color:var(--accent); background:var(--panel-3)}
+.hb-kachel.fertig{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
+.hb-kachel.fertig small{color:var(--ok)}
+.hb-kachel-sym{font-size:22px; line-height:1}
+.hb-kachel-text{display:flex; flex-direction:column; gap:2px; min-width:0}
+.hb-kachel-text small{color:var(--muted); font-size:12.5px}
+.hb-ziel{color:var(--faint); font-size:13px; text-align:center}
+.hb-feierabend{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 20px; border-radius:16px;
+  background:color-mix(in srgb, var(--info) 10%, var(--panel)); border:1px solid color-mix(in srgb, var(--info) 40%, var(--line))}
+.hb-feierabend h3{font:700 19px/1.2 var(--display)}
+.hb-feierabend p{font-size:14px; margin-top:4px}
+.hb-ausblick{color:var(--muted)}
+.hb-aufwaermen h2, .hb-raetsel h2{font:800 22px/1.2 var(--display)}
+.hb-fortschritt{color:var(--muted); font-size:13px; margin:4px 0 10px}
+.hb-teilen{font:15px/1.6 var(--mono); padding:12px 14px; border-radius:10px; background:var(--panel-2); border:1px solid var(--line); margin:12px 0 8px; white-space:pre-wrap; user-select:all}
+.sp-raetsel .knopf{margin-left:6px}
+.sp-raetsel-zeile{letter-spacing:2px}
+@media (max-width:720px){ .hb-kacheln{grid-template-columns:1fr} .hb-seite{padding:20px 16px} }
+
+/* Fehlerdex (Lernstand, #dex) */
+.dx-dex h3 small{font-weight:400; color:var(--muted); font-size:13px}
+.dx-gruppe{margin-top:14px}
+.dx-gruppe h4{font:700 14px/1.3 var(--body); margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.dx-gruppe h4 small{color:var(--muted); font-weight:400}
+.dx-titel{font-size:12.5px; padding:2px 8px; border-radius:999px; background:color-mix(in srgb, var(--geld) 15%, var(--panel)); color:var(--geld)}
+.dx-raster{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px}
+.dx-karte{display:flex; gap:10px; align-items:center; padding:9px 11px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); text-align:left; font:inherit}
+button.dx-karte{cursor:pointer}
+button.dx-karte:hover{border-color:var(--accent)}
+.dx-karte.unbekannt{border-style:dashed; color:var(--faint); background:none}
+.dx-karte.gesehen .dx-sym{color:var(--warn)}
+.dx-karte.verstanden{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
+.dx-sym{width:26px; height:26px; flex:none; display:grid; place-items:center; border-radius:50%; background:var(--panel-3); font-weight:800}
+.dx-karte.verstanden .dx-sym{background:var(--ok-soft); color:var(--ok)}
+.dx-text{display:flex; flex-direction:column; gap:1px; min-width:0}
+.dx-text small{color:var(--muted); font-size:12px}
+.dialog-dex{width:min(560px, 100%)}
+.dx-detail h3{font:700 14px/1.3 var(--body); margin:14px 0 4px}
+.dx-detail ul{margin:0 0 0 18px}
+.dx-symptom{font-style:italic; font-size:15px; margin-top:6px}
