@@ -193,6 +193,8 @@ Ticketfeld `plan:{art:"skizze"|"netzplan"|"tabelle"|"soll"|"keiner", verdeckt:[g
 
 ## Phase C · Terminal als Kernfunktion
 
+> [!check] Gebaut und abgenommen 04.10.2026 – C1–C5 fertig (Terminal je Gerät, Befehle als Beweise, IOS-Inventur + SSH, Zielarten „befehl“/„antwort“ mit drei Terminal-Aufträgen und neun Minikarten, Abzeichen „Von unten nach oben“, Hilfestufe 2 „nächste Diagnose“). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Messwerte und Bilder: [[Design – Spielspaß 2.0#17 · Stand nach Phase C (Welle 2 fertig)]]. **Neue Reihenfolge danach: E1 → E2 → D → F** (G Reserve).
+
 **C1 Terminal-Fenster** (`ui/konsole.js` umbauen, Präfix `tm-`): Das Terminal liegt **unten angedockt** als Reiter neben „Simulation“ (nicht mehr im 300-px-Inspektor), lässt sich vergrößern/lösen. **Doppelklick auf ein Gerät** oder Taste `T` öffnet es für dieses Gerät; mehrere Sitzungen als Tabs; Verlauf `↑`, `Tab`, `Strg+C`, Kopieren, „Pakete ansehen“-Link nach `ping`/`tracert` springt in die Simulation. Eingabevorschlag bleibt als einklappbare Zeile (Einsteiger).
 
 **C2 Betriebssystem je Gerät.** Modell: `geraet.os` = `"windows"|"linux"|"ios"` (Standard pc/laptop/kasse → windows, server/nas → linux, Rest → ios); Migration, Inspektor zeigt/ändert es (Server: Windows Server oder Linux). Neu `cli/host-windows.js` (aus `host-terminal.js`), neu `cli/host-linux.js`. Gemeinsame Basis bleibt `CLI.hostEingabe`.

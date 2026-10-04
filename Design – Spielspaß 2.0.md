@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2) und Phase B gebaut 04.10.2026, Zweig ausbau-1.2; Phase C folgt (Ende Welle 2 = 50 %)
+status: Welle 1 (S1 + S2) und Welle 2 (B + C) gebaut 04.10.2026, Zweig ausbau-1.2; Scorecard 33,2 von 60 – Ziel +50 % heißt Summe ≥ 39,0 (Ist 26,0), nicht „Hälfte der Sitzungen“; weiter E1 → E2 → D → F (G Reserve)
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -13,6 +13,9 @@ status: Welle 1 (S1 + S2) und Phase B gebaut 04.10.2026, Zweig ausbau-1.2; Phase
 
 > [!success] Stand 04.10.2026: Sitzung S2 „Bogen“ gebaut und im echten Programm abgenommen – Welle 1 fertig
 > Hub „Heute“ als Startseite (1 Hauptknopf, 30 Wörter) · Aufwärmen mit drei Karten · Tagesrätsel für alle gleich, Ergebnis zum Kopieren · Fehlerdex mit 34 Fehlerarten im Lernstand · Spieltagebuch mit „Auswertung kopieren“. Scorecard 1/5/8/9/10 neu bewertet: **28,4 → 32,1**. Einzelheiten: [[#15 · Stand nach S2]].
+
+> [!success] Stand 04.10.2026: Welle 2 „Detektiv“ fertig (Phasen B und C), im echten Programm abgenommen
+> Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
 
 > [!info] So liest du diese Notiz
 > **§ 0 reicht für die Entscheidung** (eine Seite). § 1 sind die Beobachtungen, § 5 die Bausteine, § 9 die Reihenfolge, § 13 der Text für Opus. Alles dazwischen ist Nachschlagewerk.
@@ -36,22 +39,24 @@ status: Welle 1 (S1 + S2) und Phase B gebaut 04.10.2026, Zweig ausbau-1.2; Phase
 
 | # | Hebel | Wirkung im Spiel | Aufwand | Welle |
 |---|---|---|---|---|
-| 1 | **Funktionsprobe + kurze Nachbesprechung** | Nach der Abnahme *siehst* du, dass die Kasse wieder druckt (Szene, Kundenstimme), statt einen Bericht zu lesen | mittel | 1 |
-| 2 | **Ermitteln: Stufenregeln, Akte, Verdacht** | Ursache wird gefunden, nicht gezeigt; „!“-Warnungen und Live-Haken hängen am Niveau | klein → mittel | 1 / 2 |
-| 3 | **Fehlerdex** | 34 Fehlerarten als Sammlung: gesehen → verstanden | klein | 1 |
-| 4 | **Hub „Heute“** | Startseite mit *einem* Hauptknopf, Aufwärmen, Feierabend mit Ausblick auf morgen | mittel | 1 |
-| 5 | **Tagesrätsel + Klasse** | Ein Rätsel pro Tag für alle (gleicher Seed, kein Server), teilbares Ergebnis; später Netz-Codes („Fehler bauen und verschenken“) | klein → mittel | 1 / 4 |
-| 6 | **Spielgefühl: Juice + Klang** | Alles antwortet in < 200 ms; leise synthetisierte Klänge | klein | 1 |
-| 7 | **Einstieg in 90 Sekunden** | Statt 60-Wörter-Fenster: sofort handeln, erster Erfolg mit Probe | klein | 1 |
-| 8 | **Werkzeugkasten & Büro** | Euro kauft *Fähigkeiten* (Kabeltester, Netzprüfer, Analyse-Modus), nicht nur Automatisierung | mittel | 2 / 4 |
-| 9 | **Abwechslung: Formen, Postfach als Wahl, Ereignisse, Entscheidungen** | 6 Auftragsformen; Wahl zwischen Lohn/Zeit/Risiko; „Provisorium oder sauber?“ mit Folgen | groß | 3 |
-| 10 | **Kundenakte: Netz-Atlas, Vertrauen, Geschichten, Folgen** | Kunden werden Personen mit Verlauf; dein Werk leuchtet im Atlas auf | groß | 3 |
-| 11 | **Meisterschaft: Kompetenzkarte, Par, Gürtel, Portfolio** | Nebel lichten; Effizienz-Medaillen; Meisterprüfung; Abnahmeprotokoll zum Mitnehmen | mittel | 3 / 4 |
-| 12 | **Messen & Abstimmen** | Lokales Spieltagebuch, Auswertung zum Kopieren, Ökonomie-Simulator | klein → mittel | 1 / 4 |
+| 1 | **Funktionsprobe + kurze Nachbesprechung** | Nach der Abnahme *siehst* du, dass die Kasse wieder druckt (Szene, Kundenstimme), statt einen Bericht zu lesen | mittel | 1 | | –
+| 2 | **Ermitteln: Stufenregeln, Akte, Verdacht** | Ursache wird gefunden, nicht gezeigt; „!“-Warnungen und Live-Haken hängen am Niveau | klein → mittel | 1 / 2 | | –
+| 3 | **Fehlerdex** | 34 Fehlerarten als Sammlung: gesehen → verstanden | klein | 1 | | **3,3**
+| 4 | **Hub „Heute“** | Startseite mit *einem* Hauptknopf, Aufwärmen, Feierabend mit Ausblick auf morgen | mittel | 1 | | **3,3**
+| 5 | **Tagesrätsel + Klasse** | Ein Rätsel pro Tag für alle (gleicher Seed, kein Server), teilbares Ergebnis; später Netz-Codes („Fehler bauen und verschenken“) | klein → mittel | 1 / 4 | | –
+| 6 | **Spielgefühl: Juice + Klang** | Alles antwortet in < 200 ms; leise synthetisierte Klänge | klein | 1 | | –
+| 7 | **Einstieg in 90 Sekunden** | Statt 60-Wörter-Fenster: sofort handeln, erster Erfolg mit Probe | klein | 1 | | –
+| 8 | **Werkzeugkasten & Büro** | Euro kauft *Fähigkeiten* (Kabeltester, Netzprüfer, Analyse-Modus), nicht nur Automatisierung | mittel | 2 / 4 | | **3,2**
+| 9 | **Abwechslung: Formen, Postfach als Wahl, Ereignisse, Entscheidungen** | 6 Auftragsformen; Wahl zwischen Lohn/Zeit/Risiko; „Provisorium oder sauber?“ mit Folgen | groß | 3 | | –
+| 10 | **Kundenakte: Netz-Atlas, Vertrauen, Geschichten, Folgen** | Kunden werden Personen mit Verlauf; dein Werk leuchtet im Atlas auf | groß | 3 | | –
+| 11 | **Meisterschaft: Kompetenzkarte, Par, Gürtel, Portfolio** | Nebel lichten; Effizienz-Medaillen; Meisterprüfung; Abnahmeprotokoll zum Mitnehmen | mittel | 3 / 4 | | –
+| 12 | **Messen & Abstimmen** | Lokales Spieltagebuch, Auswertung zum Kopieren, Ökonomie-Simulator | klein → mittel | 1 / 4 | | –
 
 **Scorecard** (12 Kriterien × 0–5, § 7): **Ist 26,0 von 60 → Ziel 39,0 (+50 %)** nach den Wellen 1–3. Das ist eine begründete Experteneinschätzung nach Anspielen und Code-Durchsicht, **kein Beweis für „mehr Spaß“**; belegt wird sie durch das Spieltagebuch und einen kleinen Playtest (§ 8).
 
 **Reihenfolge:** **Welle 1 „Sofortgefühl“** (zwei Sitzungen S1/S2, nutzt nur vorhandene Daten, geringstes Risiko) → **Welle 2 „Detektiv“** (Phasen B Netzplan + C Terminal, speist die Akte) → **Welle 3 „Welt & Abwechslung“** (Phasen D DHCP/DNS + E Formen/Ereignisse + Kundenakte + Kompetenzkarte) → **Welle 4 „Meisterschaft & Klasse“** (Par, Gürtel, Netz-Codes, Büro, Abschluss F). Nach jeder Welle: Haltepunkt, Scorecard neu bewerten, 10 Minuten Anspielen.
+
+> [!note] Reihenfolge ab 04.10.2026 abends (Vorgabe des Nutzers): **C-Rest → E1 → E2 → D → F**, G bleibt Reserve. E hebt die Scorecard am meisten (Abwechslung, Entscheidungen, Besitz, Erzählung = Kriterien 5, 6, 7, 11); D folgt danach. Halt, sobald die Scorecard ehrlich ≥ 39,0 ist oder E2 fertig ist.
 
 ---
 
@@ -236,23 +241,23 @@ Passt zu „erst beibringen, dann abfragen“ und macht aus dem Niveau eine echt
 
 Jedes Kriterium wird mit einer **Prüffrage** bewertet (0 = nein, 5 = durchgehend ja). Bewertet wird nach jedem Haltepunkt von dir (oder mir) *am echten Programm*, mit kurzer Begründung in der Notiz.
 
-| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | Ziel | Hebt vor allem |
-|---|---|---|---:|---:|---:|---:|---|
-| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | 4,0 | Hub, Akte |
-| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | 3,8 | 1, 6 |
-| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | 3,6 | 2, 12 |
-| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | 3,6 | 2, 3 |
-| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | 3,0 | 5, 9 |
-| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | 2,8 | 9, 10 |
-| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | 3,0 | 8, 10 |
-| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | 3,4 | 3, 11 |
-| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | 3,4 | 4, 5 |
-| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | 1,8 | 5 |
-| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | 3,0 | 10 |
-| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | 3,6 | 7 |
-| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **39,0** | **+50 %** |
+| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | nach C | Ziel | Hebt vor allem |
+|---|---|---|---:|---:|---:|---:|---:|---|
+| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | – | 4,0 | Hub, Akte |
+| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | – | 3,8 | 1, 6 |
+| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | **3,3** | 3,6 | 2, 12 |
+| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | **3,3** | 3,6 | 2, 3 |
+| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | – | 3,0 | 5, 9 |
+| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | – | 2,8 | 9, 10 |
+| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | – | 3,0 | 8, 10 |
+| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | **3,2** | 3,4 | 3, 11 |
+| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | – | 3,4 | 4, 5 |
+| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | – | 1,8 | 5 |
+| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | – | 3,0 | 10 |
+| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | – | 3,6 | 7 |
+| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **33,2** | **39,0** | **+50 %** |
 
-*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]] und [[#15 · Stand nach S2]].*
+*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10; „nach C“ (Ende Welle 2, B + C): 3, 4, 8. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]], [[#15 · Stand nach S2]] und [[#17 · Stand nach Phase C (Welle 2 fertig)]].*
 
 *Hinweis:* Welle 4 (Netz-Codes, Par, Gürtel, Büro) ist Reserve und hebt vor allem 8, 10 und 11 weiter; sie gehört nicht zur +50 %-Zusage.
 
@@ -575,3 +580,63 @@ Nachbesprechung: Volltreffer · Fehlschuss mit Erklärung:
 
 Kabeltester im Kabelmenü · schmal (960 px) mit Dock:
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-1366-8-kabelmenue.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-B/b-960-akte.png|320]]
+
+---
+
+## 17 · Stand nach Phase C (Welle 2 fertig)
+
+*Gebaut und abgenommen am 04.10.2026 (Zweig `ausbau-1.2`; Phase C mit 10 Commits, davon 7 in dieser Sitzung). Im echten Programm per `cdp.py lauf` gespielt, keine JS-Fehler. Bilder und Messdateien: `Nachweise/1.2-C/`. Tests: **170 grün** (vorher 163).*
+
+### Abnahme
+
+| Messung | Soll | Ergebnis |
+|---|---|---|
+| „Rechner ohne Internet“ nur über das Terminal (Plan § C) | ipconfig → ping Gateway → nslookup → netsh → Abnahme grün | Auftrag „Backstube offline – nur per Fernwartung“ (AP1): `ipconfig` zeigt Gateway .172 · `ping 192.168.10.172` „Zielhost nicht erreichbar“ (von der eigenen Adresse = ARP ohne Antwort) · `nslookup` „Zeitüberschreitung … UnKnown“ · Router-Adresse aus dem Netzplan · `ping 192.168.10.254` 4/4 · Verdacht „Falsches Standardgateway an PC-Backstube“ · `netsh interface ip set address "Ethernet" static …` · `ping www.beispiel.de` 4/4 → **★★★★★, Hilfe 0, Volltreffer (+5 €)** |
+| Befehle füllen die Akte | Beweiskarte je Diagnosebefehl | 4 Karten (ipconfig, zwei Pings, nslookup), Befund wie das echte Werkzeug |
+| Platzbudget R5 beim Terminal-Auftrag | ≤ 12 · ≤ 40 · 1 | **12 · 19 · 1** (1366 px, Labor-Start nach der Mappe) |
+| Zielart „antwort“ | Eingabe in der Mappe, gegen das Netz geprüft | salon-terminal (Einstieg): falsche IP → „Antwort stimmt nicht“ (ohne die richtige zu verraten), richtig → ✓, 3/3, ★★★★★ |
+| Hilfestufe 2 | nennt die nächste Diagnose, nicht die Lösung | „Fang unten an: Öffne das Terminal von PC-Kasse (Doppelklick) und sieh dir mit ipconfig Adresse, Maske und Gateway an.“ |
+| R1 auf der Fläche | Ursache nur, wo das Niveau Hinweise zeigt | Kabel: E „Port abgeschaltet: Schnittstelle abgeschaltet“, AP1/AP2 „Link unten“ · Paketschild: E „✗ Keine ARP-Antwort“, AP1 „✗ verworfen“ |
+| Schmal (960 px) mit Terminal | lesbar, nichts verdeckt | Fläche 70 %, Terminal bricht um; die Messung zählt dann 21 Elemente/92 Wörter, weil die Terminal-Ausgabe mitzählt (kein Start-Zustand) |
+
+### Scorecard 3, 4, 8 – neu bewertet (Welle 2 = B + C)
+
+| Kriterium | Wert | Begründung |
+|---|---|---|
+| **3 Herausforderung & Flow** | 3,0 → **3,3** | Fehlschlag wird lehrreich statt teuer: Verdacht daneben kostet nichts und erklärt den Unterschied, Hilfestufe 2 gibt einen nächsten Schritt statt der Lösung, Terminal-Tipps nach Niveau (E alle, AP1 nach Fehlern, AP2 keine). **Nicht höher**, weil sich nichts von selbst an das Können anpasst – der Flow-Regler (Hebel 12) fehlt, das Niveau stellt man von Hand. |
+| **4 Entdeckung** | 2,6 → **3,3** | Die Ursache wird jetzt im AP-Niveau tatsächlich selbst gefunden: Plan ↔ Labor, Beweiskarten, Hypothese vor dem Eingriff, echte Befehlsausgaben; die letzten „Verräter“ auf der Fläche (Kabel-Tooltip, ■-Symbol, Paketschild) sind weg. Die Abnahme wurde mit Hilfe 0 nur über das Terminal bestanden. **Nicht 3,6**, weil die ersten ~8 Aufträge Einstieg sind und dort bewusst alles markiert bleibt, und weil die Simulation die Gründe auf Klick weiter nennt (gewollt, aber ein naheliegender Abkürzungsweg). |
+| **8 Meisterschaft sichtbar** | 3,1 → **3,2** | Neues Abzeichen „Von unten nach oben“ macht eine Arbeitsweise sichtbar, Werkzeuge im Shop zeigen, was als Nächstes aufgeht (Netzprüfer ab Stufe 2). **Nur +0,1**: Die Kompetenzkarte (Hebel 11a) fehlt noch, Lernstand bleibt eine Liste. |
+
+**Summe 32,1 → 33,2.** Nicht neu bewertet, obwohl berührt: 1 (Akte/Plan helfen beim „Was jetzt?“ im Auftrag, aber das Dock bringt auch mehr Reiter), 2 (Terminal antwortet sofort, Pakete laufen über die Fläche) und 7 (gekaufte Werkzeuge sind Besitz) – zusammen höchstens +0,3; ich lasse sie bewusst stehen, damit die Zahl nicht schneller steigt als das Spiel.
+
+### Entscheidungen
+
+- **Arbeitsziele statt Netzziele:** `befehl` (passender Befehl lief fehlerfrei auf genau dem Gerät) und `antwort` (Wert aus der Ausgabe, geprüft gegen das *aktuelle* Netz). `Sim.pruefeZiel` bleibt unberührt; nur `Spiel.zielPruefen(netz, ziel, inst)` kennt sie. Ein Terminal-Auftrag darf ohne Fehler im Netz auskommen (reine Übung).
+- **„Ausgeführt“ = ohne Tippfehler.** Ein Diagnosebefehl mit negativem Befund (nslookup ohne Antwort, ping auf einen unbekannten Namen) zählt als ausgeführt – genau diese Fehlschläge sind die Erkenntnis.
+- **Keine neuen Fertigkeiten `lab.cli.*`:** Die Terminal-Minikarten heißen `mini-cli-*` und hängen an der Fertigkeit, um die es inhaltlich geht (ipconfig deuten → lab.gateway, nslookup → lab.dns …). So bleibt die Kompetenzkarte (E2) bei 27 Feldern, und Generator, Prüfung und Tagesrätsel ziehen keine Fertigkeit, für die es keine Fehlerart gibt.
+- **Die Diagnose beginnt beim Kunden:** Hilfestufe 2 nennt die Befehle für den Rechner des ersten Ziels (beim Intranet-Auftrag PC-Albers, nicht den Server) – Adresse → Weg → Name → Dienst.
+- **Vorführen im echten Terminal:** „Lösung vorführen“ legt Terminal-Schritte vorbereitet in die Eingabezeile; Enter führt aus. So sieht man die Ausgabe, und der Befehl zählt fürs Ziel.
+- **Ein Regelwerk für Hinweise:** Kabel, Port-Punkte, Paketschild und Ping-Meldung folgen derselben Regel wie die „!“-Warnungen (Einstieg an, AP1 ab Hilfestufe 2, AP2 nur mit Netzprüfer).
+
+### Aufgefallen und gleich behoben
+
+- Windows-`nslookup` zeigte bei unerreichbarem Server dessen Namen; echtes Windows schreibt „Server: UnKnown“ (die Rückwärtsauflösung scheitert ja auch).
+- Erst im echten Programm sichtbar: Das Schild an der Abbruchstelle eines Terminal-Pings nannte im AP1 „Gateway antwortet nicht“ – jetzt „✗ verworfen“.
+- Abnahmeskript: Ein Klick auf den bereits aktiven Dock-Reiter klappt das Dock zu (gewollt) – der Befehl lief dann ins Leere, die Abnahme meldete das offene Ziel korrekt („Befehl fehlt“).
+
+### Offen (ehrlich)
+
+- **Fernwartung ist eine Geschichte, keine Regel:** In den C-Aufträgen ist das Netz sichtbar und der Inspektor geht. Die Form „Terminal-Forensik“ (Netz unsichtbar) kommt in E1.
+- Der Drucker der Vorlage `lan` ist technisch ein PC mit Drucker-Aussehen – Doppelklick öffnet eine Windows-Eingabeaufforderung. Fachlich schief, stört nicht; gehört zu D (Geräte-Erweiterung).
+- `lab.cli` heißt weiter „IOS-Konsole“; Wiki-Einträge für die Host-Terminals kommen in Phase F.
+- Die Simulation nennt Gründe weiterhin auf Klick (auch im AP2). Das ist gewollt (Werkzeug), aber ein Abkürzungsweg – beobachten im Spieltagebuch.
+
+### Bildschirmfotos
+
+„Rechner ohne Internet“: Diagnose im Terminal · Plan zeigt den Router · Akte mit Verdacht · Ergebnis:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-3-terminal-diagnose.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-4-plan-router.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-5-akte-verdacht.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-7-ergebnis.png|420]]
+
+Terminal-Übung im Einstieg: Hilfestufe 2 · Antwort falsch · Antworten richtig:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-8-hilfe-naechste-diagnose.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-9-antwort-falsch.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-10-antworten-richtig.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-960-terminal.png|320]]
