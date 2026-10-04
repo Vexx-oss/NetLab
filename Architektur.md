@@ -321,3 +321,33 @@ Spiel.hub.serie(tageSet, heute) → { tage, urlaub, frei }   // Serie mit Urlaub
 - **Tagesrätsel:** Fertigkeit und Netz hängen nur an Datum und Niveau: `Spiel.generiere(skill, seed, {stufe})` mit `skill = Zufall("raetsel:"+tag+":"+niveau).wahl(Spiel.RAETSEL.SKILLS[niveau])` und festem Seed je Tag/Niveau – alle in der Klasse bekommen dasselbe Netz, ohne Server. Nummer = Tage seit 01.10.2026 + 1. Teilen-Text verrät die Ursache nicht (🟩 erster Versuch, 🟨 späterer, ⬜ nicht erreicht – je Ziel).
 - **Hub „Heute“** (`ui/hub.js`, Präfix `hb-`): Startansicht (außer im allerersten Auftrag). Datumszeile + Serie, eine Karte „Dein nächster Auftrag“ mit dem einzigen Hauptknopf, drei Kacheln (Aufwärmen · Tagesrätsel · Post bzw. Fehlerdex), nach dem Tagesziel Feierabend mit Bilanz und einem Ausblick auf morgen. Platzbudget: ≤ 40 Wörter, 1 Hauptknopf.
 - **Fehlerdex** im Lernstand (Abschnitt `#dex`); **Spieltagebuch** zum Kopieren in Einstellungen und Lernstand. `UI.kopieren(text) → Promise<bool>` (Zwischenablage mit Rückfall).
+
+### 9.4 Welle 2, Phase B „Netzplan, Dock, Akte, Verdacht“
+
+```js
+Spiel.plan.sollNetz(inst)      → Netz   // Startnetz + Referenzlösung = so soll es sein (Störung: gesund, Projekt: Ziel). Nie mit Fehler.
+Spiel.plan.aus(netz, {art, verdeckt}) → Plan
+Plan = { art:"netzplan"|"skizze"|"tabelle", breite, hoehe,
+         knoten:[ {id, name, typ, skin, x, y, ebene, adressen:[{port, ip, maske, vlan}], zeigen:[text]} ],
+         linien:[ {a:{id, port}, b:{id, port}, trunk:bool, vlan:null|n} ],
+         netze:[ {cidr, vlan, geraete:[id]} ],
+         tabelle:[ {id, name, port, ip, maske, gw, dns, vlan, dhcp:bool} ],   // verdeckte Felder = "?"
+         verdeckt:[ {id, feld} ] }
+Spiel.plan.art(inst) → "netzplan" (E) | "skizze" (AP1, Tabelle daneben) | "tabelle" (AP2, Gateway/DNS der Rechner verdeckt) | ticket.plan.art
+Spiel.plan.fuer(inst) → Plan (gecacht je Instanz)
+Spiel.plan.diff(a, b) → [ {geraet, pfad, soll, ist} | {geraet, kabel:"fehlt"|"zuviel", gegen} ]   // Konfig (running), Strom, VLAN-Datenbank, Kabel
+Spiel.plan.abweichungen(inst) → [geraeteId]          // Plan ↔ Labor, für „Abweichungen markieren“ (kostet wie Hilfestufe 4)
+
+inst.akte     = [ {n, t, art:"ping"|"trace"|"kabel"|"befehl"|"plan", von, nach, befund, schicht:null|1..7, grund:null|code, ok, wichtig:false} ]
+Spiel.akte.ausPing(inst, {von, nach, ergebnis}) · .ausKabeltest(inst, {kabel, oben, grund}) · .stern(inst, n) · .liste(inst)
+  // befund = was ein echtes Werkzeug zeigt („Zeitüberschreitung“, „Zielhost nicht erreichbar“); Grund/Schicht nur im Einstieg sichtbar
+inst.verdacht = { schicht, grund, geraet, t, vorEingriff:bool, treffer:null|"schicht"|"voll" }
+Spiel.verdacht.optionen(inst) → { schichten:[1..7], gruende:[{code, titel, schicht}] (4, eine richtig), geraete:[{id, name}] }
+Spiel.verdacht.setzen(inst, {schicht, grund, geraet}) · .bewerten(inst) → {treffer, richtig:{grund, schicht, geraete}, text}
+  // E freiwillig (+10 % Lohn bei vollem Treffer vor dem Eingriff), AP1 ohne Verdacht −½ ★, AP2 −1 ★ (Spiel.regeln(inst).verdacht)
+st.werkzeuge  = { kabeltester:bool, netzpruefer:bool }   // Shop „Werkzeuge“; inst.netzpruefer = true schaltet die „!“ im AP-Niveau zu
+```
+
+- **Dock** (`ui/editor.js`, Präfix `lb-dock`): ein Bereich rechts mit Reitern Inspektor · Simulation · Plan · Akte (Terminal folgt in C). Ein Reiter erscheint erst, wenn er Inhalt hat; ist keiner da, gibt es kein Dock (R5). Breite `clamp(260px, 40% − 72px, 440px)` der Laborbreite → die Fläche behält ≥ 60 %. Die Simulation liegt nicht mehr unten. `UI.labor.dock(reiter|null)`, `UI.labor.dockReiter(id, {titel, symbol, verfuegbar})`; `inspektor(zu)` und `simulation(zu)` gelten weiter.
+- **Netzplan** (`ui/netzplan.js`, Präfix `np-`): Reiter „Plan“ im Dock und in der Auftragsmappe; Zeichnung automatisch in Ebenen ausgerichtet (Internet → Router/Firewall → Switches → Endgeräte), Schrift ≥ 14 px, Tabelle daneben. Klick auf ein Plan-Gerät hebt es im Labor hervor und wählt es.
+- **Akte** (`ui/akte.js`, Präfix `ak-`): Reiter „Akte“ – Verdacht oben, darunter Beweiskarten (neueste zuerst, ★ markiert).
