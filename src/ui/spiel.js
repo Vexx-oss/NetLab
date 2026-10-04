@@ -186,7 +186,8 @@ UI.spiel = (() => {
     if (!Spiel.regeln(S.inst).liveHaken) return;            /* AP2: Haken erst bei der Abnahme */
     if (vorher && r.neuOk.length) {
       for (const i of r.neuOk) { const li = document.querySelector(`.sp-ziele li[data-i="${i}"]`); li?.classList.add("frisch"); }
-      document.querySelector(".am-ziele")?.classList.add("frisch");
+      UI.juice?.(document.querySelector(".am-ziele"), "haken", 700);
+      UI.klang?.spielen("haken");
       if (r.alle) {
         if (!S.coach) UI.toast("Alle Ziele erfüllt – jetzt die Abnahme anfordern.", "ok", {id: "ziele", titel: "Geschafft"});   /* mit Coach sagt die Coach-Zeile das schon */
         if (S.coach && S.coach.schritt < 1) coachWeiter(1);
@@ -357,7 +358,7 @@ UI.spiel = (() => {
     const tagStand = erg.inst.quelle !== "pruefung" ? Spiel.tag.heute() : null;
     const feierabend = !!(tagStand && tagStand.fertig && !tagStand.abschlussGezeigt);
     if (feierabend) Spiel.tag.abschlussGesehen();
-    const sternEl = h("div", {class: "sp-sterne", "aria-label": `${sterne} von 5 Sternen`}, [1, 2, 3, 4, 5].map(i => h("span", {class: i <= sterne ? "voll" : i - 0.5 <= sterne ? "halb" : "leer", style: {"--i": i}}, "★")));
+    const sternEl = h("div", {class: "sp-sterne" + (UI.bewegung() === "voll" ? " jc-sterne" : ""), "aria-label": `${sterne} von 5 Sternen`}, [1, 2, 3, 4, 5].map(i => h("span", {class: i <= sterne ? "voll" : i - 0.5 <= sterne ? "halb" : "leer", style: {"--i": i}}, "★")));
     const euroEl = h("b", {class: "sp-geld"}, "+0,00 €");
     Spiel.abzeichen.pruefen();
     const abz = Spiel.abzeichen.abholen();

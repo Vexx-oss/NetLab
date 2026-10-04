@@ -90,6 +90,7 @@ UI.laborPakete = (() => {
     function erfolg(id){
       const s = schicht(), p = F.pos(id); if (!s || !p) return Promise.resolve();
       const el = Z.gEl.get(id); el?.classList.add("blitz-ok"); setTimeout(() => el?.classList.remove("blitz-ok"), 1100);
+      UI.juice?.(el, "atmen", 1100);                    /* das Gerät „atmet“, wenn es antwortet */
       if (bewegung() === "aus") return Promise.resolve();
       const ringe = [0, 140].map(v => { const c = sv("circle", {class: "ring-ok", cx: p.x, cy: p.y, r: 34}); s.append(c); return [c, v]; });
       return Promise.all(ringe.map(([c, v]) => new Promise(r => setTimeout(r, v)).then(() =>
@@ -97,7 +98,9 @@ UI.laborPakete = (() => {
     }
     function platzen(id, grund){
       const s = schicht(), p = F.pos(id); if (!s || !p) return Promise.resolve();
-      const el = Z.gEl.get(id); el?.classList.add("blitz-fehler"); setTimeout(() => el?.classList.remove("blitz-fehler"), 1400);
+      /* sanftes Wackeln statt Rotflackern; ohne volle Bewegung bleibt die ruhige Markierung */
+      const el = Z.gEl.get(id);
+      if (!UI.juice?.(el, "wackeln", 700)) { el?.classList.add("blitz-fehler"); setTimeout(() => el?.classList.remove("blitz-fehler"), 1400); }
       const titel = grund ? F.grundText(grund) : "";
       if (titel) {
         const t = sv("g", {class: "platz-schild"});
@@ -202,8 +205,11 @@ UI.laborPakete = (() => {
       /* Ist das Simulations-Panel offen, zeigt es den neuen Ping selbst – dann keine Meldung über der (kleinen) Fläche.
          Der erste Ping in diesem Netz öffnet das Panel einmal (es war bis dahin unsichtbar). */
       const panelOffen = !!Z.root && (!Z.root.classList.contains("sim-zu") || !!Z.simWartet);
-      const melden = () => panelOffen && r.trace ? zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping", abspielen: false})
-        : UI.toast(text, art, {id: "ping", titel, aktion});
+      const melden = () => {
+        UI.klang?.spielen(ok > 0 ? "ping" : "nochnicht");
+        return panelOffen && r.trace ? zeigeTrace(r.trace, {ok: ok > 0, ziel: B.frei ? undefined : nachId, grund, quelle: "ping", abspielen: false})
+          : UI.toast(text, art, {id: "ping", titel, aktion});
+      };
       if (r.trace && bewegung() === "voll") {
         let gemeldetSchon = false;
         const t = setTimeout(() => { gemeldetSchon = true; melden(); }, 4800);

@@ -274,6 +274,8 @@ UI.laborWerkzeuge = (() => {
       const k = F.verbinden(a, b);
       hoverZeichnen();
       if (!k || k.fehler) return;
+      UI.klang?.spielen("link");
+      requestAnimationFrame(() => requestAnimationFrame(() => UI.juice?.(Z.kEl.get(k.id), "einrasten", 1500)));
       const e = store.get("einst", {}) || {};
       if (!e.tipps?.mdix) {
         e.tipps = Object.assign({}, e.tipps, {mdix: true}); store.set("einst", e);

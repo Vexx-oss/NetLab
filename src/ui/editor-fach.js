@@ -59,6 +59,7 @@ UI.laborFach = (() => {
       const k = knoepfe.find(b => b.dataset.kat === id);
       fach.style.top = Math.max(6, k.offsetTop - 6) + "px";
       for (const b of knoepfe) { const an = b.dataset.kat === id; b.classList.toggle("an", an); b.setAttribute("aria-expanded", String(an)); }
+      UI.juice?.(k, "wahl", 400); UI.klang?.spielen("klick");
       /* Fach darf nicht unten aus dem Fenster ragen */
       const r = fach.getBoundingClientRect(), unten = innerHeight - 8;
       if (r.bottom > unten) fach.style.top = Math.max(6, k.offsetTop - 6 - (r.bottom - unten)) + "px";

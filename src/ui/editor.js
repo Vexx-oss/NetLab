@@ -515,6 +515,9 @@ UI.labor = (() => {
   function platzEnde(){ const v = Z.vorPlatz && Z.vorPlatz !== "platzieren" ? Z.vorPlatz : "auswahl"; Z.vorPlatz = null; werkzeug(v); }
   function werkzeugAnzeigen(text){
     if (!Z.root) return;
+    if (Z.root.dataset.werkzeug && Z.root.dataset.werkzeug !== Z.werkzeug && Z.werkzeug !== "platzieren") {
+      UI.juice?.($(`.lb-wz[data-wz="${Z.werkzeug}"]`, Z.root), "wahl", 400); UI.klang?.spielen("klick");
+    }
     Z.root.dataset.werkzeug = Z.werkzeug;
     for (const b of $$(".lb-wz", Z.root)) { const an = b.dataset.wz === Z.werkzeug; b.classList.toggle("an", an); b.setAttribute("aria-pressed", String(an)); }
     F.fachMarkieren?.();
@@ -544,7 +547,11 @@ UI.labor = (() => {
     if (skin && SKIN_NAME[skin]) o.name = freierName(SKIN_NAME[skin]);
     else if (TYP_NAME[typ]) { const namen = new Set(Object.values(Z.netz.geraete).map(g => g.name)); let i = 1; while (namen.has(TYP_NAME[typ] + i)) i++; o.name = TYP_NAME[typ] + i; }
     aendern(`${o.name || UI.geraeteArt(typ, skin).titel} hinzugefügt`, n => { neu = Modell.geraet(n, typ, o); });
-    if (neu) { auswaehlen(neu.id); F.zuletztMerken?.(typ, skin); }
+    if (neu) {
+      auswaehlen(neu.id); F.zuletztMerken?.(typ, skin);
+      UI.klang?.spielen("klick");
+      requestAnimationFrame(() => requestAnimationFrame(() => UI.juice?.(Z.gEl.get(neu.id), "plop", 500)));   /* nach dem Neuzeichnen */
+    }
     return neu;
   }
   /* in die Mitte der sichtbaren Fläche (Tastatur, Befehlspalette) */

@@ -145,6 +145,7 @@ UI.app = (() => {
       if (typeof alt === "number" && typeof neu === "number" && k !== "stufe" && UI.bewegung() === "voll") zaehlen(w, k, alt, neu);
       else w.zahl.textContent = FORMAT[k](neu);
       if (alt != null && neu != null) { w.b.classList.remove("leuchtet"); void w.b.offsetWidth; w.b.classList.add("leuchtet"); w.b.classList.toggle("runter", neu < alt); }
+      if (k === "euro" && typeof alt === "number" && neu > alt) UI.juice?.(w.b, "geld", 1000);
     }
   }
   function zaehlen(w, k, alt, neu){
@@ -265,7 +266,9 @@ UI.app = (() => {
       zeile("Farbschema", "Dunkel ist der Leitstand-Look. „System“ folgt der Einstellung des Betriebssystems.",
         wahl("Farbschema", [["hell", "Hell"], ["dunkel", "Dunkel"], ["system", "System"]], e.thema || "system", v => { einstSetzen({thema: v}); themaAnwenden(); })),
       zeile("Animationen", "Pakete fliegen, Zahlen zählen hoch. „Reduziert“ blendet nur kurz ein, „Aus“ zeigt Ergebnisse sofort. Die Systemeinstellung „Bewegung reduzieren“ wird immer beachtet.",
-        wahl("Animationen", [["an", "An"], ["reduziert", "Reduziert"], ["aus", "Aus"]], e.bewegung || "an", v => { einstSetzen({bewegung: v}); themaAnwenden(); })))});
+        wahl("Animationen", [["an", "An"], ["reduziert", "Reduziert"], ["aus", "Aus"]], e.bewegung || "an", v => { einstSetzen({bewegung: v}); themaAnwenden(); })),
+      zeile("Ton", "Leise Klänge bei Kabel, Ping, Haken und Sternen – alles bleibt auch ohne Ton verständlich. Die Leiste und ein Fenster im Hintergrund sind immer stumm.",
+        wahl("Ton", [["aus", "Aus"], ["leise", "Leise"], ["normal", "Normal"]], e.ton || "leise", v => { einstSetzen({ton: v}); UI.klang?.spielen("haken"); })))});
     l.push({titel: "Erklärtiefe", fn: c => c.append(
       zeile("Wie ausführlich sollen Konsole und Simulation erklären?", "Einstieg erklärt jeden Schritt, AP1 knapp, AP2 zeigt nur, was ein echtes Gerät melden würde.",
         wahl("Erklärtiefe", [["E", "Einstieg"], ["AP1", "AP1"], ["AP2", "AP2"]], e.niveau || "E", v => { einstSetzen({niveau: v}); Bus.senden("niveau", v); })))});

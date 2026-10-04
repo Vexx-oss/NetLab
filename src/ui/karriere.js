@@ -295,6 +295,7 @@ UI.karriere = (() => {
   }
   function festZeigen(f){
     if (!f || f.gesehen) return;
+    UI.klang?.spielen("fanfare");
     const kunden = (f.kunden || []).map(kd);
     const zu = overlay(h("div", {class: "sp-willkommen sp-fest"}, h("span", {class: "sp-senior-sym gross"}, "🎉"),
       h("small", {class: "sp-leise"}, "Aufstieg"),
