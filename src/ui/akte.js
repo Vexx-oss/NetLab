@@ -18,11 +18,11 @@ UI.akte = (() => {
           : h("p", {class: "ak-leer"}, "Noch keine Beweise. Jeder Ping (und jeder Kabeltest) landet hier als Karte."))));
   }
   function karte(i, k, niveau){
-    return h("li", {class: "ak-karte" + (k.ok ? " ok" : " nicht") + (k.wichtig ? " wichtig" : "")},
+    return h("li", {class: "ak-karte" + (k.ok == null ? " aussage" : k.ok ? " ok" : " nicht") + (k.wichtig ? " wichtig" : "")},
       h("span", {class: "ak-sym", "aria-hidden": "true"}, SYM[k.art] || "•"),
       h("div", {class: "ak-text"},
         h("b", {}, k.titel || k.art, k.anzahl > 1 ? h("small", {}, ` ${k.anzahl}×`) : null),
-        h("span", {class: "ak-befund"}, (k.ok ? "✓ " : "✗ ") + k.befund),
+        h("span", {class: "ak-befund"}, (k.ok == null ? "„" : k.ok ? "✓ " : "✗ ") + k.befund + (k.ok == null ? "“" : "")),   /* Kundenaussage (Hotline): weder ✓ noch ✗ */
         niveau === "E" && k.grund ? h("small", {class: "ak-grund"}, `${Spiel.grundTitel(k.grund)}${k.schicht ? ` · Schicht ${k.schicht}` : ""}`) : null),
       h("button", {type: "button", class: "ak-stern" + (k.wichtig ? " an" : ""), title: k.wichtig ? "Markierung entfernen" : "Als wichtig markieren", "aria-pressed": String(!!k.wichtig),
         onclick: () => { Spiel.akte.stern(i, k.n); zeichnen(); }}, k.wichtig ? "★" : "☆"));

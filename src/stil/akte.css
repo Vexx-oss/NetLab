@@ -35,3 +35,4 @@
 .ak-leer{color:var(--muted); font-size:13px; margin:0}
 .sp-verdacht{margin:10px 0 0; font-size:14px; line-height:1.45}
 .sp-verdacht.voll{color:var(--ok)}
+.ak-karte.aussage{border-left-color:var(--line-2)}   /* Kundenaussage am Telefon (Hotline) */

@@ -117,7 +117,7 @@ DATEN.ticketSpec = function(spec){
   };
   const def = {id: spec.id, art: spec.art || "stoerung", stufe: spec.stufe || "E", karriere: spec.karriere || 1, kunde: spec.kunde, titel: spec.titel,
                reihe: spec.reihe, spec};
-  for (const f of ["skills", "lohn", "minuten", "vorhersage"]) if (spec[f] !== undefined) def[f] = spec[f];
+  for (const f of ["skills", "lohn", "minuten", "vorhersage", "form", "hotline", "varianten"]) if (spec[f] !== undefined) def[f] = spec[f];
   for (const f of ["netz", "ziele", "loesung", "hilfen", "erklaerung", "briefing", "symptom", "quelle", "vorlage", "injektoren", "gruende", "regression", "regressionOhne", "skills", "lohn", "minuten", "vorhersage", "entwurf"]) {
     if (Object.prototype.hasOwnProperty.call(def, f)) continue;
     Object.defineProperty(def, f, {enumerable: true, configurable: true, get(){ return bau()[f]; }});

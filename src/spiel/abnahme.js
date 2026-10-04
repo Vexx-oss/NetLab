@@ -103,6 +103,8 @@ Spiel.abschliessen = function(inst, abnahme){
     Spiel.abzeichen.zaehlen("verdachtTreffer");
   }
   if (Spiel.befehle.leiter(inst).vollstaendig) Spiel.abzeichen.zaehlen("leiterVonUnten");   /* C5: Diagnoseleiter im Terminal */
+  const hotline = def.hotline ? Spiel.hotline.bewertung(inst) : null;                       /* E1: Fragetechnik am Telefon */
+  if (hotline && hotline.bonus) { lohn.ruf += 1; lohn.hotline = 1; }
   st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0, kunde: inst.kunde || def.kunde || null, form: Spiel.formVon(def)});
   if (st.erledigt.length > 2000) st.erledigt.splice(0, st.erledigt.length - 2000);
   if (inst.kunde) {
@@ -123,7 +125,7 @@ Spiel.abschliessen = function(inst, abnahme){
     bestanden: true, abnahme, lernen, def, inst, sterne, euro: lohn.euro, ruf: lohn.ruf, lohn,
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
-    dex, raetsel, verdacht,
+    dex, raetsel, verdacht, hotline,
   };
   Spiel.geaendert("ticket-geloest");
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});

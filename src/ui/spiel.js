@@ -53,7 +53,7 @@ UI.spiel = (() => {
     const coach = !Spiel.st.einstieg.fertig && r.def.id === Spiel.EINSTIEG_TICKET && coachStart();
     /* Beim ersten Öffnen klappt die Mappe einmal auf (Brief, oder Ziele, wenn der Brief im Postfach schon gelesen wurde).
        Im ersten Auftrag übernehmen Willkommen und Coach diese Rolle. Prüfung: keine Mappe. */
-    if (erstesMal && !coach && r.inst.quelle !== "pruefung") mappeAuf(briefGelesen ? "ziele" : "brief", true);
+    if (erstesMal && !coach && r.inst.quelle !== "pruefung") mappeAuf(r.def.hotline ? "anruf" : briefGelesen ? "ziele" : "brief", true);
     status();
   }
   function aktiveLaden(){
@@ -118,12 +118,14 @@ UI.spiel = (() => {
   function mappe(def, k, stand, live, mitGrund){
     const m = S.mappe, n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length;
     const reiter = h("div", {class: "am-reiter", role: "tablist"},
-      [["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"], def.fernwartung || def.blatt ? null : ["plan", "Plan"]].filter(Boolean).map(([id, titel]) =>
+      [def.hotline ? ["anruf", "Anruf"] : ["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"], def.fernwartung || def.blatt ? null : ["plan", "Plan"]].filter(Boolean).map(([id, titel]) =>
         h("button", {type: "button", role: "tab", class: "am-tab" + (m.reiter === id ? " an" : ""), "aria-selected": String(m.reiter === id),
           onclick: () => { m.reiter = id; UI.labor.auftragNeu(); }}, titel)),
       h("button", {type: "button", class: "am-zu", title: "Schließen (Esc)", "aria-label": "Mappe schließen", onclick: () => mappeZu()}, UI.symbol("schliessen", 15)));
     let inhalt;
-    if (m.reiter === "plan") {
+    if (def.hotline && m.reiter === "brief") m.reiter = "anruf";
+    if (m.reiter === "anruf" && def.hotline) inhalt = anrufAnsicht(def, k);
+    else if (m.reiter === "plan") {
       /* Netzplan (Phase B): aus dem Soll-Netz; „Neben das Labor heften“ legt ihn als Reiter ins Dock */
       inhalt = h("div", {class: "am-plan"});
       UI.netzplan.zeichnen(inhalt, S.inst, {mappe: true});
@@ -155,6 +157,21 @@ UI.spiel = (() => {
     const fuss = h("div", {class: "am-fuss"},
       h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s ▸" : "Zurück ins Labor"));
     return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
+  }
+  /* Hotline (E1): Anruf als Gesprächsverlauf, drei Rückfragen zur Wahl, nach dem Auflegen die Bewertung mit Begründung */
+  function anrufAnsicht(def, k){
+    const inst = S.inst, st = Spiel.hotline.stand(inst), wer = (k.ansprechpartner || {}).name || k.name;
+    const blase = (von, text, kl) => h("div", {class: "ht-blase " + kl}, h("b", {}, von), h("span", {}, text));
+    const verlauf = [blase(wer, def.briefing, "kunde")];
+    for (const id of st.gefragt) { const f = st.def.fragen.find(x => x.id === id); if (f) verlauf.push(blase("Du", f.text, "du"), blase(wer, f.antwort, "kunde")); }
+    const neu = () => { UI.labor.auftragNeu(); requestAnimationFrame(() => { const v = document.querySelector(".ht-verlauf"); if (v) v.scrollTop = v.scrollHeight; }); };
+    const fragen = st.fertig ? null : h("div", {class: "ht-fragen"},
+      h("p", {class: "ht-rest"}, `Noch ${st.rest} ${st.rest === 1 ? "Frage" : "Fragen"} – frag gezielt:`),
+      ...st.def.fragen.filter(f => !st.gefragt.includes(f.id)).map(f => h("button", {type: "button", class: "ht-frage", onclick: () => { Spiel.hotline.fragen(inst, f.id); neu(); }}, f.text)),
+      h("button", {type: "button", class: "knopf geist klein", onclick: () => { Spiel.hotline.auflegen(inst); neu(); }}, "Auflegen – ich schau selbst nach"));
+    const b = st.fertig ? Spiel.hotline.bewertung(inst) : null;
+    return h("div", {class: "ht-anruf"}, h("div", {class: "ht-verlauf"}, ...verlauf), fragen,
+      b ? h("div", {class: "ht-bewertung"}, h("p", {}, h("b", {}, "☎ " + b.text)), ...b.hinweise.map(t => h("p", {class: "sp-leise"}, t))) : null);
   }
   /* Zielart „antwort“ (C4): Wert aus der Terminal-Ausgabe eintragen; geprüft wird gegen das Netz (Haken nur, wo das Niveau ihn zeigt) */
   function antwortFeld(ziel){
@@ -414,7 +431,8 @@ UI.spiel = (() => {
         h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
           h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])),
         erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
-          {voll: "🎯 ", ursache: "🔎 ", schicht: "🔎 "}[erg.verdacht.treffer] || "💭 ", erg.verdacht.text) : null) : null,
+          {voll: "🎯 ", ursache: "🔎 ", schicht: "🔎 "}[erg.verdacht.treffer] || "💭 ", erg.verdacht.text) : null,
+        erg.hotline ? h("p", {class: "sp-hotline"}, "☎ " + erg.hotline.text) : null) : null,
       merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
         h("div", {class: "sp-merke-fuss"},
           def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,

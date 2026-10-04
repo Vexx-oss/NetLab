@@ -91,6 +91,31 @@ gruppe("Spiel: Auftragsformen", () => {
     erwarte.gleich(fehler.slice(0, 8), []);
   }));
 
+  pruefe("Hotline: 4 Aufträge, je 6 Fragen (3 gut, ≥ 1 Fachfrage, jede begründet); höchstens 3 Fragen, Antworten in der Akte, gute Fragetechnik +1 Ruf", kapsel(() => {
+    const h = DATEN.tickets.filter(t => t.form === "hotline");
+    erwarte.gleich(h.map(t => t.id).sort(), ["baeckerei-hotline", "buero-hotline", "praxis-hotline", "salon-hotline"]);
+    for (const t of h) {
+      const f = t.hotline.fragen;
+      erwarte.wahr(f.length === 6 && f.filter(x => x.wert === "gut").length === 3 && f.some(x => x.wert === "schlecht") && f.every(x => x.warum && x.antwort && x.text.length <= 110), t.id);
+      erwarte.gleich(Spiel.formVon(t), "hotline");
+    }
+    const inst = Spiel.instanzErstellen({ticketId: "salon-hotline", quelle: "postfach"});
+    Spiel.oeffnen(inst.iid);
+    Spiel.hotline.fragen(inst, "seit"); Spiel.hotline.fragen(inst, "meldung");
+    erwarte.falsch(Spiel.hotline.stand(inst).fertig);
+    Spiel.hotline.fragen(inst, "neustart");
+    erwarte.wahr(Spiel.hotline.stand(inst).fertig && Spiel.hotline.fragen(inst, "wer") === null, "nach drei Fragen ist aufgelegt");
+    erwarte.gleich(Spiel.akte.liste(inst).filter(k => k.art === "hotline").length, 3);
+    const b = Spiel.hotline.bewertung(inst);
+    erwarte.wahr(b.bonus && b.gut === 2 && b.hinweise.length === 1, JSON.stringify(b));
+    Spiel.loesung(inst.netz, Spiel.defVon(inst).loesung);
+    const erg = Spiel.abschliessen(inst, Spiel.abnahme(inst));
+    erwarte.wahr(erg.bestanden && erg.lohn.hotline === 1 && erg.hotline.bonus, "Bonus im Ergebnis");
+    const zwei = Spiel.instanzErstellen({ticketId: "baeckerei-hotline", quelle: "postfach"});
+    Spiel.hotline.fragen(zwei, "dns"); Spiel.hotline.fragen(zwei, "drinnen"); Spiel.hotline.fragen(zwei, "lampen");
+    erwarte.falsch(Spiel.hotline.bewertung(zwei).bonus, "Fachfrage an den Laien: kein Bonus (aber auch keine Strafe)");
+  }));
+
   pruefe("Instanz einer generierten Form überlebt Speichern und Laden (inst.gen = {form, seed, opts})", kapsel(() => {
     const inst = Spiel.instanzErstellen({gen: {form: "forensik", seed: 4242, opts: {kunde: "praxis"}}, quelle: "generiert"});
     const id = inst.ticketId;

@@ -117,11 +117,11 @@ gruppe("Spiel: Arbeitsziele", () => {
     erwarte.falsch(/192\.168\.10\.254|netsh|172/.test(texte), "verrät weder Router-Adresse noch Lösung: " + texte);
     Spiel.aendern(inst, "Lösung", n => Spiel.loesung(n, Spiel.defVon(inst).loesung));
     Spiel.arbeitszieleErfuellen(inst);
-    const vorher = Spiel.abzeichen.liste().find(a => a.id === "von-unten").ist;
-    Spiel._trocken = false;                                            /* Zähler zählen nur im echten Spielstand (kapsel stellt zurück) */
-    erwarte.wahr(Spiel.abschliessen(inst, Spiel.abnahme(inst)).bestanden);
-    Spiel._trocken = true;
-    erwarte.gleich(Spiel.abzeichen.liste().find(a => a.id === "von-unten").ist, vorher + 1, "Zähler „Von unten nach oben“");
+    /* Zähler zählen nur im echten Spielstand – hier mitschreiben statt den Trockenmodus abzuschalten (sonst lernt der globale Lernmotor mit) */
+    const gezaehlt = [], zaehlen = Spiel.abzeichen.zaehlen;
+    Spiel.abzeichen.zaehlen = name => gezaehlt.push(name);
+    try { erwarte.wahr(Spiel.abschliessen(inst, Spiel.abnahme(inst)).bestanden); } finally { Spiel.abzeichen.zaehlen = zaehlen; }
+    erwarte.wahr(gezaehlt.includes("leiterVonUnten"), "Zähler „Von unten nach oben“: " + gezaehlt.join(", "));
     /* Diagnose beginnt beim betroffenen Client; Befehle passend zu dessen System */
     const srv = instanz("buero-terminal");
     erwarte.passt(Spiel.naechsteDiagnose(srv), /PC-Albers.*ipconfig/);
