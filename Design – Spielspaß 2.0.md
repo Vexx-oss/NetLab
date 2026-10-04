@@ -1,12 +1,15 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Entwurf nach zwei Durchgängen – nichts davon ist gebaut; Grundlage für die Opus-Sitzungen S1, S2 und die Phasen B–F
+status: Welle 1, Sitzung S1 gebaut (04.10.2026, Zweig ausbau-1.2) – Haltepunkt, du spielst an; S2 und B–F offen
 ---
 
 # 🎮 Design – Spielspaß 2.0
 
 ⬆️ [[10-Projekte/Lernprojekte/Netzwerk-Labor/Liesmich|Netzwerk-Labor]] · baut auf [[Plan – Ausbau 1.2]] (Phasen 0/A fertig) · Vertrag: [[Architektur]]
+
+> [!success] Stand 04.10.2026: Sitzung S1 „Sofortgefühl“ gebaut und im echten Programm abgenommen
+> Funktionsprobe-Szene + Nachbesprechung in drei Blöcken · Stufenregeln (Warnungen/Haken/Versuche) · Juice an 12 Stellen + Klang (leise, Leiste stumm) · Einstieg ohne Fenster mit zwei Senior-Blasen und erster Wahl · Kabel-Meldung kurz und unten. Messwerte, Entscheidungen und Bilder: [[#14 · Stand nach S1]]. Scorecard 2/4/12 neu bewertet: **26,0 → 28,4**. **Haltepunkt – S2 beginnt erst nach dem Anspielen.**
 
 > [!info] So liest du diese Notiz
 > **§ 0 reicht für die Entscheidung** (eine Seite). § 1 sind die Beobachtungen, § 5 die Bausteine, § 9 die Reihenfolge, § 13 der Text für Opus. Alles dazwischen ist Nachschlagewerk.
@@ -230,21 +233,23 @@ Passt zu „erst beibringen, dann abfragen“ und macht aus dem Niveau eine echt
 
 Jedes Kriterium wird mit einer **Prüffrage** bewertet (0 = nein, 5 = durchgehend ja). Bewertet wird nach jedem Haltepunkt von dir (oder mir) *am echten Programm*, mit kurzer Begründung in der Notiz.
 
-| # | Kriterium | Prüffrage (5 = …) | Ist | Ziel | Hebt vor allem |
-|---|---|---|---:|---:|---|
-| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | 4,0 | Hub, Akte |
-| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | 3,8 | 1, 6 |
-| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | 3,6 | 2, 12 |
-| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | 3,6 | 2, 3 |
-| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | 3,0 | 5, 9 |
-| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | 2,8 | 9, 10 |
-| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | 3,0 | 8, 10 |
-| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | 3,4 | 3, 11 |
-| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | 3,4 | 4, 5 |
-| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | 1,8 | 5 |
-| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | 3,0 | 10 |
-| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | 3,6 | 7 |
-| | **Summe (von 60)** | | **26,0** | **39,0** | **+50 %** |
+| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | Ziel | Hebt vor allem |
+|---|---|---|---:|---:|---:|---|
+| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | 4,0 | Hub, Akte |
+| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | 3,8 | 1, 6 |
+| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | 3,6 | 2, 12 |
+| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | 3,6 | 2, 3 |
+| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | 3,0 | 5, 9 |
+| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | 2,8 | 9, 10 |
+| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | 3,0 | 8, 10 |
+| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | 3,4 | 3, 11 |
+| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | 3,4 | 4, 5 |
+| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | 1,8 | 5 |
+| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | 3,0 | 10 |
+| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | 3,6 | 7 |
+| | **Summe (von 60)** | | **26,0** | **28,4** | **39,0** | **+50 %** |
+
+*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „–“ = unverändert, nicht neu bewertet. Begründung in [[#14 · Stand nach S1]].*
 
 *Hinweis:* Welle 4 (Netz-Codes, Par, Gürtel, Büro) ist Reserve und hebt vor allem 8, 10 und 11 weiter; sie gehört nicht zur +50 %-Zusage.
 
@@ -389,3 +394,71 @@ eintragen. Build neu, Notiz aktualisieren, HALTEPUNKT – nicht mit S2 beginnen.
 **Sitzung S2** (nach dem Anspielen von S1): gleicher Kopf, aber *„SITZUNG S2 („Bogen“)“*, Aufgaben: Hub „Heute“ (Hebel 4: Hauptkarte, Aufwärmen, Tagesrätsel-Kachel, Feierabend mit Ausblick, Urlaubstage) · Tagesrätsel (Hebel 5) · Fehlerdex (Hebel 3) · Spieltagebuch mit „Auswertung kopieren“ (Hebel 12). Abnahme laut § 9; danach Scorecard 1, 5, 8, 9, 10 neu bewerten.
 
 Verwandt: [[Plan – Ausbau 1.2]] · [[Konzept – Netzwerk-Labor]] · [[Architektur]] · [[10-Projekte/Lernprojekte/FISI-Spielhalle/Liesmich|FISI-Spielhalle]]
+
+---
+
+## 14 · Stand nach S1
+
+*Gebaut und abgenommen am 04.10.2026 (Opus, Zweig `ausbau-1.2`, 8 Commits). Alles hier ist im echten Programm gesehen: `Programm/Netzwerk-Labor.exe` (gebaut 04.10. 15:25), Szenario per `python tools/cdp.py lauf`, keine JS-Fehler. Bilder und Messdateien: `Nachweise/1.2-S1/` (im Vault, nicht im Git).*
+
+### Abnahme (Frisch → erster Auftrag → Probe → Ergebnis → Postfach mit Wahl)
+
+| Messung | Soll | Ergebnis |
+|---|---|---|
+| Startbildschirm: Text des Seniors | ≤ 25 Wörter | **23 Wörter** in zwei Blasen (11 + 12); kein Fenster, kein Klick vorab |
+| Labor-Start (Messung wie Phase A, R5) | ≤ 12 Elemente, ≤ 40 Wörter, 1 Hauptknopf | **12 · 29 Wörter (30 mit Blase 2) · 1** – in 1366×768 und 960 px |
+| Zeit bis erste Handlung | ≤ 15 s | Spiel ist nach **0,3 s** bedienbar; im Skript (mit 3 s „Lesepause“) Kabel nach **4,7 s** |
+| Erster Erfolg (Abnahme bestanden) | ≤ 90 s | **14,6 s** im Skript (Kabel, Ping mit Vorhersage, Abnahme) |
+| Funktionsprobe | 2–6 s, überspringbar | **2,95 s**; Esc überspringt (0,6 s); reduzierte Bewegung: Haken-Liste **1,2 s** |
+| Ergebnisdialog | ≤ 3 Blöcke | **3** (Sterne + Lohn · Dein Weg · Merke), 1 Hauptknopf |
+| Erste Wahl | < 3 Min | Ergebnis → „Nächsten Auftrag wählen“ → **2 Angebote, 2 Kunden** (Salon/Einstieg 35 € · Bäckerei/AP1 45 €) |
+| Ton | leise, Leiste stumm | Vollansicht Pegel 0,18 („leise“), **Leiste und Fenster im Hintergrund 0** (Test + im Programm) |
+| Leiste separat | läuft | eingeklappt unten rechts, Zähler, Mini-Ticket, kein Ton |
+
+**Tests:** 136 grün (vorher 126): Stufenregeln-Matrix, Szene für **alle 37 handgeschriebenen und 95 generierten** Aufträge (jede Zeile mit Kabel-verbundenem Pfad bis zum Endgerät), Vorher/Nachher-Diff, Ton-Regel, erste Wahl im Postfach.
+
+> [!warning] Ehrlich zu den Zeiten
+> Erste Handlung und Erfolg sind mit einem Skript gemessen, nicht mit einem Menschen. Ein Mensch liest die 23 Wörter (~6 s) und braucht für Kabel, Ping und Abnahme eher 30–60 s – das bleibt deutlich unter 90 s, ist aber eine Schätzung, bis das Spieltagebuch (S2) echte Zeiten liefert.
+
+### Scorecard 2, 4, 12 – neu bewertet
+
+| # | Ist → nach S1 | Begründung |
+|---|---|---|
+| **2 Feedback & Spielgefühl** | 2,5 → **3,5** | Erfolg ist jetzt *sichtbar*: Paket fährt den echten Weg, der Drucker schiebt „Beleg kommt raus“, Mira bedankt sich an ihrer Kasse. Alle Haupthandlungen antworten sofort und hörbar (Kabel rastet ein + LEDs, Gerät setzen, Werkzeug/Fach, Ping atmet bzw. wackelt sanft, Haken ploppt, Sterne glänzen). **Nicht 3,8**, weil Änderungen im Inspektor (Adresse tippen) und im Terminal noch keine eigene Rückmeldung haben und die Probe bei offener Simulation auf einer kleinen Fläche läuft (K1, kommt mit dem Dock). |
+| **4 Entdeckung** | 2,0 → **2,6** | B2 ist ab AP1 behoben: keine „!“-Warnungen (AP1 erst ab Hilfestufe 2, AP2 nie), in AP2 keine Live-Haken, zweiter Abnahmeversuch kostet. **Nur 2,6**, weil die meisten frühen Aufträge Einstieg sind und dort bewusst alles markiert bleibt (jetzt sogar mit Grund) und die eigentlichen Detektiv-Werkzeuge (Akte, Verdacht, Plan) erst in Welle 2 kommen. |
+| **12 Einstieg** | 3,0 → **3,8** | Kein 60-Wörter-Fenster mehr; nach 0,3 s im Labor, der Senior sagt in 23 Wörtern, worum es geht; erster Erfolg mit Probe; danach die erste echte Wahl (zwei Kunden, zwei Niveaus). Über dem Ziel 3,6, aber **nicht höher**, weil es nur skriptgemessen ist und der Vorhersage-Dialog beim ersten Ping einen zusätzlichen Klick verlangt. |
+
+**Summe 26,0 → 28,4 von 60** (nur 2/4/12 neu bewertet). Das ist meine Einschätzung am echten Programm, kein Playtest-Ergebnis.
+
+### Entscheidungen (stehen auch in den Commits)
+
+- **Versuchsabzug einmal**, nicht je Versuch (AP1 −½ ★, AP2 −1 ★ ab dem 2. Versuch) – Ruhe-Prinzip R7. Prüfung behält ihre eigenen Regeln.
+- **„!“ verschwindet überall zugleich** (Fläche, Inspektor-Kopf, Hinweise, gelbe Feldvermutungen); rote Formatfehler bleiben.
+- **Szene:** Einstieg zeigt bis 4 Ziele, AP1/AP2 bis 2 und schneller; das erste Paket verwirft der Router oft regulär während ARP – gezeigt wird das erste, das ankommt.
+- **Dialog:** Kundenzitat steckt jetzt in der Szene; Abzeichen, Fertigkeitsstufe und Tagesziel (mit „morgen fällig“) nur als je eine Zeile im ersten Block, wenn es sie gibt.
+- **Kein „Ich kenne mich aus“-Knopf** mehr; Postfach ist über die Leiste immer erreichbar.
+- **Erste Wahl:** bis zum 2. erledigten Auftrag zwei Angebote verschiedener Kunden, danach wie bisher drei.
+- **K6:** „nicht über der Fläche“ heißt hier „nicht über dem Netz“ – die Meldung steht unten links im Rand, den das Einpassen frei hält; einen Streifen außerhalb gibt es im Labor nicht, ohne dauerhaft Platz zu kosten (R5).
+- **Spiel.einstSetzen** schreibt in einen frischen Einstellungsstand (der alte Zwischenspeicher konnte Oberflächen-Einstellungen überschreiben).
+
+### Aufgefallen und gleich behoben
+
+- Kundenpost-Meldung und „Alle Ziele erfüllt“ standen mitten in der Probe → warten jetzt bzw. schließen beim Bestehen.
+
+### Offen
+
+- **K1 Dock:** Ist die Simulation offen (passiert beim ersten Ping), läuft die Probe auf ~53 % Zoom. Gehört zu Welle 2 (gemeinsames Dock).
+- Rückmeldung für Inspektor- und Terminal-Änderungen fehlt noch (Kriterium 2).
+- Zeiten mit echten Menschen messen (Spieltagebuch, S2) und die Scorecard dann gegenprüfen.
+
+### Bildschirmfotos
+
+Start ohne Fenster (Blase 1), Aufgabe (Blase 2), Kabel-Meldung unten:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-1366-1-start.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-1366-3-kabel.png|420]]
+
+Funktionsprobe und Nachbesprechung in drei Blöcken:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-1366-5-probe.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-1366-6-ergebnis.png|420]]
+
+Erste Wahl im Postfach · reduzierte Bewegung (960 px) · Leiste am Bildschirmrand:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-1366-7-wahl.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-960-3-ruhig.png|320]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-leiste-desktop-ausschnitt.png|380]]
