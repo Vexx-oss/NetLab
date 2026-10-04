@@ -258,12 +258,14 @@ UI.simpanel = (() => {
       const m = drop ? meldungZu(z.ereignisse, z.idx.get(e)) : null;
       const sk = nv === "E" ? skillName(e.grund) : null;
       const lt = typeof DATEN !== "undefined" ? DATEN.lehrtexte?.[e.grund] : null;
+      /* Textdiät (A4): Einstieg/AP1 sehen den Titel, der Lehrtext kommt erst auf „Erklär mir das“; AP2 sieht die Gerätemeldung */
+      const ex = nv !== "AP2" && lt ? UI.erklaeren?.(e.grund, nv) : null;
       el.append(h("div", {class: "si-grundzeile"},
         e.grund && nv !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null,
-        h("span", {class: "si-erklaerung"}, erklaerung(e.grund) || ""),
+        h("span", {class: "si-erklaerung"}, ex ? (sim()?.GRUENDE?.[e.grund]?.titel || e.grund) : erklaerung(e.grund) || ""),
         drop ? h("span", {class: m ? "si-kennung gemeldet" : "si-kennung still"}, m ? `↩ gemeldet von ${geraetName(m.geraet)}` : "still verworfen") : null,
         sk ? h("span", {class: "si-skill"}, `Fertigkeit: ${sk}`) : null,
-        lt?.quelle && nv !== "AP2" ? h("span", {class: "si-quelle"}, `Quelle: ${lt.quelle}`) : null));
+        ex || (lt?.quelle && nv !== "AP2" ? h("span", {class: "si-quelle"}, `Quelle: ${lt.quelle}`) : null)));
     }
     return el;
   }

@@ -1,10 +1,11 @@
 "use strict";
 /* ---------- Spiel-Oberfläche: Ticketfluss (Konzept §§ 3.2, 3.5, 4) ----------
-   Postfach (Ansicht „postfach“) · Auftragsleiste mit Live-✓ (#labor-auftrag) · Hilfeleiter mit Lösungsvorführung ·
+   Postfach (Ansicht „postfach“) · Auftragszeile mit Live-✓ und Auftragsmappe (#labor-auftrag) · Hilfeleiter mit Lösungsvorführung ·
    Abnahme und Ergebnisbildschirm · Onboarding (salon-01 in 60 Sekunden) · Vorhersage beim Ping · Senior-Angebot.
    Die Logik liegt in spiel/*.js; hier nur Anzeige und Bedienung. Start über Bus „ui-bereit“ (ui/start.js). */
 UI.spiel = (() => {
-  const S = {inst: null, live: null, liveTimer: null, hilfeOffen: false, hilfeAnsicht: null, demo: null, seniorTimer: null, coach: null, vorhersageGefragt: new Set()};
+  const S = {inst: null, live: null, liveTimer: null, hilfeOffen: false, hilfeAnsicht: null, demo: null, seniorTimer: null, coach: null, vorhersageGefragt: new Set(),
+    mappe: {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false}};
   const kunde = id => (Spiel.kundenDaten ? Spiel.kundenDaten(id) : (DATEN.kunden || {})[id]) || {name: id || "Kunde", symbol: "✉", farbe: "--accent", ansprechpartner: {name: ""}};
   const NIV = {E: "Einstieg", AP1: "AP1", AP2: "AP2"};
   const sterneText = s => "★".repeat(Math.floor(s)) + (s % 1 ? "½" : "") + "☆".repeat(Math.max(0, 5 - Math.ceil(s)));
@@ -36,13 +37,20 @@ UI.spiel = (() => {
 
   /* ---------- Ticket öffnen ---------- */
   function oeffnen(iid, {ansicht = true} = {}){
+    const vorher = Spiel.instanz(iid), erstesMal = !!vorher && !vorher.geoeffnet, briefGelesen = !!vorher?.gelesen;
     const r = Spiel.oeffnen(iid);
-    S.inst = r.inst; S.live = null; S.hilfeOffen = false; S.hilfeAnsicht = null; S.demo = null;
-    UI.labor.laden(r.netz, {titel: r.def.titel, verlauf: r.verlauf, auftrag: el => auftrag(el)});
+    S.inst = r.inst; S.live = null; S.hilfeOffen = false; S.hilfeAnsicht = null; S.demo = null; S.coach = null;
+    S.mappe = {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false};
+    const niveau = Spiel.niveauVon(r.inst);
+    UI.labor.laden(r.netz, {titel: r.def.titel, verlauf: r.verlauf, auftrag: el => auftrag(el),
+      ebene: UI.ebenen.fuerSkills(r.def.skills), ansichtMenue: niveau !== "E"});
     if (ansicht) UI.app.ansicht("labor");
     liveJetzt();
     seniorPlanen();
-    if (!Spiel.st.einstieg.fertig && r.def.id === Spiel.EINSTIEG_TICKET) coachStart();
+    const coach = !Spiel.st.einstieg.fertig && r.def.id === Spiel.EINSTIEG_TICKET && coachStart();
+    /* Beim ersten Öffnen klappt die Mappe einmal auf (Brief, oder Ziele, wenn der Brief im Postfach schon gelesen wurde).
+       Im ersten Auftrag übernehmen Willkommen und Coach diese Rolle. Prüfung: keine Mappe. */
+    if (erstesMal && !coach && r.inst.quelle !== "pruefung") mappeAuf(briefGelesen ? "ziele" : "brief", true);
     status();
   }
   function aktiveLaden(){
@@ -55,7 +63,9 @@ UI.spiel = (() => {
     UI.sandbox?.laden?.();
   }
 
-  /* ---------- Auftragsleiste ---------- */
+  /* ---------- Auftragszeile (eine Zeile) + Auftragsmappe (Ausbau 1.2, A2) ----------
+     Zeile: Kunde · Titel · Ziele x/y · [Auftrag lesen] · [Abnahme] · ⋯ (Hilfe, Nachschlagen, Zurücksetzen, Postfach).
+     Genau ein Hauptknopf: die Abnahme – außer ein offenes Feld (Mappe, Hilfeleiter) hat einen eigenen. */
   function auftrag(el){
     const inst = S.inst;
     if (!inst || !Spiel.instanz(inst.iid)) { el.append(h("div", {class: "lb-auftrag-standard"}, h("strong", {}, "Kein offenes Ticket"))); return; }
@@ -63,32 +73,70 @@ UI.spiel = (() => {
     if (inst.quelle === "pruefung") return pruefungsLeiste(el, inst, def);
     const live = niveau !== "AP2";
     const stand = S.live || {status: (def.ziele || []).map(z => ({ziel: z, ok: null}))};
-    const erfuellt = stand.status.filter(s => s.ok).length;
+    const n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length, alle = live && n > 0 && erfuellt === n;
     const naechste = Spiel.naechsteHilfe(inst);
-    const kopf = h("div", {class: "sp-auftrag-kopf"},
+    const abnahme = h("button", {type: "button", class: "knopf primaer sp-abnahme" + (alle ? " bereit" : ""), title: "Abnahme anfordern: Der Kunde prüft selbst nach.", onclick: abnahmeAnfordern}, "✓ Abnahme");
+    const zeile = h("div", {class: "am-zeile"},
       h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}, title: k.name}, k.symbol || "✉"),
-      h("div", {class: "sp-auftrag-titel"},
-        h("strong", {}, def.titel),
-        h("span", {}, `${k.name} · ${NIV[niveau] || niveau}${def.art === "projekt" ? " · Projekt" : ""}`)),
-      h("div", {class: "sp-auftrag-knoepfe"},
-        h("button", {type: "button", class: "knopf sp-hilfe-knopf" + (S.hilfeOffen ? " an" : ""), title: "Hilfeleiter: vom Hinweis bis zur vorgeführten Lösung", onclick: () => { S.hilfeOffen = !S.hilfeOffen; UI.labor.auftragNeu(); }},
-          "🛟 Hilfe", (inst.hilfeStufe || 0) > 0 ? h("small", {}, ` ${inst.hilfeStufe}/6`) : null),
-        h("button", {type: "button", class: "knopf primaer sp-abnahme" + (live && stand.status.length && erfuellt === stand.status.length ? " bereit" : ""), onclick: abnahmeAnfordern}, "✓ Abnahme anfordern"),
-        h("button", {type: "button", class: "knopf geist", title: "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
-    const ziele = h("ul", {class: "sp-ziele"}, stand.status.map((s, i) => h("li", {class: live ? (s.ok ? "ok" : s.ok === false ? "offen" : "") : "neutral", "data-i": i},
-      h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
-      h("span", {}, s.ziel.text || s.ziel.typ),
-      s.ziel.typ === "blockiert" ? h("small", {class: "sp-blockiert"}, " darf nicht gehen") : null)));
-    const zeile = h("div", {class: "sp-auftrag-mitte"},
-      h("p", {class: "sp-symptom"}, h("b", {}, "Symptom: "), def.symptom || ""),
-      ziele,
-      live ? h("span", {class: "sp-fortschritt"}, `${erfuellt}/${stand.status.length} Ziele`) : h("span", {class: "sp-fortschritt"}, "AP2: Ziele prüfst du selbst – die Abnahme sagt, ob es reicht."));
+      h("div", {class: "am-titel"}, h("strong", {}, def.titel), h("span", {class: "am-kunde"}, k.name)),
+      h("span", {class: "am-ziele" + (alle ? " fertig" : ""), title: live ? "Erfüllte Ziele – Liste in der Mappe" : "AP2: Ziele prüfst du selbst"},
+        live ? `Ziele ${erfuellt}/${n}` : `${n} ${n === 1 ? "Ziel" : "Ziele"}`),
+      h("div", {class: "am-knoepfe"},
+        h("button", {type: "button", class: "knopf am-lesen" + (S.mappe.offen ? " an" : ""), "aria-expanded": String(S.mappe.offen), title: "Auftragsmappe: Brief und Ziele",
+          onclick: () => S.mappe.offen ? mappeZu() : mappeAuf("brief")}, UI.symbol("mappe", 17), "Auftrag lesen"),
+        abnahme,
+        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfe, Nachschlagen, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
     const ungespeichert = Spiel.speichernErwartet(def, niveau) ? Spiel.ungespeicherteGeraete(inst) : [];
-    el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, kopf, zeile,
+    el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, zeile,
       ungespeichert.length ? h("p", {class: "sp-ungespeichert"}, "💾 Nicht gespeichert: ", ungespeichert.map(g => g.name).join(", "),
         niveau === "AP2" ? " – die Abnahme startet die Geräte neu!" : " – nach einem Neustart wäre die Änderung weg.") : null,
       S.coach ? coachLeiste() : null,
       S.hilfeOffen ? hilfePanel(inst, def, naechste) : null));
+    if (S.mappe.offen) el.append(mappe(def, k, stand, live));
+    if (el.querySelectorAll(".primaer").length > 1) abnahme.classList.remove("primaer");
+    S.mappe.rein = false;
+  }
+  function mappeAuf(reiter = "brief", erstes = false){
+    Object.assign(S.mappe, {offen: true, reiter, erstes, rein: true});
+    UI.labor.auftragNeu();
+  }
+  function mappeZu(){
+    if (!S.mappe.offen) return;
+    S.mappe.offen = false; S.mappe.erstes = false;
+    UI.labor.auftragNeu();
+  }
+  function mappe(def, k, stand, live){
+    const m = S.mappe, n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length;
+    const reiter = h("div", {class: "am-reiter", role: "tablist"},
+      [["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"]].map(([id, titel]) =>
+        h("button", {type: "button", role: "tab", class: "am-tab" + (m.reiter === id ? " an" : ""), "aria-selected": String(m.reiter === id),
+          onclick: () => { m.reiter = id; UI.labor.auftragNeu(); }}, titel)),
+      h("button", {type: "button", class: "am-zu", title: "Schließen (Esc)", "aria-label": "Mappe schließen", onclick: () => mappeZu()}, UI.symbol("schliessen", 15)));
+    let inhalt;
+    if (m.reiter === "ziele") {
+      inhalt = h("div", {class: "am-ziele-liste"},
+        h("ul", {class: "sp-ziele"}, stand.status.map((s, i) => h("li", {class: live ? (s.ok ? "ok" : s.ok === false ? "offen" : "") : "neutral", "data-i": i},
+          h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
+          h("span", {}, s.ziel.text || s.ziel.typ),
+          s.ziel.typ === "blockiert" ? h("small", {class: "sp-blockiert"}, " darf nicht gehen") : null))),
+        live ? null : h("p", {class: "sp-leise"}, "AP2: Ob die Ziele erreicht sind, prüfst du selbst – die Abnahme sagt, ob es reicht."));
+    } else {
+      /* höchstens ~60 Wörter sichtbar, der Rest auf „mehr“ */
+      const text = String(def.briefing || ""), woerter = text.split(/\s+/).filter(Boolean);
+      const kurz = !m.mehr && woerter.length > 70;
+      let sichtbar = text;
+      if (kurz) { let z = 0, i = 0; for (const t of text.split(/(\s+)/)) { if (t.trim()) z++; if (z > 60) break; i += t.length; } sichtbar = text.slice(0, i).trimEnd() + " …"; }
+      const ap = k.ansprechpartner || {};
+      inhalt = h("div", {class: "am-brief"},
+        h("div", {class: "am-absender"}, h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
+          h("span", {}, h("b", {}, ap.name || k.name), ap.rolle ? `, ${ap.rolle}` : "", ` · ${k.name}`)),
+        h("div", {class: "am-text"}, absaetze(sichtbar)),
+        kurz ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { m.mehr = true; UI.labor.auftragNeu(); }}, "mehr lesen") : null,
+        def.symptom ? h("p", {class: "am-symptom"}, h("b", {}, "Symptom: "), def.symptom) : null);
+    }
+    const fuss = h("div", {class: "am-fuss"},
+      h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s ▸" : "Zurück ins Labor"));
+    return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
   }
   /* Prüfungstag: keine Hilfe, keine Live-Ziele, Restzeit sichtbar */
   function pruefungsLeiste(el, inst, def){
@@ -105,14 +153,17 @@ UI.spiel = (() => {
     if (p) S.pruefTimer = setTimeout(() => { if (Spiel.pruefung.aktiv() && S.inst === inst) UI.labor.auftragNeu(); else if (!Spiel.pruefung.aktiv()) UI.toast("Die Prüfungszeit ist abgelaufen – die Prüfung wurde abgegeben.", "info"); }, 1000);
   }
   function menue(e, inst, def){
-    const r = e.currentTarget.getBoundingClientRect();
+    const r = e.currentTarget.getBoundingClientRect(), stufe = inst.hilfeStufe || 0;
     const eintraege = [
-      {text: "Ticket zurücksetzen", fn: () => { Spiel.zuruecksetzen(inst); S.live = null; liveJetzt(); UI.labor.einpassen(); UI.toast("Das Ticket steht wieder auf Anfang (Strg+Z holt deinen Stand zurück).", "info"); }},
-      {text: "Zum Postfach", fn: () => UI.app.ansicht("postfach")},
+      {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfe", sym: "hilfe", info: stufe ? `Stufe ${stufe}/6` : "vom Hinweis bis zur Lösung",
+        fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
-    if (Spiel.niveauVon(inst) !== "AP2" && typeof UI.wiki?.oeffnen === "function") eintraege.unshift({text: "📖 Nachschlagen: " + Spiel.skill((def.skills || [])[0]).name, fn: () => UI.wiki.oeffnen((def.skills || [])[0])});
-    if (typeof UI.menue === "function") return UI.menue(r.left, r.bottom + 4, eintraege, {titel: "Ticket"});
-    eintraege[0].fn();
+    if (Spiel.niveauVon(inst) !== "AP2" && typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0])
+      eintraege.push({text: "Nachschlagen: " + Spiel.skill(def.skills[0]).name, sym: "wiki", fn: () => UI.wiki.oeffnen(def.skills[0])});
+    eintraege.push("-",
+      {text: "Ticket zurücksetzen", sym: "neustart", fn: () => { Spiel.zuruecksetzen(inst); S.live = null; liveJetzt(); UI.labor.einpassen(); UI.toast("Das Ticket steht wieder auf Anfang (Strg+Z holt deinen Stand zurück).", "info"); }},
+      {text: "Zum Postfach", sym: "postfach", fn: () => UI.app.ansicht("postfach")});
+    return UI.menue(r.right - 250, r.bottom + 4, eintraege, {titel: "Ticket"});
   }
 
   /* ---------- Live-Prüfung (Einstieg und AP1) ---------- */
@@ -126,8 +177,9 @@ UI.spiel = (() => {
     if (niveau === "AP2") return;
     if (vorher && r.neuOk.length) {
       for (const i of r.neuOk) { const li = document.querySelector(`.sp-ziele li[data-i="${i}"]`); li?.classList.add("frisch"); }
+      document.querySelector(".am-ziele")?.classList.add("frisch");
       if (r.alle) {
-        if (!S.coach) UI.toast("Alle Ziele erfüllt! Jetzt „Abnahme anfordern“ – der Kunde prüft selbst nach.", "ok", {id: "ziele", titel: "Geschafft"});   /* mit Coach sagt die Coach-Leiste das schon */
+        if (!S.coach) UI.toast("Alle Ziele erfüllt – jetzt die Abnahme anfordern.", "ok", {id: "ziele", titel: "Geschafft"});   /* mit Coach sagt die Coach-Zeile das schon */
         if (S.coach && S.coach.schritt < 1) coachWeiter(1);
       } else UI.toast(`Ziel erfüllt: ${r.status[r.neuOk[0]].ziel.text}`, "ok", {id: "ziele", dauer: 2600});
     }
@@ -241,7 +293,8 @@ UI.spiel = (() => {
         h("ul", {class: "sp-pruefliste"},
           ab.ergebnisse.map(e => h("li", {class: e.ok ? "ok" : "offen"}, h("span", {}, e.ok ? "✓" : "✗"), h("div", {},
             h("b", {}, e.ziel.text || e.ziel.typ),
-            !e.ok && e.grund ? h("p", {}, Spiel.grundTitel(e.grund) + (niveau !== "AP2" ? " – " + Spiel.grundText(e.grund, niveau) : "")) : !e.ok ? h("p", {}, e.text) : null))),
+            !e.ok && e.grund ? h("p", {}, Spiel.grundTitel(e.grund)) : !e.ok ? h("p", {}, e.text) : null,
+            !e.ok && e.grund && niveau !== "AP2" ? UI.erklaeren(e.grund, niveau) : null))),
           ab.kollateral.map(r => h("li", {class: "offen"}, h("span", {}, "⚠"), h("div", {}, h("b", {}, `Kollateralschaden: ${r.vonName} erreicht ${r.nachName} nicht mehr`),
             h("p", {}, "Das ging vorher. Change-Management heißt: Nichts, was lief, darf kaputtgehen. " + Spiel.grundTitel(r.grund))))),
           ab.neustart.verlust && niveau === "AP2" ? h("li", {class: "offen"}, h("span", {}, "💾"), h("div", {}, h("b", {}, "Nach dem Neustart war deine Änderung weg"),
@@ -375,16 +428,18 @@ UI.spiel = (() => {
   }
 
   /* ---------- Onboarding: erstes Ticket mit Coach-Hinweisen ---------- */
+  /* Textdiät (A4): je Schritt genau ein Satz und ein Knopf; das passende Werkzeug ist schon gewählt */
   const COACH = [
-    {text: "① Die Kasse hat kein Kabel. Das Kabel-Werkzeug ist schon gewählt: Zieh mit der Maus von der Kasse zum Switch.", taste: "K", werkzeug: "kabel", zeigen: ["kasse", "sw1"]},
-    {text: "② Stark, das Ziel ist grün! Prüf es wie ein Profi – das Ping-Werkzeug ist gewählt: Zieh von der Kasse auf den Drucker.", taste: "P", werkzeug: "ping", zeigen: ["kasse", "drucker"]},
-    {text: "③ Paket angekommen. Jetzt „Abnahme anfordern“ – der Kunde prüft selbst nach.", werkzeug: "auswahl", zeigen: []},
+    {text: "Die Kasse hat kein Kabel – zieh mit der Maus von der Kasse zum Switch.", werkzeug: "kabel", zeigen: ["kasse", "sw1"]},
+    {text: "Prüf es wie ein Profi: Zieh mit dem Ping-Werkzeug von der Kasse auf den Drucker.", werkzeug: "ping", zeigen: ["kasse", "drucker"]},
+    {text: "Paket angekommen – jetzt fehlt nur noch die Abnahme.", werkzeug: "auswahl", zeigen: []},
   ];
   function coachStart(){
-    if (Spiel.einst.coach === false) return;
+    if (Spiel.einst.coach === false) return false;
     S.coach = {schritt: 0};
     coachZeigen();
-    UI.labor.auftragNeu();          /* Leiste sofort zeigen – vor dem Einpassen im nächsten Frame */
+    UI.labor.auftragNeu();          /* Zeile sofort zeigen – vor dem Einpassen im nächsten Frame */
+    return true;
   }
   function coachWeiter(n){ if (!S.coach) return; S.coach.schritt = Math.max(S.coach.schritt, n); coachZeigen(); UI.labor.auftragNeu(); }
   function coachZeigen(){
@@ -395,7 +450,7 @@ UI.spiel = (() => {
   }
   function coachLeiste(){
     const c = COACH[S.coach.schritt];
-    return h("div", {class: "sp-coach"}, h("span", {class: "sp-coach-sym"}, "🧑‍🔧"), h("p", {}, c.text, c.taste ? h("span", {class: "sp-leise"}, ` (Taste ${c.taste})`) : null),
+    return h("div", {class: "sp-coach", "data-hinweisquelle": "coach"}, h("span", {class: "sp-coach-sym"}, "🧑‍🔧"), h("p", {}, c.text),
       h("button", {type: "button", class: "knopf geist klein", onclick: () => { S.coach = null; Spiel.einstSetzen("coach", false); UI.labor.auftragNeu(); }}, "Hinweise aus"));
   }
   function einstiegStarten(){
@@ -487,6 +542,11 @@ UI.spiel = (() => {
       neu.map(a => h("div", {class: "sp-abz"}, h("span", {class: "sp-abz-sym"}, a.sym), h("div", {}, h("b", {}, a.titel), h("small", {}, a.lehrt)))));
   }
 
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape" || !S.mappe.offen || UI.app.aktuell !== "labor" || UI.menue?.offen?.() || document.querySelector(".sp-overlay, .dialog-huelle")) return;
+    e.preventDefault(); e.stopPropagation(); mappeZu();
+  }, true);
+
   /* ---------- Bus ---------- */
   Bus.an("netz-geaendert", d => { if (S.inst && d && d.netz === S.inst.netz) livePlanen(); });
   Bus.an("zustand-geaendert", () => {
@@ -516,5 +576,5 @@ UI.spiel = (() => {
     } catch (e) { console.error("Spielstart", e); UI.toast("Das Spiel konnte nicht starten: " + e.message, "fehler"); }
   });
 
-  return {oeffnen, postfachAnsicht, status, abnahmeAnfordern, einstiegStarten, get inst(){ return S.inst; }, _S: S};
+  return {oeffnen, postfachAnsicht, status, abnahmeAnfordern, einstiegStarten, mappeAuf, mappeZu, get inst(){ return S.inst; }, _S: S};
 })();
