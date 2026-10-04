@@ -160,6 +160,19 @@
       return {ok: false, grund: "DNS_NO_SERVER", ip: null, text: `Kein DNS-Server eingetragen.`, stelle: e};
     }
     const server = ifc.dns;
+    /* Loopback: Der eingetragene DNS-Server ist das Gerät selbst (typisch für den DNS-Server im eigenen Netz) – die Frage
+       geht nicht über das Kabel, der eigene Dienst antwortet (wie über 127.0.0.1). Ohne laufenden Dienst: Port zu. */
+    if (L3().schnittstellen(L, g).some(i => i.ip === server)) {
+      const d = (g.running.dienste || {}).dns;
+      if (!d || !d.an) {
+        const e = Sim._log(L, "verwerfen", g.id, null, null, `${g.name} fragt sich selbst (${server}), aber der eigene DNS-Dienst läuft nicht.`, {grund: "SERVICE_OFF", proto: "DNS"});
+        return {ok: false, grund: tiefer("SERVICE_OFF"), ursache: "SERVICE_OFF", ip: null, text: `Der eigene DNS-Dienst (${server}) läuft nicht.`, stelle: e};
+      }
+      const n = name.toLowerCase().replace(/\.$/, ""), treffer = (d.eintraege || []).find(x => String(x.name).toLowerCase().replace(/\.$/, "") === n);
+      if (treffer) { Sim._log(L, "info", g.id, null, null, `${g.name} ist selbst DNS-Server und kennt ${n}: ${treffer.ip} (lokal, ohne Netz).`, {proto: "DNS"}); return {ok: true, ip: treffer.ip, grund: null}; }
+      const e = Sim._log(L, "info", g.id, null, null, `${g.name} ist selbst DNS-Server, hat aber keinen Eintrag für „${n}“ (NXDOMAIN).`, {grund: "DNS_FAIL", proto: "DNS"});
+      return {ok: false, grund: "DNS_FAIL", ip: null, text: `„${name}“ ist unbekannt (NXDOMAIN).`, stelle: e};
+    }
     for (let v = 0; v < 2 && !L.abbruch; v++) {
       const sport = Sim._ephemeral(L, g.id);
       const f = Sim._frame({ip: {src: null, dst: server, ttl: L3().ttlStart(g), proto: "UDP", id: Sim._neueIpId(L, g.id)}, udp: {src: sport, dst: 53},

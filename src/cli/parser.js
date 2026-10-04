@@ -272,10 +272,11 @@ const CLI = (() => {
   /* ---------- Sitzung ---------- */
   function art(g){ return Modell.HOST[g.typ] ? "host" : g.typ === "firewall" ? "fw" : Modell.IOS[g.typ] ? "ios" : "info"; }
   /* CLI.sitzung(netz, geraetId, {verlauf, einstieg}) → Sitzung (reines Objekt, gehört der Oberfläche) */
+  /* o.tipps: "alle" (Einstieg) | "fehler" (AP1: nur nach Fehlern) | "keine" (AP2) – Stufenregeln, Design § 6 */
   C.sitzung = function(netz, id, o = {}){
     const g = netz.geraete[id]; if (!g) throw new Error("Gerät nicht gefunden: " + id);
-    const s = {netz, id, verlauf: o.verlauf || null, einstieg: !!o.einstieg, art: art(g), modus: "user", kontext: {},
-               rueckfrage: null, historie: [], hIndex: null, begruessung: ""};
+    const s = {netz, id, verlauf: o.verlauf || null, einstieg: !!o.einstieg, tipps: o.tipps || (o.einstieg ? "alle" : "keine"), art: art(g), modus: "user", kontext: {},
+               rueckfrage: null, historie: [], hIndex: null, begruessung: "", os: Modell.osVon ? Modell.osVon(g) : null};
     if (s.art === "fw") s.modus = "fwUser";
     if (s.art === "host") s.modus = "host";
     if (s.art === "info") { s.modus = "info"; s.begruessung = "Das Internet ist Kulisse und hat keine Konsole."; }
@@ -306,7 +307,7 @@ const CLI = (() => {
   }
   C.prompt = function(s){
     if (s.rueckfrage) return s.rueckfrage.prompt;
-    if (s.art === "host") return "C:\\>";
+    if (s.art === "host") return s.nslookup ? ">" : C.hostPrompt ? C.hostPrompt(s) : "C:\\>";
     if (s.art === "info") return "";
     if (s.modus === "abgemeldet") return "";
     const g = h.geraet(s); const name = g ? g.running.hostname || g.name : "?";
@@ -347,13 +348,15 @@ const CLI = (() => {
     r = norm(r);
     if (r.rueckfrage) s.rueckfrage = r.rueckfrage;
     let ausgabe = r.ausgabe || "";
-    if (r.fehler && r.tipp && s.einstieg) ausgabe += (ausgabe ? "\n" : "") + "Tipp: " + r.tipp;
-    else if (!r.fehler && r.hinweis && s.einstieg) ausgabe += (ausgabe ? "\n" : "") + "Tipp: " + r.hinweis;
+    const tipps = s.tipps || (s.einstieg ? "alle" : "keine");
+    if (r.fehler && r.tipp && tipps !== "keine") ausgabe += (ausgabe ? "\n" : "") + "Tipp: " + r.tipp;
+    else if (!r.fehler && r.hinweis && tipps === "alle") ausgabe += (ausgabe ? "\n" : "") + "Tipp: " + r.hinweis;
     const e = {ausgabe, prompt: C.prompt(s), geaendert: !!geaendert, befehl: befehl || ""};
     if (r.fehler) e.fehler = true;
     if (r.leeren) e.leeren = true;
     if (r.zeile != null) e.zeile = r.zeile;
     if (r.trace) e.trace = r.trace;                 /* ping/traceroute: Trace für die Animation (UI entscheidet) */
+    if (r.befund) { e.befund = r.befund; e.ok = r.ok !== false; }      /* Diagnosebefehl: eine Zeile für die Akte */
     if (s.rueckfrage && s.rueckfrage.verdeckt) e.verdeckt = true;
     return e;
   }

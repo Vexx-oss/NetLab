@@ -352,3 +352,21 @@ st.werkzeuge  = { kabeltester:bool, netzpruefer:bool }   // Shop „Werkzeuge“
 - **Dock** (`ui/editor.js`, Präfix `lb-dock`): ein Bereich rechts mit Reitern Inspektor · Simulation · Plan · Akte (Terminal folgt in C). Ein Reiter erscheint erst, wenn er Inhalt hat; ist keiner da, gibt es kein Dock (R5). Breite `clamp(260px, 40% − 72px, 440px)` der Laborbreite → die Fläche behält ≥ 60 %. Die Simulation liegt nicht mehr unten. `UI.labor.dock(reiter|null)`, `UI.labor.dockReiter(id, {titel, symbol, verfuegbar})`; `inspektor(zu)` und `simulation(zu)` gelten weiter.
 - **Netzplan** (`ui/netzplan.js`, Präfix `np-`): Reiter „Plan“ im Dock und in der Auftragsmappe; Zeichnung automatisch in Ebenen ausgerichtet (Internet → Router/Firewall → Switches → Endgeräte), Schrift ≥ 14 px, Tabelle daneben. Klick auf ein Plan-Gerät hebt es im Labor hervor und wählt es.
 - **Akte** (`ui/akte.js`, Präfix `ak-`): Reiter „Akte“ – Verdacht oben, darunter Beweiskarten (neueste zuerst, ★ markiert).
+
+### 9.5 Welle 2, Phase C „Terminal“
+
+```js
+Modell.osVon(geraet) → "windows" | "linux" | "ios" | null     // pc → windows, server/nas → linux (geraet.os übersteuert), switch/router/firewall → ios
+CLI.sitzung(netz, id, {verlauf, einstieg, tipps:"alle"|"fehler"|"keine"})   // Tipp-Zeilen: Einstieg alle, AP1 nur nach Fehlern, AP2 keine
+CLI.eingabe(s, zeile) → { …, befund?:"eine Zeile für die Akte", ok?:bool }   // Diagnosebefehle (ipconfig, ping, nslookup, ip a, dig, systemctl status …)
+CLI.host.*                                // gemeinsame Helfer (cli/host-terminal.js); Befehle: cli/host-windows.js, cli/host-linux.js
+CLI.traceMerken(netz, trace)              // letzte Aufzeichnung je Netz – tcpdump zeigt sie
+inst.befehle = [ {t, geraet, befehl, ok} ]                      // ausgeführte Terminalbefehle (für Zielart „befehl“, Abzeichen „Von unten nach oben“)
+Ziel {typ:"befehl", geraet, muster:"^ipconfig( /all)?$", text}   // erfüllt, wenn der Befehl im Auftrag auf dem Gerät lief
+Ziel {typ:"antwort", frage, pruefen:{art:"gw"|"ip"|"dns"|"mac", geraet}, text}   // Eingabe in der Mappe, geprüft gegen die echte Simulation
+```
+
+- **Windows (cmd):** ipconfig (/all /release /renew /flushdns /displaydns) · ping (-n -l -t) · tracert · pathping · arp -a/-d · nslookup (auch interaktiv) · getmac · route print/add/delete · netstat -an · curl · telnet · netsh interface ip show config / set address … static|dhcp / set dns · hostname · whoami · systeminfo · type …\hosts · **powershell** (Test-NetConnection, Resolve-DnsName, Get-NetIPConfiguration).
+- **Linux (bash):** ip a/r/link · sudo ip addr add|flush · sudo ip route add|replace|del default · sudo ip link set eth0 up|down · ping -c · traceroute · dig · nslookup · host · ss -tulpn · curl · cat /etc/resolv.conf|hosts|hostname · systemctl status|start|stop|restart|is-active (apache2, named, isc-dhcp-server, smbd, ssh, cups) · sudo tcpdump -n · hostnamectl · whoami.
+- Ändern geht nur über netsh/route bzw. sudo ip/systemctl – immer über den Verlauf (Rückgängig). **Simulation:** Ist der eingetragene DNS-Server das Gerät selbst, antwortet der eigene Dienst lokal (Loopback) statt per ARP ins Leere.
+- **Terminal im Dock** (`ui/terminal.js`, Präfix `tm-`): Reiter „Terminal“ mit einer Sitzung je Gerät (Reiterchen oben), Doppelklick auf ein Gerät oder Taste `T` öffnet sie; „Pakete ansehen ▸“ nach Befehlen mit Aufzeichnung; Diagnosebefehle legen Beweiskarten in die Akte (Bus `befehl`).

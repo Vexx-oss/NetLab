@@ -22,6 +22,15 @@ const Modell = (() => {
     druck: {proto: "tcp", port: 9100, name: "Druckdienst (RAW)"},
   };
   const DEFAULT_VLANS = () => ({"1": {name: "default"}});
+  /* Betriebssystem (Phase C): Endgeräte Windows oder Linux (Standard: PC Windows, Server/NAS Linux), Rest IOS-ähnlich.
+     Gespeichert wird nur eine Abweichung vom Standard (geraet.os), alte Netze brauchen keine Migration. */
+  const OS_STANDARD = {pc: "windows", server: "linux", nas: "linux"};
+  function osVon(g){
+    if (!g) return null;
+    if (IOS[g.typ]) return "ios";
+    if (!HOST[g.typ]) return null;
+    return g.os === "linux" || g.os === "windows" ? g.os : OS_STANDARD[g.typ] || "windows";
+  }
 
   function hostIf(){ return {an: true, dhcp: false, ip: "", maske: "", gw: "", dns: ""}; }
   function switchPort(){ return {modus: "access", accessVlan: 1, trunkErlaubt: "all", nativeVlan: 1, shutdown: false, beschreibung: "", portSecurity: null}; }
@@ -279,7 +288,7 @@ const Modell = (() => {
     return w;
   }
 
-  return {TYPEN, NAMEN, PORTS, DIENSTPORTS, IOS, HOST, werkszustand, subIf, switchPort, routerIf, hostIf,
+  return {TYPEN, NAMEN, PORTS, DIENSTPORTS, IOS, HOST, OS_STANDARD, osVon, werkszustand, subIf, switchPort, routerIf, hostIf,
           neu, geraet, entfernen, ports, kabelAn, freierPort, verbinden, trennen, portAn, linkOben, portStatus,
           pfad, lesen, setzen, loeschen, geraetSetzen, vlan, laufzeit, macsVergessen, speichern, neustart, startupLoeschen,
           kopie, gleich, ungespeichert, adressen, pruefen, konfig: g => g.running};
