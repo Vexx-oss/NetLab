@@ -1,0 +1,19 @@
+/* Arbeitsblatt auf der Fläche (E1: Adressplan) – Präfix bl- */
+.labor.lb-blatt-an .lb-svg, .labor.lb-blatt-an .lb-leiste-oben, .labor.lb-blatt-an .lb-leiste-unten, .labor.lb-blatt-an .lb-geraete > *{visibility:hidden}
+.lb-blatt{position:absolute; inset:0; overflow:auto; padding:28px 24px}
+.bl-blatt{max-width:880px; margin:0 auto; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px 24px; box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.bl-blatt h2{margin:0 0 4px; font:800 22px/1.2 var(--display); color:var(--ink)}
+.bl-vorgabe{margin:0 0 14px; color:var(--muted); font-size:14px}
+.bl-rahmen{overflow-x:auto}
+.bl-tabelle{border-collapse:collapse; width:100%; font-size:14px}
+.bl-tabelle th, .bl-tabelle td{padding:5px 6px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap}
+.bl-tabelle thead th{font-size:12.5px; color:var(--muted); font-weight:700}
+.bl-tabelle tbody th{font-weight:700; color:var(--ink)}
+.bl-zahl{font-family:var(--mono); text-align:right}
+.bl-feld{width:100%; min-width:112px; padding:5px 7px; border:1px solid var(--line); border-radius:6px; background:var(--panel-2); color:var(--text); font:14px var(--mono)}
+.bl-feld:focus{outline:2px solid var(--accent); outline-offset:1px}
+.bl-zelle.ok .bl-feld{border-color:var(--ok); background:var(--ok-soft)}
+.bl-zelle.falsch .bl-feld{border-color:var(--warn); background:var(--warn-soft)}
+.bl-stand{margin:10px 0 0; font-weight:700; color:var(--accent)}
+.bl-stand:empty{display:none}
+.bl-tipp{margin:8px 0 0; color:var(--muted); font-size:13px}

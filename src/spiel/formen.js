@@ -27,7 +27,7 @@ Spiel.formGeneratoren = Spiel.formGeneratoren || {};
 Spiel.FORM_AB = {forensik: 1, audit: 1, beratung: 2};       /* ab welcher Karriere-Stufe eine generierte Form angeboten wird */
 Spiel.generierte = Spiel.generierte || {};
 Spiel.generiereForm = function(form, seed, opts = {}){
-  const id = `form-${form}-${seed}`;
+  const id = ["form", form, opts.kunde || "x", opts.stufe || "auto", seed].join("-");   /* gleicher Seed, anderer Kunde/Niveau = anderer Auftrag */
   if (Spiel.generierte[id]) return Spiel.generierte[id];
   const g = Spiel.formGeneratoren[form];
   if (!g) throw new Error("Keine generierbare Form: " + form);

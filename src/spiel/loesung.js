@@ -45,6 +45,7 @@ Spiel.schrittAnwenden = function(netz, s){
     case "aus": Modell.geraetSetzen(netz, s.geraet, "an", false); break;
     case "neustart": Modell.neustart(netz, s.geraet); break;
     case "speichern": Modell.speichern(netz.geraete[s.geraet]); break;
+    case "erklaeren": break;                          /* Rechenweg ohne Netzänderung (Adressplan) – nur für die Vorführung */
     case "vlan": Modell.vlan(netz, s.geraet, s.nr, s.name === undefined ? "" : s.name); break;
     case "errdisable": { const z = netz.zustand?.[s.geraet]; if (z?.errdisabled) delete z.errdisabled[s.port]; break; }
     default: throw new Error("Unbekannte Aktion: " + s.aktion);

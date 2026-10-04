@@ -390,7 +390,7 @@ ticket.art = … | "terminal"                  // Terminal-Auftrag: Arbeitsziele
 
 ```js
 inst.gen = {skill, seed, opts} | {form:"forensik"|"audit"|"beratung", seed, opts:{stufe, kunde}}
-Spiel.generiereForm(form, seed, opts) → def      // deterministisch, id "form-<form>-<seed>", registriert in Spiel.generierte
+Spiel.generiereForm(form, seed, opts) → def      // deterministisch, id "form-<form>-<kunde>-<stufe|auto>-<seed>", registriert in Spiel.generierte
 Spiel.risikoVon(def) → {stufe:1..3, text:"gering"|"mittel"|"hoch"}   // aus dem Niveau: Abzüge je Versuch (E 0, AP1 ½, AP2 1 ★)
 ```
 

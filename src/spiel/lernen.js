@@ -139,5 +139,11 @@ Spiel.EIGENE_GRUENDE = {
     AP1: "Eingetragener Wert weicht von der Ausgabe des Geräts ab.",
     AP2: "Antwort falsch.",
   },
+  TABELLE_OFFEN: {
+    titel: "Adressplan noch nicht fertig",
+    E: "Noch nicht alle Felder stimmen. Rechne Zeile für Zeile: Geräte + 2 Adressen, aufrunden auf eine Zweierpotenz – das ist die Blockgröße. Das nächste Netz beginnt direkt nach dem Broadcast des vorigen.",
+    AP1: "Mindestens ein Feld weicht ab (Blockgröße, Grenze oder Reihenfolge prüfen).",
+    AP2: "Adressplan fehlerhaft.",
+  },
   FEHLER: {titel: "Prüfung nicht möglich", E: "Die Prüfung konnte nicht laufen.", AP1: "Prüfung nicht möglich.", AP2: "Prüfung nicht möglich."},
 };

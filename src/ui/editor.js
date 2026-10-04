@@ -87,7 +87,8 @@ UI.labor = (() => {
       h("p", {}, "Öffne links ein Fach und zieh ein Gerät hierher – oder doppelklicke auf die Fläche."));
     /* Fernwartung (E1): Die Fläche ist verdeckt – man sieht nur, was die Befehle des einen Rechners zeigen */
     Z.el.fern = h("div", {class: "lb-fern-schild", hidden: true});
-    const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer, Z.el.fern);
+    Z.el.blatt = h("div", {class: "lb-blatt", hidden: true});                 /* Arbeitsblatt statt Fläche (E1: Adressplan) */
+    const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer, Z.el.fern, Z.el.blatt);
     Z.el.leinwand = leinwand;
 
     /* Dock rechts (K1): Inspektor · Simulation · Plan · Akte in EINEM Bereich mit Reitern – die Fläche behält die volle Höhe
@@ -736,12 +737,21 @@ UI.labor = (() => {
     UI.ebenen.setzen(opt.ebene || UI.ebenen.gemerkt(), {merken: false});
     if (Z.el.ansichtGruppe) Z.el.ansichtGruppe.hidden = opt.ansichtMenue === false;
     fernwartung(opt.fernwartung && netz.geraete[opt.fernwartung] ? opt.fernwartung : null);
+    blatt(typeof opt.blatt === "function" ? opt.blatt : null);
     if (Z.root?.isConnected) {
       layoutAnwenden(); auftragZeichnen(); werkzeugAnzeigen(); zeichnen(); inspektorZeigen(); simLeer();
       requestAnimationFrame(() => { einpassen(false); Z.einpassenAusstehend = false; });
     }
     Bus.senden("labor-geladen", {netz, titel: Z.titel});
     if (Z.fern) setTimeout(() => { if (Z.fern && Z.netz === netz) UI.terminal?.oeffnen(Z.fern); }, 0);
+  }
+  /* Arbeitsblatt an (Zeichenfunktion) oder aus (null): Fläche, Werkzeuge und Geräteleiste verdeckt, Blatt darüber */
+  function blatt(fn){
+    Z.blattFn = fn || null;
+    Z.root?.classList.toggle("lb-blatt-an", !!fn);
+    const el = Z.el.blatt; if (!el) return;
+    el.hidden = !fn;
+    if (fn) fn(el); else el.replaceChildren();
   }
   /* Fernwartung an (Geräte-ID) oder aus (null): Fläche, Werkzeuge und Geräteleiste verdeckt, Schild in der Mitte.
      Nach bestandener Abnahme hebt das Spiel sie auf – dann sieht man das Netz, das man blind repariert hat. */

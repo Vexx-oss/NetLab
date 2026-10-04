@@ -40,6 +40,31 @@ gruppe("Spiel: Auftragsformen", () => {
     erwarte.wahr(arten.size >= 5, "Fehlerarten: " + [...arten].join(", "));
   }));
 
+  pruefe("Adressplan: E/AP1/AP2 je Kunde – Blöcke an ihren Grenzen, lückenlos, in der Basis; mit Tabelle bestanden, leer nicht", kapsel(() => {
+    const fehler = [];
+    for (const kunde of KUNDEN) for (const stufe of ["E", "AP1", "AP2"]) for (let s = 1; s <= 3; s++) {
+      const def = Spiel.generiereForm("beratung", 900 + 31 * s + KUNDEN.indexOf(kunde), {kunde, stufe});
+      const z = def.ziele[0], soll = Spiel.beratung.soll(z), b = IP.ausCidr(z.basis);
+      let erwartet = IP.zuZahl(b.netz);
+      for (const r of z.zeilen) {
+        const x = soll[r.name], p = Number(x.praefix.slice(1)), groesse = 2 ** (32 - p);
+        if (IP.zuZahl(x.netz) !== erwartet) fehler.push(`${def.id}: ${r.name} nicht lückenlos`);
+        if (IP.zuZahl(x.netz) % groesse !== 0) fehler.push(`${def.id}: ${r.name} nicht an der Blockgrenze`);
+        if (groesse - 2 < r.hosts || (r.praefix == null && groesse / 2 - 2 >= r.hosts)) fehler.push(`${def.id}: ${r.name} Block ${groesse} passt nicht zu ${r.hosts}`);
+        if (x.broadcast !== IP.broadcast(x.netz, IP.maske(p))) fehler.push(`${def.id}: Broadcast ${x.broadcast}`);
+        erwartet += groesse;
+      }
+      if (erwartet > IP.zuZahl(b.netz) + 2 ** (32 - b.praefix)) fehler.push(`${def.id}: passt nicht in ${z.basis}`);
+      const r = Spiel.testlauf({ids: [def.id], niveau: stufe})[0];
+      if (!r.bestanden) fehler.push(`${def.id}: Durchspiel ${r.fehler.join("; ")}`);
+      const inst = Spiel.instanzErstellen({gen: {form: "beratung", seed: 900 + 31 * s + KUNDEN.indexOf(kunde), opts: {kunde, stufe}}, quelle: "generiert"});
+      Spiel.oeffnen(inst.iid);
+      if (Spiel.abnahme(inst).bestanden) fehler.push(`${def.id}: besteht leer`);
+    }
+    erwarte.gleich(fehler.slice(0, 8), []);
+    erwarte.wahr(Spiel.beratung.gleich("praefix", "255.255.255.192", "/26") && Spiel.beratung.gleich("praefix", " 26", "/26") && !Spiel.beratung.gleich("praefix", "/25", "/26"), "Präfix-Schreibweisen");
+  }));
+
   pruefe("Instanz einer generierten Form überlebt Speichern und Laden (inst.gen = {form, seed, opts})", kapsel(() => {
     const inst = Spiel.instanzErstellen({gen: {form: "forensik", seed: 4242, opts: {kunde: "praxis"}}, quelle: "generiert"});
     const id = inst.ticketId;

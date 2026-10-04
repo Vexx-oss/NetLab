@@ -45,6 +45,7 @@ UI.spiel = (() => {
     const niveau = Spiel.niveauVon(r.inst);
     UI.labor.laden(r.netz, {titel: r.def.titel, verlauf: r.verlauf, auftrag: el => auftrag(el),
       ebene: UI.ebenen.fuerSkills(r.def.skills), ansichtMenue: niveau !== "E", fernwartung: r.def.fernwartung || null,
+      blatt: r.def.blatt ? el => UI.blatt.zeichnen(el, r.inst) : null,
       warnungen: () => Spiel.regeln(r.inst).warnungen});          /* Stufenregeln: „!“ je Niveau und Hilfestufe */
     if (ansicht) UI.app.ansicht("labor");
     liveJetzt();
@@ -117,7 +118,7 @@ UI.spiel = (() => {
   function mappe(def, k, stand, live, mitGrund){
     const m = S.mappe, n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length;
     const reiter = h("div", {class: "am-reiter", role: "tablist"},
-      [["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"], def.fernwartung ? null : ["plan", "Plan"]].filter(Boolean).map(([id, titel]) =>
+      [["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"], def.fernwartung || def.blatt ? null : ["plan", "Plan"]].filter(Boolean).map(([id, titel]) =>
         h("button", {type: "button", role: "tab", class: "am-tab" + (m.reiter === id ? " an" : ""), "aria-selected": String(m.reiter === id),
           onclick: () => { m.reiter = id; UI.labor.auftragNeu(); }}, titel)),
       h("button", {type: "button", class: "am-zu", title: "Schließen (Esc)", "aria-label": "Mappe schließen", onclick: () => mappeZu()}, UI.symbol("schliessen", 15)));
@@ -183,7 +184,7 @@ UI.spiel = (() => {
       {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfe", sym: "hilfe", info: stufe ? `Stufe ${stufe}/6` : "vom Hinweis bis zur Lösung",
         fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
-    if (!def.fernwartung) eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});
+    if (!def.fernwartung && !def.blatt) eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});
     if (Spiel.verdacht.noetig(inst)) eintraege.push({text: "Akte und Verdacht", sym: "akte", info: inst.verdacht ? "festgehalten" : null, fn: () => UI.akte.freigeben(true)});
     if (Spiel.werkzeug.hat("netzpruefer") && Spiel.niveauVon(inst) !== "E")
       eintraege.push({text: inst.netzpruefer ? "Netzprüfer ausschalten" : "Netzprüfer einschalten", sym: "warnung", info: "Werkzeug",
@@ -674,6 +675,7 @@ UI.spiel = (() => {
     if (S.inst && d && d.netz === S.inst.netz) livePlanen();
     if (S.mess && S.mess.ersteHandlung == null) S.mess.ersteHandlung = Math.round(performance.now());
   });
+  Bus.an("arbeit-geaendert", d => { if (S.inst && d && d.inst === S.inst) livePlanen(); });   /* Antwort, Tabelle, Notiz, Audit */
   Bus.an("befehl-gemerkt", d => {
     if (!S.inst || !d || d.inst !== S.inst) return;
     const b = (S.inst.befehle || []).slice(-1)[0], name = b && (S.inst.netz.geraete[b.geraet]?.name || b.geraet);
