@@ -25,6 +25,7 @@
 .hb-feierabend h3{font:700 19px/1.2 var(--display)}
 .hb-feierabend p{font-size:14px; margin-top:4px}
 .hb-ausblick{color:var(--muted)}
+.hb-feier-knoepfe{display:flex; flex-direction:column; align-items:stretch; gap:6px; flex:none}
 .hb-aufwaermen h2, .hb-raetsel h2{font:800 22px/1.2 var(--display)}
 .hb-fortschritt{color:var(--muted); font-size:13px; margin:4px 0 10px}
 .hb-teilen{font:15px/1.6 var(--mono); padding:12px 14px; border-radius:10px; background:var(--panel-2); border:1px solid var(--line); margin:12px 0 8px; white-space:pre-wrap; user-select:all}

@@ -28,15 +28,20 @@ UI.hub = (() => {
     const serie = s.serie.zurueck ? "Willkommen zurück!"
       : s.serie.tage ? `🔥 ${s.serie.tage} ${s.serie.tage === 1 ? "Tag" : "Tage"} Serie` + (s.serie.urlaub && s.serie.frei ? ` · noch ${s.serie.frei} freier Tag diese Woche` : s.serie.urlaub ? " · freie Tage dieser Woche genutzt" : "")
       : "Schön, dass du da bist.";
+    /* Nach dem Tagesziel ersetzt der Feierabend die Auftragskarte (Platzbudget): Bilanz, ein Ausblick, Hauptknopf „Zur Leiste“ –
+       wer weiterspielen will, findet „Noch einen Auftrag“ daneben */
+    const weiterFn = () => { if (n.art === "leer") { const i = Spiel.nachschub(); UI.spiel.status(); if (i) UI.spiel.oeffnen(i.iid); } else UI.spiel.oeffnen(n.iid); };
     const feier = fa ? h("section", {class: "hb-feierabend"},
       h("div", {}, h("h3", {}, "🌙 Feierabend"),
         h("p", {}, `${fa.bilanz.tickets} Aufträge · Ø ${zahl(fa.bilanz.sterne)} ★ · +${eur(fa.bilanz.euro)} €`),
         h("p", {class: "hb-ausblick"}, fa.ausblick)),
-      h("button", {type: "button", class: "knopf primaer", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => UI.modus("leiste")}, "Zur Leiste")) : null;
-    const knopfKlasse = "knopf gross hb-annehmen" + (fa ? "" : " primaer");
-    const karte = n.art === "leer"
+      h("div", {class: "hb-feier-knoepfe"},
+        h("button", {type: "button", class: "knopf primaer", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => UI.modus("leiste")}, "Zur Leiste"),
+        h("button", {type: "button", class: "knopf geist", onclick: weiterFn}, "Noch einen Auftrag"))) : null;
+    const knopfKlasse = "knopf gross primaer hb-annehmen";
+    const karte = fa ? null : n.art === "leer"
       ? h("section", {class: "hb-auftrag leer"}, h("small", {}, "Postfach leer"), h("h3", {}, "Alles erledigt"),
-          h("button", {type: "button", class: knopfKlasse, onclick: () => { const i = Spiel.nachschub(); UI.spiel.status(); if (i) UI.spiel.oeffnen(i.iid); }}, "Neuen Auftrag holen ▸"))
+          h("button", {type: "button", class: knopfKlasse, onclick: weiterFn}, "Neuen Auftrag holen ▸"))
       : h("section", {class: "hb-auftrag", style: {"--k": `var(${n.farbe || "--accent"})`}},
           h("span", {class: "sp-kunde-sym gross"}, n.symbol),
           h("div", {class: "hb-auftrag-text"},
