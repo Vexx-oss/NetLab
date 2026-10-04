@@ -15,17 +15,22 @@ UI.toast = (() => {
     document.body.append(stapel);
     return stapel;
   }
-  /* In der Laboransicht schmal oben rechts auf der Zeichenfläche (unter Rückgängig/Wiederholen): Dort liegen meist
-     Router und Internet, selten das, was man gerade anklickt. Unten mittig verdeckten die Meldungen genau die PCs,
-     die man als Nächstes anpingen soll; rechts daneben liegt der Inspektor mit Konfig und „entspricht“. */
+  /* In der Laboransicht unten links im freien Rand der Zeichenfläche (K6, Spielspaß 2.0): Den Rand hält das Einpassen
+     frei, also liegt die Meldung nicht über Geräten und Beschriftungen. Oben rechts verdeckte sie Router und Internet,
+     unten mittig die PCs. Rechts unten bleibt der Zoom-Knopf frei; der Werkzeug-Hinweis schweigt, solange sie steht. */
   function ausrichten(st){
     const m = document.querySelector(".lb-leinwand");
     const r = m && m.getClientRects().length ? m.getBoundingClientRect() : null;
     const labor = !!(r && r.width > 300 && r.height > 200);
     st.classList.toggle("im-labor", labor);
-    if (labor) Object.assign(st.style, {left: "auto", right: `${Math.round(innerWidth - r.right + 14)}px`, top: `${Math.round(r.top + 78)}px`, bottom: "auto",
-      width: `min(400px, ${Math.round(r.width - 28)}px)`});
+    if (labor) Object.assign(st.style, {left: `${Math.round(r.left + 12)}px`, right: "auto", top: "auto", bottom: `${Math.round(innerHeight - r.bottom + 12)}px`,
+      width: `min(470px, ${Math.round(r.width - 120)}px)`});
     else for (const k of ["left", "right", "top", "bottom", "width"]) st.style[k] = "";
+  }
+  /* Werkzeug-Hinweis (gleicher Platz) stummschalten, solange eine Meldung im Labor steht */
+  function hinweisStill(st){
+    const m = document.querySelector(".lb-leinwand");
+    m?.classList.toggle("unter-toast", st.classList.contains("im-labor") && !!st.querySelector(".toast:not(.weg)"));
   }
   function toast(text, art = "info", o = {}){
     if (typeof document === "undefined") return {schliessen(){}};
@@ -48,6 +53,7 @@ UI.toast = (() => {
     }
     el.append(h("button", {type: "button", class: "toast-zu", title: "Schließen", "aria-label": "Meldung schließen", onclick: () => schliessen()}, UI.symbol("schliessen", 14)));
     st.append(el);
+    hinweisStill(st);
     requestAnimationFrame(() => el.classList.add("da"));
     let rest = o.dauer ?? (aktionen.length ? 8000 : art === "fehler" ? 6500 : 4200), timer = null, t0 = 0;
     const starten = () => { if (rest === Infinity) return; t0 = performance.now(); timer = setTimeout(() => schliessen(), rest); };
@@ -58,9 +64,10 @@ UI.toast = (() => {
     function schliessen(sofort, verdraengt){
       if (zu) return; zu = true; halten();
       if (!verdraengt && warten.length) { const w = warten.shift(); setTimeout(() => toast(w.text, w.art, Object.assign({}, w.o, {dauer: 5000})), 260); }
-      if (sofort || wenigBewegung()) { el.remove(); return; }
+      if (sofort || wenigBewegung()) { el.remove(); hinweisStill(st); return; }
       el.classList.remove("da"); el.classList.add("weg");
-      setTimeout(() => el.remove(), 220);
+      hinweisStill(st);
+      setTimeout(() => { el.remove(); hinweisStill(st); }, 220);
     }
     el._schliessen = schliessen;
     if (aktionen.length && !o.nachgeholt) el._nachholen = {text, art, o: Object.assign({}, o, {nachgeholt: true})};

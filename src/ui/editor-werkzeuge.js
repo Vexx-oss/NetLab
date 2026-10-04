@@ -279,7 +279,7 @@ UI.laborWerkzeuge = (() => {
       const e = store.get("einst", {}) || {};
       if (!e.tipps?.mdix) {
         e.tipps = Object.assign({}, e.tipps, {mdix: true}); store.set("einst", e);
-        UI.toast(`${Z.netz.geraete[k.a.geraet].name} ${k.a.port} ↔ ${Z.netz.geraete[k.b.geraet].name} ${k.b.port} verbunden. Gerades oder gekreuztes Kabel musst du nicht wählen: Heutige Ports erkennen das per Auto-MDI-X selbst.`, "ok", {titel: "Kabel verlegt", dauer: 7000});
+        UI.toast(`Kabel steckt: ${Z.netz.geraete[k.a.geraet].name} ${k.a.port} ↔ ${Z.netz.geraete[k.b.geraet].name} ${k.b.port} – Kabelart egal (Auto-MDI-X).`, "ok", {dauer: 4500});
       }
     }
     function portWahl(id, x, y, fn){

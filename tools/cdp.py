@@ -255,7 +255,9 @@ def lauf(datei, ausgabe=None):
         if not zeile or zeile.startswith("#"):
             continue
         befehl, _, rest = zeile.partition(" ")
-        if befehl == "groesse":
+        if befehl == "groesse" and rest.strip() == "aus":
+            ws.rufen("Emulation.clearDeviceMetricsOverride"); time.sleep(0.4)
+        elif befehl == "groesse":
             b, h = (int(x) for x in rest.split())
             ws.rufen("Emulation.setDeviceMetricsOverride", {"width": b, "height": h, "deviceScaleFactor": 1, "mobile": False})
             time.sleep(0.4)

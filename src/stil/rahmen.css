@@ -73,7 +73,9 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .toast.da{opacity:1; transform:none}
 .toast.weg{opacity:0; transform:translateY(6px)}
 /* im Labor: oben rechts, neueste unten angehängt, kompakter */
-.toast-stapel.im-labor{transform:none; flex-direction:column; align-items:stretch}
+.toast-stapel.im-labor{transform:none; flex-direction:column; align-items:flex-start}
+.toast-stapel.im-labor .toast{max-width:100%}
+.lb-leinwand.unter-toast .lb-hinweis{visibility:hidden}
 .toast-stapel.im-labor .toast{padding:8px 6px 8px 10px; gap:10px}
 .toast-stapel.im-labor .toast-text{font-size:13.5px}
 .toast-stapel.im-labor .toast-sym{width:26px; height:26px}
