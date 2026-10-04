@@ -47,7 +47,7 @@ UI.hub = (() => {
           h("div", {class: "hb-auftrag-text"},
             h("small", {}, n.art === "weiter" ? "Weiter mit" : "Dein nächster Auftrag"),
             h("h3", {}, n.titel),
-            h("p", {}, `${n.kunde} · ~${n.minuten} min · ${eur(n.euro)} €`)),
+            h("p", {}, `${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).sym} ${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).titel} · ${n.kunde} · ~${n.minuten} min · ${eur(n.euro)} €`)),
           h("button", {type: "button", class: knopfKlasse, onclick: () => UI.spiel.oeffnen(n.iid)}, n.art === "weiter" ? "Weiterarbeiten ▸" : "Annehmen ▸"));
     const aw = s.aufwaermen, ra = s.raetsel;
     const kachel = (sym, titel, info, fn, fertig) => h("button", {type: "button", class: "hb-kachel" + (fertig ? " fertig" : ""), onclick: fn},

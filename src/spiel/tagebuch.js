@@ -32,7 +32,7 @@ Spiel.tagebuch.aktiv = function(){
 };
 Spiel.tagebuch.auftragEnde = function(inst, def, abnahme){
   Spiel.tagebuch.aktiv();
-  return tbSchreiben({t: jetzt(), art: "auftrag-ende", id: def.id, form: def.art || "stoerung", quelle: inst.quelle || "postfach",
+  return tbSchreiben({t: jetzt(), art: "auftrag-ende", id: def.id, form: Spiel.formVon(def), quelle: inst.quelle || "postfach",
     niveau: abnahme.niveau, sek: Math.round((inst.zeitMs || 0) / 1000), sterne: abnahme.sterne, hilfe: inst.hilfeStufe || 0,
     versuche: inst.abnahmen || 1, weiter: null});
 };

@@ -521,15 +521,21 @@ UI.spiel = (() => {
         h("b", {}, def.titel),
         h("span", {class: "sp-mail-vorschau"}, vorschau + (String(def.briefing || "").length > 110 ? " …" : "")),
         h("span", {class: "sp-chips"},
-          h("span", {class: "sp-chip niv-" + (Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe)}, NIV[Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe] || def.stufe),
+          formChip(def),
+          h("span", {class: "sp-chip niv-" + (Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe), title: "Risiko: " + Spiel.risikoVon(def).warum},
+            `${NIV[Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe] || def.stufe} · Risiko ${Spiel.risikoVon(def).text}`),
           h("span", {class: "sp-chip"}, `~${Spiel.minuten(def)} min`),
           h("span", {class: "sp-chip geld"}, fmtEuro((def.lohn || {}).euro || 0)),
           (def.skills || [])[0] ? h("span", {class: "sp-chip uebt", title: "Das übst du dabei"}, "Übt: " + Spiel.skill(def.skills[0]).name) : null,
           inst.quelle === "wartung" ? h("span", {class: "sp-chip wartung"}, "Wartung") : null,
           inst.quelle === "wiederholung" ? h("span", {class: "sp-chip wdh"}, "Wiederholung") : null,
-          def.art === "projekt" ? h("span", {class: "sp-chip projekt"}, "Projekt") : null,
-          def.art === "terminal" ? h("span", {class: "sp-chip terminal", title: "Die Arbeit passiert im Terminal des Rechners"}, ">_ Terminal") : null,
+
           frist != null ? h("span", {class: "sp-chip frist"}, frist > 0 ? `⏱ ${frist} min` : "⏱ überfällig") : null)));
+  }
+  /* Auftragsform als kleine Marke (Symbol + Wort), E1 */
+  function formChip(def){
+    const form = Spiel.formVon(def), F = Spiel.FORMEN[form] || Spiel.FORMEN.stoerung;
+    return h("span", {class: "sp-chip form form-" + form, title: F.text}, `${F.sym} ${F.titel}`);
   }
   function leserZeigen(el, inst){
     if (!inst) return;

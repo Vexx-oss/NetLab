@@ -56,7 +56,7 @@ Spiel.hub.naechster = function(){
   const def = Spiel.defVon(inst), k = Spiel.kundenDaten(inst.kunde || def.kunde);
   return {art: inst === aktiv || inst.geoeffnet ? "weiter" : "neu", iid: inst.iid, titel: def.titel,
     kunde: k.name, kontakt: (k.ansprechpartner || {}).name || k.name, symbol: k.symbol || "✉", farbe: k.farbe || null,
-    minuten: Spiel.minuten(def), euro: (def.lohn || {}).euro || 0, niveau: Spiel.niveauFuer(def), form: def.art};
+    minuten: Spiel.minuten(def), euro: (def.lohn || {}).euro || 0, niveau: Spiel.niveauFuer(def), form: Spiel.formVon(def)};
 };
 
 /* Ein Satz für morgen (offener Faden): Kundenauftrag im Postfach → fällige Fertigkeit → nächstes Tagesrätsel */

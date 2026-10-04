@@ -7,11 +7,11 @@
    Das Postfach hält immer 2–3 reguläre Tickets bereit (nie leer, nie übervoll); Wartung/Tag/Prüfung
    stellt die Karriere zusätzlich ein. */
 
-Spiel.POSTFACH_ZIEL = 3;                       /* so viele reguläre Tickets liegen höchstens bereit */
+Spiel.POSTFACH_ZIEL = 3;                       /* so viele reguläre Tickets liegen höchstens bereit (ab Stufe 2: eins mehr) */
 Spiel.POSTFACH_WAHL = 2;                       /* erste Wahl (Einstieg in 90 s): zwei Angebote verschiedener Kunden */
 /* Bis zum zweiten erledigten Auftrag liegen genau zwei Angebote bereit – möglichst von verschiedenen Kunden, damit sich
    Lohn, Zeit und Thema wirklich unterscheiden (erste echte Entscheidung in den ersten Minuten). Danach drei. */
-Spiel.postfachZiel = () => Spiel.st.erledigt.length < 2 ? Spiel.POSTFACH_WAHL : Spiel.POSTFACH_ZIEL;
+Spiel.postfachZiel = () => Spiel.st.erledigt.length < 2 ? Spiel.POSTFACH_WAHL : Spiel.POSTFACH_ZIEL + (Spiel.st.stufe >= 2 ? 1 : 0);
 Spiel.WIEDERHOLUNG_NACH_MS = 15 * 60 * 1000;   /* Wiederholungsticket nach „Lösung vorführen“ erscheint später */
 Spiel.generierte = Spiel.generierte || {};
 
@@ -22,6 +22,10 @@ Spiel.ticketDef = function(id, inst){
   if (d) return d;
   if (Spiel.generierte[id]) return Spiel.generierte[id];
   const gen = inst && inst.gen;
+  if (gen && gen.form) {                                      /* generierte Form (E1): Fernwartung, Plan-Audit, Adressplan */
+    try { return Spiel.generiereForm(gen.form, gen.seed, gen.opts || {}); }
+    catch (e) { typeof console !== "undefined" && console.error("Form-Generator", e); return null; }
+  }
   if (gen && typeof Spiel.generiere === "function") {
     try {
       const g = Spiel.generiere(gen.skill, gen.seed, gen.opts || {});
@@ -52,7 +56,10 @@ Spiel.neuerSeed = function(zusatz){
 Spiel.instanzErstellen = function(o = {}){
   const st = Spiel.st;
   let def = null, gen = null;
-  if (o.gen) {
+  if (o.gen && o.gen.form) {
+    gen = {form: o.gen.form, seed: o.gen.seed ?? Spiel.neuerSeed(o.gen.form), opts: o.gen.opts || {}};
+    def = Spiel.generiereForm(gen.form, gen.seed, gen.opts);
+  } else if (o.gen) {
     if (typeof Spiel.generiere !== "function") throw new Error("Kein Ticket-Generator vorhanden (Spiel.generiere).");
     gen = {skill: o.gen.skill, seed: o.gen.seed ?? Spiel.neuerSeed(o.gen.skill), opts: o.gen.opts || {}};
     def = Spiel.generiere(gen.skill, gen.seed, gen.opts);
@@ -91,12 +98,16 @@ Spiel.instanz = iid => Spiel.st.postfach.find(i => i.iid === iid) || null;
 Spiel.aktiveInstanz = () => Spiel.st.aktiv ? Spiel.instanz(Spiel.st.aktiv) : null;
 Spiel.defVon = inst => inst ? Spiel.ticketDef(inst.ticketId, inst) : null;
 
-/* Sichtbare Tickets, sortiert: Fristen zuerst (früheste oben), dann Ungelesenes, dann nach Eingang */
+/* Sichtbare Tickets, sortiert: Fristen zuerst (früheste oben), dann – nach zwei gleichen Formen in Folge – die anderen Formen
+   vor der gesperrten (der Hub schlägt sie so nie als nächstes vor), dann Ungelesenes, dann nach Eingang */
 Spiel.postfach = function(){
   const t = jetzt();
+  const sperre = Spiel.mischer ? Spiel.mischer.gesperrt(Spiel.formVerlauf()) : null;
+  const gesperrt = i => sperre && Spiel.formVon(Spiel.defVon(i)) === sperre ? 1 : 0;
   return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung" && i.quelle !== "raetsel").slice().sort((a, b) => {
     const fa = a.frist ?? Infinity, fb = b.frist ?? Infinity;
     if (fa !== fb) return fa - fb;
+    if (sperre && gesperrt(a) !== gesperrt(b)) return gesperrt(a) - gesperrt(b);
     if (!!a.gelesen !== !!b.gelesen) return a.gelesen ? 1 : -1;
     return a.start - b.start;
   });
@@ -119,6 +130,18 @@ Spiel.postfachAuffuellen = function({still = false} = {}){
   const imPostfach = new Set(st.postfach.map(i => i.ticketId));
   const kandidaten = Spiel.ticketReihe().filter(t => (t.karriere || 1) <= st.stufe && !Spiel.istErledigt(t.id) && !imPostfach.has(t.id));
   const ziel = Spiel.postfachZiel(), wahl = ziel === Spiel.POSTFACH_WAHL;
+  /* Nach der ersten Wahl: Postfach als Wahl – verschiedene Formen und Kunden (Mischer, E1) */
+  if (!wahl && Spiel.mischer && regulaer() < ziel) {
+    const offen = st.postfach.filter(i => i.quelle === "postfach" || i.quelle === "generiert").map(i => ({form: Spiel.formVon(Spiel.defVon(i)), kunde: i.kunde}));
+    const auswahl = Spiel.mischer.waehlen({kandidaten: Spiel.mischer.kandidaten(st), offen, verlauf: Spiel.formVerlauf(), n: ziel - regulaer(), z: Zufall(Spiel.neuerSeed("mischer"))});
+    const niveau = Spiel.einst.wahl === "auto" ? undefined : Spiel.einst.wahl;
+    for (const k of auswahl) {
+      try {
+        if (k.ticketId) neu.push(Spiel.instanzErstellen({ticketId: k.ticketId, quelle: "postfach"}));
+        else neu.push(Spiel.instanzErstellen({gen: {form: k.form, seed: Spiel.neuerSeed(k.schluessel), opts: Object.assign({stufe: niveau}, k.gen.opts)}, quelle: "generiert"}));
+      } catch (e) { typeof console !== "undefined" && console.error("Mischer", k.schluessel, e); }
+    }
+  }
   while (kandidaten.length && regulaer() < ziel) {
     /* in der Wahl-Phase zuerst einen Kunden, der noch nicht im Postfach steht */
     const kunden = new Set(st.postfach.filter(i => i.quelle === "postfach" || i.quelle === "generiert").map(i => i.kunde));

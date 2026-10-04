@@ -224,8 +224,9 @@
 .sp-chip.frist{background:var(--warn-soft); color:var(--warn)}
 .sp-chip.wartung{background:var(--info-soft); color:var(--info)}
 .sp-chip.wdh{background:var(--ok-soft); color:var(--ok)}
-.sp-chip.projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
-.sp-chip.terminal{background:var(--panel-3); color:var(--text); font-family:var(--mono)}
+.sp-chip.form{background:var(--panel-3); color:var(--text)}
+.sp-chip.form-terminal, .sp-chip.form-forensik{font-family:var(--mono)}
+.sp-chip.form-projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
 .sp-leser{min-height:0; overflow:auto; scrollbar-width:thin}
 .sp-brief{display:flex; flex-direction:column; gap:16px; padding:22px 24px; border-radius:18px; background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--k, var(--accent))}
 .sp-brief header{display:flex; gap:14px; align-items:center}

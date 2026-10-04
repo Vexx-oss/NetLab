@@ -383,3 +383,57 @@ ticket.art = … | "terminal"                  // Terminal-Auftrag: Arbeitsziele
 - **Linux (bash):** ip a/r/link · sudo ip addr add|flush · sudo ip route add|replace|del default · sudo ip link set eth0 up|down · ping -c · traceroute · dig · nslookup · host · ss -tulpn · curl · cat /etc/resolv.conf|hosts|hostname · systemctl status|start|stop|restart|is-active (apache2, named, isc-dhcp-server, smbd, ssh, cups) · sudo tcpdump -n · hostnamectl · whoami.
 - Ändern geht nur über netsh/route bzw. sudo ip/systemctl – immer über den Verlauf (Rückgängig). **Simulation:** Ist der eingetragene DNS-Server das Gerät selbst, antwortet der eigene Dienst lokal (Loopback) statt per ARP ins Leere.
 - **Terminal im Dock** (`ui/terminal.js`, Präfix `tm-`): Reiter „Terminal“ mit einer Sitzung je Gerät (Reiterchen oben), Doppelklick auf ein Gerät oder Taste `T` öffnet sie; „Pakete ansehen ▸“ nach Befehlen mit Aufzeichnung; Diagnosebefehle legen Beweiskarten in die Akte (Bus `befehl`).
+
+### 9.6 Welle 3, E1 „Formen, Wahl, Ereignisse, Provisorium“
+
+**Auftragsformen** (`spiel/formen.js`): `Spiel.FORMEN[form] = {titel, sym, text}` für `stoerung`, `projekt`, `terminal`, `forensik` (Fernwartung: Netz unsichtbar, nur das Terminal eines Rechners), `audit` (Kundenplan prüfen), `beratung` (Adressplan rechnen), `hotline` (Rückfragen am Telefon, dann Störung). `Spiel.formVon(def)` → `def.form || def.art` (wartung → stoerung). Generierte Formen:
+
+```js
+inst.gen = {skill, seed, opts} | {form:"forensik"|"audit"|"beratung", seed, opts:{stufe, kunde}}
+Spiel.generiereForm(form, seed, opts) → def      // deterministisch, id "form-<form>-<seed>", registriert in Spiel.generierte
+Spiel.risikoVon(def) → {stufe:1..3, text:"gering"|"mittel"|"hoch"}   // aus dem Niveau: Abzüge je Versuch (E 0, AP1 ½, AP2 1 ★)
+```
+
+**Neue Arbeitsziele** (wie `befehl`/`antwort`, geprüft mit `inst`):
+
+```js
+Ziel {typ:"tabelle", id, basis:"192.168.20.0/24", zeilen:[{name, hosts}], spalten:["netz","praefix","erster","letzter","broadcast"], text}
+inst.tabelle  = { ["zeile.spalte"]: "Eingabe" }     // Soll aus den IP-Helfern (Spiel.beratung.soll(ziel)), Vergleich ohne Leerzeichen; Präfix „/26“ oder „26“
+Ziel {typ:"audit", fehler:["id.feld"], text}        // die 1–3 Abweichungen im Kundenplan (def.kundenplan)
+inst.audit    = ["id.feld", …]                       // markierte Zellen; erfüllt = alle gefunden, nichts Falsches markiert
+def.kundenplan = Plan (wie Spiel.plan.aus) mit 1–3 geänderten Tabellenwerten
+Ziel {typ:"notiz", min:20, text}                     // Änderungsnotiz für den Kunden (Variante „sauber“)
+inst.notiz    = "…"
+def.hotline   = { anruf:"…", max:3, fragen:[{id, text, antwort, wert:"gut"|"neutral"|"schlecht", warum}] }
+inst.hotline  = { gefragt:[id], fertig:bool }       // Bewertung: gute Fragen → Ruf; Antworten als Karten in der Akte (art "hotline")
+```
+
+**Postfach als Wahl** (`spiel/mischer.js`): nach der Einstiegs-Wahl 3 Angebote (ab Stufe 2: 4), möglichst verschiedene Formen und Kunden. Je Form ist höchstens ein Angebot neu im Postfach; die Story-Reihenfolge der Handtickets bleibt je Form erhalten.
+
+```js
+Spiel.mischer.waehlen({kandidaten:[{form, kunde, gewicht, schluessel}], offen:[{form, kunde}], verlauf:[form], n, z}) → [kandidat]   // rein, ohne Ticketbau
+Spiel.mischer.gesperrt(verlauf) → form|null          // die Form der letzten zwei Abschlüsse, wenn gleich
+Spiel.postfach()                                     // gesperrte Form steht unten – der Hub schlägt sie nie als nächstes vor
+st.erledigt[i].form                                  // Form jedes Abschlusses (Mischer, Tagebuch)
+```
+
+**Provisorium oder sauber?** (`spiel/varianten.js`): Handtickets mit Änderungen an IOS-Geräten (Liste `Spiel.VARIANTEN_TICKETS`) bieten beim ersten Öffnen eine Wahl. *Provisorium:* nur die Netzziele, kein Neustart-Test, Lohn × 0,6, Schuld → nach 3 weiteren Abschlüssen kommt der Folgeauftrag („Das Provisorium von neulich …“: dasselbe Netz, der Fehler ist nach einem Neustart zurück, Ziele + Sicherung). *Sauber:* Netzziele + „gespeichert“ je geändertem IOS-Gerät + Änderungsnotiz (`notiz`), Lohn × 1,2.
+
+```js
+inst.variante = null|"provisorium"|"sauber"          // ohne Wahl gelten die Grundziele
+Spiel.varianten.fuer(def) → [{id, titel, text, lohnFaktor}] | null
+Spiel.varianten.ziele(inst) → Ziele der gewählten Variante · Spiel.varianten.waehlen(inst, id)
+st.schulden = [ {id, ticket, kunde, seit:erledigtAnzahl, faellig:erledigtAnzahl+3, folge:iid|null, erledigt:bool} ]
+Folgeauftrag-id "<ticket>-folge" (Spiel.varianten.folgeDef(def))
+```
+
+**Ereignisse** (`spiel/ereignisse.js`, Einstellung `st.einst.ereignisse = "aus"|"selten"|"normal"`, Standard „selten“): höchstens eines je 15 (normal) bzw. 30 (selten) Minuten aktiver Zeit; deterministisch aus Spielstand-Seed und Zähler; jedes mit Erklärsatz; nie Fortschrittsverlust (Stufe, Aufträge, Kunden bleiben; Netzänderungen laufen über den Verlauf).
+
+```js
+Spiel.EREIGNISSE[id] = {titel, sym, bedingung(ctx) → bool, ausloesen(ctx) → {text, warum, aktion?}}
+   // stromausfall (offener Auftrag mit IOS-Gerät: alle IOS-Geräte neu starten – nur Gespeichertes bleibt), kabelschaden,
+   // provider (Internet beim Kunden aus, bis „Provider anrufen“), praktikant (zweiter kleiner Fehler), weiterempfehlung (neuer Kunde
+   // bietet einen Auftrag an), notfall (Notfall-Auftrag mit Frist – du wählst die Reihenfolge)
+st.ereignisse = { aktivMs, letzteMs, n, liste:[{t, id, kunde, text}] }
+Spiel.ereignisse.tick(ms) → Ereignis|null · .ausloesen(id, ctx) (Tests) · .aktivZaehlen(ms)
+```
