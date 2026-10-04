@@ -100,10 +100,20 @@ gruppe("Spiel-Fluss: Zustand", () => {
     } finally { ab(); }
   }));
 
-  pruefe("Postfach: nächste 3 ungelöste Tickets bis zur Karriere-Stufe, keine Entwürfe", kapsel(() => {
-    const ids = Spiel.postfach().map(i => i.ticketId);
-    erwarte.gleich(ids, ["t1", "t2", "t3"]);
+  pruefe("Postfach: nächste 3 ungelöste Tickets bis zur Karriere-Stufe, keine Entwürfe (ab dem 2. erledigten Auftrag)", kapsel(() => {
+    Spiel.st.erledigt.push({id: "x1", sterne: 5, tag: heute(), hilfe: 0}, {id: "x2", sterne: 5, tag: heute(), hilfe: 0});
+    Spiel.st.postfach = []; Spiel.postfachAuffuellen();
+    erwarte.gleich(Spiel.postfach().map(i => i.ticketId), ["t1", "t2", "t3"]);
   }, {tickets: () => [ticket("t1"), ticket("t2"), ticket("t3"), ticket("t4"), ticket("t5", {karriere: 2}), ticket("t0", {entwurf: true, karriere: 0}), ticket("m1", {art: "mini"})]}));
+
+  pruefe("Postfach: erste Wahl – zwei Angebote, verschiedene Kunden zuerst (vorher und nach dem ersten Auftrag)", kapsel(() => {
+    erwarte.gleich(Spiel.postfach().map(i => i.ticketId).sort(), ["t1", "t3"], "Start: erster Auftrag + anderer Kunde");
+    Spiel.st.erledigt.push({id: "t1", sterne: 5, tag: heute(), hilfe: 0});
+    Spiel.st.postfach = Spiel.st.postfach.filter(i => i.ticketId !== "t1"); Spiel.postfachAuffuellen();
+    const l = Spiel.postfach();
+    erwarte.gleich(l.length, 2, "zwei zur Wahl");
+    erwarte.gleich(new Set(l.map(i => i.kunde)).size, 2, "zwei verschiedene Kunden");
+  }, {tickets: () => [ticket("t1"), ticket("t2"), ticket("t3", {kunde: "baeckerei"}), ticket("t4")]}));
 
   pruefe("Postfach: gelöste Tickets kommen nicht wieder, Nachschub hält es gefüllt", kapsel(() => {
     Spiel.st.erledigt.push({id: "t1", sterne: 5, tag: heute(), hilfe: 0});

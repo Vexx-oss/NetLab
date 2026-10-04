@@ -290,7 +290,7 @@ UI.spiel = (() => {
     UI.labor.auftragNeu();
     erg.weg = weg;
     erg.wahl = Spiel.st.erledigt.length === 1;        /* nach dem ersten Auftrag: Postfach mit zwei Angeboten zur Wahl */
-    if (S.mess) S.mess.erfolg ??= Math.round(performance.now() - S.mess.t0);
+    if (S.mess) S.mess.erfolg ??= Math.round(performance.now());
     const k = kunde(erg.inst.kunde || erg.def.kunde);
     S.probe = true;
     try {
@@ -431,7 +431,9 @@ UI.spiel = (() => {
     if (post.length) karten.push(h("div", {class: "sp-pf-trenner", role: "presentation"}, "Nachrichten"),
       ...post.map(n => postKarte(n, n.id === aktiv, () => { S.postfachWahl = n.id; postfachAnsicht(c); })));
     const kopf = h("header", {class: "sp-pf-kopf"},
-      h("div", {}, h("h2", {}, "Postfach"), h("p", {class: "sp-leise"}, liste.length ? `${liste.length} ${liste.length === 1 ? "Auftrag wartet" : "Aufträge warten"} · Stufe ${st.stufe} · ${st.erledigt.length} erledigt` : "Alles erledigt.")),
+      h("div", {}, h("h2", {}, "Postfach"), h("p", {class: "sp-leise"}, liste.length === Spiel.POSTFACH_WAHL && st.erledigt.length === 1
+        ? "Wähle deinen nächsten Auftrag – Lohn, Zeit und Thema unterscheiden sich."
+        : liste.length ? `${liste.length} ${liste.length === 1 ? "Auftrag wartet" : "Aufträge warten"} · Stufe ${st.stufe} · ${st.erledigt.length} erledigt` : "Alles erledigt.")),
       h("div", {class: "sp-pf-aktionen"},
         UI.tag?.karte ? UI.tag.karte() : null,
         h("button", {type: "button", class: "knopf", onclick: () => { UI.sandbox.laden(); UI.app.ansicht("labor"); }, title: "Ohne Auftrag frei ausprobieren"}, "🧪 Freies Labor")));
@@ -484,6 +486,7 @@ UI.spiel = (() => {
           h("span", {class: "sp-chip niv-" + (Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe)}, NIV[Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe] || def.stufe),
           h("span", {class: "sp-chip"}, `~${Spiel.minuten(def)} min`),
           h("span", {class: "sp-chip geld"}, fmtEuro((def.lohn || {}).euro || 0)),
+          (def.skills || [])[0] ? h("span", {class: "sp-chip uebt", title: "Das übst du dabei"}, "Übt: " + Spiel.skill(def.skills[0]).name) : null,
           inst.quelle === "wartung" ? h("span", {class: "sp-chip wartung"}, "Wartung") : null,
           inst.quelle === "wiederholung" ? h("span", {class: "sp-chip wdh"}, "Wiederholung") : null,
           def.art === "projekt" ? h("span", {class: "sp-chip projekt"}, "Projekt") : null,
@@ -506,45 +509,57 @@ UI.spiel = (() => {
   }
 
   /* ---------- Onboarding: erstes Ticket mit Coach-Hinweisen ---------- */
-  /* Textdiät (A4): je Schritt genau ein Satz und ein Knopf; das passende Werkzeug ist schon gewählt */
+  /* Textdiät (A4): je Schritt genau ein Satz und ein Knopf; das passende Werkzeug ist schon gewählt.
+     Einstieg in 90 s (Hebel 7): statt Willkommensfenster spricht der Senior in zwei kurzen Blasen (zusammen ≤ 25 Wörter);
+     die zweite Blase kommt nach 2,6 s oder auf Klick. */
   const COACH = [
-    {text: "Die Kasse hat kein Kabel – zieh mit der Maus von der Kasse zum Switch.", werkzeug: "kabel", zeigen: ["kasse", "sw1"]},
+    {blasen: [k => `Hallo, ich bin der Senior. ${(k.ansprechpartner?.name || k.name).split(" ")[0]} vom ${k.name} braucht uns!`,
+              () => "Ihre Kasse hat kein Kabel – zieh eins von der Kasse zum Switch."], werkzeug: "kabel", zeigen: ["kasse", "sw1"]},
     {text: "Prüf es wie ein Profi: Zieh mit dem Ping-Werkzeug von der Kasse auf den Drucker.", werkzeug: "ping", zeigen: ["kasse", "drucker"]},
     {text: "Paket angekommen – jetzt fehlt nur noch die Abnahme.", werkzeug: "auswahl", zeigen: []},
   ];
   function coachStart(){
     if (Spiel.einst.coach === false) return false;
-    S.coach = {schritt: 0};
+    S.coach = {schritt: 0, blase: 0, neu: true};
     coachZeigen();
     UI.labor.auftragNeu();          /* Zeile sofort zeigen – vor dem Einpassen im nächsten Frame */
+    S.coach.timer = setTimeout(() => coachBlase(1), 2600);
     return true;
   }
-  function coachWeiter(n){ if (!S.coach) return; S.coach.schritt = Math.max(S.coach.schritt, n); coachZeigen(); UI.labor.auftragNeu(); }
+  function coachBlase(n){
+    const c = S.coach && COACH[S.coach.schritt];
+    if (!c || !c.blasen || (S.coach.blase || 0) >= n) return;
+    clearTimeout(S.coach.timer);
+    S.coach.blase = n; S.coach.neu = true;
+    coachZeigen(); UI.labor.auftragNeu(); UI.klang?.spielen("blase");
+  }
+  function coachWeiter(n){ if (!S.coach) return; clearTimeout(S.coach.timer); S.coach.schritt = Math.max(S.coach.schritt, n); S.coach.blase = 0; S.coach.neu = true; coachZeigen(); UI.labor.auftragNeu(); }
   function coachZeigen(){
     const c = S.coach && COACH[S.coach.schritt]; if (!c) return;
     /* Einsteiger ziehen sonst Geräte herum statt zu verkabeln: passendes Werkzeug vorwählen */
     if (c.werkzeug && UI.labor.werkzeugName !== c.werkzeug) UI.labor.werkzeug(c.werkzeug);
-    if (c.zeigen.length) setTimeout(() => UI.labor.hervorheben(c.zeigen.map(g => ({geraet: g})), 4500), 250);
+    const letzte = !c.blasen || (S.coach.blase || 0) >= c.blasen.length - 1;    /* Geräte erst zeigen, wenn die Aufgabe dasteht */
+    if (letzte && c.zeigen.length) setTimeout(() => UI.labor.hervorheben(c.zeigen.map(g => ({geraet: g})), 4500), 250);
   }
   function coachLeiste(){
     const c = COACH[S.coach.schritt];
-    return h("div", {class: "sp-coach", "data-hinweisquelle": "coach"}, h("span", {class: "sp-coach-sym"}, "🧑‍🔧"), h("p", {}, c.text),
-      h("button", {type: "button", class: "knopf geist klein", onclick: () => { S.coach = null; Spiel.einstSetzen("coach", false); UI.labor.auftragNeu(); }}, "Hinweise aus"));
+    const def = S.inst ? Spiel.defVon(S.inst) : null, k = kunde(S.inst?.kunde || def?.kunde);
+    const text = c.blasen ? c.blasen[S.coach.blase || 0](k) : c.text;
+    const mehr = !!c.blasen && (S.coach.blase || 0) < c.blasen.length - 1;
+    const el = h("div", {class: "sp-coach" + (S.coach.neu ? " neu" : "") + (mehr ? " weiter" : ""), "data-hinweisquelle": "coach",
+      title: mehr ? "Klick: weiter" : null, onclick: mehr ? () => coachBlase((S.coach.blase || 0) + 1) : null},
+      h("span", {class: "sp-coach-sym", "aria-hidden": "true"}, "🧑‍🔧"), h("p", {class: "sp-blase"}, text),
+      h("button", {type: "button", class: "knopf geist klein", onclick: e => { e.stopPropagation(); clearTimeout(S.coach?.timer); S.coach = null; Spiel.einstSetzen("coach", false); UI.labor.auftragNeu(); }}, "Hinweise aus"));
+    S.coach.neu = false;
+    return el;
   }
+  /* Einstieg in 90 s (Hebel 7): kein Fenster vorab – das Spiel öffnet sofort den ersten Auftrag, der Senior spricht
+     dort in zwei kurzen Blasen. Messpunkte (für die Abnahme): S.mess = {t0, ersteHandlung, erfolg} in ms seit Seitenstart. */
   function einstiegStarten(){
-    const satz = "Schön, dass du da bist. Ich bin der Senior hier. Ich sag dir selten, was falsch ist – ich frag dich so lange, bis du es selbst findest. Dein erster Kunde wartet schon.";
-    const zu = overlay(h("div", {class: "sp-willkommen"},
-      h("span", {class: "sp-senior-sym gross"}, "🧑‍🔧"),
-      h("h2", {}, "Willkommen im Systemhaus"),
-      h("p", {}, "„" + satz + "“"),
-      h("p", {class: "sp-leise"}, "Du löst Netzwerk-Aufträge für echte Kunden – in einem Simulator, in dem jedes Paket wirklich unterwegs ist. Hilfe gibt es immer, Fehler kosten nichts."),
-      h("button", {type: "button", class: "knopf primaer gross", onclick: () => {
-        zu();
-        let inst = Spiel.st.postfach.find(i => i.ticketId === Spiel.EINSTIEG_TICKET);
-        if (!inst) inst = Spiel.instanzErstellen({ticketId: Spiel.EINSTIEG_TICKET, quelle: "postfach"});
-        oeffnen(inst.iid);
-      }}, "Erster Auftrag ▸"),
-      h("button", {type: "button", class: "knopf geist", onclick: () => { zu(); Spiel.st.einstieg.fertig = true; Spiel.speichern(); UI.app.ansicht("postfach"); }}, "Ich kenne mich aus – zum Postfach")), "willkommen");
+    let inst = Spiel.st.postfach.find(i => i.ticketId === Spiel.EINSTIEG_TICKET);
+    if (!inst) inst = Spiel.instanzErstellen({ticketId: Spiel.EINSTIEG_TICKET, quelle: "postfach"});
+    S.mess = {t0: Math.round(performance.now()), ersteHandlung: null, erfolg: null};
+    oeffnen(inst.iid);
   }
 
   /* ---------- Vorhersage: erst raten, dann sehen (Einstieg und AP1) ---------- */
@@ -609,7 +624,10 @@ UI.spiel = (() => {
   }, true);
 
   /* ---------- Bus ---------- */
-  Bus.an("netz-geaendert", d => { if (S.inst && d && d.netz === S.inst.netz) livePlanen(); });
+  Bus.an("netz-geaendert", d => {
+    if (S.inst && d && d.netz === S.inst.netz) livePlanen();
+    if (S.mess && S.mess.ersteHandlung == null) S.mess.ersteHandlung = Math.round(performance.now());
+  });
   Bus.an("zustand-geaendert", () => {
     status();
     if (Spiel.abzeichen.pruefen().length) abzeichenPlanen(400);
@@ -638,10 +656,10 @@ UI.spiel = (() => {
       Plattform.an("modus-extern", m => { if (UI.modus() !== m) UI.modus(m); });
       status();
       aktiveLaden();
-      if (!Spiel.st.einstieg.fertig && !Spiel.st.erledigt.length) einstiegStarten();
+      if (!Spiel.st.einstieg.fertig && !Spiel.st.erledigt.length) { if (!S.inst) einstiegStarten(); else UI.app.ansicht("labor"); }
       else if (!S.inst) UI.app.ansicht("postfach");
     } catch (e) { console.error("Spielstart", e); UI.toast("Das Spiel konnte nicht starten: " + e.message, "fehler"); }
   });
 
-  return {oeffnen, postfachAnsicht, status, abnahmeAnfordern, einstiegStarten, mappeAuf, mappeZu, get inst(){ return S.inst; }, _S: S};
+  return {oeffnen, postfachAnsicht, status, abnahmeAnfordern, einstiegStarten, mappeAuf, mappeZu, get inst(){ return S.inst; }, get mess(){ return S.mess || null; }, _S: S};
 })();

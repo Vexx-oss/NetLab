@@ -80,8 +80,16 @@
 .sp-ungespeichert{margin:0; padding:6px 10px; border-radius:8px; background:var(--warn-soft); color:var(--warn); font-size:13px}
 
 /* ---- Coach (Onboarding) ---- */
-.sp-coach{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:var(--accent-soft); border:1px solid var(--accent); animation:sp-rein .3s ease-out}
-.sp-coach p{margin:0; flex:1 1 auto; font-size:14px; font-weight:600}
+.sp-coach{display:flex; align-items:center; gap:12px; padding:2px 2px 2px 4px}
+.sp-coach.weiter{cursor:pointer}
+.sp-coach p{margin:0; font-size:14px; font-weight:600}
+/* Der Senior spricht in einer Sprechblase (Einstieg in 90 s): Spitze zeigt auf ihn */
+.sp-blase{position:relative; flex:0 1 auto; padding:9px 14px; border-radius:14px; background:var(--accent-soft); border:1.5px solid var(--accent); line-height:1.4}
+.sp-blase::before{content:""; position:absolute; left:-8px; top:50%; width:12px; height:12px; margin-top:-6px; background:var(--accent-soft); border-left:1.5px solid var(--accent); border-bottom:1.5px solid var(--accent); transform:rotate(45deg)}
+.sp-coach.neu .sp-blase{animation:sp-blase-rein .32s cubic-bezier(.3,1.6,.5,1)}
+@keyframes sp-blase-rein{from{opacity:0; transform:translateX(-8px) scale(.92)} to{opacity:1; transform:none}}
+.sp-coach .knopf{margin-left:auto}
+.sp-chip.uebt{background:var(--accent-soft); color:var(--accent)}
 .sp-coach-sym{font-size:22px}
 .sp-coach .knopf{white-space:nowrap; flex:0 0 auto}
 @keyframes sp-rein{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}

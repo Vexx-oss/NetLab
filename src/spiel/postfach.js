@@ -8,6 +8,10 @@
    stellt die Karriere zusätzlich ein. */
 
 Spiel.POSTFACH_ZIEL = 3;                       /* so viele reguläre Tickets liegen höchstens bereit */
+Spiel.POSTFACH_WAHL = 2;                       /* erste Wahl (Einstieg in 90 s): zwei Angebote verschiedener Kunden */
+/* Bis zum zweiten erledigten Auftrag liegen genau zwei Angebote bereit – möglichst von verschiedenen Kunden, damit sich
+   Lohn, Zeit und Thema wirklich unterscheiden (erste echte Entscheidung in den ersten Minuten). Danach drei. */
+Spiel.postfachZiel = () => Spiel.st.erledigt.length < 2 ? Spiel.POSTFACH_WAHL : Spiel.POSTFACH_ZIEL;
 Spiel.WIEDERHOLUNG_NACH_MS = 15 * 60 * 1000;   /* Wiederholungsticket nach „Lösung vorführen“ erscheint später */
 Spiel.generierte = Spiel.generierte || {};
 
@@ -114,8 +118,12 @@ Spiel.postfachAuffuellen = function({still = false} = {}){
   const regulaer = () => st.postfach.filter(i => i.quelle === "postfach" || i.quelle === "generiert").length;
   const imPostfach = new Set(st.postfach.map(i => i.ticketId));
   const kandidaten = Spiel.ticketReihe().filter(t => (t.karriere || 1) <= st.stufe && !Spiel.istErledigt(t.id) && !imPostfach.has(t.id));
-  for (const t of kandidaten) {
-    if (regulaer() >= Spiel.POSTFACH_ZIEL) break;
+  const ziel = Spiel.postfachZiel(), wahl = ziel === Spiel.POSTFACH_WAHL;
+  while (kandidaten.length && regulaer() < ziel) {
+    /* in der Wahl-Phase zuerst einen Kunden, der noch nicht im Postfach steht */
+    const kunden = new Set(st.postfach.filter(i => i.quelle === "postfach" || i.quelle === "generiert").map(i => i.kunde));
+    const i = wahl ? Math.max(0, kandidaten.findIndex(t => !kunden.has(t.kunde))) : 0;
+    const [t] = kandidaten.splice(i, 1);
     neu.push(Spiel.instanzErstellen({ticketId: t.id, quelle: "postfach"}));
   }
   if (Spiel.postfach().length === 0) {
