@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Plan]
 erstellt: 2026-10-04
-status: Phase 0 und A gebaut; Welle 1 Sitzung S1 (Spielspaß 2.0) gebaut 04.10.2026 – Haltepunkt vor S2; B–F offen
+status: Phase 0 und A gebaut; Welle 1 (S1 + S2, Spielspaß 2.0) gebaut 04.10.2026; B und C (Welle 2) in Arbeit
 ---
 
 # 🗺️ Plan – Ausbau 1.2 „Übersichtlich, abwechslungsreich, mit echtem Terminal"
@@ -9,6 +9,7 @@ status: Phase 0 und A gebaut; Welle 1 Sitzung S1 (Spielspaß 2.0) gebaut 04.10.2
 ⬆️ [[10-Projekte/Lernprojekte/Netzwerk-Labor/Liesmich|Netzwerk-Labor]] · Vertrag: [[Architektur]] · Spezifikation: [[Konzept – Netzwerk-Labor]]
 
 > [!info] Danach (04.10.2026, abends): Welle 1, Sitzung S1 „Sofortgefühl“ gebaut – Funktionsprobe, Stufenregeln, Juice + Klang, Einstieg in 90 s. Stand und Messwerte: [[Design – Spielspaß 2.0#14 · Stand nach S1]]
+> Danach Sitzung S2 „Bogen“ – Hub „Heute“, Tagesrätsel, Fehlerdex, Spieltagebuch: [[Design – Spielspaß 2.0#15 · Stand nach S2]]. Auf Wunsch geht es ohne Haltepunkt weiter mit Welle 2 (Phasen B und C).
 
 > [!success] Stand 04.10.2026: Phase 0 und A fertig, im echten Programm durchgespielt
 > **Programm:** `Programm/Netzwerk-Labor.exe` (gebaut 04.10. 13:58, Versionsnummer noch 1.1.0, die kommt in F). Die bisherige 1.1-.exe liegt als Rückfall in `Programm/Endversion-1.1/`.

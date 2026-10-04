@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1, Sitzung S1 gebaut (04.10.2026, Zweig ausbau-1.2) – Haltepunkt, du spielst an; S2 und B–F offen
+status: Welle 1 (S1 + S2) gebaut 04.10.2026, Zweig ausbau-1.2; weiter mit Welle 2 (B, C) bis 50 %
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -10,6 +10,9 @@ status: Welle 1, Sitzung S1 gebaut (04.10.2026, Zweig ausbau-1.2) – Haltepunkt
 
 > [!success] Stand 04.10.2026: Sitzung S1 „Sofortgefühl“ gebaut und im echten Programm abgenommen
 > Funktionsprobe-Szene + Nachbesprechung in drei Blöcken · Stufenregeln (Warnungen/Haken/Versuche) · Juice an 12 Stellen + Klang (leise, Leiste stumm) · Einstieg ohne Fenster mit zwei Senior-Blasen und erster Wahl · Kabel-Meldung kurz und unten. Messwerte, Entscheidungen und Bilder: [[#14 · Stand nach S1]]. Scorecard 2/4/12 neu bewertet: **26,0 → 28,4**. **Haltepunkt – S2 beginnt erst nach dem Anspielen.**
+
+> [!success] Stand 04.10.2026: Sitzung S2 „Bogen“ gebaut und im echten Programm abgenommen – Welle 1 fertig
+> Hub „Heute“ als Startseite (1 Hauptknopf, 30 Wörter) · Aufwärmen mit drei Karten · Tagesrätsel für alle gleich, Ergebnis zum Kopieren · Fehlerdex mit 34 Fehlerarten im Lernstand · Spieltagebuch mit „Auswertung kopieren“. Scorecard 1/5/8/9/10 neu bewertet: **28,4 → 32,1**. Einzelheiten: [[#15 · Stand nach S2]].
 
 > [!info] So liest du diese Notiz
 > **§ 0 reicht für die Entscheidung** (eine Seite). § 1 sind die Beobachtungen, § 5 die Bausteine, § 9 die Reihenfolge, § 13 der Text für Opus. Alles dazwischen ist Nachschlagewerk.
@@ -233,23 +236,23 @@ Passt zu „erst beibringen, dann abfragen“ und macht aus dem Niveau eine echt
 
 Jedes Kriterium wird mit einer **Prüffrage** bewertet (0 = nein, 5 = durchgehend ja). Bewertet wird nach jedem Haltepunkt von dir (oder mir) *am echten Programm*, mit kurzer Begründung in der Notiz.
 
-| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | Ziel | Hebt vor allem |
-|---|---|---|---:|---:|---:|---|
-| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | 4,0 | Hub, Akte |
-| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | 3,8 | 1, 6 |
-| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | 3,6 | 2, 12 |
-| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | 3,6 | 2, 3 |
-| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | 3,0 | 5, 9 |
-| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | 2,8 | 9, 10 |
-| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | 3,0 | 8, 10 |
-| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | 3,4 | 3, 11 |
-| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | 3,4 | 4, 5 |
-| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | 1,8 | 5 |
-| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | 3,0 | 10 |
-| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | 3,6 | 7 |
-| | **Summe (von 60)** | | **26,0** | **28,4** | **39,0** | **+50 %** |
+| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | Ziel | Hebt vor allem |
+|---|---|---|---:|---:|---:|---:|---|
+| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | 4,0 | Hub, Akte |
+| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | 3,8 | 1, 6 |
+| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | 3,6 | 2, 12 |
+| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | 3,6 | 2, 3 |
+| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | 3,0 | 5, 9 |
+| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | 2,8 | 9, 10 |
+| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | 3,0 | 8, 10 |
+| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | 3,4 | 3, 11 |
+| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | 3,4 | 4, 5 |
+| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | 1,8 | 5 |
+| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | 3,0 | 10 |
+| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | 3,6 | 7 |
+| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **39,0** | **+50 %** |
 
-*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „–“ = unverändert, nicht neu bewertet. Begründung in [[#14 · Stand nach S1]].*
+*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]] und [[#15 · Stand nach S2]].*
 
 *Hinweis:* Welle 4 (Netz-Codes, Par, Gürtel, Büro) ist Reserve und hebt vor allem 8, 10 und 11 weiter; sie gehört nicht zur +50 %-Zusage.
 
@@ -462,3 +465,66 @@ Funktionsprobe und Nachbesprechung in drei Blöcken:
 Erste Wahl im Postfach · reduzierte Bewegung (960 px) · Leiste am Bildschirmrand:
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-1366-7-wahl.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-960-3-ruhig.png|320]]
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S1/s1-leiste-desktop-ausschnitt.png|380]]
+
+---
+
+## 15 · Stand nach S2
+
+*Gebaut und abgenommen am 04.10.2026 (Opus, Zweig `ausbau-1.2`, 4 Commits). Alles im echten Programm gesehen: `Programm/Netzwerk-Labor.exe` (neu gebaut), Szenario per `python tools/cdp.py lauf` in drei Teilen mit Neustart dazwischen, keine JS-Fehler. Bilder und Messdateien: `Nachweise/1.2-S2/`.*
+
+### Abnahme
+
+| Messung | Soll | Ergebnis |
+|---|---|---|
+| Hub „Heute“ (Messung wie Phase A, ohne Kopf und Andock-Leiste) | 1 Hauptknopf, ≤ 40 Wörter | **1 („Annehmen ▸“) · 30 Wörter** in 1366×768 und 960 px; nach dem Tagesziel (Feierabend) **1 („Zur Leiste“) · 35 Wörter** |
+| Tagesrätsel: gleicher Tag + Niveau → gleiches Netz | Test | grün – für E, AP1, AP2 und 14 Tage je Niveau; Spielstand (Stufe, Geld, Niveau-Wahl) ändert nichts; ≥ 3 verschiedene Fertigkeiten in zwei Wochen |
+| Teilen-Text kopiert | gesehen | Klick auf „Ergebnis kopieren“ im Programm → Windows-Zwischenablage enthält genau `Netzwerk-Labor · Tagesrätsel #4 · Einstieg / ★★★★★ · 0:03 · Hilfe 0 · 1 Versuch / 🟩` (mit `Get-Clipboard` ausgelesen) |
+| Fehlerdex = 34 Fehlerarten | Test | grün – Dex = `Spiel.INJEKTOREN`, jede Art in einer von 8 Gruppen, mit Kundensymptom und Erkennungszeichen |
+| Tagebuch überlebt Neustart | gesehen | Programm beendet und neu gestartet: 2 Sitzungen, 2 Auftragsenden (mit Niveau, Sternen, Versuchen, Weiterspiel), Dex 2/2, Rätsel und Aufwärmen noch da |
+
+**Tests:** 144 grün (vorher 136): Fehlerdex (34 Arten, erst beim Abschluss erfasst, Hilfe ab Stufe 4 = nur „gesehen“, Ehrentitel), Tagesrätsel (Determinismus, Teilen-Text ohne Ursache, 🟨 nach Fehlversuch, verfällt am Folgetag), Hub (Serie mit Urlaubstagen, angefangener Auftrag zuerst, Feierabend mit Ausblick), Tagebuch (Weiterspiel-Rate, Neustart, höchstens 500), Spielstand v:1 → v:2.
+
+### Scorecard 1, 5, 8, 9, 10 – neu bewertet
+
+| # | vorher → nach S2 | Begründung |
+|---|---|---|
+| **1 Orientierung & Ziele** | 3,5 → **3,8** | Die Startseite beantwortet „Was jetzt?“ mit genau einer Karte und einem Knopf; ein angefangener Auftrag steht als „Weiter mit“ oben. **Nicht 4,0**, weil Postfach und Lernstand weiter lange Seiten sind und im Labor selbst noch nichts dazukam (Akte/Plan: Welle 2). |
+| **5 Abwechslung** | 1,5 → **2,0** | Jeder Tag hat jetzt eigene Elemente: ein anderes Rätsel (Fertigkeit wechselt mit dem Datum) und drei Aufwärmkarten. **Nur 2,0**, weil alle Aufträge – auch das Rätsel – noch dieselbe Form „Störung“ haben; die Formen kommen mit Hebel 9 (Welle 3). |
+| **8 Meisterschaft sichtbar** | 2,5 → **3,1** | Der Fehlerdex zeigt, was man schon kann (verstanden), was man nur mit Hilfe geschafft hat (gesehen) und was noch kommt („taucht ab Stufe 3 auf“); Gruppen geben Ehrentitel. **Nicht 3,4**, weil die Kompetenzkarte (Nebel, Regionen) erst in Welle 3 kommt. |
+| **9 Sitzungsbogen & Rückkehrgrund** | 2,0 → **3,2** | Anfang (Hub mit Datum, Serie, „Willkommen zurück“), Aufwärmen, Höhepunkt (Auftrag mit Probe), Ende (Feierabend mit Bilanz und *einem* Ausblick „Morgen wartet …“), dazu jeden Tag ein neues Rätsel. **Nicht 3,4**, weil der offene Faden nur der nächste Postfach-Auftrag ist – Geschichten und Ereignisse (Welle 3) fehlen. |
+| **10 Klasse & Teilen** | 0,5 → **1,6** | Alle mit gleichem Niveau bekommen am selben Tag dasselbe Netz – ohne Server; das Ergebnis lässt sich mit einem Klick kopieren und verrät die Ursache nicht. **Nicht 1,8**, weil es noch keinen Vergleich im Spiel und keine Netz-Codes gibt (Welle 4). |
+
+**Summe 28,4 → 32,1 von 60.** Wieder meine Einschätzung am echten Programm, kein Playtest – ab jetzt misst aber das Spieltagebuch mit (Weiterspiel-Rate, Erstversuch, Dauer), die Zahlen lassen sich mit „Auswertung kopieren“ holen.
+
+### Entscheidungen (stehen auch in den Commits)
+
+- **Fehlerdex erst beim Abschluss:** Ein offener Auftrag trägt nichts in den Dex ein – sonst stünde die Ursache dort, bevor der Spieler sie findet (R1). „Verstanden“ = bestanden ohne bezahlte Hilfe (Hilfestufe < 4, dieselbe Grenze wie im Lernmotor).
+- **Gruppen aus der Hauptfertigkeit** (8 Gruppen, Ehrentitel z. B. „Schicht-1-Profi“, „Türsteher“): Neue Fehlerarten aus Phase D landen automatisch in einer Gruppe; ohne passende Gruppe erscheint „Weitere“, und der Test schlägt an.
+- **Tagesrätsel:** Nummer = Tage seit 01.10.2026 + 1 (heute #4); Fertigkeit aus einer festen Liste je Niveau, Seed nur aus Datum und Niveau. Niveau = feste Wahl oder Lernstand der freigegebenen Fertigkeiten; im Rätsel bleibt es fest. Ein angefangenes Rätsel verfällt still beim Programmstart am Folgetag (kein Verlust, R6).
+- **Serie mit Urlaubstagen:** Je Kalenderwoche überbrücken zwei Fehltage die Serie; Fehltage vor dem Beginn der Serie verbrauchen nichts. Nach ≥ 2 Tagen Pause heißt es „Willkommen zurück!“ – nie „Serie verloren“ (R7). Die Lernmotor-Serie (Spielhalle) bleibt unverändert.
+- **Hub ist Startansicht** nach dem ersten Auftrag und steht vorn in der Andock-Leiste. „Zum Postfach“ im Ergebnis heißt jetzt „Übersicht“ und führt zum Hub; die erste Wahl (zwei Angebote) bleibt im Postfach.
+- **Feierabend ersetzt die Auftragskarte** – mit Auftragskarte waren es 57 Wörter; jetzt 35, „Noch einen Auftrag“ steht daneben.
+- **Spieltagebuch:** Sitzung = Programmstart bis zur letzten Handlung (das Programm läuft oft stundenlang im Tray); „weiter“ = nächster Auftrag binnen 2 Minuten. Nichts verlässt den Rechner – die Auswertung ist Text, den man selbst kopiert (R8).
+
+### Aufgefallen und gleich behoben
+
+- Nach dem Tagesrätsel zeigte der Hub einen neuen statt des angefangenen Auftrags (Postfach sortiert Ungelesenes nach oben) → der zuletzt angefangene steht jetzt vorn.
+- „0 Urlaubstage frei“ bei einer frischen Serie (Fehltage *vor* dem Beginn wurden mitgezählt) → zählen nur noch, wenn sie eine Lücke überbrücken.
+- Feierabend über dem Wortbudget (57) → s. o.
+
+### Offen
+
+- Das Rätsel ist noch immer eine Störung wie die anderen Aufträge (Formen: Welle 3).
+- Die Aufwärmkarten kommen aus dem vorhandenen Mini-Ticket-Bestand; für manche Fertigkeiten gibt es nur wenige Karten.
+- Spieltagebuch-Zahlen von echten Menschen fehlen noch – erst damit lässt sich die Scorecard gegenprüfen.
+
+### Bildschirmfotos
+
+Hub „Heute“ nach dem ersten Auftrag · Aufwärmen:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-2-hub.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-4-aufgewaermt.png|420]]
+
+Tagesrätsel im Labor · Ergebnis mit 🟩 und „Ergebnis kopieren“:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-5-raetsel.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-6-raetsel-ergebnis.png|420]]
+
+Fehlerdex im Lernstand · Feierabend mit Ausblick:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-8-fehlerdex.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-S2/s2-1366-11-feierabend.png|420]]
