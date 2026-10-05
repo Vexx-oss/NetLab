@@ -1197,3 +1197,47 @@ Abweichung zu M1: Dort beim ersten Versuch `0x8000FFFF`, jetzt bei **jedem** Ver
 
 So gemessen: **213/213 grün** (30 Testdateien, 75 Module).
 
+
+### Auftrag R – Bericht (05.10.2026, abends; ein Modell, allein, Zweig `ausbau-1.2`)
+
+**Vorbedingung:** `git status -sb` war sauber. **Start-Commit** `0c288eb`, **Ende** `92aa4dd` – **6 Commits** in dieser Sitzung.
+
+| Schritt | Stand | Beleg |
+|---|---|---|
+| **0 · Lage** | **fertig** | `.exe` startet nicht: `HRESULT(0x800700AA)`, 16:11:40 (`q-echt.py`) und 16:14:18 (direkt). Nichts beendet, nichts neu gestartet. Abnahme läuft deshalb im Rauchtest, ausdrücklich „nicht im echten Programm“. Commit `f9cda8d` |
+| **1a · AGENTS.md** | **fertig** | Fünf Verbote, Befehle, Zeilenenden-Regel, „senkrechter Schnitt vor Breite“, „nach jedem Commit Stand nachziehen“. Commit `fa5f8ec` |
+| **1b · Zeilenenden** | **fertig** | `.gitattributes` (`* text=auto eol=lf`, Binärdateien ausgenommen) + `git add --renormalize .`. **Schutzprüfung byteweise:** 63 Dateien im Index, davon **62 nur mit Zeilenenden, 0 mit echter Inhaltsänderung**, 1 neue (`.gitattributes`). Commit `205580a` |
+| **1c · Referenz versioniert** | **fertig** | `tests/sim-stand.json` (vorher `Nachweise/`, nicht im Git – Befund M3), `tools/sim-stand.js` zeigt dorthin. `node tools/sim-stand.js` → „Simulation unverändert gegenüber dem Referenzstand“. Commit `c67d520` |
+| **2 · Stand nachziehen** | **fertig** | § 23.7 sagt nicht mehr „nicht begonnen“, sondern „begonnen, 4 von 9 Pflichtpunkten“; `Architektur.md` § 10.9 datiert und um Betriebsregeln, versionierte Referenz und Betriebsbefund ergänzt. Commit `3ae7ecb` |
+| **3a · Form „Sicherheitsvorfall“** | **nicht gemacht** | Die zwei Aufträge („Fremder Router im Netz“, „Das Gästenetz bekommt keine Adresse“) sind **nicht** angelegt. Es fehlen die Konsolenbefehle `ip dhcp snooping` / `ip dhcp snooping trust` / `service dhcp`, ohne die die geforderte Lösung „über die Oberfläche UND über die Konsole“ nicht darstellbar ist |
+| **3b · Injektoren** | **teilweise** | Zwei von 4–5 gebaut: `fremder-dhcp` und `snooping-ohne-trust`, mit `passt`, `anwenden`, `loesung`, `hilfen`, `erklaerung`, `quelle` und Symptom-Text im Fehlerdex. Fehlerdex jetzt **36** Einträge (Test nachgezogen). Commit `92aa4dd` |
+| **3c · Oberfläche** | **nicht gemacht** | Lease-Tabelle, Pool-Felder, Snooping-Schalter fehlen |
+| **3d · Konsole** | **nicht gemacht** | `ip address` im Reservierungs-Untermodus, `ipconfig /all` mit Lease-Zeiten, `dhclient` fehlen |
+| **3e · Wiki, Lernmotor, Mini-Karten** | **nicht gemacht** | |
+| **4 · Abnahme** | **nicht gemacht** | |
+
+#### Prüfstand
+
+`sh tools/test.sh` → **212/213 grün**. Rot: „Generator › Jeder Injektor × passende Vorlage × 8 Seeds: Fehler bricht mit erwartetem Grund, Lösung heilt alles“ – **32 von 568 Kombinationen ergeben einen Entwurf ohne Wirkung** (erwartet 0).
+
+**Eingegrenzt, nicht behoben (nach drei Versuchen gestoppt, nicht umgangen):** Eine eigene Messung über *alle* Injektoren zeigt, dass die Ursache **nicht** die zwei neuen sind – sie erscheinen in der Entwurfsliste nicht. Betroffen sind `ip-tippfehler`, `maske-falsch`, `gateway-falsch`, `gateway-fehlt`, `doppelte-ip`, `dns-fehlt`, `dienst-aus`, `nat-vertauscht`. Ob dieser Test **vor** dieser Sitzung schon rot war, ist **nicht geprüft** – mein Start-Commit ist sauber, aber ich habe den Test vor meinen Änderungen nicht laufen lassen. Das ist ein Versäumnis in der Beweisführung, und es ist der erste Schritt für die nächste Sitzung: `git stash` gibt es nicht mehr (nichts gestasht); sauber wäre ein kurzer Lauf auf `0c288eb` in einem separaten Arbeitsbaum (`git worktree add`), ohne den Zweig zu wechseln.
+
+Weitere Messungen dieser Sitzung: `python tools/klassen.py` → **0**, `python bauen.py` → 106 Module, 1603 KB. Rauchtest **36/36** (vor den Injektor-Änderungen; danach nicht erneut gelaufen, weil er von `src/ui` und `src/stil` abhängt, die unberührt sind). `python tools/q-echt.py` → Fehler, siehe Schritt 0.
+
+**Nicht geprüft:** das Spiel im echten Programm (die `.exe` startet nicht), Ton, die zwei neuen Injektoren im laufenden Spiel (nur über den Generator-Test geprüft), die Punkte 3a, 3c, 3d, 3e und 4 vollständig.
+
+#### Scorecard
+
+**Nicht neu bewertet.** Die Vorgabe verlangt die Neubewertung der Kriterien 4 (Entdeckung) und 5 (Abwechslung) auf Grundlage von **Gesehenem** aus der Abnahme – die Abnahme (Schritt 4) ist nicht erfolgt, und im echten Programm war nichts zu sehen. Eine Zahl hier wäre geraten. **38,0 bleibt unverändert stehen**, weiterhin unter dem Vorbehalt aus § 24 (M1).
+
+#### Betriebsbefund (neu und wichtig)
+
+`sh tools/test.sh` läuft **nicht**, wenn `sh.exe` direkt aufgerufen wird: dann fehlt `dirname` und das Skript sucht `tests/run.js` in `C:\Program Files\Git\`. Verlässlich (in `AGENTS.md` festgehalten):
+
+```
+& "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'
+```
+
+Dazu ein belegter Messfehler zum Nachlesen: `git diff --cached --ignore-cr-at-eol --stat` zeigte **nur** `.gitattributes`, während `--name-only` **63** Dateien nannte. Die beiden widersprechen sich nicht – `--name-only` kennt `--ignore-cr-at-eol` nicht. Die Zeilenenden-Prüfung läuft deshalb byteweise über die Blobs (siehe Schritt 1b).
+
+**Bereit zum Push: nein** – 6 Commits auf `ausbau-1.2`, aber ein Test ist rot. Erst den Entwurfs-Test klären, dann pushen. **HALTEPUNKT.**
