@@ -10,6 +10,7 @@ Spiel.FORMEN = {
   audit: {titel: "Plan-Audit", sym: "📐", text: "Der Netzplan des Kunden hat Fehler – vergleiche mit dem Netz und markiere sie."},
   beratung: {titel: "Adressplan", sym: "🧮", text: "Ein Netz für Abteilungen aufteilen: Adressplan rechnen."},
   hotline: {titel: "Hotline", sym: "☎", text: "Der Kunde ruft an: erst gezielt nachfragen, dann beheben."},
+  sicherheitsvorfall: {titel: "Sicherheitsvorfall", sym: "🛡", text: "Ein fremdes Gerät oder eine Sperre im Netz – finde die Ursache und schließe die Lücke."},
 };
 /* Form eines Auftrags: def.form, sonst aus der Art (Wartung und Wiederholung sind Störungen) */
 Spiel.formVon = def => !def ? "stoerung" : def.form || (def.art === "projekt" || def.art === "terminal" ? def.art : "stoerung");
