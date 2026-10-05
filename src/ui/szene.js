@@ -80,8 +80,8 @@ UI.szene = (() => {
     if (f.art === "adressplan") {
       const n = f.bereiche.length;
       formKarte(buehne, "sz-adressplan", h("div", {class: "sz-form-kopf"}, "🧮 ", h("b", {}, "Adressplan"), ` · ${f.basis}`),
-        h("div", {class: "sz-adressen", "aria-hidden": "true"}, f.bereiche.map((b, i) => h("i", {style: {left: b.links + "%", width: b.breite + "%", "--i": i, "--f": `var(--vlan-${(i % 8) + 1})`}}))),
-        h("ul", {class: "sz-legende"}, f.bereiche.map((b, i) => h("li", {style: {"--i": i, "--f": `var(--vlan-${(i % 8) + 1})`}}, h("b", {}, b.name), ` ${b.netz}${b.praefix}`))));
+        h("div", {class: "sz-adressen", "aria-hidden": "true"}, f.bereiche.map((b, i) => h("i", {style: {left: b.links + "%", width: b.breite + "%", "--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}))),
+        h("ul", {class: "sz-legende"}, f.bereiche.map((b, i) => h("li", {style: {"--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}, h("b", {}, b.name), ` ${b.netz}${b.praefix}`))));
       UI.klang?.spielen("haken");
       await pause(ruhig ? 1200 : 300 + n * 280 + 1100, st);
     }

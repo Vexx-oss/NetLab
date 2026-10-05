@@ -771,6 +771,7 @@ UI.labor = (() => {
     Z.root?.classList.toggle("lb-fern", !!Z.fern);
     const el = Z.el.fern; if (!el) return;
     el.hidden = !Z.fern;
+    el.classList.remove("fertig");                          /* „getrennt“ aus der Probe der vorigen Sitzung nicht mitnehmen */
     if (!Z.fern) return el.replaceChildren();
     const g = Z.netz.geraete[Z.fern], info = (Z.opt && Z.opt.fernInfo) || {}, ziel = info.ziel || {};
     el.replaceChildren(
