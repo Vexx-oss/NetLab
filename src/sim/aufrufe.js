@@ -93,6 +93,14 @@
     }
     let ack = null;
     if (angebot) {
+      /* Rogue-DHCP (Architektur § 10.3 Punkt 6): Antwortet ein ANDERER Server als der, dem der Client schon
+         vertraut (er hat eine gültige Lease von ihm), ist das ein fremder DHCP-Server. Der Client nimmt das
+         erste Angebot – der Konflikt wird als Grund gemeldet, damit die Ursache auffindbar ist. */
+      const vertraut = alt && alt.server ? alt.server : null;
+      if (vertraut && angebot.server && angebot.server !== vertraut) {
+        const e = Sim._log(L, "info", g.id, port, null, `${g.name} bekommt ein Angebot von ${angebot.server}, kennt als seinen DHCP-Server aber ${vertraut}. Das deutet auf einen fremden (nicht erlaubten) DHCP-Server im Netz hin – er kann falsche Optionen wie Gateway oder DNS verteilen.`, {grund: "DHCP_ROGUE_OFFER", proto: "DHCP"});
+        L.dhcpFehler = {grund: "DHCP_ROGUE_OFFER", stelle: e, text: "Angebot von fremdem DHCP-Server"};
+      }
       for (let v = 0; v < 2 && !ack && !L.abbruch; v++) {
         const f = dhcpFrame({typ: "request", gewuenscht: angebot.angeboten, server: angebot.server}, `DHCP Request ${angebot.angeboten}`);
         const r = anfrage(L, g, f, {passt: passt(["ack", "nak"]), timeout: Sim.T.DHCP_TIMEOUT, sendOpt: {ifc,

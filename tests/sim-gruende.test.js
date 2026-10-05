@@ -265,16 +265,65 @@ gruppe("Sim Gründe", () => {
   });
   pruefe("DHCP-Konflikt: doppelt vergebene Adresse wird übersprungen und vermerkt", () => {
     const t = T(), n = t.zweiNetze();
-    /* pcb trägt .100 fest, der Pool beginnt genau dort → der Server muss sie überspringen */
+    /* pcb trägt .100 fest, der Pool beginnt genau dort → der Server muss sie prüfen und vermerken */
     Modell.setzen(n, "pcb", "if.eth0.ip", "10.0.2.100");
     t.host(n, "pcc", null); t.kabel(n, "pcc", "eth0", "sw2", "Fa0/2");
     Modell.setzen(n, "pcc", "if.eth0.dhcp", true);
     Modell.setzen(n, "r1", "dhcp", {ausgeschlossen: [], pools: [{name: "LAN2", netz: "10.0.2.0", maske: "255.255.255.0", gw: "10.0.2.1", dns: "", start: "10.0.2.100", anzahl: 5}]});
+    /* Zweiter Träger derselben Adresse: erst dadurch ist es ein echter Konflikt (mehr als ein Gerät) */
+    t.host(n, "pcd", "10.0.2.100"); t.kabel(n, "pcd", "eth0", "sw2", "Fa0/4");
     const a = Sim.dhcp(n, "pcc");
     erwarte.wahr(a.ok, a.text);
-    erwarte.falsch(a.lease.ip === "10.0.2.100", "die belegte Adresse wird nicht vergeben");
-    /* derselbe Adresskonflikt wie im Gerätemodell (zwei Träger) → DUP_IP ist bekannt */
-    erwarte.gleich(Sim.leases(n, "r1").filter(l => l.ip === a.lease.ip).length, 1, "genau eine Lease für die vergebene Adresse");
+    erwarte.falsch(a.lease.ip === "10.0.2.100", "die doppelt belegte Adresse wird nicht vergeben");
+    /* Der Server hat den Konflikt vermerkt – daran ist zu sehen, dass er wirklich geprüft hat */
+    const vermerkt = Sim.leases(n, "r1").filter(l => l.konflikt);
+    erwarte.wahr(vermerkt.some(l => l.ip === "10.0.2.100"), "die belegte Adresse steht als Konflikt in der Lease-Liste");
+    erwarte.gleich(vermerkt.find(l => l.ip === "10.0.2.100").zustand, "konflikt", "Zustand konflikt");
+  });
+  pruefe("DHCP-Snooping: Server-Antwort an nicht vertrautem Port wird verworfen, an vertrautem kommt sie durch", () => {
+    const bau = (an, vertraut) => {
+      const t = T(), n = t.zweiNetze();
+      Modell.setzen(n, "pcb", "if.eth0.dhcp", true);
+      Modell.setzen(n, "r1", "dhcp", {ausgeschlossen: [], pools: [{name: "LAN2", netz: "10.0.2.0", maske: "255.255.255.0", gw: "10.0.2.1", dns: ""}]});
+      Modell.setzen(n, "sw2", "snooping", {an, vertraut});
+      return {n, t};
+    };
+    /* Der Server hängt an sw2 Gi0/1 – ohne Vertrauen darf seine Antwort nicht durch */
+    const a = bau(true, []);
+    const ra = Sim.dhcp(a.n, "pcb");
+    erwarte.falsch(ra.ok, "ohne vertrauten Port darf keine Adresse ankommen");
+    erwarte.wahr(ra.trace.ereignisse.some(e => e.grund === "DHCP_SNOOPING_BLOCKED"), "DHCP_SNOOPING_BLOCKED wird ausgelöst");
+    erwarte.wahr(IP.apipa(Sim.adresse(a.n, "pcb").ip), "der Client fällt auf APIPA zurück");
+    /* Derselbe Aufbau mit vertrautem Port: die Adresse kommt an */
+    const b = bau(true, ["Gi0/1"]);
+    const rb = Sim.dhcp(b.n, "pcb");
+    erwarte.wahr(rb.ok, "mit vertrautem Port muss die Adresse ankommen: " + rb.text);
+    erwarte.falsch(rb.trace.ereignisse.some(e => e.grund === "DHCP_SNOOPING_BLOCKED"), "nichts wird verworfen");
+    /* Gegenprobe: Snooping aus → auch ohne vertrauten Port kommt sie durch */
+    const c = bau(false, []);
+    erwarte.wahr(Sim.dhcp(c.n, "pcb").ok, "ohne Snooping kommt die Adresse an");
+  });
+  pruefe("DHCP-Rogue: ein zweiter Server im Netz wird als fremd erkannt und gemeldet", () => {
+    const t = T(), n = t.zweiNetze();
+    /* Zwei Router im selben Netz, beide mit DHCP-Pool: der Client kennt zuerst R1, dann antwortet auch R2 */
+    Modell.geraet(n, "router", {id: "r9", name: "R9"});
+    t.kabel(n, "r9", "Gi0/0", "sw2", "Fa0/3");
+    Modell.setzen(n, "r9", "if.Gi0/0.ip", "10.0.2.9"); Modell.setzen(n, "r9", "if.Gi0/0.maske", "255.255.255.0");
+    Modell.setzen(n, "r9", "if.Gi0/0.shutdown", false);
+    Modell.setzen(n, "r9", "dhcp", {pools: [{name: "FREMD", netz: "10.0.2.0", maske: "255.255.255.0", gw: "10.0.2.9", dns: "10.0.2.9"}]});
+    Modell.setzen(n, "r1", "dhcp", {ausgeschlossen: [], pools: [{name: "LAN2", netz: "10.0.2.0", maske: "255.255.255.0", gw: "10.0.2.1", dns: ""}]});
+    Modell.setzen(n, "pcb", "if.eth0.dhcp", true);
+    const a = Sim.dhcp(n, "pcb");
+    erwarte.wahr(a.ok, a.text);
+    const ersterServer = a.lease.server;
+    /* Jetzt denselben Client neu beziehen lassen – ein anderer Server darf sich nun melden */
+    const b = Sim.dhcp(n, "pcb");
+    erwarte.wahr(b.ok, b.text);
+    erwarte.wahr([ersterServer, b.lease.server].every(IP.gueltig), "beide Serveradressen sind gültig");
+    /* Der Hinweis auf einen fremden Server ist ein bekannter Grund und darf nur bei Abweichung auftreten */
+    const fremd = b.trace.ereignisse.some(e => e.grund === "DHCP_ROGUE_OFFER");
+    const gleich = ersterServer === b.lease.server;
+    erwarte.gleich(fremd, !gleich, "Rogue wird genau dann gemeldet, wenn der Server wechselt");
   });
 
   /* ---------- Vertrag und Aufrufe ---------- */

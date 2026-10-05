@@ -48,9 +48,26 @@ Sim.switch = (() => {
       Sim._log(L, "verwerfen", g.id, port, f, `VLAN ${v} gibt es in der VLAN-Datenbank von ${g.name} nicht (show vlan brief). ${port} ist dafür inaktiv, der Frame wird verworfen.`, {grund: "DROP_VLAN"});
       return;
     }
+    if (snoopingVerwirft(L, g, port, f)) return;
     if (pc.modus !== "trunk" && pc.portSecurity && !portSec(L, g, port, pc, f)) return;
     lernen(L, g, v, f.eth.src, port, f);
     weiter(L, g, v, port, f);
+  }
+
+  /* ---- DHCP-Snooping (Architektur § 10.3 Punkt 7, § 10.1 `snooping`) ----
+     Server-Antworten (UDP 67 → 68, Offer/Ack/Nak) dürfen nur an vertrauten Ports hereinkommen.
+     Client-Anfragen (68 → 67, Discover/Request) sind immer erlaubt. */
+  function istServerAntwort(f){
+    return !!(f.udp && f.udp.src === 67 && f.udp.dst === 68 && f.app && f.app.proto === "DHCP"
+      && ["offer", "ack", "nak"].includes((f.app.felder || {}).typ));
+  }
+  function snoopingVerwirft(L, g, port, f){
+    const sn = g.running.snooping;
+    if (!sn || !sn.an || !istServerAntwort(f)) return false;
+    if ((sn.vertraut || []).includes(port)) return false;
+    const z = Sim._z(L, g.id); z.snooping ||= {}; const e = (z.snooping[port] ||= {verworfen: 0}); e.verworfen++;
+    Sim._log(L, "verwerfen", g.id, port, f, `DHCP-Snooping auf ${g.name}: ${port} ist nicht als vertrauter Port eingerichtet – die Server-Antwort ${f.app.info} wird verworfen. Vertraute Ports: ${(sn.vertraut || []).join(", ") || "keine"}.`, {grund: "DHCP_SNOOPING_BLOCKED"});
+    return true;
   }
 
   /* Native VLAN ungleich: CDP meldet es; Verhalten wie echt (ungetaggt landet im Native VLAN dieser Seite) */
