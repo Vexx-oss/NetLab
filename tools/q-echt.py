@@ -22,6 +22,9 @@ FOTO = []
 def js(ausdruck, ws=None):
     w = ws or cdp.WS(cdp.seite())
     w.rufen("Runtime.enable")
+    # window.__q gehoert zum Ausfuehrungskontext der Seite und ist nach jedem Navigationswechsel weg
+    # (gemessen 05.10.2026). Deshalb vor jeder Auswertung im aktuellen Kontext neu setzen - idempotent.
+    w.rufen("Runtime.evaluate", {"expression": HELFER, "returnByValue": True})
     r = w.rufen("Runtime.evaluate", {"expression": f"(async () => {{ return {ausdruck} }})()",
                                      "awaitPromise": True, "returnByValue": True})
     if "exceptionDetails" in r:
@@ -94,8 +97,35 @@ def main():
     ws = cdp.WS(cdp.seite())
     ws.rufen("Runtime.enable")
     ws.rufen("Page.enable")
+    # Die Seite muss fertig geladen sein, BEVOR der Helfer injiziert wird: sonst geht window.__q beim
+    # Navigationswechsel der ersten Ladephase verloren (gemessen 05.10.2026: "reading 'kabel'").
+    for _ in range(120):
+        try:
+            if js("(() => document.readyState === 'complete' && typeof UI !== 'undefined' && !!UI.app)()", ws):
+                break
+        except Exception:
+            pass
+        time.sleep(0.25)
     js(HELFER, ws)
 
+    # 0 · Einstieg vorbereiten (Voraussetzung der Pruefung, nicht ihr Gegenstand): liegt bei frischem
+    #     Teststand noch kein Auftrag an, den ersten ueber den Hauptknopf des Hubs annehmen - echte Maus.
+    einstieg = js("""(() => {
+      if (UI.spiel.inst) return {schon: true};
+      const b = document.querySelector('.hb-annehmen');
+      if (!b) return {fehlt: 'kein Hub-Knopf .hb-annehmen'};
+      const r = b.getBoundingClientRect();
+      return {x: r.left + r.width / 2, y: r.top + r.height / 2, text: (b.textContent || '').trim()};
+    })()""", ws)
+    if einstieg.get("x") is not None:
+        maus("klick", einstieg["x"], einstieg["y"], ws=ws)
+        notizen.append("Einstieg: Knopf " + str(einstieg.get("text")) + " mit echter Maus angeklickt")
+        time.sleep(0.8)
+        js(HELFER, ws)
+    elif einstieg.get("schon"):
+        notizen.append("Einstieg: Auftrag lag bereits an")
+    else:
+        notizen.append("Einstieg: " + str(einstieg.get("fehlt")))
     # 1 · Erster Auftrag muss stehen (Einstieg „Kasse ohne Netz“)
     lage = js("""(async () => {
       for (let i = 0; i < 60 && !(document.querySelector('.lb-svg g.ger[data-id="kasse"]')); i++) await new Promise(r => setTimeout(r, 150));

@@ -5,7 +5,7 @@
   python tools/cdp.py shot bild.png            Bildschirmfoto der Seite
   python tools/cdp.py klick X Y | zeigen X Y | ziehen X1 Y1 X2 Y2 | taste P   echte Maus/Tastatur (CSS-Pixel; zeigen = nur darüberfahren)
   python tools/cdp.py lauf schritte.txt [mess.json]   Szenario in einer Sitzung (groesse B H, klick-auf SELEKTOR, messen, shot …; siehe lauf())
-  python tools/cdp.py stop                     Programm beenden
+  python tools/cdp.py stop                     die in DIESEM Lauf gestartete Instanz beenden (nur eigene PID, Regel 1)
 
 Umgebung: WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9222, LABOR_DATEN=<Testordner>.
 """
@@ -27,6 +27,16 @@ HIER = Path(__file__).resolve().parent.parent
 PORT = 9222
 EXE = HIER / "Programm" / "Netzwerk-Labor.exe"
 DATEN = Path(tempfile.gettempdir()) / "netzwerk-labor-test"
+GESTARTET = []  # Popen-Objekte, die DIESER Lauf selbst gestartet hat (AGENTS.md Regel 1: nur eigene PIDs beenden)
+
+
+def laeuft_schon():
+    """Laeuft schon eine Netzwerk-Labor-Instanz? (Einzelinstanz-Plugin: ein zweiter Start kaeme nicht auf den Port.)
+
+    Es wird NICHTS beendet - der Aufruf meldet nur. Fremde Prozesse anzufassen verbietet AGENTS.md Regel 1."""
+    r = subprocess.run(["tasklist", "/FI", "IMAGENAME eq Netzwerk-Labor.exe", "/FO", "CSV", "/NH"],
+                       capture_output=True, text=True)
+    return "Netzwerk-Labor.exe" in (r.stdout or "")
 
 
 def ziele():
@@ -116,12 +126,16 @@ def start(exe=None, frisch=False):
     if frisch and DATEN.exists():
         shutil.rmtree(DATEN, ignore_errors=True)
     DATEN.mkdir(parents=True, exist_ok=True)
+    if laeuft_schon():
+        raise SystemExit("Es laeuft schon eine Netzwerk-Labor-Instanz. Bitte zuerst beenden (Tray-Symbol -> Beenden); "
+                         "dieses Werkzeug beendet aus Prinzip keine fremden Prozesse (AGENTS.md Regel 1).")
     umgebung = dict(os.environ, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=f"--remote-debugging-port={PORT}", LABOR_DATEN=str(DATEN))
-    subprocess.Popen([str(exe)], env=umgebung, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    p = subprocess.Popen([str(exe)], env=umgebung, creationflags=getattr(subprocess, "DETACHED_PROCESS", 0))
+    GESTARTET.append(p)
     for _ in range(60):
         try:
             seite()
-            print(json.dumps({"gestartet": str(exe), "daten": str(DATEN)}, ensure_ascii=False))
+            print(json.dumps({"gestartet": str(exe), "pid": p.pid, "daten": str(DATEN)}, ensure_ascii=False))
             return
         except Exception:
             time.sleep(0.5)
@@ -326,9 +340,21 @@ def lauf(datei, ausgabe=None):
 
 
 def stop():
-    subprocess.run(["taskkill", "/IM", "netzwerk-labor.exe", "/F"], capture_output=True)
-    subprocess.run(["taskkill", "/IM", "Netzwerk-Labor.exe", "/F"], capture_output=True)
-    print("gestoppt")
+    """Beendet NUR die Instanzen, die DIESER Lauf selbst gestartet hat (AGENTS.md Regel 1).
+
+    Kein Beenden nach Namen: beendet wird ausschliesslich eine PID aus GESTARTET und nur, solange genau
+    dieser Prozess noch laeuft (p.poll() is None) - damit ist eine PID-Wiederverwendung ausgeschlossen.
+    /T nimmt die msedgewebview2-Kinder mit, damit keine Waisen zurueckbleiben."""
+    if not GESTARTET:
+        print("gestoppt: nichts zu beenden - in diesem Lauf wurde keine Instanz gestartet")
+        return
+    for p in GESTARTET:
+        if p.poll() is not None:
+            print(f"gestoppt: PID {p.pid} war schon beendet")
+            continue
+        r = subprocess.run(["taskkill", "/PID", str(p.pid), "/T", "/F"], capture_output=True, text=True)
+        print(f"gestoppt: PID {p.pid} (taskkill {r.returncode})")
+    GESTARTET.clear()
 
 
 if __name__ == "__main__":

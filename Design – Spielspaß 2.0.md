@@ -1349,3 +1349,33 @@ abgearbeitet sind (u. a. wurde ein überflüssiger ACE-Eingriff außerhalb des P
 setzt eine künftige Werkzeug-Sitzung im Modus `workspace-write` das Label erneut, genügt derselbe Doppelklick.
 **Nicht geprüft:** echter menschlicher Doppelklick, Verhalten nach Windows-Neustart, Spielbarkeit (kein Klick
 ausgeführt).
+
+### Der echte Abnahmelauf läuft wieder (05.10.2026, 20:12)
+
+`python tools/q-echt.py` (Auftrag Q, Design § 22) war seit dem Ausfall nicht lauffähig. Er läuft jetzt durch –
+Exit-Code **0**, 10 s, **0** WebView2-Abstürze, keine Fehlerliste:
+
+| Prüfung | Messwert |
+|---|---|
+| Erster Auftrag | `salon-01`, Switch `sw1`, 4 Kabel |
+| G1 – trifft die Maus jedes Gerät? | **6 Geräte geprüft, 0 verdeckt** |
+| Kabel mit echter Maus ziehen | Kabel 4 → **5** |
+| G3 – Sprechblase verdeckt nichts? | links 272 px, 216 px breit, **0 Pillen überdeckt** |
+| Abnahme | **5 ★** |
+| Fernwartungs-Schild | 400 × 351 px, nur während der Fernwartung sichtbar |
+| Bilder | `Nachweise/1.2-Q/q-1366-1-einstieg.png` … `-5-fernwartung.png` |
+
+**Drei Werkzeugfehler, die dabei auffielen und behoben wurden** (alle in `tools/`, 05.10.2026 abends):
+
+1. `cdp.stop()` beendete das Programm per `taskkill /IM` – also **nach Namen**, gegen AGENTS.md Regel 1, und hätte
+   auch eine fremde laufende Sitzung getroffen. Jetzt merkt sich `cdp.start()` die gestartete PID, und `stop()`
+   beendet ausschließlich diese (nur solange `poll()` zeigt, dass genau dieser Prozess noch läuft; `/T` nimmt die
+   msedgewebview2-Kinder mit). `start()` verweigert außerdem den Start, wenn schon eine Instanz läuft.
+2. `q-echt.py` setzte voraus, dass der erste Auftrag schon angenommen ist – bei frischem Teststand (`--frisch`) ist
+   er das nicht. Der Einstieg ist jetzt ein ausdrücklicher Vorbereitungsschritt.
+3. `q-echt.py` injizierte seinen JS-Helfer, bevor die Seite fertig geladen war. Der Helfer gehört zum
+   Ausführungskontext und war nach dem Navigationswechsel weg (`TypeError: … reading 'kabel'`). `js()` setzt ihn
+   jetzt vor jeder Auswertung im aktuellen Kontext neu.
+
+**Nicht geprüft:** ein menschlicher Doppelklick (der Lauf startet das Programm selbst), Spielbarkeit über die
+Abnahme hinaus, Verhalten nach Windows-Neustart.
