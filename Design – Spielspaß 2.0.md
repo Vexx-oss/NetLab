@@ -18,7 +18,7 @@ status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zwe
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
 
 > [!info] In Arbeit 05.10.2026: Auftrag „P“ (Politur und Bindung) aus der unabhängigen Prüfung § 20
-> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Punkt 3 fertig: eigene Probe für Hotline, Fernwartung, Audit, Adressplan. Punkt 4 fertig: Vertrauen zahlt aus, Feierabend-Ausblick. Stand: [[#21 · Auftrag P – Stand]].
+> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Punkt 3 fertig: eigene Probe für Hotline, Fernwartung, Audit, Adressplan. Punkt 4 fertig: Vertrauen zahlt aus, Feierabend-Ausblick. Punkt 5 fertig: Flow-Regler. Stand: [[#21 · Auftrag P – Stand]].
 
 > [!warning] HALTEPUNKT 05.10.2026 nach E2 – Scorecard 38,0 von 60 (Ziel 39,0 nicht ganz erreicht)
 > E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Was die letzten 1,0 Punkte bringen könnte und warum ich nicht weitergebaut habe: [[#19 · Stand nach E2 – Haltepunkt]]. **D beginnt erst nach dem Anspielen.**
@@ -856,7 +856,7 @@ Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswer
 | 2 Kuratierte erste Stunde (F3) | feste Folge der ersten sechs Aufträge | ✅ fertig |
 | 3 Probe für jede Form (F4) | Hotline, Fernwartung, Audit, Adressplan | ✅ fertig |
 | 4 Vertrauen zahlt aus (F5) | Empfehlung ab 3, −20 % Wartung ab 4, Feierabend-Ausblick | ✅ fertig |
-| 5 Flow-Regler (F6) | Gerüst nach zwei Fehlschlägen, Verwicklung nach drei Glanzergebnissen | offen |
+| 5 Flow-Regler (F6) | Gerüst nach zwei Fehlschlägen, Verwicklung nach drei Glanzergebnissen | ✅ fertig |
 | 6 Hub-Wahl (F7) | „oder: 2 weitere Aufträge“, Wochenziel | offen |
 
 ### Punkt 1 · Hygiene
@@ -898,3 +898,18 @@ Geprüft: Test „eigene Probe je Form“ (Daten je Form, Bereiche lückenlos f�
 - **Sichtbar vorher:** Die Akte zeigt unter den Herzen, was das Vertrauen öffnet („♥♥♥ Empfehlung an Schreibbüro Wortgenau ✓ · ♥♥♥♥ Wartungsvertrag −20 %“); die Kundenkarte des empfohlenen Kunden trägt „💬 empfohlen von Salon Lockenwerk“; das Ergebnis meldet es in „Dein Weg“.
 - **Feierabend-Ausblick („Morgen: …“):** zuerst der Folgeauftrag eines Provisoriums („Morgen: Das Provisorium bei Mira Kaya („Das Lämpchen blinkt nicht“) meldet sich in etwa 3 Aufträgen.“), dann ein Notfall, dann ein Kapitel, das nur noch eine saubere Arbeit entfernt ist („Morgen: Noch ein sauberer Auftrag bei Mira Kaya – dann wartet Kapitel 1: „…“.“), sonst wie bisher. Gilt im Hub und in der Feierabend-Zeile des Ergebnisses.
 - **Geprüft:** 4 neue Tests (Empfehlung öffnet das Schreibbüro bei Ruf 7, nur einmal, wartet in der ersten Stunde; Rabatt; Reihenfolge des Ausblicks), im Browser Ergebnis → Karte → Kundenliste → Akte angesehen. 200/200 Tests, `rauch.py` 33/33.
+
+### Punkt 5 · Flow-Regler
+
+Je Fertigkeit merkt sich das Spiel die letzten fünf Ergebnisse. **Fehlschlag** = bezahlte Hilfe (ab „Bereich zeigen“) oder mehr als ein Abnahmeversuch; **Glanz** = 5 Sterne im ersten Versuch, ohne den Senior zu fragen; ein gewöhnlicher Erfolg setzt zurück.
+
+| Lage | Was passiert beim nächsten Auftrag dieser Fertigkeit |
+|---|---|
+| **zwei Fehlschläge in Folge → Gerüst** | Die Frage des Seniors steht gleich in der Mappe (frei), Haken, Grund und „!“-Warnungen sind an wie im Einstieg, ein zweiter Abnahmeversuch kostet nichts. Generiertes kommt eine Nummer kleiner: Formen ein Niveau tiefer (Plan-Audit mit 1 statt 2 Fehlern), Störungen mit nur einem Ziel. Postfach-Marke „🧭 mit Gerüst“. |
+| **drei Glanzergebnisse → Verwicklung** | Generierte Störungen bekommen einen **zweiten Fehler**, der nachweislich ein weiteres Ziel bricht (die Lösung behebt beide); Formen eine Nummer größer; keine „!“-Warnungen und kein Hilfsangebot des Seniors. Marke „🔥 kniffliger“. |
+
+- Der Stand wird beim Erstellen eines Auftrags festgehalten und ändert sich mitten im Auftrag nicht; handgeschriebene Aufträge behalten ihren Fehler, nur die Begleitung ändert sich. Prüfung und Tagesrätsel bleiben unberührt. Nie Fortschrittsverlust (R6).
+- **Einstellung „Anpassung“** (Darstellung): Automatisch (Standard) oder Manuell – dann gilt nur das Niveau.
+- Das Ergebnis sagt es, wenn sich etwas ändert: „🧭 Nächstes Mal „IP-Adresse und Maske setzen“ mit Gerüst“ bzw. „🔥 … sitzt – der nächste wird kniffliger“.
+- **Grenze (ehrlich):** Im Hauptfluss kommen nach der ersten Stunde vor allem Geschichten-Aufträge und Formen; für Geschichten-Aufträge wirkt nur die Begleitung (Tipp, Regeln), die Größe ändert sich bei Formen und generierten Störungen (Nachschub, Wartung, Notfall, Wiederholung).
+- **Geprüft:** 4 neue Tests (Zustandsfolge, Bewertung, Gerüst-Audit kleiner und beim Neuladen gleich, Regeln im AP2, Verwicklung mit zwei Fehlern für vier Seeds, zweimal zäh → Gerüst); im Browser Postfach-Marke und Tipp in der Mappe angesehen. 204/204 Tests, `rauch.py` 33/33.
