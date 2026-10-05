@@ -18,3 +18,9 @@ Programm/**/*.rar
 Nachweise/
 # Temporaeres Messprofil der Browser-Pruefung (kann weg, sobald das Edge-Testfenster geschlossen ist)
 _probe-browser/
+
+# Auslieferungspakete (tools/paket.py): erzeugt, einige MB, gehoeren an eine Release, nicht ins Git
+dist/
+# Messprofile und Bilder des Starttests (tools/starttest.py legt sie im TEMP an, falls jemand --bild . nutzt)
+_sonde-*/
+*.beiseite

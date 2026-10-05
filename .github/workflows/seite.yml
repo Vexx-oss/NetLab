@@ -1,0 +1,80 @@
+name: Spiel veröffentlichen
+
+# Baut das Spiel als EINZELDATEI, prüft es und stellt es auf GitHub Pages.
+# Ergebnis: https://vexx-oss.github.io/Side-Project/  — ein Klick, spielt sofort im
+# Browser. Kein Download, kein Entpacken, keine Installation.
+#
+# Voraussetzung (einmalig, kann nur im Repository eingestellt werden):
+#   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+on:
+  push:
+    branches: [ausbau-1.2]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nur eine Veröffentlichung gleichzeitig; ein neuerer Lauf darf den älteren ablösen.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    name: Einzeldatei bauen und prüfen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Erst prüfen, dann veröffentlichen: eine kaputte Fassung soll nicht online gehen.
+      - name: Tests (headless, Node)
+        run: sh tools/test.sh
+
+      - name: Simulation gegen den Referenzstand
+        run: node tools/sim-stand.js
+
+      - name: Einzeldatei bauen
+        run: python tools/einfach.py
+
+      - name: Einzeldatei prüfen — keine Außenverweise, Schriften eingebettet
+        run: python tools/einfach.py --pruefen docs/index.html
+
+      - name: Selbsttestseite mitnehmen (zum Spielen nicht nötig)
+        run: |
+          python bauen.py
+          cp web/tests.html docs/tests.html
+          { echo "User-agent: *"; echo "Disallow: /tests.html"; } > docs/robots.txt
+
+      - name: Seiten zusammenstellen
+        run: |
+          mkdir -p _site
+          cp docs/index.html _site/index.html
+          cp docs/tests.html _site/tests.html
+          cp docs/robots.txt _site/robots.txt
+          touch _site/.nojekyll
+          ls -la _site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  veroeffentlichen:
+    name: Auf GitHub Pages stellen
+    needs: bauen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

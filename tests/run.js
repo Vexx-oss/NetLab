@@ -4,7 +4,22 @@
    dann tests/harness.js und alle tests/*.test.js. Kein npm, nur Node-Bordmittel. */
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const WURZEL = path.resolve(__dirname, ".."), SRC = path.join(WURZEL, "src");
-const LERNMOTOR = path.resolve(WURZEL, "..", "FISI-Spielhalle", "src", "lernmotor.js");
+
+/* Der Lernmotor wird mit Netzwerk-Labor und FISI-Spielhalle geteilt. Liegt die Spielhalle
+   daneben, hat sie Vorrang; sonst greift die Kopie im Repositorium (fremd/lernmotor.js).
+   Ohne diesen Rückfall wäre der Testlauf in einem frischen Klon (und auf GitHub) nicht
+   lauffähig — die Datei läge außerhalb des Repositoriums. Ihr Herkunftskopf wird
+   abgeschnitten, damit beide Wege dieselbe Quelle laden. Gleiche Logik wie in bauen.py. */
+const LERNMOTOR_QUELLE = path.resolve(WURZEL, "..", "FISI-Spielhalle", "src", "lernmotor.js");
+const LERNMOTOR_KOPIE = path.join(WURZEL, "fremd", "lernmotor.js");
+function lernmotor() {
+  if (fs.existsSync(LERNMOTOR_QUELLE)) return { pfad: LERNMOTOR_QUELLE, kopie: false };
+  if (fs.existsSync(LERNMOTOR_KOPIE)) return { pfad: LERNMOTOR_KOPIE, kopie: true };
+  throw new Error("Kein Lernmotor gefunden: weder " + LERNMOTOR_QUELLE + " noch " + LERNMOTOR_KOPIE);
+}
+const LM = lernmotor();
+const KOPF = /^\/\*\s*=+[\s\S]*?=+\s*\*\/\s*/;
+
 const SCHICHTEN = [
   ["kern", ["basis.js", "netz.js"], []], ["@lernmotor", [], []], ["modell", ["geraete.js"], []],
   ["sim", ["engine.js"], []], ["cli", ["parser.js"], []], ["daten", ["basis.js"], []], ["spiel", ["zustand.js"], []],
@@ -12,7 +27,7 @@ const SCHICHTEN = [
 function module(){
   const liste = [];
   for (const [ordner, kopf, schluss] of SCHICHTEN) {
-    if (ordner === "@lernmotor") { liste.push(LERNMOTOR); continue; }
+    if (ordner === "@lernmotor") { liste.push(LM.pfad); continue; }
     const d = path.join(SRC, ordner); if (!fs.existsSync(d)) continue;
     const alle = fs.readdirSync(d).filter(n => n.endsWith(".js")).sort();
     const reihe = [...kopf.filter(n => alle.includes(n)), ...alle.filter(n => !kopf.includes(n) && !schluss.includes(n)), ...schluss.filter(n => alle.includes(n))];
@@ -20,9 +35,13 @@ function module(){
   }
   return liste;
 }
+function inhalt(f) {
+  const t = fs.readFileSync(f, "utf8");
+  return f === LM.pfad && LM.kopie ? t.replace(KOPF, "") : t;
+}
 const ctx = vm.createContext({console, setTimeout, clearTimeout, Date, Math, JSON, Intl});
 const code = [`"use strict"; const LABOR_VERSION = "test";`];
-for (const f of module()) code.push(`/* ${path.relative(WURZEL, f)} */\n` + fs.readFileSync(f, "utf8"));
+for (const f of module()) code.push(`/* ${path.relative(WURZEL, f)} */\n` + inhalt(f));
 code.push(fs.readFileSync(path.join(__dirname, "harness.js"), "utf8"));
 const filter = process.argv[2] || "";
 const testdateien = fs.readdirSync(__dirname).filter(n => n.endsWith(".test.js")).sort();

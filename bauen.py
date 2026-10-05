@@ -5,7 +5,10 @@ genannten Kopfdateien, dann alle übrigen *.js alphabetisch, zuletzt die genannt
 Eine neue Datei in einem Schichtordner ist damit automatisch dabei. Regel dafür: Auf oberster Ebene
 hängen Dateien nur Funktionen an ihren Namensraum (Sim, CLI, …) und rufen keine anderen Dateien auf.
 
-Der Lernmotor kommt zur Bauzeit aus ../FISI-Spielhalle/src/lernmotor.js (ein Lernmotor, keine Kopie).
+Der Lernmotor kommt aus fremd/lernmotor.js — einer Kopie aus ../FISI-Spielhalle/src/lernmotor.js,
+weil sich beide Projekte EINEN Lernmotor teilen. Die Kopie macht dieses Repositorium allein
+baubar (GitHub!). Liegt die Spielhalle daneben, hat sie Vorrang, damit eine Weiterentwicklung
+dort sofort im Bau landet; `python tools/lernmotor.py` meldet, ob beide gleich sind.
 Schriften liegen lokal in schriften/ (SIL OFL), keine externen Anfragen.
 
 Aufruf:  python bauen.py            -> web/index.html + web/schriften.css + web/schriften/
@@ -14,6 +17,7 @@ Aufruf:  python bauen.py            -> web/index.html + web/schriften.css + web/
 """
 import datetime
 import json
+import re
 import shutil
 import sys
 import zipfile
@@ -22,8 +26,11 @@ from pathlib import Path
 HIER = Path(__file__).resolve().parent
 SRC = HIER / "src"
 WEB = HIER / "web"
-LERNMOTOR = HIER.parent / "FISI-Spielhalle" / "src" / "lernmotor.js"
-VERSION = "1.1.0"
+# Kopie im Repositorium (immer da, auch auf GitHub) …
+LERNMOTOR_KOPIE = HIER / "fremd" / "lernmotor.js"
+# … und die Quelle daneben, falls die Spielhalle mit ausgecheckt ist (hat Vorrang).
+LERNMOTOR_QUELLE = HIER.parent / "FISI-Spielhalle" / "src" / "lernmotor.js"
+VERSION = "1.2.0"
 
 # (Ordner, Kopfdateien, Schlussdateien, headless)
 SCHICHTEN = [
@@ -55,24 +62,57 @@ def module():
     return liste
 
 
+# Der Herkunftskopf in fremd/lernmotor.js (zwischen den /* ===-Zeilen) gehoert nicht in den
+# Bau: die Quelle daneben hat ihn nicht, und der Bau soll aus beiden Wegen byte-gleich sein.
+# Der Kopf dient nur Menschen, die die Kopie im Repositorium ansehen.
+LERNMOTOR_KOPF = re.compile(r"\A/\*\s*=+.*?=+\s*\*/\s*", re.S)
+
+
+def lies(pfad: Path) -> str:
+    """Datei lesen und Zeilenenden auf LF normalisieren.
+
+    Die Quellen sind gemischt (61 Dateien CRLF, 101 LF, so gewachsen und bewusst nicht
+    angefasst). Im Repositorium gilt laut .gitattributes LF. Ohne diese Normalisierung
+    erbt die gebaute Seite die CRLF der Quellen: `web/index.html` haette 23.719 CRLF,
+    `docs/index.html` 23.838 — und beide wuerden von Git als „staendig geaendert" gefuehrt,
+    weil der Filter sie beim naechsten Anfassen auf LF umstellt. Ausserdem waere der Bau
+    auf Linux (nur LF) nicht byte-gleich zum Bau auf Windows — und die CI vergleicht.
+    """
+    return pfad.read_text(encoding="utf-8").replace("\r\n", "\n")
+
+
+def lernmotor_pfad():
+    """Welche Lernmotor-Datei wird gebaut? Die Quelle daneben hat Vorrang, sonst die Kopie."""
+    if LERNMOTOR_QUELLE.is_file():
+        return LERNMOTOR_QUELLE
+    if LERNMOTOR_KOPIE.is_file():
+        return LERNMOTOR_KOPIE
+    raise SystemExit(
+        "FEHLER: kein Lernmotor gefunden.\n"
+        f"  erwartet: {LERNMOTOR_KOPIE}\n"
+        "  Die Kopie gehoert ins Repositorium — fehlt sie, ist der Checkout unvollstaendig."
+    )
+
+
 def quelle(rel):
     if rel == "@lernmotor":
-        return LERNMOTOR.read_text(encoding="utf-8")
-    return (SRC / rel).read_text(encoding="utf-8")
+        text = lies(lernmotor_pfad())
+        return LERNMOTOR_KOPF.sub("", text, count=1) if "fremd" in str(lernmotor_pfad()) else text
+    return lies(SRC / rel)
 
 
 def stile():
     d = SRC / "stil"
     alle = sorted(p.name for p in d.glob("*.css"))
     reihe = [n for n in ["basis.css"] if n in alle] + [n for n in alle if n != "basis.css"]
-    return "\n".join(f"/* ---- {n} ---- */\n" + (d / n).read_text(encoding="utf-8") for n in reihe)
+    return "\n".join(f"/* ---- {n} ---- */\n" + lies(d / n) for n in reihe)
 
 
 def seite(schrift_link):
     NL = "\n"
     kopf = f'"use strict";{NL}const LABOR_VERSION = "{VERSION}";{NL}const LABOR_BAU = "{datetime.datetime.now().strftime("%d.%m.%Y %H:%M")}";'
     skripte = kopf + NL + NL.join(f"/* ---- {rel} ---- */{NL}" + quelle(rel).replace("</script", "<\\/script") for rel, _ in module())
-    huelle = (SRC / "seite.html").read_text(encoding="utf-8")
+    huelle = lies(SRC / "seite.html")
     return huelle.replace("/*STIL*/", stile()).replace("/*SKRIPTE*/", skripte).replace("<!--SCHRIFTEN-->", schrift_link)
 
 
@@ -82,7 +122,8 @@ def main():
         return
     WEB.mkdir(exist_ok=True)
     html = seite('<link rel="stylesheet" href="schriften.css">')
-    (WEB / "index.html").write_text(html, encoding="utf-8")
+    # newline="\n": auf jeder Plattform dieselben Zeilenenden (LF), wie .gitattributes verlangt.
+    (WEB / "index.html").write_text(html, encoding="utf-8", newline="\n")
     shutil.copy2(HIER / "schriften.css", WEB / "schriften.css")
     if (WEB / "schriften").exists():
         shutil.rmtree(WEB / "schriften")
@@ -98,8 +139,8 @@ def testseite():
     NL = "\n"
     teile = ['"use strict";', 'const LABOR_VERSION = "test";']
     teile += [quelle(rel).replace("</script", "<\\/script") for rel, headless in module() if headless]
-    teile.append((HIER / "tests" / "harness.js").read_text(encoding="utf-8"))
-    teile += [p.read_text(encoding="utf-8").replace("</script", "<\\/script") for p in sorted((HIER / "tests").glob("*.test.js"))]
+    teile.append(lies(HIER / "tests" / "harness.js"))
+    teile += [lies(p).replace("</script", "<\\/script") for p in sorted((HIER / "tests").glob("*.test.js"))]
     js = (NL + ";" + NL).join(teile)
     html = f"""<!doctype html><meta charset="utf-8"><title>Netzwerk-Labor – Tests</title>
 <style>body{{font:14px/1.5 system-ui;margin:20px;background:#fff;color:#111}} .ok{{color:#15803D}} .bad{{color:#B91C1C;font-weight:700}} pre{{white-space:pre-wrap}}</style>
@@ -109,7 +150,7 @@ def testseite():
 document.getElementById("out").innerHTML = z.join("\\n"); document.getElementById("summe").textContent = (e.length - f) + "/" + e.length + " grün" + (f ? ", " + f + " ROT" : "");
 window.TESTERGEBNIS = {{gesamt: e.length, rot: f, fehler: e.filter(r => !r.ok)}}; }})();
 </script>"""
-    (WEB / "tests.html").write_text(html, encoding="utf-8")
+    (WEB / "tests.html").write_text(html, encoding="utf-8", newline="\n")
 
 
 LIESMICH = """Netzwerk-Labor – Browser-Fassung (Nebenprodukt des Desktop-Programms)

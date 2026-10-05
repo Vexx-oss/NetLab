@@ -1,0 +1,108 @@
+Netzwerk-Labor
+Lernspiel fuer Fachinformatiker Systemintegration (AP1/AP2)
+================================================================
+
+WAS IST DAS?
+  Du fuehrst ein Ein-Mann-Systemhaus. Kunden schicken Tickets ("Die Kasse
+  druckt nicht mehr"), du loest sie in einem Netzwerk-Simulator: Geraete
+  verkabeln, IP, VLAN, Routen, ACL, NAT, DHCP, DNS, Firewall - per Klick im
+  Inspektor oder in einer IOS-aehnlichen Konsole. Jedes Paket ist wirklich
+  unterwegs; du siehst Schritt fuer Schritt, wo und warum es verworfen wird.
+
+  Kein Cisco-Produkt. Die Konsole ist "IOS-aehnlich" und kennzeichnet
+  Unbelegtes als solches. Alles laeuft lokal und offline.
+
+
+SO STARTEST DU - WEG 1 (empfohlen, laeuft ueberall)
+----------------------------------------------------------------
+  Doppelklick auf "Netzwerk-Labor.html".
+
+  Das ist das ganze Spiel in EINER Datei: Schriften sind eingebettet, es wird
+  nichts nachgeladen, nichts installiert, kein Internet gebraucht. Windows,
+  Linux, macOS - alles, was einen Browser hat.
+
+  Es fehlen gegenueber dem Windows-Programm nur die Fenster-Funktionen
+  (Leiste am Bildschirmrand, Tray-Symbol, immer im Vordergrund, globales
+  Tastenkuerzel). Das Spiel sagt das an der passenden Stelle selbst.
+
+
+SO STARTEST DU - WEG 2 (Windows-Programm)
+----------------------------------------------------------------
+  Doppelklick auf "Netzwerk-Labor.exe". Nichts installieren, kein Internet.
+  Windows 10/11 bringt die noetige WebView2-Laufzeit mit.
+
+  Erscheint "Der Computer wurde durch Windows geschuetzt" (SmartScreen, weil
+  das Programm nicht signiert ist):
+      "Weitere Informationen"  ->  "Trotzdem ausfuehren"
+
+  Startet das Programm nicht und erscheint kein Fenster: Doppelklick auf
+  "Integritaet-reparieren.cmd". Das setzt das Integritaetslabel des Ordners
+  auf "Mittel" zurueck - die Ursache ist im Feld gemessen und dort erklaert.
+
+
+SO SPIELST DU
+----------------------------------------------------------------
+  * Postfach: Kundenmails lesen, "Auftrag annehmen" -> das Netz erscheint.
+  * Labor: Geraet anklicken -> rechts der Inspektor (Adressen, Ports, VLAN,
+    Routen, ACL, NAT ...) und der Reiter "Konsole".
+  * Werkzeuge oben links in der Laborflaeche, Kurztaste in Klammern:
+      V = Auswaehlen und verschieben
+      K = Kabel verlegen (vom Geraet zum Geraet ziehen)
+      P = Ping-Werkzeug (von Geraet A auf Geraet B ziehen)
+    Geraet doppelklicken (oder Taste T) oeffnet sein Terminal.
+  * Oben stehen die Ziele des Tickets; im Einstieg springen sie live auf Haken.
+  * "Abnahme anfordern" prueft alles nach - auch, ob du dabei etwas anderes
+    kaputt gemacht hast. In der Abschlusspruefung werden Router und Switches
+    neu gestartet: nur Gespeichertes ueberlebt.
+  * Hilfe (Checkliste, Werkzeugtipp, Frage vom Senior) ist am Anfang gratis,
+    danach kostet sie Sterne - bis zur vorgefuehrten Loesung.
+    Fehler kosten nichts.
+  * Nach einem Ping unten "In Simulation oeffnen": das Paket Schicht fuer
+    Schicht, mit jedem Rahmen.
+
+
+DEIN SPIELSTAND
+----------------------------------------------------------------
+  Browser-Fassung:  im Browser (localStorage), Schluessel "netzwerk-labor".
+                    Wer die Websitedaten loescht, loescht den Spielstand.
+  Windows-Programm: %APPDATA%\de.fisi.netzwerklabor\spielstand.json
+                    Taeglich eine Sicherung, 5 werden behalten, dazu ein
+                    "vorheriger Stand" (hoechstens eine Viertelstunde zurueck).
+                    Einstellungen -> Spielstand -> Exportieren/Importieren
+                    fuer einen anderen Rechner.
+
+  Wichtig: Die beiden Fassungen haben GETRENNTE Spielstaende. Wer im Browser
+  anfaengt und spaeter die .exe nimmt, faengt dort neu an.
+
+
+INHALT
+----------------------------------------------------------------
+  * Simulation auf Frame-Ebene: ARP, Switching mit MAC-Lernen, VLAN/802.1Q,
+    Router-on-a-Stick, statische Routen, ICMP (Timeout gegen unreachable, TTL),
+    ACL, NAT/PAT, DHCP mit Relay und Snooping, DNS, TCP-Handshake, HTTP,
+    Firewall mit Zonen, Broadcast-Sturm.
+  * 37 handgeschriebene Tickets in 5 Karrierestufen plus 4 Projekte, dazu
+    unbegrenzt generierte Tickets aus 5 Netzvorlagen und 30 Fehlerinjektoren.
+  * Karriere: Sterne, Euro, Ruf, Wartungsvertraege, Pruefungstag nach
+    IHK-Notenschluessel.
+  * Lernstand: Fertigkeiten als Ringe, Abzeichen, Fehlerheft, Wiederholungen
+    im richtigen Abstand (Lernmotor).
+
+
+EHRLICHE GRENZEN
+----------------------------------------------------------------
+  * Das Windows-Programm ist nicht signiert (SmartScreen-Hinweis, siehe oben).
+  * Im Browser gibt es keine Leiste, kein Tray, kein globales Tastenkuerzel.
+  * Die Linux-Pakete sind Stand 1.0 und nicht Teil dieses Pakets.
+  * Arbeitsspeicher im Leerlauf rund 0,5 GB (WebView2); CPU praktisch null.
+
+
+RECHTSHINWEISE
+----------------------------------------------------------------
+  Schriften: Atkinson Hyperlegible, Bricolage Grotesque, JetBrains Mono -
+  SIL Open Font License 1.1. Die Lizenztexte liegen unter LIZENZEN/.
+
+  Inhalte nach bestem Wissen aus den Lernnotizen einer FISI-Umschulung
+  geprueft. Im Zweifel gilt euer Unterricht.
+
+  Lizenz dieses Programms: siehe LIZENZ.md. Kein Cisco-Produkt.

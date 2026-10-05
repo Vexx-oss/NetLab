@@ -27,10 +27,25 @@ const SCHICHTEN = [
   ["sim", ["engine.js"]], ["cli", ["parser.js"]], ["daten", ["basis.js"]], ["spiel", ["zustand.js"]],
 ];
 
+/* Lernmotor: Quelle daneben hat Vorrang, sonst die Kopie im Repositorium (wie in bauen.py und
+   tests/run.js). Ohne den Rückfall liefe dieser Vergleich in einem frischen Klon ins Leere. */
+const LM_QUELLE = path.resolve(HIER, "..", "FISI-Spielhalle", "src", "lernmotor.js");
+const LM_KOPIE = path.join(HIER, "fremd", "lernmotor.js");
+const LM = fs.existsSync(LM_QUELLE) ? { pfad: LM_QUELLE, kopie: false }
+       : fs.existsSync(LM_KOPIE) ? { pfad: LM_KOPIE, kopie: true }
+       : null;
+if (!LM) throw new Error("Kein Lernmotor gefunden: weder " + LM_QUELLE + " noch " + LM_KOPIE);
+const LM_KOPF = /^\/\*\s*=+[\s\S]*?=+\s*\*\/\s*/;
+
+function inhalt(f) {
+  const t = fs.readFileSync(f, "utf8");
+  return f === LM.pfad && LM.kopie ? t.replace(LM_KOPF, "") : t;
+}
+
 function moduleListe() {
   const liste = [];
   for (const [ordner, kopf] of SCHICHTEN) {
-    if (ordner === "@lernmotor") { liste.push(path.join(HIER, "..", "FISI-Spielhalle", "src", "lernmotor.js")); continue; }
+    if (ordner === "@lernmotor") { liste.push(LM.pfad); continue; }
     const d = path.join(HIER, "src", ordner);
     if (!fs.existsSync(d)) continue;
     const alle = fs.readdirSync(d).filter((n) => n.endsWith(".js")).sort();
@@ -47,7 +62,7 @@ function laden() {
   const code = [
     '"use strict"; const LABOR_VERSION = "stand";',
     "(function () {",
-    ...moduleListe().map((f) => `/* ${path.relative(HIER, f)} */\n` + fs.readFileSync(f, "utf8")),
+    ...moduleListe().map((f) => `/* ${path.relative(HIER, f)} */\n` + inhalt(f)),
     "return Object.fromEntries([['Modell', typeof Modell !== 'undefined' ? Modell : null]," +
       "['Sim', typeof Sim !== 'undefined' ? Sim : null], ['IP', typeof IP !== 'undefined' ? IP : null]," +
       "['CLI', typeof CLI !== 'undefined' ? CLI : null], ['Daten', typeof Daten !== 'undefined' ? Daten : null]," +

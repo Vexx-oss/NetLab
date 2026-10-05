@@ -1,0 +1,51 @@
+name: Prüfen
+
+# Läuft bei jedem Push und jedem Pull Request. Die Tests sind reines JavaScript ohne
+# Browser und laufen deshalb auf einem nackten Ubuntu-Runner.
+on:
+  push:
+    branches: [ausbau-1.2, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Tests und Bauprüfung
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests (headless, Node)
+        run: sh tools/test.sh
+
+      - name: Klassen im JS gegen Regeln im CSS
+        run: python tools/klassen.py
+
+      - name: Simulation gegen den Referenzstand
+        run: node tools/sim-stand.js
+
+      - name: Lernmotor-Kopie gegen die Quelle prüfen
+        run: python tools/lernmotor.py
+
+      - name: Bau mit und ohne FISI-Spielhalle muss gleich sein
+        run: python tools/lernmotor-bau.py
+
+      - name: Tests und Simulationsvergleich ohne FISI-Spielhalle
+        run: python tools/lernmotor-rueckfall.py
+
+      - name: Einzeldatei bauen (DAS Spiel als eine Datei)
+        run: python tools/einfach.py
+
+      - name: Einzeldatei prüfen — darf keine Außenverweise haben
+        run: python tools/einfach.py --pruefen docs/index.html
+
+      - name: Bilder der Doku prüfen
+        run: python tools/bilder.py --pruefen

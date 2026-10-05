@@ -1,8 +1,8 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk]
 erstellt: 2026-09-30
-aktualisiert: 2026-10-01
-status: Version 1.1 (Windows-.exe; Linux-Pakete Stand 1.0) – wird ausgebaut
+aktualisiert: 2026-10-05
+status: Version 1.2 (Browser-Einzeldatei + Windows-.exe; Linux-Pakete Stand 1.0) – wird ausgebaut
 ---
 
 # 🖧 Netzwerk-Labor
@@ -10,9 +10,12 @@ status: Version 1.1 (Windows-.exe; Linux-Pakete Stand 1.0) – wird ausgebaut
 Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Mann-Systemhaus löst du Netzwerk-Tickets in einem echten Simulator (Diagramm, Konfig-Panels, IOS-ähnliche Konsole). Können ist die Währung: Wer etwas sicher beherrscht, darf es automatisieren. Wer nicht weiterkommt, bekommt eine Hilfeleiter bis zur vorgeführten Lösung.
 
 ## ▶ Starten
-- **Windows:** `Programm/Netzwerk-Labor.exe` per Doppelklick (SmartScreen: „Weitere Informationen → Trotzdem ausführen“).
-- **Linux:** `Programm/linux/` – `.deb` (Ubuntu/Debian) oder AppImage, **Stand 1.0** (für 1.1 vorerst keine eigene Linux-Fassung). Details und was auf welchem System geht: [[Programm/PLATTFORM|PLATTFORM]].
-- Anleitung für die Klasse: `Programm/LIESMICH.txt`.
+- **Im Browser, ohne Download:** [vexx-oss.github.io/Side-Project](https://vexx-oss.github.io/Side-Project/) – ein Klick, spielt sofort. Kein Entpacken, keine Installation, kein Internet.
+- **Eine Datei für alles:** `docs/index.html` bzw. `Netzwerk-Labor.html` aus dem Release-ZIP – das ganze Spiel in **einer** HTML-Datei, Schriften eingebettet, läuft per Doppelklick auf Windows, Linux und macOS. Gebaut von `python tools/einfach.py`.
+- **Windows-Programm:** `Programm/Netzwerk-Labor.exe` per Doppelklick (SmartScreen: „Weitere Informationen → Trotzdem ausführen“). Bringt zusätzlich Leiste, Tray und globales Tastenkürzel.
+- **Linux:** `Programm/linux/` – `.deb` (Ubuntu/Debian) oder AppImage, **Stand 1.0** (für 1.1/1.2 vorerst keine eigene Linux-Fassung). Details und was auf welchem System geht: [[Programm/PLATTFORM|PLATTFORM]].
+- **Auslieferungspaket bauen:** `python tools/paket.py` → `dist/Netzwerk-Labor-<Version>-Windows.zip` mit Einzeldatei, `.exe`, Anleitung und Lizenztexten.
+- Anleitung für die Klasse: `Vorlagen/LIESMICH.txt` (Quelle) → liegt im Paket als `LIESMICH.txt`.
 
 ## Was drin ist (Version 1.0)
 - **Simulation** auf Frame-Ebene: ARP, Switching mit MAC-Lernen, VLAN/802.1Q, Router-on-a-Stick, statische Routen, ICMP (Timeout vs. unreachable, TTL), ACL, NAT/PAT, DHCP mit Relay, DNS, TCP-Handshake, HTTP, Firewall mit Zonen und Port-Weiterleitung, Internet als Kulisse, Broadcast-Sturm. Jede Antwort ist aus Paketen hergeleitet; die Simulation spielt Schritt für Schritt ab (PDU-Ansicht).
@@ -32,7 +35,7 @@ Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Man
 ## Aufbau
 - [[Konzept – Netzwerk-Labor]] (Spezifikation) · [[Architektur]] (Vertrag zwischen den Bausteinen) · [[Opus-Auftrag – Netzwerk-Labor]] (ursprünglicher Bauauftrag) · [[Befund – Programm startet wieder]] (05.10.2026: WebView2-Ausfall und Reparatur)
 - **Ausbau 1.2 (läuft):** [[Plan – Ausbau 1.2]] (Phasen, Stand) · [[Design – Spielspaß 2.0]] (Befunde, 12 Hebel, Scorecard, Startblöcke für Opus)
-- `src/` Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · `shell/src-tauri/` Rust-Hülle · `tests/` (124 Tests, `sh tools/test.sh`) · `tools/` (bauen, testen, messen) · `Programm/` fertige Programme
+- `src/` Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · `shell/src-tauri/` Rust-Hülle · `tests/` (213 Tests, `sh tools/test.sh`) · `tools/` (bauen, testen, messen, ausliefern) · `Programm/` fertige Programme · `docs/` die Website-Fassung (erzeugt) · `fremd/` fremder Bestand (Lernmotor aus der Spielhalle)
 - Versionen: Git im Projektordner (Tags `endversion-1.0`, `v1.1`); die Endversion 1.0 liegt zusätzlich unter `Programm/Endversion-1.0/`.
 
 ## Ehrliche Grenzen
