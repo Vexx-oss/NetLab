@@ -567,7 +567,36 @@
     return r.sort((a, b) => a.vlan - b.vlan || String(a.port).localeCompare(String(b.port)));
   };
   Sim.natTabelle = function(netz, id){ const z = (netz.zustand || {})[id] || {}, uhr = +(netz.zustand || {})._uhr || 0; return (z.nat || []).filter(e => e.bis > uhr).map(e => tief(e)); };
-  Sim.leases = function(netz, id){ const z = (netz.zustand || {})[id] || {}, uhr = +(netz.zustand || {})._uhr || 0; return Object.entries(z.leases || {}).filter(([, l]) => l.bis > uhr).map(([ip, l]) => ({ip, mac: l.mac, bis: l.bis})); };
+  /* Alle Leases eines Geräts für die Oberfläche (Architektur § 10.2/§ 10.6). Enthält auch ABGELAUFENE
+     Einträge und Konfliktvermerke ohne echte Lease (mac leer, bis 0), damit „abgelaufen“ und „Konflikt“
+     sichtbar werden. `ip`, `mac`, `bis` bleiben wie bisher; `zustand` fasst die Lage zusammen. */
+  Sim.leases = function(netz, id){
+    const z = (netz.zustand || {})[id] || {}, uhr = +(netz.zustand || {})._uhr || 0;
+    const g = netz.geraete[id] || {};
+    /* Pool-Form je Gerätetyp: der Router führt seine Pools in `running.dhcp`, der Host in `running.dienste.dhcp`. */
+    const poolListe = (() => {
+      try {
+        if (g.typ === "router") { const d = g.running.dhcp || {}; return (d.pools || []).filter(p => IP.gueltig(p.netz) && IP.maskeGueltig(p.maske)).map(p => Sim.host.poolForm(p, Sim.host.ausschluesse(d))); }
+        const d = (g.running.dienste && g.running.dienste.dhcp) || null;
+        return d ? Sim.host.poolsVonHost(g) : [];
+      } catch (e) { return []; }
+    })();
+    const reserviert = (mac) => {
+      const m = String(mac == null ? "" : mac).toLowerCase();
+      for (const p of poolListe) for (const r of (p.reservierungen || [])) if (r.mac === m) return r;
+      return null;
+    };
+    return Object.entries(z.leases || {}).map(([ip, l]) => {
+      const bis = l.bis != null ? l.bis : 0;
+      const abgelaufen = bis <= uhr;
+      const restS = bis ? Math.max(0, Math.round((bis - uhr) / 1000)) : 0;
+      const res = reserviert(l.mac);
+      const zustand = l.konflikt ? "konflikt" : abgelaufen ? "abgelaufen" : (res && res.ip === ip ? "reserviert" : "aktiv");
+      return {ip, mac: l.mac, bis, t1: l.t1 != null ? l.t1 : null, t2: l.t2 != null ? l.t2 : null,
+              hostname: l.hostname || "", abgelaufen, restS, konflikt: !!l.konflikt, konfliktSeit: l.konfliktSeit != null ? l.konfliktSeit : null,
+              reserviert: !!(res && res.ip === ip), zustand};
+    }).sort((a, b) => IP.vergleich(a.ip, b.ip));
+  };
   /* virtuelle Uhr vorstellen (z. B. für Alterung von ARP- und MAC-Einträgen zwischen Tickets) */
   Sim.vergehen = function(netz, ms){ netz.zustand ||= {_uhr: 0}; netz.zustand._uhr = (+netz.zustand._uhr || 0) + Math.max(0, +ms || 0); return netz.zustand._uhr; };
 

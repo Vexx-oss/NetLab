@@ -59,6 +59,12 @@ Sim.GRUENDE = {
   SERVICE_OFF:       {titel: "Dienst ausgeschaltet",                skill: "lab.ports",   schicht: 7},
   DHCP_NO_OFFER:     {titel: "Kein DHCP-Angebot",                   skill: "lab.dhcp",    schicht: 7},
   DHCP_POOL_EMPTY:   {titel: "DHCP-Pool erschöpft",                 skill: "lab.dhcp",    schicht: 7},
+  /* DHCP-Tiefe (Architektur § 10.4) – genau diese fünf, keine weiteren. */
+  DHCP_LEASE_EXPIRED:    {titel: "DHCP-Lease abgelaufen",           skill: "lab.dhcp",    schicht: 7},
+  DHCP_RESERVED_BUSY:    {titel: "Reservierte Adresse belegt",      skill: "lab.dhcp",    schicht: 7},
+  DHCP_ROGUE_OFFER:      {titel: "Angebot von fremdem DHCP-Server", skill: "lab.dhcp",    schicht: 7},
+  DHCP_SNOOPING_BLOCKED: {titel: "DHCP-Snooping blockiert",         skill: "lab.dhcp",    schicht: 2},
+  DHCP_CONFLICT:         {titel: "Adresskonflikt im Pool",          skill: "lab.dhcp",    schicht: 7},
   DNS_FAIL:          {titel: "Name nicht auflösbar",                skill: "lab.dns",     schicht: 7},
   DNS_NO_SERVER:     {titel: "Kein DNS-Server erreichbar",          skill: "lab.dns",     schicht: 7},
 };

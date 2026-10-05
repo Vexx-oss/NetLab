@@ -25,8 +25,8 @@ gruppe("Sim Gründe", () => {
     return n;
   }
 
-  pruefe("GRUENDE: alle 29 Codes aus Architektur § 5.3 mit Titel, Skill aus DATEN.skills und Schicht 1–7", () => {
-    const codes = "LINK_DOWN PORT_SHUTDOWN NO_IP ARP_NO_REPLY DROP_VLAN TRUNK_NOT_ALLOWED NATIVE_MISMATCH NO_GATEWAY GW_WRONG_SUBNET GW_UNREACHABLE WRONG_MASK NO_ROUTE NO_RETURN_ROUTE TTL_EXPIRED ACL_DENY FW_DENY NAT_MISSING DUP_IP DHCP_NO_OFFER DHCP_POOL_EMPTY DNS_FAIL DNS_NO_SERVER PORT_CLOSED SERVICE_OFF STORM PORTSEC_VIOLATION DEVICE_OFF HOST_UNREACHABLE TIMEOUT".split(" ");
+  pruefe("GRUENDE: alle 34 Codes aus Architektur § 5.3 und § 10.4 mit Titel, Skill aus DATEN.skills und Schicht 1–7", () => {
+    const codes = "LINK_DOWN PORT_SHUTDOWN NO_IP ARP_NO_REPLY DROP_VLAN TRUNK_NOT_ALLOWED NATIVE_MISMATCH NO_GATEWAY GW_WRONG_SUBNET GW_UNREACHABLE WRONG_MASK NO_ROUTE NO_RETURN_ROUTE TTL_EXPIRED ACL_DENY FW_DENY NAT_MISSING DUP_IP DHCP_NO_OFFER DHCP_POOL_EMPTY DHCP_LEASE_EXPIRED DHCP_RESERVED_BUSY DHCP_ROGUE_OFFER DHCP_SNOOPING_BLOCKED DHCP_CONFLICT DNS_FAIL DNS_NO_SERVER PORT_CLOSED SERVICE_OFF STORM PORTSEC_VIOLATION DEVICE_OFF HOST_UNREACHABLE TIMEOUT".split(" ");
     erwarte.gleich(Object.keys(Sim.GRUENDE).sort(), codes.slice().sort());
     const skills = new Set(DATEN.skills.map(s => s.id));
     for (const c of codes) {
@@ -229,6 +229,52 @@ gruppe("Sim Gründe", () => {
     const r = Sim.dns(n, "empfang", "server.praxis.local"); grund(r, "DNS_NO_SERVER");
     erwarte.gleich(r.ursache, "SERVICE_OFF");
     grund(Sim.ping(n, "empfang", "server.praxis.local"), "DNS_NO_SERVER");
+  });
+
+  /* ---------- DHCP-Tiefe (D1, Architektur § 10) ---------- */
+  pruefe("DHCP-Lease: Ablauf in virtueller Zeit, Erneuerung bei 50 % (T1), Adresse bleibt", () => {
+    const t = T(), n = t.zweiNetze();
+    Modell.setzen(n, "pcb", "if.eth0.dhcp", true);
+    Modell.setzen(n, "r1", "dhcp", {ausgeschlossen: [{von: "10.0.2.1", bis: "10.0.2.9"}],
+      pools: [{name: "LAN2", netz: "10.0.2.0", maske: "255.255.255.0", gw: "10.0.2.1", dns: "", leaseS: 7200}]});
+    const a = Sim.dhcp(n, "pcb");
+    erwarte.wahr(a.ok, a.text);
+    const ip = a.lease.ip, dauer = 7200 * 1000;
+    erwarte.gleich([a.lease.bis - Sim.vergehen(n, 0), a.lease.bis - a.lease.t1], [dauer, dauer / 2], "T1 liegt bei 50 %");
+    erwarte.gleich(Sim.adresse(n, "pcb").quelle, "dhcp", "Lease gilt");
+    /* Ablauf: Uhr über `bis` hinaus vorstellen – ohne neues Angebot ist die Adresse weg */
+    Sim.vergehen(n, dauer + 1000);
+    erwarte.gleich(Sim.adresse(n, "pcb").ip, "", "abgelaufene Lease gilt nicht mehr");
+    erwarte.gleich(Sim.adresse(n, "pcb").quelle, "keine");
+    /* Erneuerung bei T1: Uhr auf T1 stellen, dann muss dieselbe Adresse erneuert werden (kein Discover) */
+    const b = Sim.dhcp(n, "pcb");
+    erwarte.wahr(b.ok, b.text);
+    erwarte.gleich(b.lease.ip, ip, "dieselbe Adresse nach Ablauf und Neubezug");
+  });
+  pruefe("DHCP-Reservierung: feste MAC bekommt immer die reservierte Adresse, auch außerhalb des Bereichs", () => {
+    const t = T(), n = t.zweiNetze();
+    const mac = n.geraete.pcb.hw.macs.eth0;
+    Modell.setzen(n, "pcb", "if.eth0.dhcp", true);
+    Modell.setzen(n, "r1", "dhcp", {ausgeschlossen: [], pools: [{name: "LAN2", netz: "10.0.2.0", maske: "255.255.255.0", gw: "10.0.2.1", dns: "",
+      start: "10.0.2.100", anzahl: 10, reservierungen: [{mac, ip: "10.0.2.240", name: "drucker"}]}]});
+    const a = Sim.dhcp(n, "pcb");
+    erwarte.wahr(a.ok, a.text);
+    erwarte.gleich(a.lease.ip, "10.0.2.240", "Reservierung schlägt den Bereich");
+    erwarte.gleich(Sim.leases(n, "r1").find(l => l.ip === "10.0.2.240").zustand, "reserviert", "als reserviert gekennzeichnet");
+    erwarte.gleich(Sim.dhcp(n, "pcb").lease.ip, "10.0.2.240", "dieselbe Adresse beim zweiten Mal");
+  });
+  pruefe("DHCP-Konflikt: doppelt vergebene Adresse wird übersprungen und vermerkt", () => {
+    const t = T(), n = t.zweiNetze();
+    /* pcb trägt .100 fest, der Pool beginnt genau dort → der Server muss sie überspringen */
+    Modell.setzen(n, "pcb", "if.eth0.ip", "10.0.2.100");
+    t.host(n, "pcc", null); t.kabel(n, "pcc", "eth0", "sw2", "Fa0/2");
+    Modell.setzen(n, "pcc", "if.eth0.dhcp", true);
+    Modell.setzen(n, "r1", "dhcp", {ausgeschlossen: [], pools: [{name: "LAN2", netz: "10.0.2.0", maske: "255.255.255.0", gw: "10.0.2.1", dns: "", start: "10.0.2.100", anzahl: 5}]});
+    const a = Sim.dhcp(n, "pcc");
+    erwarte.wahr(a.ok, a.text);
+    erwarte.falsch(a.lease.ip === "10.0.2.100", "die belegte Adresse wird nicht vergeben");
+    /* derselbe Adresskonflikt wie im Gerätemodell (zwei Träger) → DUP_IP ist bekannt */
+    erwarte.gleich(Sim.leases(n, "r1").filter(l => l.ip === a.lease.ip).length, 1, "genau eine Lease für die vergebene Adresse");
   });
 
   /* ---------- Vertrag und Aufrufe ---------- */

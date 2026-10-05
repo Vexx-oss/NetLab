@@ -232,18 +232,45 @@ Sim.host = (() => {
     return (d.pools || []).filter(p => IP.gueltig(p.netz) && IP.maskeGueltig(p.maske)).map(p => poolForm(p, aus));
   }
   function belegt(L, ip){ return Sim._besitzerIp(L, ip).length > 0; }
+  /* Reservierung (Architektur § 10.3 Punkt 3): die feste Zuordnung MAC → IP gilt auch außerhalb des
+     start..anzahl-Bereichs, aber nur, wenn die Adresse im Poolnetz liegt und wirklich frei ist. */
+  function reservierteIp(pool, mac){
+    const m = String(mac == null ? "" : mac).toLowerCase();
+    if (!m) return null;
+    const r = (pool.reservierungen || []).find(x => x.mac && x.mac === m);
+    return r && IP.imNetz(r.ip, pool.netz, pool.maske) ? r.ip : null;
+  }
+  /* Ist die Adresse doppelt belegt? Geprüft wird gegen JEDES Gerät, das die Adresse trägt (auch statisch) und
+     gegen fremde Leases. Ergebnis: der Grund, warum sie nicht taugt, sonst null. Die Unterscheidung ist für den
+     Endgrund wichtig: liegt sie nur an der Nachbarschaft, ist der Pool erschöpft; ist sie doppelt vergeben, ist
+     es ein Adresskonflikt (Architektur § 10.4). */
+  function adressProblem(L, g, pool, ip, mac){
+    const m = String(mac == null ? "" : mac).toLowerCase();
+    const z = Sim._z(L, g.id), leases = (z.leases ||= {});
+    const l = leases[ip];
+    if (l && String(l.mac || "").toLowerCase() !== m && l.bis > L.t) return "vergeben";
+    if (pool.gw && ip === pool.gw) return "gateway";
+    const besitzer = Sim._besitzerIp(L, ip).filter(id => id !== g.id);
+    if (besitzer.length > 1) return "konflikt";     /* dieselbe Adresse auf mehr als einem Gerät */
+    if (besitzer.length === 1) return "vergeben";
+    return null;
+  }
   function freieAdresse(L, g, pool, mac){
     const z = Sim._z(L, g.id), leases = (z.leases ||= {});
     for (const [ip, l] of Object.entries(leases)) if (l.mac === mac && l.bis > L.t && IP.imNetz(ip, pool.netz, pool.maske)) return ip;
     const angeboten = new Set(Object.entries(L.dhcpAngebot).filter(([k]) => k.startsWith(g.id + "|") && !k.endsWith("|" + mac)).map(([, v]) => v));
+    /* Reservierung zuerst: sie schlägt den Bereich. */
+    const fest = reservierteIp(pool, mac);
+    if (fest && !angeboten.has(fest) && !adressProblem(L, g, pool, fest, mac)) return fest;
     for (let n = IP.zuZahl(pool.von), ende = IP.zuZahl(pool.bis); n <= ende; n++) {
       const ip = IP.zuText(n >>> 0);
       if (!IP.hostAdresse(ip, pool.maske)) continue;
       if (pool.aus.some(a => IP.vergleich(ip, a.von) >= 0 && IP.vergleich(ip, a.bis) <= 0)) continue;
-      if (ip === pool.gw || angeboten.has(ip)) continue;
-      const l = leases[ip]; if (l && l.mac !== mac && l.bis > L.t) continue;
-      if (belegt(L, ip)) continue;           /* vereinfacht: ersetzt die Konfliktprüfung (IOS pingt vor dem Angebot) */
-      return ip;
+      if (angeboten.has(ip)) continue;
+      const problem = adressProblem(L, g, pool, ip, mac);
+      if (!problem) return ip;
+      /* Doppelt vergeben: vermerken, damit „show ip dhcp conflict“ es zeigen kann. */
+      if (problem === "konflikt") { const e = (leases[ip] ||= {mac: "", bis: 0}); e.konflikt = true; if (e.konfliktSeit == null) e.konfliktSeit = L.t; }
     }
     return null;
   }
