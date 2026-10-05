@@ -76,6 +76,7 @@ def main() -> int:
     lauf("Lernmotor-Kopie gegen Quelle", [PY, "tools/lernmotor.py"], muss="GRUEN")
     lauf("Bau mit und ohne Spielhalle gleich", [PY, "tools/lernmotor-bau.py"], muss="GRUEN")
     lauf("Tests + Simulation ohne Spielhalle", [PY, "tools/lernmotor-rueckfall.py"], muss="GRUEN")
+    lauf("GitHub-Ablaeufe gueltig", [PY, "tools/ablaeufe.py"], muss="GRUEN")
 
     print()
     print("2 · Bauen")
