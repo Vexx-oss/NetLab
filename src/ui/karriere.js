@@ -48,11 +48,13 @@ UI.karriere = (() => {
       h("header", {class: "kr-kopf"}, h("h2", {}, "Shop"), h("p", {class: "sp-leise"}, `Du hast ${eur(Spiel.st.euro)} €. Simulation, Inspektor, Hilfe und Wiki sind immer frei – hier gibt es Zusatzwerkzeuge, Automatisierung, Verträge und Aussehen.`)),
       ...Object.entries(gruppen).map(([g, es]) => h("section", {class: "kr-gruppe"}, h("h3", {}, g),
         h("div", {class: "kr-raster klein"}, es.map(e => h("article", {class: "kr-ware " + (ZUSTAND[e.zustand] ?? "")},
-          h("b", {}, e.titel), h("p", {}, e.text || ""),
+          h("b", {}, e.farbe ? h("span", {class: "kr-tupfer", style: {"--tupfer": e.farbe}}) : null, e.titel), h("p", {}, e.text || ""),
           h("div", {class: "kr-ware-fuss"},
             e.preis != null && e.zustand !== "gekauft" && e.zustand !== "aktiv" ? h("span", {class: "kr-preis"}, eur(e.preis) + " €") : h("span", {}),
             e.zustand === "kaufbar" ? h("button", {type: "button", class: "knopf klein primaer", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Kaufen") :
             e.zustand === "veraltet" ? h("button", {type: "button", class: "knopf klein", onclick: () => training(e.skill)}, "Wiederholung jetzt") :
+            e.zustand === "gekauft" && e.art === "aussehen" ? h("button", {type: "button", class: "knopf klein", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Auswählen") :
+            e.zustand === "aktiv" && e.art === "aussehen" ? h("span", {class: "kr-status"}, "✓ ausgewählt") :
             h("span", {class: "kr-status"}, {gekauft: "✓ gekauft", aktiv: "✓ läuft", "zu-teuer": e.grund || "zu teuer", gesperrt: "🔒 " + (e.grund || "gesperrt")}[e.zustand] || ""))))))),
       h("p", {class: "sp-leise kr-fuss"}, "Playbooks lösen Wartungs-Tickets ihrer Fertigkeit automatisch (60 % Ertrag, ohne Lernwirkung). Ist die Fertigkeit im Lernstand fällig, pausiert das Playbook, bis du die Wiederholung gemacht hast.")));
   }

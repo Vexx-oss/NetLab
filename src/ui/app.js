@@ -33,10 +33,16 @@ UI.app = (() => {
 
   /* ---------- Thema ---------- */
   const einst = () => store.get("einst", {}) || {};
+  Bus.an("aussehen", () => themaAnwenden());
+  Bus.an("ui-bereit", () => setTimeout(themaAnwenden, 0));            /* nach Spiel.laden: gekauftes Aussehen anwenden */
   function einstSetzen(teil){ const e = einst(); Object.assign(e, teil); store.set("einst", e); }
   function themaAnwenden(){
     const t = einst().thema, d = document.documentElement;
     if (t === "hell") d.dataset.theme = "light"; else if (t === "dunkel") d.dataset.theme = "dark"; else delete d.dataset.theme;
+    /* Aussehen aus dem Shop (Akzentfarbe, Leistenstil) – vorher wurde es gekauft, aber nie angewendet */
+    const a = typeof Spiel !== "undefined" && Spiel._st && Spiel.karriere ? Spiel.karriere.daten().aussehen : null;
+    if (a && a.akzent && a.akzent !== "cyan") d.dataset.akzent = a.akzent; else delete d.dataset.akzent;
+    if (a && a.leiste && a.leiste !== "standard") d.dataset.leiste = a.leiste; else delete d.dataset.leiste;
     d.dataset.bewegung = UI.bewegung();
     if (el.thema) { const dunkel = istDunkel(); el.thema.replaceChildren(UI.symbol(dunkel ? "sonne" : "mond", 18)); el.thema.title = dunkel ? "Helle Darstellung" : "Dunkle Darstellung"; }
   }
@@ -259,6 +265,13 @@ UI.app = (() => {
       onclick: () => { const neu = b.getAttribute("aria-checked") !== "true"; b.setAttribute("aria-checked", String(neu)); b.classList.toggle("an", neu); fn(neu); }}, h("span", {}));
     return b;
   }
+  /* Gekaufte Akzentfarben und Leistenstile auswählen (Spiel.shop.kaufen wechselt ohne erneutes Bezahlen) */
+  function aussehenZeile(art, titel, text){
+    if (typeof Spiel === "undefined" || !Spiel._st) return document.createTextNode("");      /* append(null) schriebe „null“ */
+    const a = Spiel.karriere.daten().aussehen;
+    const optionen = Spiel.AUSSEHEN.filter(x => x.art === art && a.gekauft.includes(x.id)).map(x => [x.id, x.titel.replace(/^Leiste: /, "")]);
+    return zeile(titel, text, wahl(titel, optionen, a[art], v => { Spiel.shop.kaufen("aussehen:" + v); themaAnwenden(); }));
+  }
   function eigeneAbschnitte(){
     const e = einst();
     const l = [];
@@ -269,6 +282,8 @@ UI.app = (() => {
         wahl("Animationen", [["an", "An"], ["reduziert", "Reduziert"], ["aus", "Aus"]], e.bewegung || "an", v => { einstSetzen({bewegung: v}); themaAnwenden(); })),
       zeile("Ton", "Leise Klänge bei Kabel, Ping, Haken und Sternen – alles bleibt auch ohne Ton verständlich. Die Leiste und ein Fenster im Hintergrund sind immer stumm.",
         wahl("Ton", [["aus", "Aus"], ["leise", "Leise"], ["normal", "Normal"]], e.ton || "leise", v => { einstSetzen({ton: v}); UI.klang?.spielen("haken"); })),
+      aussehenZeile("akzent", "Akzentfarbe", "Weitere Farben gibt es im Shop – gekaufte wählst du hier jederzeit."),
+      aussehenZeile("leiste", "Leiste", "Wie die kleine Leiste am Bildschirmrand aussieht. Weitere Stile gibt es im Shop."),
       zeile("Ereignisse", "Stromausfall, Kabelschaden, Notfall-Anruf … höchstens eines je 30 (selten) oder 15 Minuten Arbeit (normal), immer mit Erklärung. Fortschritt geht nie verloren.",
         wahl("Ereignisse", [["aus", "Aus"], ["selten", "Selten"], ["normal", "Normal"]], e.ereignisse || "selten", v => { einstSetzen({ereignisse: v}); if (Spiel._einst) Spiel._einst.ereignisse = v; })))});
     l.push({titel: "Erklärtiefe", fn: c => c.append(

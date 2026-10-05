@@ -104,4 +104,14 @@ gruppe("Spiel: Akte und Verdacht", () => {
     erwarte.wahr(Spiel.regeln(inst).warnungen, "mit Netzprüfer: an");
     erwarte.gleich(Spiel.abnahme(Object.assign(inst, {})).abzuege.filter(a => /Hilfe/.test(a.text)), [], "kein Sternabzug für den Netzprüfer");
   }));
+
+  pruefe("Aussehen: Kauf schaltet um und meldet es; Gekauftes lässt sich ohne erneutes Bezahlen wieder auswählen (auch der Standard)", kapsel(() => {
+    Spiel.st.euro = 300;
+    const zustand = id => Spiel.shop.liste().find(e => e.id === "aussehen:" + id).zustand;
+    erwarte.gleich([zustand("cyan"), zustand("bernstein")], ["aktiv", "kaufbar"]);
+    erwarte.wahr(Spiel.shop.kaufen("aussehen:bernstein").ok);
+    erwarte.gleich([zustand("cyan"), zustand("bernstein"), Spiel.st.euro], ["gekauft", "aktiv", 180], "gekauft, aktiv, bezahlt");
+    erwarte.wahr(Spiel.shop.kaufen("aussehen:cyan").ok && Spiel.karriere.daten().aussehen.akzent === "cyan", "zurück zum Standard");
+    erwarte.wahr(Spiel.shop.kaufen("aussehen:bernstein").ok && Spiel.st.euro === 180, "wieder auswählen kostet nichts");
+  }));
 });

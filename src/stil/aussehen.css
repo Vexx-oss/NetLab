@@ -1,0 +1,27 @@
+/* ---------- Aussehen aus dem Shop: Akzentfarbe (html[data-akzent]) und Leistenstil (html[data-leiste]) ----------
+   Signal-Cyan und „Leiste: Klar“ sind der Standard aus basis.css/leiste.css. Im hellen Schema nimmt jede Farbe ihren
+   dunkleren Ton (Kontrast ≥ 4,5 : 1 auf Weiß, auch mit weißer Schrift auf Knöpfen). Reihenfolge der Regeln: dunkel,
+   dann hell (System) und hell (gewählt) – die hellen Regeln sind spezifischer und gewinnen. */
+:root[data-akzent="bernstein"]{--accent:#FBBF24; --accent-ink:#1A1205; --accent-soft:#3A2E0B}
+:root[data-akzent="minze"]{--accent:#34D399; --accent-ink:#04140D; --accent-soft:#0E3328}
+:root[data-akzent="koralle"]{--accent:#FB7185; --accent-ink:#1F0710; --accent-soft:#3B1520}
+:root[data-akzent="violett"]{--accent:#A78BFA; --accent-ink:#120A24; --accent-soft:#2A2147}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"])[data-akzent="bernstein"]{--accent:#B45309; --accent-ink:#FFFFFF; --accent-soft:#FEF3C7}
+  :root:not([data-theme="dark"])[data-akzent="minze"]{--accent:#047857; --accent-ink:#FFFFFF; --accent-soft:#D1FAE5}
+  :root:not([data-theme="dark"])[data-akzent="koralle"]{--accent:#BE123C; --accent-ink:#FFFFFF; --accent-soft:#FFE4E6}
+  :root:not([data-theme="dark"])[data-akzent="violett"]{--accent:#6D28D9; --accent-ink:#FFFFFF; --accent-soft:#EDE9FE}
+}
+:root[data-theme="light"][data-akzent="bernstein"]{--accent:#B45309; --accent-ink:#FFFFFF; --accent-soft:#FEF3C7}
+:root[data-theme="light"][data-akzent="minze"]{--accent:#047857; --accent-ink:#FFFFFF; --accent-soft:#D1FAE5}
+:root[data-theme="light"][data-akzent="koralle"]{--accent:#BE123C; --accent-ink:#FFFFFF; --accent-soft:#FFE4E6}
+:root[data-theme="light"][data-akzent="violett"]{--accent:#6D28D9; --accent-ink:#FFFFFF; --accent-soft:#EDE9FE}
+
+/* Leistenstile */
+html[data-leiste="glas"] .leiste-karte{background:color-mix(in srgb, var(--leiste-bg) 62%, transparent); border-color:color-mix(in srgb, var(--line-2) 55%, transparent);
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); box-shadow:0 8px 24px rgba(0,0,0,.22)}
+html[data-leiste="schiene"] .leiste-karte{border-left:3px solid var(--accent)}
+html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-mix(in srgb, var(--line-2) 60%, transparent) 1px, transparent 1.3px); background-size:10px 10px}
+
+/* Shop: Farbtupfer vor dem Namen einer Akzentfarbe */
+.kr-tupfer{display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:-1px; background:var(--tupfer); border:1px solid var(--line-2)}
