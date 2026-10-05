@@ -1262,3 +1262,53 @@ Dazu ein belegter Messfehler zum Nachlesen: `git diff --cached --ignore-cr-at-eo
 **Bewusst offen gelassen:** Ob im neuen Binary genau die 17:09:29-Seite steckt, ist **nicht bewiesen** — die Assets liegen komprimiert im exe, die Klartext-Marker (`DHCP_SNOOPING_BLOCKED`, `in-lease`) sind dort nicht auffindbar. Der Bau ist nachweislich neu (anderer Hash), die Einbettung ist eine naheliegende Annahme. Für die Spielbarkeit ist das belanglos, weil die `.exe` ohnehin nicht startet.
 
 **Erledigt (17:20):** Das alte Paket heißt jetzt `Programm/Netzwerk-Labor-ALT-2026-09-30-exe.zip` und ist damit nicht mehr mit dem aktuellen Build zu verwechseln. Es wurde **umbenannt, nicht gelöscht**; Größe unverändert 2.992.485 Bytes. Zur Einordnung: es enthält **nur** `Programm/Netzwerk-Labor.exe` (ein Eintrag) – es ist also das Auslieferungspaket der damaligen Desktop-Fassung, nicht die Browser-Fassung.
+
+## 26 · Topologie lesbar machen (05.10.2026)
+
+**Auftrag des Kunden** (mit Bildschirmfoto): „Immernoch ziemlich overloaded, vor allem die Karte zum topologie bauen hat große probleme mit cleaner darstellung von Informationen. es braucht nicht weniger sie sollen nur cleaner und übersichtlicher dargestellt werden, die IP adressen am router z.b kann ich gar nicht lesen."
+
+### Was gemessen war, bevor etwas geändert wurde
+
+Ein neues Werkzeug machte das Bildschirmfoto überhaupt erst prüfbar: `tools/topo-messen.py` lädt die Vorlage headless in Edge und vermisst die Textkästen über `getBBox()` + `getScreenCTM()`. **Der erste Versuch mit `getBoundingClientRect()` war falsch** — die Methode liefert bei SVG-Text 0 Breite, die Messung meldete deshalb „0 Überlappungen", obwohl das Foto volle Überlappung zeigt. Erst die BBox-Messung reproduzierte den Befund:
+
+| Größe | vorher |
+|---|---|
+| Labels auf einer Gerätekachel | **1** — `zone-text „192.168.30.0/24"` lag auf dem Router `r1` (69 × 14 px) |
+| Beschriftungen unter 12 px | **18 von 24** (`kabel-port` 10, `ger-ip` 11, `zone-text` 11) |
+| Überlappungen Text↔Text | 0 (die Schilder wichen einander aus, aber nicht den Geräten) |
+
+**Ursache:** In `src/ui/ebenen.js`, Funktion `zonen`, enthielt die Belegungsliste nur andere *Schilder*. Geräte waren dort unbekannt, und der Startpunkt war die obere linke Ecke der Zone — bei einem Router mit drei Netzen also dreimal dieselbe Ecke. Genau der Stapel aus dem Foto.
+
+**Zweiter Befund:** Der Zoom skalierte in `editor.js` alles mit (`scale(k)`), auch die Schrift. Bei 70 % waren die Beschriftungen sichtbar, aber nur **8,4 px** klein — sichtbar und unlesbar zugleich.
+
+**Dritter Befund (Informationslücke, keine Geschmacksfrage):** Der Router zeigte als Adresse nur `192.168.10.1/24 +2`. Die Adressen `192.168.20.1` und `192.168.30.1` standen **nirgends** auf der Fläche — der Kunde konnte sie also gar nicht finden, unabhängig von der Schriftgröße.
+
+### Was gebaut wurde
+
+| Datei | Änderung | Urheber |
+|---|---|---|
+| `src/ui/ebenen.js` | Kollisionsvermeidung kennt jetzt die Geräterechtecke (68 × 64 um `pos(id)`, +2 px Luft) und weicht unten · rechts · links · oben aus; findet sie nichts Freies, bleibt die Stelle mit der geringsten Überdeckung — das Schild wird **nie** weggelassen | Teammitglied `karte` |
+| `src/stil/editor.css` | `ger-name` 12,5→13 px · `ger-ip` 11→12,5 · `kabel-port` 10→12 · `zone-text` 11→12 px plus die dort fehlende Kontur (`paint-order:stroke`, `stroke:var(--panel)`) | Teammitglied `lesbarkeit` |
+| `src/ui/editor.js` | Abstand Name↔Adresse · Zoom gestaffelt (unter 95 % nur Name+Adresse, unter 60 % nichts) · Tooltip mit **allen** Adressen samt Schnittstelle · Internet-Beschriftung von der eigenen Kachel gerückt | Lead |
+
+### Abnahme (vom Lead selbst gemessen, jeweils `python bauen.py` davor)
+
+| Vorlage / Fenster | Überlappungen | Labels auf Kachel | unter 12 px |
+|---|---|---|---|
+| praxis 1366×768 | 0 | **1 → 0** | **18 → 0** |
+| praxis 1920×1080 | 0 | 0 | 0 |
+| salon 1366×768 | 0 | **1 → 0** | 0 |
+
+**Zoom** (echtes Mausrad, `tools/zoom-messen.py`): 102 % alles sichtbar (12,3–13,3 px) · 70 % nur Name 9 px und IP 8,7 px · 57 % nur Name 7,5 px · 39 % nur Name 5,1 px.
+
+**Prüfstand:** `sh tools/test.sh` **213/213 grün** · Referenzstand unverändert · `klassen.py` 0 · Rauchtest **36/36 grün** · Zeilenenden: `git diff --stat` = `--ignore-cr-at-eol` bei allen drei Dateien. Bild: `Nachweise/1.2-Topo/topo-praxis-nachher.png`.
+
+### Ein Versuch, der verworfen wurde — und warum das hier steht
+
+Ich hatte die drei Router-Adressen untereinander auf die Fläche geschrieben. **Gemessen war das einwandfrei** (26 Texte, 0 Überlappungen, 0 auf Kacheln) — im Bild aber füllte es den Bereich unter dem Router voll und stieß an die Portnamen, also genau die Dichte, die der Kunde bemängelt hatte. **Zurückgenommen.** Auf der Fläche steht jetzt die Kurzform, alle Adressen stehen im Tooltip, und welcher Router-Port in welchem Netz liegt, sagt der Inspektor. Lehre: **Ein Messwert, der grün ist, ersetzt nicht den Blick.**
+
+### Was offen bleibt
+
+- Weitere Klassen liegen unter 12 px, waren in der praxis-Messung aber nicht im DOM: `.pd-name` 8,5 · `.vlan-schild text` 10,5 · `.karte-zeile` 10,5 · `.gw-schild text` 10,5 · `.band-text`/`.paket-text` 10 · `.badge-aus text` 10 · `.platz-schild text` 11,5. Für die (VLAN-, ARP-, Routing- und Simulationsansicht) braucht es einen eigenen Auftrag mit Platzprüfung.
+- Unter 60 % Zoom bleibt nur der Gerätename (5,1 px am unteren Ende). Das ist gewollt — aber es ist eine Entscheidung, keine Messung.
+- **Nicht im echten Programm geprüft:** Die `.exe` startet weiterhin nicht (WebView2). Alle Messungen und das Bild stammen aus der Browser-Fassung in Edge.
