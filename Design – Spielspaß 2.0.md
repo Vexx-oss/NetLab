@@ -18,7 +18,7 @@ status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zwe
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
 
 > [!info] In Arbeit 05.10.2026: Auftrag „P“ (Politur und Bindung) aus der unabhängigen Prüfung § 20
-> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Punkt 3 fertig: eigene Probe für Hotline, Fernwartung, Audit, Adressplan. Punkt 4 fertig: Vertrauen zahlt aus, Feierabend-Ausblick. Punkt 5 fertig: Flow-Regler. Stand: [[#21 · Auftrag P – Stand]].
+> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Punkt 3 fertig: eigene Probe für Hotline, Fernwartung, Audit, Adressplan. Punkt 4 fertig: Vertrauen zahlt aus, Feierabend-Ausblick. Punkt 5 fertig: Flow-Regler. Punkt 6 fertig: Hub-Wahl und Wochenziel. Es folgt die Abnahme im echten Programm. Stand: [[#21 · Auftrag P – Stand]].
 
 > [!warning] HALTEPUNKT 05.10.2026 nach E2 – Scorecard 38,0 von 60 (Ziel 39,0 nicht ganz erreicht)
 > E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Was die letzten 1,0 Punkte bringen könnte und warum ich nicht weitergebaut habe: [[#19 · Stand nach E2 – Haltepunkt]]. **D beginnt erst nach dem Anspielen.**
@@ -857,7 +857,7 @@ Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswer
 | 3 Probe für jede Form (F4) | Hotline, Fernwartung, Audit, Adressplan | ✅ fertig |
 | 4 Vertrauen zahlt aus (F5) | Empfehlung ab 3, −20 % Wartung ab 4, Feierabend-Ausblick | ✅ fertig |
 | 5 Flow-Regler (F6) | Gerüst nach zwei Fehlschlägen, Verwicklung nach drei Glanzergebnissen | ✅ fertig |
-| 6 Hub-Wahl (F7) | „oder: 2 weitere Aufträge“, Wochenziel | offen |
+| 6 Hub-Wahl (F7) | „oder: 2 weitere Aufträge“, Wochenziel | ✅ fertig |
 
 ### Punkt 1 · Hygiene
 
@@ -913,3 +913,10 @@ Je Fertigkeit merkt sich das Spiel die letzten fünf Ergebnisse. **Fehlschlag** 
 - Das Ergebnis sagt es, wenn sich etwas ändert: „🧭 Nächstes Mal „IP-Adresse und Maske setzen“ mit Gerüst“ bzw. „🔥 … sitzt – der nächste wird kniffliger“.
 - **Grenze (ehrlich):** Im Hauptfluss kommen nach der ersten Stunde vor allem Geschichten-Aufträge und Formen; für Geschichten-Aufträge wirkt nur die Begleitung (Tipp, Regeln), die Größe ändert sich bei Formen und generierten Störungen (Nachschub, Wartung, Notfall, Wiederholung).
 - **Geprüft:** 4 neue Tests (Zustandsfolge, Bewertung, Gerüst-Audit kleiner und beim Neuladen gleich, Regeln im AP2, Verwicklung mit zwei Fehlern für vier Seeds, zweimal zäh → Gerüst); im Browser Postfach-Marke und Tipp in der Mappe angesehen. 204/204 Tests, `rauch.py` 33/33.
+
+### Punkt 6 · Hub-Wahl und Wochenziel
+
+- **„oder:“ unter der Hauptkarte:** zwei weitere Aufträge aus dem Postfach als kleine Zeilen (Formsymbol + Titelanfang, höchstens drei Wörter, voller Titel beim Darüberfahren; ein klingelnder Anruf mit ☎). Die Wahl aus E1 ist damit auch im Hub sichtbar – ohne zweiten Hauptknopf.
+- **Wochenziel:** In der Fußzeile „Wochenziel wählen“ – drei Vorschläge je Kalenderwoche, für alle gleich: *3 Fehlerarten verstehen · 5 Aufträge ohne Hilfe · 3 verschiedene Auftragsformen · an 3 Tagen das Tagesrätsel · 3 Aufträge mit 5 Sternen ohne Hilfe*. Gewählt steht dort „Heute 1/3 · Woche 0/3 Rätsel“; geschafft gibt es einmal +1 Ruf und eine Ergebniszeile („🎯 Wochenziel geschafft“). Verpasst kostet nichts, „Später“ geht immer (R7).
+- **Platzbudget:** nach dem ersten Auftrag **36 Wörter · 6 Bedienelemente · 1 Hauptknopf** (gemessen wie in Phase A). Damit auch zwei weitere Aufträge plus gewähltes Wochenziel unter 40 bleiben, heißt die Karte jetzt „Nächster Auftrag“ (statt „Dein nächster Auftrag“) und das Wochenziel hat Ein-Wort-Kürzel.
+- **Geprüft:** 3 neue Tests (zwei weitere ohne die Hauptkarte; Vorschläge je Woche gleich, nur einer der drei wählbar, Zählung nur diese Woche, +1 Ruf genau einmal; Ergebnis meldet es); im Browser Auswahl und Fußzeile angesehen. 207/207 Tests, `rauch.py` 33/33.
