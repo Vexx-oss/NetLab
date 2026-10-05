@@ -1261,4 +1261,4 @@ Dazu ein belegter Messfehler zum Nachlesen: `git diff --cached --ignore-cr-at-eo
 
 **Bewusst offen gelassen:** Ob im neuen Binary genau die 17:09:29-Seite steckt, ist **nicht bewiesen** — die Assets liegen komprimiert im exe, die Klartext-Marker (`DHCP_SNOOPING_BLOCKED`, `in-lease`) sind dort nicht auffindbar. Der Bau ist nachweislich neu (anderer Hash), die Einbettung ist eine naheliegende Annahme. Für die Spielbarkeit ist das belanglos, weil die `.exe` ohnehin nicht startet.
 
-**Offene Entscheidung:** Das veraltete `Programm/Netzwerk-Labor.zip` (30.09.) liegt unverändert daneben und kann in einer Klasse verwirren. Löschen oder ersetzen steht noch aus.
+**Erledigt (17:20):** Das alte Paket heißt jetzt `Programm/Netzwerk-Labor-ALT-2026-09-30-exe.zip` und ist damit nicht mehr mit dem aktuellen Build zu verwechseln. Es wurde **umbenannt, nicht gelöscht**; Größe unverändert 2.992.485 Bytes. Zur Einordnung: es enthält **nur** `Programm/Netzwerk-Labor.exe` (ein Eintrag) – es ist also das Auslieferungspaket der damaligen Desktop-Fassung, nicht die Browser-Fassung.
