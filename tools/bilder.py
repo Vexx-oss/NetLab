@@ -68,38 +68,60 @@ Neu bauen: `python tools/bilder.py` · Pruefen: `python tools/bilder.py --pruefe
 """
 
 
+def pruefen() -> int:
+    """Nur pruefen: sind alle Bilder da und zugeordnet?
+
+    Braucht WEDER die Nachweise NOCH Pillow. Auf dem GitHub-Runner fehlt beides
+    (Nachweise/ liegt nicht im Git, Pillow ist nicht installiert) — geprueft wird dort
+    also nur, dass die versionierten Bilder in docs/bilder/ vollstaendig sind.
+    """
+    fehler = []
+    if not ZIEL.is_dir() or not any(ZIEL.glob("*.jpg")):
+        print(f"ROT: {ZIEL} fehlt oder enthaelt keine Bilder.")
+        return 1
+    print(f"Bilder in {ZIEL.relative_to(HIER)}/  ({NACHWEISE.is_dir() and 'Nachweise vorhanden' or 'Nachweise liegen nicht vor'})")
+    for name, rel, _, _ in AUSWAHL:
+        ziel = ZIEL / name
+        if not ziel.is_file():
+            fehler.append(f"fehlt: {name}")
+            print(f"  ROT   {name:<24} fehlt")
+            continue
+        sha = hashlib.sha256(ziel.read_bytes()).hexdigest()[:16]
+        quelle_da = (NACHWEISE / rel).is_file()
+        print(f"  ok    {name:<24} {ziel.stat().st_size:>8,} B  {sha}…  Quelle: {'da' if quelle_da else 'nicht vor Ort'}")
+    if fehler:
+        print("ROT: " + ", ".join(fehler))
+        return 1
+    print(f"GRUEN: alle {len(AUSWAHL)} Bilder vorhanden und zugeordnet.")
+    if not NACHWEISE.is_dir():
+        print("      Neu bauen ginge nur mit den Nachweisen (tools/bilder.py ohne --pruefen).")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Bilder fuer die Doku aus Nachweise/ bauen")
     ap.add_argument("--pruefen", action="store_true", help="nur pruefen, nichts schreiben")
     a = ap.parse_args()
 
+    # Zuerst pruefen — das braucht weder Nachweise noch Pillow.
+    if a.pruefen:
+        return pruefen()
+
+    if not NACHWEISE.is_dir():
+        raise SystemExit(
+            f"FEHLER: {NACHWEISE} fehlt — ohne die Abnahme-Nachweise lassen sich die Bilder\n"
+            "  nicht herleiten. Die fertigen Bilder liegen in docs/bilder/ (im Git, bereits\n"
+            f"  fertig). Nur pruefen: python tools/bilder.py --pruefen"
+        )
+
+    # Pillow wird NUR zum Bauen gebraucht. Der Import stand frueher ganz oben und liess
+    # `--pruefen` auf jedem Rechner ohne Pillow scheitern — auf dem GitHub-Runner ist
+    # Pillow nicht installiert, dadurch wurde der ganze Ablauf rot (gemessen 05.10.2026).
     try:
         from PIL import Image
     except ImportError:
-        raise SystemExit("FEHLER: Pillow fehlt. Ohne Pillow kann nicht skaliert werden.")
-
-    if not NACHWEISE.is_dir():
-        # Auf GitHub ist das der Normalfall: Nachweise/ liegt bewusst nicht im Git (22 MB
-        # Beweismaterial). Dann gibt es hier nichts zu bauen — das ist kein Fehler, sondern
-        # der erwartete Zustand. Die fertigen Bilder liegen in docs/bilder/ und sind
-        # versioniert; geprueft wird dann nur, ob sie da sind.
-        if a.pruefen:
-            if not ZIEL.is_dir() or not any(ZIEL.glob("*.jpg")):
-                print(f"ROT: {NACHWEISE} fehlt UND in {ZIEL} liegen keine Bilder.")
-                return 1
-            anzahl = len(list(ZIEL.glob("*.jpg")))
-            print(f"Quellen ({NACHWEISE.name}/) liegen nicht vor — der Normalfall auf GitHub.")
-            print(f"GRUEN: die {anzahl} fertigen Bilder liegen aber in {ZIEL.name}/ (versioniert).")
-            fehlend = [n for n, _, _, _ in AUSWAHL if not (ZIEL / n).is_file()]
-            if fehlend:
-                print("ROT: es fehlen: " + ", ".join(fehlend))
-                return 1
-            print("      Kein Bild fehlt. Neu bauen ginge nur mit den Nachweisen.")
-            return 0
-        raise SystemExit(
-            f"FEHLER: {NACHWEISE} fehlt — ohne die Abnahme-Nachweise lassen sich die Bilder\n"
-            "  nicht herleiten. Die fertigen Bilder liegen in docs/bilder/ (im Git)."
-        )
+        raise SystemExit("FEHLER: Pillow fehlt. Ohne Pillow kann nicht skaliert werden.\n"
+                         "  Nur pruefen (ohne Pillow): python tools/bilder.py --pruefen")
 
     ZIEL.mkdir(parents=True, exist_ok=True)
     # Fassung des Spiels aus bauen.py lesen - eine Quelle, kein zweiter Ort zum Pflegen.
@@ -114,15 +136,6 @@ def main() -> int:
         quelle = NACHWEISE / rel
         if not quelle.is_file():
             fehler.append(f"Quelle fehlt: {rel}")
-            continue
-        if a.pruefen:
-            ziel = ZIEL / name
-            if not ziel.is_file():
-                fehler.append(f"Zielbild fehlt: {name}")
-                continue
-            sha = hashlib.sha256(ziel.read_bytes()).hexdigest()[:16]
-            zeilen.append(f"| `{name}` | `{rel}` | {ziel.stat().st_size:,} B | {sha} |")
-            gesamt += ziel.stat().st_size
             continue
 
         with Image.open(quelle) as im:
@@ -143,20 +156,19 @@ def main() -> int:
     for name, rel, breite, text in AUSWAHL:
         zeilen.append(f"- **`{name}`** — {text}")
 
-    if not a.pruefen:
-        # newline="\n": im Repositorium gilt LF (.gitattributes), auch auf Windows.
-        (ZIEL / "HERKUNFT.md").write_text("\n".join(zeilen) + "\n", encoding="utf-8", newline="\n")
-        print()
-        print(f"{len(AUSWAHL)} Bilder -> {ZIEL}")
-        print(f"  Summe {gesamt/1024:.0f} KB")
-        print(f"  Herkunft -> {ZIEL / 'HERKUNFT.md'}")
+    # newline="\n": im Repositorium gilt LF (.gitattributes), auch auf Windows.
+    (ZIEL / "HERKUNFT.md").write_text("\n".join(zeilen) + "\n", encoding="utf-8", newline="\n")
+    print()
+    print(f"{len(AUSWAHL)} Bilder -> {ZIEL}")
+    print(f"  Summe {gesamt/1024:.0f} KB")
+    print(f"  Herkunft -> {ZIEL / 'HERKUNFT.md'}")
 
     if fehler:
         print("ROT:")
         for f in fehler:
             print("  - " + f)
         return 1
-    print("GRUEN: alle Bilder vorhanden und zugeordnet." if a.pruefen else "GRUEN: fertig.")
+    print("GRUEN: fertig.")
     return 0
 
 

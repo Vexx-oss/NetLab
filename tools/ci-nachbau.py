@@ -88,13 +88,26 @@ def main() -> int:
     if spielhalle.exists():
         shutil.rmtree(spielhalle, ignore_errors=True)
     print(f"Spielhalle in Reichweite: {spielhalle.is_file() or spielhalle.is_dir()}  (muss False sein)")
+
+    # Nachweise/ liegt nicht im Git: im Klon fehlt es. Genau der Zustand auf GitHub.
+    print(f"Nachweise/ im Klon      : {(ziel / 'Nachweise').is_dir()}  (muss False sein)")
+
+    # Pillow ist auf dem GitHub-Runner NICHT installiert. Nachbauen: ein leerer Ordner mit
+    # einer PIL, die beim Import absichtlich scheitert, wird per PYTHONPATH vorgeschaltet.
+    # (Pillow wird hier nicht angefasst — nur verdeckt.)
+    sperre = Path(tempfile.mkdtemp(prefix="nl-kein-pillow-"))
+    (sperre / "PIL").mkdir()
+    (sperre / "PIL" / "__init__.py").write_text(
+        'raise ImportError("Pillow ist hier absichtlich nicht verfuegbar (CI-Nachbau)")\n', encoding="utf-8")
+    umgebung = dict(os.environ, PYTHONPATH=str(sperre))
+    print(f"Pillow                  : verdeckt (wie auf dem Runner)")
     print()
 
     fehler = []
     for name, teile, muss in SCHRITTE:
         try:
             lauf = subprocess.run(befehl(teile), cwd=ziel, capture_output=True, text=True,
-                                  encoding="utf-8", errors="replace", timeout=900)
+                                  encoding="utf-8", errors="replace", timeout=900, env=umgebung)
         except FileNotFoundError as e:
             print(f"  [ROT  ] {name:<34} Befehl nicht gefunden: {e}")
             fehler.append(f"{name}: Befehl fehlt")
