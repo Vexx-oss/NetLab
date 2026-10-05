@@ -14,6 +14,8 @@ tags: [FISI, Lernspiel, Netzwerk, Betrieb]
 > WebView2-Laufzeit. Ursache war **nicht** das Programm und **nicht** WebView2, sondern das **Integritätslabel
 > „Niedrig“** des Vaults. Reparatur: eine Sekunde `icacls`, ohne Administratorrechte.
 
+![[N1 Integritätsstufen.excalidraw]]
+
 ## 1 · Was kaputt war
 
 | Beobachtung | Messwert |
