@@ -775,3 +775,68 @@ Ergebnis mit Atlas-Zeile · Akte mit hellen Geräten:
 Provisorium im Ergebnis · Folgeauftrag im Postfach · Kompetenzkarte:
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-3-ergebnis-provisorium.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-4-postfach-folgeauftrag.png|420]]
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-5-kompetenzkarte.png|560]]
+
+---
+
+## 20 · Unabhängige Prüfung nach E2 (05.10.2026, Planungssitzung) und Auftrag „P“
+
+*Selbst gespielt in der Browser-Fassung (frischer Spielstand, nur ein schmales Fenster von 731 px) und die Tests laufen lassen (191/191 grün). **Nicht geprüft:** die .exe, Ton, Ereignisse live (ein Stromausfall ließ sich von mir nicht auslösen, die Auslöse-Funktion lieferte `null`), Stufen über 1, die Funktionsprobe nur im Zwischenbild (Ringe um Kasse, Switch, Drucker, „Weiter: Klick“; die Kundenstimme dort habe ich nicht erkannt – prüfen).*
+
+### Was gut ist (bleibt)
+- Start ohne Willkommensfenster: Senior in einer Sprechblase, erste Handlung sofort; Kabel-Meldung kurz und unten.
+- Ergebnis: Sterne, Lohn, Abzeichen, **Dein Weg** (Kabel … → Probe ✓), **Merke** – ruhig und lehrreich.
+- Postfach als echte Wahl: Formmarke, Risiko, Zeit, Lohn, „Übt“.
+- Hub „Heute“: ein Hauptknopf, drei Kacheln.
+- Fernwartung funktioniert: Terminal, Akte, Verdacht, Arbeitsziele („Auf PC-Buero nachgesehen“).
+
+### Befunde (F1–F8)
+| # | Befund | Beleg | Gewicht |
+|---|---|---|---|
+| F1 | **Postfach unter 900 px ohne „Annehmen“** | `@media (max-width:900px){ .sp-leser{display:none} }` (`spiel.css`); im Test hatten beide „Annehmen“-Knöpfe Größe 0×0; Karten anklicken wählt nur aus | mittel (kleine Fenster) |
+| F2 | **Fernwartung lässt die halbe Fläche leer** | links nur Symbol und „Fernwartung · PC-Buero“, rechts das Terminal | mittel (verschenkt Atmosphäre) |
+| F3 | **Erste Stunde ist zufällig statt gestaltet** | nach dem 1. Auftrag boten sich zwei Störungen an; die neuen Formen sah ich erst, nachdem ich sie selbst ins Postfach legte | hoch (Abwechslung beginnt erst dort, wo der Spieler schon entschieden hat, ob es ihm gefällt) |
+| F4 | **Die neuen Formen haben keine eigene Probe** | Opus nennt es selbst; Hotline, Fernwartung, Audit, Adressplan enden im selben Dialog | mittel |
+| F5 | **Vertrauen zahlt nichts aus** | Herzen steigen, öffnen aber nur Geschichten (R4 „jede Belohnung öffnet etwas“) | mittel |
+| F6 | **Kein Flow-Regler** | Hebel 12 nicht gebaut; Schwierigkeit hängt nur am Niveau | mittel |
+| F7 | **Hub zeigt nur einen Auftrag** | die Wahl aus E1 liegt im Postfach, der Hub-Knopf übergeht sie | klein |
+| F8 | **UI ist von keinem Test abgedeckt** | 191 Tests laden `ui/` nicht; F1 wäre so nie aufgefallen. 15 Klassen ohne CSS-Regel (meist IDs; `np-hand`, `lk-wert`, `sp-demo-kopf` prüfen) | mittel |
+
+Dazu Kleinigkeiten: Punktlinien von `ipconfig` brechen im schmalen Terminal hässlich um; Kunden haben noch keine Gesichter; Stufe 6 (Storage) hat Geschichten, aber keine erreichbaren Aufträge.
+
+### Strengere Scorecard (meine Einschätzung gegen die Selbstbewertung 38,0)
+Opus bewertet sein eigenes Werk. Ohne Playtest ziehe ich dort ab, wo ich im Spiel eine Lücke gesehen habe:
+
+| # | Opus | meine | warum weniger |
+|---|---:|---:|---|
+| 2 Spielgefühl | 3,5 | 3,3 | Probe nur bei Störungen, Ton ungeprüft |
+| 3 Flow | 3,4 | 3,1 | kein Flow-Regler |
+| 4 Entdeckung | 3,4 | 3,2 | Gründe in AP2 weiter auf Klick; Verdacht ist Mehrfachwahl |
+| 5 Abwechslung | 3,0 | 2,7 | erste Stunde zufällig (F3) |
+| 6 Entscheidungen | 2,8 | 2,4 | nur eine Entscheidungsart, wirkt auf wenige Aufträge |
+| 7 Besitz & Welt | 2,9 | 2,6 | Atlas ist das feste Kundennetz, Vertrauen ohne Auszahlung |
+| 11 Erzählung | 3,0 | 2,6 | nur Text, keine Gesichter, Kapitel 3 braucht ~8 saubere Aufträge |
+| **Summe** | **38,0** | **≈ 35,9** | **+38 % statt +46 %** |
+
+Das ist ebenfalls Schätzung. **Der wirkliche Maßstab ist das Spieltagebuch aus echten Sitzungen** (siehe unten).
+
+### Auftrag „P“ (Politur und Bindung) – eine Opus-Sitzung, danach Haltepunkt
+Ziel: die Lücken schließen, die am meisten Punkte bringen (geschätzt +2,0 auf meiner Skala), und die Fehler beheben.
+
+1. **Hygiene (F1, F2, F8):** Postfach schmal: Karte öffnet den Leser als Blatt von unten mit „Annehmen“. Fernwartung: linke Fläche als **Sitzungsfenster** (Gerät, Verbindung „aktiv“, Kundenzeile, Symptom) statt Leere; Terminal ≥ 55 % Breite; `ipconfig`-Punktlinien kürzer bei schmaler Breite. Neu `tools/rauch.py`: jede Ansicht in 1366, 960 und 720 px – Hauptaktion sichtbar und anklickbar, kein waagerechter Überlauf – in `tools/test.sh` aufrufbar. Drei Klassen ohne Regel klären.
+2. **Kuratierte erste Stunde (F3):** feste Folge der ersten sechs Aufträge – Kabel · Störung · **Hotline** (das Telefon klingelt) · **Fernwartung** · erste Wahl „Provisorium oder sauber?“ · erstes harmloses Ereignis – danach der Mischer. Abnahme: frischer Spielstand, die ersten sechs Abschlüsse zeigen ≥ 4 Formen.
+3. **Probe für jede Form (F4):** Hotline: Auflegen und Dank; Fernwartung: „Verbindung getrennt – PC online“; Audit: Plan wird abgestempelt; Adressplan: die Bereiche leuchten im Plan auf. Je höchstens 3 s, überspringbar.
+4. **Vertrauen zahlt aus (F5):** ab Vertrauen 3 eine **Empfehlung** (ein Folgekunde kommt eine Stufe früher oder ein Empfehlungsauftrag), ab 4 **−20 % auf den Wartungsvertrag**. Der **Feierabend-Ausblick** nennt Folgeauftrag, Notfall oder nächstes Kapitel („Morgen: …“).
+5. **Flow-Regler (F6):** nach zwei Fehlschlägen in einer Fertigkeit ein Gerüst (zusätzlicher Hinweis, kleinere Variante), nach drei Glanzergebnissen mehr Verwicklung (zweiter Fehler, weniger Hinweise); Einstellung „Anpassung: automatisch / manuell“; Tests.
+6. **Hub-Wahl (F7):** unter der Hauptkarte „oder: 2 weitere Aufträge“ als kleine Zeilen; dazu ein **frei wählbares Wochenziel** (3 Vorschläge, z. B. „3 Fehlerarten verstehen“). Platzbudget bleibt ≤ 40 Wörter, ein Hauptknopf.
+
+**Abnahme P:** Szenario „Frisch → erste Stunde“ im echten Programm mit Bildschirmfotos in 1366 und 720 px; `tools/rauch.py` grün; Tests grün; Scorecard 2, 3, 5, 6, 7, 9 neu bewerten (mit Begründung, **unabhängig davon, was die Summe dann ergibt**). Nicht mit D beginnen. **Nicht pushen** (wird blockiert), am Ende „bereit zum Push“ mit Commit-Zahl melden.
+
+### Danach (Reihenfolge)
+1. **D – DHCP und DNS** (Wunsch aus dem ersten Gespräch; schaltet „Sicherheitsvorfall“ und neue Fehlerdex-Einträge frei).
+2. **G-Teil: Netz-Codes („Fehler bauen und verschenken“) und Portfolio-Export** (Abnahmeprotokoll und Netzplan als Bild). Das sind die beiden Hebel, die in der Klasse Gesprächsstoff und echten Nutzen für Berichtsheft und Projektdokumentation bringen.
+3. **Gesichter** für Senior und die wiederkehrenden Kundenfiguren (einfache SVG-Köpfe mit 3 Stimmungen).
+4. **Stufe 6 Storage** als Endspiel (NAS, RAID, iSCSI, Backup) – die schon geschriebenen Geschichten werden erreichbar; passt zum Karriereziel.
+5. **F – Abschluss** (Version 1.2.0, Wiki, README auf `master`, Gesamtdurchspiel).
+
+### Echter Test (ohne Opus)
+Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswertung kopieren“** und den Text in den Chat einfügen. Besonders wichtig: **Weiterspiel-Rate** (startet der nächste Auftrag binnen 2 Minuten?), **Erstversuch-Quote** (Ziel 55–75 %) und wo du aufgehört hast. Wenn Mitschüler mitspielen: 30 Minuten, laut denken, danach die 8 Fragen aus § 8.
