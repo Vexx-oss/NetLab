@@ -58,11 +58,8 @@ jobs:
       - name: Simulation gegen den Referenzstand
         run: node tools/sim-stand.js
 
-      - name: "Lernmotor: Kopie, Bau, Rückfall"
-        run: |
-          python tools/lernmotor.py
-          python tools/lernmotor-bau.py
-          python tools/lernmotor-rueckfall.py
+      - name: Programm-Fassung bauen (aus der Kopie des Lernmotors)
+        run: python bauen.py
 
       - name: Einzeldatei bauen
         run: python tools/einfach.py

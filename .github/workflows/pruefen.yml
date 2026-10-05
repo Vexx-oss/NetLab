@@ -2,6 +2,10 @@ name: Prüfen
 
 # Läuft bei jedem Push und jedem Pull Request. Die Tests sind reines JavaScript ohne
 # Browser und laufen deshalb auf einem nackten Ubuntu-Runner.
+#
+# Wichtig: Hier liegt NUR dieses Repositorium. Die FISI-Spielhalle liegt daneben nur auf
+# dem Entwicklungsrechner. Jeder Schritt muss also ohne sie auskommen — genau das prüfen
+# die Schritte „Bau aus der Kopie" und „ohne Spielhalle".
 on:
   push:
     branches: [ausbau-1.2, master]
@@ -32,14 +36,11 @@ jobs:
       - name: Simulation gegen den Referenzstand
         run: node tools/sim-stand.js
 
-      - name: Lernmotor-Kopie gegen die Quelle prüfen
-        run: python tools/lernmotor.py
-
-      - name: Bau mit und ohne FISI-Spielhalle muss gleich sein
-        run: python tools/lernmotor-bau.py
-
       - name: Tests und Simulationsvergleich ohne FISI-Spielhalle
         run: python tools/lernmotor-rueckfall.py
+
+      - name: Programm-Fassung bauen (aus der Kopie des Lernmotors)
+        run: python bauen.py
 
       - name: Einzeldatei bauen (DAS Spiel als eine Datei)
         run: python tools/einfach.py
@@ -49,3 +50,6 @@ jobs:
 
       - name: Bilder der Doku prüfen
         run: python tools/bilder.py --pruefen
+
+      - name: GitHub-Abläufe selbst prüfen
+        run: python tools/ablaeufe.py

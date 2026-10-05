@@ -38,8 +38,27 @@ def stempel() -> str:
 
 if BEISEITE.exists():
     raise SystemExit(f"FEHLER: {BEISEITE} liegt noch herum — erst aufraeumen.")
+
 if not QUELLE.is_file():
-    raise SystemExit(f"FEHLER: Quelle fehlt: {QUELLE} — Test nicht durchfuehrbar.")
+    # Ohne die Nachbar-Spielhalle laesst sich der Vergleich nicht fahren — das ist auf
+    # GitHub der Normalfall, weil dort nur dieses Repositorium liegt. Kein Fehler:
+    # gemeldet wird, was trotzdem gilt (die Kopie baut), und was hier NICHT geprueft
+    # werden konnte. Ein „GRUEN" fuer etwas Ungepruefte waere gelogen.
+    print(f"Quelle nicht vorhanden: {QUELLE}")
+    print("  (Die FISI-Spielhalle liegt nur auf dem Entwicklungsrechner daneben.)")
+    print()
+    r = subprocess.run([sys.executable, str(HIER / "bauen.py")],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0:
+        print("ROT: der Bau aus der Kopie allein ist gescheitert:")
+        print("  " + ((r.stdout or "") + (r.stderr or "")).strip()[-400:])
+        sys.exit(1)
+    text = INDEX.read_text(encoding="utf-8")
+    print("Geprueft: der Bau allein aus fremd/lernmotor.js gelingt.")
+    print(f"          {(r.stdout or '').strip()[:90]}")
+    print("NICHT geprueft: ob er byte-gleich zum Bau MIT der Spielhalle ist —")
+    print("          dafür muss die Spielhalle daneben liegen.")
+    sys.exit(0)
 
 print(f"Quelle daneben: {QUELLE}")
 print(f"Kopie im Repo : {HIER / 'fremd' / 'lernmotor.js'}")

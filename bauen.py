@@ -81,12 +81,17 @@ def lies(pfad: Path) -> str:
     return pfad.read_text(encoding="utf-8").replace("\r\n", "\n")
 
 
-def lernmotor_pfad():
-    """Welche Lernmotor-Datei wird gebaut? Die Quelle daneben hat Vorrang, sonst die Kopie."""
+def lernmotor():
+    """Welche Lernmotor-Datei wird gebaut? Quelle daneben hat Vorrang, sonst die Kopie.
+
+    Gibt (Pfad, ist_kopie) zurueck. `ist_kopie` entscheidet, ob der Herkunftskopf
+    abgeschnitten und geprueft wird — ueber den Pfad zu raten wäre plattformabhaengig
+    (Windows trennt mit '\\', Linux mit '/'), das war ein echter Fehler.
+    """
     if LERNMOTOR_QUELLE.is_file():
-        return LERNMOTOR_QUELLE
+        return LERNMOTOR_QUELLE, False
     if LERNMOTOR_KOPIE.is_file():
-        return LERNMOTOR_KOPIE
+        return LERNMOTOR_KOPIE, True
     raise SystemExit(
         "FEHLER: kein Lernmotor gefunden.\n"
         f"  erwartet: {LERNMOTOR_KOPIE}\n"
@@ -96,8 +101,20 @@ def lernmotor_pfad():
 
 def quelle(rel):
     if rel == "@lernmotor":
-        text = lies(lernmotor_pfad())
-        return LERNMOTOR_KOPF.sub("", text, count=1) if "fremd" in str(lernmotor_pfad()) else text
+        pfad, ist_kopie = lernmotor()
+        text = lies(pfad)
+        if not ist_kopie:
+            return text
+        # Die Kopie MUSS ihren Herkunftskopf haben — sonst ist die Herkunft nicht mehr
+        # belegbar, und der Bau waere von der Quelle nicht mehr zu unterscheiden.
+        if not LERNMOTOR_KOPF.match(text):
+            raise SystemExit(
+                f"FEHLER: {pfad} hat keinen Herkunftskopf.\n"
+                "  Die Kopie im Repositorium traegt Herkunft und Pruefsumme im Kopf; er wird\n"
+                "  beim Bau abgeschnitten. Fehlt er, wurde die Datei von Hand beschnitten.\n"
+                "  In Ordnung bringen: python tools/lernmotor.py --neu-einlesen"
+            )
+        return LERNMOTOR_KOPF.sub("", text, count=1)
     return lies(SRC / rel)
 
 

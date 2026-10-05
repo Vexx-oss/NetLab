@@ -79,7 +79,27 @@ def main() -> int:
         raise SystemExit("FEHLER: Pillow fehlt. Ohne Pillow kann nicht skaliert werden.")
 
     if not NACHWEISE.is_dir():
-        raise SystemExit(f"FEHLER: {NACHWEISE} fehlt — die Bilder lassen sich nicht herleiten.")
+        # Auf GitHub ist das der Normalfall: Nachweise/ liegt bewusst nicht im Git (22 MB
+        # Beweismaterial). Dann gibt es hier nichts zu bauen — das ist kein Fehler, sondern
+        # der erwartete Zustand. Die fertigen Bilder liegen in docs/bilder/ und sind
+        # versioniert; geprueft wird dann nur, ob sie da sind.
+        if a.pruefen:
+            if not ZIEL.is_dir() or not any(ZIEL.glob("*.jpg")):
+                print(f"ROT: {NACHWEISE} fehlt UND in {ZIEL} liegen keine Bilder.")
+                return 1
+            anzahl = len(list(ZIEL.glob("*.jpg")))
+            print(f"Quellen ({NACHWEISE.name}/) liegen nicht vor — der Normalfall auf GitHub.")
+            print(f"GRUEN: die {anzahl} fertigen Bilder liegen aber in {ZIEL.name}/ (versioniert).")
+            fehlend = [n for n, _, _, _ in AUSWAHL if not (ZIEL / n).is_file()]
+            if fehlend:
+                print("ROT: es fehlen: " + ", ".join(fehlend))
+                return 1
+            print("      Kein Bild fehlt. Neu bauen ginge nur mit den Nachweisen.")
+            return 0
+        raise SystemExit(
+            f"FEHLER: {NACHWEISE} fehlt — ohne die Abnahme-Nachweise lassen sich die Bilder\n"
+            "  nicht herleiten. Die fertigen Bilder liegen in docs/bilder/ (im Git)."
+        )
 
     ZIEL.mkdir(parents=True, exist_ok=True)
     # Fassung des Spiels aus bauen.py lesen - eine Quelle, kein zweiter Ort zum Pflegen.

@@ -46,7 +46,25 @@ def lauf(name, befehl, muss):
 if BEISEITE.exists():
     raise SystemExit(f"FEHLER: {BEISEITE} liegt noch herum — erst aufraeumen.")
 if not QUELLE.is_file():
-    raise SystemExit(f"FEHLER: Quelle fehlt: {QUELLE}")
+    # Auf GitHub liegt die Nachbar-Spielhalle nicht — dann gibt es nichts zu vergleichen.
+    # Geprueft wird trotzdem das Wichtigste: dass Tests und Simulationsvergleich ALLEIN
+    # laufen. Genau das ist der Zustand in der Pruefung. Ein „GRUEN" fuer den nicht
+    # gefahrenen Teil waere gelogen, deshalb steht unten ausdruecklich, was fehlt.
+    print(f"Quelle nicht vorhanden: {QUELLE}")
+    print("  (auf GitHub der Normalfall) — geprueft wird nur der Weg OHNE Spielhalle.")
+    print()
+    ohne = [
+        lauf("tests/run.js", [NODE, "tests/run.js"], "grün"),
+        lauf("tools/sim-stand.js", [NODE, "tools/sim-stand.js"], "unverändert"),
+    ]
+    print()
+    if all(ohne):
+        print("GRUEN: Tests und Simulationsvergleich laufen ohne die Spielhalle —")
+        print("       das ist der Zustand in der Pruefung auf GitHub.")
+        print("NICHT geprueft: der Weg MIT Spielhalle (dafuer muss sie daneben liegen).")
+        sys.exit(0)
+    print("ROT: der Weg ohne Spielhalle ist gescheitert.")
+    sys.exit(1)
 
 print("MIT Quelle daneben:")
 mit = [
