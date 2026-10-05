@@ -58,18 +58,22 @@ dauerhaft behält, habe ich **nicht** getestet.
 Die Schriften haben Rückfallketten (`--body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif`),
 der Text bleibt also lesbar, falls ein Browser die Dateien aus `schriften/` nicht lädt.
 
-## 4 · Die Desktop-Fassung startet auf diesem Rechner derzeit nicht
+## 4 · Die Desktop-Fassung startet wieder (Stand 05.10.2026, 19:30)
 
-`Programm\Netzwerk-Labor.exe` (05.10.2026 14:37) bricht beim Start mit einem WebView2-Fehler ab:
-`failed to create webview`, `HRESULT(0x800700AA)` („Die angeforderte Ressource wird bereits verwendet.“),
-gemessen am 05.10.2026 um 16:11:40 und 16:14:18. Vermutete Ursache: Beim Aufräumen wurden 13
-`msedgewebview2.exe` zwangsweise beendet, darunter Hosts der Windows-Shell. Einzelheiten in
-`Design – Spielspaß 2.0.md` § 25 und in `AGENTS.md`.
+`Programm\Netzwerk-Labor.exe` läuft wieder: Fenster „Netzwerk-Labor“, Laboransicht v1.1.0, Profil unter
+`%LOCALAPPDATA%\de.fisi.netzwerklabor\EBWebView`, **0** Abstürze der WebView2-Laufzeit beim Start mit normalem
+Benutzer-Token. Messwerte und Beweise: `Nachweise/1.2-Start/BEFUND.md`, Bild
+`Nachweise/1.2-Start/start-05-gelaende-laeuft.png`.
 
-**Deshalb diese ZIP:** Die Browser-Fassung zeigt dasselbe Spiel ohne WebView2. Damit die `.exe` wieder läuft,
-wäre ein Windows-Neustart nötig – der erfolgt in dieser Sitzung nicht. Die Angaben in Abschnitt 4 sind aus
-`AGENTS.md` und `Design – Spielspaß 2.0.md` § 25 übernommen, **nicht** von mir neu gemessen.
+Der frühere Befund in diesem Abschnitt („`failed to create webview`, Windows-Neustart nötig“) war falsch gedeutet:
+Ursache war das **Integritätslabel „Niedrig“** auf dem Vault – davon erbt die `.exe`, läuft als Low-Prozess und darf
+`%LOCALAPPDATA%` nicht beschreiben, weshalb die WebView2-Laufzeit ihr Profil nicht anlegen konnte.
+**Abhilfe ohne Administratorrechte:** Doppelklick auf `Programm\Integritaet-reparieren.cmd`; das setzt das Label des
+Programmordners auf „Mittel“ zurück. Tritt dasselbe Bild nach einer Werkzeug-Sitzung erneut auf, genügt derselbe
+Doppelklick.
 
+**Ausweichweg ohne WebView2:** die Browser-Fassung (`Programm\Netzwerk-Labor-Browser.zip` bzw. `web\index.html`,
+Desktop-Verknüpfung `Netzwerk-Labor (Browser).lnk`) zeigt dasselbe Spiel und braucht kein Integritätslabel.
 ## 5 · Paket in Zahlen (gemessen beim Packen, 05.10.2026)
 
 | Prüfung | Ergebnis |

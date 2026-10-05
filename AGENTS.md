@@ -9,8 +9,8 @@ Vorbild für diese Datei: Design – Spielspaß 2.0.md § 24 (Auftrag „R“, P
    `python`, nicht `node`. Du darfst **höchstens eine PID beenden, die du in dieser Sitzung selbst gestartet hast** —
    und nur diese. Starte nichts neu, starte Windows nicht neu.
    *Grund (belegt):* Am 05.10.2026 wurden 13 `msedgewebview2.exe` zwangsweise beendet, darunter die Hosts der
-   Windows-Shell. Seitdem startet die `.exe` nicht mehr (`failed to create webview`, `0x800700AA`). Das Spiel ist
-   dadurch im echten Programm nicht mehr prüfbar.
+   Windows-Shell. *Nachtrag 05.10.2026, 19:30:* Dieser Zusammenhang war eine Fehldeutung – die `.exe` startet wieder
+   (Ursache war das Integritätslabel „Niedrig“ des Vaults, siehe Befund unten). Die Regel gilt unverändert.
 2. **Kein `git push`, kein `--force`, kein `reset --hard`, kein Zweigwechsel, kein Commit auf `master`, keine Zweige
    löschen.** Gearbeitet wird auf `ausbau-1.2`.
 3. **Keine Dateien außerhalb des Projektordners ändern.** Die Ordner `Nachweise/` und `Programm/` werden **nicht**
@@ -40,9 +40,15 @@ direkt aufgerufen wird: dann fehlt `dirname`, weil Git-`/usr/bin` nicht im PATH 
 & "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'
 ```
 
-**Die `.exe` startet derzeit nicht** (WebView2, `0x800700AA`). Siehe `Design – Spielspaß 2.0.md` § 25. Prüfungen, die
-das echte Programm brauchen, laufen dann im Rauchtest (`python tools/rauch.py`, echte Maus) und werden ausdrücklich
-als **„nicht im echten Programm“** gekennzeichnet.
+**Die `.exe` startet wieder** (Stand 05.10.2026, 19:30 – Befund und Beweise in `Nachweise/1.2-Start/BEFUND.md`).
+Der frühere Befund „startet nicht“ war falsch gedeutet: Nicht die zwangsweise beendeten `msedgewebview2.exe` waren
+die Ursache, sondern das **Integritätslabel „Niedrig“** auf dem Vault (Überrest der Werkzeug-Sandbox). Davon erbt
+`Programm/Netzwerk-Labor.exe`, läuft dadurch als Low-Prozess und darf `%LOCALAPPDATA%` nicht beschreiben; die
+WebView2-Laufzeit kann ihr Profil nicht anlegen und bricht ab (`failed to create webview`, `0x800700AA`/`0x8000FFFF`,
+Exception `0x80000003`). **Reparatur (ohne Administratorrechte, wiederholbar):** Doppelklick auf
+`Programm/Integritaet-reparieren.cmd` oder `icacls Programm /setintegritylevel (OI)(CI)Medium /T` +
+`icacls Programm/Netzwerk-Labor.exe /setintegritylevel Medium`. Der alte Befund in `Design – Spielspaß 2.0.md` § 25
+und in `Architektur.md` ist damit überholt.
 
 ## Zeilenenden bewahren
 

@@ -16,3 +16,5 @@ Programm/**/*.rar
 
 # Bildschirmfotos und Messwerte der Abnahmen (liegen im Vault, nicht im Git)
 Nachweise/
+# Temporaeres Messprofil der Browser-Pruefung (kann weg, sobald das Edge-Testfenster geschlossen ist)
+_probe-browser/

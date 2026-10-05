@@ -1311,4 +1311,41 @@ Ich hatte die drei Router-Adressen untereinander auf die Fläche geschrieben. **
 
 - Weitere Klassen liegen unter 12 px, waren in der praxis-Messung aber nicht im DOM: `.pd-name` 8,5 · `.vlan-schild text` 10,5 · `.karte-zeile` 10,5 · `.gw-schild text` 10,5 · `.band-text`/`.paket-text` 10 · `.badge-aus text` 10 · `.platz-schild text` 11,5. Für die (VLAN-, ARP-, Routing- und Simulationsansicht) braucht es einen eigenen Auftrag mit Platzprüfung.
 - Unter 60 % Zoom bleibt nur der Gerätename (5,1 px am unteren Ende). Das ist gewollt — aber es ist eine Entscheidung, keine Messung.
-- **Nicht im echten Programm geprüft:** Die `.exe` startet weiterhin nicht (WebView2). Alle Messungen und das Bild stammen aus der Browser-Fassung in Edge.
+- **Nicht im echten Programm geprüft:** Die `.exe` startet weiterhin nicht (WebView2). Alle Messungen und das Bild stammen aus der Browser-Fassung in Edge. **(Überholt durch § 27, 05.10.2026, 19:40 – die `.exe` startet wieder.)**
+---
+
+## 27 · Nachtrag: Das echte Programm startet wieder (05.10.2026, abends)
+
+**Kurz:** § 25 („Die `.exe` startet nicht, Windows-Neustart nötig") war eine Fehldeutung. Ursache war das
+**Integritätslabel „Niedrig"** des Vaults; die Reparatur dauert eine Sekunde und braucht keine Administratorrechte.
+
+**Ursache (belegt):** `C:\Users\Student\Documents\Joshua` trägt das Label „Niedrig" (`SYSTEM_MANDATORY_LABEL_ACE`,
+Policy `0x1`). Davon erbt `Programm/Netzwerk-Labor.exe`, Windows startet daraus einen **Low-Prozess** – auch über
+Explorer und Aufgabenplaner. Ein Low-Prozess darf Medium-Objekte nicht beschreiben; `msedgewebview2.exe` scheiterte
+deshalb beim Anlegen seines Profils (`Failed to create directory …\de.fisi.netzwerklabor\EBWebView, last error is 5`)
+und brach ab (Application Error 1000, Exception `0x80000003`), Tauri meldete `failed to create webview`
+(`0x800700AA`/`0x8000FFFF`). Die **Herkunft** des Labels ist Vermutung (Indizien: die Nicht-Standard-ACEs
+`S-1-4-…:(W,D,DC)` und `Jeder:(DENY)(DC)` am Vault) – belegt ist der Bestand.
+
+**Reparatur:** `icacls Programm /setintegritylevel (OI)(CI)Medium /T` + `icacls Programm/Netzwerk-Labor.exe
+/setintegritylevel Medium` – als Doppelklick `Programm/Integritaet-reparieren.cmd`.
+
+**Gemessen (05.10.2026, 19:26–19:45):** Start über den Aufgabenplaner (normaler Benutzer-Token) und über die
+Desktop-Verknüpfung `Netzwerk-Labor.lnk`: Fenster „Netzwerk-Labor", Laboransicht v1.1.0, **0** Abstürze der
+WebView2-Laufzeit, Profil `%LOCALAPPDATA%\de.fisi.netzwerklabor\EBWebView`, Spielstand wird wieder geschrieben
+(`spielstand.json` 40.171 → 40.227 Bytes). Vorher: **53** Application-Error-Einträge (Id 1000) seit 14:00, alle
+`msedgewebview2.exe`, **0** zu `Netzwerk-Labor.exe`.
+
+**Was das für frühere Abschnitte heißt:** § 25 und der Betriebsbefund in `Architektur.md` sind überholt; die Annahme,
+zwangsweise beendete `msedgewebview2.exe` hätten die Windows-Shell zerstört, ist **widerlegt**. Der Rauchtest bleibt
+sinnvoll, ist aber kein Ersatz mehr für den Lauf im echten Programm.
+
+**Prüfstand:** unabhängige Prüfung durch ein Teammitglied (`Nachweise/1.2-Start/pruefung/PRUEFUNG.md`): Labels,
+Wirkungskette (eigene Reproduktion), Neustart über die Verknüpfung, Regelprüfung – bestanden mit Beanstandungen, die
+abgearbeitet sind (u. a. wurde ein überflüssiger ACE-Eingriff außerhalb des Projekts zurückgebaut). Beweise:
+`Nachweise/1.2-Start/BEFUND.md`.
+
+**Offen:** Die Vault-Wurzel bleibt „Niedrig" (bewusst nicht angefasst) – neu im Vault angelegte Programme erben es;
+setzt eine künftige Werkzeug-Sitzung im Modus `workspace-write` das Label erneut, genügt derselbe Doppelklick.
+**Nicht geprüft:** echter menschlicher Doppelklick, Verhalten nach Windows-Neustart, Spielbarkeit (kein Klick
+ausgeführt).

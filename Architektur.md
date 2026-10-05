@@ -653,6 +653,8 @@ Keine neue `art`, kein neues Feld im Ereignisobjekt. `tests/sim-gruende.test.js`
 | ⑧ Tests | **teilweise** – sieben neue Fälle in `tests/sim-gruende.test.js`, ein Regressionsfall für den Pool-Modus in `tests/cli-ios-ssh.test.js`; 213 grün |
 | ⑨ Wiki + Lernmotor-Skill | **offen** |
 
+**Nachtrag 05.10.2026, 19:40 – Lauf im echten Programm:** `Programm/Netzwerk-Labor.exe` startet wieder. Ursache der Blockade war das Integritätslabel „Niedrig" des Vaults (nicht WebView2, kein Windows-Neustart nötig); Reparatur und Messwerte in `Design – Spielspaß 2.0.md` § 27, Beweise in `Nachweise/1.2-Start/BEFUND.md`. Die Punkte ④–⑨ bleiben wie sie sind; alle Prüfungen, die bisher nur im Rauchtest liefen, sind ab jetzt im echten Programm möglich.
+
 **Wichtiger Befund zur Konsole:** Der gesamte DHCP-Pool-Modus war wirkungslos. Jeder Handler las den Zustand in einen
 Klon, änderte den Klon und schrieb danach erneut einen frischen Klon zurück — also den unveränderten Stand. Dazu fehlte
 den Positionsargumenten das `n`, sodass die Werte nicht einmal in `a` landeten. Aufgefallen ist das nie, weil der
@@ -662,11 +664,11 @@ einmal schreiben) und einem Test, der den Zustand nach jedem Befehl prüft.
 **Noch offen in der Konsole:** `ip address` im Reservierungs-Untermodus wird nicht erkannt (der `ip`-Zweig am
 Konfigurationsmodus fängt es ab). Die reservierte IP ist über die Datenform und den Oberflächen-Inspektor setzbar.
 
-**Nicht möglich in der Entwicklungsumgebung:** der Lauf im echten Programm. Die `.exe` ist gebaut
-(`Programm/Netzwerk-Labor.exe`, 05.10. 14:37), aber WebView2 bricht dort beim Start ab — auch für die alte
-1.1-Fassung und auch außerhalb der Werkzeugumgebung. `tools/q-echt.py` ist für den Lauf auf einem normalen
-Desktop fertig; die Bilder gehören nach `Nachweise/1.2-Q/`.
-
+**Lauf im echten Programm:** wieder möglich (gemessen 05.10.2026, 19:26). `Programm/Netzwerk-Labor.exe` startet mit
+Standardprofil, Fenster „Netzwerk-Labor“, 0 Abstürze der WebView2-Laufzeit. Die frühere Blockade kam vom
+Integritätslabel „Niedrig“ des Vaults (Überrest der Werkzeug-Sandbox), nicht vom Programm; Einzelheiten und Beweise
+in `Nachweise/1.2-Start/BEFUND.md`, Reparatur wiederholbar über `Programm/Integritaet-reparieren.cmd`.
+`tools/q-echt.py` ist für den Lauf fertig; die Bilder gehören nach `Nachweise/1.2-Q/`.
 **Regressionsschutz:** `node tools/sim-stand.js` vergleicht die Simulation gegen `Nachweise/sim-stand.json`
 (12 Szenarien, 403 Ereignisse) und meldet jede Abweichung mit Stelle und Art. Nach jeder Änderung an `src/sim/`
 oder `src/modell/` laufen lassen — zusammen mit `node tests/run.js`.
@@ -680,7 +682,7 @@ Die **Simulations-Referenz liegt versioniert** in `tests/sim-stand.json` (vorher
 Befund M3). `node tools/sim-stand.js` vergleicht gegen diese Datei. Die **Zeilenenden** sind über `.gitattributes`
 (`* text=auto eol=lf`, Binärdateien ausgenommen) vereinheitlicht.
 
-**Betriebsbefund (Design § 25):** `python tools/q-echt.py` startet die `.exe` in dieser Umgebung **nicht** –
-`failed to create webview`, `HRESULT(0x800700AA)`, zuerst um 16:11:40 und erneut um 16:14:18 gemessen. Deshalb laufen
-alle Prüfungen, die das echte Programm brauchen, im Rauchtest (`python tools/rauch.py`, echte Maus) und werden
-ausdrücklich als „nicht im echten Programm“ gekennzeichnet.
+**Betriebsbefund (Design § 25) – überholt:** `python tools/q-echt.py` startet die `.exe` wieder. Der Befund
+`failed to create webview`, `HRESULT(0x800700AA)` (16:11:40 und 16:14:18) hatte als Ursache das Integritätslabel
+„Niedrig“ des Vaults; ein Windows-Neustart war nie nötig (gemessen 05.10.2026, 19:26–19:35).
+Beweise: `Nachweise/1.2-Start/BEFUND.md`.
