@@ -1168,3 +1168,32 @@ Eingegrenzt, damit die Ursache feststeht:
 
 ### Danach
 **D2 – DNS** → **Netz-Codes + Portfolio-Export** → **Gesichter** → **Stufe 6 Storage** → **F.** Vorher gehört **eine echte Spielsitzung von dir** (Browser-Fassung reicht, `Lernstand → Auswertung kopieren`): Seit S2 stammen alle Bewertungen von Modellen.
+## 25 · Auftrag R – Stand
+
+*Diese Sitzung: ein Modell (DeepSeek), allein und nacheinander, Zweig `ausbau-1.2`, Start bei Commit `0c288eb` (8 Commits seit § 22). Vorgabe war Auftrag „R“ aus § 24.*
+
+### Schritt 0 · Lage: läuft die .exe? **NEIN**
+
+| Prüfung | Ergebnis |
+|---|---|
+| `python tools/q-echt.py` (Start 16:11:40, Zeitlimit 3 min) | **läuft nicht** – „Programm meldet sich nicht auf dem Fernsteuerungs-Port“ |
+| Fehlercode beim direkten Start (16:14:18) | `HRESULT(0x800700AA)` – „Die angeforderte Ressource wird bereits verwendet.“ · Meldung: `failed to create webview: WebView2 error` |
+| Profilordner der App | `%LOCALAPPDATA%\de.fisi.netzwerklabor\EBWebView` vorhanden, 32,1 MB, Stand 05.10. 14:37:45; **kein** `lockfile`/`Singleton*` darin |
+| Spielstand | unberührt (`spielstand.json` 02.10. 14:14) |
+
+**Nichts beendet, nichts neu gestartet.** Es wurden keine Prozesse nach Namen beendet; der eigene Startvorgang ist von selbst ausgestiegen (PID und Uhrzeit stehen oben).
+
+Abweichung zu M1: Dort beim ersten Versuch `0x8000FFFF`, jetzt bei **jedem** Versuch `0x800700AA`. Beides sind Fehler der WebView2-Initialisierung; der Code hat gewechselt, die Wirkung ist dieselbe. Die von M1 genannte vermutete Ursache (zwangsweise beendete `msedgewebview2`-Prozesse) ist damit **nicht** widerlegt und **nicht** bestätigt. Ein Neustart ist in dieser Sitzung nicht erfolgt.
+
+**Folge für die Abnahme (Schritt 4):** Sie läuft im **Rauchtest mit echter Maus** und wird ausdrücklich als „nicht im echten Programm“ gekennzeichnet.
+
+### Prüfbefehle: was in dieser Umgebung läuft
+
+`sh tools/test.sh` läuft **nicht**, wenn `sh.exe` direkt aufgerufen wird: dann fehlt `dirname` (Git-`/usr/bin` nicht im PATH) und das Skript sucht `tests/run.js` im falschen Ordner (gemessen: „tools/test.sh: line 4: dirname: command not found“, danach `Cannot find module 'C:\Program Files\Git\tests\run.js'`). Verlässlich ist:
+
+```
+& "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'
+```
+
+So gemessen: **213/213 grün** (30 Testdateien, 75 Module).
+
