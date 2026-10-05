@@ -238,7 +238,8 @@ Ticketfeld `plan:{art:"skizze"|"netzplan"|"tabelle"|"soll"|"keiner", verdeckt:[g
 ## Phase E · Spielschleife: Abwechslung und Zufall
 
 > [!check] E1 gebaut und abgenommen 05.10.2026 – Formen (Fernwartung, Plan-Audit, Adressplan, Hotline; Sicherheitsvorfall/Rollout offen), Mischer/Postfach als Wahl, Ereignisse, „Provisorium oder sauber?“. Messwerte: [[Design – Spielspaß 2.0#18 · Stand nach E1]].
-> [!check] E2 gebaut und abgenommen 05.10.2026 – Kundenakte (Atlas, Vertrauen, 21 Geschichten, Baustellen) und Kompetenzkarte. [[Design – Spielspaß 2.0#19 · Stand nach E2 – Haltepunkt]]. **Haltepunkt: anspielen, dann D.**
+> [!check] E2 gebaut und abgenommen 05.10.2026 – Kundenakte (Atlas, Vertrauen, 21 Geschichten, Baustellen) und Kompetenzkarte. [[Design – Spielspaß 2.0#19 · Stand nach E2 – Haltepunkt]].
+> [!check] Danach Auftrag „P“ (Politur und Bindung) aus der unabhängigen Prüfung [[Design – Spielspaß 2.0#20 · Unabhängige Prüfung nach E2 (05.10.2026, Planungssitzung) und Auftrag „P“|§ 20]] gebaut und abgenommen 05.10.2026: schmales Postfach, Sitzungsfenster, Rauchtest, kuratierte erste Stunde, Probe je Form, Vertrauen zahlt aus, Flow-Regler, Hub-Wahl + Wochenziel. [[Design – Spielspaß 2.0#21 · Auftrag P – Stand]]. **Haltepunkt: anspielen, dann D.**
 
 **E1 Sechs Auftragsformen** (neben „Störung beheben“ und „Projekt“), jede mit eigenem Rhythmus und eigener Fertigkeit:
 1. **Terminal-Forensik:** Netz ist unsichtbar; nur ein Rechner per Terminal („Fernwartung“). Befehle üben (nutzt Phase C).

@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zweig ausbau-1.2; unabhängige Prüfung § 20 (Scorecard ≈ 35,9 statt 38,0); Auftrag P (Politur und Bindung) in Arbeit – § 21
+status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -17,11 +17,11 @@ status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zwe
 > [!success] Stand 04.10.2026: Welle 2 „Detektiv“ fertig (Phasen B und C), im echten Programm abgenommen
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
 
-> [!info] In Arbeit 05.10.2026: Auftrag „P“ (Politur und Bindung) aus der unabhängigen Prüfung § 20
-> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Punkt 3 fertig: eigene Probe für Hotline, Fernwartung, Audit, Adressplan. Punkt 4 fertig: Vertrauen zahlt aus, Feierabend-Ausblick. Punkt 5 fertig: Flow-Regler. Punkt 6 fertig: Hub-Wahl und Wochenziel. Es folgt die Abnahme im echten Programm. Stand: [[#21 · Auftrag P – Stand]].
+> [!warning] HALTEPUNKT 05.10.2026 nach Auftrag „P“ (Politur und Bindung) – Scorecard 38,0 auf der strengeren Grundlage aus § 20 (dort 35,9)
+> Alle sechs Punkte aus § 20 gebaut und im echten Programm abgenommen: Postfach schmal mit Blatt · Sitzungsfenster in der Fernwartung · `tools/rauch.py` (33/33) · kuratierte erste Stunde (sechs Abschlüsse = 4 Formen, Anruf, Weiterempfehlung) · eigene Probe je Form · Vertrauen zahlt aus (Empfehlung, −20 % Wartung) · Feierabend-Ausblick mit offenen Fäden · Flow-Regler · Hub-Wahl und Wochenziel. Nebenbei ein alter Fehler: Kundenfarben wirkten nie (h() setzte keine CSS-Variablen). Einzelheiten und Bilder: [[#21 · Auftrag P – Stand]]. **D beginnt erst nach dem Anspielen.**
 
-> [!warning] HALTEPUNKT 05.10.2026 nach E2 – Scorecard 38,0 von 60 (Ziel 39,0 nicht ganz erreicht)
-> E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Was die letzten 1,0 Punkte bringen könnte und warum ich nicht weitergebaut habe: [[#19 · Stand nach E2 – Haltepunkt]]. **D beginnt erst nach dem Anspielen.**
+> [!success] Stand 05.10.2026: E2 gebaut – Scorecard 38,0 als Selbstbewertung (die unabhängige Prüfung in § 20 kam auf 35,9)
+> E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Einzelheiten: [[#19 · Stand nach E2 – Haltepunkt]].
 
 > [!success] Stand 05.10.2026: E1 „Formen, Wahl, Ereignisse“ gebaut und im echten Programm abgenommen
 > Sieben Auftragsformen (Störung, Projekt, Terminal, Fernwartung, Plan-Audit, Adressplan, Hotline) · Postfach als Wahl mit Mischer (nie dreimal dieselbe Form, 1000 Postfächer im Test) · „Provisorium oder sauber?“ mit Folgeauftrag · sechs Ereignisse mit Erklärsatz. Abnahme: sechs Aufträge zeigen vier Formen, Stromausfall-Szenario (write memory rettet die Reparatur), Platzbudget hält bei jeder neuen Form. Scorecard 3/4/5/6/7/9/11 neu bewertet: **33,2 → 36,1**. Einzelheiten: [[#18 · Stand nach E1]].
@@ -250,23 +250,23 @@ Passt zu „erst beibringen, dann abfragen“ und macht aus dem Niveau eine echt
 
 Jedes Kriterium wird mit einer **Prüffrage** bewertet (0 = nein, 5 = durchgehend ja). Bewertet wird nach jedem Haltepunkt von dir (oder mir) *am echten Programm*, mit kurzer Begründung in der Notiz.
 
-| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | nach C | nach E1 | nach E2 | Ziel | Hebt vor allem |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
-| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | – | – | – | 4,0 | Hub, Akte |
-| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | – | – | – | 3,8 | 1, 6 |
-| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | **3,3** | **3,4** | – | 3,6 | 2, 12 |
-| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | **3,3** | **3,4** | – | 3,6 | 2, 3 |
-| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | – | **3,0** | – | 3,0 | 5, 9 |
-| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | – | **2,6** | **2,8** | 2,8 | 9, 10 |
-| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | – | **2,3** | **2,9** | 3,0 | 8, 10 |
-| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | **3,2** | – | **3,4** | 3,4 | 3, 11 |
-| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | – | **3,3** | **3,4** | 3,4 | 4, 5 |
-| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | – | – | – | 1,8 | 5 |
-| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | – | **2,2** | **3,0** | 3,0 | 10 |
-| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | – | – | – | 3,6 | 7 |
-| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **33,2** | **36,1** | **38,0** | **39,0** | **+50 %** |
+| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | nach C | nach E1 | nach E2 | Prüfung § 20 | nach P | Ziel | Hebt vor allem |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | – | – | – | – | – | 4,0 | Hub, Akte |
+| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | – | – | – | **3,3** | **3,6** | 3,8 | 1, 6 |
+| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | **3,3** | **3,4** | – | **3,1** | **3,4** | 3,6 | 2, 12 |
+| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | **3,3** | **3,4** | – | **3,2** | – | 3,6 | 2, 3 |
+| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | – | **3,0** | – | **2,7** | **3,2** | 3,0 | 5, 9 |
+| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | – | **2,6** | **2,8** | **2,4** | **2,8** | 2,8 | 9, 10 |
+| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | – | **2,3** | **2,9** | **2,6** | **3,0** | 3,0 | 8, 10 |
+| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | **3,2** | – | **3,4** | – | – | 3,4 | 3, 11 |
+| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | – | **3,3** | **3,4** | – | **3,6** | 3,4 | 4, 5 |
+| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | – | – | – | – | – | 1,8 | 5 |
+| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | – | **2,2** | **3,0** | **2,6** | – | 3,0 | 10 |
+| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | – | – | – | – | – | 3,6 | 7 |
+| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **33,2** | **36,1** | **38,0** | **35,9** | **38,0** | **39,0** | **+50 %** |
 
-*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10; „nach C“ (Ende Welle 2, B + C): 3, 4, 8; „nach E1“: 3, 4, 5, 6, 7, 9, 11; „nach E2“: 6, 7, 8, 9, 11. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]], [[#15 · Stand nach S2]] und [[#17 · Stand nach Phase C (Welle 2 fertig)]] [[#18 · Stand nach E1]] und [[#19 · Stand nach E2 – Haltepunkt]].*
+*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10; „nach C“ (Ende Welle 2, B + C): 3, 4, 8; „nach E1“: 3, 4, 5, 6, 7, 9, 11; „nach E2“: 6, 7, 8, 9, 11; „Prüfung § 20“: die strengere, unabhängige Einschätzung aus § 20 (2, 3, 4, 5, 6, 7, 11 niedriger); „nach P“: 2, 3, 5, 6, 7, 9 neu bewertet – auf der strengeren Grundlage, nicht auf 38,0. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]], [[#15 · Stand nach S2]] und [[#17 · Stand nach Phase C (Welle 2 fertig)]] [[#18 · Stand nach E1]] und [[#19 · Stand nach E2 – Haltepunkt]].*
 
 *Hinweis:* Welle 4 (Netz-Codes, Par, Gürtel, Büro) ist Reserve und hebt vor allem 8, 10 und 11 weiter; sie gehört nicht zur +50 %-Zusage.
 
@@ -848,7 +848,7 @@ Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswer
 
 ## 21 · Auftrag P – Stand
 
-*Gebaut am 05.10.2026 auf Zweig `ausbau-1.2`, Punkt für Punkt nach § 20. Diese Notiz wächst mit jedem Punkt; die Abnahme im echten Programm und die Scorecard kommen am Ende.*
+*Gebaut am 05.10.2026 auf Zweig `ausbau-1.2`, Punkt für Punkt nach § 20, je Punkt Tests und Commit. Abnahme im echten Programm (`cdp.py lauf`, frischer Spielstand, 1366 und 720 px), keine JS-Fehler. Bilder und Messdatei: `Nachweise/1.2-P/`. Tests: **207 grün** (vorher 191), `tools/rauch.py` **33/33**, Klassen ohne Regel **0**. `Programm/Netzwerk-Labor.exe` ist der Stand nach P.*
 
 | Punkt | Inhalt | Stand |
 |---|---|---|
@@ -920,3 +920,84 @@ Je Fertigkeit merkt sich das Spiel die letzten fünf Ergebnisse. **Fehlschlag** 
 - **Wochenziel:** In der Fußzeile „Wochenziel wählen“ – drei Vorschläge je Kalenderwoche, für alle gleich: *3 Fehlerarten verstehen · 5 Aufträge ohne Hilfe · 3 verschiedene Auftragsformen · an 3 Tagen das Tagesrätsel · 3 Aufträge mit 5 Sternen ohne Hilfe*. Gewählt steht dort „Heute 1/3 · Woche 0/3 Rätsel“; geschafft gibt es einmal +1 Ruf und eine Ergebniszeile („🎯 Wochenziel geschafft“). Verpasst kostet nichts, „Später“ geht immer (R7).
 - **Platzbudget:** nach dem ersten Auftrag **36 Wörter · 6 Bedienelemente · 1 Hauptknopf** (gemessen wie in Phase A). Damit auch zwei weitere Aufträge plus gewähltes Wochenziel unter 40 bleiben, heißt die Karte jetzt „Nächster Auftrag“ (statt „Dein nächster Auftrag“) und das Wochenziel hat Ein-Wort-Kürzel.
 - **Geprüft:** 3 neue Tests (zwei weitere ohne die Hauptkarte; Vorschläge je Woche gleich, nur einer der drei wählbar, Zählung nur diese Woche, +1 Ruf genau einmal; Ergebnis meldet es); im Browser Auswahl und Fußzeile angesehen. 207/207 Tests, `rauch.py` 33/33.
+
+### Abnahme im echten Programm – „Frisch → erste Stunde“
+
+Frischer Spielstand; Lösungen per Skript, Abnahme, Probe, Ergebnis, Karten und Wahl über die echte Oberfläche; der Befehl in der Fernwartung echt getippt.
+
+| Schritt | Was im Programm geschah |
+|---|---|
+| 1 Kabel (Einstieg) | Probe, Ergebnis mit „Nächsten Auftrag wählen ▸“ → Postfach mit **Störung** und **Hotline (☎ klingelt)**, Karte „Das Telefon klingelt – Mira Kaya (Salon Lockenwerk) ruft an“ |
+| 2 Hotline | über „Rangehen ▸“ angenommen; Probe: Hörer aufgelegt, „Gespräch beendet · 1 min“, Dank |
+| 3 Störung | über die Hauptkarte im Hub; danach Tagesziel 3/3 → Feierabend mit Ausblick („Morgen wartet Mira Kaya: …“) |
+| 4 Fernwartung | über „Noch einen Auftrag“; Sitzungsfenster + Terminal 58 %, `ipconfig /all` getippt; Probe: ✓ auf dem Bildschirm, „Verbindung getrennt“, „online ✓“, dann das Netz; danach Karte **Weiterempfehlung** („Mira Kaya hat dich weiterempfohlen: Heinz Kowalski (Bäckerei Kornblume) …“) |
+| 5 Provisorium oder sauber? | „Das Lämpchen blinkt nicht“, sauber |
+| 6 Plan-Audit | aus der Weiterempfehlung; Probe: Stempel „GEPRÜFT ✓“, „1 Wert korrigiert – der Plan stimmt wieder“ |
+| danach | erste Stunde vorbei, der Mischer füllt drei Angebote; Wochenziel gewählt; Adressplan-Probe (Bereiche leuchten); 720 px: Postfach-Blatt („Auftrag annehmen ▸“ anklickbar), Fernwartung, Hub |
+
+**Formen der ersten sechs Abschlüsse:** Störung · Hotline · Störung · Fernwartung · Störung · Plan-Audit = **4 Formen** (Soll ≥ 4) ✓
+
+**Platzbudget (gemessen wie in Phase A):**
+
+| Zustand | Breite | Bedienelemente | Wörter | Hauptknöpfe |
+|---|---|---:|---:|---:|
+| Einstieg „Kasse ohne Netz“ | 1366 | 12 | 30 | 1 |
+| Fernwartung (Einstieg) | 1366 · 720 | 8 · 7 | 32 · 24 | 1 · 1 |
+| Hub nach dem Anruf | 1366 | 6 | 34 | 1 |
+| Hub im Feierabend (mit Wochenziel) | 1366 · 720 | 6 · 6 | 39–40 · 37 | 1 · 1 |
+| Hub „nächster Tag“ (zwei oder-Zeilen + Wochenziel)¹ | 1366 | 7 | 40 | 1 |
+
+¹ Für diese Messung wurde das Tagesziel kurz hochgesetzt (sonst zeigt der Hub nach sechs Aufträgen den Feierabend).
+
+### Scorecard – neu bewertet (2, 3, 5, 6, 7, 9), auf der strengeren Grundlage aus § 20
+
+Ich habe nicht auf meine eigene 38,0 aufgesetzt, sondern auf die Werte der unabhängigen Prüfung (35,9) – deren Abzüge beruhten auf gesehenen Lücken, die P schließen sollte.
+
+| Kriterium | § 20 | nach P | Begründung |
+|---|---:|---:|---|
+| **2 Feedback & Spielgefühl** | 3,3 | **3,6** | Jede Form hat jetzt ihren Moment: Hörer auflegen, Sitzung trennen, Stempel, leuchtender Adressraum; das Telefon klingelt (Ton und Bewegung). **Nicht 3,8:** Den Ton hat kein Mensch gehört (nur die Zähler sagen „gespielt“); Audit und Adressplan sind Karten, keine Szenen im Netz. |
+| **3 Herausforderung & Flow** | 3,1 | **3,4** | Flow-Regler: Gerüst nach zwei Fehlschlägen, Verwicklung (zweiter Fehler) nach drei Glanzergebnissen, abschaltbar. **Nicht höher:** Schwellen sind geschätzt, nicht im Spiel abgestimmt; bei Geschichten-Aufträgen ändert sich nur die Begleitung, nicht der Fehler. |
+| **5 Abwechslung** | 2,7 | **3,2** | Die erste Stunde ist gestaltet: sechs Abschlüsse = vier Formen, ein Anruf, ein Ereignis; danach bleibt die Wahl im Hub sichtbar. **Nicht höher:** Sicherheitsvorfall und Rollout fehlen weiter; Ereignisse sind (gewollt) selten. |
+| **6 Bedeutsame Entscheidungen** | 2,4 | **2,8** | Mehr echte Wahlen: Reihenfolge in der ersten Stunde (Anruf annehmen oder Störung), Hub-Alternativen, Wochenziel; „sauber“ zahlt sich jetzt sichtbar aus (Vertrauen → Empfehlung, Rabatt). **Nicht höher:** Die meisten Wahlen bleiben „was als Nächstes“; es gibt weiter nur eine Entscheidung mit Folgen *im* Auftrag. |
+| **7 Besitz & Welt** | 2,6 | **3,0** | Die Welt reagiert: Ein empfohlener Kunde kommt eine Stufe früher und schickt Aufträge, Verträge werden günstiger; Kunden haben endlich ihre Farbe (der h()-Fehler). **Nicht höher:** Kein selbst gebautes Netz, kein Büro – das ist Welle 4. |
+| **9 Sitzungsbogen & Rückkehrgrund** | 3,4 | **3,6** | Feierabend nennt den offenen Faden (Folgeauftrag, Notfall, Kapitel), das Wochenziel gibt ein Ziel über den Tag hinaus, die erste Sitzung hat einen gebauten Bogen. **Nicht höher:** Ob Leute wiederkommen, zeigt erst das Spieltagebuch aus echten Sitzungen. |
+
+**Summe: 35,9 → 38,0** (+46 % gegenüber 26,0) – auf der strengeren Grundlage. Auf meiner früheren Skala wären es rund 40, aber diese Rechnung nehme ich nicht: Die Abzüge aus § 20 waren berechtigt. **Das Ziel 39,0 ist damit ehrlich weiterhin nicht erreicht;** die größten Lücken liegen jetzt bei 4 Entdeckung (3,2 – mehr Fehlerarten kommen mit D), 10 Klasse (1,6 – Netz-Codes) und 11 Erzählung (2,6 – Gesichter). Alle Zahlen bleiben Einschätzungen; belegen kann es nur das Spieltagebuch.
+
+### Aufgefallen und gleich behoben
+
+- **Kundenfarben wirkten nie** (seit S1): `h()` setzte `style`-Objekte mit `Object.assign`, CSS-Variablen wie `--k` kamen so nicht an – Karten, Brief, Hub, Akte und Szene fielen immer auf die Akzentfarbe zurück. Jetzt über `setProperty`; aufgefallen, weil die Balken der Adressplan-Probe blass blieben.
+- **Weiterempfehlung falsch herum** (E1): Der *neue* Kunde „empfahl“ einen. Jetzt empfiehlt der Kunde, für den man am meisten gearbeitet hat.
+- **Feierabend über dem Platzbudget** (44 Wörter): Der neue Ausblick-Satz war zu lang – alle Ausblick-Sätze ≤ 10 Wörter, der Test zählt wie die Messung.
+- **Wochenziel fehlte im Feierabend**, **Fernwartung behielt „getrennt“** aus der vorigen Probe, **Mischer** übersprang ein Angebot, wenn der Fernwartungs-Generator (Schreibbüro, ~0,6 % der Seeds) keinen Fehler fand – alle behoben.
+- `Spiel.ereignisse.ausloesen("stromausfall")` ohne offenen Auftrag lieferte still `null` (die Ursache aus § 20) – nimmt jetzt den offenen Auftrag.
+
+### Offen (ehrlich)
+
+- Die Abnahme lief mit Lösungen per Skript; Formen, Reihenfolge, Karten, Proben und Wahl stammen aus dem echten Programm.
+- Den Klingelton und die übrigen Klänge hat niemand gehört.
+- Flow-Regler-Schwellen (2 Fehlschläge / 3 Glanz) und das Wochenziel (+1 Ruf) sind Startwerte – abstimmen nach dem Spieltagebuch.
+- Der Hub liegt im Feierabend und mit zwei Alternativen genau bei 40 Wörtern; jedes weitere Element dort braucht eine Kürzung.
+- Nach drei Aufträgen kommt der Feierabend mitten in der ersten Stunde – gewollt (Sitzungsende), der Rest der Folge wartet auf die nächste Sitzung.
+- Sicherheitsvorfall und Rollout fehlen weiter (brauchen D).
+
+### Bildschirmfotos
+
+Einstieg · Anruf im Postfach · Hörer aufgelegt:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-01-einstieg.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-04-postfach-anruf.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-06-probe-hotline-aufgelegt.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-07b-feierabend.png|420]]
+
+Fernwartung: Sitzungsfenster · Probe „Verbindung getrennt“ · Weiterempfehlung:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-08-fernwartung-sitzung.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-10-probe-fernwartung-getrennt.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-11-weiterempfehlung.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-13-variante-wahl.png|420]]
+
+Stempel · Adressplan · Wochenziel · Hub mit „oder:“:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-15-probe-audit-stempel.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-20-probe-adressplan.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-17-wochenziel-wahl.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-1366-19-hub-oder-wochenziel.png|420]]
+
+720 px: Postfach als Blatt · Fernwartung · Hub:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-720-02-postfach-blatt.png|300]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-720-03-fernwartung.png|300]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-P/p-720-04-hub.png|300]]
+
+### HALTEPUNKT
+
+Auftrag P ist fertig. Bitte anspielen – am besten mit frischem Spielstand die erste Stunde – und danach in **Lernstand → „Auswertung kopieren“** den Text hier einfügen. D (DHCP/DNS) beginnt erst danach.
