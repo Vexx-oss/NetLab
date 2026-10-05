@@ -9,7 +9,8 @@ function h(tag, attrs = {}, ...kids){
   for (const [k, v] of Object.entries(attrs || {})) {
     if (k === "class") el.className = v;
     else if (k === "html") el.innerHTML = v;
-    else if (k === "style" && typeof v === "object") Object.assign(el.style, v);
+    /* CSS-Variablen (--k, --i …) gehen nur über setProperty – Object.assign(el.style, …) überging sie still (Kundenfarben wirkten nie) */
+    else if (k === "style" && typeof v === "object") { for (const [p, w] of Object.entries(v || {})) { if (p.startsWith("--")) el.style.setProperty(p, w == null ? "" : String(w)); else el.style[p] = w; } }
     else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2), v);
     else if (k === "value") el.value = v;
     else if (v !== false && v != null) el.setAttribute(k, v === true ? "" : v);
