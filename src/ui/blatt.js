@@ -11,7 +11,7 @@ UI.blatt = (() => {
     const def = Spiel.defVon(inst), ziel = def && (def.ziele || []).find(z => z.typ === "tabelle");
     if (!ziel) { el.replaceChildren(); return; }
     if (B.iid !== inst.iid) { B.iid = inst.iid; B.offen = null; }
-    const live = Spiel.regeln(inst).liveHaken, K = Spiel.kundenDaten(inst.kunde || def.kunde);
+    const live = Spiel.regeln(inst).liveHaken;
     const wert = key => (inst.tabelle || {})[key];                     /* immer frisch – inst.tabelle entsteht erst beim ersten Eintrag */
     const soll = Spiel.beratung.soll(ziel);
     const stimmt = (z, s) => Spiel.beratung.gleich(s, wert(z.name + "." + s), soll[z.name][s]);
@@ -48,8 +48,8 @@ UI.blatt = (() => {
     const gleich = ziel.zeilen.every(z => z.praefix != null);
     const p = Spiel.beratung.pruefen(inst, ziel), angefangen = p.richtig + p.falsch.length > 0;
     el.replaceChildren(h("div", {class: "bl-blatt"},
-      h("h2", {}, `Adressplan · ${K.name}`),
-      h("p", {class: "bl-vorgabe"}, `Basisnetz ${ziel.basis} · ${gleich ? `vier gleich große Netze (/${ziel.zeilen[0].praefix})` : "größter Bereich zuerst, lückenlos"}`),
+      h("h2", {}, "Adressplan"),                                     /* Kunde und Titel stehen schon in der Auftragszeile */
+      h("p", {class: "bl-vorgabe"}, `Basis ${ziel.basis} · ${gleich ? `${ziel.zeilen.length} × /${ziel.zeilen[0].praefix}` : "größter Bereich zuerst, lückenlos"}`),
       h("div", {class: "bl-rahmen"}, tabelle),
       live && angefangen ? h("p", {class: "bl-stand", "aria-live": "polite"}, `${p.richtig} von ${p.gesamt} Feldern richtig`) : null,
       B.offen != null ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { B.offen = null; neu(); }}, "Zurück zur nächsten offenen Zeile") : null));

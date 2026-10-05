@@ -102,7 +102,7 @@ UI.konsole = (() => {
     if (!cli()) { block(K, "info", "Die Konsole ist in dieser Fassung noch nicht verfügbar."); return; }
     if (K.S.fehler) { block(K, "fehler", "% Die Sitzung ließ sich nicht starten: " + K.S.fehler); return; }
     block(K, "info", K.host
-      ? (K.linux ? `Terminal von ${g.name}. Tippe „ip a“, um die Adresse zu sehen.` : `Eingabeaufforderung von ${g.name}. Tippe „ipconfig“, um die Adresse zu sehen.`)
+      ? `${K.linux ? "Terminal" : "Eingabeaufforderung"} von ${g.name}.`        /* Beispielbefehle stehen in der Hilfezeile darunter, im Einstieg zusätzlich als Vorschlag */
       : `Konsolenkabel an ${g.name} angeschlossen. Drücke Enter oder tippe einen Befehl.${niveau() === "E" ? " Mit „?“ siehst du jederzeit, was geht." : ""}`);
   }
 

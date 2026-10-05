@@ -46,7 +46,7 @@ UI.terminal = (() => {
         h("button", {type: "button", class: "tm-tab-zu", title: "Sitzung schließen", "aria-label": `Sitzung ${g.name} schließen`, onclick: () => schliessen(id)}, "×"));
     }));
     const flaeche = h("div", {class: "tm-flaeche"});
-    c.replaceChildren(h("div", {class: "tm"}, reiter, flaeche));
+    c.replaceChildren(h("div", {class: "tm"}, T.sitzungen.length > 1 ? reiter : null, flaeche));   /* Reiterleiste erst ab zwei Sitzungen */
     UI.konsole.oeffnen(flaeche, n, T.aktiv, UI.labor.verlauf, {fokus, eingabe: eingabe || undefined, notiz});
   }
   Bus.an("labor-geladen", () => { T.netz = null; abgleichen(); });
