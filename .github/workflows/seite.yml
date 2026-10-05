@@ -1,26 +1,29 @@
 name: Spiel veröffentlichen
 
-# Baut das Spiel als EINZELDATEI, prüft es und stellt es auf GitHub Pages.
+# Stellt das Spiel als EINZELDATEI auf GitHub Pages.
 # Ergebnis: https://vexx-oss.github.io/Side-Project/ — ein Klick, spielt sofort im
 # Browser. Kein Download, kein Entpacken, keine Installation.
 #
-# Der Ablauf ist absichtlich in drei Jobs geteilt:
-#   bauen        prüft und baut — läuft IMMER, auch wenn Pages noch aus ist.
-#   pages-an    fragt nur ab, ob Pages im Repository schon eingeschaltet ist.
-#   veroeffentlichen  stellt die Seite online — nur wenn pages-an "ja" sagt.
+# Dieser Ablauf baut ABSICHTLICH nichts: Bauen und Prüfen macht „Prüfen"
+# (.github/workflows/pruefen.yml) bei jedem Push. Hier wird nur die fertige,
+# versionierte docs/index.html veröffentlicht — kurz und ohne Warteketten.
 #
-# Warum diese Teilung: „Pages einschalten" kann ein Ablauf NICHT selbst erledigen.
-# actions/configure-pages mit enablement: true verlangt laut Aktionsquelle ein Token
-# jenseits des Standard-GITHUB_TOKEN (PAT mit repo-Recht oder GitHub App mit
-# administration:write). Fehlt das, scheitert der Schritt — und riss vorher den ganzen
-# Lauf mit, sodass noch nicht einmal die Tests liefen.
+# Warum kein eigener „Ist Pages eingeschaltet?"-Job mehr (gemessen 05.10.2026):
+# Ein zweiter Job wartete auf einen freien Läufer (die Läufe brauchten an diesem Abend
+# 5–11 Minuten Anlauf), und nach 902 Sekunden brach GitHub den GESAMTEN Lauf ab — auch
+# den bereits erfolgreichen Teil. Die Prüfung ist jetzt ein Schritt IM Job.
 #
 # EINMALIG VON HAND, falls Pages noch aus ist:
 #   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+# Solange Pages aus ist, wird der Deploy-Schritt übersprungen und der Lauf bleibt grün.
 # Danach veröffentlicht jeder Push auf ausbau-1.2 automatisch.
 on:
   push:
     branches: [ausbau-1.2]
+    paths:
+      - "docs/index.html"
+      - "docs/bilder/**"
+      - ".github/workflows/seite.yml"
   workflow_dispatch:
 
 permissions:
@@ -34,43 +37,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  bauen:
-    name: Bauen und prüfen
+  veroeffentlichen:
+    name: Auf GitHub Pages stellen
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      # Erst prüfen, dann veröffentlichen: eine kaputte Fassung soll nicht online gehen.
-      - name: Tests (headless, Node)
-        run: sh tools/test.sh
-
-      - name: Klassen im JS gegen Regeln im CSS
-        run: python tools/klassen.py
-
-      - name: Simulation gegen den Referenzstand
-        run: node tools/sim-stand.js
-
-      - name: Programm-Fassung bauen (aus der Kopie des Lernmotors)
-        run: python bauen.py
-
-      - name: Einzeldatei bauen
-        run: python tools/einfach.py
-
-      - name: Einzeldatei prüfen — keine Außenverweise, Schriften eingebettet
-        run: python tools/einfach.py --pruefen docs/index.html
-
-      - name: Bilder der Doku prüfen
-        run: python tools/bilder.py --pruefen
+      - name: Ist Pages eingeschaltet?
+        id: frage
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
+            echo "an=ja" >> "$GITHUB_OUTPUT"
+            echo "Pages ist eingeschaltet."
+          else
+            echo "an=nein" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Pages noch aus::Es wird nichts veröffentlicht. Einmalig einschalten: Settings -> Pages -> Build and deployment -> Source: 'GitHub Actions'. Danach läuft dieser Ablauf von selbst."
+          fi
 
       - name: Seiten zusammenstellen
+        if: steps.frage.outputs.an == 'ja'
         run: |
           mkdir -p _site
           cp docs/index.html _site/index.html
@@ -79,36 +69,10 @@ jobs:
           ls -la _site
 
       - uses: actions/upload-pages-artifact@v3
+        if: steps.frage.outputs.an == 'ja'
         with:
           path: _site
 
-  pages-an:
-    name: Ist Pages eingeschaltet?
-    needs: bauen
-    runs-on: ubuntu-latest
-    outputs:
-      an: ${{ steps.frage.outputs.an }}
-    steps:
-      - id: frage
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
-            echo "an=ja" >> "$GITHUB_OUTPUT"
-            echo "Pages ist eingeschaltet — wird veröffentlicht."
-          else
-            echo "an=nein" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Pages noch aus::Das Spiel wurde gebaut und geprüft, aber nicht veröffentlicht. Einmalig einschalten: Settings -> Pages -> Build and deployment -> Source: 'GitHub Actions'."
-          fi
-
-  veroeffentlichen:
-    name: Auf GitHub Pages stellen
-    needs: [bauen, pages-an]
-    if: needs.pages-an.outputs.an == 'ja'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - id: deployment
+        if: steps.frage.outputs.an == 'ja'
         uses: actions/deploy-pages@v4

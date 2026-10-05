@@ -38,6 +38,13 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`.
 - `tools/einfach.py` — baut die Einzeldatei aus `web/` und verweigert den Bau, wenn ein
   Außenverweis übrig bleibt.
 - `.github/workflows/` — Prüflauf bei jedem Push, Veröffentlichung auf GitHub Pages.
+  Beide Abläufe sind auf einem frischen Klon nachgestellt (`tools/ci-nachbau.py`): ohne
+  die Nachbar-Spielhalle, ohne `Nachweise/` und ohne Pillow — genau der Zustand auf
+  GitHub. Drei Fehler fielen dabei auf und sind behoben:
+  `tools/lernmotor-bau.py` und `tools/lernmotor-rueckfall.py` brachen ohne die Spielhalle
+  ab; `tools/bilder.py` verlangte Pillow schon beim Prüfen (auf dem Runner nicht
+  installiert) und riss den ganzen Lauf mit; und ein zweiter Job im
+  Veröffentlichungs-Ablauf ließ GitHub nach 902 s den *gesamten* Lauf abbrechen.
 - **`fremd/lernmotor.js`** — der Lernmotor lag bisher außerhalb des Repositoriums
   (`../FISI-Spielhalle`). Ein frischer Klon war deshalb weder baubar noch testbar. Jetzt
   liegt der Stand im Repo, mit Herkunft und Prüfsumme im Kopf. Drei Werkzeuge weisen es

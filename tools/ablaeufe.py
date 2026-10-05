@@ -73,13 +73,20 @@ def main() -> int:
                 if (s.get("with") or {}).get("enablement") in (True, "true"):
                     fehler.append("seite.yml: configure-pages mit enablement: true — das scheitert "
                                   "mit dem Standard-Token (braucht PAT/App) und reisst den Lauf mit")
-        texte = " ".join((s.get("run") or "") for s in alle_schritte)
-        for pflicht in PFLICHT_IM_BAU:
-            if pflicht not in texte:
-                fehler.append(f"seite.yml: '{pflicht}' fehlt in den Schritten — "
-                              "es wuerde ungeprueft veroeffentlicht")
         if not any(s.get("uses", "").startswith("actions/deploy-pages") for s in alle_schritte):
             fehler.append("seite.yml: kein deploy-pages — es wuerde nichts veroeffentlicht")
+        # Der Deploy-Schritt muss durch die Pages-Frage bedingt sein. Sonst scheitert der
+        # Lauf, solange Pages aus ist (gemessen 05.10.2026).
+        deploy = next((s for s in alle_schritte
+                       if s.get("uses", "").startswith("actions/deploy-pages")), None)
+        if deploy is not None and "if" not in deploy:
+            fehler.append("seite.yml: deploy-pages ohne Bedingung — der Lauf wuerde rot, "
+                          "solange Pages im Repository aus ist")
+        # Ein zweiter Job ist eine Wartekette: wartet er auf einen Laeufer, bricht GitHub
+        # nach rund 900 s den GANZEN Lauf ab, auch den erfolgreichen Teil.
+        if len(d["jobs"]) > 1:
+            fehler.append("seite.yml: mehr als ein Job — ein wartender zweiter Job kann den "
+                          "ganzen Lauf nach ~900 s abbrechen (gemessen 05.10.2026)")
 
     if fehler:
         print("ROT:")

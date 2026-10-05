@@ -79,13 +79,30 @@ der drei Schriften **wirklich geladen und wirklich benutzt** wird, und JS-Fehler
 
 ### Automatisch veröffentlichen
 
-`.github/workflows/seite.yml` baut die Einzeldatei bei jedem Push auf `ausbau-1.2`, prüft
-sie und stellt sie auf GitHub Pages. Danach ist das Spiel unter
+`.github/workflows/seite.yml` stellt die fertige, versionierte `docs/index.html` bei jedem
+Push auf `ausbau-1.2` auf GitHub Pages. Danach ist das Spiel unter
 **https://vexx-oss.github.io/Side-Project/** mit einem Klick spielbar.
 
 **Einmalige Einstellung, die nur im Browser geht:**
 *Settings → Pages → Build and deployment → Source: **GitHub Actions***.
-Ohne diesen Klick läuft der Prüflauf trotzdem, nur das Veröffentlichen entfällt.
+Solange Pages aus ist, wird der Deploy-Schritt übersprungen und der Lauf bleibt **grün** —
+er meldet in einer Notiz, was fehlt. Nach dem Einschalten läuft er von selbst.
+
+> **Warum der Ablauf nicht selbst baut und keinen zweiten Job hat** (gemessen 05.10.2026):
+> Zwei Dinge gingen schief, beide nachgestellt und behoben.
+>
+> 1. `actions/configure-pages` mit `enablement: true` sollte Pages selbst einschalten.
+>    Laut Aktionsquelle braucht das ein Token **jenseits** des Standard-`GITHUB_TOKEN`
+>    (PAT mit `repo`-Recht oder GitHub App mit `administration:write`). Der Schritt
+>    scheiterte und riss den ganzen Lauf mit — die Tests liefen nicht einmal.
+> 2. Ein zweiter Job („Ist Pages eingeschaltet?") wartete auf einen freien Läufer. Die
+>    Läufe brauchten an diesem Abend 5–11 Minuten Anlauf; nach **902 Sekunden** brach
+>    GitHub den *gesamten* Lauf ab, auch den bereits erfolgreichen Teil. Deshalb ist die
+>    Prüfung jetzt ein Schritt im selben Job, und der Ablauf baut nicht mehr selbst —
+>    das macht `pruefen.yml`.
+>
+> `python tools/ablaeufe.py` prüft beides dauerhaft: kein `enablement: true`, keine
+> unbedingte Veröffentlichung, kein zweiter Job.
 
 ## Das Auslieferungspaket
 
