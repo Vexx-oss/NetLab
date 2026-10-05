@@ -1034,3 +1034,94 @@ Auftrag P ist fertig. Bitte anspielen – am besten mit frischem Spielstand die 
 
 ### Danach (Reihenfolge)
 **D2 – DNS** (Records, Forwarder, Cache, hosts-Datei, `nslookup` interaktiv) → **Netz-Codes + Portfolio-Export** → **Gesichter** → **Stufe 6 Storage** → **F Abschluss.** Dazwischen gehört **eine echte Spielsitzung von dir** mit „Auswertung kopieren“.
+
+---
+
+## 23 · Auftrag Q, Punkte 1–3 gebaut und gemessen (05.10.2026)
+
+*Alles unten ist gemessen, nicht geschätzt: `tools/rauch.py` in Edge, `python tools/sonde-postfach.py`, `python tools/klassen.py`, `python bauen.py`. **Was NICHT gemessen ist, steht in § 23.5** – der Lauf im echten Programm (Q4) ist an einem Systemfehler gescheitert.*
+
+### 23.0 Was schon im Baum lag (nicht neu gebaut, aber geprüft)
+
+Beim Übernehmen lagen drei uncommittete Dateien vor, die Q1–Q3 angefangen hatten. Sie sind geprüft, ergänzt und mitcommittet:
+
+| Datei | Was drin war | Prüfung |
+|---|---|---|
+| `src/stil/basis.css` | `[hidden]{display:none !important}` mit Begründung (G1) | Gegenprobe: mit dem Fehler wird der Rauchtest 33/36 rot |
+| `src/stil/spiel.css` | „Auftrag annehmen“ im Postfach bleibt sichtbar (`position:sticky`) | eigene Messung + Gegenprobe, § 23.4 |
+| `tools/rauch.py` | G2a–G2c, `--gegenprobe`, echte Maus | 36/36 grün, Gegenprobe rot |
+
+### 23.1 G1 ist behoben – und der Rauchtest erkennt ihn jetzt
+
+Der erste Auftrag ist **mit der Maus** lösbar, in allen drei Breiten:
+
+```
+✓ 1366 px  Erster Auftrag (Maus)  Kabel per Maus, Abnahme 5 ★
+✓  960 px  Erster Auftrag (Maus)  Kabel per Maus, Abnahme 4.5 ★
+✓  720 px  Erster Auftrag (Maus)  Kabel per Maus, Abnahme 4.5 ★
+36/36 grün
+```
+
+**Gegenprobe (`--gegenprobe`, baut `.lb-fern-schild[hidden]{display:flex !important}` wieder ein): 3/36 grün – 33 rot.** Die Meldungen benennen genau den Befund aus § 22: „Kabel nicht entstanden – losgelassen über `div.lb-fern-schild`“, „verdeckt: sw1 unter `div.lb-fern-schild`“, „leer: `div.lb-fern-schild` 400×32“. Der Test hätte G1 gefunden.
+
+Dass der Fix zu grob wäre und das Schild mitentfernt hätte, ist ausgeschlossen: Es wird über `el.hidden` gesteuert (`ui/editor.js:773`); `hidden:false` entfernt das Attribut, `display:flex` greift wieder. Gemessen im Rauchtest-Fall „Labor · Fernwartung“ (prüft Breite > 100 px und „ganz im Fenster“) – grün, das Schild erscheint.
+
+### 23.2 G2 ist erfüllt
+
+`tools/rauch.py` prüft je Breite: (a) `elementFromPoint` in der Mitte **jedes** Geräts trifft das Gerät selbst; (b) das Kabel im ersten Auftrag wird mit echten Mausereignissen über Koordinaten gezogen (`Input.dispatchMouseEvent`), nicht per Selektor, und der Auftrag muss bestehen; (c) leere sichtbare Pillen/Blöcke fallen auf, dazu Elemente, die trotz `hidden` angezeigt werden. Der Lauf umfasst **12 Ansichten × 3 Breiten + Einstieg** = 36 Prüfungen (vorher 33).
+
+### 23.3 G3: die Sprechblase verdeckt keine Pille mehr
+
+**Befund der Messung:** Die Reaktionspillen bleiben im DOM stehen; die Pille der **letzten** Station wird **nach** der Blase angehängt und liegt damit über ihr. Bei 1366 und 960 px fiel das nicht auf, bei **720 px** schon: Überdeckung **64 × 26 px** (`div.sz-reaktion.sz-druckt`, also „Beleg kommt raus“). Ein bloßes Verschieben der Blase konnte das nicht lösen – ein später eingefügtes Element liegt immer oben.
+
+**Gebaut (`ui/szene.js`, `stil/szene.css`):**
+- Vor dem Schlusssatz treten die Pillen **ab** – sie werden entfernt, nicht ausgeblendet (ein noch ausblendendes Element wäre beim Vermessen weiter im Weg). Ihre Standzeit (~420 ms) haben sie da gehabt.
+- `anGeraet()` kann **ausweichen:** Es probiert weitere Stellen (höher, tiefer, neben das Gerät) und setzt die Blase nur dorthin, wo `elementFromPoint` nichts Fremdes trifft (`verdecktEtwas`). Findet sich keine freie Stelle, bleibt es beim ersten Versatz – lieber wie bisher als ohne Blase.
+- Neuer Messpunkt im Rauchtest: Schneiden sich die Rechtecke von `.sz-blase` und einer `.sz-reaktion` (> 1 px), ist der Fall rot. Die Pillen sind `pointer-events:none` und liegen über der Blase, `elementFromPoint` sieht sie also nicht – deshalb wird der Rechteckschnitt wirklich gemessen.
+
+**Ergebnis: 36/36 grün, auch bei 720 px.** Der Messpunkt schlägt an, wenn man den Fix entfernt (dann 1 rot: „Sprechblase verdeckt `div.sz-reaktion.sz-druckt`“).
+
+*Nicht gebaut:* die Anruf-Karte im Postfach („unter die Kopfzeile rechts“). Sie war als „klein“ eingestuft; der Platzmangel bei 720 px hatte Vorrang.
+
+### 23.4 Nebenbei: der Postfach-Knopf bei niedrigem Fenster
+
+Die sticky-Regel ist **notwendig**, nicht Kosmetik. `python tools/sonde-postfach.py 960 <höhe>`:
+
+| Fenster | Knopf „Auftrag annehmen“ | sichtbar | Klick trifft |
+|---|---|---|---|
+| 960 × 700 | y 622–670 | ja | ja |
+| 960 × 620 | y 542–590 | ja | ja |
+| 960 × 520 | y 442–490 | ja | ja |
+| 960 × 460 | y 382–430 | ja | ja |
+| 960 × 460 **ohne** die Regel | y 614–662 | **nein** | **nein** |
+
+Mit der Regel sitzt der Knopf bei jeder Fensterhöhe rund 78 px über der Unterkante. Ohne sie fällt er aus einem 460-px-Fenster heraus.
+
+### 23.5 Q4 (Lauf im echten Programm) ist **nicht** erledigt – Systemfehler, nicht Projektfehler
+
+Die `.exe` ist neu gebaut und liegt an ihrem Platz: `Programm/Netzwerk-Labor.exe`, 8.147.456 Bytes, 05.10.2026 14:37 (Rust-Bau 4 min 05 s, `cargo tauri build --no-bundle`). **Sie startet derzeit nicht** – aber nicht wegen des Codes:
+
+```
+Failed to setup app: error encountered during setup hook: runtime error: failed to create webview:
+WebView2 error: WindowsError(Error { code: HRESULT(0x8000FFFF), message: "Schwerwiegender Fehler" })
+```
+
+Eingegrenzt, damit die Ursache feststeht:
+
+- Die **alte 1.1-Fassung** (`Programm/Endversion-1.1/Netzwerk-Labor.exe`) scheitert mit **demselben** Fehler – es ist nicht der neue Bau.
+- Auch der Start **außerhalb** der Werkzeugumgebung (über die Aufgabenplanung) scheitert – es ist nicht die Sandbox.
+- Der WebView2-Cache der App wurde testweise zur Seite geräumt und **wieder hergestellt**; der Spielstand (`AppData\Roaming\de.fisi.netzwerklabor`) ist unberührt (Stand 02.10.2026 14:14).
+- Die WebView2-Runtime ist installiert (154.0.4258.53).
+
+**Wahrscheinliche Ursache:** Beim Aufräumen von Testprozessen wurden 13 `msedgewebview2.exe` zwangsweise beendet (darunter der WebView2-Host der Windows-Shell). Seitdem bricht die Initialisierung systemweit ab. **Vor dem nächsten Lauf ist ein Windows-Neustart nötig.**
+
+**Was dafür bereitsteht:** `tools/q-echt.py` prüft im echten Programm genau die Q-Punkte – G1 (trifft die Maus in der Gerätemitte das Gerät, liegt etwas trotz `hidden` oben), Kabel mit echter Maus, Abnahme per Mausklick, Sprechblase ohne Überdeckung, Fernwartungs-Schild erscheint – und legt die Bilder in `Nachweise/1.2-Q/` ab. Aufruf: `python tools/q-echt.py`. **Nach dem Neustart ist das der erste Schritt.**
+
+### 23.6 Scorecard
+
+**4 Entdeckung** von 3,4 zurück auf **3,8**: Die erste Minute ist wieder lösbar, und die Ursache wird weiterhin nicht verraten (der Fix ändert keine Anzeige-Logik, nur das Verdecken). **5 Abwechslung** bleibt **3,3** – Q hat keine Form hinzugefügt. Damit **38,0**; der Abzug aus § 22 (37,6 **wegen** G1) entfällt. Alle Zahlen bleiben Schätzungen, und **G4 („es fehlt jeder Mensch“) ist durch Q nicht behoben**.
+
+### 23.7 Was als Nächstes dran ist
+
+1. **Windows neu starten**, dann `python tools/q-echt.py` – Q4 nachholen, Bilder ablegen.
+2. **D1 – DHCP** (Q Punkt 5). **Nicht begonnen**, wie in Q vorgesehen erst nach Q4. Vor der ersten Änderung die Golden-Tests der Simulation sichern.

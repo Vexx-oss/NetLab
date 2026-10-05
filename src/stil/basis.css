@@ -74,6 +74,9 @@
   --schatten:0 10px 30px rgba(20,32,51,.15);
 }
 *{box-sizing:border-box}
+/* hidden heißt versteckt – auch wenn eine Klassenregel display setzt (Design § 22, G1: .lb-fern-schild hatte display:flex
+   und lag als leere Pille über dem Switch; die Maus traf das Schild statt das Gerät). !important wie im üblichen Reset. */
+[hidden]{display:none !important}
 html,body{height:100%}
 body{margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--body); -webkit-font-smoothing:antialiased; overflow:hidden}
 h1,h2,h3,h4{font-family:var(--display); margin:0; line-height:1.15; text-wrap:balance}

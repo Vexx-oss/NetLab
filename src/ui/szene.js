@@ -16,15 +16,42 @@ UI.szene = (() => {
   const pause = (ms, st) => new Promise(res => { const t = setTimeout(res, ms); st.weiter.push(() => { clearTimeout(t); res(); }); });
   const SYMBOL = {druckt: "🧾", seite: "🌐", adresse: "🏷", gesperrt: "⛔", haken: "✓", sicherung: "💾"};
 
-  /* HTML-Element über einem Gerät (Bildschirmposition auf der Leinwand) */
-  function anGeraet(buehne, id, el, versatzY = -58){
+  /* Setzt ein Element an eine Bildschirmstelle (transform: -50 % / -100 % → left = Mitte, top = Unterkante) und hält
+     es dabei innerhalb der Bühne. px/py sind bereits die endgültige Position. */
+  function setzeAn(buehne, el, px, py){
+    const b = el.offsetWidth, hoehe = el.offsetHeight, W = buehne.clientWidth, H = buehne.clientHeight;
+    el.style.left = Math.round(Math.max(b / 2 + 6, Math.min(W - b / 2 - 6, px))) + "px";
+    el.style.top = Math.round(Math.max(hoehe + 6, Math.min(H - 6, py))) + "px";
+    return el;
+  }
+
+  /* Liegt an dieser Stelle etwas anderes im Weg? Geprüft wird, was wirklich obenauf liegt (elementFromPoint), samt
+     allen Vorfahren – so zählt das Element selbst nicht als Hindernis, auch wenn es dort schon steht. */
+  function verdecktEtwas(buehne, el){
+    const r = el.getBoundingClientRect(), b = buehne.getBoundingClientRect();
+    for (let i = 1; i <= 6; i++) for (let j = 1; j <= 4; j++){
+      const x = r.left + r.width * i / 7, y = r.top + r.height * j / 5;
+      if (x < b.left + 2 || x > b.right - 2 || y < b.top + 2 || y > b.bottom - 2) continue;   /* außerhalb ist kein Verdeckungsfall */
+      const t = document.elementFromPoint(x, y);
+      if (t && t !== el && !el.contains(t) && buehne.contains(t)) return t;
+    }
+    return null;
+  }
+
+  /* HTML-Element über einem Gerät (Bildschirmposition auf der Leinwand).
+     ausweichen: weitere Stellen [[x-Versatz in Einheiten à 34 px, y-Versatz]], die der Reihe nach probiert werden, wenn
+     die Stelle belegt ist (Design § 22, G3: die Sprechblase lag auf der Pille „Beleg kommt raus“). Findet sich keine
+     freie Stelle, bleibt es beim ersten Versatz – lieber wie bisher als ganz ohne Blase. */
+  function anGeraet(buehne, id, el, versatzY = -58, ausweichen = null){
     const p = UI.labor.bildschirm(id); if (!p) return null;
     buehne.append(el);
-    /* über dem Gerät, aber nie aus der Fläche ragen (transform: -50 % / -100 % → left = Mitte, top = Unterkante) */
-    const b = el.offsetWidth, hoehe = el.offsetHeight, W = buehne.clientWidth, H = buehne.clientHeight;
-    const x = Math.max(b / 2 + 6, Math.min(W - b / 2 - 6, p.x)), y = Math.max(hoehe + 6, Math.min(H - 6, p.y + versatzY * Math.max(.6, Math.min(1.2, p.k))));
-    el.style.left = Math.round(x) + "px";
-    el.style.top = Math.round(y) + "px";
+    const versatz = (v) => p.y + v * Math.max(.6, Math.min(1.2, p.k));
+    const stellen = [[0, versatzY]].concat(ausweichen || []).map(([dx, v]) => [p.x + (dx || 0) * 34, versatz(v)]);
+    for (const [x, y] of stellen){
+      setzeAn(buehne, el, x, y);
+      if (!verdecktEtwas(buehne, el)) return el;
+    }
+    setzeAn(buehne, el, stellen[0][0], stellen[0][1]);
     return el;
   }
 
@@ -130,12 +157,22 @@ UI.szene = (() => {
         }
         if (!st.ende && f && f.art !== "fernwartung") await formProbe(buehne, f, st, o, false);   /* Hotline legt auf, Audit stempelt, Adressplan leuchtet */
         if (!st.ende && o.satz && !f) {
+          /* Die Reaktionspillen haben ihre Zeit gehabt (die letzte stand ~420 ms) und liegen als später angehängte
+             Elemente über allem. Die Sprechblase ist der Schlusssatz – dafür treten die Pillen ab (Design § 22, G3:
+             die Blase lag auf der Pille „Beleg kommt raus“, und weil die Pille danach eingefügt wurde, half ein
+             Verschieben der Blase allein nicht). Sie gehen sofort, nicht mit Übergang: die Blase wird gleich vermessen,
+             und ein noch ausblendendes Element wäre dabei weiter im Weg. */
+          for (const pille of [...buehne.querySelectorAll(".sz-reaktion")]) pille.remove();
+          await pause(20, st);
           const bei = gezeigt[0] ? gezeigt[0].von : null;
           const blase = h("div", {class: "sz-blase", style: {"--k": `var(${o.kunde?.farbe || "--accent"})`}},
             h("span", {class: "sz-kunde", "aria-hidden": "true"}, o.kunde?.symbol || "✉"),
             h("span", {}, h("b", {}, (o.kunde?.name || "Kunde") + ": "), o.satz),
             rest > 0 ? h("small", {class: "sz-rest"}, `+ ${rest} weitere${rest === 1 ? "s Ziel" : " Ziele"} ✓`) : null);
-          if (bei && anGeraet(buehne, bei, blase, -70)) { UI.klang?.spielen("blase"); await pause(o.kurz ? 1100 : 1500, st); }
+          /* Ausweichstellen gegen alles, was sonst noch über der Fläche steht: erst höher, dann tiefer, dann neben das
+             Gerät. Die Stelle unter dem Gerät bleibt frei, damit die Blase nicht auf der Kundenzeile des Geräts landet. */
+          const ausweichen = [[0, -96], [0, -30], [0, 60], [-1, -70], [1, -70], [-1.6, -70], [1.6, -70]];
+          if (bei && anGeraet(buehne, bei, blase, -70, ausweichen)) { UI.klang?.spielen("blase"); await pause(o.kurz ? 1100 : 1500, st); }
         }
         const rest2 = 2000 - (performance.now() - t0);
         if (!st.ende && rest2 > 0 && !f) await pause(rest2, st);    /* nie kürzer als 2 s – sonst wirkt es wie ein Flackern */
