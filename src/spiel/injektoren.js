@@ -403,13 +403,14 @@ Spiel.INJEKTOREN = (() => {
       return l && cs ? [{key: cs.switch, switch: cs.switch, server: l.server}] : [];
     },
     anwenden(n, k){ Modell.setzen(n, k.switch, "snooping", {an: true, vertraut: []}); },
-    /* Lösung: den Port zum Server als vertraut eintragen. Lässt sich der Port nicht sicher bestimmen (Server hinter
-       einem weiteren Switch), ist Snooping abzuschalten die richtige Antwort – beides heilt den Fehler. */
+    /* Über die Konsole, damit der Auftrag auch im Terminal lösbar ist: Snooping richtig stellen bzw. abschalten. */
     loesung: (n, k) => {
       const p = serverPort(n, k.switch, k.server);
-      return [{geraet: k.switch, setzen: {snooping: p ? {an: true, vertraut: [p]} : {an: false, vertraut: []}},
-        text: p ? `Am Switch ${name(n, k.switch)} den Port ${p} (Richtung Server) als vertraut eintragen; Snooping bleibt an.`
-                : `Am Switch ${name(n, k.switch)} DHCP-Snooping abschalten oder den Port Richtung Server als vertraut eintragen.`}];
+      return [{geraet: k.switch,
+        cli: cli(p ? "ip dhcp snooping" : "no ip dhcp snooping"),
+        setzen: {snooping: p ? {an: true, vertraut: [p]} : {an: false, vertraut: []}},
+        text: p ? `Am Switch ${name(n, k.switch)} DHCP-Snooping einschalten und den Port ${p} (Richtung Server) vertrauen – über die Konsole „ip dhcp snooping“ oder im Inspektor.`
+                : `Am Switch ${name(n, k.switch)} DHCP-Snooping abschalten (Konsole: „no ip dhcp snooping“) oder den Port Richtung Server als vertraut eintragen.`}];
     },
     hilfen: (n, k) => ({frage: ["Der Server läuft, der Pool hat Adressen – und trotzdem kommt kein Angebot an. Was könnte die Antwort auf dem Weg zum Client abfangen?"],
       bereich: [{geraet: k.switch}], konkret: [`Am Switch ${name(n, k.switch)} ist DHCP-Snooping an, aber kein Port als vertraut markiert – die Antwort des Servers wird verworfen.`]}),

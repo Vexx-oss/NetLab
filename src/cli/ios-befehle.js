@@ -488,6 +488,27 @@ CLI.baeumeBauen = function(){
   function lineWaehlen(art){ return s => { s.modus = "line"; s.kontext = {line: art}; return ""; }; }
 
   const vlanListeP = P("WORD", "vlanliste", "liste", "VLAN IDs of the allowed VLANs when this port is in trunking mode", "Liste, z. B. 10,20,30 oder 10-30");
+  /* ---------- DHCP-Snooping am Switch (Architektur § 10.1, § 10.3 Punkt 7) ---------- */
+  const snooping = s => (K(s).snooping || {an: false, vertraut: []});
+  /* Im CONFIG-Modus schaltet „ip dhcp snooping“ das Snooping global ein bzw. „no ip dhcp snooping“ aus.
+     Im SCHNITTELLENMODUS bezieht sich derselbe Befehl auf den gewählten Port und setzt dort das Vertrauen
+     (die Richtung zum Server). Beides muss hier unterschieden werden, weil jedeIf im Config-Modus nichts liefert. */
+  const imIfModus = s => ["if", "subif", "range"].includes(s.modus);
+  function snoopingAn(s, a){
+    if (!imIfModus(s)) {
+      const j = snooping(s);
+      h.setzen(s, "snooping", {an: a.no ? false : true, vertraut: (j.vertraut || []).slice()});
+      return "";
+    }
+    return jedeIf(s, (n) => {
+      const j = snooping(s), liste = new Set(j.vertraut || []);
+      if (a.no) liste.delete(n); else liste.add(n);
+      h.setzen(s, "snooping", {an: a.no ? j.an : true, vertraut: [...liste]});
+      return "";
+    });
+  }
+  const snoopingTrust = (s, a) => snoopingAn(s, a);
+
   const config = {k: []};
   config.k.push(
     W("access-list", "Add an access list entry", "nummerierte Access-Liste (1–99 Standard, 100–199 erweitert)", {nur: istRouter, k: [
@@ -514,10 +535,12 @@ CLI.baeumeBauen = function(){
         W("standard", "Standard Access List", "Standard: nur die Quelle", {k: [P("WORD", "wort", "name", "Access-list name", "Name, z. B. VERWALTUNG", {f: aclWaehlen("standard")})]})]}),
       W("default-gateway", "Specify default gateway (if not routing IP)", "Standardgateway des Switches (Verwaltung)", {nur: istSwitch, noCr: true, f: defaultGw, k: [
         IPN("gw", "IP address of default gateway", "Adresse des Routers")]}),
-      W("dhcp", "Configure DHCP server and relay parameters", "DHCP-Server", {nur: istRouter, k: [
-        W("excluded-address", "Prevent DHCP from assigning certain addresses", "Adressen nicht vergeben (Router, Server, Drucker)", {f: excluded, k: [
+      W("dhcp", "Configure DHCP server and relay parameters", "DHCP-Server (Router) · DHCP-Snooping (Switch)", {nur: s => istRouter(s) || istSwitch(s), k: [
+        W("excluded-address", "Prevent DHCP from assigning certain addresses", "Adressen nicht vergeben (Router, Server, Drucker)", {nur: istRouter, f: excluded, k: [
           IPN("von", "Low IP address", "erste Adresse", {cr: true, k: [IPN("bis", "High IP address", "letzte Adresse")]})]}),
-        W("pool", "Configure DHCP address pools", "DHCP-Pool anlegen oder bearbeiten", {k: [P("WORD", "wort", "pool", "Pool name", "Name, z. B. LAN", {f: poolWaehlen})]})]}),
+        W("pool", "Configure DHCP address pools", "DHCP-Pool anlegen oder bearbeiten", {nur: istRouter, k: [P("WORD", "wort", "pool", "Pool name", "Name, z. B. LAN", {f: poolWaehlen})]}),
+        W("snooping", "DHCP Snooping", "DHCP-Snooping am Switch an/aus (Antworten nur an vertrauten Ports)", {nur: istSwitch, f: snoopingAn, noCr: true, cr: true, k: [
+          W("trust", "Trusted port", "im Schnittstellenmodus: diesen Port vertrauen", {f: snoopingTrust})]})]}),
       W("domain-name", "Define the default domain name", "Domänenname (für SSH-Schlüssel und Namen)", {noCr: true, f: domainName, k: [
         P("WORD", "wort", "name", "Default domain name", "z. B. labor.local")]}),
       W("routing", "Enable IP routing", "IP-Routing (beim Router immer an)", {nur: istRouter, f: (s, a) => a.no
@@ -714,6 +737,9 @@ CLI.baeumeBauen = function(){
         IPN("ip", "IP address", "Adresse, z. B. 192.168.1.1", {k: [IPN("maske", "IP subnet mask", "Subnetzmaske, z. B. 255.255.255.0")]})]}),
       W("helper-address", "Specify a destination address for UDP broadcasts", "DHCP-Relay: Anfragen an diesen Server weiterleiten", {nur: nurRouterIf, noCr: true, f: helper, k: [
         IPN("helper", "IP destination address", "Adresse des DHCP-Servers")]}),
+      W("dhcp", "DHCP interface commands", "DHCP-Snooping an dieser Schnittstelle (Switch)", {nur: istSwitch, k: [
+        W("snooping", "DHCP Snooping", "Snooping-Einstellung dieser Schnittstelle", {nur: istSwitch, k: [
+          W("trust", "Trusted port", "diesen Port als vertraut markieren (Richtung Server)", {f: snoopingTrust})]})]}),
       W("nat", "NAT interface commands", "Rolle bei NAT", {nur: nurRouterIf, k: [
         W("inside", "Inside interface for address translation", "innen (privates Netz)", {n: "natRolle", v: "inside", f: natRolle}),
         W("outside", "Outside interface for address translation", "außen (Richtung Internet)", {n: "natRolle", v: "outside", f: natRolle})]}),
