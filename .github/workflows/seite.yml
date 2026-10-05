@@ -4,7 +4,8 @@ name: Spiel veröffentlichen
 # Ergebnis: https://vexx-oss.github.io/Side-Project/  — ein Klick, spielt sofort im
 # Browser. Kein Download, kein Entpacken, keine Installation.
 #
-# Voraussetzung (einmalig, kann nur im Repository eingestellt werden):
+# Die Pages-Einrichtung erledigt der Ablauf selbst (configure-pages mit enablement: true).
+# Sollte das am Token scheitern, bleibt der eine Klick von Hand:
 #   Settings → Pages → Build and deployment → Source: "GitHub Actions"
 on:
   push:
@@ -35,6 +36,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Pages einrichten, falls noch nicht geschehen
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       # Erst prüfen, dann veröffentlichen: eine kaputte Fassung soll nicht online gehen.
       - name: Tests (headless, Node)
