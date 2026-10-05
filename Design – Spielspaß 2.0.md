@@ -720,7 +720,7 @@ Fernwartung · Adressplan Zeile für Zeile:
 
 ## 19 · Stand nach E2 – Haltepunkt
 
-*Gebaut und abgenommen am 05.10.2026 (Zweig `ausbau-1.2`, 4 Commits). Im echten Programm per `cdp.py lauf` gespielt, keine JS-Fehler. Bilder und Messdatei: `Nachweise/1.2-E2/`. Tests: **191 grün** (vorher 187). `Programm/Netzwerk-Labor.exe` ist der Stand nach E2.*
+*Gebaut und abgenommen am 05.10.2026 (Zweig `ausbau-1.2`, 3 Commits). Im echten Programm per `cdp.py lauf` gespielt, keine JS-Fehler. Bilder und Messdatei: `Nachweise/1.2-E2/`. Tests: **191 grün** (vorher 187). `Programm/Netzwerk-Labor.exe` ist der Stand nach E2.*
 
 ### Abnahme
 
