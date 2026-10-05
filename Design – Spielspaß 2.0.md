@@ -18,7 +18,7 @@ status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zwe
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
 
 > [!info] In Arbeit 05.10.2026: Auftrag „P“ (Politur und Bindung) aus der unabhängigen Prüfung § 20
-> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Stand: [[#21 · Auftrag P – Stand]].
+> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Punkt 3 fertig: eigene Probe für Hotline, Fernwartung, Audit, Adressplan. Stand: [[#21 · Auftrag P – Stand]].
 
 > [!warning] HALTEPUNKT 05.10.2026 nach E2 – Scorecard 38,0 von 60 (Ziel 39,0 nicht ganz erreicht)
 > E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Was die letzten 1,0 Punkte bringen könnte und warum ich nicht weitergebaut habe: [[#19 · Stand nach E2 – Haltepunkt]]. **D beginnt erst nach dem Anspielen.**
@@ -854,7 +854,7 @@ Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswer
 |---|---|---|
 | 1 Hygiene (F1, F2, F8) | Postfach schmal, Sitzungsfenster Fernwartung, Punktlinien, `tools/rauch.py`, Klassen | ✅ fertig |
 | 2 Kuratierte erste Stunde (F3) | feste Folge der ersten sechs Aufträge | ✅ fertig |
-| 3 Probe für jede Form (F4) | Hotline, Fernwartung, Audit, Adressplan | offen |
+| 3 Probe für jede Form (F4) | Hotline, Fernwartung, Audit, Adressplan | ✅ fertig |
 | 4 Vertrauen zahlt aus (F5) | Empfehlung ab 3, −20 % Wartung ab 4, Feierabend-Ausblick | offen |
 | 5 Flow-Regler (F6) | Gerüst nach zwei Fehlschlägen, Verwicklung nach drei Glanzergebnissen | offen |
 | 6 Hub-Wahl (F7) | „oder: 2 weitere Aufträge“, Wochenziel | offen |
@@ -877,3 +877,16 @@ Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswer
 - **Wer bekommt sie:** nur ein neuer Spielstand. Alte Spielstände mit erledigten Aufträgen spielen weiter wie bisher. Fehlen die Aufträge der Folge, schaltet sie sich ab.
 - **Geprüft:** Test „die ersten sechs Abschlüsse“ ergibt Störung · Störung · Hotline · Fernwartung · Störung · Plan-Audit = **4 Formen**, Karten nach Abschluss 1 (Anruf) und 4 (Weiterempfehlung), danach füllt der Mischer. Im Browser von frischem Spielstand bis zur Weiterempfehlung durchgespielt. 195/195 Tests, `rauch.py` 33/33. Die Abnahme im echten Programm kommt am Ende von P.
 - **Nebenbei:** `Spiel.ereignisse.ausloesen("stromausfall")` nimmt ohne Angabe den offenen Auftrag – der `null` aus der Prüfung (§ 20) kam daher, dass ohne Auftrag kein Kunde mit Netz da war.
+
+### Punkt 3 · Probe für jede Form
+
+Jede neue Form endet jetzt mit einem eigenen Moment statt im gleichen Dialog – je höchstens rund 3 s, überspringbar mit Klick, Esc oder Leertaste, bei reduzierter Bewegung als ruhige Karte:
+
+| Form | Probe | Dauer |
+|---|---|---|
+| **Hotline** | ein Paketweg, dann wird der Hörer aufgelegt: „Mira Kaya · Gespräch beendet · 6 min“ und ihr Dank („Perfekt, alles läuft. Ich sag’s gleich dem Team.“) – statt der Sprechblase am Gerät | ~2,5 s |
+| **Fernwartung** | das Sitzungsfenster zeigt ✓ auf dem Bildschirm des Kunden, „Verbindung getrennt“ und „PC-Buero online ✓“; erst dann deckt sich das Netz auf, das man blind repariert hat | ~1,2 s + Netz |
+| **Plan-Audit** | Skizze des Netzes, ein Stempel „GEPRÜFT ✓ 05.10.2026“ fällt darauf, „2 Werte korrigiert – der Plan stimmt wieder“ | ~2 s |
+| **Adressplan** | die Bereiche leuchten nacheinander im Adressraum auf (Balken in VLAN-Farben, lückenlos ab der Basis) – VLSM wird sichtbar: große Blöcke zuerst, der Rest bleibt frei | ~2,5 s |
+
+Geprüft: Test „eigene Probe je Form“ (Daten je Form, Bereiche lückenlos für E/AP1/AP2), im Browser alle vier abgespielt (Fernwartung: nach 0,15 s „getrennt“, nach 1,25 s ist das Netz sichtbar). Bilder kommen mit der Abnahme im echten Programm – im Browserfenster im Hintergrund laufen Animationen nicht.
