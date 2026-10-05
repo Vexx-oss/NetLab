@@ -111,6 +111,8 @@ Spiel.abschliessen = function(inst, abnahme){
   /* E1 Notfall-Anruf: Frist gehalten → +25 % und +1 Ruf; zu spät kostet nichts außer dem Bonus */
   if (inst.quelle === "notfall" && inst.frist && jetzt() <= inst.frist) { lohn.notfall = Math.max(1, Math.round(lohn.grund * Spiel.NOTFALL_BONUS)); lohn.euro += lohn.notfall; lohn.ruf += 1; }
   if (hotline && hotline.bonus) { lohn.ruf += 1; lohn.hotline = 1; }
+  /* E2: Kundenakte – Atlas, Vertrauen, Kapitel (vor instanzEntfernen: braucht das Startnetz der Laufzeit) */
+  const kundenakte = Spiel.kundenakte ? Spiel.kundenakte.nachAbschluss(inst, def, {sterne, lohn}) : null;
   st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0, kunde: inst.kunde || def.kunde || null, form: Spiel.formVon(def)});
   if (st.erledigt.length > 2000) st.erledigt.splice(0, st.erledigt.length - 2000);
   if (inst.kunde) {
@@ -134,7 +136,7 @@ Spiel.abschliessen = function(inst, abnahme){
     bestanden: true, abnahme, lernen, def, inst, sterne, euro: lohn.euro, ruf: lohn.ruf, lohn,
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
-    dex, raetsel, verdacht, hotline, schuld,
+    dex, raetsel, verdacht, hotline, schuld, kundenakte,
   };
   Spiel.geaendert("ticket-geloest");
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});
