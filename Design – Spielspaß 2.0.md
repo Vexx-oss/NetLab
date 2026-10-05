@@ -1001,3 +1001,36 @@ Stempel · Adressplan · Wochenziel · Hub mit „oder:“:
 ### HALTEPUNKT
 
 Auftrag P ist fertig. Bitte anspielen – am besten mit frischem Spielstand die erste Stunde – und danach in **Lernstand → „Auswertung kopieren“** den Text hier einfügen. D (DHCP/DNS) beginnt erst danach.
+
+---
+
+## 22 · Unabhängige Prüfung nach P (05.10.2026, Planungssitzung) und Auftrag „Q“
+
+*Selbst gelaufen: `sh tools/test.sh --rauch` (**207/207**, Rauchtest **33/33**) und ein frischer Durchlauf in der Browser-Fassung: Kabel → Funktionsprobe → Ergebnis → Anruf → Hotline (731 px und 1366 px gemessen). **Nicht geprüft:** die .exe, Ton, Stufen über 1, die Fernwartungs-Probe und die Weiterempfehlung (nicht bis dahin gespielt).*
+
+### Was gut ist
+- **Die Probe wirkt.** Nach der Abnahme zeigt der Drucker „Beleg kommt raus“, und Mira antwortet in einer Sprechblase („Du bist ein Schatz, die Kasse druckt wieder!“). Das ist der Peak, der in § 1 (B3) fehlte.
+- **Der Anruf funktioniert:** Karte „Das Telefon klingelt – Rangehen ▸“, im Postfach als „klingelt“ markiert, danach die Hotline mit „Noch 3 Fragen – frag gezielt“ (sechs Rückfragen, drei dürfen gestellt werden). Das ist Fragetechnik als Spielzug.
+- Ergebnis, Hub („oder: …“), Wochenziel, ruhiges Platzbudget – wie in § 21 beschrieben.
+- Opus hat § 20 vollständig abgearbeitet, die Scorecard auf der **strengeren** Grundlage gerechnet und das verfehlte Ziel (38,0 statt 39,0) offen benannt.
+
+### Befunde
+| # | Befund | Beleg | Gewicht |
+|---|---|---|---|
+| **G1** | **Der erste Auftrag ist mit der Maus nicht lösbar.** Das Fernwartungs-Schild (`.lb-fern-schild`) hat `display:flex` und überstimmt damit das `hidden`-Attribut: eine **leere Pille (400 × 32 px) liegt in jedem normalen Auftrag über dem Switch** und fängt die Maus ab (`pointer-events:auto`) | Gemessen bei 1366 px: Schild x 522–922, y 431–463; Switch x 620–686, y 409–483. Kabel von der Kasse zum Switch gezogen → **kein Kabel entstanden** (Kabelzahl blieb 4, Ziele 0/1). Eingeführt mit dem Sitzungsfenster (P1/P3). Die Abnahme zog das Kabel per Skript (Selektor) und fand es nicht. Eine statische Suche nach `hidden` + `display:` ohne `[hidden]`-Regel findet **nur diese eine** Klasse | **kritisch** (blockiert die erste Minute; steckt auch in der .exe, wenn sie nach c87abf6 gebaut ist) |
+| G2 | **Der Rauchtest sieht Verdeckungen nicht** | Er prüft „Hauptaktion sichtbar und anklickbar“, nicht „Gerät ist nicht überdeckt“ und nicht „echte Mausbahn“ | hoch (sonst wiederholt sich G1) |
+| G3 | Überlappungen: die Probe-Sprechblase verdeckt das „Beleg kommt raus“-Schild und Teile des Netzes; die Anruf-Karte liegt im Postfach über dem Titel der ersten Karte | Bildschirmfotos | klein |
+| G4 | **Es fehlt weiter jeder Mensch.** Alle Zahlen sind Einschätzungen von Modellen; niemand hat gespielt und „Auswertung kopieren“ benutzt | – | hoch (Aussagekraft) |
+
+**Scorecard:** Opus 38,0 (auf der strengeren Grundlage). Solange G1 offen ist, nehme ich *12 Einstieg* von 3,8 auf 3,4 zurück (die erste Minute lässt sich nicht lösen) – das ergibt **37,6**; nach dem Fix gilt wieder 38,0. Die Zahlen bleiben Schätzungen; verlässlicher als jede weitere Politur ist **eine echte Sitzung mit Tagebuch**.
+
+### Auftrag „Q“ (eine Opus-Sitzung, danach Haltepunkt)
+1. **G1 beheben:** `.lb-fern-schild[hidden]{display:none}` (und prüfen, dass das Schild in Fernwartung weiter erscheint). Dann **alle** Elemente mit `hidden` und gesetztem `display` suchen (die statische Suche steht oben).
+2. **G2: Rauchtest erweitern (`tools/rauch.py`):** (a) in jeder Labor-Ansicht liefert `elementFromPoint` in der Mitte jedes Geräts das Gerät selbst (nichts liegt darüber); (b) im ersten Auftrag wird das Kabel **mit echten Mausereignissen** über Koordinaten gezogen (CDP `Input.dispatchMouseEvent`), nicht per Selektor, und der Auftrag besteht; (c) leere sichtbare Pillen/Blöcke (Größe > 0, kein Text, kein Kind) fallen auf. Gegenprobe wie bisher: den Fehler absichtlich wieder einbauen, der Test muss rot werden.
+3. **G3:** Probe-Sprechblase an eine freie Stelle neben dem Gerät (mit Platzprüfung gegen das Schild), Anruf-Karte unter die Kopfzeile rechts.
+4. **.exe neu bauen** (`python bauen.py` vor `cargo tauri build`) und **im echten Programm den ersten Auftrag mit echter Maus durchspielen** (`cdp.py` per Koordinaten), Bildschirmfotos.
+5. **D1 – DHCP (Plan Phase D, Hebel „Funktionstiefe“):** Lease-Zeit mit Ablauf in virtueller Zeit und Erneuerung · Reservierung (MAC → IP) · Optionen (Gateway, DNS, Domain) · Adresskonflikt · Pool-Erschöpfung vertiefen · **Rogue-DHCP** (zweiter Server verteilt falsches Gateway) und **DHCP-Snooping** (vertraute Ports am Switch) · Server-/Router-Panel mit **Lease-Tabelle** · CLI: `show ip dhcp binding|pool|conflict`, `ip dhcp excluded-address`, `ip dhcp pool`, Windows `ipconfig /all` mit Lease-Zeiten, Linux `dhclient`. Dazu die **Auftragsform „Sicherheitsvorfall“** (fremder DHCP-Server) und 4–5 neue Fehlerarten (→ Fehlerdex-Einträge, jeweils Lehrtext E/AP1/AP2 mit Quelle, Injektor, Ticket je Stufe, Pflichtvalidierung). **Definition „fertig“ aus Phase D (alle neun Punkte) gilt.** Vor der ersten Änderung die Golden-Tests der Simulation sichern.
+6. **Abnahme Q:** `tools/rauch.py` mit den neuen Prüfungen grün; Tests grün; Szenario „Frisch → erste Stunde“ **und** „Rogue-DHCP“ im echten Programm mit Bildschirmfotos; Scorecard 4 Entdeckung und 5 Abwechslung ehrlich neu bewerten. Nicht mit D2 (DNS) beginnen. Nicht pushen, am Ende „bereit zum Push“ mit Commit-Zahl.
+
+### Danach (Reihenfolge)
+**D2 – DNS** (Records, Forwarder, Cache, hosts-Datei, `nslookup` interaktiv) → **Netz-Codes + Portfolio-Export** → **Gesichter** → **Stufe 6 Storage** → **F Abschluss.** Dazwischen gehört **eine echte Spielsitzung von dir** mit „Auswertung kopieren“.
