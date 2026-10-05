@@ -27,7 +27,7 @@ CLI.baeumeBauen = function(){
 
   /* ---------- gemeinsame Knoten der Konfigurationsmodi ---------- */
   const exitSub = W("exit", "Exit from this submode", "diesen Modus verlassen (eine Ebene zurück)",
-    {nein: false, sim: true, f: s => { s.modus = "config"; s.kontext = {}; return ""; }});
+    {nein: false, sim: true, f: s => { const m = C.MODI[s.modus]; s.modus = (m && m.eltern) || "config"; s.kontext = {}; return ""; }});
   const ende = W("end", "Exit from configure mode", "Konfiguration ganz verlassen, zurück zu #",
     {nein: false, sim: true, f: s => { s.modus = "priv"; s.kontext = {}; return CONFIG_I; }});
   const doN = W("do", "To run exec commands in config mode", "Exec-Befehl im Konfigurationsmodus ausführen, z. B. do show ip interface brief",
@@ -800,10 +800,57 @@ CLI.baeumeBauen = function(){
   const ext = {k: []};
   ext.k.push(...aktion(aclRegel, extProto), doN, ende, exitSub, noN(() => ext.k), seqP(() => aktion(aclRegel, extProto)));
 
-  /* ================= DHCP-Pool-Modus ================= */
+  /* ================= DHCP-Pool-Modus =================
+     Form des Pools: Architektur.md § 10.1 (start, anzahl, domain, leaseS, reservierungen).
+     Ein neuer Pool bekommt gleich alle Felder mit Standardwert, damit die Anzeige nie ins Leere greift;
+     fehlt eins in einem alten Spielstand, liefert dhcpPool() den Standard (§ 10.1 „defensiv lesen“). */
+  /* ---- Arbeitsobjekt für eine Änderung ----
+     EINMAL aus dem laufenden Zustand lesen, ändern, dann EINMAL zurückschreiben. `dhcpDaten` liest JEDES MAL NEU –
+     wer erst einen Klon ändert und danach `dhcpDaten(s)` schreibt, schreibt den unveränderten Stand zurück. Genau
+     darüber waren alle DHCP-Befehle wirkungslos (gefunden am 05.10.2026): sie meldeten keinen Fehler und änderten
+     nichts. Die Prüfung „geaendert“ blieb deshalb falsch – und die Tests sahen nur den Prompt. */
+  function dhcpDaten(s){ return tief(K(s).dhcp || {ausgeschlossen: [], pools: []}); }
+  function dhcpArbeiten(s, fn){
+    const d = dhcpDaten(s);
+    const r = fn(d, (d.pools || []).find(x => x.name === (s.kontext && s.kontext.pool)) || null, K(s));
+    h.setzen(s, "dhcp", d);
+    return r == null ? "" : r;
+  }
+  function dhcpPool(s){
+    const d = dhcpDaten(s);
+    return (d.pools || []).find(x => x.name === (s.kontext && s.kontext.pool)) || null;
+  }
+  /* MAC-Schreibweisen wie im IOS: 0200.aabb.cc01, 02:00:aa:bb:cc:01, 02-00-aa-bb-cc-01 */
+  function macNormal(mac){
+    const hex = String(mac || "").replace(/[^0-9a-f]/gi, "").toLowerCase();
+    return hex.length === 12 ? hex.match(/.{2}/g).join(":") : null;
+  }
+  /* Reservierung im Arbeitsobjekt holen oder anlegen (Name aus dem Kontext „host NAME“) */
+  function reservierungIn(p, s){
+    if (!p) return null;
+    p.reservierungen = p.reservierungen || [];
+    const n = String((s.kontext && s.kontext.wirt) || "").toLowerCase();
+    let r = p.reservierungen.find(x => String(x.name || "").toLowerCase() === n);
+    if (!r) { r = {mac: "", ip: "", name: (s.kontext && s.kontext.wirt) || "host"}; p.reservierungen.push(r); }
+    return r;
+  }
+  /* lease {Tage [Stunden [Minuten]] | infinite} – 0/fehlend = Standard (§ 10.1) */
+  function leaseSetzen(s, a){
+    return dhcpArbeiten(s, (d, p) => {
+      if (!p) return fehler("% Diesen Pool gibt es nicht mehr.");
+      if (a.no || a.infinite) { delete p.leaseS; return ""; }
+      const t = Number(a.tage), std = Number(a.stunden || 0), min = Number(a.minuten || 0);
+      if (!Number.isFinite(t) || !Number.isFinite(std) || !Number.isFinite(min) || std > 23 || min > 59)
+        return fehler("% Invalid lease duration", "Tage 0–365, Stunden 0–23, Minuten 0–59.");
+      p.leaseS = Math.round((t * 86400) + (std * 3600) + (min * 60));
+      return "";
+    });
+  }
+  function poolFeld(s, feld, wert){
+    return dhcpArbeiten(s, (d, p) => { if (!p) return fehler("% Diesen Pool gibt es nicht mehr."); p[feld] = wert; return ""; });
+  }
   function poolSetzen(feld){
-    return (s, a) => {
-      const d = tief(K(s).dhcp), p = (d.pools || []).find(x => x.name === s.kontext.pool);
+    return (s, a) => dhcpArbeiten(s, (d, p) => {
       if (!p) return fehler("% Diesen Pool gibt es nicht mehr.");
       if (feld === "netz") {
         if (a.no) { p.netz = ""; p.maske = ""; }
@@ -813,19 +860,90 @@ CLI.baeumeBauen = function(){
           p.netz = IP.netz(a.netz, m); p.maske = m;
         }
       } else p[feld] = a.no ? "" : a[feld];
-      h.setzen(s, "dhcp", d); return "";
-    };
+      return "";
+    });
+  }
+  function hostWaehlen(s, a){
+    const n = String(a.host || "").trim(); if (!n) return fehler("% Incomplete command.");
+    if (n.length > 32) return fehler("% Der Name der Reservierung darf höchstens 32 Zeichen haben.");
+    return dhcpArbeiten(s, (d, p) => {
+      if (!p) return fehler("% Diesen Pool gibt es nicht mehr.");
+      if (a.no) {
+        const vorher = (p.reservierungen || []).length;
+        p.reservierungen = (p.reservierungen || []).filter(x => String(x.name || "").toLowerCase() !== n.toLowerCase());
+        if (p.reservierungen.length === vorher) return fehler(`% Die Reservierung „${n}“ gibt es in diesem Pool nicht.`);
+        return "";
+      }
+      s.modus = "dhcpHost";
+      s.kontext = {pool: (s.kontext && s.kontext.pool) || null, wirt: n};
+      const r = reservierungIn(p, s); r.name = n;
+      return "";
+    });
+  }
+  function reservierungMac(s, a){
+    return dhcpArbeiten(s, (d, p) => {
+      if (!p) return fehler("% Diesen Pool gibt es nicht mehr.");
+      const r = reservierungIn(p, s); if (!r) return fehler("% Erst „host NAME“ wählen.");
+      if (a.no) { r.mac = ""; return ""; }
+      const m = macNormal(a.mac);
+      if (!m) return fehler(`% Ungültige Hardware-Adresse: ${a.mac}`, "Schreibweise wie im IOS: 0200.aabb.cc01 (12 Hex-Ziffern, Punkte oder Doppelpunkte).");
+      const doppelt = (p.reservierungen || []).find(x => x !== r && macNormal(x.mac) === m);
+      if (doppelt) { r.mac = ""; return fehler(`% ${m} ist schon für „${doppelt.name}“ reserviert.`, "Eine MAC-Adresse kann in einem Pool nur auf eine IP zeigen."); }
+      r.mac = m; return "";
+    });
+  }
+  function reservierungIp(s, a){
+    return dhcpArbeiten(s, (d, p) => {
+      if (!p) return fehler("% Diesen Pool gibt es nicht mehr.");
+      const r = reservierungIn(p, s); if (!r) return fehler("% Erst „host NAME“ wählen.");
+      if (a.no) { r.ip = ""; return ""; }
+      const ip = IP.zuText(IP.zuZahl(a.ip));
+      if (p.netz && p.maske && !IP.imNetz(ip, p.netz, p.maske))
+        return fehler(`% ${ip} liegt nicht im Netz ${p.netz} ${p.maske} des Pools.`, "Eine Reservierung muss aus dem Subnetz des Pools kommen.");
+      const doppelt = (p.reservierungen || []).find(x => x !== r && x.ip === ip);
+      if (doppelt) { r.ip = ""; return fehler(`% ${ip} ist schon für „${doppelt.name}“ reserviert.`, "Zwei Reservierungen dürfen nicht auf dieselbe IP zeigen."); }
+      r.ip = ip; return "";
+    });
   }
   const dhcp = {k: []};
+  /* WICHTIG: `n` am Positionsknoten bestimmt, unter welchem Namen der Wert in `a` landet (parser.js:241) –
+     ohne `n` wird die Eingabe geparst und dann verworfen. `f` gehört an den Knoten, der den Befehl ausführt. */
   dhcp.k.push(
-    W("default-router", "Default routers", "Standardgateway für die Clients", {noCr: true, f: poolSetzen("gw"), k: [IPN("gw", "Router's IP address", "Adresse des Routers im Client-Netz")]}),
-    W("dns-server", "DNS servers", "DNS-Server für die Clients", {noCr: true, f: poolSetzen("dns"), k: [IPN("dns", "Server's IP address", "Adresse des DNS-Servers")]}),
+    W("default-router", "Default routers", "Standardgateway für die Clients", {noCr: true, f: poolSetzen("gw"), k: [
+      P("A.B.C.D", "ip", "gw", "Router's IP address", "Adresse des Routers im Client-Netz", {f: poolSetzen("gw")})]}),
+    W("dns-server", "DNS servers", "DNS-Server für die Clients", {noCr: true, f: poolSetzen("dns"), k: [
+      P("A.B.C.D", "ip", "dns", "Server's IP address", "Adresse des DNS-Servers", {f: poolSetzen("dns")})]}),
     doN, ende, exitSub,
     W("network", "Network number and mask", "Netz, aus dem der Pool Adressen vergibt", {noCr: true, f: poolSetzen("netz"), k: [
-      IPN("netz", "Network number in dotted-decimal notation", "Netzadresse", {k: [
-        IPN("maske", "Network mask", "Subnetzmaske"), P("/nn", "praefix", "praefix", "Network mask prefix length", "Präfixlänge, z. B. /24")]})]}),
+      P("A.B.C.D", "ip", "netz", "Network number in dotted-decimal notation", "Netzadresse", {k: [
+        P("A.B.C.D", "ip", "maske", "Network mask", "Subnetzmaske", {f: poolSetzen("netz")}),
+        P("/nn", "praefix", "praefix", "Network mask prefix length", "Präfixlänge, z. B. /24", {f: poolSetzen("netz")})]})]}),
+    W("lease", "Address lease time", "Lease-Dauer in Tagen, Stunden und Minuten („infinite“ = unbegrenzt)", {noCr: true, f: leaseSetzen, k: [
+      /* cr: true, weil „lease 2“ schon vollständig ist (2 Tage); Stunden und Minuten sind freiwillig. */
+      P("<0-365>", "zahl", "tage", "Days", "Tage (0–365)", {min: 0, max: 365, cr: true, k: [
+        P("<0-23>", "zahl", "stunden", "Hours", "Stunden (0–23)", {min: 0, max: 23, cr: true, k: [
+          P("<0-59>", "zahl", "minuten", "Minutes", "Minuten (0–59)", {min: 0, max: 59})]})]}),
+      W("infinite", "Infinite lease", "unbegrenzte Lease", {n: "infinite", v: true, f: leaseSetzen})]}),
+    W("domain-name", "Domain name for the pool", "Domänenname, den die Clients als Option 15 bekommen (suffix für Namen ohne Punkt)",
+      {noCr: true, f: poolSetzen("domain"), k: [
+        P("WORD", "wort", "domain", "Domain name", "z. B. labor.local", {f: poolSetzen("domain")})]}),
+    W("host", "Reserve an address for a host", "feste Zuordnung MAC → IP (Reservierung) anlegen und bearbeiten", {k: [
+      P("WORD", "wort", "host", "Host name or client identifier", "Name für die Reservierung, z. B. drucker", {f: hostWaehlen})]}),
     noN(() => dhcp.k),
   );
+  /* Untermodus der Reservierung (Architektur § 10.1): erst „host NAME“, dann MAC und IP.
+     Er ist in parser.js als eigener Modus registriert (sonst wäre er unerreichbar); der Kontext mit dem gewählten
+     Namen wird nach dem Moduswechsel neu gesetzt, weil ein Moduswechsel den Kontext leert. */
+  const dhcpHost = {k: []};
+  dhcpHost.k.push(
+    W("hardware-address", "Hardware address", "MAC-Adresse des Geräts, das diese IP fest bekommt", {noCr: true, f: reservierungMac, k: [
+      P("H.H.H", "wort", "mac", "48-bit hardware address of the host", "z. B. 0200.aabb.cc01", {f: reservierungMac})]}),
+    W("ip", "IP address of the host", "feste IP-Adresse für diese MAC", {noCr: true, f: reservierungIp, k: [
+      P("A.B.C.D", "ip", "ip", "IP address of the host", "z. B. 192.168.10.50", {f: reservierungIp})]}),
+    exitSub, ende, doN,
+    noN(() => dhcpHost.k),
+  );
+
 
   /* ================= Firewall (Grundzüge: anzeigen und testen) ================= */
   const fwPriv = s => s.modus === "fwPriv";
@@ -847,5 +965,5 @@ CLI.baeumeBauen = function(){
     traceroute,
   ]};
 
-  return {exec, config, if: ifb, vlan, line, std, ext, dhcp, fw};
+  return {exec, config, if: ifb, vlan, line, std, ext, dhcp, dhcpHost, fw};
 };

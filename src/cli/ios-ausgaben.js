@@ -263,7 +263,25 @@
       z.push("-- Inside Source", `[Id: ${i + 1}] access-list ${d.acl} interface ${h.langName(d.aus)} refcount ${dyn}`);
     return z.join("\n");
   };
-  Z.dhcpKonflikt = () => "IP address        Detection method   Detection time          VRF";
+  /* `show ip dhcp conflict` – echte Konflikte aus der Laufzeit (§ 10.2: `leases[ip].konflikt` mit Zeitpunkt).
+     Die Erkennungsmethode (Ping/ARP/Gratuitous ARP) unterscheidet die Simulation nicht: „IOS-ähnlich“,
+     ein echter Router zeigt dort „Ping“ bzw. „ARP“ oder „Gratuitous ARP“. */
+  Z.dhcpKonflikt = s => {
+    const g = G(s), z = zustand(s.netz, s.id), jetzt = uhr(s.netz), zeilen = [];
+    if (!dhcpAktiv(g)) return `% Auf ${g.running.hostname || g.name} läuft kein DHCP-Server (Dienst ist aus).`;
+    for (const [ip, l] of Object.entries(z.leases || {})) {
+      if (!l || typeof l !== "object" || !(l.konflikt || l.konfliktZeit)) continue;
+      const t = l.konfliktZeit != null ? l.konfliktZeit : l.konflikt === true ? null : l.konflikt;
+      const alter = typeof t === "number" && t <= jetzt ? Math.floor((jetzt - t) / 1000) : null;
+      zeilen.push({ip, methode: l.konfliktMethode || "Ping", zeit: alter == null ? "unbekannt"
+        : `${pad(Math.floor(alter / 3600))}:${pad(Math.floor(alter / 60) % 60)}:${pad(alter % 60)}`, vrf: l.vrf || "default"});
+    }
+    zeilen.sort((a, b) => IP.zuZahl(a.ip) - IP.zuZahl(b.ip));
+    const out = ["IP address        Detection method   Detection time          VRF"];
+    for (const zl of zeilen) out.push(links(zl.ip, 18) + links(zl.methode, 19) + links(zl.zeit, 24) + zl.vrf);
+    if (!zeilen.length) out.push("% Keine Adresskonflikte – der Server hat keine doppelt belegte Adresse gefunden.");
+    return out.join("\n");
+  };
   Z.benutzer = s => {
     const z = ["    Line       User       Host(s)              Idle       Location"];
     z.push(s.ueberSsh ? `   0 con 0                idle                 00:01:12` : "*  0 con 0                idle                 00:00:00");
@@ -303,38 +321,192 @@
     return z.join("\n");
   };
 
-  /* ---------- DHCP ---------- */
-  Z.dhcpBinding = s => {
-    const z = zustand(s.netz, s.id), jetztUhr = uhr(s.netz), zeilen = [];
-    for (const [ip, e] of Object.entries(z.leases || {})) {
-      if (!e || (e.bis != null && e.bis <= jetztUhr)) continue;
-      const rest = e.bis != null ? Math.max(0, Math.floor((e.bis - jetztUhr) / 1000)) : null;
-      const dauer = rest == null ? "Infinite" : `${pad(Math.floor(rest / 3600))}:${pad(Math.floor(rest / 60) % 60)}:${pad(rest % 60)} Rest`;
-      const cid = ("01" + String(e.mac).replace(/[^0-9a-f]/gi, "").toLowerCase()).match(/.{1,4}/g).join(".");
-      zeilen.push({ip, text: links(ip, 20) + links(cid, 24) + links(dauer, 24) + "Automatic"});
+  /* ---------- DHCP ----------
+     Datenformen: Architektur.md § 10.1 (Pool) und § 10.2 (Laufzeit). Der Router führt seine Pools in
+     `running.dhcp`, ein Server/NAS in `running.dienste.dhcp` – beide haben dieselbe Form. Alle neuen Felder
+     (start, anzahl, domain, leaseS, reservierungen, t1, t2, abgelaufen, konflikt) werden DEFENSIV gelesen:
+     fehlt eins, gilt der Standard (Architektur § 10.1 „Fehlende Felder werden defensiv gelesen“).
+     `show ip dhcp binding|pool|conflict` gilt damit auch auf einem Server-Host mit DHCP-Dienst. */
+  const LEASE_STANDARD_S = 86400;                      /* IOS-Vorgabe: 1 Tag (Sim.T.LEASE/1000) */
+  const macKlein = m => String(m == null ? "" : m).toLowerCase();
+  /* Pools eines Geräts – Router und Host haben dieselbe Form (§ 10.1) */
+  const dhcpDaten = g => (g.running && g.running.dhcp) || (g.running && g.running.dienste && g.running.dienste.dhcp) || {};
+  const dhcpPools = g => { const p = dhcpDaten(g).pools; return Array.isArray(p) ? p : []; };
+  /* Läuft auf diesem Gerät überhaupt ein DHCP-Dienst? (Router: immer, Host: nur wenn eingeschaltet) */
+  const dhcpAktiv = g => g.typ === "router" ? true : !!dhcpDaten(g).an;
+  /* Leases der Laufzeit (§ 10.2). Fehlt `leases` (noch) ganz, liefert die Sim die aktuellen – defensiv. */
+  function leasesVon(s, g = G(s)){
+    const l = zustand(s.netz, g.id).leases;
+    if (l && typeof l === "object") return l;
+    const sim = h.sim && h.sim();
+    if (sim && typeof sim.leases === "function") {
+      const r = sim.leases(s.netz, g.id) || [];
+      const o = {}; for (const x of r) if (x && x.ip) o[x.ip] = x;
+      return o;
     }
-    zeilen.sort((a, b) => IP.zuZahl(a.ip) - IP.zuZahl(b.ip));
-    return ["Bindings from all pools not associated with VRF:",
-            "IP address          Client-ID/              Lease expiration        Type",
-            "                    Hardware address/", "                    User name", ...zeilen.map(x => x.text)].join("\n");
+    return {};
+  }
+  const reservierungen = p => { const r = p.reservierungen; return Array.isArray(r) ? r : []; };
+  /* Reservierungen mit Zustand: {mac, ip, name, frei, aktiv} */
+  const reservierungenMitZustand = (s, p, leases = leasesVon(s)) => {
+    const jetzt = uhr(s.netz);
+    return reservierungen(p).map(r => {
+      const l = leases[r.ip];
+      const bis = l && l.bis != null ? l.bis : null;
+      const aktiv = !!l && macKlein(l.mac) === macKlein(r.mac) && (bis == null || bis > jetzt);
+      return {mac: r.mac, ip: r.ip, name: r.name, frei: !aktiv && (!l || (bis != null && bis <= jetzt)), bis, aktiv};
+    });
   };
-  Z.dhcpPool = s => {
-    const k = K(s), z = zustand(s.netz, s.id), leases = Object.keys(z.leases || {}), out = [];
-    for (const p of (k.dhcp && k.dhcp.pools) || []) {
-      const ok = IP.gueltig(p.netz) && IP.maskeGueltig(p.maske);
-      const gesamt = ok ? Math.max(0, 2 ** (32 - IP.praefix(p.maske)) - 2) : 0;
-      const belegt = ok ? leases.filter(ip => IP.imNetz(ip, p.netz, p.maske)).length : 0;
-      out.push("", `Pool ${p.name} :`,
-        " Utilization mark (high/low)    : 100 / 0", " Subnet size (first/next)       : 0 / 0",
-        ` Total addresses                : ${gesamt}`, ` Leased addresses               : ${belegt}`, " Pending event                  : none");
-      if (ok) {
-        const erste = IP.plus(p.netz, 1), letzte = IP.plus(IP.broadcast(p.netz, p.maske), -1 >>> 0);
-        out.push(" 1 subnet is currently in the pool :", " Current index        IP address range                    Leased addresses",
-          " " + links(erste, 21) + links(erste, 17) + "- " + links(letzte, 18) + belegt);
-      } else out.push(" 0 subnets are currently in the pool :");
+  /* Ein Lease-Eintrag in eine Zeile für die Anzeige übersetzen */
+  function leaseZeile(s, ip, l, jetzt){
+    const bis = l.bis != null ? l.bis : null;
+    const restS = bis != null ? Math.floor((bis - jetzt) / 1000) : null;      /* negativ = abgelaufen */
+    const abgelaufen = !!l.abgelaufen || (restS != null && restS < 0);
+    const dauer = restS == null ? "Infinite"
+      : abgelaufen ? "abgelaufen" : `${pad(Math.floor(restS / 3600))}:${pad(Math.floor(restS / 60) % 60)}:${pad(restS % 60)} Rest`;
+    const hex = macKlein(l.mac).replace(/[^0-9a-f]/g, "");
+    const cid = hex.length >= 12 ? ("01" + hex).match(/.{1,4}/g).join(".") : "unbekannt";
+    return {ip, mac: macKlein(l.mac), bis, restS, abgelaufen, t1: l.t1 != null ? l.t1 : null, t2: l.t2 != null ? l.t2 : null,
+            hostname: l.hostname || "", konflikt: !!l.konflikt || !!l.konfliktZeit, name: nameZuMac(s, l.mac), cid, dauer};
+  }
+  function nameZuMac(s, mac){
+    const m = macKlein(mac);
+    for (const g of Object.values(s.netz.geraete || {})) {
+      for (const x of Object.values((g.hw && g.hw.macs) || {})) if (macKlein(x) === m) return String(g.running && g.running.hostname || g.name);
+    }
+    return "";
+  }
+  const zustandsWort = (l, res) => res && res.aktiv ? "reserviert" : l.abgelaufen ? "abgelaufen" : l.konflikt ? "Konflikt" : "aktiv";
+  Z.dhcpBinding = s => {
+    const g = G(s), jetzt = uhr(s.netz), leases = leasesVon(s, g);
+    if (!dhcpAktiv(g)) return {ausgabe: `% Auf ${g.running.hostname || g.name} läuft kein DHCP-Server (Dienst ist aus).\n% Einschalten im Inspektor (Reiter „Dienste“) oder auf einem Router mit „ip dhcp pool …“.`, fehler: true,
+      tipp: "Ohne laufenden DHCP-Dienst gibt es keine Leases – die Adressen der Clients kommen dann von einem anderen Server."};
+    /* Reservierungen der Pools mit Namen, damit „reserviert“ an der richtigen Zeile steht */
+    const res = new Map();
+    for (const p of dhcpPools(g)) for (const r of reservierungenMitZustand(s, p, leases)) if (r.ip) res.set(r.ip, r);
+    /* Aktive Leases aus der Laufzeit dieses Geräts (Architektur § 10.2) */
+    const akt = [], alt = [];
+    for (const [ip, e] of Object.entries(leases)) {
+      if (!e || typeof e !== "object") continue;
+      const l = leaseZeile(s, ip, e, jetzt);
+      if (l.abgelaufen) alt.push(l); else akt.push(l);
+    }
+    akt.sort((a, b) => IP.zuZahl(a.ip) - IP.zuZahl(b.ip));
+    alt.sort((a, b) => IP.zuZahl(a.ip) - IP.zuZahl(b.ip));
+    for (const l of akt) l.wort = zustandsWort(l, res.get(l.ip));
+    const out = ["Bindings from all pools not associated with VRF:",
+      "IP address          Client-ID/              Lease expiration        Type",
+      "                    Hardware address/", "                    User name",
+      links("Gerät", 16) + links("Zustand", 11) + "T1 / T2 (Erneuerung, IOS-ähnlich)"];
+    if (!akt.length) out.push("  (keine aktiven Leases)");
+    for (const l of akt)
+      out.push(links(l.ip, 20) + links(l.cid, 24) + links(l.dauer, 24) + "Automatic",
+        "  " + links(l.name || l.hostname || "unbekannt", 14) + links(l.wort, 11) + t1t2Text(l, jetzt));
+    /* Abgelaufene Leases zeigt ein echter Router nicht mehr an (er löscht sie) – hier stehen sie zur Kontrolle darunter. */
+    if (alt.length) {
+      out.push("", "Abgelaufene Leases (im Labor sichtbar, IOS räumt sie selbst weg):",
+        "IP address          Client-ID/              Zustand           Gerät");
+      for (const l of alt) out.push(links(l.ip, 20) + links(l.cid, 24) + links("abgelaufen", 17) + (l.name || "unbekannt"));
+    }
+    if (res.size) {
+      const offen = [...res.values()].filter(r => !r.aktiv);
+      if (offen.length) {
+        out.push("", "Reservierungen (fest MAC → IP), noch ohne Lease:");
+        for (const r of offen) out.push("  " + links(r.ip || "–", 16) + links(IP.macCisco(r.mac), 18) + (r.name || ""));
+      }
     }
     return out.join("\n");
   };
+  /* T1/T2 sind Zeitpunkte (§ 10.2). Angezeigt wird die Restzeit bis dorthin – beides ist „IOS-ähnlich“:
+     ein echter Router zeigt in `show ip dhcp binding` weder T1 noch T2. */
+  const t1t2Text = (l, jetzt) => {
+    if (l.t1 == null && l.t2 == null) return "kein T1 bekannt";      /* alte Leases ohne t1/t2: kein Fehler (§ 10.2) */
+    const rest = t => { if (t == null) return "–"; const s = Math.floor((t - jetzt) / 1000); return s <= 0 ? "erreicht" : `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`; };
+    return `T1 ${rest(l.t1)}  T2 ${rest(l.t2)}`;
+  };
+  Z.dhcpPool = s => {
+    const g = G(s), z = zustand(s.netz, s.id), jetzt = uhr(s.netz), leases = z.leases || {}, out = [];
+    if (!dhcpAktiv(g)) return `% Auf ${g.running.hostname || g.name} läuft kein DHCP-Server (Dienst ist aus).\n% Einschalten im Inspektor (Reiter „Dienste“).`;
+    const pools = dhcpPools(g);
+    if (!pools.length) return "% Kein DHCP-Pool eingerichtet. Anlegen mit „ip dhcp pool NAME“ (Router) bzw. im Inspektor unter „Dienste“.";
+    for (const p of pools) {
+      /* Bereich: netz/maske + start + anzahl (Architektur § 10.1) – Ausschlüsse und Reservierungen zählen mit (§ 10.6) */
+      const ok = IP.gueltig(p.netz) && IP.maskeGueltig(p.maske);
+      const b = ok ? poolBereich(p) : null;
+      const belegtIp = new Set(Object.entries(leases).filter(([, l]) => l && l.mac && l.bis != null && l.bis > jetzt).map(([ip]) => ip));
+      const res = ok ? reservierungenMitZustand(s, p) : [];
+      let vergebbar = 0, vergeben = 0, reserviert = 0;
+      if (b) {
+        for (let n = IP.zuZahl(b.von); n <= IP.zuZahl(b.bis); n++) {
+          const ip = IP.zuText(n >>> 0);
+          if (!IP.hostAdresse(ip, p.maske)) continue;
+          if (ausgeschlossen(g, ip)) continue;                                  /* ip dhcp excluded-address */
+          if (macKlein(b.gw && b.gw) && ip === b.gw) continue;                   /* das Gateway vergibt der Pool nie */
+          if (res.some(r => r.ip === ip)) { reserviert++; continue; }            /* fest MAC → IP */
+          vergebbar++; if (belegtIp.has(ip)) vergeben++;
+        }
+      }
+      const frei = Math.max(0, vergebbar - vergeben);
+      const last = vergebbar + reserviert;
+      const lastProzent = last > 0 ? Math.round((vergeben + reserviert) * 100 / last) : 0;
+      const naechste = b ? naechsteFreie(g, p, b, leases, res, jetzt) : "";
+      out.push("", `Pool ${p.name} :`,
+        ` Utilization mark (high/low)    : ${lastProzent} / 0`, " Subnet size (first/next)       : 0 / 0",
+        ` Total addresses                : ${vergebbar}`);                  /* nur vergebbare Adressen: start/anzahl minus Ausschlüsse minus Gateway */
+      if (reserviert) out.push(` Reserved addresses             : ${reserviert}   (feste MAC → IP, IOS-ähnlich)`);
+      out.push(` Leased addresses               : ${vergeben}`,
+        ` Free addresses                 : ${frei}`, " Pending event                  : none");
+      const lz = leaseDauerS(p);
+      out.push(` Lease duration                 : ${lz ? zeitText(lz) : "unendlich (infinite)"}`,
+        ` Domain name (Option 15)        : ${p.domain || "–"}`, " DNS server                     : " + (p.dns || "–"));
+      if (ok && b) {
+        out.push(" 1 subnet is currently in the pool :", " Current index        IP address range                    Leased addresses",
+          " " + links(naechste || b.von, 21) + links(b.von, 17) + "- " + links(b.bis, 18) + vergeben);
+      } else out.push(" 0 subnets are currently in the pool :");
+      if (res.length) {
+        out.push(" Reservierungen (fest MAC → IP):");
+        for (const r of res) out.push("  " + links(r.ip || "–", 16) + links(IP.macCisco(r.mac), 18) + links(r.name || "", 14) + (r.aktiv ? "Lease aktiv" : "frei"));
+      }
+    }
+    return out.join("\n");
+  };
+  /* Bereich eines Pools: start (Standard: erste Hostadresse) + anzahl Adressen, begrenzt auf das Subnetz */
+  function poolBereich(p){
+    const n = Math.max(0, Math.round(Number(p.anzahl == null || p.anzahl === "" ? 50 : p.anzahl)) || 0);
+    const von = IP.gueltig(p.start) ? IP.zuText(IP.zuZahl(p.start)) : IP.plus(IP.netz(p.netz, p.maske), 1);
+    if (n <= 0) return {von, bis: IP.plus(von, -1 >>> 0), anzahl: 0, gw: p.gw || ""};    /* leerer Bereich */
+    const bisSoll = IP.plus(von, n - 1), bisMax = IP.plus(IP.broadcast(p.netz, p.maske), -1 >>> 0);
+    const bis = IP.vergleich(bisSoll, bisMax) > 0 ? bisMax : bisSoll;
+    return {von, bis, anzahl: Math.max(0, IP.zuZahl(bis) - IP.zuZahl(von) + 1), gw: p.gw || ""};
+  }
+  /* `ip dhcp excluded-address` liegt am Router in `dhcp.ausgeschlossen`, am Host in `dienste.dhcp.ausgeschlossen`
+     (Architektur § 10.1: „ausgeschlossen gilt auch hier“). Fehlt die Liste, ist nichts ausgeschlossen. */
+  function ausgeschlossen(g, ip){
+    const liste = dhcpDaten(g).ausgeschlossen;
+    if (!Array.isArray(liste)) return false;
+    return liste.some(x => x && IP.gueltig(x.von) && IP.vergleich(ip, x.von) >= 0 && IP.vergleich(ip, IP.gueltig(x.bis) ? x.bis : x.von) <= 0);
+  }
+  /* Lease-Dauer eines Pools in Sekunden: `leaseS` ist neu (§ 10.1), `lease` lesen wir defensiv mit,
+     0/fehlend = Sim.T.LEASE (IOS-Vorgabe 1 Tag). */
+  function leaseDauerS(p){
+    const roh = p.leaseS != null && p.leaseS !== "" ? p.leaseS : (p.lease != null && p.lease !== "" ? p.lease : null);
+    if (roh == null) return 0;
+    if (roh === 0 || roh === "0" || roh === "infinite") return 0;
+    return Math.max(0, Math.round(Number(roh) || 0));
+  }
+  const zeitText = sek => sek >= 86400 && sek % 86400 === 0 ? `${sek / 86400} Tag(e) (${sek} s)`
+    : sek >= 3600 && sek % 3600 === 0 ? `${sek / 3600} Stunde(n) (${sek} s)` : `${sek} s`;
+  function naechsteFreie(g, p, b, leases, res, jetzt){
+    for (let n = IP.zuZahl(b.von); n <= IP.zuZahl(b.bis); n++) {
+      const ip = IP.zuText(n >>> 0);
+      if (!IP.hostAdresse(ip, p.maske) || ip === b.gw) continue;
+      if (ausgeschlossen(g, ip)) continue;
+      if (res.some(r => r.ip === ip)) continue;
+      const l = leases[ip];
+      if (!l || !l.mac || l.bis == null || l.bis <= jetzt) return ip;
+    }
+    return "";
+  }
 
   /* ---------- Port-Security ---------- */
   const VERSTOSS = {shutdown: "Shutdown", restrict: "Restrict", protect: "Protect"};

@@ -16,6 +16,45 @@ gruppe("CLI: IOS-Inventur und SSH", () => {
   const e = (s, ...zeilen) => { let r; for (const z of zeilen) r = CLI.eingabe(s, z); return r; };
   const vorhanden = (s, befehl) => { const r = CLI.eingabe(s, befehl); return !/% (Invalid input|Incomplete command|Ambiguous)/.test(r.ausgabe) ? null : `${befehl} → ${r.ausgabe.split("\n").slice(-1)[0]}`; };
 
+  pruefe("DHCP-Pool-Modus WIRKT: network, default-router, dns-server, lease, domain-name, Reservierung", () => {
+    /* Diese Prüfung fehlte. Der Test „ip dhcp pool LAN“ → Prompt war grün, während KEIN Befehl im Pool etwas
+       änderte: jeder Handler schrieb einen Klon zurück, der die Änderung nicht enthielt (gefunden am 05.10.2026).
+       Deshalb prüft dieser Fall nicht den Prompt, sondern den Zustand nach jedem Befehl. */
+    const n = netz(), s = CLI.sitzung(n, "r1"); e(s, "enable", "configure terminal");
+    Modell.setzen(n, "r1", "dhcp", {an: true, ausgeschlossen: [], pools: [{name: "LAN", netz: "10.9.0.0", maske: "255.255.255.0", gw: "10.9.0.1", dns: ""}]});
+    const pool = () => n.geraete.r1.running.dhcp.pools.find(p => p.name === "LAN");
+
+    erwarte.enthaelt(e(s, "ip dhcp pool LAN").prompt, "(dhcp-config)#");
+    erwarte.wahr(e(s, "network 192.168.44.0 255.255.255.0").geaendert, "network muss den Pool ändern");
+    erwarte.gleich([pool().netz, pool().maske], ["192.168.44.0", "255.255.255.0"]);
+    erwarte.wahr(e(s, "default-router 192.168.44.1").geaendert, "default-router muss wirken");
+    erwarte.gleich(pool().gw, "192.168.44.1");
+    erwarte.wahr(e(s, "dns-server 192.168.44.53").geaendert, "dns-server muss wirken");
+    erwarte.gleich(pool().dns, "192.168.44.53");
+    erwarte.wahr(e(s, "domain-name labor.local").geaendert, "domain-name muss wirken");
+    erwarte.gleich(pool().domain, "labor.local");
+    /* lease: Tage allein müssen reichen (2 Tage) – Stunden und Minuten sind freiwillig */
+    erwarte.wahr(e(s, "lease 2").geaendert, "lease mit nur Tagen muss wirken");
+    erwarte.gleich(pool().leaseS, 2 * 86400);
+    erwarte.wahr(e(s, "lease 1 12 30").geaendert);
+    erwarte.gleich(pool().leaseS, 86400 + 12 * 3600 + 30 * 60);
+    erwarte.wahr(e(s, "lease infinite").geaendert, "infinite entfernt die Dauer");
+    erwarte.gleich(pool().leaseS, undefined, "ohne leaseS gilt der Standard");
+    /* Reservierung: „host NAME“ wechselt in den Untermodus, die MAC wird dort gesetzt.
+       Die reservierte IP ist über den Inspektor und über die Datenform setzbar; der IOS-Befehl „ip address“ im
+       Untermodus ist noch offen (siehe Bericht) und wird hier deshalb NICHT geprüft. */
+    erwarte.enthaelt(e(s, "host drucker").prompt, "(dhcp-config-host)#");
+    erwarte.wahr(e(s, "hardware-address 0200.aabb.cc01").geaendert, "hardware-address muss wirken");
+    const r = (pool().reservierungen || [])[0];
+    erwarte.wahr(!!r, "die Reservierung steht im Pool");
+    erwarte.gleich([r.mac, r.name], ["02:00:aa:bb:cc:01", "drucker"]);
+    erwarte.enthaelt(e(s, "exit").prompt, "(dhcp-config)#");
+    /* Ausschlussbereich im Konfigurationsmodus */
+    e(s, "exit");
+    erwarte.wahr(e(s, "ip dhcp excluded-address 192.168.44.1 192.168.44.9").geaendert, "excluded-address muss wirken");
+    erwarte.gleich(n.geraete.r1.running.dhcp.ausgeschlossen.length, 1);
+  });
+
   pruefe("Inventur: show-Befehle (privilegiert) und Konfigurationsbefehle sind auf Router und Switch vorhanden", () => {
     const n = netz(), fehlt = [];
     const r = CLI.sitzung(n, "r1"); e(r, "enable");

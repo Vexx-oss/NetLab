@@ -262,6 +262,7 @@ const CLI = (() => {
     std:    {prompt: "(config-std-nacl)#", baum: "std", eltern: "config", konfig: true},
     ext:    {prompt: "(config-ext-nacl)#", baum: "ext", eltern: "config", konfig: true},
     dhcp:   {prompt: "(dhcp-config)#", baum: "dhcp", eltern: "config", konfig: true},
+    dhcpHost: {prompt: "(dhcp-config-host)#", baum: "dhcpHost", eltern: "dhcp", konfig: true},
     fwUser: {prompt: ">", baum: "fw"},
     fwPriv: {prompt: "#", baum: "fw"},
   };
@@ -311,6 +312,8 @@ const CLI = (() => {
     if (s.art === "info") return "";
     if (s.modus === "abgemeldet") return "";
     const g = h.geraet(s); const name = g ? g.running.hostname || g.name : "?";
+    /* Der Reservierungs-Untermodus nennt den gewählten Namen wie IOS: (dhcp-config-host)# */
+    if (s.modus === "dhcpHost") return name + "(dhcp-config-host)#";
     return name + (MODI[s.modus] ? MODI[s.modus].prompt : ">");
   };
   /* Verlauf der Eingaben (Pfeil hoch/runter): schritt -1 = älter, +1 = neuer */
