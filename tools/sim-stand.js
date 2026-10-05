@@ -16,7 +16,9 @@ const path = require("path");
 const vm = require("vm");
 
 const HIER = path.resolve(__dirname, "..");
-const STD = path.join(HIER, "Nachweise", "sim-stand.json");
+/* Die Referenz liegt in tests/ und ist damit versioniert (Design § 24, Befund M3): in Nachweise/ – das nicht im
+   Git liegt – wäre sie in einem frischen Klon nicht vorhanden und der Vergleich liefe ins Leere. */
+const STD = path.join(HIER, "tests", "sim-stand.json");
 
 /* Module genau wie tests/run.js in einen gemeinsamen Kontext laden – sonst fehlen Querverweise (Sim, Modell, IP).
    Die Reihenfolge je Schicht ist dieselbe wie dort (Kopfdateien zuerst). */
