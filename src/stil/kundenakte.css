@@ -34,3 +34,9 @@
 .ka-optionen .knopf.richtig{border-color:var(--ok); background:var(--ok-soft); color:var(--ink); opacity:1}
 .ka-optionen .knopf.falsch{border-color:var(--warn); background:var(--warn-soft); color:var(--ink); opacity:1}
 .ka-ergebnis p{margin:4px 0}
+/* Vertrauen zahlt aus (§ 20 F5): Empfehlung ab 3, Rabatt ab 4 */
+.ka-lohn{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 14px; font-size:13px}
+.ka-lohn li{color:var(--faint)}
+.ka-lohn li.da{color:var(--ok); font-weight:700}
+.ka-lohn li.bald{color:var(--ink)}
+.ka-lohn .ka-herzen{font-size:12px; letter-spacing:0}

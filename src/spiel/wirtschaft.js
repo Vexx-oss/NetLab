@@ -76,7 +76,7 @@ Spiel.shop.liste = function(){
     liste.push(Spiel.shop.eintrag({
       id: "vertrag:" + id, art: "vertrag", gruppe: "Kunden", kunde: id,
       titel: "Wartungsvertrag anbieten: " + kd.name,
-      text: `Bringt ${eur(kd.euroProStunde)} €/h, solange die Ampel grün ist. Dafür kommen Wartungs-Tickets mit Frist.`,
+      text: `Bringt ${eur(kd.euroProStunde)} €/h, solange die Ampel grün ist. Dafür kommen Wartungs-Tickets mit Frist.` + (kd.vertragRabatt ? ` −${Math.round(kd.vertragRabatt * 100)} % für Vertrauen ${Spiel.VERTRAUEN_LOHN.rabatt}.` : ""),
       preis: kd.vertragPreis, zustand, grund,
     }));
   }

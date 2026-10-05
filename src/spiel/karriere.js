@@ -140,7 +140,9 @@ Spiel.karriere.kunde = function(id){
     abRuf: +(d.abRuf ?? d.ruf ?? (stufeDef ? stufeDef.ruf : 0)),
     spaeter: !!(d.spaeter ?? s.spaeter ?? (stufeDef && stufeDef.spaeter)),
     euroProStunde: eph,
-    vertragPreis: +(vertrag.preis ?? Math.round(eph * Spiel.WIRTSCHAFT_VERTRAG_STUNDEN / 10) * 10),
+    vertragPreisVoll: +(vertrag.preis ?? Math.round(eph * Spiel.WIRTSCHAFT_VERTRAG_STUNDEN / 10) * 10),
+    vertragRabatt: Spiel.kundenakte && Spiel._st ? Spiel.kundenakte.rabatt(id) : 0,              /* Vertrauen 4: −20 % (§ 20 F5) */
+    get vertragPreis(){ return Math.round(this.vertragPreisVoll * (1 - this.vertragRabatt)); },
     skills: Array.isArray(d.skills) ? d.skills : null,
     saetze: d.saetze || {},
   };
@@ -149,7 +151,10 @@ Spiel.WIRTSCHAFT_VERTRAG_STUNDEN = 20;   /* Vertragsangebot kostet so viele Stun
 
 Spiel.karriere.kundeOffen = function(id){
   const k = Spiel.karriere.kunde(id);
-  return !k.spaeter && Spiel.st.ruf >= k.abRuf;
+  if (k.spaeter) return false;
+  /* Empfehlung (Vertrauen 3 bei einem anderen Kunden): eine Stufe früher – es reicht der Ruf der Stufe davor */
+  const frueher = Spiel.kundenakte && Spiel.kundenakte.empfohlen(id) ? ((Spiel.KARRIERE_STUFEN.find(x => x.nr === k.stufe - 1) || {}).ruf ?? 0) : null;
+  return Spiel.st.ruf >= (frueher != null ? Math.min(frueher, k.abRuf) : k.abRuf);
 };
 Spiel.karriere.kundeStand = id => (typeof Spiel.kunde === "function" ? Spiel.kunde(id) : (Spiel.st.kunden[id] ||= {vertrag: false, ampel: "gruen", seit: heute(), sterne: []}));
 Spiel.karriere.hatVertrag = id => !!(Spiel.st.kunden[id] && Spiel.st.kunden[id].vertrag);

@@ -45,7 +45,8 @@ Spiel.mischer.kandidaten = function(st = Spiel.st){
     erste[f] = t;
     liste.push({form: f, kunde: t.kunde, gewicht: 3, schluessel: "t:" + t.id, ticketId: t.id, story: true, rang});
   }
-  const kunden = Object.values(DATEN.kunden || {}).filter(k => (k.stufe || 1) <= st.stufe && Spiel.vorlagen._fuerKunde[k.id] && k.id !== "storage").map(k => k.id);
+  const empfohlen = id => !!(Spiel.kundenakte && Spiel.kundenakte.empfohlen(id, st) && Spiel.karriere.kundeOffen(id));    /* Vertrauen 3: eine Stufe früher */
+  const kunden = Object.values(DATEN.kunden || {}).filter(k => ((k.stufe || 1) <= st.stufe || ((k.stufe || 1) <= st.stufe + 1 && empfohlen(k.id))) && Spiel.vorlagen._fuerKunde[k.id] && k.id !== "storage").map(k => k.id);
   for (const form of Object.keys(Spiel.formGeneratoren)) {
     if ((Spiel.FORM_AB[form] || 1) > st.stufe) continue;
     for (const kunde of kunden) liste.push({form, kunde, gewicht: 1, schluessel: `g:${form}:${kunde}`, gen: {form, opts: {kunde}}});

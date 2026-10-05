@@ -60,8 +60,20 @@ Spiel.hub.naechster = function(){
     klingelt: !!inst.klingelt && !inst.geoeffnet};
 };
 
-/* Ein Satz für morgen (offener Faden): Kundenauftrag im Postfach → fällige Fertigkeit → nächstes Tagesrätsel */
+/* Ein Satz für morgen – der offene Faden (Design § 20, F5): Folgeauftrag eines Provisoriums → Notfall → ein Kapitel, das nur
+   noch eine saubere Arbeit entfernt ist → Kundenauftrag im Postfach → fällige Fertigkeit → nächstes Tagesrätsel */
 Spiel.hub.ausblick = function(){
+  const st = Spiel.st, wer = id => { const k = Spiel.kundenDaten(id); return (k.ansprechpartner || {}).name || k.name; };
+  const s = (Spiel.varianten ? Spiel.varianten.schulden() : []).filter(x => !x.erledigt).sort((a, b) => a.faellig - b.faellig)[0];
+  if (s) return s.folge && Spiel.instanz(s.folge) ? `Morgen: ${wer(s.kunde)} wartet auf den Folgeauftrag – „${s.titel}“, diesmal gesichert.`
+    : `Morgen: Das Provisorium bei ${wer(s.kunde)} („${s.titel}“) meldet sich in etwa ${Math.max(1, s.faellig - st.erledigt.length)} Aufträgen.`;
+  const notfall = Spiel.postfach().find(i => i.quelle === "notfall");
+  if (notfall) { const d = Spiel.defVon(notfall); return `Morgen zuerst: Notfall bei ${Spiel.kundenDaten(notfall.kunde || d.kunde).name} – „${d.titel}“.`; }
+  if (Spiel.kundenakte) for (const kunde of Object.keys(Spiel.kundenakte.alle())) {
+    const v = Spiel.kundenakte.vertrauen(kunde), sw = Spiel.kundenakte.naechsteSchwelle(kunde);
+    const kap = Spiel.kundenakte.kapitel(kunde).find(x => !x.frei && x.ab === v + 1);
+    if (kap && sw && sw.bis - sw.punkte <= 1) return `Morgen: Noch ein sauberer Auftrag bei ${wer(kunde)} – dann wartet Kapitel ${kap.nr}: „${kap.titel}“.`;
+  }
   const n = Spiel.hub.naechster();
   if (n.art !== "leer") return `Morgen wartet ${n.kontakt}${n.kontakt !== n.kunde ? ` (${n.kunde})` : ""}: „${n.titel}“`;
   const b = Spiel.tag.bilanz();

@@ -495,4 +495,23 @@ UI.szene.abspielen(zeilen, {…, form, aufdecken})   // Hotline/Fernwartung: hö
 UI.labor.fernFertig()                               // Sitzungsfenster in den Zustand „getrennt“; aufdecken() hebt die Fernwartung auf (auch beim Überspringen)
 ```
 
+**Vertrauen zahlt aus** (`spiel/kundenakte.js`, § 20 F5 – R4 „jede Belohnung öffnet etwas“):
+
+```js
+Spiel.VERTRAUEN_LOHN = {empfehlung:3, rabatt:4, rabattAnteil:0.2}
+st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stufe früher offen
+st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
+inst.empfehlung = "salon"                           // Auftrag, den eine Empfehlung gebracht hat
+Spiel.kundenakte.empfehlen(von) → Karte {id:"empfehlung", sym, titel, text, warum, aktion:"neu", iid, kunde, von, neu}
+Spiel.kundenakte.empfohlen(id) · .rabatt(kunde) → 0|0.2 (ohne Nebenwirkung) · .belohnungen(kunde) → [{ab, art, da, text}]
+Spiel.kundenakte.nachAbschluss(…) → {…, empfehlung:Karte|null, rabatt:bool}
+Spiel.karriere.kunde(id) → {…, vertragPreisVoll, vertragRabatt, vertragPreis (mit Rabatt)}
+Spiel.karriere.kundeOffen(id)                       // empfohlen: Ruf der Stufe davor genügt
+ergebnis.karten = [Ereignis der ersten Stunde, Empfehlung]   // UI.ereignisse.vormerken – nacheinander, nie zwei auf einmal
+Spiel.hub.ausblick()                                // „Morgen: …“ Folgeauftrag → Notfall → Kapitel (eine saubere Arbeit entfernt) → Postfach → Fertigkeit → Rätsel
+```
+
+- Ab Vertrauen 3 empfiehlt der Kunde einmal weiter: Der nächste noch verschlossene Kunde kommt eine Stufe früher und schickt sofort einen generierten Auftrag; sind alle offen, kommt ein Auftrag des Kunden mit den wenigsten Abschlüssen. In der ersten Stunde wartet die Empfehlung, bis die Folge durch ist. Der Mischer nimmt empfohlene Kunden eine Stufe früher in die Generatoren auf.
+- Ab Vertrauen 4 kostet der Wartungsvertrag bei diesem Kunden 20 % weniger (Shop-Eintrag, Kauf, Kundenkarte).
+
 **Rauchtest der Oberfläche** (`tools/rauch.py`, § 20 F8): siehe § 2.

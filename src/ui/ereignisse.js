@@ -6,7 +6,7 @@
    Erste Stunde (§ 20 F3): Anruf („Das Telefon klingelt“, Knopf „Rangehen ▸“) und Weiterempfehlung („Ansehen ▸“) kommen
    als Karte, sobald das Ergebnis geschlossen ist – UI.ereignisse.vormerken(e) wartet, bis kein Dialog mehr offen ist. */
 UI.ereignisse = (() => {
-  const E = {karte: null, wartend: null, t: null};
+  const E = {karte: null, wartend: [], t: null};
   function pruefen(){
     if (UI.app.aktuell !== "labor" || (UI.modus && UI.modus() === "leiste") || E.karte) return;
     const inst = UI.spiel && UI.spiel.inst;
@@ -37,13 +37,13 @@ UI.ereignisse = (() => {
   }
   function zu(){ if (E.karte) E.karte.remove(); E.karte = null; }
   /* Karte zeigen, sobald kein Dialog (Ergebnis) und keine Funktionsprobe mehr läuft */
-  function vormerken(e){ if (!e) return; E.wartend = e; warten(); }
+  function vormerken(e){ if (!e) return; E.wartend.push(e); warten(); }
   function warten(){
     clearTimeout(E.t);
-    if (!E.wartend) return;
-    if (document.querySelector(".sp-overlay") || (UI.szene && UI.szene.laeuft && UI.szene.laeuft())) { E.t = setTimeout(warten, 500); return; }
-    const e = E.wartend; E.wartend = null;
-    zeigen(e);
+    if (!E.wartend.length) return;
+    /* erst, wenn kein Dialog und keine Probe mehr läuft – und die vorige Karte weg ist (nie zwei auf einmal) */
+    if (E.karte || document.querySelector(".sp-overlay") || (UI.szene && UI.szene.laeuft && UI.szene.laeuft())) { E.t = setTimeout(warten, 500); return; }
+    zeigen(E.wartend.shift());
   }
   Bus.an("ui-bereit", () => setInterval(pruefen, 20000));
   Bus.an("labor-geladen", () => { if (!E.karte || !E.karte.classList.contains("ev-anruf")) zu(); });

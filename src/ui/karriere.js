@@ -23,6 +23,7 @@ UI.karriere = (() => {
         offen ? akteZeile(id, c) : null,
         offen ? h("div", {class: "kr-kunde-fuss"},
           h("span", {class: "sp-chip"}, "Stufe " + k.stufe),
+          Spiel.kundenakte.empfohlen(id) ? h("span", {class: "sp-chip uebt", title: "Durch eine Empfehlung eine Stufe früher"}, `💬 empfohlen von ${Spiel.kundenDaten(Spiel.kundenakte.empfehlungen()[id].von).name}`) : null,
           sterne && sterne.anzahl ? h("span", {class: "sp-chip geld", title: `${sterne.anzahl} Tickets`}, `★ ${String(sterne.schnitt ?? sterne.mittel ?? "").replace(".", ",")}`) : null,
           vertrag ? h("span", {class: "kr-ampel " + a[0]}, a[1] + " Vertrag: " + a[2] + ` · ${eur(k.euroProStunde)} €/h`) :
             shopEintrag ? h("button", {type: "button", class: "knopf klein" + (shopEintrag.zustand === "kaufbar" ? " primaer" : ""), disabled: shopEintrag.zustand !== "kaufbar", title: shopEintrag.grund || "",
@@ -59,7 +60,10 @@ UI.karriere = (() => {
       h("header", {class: "ka-kopf"}, h("span", {class: "sp-kunde-sym gross"}, k.symbol),
         h("div", {}, h("h2", {}, k.name), h("p", {class: "sp-leise"}, [k.ansprechpartner, k.rolle].filter(Boolean).join(", ")),
           h("p", {class: "ka-vertrauen"}, h("span", {class: "ka-herzen gross"}, herzen(v)), ` Vertrauen ${v}/5`,
-            schwelle ? h("small", {class: "sp-leise"}, ` · noch ${schwelle.bis - schwelle.punkte} saubere ${schwelle.bis - schwelle.punkte === 1 ? "Arbeit" : "Arbeiten"} bis ${v + 1}`) : null))),
+            schwelle ? h("small", {class: "sp-leise"}, ` · noch ${schwelle.bis - schwelle.punkte} saubere ${schwelle.bis - schwelle.punkte === 1 ? "Arbeit" : "Arbeiten"} bis ${v + 1}`) : null),
+          /* Vertrauen zahlt aus (§ 20 F5): was es geöffnet hat und was als Nächstes kommt */
+          h("ul", {class: "ka-lohn"}, Spiel.kundenakte.belohnungen(id).map(b => h("li", {class: b.da ? "da" : v >= b.ab ? "bald" : "zu"},
+            h("span", {class: "ka-herzen", "aria-hidden": "true"}, "♥".repeat(b.ab)), " ", b.text, b.da ? " ✓" : v >= b.ab ? " – beim nächsten Auftrag" : ""))))),
       h("section", {class: "ka-block"}, h("h3", {}, "Netz-Atlas ", h("small", {}, atlas ? (atlas.komplett ? "✓ komplett betreut" : `${atlas.hell.length} von ${atlas.gesamt.length} Geräten betreut`) : "")),
         h("p", {class: "sp-leise"}, "Hell sind die Geräte, an denen du schon gearbeitet hast."), bild ? h("div", {class: "ka-atlas-rahmen"}, bild) : null),
       h("section", {class: "ka-block"}, h("h3", {}, "Geschichten"),

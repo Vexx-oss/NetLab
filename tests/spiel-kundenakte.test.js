@@ -88,4 +88,52 @@ gruppe("Spiel: Kundenakte", () => {
     Spiel.kundenakte.antworten("praxis", 1, g.frage.richtig);
     erwarte.gleich(Spiel.st.ruf, ruf + 1, "nur beim ersten Mal");
   }));
+
+  /* § 20 F5: Vertrauen zahlt aus – ab 3 eine Empfehlung (nächster verschlossener Kunde eine Stufe früher), ab 4 −20 % Wartung */
+  const stufe1 = fn => kapsel(() => { Spiel._st.stufe = 1; Spiel._st.ruf = 0; fn(); });
+  pruefe("Vertrauen 3: Empfehlung – das Schreibbüro kommt eine Stufe früher und schickt gleich einen Auftrag; nur einmal", stufe1(() => {
+    erwarte.falsch(Spiel.karriere.kundeOffen("schreibbuero"), "vorher zu (Ruf 10 nötig)");
+    erwarte.falsch(Spiel.mischer.kandidaten().some(k => k.kunde === "schreibbuero"), "vorher keine Aufträge vom Schreibbüro");
+    Spiel.kundenakte.daten("salon").punkte = 4;                                   /* Vertrauen 2, ein Glanzauftrag fehlt */
+    const erg = loesen("salon-02");
+    const e = erg.kundenakte.empfehlung;
+    erwarte.wahr(erg.sterne >= 4.5 && e && e.neu && e.kunde === "schreibbuero" && e.von === "salon", JSON.stringify(e));
+    erwarte.wahr(/^Mira Kaya hat dich an Konrad Albers \(Schreibbüro Wortgenau\) empfohlen/.test(e.text), e.text);
+    erwarte.wahr(Spiel.st.ruf < 10 && Spiel.karriere.kundeOffen("schreibbuero"), "offen mit Ruf " + Spiel.st.ruf);
+    const auftrag = Spiel.instanz(e.iid);
+    erwarte.wahr(auftrag && auftrag.kunde === "schreibbuero" && auftrag.empfehlung === "salon", "Auftrag im Postfach");
+    erwarte.wahr(erg.karten.includes(e), "Karte nach dem Ergebnis");
+    erwarte.wahr(Spiel.mischer.kandidaten().some(k => k.kunde === "schreibbuero" && k.gen), "der Mischer kennt jetzt das Schreibbüro");
+    erwarte.wahr(Spiel.kundenakte.belohnungen("salon")[0].da, "Akte: Empfehlung erledigt");
+    erwarte.gleich(loesen("salon-03").kundenakte.empfehlung, null, "jeder Kunde empfiehlt nur einmal");
+  }));
+
+  pruefe("in der ersten Stunde wartet die Empfehlung, danach kommt sie beim nächsten Auftrag dieses Kunden", stufe1(() => {
+    Spiel._st.ersteStunde = {fertig: false, ereignis: false};
+    Spiel.kundenakte.daten("salon").punkte = 4;
+    erwarte.gleich(loesen("salon-03").kundenakte.empfehlung, null, "erste Stunde: noch nicht");
+    Spiel._st.ersteStunde.fertig = true;
+    erwarte.wahr(loesen("salon-04").kundenakte.empfehlung, "danach");
+  }));
+
+  pruefe("Vertrauen 4: Wartungsvertrag 20 % günstiger – im Shop-Eintrag, den auch der Kauf bezahlt", stufe1(() => {
+    const voll = Spiel.karriere.kunde("salon").vertragPreis;
+    erwarte.gleich(Spiel.karriere.kunde("salon").vertragRabatt, 0, "Vertrauen 1: kein Rabatt");
+    Spiel.kundenakte.daten("salon").punkte = Spiel.VERTRAUEN_SCHWELLEN[3];         /* Vertrauen 4 */
+    const k = Spiel.karriere.kunde("salon");
+    erwarte.wahr(k.vertragRabatt === 0.2 && k.vertragPreis === Math.round(voll * 0.8) && k.vertragPreisVoll === voll, JSON.stringify([voll, k.vertragPreis]));
+    const e = Spiel.shop.liste().find(x => x.id === "vertrag:salon");
+    erwarte.wahr(e.preis === k.vertragPreis && /−20 % für Vertrauen 4/.test(e.text), JSON.stringify(e));
+    erwarte.gleich(Spiel.kundenakte.daten("baeckerei").punkte, 0, "der Preis fragt keine Akte an (keine Nebenwirkung)");
+  }));
+
+  pruefe("Feierabend-Ausblick: Folgeauftrag vor Notfall vor Kapitel vor Postfach („Morgen: …“)", stufe1(() => {
+    Spiel.kundenakte.daten("salon").punkte = 1;                                     /* eine saubere Arbeit bis Vertrauen 2 = Kapitel 1 */
+    erwarte.wahr(/^Morgen: Noch ein sauberer Auftrag bei Mira Kaya – dann wartet Kapitel 1: „/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
+    const n = Spiel.instanzErstellen({ticketId: "baeckerei-01", quelle: "notfall", frist: jetzt() + 20 * 60e3});
+    erwarte.wahr(/^Morgen zuerst: Notfall bei Bäckerei Kornblume/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
+    Spiel.varianten.schulden().push({id: "s1", ticket: "salon-05", kunde: "salon", titel: "Das Lämpchen blinkt nicht", seit: 0, faellig: 3, folge: null, erledigt: false});
+    erwarte.wahr(/^Morgen: Das Provisorium bei Mira Kaya \(„Das Lämpchen blinkt nicht“\) meldet sich in etwa 3 Aufträgen\.$/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
+    Spiel.instanzEntfernen(n.iid);
+  }));
 });

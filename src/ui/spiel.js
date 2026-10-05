@@ -176,6 +176,8 @@ UI.spiel = (() => {
     if (a.neuHell.length) teile.push(`🗺 ${a.neuHell.length} ${a.neuHell.length === 1 ? "Gerät" : "Geräte"} im Netz-Atlas (${a.hell}/${a.gesamt}${a.komplett ? ", komplett betreut" : ""})`);
     if (a.vertrauen.nachher > a.vertrauen.vorher) teile.push(`♥ Vertrauen ${a.vertrauen.nachher}/5`);
     if (a.kapitel) teile.push(`📖 Neue Geschichte: „${a.kapitel.titel}“ (Kunden → Akte)`);
+    if (a.empfehlung) teile.push(`💬 ${a.empfehlung.neu ? `Empfehlung: ${Spiel.kundenDaten(a.empfehlung.kunde).name} kommt eine Stufe früher` : "Empfehlung an einen anderen Kunden"}`);
+    if (a.rabatt) teile.push(`🏷 Wartungsvertrag −${Math.round(Spiel.VERTRAUEN_LOHN.rabattAnteil * 100)} %`);
     return teile.length ? h("p", {class: "sp-akte-zeile"}, teile.join(" · ")) : null;
   }
   /* E1 „Provisorium oder sauber?“: zwei Karten im Brief; nach der Wahl eine Zeile (bis zur ersten Abnahme änderbar) */
@@ -382,7 +384,7 @@ UI.spiel = (() => {
     } catch (e) { console.error("Funktionsprobe", e); }
     finally { S.probe = false; S.fertig = null; aufdecken(); }
     ergebnisZeigen(erg);
-    if (erg.ereignis) UI.ereignisse?.vormerken(erg.ereignis);      /* erste Stunde: Anruf oder Weiterempfehlung, wenn das Ergebnis zu ist */
+    for (const k of erg.karten || []) UI.ereignisse?.vormerken(k);   /* erste Stunde (Anruf, Weiterempfehlung) und Empfehlung: Karten, wenn das Ergebnis zu ist */
   }
   /* „Dein Weg“: was der Spieler getan hat – Diagnose (Ping), Eingriffe (Verlauf), Probe */
   function wegMerken(inst, eintrag){
@@ -499,10 +501,10 @@ UI.spiel = (() => {
     if ((dex.titel || []).length) z.push(h("p", {class: "sp-zeile"}, "🏆 ", h("b", {}, "Ehrentitel: "), dex.titel.join(" · ")));
     return z;
   }
-  /* Tagesziel: eine Zeile mit offenem Faden für morgen (die ausführliche Bilanz steht im Hub „Heute“) */
+  /* Tagesziel: eine Zeile mit offenem Faden für morgen (Folgeauftrag, Notfall, Kapitel … – Spiel.hub.ausblick; die Bilanz steht im Hub) */
   function feierabendZeile(){
-    const b = Spiel.tag.bilanz(), morgen = b.morgenFaellig[0] ? Spiel.skill(b.morgenFaellig[0]).name : null;
-    return h("p", {class: "sp-zeile"}, "🎉 ", h("b", {}, "Tagesziel geschafft"), ` – ${b.tickets} Aufträge heute` + (morgen ? ` · morgen fällig: ${morgen}` : ""));
+    const b = Spiel.tag.bilanz();
+    return h("p", {class: "sp-zeile"}, "🎉 ", h("b", {}, "Tagesziel geschafft"), ` – ${b.tickets} Aufträge heute · ${Spiel.hub.ausblick()}`);
   }
   /* Merke: Einstieg erklärt (bis drei Sätze), AP1/AP2 bekommen nur die Regel – den letzten Satz der Erklärung */
   function merkeText(def, niveau){

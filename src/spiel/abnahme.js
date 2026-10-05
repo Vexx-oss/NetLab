@@ -138,7 +138,9 @@ Spiel.abschliessen = function(inst, abnahme){
     naechstes: naechstes ? naechstes.iid : null,
     dex, raetsel, verdacht, hotline, schuld, kundenakte,
     ereignis: Spiel.ersteStunde ? Spiel.ersteStunde.abholen() : null,     /* erste Stunde: Anruf oder Weiterempfehlung als Karte */
+    karten: [],                                                           /* Karten nach dem Ergebnis (Oberfläche), unten gefüllt */
   };
+  ergebnis.karten = [ergebnis.ereignis, kundenakte && kundenakte.empfehlung].filter(Boolean);
   Spiel.geaendert("ticket-geloest");
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});
   return ergebnis;

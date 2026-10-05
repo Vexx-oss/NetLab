@@ -7,7 +7,13 @@
                 Es sinkt nie (R6: keine Strafe), es wächst nur langsamer.
      Kapitel    drei kurze Geschichten je Kunde (DATEN.geschichten), frei ab Vertrauen 2, 3, 4; je eine Frage (+1 Ruf beim
                 ersten richtigen Versuch).
-     Baustellen offene Provisorien (Spiel.varianten.schulden), bis ihr Folgeauftrag erledigt ist. */
+     Baustellen offene Provisorien (Spiel.varianten.schulden), bis ihr Folgeauftrag erledigt ist.
+   Vertrauen zahlt aus (Design § 20, F5 – R4 „jede Belohnung öffnet etwas“):
+     ab 3  Empfehlung: Der nächste noch verschlossene Kunde kommt eine Stufe früher (braucht nur den Ruf der Stufe davor)
+           und schickt gleich einen ersten Auftrag; sind alle offen, bringt die Empfehlung einen Auftrag eines anderen Kunden.
+           Jeder Kunde empfiehlt einmal; in der ersten Stunde wartet die Empfehlung, bis die Folge durch ist.
+     ab 4  Wartungsvertrag bei diesem Kunden 20 % günstiger.
+     st.empfehlungen = { [kunde]: {von, tag} } */
 Spiel.VERTRAUEN_SCHWELLEN = [0, 2, 5, 9, 14];        /* Punkte für Vertrauen 1 … 5 */
 Spiel.kundenakte = {};
 Spiel.kundenakte.alle = (st = Spiel.st) => (st.kundenakte && typeof st.kundenakte === "object" && !Array.isArray(st.kundenakte) ? st.kundenakte : (st.kundenakte = {}));
@@ -23,6 +29,46 @@ Spiel.kundenakte.vertrauen = kunde => Spiel.kundenakte.vertrauenAus(Spiel.kunden
 Spiel.kundenakte.naechsteSchwelle = function(kunde){
   const p = Spiel.kundenakte.daten(kunde).punkte, s = Spiel.VERTRAUEN_SCHWELLEN.find(x => x > p);
   return s == null ? null : {punkte: p, bis: s};
+};
+
+/* ---- Vertrauen zahlt aus ---- */
+Spiel.VERTRAUEN_LOHN = {empfehlung: 3, rabatt: 4, rabattAnteil: 0.2};
+Spiel.kundenakte.empfehlungen = (st = Spiel.st) => (st.empfehlungen && typeof st.empfehlungen === "object" && !Array.isArray(st.empfehlungen) ? st.empfehlungen : (st.empfehlungen = {}));
+Spiel.kundenakte.empfohlen = (id, st = Spiel.st) => !!Spiel.kundenakte.empfehlungen(st)[id];
+/* ohne Nebenwirkung (legt keine Akte an) – der Vertragspreis fragt das für jeden Kunden */
+Spiel.kundenakte.rabatt = kunde => { const a = Spiel.kundenakte.alle()[kunde]; return a && Spiel.kundenakte.vertrauenAus(a.punkte || 0) >= Spiel.VERTRAUEN_LOHN.rabatt ? Spiel.VERTRAUEN_LOHN.rabattAnteil : 0; };
+/* Was das Vertrauen bei diesem Kunden schon geöffnet hat und was als Nächstes kommt (für die Akte) */
+Spiel.kundenakte.belohnungen = function(kunde){
+  const v = Spiel.kundenakte.vertrauen(kunde), d = Spiel.kundenakte.daten(kunde), L = Spiel.VERTRAUEN_LOHN;
+  const an = Object.entries(Spiel.kundenakte.empfehlungen()).find(([, e]) => e.von === kunde);
+  return [
+    {ab: L.empfehlung, art: "empfehlung", da: v >= L.empfehlung && !!d.empfohlen, text: an ? `Empfehlung an ${Spiel.kundenDaten(an[0]).name}` : "Empfehlung an einen neuen Kunden"},
+    {ab: L.rabatt, art: "rabatt", da: v >= L.rabatt, text: `Wartungsvertrag −${Math.round(L.rabattAnteil * 100)} %`},
+  ];
+};
+/* Empfehlung aussprechen: nächster verschlossener Kunde (eine Stufe früher) oder Auftrag eines anderen Kunden → Karte */
+Spiel.kundenakte.empfehlen = function(von){
+  const st = Spiel.st, E = Spiel.kundenakte.empfehlungen(st), K = Spiel.karriere;
+  const ids = K.kundenIds().filter(id => id !== von && !K.kunde(id).spaeter && Spiel.vorlagen._fuerKunde[id]);
+  const neu = ids.find(id => !K.kundeOffen(id) && !E[id]) || null;
+  const zahl = id => (st.erledigt || []).filter(e => e.kunde === id).length;
+  const ziel = neu || ids.filter(id => K.kundeOffen(id)).sort((a, b) => zahl(a) - zahl(b))[0];
+  if (!ziel) return null;
+  if (neu) E[neu] = {von, tag: heute()};
+  const z = Zufall(`empfehlung:${von}:${ziel}:${st.naechsteIid}`);
+  const formen = Object.keys(Spiel.formGeneratoren || {}).filter(f => (Spiel.FORM_AB[f] || 1) <= Math.max(st.stufe, K.kunde(ziel).stufe - (neu ? 1 : 0)));
+  let inst = null;
+  for (const form of z.mischen(formen.length ? formen : ["forensik"])) {
+    try { inst = Spiel.instanzErstellen({gen: {form, seed: 1 + z.zahl(1000000), opts: {kunde: ziel}}, quelle: "generiert", kunde: ziel}); break; } catch (e) { inst = null; }
+  }
+  if (inst) inst.empfehlung = von;
+  const kv = Spiel.kundenDaten(von), kz = Spiel.kundenDaten(ziel);
+  const wer = (kv.ansprechpartner || {}).name || kv.name, an = (kz.ansprechpartner || {}).name || kz.name;
+  Spiel.speichern();
+  return {id: "empfehlung", sym: "💬", titel: "Empfehlung", aktion: inst ? "neu" : null, iid: inst ? inst.iid : null, kunde: ziel, von, neu: !!neu,
+    text: neu ? `${wer} hat dich an ${an} (${kz.name}) empfohlen. ${kz.name} kommt eine Stufe früher${inst ? " – der erste Auftrag liegt im Postfach" : ""}.`
+      : `${wer} hat dich bei ${an} (${kz.name}) empfohlen${inst ? " – ein Auftrag liegt im Postfach" : ""}.`,
+    warum: `Vertrauen ${Spiel.VERTRAUEN_LOHN.empfehlung} bei ${kv.name}: Zufriedene Kunden empfehlen weiter – im IT-Service die wichtigste Werbung.`};
 };
 
 /* Das dokumentierte Netz des Kunden: seine Vorlage mit dem Seed seines ersten Auftrags (gleich für alle Spieler) */
@@ -69,8 +115,15 @@ Spiel.kundenakte.nachAbschluss = function(inst, def, {sterne = 0, lohn = {}} = {
   }
   const nachher = Spiel.kundenakte.vertrauenAus(d.punkte);
   const kapitel = Spiel.kundenakte.kapitel(kunde).filter(k => k.frei).slice(freiVorher)[0] || null;
+  /* Vertrauen zahlt aus: ab 3 einmal eine Empfehlung (nicht mitten in der ersten Stunde), ab 4 der Rabatt (nur Meldung) */
+  let empfehlung = null;
+  if (nachher >= Spiel.VERTRAUEN_LOHN.empfehlung && !d.empfohlen && !(Spiel.ersteStunde && Spiel.ersteStunde.aktiv())) {
+    d.empfohlen = true;
+    empfehlung = Spiel.kundenakte.empfehlen(kunde);
+  }
+  const rabatt = vorher < Spiel.VERTRAUEN_LOHN.rabatt && nachher >= Spiel.VERTRAUEN_LOHN.rabatt;
   return {kunde, neuHell, hell: d.atlas.length, gesamt: gesamt.length, komplett: gesamt.length > 0 && gesamt.every(id => d.atlas.includes(id)),
-    vertrauen: {vorher, nachher}, kapitel: kapitel && {nr: kapitel.nr, titel: kapitel.titel}};
+    vertrauen: {vorher, nachher}, kapitel: kapitel && {nr: kapitel.nr, titel: kapitel.titel}, empfehlung, rabatt};
 };
 
 /* ---- Kapitel ---- */
