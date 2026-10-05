@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2), Welle 2 (B + C) und E1 gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard 36,1 von 60 – Ziel +50 % heißt Summe ≥ 39,0 (Ist 26,0); weiter E2 → D → F (G Reserve)
+status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard 38,0 von 60 (Ist 26,0, Ziel 39,0 = +50 %) – HALTEPUNKT nach E2; danach D → F (G Reserve)
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -16,6 +16,9 @@ status: Welle 1 (S1 + S2), Welle 2 (B + C) und E1 gebaut 04./05.10.2026, Zweig a
 
 > [!success] Stand 04.10.2026: Welle 2 „Detektiv“ fertig (Phasen B und C), im echten Programm abgenommen
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
+
+> [!warning] HALTEPUNKT 05.10.2026 nach E2 – Scorecard 38,0 von 60 (Ziel 39,0 nicht ganz erreicht)
+> E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Was die letzten 1,0 Punkte bringen könnte und warum ich nicht weitergebaut habe: [[#19 · Stand nach E2 – Haltepunkt]]. **D beginnt erst nach dem Anspielen.**
 
 > [!success] Stand 05.10.2026: E1 „Formen, Wahl, Ereignisse“ gebaut und im echten Programm abgenommen
 > Sieben Auftragsformen (Störung, Projekt, Terminal, Fernwartung, Plan-Audit, Adressplan, Hotline) · Postfach als Wahl mit Mischer (nie dreimal dieselbe Form, 1000 Postfächer im Test) · „Provisorium oder sauber?“ mit Folgeauftrag · sechs Ereignisse mit Erklärsatz. Abnahme: sechs Aufträge zeigen vier Formen, Stromausfall-Szenario (write memory rettet die Reparatur), Platzbudget hält bei jeder neuen Form. Scorecard 3/4/5/6/7/9/11 neu bewertet: **33,2 → 36,1**. Einzelheiten: [[#18 · Stand nach E1]].
@@ -244,23 +247,23 @@ Passt zu „erst beibringen, dann abfragen“ und macht aus dem Niveau eine echt
 
 Jedes Kriterium wird mit einer **Prüffrage** bewertet (0 = nein, 5 = durchgehend ja). Bewertet wird nach jedem Haltepunkt von dir (oder mir) *am echten Programm*, mit kurzer Begründung in der Notiz.
 
-| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | nach C | nach E1 | Ziel | Hebt vor allem |
-|---|---|---|---:|---:|---:|---:|---:|---:|---|
-| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | – | – | 4,0 | Hub, Akte |
-| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | – | – | 3,8 | 1, 6 |
-| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | **3,3** | **3,4** | 3,6 | 2, 12 |
-| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | **3,3** | **3,4** | 3,6 | 2, 3 |
-| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | – | **3,0** | 3,0 | 5, 9 |
-| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | – | **2,6** | 2,8 | 9, 10 |
-| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | – | **2,3** | 3,0 | 8, 10 |
-| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | **3,2** | – | 3,4 | 3, 11 |
-| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | – | **3,3** | 3,4 | 4, 5 |
-| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | – | – | 1,8 | 5 |
-| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | – | **2,2** | 3,0 | 10 |
-| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | – | – | 3,6 | 7 |
-| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **33,2** | **36,1** | **39,0** | **+50 %** |
+| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | nach C | nach E1 | nach E2 | Ziel | Hebt vor allem |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
+| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | – | – | – | 4,0 | Hub, Akte |
+| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | – | – | – | 3,8 | 1, 6 |
+| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | **3,3** | **3,4** | – | 3,6 | 2, 12 |
+| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | **3,3** | **3,4** | – | 3,6 | 2, 3 |
+| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | – | **3,0** | – | 3,0 | 5, 9 |
+| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | – | **2,6** | **2,8** | 2,8 | 9, 10 |
+| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | – | **2,3** | **2,9** | 3,0 | 8, 10 |
+| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | **3,2** | – | **3,4** | 3,4 | 3, 11 |
+| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | – | **3,3** | **3,4** | 3,4 | 4, 5 |
+| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | – | – | – | 1,8 | 5 |
+| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | – | **2,2** | **3,0** | 3,0 | 10 |
+| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | – | – | – | 3,6 | 7 |
+| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **33,2** | **36,1** | **38,0** | **39,0** | **+50 %** |
 
-*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10; „nach C“ (Ende Welle 2, B + C): 3, 4, 8; „nach E1“: 3, 4, 5, 6, 7, 9, 11. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]], [[#15 · Stand nach S2]] und [[#17 · Stand nach Phase C (Welle 2 fertig)]] und [[#18 · Stand nach E1]].*
+*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10; „nach C“ (Ende Welle 2, B + C): 3, 4, 8; „nach E1“: 3, 4, 5, 6, 7, 9, 11; „nach E2“: 6, 7, 8, 9, 11. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]], [[#15 · Stand nach S2]] und [[#17 · Stand nach Phase C (Welle 2 fertig)]] [[#18 · Stand nach E1]] und [[#19 · Stand nach E2 – Haltepunkt]].*
 
 *Hinweis:* Welle 4 (Netz-Codes, Par, Gürtel, Büro) ist Reserve und hebt vor allem 8, 10 und 11 weiter; sie gehört nicht zur +50 %-Zusage.
 
@@ -712,3 +715,63 @@ Postfach als Wahl · Stromausfall: ungesichert weg · mit write memory gesichert
 
 Fernwartung · Adressplan Zeile für Zeile:
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-13-fernwartung-start.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-14-adressplan-start.png|420]]
+
+---
+
+## 19 · Stand nach E2 – Haltepunkt
+
+*Gebaut und abgenommen am 05.10.2026 (Zweig `ausbau-1.2`, 4 Commits). Im echten Programm per `cdp.py lauf` gespielt, keine JS-Fehler. Bilder und Messdatei: `Nachweise/1.2-E2/`. Tests: **191 grün** (vorher 187). `Programm/Netzwerk-Labor.exe` ist der Stand nach E2.*
+
+### Abnahme
+
+| Messung | Soll | Ergebnis |
+|---|---|---|
+| Atlas leuchtet nach einem Auftrag | ja | „Die Kasse findet niemanden“ (Salon) → Ergebnis „🗺 3 Geräte im Netz-Atlas (3/5)“; Akte: Kasse, Büro-PC, Drucker hell, „3 von 5 Geräten betreut“ |
+| Folgeauftrag nach einem Provisorium | erscheint | „Die Kiste lässt niemanden raus“ als Provisorium (Abschlag × 0,6, „meldet sich in etwa drei Aufträgen wieder“) → nach drei weiteren Abschlüssen „Das Provisorium von neulich: …“ mit Marke „↩ Folgeauftrag“ im Postfach; Akte: „Folgeauftrag liegt im Postfach“ |
+| Kompetenzkarte | 27 Felder mit Nebel | 27 Felder in 6 Regionen, auf Stufe 1 **13 im Nebel** („14 von 27 Feldern sichtbar“) |
+| Kapitel | frei mit Vertrauen, Frage mit Erklärung und Quelle | Im Browser: „Vier Uhr morgens“ (Bäckerei) richtig beantwortet → +1 Ruf, Erklärung + Quelle IEC 62040, Kapitel als gelesen markiert |
+
+### Was gebaut ist
+
+- **Kundenakte** (`spiel/kundenakte.js`, Ansicht „Kunden“ → „Akte ▸“): Netz-Atlas (das dokumentierte Netz des Kunden aus dem Plan-Erzeuger; ein Gerät leuchtet, sobald man dort gearbeitet hat – geändert, geprüft, per Fernwartung betreut, im Audit korrigiert), Vertrauen 1–5 (★ ≥ 4,5 +1, „sauber“ +1, Notfall rechtzeitig +1, Provisorium nichts, sinkt nie), Geschichten, offene Baustellen, letzte Aufträge.
+- **21 Kundengeschichten** (`daten/geschichten.js`): je Kunde drei kurze Kapitel mit wiederkehrenden Figuren (Miras Nichte Lea, Kowalskis Neffe Kevin, Albers' Wartungsbuch, Frau Krämer und Dr. Müller, Timo Brenner und der Seniorchef, Dr. Kessler, Jana Wolff), einem Satz des Seniors als Gegenfrage, einer Frage mit Erklärung und Quelle (BSI IT-Grundschutz, BSI 200-4, DSGVO, RFCs, IEEE, IEC, ETSI, ITIL, SNIA).
+- **Kompetenzkarte** (`spiel/kompetenz.js`, Lernstand): ersetzt die Fertigkeitenliste; Nebel lichtet sich durch neue Stufen und geübte Nachbarn (Reihe in der Region + fachliche Brücken); Klick: Üben oder Nachschlagen.
+- **Ergebnisdialog:** eine Zeile im Block „Dein Weg“ – Atlas, Vertrauen, neue Geschichte.
+
+### Scorecard – neu bewertet (betroffen: 6, 7, 8, 9, 11)
+
+| Kriterium | Wert | Begründung |
+|---|---|---|
+| **11 Figuren & Erzählung** | 2,2 → **3,0** | Kunden sind Personen mit Verlauf: wiederkehrende Figuren über drei Kapitel, eigene Stimme (Hotline, Folgeaufträge, Kapitel), der Senior mit Haltung (Gegenfrage statt Lösung). **Nicht höher:** kurze Szenen statt verzweigter Geschichte, keine Gesichter, das dritte Kapitel braucht rund acht saubere Aufträge beim selben Kunden. |
+| **7 Besitz & Welt** | 2,3 → **2,9** | Man sieht sein Werk wachsen (Atlas je Kunde bis „komplett betreut“), die Welt erinnert sich (Vertrauen, Baustellen, Folgeaufträge, Verlauf). **Nicht 3,0:** Der Atlas ist das feste Kundennetz, nicht das selbst Gebaute; Vertrauen öffnet nur Geschichten – Empfehlungen und Rabatte aus Hebel 10 fehlen. |
+| **8 Meisterschaft sichtbar** | 3,2 → **3,4** | Die Kompetenzkarte zeigt auf einen Blick, was man kann (Stufen je Feld) und was als Nächstes aufgeht (Nebel, „ab Stufe n“). Sie macht vorhandenes Können sichtbar, neue Meisterschafts-Mechanik (Par, Gürtel) gibt es erst in Welle 4. |
+| **6 Bedeutsame Entscheidungen** | 2,6 → **2,8** | Die Wahl „Provisorium oder sauber?“ hat jetzt eine sichtbare zweite Folge: Vertrauen wächst nur mit sauberer Arbeit, die Baustelle steht in der Akte. |
+| **9 Sitzungsbogen & Rückkehrgrund** | 3,3 → **3,4** | Lange Fäden: die nächste Geschichte bei Vertrauen n, der Atlas, der noch nicht komplett ist. Der Feierabend-Ausblick nennt sie noch nicht. |
+
+**Summe 36,1 → 38,0 (+46 % gegenüber 26,0).** Das Ziel 39,0 ist **nicht ganz erreicht**. Ehrlich gerechnet fehlen die letzten Zehntel dort, wo E nicht hinreicht: 1 Orientierung (3,8 statt 4,0), 2 Spielgefühl (3,5 statt 3,8 – die neuen Formen haben keine eigene Funktionsprobe), 3 Flow (3,4 statt 3,6 – kein automatischer Flow-Regler), 4 Entdeckung (3,4 statt 3,6 – mehr Fehlerarten kommen mit D), 10 Klasse (1,6 statt 1,8 – Netz-Codes sind Welle 4).
+
+### Warum Haltepunkt statt weiterbauen
+
+Der Auftrag lautete: halten, sobald die Scorecard ehrlich ≥ 39,0 ist **oder** E2 fertig ist. E2 ist fertig. Die naheliegenden nächsten Hebel wären klein und gezielt – Vertrauen mit Folgen (Empfehlung, kleiner Rabatt), Feierabend-Ausblick mit offenen Fäden, eine kurze Funktionsprobe für Fernwartung, Adressplan und Audit, der Flow-Regler aus Hebel 12 –, aber das gehört nach dem Anspielen entschieden, nicht vorher. D (DHCP/DNS-Tiefe) habe ich wie verlangt nicht angefangen.
+
+### Aufgefallen und gleich behoben
+
+- Der Atlas wurde in voller Seitenbreite gezeichnet (die Größenregel des Netzplans gilt nur im Plan-Container) – jetzt in natürlicher Planbreite.
+- Die richtige Antwort im Kapitel-Dialog war nach dem Klick nicht hervorgehoben (das Aussehen deaktivierter Knöpfe überdeckte es).
+- Ein Test der Kompetenzkarte hatte sich verrechnet (ein geübtes Feld lichtet alle Nachbarn, nicht nur eines) – jetzt aus der Nachbarschaft berechnet.
+
+### Offen (ehrlich)
+
+- Vertrauen hat außer Geschichten noch keine Folgen (Empfehlungen, Rabatte).
+- Für „Planwerk Architekten“ (Stufe 6) gibt es noch keine Aufträge – die drei Geschichten sind geschrieben, aber unerreichbar, bis Storage kommt.
+- Der Atlas ist hoch (Ebenen-Layout); auf kleinen Bildschirmen muss man scrollen.
+- Die Abnahme lief mit Lösung per Skript; Formen, Kunden und Abläufe stammen aus dem echten Spiel.
+
+### Bildschirmfotos
+
+Ergebnis mit Atlas-Zeile · Akte mit hellen Geräten:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-1-ergebnis-atlas.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-2-akte-atlas.png|420]]
+
+Provisorium im Ergebnis · Folgeauftrag im Postfach · Kompetenzkarte:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-3-ergebnis-provisorium.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-4-postfach-folgeauftrag.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E2/e2-1366-5-kompetenzkarte.png|560]]
