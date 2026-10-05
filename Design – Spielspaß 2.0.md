@@ -18,7 +18,7 @@ status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zwe
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
 
 > [!info] In Arbeit 05.10.2026: Auftrag „P“ (Politur und Bindung) aus der unabhängigen Prüfung § 20
-> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Stand: [[#21 · Auftrag P – Stand]].
+> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Punkt 2 fertig: kuratierte erste Stunde (Anruf, Weiterempfehlung). Stand: [[#21 · Auftrag P – Stand]].
 
 > [!warning] HALTEPUNKT 05.10.2026 nach E2 – Scorecard 38,0 von 60 (Ziel 39,0 nicht ganz erreicht)
 > E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Was die letzten 1,0 Punkte bringen könnte und warum ich nicht weitergebaut habe: [[#19 · Stand nach E2 – Haltepunkt]]. **D beginnt erst nach dem Anspielen.**
@@ -853,7 +853,7 @@ Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswer
 | Punkt | Inhalt | Stand |
 |---|---|---|
 | 1 Hygiene (F1, F2, F8) | Postfach schmal, Sitzungsfenster Fernwartung, Punktlinien, `tools/rauch.py`, Klassen | ✅ fertig |
-| 2 Kuratierte erste Stunde (F3) | feste Folge der ersten sechs Aufträge | offen |
+| 2 Kuratierte erste Stunde (F3) | feste Folge der ersten sechs Aufträge | ✅ fertig |
 | 3 Probe für jede Form (F4) | Hotline, Fernwartung, Audit, Adressplan | offen |
 | 4 Vertrauen zahlt aus (F5) | Empfehlung ab 3, −20 % Wartung ab 4, Feierabend-Ausblick | offen |
 | 5 Flow-Regler (F6) | Gerüst nach zwei Fehlschlägen, Verwicklung nach drei Glanzergebnissen | offen |
@@ -867,3 +867,13 @@ Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswer
 - **`tools/rauch.py` (F8):** baut `web/index.html`, startet Edge ohne Fenster mit frischem Profil und prüft **11 Ansichten × 3 Breiten** (1366, 960, 720 px): Hauptaktion ohne Scrollen sichtbar und anklickbar, kein seitliches Scrollen außer in Bereichen, die es absichtlich tun, nichts ragt rechts hinaus, keine JS-Fehler; Fernwartung zusätzlich Sitzungsfenster sichtbar, Terminal ≥ 55 %. Aufruf `sh tools/test.sh --rauch` (Node-Tests → Klassen-Abgleich → Rauchtest), `--exe` prüft das echte Programm. **Gegenprobe:** ein versteckter „Annehmen“-Knopf im Blatt und ein 900 px breites Element im Hub werden erkannt. Ergebnis **33/33 grün**.
 - **Klassen ohne Regel:** `np-hand` ist eine Filter-ID (das Werkzeug zählt IDs, `url(#…)` und Bus-Namen jetzt nicht mehr), `lk-wert` und `sp-demo-kopf` haben eine Regel, echte JS-Marken stehen in einer Liste. `tools/klassen.py` meldet **0** und bricht die Testkette bei Treffern ab.
 - **Geprüft, kein Fehler:** Die Kundenstimme der Funktionsprobe erscheint erst, nachdem der Paketweg abgelaufen ist – im Hintergrund-Browserfenster laufen Animationen nicht, deshalb war sie in der Prüfung nicht zu sehen (Abnahme im echten Programm folgt). `Spiel.ereignisse.ausloesen("stromausfall")` lieferte `null`, weil ein Stromausfall einen laufenden Auftrag beim Kunden braucht; Punkt 2 macht den Aufruf ohne Auftrag bequemer.
+
+### Punkt 2 · Kuratierte erste Stunde
+
+- **Folge:** Kabel (Einstieg) · Störung („Die Kasse findet niemanden“) · **Hotline** – das Telefon klingelt („Mira ruft an: Mal geht’s, mal nicht“) · **Fernwartung** · „Provisorium oder sauber?“ („Das Lämpchen blinkt nicht“) · **Weiterempfehlung** als erstes Ereignis, die einen **Plan-Audit** bei der Bäckerei bringt. Danach übernimmt der Mischer.
+- **Wahl bleibt:** Im Postfach liegen immer die nächsten **zwei** offenen Schritte, zum Beispiel nach dem Kabel „Störung oder Anruf?“. Darum kommt die Weiterempfehlung schon nach dem **vierten** Abschluss (sobald sie einer der nächsten zwei Schritte ist) – sonst läge nach dem vierten Auftrag nur noch ein einziges Angebot da. Das ist die eine bewusste Abweichung von der Reihenfolge in § 20.
+- **Anruf statt Brief:** Nach dem ersten Auftrag erscheint, sobald das Ergebnis geschlossen ist, die Karte **„☎ Das Telefon klingelt – Mira Kaya (Salon Lockenwerk) ruft an.“** mit grünem „Rangehen ▸“ und einem kurzen Klingelton; im Postfach trägt der Auftrag die Marke „☎ klingelt“, im Hub heißt die Hauptkarte „Mira Kaya ruft an“ mit „Rangehen ▸“.
+- **Erstes Ereignis harmlos:** Zufällige Ereignisse ruhen, bis die Weiterempfehlung kam – die Karte sagt jetzt richtig herum, wer wen empfiehlt: „Mira Kaya hat dich weiterempfohlen: Heinz Kowalski (Bäckerei Kornblume) meldet sich mit einem Auftrag. +1 Ruf.“ (Vorher ließ E1 den *neuen* Kunden empfehlen – behoben.)
+- **Wer bekommt sie:** nur ein neuer Spielstand. Alte Spielstände mit erledigten Aufträgen spielen weiter wie bisher. Fehlen die Aufträge der Folge, schaltet sie sich ab.
+- **Geprüft:** Test „die ersten sechs Abschlüsse“ ergibt Störung · Störung · Hotline · Fernwartung · Störung · Plan-Audit = **4 Formen**, Karten nach Abschluss 1 (Anruf) und 4 (Weiterempfehlung), danach füllt der Mischer. Im Browser von frischem Spielstand bis zur Weiterempfehlung durchgespielt. 195/195 Tests, `rauch.py` 33/33. Die Abnahme im echten Programm kommt am Ende von P.
+- **Nebenbei:** `Spiel.ereignisse.ausloesen("stromausfall")` nimmt ohne Angabe den offenen Auftrag – der `null` aus der Prüfung (§ 20) kam daher, dass ohne Auftrag kein Kunde mit Netz da war.
