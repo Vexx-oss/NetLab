@@ -1,6 +1,6 @@
 "use strict";
 /* ---------- Hub „Heute“: die ruhige Startseite (Design – Spielspaß 2.0, Hebel 4; Architektur § 9.3) ----------
-   Datumszeile und Serie · eine Karte „Nächster Auftrag“ mit dem einzigen Hauptknopf (darunter „oder:“ zwei weitere als kleine Zeilen) · drei Kacheln
+   Datumszeile und Serie · eine Karte mit dem nächsten Auftrag (oben der Kunde) und dem einzigen Hauptknopf (darunter „oder:“ zwei weitere als kleine Zeilen) · drei Kacheln
    (Aufwärmen · Tagesrätsel · Post bzw. Fehlerdex) · nach dem Tagesziel Feierabend mit Bilanz und Ausblick.
    Platzbudget R5: ≤ 40 Wörter, genau ein Hauptknopf. Dazu: Aufwärmen (3 Mini-Karten), Tagesrätsel-Ergebnis
    zum Kopieren, Fehlerdex (Abschnitt im Lernstand) und das Spieltagebuch (Einstellungen, Lernstand). Präfix hb-, dx-. */
@@ -45,9 +45,9 @@ UI.hub = (() => {
       : h("section", {class: "hb-auftrag" + (n.klingelt ? " klingelt" : ""), style: {"--k": `var(${n.farbe || "--accent"})`}},
           h("span", {class: "sp-kunde-sym gross"}, n.klingelt ? "☎" : n.symbol),
           h("div", {class: "hb-auftrag-text"},
-            h("small", {}, n.klingelt ? `${n.kontakt} ruft an` : n.art === "weiter" ? "Weiter mit" : "Nächster Auftrag"),
+            h("small", {}, n.klingelt ? `${n.kontakt} ruft an` : n.art === "weiter" ? `Weiter mit · ${n.kunde}` : n.kunde),   /* wer – der Name steht nur einmal (Platzbudget) */
             h("h3", {}, n.titel),
-            h("p", {}, `${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).sym} ${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).titel} · ${n.kunde} · ~${n.minuten} min · ${eur(n.euro)} €`)),
+            h("p", {}, `${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).sym} ${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).titel} · ~${n.minuten} min · ${eur(n.euro)} €`)),
           h("button", {type: "button", class: knopfKlasse, onclick: () => UI.spiel.oeffnen(n.iid)}, n.klingelt ? "Rangehen ▸" : n.art === "weiter" ? "Weiterarbeiten ▸" : "Annehmen ▸"),
           /* § 20 F7: die Wahl aus dem Postfach – zwei weitere als kleine Zeilen (kein zweiter Hauptknopf) */
           s.weitere.length ? h("div", {class: "hb-oder"}, h("small", {}, "oder:"), s.weitere.map(w => h("button", {type: "button", class: "hb-oder-zeile", title: w.voll,
