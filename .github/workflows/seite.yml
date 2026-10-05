@@ -1,12 +1,23 @@
 name: Spiel veröffentlichen
 
 # Baut das Spiel als EINZELDATEI, prüft es und stellt es auf GitHub Pages.
-# Ergebnis: https://vexx-oss.github.io/Side-Project/  — ein Klick, spielt sofort im
+# Ergebnis: https://vexx-oss.github.io/Side-Project/ — ein Klick, spielt sofort im
 # Browser. Kein Download, kein Entpacken, keine Installation.
 #
-# Die Pages-Einrichtung erledigt der Ablauf selbst (configure-pages mit enablement: true).
-# Sollte das am Token scheitern, bleibt der eine Klick von Hand:
+# Der Ablauf ist absichtlich in drei Jobs geteilt:
+#   bauen        prüft und baut — läuft IMMER, auch wenn Pages noch aus ist.
+#   pages-an    fragt nur ab, ob Pages im Repository schon eingeschaltet ist.
+#   veroeffentlichen  stellt die Seite online — nur wenn pages-an "ja" sagt.
+#
+# Warum diese Teilung: „Pages einschalten" kann ein Ablauf NICHT selbst erledigen.
+# actions/configure-pages mit enablement: true verlangt laut Aktionsquelle ein Token
+# jenseits des Standard-GITHUB_TOKEN (PAT mit repo-Recht oder GitHub App mit
+# administration:write). Fehlt das, scheitert der Schritt — und riss vorher den ganzen
+# Lauf mit, sodass noch nicht einmal die Tests liefen.
+#
+# EINMALIG VON HAND, falls Pages noch aus ist:
 #   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+# Danach veröffentlicht jeder Push auf ausbau-1.2 automatisch.
 on:
   push:
     branches: [ausbau-1.2]
@@ -24,7 +35,7 @@ concurrency:
 
 jobs:
   bauen:
-    name: Einzeldatei bauen und prüfen
+    name: Bauen und prüfen
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,17 +48,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Pages einrichten, falls noch nicht geschehen
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       # Erst prüfen, dann veröffentlichen: eine kaputte Fassung soll nicht online gehen.
       - name: Tests (headless, Node)
         run: sh tools/test.sh
 
+      - name: Klassen im JS gegen Regeln im CSS
+        run: python tools/klassen.py
+
       - name: Simulation gegen den Referenzstand
         run: node tools/sim-stand.js
+
+      - name: Lernmotor: Kopie, Bau, Rückfall
+        run: |
+          python tools/lernmotor.py
+          python tools/lernmotor-bau.py
+          python tools/lernmotor-rueckfall.py
 
       - name: Einzeldatei bauen
         run: python tools/einfach.py
@@ -55,18 +70,14 @@ jobs:
       - name: Einzeldatei prüfen — keine Außenverweise, Schriften eingebettet
         run: python tools/einfach.py --pruefen docs/index.html
 
-      - name: Selbsttestseite mitnehmen (zum Spielen nicht nötig)
-        run: |
-          python bauen.py
-          cp web/tests.html docs/tests.html
-          { echo "User-agent: *"; echo "Disallow: /tests.html"; } > docs/robots.txt
+      - name: Bilder der Doku prüfen
+        run: python tools/bilder.py --pruefen
 
       - name: Seiten zusammenstellen
         run: |
           mkdir -p _site
           cp docs/index.html _site/index.html
-          cp docs/tests.html _site/tests.html
-          cp docs/robots.txt _site/robots.txt
+          cp -r docs/bilder _site/bilder
           touch _site/.nojekyll
           ls -la _site
 
@@ -74,9 +85,29 @@ jobs:
         with:
           path: _site
 
+  pages-an:
+    name: Ist Pages eingeschaltet?
+    needs: bauen
+    runs-on: ubuntu-latest
+    outputs:
+      an: ${{ steps.frage.outputs.an }}
+    steps:
+      - id: frage
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
+            echo "an=ja" >> "$GITHUB_OUTPUT"
+            echo "Pages ist eingeschaltet — wird veröffentlicht."
+          else
+            echo "an=nein" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Pages noch aus::Das Spiel wurde gebaut und geprüft, aber nicht veröffentlicht. Einmalig einschalten: Settings -> Pages -> Build and deployment -> Source: 'GitHub Actions'."
+          fi
+
   veroeffentlichen:
     name: Auf GitHub Pages stellen
-    needs: bauen
+    needs: [bauen, pages-an]
+    if: needs.pages-an.outputs.an == 'ja'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
