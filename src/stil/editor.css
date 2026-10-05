@@ -141,8 +141,10 @@
 .ger.gewaehlt .ger-auswahl{opacity:1}
 .ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.4}
 .ger.hover .gb-kachel{fill:var(--panel-3); stroke:var(--g)}
-.ger-name{font:700 12.5px/1 var(--body); fill:var(--ink); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
-.ger-ip{font:500 11px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
+/* TOPO-2: Beschriftungen der Fläche lesbar machen – keine Schrift unter 12 px.
+   Adressen und Portnamen in Monospace (Ziffern stehen untereinander), Kontur-Schatten gegen den Untergrund. */
+.ger-name{font:700 13px/1 var(--body); fill:var(--ink); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
+.ger-ip{font:500 12.5px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
 .ger-ip.schwach{fill:var(--faint); font-style:italic}
 .ger.aus .gb{opacity:.38}
 .ger.aus .ger-name{fill:var(--muted)}
@@ -176,7 +178,8 @@
 .ps-grund{fill:var(--bg); stroke:var(--line-2); stroke-width:1}
 .ps-oben path{fill:var(--ok)} .ps-unten path{fill:var(--bad)} .ps-aus rect{fill:var(--warn)}
 .ps{cursor:help}
-.kabel-port{font:600 10px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round; pointer-events:none}
+.kabel-port{font:600 12px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round; pointer-events:none}
+.lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text{display:none}   /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
 .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip{display:none}
 .vlan-schild rect{fill:var(--kf); stroke:var(--bg); stroke-width:1.5}
 .vlan-schild text{font:700 10.5px/1 var(--mono); fill:var(--accent-ink)}
@@ -190,7 +193,9 @@
 .zone{pointer-events:none}
 .zone-flaeche{fill:var(--zf); stroke:var(--zl); stroke-width:1.5; stroke-linejoin:round}
 .zone-schild{fill:var(--panel); stroke:var(--zl); stroke-width:1.5}
-.zone-text{font:700 11px/1 var(--mono); fill:var(--ink)}
+/* Zonenbeschriftung liegt auf dem Zonenschild (.zone-schild, fill:var(--panel)) – Kontur deshalb in --panel,
+   damit der Halo in hell und dunkel mit dem eigenen Untergrund verschmilzt statt als Naht zu erscheinen. */
+.zone-text{font:700 12px/1 var(--mono); fill:var(--ink); paint-order:stroke; stroke:var(--panel); stroke-width:2.5px; stroke-linejoin:round}
 
 /* ---- Kärtchen (MAC/ARP/Routen) ---- */
 .karte, .gw-schild{pointer-events:none}

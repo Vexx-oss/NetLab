@@ -190,6 +190,11 @@ UI.labor = (() => {
     pat?.setAttribute("patternTransform", `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${k.toFixed(4)})`);
     Z.raster?.classList.toggle("fein", k < 0.5);
     if (Z.el.zoomText) Z.el.zoomText.textContent = Math.round(k * 100) + " %";
+    /* Beschriftungen mit dem Zoom staffeln statt alles oder nichts (Befund 05.10.2026):
+       Unter 100 % skaliert `scale(k)` die Schrift mit, sie fällt dann unter die Lesbarkeitsgrenze.
+       Deshalb: ab 0,95 nur noch Gerätename und -adresse (das Wesentliche), ab 0,6 gar nichts mehr.
+       So bleibt bei jedem Zoom etwas Lesbares stehen, statt zu schrumpfen oder zu verschwinden. */
+    Z.svg?.classList.toggle("wenig-text", k < 0.95);
     Z.svg?.classList.toggle("klein", k < 0.6);
   }
   function weltPunkt(clientX, clientY){
@@ -407,9 +412,18 @@ UI.labor = (() => {
     el.append(sv("circle", {class: "ger-auswahl", cx: 0, cy: 0, r: 38}));
     el.append(UI.geraetebild(g.typ, g.skin));
     const a = UI.ebenen.adresse(netz, g);
-    el.append(sv("text", {class: "ger-name", x: 0, y: g.typ === "internet" ? 38 : 44, "text-anchor": "middle", text: g.name}));
-    if (a.text) el.append(sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: g.typ === "internet" ? 52 : 58, "text-anchor": "middle", text: a.text}));
-    el.append(sv("title", {text: `${g.name} – ${art.titel}${g.an ? "" : " (ausgeschaltet)"}\n${a.text || ""}\nZiehen = verschieben · Doppelklick = Inspektor · Rechtsklick = Menü`.trim()}));
+    el.append(sv("text", {class: "ger-name", x: 0, y: g.typ === "internet" ? 46 : 44, "text-anchor": "middle", text: g.name}));
+    if (a.text) el.append(sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: g.typ === "internet" ? 60 : 58, "text-anchor": "middle", text: a.text}));
+    /* Alle Adressen in den Tooltip: Auf der Fläche steht nur die erste (sonst wird es unleserlich) – hier muss
+       vollständig stehen, welche Adresse zu welcher Schnittstelle gehört. Sonst findet der Spieler die Adressen
+       der übrigen Subnetze nirgends (Befund 05.10.2026: Router zeigte nur „192.168.10.1/24 +2“). */
+    const alle = (UI.ebenen.alleAdressen(netz, g) || []).map(x => {
+      const p = IP.maskeGueltig(x.maske) ? IP.praefix(x.maske) : null;
+      return `${x.ip}${p != null ? "/" + p : ""}${x.port ? " · " + x.port : ""}`;
+    });
+    el.append(sv("title", {text: [g.name + " – " + art.titel + (g.an ? "" : " (ausgeschaltet)"),
+      alle.length ? (alle.length > 1 ? alle.map(z => "  " + z).join("\n") : "  " + alle[0]) : (a.text ? "  " + a.text : ""),
+      "Ziehen = verschieben · Doppelklick = Inspektor · Rechtsklick = Menü"].filter(Boolean).join("\n")}));
     const w = warnungenAn() ? Z.warn.get(g.id) : null;
     if (w && w.length) {
       const b = sv("g", {class: "badge badge-warn", transform: "translate(24 -24)"});

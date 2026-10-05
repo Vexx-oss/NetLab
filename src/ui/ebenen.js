@@ -113,9 +113,35 @@ UI.ebenen = (() => {
     const hl = huelle(pts);
     return {d: "M" + hl.map(q => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L") + "Z", obenLinks: hl.reduce((m, q) => q[0] + q[1] < m[0] + m[1] ? q : m, hl[0])};
   }
+  /* Fläche der Gerätetrefferfläche (editor.js `ger-treffer`: 68x64 um den Mittelpunkt) plus 2 px Luft */
+  const GER_B = 36, GER_H = 34;
+  /* Freie Stelle für ein Schild der Breite b und Höhe h suchen. belegt sind Rechtecke {x1,y1,x2,y2}
+     von Geräten UND schon gesetzten Schildern. Feste Reihenfolge unten · rechts · links · oben,
+     je Richtung einen Schildschritt weiter – die erste Stelle ohne Überdeckung gewinnt.
+     Bleibt keine frei, gewinnt die Stelle mit der GERINGSTEN Überdeckung (Schild nie weglassen). */
+  function schildStelle(belegt, x0, y0, b, h){
+    const ueber = (x, y) => belegt.reduce((s, q) => {
+      const dx = Math.min(x + b, q.x2) - Math.max(x, q.x1), dy = Math.min(y + h, q.y2) - Math.max(y, q.y1);
+      return s + (dx > 0 && dy > 0 ? dx * dy : 0);
+    }, 0);
+    const richtungen = [[0, h + 4], [b + 12, 0], [-(b + 12), 0], [0, -(h + 4)]];
+    let wahl = [x0, y0], beste = ueber(x0, y0);
+    for (let n = 1; n <= 12 && beste > 0; n++) for (const [dx, dy] of richtungen) {
+      const u = ueber(x0 + dx * n, y0 + dy * n);
+      if (u < beste) { beste = u; wahl = [x0 + dx * n, y0 + dy * n]; }
+      if (!beste) break;
+    }
+    return wahl;
+  }
   function zeichneZonen(schicht, netz, pos){
     const {zonen: zl} = zonen(netz);
+    /* Vorbelegung: die Geräterechtecke. Ohne sie blieb ein Schild auf dem Router liegen
+       (Befund 05.10.2026: „192.168.30.0/24“ mitten auf r1). */
     const belegt = [];
+    for (const g of Object.values(netz.geraete)) {
+      const p = pos(g.id); if (!p) continue;
+      belegt.push({x1: p.x - GER_B, y1: p.y - GER_H, x2: p.x + GER_B, y2: p.y + GER_H});
+    }
     for (const z of zl) {
       const mitten = z.ids.map(pos).filter(Boolean);
       if (!mitten.length) continue;
@@ -123,11 +149,10 @@ UI.ebenen = (() => {
       const g = sv("g", {class: `zone zone-${z.farbe}`, "data-cidr": z.cidr});
       g.append(sv("path", {class: "zone-flaeche", d}));
       const text = z.cidr + (z.apipa ? " · APIPA" : "");
-      const b = text.length * 6.6 + 16;
-      let x = obenLinks[0] - 14, y = obenLinks[1] - 22;
-      for (let n = 0; n < 8 && belegt.some(q => x < q.x + q.b && x + b > q.x && Math.abs(y - q.y) < 20); n++) y += 20;
-      belegt.push({x, y, b});
-      g.append(sv("rect", {class: "zone-schild", x, y, width: b, height: 20, rx: 10}));
+      const b = text.length * 6.6 + 16, h = 20;
+      const [x, y] = schildStelle(belegt, obenLinks[0] - 14, obenLinks[1] - 22, b, h);
+      belegt.push({x1: x, y1: y, x2: x + b, y2: y + h});
+      g.append(sv("rect", {class: "zone-schild", x, y, width: b, height: h, rx: 10}));
       g.append(sv("text", {class: "zone-text", x: x + b / 2, y: y + 14, "text-anchor": "middle", text}));
       schicht.append(g);
     }
