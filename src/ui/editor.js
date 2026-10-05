@@ -65,8 +65,12 @@ UI.labor = (() => {
 
     Z.el.ansicht = h("button", {type: "button", class: "lb-ansicht", "aria-haspopup": "menu", title: "Ansicht: welche Ebene die Fläche zeigt (Umschalt+1 … 5)",
       onclick: e => ansichtMenue(e.currentTarget)}, UI.symbol("ebenen", 17), h("span", {class: "lb-ansicht-text"}), UI.symbol("pfeilUnten", 14));
-    const wz = (name, sym, titel) => h("button", {type: "button", class: "lb-wz", "data-wz": name, title: titel, "aria-label": titel,
-      onclick: () => werkzeug(name)}, UI.symbol(sym, 19));
+    /* Die Taste steht sichtbar im Knopf, nicht nur im Tooltip (Rückmeldung 05.10.2026: „Werkzeuge,
+       arbeitsmodi wie ping oder so sollten Hotkeys für besseren workflow erhalten"). Die Kürzel gab es
+       schon – man fand sie nur nicht. Ein <kbd> im Knopf ist kein zusätzliches Bedienelement, das
+       Platzbudget (≤ 12) bleibt also unberührt. */
+    const wz = (name, sym, titel, taste) => h("button", {type: "button", class: "lb-wz", "data-wz": name, title: titel, "aria-label": titel,
+      onclick: () => werkzeug(name)}, UI.symbol(sym, 19), taste ? h("kbd", {class: "lb-wz-taste"}, taste) : null);
     const knopf = (sym, titel, fn, cls = "") => h("button", {type: "button", class: "lb-knopf " + cls, title: titel, "aria-label": titel, onclick: fn}, UI.symbol(sym, 18));
     Z.el.zurueck = knopf("zurueck", "Rückgängig (Strg+Z)", () => rueckgaengig());
     Z.el.vor = knopf("vor", "Wiederholen (Strg+Y)", () => wiederholen());
@@ -76,7 +80,7 @@ UI.labor = (() => {
     Z.el.verlaufGruppe = h("div", {class: "lb-gruppe", hidden: true}, Z.el.zurueck, Z.el.vor);   /* erst sichtbar, wenn es etwas rückgängig zu machen gibt */
     const oben = h("div", {class: "lb-leiste-oben"},
       h("div", {class: "lb-gruppe lb-werkzeuge", role: "toolbar", "aria-label": "Werkzeuge"},
-        wz("auswahl", "zeiger", "Auswählen und verschieben (V)"), wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen")),
+        wz("auswahl", "zeiger", "Auswählen und verschieben (V)", "V"), wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen", "K"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen", "P")),
       Z.el.ansichtGruppe,
       h("div", {class: "lb-luecke"}),
       Z.el.verlaufGruppe);
