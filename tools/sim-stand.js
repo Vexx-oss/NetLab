@@ -245,6 +245,10 @@ function eindampfen(ereignisse) {
     /* Frame-Felder als Pfade, damit neue Felder auffallen */
     felder: e.frame ? Object.keys(e.frame).sort() : [],
     app: e.frame && e.frame.app ? `${e.frame.app.proto}#${e.frame.app.info || ""}` : null,
+    /* Die FELDER INNERHALB der Anwendung mitzählen – sonst bliebe z. B. eine neue DHCP-Option unsichtbar.
+       Nur die Schlüssel, nicht die Werte: ein neuer Wert bei gleichem Schlüssel ist meist gewollt (andere IP),
+       ein neuer Schlüssel dagegen ist eine Formatänderung und soll auffallen. */
+    appFelder: e.frame && e.frame.app && e.frame.app.felder ? Object.keys(e.frame.app.felder).sort() : [],
     text: e.text ?? null,
     /* alle Schlüssel des Ereignisses selbst – neue Felder sollen auffallen */
     schluessel: Object.keys(e).sort(),

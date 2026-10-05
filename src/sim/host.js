@@ -210,6 +210,17 @@ Sim.host = (() => {
     const d = (g.running.dienste && g.running.dienste.dhcp) || {};
     return !!d.an;
   }
+  /* Gerätename zu einer MAC – für die Lease-Tabelle (Architektur § 10.2, Feld `hostname`). */
+  function nameZuMac(L, mac){
+    const m = String(mac == null ? "" : mac).toLowerCase();
+    if (!m) return "";
+    for (const g of Object.values(L.netz.geraete || {})) {
+      for (const x of Object.values((g.hw && g.hw.macs) || {})) {
+        if (String(x).toLowerCase() === m) return String((g.running && g.running.hostname) || g.name || "");
+      }
+    }
+    return "";
+  }
   /* Ausschlussbereiche eines Geräts – Router führen sie in `dhcp.ausgeschlossen`, Hosts ebenso (ab D1). */
   function ausschluesse(d){
     return ((d && d.ausgeschlossen) || []).filter(a => a && IP.gueltig(a.von))
@@ -256,11 +267,18 @@ Sim.host = (() => {
       const l = leases[ip];
       const ok = ip && IP.imNetz(ip, pool.netz, pool.maske) && (!l || l.mac === a.clientMac || l.bis <= L.t);
       typ = ok ? "ack" : "nak";
-      if (ok) { leases[ip] = {mac: a.clientMac, bis: L.t + Sim.T.LEASE}; delete L.dhcpAngebot[g.id + "|" + a.clientMac]; }
-      Sim._log(L, "antworten", g.id, wo, f, ok ? `${g.name} bestätigt: ${ip} gehört jetzt ${a.clientMac} (DHCP Ack, Lease 1 Tag).` : `${g.name} lehnt die gewünschte Adresse ${ip} ab (DHCP Nak).`);
+      if (ok) {
+        const dauer = pool.leaseS * 1000, bis = L.t + dauer;
+        const alt = l && l.mac === a.clientMac ? l : null;
+        leases[ip] = {mac: a.clientMac, bis, t1: bis - Math.round(dauer / 2), t2: bis - Math.round(dauer / 8),
+                      hostname: alt && alt.hostname ? alt.hostname : nameZuMac(L, a.clientMac),
+                      konflikt: alt ? !!alt.konflikt : false, konfliktSeit: alt && alt.konfliktSeit != null ? alt.konfliktSeit : null};
+        delete L.dhcpAngebot[g.id + "|" + a.clientMac];
+      }
+      Sim._log(L, "antworten", g.id, wo, f, ok ? `${g.name} bestätigt: ${ip} gehört jetzt ${a.clientMac} (DHCP Ack, ${pool.leaseS === 86400 ? "Lease 1 Tag" : `Lease ${Math.round(pool.leaseS / 3600)} h`}).` : `${g.name} lehnt die gewünschte Adresse ${ip} ab (DHCP Nak).`);
     } else return;
     const felder = {typ, xid: a.xid, clientMac: a.clientMac, angeboten: typ === "nak" ? "0.0.0.0" : ip, relay: relay || "0.0.0.0", server: serverId,
-                    maske: pool.maske, gateway: pool.gw || "", dns: pool.dns || "", leaseS: Sim.T.LEASE / 1000};
+                    maske: pool.maske, gateway: pool.gw || "", dns: pool.dns || "", leaseS: pool.leaseS, domain: pool.domain || ""};
     const info = {offer: "DHCP Offer", ack: "DHCP Ack", nak: "DHCP Nak"}[typ];
     const app = {proto: "DHCP", info: `${info}${typ !== "nak" ? " " + ip : ""}`, felder};
     if (relay) {
@@ -286,5 +304,5 @@ Sim.host = (() => {
     L3().senden(L, g, p);
   }
 
-  return {ifWahl, ipSenden, empfangen, lokal, dienst, dhcpServer, poolsVonHost, freieAdresse, dnsAntwort, poolForm, dhcpAn, ausschluesse};
+  return {ifWahl, ipSenden, empfangen, lokal, dienst, dhcpServer, poolsVonHost, freieAdresse, dnsAntwort, poolForm, dhcpAn, ausschluesse, nameZuMac};
 })();

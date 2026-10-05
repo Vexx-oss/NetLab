@@ -61,7 +61,12 @@
     const c = g.running.if && g.running.if[port];
     if (!c) return {ok: false, grund: null, text: `${g.name} hat keinen Anschluss ${port}.`};
     if (!c.dhcp) return {ok: false, grund: null, text: `An ${g.name} ${port} ist DHCP aus (feste Adresse).`};
-    const z = Sim._z(L, g.id); z.dhcp ||= {}; delete z.dhcp[port]; Sim._cacheNeu(L);
+    const z = Sim._z(L, g.id); z.dhcp ||= {}; Sim._cacheNeu(L);
+    /* Erneuerung bei 50 % (Architektur § 10.3): Läuft noch eine gültige Lease, ist aber T1 erreicht, wird sie
+       erneuert statt neu bezogen – dieselbe Adresse, dieselben Nachrichtentypen (request/ack), kein Discover. */
+    const alt = z.dhcp[port];
+    const erneuern = alt && !alt.apipa && alt.bis > L.t && alt.t1 != null && L.t >= alt.t1;
+    if (!erneuern) delete z.dhcp[port];
     const ifc = L3().schnittstellen(L, g).find(i => i.port === port);
     const idx0 = L.ev.length;
     if (!ifc.oben) {
@@ -74,11 +79,17 @@
       udp: {src: 68, dst: 67}, app: {proto: "DHCP", info, felder: Object.assign({xid, clientMac: ifc.mac, clientIp: "0.0.0.0", angeboten: "0.0.0.0", relay: "0.0.0.0", server: null}, felder)}});
     const passt = typen => fr => !!(fr.app && fr.app.proto === "DHCP" && fr.app.felder && fr.app.felder.xid === xid && typen.includes(fr.app.felder.typ));
     let angebot = null;
-    for (let v = 0; v < 3 && !angebot && !L.abbruch; v++) {
-      const f = dhcpFrame({typ: "discover"}, "DHCP Discover");
-      const r = anfrage(L, g, f, {passt: passt(["offer"]), timeout: Sim.T.DHCP_TIMEOUT * (v + 1), sendOpt: {ifc,
-        text: v ? `${g.name} bekommt kein Angebot und wiederholt den DHCP Discover (Versuch ${v + 1}).` : `${g.name} hat noch keine Adresse und ruft per Broadcast nach einem DHCP-Server (DHCP Discover).`}});
-      if (r.antwort) angebot = r.antwort.app.felder;
+    if (erneuern) {
+      /* Kein Angebot nötig: die Adresse ist bekannt, es wird direkt um Verlängerung gebeten (Renew). */
+      angebot = {angeboten: alt.ip, server: alt.server};
+      Sim._log(L, "info", g.id, port, null, `${g.name} verlängert seine Lease für ${alt.ip} beim DHCP-Server ${alt.server || "?"} (T1 erreicht, Erneuerung bei 50 %).`, {proto: "DHCP"});
+    } else {
+      for (let v = 0; v < 3 && !angebot && !L.abbruch; v++) {
+        const f = dhcpFrame({typ: "discover"}, "DHCP Discover");
+        const r = anfrage(L, g, f, {passt: passt(["offer"]), timeout: Sim.T.DHCP_TIMEOUT * (v + 1), sendOpt: {ifc,
+          text: v ? `${g.name} bekommt kein Angebot und wiederholt den DHCP Discover (Versuch ${v + 1}).` : `${g.name} hat noch keine Adresse und ruft per Broadcast nach einem DHCP-Server (DHCP Discover).`}});
+        if (r.antwort) angebot = r.antwort.app.felder;
+      }
     }
     let ack = null;
     if (angebot) {
@@ -90,7 +101,10 @@
       }
     }
     if (ack && ack.typ === "ack") {
-      const lease = {ip: ack.angeboten, maske: ack.maske, gw: ack.gateway || "", dns: ack.dns || "", server: ack.server, bis: L.t + (ack.leaseS || 86400) * 1000};
+      /* t1 = Erneuerung bei 50 %, t2 = Rebind (nur Anzeige). Beides absolut in virtueller Zeit (Architektur § 10.2). */
+      const dauer = (ack.leaseS || 86400) * 1000, bis = L.t + dauer;
+      const lease = {ip: ack.angeboten, maske: ack.maske, gw: ack.gateway || "", dns: ack.dns || "", server: ack.server,
+                     bis, t1: bis - Math.round(dauer / 2), t2: bis - Math.round(dauer / 8), domain: ack.domain || ""};
       z.dhcp[port] = lease; Sim._cacheNeu(L);
       Sim._log(L, "lernen", g.id, port, null, `${g.name} übernimmt ${lease.ip}/${IP.praefix(lease.maske)}${lease.gw ? `, Gateway ${lease.gw}` : ", kein Gateway"}${lease.dns ? `, DNS ${lease.dns}` : ""} vom DHCP-Server ${lease.server}.`, {proto: "DHCP"});
       return {ok: true, grund: null, lease: tief(lease), text: `${g.name} hat per DHCP ${lease.ip} bekommen.`};
