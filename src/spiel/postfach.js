@@ -111,6 +111,7 @@ Spiel.postfach = function(){
   return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung" && i.quelle !== "raetsel").slice().sort((a, b) => {
     const fa = a.frist ?? Infinity, fb = b.frist ?? Infinity;
     if (fa !== fb) return fa - fb;
+    if ((a.kuratiert || 99) !== (b.kuratiert || 99)) return (a.kuratiert || 99) - (b.kuratiert || 99);     /* erste Stunde: Folge vorn */
     if (sperre && gesperrt(a) !== gesperrt(b)) return gesperrt(a) - gesperrt(b);
     if (!!a.gelesen !== !!b.gelesen) return a.gelesen ? 1 : -1;
     return a.start - b.start;
@@ -130,6 +131,11 @@ Spiel.instanzenPruefen = function(){
    Ist alles gelöst: Generator-Variante (fällige Fertigkeit zuerst) oder das schwächste gelöste Ticket erneut. */
 Spiel.postfachAuffuellen = function({still = false} = {}){
   const st = Spiel.st, neu = [];
+  /* Erste Stunde (§ 20 F3): die nächsten zwei Schritte der gestalteten Folge statt Mischer und Geschichtsreihe */
+  if (Spiel.ersteStunde && Spiel.ersteStunde.aktiv()) {
+    neu.push(...Spiel.ersteStunde.auffuellen());
+    if (Spiel.ersteStunde.aktiv() && Spiel.postfach().length) return neu;
+  }
   const regulaer = () => st.postfach.filter(i => i.quelle === "postfach" || i.quelle === "generiert").length;
   const imPostfach = new Set(st.postfach.map(i => i.ticketId));
   const kandidaten = Spiel.ticketReihe().filter(t => (t.karriere || 1) <= st.stufe && !Spiel.istErledigt(t.id) && !imPostfach.has(t.id));

@@ -137,6 +137,7 @@ Spiel.abschliessen = function(inst, abnahme){
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
     dex, raetsel, verdacht, hotline, schuld, kundenakte,
+    ereignis: Spiel.ersteStunde ? Spiel.ersteStunde.abholen() : null,     /* erste Stunde: Anruf oder Weiterempfehlung als Karte */
   };
   Spiel.geaendert("ticket-geloest");
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});

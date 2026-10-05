@@ -1,7 +1,7 @@
 "use strict";
 /* ---------- Klang (Design – Spielspaß 2.0, Hebel 6; Architektur § 9.2) ----------
    UI.klang.spielen(name) → true, wenn hörbar gespielt. Alle Klänge werden mit WebAudio erzeugt – keine Dateien.
-   Namen: klick · link · ping · haken · druck · sperre · blase · sterne · nochnicht · fanfare
+   Namen: klick · link · ping · haken · druck · sperre · blase · sterne · nochnicht · fanfare · klingeln
    Lautstärke aus Spiel.tonPegel(einst.ton, {modus, fokus}): Standard leise; Leiste/Tray und Fenster im Hintergrund
    immer stumm. Klänge erst nach der ersten Nutzer-Handlung (Autoplay-Regel), nie nur über Klang verständlich.
    UI.klang.zaehler {gespielt, stumm} und UI.klang.letzte {name, pegel, gespielt} – für Tests im Programm. */
@@ -24,6 +24,7 @@ UI.klang = (() => {
     sterne:    [523, 659, 784, 1046].map((f, i) => T(f, {typ: "triangle", start: i * .075, dauer: .16, laut: .4})),
     nochnicht: [T(220, {f2: 175, dauer: .24, laut: .35})],
     fanfare:   [523, 659, 784, 1046, 1318].map((f, i) => T(f, {typ: "triangle", start: i * .1, dauer: i === 4 ? .45 : .14, laut: .45})),
+    klingeln:  [0, .07, .14, .21, .55, .62, .69, .76].map((s, i) => T(i % 2 ? 740 : 880, {start: s, dauer: .06, laut: .28})),   /* zweimal kurz, wie ein Tischtelefon */
   };
   function kontext(){
     if (!ctx) { const AC = typeof window !== "undefined" && (window.AudioContext || window.webkitAudioContext); if (!AC) return null; ctx = new AC(); }

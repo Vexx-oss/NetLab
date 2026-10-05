@@ -380,6 +380,7 @@ UI.spiel = (() => {
     } catch (e) { console.error("Funktionsprobe", e); }
     finally { S.probe = false; S.fertig = null; }
     ergebnisZeigen(erg);
+    if (erg.ereignis) UI.ereignisse?.vormerken(erg.ereignis);      /* erste Stunde: Anruf oder Weiterempfehlung, wenn das Ergebnis zu ist */
   }
   /* „Dein Weg“: was der Spieler getan hat – Diagnose (Ping), Eingriffe (Verlauf), Probe */
   function wegMerken(inst, eintrag){
@@ -589,7 +590,8 @@ UI.spiel = (() => {
     const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde);
     const vorschau = String(def.briefing || "").replace(/\s+/g, " ").slice(0, 110);
     const frist = inst.frist ? Math.round((inst.frist - jetzt()) / 60000) : null;
-    return h("button", {type: "button", role: "listitem", class: "sp-mail" + (an ? " an" : "") + (inst.gelesen ? "" : " neu") + (frist != null && frist < 15 ? " eilig" : ""),
+    const klingelt = !!inst.klingelt && !inst.geoeffnet;
+    return h("button", {type: "button", role: "listitem", class: "sp-mail" + (an ? " an" : "") + (inst.gelesen ? "" : " neu") + (frist != null && frist < 15 ? " eilig" : "") + (klingelt ? " klingelt" : ""),
       style: {"--k": `var(${k.farbe || "--accent"})`}, onclick: wahl},
       h("span", {class: "sp-kunde-sym"}, k.symbol || "✉"),
       h("span", {class: "sp-mail-text"},
@@ -597,6 +599,7 @@ UI.spiel = (() => {
         h("b", {}, def.titel),
         h("span", {class: "sp-mail-vorschau"}, vorschau + (String(def.briefing || "").length > 110 ? " …" : "")),
         h("span", {class: "sp-chips"},
+          klingelt ? h("span", {class: "sp-chip klingelt", title: "Der Kunde ist am Telefon"}, h("i", {class: "sp-klingel", "aria-hidden": "true"}, "☎"), " klingelt") : null,
           formChip(def),
           h("span", {class: "sp-chip niv-" + (Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe), title: "Risiko: " + Spiel.risikoVon(def).warum},
             `${NIV[Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe] || def.stufe} · Risiko ${Spiel.risikoVon(def).text}`),
@@ -792,5 +795,7 @@ UI.spiel = (() => {
     } catch (e) { console.error("Spielstart", e); UI.toast("Das Spiel konnte nicht starten: " + e.message, "fehler"); }
   });
 
-  return {oeffnen, postfachAnsicht, status, abnahmeAnfordern, einstiegStarten, mappeAuf, mappeZu, get inst(){ return S.inst; }, get mess(){ return S.mess || null; }, _S: S};
+  /* Postfach mit diesem Auftrag im Leser öffnen (Karte „Weiterempfehlung“) */
+  function imPostfach(iid){ S.postfachWahl = iid; UI.app.ansicht("postfach"); }
+  return {oeffnen, postfachAnsicht, status, abnahmeAnfordern, einstiegStarten, mappeAuf, mappeZu, imPostfach, get inst(){ return S.inst; }, get mess(){ return S.mess || null; }, _S: S};
 })();

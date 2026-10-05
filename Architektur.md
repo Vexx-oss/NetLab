@@ -462,3 +462,25 @@ Spiel.KOMPETENZ_REGIONEN = [ {id, titel, skills:[id…]} ]          // 6 Regione
 Spiel.kompetenz.karte() → { regionen:[{id, titel, felder:[{id, name, zustand, box, nachbarn:[id]}]}], sichtbar, gesamt:27 }
    // zustand: "nebel" (weder geübt noch neben einem geübten Feld noch freigeschaltet) | "offen" | Lernmotor-Stufe („angefangen“ … „gemeistert ★“)
 ```
+
+### 9.8 Auftrag P „Politur und Bindung“ (Design – Spielspaß 2.0, § 20/§ 21)
+
+**Erste Stunde** (`spiel/erstestunde.js`, § 20 F3): Ein neuer Spielstand bekommt statt Zufall eine gestaltete Folge der ersten sechs Aufträge; danach füllt der Mischer.
+
+```js
+Spiel.ERSTE_STUNDE = [ {id:"kabel", ticket:"salon-01"}, {id:"stoerung", ticket:"salon-02"}, {id:"hotline", ticket:"salon-hotline", klingelt:true},
+                       {id:"fernwartung", form:"forensik", opts:{kunde:"salon"}}, {id:"variante", ticket:"salon-05"},
+                       {id:"empfehlung", form:"audit", ereignis:"weiterempfehlung", opts:{kunde:"baeckerei"}} ]
+st.ersteStunde = { fertig:bool, ereignis:bool }      // nur ein NEUER Stand beginnt mit fertig:false (Spiel.ergaenzer.ersteStunde);
+                                                     // fehlt das Feld (alter Stand, Tests mit leererStand): vorbei
+inst.kuratiert = 1..6 · inst.kuratiertId = "hotline" … · inst.klingelt = true   // Postfach-Reihenfolge, Anruf
+Spiel.ersteStunde.aktiv() · .auffuellen() → [inst] · .ruhig() · .abholen() → Karte|null · .stand() → {aktiv, geschafft, gesamt, naechster}
+ergebnis.ereignis = {id:"anruf"|"weiterempfehlung", sym, titel, text, warum?, aktion:"abheben"|"neu", iid}   // Spiel.abschliessen
+Spiel.ereignisse.ausloesen(id, {inst?, form?, kunde?, stufe?})   // ohne inst gilt der offene Auftrag; form/kunde/stufe sind Wünsche
+```
+
+- `Spiel.postfachAuffuellen` legt während der ersten Stunde die **nächsten zwei offenen Schritte** bereit (die Reihenfolge bleibt eine Wahl) und ruft weder Mischer noch Geschichtsreihe. Die Weiterempfehlung löst aus, sobald sie einer der nächsten zwei Schritte ist (nach dem vierten Abschluss) und bringt den Plan-Audit; zufällige Ereignisse ruhen bis dahin (`ruhig()`). Fehlen die Aufträge der Folge (andere Daten, Testtickets), gilt die erste Stunde als vorbei.
+- `Spiel.postfach()` sortiert nach Frist, dann `kuratiert`, dann wie bisher. Der Hub zeigt einen klingelnden Anruf als Hauptkarte („Mira Kaya ruft an“, „Rangehen ▸“).
+- Oberfläche: `UI.ereignisse.vormerken(e)` zeigt die Karte, sobald kein Dialog und keine Funktionsprobe mehr läuft (Anruf mit grünem „Rangehen ▸“ und Klang `klingeln`, Weiterempfehlung mit „Ansehen ▸“ → `UI.spiel.imPostfach(iid)`); Postfach-Karte mit Marke „☎ klingelt“.
+
+**Rauchtest der Oberfläche** (`tools/rauch.py`, § 20 F8): siehe § 2.

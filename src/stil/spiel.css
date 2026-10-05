@@ -226,6 +226,10 @@
 .sp-chip.frist{background:var(--warn-soft); color:var(--warn)}
 .sp-chip.wartung{background:var(--info-soft); color:var(--info)}
 .sp-chip.wdh{background:var(--ok-soft); color:var(--ok)}
+.sp-chip.klingelt{background:var(--ok-soft); color:var(--ok)}
+.sp-klingel{display:inline-block; font-style:normal; animation:ev-klingeln 1.2s ease-in-out infinite}
+.sp-mail.klingelt{border-color:var(--ok)}
+@media (prefers-reduced-motion: reduce){ .sp-klingel{animation:none} }
 .sp-chip.form{background:var(--panel-3); color:var(--text)}
 .sp-chip.form-terminal, .sp-chip.form-forensik{font-family:var(--mono)}
 .sp-chip.form-projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}

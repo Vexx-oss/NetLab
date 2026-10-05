@@ -54,3 +54,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .dx-detail h3{font:700 14px/1.3 var(--body); margin:14px 0 4px}
 .dx-detail ul{margin:0 0 0 18px}
 .dx-symptom{font-style:italic; font-size:15px; margin-top:6px}
+/* Erste Stunde: der Anruf klingelt auf der Hauptkarte */
+.hb-auftrag.klingelt{border-color:var(--ok)}
+.hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln 1.2s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){ .hb-auftrag.klingelt .sp-kunde-sym{animation:none} }

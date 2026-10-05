@@ -74,13 +74,18 @@ Spiel.EREIGNISSE = {
     }},
   weiterempfehlung: {titel: "Weiterempfehlung", sym: "💬", gewicht: 2,
     bedingung: () => Object.values(DATEN.kunden || {}).some(k => (k.stufe || 1) <= Spiel.st.stufe && Spiel.vorlagen._fuerKunde[k.id] && k.id !== "storage"),
-    ausloesen({z}){
+    ausloesen({z, wunsch = {}}){
       const kunden = Object.values(DATEN.kunden).filter(k => (k.stufe || 1) <= Spiel.st.stufe && Spiel.vorlagen._fuerKunde[k.id] && k.id !== "storage");
-      const k = z.wahl(kunden), form = z.wahl(["forensik", "audit"]);
+      const k = kunden.find(x => x.id === wunsch.kunde) || z.wahl(kunden), form = wunsch.form || z.wahl(["forensik", "audit"]);
       let inst = null;
-      try { inst = Spiel.instanzErstellen({gen: {form, seed: 1 + z.zahl(1000000), opts: {kunde: k.id}}, quelle: "generiert", kunde: k.id}); } catch (e) { return null; }
-      Spiel.gutschreiben(0, 1, `Weiterempfehlung durch ${k.name}`);
-      return {iid: inst.iid, text: `${(k.ansprechpartner || {}).name || k.name} hat dich weiterempfohlen – ein neuer Auftrag liegt im Postfach. +1 Ruf.`,
+      try { inst = Spiel.instanzErstellen({gen: {form, seed: 1 + z.zahl(1000000), opts: Object.assign({kunde: k.id}, wunsch.stufe ? {stufe: wunsch.stufe} : {})}, quelle: "generiert", kunde: k.id}); } catch (e) { return null; }
+      /* Wer empfiehlt? Der Kunde, für den man bisher am meisten gearbeitet hat – nicht der neue (der kennt einen ja noch nicht) */
+      const zahl = {};
+      for (const e of Spiel.st.erledigt || []) if (e && e.kunde && e.kunde !== k.id) zahl[e.kunde] = (zahl[e.kunde] || 0) + 1;
+      const vonId = Object.keys(zahl).sort((a, b) => zahl[b] - zahl[a])[0], von = vonId ? Spiel.kundenDaten(vonId) : null;
+      const vonName = von ? (von.ansprechpartner || {}).name || von.name : "Ein zufriedener Kunde", neuName = (k.ansprechpartner || {}).name || k.name;
+      Spiel.gutschreiben(0, 1, `Weiterempfehlung${von ? " durch " + von.name : ""}`);
+      return {iid: inst.iid, aktion: "neu", von: vonId || null, text: `${vonName} hat dich weiterempfohlen: ${neuName} (${k.name}) meldet sich mit einem Auftrag. +1 Ruf.`,
         warum: "Im IT-Service kommen viele Aufträge über Empfehlungen: Wer sauber arbeitet und erklärt, was er tut, wird weitergegeben."};
     }},
   notfall: {titel: "Notfall-Anruf", sym: "🚨", gewicht: 2,
@@ -101,11 +106,13 @@ Spiel.NOTFALL_FRIST = 20 * 60 * 1000;
 Spiel.NOTFALL_BONUS = 0.25;
 
 /* Ein Ereignis auslösen (Tests, Abnahme) – ctx = {inst?}. Gibt {id, titel, sym, text, warum, …} oder null */
+/* ctx: {inst?} – ohne inst gilt der gerade offene Auftrag (ein Stromausfall braucht einen Kunden mit Netz);
+   {form, kunde, stufe} sind Wünsche, die passende Ereignisse beachten (Weiterempfehlung in der ersten Stunde) */
 Spiel.ereignisse.ausloesen = function(id, ctx = {}){
   const E = Spiel.EREIGNISSE[id]; if (!E) return null;
   const d = Spiel.ereignisse.daten();
-  const inst = ctx.inst || null, def = inst ? Spiel.defVon(inst) : null;
-  const c = {inst, def, z: Zufall(`ereignis:${id}:${d.n}:${Spiel.st.naechsteIid}`)};
+  const inst = ctx.inst || (Spiel.aktiveInstanz && Spiel.aktiveInstanz()) || null, def = inst ? Spiel.defVon(inst) : null;
+  const c = {inst, def, z: Zufall(`ereignis:${id}:${d.n}:${Spiel.st.naechsteIid}`), wunsch: {form: ctx.form || null, kunde: ctx.kunde || null, stufe: ctx.stufe || null}};
   if (!E.bedingung(c)) return null;
   const r = E.ausloesen(c);
   if (!r) return null;
@@ -117,6 +124,7 @@ Spiel.ereignisse.ausloesen = function(id, ctx = {}){
 };
 /* Takt: ist ein Ereignis fällig, wählt der Zähler eines der passenden (gewichtet) */
 Spiel.ereignisse.tick = function({inst} = {}){
+  if (Spiel.ersteStunde && Spiel.ersteStunde.ruhig()) return null;        /* erste Stunde: das erste Ereignis ist ein harmloses */
   if (!Spiel.ereignisse.faellig()) return null;
   if (inst && (inst.quelle === "pruefung" || inst.quelle === "raetsel" || Spiel.defVon(inst).id === Spiel.EINSTIEG_TICKET)) return null;
   const d = Spiel.ereignisse.daten(), def = inst ? Spiel.defVon(inst) : null;

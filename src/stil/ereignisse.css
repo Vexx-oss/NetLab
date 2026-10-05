@@ -9,5 +9,10 @@
 .ev-text{margin:8px 0 4px; font-size:14.5px; line-height:1.45}
 .ev-warum{margin:0; font-size:13px; line-height:1.4; color:var(--muted)}
 .ev-fuss{margin-top:8px; display:flex; justify-content:flex-end}
+.ev-anruf{border-color:var(--ok)}
+.ev-rangehen{border-color:var(--ok); color:var(--ok); font-weight:700}   /* grün wie beim Telefon – kein zweiter Hauptknopf */
+.ev-rangehen:hover, .ev-rangehen:focus-visible{background:var(--ok); color:var(--bg)}
+.ev-anruf .ev-sym{display:inline-block; animation:ev-klingeln 1.2s ease-in-out infinite; transform-origin:50% 60%}
+@keyframes ev-klingeln{0%, 40%, 100%{transform:none} 5%, 15%, 25%{transform:rotate(-14deg)} 10%, 20%, 30%{transform:rotate(14deg)}}
 @keyframes ev-rein{from{opacity:0; transform:translate(-50%, -8px)} to{opacity:1; transform:translate(-50%, 0)}}
-@media (prefers-reduced-motion: reduce){ .ev-karte{animation:none} }
+@media (prefers-reduced-motion: reduce){ .ev-karte, .ev-anruf .ev-sym{animation:none} }
