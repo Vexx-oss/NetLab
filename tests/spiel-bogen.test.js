@@ -34,14 +34,14 @@ gruppe("Spiel: Bogen (S2)", () => {
   };
 
   /* ---------- Fehlerdex ---------- */
-  pruefe("Fehlerdex: genau die 34 Fehlerarten, jede mit Gruppe, Symptom, Erkennungszeichen", kapsel(() => {
+  pruefe("Fehlerdex: genau die 36 Fehlerarten, jede mit Gruppe, Symptom, Erkennungszeichen", kapsel(() => {
     const ids = Object.keys(Spiel.INJEKTOREN).sort(), liste = Spiel.dex.liste();
-    erwarte.gleich(ids.length, 34, "34 Fehlerarten");
+    erwarte.gleich(ids.length, 36, "36 Fehlerarten");
     erwarte.gleich(liste.map(e => e.id).sort(), ids, "Dex = Injektoren");
     erwarte.gleich(liste.filter(e => e.gruppe === "weitere").map(e => e.id), [], "jede Fehlerart hat eine Gruppe");
     erwarte.gleich(liste.filter(e => !e.symptom || !e.erkennen.length || !e.erklaerung).map(e => e.id), [], "Symptom, Erkennen, Erklärung");
     erwarte.wahr(liste.every(e => e.zustand === "unbekannt" && e.ab >= 1), "frisch: alles unbekannt, mit Stufe");
-    erwarte.gleich(Spiel.dex.gruppen().reduce((s, g) => s + g.gesamt, 0), 34, "Gruppen decken alles ab");
+    erwarte.gleich(Spiel.dex.gruppen().reduce((s, g) => s + g.gesamt, 0), 36, "Gruppen decken alles ab");
   }));
 
   pruefe("Fehlerdex: erst beim Abschluss, ohne bezahlte Hilfe = verstanden, übersteht Neustart", kapsel(() => {
@@ -55,7 +55,7 @@ gruppe("Spiel: Bogen (S2)", () => {
     erwarte.gleich(e2.dex.neu.map(n => [n.id, n.zustand]), [["ip-tippfehler", "gesehen"]]);
     Spiel.sofortSpeichern(); Spiel._st = null; Spiel.laden();
     erwarte.gleich([z("kabel-fehlt"), z("ip-tippfehler"), z("maske-falsch")], ["verstanden", "gesehen", "unbekannt"], "nach Neustart");
-    erwarte.gleich(Spiel.dex.zaehlen(), {gesamt: 34, gesehen: 2, verstanden: 1});
+    erwarte.gleich(Spiel.dex.zaehlen(), {gesamt: 36, gesehen: 2, verstanden: 1});
   }));
 
   pruefe("Fehlerdex: Gruppe komplett verstanden → Ehrentitel genau einmal", kapsel(() => {

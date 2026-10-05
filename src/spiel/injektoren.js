@@ -323,5 +323,97 @@ Spiel.INJEKTOREN = (() => {
       bereich: [{geraet: "fw"}], konkret: ["Es fehlt „aussen → dmz, tcp/443, Ziel Webshop, erlauben“."]}),
     erklaerung: "Die DMZ ist eine eigene Zone zwischen Internet und LAN: Von außen darf nur genau das hinein, was die Dienste dort brauchen (hier HTTPS), und aus der DMZ darf nichts ins LAN. So bleibt das interne Netz geschützt, selbst wenn der Webserver angegriffen wird."});
 
+  /* ---------- DHCP-Tiefe (D1, Architektur § 10) ---------- */
+  /* Lage des DHCP im Netz ermitteln, ohne die Rollen zu brauchen: Wer vergibt Adressen, aus welchem Netz, an wen? */
+  function dhcpLage(n){
+    for (const g of Object.values(n.geraete)) {
+      const d = (g.running && g.running.dhcp) || (g.running && g.running.dienste && g.running.dienste.dhcp);
+      const pools = (d && d.pools) || [];
+      const p = pools.find(x => IP.gueltig(x.netz) && IP.maskeGueltig(x.maske));
+      if (p) return {server: g.id, pool: p, netz: IP.netz(p.netz, p.maske), maske: p.maske};
+    }
+    return null;
+  }
+  /* Der Switch, an dem die DHCP-Clients hängen – darüber läuft Snooping.
+     Nur DIREKT am Switch: sonst bietet `passt` Fälle an, in denen der Fehler gar nicht ankommt (Entwürfe ohne Wirkung). */
+  function clientSwitch(n){
+    for (const g of Object.values(n.geraete)) {
+      if (!Modell.HOST[g.typ] || !(g.running.if && g.running.if.eth0 && g.running.if.eth0.dhcp)) continue;
+      const k = Modell.kabelAn(n, g.id, "eth0");
+      if (k && n.geraete[k.gegen.geraet] && n.geraete[k.gegen.geraet].typ === "switch") return {switch: k.gegen.geraet, port: k.gegen.port};
+    }
+    return null;
+  }
+  const freiSwitchPort = (n, sw) => Object.keys(n.geraete[sw].running.ports).find(p => !Modell.kabelAn(n, sw, p)) || null;
+  /* An welchem Port eines Switches hängt der DHCP-Server? (Für „vertrauter Port“ beim Snooping.) */
+  function serverPort(n, sw, server){
+    for (const p of Object.keys(n.geraete[sw].running.ports)) {
+      const k = Modell.kabelAn(n, sw, p);
+      if (!k) continue;
+      /* direkt am Switch oder dahinter über einen weiteren Switch */
+      if (k.gegen.geraet === server) return p;
+      let g = k.gegen.geraet;
+      for (let i = 0; i < 3; i++) {
+        const gg = n.geraete[g];
+        if (!gg || gg.typ !== "switch") break;
+        let weiter = null;
+        for (const q of Object.keys(gg.running.ports)) {
+          const kk = Modell.kabelAn(n, g, q);
+          if (!kk || kk.gegen.geraet === sw) continue;
+          if (kk.gegen.geraet === server) return p;
+          weiter = kk.gegen.geraet;
+        }
+        if (!weiter) break;
+        g = weiter;
+      }
+    }
+    return null;
+  }
+
+  neu({name: "fremder-dhcp", titel: "Zweiter DHCP-Server im Netz", skills: ["lab.dhcp"], gruende: ["NO_ROUTE", "TIMEOUT", "DHCP_ROGUE_OFFER", "NO_GATEWAY"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const l = dhcpLage(n), cs = clientSwitch(n);
+      return l && cs && freiSwitchPort(n, cs.switch) ? [{key: "fremd", server: l.server, pool: l.pool, netz: l.netz, maske: l.maske, switch: cs.switch}] : [];
+    },
+    anwenden(n, k){
+      const p3 = k.netz.split(".").slice(0, 3).join(".");
+      Modell.geraet(n, "router", {id: "fremd1", name: "FRITZ-Router"});
+      const v = Modell.verbinden(n, {geraet: "fremd1"}, {geraet: k.switch});
+      if (v && v.fehler) throw new Error("fremder-dhcp: " + v.fehler);
+      Modell.setzen(n, "fremd1", "if.Gi0/0.ip", p3 + ".254");
+      Modell.setzen(n, "fremd1", "if.Gi0/0.maske", k.maske);
+      Modell.setzen(n, "fremd1", "if.Gi0/0.shutdown", false);
+      Modell.setzen(n, "fremd1", "dhcp", {an: true, ausgeschlossen: [],
+        pools: [{name: "GAST", netz: k.netz + "0", maske: k.maske, gw: p3 + ".254", dns: "8.8.8.8", start: p3 + ".200", anzahl: 20}]});
+    },
+    loesung: (n, k, p, r) => [
+      {geraet: "fremd1", cli: cli("interface Gi0/0", "shutdown"), text: "Den fremden Router abschalten: auf fremd1 „interface Gi0/0“ → „shutdown“. (Im Inspektor: Schnittstelle abschalten.)"},
+      {geraet: r && r.clients && r.clients[0] ? r.clients[0] : "pc1", setzen: {"if.eth0.dhcp": false}, text: "Am betroffenen Rechner die falsche Adresse loswerden (DHCP aus/an oder ipconfig /renew)."}],
+    hilfen: (n, k) => ({frage: ["Der Rechner hat eine Adresse bekommen – aber kommt nicht hinaus. Sieh dir sein Standardgateway an: Ist das der Router, den du kennst?"],
+      bereich: [{geraet: k.switch}], konkret: [`Im Netz antwortet ein zweiter DHCP-Server (${k.netz.split(".").slice(0, 3).join(".")}.254) und verteilt sich selbst als Gateway. Er hängt am Switch ${name(n, k.switch)}.`]}),
+    erklaerung: "Ein Rechner nimmt das erste DHCP-Angebot, das ankommt – vom richtigen Server oder von einem fremden. Ein fremder („Rogue“) Server verteilt dann oft sich selbst als Gateway und einen fremden DNS-Server: Der Rechner hat eine gültige Adresse, kommt aber nicht ins Internet. Erkennbar an „ipconfig /all“: Dort steht ein DHCP-Server, den es im Netz nicht geben sollte. Abhilfe: den fremden Server abschalten oder DHCP-Snooping am Switch einschalten.",
+    quelle: "RFC 2131 · IOS-ähnlich (Snooping ist eine Switch-Funktion, kein RFC-Verfahren)"});
+
+  neu({name: "snooping-ohne-trust", titel: "DHCP-Snooping ohne vertrauten Port", skills: ["lab.dhcp", "lab.switch"], gruende: ["DHCP_NO_OFFER", "NO_IP"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const l = dhcpLage(n), cs = clientSwitch(n);
+      return l && cs ? [{key: cs.switch, switch: cs.switch, server: l.server}] : [];
+    },
+    anwenden(n, k){ Modell.setzen(n, k.switch, "snooping", {an: true, vertraut: []}); },
+    /* Lösung: den Port zum Server als vertraut eintragen. Lässt sich der Port nicht sicher bestimmen (Server hinter
+       einem weiteren Switch), ist Snooping abzuschalten die richtige Antwort – beides heilt den Fehler. */
+    loesung: (n, k) => {
+      const p = serverPort(n, k.switch, k.server);
+      return [{geraet: k.switch, setzen: {snooping: p ? {an: true, vertraut: [p]} : {an: false, vertraut: []}},
+        text: p ? `Am Switch ${name(n, k.switch)} den Port ${p} (Richtung Server) als vertraut eintragen; Snooping bleibt an.`
+                : `Am Switch ${name(n, k.switch)} DHCP-Snooping abschalten oder den Port Richtung Server als vertraut eintragen.`}];
+    },
+    hilfen: (n, k) => ({frage: ["Der Server läuft, der Pool hat Adressen – und trotzdem kommt kein Angebot an. Was könnte die Antwort auf dem Weg zum Client abfangen?"],
+      bereich: [{geraet: k.switch}], konkret: [`Am Switch ${name(n, k.switch)} ist DHCP-Snooping an, aber kein Port als vertraut markiert – die Antwort des Servers wird verworfen.`]}),
+    erklaerung: "DHCP-Snooping schützt vor fremden DHCP-Servern: Nur an „vertrauten“ Ports dürfen Server-Antworten (Offer, Ack) hereinkommen, alle anderen Ports dürfen nur Anfragen stellen. Ist der Port zum echten Server nicht als vertraut eingetragen, wirft der Switch dessen Antworten weg – die Clients bekommen keine Adresse, obwohl der Server läuft.",
+    quelle: "RFC 2131 · IOS-ähnlich (Snooping ist eine Switch-Funktion)"});
+
   return I;
 })();

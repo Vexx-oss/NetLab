@@ -54,6 +54,8 @@ Spiel.DEX_SYMPTOM = {
   "fw-reihenfolge":     "„Eine Freigabe ist eingerichtet – und wird trotzdem gesperrt.“",
   "portfwd-falsch":     "„Der Webshop ist von außen nicht erreichbar, intern schon.“",
   "dmz-regel-fehlt":    "„Von außen erreicht niemand unseren Webserver.“",
+  "fremder-dhcp":       "„Alle Rechner haben eine Adresse – und trotzdem kommt keiner mehr ins Internet. Ging vorher.“",
+  "snooping-ohne-trust": "„Der Server läuft doch – warum bekommt trotzdem kein Rechner eine Adresse?“"
 };
 
 Spiel.dex.daten = function(){
