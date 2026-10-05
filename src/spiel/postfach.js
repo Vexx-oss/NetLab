@@ -151,7 +151,16 @@ Spiel.postfachAuffuellen = function({still = false} = {}){
     for (const k of auswahl) {
       try {
         if (k.ticketId) neu.push(Spiel.instanzErstellen({ticketId: k.ticketId, quelle: "postfach"}));
-        else neu.push(Spiel.instanzErstellen({gen: {form: k.form, seed: Spiel.neuerSeed(k.schluessel), opts: Object.assign({stufe: niveau}, k.gen.opts)}, quelle: "generiert"}));
+        else {
+          /* selten findet ein Form-Generator für einen Seed keinen passenden Fehler (z. B. Fernwartung beim Schreibbüro ~0,6 %) – dann ein anderer Seed */
+          let inst = null, fehler = null;
+          for (let v = 0; v < 3 && !inst; v++) {
+            try { inst = Spiel.instanzErstellen({gen: {form: k.form, seed: Spiel.neuerSeed(k.schluessel + (v ? ":" + v : "")), opts: Object.assign({stufe: niveau}, k.gen.opts)}, quelle: "generiert"}); }
+            catch (e) { fehler = e; }
+          }
+          if (!inst) throw fehler;
+          neu.push(inst);
+        }
       } catch (e) { typeof console !== "undefined" && console.error("Mischer", k.schluessel, e); }
     }
   }

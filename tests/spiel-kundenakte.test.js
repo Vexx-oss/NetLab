@@ -129,11 +129,12 @@ gruppe("Spiel: Kundenakte", () => {
 
   pruefe("Feierabend-Ausblick: Folgeauftrag vor Notfall vor Kapitel vor Postfach („Morgen: …“)", stufe1(() => {
     Spiel.kundenakte.daten("salon").punkte = 1;                                     /* eine saubere Arbeit bis Vertrauen 2 = Kapitel 1 */
-    erwarte.wahr(/^Morgen: Noch ein sauberer Auftrag bei Mira Kaya – dann wartet Kapitel 1: „/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
+    erwarte.wahr(/^Morgen: Ein sauberer Auftrag bei Mira Kaya, dann „.+“\.$/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
     const n = Spiel.instanzErstellen({ticketId: "baeckerei-01", quelle: "notfall", frist: jetzt() + 20 * 60e3});
-    erwarte.wahr(/^Morgen zuerst: Notfall bei Bäckerei Kornblume/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
+    erwarte.wahr(/^Morgen zuerst: Notfall bei Bäckerei Kornblume\.$/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
     Spiel.varianten.schulden().push({id: "s1", ticket: "salon-05", kunde: "salon", titel: "Das Lämpchen blinkt nicht", seit: 0, faellig: 3, folge: null, erledigt: false});
-    erwarte.wahr(/^Morgen: Das Provisorium bei Mira Kaya \(„Das Lämpchen blinkt nicht“\) meldet sich in etwa 3 Aufträgen\.$/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
+    erwarte.wahr(/^Morgen: Provisorium bei Mira Kaya – meldet sich in 3 Aufträgen\.$/.test(Spiel.hub.ausblick()), Spiel.hub.ausblick());
+    erwarte.wahr(Spiel.hub.ausblick().split(/\s+/).filter(w => /[\p{L}\p{N}]/u.test(w)).length <= 10, "kurz genug fürs Platzbudget des Hubs (gezählt wie bei der Messung)");
     Spiel.instanzEntfernen(n.iid);
   }));
 });

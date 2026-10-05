@@ -63,7 +63,7 @@ UI.hub = (() => {
     c.replaceChildren(h("div", {class: "hb-seite"},
       h("header", {class: "hb-kopf"}, h("h2", {}, datumText()), h("p", {class: "hb-serie"}, serie)),
       feier, karte, kacheln,
-      fa ? null : h("p", {class: "hb-ziel"}, `Heute ${s.tagesziel.erledigt}/${s.tagesziel.ziel}`, " · ", wocheZeile(s.woche))));
+      h("p", {class: "hb-ziel"}, fa ? null : `Heute ${s.tagesziel.erledigt}/${s.tagesziel.ziel} · `, wocheZeile(s.woche))));   /* Wochenziel auch im Feierabend */
   }
   /* Wochenziel (§ 20 F7): frei wählbar aus drei Vorschlägen; ohne Wahl nur ein kleiner Knopf */
   function wocheZeile(w){
