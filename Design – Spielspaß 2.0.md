@@ -1124,7 +1124,7 @@ Eingegrenzt, damit die Ursache feststeht:
 ### 23.7 Was als Nächstes dran ist
 
 1. **Windows neu starten**, dann `python tools/q-echt.py` – Q4 nachholen, Bilder ablegen.
-2. **D1 – DHCP** (Q Punkt 5). **Nicht begonnen**, wie in Q vorgesehen erst nach Q4. Vor der ersten Änderung die Golden-Tests der Simulation sichern.
+2. **D1 – DHCP** (Q Punkt 5): **begonnen, 4 von 9 Pflichtpunkten fertig** – Vertrag, Simulation, Konsole und Lehrtexte stehen (Commits `57c34b4` bis `6012d88`). Offen: Oberfläche, Fehlerinjektoren, Tickets je Stufe, Wiki/Lernmotor-Skill. Stand im Einzelnen: `Architektur.md` § 10.9. Der Regressionsschutz für die Simulation ist eingerichtet (`tests/sim-stand.json`, 12 Szenarien, 403 Ereignisse) und läuft vor jeder Änderung an `src/sim/` oder `src/modell/`.
 
 ---
 

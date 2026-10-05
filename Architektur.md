@@ -639,7 +639,7 @@ Keine neue `art`, kein neues Feld im Ereignisobjekt. `tests/sim-gruende.test.js`
 
 Änderungen an einer fremden Datei gehen über den Lead. Kein Mitglied committet selbst.
 
-### 10.9 Stand der Umsetzung (05.10.2026)
+### 10.9 Stand der Umsetzung (05.10.2026, abends nachgetragen)
 
 | Punkt aus § 10.7 | Stand |
 |---|---|
@@ -670,3 +670,17 @@ Desktop fertig; die Bilder gehören nach `Nachweise/1.2-Q/`.
 **Regressionsschutz:** `node tools/sim-stand.js` vergleicht die Simulation gegen `Nachweise/sim-stand.json`
 (12 Szenarien, 403 Ereignisse) und meldet jede Abweichung mit Stelle und Art. Nach jeder Änderung an `src/sim/`
 oder `src/modell/` laufen lassen — zusammen mit `node tests/run.js`.
+**Betriebsregeln und Werkzeuge (Auftrag R, Schritt 1, 05.10.2026):** Die verbindlichen Regeln für jede weitere Arbeit
+stehen in `AGENTS.md` im Projektordner. Kurz: keine Prozesse nach Namen beenden (nur eigene PIDs), kein Push, kein
+Zweigwechsel, keine Dateien außerhalb des Projekts ändern, nichts behaupten, was nicht gemessen ist. Dazu die
+Zeilenenden-Regel (`git ls-files --eol`, danach `git diff --stat` gegen `--ignore-cr-at-eol`) und „senkrechter Schnitt
+vor Breite“.
+
+Die **Simulations-Referenz liegt versioniert** in `tests/sim-stand.json` (vorher `Nachweise/`, das nicht im Git liegt –
+Befund M3). `node tools/sim-stand.js` vergleicht gegen diese Datei. Die **Zeilenenden** sind über `.gitattributes`
+(`* text=auto eol=lf`, Binärdateien ausgenommen) vereinheitlicht.
+
+**Betriebsbefund (Design § 25):** `python tools/q-echt.py` startet die `.exe` in dieser Umgebung **nicht** –
+`failed to create webview`, `HRESULT(0x800700AA)`, zuerst um 16:11:40 und erneut um 16:14:18 gemessen. Deshalb laufen
+alle Prüfungen, die das echte Programm brauchen, im Rauchtest (`python tools/rauch.py`, echte Maus) und werden
+ausdrücklich als „nicht im echten Programm“ gekennzeichnet.
