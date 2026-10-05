@@ -1241,3 +1241,24 @@ Weitere Messungen dieser Sitzung: `python tools/klassen.py` → **0**, `python b
 Dazu ein belegter Messfehler zum Nachlesen: `git diff --cached --ignore-cr-at-eol --stat` zeigte **nur** `.gitattributes`, während `--name-only` **63** Dateien nannte. Die beiden widersprechen sich nicht – `--name-only` kennt `--ignore-cr-at-eol` nicht. Die Zeilenenden-Prüfung läuft deshalb byteweise über die Blobs (siehe Schritt 1b).
 
 **Bereit zum Push: nein** – 6 Commits auf `ausbau-1.2`, aber ein Test ist rot. Erst den Entwurfs-Test klären, dann pushen. **HALTEPUNKT.**
+
+### Auslieferung: spielbarer Build (05.10.2026, 17:15)
+
+**Spielbar ist die Browser-Fassung.** Zwei Dateien liegen bereit:
+
+| Datei | Größe | Stand |
+|---|---|---|
+| `Programm/Netzwerk-Labor-Browser.zip` | 1.252.929 Bytes | 17:09 |
+| `Programm/SPIELEN.md` | 5.655 Bytes | 17:11 — Start, erste 5 Minuten, Grenzen |
+| `Programm/Netzwerk-Labor.exe` | 8.174.592 Bytes | 17:11 — **startet nicht** (WebView2, s. o.) |
+
+**Gemessen (nicht behauptet):**
+
+- Das ZIP enthält **20 von 20 Dateien** aus `web/`, keine fehlt, keine ist überzählig; `index.html` liegt im Wurzelverzeichnis, `schriften/` mit 17 Dateien ist dabei. Unabhängig gegengeprüft mit einem eigenen Skript über `zipfile` (Eintragsliste, Größen) **und** vom Teammitglied zusätzlich über den Windows-eigenen ZIP-Leser.
+- Die Fassung **läuft per Doppelklick (`file://`)**: in Edge geladen, Engine vollständig da (46 Tickets, 36 Injektoren, 8 Formen, 14 Schriftarten geladen), Fenstertitel zeigt „Netzwerk-Labor“. Das war der einzige offene Punkt aus der ZIP-Prüfung des Teammitglieds — es hatte ausdrücklich vermerkt, **keinen** Browser geöffnet zu haben.
+- Der **Rauchtest läuft 36/36 grün gegen genau diese Datei** (12 Ansichten × 3 Breiten, erster Auftrag mit echter Maus, Abnahme 5 ★).
+- Die `.exe` wurde neu gebaut (127,4 s, anderes Binary als 14:37: +27.136 Bytes, SHA256 874E3690…) und **startet weiterhin nicht**: `python tools/q-echt.py`, Start 17:11:56, Exit 1, kein Port 9222. Ursache ist der bekannte WebView2-Befund (M1/§ 25), **nicht** der neue Bau.
+
+**Bewusst offen gelassen:** Ob im neuen Binary genau die 17:09:29-Seite steckt, ist **nicht bewiesen** — die Assets liegen komprimiert im exe, die Klartext-Marker (`DHCP_SNOOPING_BLOCKED`, `in-lease`) sind dort nicht auffindbar. Der Bau ist nachweislich neu (anderer Hash), die Einbettung ist eine naheliegende Annahme. Für die Spielbarkeit ist das belanglos, weil die `.exe` ohnehin nicht startet.
+
+**Offene Entscheidung:** Das veraltete `Programm/Netzwerk-Labor.zip` (30.09.) liegt unverändert daneben und kann in einer Klasse verwirren. Löschen oder ersetzen steht noch aus.
