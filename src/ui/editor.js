@@ -412,8 +412,15 @@ UI.labor = (() => {
     el.append(sv("circle", {class: "ger-auswahl", cx: 0, cy: 0, r: 38}));
     el.append(UI.geraetebild(g.typ, g.skin));
     const a = UI.ebenen.adresse(netz, g);
-    el.append(sv("text", {class: "ger-name", x: 0, y: g.typ === "internet" ? 46 : 44, "text-anchor": "middle", text: g.name}));
-    if (a.text) el.append(sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: g.typ === "internet" ? 60 : 58, "text-anchor": "middle", text: a.text}));
+    /* Name und Adresse mit Luft: bei 12-13 px Schrift berührten sich die beiden Zeilen (Abstand 0 gemessen,
+       Befund 05.10.2026) – das wirkt gedrängt, auch wenn sich die Kästen formal nicht schneiden. */
+    el.append(sv("text", {class: "ger-name", x: 0, y: 46, "text-anchor": "middle", text: g.name}));
+    /* Auf der Fläche steht bewusst NUR die erste Adresse (Kurzform „… +2“ bei mehreren Schnittstellen).
+       Alle Adressen mit Schnittstelle stehen im Tooltip. Begründung: Mit allen drei Adressen untereinander
+       füllte der Router den Bereich unter sich voll und stieß an die Portnamen – dieselbe Dichte, die der
+       Kunde bemängelt hat (Versuch und Messung 05.10.2026). Die Subnetz-Schilder sagen bereits, welche
+       Netze es gibt; welcher Router-Port in welchem Netz liegt, verrät der Tooltip und der Inspektor. */
+    if (a.text) el.append(sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: 62, "text-anchor": "middle", text: a.text}));
     /* Alle Adressen in den Tooltip: Auf der Fläche steht nur die erste (sonst wird es unleserlich) – hier muss
        vollständig stehen, welche Adresse zu welcher Schnittstelle gehört. Sonst findet der Spieler die Adressen
        der übrigen Subnetze nirgends (Befund 05.10.2026: Router zeigte nur „192.168.10.1/24 +2“). */

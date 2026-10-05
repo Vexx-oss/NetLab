@@ -100,6 +100,16 @@ MESSUNG = r"""
   }
   const groessen = {};
   for (const t of texte) groessen[t.klasse] = Math.min(groessen[t.klasse] ?? 99, t.schrift);
+  /* Engste Abstaende zwischen zwei Texten: kleiner als 2 px heisst "klebt aneinander",
+     auch wenn sich die Kaesten formal nicht schneiden. */
+  const abstand = (a, c) => Math.max(0, Math.max(a.x - (c.x + c.b), c.x - (a.x + a.b)))
+                        + Math.max(0, Math.max(a.y - (c.y + c.h), c.y - (a.y + a.h)));
+  const eng = [];
+  for (let i = 0; i < texte.length; i++) for (let j = i + 1; j < texte.length; j++) {
+    const d = abstand(texte[i], texte[j]);
+    if (d < 2) eng.push({a: texte[i].klasse + ' „' + texte[i].inhalt + '“',
+                         b: texte[j].klasse + ' „' + texte[j].inhalt + '“', abstand: +d.toFixed(1)});
+  }
   const kabel = [...svg.querySelectorAll('.kabel-port')].map(t => t.textContent);
   const zonen = [...svg.querySelectorAll('.zone-text')].map(t => t.textContent);
   return {
@@ -110,6 +120,8 @@ MESSUNG = r"""
     beispieleKachel: aufKachel.slice(0, 6),
     kleinsteSchrift: groessen,
     schriftUnter12: texte.filter(t => t.schrift < 12).length,
+    klebtAneinander: eng.length,
+    beispieleEng: eng.slice(0, 6),
     kabelPorts: kabel.length,
     kabelPortDoppelt: kabel.length - new Set(kabel).size,
     textListe: texte.map(t => ({klasse: t.klasse, schrift: t.schrift, inhalt: t.inhalt})),
