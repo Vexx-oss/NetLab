@@ -544,3 +544,97 @@ ergebnis.woche                                                                  
 Der Hub bleibt bei einem Hauptknopf und ≤ 40 Wörtern: „oder:“ mit zwei kleinen Zeilen (Formsymbol + Titelanfang), Fußzeile „Heute 1/3 · Woche 0/3 Rätsel“ bzw. „Wochenziel wählen“ (Dialog mit drei Vorschlägen und „Später“).
 
 **Rauchtest der Oberfläche** (`tools/rauch.py`, § 20 F8): siehe § 2.
+
+---
+
+## 10 · DHCP-Tiefe (D1 aus `Plan – Ausbau 1.2.md`) — verbindlicher Vertrag
+
+*Festgelegt 05.10.2026 vor der ersten Zeile Code. Datenformen zuerst hier, dann im Code (Leitplanke 1).*
+
+**Regressionsschutz zuerst:** `tools/sim-stand.js` friert die Ereignisse der Simulation ein (`Nachweise/sim-stand.json`). Nach **jeder** Änderung an `src/sim/` und `src/modell/` laufen lassen:
+`node tools/sim-stand.js` → muss „Simulation unverändert" melden, außer der Änderungsteil ist gewollt und im Bericht benannt. Zusätzlich bleiben die 207 Tests grün.
+
+### 10.1 Konfiguration (`geraet.running`, wandert in den Spielstand) — ERWEITERT
+
+```js
+/* Router/Firewall als DHCP-Server: running.dhcp */
+dhcp = {
+  an: false,                       // NEU: Server an/aus (bisher immer an, sobald Pools existieren)
+  pools: [{
+    name, netz, maske, gw, dns,    // vorhanden
+    start: "", anzahl: 50,         // NEU beim Router (Host kennt sie schon) – wie host.js
+    domain: "",                    // NEU: Option 15
+    leaseS: 86400,                 // NEU: Lease-Dauer in Sekunden; 0/fehlend = Sim.T.LEASE
+    reservierungen: [              // NEU: feste Zuordnung MAC → IP
+      { mac:"02:00:...", ip:"192.168.10.20", name:"drucker" }
+    ]
+  }],
+  ausgeschlossen: [{von, bis}],    // vorhanden
+}
+/* Host (pc/server/nas) als DHCP-Server: running.dienste.dhcp – bekommt dieselben Pool-Felder
+   (start, anzahl, domain, leaseS, reservierungen). `ausgeschlossen` gilt auch hier (heute nicht). */
+/* Switch: running.snooping */
+snooping = { an:false, vertraut:["Gi0/1"] }   // NEU: DHCP-Snooping, vertraute Ports (Richtung Server)
+```
+
+**Einheitlichkeit ist Pflicht:** Ein Router-Pool und ein Host-Pool haben dieselbe Form. Die heute unterschiedliche Feldliste (Router ohne `start`/`anzahl`, Host ohne `ausgeschlossen`) wird zusammengeführt. Fehlende Felder werden **defensiv** gelesen (Standard), damit alte Spielstände laden.
+
+### 10.2 Laufzeit (`netz.zustand[id]`) — ERWEITERT
+
+```js
+leases: { [ip]: { mac, bis, t1, t2, hostname, abgelaufen:false } }   // t1/t2 NEU (ms), abgelaufen NEU
+dhcp:   { [port]: { ip, maske, gw, dns, server, bis, t1, t2, domain } }  // t1/t2/domain NEU (Client-Sicht)
+snooping: { [port]: { verworfen:0 } }                                 // NEU: Zähler je Switch-Port
+```
+`t1 = bis - leaseDauer/2` (Erneuerung bei 50 %), `t2 = bis - leaseDauer/8` (Rebind, nur Anzeige). Alte Leases ohne `t1/t2` werden als „kein T1 bekannt" behandelt, nicht als Fehler.
+
+### 10.3 Verhalten (Simulation)
+
+1. **Ablauf in virtueller Zeit.** Ist `L.t > l.bis`, gilt die Lease als abgelaufen: `Sim.adresse` liefert `quelle:"keine"`, und der nächste `Sim.ping`/`Sim.dhcp` holt neu (bestehendes `brauchtDhcp`). **Kein** neues Ereignis, kein Timer, keine neue `art` – der Ablauf wird beim Zugriff festgestellt, nicht nebenher. Damit bleibt der Trace für bestehende Läufe unverändert.
+2. **Erneuerung bei 50 %.** `dhcpHolen` unterscheidet: gültige Lease vorhanden und `L.t >= t1` → **Renew** (Unicast Request an den Server, danach Ack; Typ `request`/`ack` wie bisher, damit die Feldmenge `["discover","offer","request","ack"]` erhalten bleibt). Sonst wie heute Discover.
+3. **Reservierung.** Passt die Client-MAC auf einen Eintrag, wird **diese** IP angeboten (auch wenn sie außerhalb `start..anzahl` liegt), aber nur, wenn sie frei ist. Nicht freie Reservierung → kein Angebot, Grund `DHCP_RESERVED_BUSY`.
+4. **Optionen.** Der Ack trägt zusätzlich `domain` (Option 15). `leaseS` kommt aus dem Pool.
+5. **Adresskonflikt.** Vor dem Angebot prüft der Server die Adresse gegen alle Geräte und fremden Leases; ist sie doppelt belegt → nächste Adresse, und der Konflikt wird vermerkt: `leases[ip].konflikt = true` mit Zeitpunkt. `show ip dhcp conflict` gibt diese Zeilen aus (heute feste Kopfzeile ohne Daten).
+6. **Rogue-DHCP.** Ein zweiter DHCP-Server im selben LAN ist erlaubt; der Client nimmt das **erste** Angebot. Der fremde Server kann ein falsches Gateway/DNS verteilen. Erkennbar an `show ip dhcp binding` (unbekannte MAC) und am Symptom „falsches Gateway". Neuer Grund `DHCP_ROGUE_OFFER` (Schicht 7) für den Fall, dass ein Angebot von einem nicht vorgesehenen Server kommt und der Client es annimmt.
+7. **DHCP-Snooping.** Am Switch mit `snooping.an`: DHCP-**Server**-Nachrichten (UDP 67 → 68, Offer/Ack) von einem **nicht vertrauten** Port werden verworfen; der Zähler steigt, der Client bekommt kein Angebot. Neuer Grund `DHCP_SNOOPING_BLOCKED` (Schicht 2). Client-Nachrichten (Discover/Request, Port 68 → 67) sind immer erlaubt.
+
+### 10.4 Neue Gründe (Codes) — genau diese fünf, keine weiteren
+
+| Code | Titel | Schicht | Ausgelöst wenn |
+|---|---|---|---|
+| `DHCP_LEASE_EXPIRED` | DHCP-Lease abgelaufen | 7 | Zugriff mit `L.t > l.bis` und kein neues Angebot |
+| `DHCP_RESERVED_BUSY` | Reservierte Adresse belegt | 7 | Reservierung zeigt auf eine belegte Adresse |
+| `DHCP_ROGUE_OFFER` | Angebot von fremdem DHCP-Server | 7 | Client nimmt ein Angebot eines unerwarteten Servers |
+| `DHCP_SNOOPING_BLOCKED` | DHCP-Snooping blockiert | 2 | Server-Antwort an einem nicht vertrauten Switch-Port |
+| `DHCP_CONFLICT` | Adresskonflikt im Pool | 7 | Server findet eine doppelt belegte Adresse |
+
+Jeder Code braucht: Eintrag in `Sim.GRUENDE`, Lehrtext in drei Tiefen in `DATEN.lehrtexte` **mit Quelle** (RFC 2131/2132, „IOS-ähnlich" kennzeichnen, wo es kein echtes Vorbild gibt), Injektor in `spiel/injektoren.js`, mindestens ein Ticket je Stufe, und Aufnahme in die Grundcode-Liste in `tests/sim-gruende.test.js` (sonst rot).
+
+### 10.5 Trace — unverändert im Format
+
+Keine neue `art`, kein neues Feld im Ereignisobjekt. `tests/sim-gruende.test.js` prüft die Schlüsselmenge eines Ereignisses **exakt** (Zeile ~244) und führt `ARTEN`/`PROTOS` als geschlossene Listen. Neue DHCP-Nachrichten (Renew) nutzen die vorhandenen Typen `request`/`ack`; neue `app.felder` sind erlaubt (sie erscheinen in der PDU-Ansicht und sind dort gewollt).
+
+### 10.6 Oberfläche und Konsole
+
+- **Lease-Tabelle** (neu, `ui/inspektor.js`, Router- und Server-Reiter „NAT/DHCP" bzw. „Dienste"): Gerät · IP · MAC · Restlaufzeit · Zustand (aktiv/abgelaufen/reserviert). Quelle ist `Sim.leases(netz, id)` – heute vorhanden, aber von keiner UI benutzt.
+- **Pool-Formular** um `start`, `anzahl`, `domain`, `leaseS`, `reservierungen` erweitern (Router **und** Host gleich).
+- **Switch-Reiter**: Schalter „DHCP-Snooping" und die vertrauten Ports.
+- `show ip dhcp binding|pool|conflict` gilt **auch auf Server-Hosts** (heute nur Router), `binding` zeigt Restzeit und Zustand, `conflict` die echten Konflikte, `pool` rechnet `start`/`anzahl` und Ausschlüsse korrekt (heute „ganzes Subnetz").
+- Windows `ipconfig /all`: Lease erhalten/erstellt/ablauf (aus `t1/t2/bis`), DHCP-Server. Linux: `dhclient` und `ip a` mit echter Restlaufzeit (heute fest `86234sec`).
+- IOS-Poolmodus: `lease`, `domain-name`, `network`, `default-router`, `dns-server`, `host`/`hardware-address` (Reservierung).
+
+### 10.7 Definition „fertig" (neun Punkte aus Phase D)
+
+① Architektur (dieser Abschnitt) ② Sim-Verhalten + Gründe ③ CLI (IOS *und* Host) ④ Oberfläche ⑤ Lehrtext E/AP1/AP2 mit Quelle ⑥ 3–5 Fehlerinjektoren ⑦ mindestens ein Ticket je Stufe, automatisch validiert ⑧ Tests ⑨ Wiki-Eintrag + Skill im Lernmotor. Fehlt einer, gilt D1 als nicht eingebaut.
+
+### 10.8 Arbeitsteilung (Schreibrechte, damit sich niemand überschreibt)
+
+| Wer | Dateien (nur diese) |
+|---|---|
+| Simulation | `src/modell/**`, `src/sim/**` |
+| Konsole | `src/cli/**` |
+| Oberfläche | `src/ui/**`, `src/stil/**` |
+| Inhalte | `src/daten/**`, `src/spiel/**` |
+| Lead | `Architektur.md`, `bauen.py`, `tools/**`, Tests, Commits |
+
+Änderungen an einer fremden Datei gehen über den Lead. Kein Mitglied committet selbst.
