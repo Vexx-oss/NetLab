@@ -60,6 +60,15 @@ Spiel.hub.naechster = function(){
     klingelt: !!inst.klingelt && !inst.geoeffnet};
 };
 
+/* Die Wahl bleibt sichtbar (§ 20 F7): zwei weitere Aufträge aus dem Postfach neben der Hauptkarte (Titel kurz: Platzbudget) */
+Spiel.hub.weitere = function(n = 2){
+  const haupt = Spiel.hub.naechster();
+  return Spiel.postfach().filter(i => i.iid !== haupt.iid).slice(0, n).map(i => {
+    const def = Spiel.defVon(i), w = String(def.titel || "").split(/\s+/);
+    return {iid: i.iid, titel: w.length > 3 ? w.slice(0, 3).join(" ") + " …" : def.titel, voll: def.titel, form: Spiel.formVon(def), klingelt: !!i.klingelt && !i.geoeffnet};
+  });
+};
+
 /* Ein Satz für morgen – der offene Faden (Design § 20, F5): Folgeauftrag eines Provisoriums → Notfall → ein Kapitel, das nur
    noch eine saubere Arbeit entfernt ist → Kundenauftrag im Postfach → fällige Fertigkeit → nächstes Tagesrätsel */
 Spiel.hub.ausblick = function(){
@@ -100,6 +109,8 @@ Spiel.hub.stand = function(){
     post: {ungelesen: Spiel.post ? Spiel.post.ungelesen() : 0},
     dex: Spiel.dex.zaehlen(),
     tagesziel: {erledigt: t.erledigtHeute, ziel: t.ziel},
+    weitere: Spiel.hub.weitere(),                                     /* § 20 F7: die Wahl aus dem Postfach, als kleine Zeilen */
+    woche: Spiel.woche ? Spiel.woche.stand() : null,
     feierabend: t.fertig ? {bilanz: Spiel.tag.bilanz(), ausblick: Spiel.hub.ausblick()} : null,
   };
 };

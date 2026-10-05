@@ -1,6 +1,6 @@
 "use strict";
 /* ---------- Hub „Heute“: die ruhige Startseite (Design – Spielspaß 2.0, Hebel 4; Architektur § 9.3) ----------
-   Datumszeile und Serie · eine Karte „Dein nächster Auftrag“ mit dem einzigen Hauptknopf · drei Kacheln
+   Datumszeile und Serie · eine Karte „Nächster Auftrag“ mit dem einzigen Hauptknopf (darunter „oder:“ zwei weitere als kleine Zeilen) · drei Kacheln
    (Aufwärmen · Tagesrätsel · Post bzw. Fehlerdex) · nach dem Tagesziel Feierabend mit Bilanz und Ausblick.
    Platzbudget R5: ≤ 40 Wörter, genau ein Hauptknopf. Dazu: Aufwärmen (3 Mini-Karten), Tagesrätsel-Ergebnis
    zum Kopieren, Fehlerdex (Abschnitt im Lernstand) und das Spieltagebuch (Einstellungen, Lernstand). Präfix hb-, dx-. */
@@ -45,10 +45,13 @@ UI.hub = (() => {
       : h("section", {class: "hb-auftrag" + (n.klingelt ? " klingelt" : ""), style: {"--k": `var(${n.farbe || "--accent"})`}},
           h("span", {class: "sp-kunde-sym gross"}, n.klingelt ? "☎" : n.symbol),
           h("div", {class: "hb-auftrag-text"},
-            h("small", {}, n.klingelt ? `${n.kontakt} ruft an` : n.art === "weiter" ? "Weiter mit" : "Dein nächster Auftrag"),
+            h("small", {}, n.klingelt ? `${n.kontakt} ruft an` : n.art === "weiter" ? "Weiter mit" : "Nächster Auftrag"),
             h("h3", {}, n.titel),
             h("p", {}, `${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).sym} ${(Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung).titel} · ${n.kunde} · ~${n.minuten} min · ${eur(n.euro)} €`)),
-          h("button", {type: "button", class: knopfKlasse, onclick: () => UI.spiel.oeffnen(n.iid)}, n.klingelt ? "Rangehen ▸" : n.art === "weiter" ? "Weiterarbeiten ▸" : "Annehmen ▸"));
+          h("button", {type: "button", class: knopfKlasse, onclick: () => UI.spiel.oeffnen(n.iid)}, n.klingelt ? "Rangehen ▸" : n.art === "weiter" ? "Weiterarbeiten ▸" : "Annehmen ▸"),
+          /* § 20 F7: die Wahl aus dem Postfach – zwei weitere als kleine Zeilen (kein zweiter Hauptknopf) */
+          s.weitere.length ? h("div", {class: "hb-oder"}, h("small", {}, "oder:"), s.weitere.map(w => h("button", {type: "button", class: "hb-oder-zeile", title: w.voll,
+            onclick: () => UI.spiel.oeffnen(w.iid)}, h("span", {"aria-hidden": "true"}, w.klingelt ? "☎" : (Spiel.FORMEN[w.form] || Spiel.FORMEN.stoerung).sym), " ", w.titel))) : null);
     const aw = s.aufwaermen, ra = s.raetsel;
     const kachel = (sym, titel, info, fn, fertig) => h("button", {type: "button", class: "hb-kachel" + (fertig ? " fertig" : ""), onclick: fn},
       h("span", {class: "hb-kachel-sym", "aria-hidden": "true"}, sym), h("span", {class: "hb-kachel-text"}, h("b", {}, titel), h("small", {}, info)));
@@ -60,9 +63,24 @@ UI.hub = (() => {
     c.replaceChildren(h("div", {class: "hb-seite"},
       h("header", {class: "hb-kopf"}, h("h2", {}, datumText()), h("p", {class: "hb-serie"}, serie)),
       feier, karte, kacheln,
-      fa ? null : h("p", {class: "hb-ziel"}, `${s.tagesziel.erledigt}/${s.tagesziel.ziel} Aufträge heute`)));
+      fa ? null : h("p", {class: "hb-ziel"}, `Heute ${s.tagesziel.erledigt}/${s.tagesziel.ziel}`, " · ", wocheZeile(s.woche))));
   }
-  const neu = () => { if (wurzel && wurzel.isConnected && !wurzel.hidden) zeigen(wurzel); };
+  /* Wochenziel (§ 20 F7): frei wählbar aus drei Vorschlägen; ohne Wahl nur ein kleiner Knopf */
+  function wocheZeile(w){
+    if (!w) return h("button", {type: "button", class: "hb-woche-knopf", onclick: wocheWaehlen}, "Wochenziel wählen");
+    return h("button", {type: "button", class: "hb-woche-knopf" + (w.erreicht ? " fertig" : ""), title: w.text + " – ändern", onclick: wocheWaehlen},
+      w.erreicht ? `Woche ✓ ${w.text}` : `Woche ${w.ist}/${w.soll} ${w.kurz}`);
+  }
+  function wocheWaehlen(){
+    const jetzt = Spiel.woche.stand();
+    const zu = overlay(h("div", {class: "hb-woche"},
+      h("h2", {}, "Dein Ziel für diese Woche"),
+      h("p", {class: "sp-leise"}, "Eins von dreien – oder keins. Geschafft gibt +1 Ruf; verpasst kostet nichts."),
+      h("div", {class: "hb-woche-wahl"}, Spiel.woche.vorschlaege().map(v => h("button", {type: "button", class: "knopf" + (jetzt && jetzt.id === v.id ? " an" : ""),
+        onclick: () => { Spiel.woche.waehlen(v.id); zu(); neu(); }}, "🎯 " + v.text))),
+      h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Später"))));
+  }
+  function neu(){ if (wurzel && wurzel.isConnected && !wurzel.hidden) zeigen(wurzel); }
 
   /* ---------- Aufwärmen: drei Mini-Karten (Lernmotor: fällige Fertigkeiten zuerst) ---------- */
   function aufwaermen(){

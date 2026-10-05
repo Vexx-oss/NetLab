@@ -465,6 +465,7 @@ UI.spiel = (() => {
       abz.length ? h("p", {class: "sp-zeile"}, "🏅 ", h("b", {}, abz.length === 1 ? "Neues Abzeichen: " : "Neue Abzeichen: "), abz.map(a => `${a.sym} ${a.titel}`).join(" · ")) : null,
       besser ? h("p", {class: "sp-zeile"}, "📈 ", h("b", {}, besser.name + ": "), `Stufe ${besser.vorher} → ${besser.nachher}`) : null,
       feierabend ? feierabendZeile() : null,
+      erg.woche ? h("p", {class: "sp-zeile"}, "🎯 ", h("b", {}, "Wochenziel geschafft: "), `${erg.woche.text} · +${erg.woche.ruf} Ruf`) : null,
       ...dexZeilen(erg.dex),
       erg.raetsel ? h("p", {class: "sp-zeile sp-raetsel"}, "🧩 ", h("b", {}, `Tagesrätsel #${erg.raetsel.nr}: `), h("span", {class: "sp-raetsel-zeile"}, erg.raetsel.zeile), " ",
         h("button", {type: "button", class: "knopf klein", onclick: () => UI.hub.kopieren(Spiel.raetsel.teilen(), "Ergebnis kopiert – einfach einfügen.")}, "Ergebnis kopieren")) : null,

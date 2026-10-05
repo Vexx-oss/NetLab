@@ -58,3 +58,16 @@ button.dx-karte:hover{border-color:var(--accent)}
 .hb-auftrag.klingelt{border-color:var(--ok)}
 .hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln 1.2s ease-in-out infinite}
 @media (prefers-reduced-motion: reduce){ .hb-auftrag.klingelt .sp-kunde-sym{animation:none} }
+/* § 20 F7: Wahl unter der Hauptkarte und Wochenziel */
+.hb-oder{grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin-top:-4px}
+.hb-oder small{color:var(--faint); font-size:12.5px}
+.hb-oder-zeile{all:unset; cursor:pointer; padding:3px 9px; border-radius:8px; border:1px solid var(--line); color:var(--muted); font-size:13px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.hb-oder-zeile:hover, .hb-oder-zeile:focus-visible{border-color:var(--accent); color:var(--ink); outline:none}
+.hb-woche-knopf{all:unset; cursor:pointer; color:var(--muted); border-bottom:1px dashed var(--line-2)}
+.hb-woche-knopf:hover, .hb-woche-knopf:focus-visible{color:var(--ink); border-bottom-color:var(--accent)}
+.hb-woche-knopf.fertig{color:var(--ok)}
+.hb-woche{display:flex; flex-direction:column; gap:12px}
+.hb-woche h2{font:800 22px/1.2 var(--display)}
+.hb-woche-wahl{display:flex; flex-direction:column; gap:8px}
+.hb-woche-wahl .knopf{justify-content:flex-start; text-align:left}
+.hb-woche-wahl .knopf.an{border-color:var(--accent); background:var(--accent-soft)}

@@ -138,6 +138,7 @@ Spiel.abschliessen = function(inst, abnahme){
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
     dex, raetsel, verdacht, hotline, schuld, kundenakte, flow,
+    woche: Spiel.woche ? Spiel.woche.pruefen() : null,                    /* § 20 F7: Wochenziel geschafft → +1 Ruf */
     ereignis: Spiel.ersteStunde ? Spiel.ersteStunde.abholen() : null,     /* erste Stunde: Anruf oder Weiterempfehlung als Karte */
     karten: [],                                                           /* Karten nach dem Ergebnis (Oberfläche), unten gefüllt */
   };

@@ -531,4 +531,16 @@ ergebnis.flow                                         // Zeile im Ergebnis, wenn
 - `Spiel.instanzErstellen` hält `inst.flow` fest und baut Generiertes neu: Formen ein Niveau tiefer/höher (`gen.opts.stufe`, z. B. Plan-Audit 1 statt 2 Fehler), Störungen über `gen.opts.flow` – beides steht in `gen.opts`, das Neuladen baut dieselbe Fassung. Handgeschriebene Aufträge ändern nur Begleitung (Tipp, Regeln), nie ihren Fehler.
 - Oberfläche: Gerüst – die Frage des Seniors steht in Brief und Zielen der Mappe; Marken „🧭 mit Gerüst“ / „🔥 kniffliger“ im Postfach; Verwicklung – kein Hilfsangebot des Seniors (`Spiel.seniorFaellig`). Einstellung „Anpassung“ unter Darstellung.
 
+**Hub-Wahl und Wochenziel** (`spiel/hub.js`, `spiel/woche.js`, § 20 F7):
+
+```js
+Spiel.hub.weitere(n=2) → [{iid, titel (≤ 3 Wörter + „…“), voll, form, klingelt}]   // neben der Hauptkarte; Spiel.hub.stand().weitere
+Spiel.WOCHENZIELE = [ {id, text, kurz, soll, ist(st, montag)} ]                  // dex · ohneHilfe · formen · raetsel · glanz
+st.wochenziel = {woche:"2026-10-05" (Montag), id, erreicht}                      // gilt nur in dieser Kalenderwoche
+Spiel.woche.vorschlaege() → 3 (Seed = Montag, für alle gleich) · .waehlen(id) · .stand() → {…, ist, soll, erreicht}|null · .pruefen() → {text, ruf:1}|null
+ergebnis.woche                                                                     // „🎯 Wochenziel geschafft: … · +1 Ruf“
+```
+
+Der Hub bleibt bei einem Hauptknopf und ≤ 40 Wörtern: „oder:“ mit zwei kleinen Zeilen (Formsymbol + Titelanfang), Fußzeile „Heute 1/3 · Woche 0/3 Rätsel“ bzw. „Wochenziel wählen“ (Dialog mit drei Vorschlägen und „Später“).
+
 **Rauchtest der Oberfläche** (`tools/rauch.py`, § 20 F8): siehe § 2.
