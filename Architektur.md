@@ -437,3 +437,28 @@ Spiel.EREIGNISSE[id] = {titel, sym, bedingung(ctx) → bool, ausloesen(ctx) → 
 st.ereignisse = { aktivMs, letzteMs, n, liste:[{t, id, kunde, text}] }
 Spiel.ereignisse.tick(ms) → Ereignis|null · .ausloesen(id, ctx) (Tests) · .aktivZaehlen(ms)
 ```
+
+### 9.7 Welle 3, E2 „Kundenakte und Kompetenzkarte“
+
+**Kundenakte** (`spiel/kundenakte.js`, Oberfläche in der Ansicht „Kunden“, Präfix `ka-`):
+
+```js
+st.kundenakte = { [kunde]: { punkte:0, atlas:[geraeteId], kapitel:0..3, gelesen:[nr], antworten:{[nr]: index} } }
+Spiel.kundenakte.daten(kunde) · .vertrauen(kunde) → 1..5          // aus Punkten: ★ ≥ 4,5 +1 · „sauber“ +1 · Notfall rechtzeitig +1 · Provisorium 0
+Spiel.kundenakte.atlasNetz(kunde) → Netz                           // das dokumentierte Netz des Kunden (Vorlage mit festem Seed) für den Plan-Erzeuger
+Spiel.kundenakte.atlas(kunde) → {plan, hell:[id], gesamt, komplett}  // Geräte leuchten, an denen man gearbeitet hat (geändert oder geprüft)
+Spiel.kundenakte.nachAbschluss(inst, def, abnahme, {geaendert, variante}) → {neuHell:[id], vertrauen:{vorher, nachher}, kapitel:nr|null}
+Spiel.kundenakte.kapitel(kunde) → [{nr, titel, frei:bool, ab:vertrauen, gelesen}] · .lesen(kunde, nr) · .antworten(kunde, nr, i) → {richtig, erklaerung}
+Spiel.kundenakte.baustellen(kunde) → offene Schulden (Provisorium, Folgeauftrag noch nicht erledigt)
+DATEN.geschichten[kunde] = [ {nr:1..3, ab:2..4, titel, text, senior, frage:{text, optionen, richtig, erklaerung}, quelle} ]
+```
+
+Kapitel 1 öffnet bei Vertrauen 2, Kapitel 2 bei 3, Kapitel 3 bei 4. Jedes Kapitel: kurze Szene beim Kunden mit kleiner Wendung, ein Satz des Seniors (Haltung: Gegenfrage statt Lösung, trocken-warm), eine Frage mit Erklärung, Quelle für die fachliche Aussage.
+
+**Kompetenzkarte** (`spiel/kompetenz.js`, im Lernstand statt der Fertigkeiten-Liste, Präfix `kk-`):
+
+```js
+Spiel.KOMPETENZ_REGIONEN = [ {id, titel, skills:[id…]} ]          // 6 Regionen, zusammen genau die 27 Fertigkeiten aus DATEN.skills
+Spiel.kompetenz.karte() → { regionen:[{id, titel, felder:[{id, name, zustand, box, nachbarn:[id]}]}], sichtbar, gesamt:27 }
+   // zustand: "nebel" (weder geübt noch neben einem geübten Feld noch freigeschaltet) | "offen" | Lernmotor-Stufe („angefangen“ … „gemeistert ★“)
+```

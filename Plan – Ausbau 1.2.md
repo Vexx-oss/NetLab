@@ -237,6 +237,8 @@ Ticketfeld `plan:{art:"skizze"|"netzplan"|"tabelle"|"soll"|"keiner", verdeckt:[g
 
 ## Phase E · Spielschleife: Abwechslung und Zufall
 
+> [!check] E1 gebaut und abgenommen 05.10.2026 – Formen (Fernwartung, Plan-Audit, Adressplan, Hotline; Sicherheitsvorfall/Rollout offen), Mischer/Postfach als Wahl, Ereignisse, „Provisorium oder sauber?“. Messwerte: [[Design – Spielspaß 2.0#18 · Stand nach E1]]. Weiter mit E2 (Kundenakte, Kompetenzkarte).
+
 **E1 Sechs Auftragsformen** (neben „Störung beheben“ und „Projekt“), jede mit eigenem Rhythmus und eigener Fertigkeit:
 1. **Terminal-Forensik:** Netz ist unsichtbar; nur ein Rechner per Terminal („Fernwartung“). Befehle üben (nutzt Phase C).
 2. **Plan-Audit:** Kundenplan hat Fehler, markiere Abweichungen (Phase B5).

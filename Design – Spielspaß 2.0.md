@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2) und Welle 2 (B + C) gebaut 04.10.2026, Zweig ausbau-1.2; Scorecard 33,2 von 60 – Ziel +50 % heißt Summe ≥ 39,0 (Ist 26,0), nicht „Hälfte der Sitzungen“; weiter E1 → E2 → D → F (G Reserve)
+status: Welle 1 (S1 + S2), Welle 2 (B + C) und E1 gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard 36,1 von 60 – Ziel +50 % heißt Summe ≥ 39,0 (Ist 26,0); weiter E2 → D → F (G Reserve)
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -16,6 +16,9 @@ status: Welle 1 (S1 + S2) und Welle 2 (B + C) gebaut 04.10.2026, Zweig ausbau-1.
 
 > [!success] Stand 04.10.2026: Welle 2 „Detektiv“ fertig (Phasen B und C), im echten Programm abgenommen
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
+
+> [!success] Stand 05.10.2026: E1 „Formen, Wahl, Ereignisse“ gebaut und im echten Programm abgenommen
+> Sieben Auftragsformen (Störung, Projekt, Terminal, Fernwartung, Plan-Audit, Adressplan, Hotline) · Postfach als Wahl mit Mischer (nie dreimal dieselbe Form, 1000 Postfächer im Test) · „Provisorium oder sauber?“ mit Folgeauftrag · sechs Ereignisse mit Erklärsatz. Abnahme: sechs Aufträge zeigen vier Formen, Stromausfall-Szenario (write memory rettet die Reparatur), Platzbudget hält bei jeder neuen Form. Scorecard 3/4/5/6/7/9/11 neu bewertet: **33,2 → 36,1**. Einzelheiten: [[#18 · Stand nach E1]].
 
 > [!info] So liest du diese Notiz
 > **§ 0 reicht für die Entscheidung** (eine Seite). § 1 sind die Beobachtungen, § 5 die Bausteine, § 9 die Reihenfolge, § 13 der Text für Opus. Alles dazwischen ist Nachschlagewerk.
@@ -241,23 +244,23 @@ Passt zu „erst beibringen, dann abfragen“ und macht aus dem Niveau eine echt
 
 Jedes Kriterium wird mit einer **Prüffrage** bewertet (0 = nein, 5 = durchgehend ja). Bewertet wird nach jedem Haltepunkt von dir (oder mir) *am echten Programm*, mit kurzer Begründung in der Notiz.
 
-| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | nach C | Ziel | Hebt vor allem |
-|---|---|---|---:|---:|---:|---:|---:|---|
-| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | – | 4,0 | Hub, Akte |
-| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | – | 3,8 | 1, 6 |
-| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | **3,3** | 3,6 | 2, 12 |
-| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | **3,3** | 3,6 | 2, 3 |
-| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | – | 3,0 | 5, 9 |
-| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | – | 2,8 | 9, 10 |
-| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | – | 3,0 | 8, 10 |
-| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | **3,2** | 3,4 | 3, 11 |
-| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | – | 3,4 | 4, 5 |
-| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | – | 1,8 | 5 |
-| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | – | 3,0 | 10 |
-| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | – | 3,6 | 7 |
-| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **33,2** | **39,0** | **+50 %** |
+| # | Kriterium | Prüffrage (5 = …) | Ist | nach S1 | nach S2 | nach C | nach E1 | Ziel | Hebt vor allem |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| 1 | Orientierung & Ziele | …man weiß in 5 Sekunden, was zu tun ist, auf jedem Bildschirm | 3,5 | – | **3,8** | – | – | 4,0 | Hub, Akte |
+| 2 | Feedback & Spielgefühl | …jede Handlung antwortet sofort, Erfolge *fühlen* sich an | 2,5 | **3,5** | – | – | – | 3,8 | 1, 6 |
+| 3 | Herausforderung & Flow | …Aufgaben passen sich Können an, Fehlschlag frustriert nicht | 3,0 | – | – | **3,3** | **3,4** | 3,6 | 2, 12 |
+| 4 | Entdeckung | …die Ursache wird selbst gefunden, nie vorher markiert | 2,0 | **2,6** | – | **3,3** | **3,4** | 3,6 | 2, 3 |
+| 5 | Abwechslung | …nie dieselbe Form > 2× in Folge, Überraschungen mit Sinn | 1,5 | – | **2,0** | – | **3,0** | 3,0 | 5, 9 |
+| 6 | Bedeutsame Entscheidungen | …Wahlen verändern Lohn, Risiko, spätere Aufträge | 1,5 | – | – | – | **2,6** | 2,8 | 9, 10 |
+| 7 | Besitz & Welt | …man sieht *sein* Werk wachsen; die Welt erinnert sich | 2,0 | – | – | – | **2,3** | 3,0 | 8, 10 |
+| 8 | Meisterschaft sichtbar | …man sieht, was man kann und was als Nächstes aufgeht | 2,5 | – | **3,1** | **3,2** | – | 3,4 | 3, 11 |
+| 9 | Sitzungsbogen & Rückkehrgrund | …Anfang, Höhepunkt, Ende, offener Faden für morgen | 2,0 | – | **3,2** | – | **3,3** | 3,4 | 4, 5 |
+| 10 | Klasse & Teilen | …man kann mit Mitschülern vergleichen, spielen, sich helfen – ohne Server | 0,5 | – | **1,6** | – | – | 1,8 | 5 |
+| 11 | Figuren & Erzählung | …Kunden sind Personen mit Verlauf, der Senior hat Haltung | 2,0 | – | – | – | **2,2** | 3,0 | 10 |
+| 12 | Einstieg | …erste Handlung < 15 s, erster Erfolg < 90 s, Wahl < 3 Min | 3,0 | **3,8** | – | – | – | 3,6 | 7 |
+| | **Summe (von 60)** | | **26,0** | **28,4** | **32,1** | **33,2** | **36,1** | **39,0** | **+50 %** |
 
-*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10; „nach C“ (Ende Welle 2, B + C): 3, 4, 8. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]], [[#15 · Stand nach S2]] und [[#17 · Stand nach Phase C (Welle 2 fertig)]].*
+*„nach S1“: nur die Kriterien, die S1 laut Auftrag neu bewertet (2, 4, 12); „nach S2“: 1, 5, 8, 9, 10; „nach C“ (Ende Welle 2, B + C): 3, 4, 8; „nach E1“: 3, 4, 5, 6, 7, 9, 11. „–“ = unverändert gegenüber der Spalte davor. Begründungen in [[#14 · Stand nach S1]], [[#15 · Stand nach S2]] und [[#17 · Stand nach Phase C (Welle 2 fertig)]] und [[#18 · Stand nach E1]].*
 
 *Hinweis:* Welle 4 (Netz-Codes, Par, Gürtel, Büro) ist Reserve und hebt vor allem 8, 10 und 11 weiter; sie gehört nicht zur +50 %-Zusage.
 
@@ -640,3 +643,72 @@ Kabeltester im Kabelmenü · schmal (960 px) mit Dock:
 Terminal-Übung im Einstieg: Hilfestufe 2 · Antwort falsch · Antworten richtig:
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-8-hilfe-naechste-diagnose.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-9-antwort-falsch.png|420]]
 ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-1366-10-antworten-richtig.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-C/c-960-terminal.png|320]]
+
+---
+
+## 18 · Stand nach E1
+
+*Gebaut und abgenommen am 04./05.10.2026 (Zweig `ausbau-1.2`, 13 Commits, darunter zwei Fehlerbehebungen außerhalb von E1: Theme-Auswahl, Linux-Terminal). Im echten Programm per `cdp.py lauf` in drei Teilen gespielt, keine JS-Fehler. Bilder und Messdateien: `Nachweise/1.2-E1/`. Tests: **187 grün** (vorher 170).*
+
+### Abnahme
+
+| Messung | Soll | Ergebnis |
+|---|---|---|
+| „Vormittag“: 6 Aufträge nacheinander | ≥ 4 Formen | Immer der Vorschlag des Hubs, Lösung per Skript: **Plan-Audit · Adressplan · Fernwartung · Plan-Audit · Adressplan · Projekt** – 4 Formen (erster Lauf vor den Korrekturen: 5 Formen), nie dreimal dieselbe, alle ★★★★★ |
+| Postfach als Wahl | 3–4 Angebote, verschiedene Kunden und Formen, Lohn · Zeit · Risiko · Übt | 4 Angebote von 3 Kunden in 4 Formen (Bild 1); Marke „Form“ und „Einstieg · Risiko gering“ |
+| Mischer | 1000 Postfächer | Test: 1000 × 12 Abschlüsse – nie dreimal dieselbe Form, nie dazu gezwungen, erste Angebote immer verschiedener Form, Kunden doppelt < 2 %; Story-Auftrag ist immer dabei |
+| Stromausfall | ungesicherte Konfig weg, write memory rettet | salon-05 „sauber“: Port per Terminal eingeschaltet → „💾 Nicht gespeichert: SW-Salon“ → Stromausfall „was nicht gesichert war, ist weg“ (Ziele 3/5 → 0/5) → erneut + `write memory` → zweiter Stromausfall „nichts verloren“ → mit Notiz bestanden, „Aufschlag für saubere Arbeit (× 1,2)“ |
+| Platzbudget R5 am Start jeder neuen Form | ≤ 12 · ≤ 40 · 1 | Fernwartung E **8·40·1**, AP1 **7·36·1** · Adressplan E **7·32·1**, AP1 **8·34·1** · Plan-Audit **12·18·1** · Hotline **12·22·1** · Provisorium/sauber **12·18·1** (gemessen nach dem Schließen der Mappe, ohne vorübergehende Toasts) |
+
+### Was gebaut ist
+
+- **Formen** (`spiel/formen.js`): Störung, Projekt, Terminal (C), **Fernwartung** (`forensik.js`: Fläche verdeckt, nur das Terminal eines Rechners; Fehler, die man dort findet und behebt – Adresse, Maske, Gateway, DNS am Windows-PC, Dienst am Linux-Server), **Plan-Audit** (`audit.js`: 1–3 Fehler stehen nur im Plan, man markiert sie in der Tabelle), **Adressplan** (`beratung.js` + `ui/blatt.js`: Subnetting als Arbeitsblatt, Einstieg gleich große Netze, AP1/AP2 VLSM, Zeile für Zeile), **Hotline** (`daten/tickets-hotline.js`, `hotline.js`: drei Rückfragen zur Wahl, Antworten in der Akte, gute Fragetechnik +1 Ruf).
+- **Mischer** (`mischer.js`) und Postfach als Wahl (3 Angebote, ab Stufe 2 vier); Marke mit Form und „Niveau · Risiko“ am Angebot und im Hub.
+- **„Provisorium oder sauber?“** (`varianten.js`) bei acht Aufträgen; Provisorium = Schuld → Folgeauftrag nach drei Abschlüssen; sauber = „Änderung gesichert“ + Änderungsnotiz.
+- **Ereignisse** (`ereignisse.js`, `ui/ereignisse.js`): Stromausfall, Kabelschaden, Provider-Störung, Praktikant, Weiterempfehlung, Notfall-Anruf; aus/selten/normal (Standard selten = höchstens eines je 30 Minuten aktiver Arbeit).
+
+### Scorecard – neu bewertet (betroffen: 3, 4, 5, 6, 7, 9, 11)
+
+| Kriterium | Wert | Begründung |
+|---|---|---|
+| **5 Abwechslung** | 2,0 → **3,0** | Sieben Formen, die sich wirklich anders spielen (blind im Terminal, Arbeitsblatt, Telefonat, Tabelle prüfen), der Mischer garantiert „nie dreimal dieselbe Form“, Ereignisse bringen Überraschungen mit Erklärung. **Nicht höher**: Sicherheitsvorfall und Rollout fehlen, Terminal und Fernwartung ähneln sich, generierte Formen wiederholen ihr Muster nach ein paar Runden, Ereignisse sind im Standard selten. |
+| **6 Bedeutsame Entscheidungen** | 1,5 → **2,6** | Angebote mit Lohn · Zeit · Risiko · Übt, „Provisorium oder sauber?“ mit spürbarer Folge (×0,6 und Folgeauftrag gegen ×1,2 und Mehrarbeit), Notfall: jetzt wechseln oder erst fertig machen, Hotline: welche Frage. **Nicht 2,8**: nur acht Aufträge bieten die Variante, Vertrauen als Folge kommt erst mit E2, das Risiko ergibt sich nur aus dem Niveau. |
+| **7 Besitz & Welt** | 2,0 → **2,3** | Die Welt erinnert sich zum ersten Mal: Das Provisorium kommt als „Das Provisorium von neulich …“ zurück, Weiterempfehlung bringt einen anderen Kunden. Der eigentliche Hebel (Atlas, Kundenakte) ist E2. |
+| **9 Sitzungsbogen & Rückkehrgrund** | 3,2 → **3,3** | Offene Fäden entstehen jetzt aus dem Spiel (Folgeauftrag, Notfall mit Frist). Der Feierabend-Ausblick nennt sie noch nicht. |
+| **11 Figuren & Erzählung** | 2,0 → **2,2** | Kunden sprechen am Telefon im eigenen Ton, Folgeaufträge erzählen weiter („Heute Nacht war bei uns der Strom weg …“). Kundengeschichten und Senior mit Haltung kommen in E2. |
+| **3 Herausforderung & Flow** | 3,3 → **3,4** | Das Risiko steht am Angebot – man wählt die Schwierigkeit bewusst; Formen fordern verschiedene Fähigkeiten. Automatische Anpassung fehlt weiter. |
+| **4 Entdeckung** | 3,3 → **3,4** | Fernwartung (nur Befehle) und Plan-Audit (selbst vergleichen) sind reines Herausfinden; die Hotline sammelt Hinweise statt sie zu geben. |
+
+**Summe 33,2 → 36,1.** Nicht neu bewertet: 1, 2, 8, 10, 12 (E1 berührt sie kaum).
+
+### Entscheidungen
+
+- **Story geht vor:** Liegt kein Story-Auftrag im Postfach, ist der nächste immer dabei (nach Reihe, nicht gesperrt); generierte Formen füllen die übrigen Plätze.
+- **Keine neuen Fertigkeiten** für die Formen: Fernwartung übt lab.gateway/lab.ip/…, Adressplan lab.subnetz, Audit lab.ip – die Kompetenzkarte bleibt bei 27.
+- **Provisorium nur, wo es fachlich stimmt:** Die Reparatur muss in der running-config stehen. praxis-02 (VLAN anlegen) flog raus – VLANs stehen in vlan.dat und überleben den Neustart auch ungesichert; ein Test prüft das für alle acht.
+- **„Änderung gesichert“** ist erst erfüllt, wenn die startup-config nicht mehr die vom Start ist (vorher stand der Haken schon vor jeder Arbeit da).
+- **Ereignisse laufen über den Verlauf** (Strg+Z holt den Stand zurück) – nie Fortschrittsverlust, die Erklärung sagt, dass es in echt nicht ginge.
+- **Adressplan Zeile für Zeile:** höchstens fünf Felder zugleich (R5) – und so rechnet man VLSM ohnehin.
+
+### Aufgefallen und gleich behoben
+
+- **Nutzer-Meldung „Theme lässt sich nicht auswählen“:** Seit dem ersten Stand verkaufte der Shop Akzentfarben und Leistenstile, die Oberfläche hat sie nie angewendet, und für Gekauftes gab es keinen Knopf. Jetzt: Farben für Dunkel und Hell (Kontrast ≥ 4,5 : 1), Leistenstile, „Auswählen“ im Shop und Auswahl in den Einstellungen.
+- **Linux-Terminal** (Phase C) hieß „Eingabeaufforderung · Windows-artig“ und schlug `ipconfig` vor – jetzt „Terminal · Linux-artig (bash)“, Vorschlag `ip a`.
+- IDs generierter Formen hingen nur am Seed – gleicher Seed mit anderem Niveau lieferte den zwischengespeicherten Auftrag.
+- Zwei Tests schalteten den Trockenmodus aus und ließen so den globalen Lernmotor mitlernen – ein späterer Test bekam dadurch ein anderes Niveau.
+
+### Offen (ehrlich)
+
+- Die Abnahme „6 Aufträge“ lief mit Lösung per Skript (Formen und Reihenfolge echt aus dem Mischer, das Lösen nicht von Hand).
+- Sicherheitsvorfall (braucht D: Rogue-DHCP, Port-Security) und Rollout fehlen; Glücksmomente/Fundstück auch.
+- `https` am Linux-Server lässt sich im Terminal nicht starten (apache2 schaltet nur http) – deshalb nicht in der Fernwartung (→ D).
+- Der Feierabend-Ausblick nennt Folgeaufträge und Notfälle noch nicht.
+
+### Bildschirmfotos
+
+Postfach als Wahl · Stromausfall: ungesichert weg · mit write memory gesichert:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-1-postfach-wahl.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-10-stromausfall-verlust.png|420]]
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-11-stromausfall-gesichert.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-9-wahl-provisorium-sauber.png|420]]
+
+Fernwartung · Adressplan Zeile für Zeile:
+![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-13-fernwartung-start.png|420]] ![[10-Projekte/Lernprojekte/Netzwerk-Labor/Nachweise/1.2-E1/e1-1366-14-adressplan-start.png|420]]
