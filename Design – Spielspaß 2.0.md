@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard 38,0 von 60 (Ist 26,0, Ziel 39,0 = +50 %) – HALTEPUNKT nach E2; danach D → F (G Reserve)
+status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zweig ausbau-1.2; unabhängige Prüfung § 20 (Scorecard ≈ 35,9 statt 38,0); Auftrag P (Politur und Bindung) in Arbeit – § 21
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -16,6 +16,9 @@ status: Welle 1 (S1 + S2), Welle 2 (B + C), E1 und E2 gebaut 04./05.10.2026, Zwe
 
 > [!success] Stand 04.10.2026: Welle 2 „Detektiv“ fertig (Phasen B und C), im echten Programm abgenommen
 > Terminal je Gerät (Windows/Linux/IOS) im Dock · Befehle werden Beweise in der Akte · Zielarten „befehl“ und „antwort“ mit drei Terminal-Aufträgen · neun Terminal-Minikarten · Abzeichen „Von unten nach oben“ · Hilfestufe 2 nennt die nächste Diagnose · Kabel, Ports und Paketschilder verraten im AP-Niveau keine Ursache mehr (R1). Abnahme „Rechner ohne Internet“ nur über das Terminal: ★★★★★, Hilfe 0. Scorecard 3/4/8 neu bewertet: **32,1 → 33,2**. Einzelheiten: [[#17 · Stand nach Phase C (Welle 2 fertig)]].
+
+> [!info] In Arbeit 05.10.2026: Auftrag „P“ (Politur und Bindung) aus der unabhängigen Prüfung § 20
+> Punkt 1 Hygiene fertig: Postfach schmal mit Blatt und „Annehmen“, Sitzungsfenster in der Fernwartung, Punktlinien, `tools/rauch.py` (33/33 grün), Klassen-Abgleich 0. Stand: [[#21 · Auftrag P – Stand]].
 
 > [!warning] HALTEPUNKT 05.10.2026 nach E2 – Scorecard 38,0 von 60 (Ziel 39,0 nicht ganz erreicht)
 > E2 „Kundenakte und Kompetenzkarte“ gebaut und im echten Programm abgenommen: Netz-Atlas je Kunde, Vertrauen 1–5, 21 Kundengeschichten mit Senior, offene Baustellen; Kompetenzkarte mit 27 Feldern in 6 Regionen und Nebel. Scorecard 6/7/8/9/11 neu bewertet: **36,1 → 38,0** (+46 % statt +50 %). Was die letzten 1,0 Punkte bringen könnte und warum ich nicht weitergebaut habe: [[#19 · Stand nach E2 – Haltepunkt]]. **D beginnt erst nach dem Anspielen.**
@@ -840,3 +843,27 @@ Ziel: die Lücken schließen, die am meisten Punkte bringen (geschätzt +2,0 auf
 
 ### Echter Test (ohne Opus)
 Spiele 3–4 Sitzungen von je 20–30 Minuten, dann in **Lernstand → „Auswertung kopieren“** und den Text in den Chat einfügen. Besonders wichtig: **Weiterspiel-Rate** (startet der nächste Auftrag binnen 2 Minuten?), **Erstversuch-Quote** (Ziel 55–75 %) und wo du aufgehört hast. Wenn Mitschüler mitspielen: 30 Minuten, laut denken, danach die 8 Fragen aus § 8.
+
+---
+
+## 21 · Auftrag P – Stand
+
+*Gebaut am 05.10.2026 auf Zweig `ausbau-1.2`, Punkt für Punkt nach § 20. Diese Notiz wächst mit jedem Punkt; die Abnahme im echten Programm und die Scorecard kommen am Ende.*
+
+| Punkt | Inhalt | Stand |
+|---|---|---|
+| 1 Hygiene (F1, F2, F8) | Postfach schmal, Sitzungsfenster Fernwartung, Punktlinien, `tools/rauch.py`, Klassen | ✅ fertig |
+| 2 Kuratierte erste Stunde (F3) | feste Folge der ersten sechs Aufträge | offen |
+| 3 Probe für jede Form (F4) | Hotline, Fernwartung, Audit, Adressplan | offen |
+| 4 Vertrauen zahlt aus (F5) | Empfehlung ab 3, −20 % Wartung ab 4, Feierabend-Ausblick | offen |
+| 5 Flow-Regler (F6) | Gerüst nach zwei Fehlschlägen, Verwicklung nach drei Glanzergebnissen | offen |
+| 6 Hub-Wahl (F7) | „oder: 2 weitere Aufträge“, Wochenziel | offen |
+
+### Punkt 1 · Hygiene
+
+- **Postfach unter 900 px (F1):** Die Karte öffnet den Leser als **Blatt von unten** mit „Auftrag annehmen ▸“ (Esc, Klick daneben oder der Griff schließen es). Vorher war der Leser unter 900 px ausgeblendet – man konnte nur auswählen, nicht annehmen.
+- **Fernwartung (F2):** Links steht jetzt ein **Sitzungsfenster**: „Fernwartung · ● verbunden“, der **Bildschirm des Kunden** mit dem Ziel, das nicht geht (dasselbe Gerätebild wie auf der Fläche, mit ✗), das Gerät und „Freigabe: Mira Kaya“. Das Terminal bekommt **58 %** der Arbeitsfläche, die Geräteleiste fällt weg. Das Symptom steht als Bild, nicht als Satz – der Satz steht schon im Titel, und das Platzbudget erlaubt keine Wiederholung: **Einstieg 8 Bedienelemente · 34 Wörter · 1 Hauptknopf** (vorher 8 · 41 · 1, also schon einmal knapp über dem Budget). Dafür entfällt in der Fernwartung die doppelte Begrüßung im Terminal, und die Beispiele in der Hilfezeile verschwinden, solange ein Vorschlag dasteht.
+- **ipconfig-Punktlinien:** Jede Zeile ist eine eigene Zeile, deren Punkte nur so weit wachsen, wie Platz ist; der Wert bricht nicht mehr um (bei 720 px alle 14 Zeilen von `ipconfig /all` einzeilig).
+- **`tools/rauch.py` (F8):** baut `web/index.html`, startet Edge ohne Fenster mit frischem Profil und prüft **11 Ansichten × 3 Breiten** (1366, 960, 720 px): Hauptaktion ohne Scrollen sichtbar und anklickbar, kein seitliches Scrollen außer in Bereichen, die es absichtlich tun, nichts ragt rechts hinaus, keine JS-Fehler; Fernwartung zusätzlich Sitzungsfenster sichtbar, Terminal ≥ 55 %. Aufruf `sh tools/test.sh --rauch` (Node-Tests → Klassen-Abgleich → Rauchtest), `--exe` prüft das echte Programm. **Gegenprobe:** ein versteckter „Annehmen“-Knopf im Blatt und ein 900 px breites Element im Hub werden erkannt. Ergebnis **33/33 grün**.
+- **Klassen ohne Regel:** `np-hand` ist eine Filter-ID (das Werkzeug zählt IDs, `url(#…)` und Bus-Namen jetzt nicht mehr), `lk-wert` und `sp-demo-kopf` haben eine Regel, echte JS-Marken stehen in einer Liste. `tools/klassen.py` meldet **0** und bricht die Testkette bei Treffern ab.
+- **Geprüft, kein Fehler:** Die Kundenstimme der Funktionsprobe erscheint erst, nachdem der Paketweg abgelaufen ist – im Hintergrund-Browserfenster laufen Animationen nicht, deshalb war sie in der Prüfung nicht zu sehen (Abnahme im echten Programm folgt). `Spiel.ereignisse.ausloesen("stromausfall")` lieferte `null`, weil ein Stromausfall einen laufenden Auftrag beim Kunden braucht; Punkt 2 macht den Aufruf ohne Auftrag bequemer.
