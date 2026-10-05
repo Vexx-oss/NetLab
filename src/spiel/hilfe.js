@@ -94,7 +94,8 @@ Spiel.hilfeInhalt = function(inst, stufe){
   switch (stufe) {
     case 0: r.symptom = def.symptom || ""; r.ziele = (def.ziele || []).map(z => z.text || z.typ); break;
     case 1: r.leiter = Spiel.LEITER.map(s => Object.assign({}, s, {erledigt: !!(inst.leiter && inst.leiter[s.id])})); break;
-    case 2: r.werkzeuge = [...new Set((def.skills || []).map(s => Spiel.WERKZEUGE[s]).filter(Boolean))];
+    case 2: r.werkzeuge = def.blatt ? ["Adressen je Netz = Geräte + 2, aufgerundet auf eine Zweierpotenz: 2^(32 − Präfix). Das nächste Netz beginnt direkt nach dem Broadcast des vorigen."]
+              : [...new Set((def.skills || []).map(s => Spiel.WERKZEUGE[s]).filter(Boolean))];
             if (!r.werkzeuge.length) r.werkzeuge = [Spiel.WERKZEUGE["lab.ping"]];
             r.simulation = "Die Simulation zeigt jede Etappe eines Pakets mit Grund, wenn es verworfen wird.";
             r.naechste = Spiel.naechsteDiagnose(inst); break;

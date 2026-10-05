@@ -16,4 +16,12 @@
 .bl-zelle.falsch .bl-feld{border-color:var(--warn); background:var(--warn-soft)}
 .bl-stand{margin:10px 0 0; font-weight:700; color:var(--accent)}
 .bl-stand:empty{display:none}
-.bl-tipp{margin:8px 0 0; color:var(--muted); font-size:13px}
+/* Zeile für Zeile: fertige Zeilen als Text (Klick öffnet sie wieder), spätere Zeilen noch leer */
+.bl-tabelle tr.bl-fertig{cursor:pointer}
+.bl-tabelle tr.bl-fertig:hover td, .bl-tabelle tr.bl-fertig:hover th{background:var(--panel-2)}
+.bl-wert{font-family:var(--mono); padding-left:12px !important}
+.bl-wert.ok{color:var(--ok)}
+.bl-wert.falsch{color:var(--warn)}
+.bl-leer{color:var(--faint); padding-left:12px !important}
+.bl-tabelle tr.bl-spaeter th, .bl-tabelle tr.bl-spaeter .bl-zahl{color:var(--muted)}
+.bl-tabelle tr.bl-aktiv th{color:var(--accent)}

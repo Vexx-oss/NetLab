@@ -763,7 +763,7 @@ UI.labor = (() => {
     if (!Z.fern) return el.replaceChildren();
     const g = Z.netz.geraete[Z.fern];
     el.replaceChildren(h("span", {class: "lb-fern-sym", "aria-hidden": "true"}, "🛰"), h("strong", {}, `Fernwartung · ${g.name}`),
-      h("p", {}, "Das Netz siehst du von hier aus nicht – nur, was die Befehle dieses Rechners zeigen."));
+      h("p", {}, "Nur die Befehle dieses Rechners zeigen dir das Netz."));
   }
   function simLeer(){
     const c = Z.el.sim; if (!c) return;
