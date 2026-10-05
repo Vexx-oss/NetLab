@@ -77,6 +77,7 @@ def main() -> int:
     lauf("Bau mit und ohne Spielhalle gleich", [PY, "tools/lernmotor-bau.py"], muss="GRUEN")
     lauf("Tests + Simulation ohne Spielhalle", [PY, "tools/lernmotor-rueckfall.py"], muss="GRUEN")
     lauf("GitHub-Ablaeufe gueltig", [PY, "tools/ablaeufe.py"], muss="GRUEN")
+    lauf("CI-Nachbau (frischer Klon, keine Spielhalle)", [PY, "tools/ci-nachbau.py"], muss="GRUEN")
 
     print()
     print("2 · Bauen")
