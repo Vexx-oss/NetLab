@@ -5,12 +5,27 @@ name: Prüfen
 #
 # Wichtig: Hier liegt NUR dieses Repositorium. Die FISI-Spielhalle liegt daneben nur auf
 # dem Entwicklungsrechner. Jeder Schritt muss also ohne sie auskommen — genau das prüfen
-# die Schritte „Bau aus der Kopie" und „ohne Spielhalle".
+# die Schritte „ohne Spielhalle" und „Bau aus der Kopie".
+#
+# Der nächtliche Lauf ist ein Rückfall: Am 05.10.2026 blieben mehrere Läufe dieses
+# Ablaufs 15 Minuten ohne zugeteilten Läufer in der Warteschlange und wurden dann von
+# GitHub abgebrochen (Status „cancelled", 0 Schritte, kein Runner). Das ist Verhalten der
+# Plattform, nicht der Tests — nachgewiesen ist der Gegenbeweis: Lauf 37367258747 hatte
+# alle 13 Schritte erfolgreich. Der Zeitplan stellt sicher, dass trotzdem regelmäßig
+# gemessen wird, auch wenn ein Push-Lauf in der Warteschlange verfällt.
 on:
   push:
     branches: [ausbau-1.2, master]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+# Je Zweig nur ein Lauf: Staut sich die Warteschlange (siehe oben), räumt ein neuer Lauf
+# den alten ab, statt dass beide warten und beide verfallen.
+concurrency:
+  group: pruefen-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tests:

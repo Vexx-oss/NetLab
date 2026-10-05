@@ -104,6 +104,20 @@ er meldet in einer Notiz, was fehlt. Nach dem Einschalten läuft er von selbst.
 > `python tools/ablaeufe.py` prüft beides dauerhaft: kein `enablement: true`, keine
 > unbedingte Veröffentlichung, kein zweiter Job.
 
+### Wenn ein Prüflauf als „cancelled" mit 0 Schritten dasteht
+
+Gemessen am 05.10.2026: Mehrere Läufe von `pruefen.yml` bekamen **keinen Läufer** zugeteilt,
+blieben rund 15 Minuten in der Warteschlange und wurden dann von GitHub abgebrochen —
+Status `cancelled`, 0 Schritte, kein Runner. Das ist Verhalten der Plattform, **kein
+Testergebnis**: es wurde nichts gemessen, also ist auch nichts rot.
+
+Der Gegenbeweis liegt vor: Lauf `37367258747` (Job „Bauen und prüfen") hatte **alle 13
+Schritte erfolgreich**, einschließlich Einzeldatei und Bilderprüfung. Derselbe Stand ist
+zusätzlich hier nachgestellt und grün: `python tools/ci-nachbau.py`.
+
+Nachholen von Hand: *Actions → Prüfen → Run workflow*. Damit sich nichts staut, hat der
+Ablauf eine Concurrency-Gruppe je Zweig; zusätzlich läuft er nachts um 03:17 UTC.
+
 ## Das Auslieferungspaket
 
 ```bash
