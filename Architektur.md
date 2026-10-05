@@ -638,3 +638,35 @@ Keine neue `art`, kein neues Feld im Ereignisobjekt. `tests/sim-gruende.test.js`
 | Lead | `Architektur.md`, `bauen.py`, `tools/**`, Tests, Commits |
 
 Änderungen an einer fremden Datei gehen über den Lead. Kein Mitglied committet selbst.
+
+### 10.9 Stand der Umsetzung (05.10.2026)
+
+| Punkt aus § 10.7 | Stand |
+|---|---|
+| ① Vertrag | fertig (dieser Abschnitt) |
+| ② Sim-Verhalten und Gründe | **fertig** – alle sieben Punkte aus § 10.3 gebaut, fünf Grundcodes angelegt und ausgelöst (`src/sim/`) |
+| ③ Konsole | **fertig** – `show ip dhcp binding\|pool\|conflict` auch auf Server-Hosts, `lease`, `domain-name`, `hardware-address`; der Pool-Modus war bis 05.10. wirkungslos (siehe unten) |
+| ④ Oberfläche | **offen** – Lease-Tabelle, erweiterte Pool-Felder und Snooping-Schalter fehlen |
+| ⑤ Lehrtexte | **fertig** – drei Tiefen mit Quelle je Code (`src/daten/lehrtexte.js`) |
+| ⑥ Fehlerinjektoren | **offen** |
+| ⑦ Tickets je Stufe | **offen** |
+| ⑧ Tests | **teilweise** – sieben neue Fälle in `tests/sim-gruende.test.js`, ein Regressionsfall für den Pool-Modus in `tests/cli-ios-ssh.test.js`; 213 grün |
+| ⑨ Wiki + Lernmotor-Skill | **offen** |
+
+**Wichtiger Befund zur Konsole:** Der gesamte DHCP-Pool-Modus war wirkungslos. Jeder Handler las den Zustand in einen
+Klon, änderte den Klon und schrieb danach erneut einen frischen Klon zurück — also den unveränderten Stand. Dazu fehlte
+den Positionsargumenten das `n`, sodass die Werte nicht einmal in `a` landeten. Aufgefallen ist das nie, weil der
+vorhandene Test nur den **Prompt** prüfte, nicht die Wirkung. Behoben mit `dhcpArbeiten()` (einmal lesen, ändern,
+einmal schreiben) und einem Test, der den Zustand nach jedem Befehl prüft.
+
+**Noch offen in der Konsole:** `ip address` im Reservierungs-Untermodus wird nicht erkannt (der `ip`-Zweig am
+Konfigurationsmodus fängt es ab). Die reservierte IP ist über die Datenform und den Oberflächen-Inspektor setzbar.
+
+**Nicht möglich in der Entwicklungsumgebung:** der Lauf im echten Programm. Die `.exe` ist gebaut
+(`Programm/Netzwerk-Labor.exe`, 05.10. 14:37), aber WebView2 bricht dort beim Start ab — auch für die alte
+1.1-Fassung und auch außerhalb der Werkzeugumgebung. `tools/q-echt.py` ist für den Lauf auf einem normalen
+Desktop fertig; die Bilder gehören nach `Nachweise/1.2-Q/`.
+
+**Regressionsschutz:** `node tools/sim-stand.js` vergleicht die Simulation gegen `Nachweise/sim-stand.json`
+(12 Szenarien, 403 Ereignisse) und meldet jede Abweichung mit Stelle und Art. Nach jeder Änderung an `src/sim/`
+oder `src/modell/` laufen lassen — zusammen mit `node tests/run.js`.
