@@ -191,9 +191,9 @@
     const hist = s.historie.map(x => x.toLowerCase());
     const schon = re => hist.some(x => re.test(x));
     if (s.art === "host") {
-      const a = C.hostAdresse(s, "eth0");
-      if (!schon(/^ipconfig/)) return V("ipconfig", "Zeigt Adresse, Maske und Gateway dieses Rechners.");
-      if (a.gw && !schon(new RegExp("^ping\\s+" + a.gw.replace(/\./g, "\\.") + "$"))) return V("ping " + a.gw, "Erreicht der Rechner sein Standardgateway?");
+      const a = C.hostAdresse(s, "eth0"), linux = s.os === "linux";
+      if (linux ? !schon(/^ip (a|addr)/) : !schon(/^ipconfig/)) return linux ? V("ip a", "Zeigt die Schnittstellen dieses Rechners mit ihren Adressen.") : V("ipconfig", "Zeigt Adresse, Maske und Gateway dieses Rechners.");
+      if (a.gw && !schon(new RegExp("^ping\\s+(-[cn]\\s+\\d+\\s+)?" + a.gw.replace(/\./g, "\\.") + "$"))) return V((linux ? "ping -c 4 " : "ping ") + a.gw, "Erreicht der Rechner sein Standardgateway?");
       return null;
     }
     if (s.art === "fw") {

@@ -1,7 +1,7 @@
 "use strict";
 /* ---------- Konsole (Konzept § 6, Architektur § 6) ----------
    UI.konsole.oeffnen(container, netz, geraetId, verlauf, {eingabe?, fokus?})
-     Terminal für ein Gerät: IOS-ähnlich (Switch, Router, Firewall) bzw. Windows-artig (PC, Server, NAS).
+     Terminal für ein Gerät: IOS-ähnlich (Switch, Router, Firewall), Windows-artig (PC) bzw. Linux-artig (Server, NAS – je nach Betriebssystem).
      Rechnen, Parsen und Ändern macht CLI (CLI.eingabe → Modell/Verlauf = eine Quelle der Wahrheit);
      hier nur Anzeige und Bedienung: Ausgabe scrollt, Prompt aus CLI, Verlauf ↑/↓, Tab → CLI.tab,
      „?“ sofort wie IOS, Strg+C/Strg+Z, mehrzeiliges Einfügen, Rückfragen (copy run start, reload) als Dialog.
@@ -46,7 +46,7 @@ UI.konsole = (() => {
     const g = netz.geraete[id];
     let K = KZ.get(container);
     if (!K) { K = {container}; KZ.set(container, K); }
-    K.netz = netz; K.id = id; K.host = !!(g && Modell.HOST[g.typ]);
+    K.netz = netz; K.id = id; K.host = !!(g && Modell.HOST[g.typ]); K.linux = !!(g && Modell.osVon(g) === "linux");
     container.classList.add("ko-huelle");
     container.classList.toggle("ko-host", K.host);   /* Eingabeaufforderung bricht lange Zeilen um wie Windows */
     container.replaceChildren();
@@ -56,16 +56,16 @@ UI.konsole = (() => {
     K.ausgabeEl = h("div", {class: "ko-ausgabe"});
     K.promptEl = h("span", {class: "ko-prompt"});
     K.eingabeEl = h("textarea", {class: "ko-eingabe", rows: "1", spellcheck: "false", autocomplete: "off", autocapitalize: "off",
-      "aria-label": K.host ? "Befehl für die Eingabeaufforderung" : "IOS-Befehl eingeben", wrap: "off"});
+      "aria-label": K.linux ? "Befehl für das Terminal" : K.host ? "Befehl für die Eingabeaufforderung" : "IOS-Befehl eingeben", wrap: "off"});
     K.notizEl = h("div", {class: "ko-notiz", hidden: true});
     K.schirmEl = h("div", {class: "ko-schirm", role: "log", "aria-label": `Konsole ${g.name}`, tabindex: "-1"},
       K.ausgabeEl, K.notizEl, h("div", {class: "ko-zeile"}, K.promptEl, K.eingabeEl));
     K.vorschlagEl = h("div", {class: "ko-vorschlag", hidden: true});
     const hilfe = K.host
-      ? [h("kbd", {}, "↑"), h("kbd", {}, "↓"), " Verlauf · ", h("kbd", {}, "Tab"), " ergänzt · z. B. ", h("code", {}, "ipconfig"), ", ", h("code", {}, "ping 192.168.1.1")]
+      ? [h("kbd", {}, "↑"), h("kbd", {}, "↓"), " Verlauf · ", h("kbd", {}, "Tab"), " ergänzt · z. B. ", h("code", {}, K.linux ? "ip a" : "ipconfig"), ", ", h("code", {}, K.linux ? "ping -c 4 192.168.1.1" : "ping 192.168.1.1")]
       : [h("kbd", {}, "?"), " zeigt Möglichkeiten · ", h("kbd", {}, "Tab"), " ergänzt · ", h("kbd", {}, "↑"), h("kbd", {}, "↓"), " Verlauf · ", h("kbd", {}, "Strg"), "+", h("kbd", {}, "Z"), " verlässt die Konfiguration"];
     const kopf = h("div", {class: "ko-kopf"},
-      h("span", {class: "ko-titel"}, K.host ? `Eingabeaufforderung · ${g.name}` : `Konsole · ${g.name}`, h("span", {class: "ko-art"}, K.host ? "Windows-artig" : "IOS-ähnlich")),
+      h("span", {class: "ko-titel"}, K.linux ? `Terminal · ${g.name}` : K.host ? `Eingabeaufforderung · ${g.name}` : `Konsole · ${g.name}`, h("span", {class: "ko-art"}, K.linux ? "Linux-artig (bash)" : K.host ? "Windows-artig" : "IOS-ähnlich")),
       h("button", {type: "button", class: "ko-knopf", title: "Bildschirm leeren (Verlauf bleibt)", onclick: () => { K.S.bloecke = []; K.ausgabeEl.replaceChildren(); K.eingabeEl.focus(); }}, "Leeren"));
     container.append(kopf, K.schirmEl, K.vorschlagEl, h("div", {class: "ko-hilfe"}, hilfe));
 
@@ -102,7 +102,7 @@ UI.konsole = (() => {
     if (!cli()) { block(K, "info", "Die Konsole ist in dieser Fassung noch nicht verfügbar."); return; }
     if (K.S.fehler) { block(K, "fehler", "% Die Sitzung ließ sich nicht starten: " + K.S.fehler); return; }
     block(K, "info", K.host
-      ? `Eingabeaufforderung von ${g.name}. Tippe „ipconfig“, um die Adresse zu sehen.`
+      ? (K.linux ? `Terminal von ${g.name}. Tippe „ip a“, um die Adresse zu sehen.` : `Eingabeaufforderung von ${g.name}. Tippe „ipconfig“, um die Adresse zu sehen.`)
       : `Konsolenkabel an ${g.name} angeschlossen. Drücke Enter oder tippe einen Befehl.${niveau() === "E" ? " Mit „?“ siehst du jederzeit, was geht." : ""}`);
   }
 
