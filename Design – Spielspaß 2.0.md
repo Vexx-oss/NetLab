@@ -1125,3 +1125,46 @@ Eingegrenzt, damit die Ursache feststeht:
 
 1. **Windows neu starten**, dann `python tools/q-echt.py` – Q4 nachholen, Bilder ablegen.
 2. **D1 – DHCP** (Q Punkt 5). **Nicht begonnen**, wie in Q vorgesehen erst nach Q4. Vor der ersten Änderung die Golden-Tests der Simulation sichern.
+
+---
+
+## 24 · Unabhängige Prüfung nach Q/D1-Anfang (05.10.2026 nachmittags, Planungssitzung) und Auftrag „R“
+
+*Gearbeitet hat hier ein anderes Modell (DeepSeek) auf dem Zweig `ausbau-1.2` (8 Commits seit § 22). Selbst gelaufen: `sh tools/test.sh --rauch` (**213/213**, Rauchtest **36/36**), `node tools/sim-stand.js` (Simulation unverändert gegenüber dem Referenzstand), `python tools/rauch.py --gegenprobe` (3/36 grün, **33 rot** – der Test erkennt G1 wirklich). Außerdem die .exe gestartet. **Nicht geprüft:** das Spiel im echten Programm (siehe M1), Ton, `tools/q-echt.py` (nie gelaufen).*
+
+### Bewertung
+| Bereich | Note | Beleg |
+|---|---|---|
+| **Q1–Q3 (G1–G3)** | **sehr gut** | G1 an der Wurzel behoben (`[hidden]{display:none !important}` in `basis.css`), Rauchtest um Verdeckung, echte Maus und leere Blöcke erweitert, Gegenprobe vorhanden und von mir bestätigt; G3 mit Messpunkt statt Augenmaß; Postfach-Knopf mit Sonde belegt |
+| **D1 Simulation und Konsole** | **gut, aber unfertig** | Vertrag zuerst (`Architektur.md` § 10), Lease-Ablauf und Erneuerung bei 50 %, Reservierung, Konflikt, Lease-Liste, Rogue-DHCP, Snooping, fünf neue Gründe mit Lehrtext in drei Tiefen, `show ip dhcp binding\|pool\|conflict`; dazu ein echter Fund: der **gesamte DHCP-Pool-Modus der Konsole war seit 1.0 wirkungslos** (Test prüfte nur den Prompt) – behoben mit Wirkungstest |
+| **Regressionsschutz** | **sehr gut, mit Lücke** | `tools/sim-stand.js` (12 Szenarien, 403 Ereignisse) – aber die Referenzdatei liegt in `Nachweise/`, das **nicht im Git** ist (M3) |
+| **Ehrlichkeit** | **gut** | Q4 offen und der Grund genannt; Systemursache als „wahrscheinlich“ gekennzeichnet. Kleine Drift: § 23.7 sagt „D1 nicht begonnen“, obwohl D1 danach committet wurde (Stand steht nur in `Architektur.md` § 10.9) |
+| **Betriebssicherheit** | **mangelhaft** | M1 und M2 unten |
+| **Spielerwirkung seit § 22** | **keine neue** | D1 hat 4 von 9 Pflichtpunkten (Vertrag, Sim, Konsole, Lehrtexte); Oberfläche, Injektoren, Tickets, Wiki/Skill **offen** – ein Spieler sieht von D1 bisher nichts. Das ist genau das Muster „grüne Tests, null Wirkung“ (Leitplanke 3) |
+
+### Befunde
+| # | Befund | Beleg | Gewicht |
+|---|---|---|---|
+| **M1** | **Die .exe startet auf diesem Rechner nicht – auch die alte 1.1 nicht.** Ursache vermutlich die Aufräumaktion: **13 `msedgewebview2.exe` wurden zwangsweise beendet, darunter die Hosts der Windows-Suche und anderer Shell-Teile** | Ich habe selbst gestartet: sofort `exit 101`, `failed to create webview`, zuerst `0x8000FFFF`, bei mir `0x800700AA`; im Ereignisprotokoll stürzt `msedgewebview2.exe` 154.0.4258.53 beim Start ab (Ausnahme `0x80000003` in `msedge.dll`, immer derselbe Offset). Der Rechner läuft seit 6 Tagen ohne Neustart. Edge selbst und Teams laufen, Opus' Läufe am Vormittag gingen mit derselben Runtime | **hoch** (Spiel nicht spielbar; G1-Fix im echten Programm unbelegt) |
+| **M2** | **Prozesse nach Namen zu beenden ist ein Betriebsfehler** | siehe M1; so etwas darf kein Agent tun (nur die eigenen PIDs und deren Kinder) | hoch |
+| **M3** | Die Simulations-Referenz liegt im ignorierten Ordner `Nachweise/` | `.gitignore` Zeile 18; in einem frischen Klon läuft `sim-stand.js` nicht, und die Datei ist nicht auf GitHub | mittel |
+| **M4** | **Zeilenenden-Rauschen:** fünf Dateien wurden komplett neu geschrieben (CRLF), z. B. `engine.js` +265/−259 bei **6** echten Zeilen; insgesamt 3107 gezählte Zeilen statt 1599 echter | `git diff --stat` gegen `--ignore-cr-at-eol` | mittel (Review und Merge werden unlesbar) |
+| **M5** | **D1 ohne senkrechten Schnitt** | siehe Tabelle; kein Injektor, kein Ticket, keine Oberfläche nutzt die neuen Gründe | hoch (Spielspaß) |
+| M6 | Kleinigkeit: `ip address` im Reservierungs-Untermodus der Konsole wird nicht erkannt (offen in § 10.9) | Architektur § 10.9 | klein |
+
+**Scorecard:** **38,0 bleibt** (G1 ist im Rauchtest nachweislich behoben; D1 bringt keinen sichtbaren Punkt). Bis zum echten Lauf (M1) steht das unter Vorbehalt. Das Ziel 39,0 fehlt noch eine Stufe: **Entdeckung (4)** durch eine spielbare DHCP-Ermittlung, **Klasse (10)** durch Netz-Codes, **Erzählung (11)** durch Gesichter.
+
+### Auftrag „R“ (eine Sitzung, danach Haltepunkt; geeignet für jedes Modell)
+0. **Vorbedingung:** Rechner neu starten (macht der Nutzer). Danach als **erstes** `python tools/q-echt.py`. Startet die .exe weiter nicht: **nichts beenden**, nur berichten (Fehlercode, Ereignisprotokoll) und mit der Browser-Fassung (`tools/rauch.py`) weiterarbeiten. **Niemals Prozesse nach Namen beenden** – nur die PIDs, die man selbst gestartet hat.
+1. **Betriebsregeln festschreiben:** `AGENTS.md` im Projektordner (gilt für jedes Modell): nie Prozesse nach Namen beenden · nie pushen, nie auf `master` committen · Zeilenenden bewahren (`tools/patchlib.py` oder gleichwertig) · nach jedem Commit den Stand in `Design`/`Architektur` nachziehen · senkrechter Schnitt vor Breite (siehe 3) · Wirkung vor Grün. Dazu **`.gitattributes`** und **ein einziger Commit „Zeilenenden vereinheitlichen (nur Zeilenenden)“**, danach `git diff --ignore-cr-at-eol` leer und Tests grün (M4). Die Simulations-Referenz nach **`tests/sim-stand.json`** (versioniert) verlegen und `tools/sim-stand.js` anpassen (M3).
+2. **Stand nachziehen:** § 23.7 und `Architektur.md` § 10.9 auf den echten Stand bringen (D1 begonnen, 4/9).
+3. **D1 als senkrechten Schnitt fertigstellen** (Rest der Definition „fertig“, Reihenfolge so, dass nach jedem Schritt etwas *spielbar* ist):
+   a. **Auftragsform „Sicherheitsvorfall“** mit zwei Aufträgen: *„Fremder Router im Netz“* (Rogue-DHCP; die **Akte** legt Beweiskarten ab: „Angebot von 192.168.1.254, erwartet 192.168.1.1“; Verdacht-Optionen enthalten die neue Fehlerart) und *„Das Gästenetz bekommt keine Adresse“* (Snooping blockt einen vertrauten Port). Lösung per Oberfläche **und** Konsole (`ip dhcp snooping`, `ip dhcp snooping trust`).
+   b. **Injektoren** (4–5): Rogue-Server, Pool leer/zu klein, falsches Gateway im Pool, Snooping falsch gesetzt, Reservierung kollidiert → je Lehrtext E/AP1/AP2 mit Quelle, **Fehlerdex-Einträge**, Pflichtvalidierung jedes Tickets.
+   c. **Oberfläche:** Lease-Tabelle im Server-/Router-Panel (Zustand aktiv/reserviert/abgelaufen/Konflikt), erweiterte Pool-Felder (Lease-Zeit, Domain), Snooping-Schalter am Switch; Platzbudget R5 und `tools/rauch.py` einhalten.
+   d. **Konsole:** `ip address` im Reservierungs-Untermodus (M6), Windows `ipconfig /all` mit Lease-Zeiten, Linux `dhclient`/`journalctl`-Auszug.
+   e. **Wiki-Eintrag und Fertigkeit `lab.dhcp` im Lernmotor**; Mini-Karten (3–4) zum Thema.
+4. **Abnahme R:** Szenario „Fremder Router“ **im echten Programm** (oder, falls M1 bleibt, im Rauchtest mit echter Maus und dem Hinweis „nicht im echten Programm“), Bildschirmfotos; Tests, `rauch.py`, `sim-stand.js`, `klassen.py` grün; Fehlerdex zählt die neuen Einträge; **Scorecard 4 und 5 ehrlich neu bewerten**. Nicht mit D2 (DNS) beginnen. Nicht pushen, am Ende „bereit zum Push“ mit Commit-Zahl.
+
+### Danach
+**D2 – DNS** → **Netz-Codes + Portfolio-Export** → **Gesichter** → **Stufe 6 Storage** → **F.** Vorher gehört **eine echte Spielsitzung von dir** (Browser-Fassung reicht, `Lernstand → Auswertung kopieren`): Seit S2 stammen alle Bewertungen von Modellen.
