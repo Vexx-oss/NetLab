@@ -387,9 +387,10 @@ Spiel.INJEKTOREN = (() => {
       Modell.setzen(n, "fremd1", "dhcp", {an: true, ausgeschlossen: [],
         pools: [{name: "GAST", netz: k.netz + "0", maske: k.maske, gw: p3 + ".254", dns: "8.8.8.8", start: p3 + ".200", anzahl: 20}]});
     },
-    loesung: (n, k, p, r) => [
-      {geraet: "fremd1", cli: cli("interface Gi0/0", "shutdown"), text: "Den fremden Router abschalten: auf fremd1 „interface Gi0/0“ → „shutdown“. (Im Inspektor: Schnittstelle abschalten.)"},
-      {geraet: r && r.clients && r.clients[0] ? r.clients[0] : "pc1", setzen: {"if.eth0.dhcp": false}, text: "Am betroffenen Rechner die falsche Adresse loswerden (DHCP aus/an oder ipconfig /renew)."}],
+    /* EIN Schritt: den fremden Server abschalten. Der Rechner holt sich danach beim nächsten Senden die Adresse vom
+       richtigen Server – er darf NICHT auf statisch umgestellt werden, sonst steht er ohne Adresse da. */
+    loesung: () => [
+      {geraet: "fremd1", cli: cli("interface Gi0/0", "shutdown"), text: "Den fremden Router abschalten: auf dem fremden Router „interface Gi0/0“ → „shutdown“ (im Inspektor: Schnittstelle abschalten). Danach „ipconfig /renew“, damit der Rechner die richtige Adresse holt."}],
     hilfen: (n, k) => ({frage: ["Der Rechner hat eine Adresse bekommen – aber kommt nicht hinaus. Sieh dir sein Standardgateway an: Ist das der Router, den du kennst?"],
       bereich: [{geraet: k.switch}], konkret: [`Im Netz antwortet ein zweiter DHCP-Server (${k.netz.split(".").slice(0, 3).join(".")}.254) und verteilt sich selbst als Gateway. Er hängt am Switch ${name(n, k.switch)}.`]}),
     erklaerung: "Ein Rechner nimmt das erste DHCP-Angebot, das ankommt – vom richtigen Server oder von einem fremden. Ein fremder („Rogue“) Server verteilt dann oft sich selbst als Gateway und einen fremden DNS-Server: Der Rechner hat eine gültige Adresse, kommt aber nicht ins Internet. Erkennbar an „ipconfig /all“: Dort steht ein DHCP-Server, den es im Netz nicht geben sollte. Abhilfe: den fremden Server abschalten oder DHCP-Snooping am Switch einschalten.",

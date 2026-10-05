@@ -53,6 +53,18 @@ Spiel.ticketBauen = function(spec){
   }
   /* Terminal-Aufträge (C4) dürfen ohne Fehler im Netz auskommen: dann tragen allein die Arbeitsziele den Auftrag */
   if (!ziele.some(z => z.erwartet) && !zusatz.some(z => Spiel.istArbeitsziel(z))) return null;
+  /* Ein Fehler, der NICHTS bricht, ist kein Auftrag: er hätte eine Erklärung, die nicht zum Netz passt („der Fehler
+     steckt hier“) – und der Spieler sucht etwas, das es nicht zu finden gibt. Kommt vor, wenn ein Injektor in einer
+     Vorlage wirkungslos bleibt (Beispiel: eine /25-Maske, die Gateway UND Ziel noch umfasst). Solche Kombinationen
+     werden hier zu „ohne Wirkung“ – dieselbe Behandlung wie ein Injektor, der gar keinen Kandidaten anbietet.
+     Geprüft wird gegen das GESUNDE Netz, damit nur die Wirkung des Fehlers zählt, nicht ein schon vorher offenes Ziel. */
+  if (gewaehlt.length) {
+    const wirklich = basis.some(z => {
+      if (Spiel.istArbeitsziel(z)) return false;                       /* Arbeitsziele prüfen kein Netz */
+      return !Sim.pruefeZiel(kaputt, z).ok && Sim.pruefeZiel(gesund.netz, z).ok;
+    });
+    if (!wirklich) return null;
+  }
   const max = spec.maxZiele || 3;
   /* Ziele mit dem direkten Grund des Fehlers zuerst (das ist das Symptom, das der Kunde meldet) */
   const direkt = new Set(gewaehlt.flatMap(g => g.inj.gruende));
