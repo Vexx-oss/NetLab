@@ -363,7 +363,9 @@ UI.spiel = (() => {
     status();
     if (!erg.bestanden) { UI.klang?.spielen("nochnicht"); ergebnisZeigen(erg); return; }
     S.coach = null; ticketFertig();
-    if (UI.labor.fern) UI.labor.fernwartung(null);         /* Fernwartung: jetzt zeigt sich das Netz, das man blind repariert hat */
+    const form = Spiel.szeneForm(erg.inst);                 /* § 20 F4: eigene Probe je Form */
+    const aufdecken = () => { if (UI.labor.fern) UI.labor.fernwartung(null); };   /* Fernwartung: jetzt zeigt sich das Netz, das man blind repariert hat */
+    if (!form || form.art !== "fernwartung") aufdecken();
     UI.toast.zu?.("ziele");                                /* „Alle Ziele erfüllt – jetzt die Abnahme“ ist erledigt */
     const kd = kunde(erg.inst.kunde || erg.def.kunde);
     S.fertig = {titel: erg.def.titel, symbol: kd.symbol, farbe: kd.farbe};
@@ -375,10 +377,10 @@ UI.spiel = (() => {
     const k = kunde(erg.inst.kunde || erg.def.kunde);
     S.probe = true;
     try {
-      await UI.szene.abspielen(Spiel.szene(erg.inst, ab), {geaendert, satz: erg.dank, kurz: ab.niveau !== "E",
+      await UI.szene.abspielen(Spiel.szene(erg.inst, ab), {geaendert, satz: erg.dank, kurz: ab.niveau !== "E", form, aufdecken,
         kunde: {name: k.ansprechpartner?.name || k.name, symbol: k.symbol, farbe: k.farbe}});
     } catch (e) { console.error("Funktionsprobe", e); }
-    finally { S.probe = false; S.fertig = null; }
+    finally { S.probe = false; S.fertig = null; aufdecken(); }
     ergebnisZeigen(erg);
     if (erg.ereignis) UI.ereignisse?.vormerken(erg.ereignis);      /* erste Stunde: Anruf oder Weiterempfehlung, wenn das Ergebnis zu ist */
   }

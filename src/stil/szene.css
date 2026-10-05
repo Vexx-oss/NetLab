@@ -33,3 +33,44 @@
 @keyframes sz-beleg{from{transform:translateY(9px); opacity:0} to{transform:none; opacity:1}}
 @keyframes sz-laden{to{width:100%}}
 @media (prefers-reduced-motion: reduce){ .sz-buehne, .sz-reaktion, .sz-blase, .sz-druckt .sz-sym, .sz-balken i{animation:none} .sz-balken i{width:100%} }
+/* Eigene Probe je Form (§ 20 F4): Karte mitten auf der Fläche, höchstens ~3 s */
+.sz-form{position:absolute; left:50%; top:46%; transform:translate(-50%, -50%); width:min(420px, calc(100% - 32px)); padding:14px 16px; border-radius:16px;
+  background:var(--panel); border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); pointer-events:none; animation:sz-pop-mitte .32s cubic-bezier(.3,1.6,.5,1) both}
+.sz-form-kopf{font-size:14px; color:var(--muted); margin-bottom:8px}
+.sz-form-kopf b{color:var(--ink)}
+.sz-form-fuss{margin:8px 0 0; font-size:13px; color:var(--ok); font-weight:700}
+/* Hotline: der Hörer wird aufgelegt */
+.sz-auflegen{display:flex; gap:12px; align-items:flex-start; border-color:var(--k, var(--ok))}
+.sz-hoerer{font-size:30px; line-height:1; animation:sz-auflegen .7s .5s ease-in both}
+.sz-form-text{display:flex; flex-direction:column; gap:2px}
+.sz-form-text small{color:var(--muted)}
+.sz-form-text p{margin:6px 0 0; font-style:italic; line-height:1.4}
+@keyframes sz-auflegen{0%{transform:none} 60%{transform:rotate(-135deg) translateY(4px)} 100%{transform:rotate(-135deg) translateY(4px); opacity:.55}}
+/* Plan-Audit: der Plan wird abgestempelt */
+.sz-audit{width:min(460px, calc(100% - 32px))}
+.sz-plan{position:relative; max-height:170px; overflow:hidden; border-radius:10px; background:var(--bg); display:flex; justify-content:center}
+.sz-plan .np-svg{width:100%; max-height:170px}
+.sz-plan-leer{font-size:56px; padding:20px}
+.sz-stempel{position:absolute; right:26px; top:58px; display:flex; flex-direction:column; align-items:center; padding:6px 12px; border:3px solid var(--ok); border-radius:8px;
+  color:var(--ok); background:color-mix(in srgb, var(--panel) 70%, transparent); transform:rotate(-12deg) scale(2.4); opacity:0}
+.sz-stempel b{font:800 17px/1.1 var(--display); letter-spacing:.06em}
+.sz-stempel small{font:700 11px/1.2 var(--mono)}
+.sz-audit.gestempelt .sz-stempel{animation:sz-stempeln .28s cubic-bezier(.5,0,.8,.6) forwards}
+@keyframes sz-stempeln{to{transform:rotate(-12deg) scale(1); opacity:1}}
+/* Adressplan: die Bereiche leuchten nacheinander im Adressraum auf */
+.sz-adressplan{width:min(480px, calc(100% - 32px))}
+.sz-adressen{position:relative; height:26px; border-radius:7px; background:var(--panel-3); overflow:hidden}
+.sz-adressen i{position:absolute; top:0; bottom:0; border-right:2px solid var(--panel); background:var(--f, var(--accent)); opacity:.12;
+  animation:sz-leuchten .35s calc(var(--i) * 280ms + 250ms) ease-out forwards}
+.sz-legende{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 12px; font:500 12.5px/1.4 var(--mono); color:var(--muted)}
+.sz-legende li{opacity:.25; animation:sz-leuchten-text .35s calc(var(--i) * 280ms + 250ms) ease-out forwards}
+.sz-legende b{font-family:var(--body); color:var(--f, var(--ink))}
+@keyframes sz-leuchten{to{opacity:1}}
+@keyframes sz-leuchten-text{to{opacity:1; color:var(--ink)}}
+@keyframes sz-pop-mitte{from{opacity:0; transform:translate(-50%, -40%) scale(.85)} to{opacity:1; transform:translate(-50%, -50%) scale(1)}}
+@media (prefers-reduced-motion: reduce){
+  .sz-form, .sz-hoerer, .sz-adressen i, .sz-legende li{animation:none}
+  .sz-adressen i, .sz-legende li{opacity:1}
+  .sz-stempel{transform:rotate(-12deg); opacity:1}
+  .sz-audit.gestempelt .sz-stempel{animation:none}
+}

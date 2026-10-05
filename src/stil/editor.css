@@ -121,6 +121,12 @@
 .lb-fern-kunde b{color:var(--ink)}
 .lb-fern-kunde-sym{display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:7px; background:color-mix(in srgb, var(--k, var(--accent)) 20%, var(--panel)); font-size:14px}
 @media (prefers-reduced-motion: reduce){ .lb-fern-punkt{animation:none} }
+/* Probe (§ 20 F4): ✓ auf dem Bildschirm, Verbindung getrennt, PC online */
+.lb-fern-schild.fertig .lb-fern-x{background:var(--ok); animation:lb-fern-ok .35s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes lb-fern-ok{from{transform:scale(.3)} to{transform:none}}
+.lb-fern-schild.fertig .lb-fern-status{color:var(--muted)}
+.lb-fern-schild.fertig .lb-fern-punkt{background:var(--muted); animation:none}
+.lb-fern-online{margin-left:auto; color:var(--ok); font:700 12.5px/1 var(--body)}
 /* Fernwartung (F2): Geräteleiste weg, Terminal bekommt mehr als die Hälfte der Arbeitsfläche */
 .labor.lb-fern{grid-template-columns:0 minmax(0,1fr) var(--dock-b, 0px)}
 .labor.lb-fern > .lb-geraete{width:0; padding:0; border:0; overflow:hidden}

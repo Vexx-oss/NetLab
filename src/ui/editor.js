@@ -745,6 +745,14 @@ UI.labor = (() => {
     Bus.senden("labor-geladen", {netz, titel: Z.titel});
     if (Z.fern) setTimeout(() => { if (Z.fern && Z.netz === netz) UI.terminal?.oeffnen(Z.fern); }, 0);
   }
+  /* Funktionsprobe der Fernwartung (§ 20 F4): Bildschirm des Kunden zeigt ✓, die Sitzung endet, der PC ist online */
+  function fernFertig(){
+    const el = Z.el.fern; if (!el || el.hidden || !Z.fern) return;
+    el.classList.add("fertig");
+    const x = el.querySelector(".lb-fern-x"); if (x) x.textContent = "✓";
+    const s = el.querySelector(".lb-fern-status"); if (s) s.replaceChildren(h("i", {class: "lb-fern-punkt", "aria-hidden": "true"}), "Verbindung getrennt");
+    el.querySelector(".lb-fern-geraet")?.append(h("small", {class: "lb-fern-online"}, "online ✓"));
+  }
   /* Arbeitsblatt an (Zeichenfunktion) oder aus (null): Fläche, Werkzeuge und Geräteleiste verdeckt, Blatt darüber */
   function blatt(fn){
     Z.blattFn = fn || null;
@@ -827,6 +835,7 @@ UI.labor = (() => {
     auftragNeu: () => auftragZeichnen(),
     warnungenAn,
     fernwartung: id => { fernwartung(id); if (!id) { zeichnen(); einpassen(false); } },
+    fernFertig: () => fernFertig(),
     get fern(){ return Z.fern || null; },
     auffrischen: () => { zeichnen(); inspektorZeigen(); },
     /* für Szenen (ui/szene.js): Weltposition, Bildschirmposition auf der Leinwand, Paket zwischen zwei Geräten */

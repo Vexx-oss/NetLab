@@ -483,4 +483,16 @@ Spiel.ereignisse.ausloesen(id, {inst?, form?, kunde?, stufe?})   // ohne inst gi
 - `Spiel.postfach()` sortiert nach Frist, dann `kuratiert`, dann wie bisher. Der Hub zeigt einen klingelnden Anruf als Hauptkarte („Mira Kaya ruft an“, „Rangehen ▸“).
 - Oberfläche: `UI.ereignisse.vormerken(e)` zeigt die Karte, sobald kein Dialog und keine Funktionsprobe mehr läuft (Anruf mit grünem „Rangehen ▸“ und Klang `klingeln`, Weiterempfehlung mit „Ansehen ▸“ → `UI.spiel.imPostfach(iid)`); Postfach-Karte mit Marke „☎ klingelt“.
 
+**Probe je Form** (`spiel/szene.js` + `ui/szene.js`, § 20 F4): eigene, höchstens rund 3 s lange Funktionsprobe für die neuen Formen, überspringbar wie die Paket-Szene.
+
+```js
+Spiel.szeneForm(inst) → null (Störung, Projekt, Terminal: Paket-Szene genügt)
+  | {art:"hotline", person, symbol, farbe, satz, minuten}          // Hörer wird aufgelegt, Dank, Gesprächsdauer (statt Sprechblase)
+  | {art:"fernwartung", geraet, name}                              // Sitzungsfenster: ✓ auf dem Bildschirm, „Verbindung getrennt“, „online ✓“ – dann das Netz
+  | {art:"audit", kunde, korrigiert, tag}                          // Stempel „GEPRÜFT ✓“ mit Datum auf der Skizze des Netzes
+  | {art:"adressplan", basis, bereiche:[{name, netz, praefix, links, breite}]}   // Bereiche leuchten nacheinander im Adressraum (Prozent)
+UI.szene.abspielen(zeilen, {…, form, aufdecken})   // Hotline/Fernwartung: höchstens 1 Paketweg; Audit/Adressplan: keine Paketfahrt
+UI.labor.fernFertig()                               // Sitzungsfenster in den Zustand „getrennt“; aufdecken() hebt die Fernwartung auf (auch beim Überspringen)
+```
+
 **Rauchtest der Oberfläche** (`tools/rauch.py`, § 20 F8): siehe § 2.

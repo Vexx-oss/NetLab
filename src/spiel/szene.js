@@ -125,6 +125,30 @@ Spiel.szene = function(instOderNetz, abnahme){
   return zeilen;
 };
 
+/* Eigene Probe je Form (Design § 20, F4) – je höchstens 3 s, die Oberfläche spielt ab (ui/szene.js):
+   Hotline legt auf (Dank, Gesprächsdauer) · Fernwartung trennt die Verbindung (Bildschirm des Kunden ✓, PC online) ·
+   Plan-Audit stempelt den Plan · Adressplan lässt die Bereiche im Adressraum aufleuchten. Störung/Projekt/Terminal: null.
+   → {art:"hotline", person, symbol, farbe, satz, minuten} | {art:"fernwartung", geraet, name}
+     | {art:"audit", kunde, korrigiert, tag} | {art:"adressplan", basis, bereiche:[{name, netz, praefix, links, breite}]} */
+Spiel.szeneForm = function(inst){
+  const def = inst && Spiel.defVon(inst); if (!def) return null;
+  const form = Spiel.formVon(def), k = Spiel.kundenDaten(inst.kunde || def.kunde), person = (k.ansprechpartner || {}).name || k.name;
+  if (form === "hotline") return {art: "hotline", person, symbol: k.symbol || "☎", farbe: k.farbe || null,
+    satz: Spiel.kundenSatz(inst.kunde || def.kunde, "dank", inst.seed) || "", minuten: Math.max(1, Math.round((inst.zeitMs || 0) / 60000))};
+  if (form === "forensik" && def.fernwartung) return {art: "fernwartung", geraet: def.fernwartung, name: (inst.netz.geraete[def.fernwartung] || {}).name || def.fernwartung};
+  if (form === "audit") return {art: "audit", kunde: k.name, korrigiert: (def.planFehler || []).length, tag: heute()};
+  if (form === "beratung") {
+    const ziel = (def.ziele || []).find(z => z.typ === "tabelle");
+    if (!ziel) return null;
+    const b = IP.ausCidr(ziel.basis), start = IP.zuZahl(b.netz), gesamt = 2 ** (32 - b.praefix), soll = Spiel.beratung.soll(ziel);
+    return {art: "adressplan", basis: ziel.basis, bereiche: ziel.zeilen.map(z => {
+      const s = soll[z.name], groesse = 2 ** (32 - Number(s.praefix.slice(1)));
+      return {name: z.name, netz: s.netz, praefix: s.praefix, links: 100 * (IP.zuZahl(s.netz) - start) / gesamt, breite: 100 * groesse / gesamt};
+    })};
+  }
+  return null;
+};
+
 /* Was hat der Spieler verändert? (für das kurze Vorher/Nachher-Pulsieren) */
 Spiel.geaenderteGeraete = function(inst){
   const start = Spiel.startNetzVon(inst), netz = inst.netz;

@@ -1,10 +1,13 @@
 "use strict";
 /* ---------- Funktionsprobe-Szene (Design – Spielspaß 2.0, Hebel 1; Architektur § 9.2) ----------
-   UI.szene.abspielen(zeilen, {geaendert, kunde, satz, kurz}) → Promise<{dauer, uebersprungen, gezeigt}>
+   UI.szene.abspielen(zeilen, {geaendert, kunde, satz, kurz, form, aufdecken}) → Promise<{dauer, uebersprungen, gezeigt}>
      zeilen   aus Spiel.szene(inst, abnahme): je Ziel {art, pfad, von, ende, text}
      geaendert  Geräte, die kurz pulsieren (Vorher/Nachher, Spiel.geaenderteGeraete)
      kunde/satz die Kundenzeile als Sprechblase an dem Gerät, das der Kunde zuerst nutzt
      kurz     AP1/AP2: höchstens 2 Ziele, schneller (Einstieg: bis 4, ausführlicher)
+     form     Spiel.szeneForm(inst): eigene Probe je Form, zusammen höchstens ~3 s (§ 20 F4) – Hotline legt auf (statt
+              Sprechblase), Fernwartung trennt erst die Sitzung und deckt dann das Netz auf (aufdecken), Plan-Audit stempelt,
+              Adressplan leuchtet (beide ohne Paketfahrt)
    Läuft 2–6 s auf der Zeichenfläche, überspringbar mit Klick, Esc oder Leertaste. Bei reduzierter Bewegung:
    ruhige Haken-Liste (1,2 s). UI.szene.laeuft() → bool, UI.szene.letzte → Messwerte der letzten Probe.
    Klassenpräfix sz-. */
@@ -45,6 +48,45 @@ UI.szene = (() => {
     }
   }
 
+  /* ---------- Eigene Probe je Form (§ 20 F4) ---------- */
+  function formKarte(buehne, klasse, ...inhalt){ const el = h("div", {class: "sz-form " + klasse, role: "status"}, ...inhalt); buehne.append(el); return el; }
+  async function formProbe(buehne, f, st, o, ruhig){
+    if (f.art === "fernwartung") {
+      UI.labor.fernFertig?.(); UI.klang?.spielen("haken");
+      await pause(ruhig ? 900 : 1200, st);
+      o.aufdecken?.();                                      /* jetzt zeigt sich das Netz, das man blind repariert hat */
+      return;
+    }
+    if (f.art === "hotline") {
+      const el = formKarte(buehne, "sz-auflegen", h("span", {class: "sz-hoerer", "aria-hidden": "true"}, "☎"),
+        h("div", {class: "sz-form-text"}, h("b", {}, f.person), h("small", {}, `Gespräch beendet · ${f.minuten} min`), f.satz ? h("p", {}, `„${f.satz}“`) : null));
+      el.style.setProperty("--k", `var(${f.farbe || "--accent"})`);
+      UI.klang?.spielen("blase");
+      await pause(ruhig ? 1200 : 1600, st);
+      return;
+    }
+    if (f.art === "audit") {
+      let bild = null;
+      try { const netz = UI.labor.netz; if (netz) bild = UI.netzplan.zeichnung(Spiel.plan.aus(netz, {art: "skizze"}), "skizze"); } catch (e) { bild = null; }
+      const el = formKarte(buehne, "sz-audit", h("div", {class: "sz-form-kopf"}, "📐 ", h("b", {}, "Netzplan"), ` · ${f.kunde}`),
+        h("div", {class: "sz-plan"}, bild || h("span", {class: "sz-plan-leer", "aria-hidden": "true"}, "🗺")),
+        h("div", {class: "sz-stempel", "aria-label": "Geprüft"}, h("b", {}, "GEPRÜFT ✓"), h("small", {}, datumDe(f.tag))),
+        h("p", {class: "sz-form-fuss"}, `${f.korrigiert} ${f.korrigiert === 1 ? "Wert" : "Werte"} korrigiert – der Plan stimmt wieder`));
+      await pause(ruhig ? 0 : 420, st);
+      el.classList.add("gestempelt"); UI.klang?.spielen("druck");
+      await pause(ruhig ? 1200 : 1500, st);
+      return;
+    }
+    if (f.art === "adressplan") {
+      const n = f.bereiche.length;
+      formKarte(buehne, "sz-adressplan", h("div", {class: "sz-form-kopf"}, "🧮 ", h("b", {}, "Adressplan"), ` · ${f.basis}`),
+        h("div", {class: "sz-adressen", "aria-hidden": "true"}, f.bereiche.map((b, i) => h("i", {style: {left: b.links + "%", width: b.breite + "%", "--i": i, "--f": `var(--vlan-${(i % 8) + 1})`}}))),
+        h("ul", {class: "sz-legende"}, f.bereiche.map((b, i) => h("li", {style: {"--i": i, "--f": `var(--vlan-${(i % 8) + 1})`}}, h("b", {}, b.name), ` ${b.netz}${b.praefix}`))));
+      UI.klang?.spielen("haken");
+      await pause(ruhig ? 1200 : 300 + n * 280 + 1100, st);
+    }
+  }
+
   function liste(buehne, zeilen, o){
     buehne.classList.add("sz-ruhig");
     buehne.append(h("div", {class: "sz-liste", role: "status"},
@@ -54,10 +96,12 @@ UI.szene = (() => {
 
   async function abspielen(zeilen, o = {}){
     if (aktiv) aktiv.ende = true;
-    const leinwand = UI.labor.leinwand;
-    if (!leinwand || !zeilen || !zeilen.length) return {dauer: 0, uebersprungen: false, gezeigt: 0};
+    const leinwand = UI.labor.leinwand, f = o.form || null;
+    if (!leinwand || ((!zeilen || !zeilen.length) && !f)) { o.aufdecken?.(); return {dauer: 0, uebersprungen: false, gezeigt: 0}; }
+    zeilen = zeilen || [];
     const t0 = performance.now(), ruhig = UI.bewegung() !== "voll";
-    const max = o.kurz ? 2 : 4, gezeigt = zeilen.slice(0, max), rest = zeilen.length - gezeigt.length;
+    const nurForm = !!f && (f.art === "audit" || f.art === "adressplan");          /* Arbeitsblatt und Plan: keine Paketfahrt */
+    const max = nurForm ? 0 : f ? 1 : o.kurz ? 2 : 4, gezeigt = zeilen.slice(0, max), rest = zeilen.length - gezeigt.length;
     const st = aktiv = {ende: false, weiter: [], uebersprungen: false};
     const buehne = h("div", {class: "sz-buehne", role: "presentation", title: "Klick, Esc oder Leertaste: weiter"},
       h("span", {class: "sz-weiter"}, "Weiter: Klick"));
@@ -67,21 +111,25 @@ UI.szene = (() => {
     buehne.addEventListener("pointerdown", e => { e.preventDefault(); stopp(); });
     document.addEventListener("keydown", taste, true);
     try {
-      if (ruhig) {
+      if (ruhig && f) {
+        await formProbe(buehne, f, st, o, true);
+      } else if (ruhig) {
         liste(buehne, zeilen, o);
         await pause(1200, st);
       } else {
-        if (o.geaendert && o.geaendert.length) UI.labor.hervorheben(o.geaendert.map(id => ({geraet: id})), 1500);
-        await pause(o.kurz ? 150 : 300, st);
-        const proZiel = o.kurz ? 650 : 950;
+        if (f && f.art === "fernwartung") await formProbe(buehne, f, st, o, false);   /* erst die Sitzung beenden, dann das Netz */
+        if (o.geaendert && o.geaendert.length && !nurForm) UI.labor.hervorheben(o.geaendert.map(id => ({geraet: id})), 1500);
+        if (gezeigt.length) await pause(o.kurz || f ? 150 : 300, st);
+        const proZiel = o.kurz || f ? 650 : 950;
         for (const z of gezeigt) {
-          if (st.ende || performance.now() - t0 > 4300) break;
+          if (st.ende || performance.now() - t0 > (f ? 2200 : 4300)) break;
           await fahren(z, proZiel, st);
           if (st.ende) break;
           reaktion(buehne, z);
-          await pause(o.kurz ? 220 : 420, st);
+          await pause(o.kurz || f ? 220 : 420, st);
         }
-        if (!st.ende && o.satz) {
+        if (!st.ende && f && f.art !== "fernwartung") await formProbe(buehne, f, st, o, false);   /* Hotline legt auf, Audit stempelt, Adressplan leuchtet */
+        if (!st.ende && o.satz && !f) {
           const bei = gezeigt[0] ? gezeigt[0].von : null;
           const blase = h("div", {class: "sz-blase", style: {"--k": `var(${o.kunde?.farbe || "--accent"})`}},
             h("span", {class: "sz-kunde", "aria-hidden": "true"}, o.kunde?.symbol || "✉"),
@@ -90,9 +138,10 @@ UI.szene = (() => {
           if (bei && anGeraet(buehne, bei, blase, -70)) { UI.klang?.spielen("blase"); await pause(o.kurz ? 1100 : 1500, st); }
         }
         const rest2 = 2000 - (performance.now() - t0);
-        if (!st.ende && rest2 > 0) await pause(rest2, st);           /* nie kürzer als 2 s – sonst wirkt es wie ein Flackern */
+        if (!st.ende && rest2 > 0 && !f) await pause(rest2, st);    /* nie kürzer als 2 s – sonst wirkt es wie ein Flackern */
       }
     } finally {
+      if (f && f.art === "fernwartung") o.aufdecken?.();        /* auch beim Überspringen: das Netz zeigt sich */
       document.removeEventListener("keydown", taste, true);
       buehne.classList.add("weg");
       setTimeout(() => buehne.remove(), wenigBewegung() ? 0 : 180);

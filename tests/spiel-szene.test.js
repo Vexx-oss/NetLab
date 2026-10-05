@@ -77,4 +77,28 @@ gruppe("Spiel: Funktionsprobe", () => {
       erwarte.gleich(Spiel.geaenderteGeraete(b), ["kasse"], "Adresse der Kasse");
     } finally { Spiel._st = alt.st; Spiel._einst = alt.einst; Spiel._lz = alt.lz; Spiel._trocken = alt.trocken; }
   });
+
+  /* § 20 F4: eigene Probe je Form – Hotline legt auf, Fernwartung trennt, Audit stempelt, Adressplan leuchtet */
+  pruefe("eigene Probe je Form: Hotline, Fernwartung, Plan-Audit, Adressplan (Bereiche lückenlos im Adressraum); Störung ohne", () => {
+    const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken};
+    try {
+      Spiel._trocken = true; Spiel._lz = {}; Spiel._st = Spiel.leererStand(); Spiel._st.stufe = 99;
+      Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD);
+      const form = (f, stufe) => Spiel.instanzErstellen({gen: {form: f, seed: 7, opts: {kunde: "salon", stufe}}, quelle: "generiert"});
+      const h = Spiel.szeneForm(Spiel.instanzErstellen({ticketId: "salon-hotline", quelle: "postfach"}));
+      erwarte.wahr(h && h.art === "hotline" && h.person === "Mira Kaya" && h.minuten >= 1 && typeof h.satz === "string", JSON.stringify(h));
+      const fw = form("forensik", "E"), f = Spiel.szeneForm(fw);
+      erwarte.wahr(f && f.art === "fernwartung" && f.geraet === Spiel.defVon(fw).fernwartung && f.name, JSON.stringify(f));
+      const a = Spiel.szeneForm(form("audit", "AP1"));
+      erwarte.wahr(a && a.art === "audit" && a.korrigiert === 2 && a.kunde === "Salon Lockenwerk", JSON.stringify(a));
+      for (const stufe of ["E", "AP1", "AP2"]) {
+        const p = Spiel.szeneForm(form("beratung", stufe));
+        erwarte.wahr(p && p.art === "adressplan" && p.bereiche.length >= 3, stufe + ": " + JSON.stringify(p));
+        let ende = 0;
+        for (const b of p.bereiche) { erwarte.wahr(Math.abs(b.links - ende) < 1e-9 && b.breite > 0, `${stufe} ${b.name}: lückenlos ab ${ende} (${b.links})`); ende = b.links + b.breite; }
+        erwarte.wahr(ende <= 100 + 1e-9, `${stufe}: passt in den Adressraum (${ende} %)`);
+      }
+      erwarte.gleich(Spiel.szeneForm(Spiel.instanzErstellen({ticketId: "salon-02", quelle: "postfach"})), null, "Störung: die Paket-Szene genügt");
+    } finally { Spiel._st = alt.st; Spiel._einst = alt.einst; Spiel._lz = alt.lz; Spiel._trocken = alt.trocken; }
+  });
 });
