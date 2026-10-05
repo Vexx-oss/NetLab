@@ -406,6 +406,8 @@ UI.inspektor = (() => {
       const pools = d.dhcp.pools || [];
       el.append(abschnitt("DHCP-Pools", pools.map((p, i) => poolKarte(K, "dienste.dhcp.pools", pools, i, true)),
         knopf("+ Pool anlegen", () => setzen(K, "dienste.dhcp.pools", [...pools, {name: "LAN" + (pools.length + 1), netz: "", maske: "255.255.255.0", gw: "", dns: "", start: "", anzahl: 50}], "DHCP-Pool angelegt"), "klein")));
+      /* Was der Server wirklich vergeben hat (Architektur § 10.6) – dieselben Daten wie „show ip dhcp binding“. */
+      el.append(abschnitt("Vergebene Adressen (Leases)", ...leaseTabelle(g)));
     }
   }
   /* Pool-Karte (Server: mit start/anzahl; Router: netz/maske/gw/dns) */
@@ -418,9 +420,34 @@ UI.inspektor = (() => {
       h("div", {class: "in-raster"},
         f("name", "Name", "text"), f("netz", "Netz", "ip", "192.168.10.0"), f("maske", "Maske", "maske", "255.255.255.0"),
         f("gw", server ? "Gateway" : "default-router", "ip", "Router-Adresse"), f("dns", "DNS-Server", "ip", "optional"),
-        server ? f("start", "Erste Adresse", "ip") : null,
-        server ? feld(K, {key: `${pfad}.${i}.anzahl`, titel: "Anzahl", wert: p.anzahl, art: "zahl", min: 1, max: 1000, uebernehmen: w => neu("anzahl", +w)}) : null));
+        f("start", "Erste Adresse", "ip", "z. B. .100"),
+        feld(K, {key: `${pfad}.${i}.anzahl`, titel: "Anzahl", wert: p.anzahl, art: "zahl", min: 1, max: 1000, uebernehmen: w => neu("anzahl", +w)}),
+        /* Lease-Zeit in Sekunden (Architektur § 10.1): leer = Standard (1 Tag) */
+        feld(K, {key: `${pfad}.${i}.leaseS`, titel: "Lease-Zeit (Sekunden)", wert: p.leaseS, art: "zahl", min: 60, max: 31536000,
+          uebernehmen: w => neu("leaseS", w === "" ? "" : +w), platz: "leer = 1 Tag"}),
+        f("domain", "Domain (Option 15)", "text", "z. B. labor.local")));
   }
+  /* ---------- Lease-Tabelle (Architektur § 10.6) ----------
+     Zeigt, was der DHCP-Server wirklich vergeben hat: Zustand, Restlaufzeit, Reservierung und Konflikte.
+     Quelle ist Sim.leases (Architektur § 10.2) – dieselben Daten, die „show ip dhcp binding“ ausgibt. */
+  function leaseTabelle(g){
+    const alle = (typeof Sim !== "undefined" && Sim.leases) ? Sim.leases(UI.app.netz, g.id) : [];
+    if (!alle.length) return [hinweis("Noch keine Lease vergeben. Sobald ein Client eine Adresse holt, steht sie hier.", "klein")];
+    const rest = s => {
+      if (s <= 0) return "abgelaufen";
+      const std = Math.floor(s / 3600), min = Math.floor(s / 60) % 60;
+      return std ? `${std} h ${min} min` : `${min} min ${s % 60} s`;
+    };
+    const ZUSTAND = {aktiv: "aktiv", reserviert: "reserviert", abgelaufen: "abgelaufen", konflikt: "Konflikt"};
+    const kopf = h("tr", {}, h("th", {}, "Gerät"), h("th", {}, "IP"), h("th", {}, "MAC"),
+      h("th", {}, "Restlaufzeit"), h("th", {}, "Zustand"));
+    const zeilen = alle.map(l => h("tr", {class: l.zustand === "konflikt" ? "in-lease-konflikt" : l.zustand === "abgelaufen" ? "in-lease-alt" : ""},
+      h("td", {}, l.hostname || "—"), h("td", {class: "mono"}, l.ip), h("td", {class: "mono"}, l.mac || "—"),
+      h("td", {}, rest(l.restS)), h("td", {class: "in-lease-" + l.zustand}, ZUSTAND[l.zustand] || l.zustand)));
+    return [h("table", {class: "in-lease-tabelle"}, h("thead", {}, kopf), h("tbody", {}, ...zeilen)),
+      hinweis(`${alle.length} Eintrag${alle.length === 1 ? "" : " e"} · Reservierungen und Konflikte kommen aus dem laufenden Betrieb.`, "klein")];
+  }
+
   /* Zeile zum Hinzufügen: felder [[name, titel, platz, art]] → onAdd(werte) */
   function neuZeile(K, key, felder, onAdd, knopfText = "Hinzufügen"){
     const werte = {}, inputs = {};
@@ -713,6 +740,8 @@ UI.inspektor = (() => {
       ...(dh.pools || []).map((p, i) => poolKarte(K, "dhcp.pools", dh.pools, i, false)),
       knopf("+ Pool anlegen", () => aendern(K, "DHCP-Pool angelegt", n => Modell.setzen(n, g.id, "dhcp.pools", [...(dh.pools || []), {name: "LAN" + ((dh.pools || []).length + 1), netz: "", maske: "255.255.255.0", gw: "", dns: ""}]),
         {text: `ip dhcp pool LAN${(dh.pools || []).length + 1}`}), "klein"),
+      h("h5", {}, "Vergebene Adressen (Leases)"),
+      ...leaseTabelle(g),
       hinweis("Clients in einem anderen Netz erreichen den DHCP-Server nur über ein Relay: <code>ip helper-address</code> auf der Schnittstelle zu ihnen.", "klein")));
   }
   function neuPat(K, g, nat, natNeu){
