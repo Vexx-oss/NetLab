@@ -184,16 +184,41 @@ Sim.host = (() => {
   }
 
   /* ---- DHCP-Server (auch vom Router benutzt) ----
-     pools: [{name, netz, maske, gw, dns, von, bis, aus:[{von,bis}]}] */
+     Ein Pool hat für Router UND Host dieselbe Form (Architektur § 10.1). Fehlende Felder werden defensiv gelesen,
+     damit alte Spielstände weiterlaufen:
+       anzahl    fehlend → ganzes Subnetz (bis Broadcast−1); gesetzt → so viele Adressen ab start
+       start     fehlend → Netz+1
+       leaseS    fehlend/0 → Sim.T.LEASE
+       domain    fehlend → "" (Option 15 wird dann nicht gesendet)
+     Ergebnis: {name, netz, maske, gw, dns, domain, leaseS, von, bis, aus:[{von,bis}], reservierungen:[{mac,ip,name}]} */
+  function poolForm(p, aus){
+    const netz = IP.netz(p.netz, p.maske);
+    const von = IP.gueltig(p.start) ? p.start : IP.plus(netz, 1);
+    const bisMax = IP.plus(IP.broadcast(p.netz, p.maske), -1);
+    const gesetzt = p.anzahl != null && p.anzahl !== "";
+    const roh = gesetzt ? Math.max(0, +p.anzahl || 0) : null;
+    const bis = roh == null ? bisMax : (IP.vergleich(IP.plus(von, roh - 1), bisMax) > 0 ? bisMax : IP.plus(von, roh - 1));
+    const leaseS = +p.leaseS > 0 ? Math.round(+p.leaseS) : Sim.T.LEASE / 1000;
+    const res = (Array.isArray(p.reservierungen) ? p.reservierungen : [])
+      .filter(r => r && IP.gueltig(r.ip)).map(r => ({mac: String(r.mac == null ? "" : r.mac).toLowerCase(), ip: r.ip, name: r.name || ""}));
+    return {name: p.name || "Pool", netz, maske: p.maske, gw: p.gw || "", dns: p.dns || "", domain: p.domain || "",
+            leaseS, von, bis, aus: aus || [], reservierungen: res};
+  }
+  /* Ist der DHCP-Dienst dieses Geräts an? Router: fehlendes `an` = an (IOS-Vorgabe). Host: nur wenn eingeschaltet. */
+  function dhcpAn(g){
+    if (g.typ === "router") { const d = g.running.dhcp || {}; return d.an !== false; }
+    const d = (g.running.dienste && g.running.dienste.dhcp) || {};
+    return !!d.an;
+  }
+  /* Ausschlussbereiche eines Geräts – Router führen sie in `dhcp.ausgeschlossen`, Hosts ebenso (ab D1). */
+  function ausschluesse(d){
+    return ((d && d.ausgeschlossen) || []).filter(a => a && IP.gueltig(a.von))
+      .map(a => ({von: a.von, bis: IP.gueltig(a.bis) ? a.bis : a.von}));
+  }
   function poolsVonHost(g){
     const d = g.running.dienste.dhcp || {};
-    return (d.pools || []).filter(p => IP.gueltig(p.netz) && IP.maskeGueltig(p.maske)).map(p => {
-      const von = IP.gueltig(p.start) ? p.start : IP.plus(IP.netz(p.netz, p.maske), 1);
-      const n = p.anzahl == null || p.anzahl === "" ? 50 : Math.max(0, +p.anzahl || 0);
-      const bisMax = IP.plus(IP.broadcast(p.netz, p.maske), -1);
-      const bis = IP.vergleich(IP.plus(von, n - 1), bisMax) > 0 ? bisMax : IP.plus(von, n - 1);
-      return {name: p.name || "Pool", netz: IP.netz(p.netz, p.maske), maske: p.maske, gw: p.gw || "", dns: p.dns || "", von, bis, aus: []};
-    });
+    const aus = ausschluesse(d);
+    return (d.pools || []).filter(p => IP.gueltig(p.netz) && IP.maskeGueltig(p.maske)).map(p => poolForm(p, aus));
   }
   function belegt(L, ip){ return Sim._besitzerIp(L, ip).length > 0; }
   function freieAdresse(L, g, pool, mac){
@@ -261,5 +286,5 @@ Sim.host = (() => {
     L3().senden(L, g, p);
   }
 
-  return {ifWahl, ipSenden, empfangen, lokal, dienst, dhcpServer, poolsVonHost, freieAdresse, dnsAntwort};
+  return {ifWahl, ipSenden, empfangen, lokal, dienst, dhcpServer, poolsVonHost, freieAdresse, dnsAntwort, poolForm, dhcpAn, ausschluesse};
 })();

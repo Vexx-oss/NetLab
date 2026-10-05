@@ -53,11 +53,15 @@ const Modell = (() => {
       }
       case "switch": {
         const ports = {}; for (const p of PORTS.switch) ports[p] = switchPort();
-        return {hostname: hn, enableSecret: null, banner: "", ports, svi: {"1": {ip: "", maske: "", shutdown: true}}, defaultGateway: ""};
+        /* snooping: DHCP-Snooping (Architektur § 10.1). Vertraute Ports sind die Richtung zum Server. */
+        return {hostname: hn, enableSecret: null, banner: "", ports, svi: {"1": {ip: "", maske: "", shutdown: true}}, defaultGateway: "",
+                snooping: {an: false, vertraut: []}};
       }
       case "router": {
         const ifs = {}; for (const p of PORTS.router) ifs[p] = routerIf();
-        return {hostname: hn, enableSecret: null, banner: "", if: ifs, routen: [], acls: {}, nat: {statisch: [], dynamisch: []}, dhcp: {ausgeschlossen: [], pools: []}};
+        /* dhcp.an: IOS hat den DHCP-Dienst standardmäßig an – fehlendes `an` gilt als an (alte Spielstände). */
+        return {hostname: hn, enableSecret: null, banner: "", if: ifs, routen: [], acls: {}, nat: {statisch: [], dynamisch: []},
+                dhcp: {an: true, ausgeschlossen: [], pools: []}};
       }
       case "firewall": {
         const ifs = {}; for (const p of PORTS.firewall) ifs[p] = {ip: "", maske: "", zone: null, shutdown: false};

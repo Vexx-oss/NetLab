@@ -260,12 +260,12 @@ Sim.router = (() => {
   }
 
   /* ---------- DHCP ---------- */
+  /* Dieselbe Pool-Form wie beim Host (Architektur § 10.1): start/anzahl/domain/leaseS/reservierungen und
+     Ausschlüsse sind auf beiden Gerätetypen gleich. Der Router reicht seine `ausgeschlossen`-Liste mit. */
   function routerPools(g){
     const d = g.running.dhcp || {};
-    const aus = (d.ausgeschlossen || []).filter(a => IP.gueltig(a.von)).map(a => ({von: a.von, bis: IP.gueltig(a.bis) ? a.bis : a.von}));
-    return (d.pools || []).filter(p => IP.gueltig(p.netz) && IP.maskeGueltig(p.maske)).map(p => ({
-      name: p.name || "Pool", netz: IP.netz(p.netz, p.maske), maske: p.maske, gw: p.gw || "", dns: p.dns || "",
-      von: IP.plus(IP.netz(p.netz, p.maske), 1), bis: IP.plus(IP.broadcast(p.netz, p.maske), -1), aus}));
+    const aus = Sim.host.ausschluesse(d);
+    return (d.pools || []).filter(p => IP.gueltig(p.netz) && IP.maskeGueltig(p.maske)).map(p => Sim.host.poolForm(p, aus));
   }
   function relay(L, g, ifc, f){
     const a = f.app.felder || {};
@@ -298,7 +298,7 @@ Sim.router = (() => {
     },
     broadcast(L, g, ifc, f){
       if (!(f.udp && f.udp.dst === 67 && f.app && f.app.proto === "DHCP")) return false;
-      const pools = routerPools(g);
+      const pools = Sim.host.dhcpAn(g) ? routerPools(g) : [];
       if (pools.some(p => IP.imNetz(ifc.ip, p.netz, p.maske))) { Sim.host.dhcpServer(L, g, ifc, f, pools); return true; }
       if (ifc.helper.length) { relay(L, g, ifc, f); return true; }
       Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} ist hier kein DHCP-Server und hat an ${ifc.name} keine „ip helper-address“ – der Broadcast endet am Router.`);
@@ -308,7 +308,7 @@ Sim.router = (() => {
       if (!(f.app && f.app.proto === "DHCP" && f.udp.dst === 67)) return false;
       const a = f.app.felder || {};
       if (a.typ === "discover" || a.typ === "request") {
-        const pools = routerPools(g);
+        const pools = Sim.host.dhcpAn(g) ? routerPools(g) : [];
         if (!pools.length) return false;
         Sim.host.dhcpServer(L, g, ifcIn, f, pools);
         return true;
