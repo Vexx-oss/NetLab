@@ -56,7 +56,8 @@ def main():
     for k, ort in sorted(fehlt.items()):
         print(f"{k:32} {ort}")
     print(f"\n{len(fehlt)} Klassen ohne CSS-Regel" + (f" (Präfixe {' '.join(praefixe)})" if praefixe else ""))
+    return 1 if fehlt else 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

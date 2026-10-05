@@ -41,13 +41,13 @@ Netzwerk-Labor/
   src/**/*.js          Reihenfolge in bauen.py (MODULE)
   shell/src-tauri/     Tauri-Projekt (frontendDist = ../../web)
   tests/               harness.js, run.js (Node), tests.html (Browser), *.test.js
-  tools/               messen.ps1, linux-bauen.sh, cdp.py (Test im echten Programm)
+  tools/               messen.ps1, linux-bauen.sh, cdp.py (Test im echten Programm), klassen.py (Klassen ↔ CSS), rauch.py (Rauchtest der Oberfläche)
   web/                 Build-Ausgabe
 ```
 
 **Neue Datei?** In `bauen.py` in `MODULE` (bzw. `STILE`) an der richtigen Stelle eintragen, und – falls headless-fähig – in `tests/run.js` in `HEADLESS`. Eine Datei, die nicht in `MODULE` steht, existiert für das Programm nicht.
 
-Tests: `wsl -d Ubuntu -- node tests/run.js` (Node 22 in der WSL; Pfad über `/mnt/c/...`). Testdateien nutzen `pruefe(name, fn)` und `erwarte`-Hilfen aus `tests/harness.js`.
+Tests: `sh tools/test.sh [filter]` (Node 24 portabel; früher WSL). Testdateien nutzen `pruefe(name, fn)` und `erwarte`-Hilfen aus `tests/harness.js`. Die Tests laden `ui/` nicht – dafür gibt es `sh tools/test.sh --rauch`: Node-Tests, `tools/klassen.py` (muss 0 melden) und `tools/rauch.py` (jede Ansicht in 1366/960/720 px in Edge headless: Hauptaktion sichtbar und anklickbar, kein waagerechter Überlauf, keine JS-Fehler; `--exe` prüft das echte Programm).
 
 ## 3 · Kern (`kern/basis.js`, `kern/netz.js`)
 
