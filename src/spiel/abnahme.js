@@ -113,6 +113,7 @@ Spiel.abschliessen = function(inst, abnahme){
   if (hotline && hotline.bonus) { lohn.ruf += 1; lohn.hotline = 1; }
   /* E2: Kundenakte – Atlas, Vertrauen, Kapitel (vor instanzEntfernen: braucht das Startnetz der Laufzeit) */
   const kundenakte = Spiel.kundenakte ? Spiel.kundenakte.nachAbschluss(inst, def, {sterne, lohn}) : null;
+  const flow = Spiel.flow ? Spiel.flow.nachAbschluss(inst, def, {sterne}) : null;           /* § 20 F6: Gerüst/Verwicklung für den nächsten */
   st.erledigt.push({id: def.id, sterne, tag: heute(), hilfe: inst.hilfeStufe || 0, quelle: inst.quelle, niveau: abnahme.niveau, zeitMs: inst.zeitMs || 0, kunde: inst.kunde || def.kunde || null, form: Spiel.formVon(def)});
   if (st.erledigt.length > 2000) st.erledigt.splice(0, st.erledigt.length - 2000);
   if (inst.kunde) {
@@ -136,7 +137,7 @@ Spiel.abschliessen = function(inst, abnahme){
     bestanden: true, abnahme, lernen, def, inst, sterne, euro: lohn.euro, ruf: lohn.ruf, lohn,
     dank: Spiel.kundenSatz(inst.kunde, "dank", inst.seed), erklaerung: def.erklaerung || "", quelle: def.quelle || "",
     naechstes: naechstes ? naechstes.iid : null,
-    dex, raetsel, verdacht, hotline, schuld, kundenakte,
+    dex, raetsel, verdacht, hotline, schuld, kundenakte, flow,
     ereignis: Spiel.ersteStunde ? Spiel.ersteStunde.abholen() : null,     /* erste Stunde: Anruf oder Weiterempfehlung als Karte */
     karten: [],                                                           /* Karten nach dem Ergebnis (Oberfläche), unten gefüllt */
   };

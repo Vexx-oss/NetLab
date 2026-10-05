@@ -285,7 +285,9 @@ UI.app = (() => {
       aussehenZeile("akzent", "Akzentfarbe", "Weitere Farben gibt es im Shop – gekaufte wählst du hier jederzeit."),
       aussehenZeile("leiste", "Leiste", "Wie die kleine Leiste am Bildschirmrand aussieht. Weitere Stile gibt es im Shop."),
       zeile("Ereignisse", "Stromausfall, Kabelschaden, Notfall-Anruf … höchstens eines je 30 (selten) oder 15 Minuten Arbeit (normal), immer mit Erklärung. Fortschritt geht nie verloren.",
-        wahl("Ereignisse", [["aus", "Aus"], ["selten", "Selten"], ["normal", "Normal"]], e.ereignisse || "selten", v => { einstSetzen({ereignisse: v}); if (Spiel._einst) Spiel._einst.ereignisse = v; })))});
+        wahl("Ereignisse", [["aus", "Aus"], ["selten", "Selten"], ["normal", "Normal"]], e.ereignisse || "selten", v => { einstSetzen({ereignisse: v}); if (Spiel._einst) Spiel._einst.ereignisse = v; })),
+      zeile("Anpassung", "Automatisch: Nach zwei zähen Aufträgen in einer Fertigkeit kommt der nächste mit Gerüst (Tipp, Haken, Warnungen), nach drei Glanzergebnissen wird er kniffliger. Manuell: Es gilt nur das Niveau.",
+        wahl("Anpassung", [["auto", "Automatisch"], ["manuell", "Manuell"]], e.anpassung || "auto", v => { einstSetzen({anpassung: v}); if (Spiel._einst) Spiel._einst.anpassung = v; })))});
     l.push({titel: "Erklärtiefe", fn: c => c.append(
       zeile("Wie ausführlich sollen Konsole und Simulation erklären?", "Einstieg erklärt jeden Schritt, AP1 knapp, AP2 zeigt nur, was ein echtes Gerät melden würde.",
         wahl("Erklärtiefe", [["E", "Einstieg"], ["AP1", "AP1"], ["AP2", "AP2"]], e.niveau || "E", v => { einstSetzen({niveau: v}); Bus.senden("niveau", v); })))});

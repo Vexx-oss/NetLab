@@ -7,6 +7,8 @@
    Prüfung: keine Warnungen, keine Live-Haken, kein Versuchsabzug (sie hat eigene Regeln, spiel/pruefung.js).
    Verdacht (Phase B): Einstieg freiwillig, AP1 ohne Verdacht −½ ★, AP2 −1 ★. Netzprüfer (Werkzeug aus dem Shop, am
    Auftrag eingeschaltet): „!“-Warnungen auch im AP-Niveau – bezahlte Hilfe im Sinne von R1.
+   Flow-Regler (§ 20 F6): inst.flow "geruest" zeigt Warnungen, Haken und Grund wie im Einstieg, ein zweiter Abnahmeversuch kostet
+   nichts; "verwicklung" lässt die „!“-Warnungen weg (außer mit Netzprüfer).
    Spiel.regeln(inst) → {niveau, warnungen, liveHaken, liveGrund, versuchAbzug, verdachtAbzug} */
 Spiel.REGELN = {
   E:   {warnungenAbHilfe: 0,    liveHaken: true,  liveGrund: true,  versuchAbzug: 0,   verdachtAbzug: 0},
@@ -20,12 +22,14 @@ Spiel.regeln = function(inst){
   const pruefung = !!inst && inst.quelle === "pruefung";
   const hilfe = (inst && inst.hilfeStufe) || 0;
   const pruefer = !!inst && !!inst.netzpruefer && !!Spiel.werkzeug && Spiel.werkzeug.hat("netzpruefer");
+  const geruest = !pruefung && !!inst && inst.flow === "geruest", verwicklung = !pruefung && !!inst && inst.flow === "verwicklung";
   return {
     niveau,
-    warnungen: !pruefung && ((r.warnungenAbHilfe != null && hilfe >= r.warnungenAbHilfe) || pruefer),
-    liveHaken: !pruefung && r.liveHaken,
-    liveGrund: !pruefung && r.liveGrund,
-    versuchAbzug: pruefung ? 0 : r.versuchAbzug,
+    warnungen: !pruefung && (geruest || (!verwicklung && r.warnungenAbHilfe != null && hilfe >= r.warnungenAbHilfe) || pruefer),
+    liveHaken: !pruefung && (geruest || r.liveHaken),
+    liveGrund: !pruefung && (geruest || r.liveGrund),
+    versuchAbzug: pruefung || geruest ? 0 : r.versuchAbzug,
     verdachtAbzug: pruefung ? 0 : r.verdachtAbzug,
+    flow: pruefung ? null : (inst && inst.flow) || null,
   };
 };

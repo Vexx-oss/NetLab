@@ -6,7 +6,9 @@
             ziele? (ersetzt die Vorlagen-Ziele), zusatzZiele? (auch Arbeitsziele befehl/antwort), maxZiele?, umbau?(netz, rollen, z), loesungExtra?[],
             loesung? (ersetzt die berechnete), loesungFn?(gesund, rollen), alleZiele?}
    Die Netz-Fabrik baut die Vorlage mit vSeed immer gleich und setzt dieselben Fehler: deterministisch.
-   Spiel.generiere(skill, seed, {stufe, kunde, art}) → generiertes Ticket, registriert in Spiel.generierte. */
+   Spiel.generiere(skill, seed, {stufe, kunde, art, flow}) → generiertes Ticket, registriert in Spiel.generierte.
+     flow "geruest": ein Niveau tiefer, nur ein Ziel · flow "verwicklung": ein zweiter Fehler, der ein weiteres Ziel bricht
+     (Flow-Regler, spiel/flow.js) – eigene ID, damit die gewöhnliche Fassung erhalten bleibt. */
 Spiel.generierte = Spiel.generierte || {};
 
 Spiel.ticketBauen = function(spec){
@@ -125,7 +127,8 @@ Spiel.briefingText = function(kundeId, symptom, z){
 
 /* Generator: Fertigkeit → passender Injektor → passende Vorlage (bevorzugt die des Kunden) */
 Spiel.generiere = function(skill, seed, opts = {}){
-  const id = `gen-${skill}-${seed}`;
+  const flow = opts.flow === "geruest" || opts.flow === "verwicklung" ? opts.flow : null;
+  const id = `gen-${skill}-${seed}` + (flow ? "-" + flow : "");
   if (Spiel.generierte[id]) return Spiel.generierte[id];
   const z = Zufall(`gen:${skill}:${seed}`);
   const injs = Object.values(Spiel.INJEKTOREN).filter(i => i.skills.includes(skill));
@@ -140,12 +143,26 @@ Spiel.generiere = function(skill, seed, opts = {}){
     const V = Spiel.vorlagen[vName];
     const kunde = kundeVorlage === vName ? opts.kunde : V.kunde;
     const skillInfo = (DATEN.skills || []).find(s => s.id === skill) || {};
-    const stufe = niveau || (skillInfo.ap === "AP2" ? "AP1" : "E");
+    const grund = niveau || (skillInfo.ap === "AP2" ? "AP1" : "E");
+    const stufe = flow === "geruest" && Spiel.flow ? Spiel.flow.schieben(grund, -1) : grund;
+    const vSeed = 1 + z.zahl(1e6), erster = {name: inj.name, wahl: z.zahl(1000)};
+    const spec = injektoren => ({id, vorlage: vName, vSeed, kunde, injektoren, stufe, karriere: V.stufe, art: opts.art === "wartung" ? "wartung" : "stoerung", generiert: true,
+      skills: [skill, ...inj.skills.filter(s => s !== skill)].slice(0, 2), maxZiele: flow === "geruest" ? 1 : flow === "verwicklung" ? 4 : undefined});
     let def = null;
     try {
-      def = Spiel.ticketBauen({id, vorlage: vName, vSeed: 1 + z.zahl(1e6), kunde, injektoren: [{name: inj.name, wahl: z.zahl(1000)}],
-        stufe, karriere: V.stufe, art: opts.art === "wartung" ? "wartung" : "stoerung", generiert: true,
-        skills: [skill, ...inj.skills.filter(s => s !== skill)].slice(0, 2)});
+      def = Spiel.ticketBauen(spec([erster]));
+      if (def && flow === "verwicklung") {
+        /* zweiter Fehler: ein anderer Injektor derselben Vorlage, der mindestens ein WEITERES Ziel bricht (sonst ließe er sich übersehen) */
+        const gebrochen = d => new Set(d.ziele.filter(x => x.erwartet).map(x => x.text));
+        const eins = gebrochen(def), andere = z.mischen(Object.values(Spiel.INJEKTOREN).filter(i => i !== inj && i.vorlagen.includes(vName) && i.skills[0] !== inj.skills[0]));
+        let zwei = null;
+        for (const i2 of andere.slice(0, 12)) {
+          let d2 = null;
+          try { d2 = Spiel.ticketBauen(spec([erster, {name: i2.name, wahl: z.zahl(1000)}])); } catch (e) { d2 = null; }
+          if (d2 && [...eins].every(t => gebrochen(d2).has(t)) && gebrochen(d2).size > eins.size) { zwei = d2; break; }
+        }
+        def = zwei;
+      }
     } catch (e) { def = null; }
     if (def) { Spiel.generierte[id] = def; return def; }
   }

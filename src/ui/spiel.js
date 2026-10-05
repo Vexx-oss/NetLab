@@ -141,6 +141,7 @@ UI.spiel = (() => {
       UI.netzplan.zeichnen(inhalt, S.inst, {mappe: true});
     } else if (m.reiter === "ziele") {
       inhalt = h("div", {class: "am-ziele-liste"},
+        geruestTipp(def),
         h("ul", {class: "sp-ziele"}, stand.status.map((s, i) => h("li", {class: live ? (s.ok ? "ok" : s.ok === false ? "offen" : "") : "neutral", "data-i": i},
           h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
           h("span", {class: "am-ziel-text"}, s.ziel.typ === "antwort" ? s.ziel.frage : s.ziel.text || s.ziel.typ,
@@ -163,20 +164,29 @@ UI.spiel = (() => {
         h("div", {class: "am-text"}, absaetze(sichtbar)),
         kurz ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { m.mehr = true; UI.labor.auftragNeu(); }}, "mehr lesen") : null,
         def.symptom ? h("p", {class: "am-symptom"}, h("b", {}, "Symptom: "), def.symptom) : null,
+        geruestTipp(def),
         variantenWahl(def));
     }
     const fuss = h("div", {class: "am-fuss"},
       h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s ▸" : "Zurück ins Labor"));
     return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
   }
+  /* Flow-Regler (§ 20 F6): Gerüst – die Frage des Seniors steht gleich da (frei), in Brief und Zielen */
+  function geruestTipp(def){
+    const frage = S.inst && S.inst.flow === "geruest" ? (def.hilfen?.frage || [])[0] : null;
+    return frage ? h("p", {class: "am-geruest"}, h("span", {"aria-hidden": "true"}, "🧭 "), h("b", {}, "Der Senior: "), `„${frage}“`,
+      h("small", {}, "Diesmal mit Gerüst: Haken und Warnungen sind an, ein zweiter Versuch kostet nichts.")) : null;
+  }
   /* E2 Kundenakte im Ergebnis: Atlas erschlossen, Vertrauen gestiegen, neues Kapitel – eine Zeile im Block „Dein Weg“ */
   function akteZeile(erg){
-    const a = erg.kundenakte; if (!a) return null;
+    const a = erg.kundenakte || {neuHell: [], vertrauen: {vorher: 0, nachher: 0}};
     const teile = [];
     if (a.neuHell.length) teile.push(`🗺 ${a.neuHell.length} ${a.neuHell.length === 1 ? "Gerät" : "Geräte"} im Netz-Atlas (${a.hell}/${a.gesamt}${a.komplett ? ", komplett betreut" : ""})`);
     if (a.vertrauen.nachher > a.vertrauen.vorher) teile.push(`♥ Vertrauen ${a.vertrauen.nachher}/5`);
     if (a.kapitel) teile.push(`📖 Neue Geschichte: „${a.kapitel.titel}“ (Kunden → Akte)`);
     if (a.empfehlung) teile.push(`💬 ${a.empfehlung.neu ? `Empfehlung: ${Spiel.kundenDaten(a.empfehlung.kunde).name} kommt eine Stufe früher` : "Empfehlung an einen anderen Kunden"}`);
+    const f = erg.flow;
+    if (f && f.stand !== f.vorher && f.stand !== "normal" && Spiel.flow.an()) teile.push(f.stand === "geruest" ? `🧭 Nächstes Mal „${Spiel.skill(f.skill).name}“ mit Gerüst` : `🔥 „${Spiel.skill(f.skill).name}“ sitzt – der nächste wird kniffliger`);
     if (a.rabatt) teile.push(`🏷 Wartungsvertrag −${Math.round(Spiel.VERTRAUEN_LOHN.rabattAnteil * 100)} %`);
     return teile.length ? h("p", {class: "sp-akte-zeile"}, teile.join(" · ")) : null;
   }
@@ -613,6 +623,8 @@ UI.spiel = (() => {
           inst.quelle === "wartung" ? h("span", {class: "sp-chip wartung"}, "Wartung") : null,
           inst.quelle === "wiederholung" ? h("span", {class: "sp-chip wdh"}, "Wiederholung") : null,
           inst.quelle === "folge" ? h("span", {class: "sp-chip folge", title: "Ein Provisorium von neulich hat nicht gehalten"}, "↩ Folgeauftrag") : null,
+          inst.flow === "geruest" ? h("span", {class: "sp-chip flow-geruest", title: "Die letzten zwei Aufträge dieser Fertigkeit waren zäh: diesmal mit Tipp, Haken und Warnungen"}, "🧭 mit Gerüst") : null,
+          inst.flow === "verwicklung" ? h("span", {class: "sp-chip flow-verwicklung", title: "Drei Glanzergebnisse in Folge: diesmal kniffliger, ohne Warnungen"}, "🔥 kniffliger") : null,
           Spiel.varianten.fuer(def) ? h("span", {class: "sp-chip wahl", title: "Du entscheidest: Provisorium (schnell, 60 % Lohn, kommt wieder) oder sauber (gesichert und dokumentiert, 120 %)"}, "🩹/🧰 Wahl") : null,
 
           frist != null ? h("span", {class: "sp-chip frist"}, frist > 0 ? `⏱ ${frist} min` : "⏱ überfällig") : null)));

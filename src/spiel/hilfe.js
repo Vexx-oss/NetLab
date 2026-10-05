@@ -177,7 +177,7 @@ Spiel.wiederholungAnlegen = function(inst){
 
 /* Soll der Senior jetzt (einmal je Ticket) Hilfe anbieten? */
 Spiel.seniorFaellig = function(inst){
-  if (!inst || inst.seniorAngeboten || (inst.hilfeStufe || 0) >= 6) return false;
+  if (!inst || inst.seniorAngeboten || (inst.hilfeStufe || 0) >= 6 || inst.flow === "verwicklung") return false;   /* Verwicklung: weniger Hinweise */
   return jetzt() - (inst.fortschritt || inst.geoeffnet || jetzt()) >= Spiel.SENIOR_NACH_MS;
 };
 Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speichern(); };

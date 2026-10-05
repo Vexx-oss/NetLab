@@ -73,6 +73,9 @@ Spiel.instanzErstellen = function(o = {}){
     def = Spiel.ticketDef(o.ticketId);
     if (!def) throw new Error("Unbekanntes Ticket: " + o.ticketId);
   }
+  /* Flow-Regler (§ 20 F6): Stand der Hauptfertigkeit festhalten; Generiertes kommt eine Nummer kleiner bzw. größer */
+  const flow = Spiel.flow && !o.ohneFlow && o.quelle !== "pruefung" && o.quelle !== "raetsel" ? Spiel.flow.fuer(def) : null;
+  if (flow && gen) { const anders = Spiel.flow.anpassen(gen, def, flow); if (anders && anders.def) { gen = anders.gen; def = anders.def; } }
   const seed = o.seed ?? (gen ? gen.seed : Spiel.neuerSeed(def.id));
   const netz = Spiel.startNetz(def, seed);
   const inst = {
@@ -80,7 +83,7 @@ Spiel.instanzErstellen = function(o = {}){
     hilfeStufe: 0, hilfen: [], start: jetzt(), frist: typeof o.frist === "number" ? o.frist : null,
     quelle: o.quelle || "postfach", kunde: o.kunde || def.kunde || null,
     gelesen: false, ab: typeof o.ab === "number" ? o.ab : null,
-    zeitMs: 0, basis: null, gen, leiter: {}, fortschritt: null,
+    zeitMs: 0, basis: null, gen, leiter: {}, fortschritt: null, flow,
   };
   st.postfach.push(inst);
   if (!st.angebot.includes(def.id) && !gen) st.angebot.push(def.id);

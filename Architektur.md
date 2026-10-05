@@ -514,4 +514,21 @@ Spiel.hub.ausblick()                                // „Morgen: …“ Folgeau
 - Ab Vertrauen 3 empfiehlt der Kunde einmal weiter: Der nächste noch verschlossene Kunde kommt eine Stufe früher und schickt sofort einen generierten Auftrag; sind alle offen, kommt ein Auftrag des Kunden mit den wenigsten Abschlüssen. In der ersten Stunde wartet die Empfehlung, bis die Folge durch ist. Der Mischer nimmt empfohlene Kunden eine Stufe früher in die Generatoren auf.
 - Ab Vertrauen 4 kostet der Wartungsvertrag bei diesem Kunden 20 % weniger (Shop-Eintrag, Kauf, Kundenkarte).
 
+**Flow-Regler** (`spiel/flow.js`, § 20 F6 / Hebel 12):
+
+```js
+Spiel.FLOW = {GERUEST_NACH:2, VERWICKLUNG_NACH:3, MERKEN:5}
+st.flow = { [skill]: {letzte:["f"|"n"|"g"], stand:"normal"|"geruest"|"verwicklung"} }
+einst.anpassung = "auto" (Standard) | "manuell"
+inst.flow = "geruest"|"verwicklung"|null            // beim Erstellen festgehalten (Hauptfertigkeit def.skills[0])
+Spiel.flow.bewerten(inst, sterne) → "f" (bezahlte Hilfe ≥ Stufe 4 oder ≥ 2 Abnahmen) | "g" (5 ★, erste Abnahme, Senior nicht gefragt) | "n"
+Spiel.flow.merken(skill, art) · .fuer(def) · .anpassen(gen, def, stand) → {gen, def}|null · .nachAbschluss(inst, def, {sterne}) → {skill, vorher, stand, art}
+Spiel.generiere(skill, seed, {…, flow})              // "geruest": ein Niveau tiefer, ein Ziel · "verwicklung": zweiter Injektor, der ein weiteres Ziel bricht
+Spiel.regeln(inst) → {…, flow}                       // Gerüst: Warnungen, Haken, Grund wie im Einstieg, kein Versuchsabzug · Verwicklung: keine Warnungen
+ergebnis.flow                                         // Zeile im Ergebnis, wenn sich der Stand ändert
+```
+
+- `Spiel.instanzErstellen` hält `inst.flow` fest und baut Generiertes neu: Formen ein Niveau tiefer/höher (`gen.opts.stufe`, z. B. Plan-Audit 1 statt 2 Fehler), Störungen über `gen.opts.flow` – beides steht in `gen.opts`, das Neuladen baut dieselbe Fassung. Handgeschriebene Aufträge ändern nur Begleitung (Tipp, Regeln), nie ihren Fehler.
+- Oberfläche: Gerüst – die Frage des Seniors steht in Brief und Zielen der Mappe; Marken „🧭 mit Gerüst“ / „🔥 kniffliger“ im Postfach; Verwicklung – kein Hilfsangebot des Seniors (`Spiel.seniorFaellig`). Einstellung „Anpassung“ unter Darstellung.
+
 **Rauchtest der Oberfläche** (`tools/rauch.py`, § 20 F8): siehe § 2.

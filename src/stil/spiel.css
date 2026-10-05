@@ -229,6 +229,11 @@
 .sp-chip.klingelt{background:var(--ok-soft); color:var(--ok)}
 .sp-klingel{display:inline-block; font-style:normal; animation:ev-klingeln 1.2s ease-in-out infinite}
 .sp-mail.klingelt{border-color:var(--ok)}
+/* Flow-Regler (§ 20 F6) */
+.sp-chip.flow-geruest{background:var(--info-soft); color:var(--info)}
+.sp-chip.flow-verwicklung{background:var(--warn-soft); color:var(--warn)}
+.am-geruest{margin:0; padding:9px 11px; border-radius:10px; background:var(--info-soft); color:var(--ink); font-size:14px; line-height:1.45}
+.am-geruest small{display:block; margin-top:3px; color:var(--muted); font-size:12.5px}
 @media (prefers-reduced-motion: reduce){ .sp-klingel{animation:none} }
 .sp-chip.form{background:var(--panel-3); color:var(--text)}
 .sp-chip.form-terminal, .sp-chip.form-forensik{font-family:var(--mono)}
