@@ -753,16 +753,30 @@ UI.labor = (() => {
     el.hidden = !fn;
     if (fn) fn(el); else el.replaceChildren();
   }
-  /* Fernwartung an (Geräte-ID) oder aus (null): Fläche, Werkzeuge und Geräteleiste verdeckt, Schild in der Mitte.
-     Nach bestandener Abnahme hebt das Spiel sie auf – dann sieht man das Netz, das man blind repariert hat. */
+  /* Fernwartung an (Geräte-ID) oder aus (null): Fläche, Werkzeuge und Geräteleiste verdeckt. Links steht statt Leere ein
+     Sitzungsfenster (Design § 20, F2): Verbindung, der Bildschirm des Kunden mit dem Symptom als Bild, das Gerät und wer die
+     Sitzung freigegeben hat (opt.fernInfo = {person, symbol, farbe, symptom, ziel:{typ?, skin?, sym?, text}}). Das Terminal rechts bekommt
+     mehr als die Hälfte der Breite (CSS). Nach bestandener Abnahme hebt das Spiel sie auf – dann sieht man das Netz, das man
+     blind repariert hat. Wenige Wörter mit Absicht: Platzbudget R5 (≤ 40 Wörter beim Start). */
   function fernwartung(id){
     Z.fern = id || null;
     Z.root?.classList.toggle("lb-fern", !!Z.fern);
     const el = Z.el.fern; if (!el) return;
     el.hidden = !Z.fern;
     if (!Z.fern) return el.replaceChildren();
-    const g = Z.netz.geraete[Z.fern];
-    el.replaceChildren(h("span", {class: "lb-fern-sym", "aria-hidden": "true"}, "🛰"), h("strong", {}, `Fernwartung · ${g.name}`));   /* das Warum steht im Brief */
+    const g = Z.netz.geraete[Z.fern], info = (Z.opt && Z.opt.fernInfo) || {}, ziel = info.ziel || {};
+    el.replaceChildren(
+      h("div", {class: "lb-fern-kopf"}, h("span", {class: "lb-fern-sym", "aria-hidden": "true"}, "🛰"), h("strong", {}, "Fernwartung"),
+        h("span", {class: "lb-fern-status", title: "Die Sitzung steht – du arbeitest im Terminal rechts"}, h("i", {class: "lb-fern-punkt", "aria-hidden": "true"}), "verbunden")),
+      h("div", {class: "lb-fern-schirm", title: info.symptom || null},
+        h("div", {class: "lb-fern-symptom"},
+          ziel.typ ? sv("svg", {class: "lb-fern-zielbild typ-" + ziel.typ, viewBox: "-28 -28 56 56", "aria-hidden": "true"}, UI.geraetebild(ziel.typ, ziel.skin))
+            : h("span", {class: "lb-fern-symptom-sym", "aria-hidden": "true"}, ziel.sym || "⚠"),
+          h("b", {class: "lb-fern-x", "aria-hidden": "true"}, "✗")),
+        ziel.text ? h("span", {class: "lb-fern-symptom-text"}, ziel.text) : null),
+      h("div", {class: "lb-fern-geraet"}, sv("svg", {class: "lb-fern-bild typ-" + g.typ, viewBox: "-28 -28 56 56", "aria-hidden": "true"}, UI.geraetebild(g.typ, g.skin)), h("strong", {}, g.name)),
+      info.person ? h("p", {class: "lb-fern-kunde", style: info.farbe ? {"--k": `var(${info.farbe})`} : null},
+        h("span", {class: "lb-fern-kunde-sym", "aria-hidden": "true"}, info.symbol || "✉"), "Freigabe: ", h("b", {}, info.person)) : null);
   }
   function simLeer(){
     const c = Z.el.sim; if (!c) return;

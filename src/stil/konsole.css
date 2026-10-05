@@ -47,6 +47,14 @@
 .ko-vorschlag-text{color:var(--muted); flex-basis:100%; line-height:1.4}
 .ko-hilfe{padding:7px 12px 9px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; line-height:1.7}
 .ko-hilfe code{font:12px var(--mono); color:var(--ink)}
+.ko-mit-vorschlag .ko-hilfe-bsp{display:none}
+/* Punktlinien (ipconfig): eine Zeile je Eintrag. Die Punkte beginnen mit 2 Zeichen und wachsen bis zur Originallänge,
+   solange Platz ist – der Wert schrumpft nie (sonst bräche er an Bruchteilen eines Pixels um) und rutscht nur, wenn gar nichts
+   mehr passt, als Ganzes in die nächste Zeile. */
+.ko-pz{display:flex; flex-wrap:wrap; white-space:pre}
+.ko-pz-name{flex:0 0 auto}
+.ko-pz-punkte{flex:1 0 2ch; max-width:max-content; overflow:hidden}
+.ko-pz-wert{flex:0 0 auto; max-width:100%; white-space:pre-wrap; overflow-wrap:anywhere}
 .ko-leer{padding:16px; color:var(--muted)}
 
 /* Die Konsole braucht Breite: IOS-Tabellen sind ~80 Zeichen breit (bei 12 px ≈ 600 px). Der Inspektor wächst,

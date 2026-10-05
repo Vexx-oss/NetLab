@@ -45,6 +45,7 @@ UI.spiel = (() => {
     const niveau = Spiel.niveauVon(r.inst);
     UI.labor.laden(r.netz, {titel: r.def.titel, verlauf: r.verlauf, auftrag: el => auftrag(el),
       ebene: UI.ebenen.fuerSkills(r.def.skills), ansichtMenue: niveau !== "E", fernwartung: r.def.fernwartung || null,
+      fernInfo: r.def.fernwartung ? fernInfo(r.def, r.inst) : null,
       blatt: r.def.blatt ? el => UI.blatt.zeichnen(el, r.inst) : null,
       warnungen: () => Spiel.regeln(r.inst).warnungen});          /* Stufenregeln: „!“ je Niveau und Hilfestufe */
     if (ansicht) UI.app.ansicht("labor");
@@ -55,6 +56,15 @@ UI.spiel = (() => {
        Im ersten Auftrag übernehmen Willkommen und Coach diese Rolle. Prüfung: keine Mappe. */
     if (erstesMal && !coach && r.inst.quelle !== "pruefung") mappeAuf(r.def.hotline ? "anruf" : briefGelesen ? "ziele" : "brief", true);
     status();
+  }
+  /* Fernwartung (F2): Was zeigt der Bildschirm des Kunden? Das Ziel, das gerade nicht geht – als Symbol mit Namen. */
+  function fernInfo(def, inst){
+    const k = kunde(inst.kunde || def.kunde), ziele = def.ziele || [];
+    const z = ziele.find(x => x.erwartet) || ziele.find(x => x.typ === "erreichbar") || null;
+    const zg = z && inst.netz.geraete[z.nach];
+    const ziel = zg ? {typ: zg.typ, skin: zg.skin, text: zg.name}                     /* Gerät: dasselbe Bild wie auf der Fläche */
+      : {sym: !z ? "⚠" : z.proto === "dns" ? "🔎" : "🌐", text: z ? z.name || z.nach || "" : ""};
+    return {person: k.ansprechpartner?.name || k.name, symbol: k.symbol, farbe: k.farbe, symptom: def.symptom, ziel};
   }
   function aktiveLaden(){
     const inst = Spiel.aktiveInstanz && Spiel.aktiveInstanz();
@@ -393,13 +403,14 @@ UI.spiel = (() => {
     clearInterval(S.seniorTimer); S.seniorTimer = null;
     S.inst = null; S.demo = null; S.live = null;
   }
-  function overlay(inhalt, klasse = ""){
+  function overlay(inhalt, klasse = "", {aussenZu = false} = {}){
     const o = h("div", {class: "sp-overlay " + klasse, role: "dialog", "aria-modal": "true"}, h("div", {class: "sp-karte"}, inhalt));
     document.body.append(o);
     requestAnimationFrame(() => o.classList.add("da"));
     const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), 180); document.removeEventListener("keydown", esc); };
     const esc = e => { if (e.key === "Escape") zu(); };
     document.addEventListener("keydown", esc);
+    if (aussenZu) o.addEventListener("click", e => { if (e.target === o) zu(); });
     return zu;
   }
   function ergebnisZeigen(erg){
@@ -517,9 +528,10 @@ UI.spiel = (() => {
     const aktiv = S.postfachWahl && gibt(S.postfachWahl) ? S.postfachWahl : (liste[0] ? liste[0].iid : post[0] ? post[0].id : null);
     S.postfachWahl = aktiv;
     const leser = h("div", {class: "sp-leser"});
-    const karten = liste.map(inst => mailKarte(inst, inst.iid === aktiv, () => { S.postfachWahl = inst.iid; postfachAnsicht(c); }));
+    const waehlen = id => { S.postfachWahl = id; postfachAnsicht(c); if (schmal()) blattZeigen(c, id); };
+    const karten = liste.map(inst => mailKarte(inst, inst.iid === aktiv, () => waehlen(inst.iid)));
     if (post.length) karten.push(h("div", {class: "sp-pf-trenner", role: "presentation"}, "Nachrichten"),
-      ...post.map(n => postKarte(n, n.id === aktiv, () => { S.postfachWahl = n.id; postfachAnsicht(c); })));
+      ...post.map(n => postKarte(n, n.id === aktiv, () => waehlen(n.id))));
     const kopf = h("header", {class: "sp-pf-kopf"},
       h("div", {}, h("h2", {}, "Postfach"), h("p", {class: "sp-leise"}, liste.length === Spiel.POSTFACH_WAHL && st.erledigt.length === 1
         ? "Wähle deinen nächsten Auftrag – Lohn, Zeit und Thema unterscheiden sich."
@@ -533,6 +545,18 @@ UI.spiel = (() => {
     c.replaceChildren(h("div", {class: "sp-postfach"}, kopf, h("div", {class: "sp-pf-teile"}, links, leser)));
     if (aktiv && String(aktiv).startsWith("post-")) postLesen(leser, Spiel.post.von(aktiv), c);
     else if (aktiv) leserZeigen(leser, Spiel.instanz(aktiv));
+  }
+  /* Postfach schmal (< 900 px, Design § 20 F1): Der Leser hat neben der Liste keinen Platz – die Karte öffnet ihn
+     als Blatt von unten, mit „Annehmen“. Esc, Klick daneben oder der Griff schließen es. */
+  const schmal = () => typeof matchMedia !== "undefined" && matchMedia("(max-width: 900px)").matches;
+  function blattZeigen(c, id){
+    const el = h("div", {class: "sp-leser sp-blatt-leser"});
+    let zu = null;
+    const schliessen = () => zu && zu();
+    if (String(id).startsWith("post-")) postLesen(el, Spiel.post.von(id), c, schliessen);
+    else leserZeigen(el, Spiel.instanz(id), schliessen);
+    zu = overlay(h("div", {class: "sp-blatt"},
+      h("button", {type: "button", class: "sp-blatt-griff", title: "Zurück zur Liste", "aria-label": "Zurück zur Liste", onclick: schliessen}), el), "blatt", {aussenZu: true});
   }
   /* Kundenpost: Nachricht ohne Auftrag (Lob vom Kunden oder Notiz vom Senior) */
   function postAbsender(n){
@@ -549,7 +573,7 @@ UI.spiel = (() => {
         h("span", {class: "sp-mail-vorschau"}, text.slice(0, 110) + (text.length > 110 ? " …" : "")),
         h("span", {class: "sp-chips"}, h("span", {class: "sp-chip"}, n.art === "senior" ? "Notiz" : "Nachricht"))));
   }
-  function postLesen(el, n, c){
+  function postLesen(el, n, c, schliessen){
     if (!n) return;
     if (!n.gelesen) { Spiel.post.gelesen(n.id); status(); }
     const a = postAbsender(n);
@@ -558,8 +582,8 @@ UI.spiel = (() => {
         h("div", {}, h("span", {class: "sp-leise"}, a.zusatz), h("h3", {}, a.name))),
       h("div", {class: "sp-brief-text"}, absaetze(n.text)),
       h("div", {class: "sp-knoepfe"},
-        n.art === "senior" ? h("button", {type: "button", class: "knopf", onclick: () => UI.app.ansicht("kunden")}, "Zu den Kunden") : null,
-        h("button", {type: "button", class: "knopf geist", onclick: () => { Spiel.post.ablegen(n.id); S.postfachWahl = null; postfachAnsicht(c); }}, "Ablegen"))));
+        n.art === "senior" ? h("button", {type: "button", class: "knopf", onclick: () => { schliessen?.(); UI.app.ansicht("kunden"); }}, "Zu den Kunden") : null,
+        h("button", {type: "button", class: "knopf geist", onclick: () => { schliessen?.(); Spiel.post.ablegen(n.id); S.postfachWahl = null; postfachAnsicht(c); }}, "Ablegen"))));
   }
   function mailKarte(inst, an, wahl){
     const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde);
@@ -591,7 +615,7 @@ UI.spiel = (() => {
     const form = Spiel.formVon(def), F = Spiel.FORMEN[form] || Spiel.FORMEN.stoerung;
     return h("span", {class: "sp-chip form form-" + form, title: F.text}, `${F.sym} ${F.titel}`);
   }
-  function leserZeigen(el, inst){
+  function leserZeigen(el, inst, schliessen){
     if (!inst) return;
     const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde);
     if (!inst.gelesen) { Spiel.alsGelesen(inst.iid); status(); }
@@ -604,7 +628,7 @@ UI.spiel = (() => {
         h("div", {}, h("small", {}, "Symptom"), h("p", {}, def.symptom || "—")),
         h("div", {}, h("small", {}, "Übt"), h("p", {}, (def.skills || []).map(s => Spiel.skill(s).name).join(" · "))),
         h("div", {}, h("small", {}, "Lohn"), h("p", {}, `${fmtEuro((def.lohn || {}).euro || 0)} · ${(def.lohn || {}).ruf || 0} Ruf`))),
-      h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer gross", onclick: () => oeffnen(inst.iid)}, angefangen ? "Weiterarbeiten ▸" : "Auftrag annehmen ▸"))));
+      h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer gross", onclick: () => { schliessen?.(); oeffnen(inst.iid); }}, angefangen ? "Weiterarbeiten ▸" : "Auftrag annehmen ▸"))));
   }
 
   /* ---------- Onboarding: erstes Ticket mit Coach-Hinweisen ---------- */

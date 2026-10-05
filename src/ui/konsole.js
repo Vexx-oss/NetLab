@@ -62,7 +62,8 @@ UI.konsole = (() => {
       K.ausgabeEl, K.notizEl, h("div", {class: "ko-zeile"}, K.promptEl, K.eingabeEl));
     K.vorschlagEl = h("div", {class: "ko-vorschlag", hidden: true});
     const hilfe = K.host
-      ? [h("kbd", {}, "↑"), h("kbd", {}, "↓"), " Verlauf · ", h("kbd", {}, "Tab"), " ergänzt · z. B. ", h("code", {}, K.linux ? "ip a" : "ipconfig"), ", ", h("code", {}, K.linux ? "ping -c 4 192.168.1.1" : "ping 192.168.1.1")]
+      ? [h("kbd", {}, "↑"), h("kbd", {}, "↓"), " Verlauf · ", h("kbd", {}, "Tab"), " ergänzt",
+         h("span", {class: "ko-hilfe-bsp"}, " · z. B. ", h("code", {}, K.linux ? "ip a" : "ipconfig"), ", ", h("code", {}, K.linux ? "ping -c 4 192.168.1.1" : "ping 192.168.1.1"))]
       : [h("kbd", {}, "?"), " zeigt Möglichkeiten · ", h("kbd", {}, "Tab"), " ergänzt · ", h("kbd", {}, "↑"), h("kbd", {}, "↓"), " Verlauf · ", h("kbd", {}, "Strg"), "+", h("kbd", {}, "Z"), " verlässt die Konfiguration"];
     const kopf = h("div", {class: "ko-kopf"},
       h("span", {class: "ko-titel"}, K.linux ? `Terminal · ${g.name}` : K.host ? `Eingabeaufforderung · ${g.name}` : `Konsole · ${g.name}`, h("span", {class: "ko-art"}, K.linux ? "Linux-artig (bash)" : K.host ? "Windows-artig" : "IOS-ähnlich")),
@@ -101,6 +102,7 @@ UI.konsole = (() => {
   function begruessung(K, g){
     if (!cli()) { block(K, "info", "Die Konsole ist in dieser Fassung noch nicht verfügbar."); return; }
     if (K.S.fehler) { block(K, "fehler", "% Die Sitzung ließ sich nicht starten: " + K.S.fehler); return; }
+    if (K.host && UI.labor?.fern === K.id) return;          /* Fernwartung: das Sitzungsfenster links sagt schon, wo man ist */
     block(K, "info", K.host
       ? `${K.linux ? "Terminal" : "Eingabeaufforderung"} von ${g.name}.`        /* Beispielbefehle stehen in der Hilfezeile darunter, im Einstieg zusätzlich als Vorschlag */
       : `Konsolenkabel an ${g.name} angeschlossen. Drücke Enter oder tippe einen Befehl.${niveau() === "E" ? " Mit „?“ siehst du jederzeit, was geht." : ""}`);
@@ -123,13 +125,19 @@ UI.konsole = (() => {
     if (b.art === "pakete") return h("div", {class: "ko-pakete"}, h("button", {type: "button", class: "ko-pakete-knopf", title: "Die Aufzeichnung dieses Befehls in der Simulation ansehen",
       onclick: () => { UI.labor.zeigeTrace?.(b.trace, {quelle: "terminal", abspielen: false}); UI.labor.dock?.("sim"); }}, "Pakete ansehen ▸"));
     const el = h("pre", {class: "ko-block " + b.art});
+    let vorherZeile = false;
     for (const [i, z] of b.text.split("\n").entries()) {
-      if (i) el.append("\n");
+      /* „   IPv4-Adresse  . . . . . . : 192.168.1.10“: eigene Zeile, deren Punkte im schmalen Terminal schrumpfen (Design § 20) */
+      const p = b.art === "aus" && PUNKTE.exec(z);
+      if (p) { el.append(h("span", {class: "ko-pz"}, h("span", {class: "ko-pz-name"}, p[1]), h("span", {class: "ko-pz-punkte", "aria-hidden": "true"}, p[2]), h("span", {class: "ko-pz-wert"}, p[3]))); vorherZeile = true; continue; }
+      if (i && !vorherZeile) el.append("\n");
+      vorherZeile = false;
       /* %SYS-5-CONFIG_I: … ist eine Protokollmeldung, kein Fehler – eigene, ruhigere Farbe */
       el.append(/^\s*%[A-Z0-9_]+-\d-[A-Z0-9_]+:/.test(z) ? h("span", {class: "ko-syslog"}, z) : /^\s*%/.test(z) ? h("span", {class: "ko-fehlerzeile"}, z) : z);
     }
     return el;
   }
+  const PUNKTE = /^(\s*[^.:\s][^.:]*?\s?)((?:\. ?){2,})(:.*)$/;
   function block(K, art, text, prompt){
     const b = art === "echo" ? {art, text, prompt} : art === "pakete" ? {art, trace: text} : {art, text: String(text).replace(/\n$/, "")};
     K.S.bloecke.push(b);
@@ -263,13 +271,13 @@ UI.konsole = (() => {
 
   function vorschlag(K){
     const c = cli(), el = K.vorschlagEl;
-    el.hidden = true; el.replaceChildren();
+    el.hidden = true; el.replaceChildren(); K.container.classList.remove("ko-mit-vorschlag");
     if (niveau() !== "E" || !c || typeof c.vorschlag !== "function" || !K.S.sitzung || K.eingabeEl.disabled) return;
     let v; try { v = c.vorschlag(K.S.sitzung); } catch (e) { console.error(e); return; }
     if (!v) return;
     const befehl = typeof v === "string" ? v : v.befehl, text = typeof v === "string" ? null : (v.text || v.erklaerung);
     if (!befehl) return;
-    el.hidden = false;
+    el.hidden = false; K.container.classList.add("ko-mit-vorschlag");     /* Beispiele unten wären doppelt */
     el.append(h("span", {class: "ko-vorschlag-titel"}, "Vorschlag:"),
       h("button", {type: "button", class: "ko-vorschlag-knopf", title: "In die Eingabe übernehmen – Enter führt ihn aus",
         onclick: () => { K.eingabeEl.value = K.S.entwurf = befehl; groesse(K); K.eingabeEl.focus(); const n = befehl.length; K.eingabeEl.setSelectionRange(n, n); }},

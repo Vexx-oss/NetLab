@@ -25,6 +25,7 @@ html[data-modus="leiste"] body{overflow:hidden}
 .lk-mehr{font:600 11px/1 var(--body); color:var(--muted)}
 .lk-werte{display:flex; align-items:center; gap:9px; margin-left:auto; font:700 13px/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap}
 .lk-werte > *, .lk-werte .sym{pointer-events:none}
+.lk-wert{display:inline-flex; align-items:center; gap:3px}   /* Euro je Stunde und Ruf */
 .lk-euro{color:var(--geld)}
 .lk-ruf{display:inline-flex; align-items:center; gap:3px; color:var(--ink)}
 .lk-ruf .sym{color:var(--ruf)}
