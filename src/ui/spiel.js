@@ -159,6 +159,15 @@ UI.spiel = (() => {
       h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s ▸" : "Zurück ins Labor"));
     return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
   }
+  /* E2 Kundenakte im Ergebnis: Atlas erschlossen, Vertrauen gestiegen, neues Kapitel – eine Zeile im Block „Dein Weg“ */
+  function akteZeile(erg){
+    const a = erg.kundenakte; if (!a) return null;
+    const teile = [];
+    if (a.neuHell.length) teile.push(`🗺 ${a.neuHell.length} ${a.neuHell.length === 1 ? "Gerät" : "Geräte"} im Netz-Atlas (${a.hell}/${a.gesamt}${a.komplett ? ", komplett betreut" : ""})`);
+    if (a.vertrauen.nachher > a.vertrauen.vorher) teile.push(`♥ Vertrauen ${a.vertrauen.nachher}/5`);
+    if (a.kapitel) teile.push(`📖 Neue Geschichte: „${a.kapitel.titel}“ (Kunden → Akte)`);
+    return teile.length ? h("p", {class: "sp-akte-zeile"}, teile.join(" · ")) : null;
+  }
   /* E1 „Provisorium oder sauber?“: zwei Karten im Brief; nach der Wahl eine Zeile (bis zur ersten Abnahme änderbar) */
   function variantenWahl(def){
     const inst = S.inst, v = Spiel.varianten.fuer(def);
@@ -454,6 +463,7 @@ UI.spiel = (() => {
         erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
           {voll: "🎯 ", ursache: "🔎 ", schicht: "🔎 "}[erg.verdacht.treffer] || "💭 ", erg.verdacht.text) : null,
         erg.hotline ? h("p", {class: "sp-hotline"}, "☎ " + erg.hotline.text) : null,
+        akteZeile(erg),
         erg.schuld ? h("p", {class: "sp-schuld"}, `🩹 Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null) : null,
       merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
         h("div", {class: "sp-merke-fuss"},

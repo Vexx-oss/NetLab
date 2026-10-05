@@ -1,6 +1,27 @@
 "use strict";
 /* KUNDENAKTE (Design – Spielspaß 2.0, Hebel 10; Architektur § 9.7): Atlas leuchtet, wo man gearbeitet hat; Vertrauen wächst durch
    saubere Arbeit (Provisorium bringt nichts, nichts sinkt); Kapitel öffnen sich mit dem Vertrauen; Baustellen = offene Provisorien. */
+gruppe("Spiel: Kompetenzkarte", () => {
+  pruefe("27 Felder in 6 Regionen = genau DATEN.skills; Nebel lichtet sich durch Stufe und geübte Nachbarn; Stufen aus dem Lernmotor", () => {
+    const ids = Spiel.KOMPETENZ_REGIONEN.flatMap(r => r.skills);
+    erwarte.gleich(ids.length, 27);
+    erwarte.gleich(ids.slice().sort(), DATEN.skills.map(s => s.id).sort(), "jede Fertigkeit genau einmal");
+    erwarte.gleich(Spiel.KOMPETENZ_REGIONEN.length, 6);
+    for (const [a, b] of Spiel.KOMPETENZ_BRUECKEN) erwarte.wahr(ids.includes(a) && ids.includes(b), a + "–" + b);
+    const leer = Spiel.kompetenz.karte({versucht: () => false, box: () => 0}, 1);
+    const stufe1 = DATEN.skills.filter(s => s.stufe === 1).length;
+    erwarte.gleich([leer.gesamt, leer.sichtbar], [27, stufe1], "Start: nur Stufe 1 sichtbar, Rest Nebel");
+    const geuebt = new Set(["lab.gateway"]);
+    const k = Spiel.kompetenz.karte({versucht: id => geuebt.has(id), box: () => 3}, 1);
+    const feld = id => k.regionen.flatMap(r => r.felder).find(f => f.id === id);
+    erwarte.gleich(feld("lab.gateway").zustand, "sicher", "Box 3 = sicher");
+    erwarte.gleich(feld("lab.route").zustand, "offen", "Nachbar über die Brücke lichtet den Nebel (Routing ist Stufe 4)");
+    erwarte.gleich(feld("lab.dmz").zustand, "nebel");
+    const erwartet = new Set([...DATEN.skills.filter(s => s.stufe === 1).map(s => s.id), ...Spiel.kompetenz.nachbarn("lab.gateway")]);
+    erwarte.gleich(k.sichtbar, erwartet.size, "sichtbar = Stufe 1 + Nachbarn des geübten Felds (lab.subnetz, lab.route)");
+  });
+});
+
 gruppe("Spiel: Kundenakte", () => {
   const kapsel = fn => () => {
     const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken};

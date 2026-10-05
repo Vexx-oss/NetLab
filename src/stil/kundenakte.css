@@ -1,0 +1,36 @@
+/* Kundenakte (E2, Hebel 10): Zeile in der Kundenkarte, Akte mit Atlas, Geschichten, Baustellen – Präfix ka- */
+.ka-zeile{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px}
+.ka-zeile .knopf{margin-left:auto}
+.ka-herzen{color:var(--ruf); letter-spacing:1px; font-size:15px}
+.ka-herzen.gross{font-size:20px}
+.ka-seite{gap:14px}
+.ka-zurueck{align-self:flex-start}
+.ka-kopf{display:flex; gap:14px; align-items:flex-start}
+.ka-kopf h2{margin:0; font:800 24px/1.2 var(--display)}
+.ka-kopf p{margin:2px 0}
+.ka-vertrauen{font-weight:700}
+.ka-block{padding:14px 16px; border-radius:14px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
+.ka-block h3{margin:0; font:800 17px/1.2 var(--display)}
+.ka-block h3 small{font:600 12.5px var(--body); color:var(--muted)}
+.ka-atlas-rahmen{overflow-x:auto; max-width:100%}
+.np-svg.ka-atlas{width:min(100%, var(--np-b)); min-width:0; margin:0 auto}   /* natürliche Plan-Breite, nie größer */
+.ka-atlas .np-geraet{opacity:.42; filter:grayscale(1); cursor:default}
+.ka-atlas .np-geraet.ka-hell{opacity:1; filter:none}
+.ka-atlas .np-geraet.ka-hell .np-ring{stroke:var(--accent); stroke-width:2.5; fill:var(--accent-soft)}
+.ka-kapitel{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px}
+.ka-kapitel li.zu{color:var(--faint)}
+.ka-kapitel-knopf{all:unset; cursor:pointer; padding:5px 8px; border-radius:8px; font-weight:600}
+.ka-kapitel-knopf:hover, .ka-kapitel-knopf:focus-visible{background:var(--accent-soft); outline:none}
+.ka-neu{color:var(--accent); font-size:12px; font-weight:800}
+.ka-baustellen, .ka-verlauf{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:3px}
+.ka-dialog{max-width:620px}
+.ka-geschichte{display:flex; flex-direction:column; gap:10px}
+.ka-text{margin:0; font-size:15px; line-height:1.55}
+.ka-senior{margin:0; display:flex; gap:8px; align-items:flex-start; font-style:italic}
+.ka-senior small{font-style:normal; color:var(--muted)}
+.ka-frage{margin:4px 0 0}
+.ka-optionen{display:flex; flex-direction:column; gap:6px}
+.ka-optionen .knopf{text-align:left; justify-content:flex-start}
+.ka-optionen .knopf.richtig{border-color:var(--ok); background:var(--ok-soft); color:var(--ink); opacity:1}
+.ka-optionen .knopf.falsch{border-color:var(--warn); background:var(--warn-soft); color:var(--ink); opacity:1}
+.ka-ergebnis p{margin:4px 0}

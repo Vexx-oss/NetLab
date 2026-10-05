@@ -148,5 +148,5 @@ UI.netzplan = (() => {
   }
   for (const e of ["auswahl", "netz-geaendert", "dock"]) Bus.an(e, () => requestAnimationFrame(neu));
 
-  return {zeichnen, anheften, markieren, neu};
+  return {zeichnen, anheften, markieren, neu, zeichnung};
 })();

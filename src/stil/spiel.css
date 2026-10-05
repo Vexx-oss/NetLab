@@ -261,3 +261,4 @@
 .sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
 .sp-chip.wahl{background:var(--accent-soft); color:var(--accent)}
 .sp-schuld{margin:8px 0 0; font-size:14px; color:var(--warn)}
+.sp-akte-zeile{margin:8px 0 0; font-size:14px}

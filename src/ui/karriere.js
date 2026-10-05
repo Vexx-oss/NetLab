@@ -20,6 +20,7 @@ UI.karriere = (() => {
         h("header", {}, h("span", {class: "sp-kunde-sym gross"}, k.symbol),
           h("div", {}, h("h3", {}, k.name), h("span", {class: "sp-leise"}, [k.ansprechpartner, k.rolle].filter(Boolean).join(", ")))),
         h("p", {class: "kr-text"}, offen ? k.beschreibung : `Ab Stufe ${k.stufe} (${Spiel.KARRIERE_STUFEN.find(x => x.nr === k.stufe)?.name || ""}) und ${k.abRuf} Ruf. ${k.spaeter ? "Kommt in einer späteren Version." : ""}`),
+        offen ? akteZeile(id, c) : null,
         offen ? h("div", {class: "kr-kunde-fuss"},
           h("span", {class: "sp-chip"}, "Stufe " + k.stufe),
           sterne && sterne.anzahl ? h("span", {class: "sp-chip geld", title: `${sterne.anzahl} Tickets`}, `★ ${String(sterne.schnitt ?? sterne.mittel ?? "").replace(".", ",")}`) : null,
@@ -30,6 +31,63 @@ UI.karriere = (() => {
     c.replaceChildren(h("div", {class: "kr-seite"}, h("header", {class: "kr-kopf"}, h("h2", {}, "Kunden"),
       h("p", {class: "sp-leise"}, `Stufe ${st.stufe} · ${st.ruf} Ruf · ${Spiel.karriere.vertragskunden().length} Wartungsverträge · ${eur(Spiel.euroProStunde())} €/h passiv`)),
       h("div", {class: "kr-raster"}, karten)));
+  }
+  /* ---------- Kundenakte (E2, Hebel 10; Präfix ka-) ---------- */
+  const herzen = v => "♥".repeat(v) + "♡".repeat(5 - v);
+  function akteZeile(id, c){
+    const v = Spiel.kundenakte.vertrauen(id), a = Spiel.kundenakte.atlas(id), bau = Spiel.kundenakte.baustellen(id).length;
+    const neu = Spiel.kundenakte.kapitel(id).filter(x => x.frei && !x.gelesen).length;
+    return h("div", {class: "ka-zeile"},
+      h("span", {class: "ka-herzen", title: `Vertrauen ${v} von 5`}, herzen(v)),
+      a ? h("span", {class: "sp-chip", title: "Geräte im Netz-Atlas, an denen du gearbeitet hast"}, `🗺 ${a.hell.length}/${a.gesamt.length}`) : null,
+      bau ? h("span", {class: "sp-chip folge", title: "Offene Provisorien"}, `🩹 ${bau}`) : null,
+      neu ? h("span", {class: "sp-chip uebt"}, `📖 ${neu} neu`) : null,
+      h("button", {type: "button", class: "knopf klein", onclick: () => akteAnsicht(c, id)}, "Akte ▸"));
+  }
+  function akteAnsicht(c, id){
+    const k = kd(id), v = Spiel.kundenakte.vertrauen(id), schwelle = Spiel.kundenakte.naechsteSchwelle(id);
+    const atlas = Spiel.kundenakte.atlas(id, {breite: 520}), bau = Spiel.kundenakte.baustellen(id), kap = Spiel.kundenakte.kapitel(id);
+    const verlauf = Spiel.st.erledigt.filter(e => e.kunde === id).slice(-5).reverse();
+    let bild = null;
+    if (atlas && UI.netzplan.zeichnung) {
+      bild = UI.netzplan.zeichnung(atlas.plan, "netzplan", null);
+      bild.classList.add("ka-atlas");
+      for (const g of bild.querySelectorAll(".np-geraet")) { g.onclick = null; g.onkeydown = null; g.removeAttribute("tabindex"); g.removeAttribute("role"); g.classList.toggle("ka-hell", atlas.hell.includes(g.dataset.id)); }
+    }
+    c.replaceChildren(h("div", {class: "kr-seite ka-seite", style: {"--k": `var(${k.farbe || "--accent"})`}},
+      h("button", {type: "button", class: "knopf geist klein ka-zurueck", onclick: () => kundenAnsicht(c)}, "← Alle Kunden"),
+      h("header", {class: "ka-kopf"}, h("span", {class: "sp-kunde-sym gross"}, k.symbol),
+        h("div", {}, h("h2", {}, k.name), h("p", {class: "sp-leise"}, [k.ansprechpartner, k.rolle].filter(Boolean).join(", ")),
+          h("p", {class: "ka-vertrauen"}, h("span", {class: "ka-herzen gross"}, herzen(v)), ` Vertrauen ${v}/5`,
+            schwelle ? h("small", {class: "sp-leise"}, ` · noch ${schwelle.bis - schwelle.punkte} saubere ${schwelle.bis - schwelle.punkte === 1 ? "Arbeit" : "Arbeiten"} bis ${v + 1}`) : null))),
+      h("section", {class: "ka-block"}, h("h3", {}, "Netz-Atlas ", h("small", {}, atlas ? (atlas.komplett ? "✓ komplett betreut" : `${atlas.hell.length} von ${atlas.gesamt.length} Geräten betreut`) : "")),
+        h("p", {class: "sp-leise"}, "Hell sind die Geräte, an denen du schon gearbeitet hast."), bild ? h("div", {class: "ka-atlas-rahmen"}, bild) : null),
+      h("section", {class: "ka-block"}, h("h3", {}, "Geschichten"),
+        h("ol", {class: "ka-kapitel"}, kap.map(x => h("li", {class: x.frei ? (x.gelesen ? "gelesen" : "frei") : "zu"},
+          x.frei ? h("button", {type: "button", class: "ka-kapitel-knopf", onclick: () => kapitelLesen(id, x.nr, () => akteAnsicht(c, id))}, `${x.nr}. ${x.titel}`, x.gelesen ? (x.beantwortet ? " ✓" : "") : h("span", {class: "ka-neu"}, " neu"))
+            : h("span", {}, `${x.nr}. 🔒 ab Vertrauen ${x.ab}`))))),
+      bau.length ? h("section", {class: "ka-block"}, h("h3", {}, "Offene Baustellen"),
+        h("ul", {class: "ka-baustellen"}, bau.map(b => h("li", {}, `🩹 Provisorium bei „${b.titel}“ – `, b.imPostfach ? "der Folgeauftrag liegt im Postfach." : b.offen ? `meldet sich in etwa ${b.offen} ${b.offen === 1 ? "Auftrag" : "Aufträgen"} wieder.` : "meldet sich bald wieder.")))) : null,
+      h("section", {class: "ka-block"}, h("h3", {}, "Zuletzt"),
+        verlauf.length ? h("ul", {class: "ka-verlauf"}, verlauf.map(e => h("li", {}, `${(Spiel.ticketDef(e.id) || {}).titel || e.id} · ${"★".repeat(Math.floor(e.sterne || 0))}${(e.sterne || 0) % 1 ? "½" : ""} · ${datumDe(e.tag)}`)))
+          : h("p", {class: "sp-leise"}, "Noch kein Auftrag für diesen Kunden."))));
+  }
+  function kapitelLesen(kunde, nr, danach){
+    const g = Spiel.kundenakte.lesen(kunde, nr); if (!g) return;
+    const ergebnis = h("div", {class: "ka-ergebnis", "aria-live": "polite"});
+    const fragen = h("div", {class: "ka-optionen"}, g.frage.optionen.map((o, i) => h("button", {type: "button", class: "knopf", onclick: () => {
+      const r = Spiel.kundenakte.antworten(kunde, nr, i);
+      for (const b of fragen.querySelectorAll("button")) b.disabled = true;
+      fragen.children[g.frage.richtig].classList.add("richtig");
+      if (!r.richtig) fragen.children[i].classList.add("falsch");
+      ergebnis.replaceChildren(h("p", {}, h("b", {}, r.richtig ? (r.erstes ? "Richtig – +1 Ruf. " : "Richtig. ") : "Nicht ganz. "), r.erklaerung), h("p", {class: "sp-leise"}, "Quelle: " + g.quelle));
+      if (danach) danach();
+    }}, o)));
+    UI.app.dialogOeffnen(`${kd(kunde).name} · ${g.titel}`, h("div", {class: "ka-geschichte"},
+      h("p", {class: "ka-text"}, g.text),
+      h("p", {class: "ka-senior"}, h("span", {class: "sp-senior-sym", "aria-hidden": "true"}, "🧑‍🔧"), h("span", {}, g.senior, h("small", {}, " — der Senior"))),
+      h("p", {class: "ka-frage"}, h("b", {}, g.frage.text)), fragen, ergebnis), "ka-dialog");
+    if (danach) danach();                                           /* Akte dahinter frisch: Kapitel ist jetzt gelesen */
   }
   function kaufen(id, danach){
     const r = Spiel.shop.kaufen(id);
@@ -65,22 +123,37 @@ UI.karriere = (() => {
     else UI.toast(r.grund, "info");
   }
 
+  /* ---------- Kompetenzkarte (E2, Hebel 11a; Präfix kk-) ----------
+     27 Fertigkeiten in sechs Regionen; Nebel über allem, was weder freigeschaltet noch neben Geübtem liegt.
+     Klick: Üben (Mini-Übung oder Auftrag) oder Nachschlagen. */
+  const KK_KLASSE = {nebel: "kk-nebel", offen: "kk-offen", angefangen: "kk-angefangen", gesehen: "kk-gesehen", "geübt": "kk-geuebt", sicher: "kk-sicher", gemeistert: "kk-gemeistert", "gemeistert ★": "kk-gemeistert kk-stern"};
+  function kompetenzkarte(){
+    const k = Spiel.kompetenz.karte(), st = Spiel.st;
+    const faellig = id => typeof L !== "undefined" && L.istFaellig(id);
+    return h("section", {class: "kk-karte"},
+      h("div", {class: "kk-kopf"}, h("h3", {}, "Kompetenzkarte"),
+        h("small", {class: "sp-leise"}, `${k.sichtbar} von ${k.gesamt} Feldern sichtbar – der Nebel lichtet sich durch Üben und neue Stufen.`)),
+      h("div", {class: "kk-regionen"}, k.regionen.map(r => h("div", {class: "kk-region"},
+        h("h4", {}, `${r.sym} ${r.titel}`),
+        h("div", {class: "kk-felder"}, r.felder.map(f => h("button", {type: "button", class: "kk-feld " + (KK_KLASSE[f.zustand] || "kk-offen") + (faellig(f.id) ? " kk-faellig" : ""), "data-skill": f.id,
+            title: f.zustand === "nebel" ? "Noch im Nebel – übe ein Nachbarfeld oder steig eine Stufe auf." : `${f.name}: ${f.zustand === "offen" ? "noch nicht geübt" : f.zustand}${faellig(f.id) ? " – fällig" : ""}`,
+            onclick: e => feldMenue(e, f, st)},
+            h("span", {class: "kk-name"}, f.zustand === "nebel" ? "?" : f.name),
+            f.zustand === "nebel" ? null : h("small", {class: "kk-stufe"}, faellig(f.id) ? "fällig" : f.zustand === "offen" ? "neu" : f.zustand))))))),
+      h("p", {class: "kk-legende sp-leise"}, "neu → angefangen → gesehen → geübt → sicher → gemeistert"));
+  }
+  function feldMenue(e, f, st){
+    if (f.zustand === "nebel") { UI.toast("Noch im Nebel – übe ein Nachbarfeld oder steig eine Stufe auf.", "info", {dauer: 2800}); return; }
+    const r = e.currentTarget.getBoundingClientRect(), frei = f.stufe <= st.stufe;
+    UI.menue(r.left, r.bottom + 4, [
+      {text: "Üben", sym: "labor", info: frei ? "Mini-Übung oder Auftrag" : `Aufträge ab Stufe ${f.stufe}`, fn: () => frei ? training(f.id) : UI.toast(`Aufträge dazu gibt es ab Stufe ${f.stufe} – nachschlagen geht schon.`, "info", {dauer: 3000})},
+      {text: "Nachschlagen", sym: "wiki", fn: () => UI.wiki.oeffnen(f.id)},
+    ], {titel: f.name});
+  }
+
   /* ---------- Lernstand ---------- */
   function lernstandAnsicht(c){
     const info = Spiel.stufeInfo(), st = Spiel.st;
-    const stufen = [1, 2, 3, 4, 5, 6].map(nr => {
-      const skills = (DATEN.skills || []).filter(s => (s.stufe || 1) === nr);
-      const def = Spiel.karriere.stufeDef(nr);
-      return h("section", {class: "kr-stufe" + (nr > st.stufe ? " zu" : "") + (nr === st.stufe ? " jetzt" : "")},
-        h("h3", {}, `Stufe ${nr} · ${def.name}`, nr > st.stufe ? h("small", {}, ` ab ${def.ruf} Ruf`) : null),
-        h("div", {class: "kr-ringe"}, skills.map(s => {
-          const box = typeof L !== "undefined" ? L.box(s.id) : 0, faellig = typeof L !== "undefined" && L.istFaellig(s.id);
-          return h("button", {type: "button", class: "kr-skill" + (faellig ? " faellig" : ""), title: `${s.name}: ${typeof L !== "undefined" ? L.stufeName(s.id) : "neu"}${faellig ? " – fällig" : ""}`,
-            onclick: () => nr <= st.stufe ? training(s.id) : UI.wiki.oeffnen(s.id)},
-            h("span", {class: "sp-ring", style: {"--von": box / 5, "--nach": box / 5}}), h("span", {class: "kr-skill-name"}, s.name),
-            h("small", {}, faellig ? "fällig" : typeof L !== "undefined" ? L.stufeName(s.id) : "neu"));
-        })));
-    });
     const fehler = typeof L !== "undefined" ? L.st.fehler.filter(f => String(f.spiel).startsWith("labor")).slice(0, 8) : [];
     const beh = typeof L !== "undefined" ? L.behalten() : null;
     const quote = k => beh && beh[k][1] ? `${Math.round(100 * beh[k][0] / beh[k][1])} %` : "–";
@@ -106,6 +179,7 @@ UI.karriere = (() => {
           h("label", {}, `Können Stufe ${info.stufe}: ${info.koennen.summe} / ${info.koennen.sollSumme}`, h("span", {class: "kr-bar koennen"}, h("i", {style: {width: Math.min(100, 100 * info.koennen.summe / Math.max(1, info.koennen.sollSumme)) + "%"}})))) : h("p", {}, "Höchste Stufe erreicht."),
         info.fehlt.length ? h("ul", {class: "kr-fehlt"}, info.fehlt.map(f => h("li", {}, f))) : info.naechste ? h("p", {class: "sp-ok"}, "Bereit für den Aufstieg!") : null,
         h("p", {class: "sp-leise"}, info.hinweis)),
+      kompetenzkarte(),
       UI.hub ? UI.hub.dexAbschnitt() : null,
       abzeichen,
       h("section", {class: "kr-pruefung"}, h("h3", {}, "Zertifizierung (Prüfungstag)"),
@@ -114,7 +188,6 @@ UI.karriere = (() => {
           h("div", {class: "sp-knoepfe"}, ["AP1", "AP2"].map(art => h("button", {type: "button", class: "knopf", onclick: () => pruefungStarten(art)}, `Prüfung ${art} starten (${Spiel.PRUEFUNG.GEBUEHR[art]} €)`))),
         (st.zertifikate || []).length ? h("div", {class: "kr-zert"}, st.zertifikate.map(z => h("span", {class: "kr-zertifikat"}, `🎓 ${z.art} · Note ${z.note} · ${datumDe(z.tag)}`))) : null,
         (st.pruefungen || []).length ? h("p", {class: "sp-leise"}, "Bisher: " + st.pruefungen.slice(-5).map(x => `${x.art} ${x.punkte} P. (Note ${x.note})`).join(" · ")) : null),
-      ...stufen,
       h("section", {class: "kr-zwei"},
         h("div", {}, h("h3", {}, "Fehlerheft"), fehler.length ? h("ul", {class: "kr-fehlerheft"}, fehler.map(f => h("li", {}, h("b", {}, Spiel.karriere.skillName(f.unit) + ": "), f.text))) : h("p", {class: "sp-leise"}, "Noch leer.")),
         h("div", {}, h("h3", {}, "Behalten"), h("p", {class: "sp-leise"}, "Trefferquote bei fälligen Wiederholungen – die ehrliche Messung, ob es hängen bleibt."),
