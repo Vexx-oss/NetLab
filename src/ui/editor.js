@@ -420,7 +420,34 @@ UI.labor = (() => {
        füllte der Router den Bereich unter sich voll und stieß an die Portnamen – dieselbe Dichte, die der
        Kunde bemängelt hat (Versuch und Messung 05.10.2026). Die Subnetz-Schilder sagen bereits, welche
        Netze es gibt; welcher Router-Port in welchem Netz liegt, verrät der Tooltip und der Inspektor. */
-    if (a.text) el.append(sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: 62, "text-anchor": "middle", text: a.text}));
+    if (a.text) {
+      const adr = sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: 62, "text-anchor": "middle", text: a.text});
+      /* Adresse anklicken = in die Zwischenablage (Wunsch 05.10.2026: „für easy von hand routing").
+         Kopiert wird NUR die Adresse ohne Präfix und ohne „+2" – genau das, was man in eine Route tippt.
+
+         WICHTIG (gemessen 05.10.2026, tools/zeiger-probe.py): Der Klick darf NICHT am „click" hängen.
+         Die Fläche ruft beim pointerdown setPointerCapture, danach gehen pointerup, mouseup UND click ans
+         SVG – der Text bekommt nur das pointerdown. Ereignisreihenfolge mit echter Maus:
+             pointerdown@ger-ip  → pointerup@lb-svg → mouseup@lb-svg → click@lb-svg
+         Deshalb hängt das Kopieren am pointerdown; stopPropagation verhindert zugleich, dass die Fläche
+         das Gerät auswählt und den Inspektor öffnet. */
+      const blank = String(a.text).split(" ")[0].split("/")[0];
+      if (IP.gueltig(blank)) {
+        adr.setAttribute("class", adr.getAttribute("class") + " kopierbar");
+        adr.setAttribute("role", "button");
+        adr.setAttribute("tabindex", "0");
+        adr.append(sv("title", {text: `Klicken kopiert ${blank} – für Routing, Ping oder Konfiguration von Hand.`}));
+        const kopieren = async e => {
+          if (e) { e.stopPropagation(); e.preventDefault?.(); }
+          const ok = await UI.kopieren(blank);
+          UI.toast(ok ? `${blank} kopiert – jetzt in Route, Ping oder Konfiguration einfügen.`
+                      : "Kopieren ging nicht – die Adresse steht auch im Inspektor.", ok ? "ok" : "warn");
+        };
+        adr.addEventListener("pointerdown", kopieren);
+        adr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") kopieren(e); });
+      }
+      el.append(adr);
+    }
     /* Alle Adressen in den Tooltip: Auf der Fläche steht nur die erste (sonst wird es unleserlich) – hier muss
        vollständig stehen, welche Adresse zu welcher Schnittstelle gehört. Sonst findet der Spieler die Adressen
        der übrigen Subnetze nirgends (Befund 05.10.2026: Router zeigte nur „192.168.10.1/24 +2“). */
