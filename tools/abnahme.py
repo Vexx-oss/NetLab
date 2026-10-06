@@ -10,6 +10,7 @@ Was NICHT geprüft wird (ehrlich): die Windows-.exe. Sie braucht ein Fenster, ei
 laufenden WebView2 und darf nicht neben einer bereits laufenden Instanz starten. Wer sie
 messen will: tools/q-echt.py (AGENTS.md Regel 1 — es wird kein fremder Prozess beendet).
 """
+import argparse
 import os
 import re
 import shutil
@@ -61,6 +62,13 @@ def lauf(name: str, befehl: list[str], muss: str | None = None, shell: bool = Fa
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(description="Gesamtabnahme des Netzwerk-Labors")
+    ap.add_argument("--exe", action="store_true",
+                    help="auch das echte Windows-Programm messen (oeffnet ein Fenster; "
+                         "darf nicht laufen — fremde Instanzen werden nicht beendet)")
+    args = ap.parse_args()
+    mit_exe = args.exe
+
     m = re.search(r'^VERSION\s*=\s*"([^"]+)"', (HIER / "bauen.py").read_text(encoding="utf-8"), re.M)
     version = m.group(1) if m else "?"
     print(f"Gesamtabnahme Netzwerk-Labor {version}")
@@ -128,6 +136,21 @@ def main() -> int:
     print("5 · Die veroeffentlichte Seite (braucht Internet)")
     lauf("Kundenadresse liefert das Spiel", [PY, "tools/seite-pruefen.py"], muss="GRUEN")
 
+    if mit_exe:
+        print()
+        print("6 · Das echte Windows-Programm (oeffnet ein Fenster)")
+        # q-echt.py startet die .exe und beendet NUR die eigene Instanz (AGENTS.md Regel 1).
+        # Es scheitert mit klarer Meldung, wenn schon eine Instanz laeuft — die wird nicht
+        # angefasst. Gemessen 06.10.2026: Fenster offen, erster Auftrag mit echter Maus
+        # geloest, 5 Sterne, 0 Fehler.
+        lauf("Abnahme im echten Programm", [PY, "tools/q-echt.py"], muss='"fehler": []')
+    else:
+        print()
+        print("6 · Das echte Windows-Programm: uebersprungen")
+        print("    Es oeffnet ein Fenster und braucht freie Bahn (keine laufende Instanz).")
+        print("    Mitmessen:  python tools/abnahme.py --exe")
+        print("    Allein:     python tools/q-echt.py")
+
     print()
     rot = [n for n, ok, _ in ERGEBNISSE if not ok]
     print(f"{len(ERGEBNISSE) - len(rot)}/{len(ERGEBNISSE)} grün")
@@ -135,9 +158,6 @@ def main() -> int:
         print("ROT:")
         for n in rot:
             print("  - " + n)
-    print()
-    print("NICHT geprüft: die Windows-.exe (braucht ein Fenster; laufende Instanz vorhanden).")
-    print("               Wer sie messen will: python tools/q-echt.py")
     return 1 if rot else 0
 
 

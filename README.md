@@ -28,11 +28,12 @@ Läuft lokal und offline; nichts wird gesendet.
 Alle drei Wege liefern dieselbe Fassung `1.2.0`. Die Anhänge der Release laden **direkt
 herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umweg.
 
-> **Zur Windows-`.exe`:** Sie ist ebenfalls **1.2.0** (gebaut am 06.10.2026) und bringt
-> Leiste, Tray und globales Tastenkürzel. Sie liegt **nicht im Release**, weil sie 8 MB
-> groß ist und nicht ins Git gehört. Im Repositorium steht sie unter
-> `Programm/Netzwerk-Labor.exe`; ihren Start habe ich in dieser Fassung **nicht gemessen**
-> (siehe *Ehrliche Grenzen*).
+> **Zur Windows-`.exe`:** Sie ist **1.2.0** (gebaut am 06.10.2026) und bringt Leiste, Tray
+> und globales Tastenkürzel. Sie liegt **nicht im Release**, weil sie 8 MB groß ist und
+> nicht ins Git gehört — im Repositorium steht sie unter `Programm/Netzwerk-Labor.exe`.
+> **Ihr Start ist gemessen:** die Abnahme `python tools/q-echt.py` lief im echten Programm
+> durch — Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler,
+> Fernwartungs-Schild sichtbar. Bilder: `Nachweise/1.2-Q/`.
 
 `Netzwerk-Labor.html` liegt direkt im Repositorium, damit der Download **einen Klick**
 braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft —
@@ -219,11 +220,10 @@ und globalem Tastenkürzel — aber nicht auf dem Stand von `ausbau-1.2`.
 
 ## Ehrliche Grenzen
 
-- **Die Windows-`.exe` ist 1.2.0, ihr Start aber nicht gemessen.** Gebaut am 06.10.2026
-  (Rust 1.97.1, Tauri 2, 9m 21s), Versionsangabe in der Datei geprüft: 1.2.0. Beim Bau lief
-  noch eine Instanz der Vorgängerfassung; wegen der Einzelinstanz-Sperre beendet sich eine
-  zweite Instanz sofort mit Exitcode 0, sodass kein Start gemessen werden konnte. Fremde
-  Prozesse werden hier aus Prinzip nicht beendet.
+- **Die Windows-`.exe` ist 1.2.0 und ihr Start ist gemessen** (06.10.2026):
+  `python tools/q-echt.py` fuhr im echten Programm durch — erster Auftrag mit echter Maus
+  gelöst, 5 ★, 0 Fehler, Fernwartungs-Schild sichtbar, keine JS-Fehler. Das ist ein
+  Durchlauf auf **diesem** Rechner; andere Windows-Fassungen sind nicht geprüft.
 - **Die `.exe` ist nicht signiert** → SmartScreen-Hinweis beim ersten Start.
 - **Die Linux-Pakete sind Stand 1.0** und enthalten die Neuerungen von 1.1 und 1.2 nicht.
 - Arbeitsspeicher im Leerlauf rund **0,5 GB** (WebView2 mit GPU-, Netzwerk- und

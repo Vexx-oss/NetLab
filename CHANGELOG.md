@@ -20,10 +20,12 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`.
   `1.2.0` in `bauen.py`, `shell/src-tauri/Cargo.toml` und `shell/src-tauri/tauri.conf.json`.
   Kein Test hängt an der Nummer (geprüft: 213/213 unverändert grün).
 - **Die Windows-`.exe` wurde am 06.10.2026 neu gebaut** (Rust 1.97.1, Tauri 2, 9m 21s) und
-  liegt als 1.2.0 in `Programm/`. Versionsangabe in der Datei geprüft: `FileVersion 1.2.0`.
-  **Ihr Start ist nicht gemessen** — beim Bau lief noch eine Instanz der Vorgängerfassung,
-  und wegen der Einzelinstanz-Sperre beendet sich eine zweite Instanz sofort mit Exitcode 0.
-  Die Vorgängerfassung 1.1.0 lief nachweislich. Die alte Datei liegt als
+  liegt als 1.2.0 in `Programm/`. **Ihr Start ist gemessen:** `python tools/q-echt.py` fuhr
+  im echten Programm durch — Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★,
+  0 Fehler, Fernwartungs-Schild sichtbar, keine JS-Fehler. Beweisbilder in
+  `Nachweise/1.2-Q/`. Zuvor war der Start zweimal an der Einzelinstanz-Sperre gescheitert
+  (eine Instanz der Vorgängerfassung lief noch, Exitcode 0) — die wurde nicht angefasst,
+  sondern der Nutzer beendete sie. Die alte Datei liegt als
   `Programm/Netzwerk-Labor-1.1.0.exe.beiseite` daneben (nicht im Git).
 
 **Lizenz festgelegt: MIT**
