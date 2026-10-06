@@ -5,7 +5,26 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](Design%20%E2%80%93%20Spielspa%C3%9F%202.0.md) und
 [`Plan – Ausbau 1.2.md`](Plan%20%E2%80%93%20Ausbau%201.2.md).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`.
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`.
+
+---
+
+## 1.2.1
+
+Nur die Lizenz — der Grund für eine eigene Fassung: **das Release `v1.2.0` enthielt noch
+die MIT-Lizenz.** Wer es heruntergeladen hat, hätte das Spiel kommerziell nutzen dürfen.
+
+- `LICENSE` → **PolyForm Noncommercial 1.0.0**, `LIZENZ.md` entsprechend neu geschrieben,
+  README und die Paket-Anleitung nachgezogen. Der verbindliche Wortlaut kommt von
+  [polyformproject.org](https://polyformproject.org/licenses/noncommercial/1.0.0) und ist
+  unverändert übernommen, nur mit Copyright-Zeile und dem Hinweis für kommerzielle
+  Anfragen davor.
+- Versionsnummer auf `1.2.1` in `bauen.py`, `Cargo.toml` und `tauri.conf.json`, damit die
+  Fassung mit der neuen Lizenz von der alten unterscheidbar ist.
+
+Die Windows-`.exe` wurde in dieser Fassung **ebenfalls neu gebaut** und nennt sich jetzt
+`1.2.1` — sie trägt die Lizenz zwar nicht in der Binärdatei, soll aber dieselbe Fassung
+melden wie der Rest. Ihr Start wurde gemessen (siehe unten).
 
 ---
 

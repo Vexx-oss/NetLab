@@ -138,7 +138,7 @@ Ablauf eine Concurrency-Gruppe je Zweig; zusätzlich läuft er nachts um 03:17 U
 ## Das Auslieferungspaket
 
 ```bash
-python tools/paket.py               # -> dist/Netzwerk-Labor-1.2.0-Windows.zip
+python tools/paket.py               # -> dist/Netzwerk-Labor-<Version>-Windows.zip
 python tools/paket.py --ohne-exe    # nur die Browser-Fassung (klein)
 python tools/paket.py --nur-ordner  # Ordner bauen, kein ZIP
 ```

@@ -23,12 +23,12 @@ Läuft lokal und offline; nichts wird gesendet.
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)** (2,1 MB), Doppelklick | nur einen Browser |
-| **Zum Entpacken** | [Netzwerk-Labor-1.2.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest) (877 KB): Spiel, Anleitungen, Lizenztexte | nur einen Browser |
+| **Zum Entpacken** | [Netzwerk-Labor-1.2.1-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, Anleitungen, Lizenztexte | nur einen Browser |
 
-Alle drei Wege liefern dieselbe Fassung `1.2.0`. Die Anhänge der Release laden **direkt
+Alle drei Wege liefern dieselbe Fassung `1.2.1`. Die Anhänge der Release laden **direkt
 herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umweg.
 
-> **Zur Windows-`.exe`:** Sie ist **1.2.0** (gebaut am 06.10.2026) und bringt Leiste, Tray
+> **Zur Windows-`.exe`:** Sie ist **1.2.1** (gebaut am 06.10.2026) und bringt Leiste, Tray
 > und globales Tastenkürzel. Sie liegt **nicht im Release**, weil sie 8 MB groß ist und
 > nicht ins Git gehört — im Repositorium steht sie unter `Programm/Netzwerk-Labor.exe`.
 > **Ihr Start ist gemessen:** die Abnahme `python tools/q-echt.py` lief im echten Programm
@@ -211,7 +211,7 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 
 | Zweig / Tag | Inhalt |
 |---|---|
-| `ausbau-1.2` ← **Standardzweig** | Version 1.2.0 in Arbeit: Ausbau 1.2 (Geräte-Fächer, Auftragsmappe, DHCP-Tiefe), dazu die Auslieferung als Einzeldatei. **Hier spielt die Browser-Fassung.** |
+| `ausbau-1.2` ← **Standardzweig** | Version 1.2.1: Ausbau 1.2 (Geräte-Fächer, Auftragsmappe, DHCP-Tiefe), Auslieferung als Einzeldatei, Lizenz PolyForm Noncommercial. **Hier spielt die Browser-Fassung.** |
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 
@@ -220,7 +220,7 @@ und globalem Tastenkürzel — aber nicht auf dem Stand von `ausbau-1.2`.
 
 ## Ehrliche Grenzen
 
-- **Die Windows-`.exe` ist 1.2.0 und ihr Start ist gemessen** (06.10.2026):
+- **Die Windows-`.exe` ist 1.2.1 und ihr Start ist gemessen** (06.10.2026):
   `python tools/q-echt.py` fuhr im echten Programm durch — erster Auftrag mit echter Maus
   gelöst, 5 ★, 0 Fehler, Fernwartungs-Schild sichtbar, keine JS-Fehler. Das ist ein
   Durchlauf auf **diesem** Rechner; andere Windows-Fassungen sind nicht geprüft.
