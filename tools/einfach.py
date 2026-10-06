@@ -22,6 +22,7 @@ import base64
 import hashlib
 import mimetypes
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -71,7 +72,30 @@ def aussenverweise(html: str) -> list[str]:
     return fund
 
 
+def baue_web_falls_noetig() -> None:
+    """Sorgt dafuer, dass web/index.html existiert.
+
+    `web/` liegt nicht im Git (erzeugt). Auf einem frischen Klon — und damit in jeder
+    Pruefung auf GitHub — fehlt `web/index.html`, und dieser Aufruf scheiterte dann mit
+    „zuerst bauen.py laufen lassen" (gemessen 06.10.2026: der Release-Ablauf brach genau
+    daran ab). Statt den Aufrufer zu ermahnen, wird hier gebaut: bauen.py ist schnell und
+    schreibt nur nach web/.
+    """
+    if STANDARD_QUELLE.is_file():
+        return
+    bauen = HIER / "bauen.py"
+    if not bauen.is_file():
+        return
+    print("web/index.html fehlt — baue zuerst (python bauen.py) …")
+    r = subprocess.run([sys.executable, str(bauen)], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
+    if r.returncode != 0:
+        raise SystemExit("FEHLER: bauen.py ist gescheitert:\n" + ((r.stdout or "") + (r.stderr or ""))[-500:])
+    print("  " + (r.stdout or "").strip())
+
+
 def bauen(quelle: Path, stil: Path, ziel: Path) -> int:
+    baue_web_falls_noetig()
     if not quelle.is_file():
         raise SystemExit(f"FEHLER: {quelle} fehlt — zuerst `python bauen.py` laufen lassen.")
     if not stil.is_file():
