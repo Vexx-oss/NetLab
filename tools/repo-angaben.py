@@ -29,15 +29,18 @@ Das Token wird nur an api.github.com gesendet und nirgends gespeichert.
 """
 import argparse
 import json
+import math
 import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8")
 
 REPO = "Vexx-oss/NetLab"
+DIST = Path(__file__).resolve().parent.parent / "dist"
 BESCHREIBUNG = ("Lernspiel fuer FISI (IHK AP1/AP2): Netzwerk-Simulator auf Frame-Ebene, "
                 "IOS-aehnliche Konsole, 37 Tickets plus Generator, laeuft offline.")
 HOMEPAGE = "https://vexx-oss.github.io/NetLab/"
@@ -122,14 +125,65 @@ def release(tag: str) -> int:
     return 0
 
 
+def hochladen(tag: str, dateien: list[str]) -> int:
+    """Haengt fertige Pakete an ein bestehendes Release — z. B. die Windows-Fassung.
+
+    Die .exe liegt bewusst nicht im Git, kann also vom Release-Ablauf nicht gebaut werden.
+    Wer sie im Release haben will, laesst hier `dist/Netzwerk-Labor-<Version>-Windows.zip`
+    hochladen. Vorhandene Anhaenge gleichen Namens werden ersetzt.
+    """
+    tok = token()
+    status, d = rufen("GET", f"/repos/{REPO}/releases/tags/{tag}", None, tok)
+    if status != 200:
+        print(f"ROT: Release {tag} nicht gefunden (HTTP {status}). Erst anlegen (--release).")
+        return 1
+    release_id = d["id"]
+    vorhanden = {a["name"]: a["id"] for a in d.get("assets", [])}
+    print(f"Release {tag} (id {release_id}) — {len(vorhanden)} Anhang/Anhaenge vorhanden")
+
+    fehler = 0
+    for pfad_text in dateien:
+        pfad = Path(pfad_text)
+        if not pfad.is_file():
+            print(f"  ROT   {pfad} fehlt — erst bauen (python tools/paket.py)")
+            fehler = 1
+            continue
+        if pfad.name in vorhanden:
+            # Ersetzen: alten Anhang loeschen, dann neu laden.
+            s, _ = rufen("DELETE", f"/repos/{REPO}/releases/assets/{vorhanden[pfad.name]}", None, tok)
+            print(f"  alt   {pfad.name} entfernt (HTTP {s})")
+        daten = pfad.read_bytes()
+        kopf = {
+            "User-Agent": "dsh",
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {tok}",
+            "Content-Type": "application/zip" if pfad.suffix == ".zip" else "text/html",
+        }
+        # name-Parameter fuer die URL; der Dateiname kommt aus dem Kopf nicht mit.
+        url = (f"https://uploads.github.com/repos/{REPO}/releases/{release_id}/assets"
+               f"?name={urllib.parse.quote(pfad.name)}")
+        anfrage = urllib.request.Request(url, data=daten, headers=kopf, method="POST")
+        try:
+            with urllib.request.urlopen(anfrage, timeout=300) as r:
+                antwort = json.loads(r.read())
+            print(f"  GRUEN {pfad.name}  {math.ceil(len(daten)/1024)} KB  "
+                  f"-> {antwort.get('browser_download_url')}")
+        except urllib.error.HTTPError as e:
+            print(f"  ROT   {pfad.name}: HTTP {e.code} — {e.read().decode('utf-8', 'replace')[:200]}")
+            fehler = 1
+    return fehler
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Repo-Angaben und Release ueber die GitHub-API setzen")
     ap.add_argument("--setzen", action="store_true", help="Beschreibung, Homepage und Themen wirklich setzen")
     ap.add_argument("--release", action="store_true", help="zusaetzlich ein Release fuer den Tag anlegen")
-    ap.add_argument("--tag", default="v1.2.0", help="Tag fuer --release (Standard v1.2.0)")
+    ap.add_argument("--tag", default="v1.2.0", help="Tag fuer --release/--hochladen (Standard v1.2.0)")
+    ap.add_argument("--hochladen", nargs="*", metavar="DATEI",
+                    help="Dateien an das Release haengen (Standard: dist/*-Windows.zip)")
     a = ap.parse_args()
 
-    if not a.setzen and not a.release:
+    if not a.setzen and not a.release and a.hochladen is None:
         zeigen()
         print()
         print("Nichts geaendert. Zum Setzen: --setzen   (braucht GH_TOKEN)")
@@ -140,6 +194,16 @@ def main() -> int:
         fehler |= setzen()
     if a.release:
         fehler |= release(a.tag)
+    if a.hochladen is not None:
+        dateien = a.hochladen
+        if not dateien:
+            kandidaten = sorted(DIST.glob("*Windows.zip")) if DIST.is_dir() else []
+            if not kandidaten:
+                print("ROT: kein dist/*-Windows.zip gefunden — erst `python tools/paket.py` laufen lassen.")
+                return 1
+            dateien = [str(k) for k in kandidaten]
+        print()
+        fehler |= hochladen(a.tag, dateien)
     return fehler
 
 

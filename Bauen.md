@@ -224,6 +224,16 @@ Berechtigung **Administration: Read and write** (GitHub → Settings → Develop
 Personal access tokens). Das Token wird nur an `api.github.com` gesendet und nirgends
 gespeichert. Die Homepage ist bereits gesetzt; Beschreibung und Themen fehlen noch.
 
+Dasselbe Werkzeug kann die **Windows-Fassung an ein Release hängen** — die 8-MB-`.exe`
+liegt nicht im Git und kann deshalb vom Release-Ablauf nicht mitgebaut werden:
+
+```bash
+python tools/paket.py                                        # erzeugt dist/*-Windows.zip
+GH_TOKEN=ghp_xxx python tools/repo-angaben.py --hochladen    # hängt sie an das Release
+```
+
+Dafür braucht das Token zusätzlich **Contents: Read and write**.
+
 Alles andere ist in Abläufe gewandert und braucht kein Token von Hand: Prüfen
 (`pruefen.yml`), Veröffentlichen (`seite.yml`) und das Anlegen des Releases
 (`release.yml`).
