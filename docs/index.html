@@ -2098,7 +2098,7 @@ html[data-bewegung="aus"] *, html[data-bewegung="aus"] *::before, html[data-bewe
 <script>
 "use strict";
 const LABOR_VERSION = "1.2.0";
-const LABOR_BAU = "05.10.2026 22:39";
+const LABOR_BAU = "e0eaf9da";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -23550,7 +23550,7 @@ UI.app = (() => {
           sv("rect", {x: 1.5, y: 1.5, width: 29, height: 29, rx: 8}),
           sv("path", {d: "M9 21V11h5v5h5v-5h4"}), sv("circle", {cx: 9, cy: 21, r: 2.2}), sv("circle", {cx: 23, cy: 11, r: 2.2}), sv("circle", {cx: 19, cy: 21, r: 2.2}), sv("path", {d: "M19 16v5"})),
         h("span", {class: "marke-name"}, "Netzwerk-Labor"),
-        h("span", {class: "marke-version", title: typeof LABOR_BAU !== "undefined" ? "Gebaut " + LABOR_BAU : ""}, "v" + (typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : "dev"))),
+        h("span", {class: "marke-version", title: typeof LABOR_BAU !== "undefined" ? "Baukennung " + LABOR_BAU + " (aus dem Inhalt der Bausteine)" : ""}, "v" + (typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : "dev"))),
       h("div", {class: "kopf-werte"}, el.werte.euro.b, el.werte.ruf.b, el.werte.stufe.b, el.werte.offen.b),
       h("div", {class: "kopf-knoepfe"},
         knopf("suche", "Befehlspalette (Strg+K)", () => UI.palette.oeffnen(), "Strg+K"),
@@ -23685,7 +23685,7 @@ UI.app = (() => {
       try { a.fn(c); } catch (e) { console.error("Einstellungen", a.titel, e); c.append(h("p", {}, "Dieser Abschnitt konnte nicht geladen werden.")); }
       inhalt.append(c);
     }
-    inhalt.append(h("p", {class: "einst-fuss"}, `Netzwerk-Labor ${typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : ""}${typeof LABOR_BAU !== "undefined" ? " · gebaut " + LABOR_BAU : ""} · ${Plattform.name === "tauri" ? "Desktop-Programm" : "Browser-Fassung"}`));
+    inhalt.append(h("p", {class: "einst-fuss"}, `Netzwerk-Labor ${typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : ""}${typeof LABOR_BAU !== "undefined" ? " · Stand " + LABOR_BAU : ""} · ${Plattform.name === "tauri" ? "Desktop-Programm" : "Browser-Fassung"}`));
     dialogOeffnen("Einstellungen", inhalt, "dialog-einst");
   }
   const KUERZEL = [

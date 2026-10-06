@@ -16,10 +16,10 @@ Aufruf:  python bauen.py            -> web/index.html + web/schriften.css + web/
          python bauen.py --paket    -> zusätzlich Browser-ZIP (Nebenprodukt) in Dokumente/Lernpakete/
 """
 import datetime
+import hashlib
 import json
 import re
 import shutil
-import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -126,32 +126,34 @@ def stile():
     return "\n".join(f"/* ---- {n} ---- */\n" + lies(d / n) for n in reihe)
 
 
-def baustempel() -> str:
-    """Zeitstempel fuer den Kopf der gebauten Seite — aus dem letzten Commit.
+def baukennung() -> str:
+    """Kurze Kennung der gebauten Fassung, aus dem INHALT der Bausteine.
 
-    Frueher kam hier die aktuelle Uhrzeit hinein. Dadurch war die versionierte
-    `docs/index.html` nach JEDEM Bau „geaendert", auch wenn sich inhaltlich nichts tat —
-    ein Diff ueber eine Datei, die nur eine Zeit traegt. Beim Nachbauen liess sich so
-    nicht unterscheiden, was wirklich neu ist.
+    Vorher stand hier die Uhrzeit des Bauens. Das war aus zwei Gruenden schlecht:
 
-    Jetzt ist der Stempel reproduzierbar: derselbe Stand ergibt denselben Bau. Er sagt,
-    aus welchem Commit die Seite stammt — was fuer eine veroeffentlichte Fassung die
-    nuetzlichere Auskunft ist als die Uhrzeit des Bauens. Ohne Git (Export, ZIP) bleibt
-    die Uhrzeit als Rueckfall.
+    1. Die versionierte `docs/index.html` galt nach jedem Bau als geaendert, auch wenn
+       sich inhaltlich nichts tat — ein Diff ueber eine Datei, die nur eine Zeit traegt.
+    2. Auch ein Stempel aus dem letzten Commit loest es nicht: der Commit, der die Datei
+       enthaelt, ist immer neuer als der Stempel darin. Die Datei koennte sich nie
+       einholen.
+
+    Jetzt wird ueber die Modulinhalte, die Stile und die Seitenhuelle gehasht. Damit gilt:
+    gleicher Inhalt -> gleiche Kennung, auf jeder Plattform und zu jeder Uhrzeit. Zwei
+    Staende lassen sich ueber die Kennung vergleichen, ohne die Dateien zu diffen.
     """
-    try:
-        r = subprocess.run(["git", "log", "-1", "--format=%cd", "--date=format:%d.%m.%Y %H:%M"],
-                           cwd=HIER, capture_output=True, text=True, timeout=10)
-        if r.returncode == 0 and r.stdout.strip():
-            return r.stdout.strip()
-    except (OSError, subprocess.SubprocessError):
-        pass
-    return datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    teile = []
+    for rel, _ in module():
+        if rel == "@lernmotor":
+            continue
+        teile.append(quelle(rel))
+    teile.append(stile())
+    teile.append(lies(SRC / "seite.html"))
+    return hashlib.sha256("\n".join(teile).encode("utf-8")).hexdigest()[:8]
 
 
 def seite(schrift_link):
     NL = "\n"
-    kopf = f'"use strict";{NL}const LABOR_VERSION = "{VERSION}";{NL}const LABOR_BAU = "{baustempel()}";'
+    kopf = f'"use strict";{NL}const LABOR_VERSION = "{VERSION}";{NL}const LABOR_BAU = "{baukennung()}";'
     skripte = kopf + NL + NL.join(f"/* ---- {rel} ---- */{NL}" + quelle(rel).replace("</script", "<\\/script") for rel, _ in module())
     huelle = lies(SRC / "seite.html")
     return huelle.replace("/*STIL*/", stile()).replace("/*SKRIPTE*/", skripte).replace("<!--SCHRIFTEN-->", schrift_link)
