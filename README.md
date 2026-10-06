@@ -29,10 +29,13 @@ Läuft lokal und offline; nichts wird gesendet.
 > Klick zeigt das Spiel also nur als Quelltext an, statt es zu speichern — gemessen am
 > 06.10.2026 an beiden Linkformen. Wenn du das ZIP aus der Release nimmst, entfällt das.
 
-> **Die beiden Wege sind nicht auf demselben Stand.** Der Browser-Weg liefert `1.2.0` —
-> den ganzen Ausbau 1.2. Die mitgelieferte **`.exe` ist noch `1.1.0`**: sie bringt Leiste,
-> Tray und globales Tastenkürzel, aber nicht die Neuerungen von 1.2. Eine neue `.exe` baut
-> man selbst ([`Bauen.md`](Bauen.md)).
+> **Zur Windows-`.exe`:** Sie ist inzwischen ebenfalls **1.2.0** (gebaut am 06.10.2026) und
+> bringt Leiste, Tray und globales Tastenkürzel. Ihr **Start wurde in dieser Fassung nicht
+> gemessen**, weil beim Bau bereits eine Instanz der Vorgängerfassung lief und fremde
+> Prozesse hier nicht angefasst werden — eine zweite Instanz beendet sich wegen der
+> Einzelinstanz-Sperre sofort. Die Vorgängerfassung 1.1.0 lief nachweislich
+> ([`Nachweise/1.2-Start/BEFUND.md`](Nachweise/1.2-Start/BEFUND.md)); die 1.2.0 baut aus
+> demselben Quelltext mit nur geänderter Versionsnummer.
 
 `Netzwerk-Labor.html` liegt direkt im Repositorium, damit der Download **einen Klick**
 braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft —
@@ -203,7 +206,8 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 | [`Bauen.md`](Bauen.md) | Bauen, Testen, Messen, Ausliefern im Detail |
 | [`Mitmachen.md`](Mitmachen.md) | Arbeitsweise und Regeln für Beiträge |
 | [`AGENTS.md`](AGENTS.md) | Betriebsregeln für Mensch und Modell |
-| [`LIZENZ.md`](LIZENZ.md) | Lizenz (offener Punkt) und Schriftenlizenzen |
+| [`LICENSE`](LICENSE) | Lizenz (MIT) — der verbindliche Text |
+| [`LIZENZ.md`](LIZENZ.md) | dieselbe Lizenz auf Deutsch, mit den Ausnahmen und den Schriftenlizenzen |
 
 ## Stand
 
@@ -218,12 +222,12 @@ und globalem Tastenkürzel — aber nicht auf dem Stand von `ausbau-1.2`.
 
 ## Ehrliche Grenzen
 
-- **Die Windows-`.exe` ist Version 1.1.0**, nicht 1.2.0 — sie wurde in dieser Fassung
-  nicht neu gebaut. Die Browser-Fassung ist die aktuellere. Ihr Start wurde in dieser
-  Sitzung **nicht gemessen**: es lief bereits eine Instanz, und fremde Prozesse werden
-  hier nicht angefasst. Belegter Stand vom 05.10.2026: sie startet
-  ([`Nachweise/1.2-Start/BEFUND.md`](Nachweise/1.2-Start/BEFUND.md)).
-- Die Windows-`.exe` ist **nicht signiert** → SmartScreen-Hinweis beim ersten Start.
+- **Die Windows-`.exe` ist 1.2.0, ihr Start aber nicht gemessen.** Gebaut am 06.10.2026
+  (Rust 1.97.1, Tauri 2, 9m 21s), Versionsangabe in der Datei geprüft: 1.2.0. Beim Bau lief
+  noch eine Instanz der Vorgängerfassung; wegen der Einzelinstanz-Sperre beendet sich eine
+  zweite Instanz sofort mit Exitcode 0, sodass kein Start gemessen werden konnte. Fremde
+  Prozesse werden hier aus Prinzip nicht beendet.
+- **Die `.exe` ist nicht signiert** → SmartScreen-Hinweis beim ersten Start.
 - **Die Linux-Pakete sind Stand 1.0** und enthalten die Neuerungen von 1.1 und 1.2 nicht.
 - Arbeitsspeicher im Leerlauf rund **0,5 GB** (WebView2 mit GPU-, Netzwerk- und
   Renderprozessen); die CPU ist praktisch null. Gemessen, nicht geschätzt.
@@ -231,8 +235,9 @@ und globalem Tastenkürzel — aber nicht auf dem Stand von `ausbau-1.2`.
   keinen Tray-Dienst.
 - Ob ein Browser `localStorage` für eine per Doppelklick geöffnete Datei (`file://`)
   dauerhaft behält, ist **nicht gemessen**.
-- Die Lizenz ist ein **offener Punkt** (alle Rechte vorbehalten) und braucht eine
-  Entscheidung — siehe [`LIZENZ.md`](LIZENZ.md).
+- Die Lizenz ist **MIT** — mit zwei Ausnahmen (Name/Herkunft und die Schriften unter
+  SIL OFL). Wer eine veränderte Fassung weitergibt, muss das kenntlich machen. Details:
+  [`LIZENZ.md`](LIZENZ.md), verbindlich: [`LICENSE`](LICENSE).
 
 Schriften: Atkinson Hyperlegible, Bricolage Grotesque, JetBrains Mono — SIL Open Font
 License 1.1, Lizenztexte liegen bei. Inhalte nach bestem Wissen aus den Lernnotizen einer

@@ -71,11 +71,12 @@ Einstellungen → Spielstand → Exportieren/Importieren für einen anderen Rech
 | Datei | Wozu |
 |---|---|
 | `Netzwerk-Labor.html` | das Spiel als Einzeldatei — **Weg 1** |
-| `Netzwerk-Labor.exe` | das Windows-Programm — **Weg 2** |
+| `Netzwerk-Labor.exe` | das Windows-Programm — **Weg 2** (falls im Paket enthalten) |
 | `Integritaet-reparieren.cmd` | falls die `.exe` kein Fenster zeigt |
 | `LIESMICH.txt` | dieselbe Anleitung als reiner Text, ausführlicher |
 | `START-HIER.md` | dieses Blatt |
-| `LIZENZ.md` | Lizenz des Programms |
+| `LICENSE` | Lizenz des Programms (MIT) — der verbindliche Text |
+| `LIZENZ.md` | dieselbe Lizenz auf Deutsch, mit den Ausnahmen |
 | `LIZENZEN/` | Lizenztexte der drei mitgelieferten Schriften (SIL OFL 1.1) |
 
 ---

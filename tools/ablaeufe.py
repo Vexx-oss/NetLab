@@ -234,6 +234,35 @@ def pruefe_seite(fehler: list[str]) -> None:
                       "Einschalten von Pages nicht an und die Seite bleibt 404")
 
 
+def pruefe_release(fehler: list[str]) -> None:
+    """Zusatzregeln fuer den Ablauf, der Releases anlegt."""
+    pfad = ORDNER / "release.yml"
+    if not pfad.is_file():
+        return
+    d = lies(pfad)
+
+    # Ohne Schreibrecht darf der Ablauf kein Release anlegen.
+    rechte = d.get("permissions")
+    if not isinstance(rechte, dict) or rechte.get("contents") != "write":
+        fehler.append("release.yml: 'permissions: contents: write' fehlt — ohne das darf "
+                      "der Ablauf kein Release anlegen")
+
+    # Der Ausloeser muss Tags enthalten, sonst laeuft er beim Tag-Push nicht an.
+    ausloeser = d.get("on") or {}
+    push = ausloeser.get("push") if isinstance(ausloeser, dict) else None
+    hat_tags = isinstance(push, dict) and bool(push.get("tags"))
+    if not hat_tags:
+        fehler.append("release.yml: kein Tag-Ausloeser unter 'push' — beim Setzen eines "
+                      "Versions-Tags liefe kein Release an")
+
+    # Vor dem Veroeffentlichen pruefen.
+    texte = " ".join((s.get("run") or "") for s in _schritte(d))
+    for pflicht in ("tools/test.sh", "tools/paket.py"):
+        if pflicht not in texte:
+            fehler.append(f"release.yml: '{pflicht}' fehlt — es wuerde ungepruefte oder "
+                          "unvollstaendige Ware veroeffentlicht")
+
+
 def main() -> int:
     dateien = sorted(ORDNER.glob("*.yml")) + sorted(ORDNER.glob("*.yaml"))
     if not dateien:
@@ -248,6 +277,7 @@ def main() -> int:
         print("\n".join(m))
         print()
     pruefe_seite(fehler)
+    pruefe_release(fehler)
 
     if fehler:
         print("ROT:")

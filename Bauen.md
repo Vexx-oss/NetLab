@@ -163,19 +163,31 @@ Die Anleitungen kommen aus `Vorlagen/` — **eine** Quelle, kein zweiter Ort zum
 
 ### Eine Release anlegen
 
-Ein Tag allein ist noch kein Release: **GitHub legt Releases nie von selbst an.** Der
-Reiter „Releases" bleibt leer, bis jemand einen anlegt. Die Tags `endversion-1.0` und
-`v1.1` existieren schon, haben aber ebenfalls kein Release.
+**Das macht ein Ablauf** ([`.github/workflows/release.yml`](.github/workflows/release.yml)):
+Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferungspaket und
+legt das Release mit den Anhängen an.
 
 ```bash
-git tag -a v1.2.0 -m "Netzwerk-Labor 1.2.0"
-git push origin ausbau-1.2 --tags
+git tag -a v1.2.1 -m "Netzwerk-Labor 1.2.1"
+git push origin v1.2.1
 ```
 
-Dann auf GitHub: *Releases → **Draft a new release*** → unter „Choose a tag" `v1.2.0`
-auswählen → Titel und Text schreiben → das ZIP aus `dist/` als Anhang hineinziehen →
-**Publish release**. Die README verlinkt `releases/latest`, es muss also nichts
-nachgezogen werden.
+Nach etwa einer Minute steht das Release unter
+*Releases* — mit dem ZIP und der Einzeldatei `Netzwerk-Labor.html` als Anhänge.
+
+> **Warum ein Ablauf und nicht von Hand:** Ein Release über die API anzulegen braucht ein
+> Token mit Schreibrecht. Auf dem Entwicklungsrechner liegt keines (die API antwortet dort
+> mit 401, gemessen 06.10.2026). Ein Ablauf bekommt von GitHub ein `GITHUB_TOKEN` und darf
+> mit `permissions: contents: write` Releases anlegen.
+
+> **Die `.exe` ist nicht im Release**, weil sie nicht im Git liegt (8 MB). Im Paket steht
+> dann der Browser-Hinweis. Wer die Windows-Fassung anhängen will: `.exe` bauen
+> (siehe unten), `python tools/paket.py` laufen lassen und das entstandene
+> `dist/Netzwerk-Labor-<Version>-Windows.zip` im Release-Bildschirm von Hand hineinziehen.
+
+Ein Tag allein ist noch kein Release: **GitHub legt Releases nie von selbst an.** Der
+Reiter „Releases" bleibt leer, bis ein Ablauf oder ein Mensch einen anlegt. Die älteren
+Tags `endversion-1.0` und `v1.1` haben aus demselben Grund bis heute kein Release.
 
 > **Warum `Netzwerk-Labor.html` zusätzlich im Repositorium liegt** (2,2 MB, gegen die
 > Regel „keine gebauten Dateien im Git"): Ein Download-Weg muss **einen** Klick brauchen,

@@ -19,8 +19,28 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`.
   105 Commits weiter ist — das gebaute Spiel nannte sich also weiter „v1.1.0". Jetzt
   `1.2.0` in `bauen.py`, `shell/src-tauri/Cargo.toml` und `shell/src-tauri/tauri.conf.json`.
   Kein Test hängt an der Nummer (geprüft: 213/213 unverändert grün).
-- **Nicht** neu gebaut wurde die `.exe` — sie liegt weiter als Version 1.1.0 in
-  `Programm/` und sagt das über ihre Dateieigenschaften auch selbst.
+- **Die Windows-`.exe` wurde am 06.10.2026 neu gebaut** (Rust 1.97.1, Tauri 2, 9m 21s) und
+  liegt als 1.2.0 in `Programm/`. Versionsangabe in der Datei geprüft: `FileVersion 1.2.0`.
+  **Ihr Start ist nicht gemessen** — beim Bau lief noch eine Instanz der Vorgängerfassung,
+  und wegen der Einzelinstanz-Sperre beendet sich eine zweite Instanz sofort mit Exitcode 0.
+  Die Vorgängerfassung 1.1.0 lief nachweislich. Die alte Datei liegt als
+  `Programm/Netzwerk-Labor-1.1.0.exe.beiseite` daneben (nicht im Git).
+
+**Lizenz festgelegt: MIT**
+
+- Bis hierher stand „Noch nicht festgelegt (alle Rechte vorbehalten)". Das war für ein
+  Lernmittel die falsche Wahl: Es hätte genau das erschwert, wofür das Spiel gebaut ist.
+  Jetzt **MIT** in [`LICENSE`](LICENSE), erklärt in [`LIZENZ.md`](LIZENZ.md) — mit zwei
+  Ausnahmen, die MIT nicht abdeckt: Name/Herkunft (wer eine veränderte Fassung weitergibt,
+  muss das kenntlich machen) und die Schriften (SIL OFL 1.1).
+  Nutzen, Weitergeben, Verändern und Unterrichten sind damit ausdrücklich erlaubt.
+
+**Release wird automatisch angelegt**
+
+- `.github/workflows/release.yml`: Ein Versions-Tag genügt. Der Ablauf prüft den Stand,
+  baut das Auslieferungspaket und legt das Release mit den Anhängen an. Nötig, weil ein
+  Release über die API ein Schreib-Token braucht, das auf dem Entwicklungsrechner nicht
+  liegt (die API antwortet dort mit 401); ein Ablauf bekommt es von GitHub.
 
 **Auslieferung (neu in dieser Fassung)**
 

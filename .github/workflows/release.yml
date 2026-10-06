@@ -1,0 +1,98 @@
+name: Release anlegen
+
+# Legt beim Setzen eines Versions-Tags ein GitHub-Release an und haengt das
+# Auslieferungspaket an. Ergebnis: https://github.com/Vexx-oss/NetLab/releases
+#
+# Warum ein Ablauf und nicht von Hand: Ein Release ueber die API anzulegen braucht ein
+# Token mit Schreibrecht. Auf dem Entwicklungsrechner liegt keines (die API antwortet
+# dort mit 401, gemessen 06.10.2026); ein Ablauf bekommt von GitHub dagegen ein
+# GITHUB_TOKEN, und mit `permissions: contents: write` darf er Releases anlegen.
+#
+# Was angehaengt wird: das ZIP aus tools/paket.py und die Einzeldatei Netzwerk-Labor.html
+# einzeln. Die Windows-.exe ist bewusst NICHT im Git (8 MB) — sie fehlt deshalb hier und
+# wird nicht angehaengt; im Paket steht dann der Browser-Hinweis. Wer die .exe will, baut
+# sie selbst (Bauen.md) und ruft tools/paket.py danach erneut auf.
+#
+# Aufruf: Tag setzen und pushen.
+#   git tag -a v1.2.1 -m "Netzwerk-Labor 1.2.1"
+#   git push origin v1.2.1
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag, fuer den ein Release angelegt werden soll (muss schon existieren)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release bauen und anlegen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      # Erst pruefen: ein Release soll keinen kaputten Stand veroeffentlichen.
+      - name: Tests (headless, Node)
+        run: sh tools/test.sh
+
+      - name: Einzeldatei bauen und pruefen
+        run: |
+          python tools/einfach.py
+          python tools/einfach.py --pruefen docs/index.html
+
+      - name: Auslieferungspaket bauen
+        run: python tools/paket.py
+
+      - name: Tag bestimmen
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "name=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Release anlegen und Pakete anhaengen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG="${{ steps.tag.outputs.name }}"
+          echo "Tag: $TAG"
+          ls -la dist/
+
+          # Windows-Fassung, wenn eine .exe vorhanden war — sonst die Browser-Fassung.
+          ZIPS=$(ls dist/*.zip | tr '\n' ' ')
+          EINZEL=$(ls dist/Netzwerk-Labor-*/Netzwerk-Labor.html)
+          echo "Anhaenge: $ZIPS $EINZEL"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # Schon da (z. B. zweiter Anlauf): nur die Anhaenge erneuern.
+            echo "Release existiert bereits — Anhaenge werden ersetzt."
+            gh release upload "$TAG" $ZIPS "$EINZEL" --clobber
+          else
+            gh release create "$TAG" \
+              --title "Netzwerk-Labor ${TAG#v}" \
+              --generate-notes \
+              $ZIPS "$EINZEL"
+          fi
+
+      - name: Ergebnis melden
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view "${{ steps.tag.outputs.name }}"

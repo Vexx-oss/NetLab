@@ -101,6 +101,12 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
         shutil.copy2(lizenz, ordner / "LIZENZ.md")
     else:
         print("  HINWEIS: LIZENZ.md fehlt — Paket kommt ohne Lizenzangabe des Programms.")
+    # Der verbindliche englische Lizenztext gehoert dazu, nicht nur die Erklaerung.
+    englisch = HIER / "LICENSE"
+    if englisch.is_file():
+        shutil.copy2(englisch, ordner / "LICENSE")
+    else:
+        raise SystemExit(f"FEHLER: {englisch} fehlt — ohne Lizenztext darf nicht ausgeliefert werden.")
 
     (ordner / "LIZENZEN").mkdir(exist_ok=True)
     for name in lizenz_texte():
@@ -117,7 +123,15 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
             if REPARATUR.is_file():
                 shutil.copy2(REPARATUR, ordner / "Integritaet-reparieren.cmd")
         else:
-            raise SystemExit(f"FEHLER: --ohne-exe nicht gesetzt, aber {EXE} fehlt.")
+            # Kein Abbruch: Auf einem frischen Klon (und damit in jeder Pruefung auf GitHub)
+            # gibt es die .exe nicht — sie ist 8 MB gross und liegt bewusst nicht im Git.
+            # Dann entsteht die Browser-Fassung, und das steht auch so im Bericht. Ein
+            # Abbruch waere hier falsch: das Paket ist auch ohne .exe vollstaendig spielbar.
+            print(f"  HINWEIS: {EXE} fehlt — es entsteht die Browser-Fassung ohne .exe.")
+            print("           Die .exe baut man selbst (siehe Bauen.md) und ruft paket.py")
+            print("           danach erneut auf.")
+    else:
+        print("  --ohne-exe: es entsteht die Browser-Fassung ohne .exe.")
 
     # 3 · Inhaltsverzeichnis mit Pruefsummen schreiben.
     zeilen = [
@@ -203,9 +217,15 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Auslieferungspaket des Netzwerk-Labors bauen")
     ap.add_argument("--ohne-exe", action="store_true", help="nur die Browser-Fassung (klein, ueberall lauffaehig)")
+    ap.add_argument("--mit-exe", action="store_true",
+                    help="Windows-Fassung anstreben; fehlt die .exe, entsteht die Browser-Fassung (kein Abbruch)")
     ap.add_argument("--nur-ordner", action="store_true", help="Ordner bauen, kein ZIP")
     ap.add_argument("--ziel", type=Path, help="Pfad des ZIPs")
     a = ap.parse_args()
+    if a.ohne_exe and a.mit_exe:
+        raise SystemExit("FEHLER: --ohne-exe und --mit-exe zusammen ergeben keinen Sinn.")
+    # Standard ist die Windows-Fassung; auf einem frischen Klon wird daraus die
+    # Browser-Fassung, mit Hinweis statt Abbruch (siehe paket_bauen).
     return paket_bauen(not a.ohne_exe, a.nur_ordner, a.ziel)
 
 

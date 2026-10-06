@@ -1,52 +1,57 @@
 # Lizenz
 
-> **Offener Punkt — bitte bestätigen.** Diese Datei hält den bisherigen Stand aus der
-> README fest („Noch nicht festgelegt, alle Rechte vorbehalten") und ergänzt nur das, was
-> für eine Auslieferung unvermeidlich ist. Sie ist **keine Rechtsberatung**. Wenn du eine
-> andere Lizenz willst (z. B. MIT, CC BY-NC-SA, GPL), ist das eine Zeile Arbeit — sag es.
+Kurz: **MIT** ([`LICENSE`](LICENSE)) — mit zwei Ausnahmen, die darunter nicht fallen.
 
-## Programm
+> Diese Datei erklärt die Lizenz auf Deutsch. Verbindlich ist der englische Text in
+> [`LICENSE`](LICENSE). Sie ist **keine Rechtsberatung**.
 
-Alle Rechte vorbehalten. Der Quelltext ist offen einsehbar, aber ohne ausdrückliche
-Erlaubnis nicht zur Weiterverbreitung in geänderter Form bestimmt.
+## Programm: MIT
 
-**Ausdrücklich erlaubt** ist das, was dieses Projekt ohnehin tut:
+Der Quelltext und die gebauten Fassungen stehen unter der MIT-Lizenz. Damit ist erlaubt,
+was dieses Projekt ohnehin will:
 
-- Das Spiel benutzen, im Unterricht wie privat — auch in einer Klasse oder Lerngruppe.
-- Ein Auslieferungspaket oder die Einzeldatei `Netzwerk-Labor.html` unverändert und
-  vollständig weitergeben (solange Programmname und diese Datei beiliegen).
-- Vom Quelltext lernen, ihn lesen und für den eigenen Unterricht zitieren.
+- **Benutzen** — im Unterricht wie privat, auch in einer Klasse oder Lerngruppe.
+- **Weitergeben** — das Auslieferungspaket oder die Einzeldatei `Netzwerk-Labor.html`,
+  unverändert oder verändert, auch kommerziell.
+- **Verändern** und die geänderte Fassung weitergeben.
+- **Vom Quelltext lernen**, ihn lesen und für den eigenen Unterricht zitieren.
 
-**Nicht erlaubt** ohne Absprache:
+Einzige Bedingung: Der Copyright-Hinweis und der Lizenztext bleiben bei jeder Weitergabe
+dabei.
 
-- Das Spiel oder Teile davon als eigenes Werk ausgeben.
-- Es verändern und die veränderte Fassung unter demselben Namen weitergeben
-  (Verwechslungsgefahr für Lernende).
-- Es kommerziell verkaufen.
+**Warum MIT und nicht „alle Rechte vorbehalten"** (so stand es bis 06.10.2026 in der
+README): Das Spiel ist ein Lernmittel. Eine Lizenz, die Weitergeben und Verändern
+verbietet, hätte genau das erschwert, wofür es gebaut ist — und niemanden geschützt.
+Wer etwas beitragen oder für die eigene Klasse anpassen will, soll das dürfen.
 
-## Schriften
+## Was MIT **nicht** abdeckt
 
-Die mitgelieferten Schriften stehen **nicht** unter der Lizenz des Programms, sondern
-unter der **SIL Open Font License 1.1**. Die Lizenztexte liegen unter `LIZENZEN/` bzw.
-`schriften/` — sie gehören bei jeder Weitergabe dazu:
+**1. Name und Herkunft.** Die Lizenz erlaubt das Kopieren des Codes, nicht das Ausgeben
+als eigenes Werk. Wer eine veränderte Fassung weitergibt, muss kenntlich machen, dass es
+eine veränderte Fassung ist — die Lernenden sollen nicht eine bearbeitete Version für das
+Original halten.
+
+**2. Die Schriften.** Sie stehen **nicht** unter MIT, sondern unter der **SIL Open Font
+License 1.1**. Die Lizenztexte liegen unter `schriften/` und gehören bei jeder Weitergabe
+dazu:
 
 | Schrift | Dateien | Lizenztext |
 |---|---|---|
-| Atkinson Hyperlegible | `schriften/AtkinsonHyperlegible-*` | `OFL-atkinsonhyperlegible.txt` |
-| Bricolage Grotesque | `schriften/BricolageGrotesque-*` | `OFL-bricolagegrotesque.txt` |
-| JetBrains Mono | `schriften/JetBrainsMono-*` | `OFL-jetbrainsmono.txt` |
+| Atkinson Hyperlegible | `schriften/AtkinsonHyperlegible-*` | `schriften/OFL-atkinsonhyperlegible.txt` |
+| Bricolage Grotesque | `schriften/BricolageGrotesque-*` | `schriften/OFL-bricolagegrotesque.txt` |
+| JetBrains Mono | `schriften/JetBrainsMono-*` | `schriften/OFL-jetbrainsmono.txt` |
 
 ## Marken und Inhalte
 
 **Kein Cisco-Produkt.** Die Konsole ist „IOS-ähnlich"; Befehle, die nicht belegt sind,
-kennzeichnet das Programm als solche. Es werden keine Cisco-Marken, keine
-Cisco-Software und keine Cisco-Unterlagen verwendet oder mitgeliefert.
+kennzeichnet das Programm als solche. Es werden keine Cisco-Marken, keine Cisco-Software
+und keine Cisco-Unterlagen verwendet oder mitgeliefert.
 
 Die Lerninhalte sind nach bestem Wissen aus den Lernnotizen einer FISI-Umschulung
 geprüft. Sie sind kein offizielles IHK-Material; im Zweifel gilt der Unterricht.
 
 ## Fremder Bestandteil
 
-`fremd/lernmotor.js` stammt aus dem Nachbarprojekt FISI-Spielhalle und gehoert demselben
-Urheber. Herkunft und Prüfsumme stehen im Kopf der Datei; `python tools/lernmotor.py`
-prüft, ob beide Fassungen noch gleich sind.
+`fremd/lernmotor.js` stammt aus dem Nachbarprojekt FISI-Spielhalle und gehört demselben
+Urheber; er steht unter derselben MIT-Lizenz. Herkunft und Prüfsumme stehen im Kopf der
+Datei; `python tools/lernmotor.py` prüft, ob beide Fassungen noch gleich sind.
