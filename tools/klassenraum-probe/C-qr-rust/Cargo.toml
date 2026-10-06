@@ -1,0 +1,19 @@
+[package]
+name = "c-qr-rust"
+version = "0.1.0"
+edition = "2021"
+description = "QR-Encoder-Probe (Stufe D): Model 2, ohne fremde Kisten"
+publish = false
+
+[[bin]]
+name = "C-qr-rust"
+path = "src/main.rs"
+
+# Keine [dependencies]: crates.io ist in dieser Umgebung nicht erreichbar
+# ("cargo fetch" scheitert an SSL/schannel), und die Kiste "qrcode" liegt nicht im Cache.
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

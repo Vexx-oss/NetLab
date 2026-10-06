@@ -1,0 +1,3 @@
+# Bauabfall dieses eigenen Cargo-Projekts (Vorschlag fuer die Wurzel-.gitignore:
+# die Zeile "tools/klassenraum/target/"). Der Ordner wird nicht versioniert.
+target/

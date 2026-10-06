@@ -1,0 +1,4 @@
+# Bau- und Hilfsdateien der Klassenraum-Proben bleiben aus dem Repositorium heraus.
+target/
+__pycache__/
+*.pyc

@@ -1,0 +1,20 @@
+[package]
+name = "klassenraum"
+version = "0.1.0"
+edition = "2021"
+description = "Klassenraum-Live-Server (Stufe C2): zwei Endpunkte, keine fremden Kisten"
+publish = false
+
+[[bin]]
+name = "klassenraum"
+path = "src/main.rs"
+
+# Keine [dependencies]: In dieser Umgebung ist crates.io nicht erreichbar
+# (cargo fetch scheitert mit SSL/schannel SEC_E_NO_CREDENTIALS). Alles, was das
+# Programm braucht - HTTP, JSON, Threads, Zeit - ist in der Standardbibliothek.
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
