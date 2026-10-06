@@ -22,8 +22,12 @@ Läuft lokal und offline; nichts wird gesendet.
 | Weg | Wie | Was du brauchst |
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
-| **Eine Datei** | **[Netzwerk-Labor.html herunterladen](../../raw/ausbau-1.2/Netzwerk-Labor.html)**, Doppelklick | nur einen Browser |
+| **Eine Datei** | [Netzwerk-Labor.html](Netzwerk-Labor.html) öffnen → **Rechtsklick → „Link speichern unter …"** | nur einen Browser |
 | **Alles auf einmal** | [Release-ZIP](https://github.com/Vexx-oss/NetLab/releases/latest): Einzeldatei, `.exe`, Anleitung | Windows 10/11 für die `.exe` |
+
+> **Warum Rechtsklick?** GitHub liefert HTML-Dateien als `text/plain` aus. Ein normaler
+> Klick zeigt das Spiel also nur als Quelltext an, statt es zu speichern — gemessen am
+> 06.10.2026 an beiden Linkformen. Wenn du das ZIP aus der Release nimmst, entfällt das.
 
 > **Die beiden Wege sind nicht auf demselben Stand.** Der Browser-Weg liefert `1.2.0` —
 > den ganzen Ausbau 1.2. Die mitgelieferte **`.exe` ist noch `1.1.0`**: sie bringt Leiste,
@@ -31,8 +35,8 @@ Läuft lokal und offline; nichts wird gesendet.
 > man selbst ([`Bauen.md`](Bauen.md)).
 
 `Netzwerk-Labor.html` liegt direkt im Repositorium, damit der Download **einen Klick**
-braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft
-(gleiche Prüfsumme).
+braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft —
+gleiche Prüfsumme, nachgewiesen von `python tools/seite-pruefen.py`.
 
 Die Einzeldatei ist das **ganze Spiel in einer Datei** — Schriften eingebettet, kein
 Nachladen, kein Installieren, kein Internet. Windows, Linux, macOS: alles mit einem
