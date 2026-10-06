@@ -20,11 +20,13 @@ name: Spiel veröffentlichen
 on:
   push:
     branches: [ausbau-1.2]
-    paths:
-      - "docs/index.html"
-      - "docs/bilder/**"
-      - ".github/workflows/seite.yml"
   workflow_dispatch:
+
+# Kein Pfadfilter hier. Er stand hier und war ein Fehler (gemessen 06.10.2026): er liess
+# nur Aenderungen an docs/ durch. Wer Pages einschaltet, aendert aber nichts an docs/ —
+# also lief der Ablauf nicht an, und die Seite blieb 404, obwohl Pages an war. Veroeffentlicht
+# wird ohnehin immer die versionierte docs/index.html; der Ablauf ist kurz genug, um bei
+# jedem Push zu laufen.
 
 permissions:
   contents: read

@@ -225,6 +225,14 @@ def pruefe_seite(fehler: list[str]) -> None:
         fehler.append("seite.yml: mehr als ein Job — ein wartender zweiter Job kann den "
                       "ganzen Lauf nach ~900 s abbrechen (gemessen 05.10.2026)")
 
+    # Kein Pfadfilter: Wer Pages einschaltet, aendert nichts an docs/. Mit Pfadfilter laeuft
+    # der Ablauf dann nicht an, und die Seite bleibt 404 (gemessen 06.10.2026).
+    ausloeser = d.get("on") or {}
+    push = ausloeser.get("push") if isinstance(ausloeser, dict) else None
+    if isinstance(push, dict) and push.get("paths"):
+        fehler.append("seite.yml: Pfadfilter unter 'push' — dann laeuft der Ablauf beim "
+                      "Einschalten von Pages nicht an und die Seite bleibt 404")
+
 
 def main() -> int:
     dateien = sorted(ORDNER.glob("*.yml")) + sorted(ORDNER.glob("*.yaml"))
