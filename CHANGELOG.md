@@ -41,6 +41,13 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`.
   baut das Auslieferungspaket und legt das Release mit den Anhängen an. Nötig, weil ein
   Release über die API ein Schreib-Token braucht, das auf dem Entwicklungsrechner nicht
   liegt (die API antwortet dort mit 401); ein Ablauf bekommt es von GitHub.
+- **Erster Lauf gescheitert und behoben:** `tools/einfach.py` verlangte `web/index.html`,
+  das auf einem frischen Klon fehlt (`web/` ist erzeugt). Jetzt baut das Werkzeug `web/` bei
+  Bedarf selbst nach — damit ist es selbstgenügsam, egal wer es aufruft. Belegt mit einem
+  frischen Klon ohne `web/`: derselbe Bau, dieselbe Prüfsumme.
+- Ergebnis: Release
+  [`v1.2.0`](https://github.com/Vexx-oss/NetLab/releases/tag/v1.2.0) mit zwei Anhängen.
+  Beide laden mit `Content-Disposition: attachment` herunter (gemessen) — ein Klick.
 
 **Auslieferung (neu in dieser Fassung)**
 

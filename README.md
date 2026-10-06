@@ -22,20 +22,17 @@ Läuft lokal und offline; nichts wird gesendet.
 | Weg | Wie | Was du brauchst |
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
-| **Eine Datei** | [Netzwerk-Labor.html](Netzwerk-Labor.html) öffnen → **Rechtsklick → „Link speichern unter …"** | nur einen Browser |
-| **Alles auf einmal** | [Release-ZIP](https://github.com/Vexx-oss/NetLab/releases/latest): Einzeldatei, `.exe`, Anleitung | Windows 10/11 für die `.exe` |
+| **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)** (2,1 MB), Doppelklick | nur einen Browser |
+| **Zum Entpacken** | [Netzwerk-Labor-1.2.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest) (877 KB): Spiel, Anleitungen, Lizenztexte | nur einen Browser |
 
-> **Warum Rechtsklick?** GitHub liefert HTML-Dateien als `text/plain` aus. Ein normaler
-> Klick zeigt das Spiel also nur als Quelltext an, statt es zu speichern — gemessen am
-> 06.10.2026 an beiden Linkformen. Wenn du das ZIP aus der Release nimmst, entfällt das.
+Alle drei Wege liefern dieselbe Fassung `1.2.0`. Die Anhänge der Release laden **direkt
+herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umweg.
 
-> **Zur Windows-`.exe`:** Sie ist inzwischen ebenfalls **1.2.0** (gebaut am 06.10.2026) und
-> bringt Leiste, Tray und globales Tastenkürzel. Ihr **Start wurde in dieser Fassung nicht
-> gemessen**, weil beim Bau bereits eine Instanz der Vorgängerfassung lief und fremde
-> Prozesse hier nicht angefasst werden — eine zweite Instanz beendet sich wegen der
-> Einzelinstanz-Sperre sofort. Die Vorgängerfassung 1.1.0 lief nachweislich
-> ([`Nachweise/1.2-Start/BEFUND.md`](Nachweise/1.2-Start/BEFUND.md)); die 1.2.0 baut aus
-> demselben Quelltext mit nur geänderter Versionsnummer.
+> **Zur Windows-`.exe`:** Sie ist ebenfalls **1.2.0** (gebaut am 06.10.2026) und bringt
+> Leiste, Tray und globales Tastenkürzel. Sie liegt **nicht im Release**, weil sie 8 MB
+> groß ist und nicht ins Git gehört. Im Repositorium steht sie unter
+> `Programm/Netzwerk-Labor.exe`; ihren Start habe ich in dieser Fassung **nicht gemessen**
+> (siehe *Ehrliche Grenzen*).
 
 `Netzwerk-Labor.html` liegt direkt im Repositorium, damit der Download **einen Klick**
 braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft —
