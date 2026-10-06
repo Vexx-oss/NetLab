@@ -204,7 +204,7 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 | [`Bauen.md`](Bauen.md) | Bauen, Testen, Messen, Ausliefern im Detail |
 | [`Mitmachen.md`](Mitmachen.md) | Arbeitsweise und Regeln für Beiträge |
 | [`AGENTS.md`](AGENTS.md) | Betriebsregeln für Mensch und Modell |
-| [`LICENSE`](LICENSE) | Lizenz (MIT) — der verbindliche Text |
+| [`LICENSE`](LICENSE) | Lizenz (PolyForm Noncommercial 1.0.0) — der verbindliche Text |
 | [`LIZENZ.md`](LIZENZ.md) | dieselbe Lizenz auf Deutsch, mit den Ausnahmen und den Schriftenlizenzen |
 
 ## Stand
@@ -232,9 +232,17 @@ und globalem Tastenkürzel — aber nicht auf dem Stand von `ausbau-1.2`.
   keinen Tray-Dienst.
 - Ob ein Browser `localStorage` für eine per Doppelklick geöffnete Datei (`file://`)
   dauerhaft behält, ist **nicht gemessen**.
-- Die Lizenz ist **MIT** — mit zwei Ausnahmen (Name/Herkunft und die Schriften unter
-  SIL OFL). Wer eine veränderte Fassung weitergibt, muss das kenntlich machen. Details:
-  [`LIZENZ.md`](LIZENZ.md), verbindlich: [`LICENSE`](LICENSE).
+- **Die Lizenz erlaubt kein Geldverdienen.** Spielen, Üben und Unterricht — auch in
+  Schulen und Bildungseinrichtungen — sind frei. Verkaufen, kommerzielles Nutzen und
+  Weitergeben unter eigener Flagge sind **nicht** erlaubt; dafür braucht es eine
+  gesonderte Erlaubnis. Details: [`LIZENZ.md`](LIZENZ.md), verbindlich:
+  [`LICENSE`](LICENSE) (PolyForm Noncommercial 1.0.0).
+- **Der Quelltext ist hier öffentlich einsehbar, die gebaute Fassung ist es nicht.**
+  GitHub erlaubt jedem, ein öffentliches Repositorium zu forken — das ist eine Bedingung
+  der Plattform und lässt sich nicht abschalten. Wer eine Fassung **weitergeben oder
+  hosten** will, braucht dafür die Erlaubnis des Urhebers. Wer den Code ganz unter
+  Verschluss halten will, muss das Repositorium auf **privat** stellen; dann ist
+  allerdings auch nichts mehr einsehbar.
 
 Schriften: Atkinson Hyperlegible, Bricolage Grotesque, JetBrains Mono — SIL Open Font
 License 1.1, Lizenztexte liegen bei. Inhalte nach bestem Wissen aus den Lernnotizen einer

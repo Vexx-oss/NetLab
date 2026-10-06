@@ -75,7 +75,7 @@ Einstellungen → Spielstand → Exportieren/Importieren für einen anderen Rech
 | `Integritaet-reparieren.cmd` | falls die `.exe` kein Fenster zeigt |
 | `LIESMICH.txt` | dieselbe Anleitung als reiner Text, ausführlicher |
 | `START-HIER.md` | dieses Blatt |
-| `LICENSE` | Lizenz des Programms (MIT) — der verbindliche Text |
+| `LICENSE` | Lizenz des Programms (PolyForm Noncommercial 1.0.0) — der verbindliche Text |
 | `LIZENZ.md` | dieselbe Lizenz auf Deutsch, mit den Ausnahmen |
 | `LIZENZEN/` | Lizenztexte der drei mitgelieferten Schriften (SIL OFL 1.1) |
 

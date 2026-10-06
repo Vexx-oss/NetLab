@@ -28,14 +28,24 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`.
   sondern der Nutzer beendete sie. Die alte Datei liegt als
   `Programm/Netzwerk-Labor-1.1.0.exe.beiseite` daneben (nicht im Git).
 
-**Lizenz festgelegt: MIT**
+**Lizenz festgelegt: PolyForm Noncommercial 1.0.0**
 
-- Bis hierher stand „Noch nicht festgelegt (alle Rechte vorbehalten)". Das war für ein
-  Lernmittel die falsche Wahl: Es hätte genau das erschwert, wofür das Spiel gebaut ist.
-  Jetzt **MIT** in [`LICENSE`](LICENSE), erklärt in [`LIZENZ.md`](LIZENZ.md) — mit zwei
-  Ausnahmen, die MIT nicht abdeckt: Name/Herkunft (wer eine veränderte Fassung weitergibt,
-  muss das kenntlich machen) und die Schriften (SIL OFL 1.1).
-  Nutzen, Weitergeben, Verändern und Unterrichten sind damit ausdrücklich erlaubt.
+- Bis hierher stand „Noch nicht festgelegt (alle Rechte vorbehalten)". Zwischenstand war
+  **MIT** — das war zu weitgehend: MIT erlaubt ausdrücklich Verkauf und kommerzielle
+  Nutzung, also genau das, was hier nicht gewollt ist.
+- Jetzt **PolyForm Noncommercial 1.0.0** in [`LICENSE`](LICENSE), erklärt in
+  [`LIZENZ.md`](LIZENZ.md). Die Wahl ist bewusst auf eine **anerkannte, fertig
+  formulierte** Lizenz gefallen statt auf etwas Selbstgeschriebenes: Sie erlaubt alles
+  Nicht-Kommerzielle (spielen, üben, unterrichten, studieren, weitergeben) und verbietet
+  alles Kommerzielle, mit klaren Definitionen für „kommerziell", „Bildungseinrichtung"
+  und „persönliche Nutzung".
+- **Bildungseinrichtungen** sind ausdrücklich erlaubt, unabhängig von der Herkunft ihrer
+  Mittel — eine bezahlte Schulung einer Firma oder eines einzelnen Trainers ist dagegen
+  kommerziell und braucht eine gesonderte Erlaubnis.
+- Die Grenze steht in `LIZENZ.md`: Der Quelltext ist öffentlich, und GitHub erlaubt
+  jedermann das **Forken** — das ist Plattform-Bedingung und nicht abschaltbar. Verhindert
+  wird die **Nutzung** über das Erlaubte hinaus. Wer den Code unter Verschluss halten will,
+  muss das Repositorium auf privat stellen; dann ist allerdings nichts mehr einsehbar.
 
 **Release wird automatisch angelegt**
 
