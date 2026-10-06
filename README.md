@@ -22,13 +22,17 @@ Läuft lokal und offline; nichts wird gesendet.
 | Weg | Wie | Was du brauchst |
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/Side-Project](https://vexx-oss.github.io/Side-Project/)** öffnen | nur einen Browser |
-| **Eine Datei** | [Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/Side-Project/releases/latest), Doppelklick | nur einen Browser |
-| **Windows-Programm** | Release-ZIP öffnen, `Netzwerk-Labor.exe` doppelklicken | Windows 10/11 |
+| **Eine Datei** | **[Netzwerk-Labor.html herunterladen](../../raw/ausbau-1.2/Netzwerk-Labor.html)**, Doppelklick | nur einen Browser |
+| **Alles auf einmal** | [Release-ZIP](https://github.com/Vexx-oss/Side-Project/releases/latest): Einzeldatei, `.exe`, Anleitung | Windows 10/11 für die `.exe` |
 
 > **Die beiden Wege sind nicht auf demselben Stand.** Der Browser-Weg liefert `1.2.0` —
 > den ganzen Ausbau 1.2. Die mitgelieferte **`.exe` ist noch `1.1.0`**: sie bringt Leiste,
 > Tray und globales Tastenkürzel, aber nicht die Neuerungen von 1.2. Eine neue `.exe` baut
 > man selbst ([`Bauen.md`](Bauen.md)).
+
+`Netzwerk-Labor.html` liegt direkt im Repositorium, damit der Download **einen Klick**
+braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft
+(gleiche Prüfsumme).
 
 Die Einzeldatei ist das **ganze Spiel in einer Datei** — Schriften eingebettet, kein
 Nachladen, kein Installieren, kein Internet. Windows, Linux, macOS: alles mit einem

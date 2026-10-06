@@ -146,13 +146,26 @@ Die Anleitungen kommen aus `Vorlagen/` — **eine** Quelle, kein zweiter Ort zum
 
 ### Eine Release anlegen
 
+Ein Tag allein ist noch kein Release: **GitHub legt Releases nie von selbst an.** Der
+Reiter „Releases" bleibt leer, bis jemand einen anlegt. Die Tags `endversion-1.0` und
+`v1.1` existieren schon, haben aber ebenfalls kein Release.
+
 ```bash
 git tag -a v1.2.0 -m "Netzwerk-Labor 1.2.0"
 git push origin ausbau-1.2 --tags
 ```
 
-Dann auf GitHub: *Releases → Draft a new release* → Tag `v1.2.0` → das ZIP aus `dist/`
-anhängen. Die README verlinkt `releases/latest`, es muss also nichts nachgezogen werden.
+Dann auf GitHub: *Releases → **Draft a new release*** → unter „Choose a tag" `v1.2.0`
+auswählen → Titel und Text schreiben → das ZIP aus `dist/` als Anhang hineinziehen →
+**Publish release**. Die README verlinkt `releases/latest`, es muss also nichts
+nachgezogen werden.
+
+> **Warum `Netzwerk-Labor.html` zusätzlich im Repositorium liegt** (2,2 MB, gegen die
+> Regel „keine gebauten Dateien im Git"): Ein Download-Weg muss **einen** Klick brauchen,
+> und ein Release-Anhang braucht eine Person, die ihn anlegt. Die Datei ist textbasiert
+> und damit diffbar, wird bei inhaltlichen Änderungen mitgebaut und ist mit
+> `docs/index.html` byte-identisch. Die 8-MB-`.exe` bleibt weiter draußen — sie gehört
+> an eine Release.
 
 ## Die Windows-`.exe`
 
