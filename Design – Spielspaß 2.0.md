@@ -1482,3 +1482,88 @@ einen Export.
 **Nicht geprüft:** kein Lauf auf einem echten Android-Gerät (nur Quellenlesung der Hülle und Messungen in
 Edge mit der eingehängten Android-Anpassung), kein Prozess-Tod unter Android (nur das Verstecken der Seite),
 keine Messung eines sehr großen Spielstands über 103 KB hinaus.
+
+---
+
+## 29 · Fehler in den tief genesteten Menüs, und was der Bau kostet (06.10.2026)
+
+Diese Runde war eine andere Art von Arbeit als § 28: nicht „mehr Inhalt“, sondern **nachsehen, ob
+das, was da ist, auch bedienbar ist** — und zwar in den Ebenen, die man selten öffnet. Dazu wurde
+zum ersten Mal in diesem Projekt ein Team aus vier Rollen plus einem Qualitätstor eingesetzt
+(Auftrag des Nutzers, ausdrücklich gegen die Regel „keine Agentenschwärme“ in `AGENTS.md`).
+
+**Wie gemessen wurde.** Ein neues Werkzeug, `tools/menueprobe.py`, klickt in einem echten Browser
+mit emulierten Gerätemaßen die tiefen Ebenen durch — Geräteblatt → Kategorie-Fach → Gerätewahl →
+Kontextmenü → Port-Menü, Kopf-⋯ → Dialog, Ansicht-/Zoom-Menü, Dock-Blatt → Reiter, Auftrags-⋯,
+Auftragsmappe — und prüft je Ebene: liegt sie ganz im Bild, ist sie in einem scrollenden Behälter
+eingesperrt, Trefferflächen unter 44 px, Überdeckung durch eine spätere Ebene, und ob sie sich
+wieder schließt. Dazu kamen `mobilprobe.py` über 16 Profile und ein echtes WebView2-Fenster.
+
+**Was gefunden wurde (elf Befunde, alle mit Messwert und Bild).** Vier Trefferflächen waren zu
+klein — und zwar in **jedem** der fünf Profile: `.pa-zu`, `.dialog-zu` und `.wahl-knopf` mit
+40 × 44 px, `.lb-dock-einklappen` mit 32 × 44 px, der Griff am Dock-Blatt mit **96 × 18 px**. Das
+Dock-Blatt blieb eingeklappt 412 × 520 px groß und deckend über der Leinwand, sodass der
+Werkzeugleiste der Zugriff fehlte. Im eingeklappten Reiterstreifen stand das Wort **„null“**. Die
+Auftragsmappe deckte die Werkzeugleiste zu (Klick auf „Ansicht“ öffnete nichts). Die
+Karriere-Overlays schlossen nicht mit Escape. Ein 26-zeiliges Port-Menü ragte 4 px unten heraus.
+Der aktive Terminal-Reiter lag bei vier Sitzungen außerhalb, und `scrollbar-width:none` versteckte
+den einzigen Hinweis darauf. Die Auftragsmappe hatte zwei Bildlaufleisten nebeneinander.
+
+**Der verworfene Versuch, und warum er hier steht.** Beim Menü war der erste Reparaturgedanke
+„unsichtbar anhängen, messen, dann einblenden“ — mit `hidden`, also `display:none`. Das ist
+**falsch**: ein `display:none`-Element liefert für jedes Rechteck 0. Die Klemmung rechnete danach
+mit Höhe 0, und dasselbe Port-Menü lief **506 px** aus dem Fenster statt 4 px. Die Lehre ist
+allgemein: „unsichtbar“ und „nicht gemessen“ sind zwei verschiedene Zustände. Richtig ist
+`visibility:hidden` — Layout bleibt, Maße sind echt — und die Einblend-Animation muss während der
+Messung aus sein, weil ihr `scale(.98)` das Rechteck um 2 % verkleinert.
+
+**Zweiter verworfener Versuch.** Den aktiven Terminal-Reiter mit `scrollIntoView({inline:"nearest"})`
+ins Bild zu holen, genügte nicht: gemessen bei 1280 × 800 blieb der vierte Reiter rechts draußen.
+Jetzt wird der Bildlauf ausdrücklich gesetzt, mit `Math.max(0, …)` als linke Grenze — ohne die
+rutschte bei zwei Reitern in 239 px der erste Reiter nach x 466, also links aus dem Fenster.
+
+**Was der Bau kostet (gemessen, nicht geschätzt).** Der Android-Vollbau ist mit **5,1 s** kein
+Problem (Zeitfresser `d8` 1,36 s, `javac` 1,0 s). Der PC-Bau ist eines: `cargo tauri build` 241 s,
+mit dem üblichen `cargo build --release` davor **661 s**, und bei jeder App-Änderung allein
+104–176 s Neu-Link — die Hülle baut dieselben acht Crates zweimal. Deshalb gibt es jetzt
+`shell/entwickeln.ps1`: `web/` bauen und die Hülle im **Debug**-Profil, **4,2 s** je Runde (erster
+Lauf 3 m 11 s). Die Auslieferung bleibt Release.
+
+**Nebenbefund, der eine Falle offenlegt.** Die eingebetteten Schriften trugen den MIME-Typ
+`application/octet-stream` statt `font/woff2`, weil `mimetypes.guess_type` unter Windows die
+Registry liest. Die Schriften luden trotzdem (Browser erkennen das Format an den Bytes), aber die
+Einzeldatei war 196 Bytes größer als ein Bau auf Linux — und `docs/index.html` galt nach jedem Bau
+als geändert. Jetzt feste Tabelle.
+
+**Ehrlich zum Vorgehen.** Zwei Teammitglieder haben eigene Fehlmessungen gemeldet und widerrufen
+(ein voreiliger Schluss aus „0 Overlays“, ein Überdeckungsraster, das die Trefferkette nicht
+prüfte). Das Qualitätstor fand zwei Regressionen, die sonst durchgerutscht wären: eine doppelte
+CSS-Zusage ließ `ethos.py` abbrechen und damit **den gesamten Testlauf stillstehen**, und ein Fix
+lag nur in einem von drei Erzeugnissen. Der Lead hat außerdem einen eigenen Fehler gefunden und
+behoben: die Editor-Speicherung hatte in drei Dateien **alle** Zeilenenden von LF auf CRLF
+umgestellt — `git diff --numstat` zeigt das nicht, ein Byte-Vergleich gegen `HEAD` schon.
+
+**Zahlen zum Stand (06.10.2026).**
+
+| Prüfung | Wert |
+|---|---|
+| `sh tools/test.sh` | **251/251 grün** (35 Testdateien, 76 Module) |
+| `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | **5 Profile, 49 Kriterien erfüllt, 0 verletzt** (vorher 18 Verletzungen) |
+| `python Nachweise/experten/nachprobe-menuefix.py` | **GRÜN**, alle drei Randbefunde behoben |
+| `python android/werkzeuge/mobilprobe.py --lauf` | **12 von 12** gewerteten Profilen grün |
+| `python tools/ethos.py` · `klassen.py` · `sim-stand.js` | GRÜN · 0 Klassen ohne CSS-Regel · Simulation unverändert |
+| `python android/bauen.py` | **5,1 s**, endet mit GRÜN, APK signiert |
+| `shell/entwickeln.ps1 -NurBauen` | **4,2 s** je Runde (Debug-Profil) |
+| Android-APK | `Programm/Netzwerk-Labor-1.2.1-Android.apk`, **988.700 B**, Asset zeichengleich |
+
+**Offen, mit Absicht.** Das Port-Menü ist mit dem Finger nicht erreichbar — der Weg ist Umschalt
+beim Loslassen eines Kabelzugs, und ein Telefon hat keine Umschalttaste (gemessen: der Fingerzug
+legt das Kabel an, das Menü erscheint nicht). Das ist eine Entscheidung des Nutzers, keine
+Reparatur; der übliche Weg „nächster freier Port“ funktioniert. Auf 640 × 360 liegen die untersten
+Einträge langer Fächer und Kontextmenüs unter der Kante — der Behälter scrollt, sie sind per
+Bildlauf erreichbar (Bildlaufgrenze, kein Abschneiden).
+
+**Nicht geprüft:** kein echtes Android-Gerät und kein Emulator; die sicheren Ränder (Notch,
+Gestenleiste) sind auf dem Messplatz 0 px; Langdruck als Kontextmenü, eine echte Wischgeste am
+Dock-Blatt und das Treffen der Port-Punkte (Ø 11 px) mit dem Finger sind ungemessen; der Start der
+neu gebauten Release-`.exe` wurde in dieser Runde nicht gemessen.

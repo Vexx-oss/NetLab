@@ -727,3 +727,89 @@ Befund M3). `node tools/sim-stand.js` vergleicht gegen diese Datei. Die **Zeilen
 `failed to create webview`, `HRESULT(0x800700AA)` (16:11:40 und 16:14:18) hatte als Ursache das Integritätslabel
 „Niedrig“ des Vaults; ein Windows-Neustart war nie nötig (gemessen 05.10.2026, 19:26–19:35).
 Beweise: `Nachweise/1.2-Start/BEFUND.md`.
+
+## 11 · Tiefe Menüebenen und Bau (06.10.2026) — Vertrag für die Anpassungsschicht
+
+Neu gefasst nach einer Sitzung, in der ein Expertenteam die Oberfläche in einem echten Browser
+und im echten WebView2-Fenster vermessen hat. Die Zahlen stehen in `CHANGELOG.md` (Abschnitt
+1.2.2), in `android/LIESMICH.md` (Nachtrag) und in `Nachweise/experten/`; hier steht **was gilt**.
+
+### 11.1 Menüplatzierung: in zwei Durchgängen messen
+
+`UI.menue(x, y, eintraege, {oben})` und `UI.menue.popover(...)` hängen das Element an `document.body`
+und klemmen `left`/`top` gegen `innerWidth`/`innerHeight` (Rand 6 px). **Vertrag:** Gemessen wird
+mit der Klasse `.nl-messend` (`animation:none; visibility:hidden`) — **nicht** mit `hidden`
+(`display:none`) und **nicht** mit laufender Einblend-Animation.
+
+- `display:none` liefert für jedes Rechteck 0. Die Klemmung rechnet dann mit Höhe 0, und ein
+  26-zeiliges Menü lief 506 px aus dem Fenster (selbst gemessen 06.10.2026; der erste, verworfene
+  Versuch dieser Reparatur).
+- Die Animation `menue-auf` beginnt mit `scale(.98)` und verschiebt das Rechteck — gemessen würde
+  die Klemmung 2 % zu klein rechnen.
+- **Vorher** (bis 06.10.2026) wurde ohne Messklasse gerechnet; ein Port-Menü mit 26 Einträgen ragte
+  3–4 px unten heraus (menu-auditor, 1280 × 800 und 720 × 640 — je gemessen). Mit der Messklasse:
+  **0 px** in beiden Fenstern (`Nachweise/experten/nachprobe-menuefix.py`).
+
+### 11.2 Dock-Blatt (`ui/editor.js`, `android/mobil/mobil.css`)
+
+- Der Reiter des **bereits offenen** Bereichs ist der Einklapp-Schalter
+  (`onclick: () => an ? dockZu() : dockZeigen(id)`). Wer den Inhalt messen will, darf ihn nicht
+  anklicken, sondern muss ihn messen, wie er ist.
+- Eingeklappt ist nicht „leer“: `dockZu()` setzt `dock-zu` am `.labor`; die Anpassungsschicht
+  nimmt dann den Inhalt aus dem Fluss (`display:none`) und schrumpft das Blatt auf die Reiterleiste
+  (`height:auto; bottom:auto`). Vorher blieb eine 412 × 520 px große, deckende Fläche stehen — die
+  Trefferprobe auf die Werkzeugknöpfe landete auf `lb-dock`. Jetzt 412 × 109 px, 6 Knöpfe, 0 nicht
+  treffbar.
+- Der Reiterstreifen wird ohne `null`-Kinder gebaut: `replaceChildren(null)` erzeugt den **Text
+  „null“**. Deshalb `.filter(Boolean)`.
+- Der Dock-Knopf (`.nl-fab-dock`) liegt bei offenem Blatt darunter (`z-index` 9 gegen 45) und wird
+  in der Anpassungsschicht ausgeblendet, statt als toter Knopf stehenzubleiben.
+
+### 11.3 Terminal-Reiter (`ui/terminal.js`, `stil/terminal.css`)
+
+Bei mehr Sitzungen als Platz: der Streifen ist `overflow-x:auto` mit **sichtbarem** Rollbalken
+(`scrollbar-width:thin`), und nach jedem Neuaufbau wird der **aktive** Reiter ausdrücklich ins Bild
+gesetzt (`scrollLeft` aus `offsetLeft`/`offsetWidth`, mit `Math.max(0, …)` nach links begrenzt).
+`scrollIntoView({inline:"nearest"})` allein genügte nicht — selbst gemessen blieb der vierte Reiter
+bei 1280 × 800 rechts draußen.
+
+### 11.4 Nur EINE Bildlaufleiste je Blatt
+
+In der Auftragsmappe scrollt `.am-inhalt`; der Netzplan darin hat keinen eigenen Bildlaufbereich mehr
+(`.am-plan{max-height:none; overflow:visible}`). Zwei ineinander begrenzte Bereiche ergaben zwei
+Leisten nebeneinander (menu-auditor, 1280 × 800).
+
+### 11.5 Trefferflächen auf Fingergeräten
+
+`mobil.css` sichert **jede** Fläche auf 44 px. `button:not(.sp-mail){min-height:44px !important}`
+deckt nur die **Höhe** — Breiten aus Klassen (`width:40px` in `.dialog-zu`, `.pa-zu`, `.wahl-knopf`,
+`.lb-dock-einklappen`) schlagen den Element-Selektor und müssen einzeln gehoben werden. Der Griff am
+Dock-Blatt (`.nl-griff`) ist ein `div` mit `role=button` und wird von `button{…}` gar nicht erfasst.
+Wer eine neue Fläche baut, prüft sie mit `tools/menueprobe.py` — nicht am Augenschein.
+
+### 11.6 Werkzeuge für diese Schicht
+
+| Zweck | Befehl | Erwartung |
+|---|---|---|
+| Tiefe Menüebenen (Web und Android) | `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | 5 Profile, 49 Kriterien, 0 verletzt |
+| Dock und Auftragsmappe | `python Nachweise/experten/dock-pruefung.py` | Reparatur bestätigt |
+| Die drei Randbefunde | `python Nachweise/experten/nachprobe-menuefix.py` | GRÜN, alle drei behoben |
+| Telefonmaße | `python android/werkzeuge/mobilprobe.py --lauf --port 0` | 12 von 12 gewerteten Profilen grün |
+
+**Wichtig beim Messen mit `mobilprobe`/`menueprobe`:** ohne `Emulation.setTouchEmulationEnabled`
+ist `(pointer: coarse)` falsch und **keine** Mobil-Regel greift. Der superviser hat sich mit dieser
+Falle zuerst selbst ein falsches Ergebnis gemessen (14 Flächen unter 44 px) und es widerrufen.
+
+### 11.7 Bau
+
+- `python bauen.py` → `web/`, **0,14 s**; `python tools/einfach.py` → `docs/index.html`, **1,3 s**;
+  `python android/bauen.py` (7 Schritte, mit Spiel) → **5,1 s** (Median mehrerer Läufe: 5,59 s;
+  Zeitfresser d8 1,36 s, javac 1,00 s).
+- Die Schrift-Einbettung nimmt den MIME-Typ aus `tools/einfach.py` `FESTE_TYPEN`, nicht aus
+  `mimetypes.guess_type` (Windows-Registry): sonst `application/octet-stream` statt `font/woff2`,
+  14-mal, 196 Bytes größer und nicht byte-gleich zu einem Bau auf Linux.
+- PC-Hülle: Auslieferung `cargo tauri build` (241 s, mit `cargo build --release` davor 661 s);
+  Entwicklungsrunde `pwsh -File shell/entwickeln.ps1 -NurBauen` → Debug-Profil, **4,2 s** je Runde
+  (erster Lauf 3 m 11 s für die Abhängigkeiten).
+- `docs/index.html` und `Netzwerk-Labor.html` im Wurzelverzeichnis sind **dieselbe** Datei und
+  müssen denselben SHA256 tragen.

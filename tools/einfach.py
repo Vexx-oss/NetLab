@@ -41,9 +41,36 @@ VERBOTEN = [
 ]
 
 
+# MIME-Typen, die nicht von der Umgebung abhaengen duerfen.
+#
+# Grund (gemessen 06.10.2026): `mimetypes.guess_type` liest unter Windows die Registry.
+# Fehlt dort der Eintrag fuer `.woff2`, liefert es `application/octet-stream` — und die
+# gebaute Einzeldatei traegt dann 14-mal den falschen Typ. Das ist nicht nur unschoen:
+# die Datei wird dadurch 196 Bytes groesser und ist nicht mehr byte-gleich zu einem Bau
+# auf Linux. Schriften laden zwar trotzdem (Browser erkennen das Format an den Bytes),
+# aber der Bau soll ueberall dasselbe Ergebnis liefern. Deshalb hier feste Werte.
+FESTE_TYPEN = {
+    ".woff2": "font/woff2",
+    ".woff": "font/woff",
+    ".ttf": "font/ttf",
+    ".otf": "font/otf",
+    ".eot": "application/vnd.ms-fontobject",
+    ".svg": "image/svg+xml",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+}
+
+
+def typ_von(pfad: Path) -> str:
+    """MIME-Typ einer Datei — feste Tabelle zuerst, sonst die Umgebung."""
+    fest = FESTE_TYPEN.get(pfad.suffix.lower())
+    return fest or mimetypes.guess_type(pfad.name)[0] or "application/octet-stream"
+
+
 def daten_uri(pfad: Path) -> str:
-    typ = mimetypes.guess_type(pfad.name)[0] or "application/octet-stream"
-    return f"data:{typ};base64," + base64.b64encode(pfad.read_bytes()).decode("ascii")
+    return f"data:{typ_von(pfad)};base64," + base64.b64encode(pfad.read_bytes()).decode("ascii")
 
 
 def stil_einbetten(css: str, basis: Path) -> tuple[str, int]:

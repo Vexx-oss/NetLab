@@ -150,12 +150,17 @@ UI.labor = (() => {
     Z.root.classList.toggle("sim-zu", Z.simZu);              /* ältere Abfragen (Paketanzeige) */
     for (const r of DOCK) { const el = r.el(); if (el) el.hidden = !r.da() || Z.dock.zu || r.id !== Z.dock.reiter; }
     if (!Z.el.dockReiter) return;
-    Z.el.dockReiter.replaceChildren(...da.map(r => {
+    /* `.filter(Boolean)` ist Pflicht: `replaceChildren` macht aus einem `null`-Argument den
+       TEXT „null" (die DOM-Umwandlung nimmt `undefined` als leeren String, `null` aber als
+       „null"). Gemessen von „mobil-verifier“ am 06.10.2026 im eingeklappten Reiterstreifen:
+       dort stand sichtbar „null" (DOM: ["lb-dock-tab", TEXT:"null"]) — der Einklapp-Knopf
+       fehlt ja, wenn das Dock zu ist, und die Bedingung lieferte genau dieses `null`. */
+    Z.el.dockReiter.replaceChildren(...[...da.map(r => {
       const an = !Z.dock.zu && r.id === Z.dock.reiter, z = Z.dockZahl?.[r.id];
       return h("button", {type: "button", role: "tab", class: "lb-dock-tab" + (an ? " an" : ""), "data-reiter": r.id, "aria-selected": String(an),
         title: an ? `${r.titel} einklappen` : r.titel, onclick: () => an ? dockZu() : dockZeigen(r.id)},
         UI.symbol(r.symbol, 17), h("span", {class: "lb-dock-titel"}, r.titel), z ? h("b", {class: "lb-dock-zahl"}, z > 99 ? "99+" : String(z)) : null);
-    }), da.length && !Z.dock.zu ? h("button", {type: "button", class: "lb-dock-einklappen", title: "Dock einklappen", "aria-label": "Dock einklappen", onclick: () => dockZu()}, UI.symbol("pfeil", 16)) : null);
+    }), da.length && !Z.dock.zu ? h("button", {type: "button", class: "lb-dock-einklappen", title: "Dock einklappen", "aria-label": "Dock einklappen", onclick: () => dockZu()}, UI.symbol("pfeil", 16)) : null].filter(Boolean));
   }
   function dockZeigen(id){
     if (!DOCK.some(r => r.id === id)) return;

@@ -44,7 +44,13 @@
 .np-fuss{display:flex; justify-content:flex-end; gap:8px}
 .np-fuss small{color:var(--warn); font-weight:700}
 .np-leer{padding:16px; color:var(--muted)}
-.am-plan{max-height:min(58vh, 520px); overflow:auto}
+/* Nur EINE Bildlaufleiste in der Auftragsmappe: `.am-inhalt` scrollt schon
+   (spiel.css:41, overflow:auto). Ein zweiter, unabhängig begrenzter Scrollbereich hier
+   ergab zwei senkrechte Leisten direkt nebeneinander — gemessen von „menu-auditor“ am
+   06.10.2026 (1280 × 800): `.am-inhalt` scrollHeight 484 > clientHeight 410 und darin
+   `.am-plan` scrollHeight 1200 > clientHeight 464. Der Plan wächst jetzt mit; gescrollt
+   wird die Mappe. */
+.am-plan{max-height:none; overflow:visible}
 .am-plan .np{padding:4px 0 0}
 .np-linien{pointer-events:none}
 /* Plan-Audit (E1): Werte als Knöpfe, markiert = „stimmt nicht“ */

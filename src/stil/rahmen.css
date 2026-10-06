@@ -95,6 +95,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .menue{position:fixed; z-index:50; min-width:220px; max-width:340px; max-height:min(70vh, 520px); overflow:auto; padding:6px; border-radius:12px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
   animation:menue-auf .12s ease-out}
 @keyframes menue-auf{from{opacity:0; transform:translateY(-4px) scale(.98)} to{opacity:1; transform:none}}
+/* Während der Messung (UI.menue hängt das Menü unsichtbar an, misst, klemmt, blendet ein)
+   darf weder eine Animation laufen noch das Element versteckt sein: `display:none` liefert
+   für JEDES Rechteck 0 (dann klemmt die Rechnung mit Höhe 0, und das Menü läuft unten aus
+   dem Fenster — genau der Befund von „menu-auditor“), und die Animation verschiebt und
+   verkleinert das Rechteck (scale .98 → 2 % zu klein). `visibility:hidden` behält das
+   Layout und liefert die echten Maße. */
+.menue.nl-messend { animation: none; visibility: hidden }
 .menue-titel{padding:6px 10px 8px; font:700 12px/1.2 var(--body); color:var(--muted); letter-spacing:.02em; border-bottom:1px solid var(--line); margin-bottom:4px}
 .menue-punkt{display:flex; align-items:center; gap:10px; width:100%; min-height:38px; padding:0 10px; border:0; border-radius:8px; background:none; color:var(--ink); text-align:left; font:500 14px/1.2 var(--body)}
 .menue-punkt:hover:not([disabled]), .menue-punkt:focus-visible{background:var(--panel-3); outline:none}

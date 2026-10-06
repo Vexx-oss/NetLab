@@ -47,6 +47,20 @@ UI.terminal = (() => {
     }));
     const flaeche = h("div", {class: "tm-flaeche"});
     c.replaceChildren(h("div", {class: "tm"}, T.sitzungen.length > 1 ? reiter : null, flaeche));   /* Reiterleiste erst ab zwei Sitzungen */
+    /* Den aktiven Reiter ins Bild holen. Gemessen von „menu-auditor“ am 06.10.2026
+       (720 × 640): der dritte Reiter „PC-Kasse“ lag bei scrollWidth 388 in 249 px
+       vollständig außerhalb und war nicht anklickbar. `scrollIntoView({inline:"nearest"})`
+       allein genügte nicht — selbst gemessen: bei 1280 × 800 blieb der aktive Reiter
+       rechts draußen (x 1146…1270 in einem Scrollfenster bis 1270, Rollbalken 10 px).
+       Deshalb den Bildlauf ausdrücklich setzen; `Math.max(0, …)` fängt ab, dass der linke
+       Rand vor den Inhalt rutscht (bei zwei Reitern in 239 px passiert: der erste Reiter
+       stand auf x 466, also links außerhalb). */
+    const aktiverReiter = reiter.querySelector(".tm-tab.an");
+    if (aktiverReiter) {
+      const links = aktiverReiter.offsetLeft, rechtsKante = links + aktiverReiter.offsetWidth;
+      if (links < reiter.scrollLeft) reiter.scrollLeft = Math.max(0, links - 4);
+      else if (rechtsKante > reiter.scrollLeft + reiter.clientWidth) reiter.scrollLeft = rechtsKante - reiter.clientWidth + 4;
+    }
     UI.konsole.oeffnen(flaeche, n, T.aktiv, UI.labor.verlauf, {fokus, eingabe: eingabe || undefined, notiz});
   }
   Bus.an("labor-geladen", () => { T.netz = null; abgleichen(); });

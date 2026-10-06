@@ -32,9 +32,22 @@ UI.menue = (() => {
       void i;
     });
     document.body.append(el);
+    /* In ZWEI Durchgängen platzieren. Gemessen von „menu-auditor“ am 06.10.2026 am
+       Port-Menü mit 26 Einträgen: die erste Messung ergab 267 × 510, nach dem Setzen von
+       left/top aber 273 × 520 — die Klemmung rechnete mit 510 statt 520 px Höhe, und das
+       Menü ragte 3–4 px unten aus dem Fenster. Ursache: das Element wird gemessen, bevor
+       es seine endgültige Gestalt hat (der Rollbalken kommt erst mit der festen Höhe).
+       Deshalb: unsichtbar anhängen, messen, klemmen, dann einblenden. */
+    /* Messen mit `visibility:hidden` — NICHT mit `hidden`/`display:none`: ein verstecktes
+       Element liefert für jedes Rechteck 0, dann klemmt die Rechnung mit Höhe 0 und das
+       Menü läuft unten aus dem Fenster (selbst gemessen 06.10.2026: 506 px Überstand).
+       Die Klasse schaltet zugleich die Einblend-Animation ab, deren scale(.98) das
+       Rechteck um 2 % verkleinert. */
+    el.classList.add("nl-messend");
     const r = el.getBoundingClientRect(), W = innerWidth, H = innerHeight;
     el.style.left = Math.max(6, Math.min(x, W - r.width - 6)) + "px";
     el.style.top = Math.max(6, Math.min(o.oben ? y - r.height : y, H - r.height - 6)) + "px";
+    el.classList.remove("nl-messend");
     const aussen = ev => { if (!el.contains(ev.target)) zu(); };
     offen = {el, aussen, zurueck: document.activeElement};
     setTimeout(() => document.addEventListener("pointerdown", aussen, true), 0);
@@ -50,9 +63,13 @@ UI.menue = (() => {
     el.append(inhalt);
     el.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); zu(); } });
     document.body.append(el);
+    /* Zwei Durchgänge wie in `menue()` — mit `visibility:hidden` (siehe dort), nicht mit
+       `display:none`: versteckt liefert jedes Rechteck 0. */
+    el.classList.add("nl-messend");
     const r = el.getBoundingClientRect();
     el.style.left = Math.max(6, Math.min(x, innerWidth - r.width - 6)) + "px";
     el.style.top = Math.max(6, Math.min(y, innerHeight - r.height - 6)) + "px";
+    el.classList.remove("nl-messend");
     const aussen = ev => { if (!el.contains(ev.target)) zu(); };
     offen = {el, aussen, zurueck: document.activeElement};
     setTimeout(() => document.addEventListener("pointerdown", aussen, true), 0);

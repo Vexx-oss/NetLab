@@ -28,6 +28,95 @@ melden wie der Rest. Ihr Start wurde gemessen (siehe unten).
 
 ---
 
+## 1.2.2 — in Arbeit (Android-Oberfläche und Bau)
+
+Schwerpunkt: Fehler in den **tiefer genesteten Menüs** der Android-Fassung, gefunden und
+belegt von einem Expertenteam (vier Teammitglieder, ein Qualitätstor), gemessen mit
+`tools/menueprobe.py` (neu), `android/werkzeuge/mobilprobe.py` und einem echten
+WebView2-Fenster.
+
+**Tiefe Menüebenen — vier Trefferflächen waren zu klein**
+
+- `.pa-zu` (Fach schließen), `.dialog-zu` (Dialog schließen) und `.lb-dock-einklappen`
+  (Dock einklappen) waren **40 × 44 px**, der `.nl-griff` am Dock-Blatt **96 × 18 px** —
+  in JEDEM der fünf gemessenen Profile. Ursache: `min-height` deckt nur die Höhe, die
+  Breite stand als `width` in einer Klasse (`src/stil/editor.css:29`, `rahmen.css:146`,
+  `editor.css:305`). Jetzt `min-width: 44px` bzw. `min-height: 44px` in `mobil.css`.
+- `.wahl-knopf` (Umschalter in den Einstellungen: Hell/Dunkel/System, An/Reduziert/Aus)
+  war 40 × 44 px — dieselbe Ursache (`rahmen.css:162`). Jetzt ebenfalls 44 px breit.
+
+**Auftragsmappe deckte die Werkzeugleiste zu**
+
+- Bei offener Mappe trafen alle vier Knöpfe der oberen Werkzeugleiste auf die Mappenreiter;
+  ein Klick auf „Ansicht“ öffnete nichts. Ursache: `.lb-auftrag{z-index:5}` trägt die Mappe
+  (`spiel.css:31`, `z-index:30`), die Leisten lagen ohne eigene Ebene darunter. Jetzt
+  `z-index:10` aus der benannten Leiter (`tools/ethos.py`, R6) an beiden Leisten.
+
+**Dock: Reiterleiste und eingeklapptes Blatt**
+
+- Die Reiterleiste war bei fünf Reitern 499 px breit in 393 px Platz: Der Reiter „Akte“
+  lag als 2-px-Streifen am Rand, „Dock einklappen“ ganz außerhalb, und der Bildlauf war
+  ausgeblendet. Die Container-Schwelle von 380 px griff bei 393 px Dockbreite nicht —
+  jetzt 560 px, und die Reiter behalten mit `min-width:44px` ihre Fingerfläche.
+- Das **eingeklappte** Blatt blieb 412 × 520 px groß und deckend über der Leinwand; die
+  Trefferprobe auf „Auswählen“, „Kabel verlegen“ und „Ping“ landete auf `lb-dock`. Jetzt
+  schrumpft es auf die Reiterleiste (**412 × 109 px**, gemessen), die sechs Knöpfe sind
+  wieder treffbar.
+- Im eingeklappten Reiterstreifen stand sichtbar **„null“**: `replaceChildren(null)` macht
+  aus dem Argument den Text „null“. Jetzt `.filter(Boolean)` (`editor.js:153-158`).
+
+**Karriere-Overlays schließen mit Escape**
+
+- „Prüfung AP1“ und „Mini-Ticket“ blieben nach Escape offen — `karriere.js` hängte keinen
+  Tastenhörer ein, anders als `spiel.js:434-443` und `hub.js:13-21`. Nachgezogen.
+
+**Schriften: der MIME-Typ hing an der Windows-Registry**
+
+- `tools/einfach.py` fragte `mimetypes.guess_type`; fehlt `.woff2` in der Registry, wurde
+  daraus `application/octet-stream` — 14-mal, 196 Bytes größer und nicht byte-gleich zu
+  einem Bau auf Linux. Jetzt feste Tabelle (`FESTE_TYPEN`/`typ_von`). Zweimal aufgerufen:
+  beide Läufe **14× `font/woff2`, 0× `application/octet-stream`**, identische Prüfsumme.
+
+**Bau: Entwicklungsrunde in Sekunden**
+
+- Neu `shell/entwickeln.ps1`: baut `web/` und die Hülle im **Debug-Profil**. Gemessen:
+  erster Lauf 3 m 11 s (Abhängigkeiten), **jede weitere Runde 4,2 s** — gegenüber
+  104–176 s Release-Neu-Link. Die Auslieferung bleibt Release (`cargo tauri build`).
+- `android/werkzeuge/mobilprobe.py` brach bei jedem Start ab (`%` in einem `help=`-Text,
+  argparse formatiert mit `%`). Eine Zeile: `%%`.
+
+**Neues Werkzeug**
+
+- `tools/menueprobe.py` — fährt die tiefen Menüebenen in einem echten Browser ab
+  (Geräteblatt → Fach → Gerätewahl → Kontextmenü → Port-Menü, Kopf-⋯ → Dialog,
+  Ansicht-/Zoom-Menü, Dock-Blatt → Reiter, Auftrags-⋯, Auftragsmappe) und prüft je
+  Ebene Lage, Abschneiden, Trefferflächen, Überdeckung und den Schließ-Zustand.
+  Stand: **5 Profile, 49 Kriterien erfüllt, 0 verletzt.**
+
+**Drei weitere Menüfehler aus dem Audit behoben (Desktop, damit auch Android-Tablet)**
+
+- **Menü am Fensterrand:** Ein Menü mit 26 Einträgen (Port-Wahl) ragte 3–4 px unten aus dem
+  Fenster. Ursache: `UI.menue()` maß **vor** dem Setzen von `left`/`top` und klemmte mit
+  267 × 510 statt 273 × 520. Der erste Versuch, das Element zum Messen mit `hidden`
+  (also `display:none`) anzuhängen, machte es schlimmer — ein unsichtbares Element liefert
+  für **jedes** Rechteck 0, die Klemmung rechnete mit Höhe 0 und das Menü lief 506 px aus
+  dem Fenster. Jetzt misst die Klasse `.nl-messend` mit `visibility:hidden` (Layout bleibt,
+  Animation aus): **0 px Überstand** bei 1280 × 800 und 720 × 640.
+- **Terminal-Sitzungen:** Bei vier Sitzungen lag der aktive Reiter außerhalb der Leiste
+  (720 × 640: scrollWidth 517 in 239 px), und `scrollbar-width:none` versteckte den einzigen
+  Hinweis darauf. Jetzt `scrollbar-width:thin` **und** der Bildlauf wird ausdrücklich auf
+  den aktiven Reiter gesetzt (`scrollIntoView` allein genügte nicht — selbst gemessen: bei
+  1280 × 800 blieb der vierte Reiter rechts draußen). Nachgemessen: der aktive Reiter ist in
+  beiden Fenstern ganz sichtbar und mit der Mitte treffbar.
+- **Zwei Bildlaufleisten in der Auftragsmappe:** Der Reiter „Plan“ scrollte doppelt
+  (`.am-inhalt` und `.am-plan` getrennt begrenzt). Jetzt wächst der Plan mit, gescrollt wird
+  die Mappe — gemessen: **1 scrollender Bereich** statt 2.
+
+Nachprobe: `python Nachweise/experten/nachprobe-menuefix.py` → **GRÜN: alle drei Befunde
+behoben** (1280 × 800 und 720 × 640). Menüprobe, Dock-Probe und Testbatterie bleiben grün.
+
+---
+
 ## 1.2.0 — in Arbeit auf `ausbau-1.2`
 
 105 Commits seit `v1.1`. Schwerpunkte:

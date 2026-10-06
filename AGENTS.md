@@ -23,11 +23,16 @@ Vorbild für diese Datei: Design – Spielspaß 2.0.md § 24 (Auftrag „R“, P
 
 | Zweck | Befehl | Erwartung |
 |---|---|---|
-| Tests | `sh tools/test.sh` | meldet `N/N grün` (Stand: 213) |
+| Tests | `sh tools/test.sh` | meldet `N/N grün` (Stand: **251**) |
 | + Rauchtest der Oberfläche | `sh tools/test.sh --rauch` | zusätzlich 36/36 |
+| Tiefe Menüebenen (Android und Web) | `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | **5 Profile, 49 Kriterien erfüllt, 0 verletzt** |
 | Simulation gegen Referenzstand | `node tools/sim-stand.js` | „Simulation unverändert gegenüber dem Referenzstand“ |
 | Klassen ↔ CSS | `python tools/klassen.py` | `0 Klassen ohne CSS-Regel` |
+| Regelwerk (Minimalismus) | `python tools/ethos.py` | `GRUEN: keine Regel schlechter als tests/stil-stand.json` |
 | Bauen (Browser-Fassung) | `python bauen.py` | immer **vor** `cargo tauri build` |
+| Einzeldatei (auch die Wurzel-Datei) | `python tools/einfach.py` · `--ziel Netzwerk-Labor.html` | beide byte-gleich, `0 Außenverweise` |
+| Android-APK | `python android/bauen.py` | 7 Schritte, ~5 s, endet mit `GRUEN` |
+| PC-Hülle für die Entwicklungsrunde | `pwsh -File shell/entwickeln.ps1 -NurBauen` | Debug-Profil, ~4 s je Runde (Auslieferung bleibt `cargo tauri build`) |
 | Echtes Programm | `python tools/q-echt.py` | startet die `.exe`; siehe Befund unten |
 
 Node liegt portabel unter `%LOCALAPPDATA%\node-portable\node-v24.21.0-win-x64\node.exe` (v24.21.0).

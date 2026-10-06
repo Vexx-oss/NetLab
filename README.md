@@ -41,9 +41,10 @@ gleiche Prüfsumme, nachgewiesen von `python tools/seite-pruefen.py`.
 
 Die Einzeldatei ist das **ganze Spiel in einer Datei** — Schriften eingebettet, kein
 Nachladen, kein Installieren, kein Internet. Windows, Linux, macOS: alles mit einem
-Browser. Belegt: 2.193.460 Bytes (2,09 MB), **0 Außenverweise** (geprüft über `<link>`,
+Browser. Belegt: 2.265.826 Bytes (2,16 MB), **0 Außenverweise** (geprüft über `<link>`,
 `<script src>`, `<img src>` und `url()`), Start im echten Browser über `file://` gemessen
-(`python tools/starttest.py`).
+(`python tools/starttest.py`). Dieselbe Datei liegt als `Netzwerk-Labor.html` im
+Wurzelverzeichnis; beide müssen denselben SHA256 tragen (`tools/einfach.py`).
 
 Gegenüber dem Windows-Programm fehlen nur die Fenster-Funktionen: Leiste am
 Bildschirmrand, Tray-Symbol, immer im Vordergrund, globales Tastenkürzel. Das Spiel sagt
@@ -138,18 +139,21 @@ Oberfläche und Logik in **schlichtem JavaScript ohne Bundler**; die Rust-Hülle
 die Grundlage dafür, dass die Simulation reproduzierbar getestet werden kann.
 
 ```
-107 Module · 20.706 Zeilen JavaScript · 30 Testdateien · 213/213 Tests grün
+107 Module · 20.706 Zeilen JavaScript · 35 Testdateien · 251/251 Tests grün
 ```
 
 ```bash
 python bauen.py                      # src/ -> web/index.html (Einzeldatei-Bau des Programms)
 python tools/einfach.py              # web/ -> docs/index.html (DAS Spiel als eine Datei)
-sh tools/test.sh                     # Tests headless in Node — meldet 213/213 grün
+sh tools/test.sh                     # Tests headless in Node — meldet 251/251 grün
 node tools/sim-stand.js              # Simulation gegen den versionierten Referenzstand
 python tools/klassen.py              # Abgleich: Klassen im JS <-> Regeln im CSS
+python tools/ethos.py                # 12 Minimalismus-Regeln gegen tests/stil-stand.json
 python tools/starttest.py            # startet docs/index.html im echten Browser und misst
+python tools/menueprobe.py --lauf    # die tiefen Menüebenen in 5 Profilen messen
 python tools/paket.py                # Auslieferungspaket -> dist/ (Ordner + ZIP, geprüft)
 python tools/lernmotor.py            # Kopie des Lernmotors gegen die Spielhalle prüfen
+python android/bauen.py              # Spiel -> Einzeldatei -> APK -> Prüfung (~5 s)
 python tools/abnahme.py              # die ganze Kette: 14 Prüfungen, ein Befehl
 ```
 

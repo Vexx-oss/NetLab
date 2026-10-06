@@ -65,9 +65,19 @@
 .lb-raster-punkt{fill:var(--line)}
 .lb-raster.fein{opacity:.35}
 
-/* schwebende Werkzeugleisten */
-.lb-leiste-oben{position:absolute; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
-.lb-leiste-unten{position:absolute; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
+/* schwebende Werkzeugleisten
+   `z-index:10` ist kein Schmuck: `.lb-auftrag` (z-index:5) trägt die Auftragsmappe, und
+   `.am-mappe` steht darin auf 30 (spiel.css:31). Ohne eigene Ebene liegen die Leisten
+   unter der Mappe und sind mit der Maus nicht mehr zu treffen. Gemessen von
+   „menu-auditor“ am 06.10.2026 (1280 × 800, echte Maus): bei offener Mappe trafen alle
+   vier Knöpfe der oberen Leiste auf `div.am-reiter` / `button.am-tab`, ein Klick auf
+   „Ansicht“ öffnete nichts (`.menue` 0 → 0); nach „×“ derselbe Klick → Menü
+   [307,171,220,237]. 10 ist der erste Wert der benannten z-index-Leiter
+   (tools/ethos.py, R6) über der 5 des Auftrags und weit unter Menü (50), Dialog (56)
+   und Overlay (80) — der Stapel bleibt also unverändert, nur die beiden Leisten
+   kommen über die Mappe. */
+.lb-leiste-oben{position:absolute; z-index:10; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
+.lb-leiste-unten{position:absolute; z-index:10; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
 .lb-luecke{flex:1 1 auto}
 .lb-gruppe{display:flex; align-items:center; gap:2px; padding:3px; border-radius:12px; background:var(--glas); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); pointer-events:auto}
@@ -300,7 +310,20 @@
 .lb-dock-inhalt{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .lb-dock-inhalt > *{flex:1 1 auto; min-height:0}
 .lb-plan, .lb-akte{overflow:auto}
-@container (max-width:380px){ .lb-dock-tab:not(.an) .lb-dock-titel{display:none} .lb-dock-tab{padding:0 8px} }
+/* Reiterleiste des Docks: alle Reiter und der Einklapp-Knopf müssen sichtbar bleiben.
+   Gemessen von „menu-auditor“ am 06.10.2026 (1280 × 800, fünf Reiter): die Leiste war
+   393 px breit, der Inhalt 499 px — der Reiter „Akte“ lag als 2-px-Streifen am
+   Fensterrand, „Dock einklappen“ ganz außerhalb; `scrollbar-width:none` versteckt den
+   Bildlauf, der Weg dorthin ist also nicht auffindbar. Die alte Schwelle von 380 px
+   griff bei 393 px Dockbreite nicht. 560 px deckt den gemessenen Fall (499 px Inhalt)
+   mit Reserve ab; ab dort verlieren die Reiter ihre Beschriftung, das Symbol bleibt.
+   `min-width:44px` ist die Fingerzusage: ohne Beschriftung war der Reiter auf einem
+   Tablet nur 35 px breit (selbst nachgemessen mit tools/menueprobe.py, Profil
+   „tablet-hoch“). Es steht ABSICHTLICH nur hier drin: dieselbe Zusage ein zweites Mal
+   außerhalb des Containers zu setzen, ließ `tools/ethos.py` R9 („ein Selektor einmal
+   definiert“) von 0 auf 1 steigen und riss damit den ganzen Prüflauf ab — gemessen von
+   „superviser“ am 06.10.2026, Gate-Bericht Abschnitt 4. */
+@container (max-width:560px){ .lb-dock-tab .lb-dock-titel{display:none} .lb-dock-tab{padding:0 8px; min-width:44px} }
 .labor.dock-zu .lb-dock-reiter{flex-direction:column; align-items:center; border-bottom:0; padding:8px 0; gap:4px}
 .labor.dock-zu .lb-dock-tab{justify-content:center; width:38px; padding:0; border-radius:9px; border:1px solid transparent; margin:0}
 .labor.dock-zu .lb-dock-titel{display:none}

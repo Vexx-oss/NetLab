@@ -98,6 +98,31 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
      Findet jemand einen zweiten solchen Listeneintrag, gehört er in dieselbe Ausnahme. --- */
   button:not(.sp-mail) { min-height: 44px !important; }
   .sp-mail { min-height: auto; }
+
+  /* --- Vier Nest-Schließer waren 40 px breit, nicht 44 ---
+     `min-height` deckt nur die HÖHE. Diese Knöpfe tragen ihre Breite als `width` in
+     einer Klasse und schlagen damit den Element-Selektor: `.pa-zu` und `.dialog-zu`
+     (je 40 px) sowie `.lb-dock-einklappen` (32 px). Gemessen mit tools/menueprobe.py
+     am 06.10.2026 in der gebauten Seite (android/bau/assets/index.html) — der Wert
+     „40×44“ stand in JEDEM der fünf Profile auf den Ebenen „Kategorie-Fach“,
+     „Dialog aus dem ⋯-Menü“ und „Dock-Blatt“. Genau diese drei Knöpfe schließen die
+     tiefsten Ebenen; sie dürfen nicht die kleinsten Ziele der App sein.
+     Die Symbolgröße bleibt: nur die Trefferfläche wächst. --- */
+  .pa-zu, .dialog-zu, .lb-dock-einklappen { min-width: 44px; }
+
+  /* `.wahl-knopf` ist der Umschalter in den Einstellungen (Hell/Dunkel/System,
+     An/Reduziert/Aus …). Er stand auf 61 × 34 px — ebenfalls unter der Zusage.
+     Gemessen im Dialog „Einstellungen“ aus dem ⋯-Menü, Telefon hoch und klein hoch:
+     der Knopf „An“ war 40 × 44. Dieselbe Ursache: `width`/`min-height` aus einer
+     Klasse in src/stil/rahmen.css:162. --- */
+  .wahl-knopf { min-width: 44px; }
+
+  /* --- Der Griff am Dock-Blatt ist kein Knopf, sondern ein div mit der Rolle „button“
+     (mobil.js). Deshalb greift `button{...}` dort nicht: gemessen 96 × 18 px — die
+     schmalste und flachste Fläche der ganzen Fassung, und das auf einem Telefon.
+     Die sichtbare Rille bleibt 4 px hoch; der Griff wird nur höher, damit der Finger
+     ihn trifft (hier gilt die ganze Höhe als Treffer, nicht nur der Strich). --- */
+  .nl-griff { min-height: 44px; }
 }
 
 /* Auf sehr schmalen Flächen (Telefon quer, ~700–1000 px) wird es eng.
@@ -236,7 +261,21 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
     max-height: 54vh; overflow: auto;
   }
 
-  /* ---------- Dock → Blatt von unten (hoch) bzw. von rechts (quer) ---------- */
+  /* ---------- Dock → Blatt von unten (hoch) bzw. von rechts (quer) ----------
+     Eingeklappt muss das Blatt WIRKLICH klein werden. Gemessen von „mobil-verifier“
+     (Bericht audit-android.md) und von mir mit Nachweise/experten/_debugdock.py
+     nachgestellt am 06.10.2026, Pixel 7 hoch: nach dem Einklappen blieb das Blatt
+     412 × 520 px groß und deckend über der Leinwand — die Trefferprobe auf die Mitte
+     von „Auswählen“, „Kabel verlegen“ und „Ping“ landete auf `lb-dock`, nicht auf dem
+     Knopf (trifftSichSelbst=false). Zurück kam man nur über den eingeklappten Reiter
+     (gemessen: der Tipp darauf öffnet wieder, inhaltSichtbar = lb-inspektor) — der
+     Dock-Knopf, der Griff und ein Ansichtswechsel führten NICHT zurück.
+     Deshalb: Inhalt aus dem Fluss nehmen (`display:none`) und das Blatt auf die Leiste
+     schrumpfen (`height:auto; bottom:auto`), sonst bleibt eine unsichtbare, aber
+     treffende 520-px-Fläche stehen. Die Regel steht NACH der Basisregel, damit sie
+     gewinnt. */
+  .labor.dock-zu .lb-dock-inhalt { display: none; }
+  .labor.dock-zu .lb-dock { height: auto; bottom: auto; }
   .lb-dock {
     position: fixed; left: 0; right: 0; top: auto;
     bottom: var(--nl-nav-h);
@@ -276,6 +315,15 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
   .nl-fab-text { font: 600 9.5px/1 var(--body); margin-top: 2px; letter-spacing: 0; }
   .nl-fab-geraete { left: 6px; }
   .nl-fab-dock { right: 6px; }
+
+  /* Der Dock-Knopf liegt im offenen Zustand UNTER dem Blatt. Gemessen von „superviser“
+     am 06.10.2026 (A13): bei offenem Blatt war `.nl-fab-dock` an 0 von 5 Punkten
+     treffbar, das oberste Element war `.lb-inspektor` (`.nl-fab` hat z-index 9, das Blatt
+     45). Ein Knopf, den man sieht und der nicht reagiert, ist schlimmer als kein Knopf —
+     deshalb wird er ausgeblendet, solange das offene Blatt ihn überdeckt. Das Blatt
+     schließt sich weiterhin über den Einklapp-Knopf, den aktiven Reiter und Escape; die
+     Geräteleiste bleibt unberührt (sie liegt auf der anderen Seite und ist frei). */
+  .labor.dock-da:not(.dock-zu) .nl-fab-dock { display: none; }
 
   /* ---------- Griff am Dock-Blatt: zuschieben mit dem Finger ---------- */
   .nl-griff {
@@ -361,6 +409,13 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
   .lb-ansicht svg:last-of-type { display: block; }
   /* Die Blätter stehen jetzt neben der Schiene, nicht darüber. */
   .lb-geraete { left: 56px; }
+  /* Das Geräte-Fach bekommt im flachen Querformat mehr Höhe. Gemessen von
+     „mobil-verifier“ am 06.10.2026 am Stand 2.301.100 B (640 × 360, Fach 568 × 194):
+     drei Einträge lagen unten heraus — „Tablet“ 10,1 px, „Kasse“ 57,1 px, „Drucker“
+     104,1 px. Das Fach scrollt zwar, aber ein Gerät, das man nicht sieht, wird nicht
+     gewählt. Über der Werkzeugzeile ist Platz: die schwebenden Knöpfe sitzen in der
+     Mitte, die Werkzeugzeile unten links. 78 vh statt 54 vh. */
+  .pa-fach { max-height: 78vh; }
   .lb-dock {
     left: auto; right: 0; top: var(--nl-kopf-h);
     bottom: 0;

@@ -1910,7 +1910,7 @@ def main() -> int:
     ap.add_argument("--drehprobe", action="store_true",
                     help="Fenster ohne Neuladen drehen und prüfen, ob der Stand überlebt")
     ap.add_argument("--zoomprobe", action="store_true",
-                    help="Zoom-Menü auf „Zoom 100 %\" stellen und nachmessen, ob die klickbaren "
+                    help="Zoom-Menü auf „Zoom 100 %%\" stellen und nachmessen, ob die klickbaren "
                          "IP-Beschriftungen der Zeichenfläche dann zu klein sind")
     ap.add_argument("--zoomwechsel", action="store_true",
                     help="im Labor von Hand zoomen, dann ein zweites Ticket laden und prüfen, "

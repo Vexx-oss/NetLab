@@ -279,7 +279,14 @@ UI.karriere = (() => {
   function overlay(inhalt){
     const o = h("div", {class: "sp-overlay", role: "dialog", "aria-modal": "true"}, h("div", {class: "sp-karte"}, inhalt));
     document.body.append(o); requestAnimationFrame(() => o.classList.add("da"));
-    return () => { o.classList.remove("da"); setTimeout(() => o.remove(), 180); };
+    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), 180); document.removeEventListener("keydown", esc); };
+    /* Escape muss auch hier schließen. Gemessen von „menu-auditor“ am 06.10.2026:
+       „Prüfung AP1“ und „Mini-Ticket“ blieben nach Escape offen (Geometrie unverändert),
+       während die Overlays aus spiel.js und hub.js korrekt schlossen — die hatten den
+       Hörer, dieser Bauer nicht. Gleiche Bauart wie src/ui/spiel.js:434-443. */
+    const esc = e => { if (e.key === "Escape") zu(); };
+    document.addEventListener("keydown", esc);
+    return zu;
   }
 
   /* ---------- Wiki ---------- */

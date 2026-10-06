@@ -476,4 +476,57 @@ Ursache ist der MIME-Typ in der Daten-URI: `font/woff2` (10 Zeichen) gegen
 gemeldet: es ist eine Frage der Nachvollziehbarkeit, nicht der Funktion — und eine
 Änderung an `tools/einfach.py` gehört in einen eigenen Schritt mit eigenen Tests.
 
+## Nachtrag: die tiefer genesteten Menüs (06.10.2026, zweite Runde)
+
+Gefunden von einem Expertenteam (menu-auditor, mobil-verifier, build-engineer, superviser als
+Qualitätstor) und nachgemessen mit dem neuen Werkzeug **`tools/menueprobe.py`** — es klickt in
+einem echten Browser (headless Edge, Gerätemaße emuliert) die tiefen Ebenen durch:
+Geräteblatt → Kategorie-Fach → Gerätewahl → Kontextmenü → Port-Menü, Kopf-⋯ → Dialog,
+Ansicht-/Zoom-Menü, Dock-Blatt → Reiter, Auftrags-⋯, Auftragsmappe. Je Ebene wird geprüft:
+liegt sie ganz im Bild, ist sie in einem scrollenden Behälter eingesperrt, Trefferflächen
+unter 44 px, Überdeckung durch eine spätere Ebene, und ob sie sich wieder schließt.
+
+| Befund | vorher (gemessen) | nachher (gemessen) |
+|---|---|---|
+| `.pa-zu` (Fach schließen) | 40 × 44 px, in **allen** 5 Profilen | **44 × 44 px** |
+| `.dialog-zu` (Dialog schließen) | 40 × 44 px | **44 × 44 px** |
+| `.lb-dock-einklappen` | 32 × 44 px (Tablet/Schreibtisch) | **44 × 44 px** |
+| `.wahl-knopf` (Einstellungen) | 40 × 44 px | **44 × 44 px** |
+| `.nl-griff` (Dock zuschieben) | 96 × 18 px | **96 × 44 px** |
+| Dock-Reiter ohne Beschriftung | 35 px breit (Tablet) | **44 px** |
+| Dock-Reiterleiste, 5 Reiter | Inhalt 499 px in 393 px Platz, „Akte“ 2 px sichtbar, „Dock einklappen“ außerhalb | Beschriftungen ab 560 px Dockbreite aus, alles sichtbar |
+| Eingeklapptes Dock-Blatt | **412 × 520 px** groß und deckend über der Leinwand; Trefferprobe auf „Auswählen“, „Kabel verlegen“, „Ping“ landete auf `lb-dock` | **412 × 109 px**; 6 Knöpfe, **0 nicht treffbar** |
+| „null“ im eingeklappten Reiterstreifen | sichtbarer Textknoten „null“ (`replaceChildren(null)`) | weg (`.filter(Boolean)`) |
+| Menüprobe gesamt | 18 Verletzungen in 5 Profilen | **49 Kriterien erfüllt, 0 verletzt** |
+
+Dazu zwei Befunde außerhalb der Telefon-Anordnung, die aber auf jeder Fassung lagen:
+
+- **Die Auftragsmappe deckte die Werkzeugleiste zu** (menu-auditor, echtes WebView2-Fenster
+  1280 × 800, echte Maus): bei offener Mappe trafen alle vier Knöpfe der oberen Leiste auf die
+  Mappenreiter, ein Klick auf „Ansicht“ öffnete nichts. Ursache: `.lb-auftrag{z-index:5}` trägt
+  die Mappe (`spiel.css:31`, `z-index:30`), die Leisten hatten keine eigene Ebene. Jetzt
+  `z-index:10` (benannte Leiter, `tools/ethos.py` R6) an `.lb-leiste-oben`/`.lb-leiste-unten`.
+  Nachgemessen: alle drei Werkzeugknöpfe erreichbar, 0 verdeckt.
+- **Die Karriere-Overlays schlossen nicht mit Escape** („Prüfung AP1“, „Mini-Ticket“);
+  `karriere.js` hängte keinen Tastenhörer ein, anders als `spiel.js:434-443` und `hub.js:13-21`.
+  Nachgemessen: 1 Overlay → nach echter Escape-Taste 0.
+
+**Was NICHT geprüft ist** (unverändert offen): kein echtes Android-Gerät und kein Emulator; die
+sicheren Ränder (Notch, Gestenleiste) sind auf dem Messplatz 0 px; Langdruck als Kontextmenü;
+eine echte Wischgeste am Dock-Blatt; ob die Port-Punkte (Ø 11 px) mit dem Finger zu treffen sind;
+die tiefen Ebenen auf einem Tablet; `--drehprobe`/`--zoomprobe`/`--zoomwechsel` nach den
+Änderungen.
+
+Dazu zwei **Reste ohne Reparatur**, gemessen und bewusst offen gelassen:
+
+- **Das Port-Menü erreicht man mit dem Finger nicht.** Der Weg dorthin ist Umschalt beim
+  Loslassen eines Kabelzugs (`src/ui/editor-werkzeuge.js` prüft nur `e.shiftKey`); ein Telefon
+  hat keine Umschalttaste. Gemessen von „mobil-verifier“: Der Fingerzug legt das Kabel an
+  (5 → 6), das Menü erscheint aber nicht. Der übliche Weg „nächster freier Port“ funktioniert;
+  wer den Port selbst wählen will, braucht eine Tastatur. Ob das so bleiben soll, ist eine
+  Entscheidung des Nutzers.
+- **Auf sehr flachen Fenstern (640 × 360) liegen die untersten Einträge eines langen Fächers
+  oder Kontextmenüs unter der Kante** — der Behälter scrollt, sie sind per Bildlauf erreichbar.
+  Kein Abschneiden, sondern die Bildlaufgrenze.
+
 ⬆️ [[10-Projekte/Lernprojekte/Netzwerk-Labor/Liesmich|Netzwerk-Labor]] · 🏠 [[Start]]

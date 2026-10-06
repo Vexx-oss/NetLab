@@ -1,7 +1,12 @@
 /* ---------- Terminal im Dock (tm-, Phase C) ---------- */
 .lb-terminal{display:flex; flex-direction:column; min-height:0}
 .tm{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
-.tm-reiter{display:flex; gap:4px; padding:6px 8px 0; flex:0 0 auto; overflow-x:auto; scrollbar-width:none; border-bottom:1px solid var(--line); background:var(--panel)}
+/* `scrollbar-width:none` versteckte den einzigen Hinweis darauf, dass es weitere
+   Sitzungen gibt. Gemessen von „menu-auditor“ am 06.10.2026 (720 × 640): `.tm-reiter`
+   scrollWidth 388 gegen clientWidth 249 (+139 px), der dritte Reiter „PC-Kasse“ lag
+   außerhalb und war mit der Maus nicht zu treffen. Jetzt bleibt die Leiste scrollbar
+   UND sichtbar; zusätzlich holt `src/ui/terminal.js` den aktiven Reiter ins Bild. */
+.tm-reiter{display:flex; gap:4px; padding:6px 8px 0; flex:0 0 auto; overflow-x:auto; scrollbar-width:thin; border-bottom:1px solid var(--line); background:var(--panel)}
 .tm-tab{display:inline-flex; align-items:center; border:1px solid transparent; border-bottom:0; border-radius:8px 8px 0 0; color:var(--muted)}
 .tm-tab.an{background:var(--panel-2); border-color:var(--line); color:var(--ink); margin-bottom:-1px; padding-bottom:1px}
 .tm-tab-name{display:inline-flex; align-items:baseline; gap:6px; min-height:30px; padding:0 4px 0 10px; border:0; background:none; color:inherit; font:700 12.5px/1 var(--body); cursor:pointer; white-space:nowrap}
