@@ -125,6 +125,10 @@ def main() -> int:
         print("  [ROT  ] ZIP zurueckgelesen (CRC32)              kein ZIP gefunden")
 
     print()
+    print("5 · Die veroeffentlichte Seite (braucht Internet)")
+    lauf("Kundenadresse liefert das Spiel", [PY, "tools/seite-pruefen.py"], muss="GRUEN")
+
+    print()
     rot = [n for n, ok, _ in ERGEBNISSE if not ok]
     print(f"{len(ERGEBNISSE) - len(rot)}/{len(ERGEBNISSE)} grün")
     if rot:

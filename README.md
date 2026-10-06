@@ -8,7 +8,7 @@ ist wirklich unterwegs, Frame für Frame, und du siehst, wo und warum es verworf
 Lernspiel für **Fachinformatiker Systemintegration (IHK AP1/AP2)**. Kein Cisco-Produkt.
 Läuft lokal und offline; nichts wird gesendet.
 
-![Tests](https://github.com/Vexx-oss/Side-Project/actions/workflows/pruefen.yml/badge.svg?branch=ausbau-1.2)
+![Tests](https://github.com/Vexx-oss/NetLab/actions/workflows/pruefen.yml/badge.svg?branch=ausbau-1.2)
 ![Tests grün](https://img.shields.io/badge/Tests-213%2F213%20gr%C3%BCn-brightgreen)
 ![JavaScript ohne Bundler](https://img.shields.io/badge/JavaScript-ohne%20Bundler-blue)
 ![Läuft offline](https://img.shields.io/badge/l%C3%A4uft-offline-informational)
@@ -21,9 +21,9 @@ Läuft lokal und offline; nichts wird gesendet.
 
 | Weg | Wie | Was du brauchst |
 |---|---|---|
-| **Im Browser** | **[vexx-oss.github.io/Side-Project](https://vexx-oss.github.io/Side-Project/)** öffnen | nur einen Browser |
+| **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](../../raw/ausbau-1.2/Netzwerk-Labor.html)**, Doppelklick | nur einen Browser |
-| **Alles auf einmal** | [Release-ZIP](https://github.com/Vexx-oss/Side-Project/releases/latest): Einzeldatei, `.exe`, Anleitung | Windows 10/11 für die `.exe` |
+| **Alles auf einmal** | [Release-ZIP](https://github.com/Vexx-oss/NetLab/releases/latest): Einzeldatei, `.exe`, Anleitung | Windows 10/11 für die `.exe` |
 
 > **Die beiden Wege sind nicht auf demselben Stand.** Der Browser-Weg liefert `1.2.0` —
 > den ganzen Ausbau 1.2. Die mitgelieferte **`.exe` ist noch `1.1.0`**: sie bringt Leiste,

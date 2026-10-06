@@ -10,7 +10,7 @@ status: Version 1.2 (Browser-Einzeldatei + Windows-.exe; Linux-Pakete Stand 1.0)
 Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Mann-Systemhaus löst du Netzwerk-Tickets in einem echten Simulator (Diagramm, Konfig-Panels, IOS-ähnliche Konsole). Können ist die Währung: Wer etwas sicher beherrscht, darf es automatisieren. Wer nicht weiterkommt, bekommt eine Hilfeleiter bis zur vorgeführten Lösung.
 
 ## ▶ Starten
-- **Im Browser, ohne Download:** [vexx-oss.github.io/Side-Project](https://vexx-oss.github.io/Side-Project/) – ein Klick, spielt sofort. Kein Entpacken, keine Installation, kein Internet.
+- **Im Browser, ohne Download:** [vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/) – ein Klick, spielt sofort. Kein Entpacken, keine Installation, kein Internet. (Das Repositorium hieß früher `Side-Project`; GitHub leitet die alte Adresse um.)
 - **Eine Datei für alles:** `docs/index.html` bzw. `Netzwerk-Labor.html` aus dem Release-ZIP – das ganze Spiel in **einer** HTML-Datei, Schriften eingebettet, läuft per Doppelklick auf Windows, Linux und macOS. Gebaut von `python tools/einfach.py`.
 - **Windows-Programm:** `Programm/Netzwerk-Labor.exe` per Doppelklick (SmartScreen: „Weitere Informationen → Trotzdem ausführen“). Bringt zusätzlich Leiste, Tray und globales Tastenkürzel.
 - **Linux:** `Programm/linux/` – `.deb` (Ubuntu/Debian) oder AppImage, **Stand 1.0** (für 1.1/1.2 vorerst keine eigene Linux-Fassung). Details und was auf welchem System geht: [[Programm/PLATTFORM|PLATTFORM]].

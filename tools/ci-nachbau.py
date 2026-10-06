@@ -71,7 +71,7 @@ SCHRITTE = [
 
 
 def main() -> int:
-    ziel = Path(tempfile.mkdtemp(prefix="nl-ci-")) / "Side-Project"
+    ziel = Path(tempfile.mkdtemp(prefix="nl-ci-")) / "NetLab"
     print(f"Frischer Klon nach {ziel}")
     print("(kein ../FISI-Spielhalle — genau der Zustand auf GitHub)")
     print()

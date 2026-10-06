@@ -81,7 +81,7 @@ der drei Schriften **wirklich geladen und wirklich benutzt** wird, und JS-Fehler
 
 `.github/workflows/seite.yml` stellt die fertige, versionierte `docs/index.html` bei jedem
 Push auf `ausbau-1.2` auf GitHub Pages. Danach ist das Spiel unter
-**https://vexx-oss.github.io/Side-Project/** mit einem Klick spielbar.
+**https://vexx-oss.github.io/NetLab/** mit einem Klick spielbar.
 
 **Die eine Einstellung, die nur im Browser geht:**
 *Settings → Pages → Build and deployment → **Source: „GitHub Actions"***.
