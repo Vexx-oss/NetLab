@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Netzwerk-Labor</title>
+
+<!-- ===================================================================
+     Warum diese Datei existiert
+     ===================================================================
+     Zwei Wege führen zu GitHub Pages, und beide sollen funktionieren:
+
+     1. Quelle "GitHub Actions" (der Ablauf .github/workflows/seite.yml):
+        Dort wird docs/index.html veröffentlicht — diese Datei ist dann
+        gar nicht im Spiel.
+
+     2. Quelle "Zweig" (z. B. ausbau-1.2, Ordner "/"): GitHub Pages sucht
+        im Wurzelverzeichnis eine index.html. Ohne diese Datei antwortet die
+        Seite mit "Site not found" (404) — obwohl Pages eingeschaltet ist.
+        Gemessen am 06.10.2026, nachdem Pages eingeschaltet worden war.
+
+     Beide Wege landen so beim selben Spiel. Diese Datei ist nur eine
+     Weiterleitung; das Spiel selbst ist Netzwerk-Labor.html und liegt
+     daneben.
+     =================================================================== -->
+
+<meta http-equiv="refresh" content="0; url=Netzwerk-Labor.html">
+<link rel="canonical" href="Netzwerk-Labor.html">
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; display: grid; place-items: center; min-height: 100vh;
+         font: 16px/1.6 system-ui, "Segoe UI", sans-serif; background: #F7F7F5; color: #1F2937; }
+  main { max-width: 32rem; padding: 2rem; text-align: center; }
+  h1 { font-size: 1.5rem; margin: 0 0 .75rem; }
+  a { color: #1D4ED8; }
+  p { margin: .5rem 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Netzwerk-Labor</h1>
+  <p>Das Spiel wird geöffnet …</p>
+  <p>Falls nicht: <a href="Netzwerk-Labor.html">Netzwerk-Labor starten</a></p>
+</main>
+<script>location.replace("Netzwerk-Labor.html");</script>
+</body>
+</html>
