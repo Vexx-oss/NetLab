@@ -83,10 +83,27 @@ der drei Schriften **wirklich geladen und wirklich benutzt** wird, und JS-Fehler
 Push auf `ausbau-1.2` auf GitHub Pages. Danach ist das Spiel unter
 **https://vexx-oss.github.io/Side-Project/** mit einem Klick spielbar.
 
-**Einmalige Einstellung, die nur im Browser geht:**
-*Settings → Pages → Build and deployment → Source: **GitHub Actions***.
+**Die eine Einstellung, die nur im Browser geht:**
+*Settings → Pages → Build and deployment → **Source: „GitHub Actions"***.
 Solange Pages aus ist, wird der Deploy-Schritt übersprungen und der Lauf bleibt **grün** —
 er meldet in einer Notiz, was fehlt. Nach dem Einschalten läuft er von selbst.
+
+> **Wenn die Adresse trotzdem 404 liefert** (gemessen 06.10.2026): Die Antwort war
+> `Site not found · GitHub Pages`, obwohl der Ablauf grün war und `deploy-pages`
+> erfolgreich meldete. Diese Kombination heißt: Es wurde veröffentlicht, aber die
+> **Quelle** in den Einstellungen ist nicht „GitHub Actions" — dann wird eine Seite aus
+> einem Zweig erwartet.
+>
+> Deshalb funktioniert jetzt **beides**:
+>
+> | Quelle in den Einstellungen | Was veröffentlicht wird |
+> |---|---|
+> | „GitHub Actions" | `docs/index.html` aus dem Ablauf |
+> | Ein Zweig, Ordner `/` | `index.html` im Wurzelverzeichnis — eine Weiterleitung auf `Netzwerk-Labor.html` |
+>
+> Ohne die Weiterleitung im Wurzelverzeichnis findet Pages bei einer Zweig-Quelle keine
+> `index.html` und antwortet mit 404. Die Weiterleitung ist absichtlich doppelt
+> abgesichert: `meta refresh`, `location.replace` und ein sichtbarer Link.
 
 > **Warum der Ablauf nicht selbst baut und keinen zweiten Job hat** (gemessen 05.10.2026):
 > Zwei Dinge gingen schief, beide nachgestellt und behoben.
