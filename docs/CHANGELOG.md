@@ -112,7 +112,7 @@ WebView2-Fenster.
   (`.am-inhalt` und `.am-plan` getrennt begrenzt). Jetzt wächst der Plan mit, gescrollt wird
   die Mappe — gemessen: **1 scrollender Bereich** statt 2.
 
-Nachprobe: `python Nachweise/experten/nachprobe-menuefix.py` → **GRÜN: alle drei Befunde
+Nachprobe: `python tools/nachprobe-menuefix.py` → **GRÜN: alle drei Befunde
 behoben** (1280 × 800 und 720 × 640). Menüprobe, Dock-Probe und Testbatterie bleiben grün.
 
 **Veröffentlichte Fassung: Tag `v1.2.2`.** Die Fassungsnummer steht in `bauen.py`,

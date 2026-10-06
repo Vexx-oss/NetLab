@@ -1,7 +1,7 @@
 # AGENTS.md – Betriebsregeln für das Netzwerk-Labor
 
 Gilt für **jedes** Modell und jeden Menschen, der in diesem Projekt arbeitet. Kurz, verbindlich, ohne Ausnahmen.
-Vorbild für diese Datei: Design – Spielspaß 2.0.md § 24 (Auftrag „R“, Punkt 1).
+Vorbild für diese Datei: docs/entwicklung/Design – Spielspaß 2.0.md § 24 (Auftrag „R“, Punkt 1).
 
 ## Absolute Verbote
 
@@ -21,6 +21,11 @@ Vorbild für diese Datei: Design – Spielspaß 2.0.md § 24 (Auftrag „R“, P
 
 ## Befehle
 
+**Am Ende jeder Sitzung:** [`docs/SITZUNGSABSCHLUSS.md`](docs/SITZUNGSABSCHLUSS.md) — die acht
+Schritte von „aufräumen" bis „nachmessen, was online steht", samt der Regeln, die aus Fehlern
+stammen (Fassung ziehen, Zeilenenden prüfen, erzeugen und gegenprüfen, Stand nachziehen,
+veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unten.
+
 | Zweck | Befehl | Erwartung |
 |---|---|---|
 | Tests | `sh tools/test.sh` | meldet `N/N grün` (Stand: **251**) |
@@ -33,6 +38,9 @@ Vorbild für diese Datei: Design – Spielspaß 2.0.md § 24 (Auftrag „R“, P
 | Einzeldatei (auch die Wurzel-Datei) | `python tools/einfach.py` · `--ziel Netzwerk-Labor.html` | beide byte-gleich, `0 Außenverweise` |
 | Android-APK | `python android/bauen.py` | 7 Schritte, ~5 s, endet mit `GRUEN` |
 | PC-Hülle für die Entwicklungsrunde | `pwsh -File shell/entwickeln.ps1 -NurBauen` | Debug-Profil, ~4 s je Runde (Auslieferung bleibt `cargo tauri build`) |
+| Fassung ziehen (1.2.2 → 1.2.3) | `python tools/fassung-ziehen.py --neu 1.2.3` · `--setzen` | Trockenlauf zuerst; im `Cargo.lock` bleibt nur der eigene Block |
+| Tote Verweise finden | `python tools/repo-verweise-flicken.py` | prüft **jeden** relativen Verweis in jeder Markdown-Datei |
+| Die drei Randbefunde nachmessen | `python tools/nachprobe-menuefix.py` | `GRÜN: alle drei Befunde behoben` |
 | Echtes Programm | `python tools/q-echt.py` | startet die `.exe`; siehe Befund unten |
 
 Node liegt portabel unter `%LOCALAPPDATA%\node-portable\node-v24.21.0-win-x64\node.exe` (v24.21.0).
@@ -53,7 +61,7 @@ WebView2-Laufzeit kann ihr Profil nicht anlegen und bricht ab (`failed to create
 Exception `0x80000003`). **Reparatur (ohne Administratorrechte, wiederholbar):** Doppelklick auf
 `Programm/Integritaet-reparieren.cmd` oder `icacls Programm /setintegritylevel (OI)(CI)Medium /T` +
 `icacls Programm/Netzwerk-Labor.exe /setintegritylevel Medium`. Der alte Befund in `Design – Spielspaß 2.0.md` § 25
-und in `Architektur.md` ist damit überholt.
+und in `docs/Architektur.md` ist damit überholt.
 
 ## Zeilenenden bewahren
 
@@ -79,12 +87,12 @@ Anhängen das überwiegende Ende der Datei übernimmt. Ein Editor, der beim Spei
   Oberfläche gelten als **nicht fertig**. *Belegtes Gegenbeispiel:* Der gesamte DHCP-Pool-Modus der Konsole war seit
   1.0 wirkungslos, weil der Test nur den Prompt prüfte (gefunden 05.10.2026). Ein Test, der nur den Prompt prüft, ist
   kein Test.
-- **Vertrag zuerst.** Jede Änderung an Datenformen steht zuerst in `Architektur.md` (Datenform, Verhalten, Gründe,
+- **Vertrag zuerst.** Jede Änderung an Datenformen steht zuerst in `docs/Architektur.md` (Datenform, Verhalten, Gründe,
   Trace-Format). Danach der Code.
 - **Selbst und nacheinander.** Keine Agentenschwärme: Ein Schwarm riss zweimal das Limit, und drei von vier
   Teammitgliedern brachen am 05.10.2026 mitten in der Arbeit ab, ohne etwas zu hinterlassen.
-- **Nach jedem Commit den Stand nachziehen.** `Design – Spielspaß 2.0.md` (neuer Abschnitt) und `Architektur.md`
-  (Stand-Tabelle) müssen den echten Zustand zeigen. Kein Commit ohne Stand.
+- **Nach jedem Commit den Stand nachziehen.** `docs/entwicklung/Design – Spielspaß 2.0.md` (neuer Abschnitt) und
+  `docs/Architektur.md` (Stand-Tabelle) müssen den echten Zustand zeigen. Kein Commit ohne Stand.
 - **Tests statt Augenschein, wo es geht.** Nach jeder Änderung an `src/sim/` oder `src/modell/` zusätzlich
   `node tools/sim-stand.js` laufen lassen und jede Abweichung benennen: gewollt oder ungewollt.
 - **Determinismus.** Kein `Math.random` ohne Seed, kein Datum, keine Uhr in `src/sim/` und `src/cli/`.

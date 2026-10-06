@@ -11,7 +11,7 @@
 # Installer, kein MSI), und startet sie auf Wunsch gleich.
 #
 # Reihenfolge ist wichtig: `python bauen.py` erzeugt web/ (die Hülle lädt web/). Ohne das
-# zeigt das Fenster den alten Stand. Dieselbe Regel steht in Bauen.md.
+# zeigt das Fenster den alten Stand. Dieselbe Regel steht in docs/Bauen.md.
 #
 # Aufruf:
 #   pwsh -File shell/entwickeln.ps1              # bauen (Debug) und starten

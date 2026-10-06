@@ -748,7 +748,7 @@ mit der Klasse `.nl-messend` (`animation:none; visibility:hidden`) — **nicht**
   die Klemmung 2 % zu klein rechnen.
 - **Vorher** (bis 06.10.2026) wurde ohne Messklasse gerechnet; ein Port-Menü mit 26 Einträgen ragte
   3–4 px unten heraus (menu-auditor, 1280 × 800 und 720 × 640 — je gemessen). Mit der Messklasse:
-  **0 px** in beiden Fenstern (`Nachweise/experten/nachprobe-menuefix.py`).
+  **0 px** in beiden Fenstern (`python tools/nachprobe-menuefix.py`).
 
 ### 11.2 Dock-Blatt (`ui/editor.js`, `android/mobil/mobil.css`)
 
@@ -793,7 +793,7 @@ Wer eine neue Fläche baut, prüft sie mit `tools/menueprobe.py` — nicht am Au
 |---|---|---|
 | Tiefe Menüebenen (Web und Android) | `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | 5 Profile, 49 Kriterien, 0 verletzt |
 | Dock und Auftragsmappe | `python Nachweise/experten/dock-pruefung.py` | Reparatur bestätigt |
-| Die drei Randbefunde | `python Nachweise/experten/nachprobe-menuefix.py` | GRÜN, alle drei behoben |
+| Die drei Randbefunde | `python tools/nachprobe-menuefix.py` | GRÜN, alle drei behoben |
 | Telefonmaße | `python android/werkzeuge/mobilprobe.py --lauf --port 0` | 12 von 12 gewerteten Profilen grün |
 
 **Wichtig beim Messen mit `mobilprobe`/`menueprobe`:** ohne `Emulation.setTouchEmulationEnabled`

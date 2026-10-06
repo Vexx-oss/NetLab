@@ -14,6 +14,7 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 |---|---|
 | [`Architektur.md`](Architektur.md) | Der Vertrag zwischen den Bausteinen: Datenformen, Verhalten, Gründe, Trace-Format. Änderungen an Datenformen stehen **zuerst** hier. |
 | [`Bauen.md`](Bauen.md) | Bauen, Testen, Messen, Ausliefern im Detail — inklusive der gemessenen Fallen (d8, `</head>`, `screenOrientation`, MIME-Typ der Schriften). |
+| [`SITZUNGSABSCHLUSS.md`](SITZUNGSABSCHLUSS.md) | Die acht Schritte am Ende einer Sitzung: aufräumen, Fassung ziehen, prüfen, bauen, Stand nachziehen, committen, veröffentlichen, nachmessen — mit den Regeln, die aus Fehlern stammen. |
 | [`Mitmachen.md`](Mitmachen.md) | Arbeitsweise und Regeln für Beiträge. |
 | [`Liesmich.md`](Liesmich.md) | Übersicht für Leser: was das Spiel ist, wie man es startet, was es kann. |
 
@@ -39,7 +40,7 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 Bis zum 06.10.2026 lagen zwölf Notizen im Wurzelverzeichnis; ein Besucher sah sie vor dem
 Quelltext. Auf Wunsch wurden sie hierher gezogen — **mit** `git mv`, damit die
 Versionsgeschichte jeder Datei erhalten bleibt, und mit angepassten Verweisen
-(`Nachweise/experten/repo-aufraeumen.py`, `repo-verweise-flicken.py`; der zweite Lauf prüft
+(`tools/repo-aufraeumen.py`, `tools/repo-verweise-flicken.py`; der zweite Lauf prüft
 **jeden** relativen Verweis in **jeder** Markdown-Datei gegen die Wirklichkeit).
 
 Im Wurzelverzeichnis bleiben nur, was man dort erwartet: `README.md`, `CHANGELOG.md`
