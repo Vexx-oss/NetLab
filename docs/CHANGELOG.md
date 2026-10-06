@@ -28,7 +28,7 @@ melden wie der Rest. Ihr Start wurde gemessen (siehe unten).
 
 ---
 
-## 1.2.2 — in Arbeit (Android-Oberfläche und Bau)
+## 1.2.2 — Tag `v1.2.2` (Android-Oberfläche und Bau)
 
 Schwerpunkt: Fehler in den **tiefer genesteten Menüs** der Android-Fassung, gefunden und
 belegt von einem Expertenteam (vier Teammitglieder, ein Qualitätstor), gemessen mit
@@ -114,6 +114,23 @@ WebView2-Fenster.
 
 Nachprobe: `python Nachweise/experten/nachprobe-menuefix.py` → **GRÜN: alle drei Befunde
 behoben** (1280 × 800 und 720 × 640). Menüprobe, Dock-Probe und Testbatterie bleiben grün.
+
+**Veröffentlichte Fassung: Tag `v1.2.2`.** Die Fassungsnummer steht in `bauen.py`,
+`shell/src-tauri/Cargo.toml` und `shell/src-tauri/tauri.conf.json` — ein Skript hat sie
+gezogen und dabei im `Cargo.lock` **nur** den eigenen Block geändert (die beiden fremden
+Pakete mit derselben Nummer blieben unberührt, sonst wäre die Sperrdatei beschädigt).
+
+- Browser-Einzeldatei `docs/index.html` = `Netzwerk-Labor.html`: 2.269.597 Bytes,
+  SHA256 `e44e4c6b…`, meldet `LABOR_VERSION = "1.2.2"`.
+- Android-App `Programm/Netzwerk-Labor-1.2.2-Android.apk`: 988.700 Bytes, versionCode
+  **10202** (unverändert — die Bauzählung steigt nur, wenn sie muss), versionName 1.2.2,
+  signiert (v2+v3), keine Berechtigungen. Die 1.2.1 liegt als `.apk.beiseite` daneben.
+- Windows-Programm `Programm/Netzwerk-Labor.exe`: neu gebaut (Rust 1.97.1, 4m 25s), meldet
+  als Produkt- und Dateiversion **1.2.2**. **Start gemessen** (`python tools/q-echt.py`):
+  Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler, Fernwartungs-Schild
+  sichtbar, eigene Instanz wieder beendet.
+- Geprüft auf dem Endstand: 251/251 Tests grün, `ethos.py` GRÜN, 0 Klassen ohne CSS-Regel,
+  `tools/menueprobe.py` 5 Profile / 49 Kriterien / 0 verletzt, `tools/seite-pruefen.py` GRÜN.
 
 ---
 

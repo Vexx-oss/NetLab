@@ -31,7 +31,7 @@ WEB = HIER / "web"
 LERNMOTOR_KOPIE = HIER / "fremd" / "lernmotor.js"
 # … und die Quelle daneben, falls die Spielhalle mit ausgecheckt ist (hat Vorrang).
 LERNMOTOR_QUELLE = HIER.parent / "FISI-Spielhalle" / "src" / "lernmotor.js"
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 
 # (Ordner, Kopfdateien, Schlussdateien, headless)
 SCHICHTEN = [

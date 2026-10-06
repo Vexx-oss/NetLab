@@ -14,8 +14,8 @@ name: Release anlegen
 # sie selbst (Bauen.md) und ruft tools/paket.py danach erneut auf.
 #
 # Aufruf: Tag setzen und pushen.
-#   git tag -a v1.2.1 -m "Netzwerk-Labor 1.2.1"
-#   git push origin v1.2.1
+#   git tag -a v1.2.2 -m "Netzwerk-Labor 1.2.2"
+#   git push origin v1.2.2
 on:
   push:
     tags:
