@@ -7,7 +7,7 @@
 .kk-region h4{margin:0 0 8px; font:700 14px/1.2 var(--display); color:var(--ink)}
 .kk-felder{display:flex; flex-wrap:wrap; gap:6px}
 .kk-feld{all:unset; cursor:pointer; box-sizing:border-box; display:flex; flex-direction:column; gap:1px; min-width:120px; max-width:100%; flex:1 1 120px; padding:7px 9px;
-  border-radius:10px; border:1px solid var(--line); background:var(--panel); font-size:13px; line-height:1.25}
+  border-radius:var(--radius); border:1px solid var(--line); background:var(--panel); font-size:13px; line-height:1.25}
 .kk-feld:hover, .kk-feld:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 .kk-name{font-weight:700; color:var(--ink)}
 .kk-stufe{color:var(--muted); font-size:11.5px}

@@ -30,6 +30,8 @@ if [ "$1" = "--rauch" ]; then
   shift
   "$NODE" tests/run.js "$@" || exit 1
   python tools/klassen.py || exit 1
+  python tools/ethos.py || exit 1
   exec python tools/rauch.py
 fi
+python tools/ethos.py || exit 1
 exec "$NODE" tests/run.js "$@"

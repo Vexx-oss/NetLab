@@ -3,7 +3,7 @@
    Logik in spiel/karriere.js, wirtschaft.js, wartung.js, playbooks.js, offline.js, mini.js, tag.js, pruefung.js.
    Takt: Spiel.tick alle 60 s und beim Sichtbarwerden (Zeit über Zeitstempel, nicht über Ticks). */
 UI.karriere = (() => {
-  const K = {wikiWahl: null, wikiSuche: "", mini: {antwort: null, ergebnis: null, auswahl: [], links: null}};
+  const K = {wikiWahl: null, wikiSuche: "", shopOffen: {playbooks: false, aussehen: false}, mini: {antwort: null, ergebnis: null, auswahl: [], links: null}};
   const kd = id => Spiel.karriere.kunde(id);
   const AMPEL = {gruen: ["ok", "●", "läuft"], gelb: ["warn", "▲", "Frist überschritten"], rot: ["bad", "■", "steht – kein Geld"]};
   const NIV = {E: "Einstieg", AP1: "AP1", AP2: "AP2"};
@@ -100,25 +100,68 @@ UI.karriere = (() => {
     danach && danach();
   }
 
-  /* ---------- Shop ---------- */
+  /* ---------- Shop (P5b: zwei Gruppen, vier Bedienelemente, eine Bildschirmhöhe) ----------
+     Verkauft werden Werkzeuge (Lerninhalt: Kabeltester, Netzprüfer) und die Automatisierung als Liste.
+     Wartungsverträge stehen in der Kundenakte, die Prüfungsanmeldung im Lernstand – der Preis kommt aus
+     Spiel.PRUEFUNG.GEBUEHR, der einen Quelle. Farben und Leisten liegen hinter EINER Zeile (Kauf hier,
+     Auswahl in den Einstellungen „Darstellung“). */
   function shopAnsicht(c){
-    const liste = Spiel.shop.liste();
-    const gruppen = {};
-    for (const e of liste) (gruppen[e.gruppe || "Sonstiges"] ||= []).push(e);
-    const ZUSTAND = {kaufbar: "", "zu-teuer": "teuer", gekauft: "gekauft", aktiv: "gekauft", veraltet: "veraltet", gesperrt: "gesperrt"};
+    const st = Spiel.st, liste = Spiel.shop.liste();
+    const inGruppe = g => liste.filter(e => e.gruppe === g);
+    const ZUSTAND = {kaufbar: "", "zu-teuer": "teuer", gekauft: "gekauft", aktiv: "gekauft", veraltet: "veraltet", gesperrt: "gesperrt", "kein-slot": "gesperrt"};
+    const kurz = t => String(t).replace(/^Playbook: /, "");
+    const auf = K.shopOffen ||= {playbooks: false, aussehen: false};
+    const werkzeuge = inGruppe("Werkzeuge"), auto = inGruppe("Automatisierung"), aussehen = inGruppe("Aussehen");
+    const slot = auto.find(e => e.art === "slot");
+    const spiele = auto.filter(e => e.art === "playbook");
+    const offen = spiele.filter(e => e.zustand !== "gesperrt"), gesperrt = spiele.length - offen.length;
+    const kaufbar = spiele.filter(e => e.zustand === "kaufbar").length;
+    /* Kachel nur noch für die zwei Werkzeuge (Lerninhalt) und – aufgeklappt – für das Aussehen */
+    const karte = e => h("article", {class: "kr-ware " + (ZUSTAND[e.zustand] ?? "")},
+      h("b", {}, e.farbe ? h("span", {class: "kr-tupfer", style: {"--tupfer": e.farbe}}) : null, kurz(e.titel)), h("p", {}, e.text || ""),
+      h("div", {class: "kr-ware-fuss"},
+        e.preis != null && e.zustand !== "gekauft" && e.zustand !== "aktiv" ? h("span", {class: "kr-preis"}, eur(e.preis) + " €") : h("span", {}),
+        e.zustand === "kaufbar" ? h("button", {type: "button", class: "knopf klein primaer", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Kaufen") :
+        e.zustand === "veraltet" ? h("button", {type: "button", class: "knopf klein", onclick: () => training(e.skill)}, "Wiederholung jetzt") :
+        e.zustand === "gekauft" && e.art === "aussehen" ? h("button", {type: "button", class: "knopf klein", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Auswählen") :
+        e.zustand === "aktiv" && e.art === "aussehen" ? h("span", {class: "kr-status"}, "✓ ausgewählt") :
+        e.zustand === "gekauft" ? h("span", {class: "kr-status"}, "✓ gekauft") :
+        e.zustand === "aktiv" ? h("span", {class: "kr-status"}, "✓ läuft") :
+        /* Ausgrauung statt Statuszeile: der Grund steht im Tooltip und gesammelt unter der Gruppe */
+        h("button", {type: "button", class: "knopf klein", disabled: true, title: e.grund || "gesperrt"}, "Kaufen")));
+    /* EIN Sammelhinweis je Gruppe statt einer Statuszeile je Artikel */
+    const sammel = es => {
+      const b = es.filter(e => e.zustand === "zu-teuer" || e.zustand === "gesperrt" || e.zustand === "kein-slot");
+      return b.length ? h("p", {class: "sp-leise kr-fuss"}, "Noch nicht kaufbar: " + b.map(e => `${kurz(e.titel)} – ${String(e.grund || "gesperrt").replace(/\.$/, "")}`).join(" · ")) : null;
+    };
+    /* Zeile: klickbar nur, wenn es etwas zu tun gibt – sonst ausgegraut (disabled) mit dem Grund im Tooltip.
+       Für die Ausgrauung gehört eine Zeile in karriere.css: .kr-wiki-punkt[disabled]{opacity:.6; cursor:default}
+       (src/stil gehört dem Ethos-Auftrag, darum hier nur die Klasse, keine eigene Regel). */
+    const zeile = (e, text, info) => {
+      const tun = e.zustand === "kaufbar" ? () => kaufen(e.id, () => shopAnsicht(c)) : e.zustand === "veraltet" ? () => training(e.skill) : null;
+      return h("button", {type: "button", class: "kr-wiki-punkt", disabled: !tun, title: e.grund || "", onclick: tun || undefined},
+        h("span", {}, text), h("small", {}, info));
+    };
+    const spielZeile = e => zeile(e, kurz(e.titel),
+      e.zustand === "kaufbar" ? `${eur(e.preis)} €` : e.zustand === "aktiv" ? "✓ läuft" : e.zustand === "veraltet" ? "veraltet – jetzt wiederholen"
+        : e.zustand === "zu-teuer" ? `Dir fehlen ${eur(e.preis - st.euro)} €` : e.zustand === "kein-slot" ? "kein Slot frei" : "gesperrt");
+    const klappe = (schluessel, titel, info) => h("button", {type: "button", class: "kr-wiki-punkt", "aria-expanded": String(!!auf[schluessel]),
+      onclick: () => { auf[schluessel] = !auf[schluessel]; shopAnsicht(c); }}, h("span", {}, titel), h("small", {}, `${info} ${auf[schluessel] ? "▾" : "▸"}`));
     c.replaceChildren(h("div", {class: "kr-seite"},
-      h("header", {class: "kr-kopf"}, h("h2", {}, "Shop"), h("p", {class: "sp-leise"}, `Du hast ${eur(Spiel.st.euro)} €. Simulation, Inspektor, Hilfe und Wiki sind immer frei – hier gibt es Zusatzwerkzeuge, Automatisierung, Verträge und Aussehen.`)),
-      ...Object.entries(gruppen).map(([g, es]) => h("section", {class: "kr-gruppe"}, h("h3", {}, g),
-        h("div", {class: "kr-raster klein"}, es.map(e => h("article", {class: "kr-ware " + (ZUSTAND[e.zustand] ?? "")},
-          h("b", {}, e.farbe ? h("span", {class: "kr-tupfer", style: {"--tupfer": e.farbe}}) : null, e.titel), h("p", {}, e.text || ""),
-          h("div", {class: "kr-ware-fuss"},
-            e.preis != null && e.zustand !== "gekauft" && e.zustand !== "aktiv" ? h("span", {class: "kr-preis"}, eur(e.preis) + " €") : h("span", {}),
-            e.zustand === "kaufbar" ? h("button", {type: "button", class: "knopf klein primaer", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Kaufen") :
-            e.zustand === "veraltet" ? h("button", {type: "button", class: "knopf klein", onclick: () => training(e.skill)}, "Wiederholung jetzt") :
-            e.zustand === "gekauft" && e.art === "aussehen" ? h("button", {type: "button", class: "knopf klein", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Auswählen") :
-            e.zustand === "aktiv" && e.art === "aussehen" ? h("span", {class: "kr-status"}, "✓ ausgewählt") :
-            h("span", {class: "kr-status"}, {gekauft: "✓ gekauft", aktiv: "✓ läuft", "zu-teuer": e.grund || "zu teuer", gesperrt: "🔒 " + (e.grund || "gesperrt")}[e.zustand] || ""))))))),
-      h("p", {class: "sp-leise kr-fuss"}, "Playbooks lösen Wartungs-Tickets ihrer Fertigkeit automatisch (60 % Ertrag, ohne Lernwirkung). Ist die Fertigkeit im Lernstand fällig, pausiert das Playbook, bis du die Wiederholung gemacht hast.")));
+      h("header", {class: "kr-kopf"}, h("h2", {}, "Shop"),
+        h("p", {class: "sp-leise"}, `Du hast ${eur(Spiel.st.euro)} €. Simulation, Inspektor, Hilfe und Wiki sind immer frei.`)),
+      h("section", {class: "kr-gruppe"}, h("h3", {}, "Werkzeuge"),
+        h("div", {class: "kr-raster klein"}, werkzeuge.map(karte)), sammel(werkzeuge)),
+      h("section", {class: "kr-gruppe"}, h("h3", {}, "Automatisierung"),
+        klappe("playbooks", "Playbooks und Slots", `${kaufbar} kaufbar · ${st.playbooks.aktiv.length}/${st.playbooks.slots} belegt`),
+        auf.playbooks ? h("div", {}, slot ? zeile(slot, "Playbook-Slot", slot.zustand === "kaufbar" ? `${eur(slot.preis)} €` : slot.zustand === "gekauft" ? "✓ alle Slots gekauft" : `Dir fehlen ${eur(slot.preis - st.euro)} €`) : null,
+          offen.map(spielZeile)) : null,
+        gesperrt ? h("p", {class: "sp-leise kr-fuss"}, `🔒 ${gesperrt} weitere ${gesperrt === 1 ? "Fertigkeit wird" : "Fertigkeiten werden"} ab „sicher“ kaufbar – üben kannst du sie in der Kompetenzkarte.`) : null,
+        h("p", {class: "sp-leise kr-fuss"}, "Playbooks lösen Wartungs-Tickets ihrer Fertigkeit automatisch (60 % Ertrag, ohne Lernwirkung). Ist die Fertigkeit fällig, pausiert das Playbook, bis du die Wiederholung gemacht hast.")),
+      klappe("aussehen", "Aussehen", `${aussehen.length} Artikel`),
+      auf.aussehen ? h("div", {class: "kr-raster klein"}, aussehen.map(karte)) : null,
+      h("p", {class: "sp-leise kr-fuss"}, "Wartungsverträge schließt du in der Kundenakte ab. Die Prüfungsanmeldung steht im Lernstand – AP1 ",
+        eur(Spiel.PRUEFUNG.GEBUEHR.AP1), " €, AP2 ", eur(Spiel.PRUEFUNG.GEBUEHR.AP2), " €, die erste Prüfung ist gebührenfrei.")));
   }
   function training(skill){
     const r = Spiel.karriere.training(skill);
@@ -358,12 +401,18 @@ UI.karriere = (() => {
     Plattform.datei.importieren().then(text => {
       if (!text) return;
       let d; try { d = JSON.parse(text); } catch (e) { UI.toast("Die Datei ist kein gültiger Spielstand.", "fehler"); return; }
-      if (!d || d.format !== "netzwerk-labor" || !d.speicher) { UI.toast("Das ist kein Netzwerk-Labor-Spielstand.", "fehler"); return; }
+      const pruef = Spiel.importPruefen(d);                 /* fremd oder ZU NEU? alte Stände sind erlaubt (Migration) */
+      if (!pruef.ok) { UI.toast(pruef.grund, "fehler", pruef.zuNeu ? {titel: "Zu neuer Spielstand", dauer: 14000} : undefined); return; }
       const lab = d.speicher.labor || {};
       const zu = overlay(h("div", {class: "sp-ergebnis"}, h("h2", {}, "Spielstand importieren?"),
         h("p", {}, `Stand vom ${datumDe(d.datum || heute())}: Stufe ${lab.stufe || 1}, ${eur(lab.euro || 0)} €, ${lab.ruf || 0} Ruf, ${(lab.erledigt || []).length} erledigte Tickets.`),
-        h("p", {class: "sp-leise"}, "Dein aktueller Stand wird ersetzt. Exportiere ihn vorher, wenn du ihn behalten willst."),
-        h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer", onclick: () => { store.initialisieren(d.speicher, SPEICHER.schreiber, null); store.markieren(); store.sofort(); location.reload(); }}, "Ersetzen und neu laden"),
+        h("p", {class: "sp-leise"}, "Dein aktueller Stand wird ersetzt — er bleibt aber als Sicherung im Spielstand erhalten (ein Export ist trotzdem die sichere Ablage)."),
+        h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer", onclick: () => {
+          const vorher = store.get("labor", null);            /* bisheriger Stand, noch vor dem Ersetzen */
+          store.initialisieren(d.speicher, SPEICHER.schreiber, null);
+          Spiel.sicherungAnlegen(vorher, true);               /* rollierende Zweitsicherung im NEUEN Speicher ablegen */
+          store.markieren(); store.sofort(); location.reload();
+        }}, "Ersetzen und neu laden"),
           h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Abbrechen"))));
     });
   }

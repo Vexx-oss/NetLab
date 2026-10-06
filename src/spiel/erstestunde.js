@@ -84,3 +84,61 @@ Spiel.ersteStunde = (() => {
 Spiel.ergaenzer.ersteStunde = st => {
   if (!st.ersteStunde || typeof st.ersteStunde !== "object") st.ersteStunde = {fertig: (st.erledigt || []).length > 0, ereignis: false};
 };
+
+/* ---------- Sanftes Onboarding beim ersten Start (Bau P7) ----------
+   Der Nutzer: „Man wird jetzt ziemlich reingeworfen, ohne Introduction oder was zu tun ist.“
+   Drei Stationen, jede genau einmal, jede überspringbar, keine Textwand (je Karte höchstens zwei Sätze):
+     1. Begrüßungskarte  – was das Programm ist, welche Rolle der Spieler hat, zwei Wege
+     2. Anweisung        – EINE Zeile am ersten Auftrag, nennt den Weg (Werkzeug), nicht die Lösung
+     3. Abschluss        – nach dem ersten bestandenen Auftrag: was gelernt wurde und wie es hier läuft
+   (Eine vierte Station „Bedienelemente sanfter“ gibt es bewusst nicht: Inspektor, Simulation und
+   Terminal erscheinen schon heute erst, wenn sie Inhalt haben – `ui/editor.js:142` (`dockOffen`,
+   `Z.inspWartet`) und `:151`. Etwas zu dämpfen, was noch gar nicht da ist, wäre eine zweite
+   Baustelle ohne Wirkung; unerreichbar machen darf ohnehin nichts werden.)
+
+   Zustand: `st.einstieg` (bleibt, wie es ist) bekommt zwei Felder:
+     `begruessung` = "auftrag" | "umsehen"  – die Wahl in Station 1, gesetzt beim Klick
+     `abschluss`   = true                   – Station 3 wurde gezeigt
+   Damit gilt: Ein ALTER Spielstand hat `fertig: true` (oder erledigte Aufträge) und bekommt NICHTS
+   davon zu sehen — die Begrüßung verlangt `fertig === false` UND keine erledigten Aufträge, der
+   Abschluss verlangt zusätzlich, dass genau dieser Stand die Begrüßung gesehen hat. */
+Spiel.EINSTIEG_TEXTE = {
+  /* 135 Zeichen, zwei Sätze (der Test prüft beides). */
+  BEGRUESSUNG: "Willkommen im Netzwerk-Labor! Als neuer FISI in dieser IT-Werkstatt hilfst du Kunden bei Netzproblemen – dein erster Auftrag liegt bereit.",
+  WEG_AUFTRAG: "Zeig mir den ersten Auftrag",
+  WEG_UMSEHEN: "Erst umsehen",
+  /* Nennt den WEG, nicht die LÖSUNG: Das Ziel von salon-01 ist „Die Kasse druckt auf dem Drucker“
+     (Ziel kasse → drucker). Genau dieses Paar steht hier NICHT – welches Gerät seinen Link
+     verloren hat, sieht der Spieler selbst; der Switch ist der offensichtliche Verteiler in der
+     Zeichnung und hilft als Richtung, ohne die Diagnose abzunehmen. */
+  HINWEIS: "Wähle das Kabel-Werkzeug (K) und zieh vom Gerät ohne Link ein Kabel zum Switch.",
+  SCHLUSS_LERNEN: "Das war Schicht 1: Ohne Kabel kein Link – deshalb fängt jede Fehlersuche beim Stecker an.",
+  SCHLUSS_WEG: "Aufträge kommen ins Postfach, gelöst wird im Labor, danach prüft der Kunde in der Abnahme.",
+};
+
+Spiel.einstieg = (() => {
+  /* Fehlt `einstieg` ganz (sehr alter Stand, Teststand), gilt das Onboarding als vorbei. */
+  const daten = (st = Spiel.st) => (st && st.einstieg && typeof st.einstieg === "object") ? st.einstieg : {fertig: true};
+  const frisch = (st = Spiel.st) => !daten(st).fertig && !((st && Array.isArray(st.erledigt)) ? st.erledigt.length : 0);
+  const begruessungNoetig = (st = Spiel.st) => frisch(st) && !daten(st).begruessung;
+  /* Die Wahl fällt genau einmal; ein zweiter Aufruf ändert nichts mehr. */
+  function waehlen(weg, st = Spiel.st){
+    const e = daten(st);
+    if (!begruessungNoetig(st)) return e.begruessung || null;
+    e.begruessung = weg === "umsehen" ? "umsehen" : "auftrag";
+    Spiel.speichern();
+    Spiel.melden("einstieg", {schritt: "begruessung", weg: e.begruessung});
+    return e.begruessung;
+  }
+  /* Station 2: die Anweisung gilt nur für den Einstiegsauftrag. */
+  const hinweisFuer = def => (def && def.id === Spiel.EINSTIEG_TICKET) ? Spiel.EINSTIEG_TEXTE.HINWEIS : null;
+  const abschlussNoetig = (st = Spiel.st) => { const e = daten(st); return !!e.begruessung && !!e.fertig && !e.abschluss; };
+  function abschlussZeigen(st = Spiel.st){
+    if (!abschlussNoetig(st)) return false;
+    daten(st).abschluss = true;
+    Spiel.speichern();
+    Spiel.melden("einstieg", {schritt: "abschluss"});
+    return true;
+  }
+  return {daten, begruessungNoetig, waehlen, hinweisFuer, abschlussNoetig, abschlussZeigen};
+})();

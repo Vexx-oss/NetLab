@@ -90,7 +90,7 @@ Spiel.abschliessen = function(inst, abnahme){
   if (lz.letzteArbeit) { inst.zeitMs = (inst.zeitMs || 0) + Math.min(jetzt() - lz.letzteArbeit, Spiel.ARBEIT_LUECKE_MS); lz.letzteArbeit = jetzt(); }
   const lernen = Spiel.lernenNachAbnahme(inst, def, abnahme);
   if (!abnahme.bestanden) {
-    Spiel.speichern();
+    Spiel.sofortSpeichern();                  /* auch ein Fehlversuch steht sofort auf der Platte */
     return {bestanden: false, abnahme, lernen, def, inst};
   }
   const st = Spiel.st;
@@ -144,6 +144,7 @@ Spiel.abschliessen = function(inst, abnahme){
   };
   ergebnis.karten = [ergebnis.ereignis, kundenakte && kundenakte.empfehlung].filter(Boolean);
   Spiel.geaendert("ticket-geloest");
+  Spiel.sofortSpeichern();                    /* „nach jedem Abschluss": sofort schreiben, nicht erst nach 2 s */
   Spiel.melden("ticket-geloest", {inst, def, sterne, hilfeStufe: inst.hilfeStufe || 0, skills: def.skills || [], euro: lohn.euro, ruf: lohn.ruf});
   return ergebnis;
 };

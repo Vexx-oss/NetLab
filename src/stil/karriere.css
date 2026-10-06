@@ -37,11 +37,10 @@
 .kr-bar.koennen i{background:var(--ok)}
 .kr-fehlt{margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); display:flex; flex-direction:column; gap:4px}
 .kr-stufe.zu{opacity:.55}
-.kr-stufe.jetzt{border-color:var(--accent)}
+.kr-stufe.jetzt, .kr-skill:hover{border-color:var(--accent)}
 .kr-stufe h3 small{font:600 12px var(--body); color:var(--faint)}
 .kr-ringe{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:6px}
 .kr-skill{display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; column-gap:10px; align-items:center; text-align:left; padding:8px 10px; border-radius:12px; border:1px solid transparent; background:var(--panel-2); color:var(--ink)}
-.kr-skill:hover{border-color:var(--accent)}
 .kr-skill .sp-ring{grid-row:1 / 3}
 .kr-skill-name{font-size:13px; font-weight:600; line-height:1.25}
 .kr-skill small{color:var(--faint); font-size:11.5px}
@@ -63,7 +62,7 @@
 .kr-einst{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 0; font-size:14px}
 .kr-einst span{display:flex; flex-direction:column}
 .kr-einst small{color:var(--faint); font-size:12px}
-.kr-einst.aus{opacity:.6}
+.kr-einst.aus, .mk-knopf.gewaehlt{opacity:.6}
 .kr-einst select{max-width:260px}
 @media (max-width: 900px){ .kr-balken, .kr-zwei{grid-template-columns:1fr} }
 
@@ -73,8 +72,9 @@
 .kr-wiki-liste h2{font:800 28px/1 var(--display)}
 .kr-wiki-liste nav{display:flex; flex-direction:column; gap:2px}
 .kr-wiki-punkt{display:flex; justify-content:space-between; gap:8px; text-align:left; padding:7px 10px; border:0; border-radius:9px; background:none; color:var(--ink); font-size:14px}
-.kr-wiki-punkt small{color:var(--faint); white-space:nowrap; flex:0 0 auto}
-.kr-wiki-liste input[type=search]{min-height:36px; padding:0 12px; border-radius:10px; border:1px solid var(--line-2); background:var(--panel); color:var(--ink); font:500 14px/1 var(--body)}
+.kr-wiki-punkt[disabled]{opacity:.6; cursor:default}
+.kr-wiki-punkt small{color:var(--faint); white-space:nowrap; flex:0 0 auto; font-size:12px}
+.kr-wiki-liste input[type=search]{min-height:36px; padding:0 12px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel); color:var(--ink); font:500 14px/1 var(--body)}
 .kr-wiki-liste input[type=search]:focus{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--accent-soft)}
 .kr-wiki-punkt:hover{background:var(--panel-2)}
 .kr-wiki-punkt.an{background:var(--accent-soft); color:var(--accent)}
@@ -93,16 +93,14 @@
 .mk-kopf{display:flex; gap:6px; align-items:center; justify-content:space-between}
 .mk-skill{color:var(--faint); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .mk-frage{margin:0; font-weight:700; font-size:12.5px}
-.mk-schnapp{margin:0; padding:5px 7px; border-radius:6px; background:var(--bg); color:var(--ok); font:500 10.5px/1.35 var(--mono); white-space:pre; overflow:hidden}
+.mk-schnapp{margin:0; padding:5px 7px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 10.5px/1.35 var(--mono); white-space:pre; overflow:hidden}
 .mk-hinweis{margin:0; color:var(--faint); font-size:11px}
-.mk-optionen{display:flex; flex-direction:column; gap:3px}
+.mk-optionen, .mk-zuordnen > div{display:flex; flex-direction:column; gap:3px}
 .mk-knopf{min-height:28px; padding:3px 8px; border-radius:7px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); text-align:left; font:600 12px/1.25 var(--body)}
 .mk-knopf:hover:not(:disabled){border-color:var(--accent); background:var(--panel-3)}
 .mk-knopf.an{border-color:var(--accent); background:var(--accent-soft)}
-.mk-knopf.gewaehlt{opacity:.6}
 .mk-knopf:disabled{cursor:default}
 .mk-zuordnen{display:grid; grid-template-columns:1fr 1fr; gap:6px}
-.mk-zuordnen > div{display:flex; flex-direction:column; gap:3px}
 .mk-klein{align-self:flex-start; border:0; background:none; color:var(--muted); font-size:11px; padding:2px 0}
 .mk-ergebnis{padding:6px 8px; border-radius:8px}
 .mk-ergebnis.ok{background:var(--ok-soft)}
@@ -126,7 +124,7 @@
 .kr-abz.hat .kr-abz-sym{filter:none; opacity:1}
 .kr-abz-text{display:flex; flex-direction:column; gap:3px; min-width:0; flex:1}
 .kr-abz-text small{color:var(--muted); font-size:12.5px; line-height:1.35}
-.kr-abz-datum{color:var(--ok) !important; font-weight:700}
+.kr-abz-text .kr-abz-datum{color:var(--ok); font-weight:700}
 .kr-abz-offen{font-style:italic}
 .kr-abz-stand{display:flex; align-items:center; gap:8px; margin-top:2px}
 .kr-abz-stand .kr-bar{flex:1; height:6px}

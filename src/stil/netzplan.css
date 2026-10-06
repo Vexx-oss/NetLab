@@ -29,8 +29,7 @@
 .np-tabelle tbody tr:hover{background:var(--panel-2)}
 .np-tabelle tbody tr.gewaehlt{background:var(--accent-soft)}
 .np-luecke{color:var(--warn); font-weight:800}
-.np-vergleich{border:1px solid var(--line); border-radius:12px; overflow:hidden}
-.np-vergleich{container-type:inline-size}
+.np-vergleich{border:1px solid var(--line); border-radius:12px; overflow:hidden; container-type:inline-size}
 .np-vgl-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:7px 10px; background:var(--panel-2); border-bottom:1px solid var(--line)}
 .np-vgl-kopf strong{font-size:14px} .np-vgl-kopf small{color:var(--muted); font-size:12px}
 .np-vgl-tabelle{width:100%; border-collapse:collapse; font-size:14px}
@@ -51,6 +50,6 @@
 /* Plan-Audit (E1): Werte als Knöpfe, markiert = „stimmt nicht“ */
 .np-audit-hinweis{margin:0 0 8px; font-size:13px; color:var(--muted)}
 .np-tabelle.np-audit td{cursor:default}
-.np-wert{all:unset; cursor:pointer; padding:1px 4px; border-radius:4px; font:inherit}
+.np-wert{all:unset; cursor:pointer; padding:1px 4px; border-radius:var(--radius-xs); font:inherit}
 .np-wert:hover, .np-wert:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 .np-pruef.markiert .np-wert{background:var(--warn-soft); color:var(--warn); font-weight:700; text-decoration:line-through}

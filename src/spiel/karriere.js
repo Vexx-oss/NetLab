@@ -14,16 +14,20 @@
 
 Spiel.karriere = {};
 
-/* Stufen (6 = Storage & Cloud, später). ruf = Ruf-Schwelle, ab der man diese Stufe erreichen kann. */
+/* Stufen. ruf = Ruf-Schwelle, ab der man diese Stufe erreichen kann.
+   Stufe 6 ist seit dem Ausbau 1.2 erreichbar (storage-Kunde, Geschichten, Wiki-Seite „lab.storage“).
+   Die Schwelle steht auf 115: Aus den handgeschriebenen Aufträgen sind bis Stufe 5 genau 114 Ruf zu holen
+   (Summe der lohn.ruf-Felder), die drei Storage-Aufträge der Stufe 6 bringen weitere 13 – so ist die letzte
+   Stufe erreichbar, ohne dass man Ruf wiederholen muss. */
 Spiel.KARRIERE_STUFEN = [
   {nr: 1, name: "Azubi",           ruf: 0,   geraete: ["PC", "Router", "Switch"]},
   {nr: 2, name: "Geselle",         ruf: 10,  geraete: ["Server", "verwaltbarer Switch"]},
   {nr: 3, name: "Fachkraft",       ruf: 28,  geraete: []},
   {nr: 4, name: "Spezialist",      ruf: 55,  geraete: ["Internet-Anschluss"]},
   {nr: 5, name: "Senior",          ruf: 90,  geraete: ["Firewall"]},
-  {nr: 6, name: "Storage & Cloud", ruf: 140, geraete: ["NAS"], spaeter: true},
+  {nr: 6, name: "Storage & Cloud", ruf: 115, geraete: ["NAS"]},
 ];
-Spiel.KARRIERE_MAX = 5;          /* höchste erreichbare Stufe, solange Stufe 6 „später“ ist */
+Spiel.KARRIERE_MAX = 6;          /* höchste erreichbare Stufe */
 Spiel.KOENNEN_SOLL = 2;          /* Mittel L.box der Stufen-Fertigkeiten, 2 = „geübt“ */
 
 /* Rückfall, falls DATEN.kunden (noch) keinen Eintrag hat. Echte Texte kommen aus daten/kunden.js. */
@@ -33,7 +37,7 @@ Spiel.KUNDEN_STANDARD = {
   praxis:       {name: "Arztpraxis",     stufe: 3, symbol: "✚", vertrag: {euroProStunde: 13}},
   autohaus:     {name: "Autohaus",       stufe: 4, symbol: "⛟", vertrag: {euroProStunde: 18}},
   mittelstand:  {name: "Mittelstand",    stufe: 5, symbol: "⌂", vertrag: {euroProStunde: 24}},
-  storage:      {name: "Storage & Cloud", stufe: 6, symbol: "▤", vertrag: {euroProStunde: 30}, spaeter: true},
+  storage:      {name: "Storage & Cloud", stufe: 6, symbol: "▤", vertrag: {euroProStunde: 30}},
 };
 
 /* ---------- eigener Teil des Spielstands ---------- */
@@ -237,13 +241,14 @@ Spiel.karriere.aufsteigen = function(){
   };
   if (typeof Spiel.postfachAuffuellen === "function") { try { Spiel.postfachAuffuellen({still: true}); } catch (e) { /* Postfach ist Sache von FLUSS */ } }
   Spiel.speichern();
+  Spiel.sofortSpeichern();                    /* Meilenstein (Aufstieg): sofort auf die Platte, nicht erst nach der Entprellung */
   Spiel.melden("aufstieg", k.fest);
   Spiel.melden("zustand-geaendert", {grund: "aufstieg"});
   return k.fest;
 };
 Spiel.karriere.festGesehen = function(){
   const k = Spiel.karriere.daten();
-  if (k.fest) { k.fest.gesehen = true; Spiel.speichern(); }
+  if (k.fest) { k.fest.gesehen = true; Spiel.sofortSpeichern(); }   /* Meilenstein-Fest gesehen: sofort sichern */
 };
 
 /* Senior-Satz: DATEN.senior[schluessel] darf Text, Liste oder Funktion sein */

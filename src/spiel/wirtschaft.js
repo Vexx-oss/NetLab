@@ -1,16 +1,24 @@
 "use strict";
 /* ---------- Spiel: Wirtschaft und Shop (Konzept § 3.5 „Wirtschaft bewusst dünn“) ----------
    Euro kaufen: Zusatzwerkzeuge (Kabeltester, Netzprüfer – spiel/werkzeuge.js), Playbook-Slots und Playbooks,
-   Wartungsvertrag anbieten (ab genug Sternen bei diesem Kunden), Prüfungsanmeldung (Gebühr) und Aussehen.
+   Wartungsvertrag anbieten (ab genug Sternen bei diesem Kunden) und Aussehen.
    NIE Kernwerkzeuge (Simulation, Inspektor, Konsole, Hilfe, Wiki).
    Ruf ist kein Zahlungsmittel.
 
-   Spiel.shop.liste() → [{id, art, titel, text, preis, zustand:"kaufbar"|"gesperrt"|"gekauft"|"aktiv"|"zu-teuer", grund, gruppe}]
+   P5b „Shop entlasten“: Die Shop-ANSICHT (ui/karriere.js shopAnsicht) zeigt nur noch die zwei Gruppen aus
+   Spiel.shop.GRUPPEN. Die übrigen Artikel bleiben in der Liste, weil ihre neue Heimat sie benutzt – sonst
+   liefen Kundenkarte und Auswahl leer:
+     art "vertrag"   → Kundenakte (ui/karriere.js kundenAnsicht kauft „vertrag:<kunde>“); im Shop nur ein Verweis
+     art "aussehen"  → EINE aufklappbare Zeile im Shop (Kauf), Auswahl in den Einstellungen „Darstellung“
+     Prüfungsanmeldung → GESTRICHEN. Sie kostete 60/90 €, ohne dass die Prüfung davon wusste: Spiel.pruefung.starten
+       bucht Spiel.PRUEFUNG.GEBUEHR ab (40/80 €) und erlässt die erste Prüfung. Es gibt genau EINE Preisquelle:
+       Spiel.PRUEFUNG.GEBUEHR (spiel/pruefung.js) – beide Anzeigen ziehen daraus.
+
+   Spiel.shop.liste() → [{id, art, titel, text, preis, zustand:"kaufbar"|"gesperrt"|"gekauft"|"aktiv"|"zu-teuer"|"kein-slot", grund, gruppe}]
    Spiel.shop.kaufen(id) → {ok, grund} */
 
 Spiel.WIRTSCHAFT = {
   VERTRAG_STERNE: 8,                 /* so viele Sterne (Summe) bei einem Kunden, dann kannst du einen Vertrag anbieten */
-  PRUEFUNG_GEBUEHR: {AP1: 60, AP2: 90},
 };
 
 /* Aussehen: Akzentfarben für den Leitstand und Stile für die Leiste. Rein kosmetisch. */
@@ -28,6 +36,9 @@ Spiel.AUSSEHEN = [
 
 Spiel.shop = {};
 
+/* Die Gruppen, die die Shop-Ansicht zeigt – Reihenfolge = Reihenfolge im Bild (Single Source für die Ansicht) */
+Spiel.shop.GRUPPEN = ["Werkzeuge", "Automatisierung"];
+
 Spiel.shop.eintrag = function(e){
   const euro = Spiel.st.euro;
   if (e.zustand === "kaufbar" && e.preis > euro + 1e-9) { e.zustand = "zu-teuer"; e.grund = `Dir fehlen ${eur(e.preis - euro)} €.`; }
@@ -35,8 +46,8 @@ Spiel.shop.eintrag = function(e){
 };
 
 Spiel.shop.liste = function(){
-  const st = Spiel.st, k = Spiel.karriere.daten(), W = Spiel.WIRTSCHAFT, liste = [];
-  /* Werkzeuge (Hebel 8): Fähigkeiten statt Automatisierung */
+  const st = Spiel.st, k = Spiel.karriere.daten(), liste = [];
+  /* Werkzeuge (Hebel 8): Fähigkeiten statt Automatisierung – Lerninhalt, bleibt im Shop */
   for (const [id, w] of Object.entries(Spiel.SHOP_WERKZEUGE || {})) {
     const hat = Spiel.werkzeug.hat(id);
     liste.push(Spiel.shop.eintrag({id: "werkzeug:" + id, art: "werkzeug", gruppe: "Werkzeuge", titel: w.titel, text: w.text, preis: w.preis,
@@ -49,20 +60,22 @@ Spiel.shop.liste = function(){
     text: `Du hast ${st.playbooks.slots} Slot${st.playbooks.slots === 1 ? "" : "s"}. Jeder Slot hält ein Playbook.`,
     preis: slotPreis, zustand: slotPreis == null ? "gekauft" : "kaufbar", grund: slotPreis == null ? "Alle Slots gekauft." : null,
   }));
-  /* Playbooks: gekaufte, kaufbare und die nächsten gesperrten (nur freigeschaltete Stufen) */
+  /* Playbooks: gekaufte, kaufbare und die nächsten gesperrten (nur freigeschaltete Stufen).
+     „kein-slot“ bleibt ein eigener Zustand: dann hilft ein weiterer Slot, nicht Üben. */
   for (const p of Spiel.playbooks.liste()) {
     const s = Spiel.karriere.skills().find(x => x.id === p.skill) || {};
     if ((s.stufe || 1) > st.stufe && p.zustand === "gesperrt") continue;
     liste.push(Spiel.shop.eintrag({
       id: "playbook:" + p.skill, art: "playbook", gruppe: "Automatisierung", skill: p.skill,
       titel: "Playbook: " + p.name, preis: p.preis ?? Spiel.playbooks.preis(p.skill),
-      /* Karte: oben, was es tut; unten nur noch der kurze Grund – nicht zweimal derselbe Satz */
+      /* Die Ansicht zeigt Playbooks als LISTE (Name · Zustand · Preis) und den Erklärsatz EINMAL als Fußnote. */
       text: p.zustand === "aktiv" || p.zustand === "veraltet" ? p.text : "Erledigt Wartungs-Tickets dieser Fertigkeit von selbst (60 % Ertrag, ohne Lernwirkung). Automatisieren darf nur, was du sicher beherrschst.",
-      zustand: p.zustand === "aktiv" || p.zustand === "veraltet" ? p.zustand : p.zustand === "kaufbar" ? "kaufbar" : "gesperrt",
+      zustand: p.zustand === "aktiv" || p.zustand === "veraltet" ? p.zustand : p.zustand === "kaufbar" ? "kaufbar" : p.zustand === "kein-slot" ? "kein-slot" : "gesperrt",
       grund: p.zustand === "kaufbar" ? null : p.zustand === "gesperrt" ? `ab „sicher“ (jetzt: ${Spiel.karriere.stufeName(p.skill)})` : p.text,
     }));
   }
-  /* Wartungsverträge */
+  /* Wartungsverträge: Artikel für die KUNDENAKTE (ui/karriere.js kundenAnsicht). Die Shop-Ansicht zeigt dazu
+     nur einen Verweis – der Kauf gehört zum Kunden, nicht in den Laden. */
   for (const id of Spiel.karriere.kundenIds()) {
     const kd = Spiel.karriere.kunde(id);
     if (kd.spaeter || !(kd.euroProStunde > 0)) continue;
@@ -72,7 +85,7 @@ Spiel.shop.liste = function(){
     let zustand = "kaufbar", grund = null;
     if (hat) { zustand = "gekauft"; grund = "Vertrag läuft."; }
     else if (!offen) { zustand = "gesperrt"; grund = `Kunde ab Ruf ${kd.abRuf}.`; }
-    else if (sterne < W.VERTRAG_STERNE) { zustand = "gesperrt"; grund = `Noch ${W.VERTRAG_STERNE - sterne} Sterne bei ${kd.kurz || kd.name} (${sterne} von ${W.VERTRAG_STERNE}).`; }
+    else if (sterne < Spiel.WIRTSCHAFT.VERTRAG_STERNE) { zustand = "gesperrt"; grund = `Noch ${Spiel.WIRTSCHAFT.VERTRAG_STERNE - sterne} Sterne bei ${kd.kurz || kd.name} (${sterne} von ${Spiel.WIRTSCHAFT.VERTRAG_STERNE}).`; }
     liste.push(Spiel.shop.eintrag({
       id: "vertrag:" + id, art: "vertrag", gruppe: "Kunden", kunde: id,
       titel: "Wartungsvertrag anbieten: " + kd.name,
@@ -80,18 +93,8 @@ Spiel.shop.liste = function(){
       preis: kd.vertragPreis, zustand, grund,
     }));
   }
-  /* Prüfungsanmeldung */
-  for (const art of ["AP1", "AP2"]) {
-    const angemeldet = !!k.anmeldungen[art];
-    liste.push(Spiel.shop.eintrag({
-      id: "pruefung:" + art, art: "pruefung", gruppe: "Prüfung", pruefung: art,
-      titel: `Prüfungsanmeldung ${art}`,
-      text: `Zertifizierung: gemischter Satz, 25 Minuten, keine Hilfen, Note nach IHK-Schlüssel. Die Gebühr gilt für einen Versuch.`,
-      preis: W.PRUEFUNG_GEBUEHR[art], zustand: angemeldet ? "gekauft" : k.pruefung ? "gesperrt" : "kaufbar",
-      grund: angemeldet ? "Angemeldet – starte die Prüfung, wann du willst." : k.pruefung ? "Eine Prüfung läuft gerade." : null,
-    }));
-  }
-  /* Aussehen */
+  /* Aussehen: EINE aufklappbare Zeile in der Shop-Ansicht; die Auswahl der gekauften steht in den
+     Einstellungen („Darstellung“). Der Kauf bleibt hier – app.js (P5a) gehört einem anderen Schreiber. */
   for (const a of Spiel.AUSSEHEN) {
     const gekauft = k.aussehen.gekauft.includes(a.id);
     const aktiv = (a.art === "akzent" ? k.aussehen.akzent : k.aussehen.leiste) === a.id;
@@ -105,7 +108,7 @@ Spiel.shop.liste = function(){
 
 Spiel.shop.kaufen = function(id){
   const [art, was] = String(id).split(":");
-  const k = Spiel.karriere.daten(), W = Spiel.WIRTSCHAFT;
+  const k = Spiel.karriere.daten();
   if (art === "werkzeug") return Spiel.werkzeug.kaufen(was);
   if (art === "slot") return Spiel.playbooks.slotKaufen();
   if (art === "playbook") return Spiel.playbooks.kaufen(was);
@@ -117,17 +120,11 @@ Spiel.shop.kaufen = function(id){
     Spiel.wartung.vertragStarten(was);
     Spiel.melden("vertrag", {kunde: was});
     Spiel.geaendert ? Spiel.geaendert("vertrag") : Spiel.speichern();
+    Spiel.sofortSpeichern();                    /* bezahlt ist bezahlt: sofort auf die Platte, nicht erst nach der Entprellung */
     return {ok: true, satz: Spiel.shop.kundenSatz(was, "vertrag")};
   }
-  if (art === "pruefung") {
-    if (!W.PRUEFUNG_GEBUEHR[was]) return {ok: false, grund: "Unbekannte Prüfung."};
-    if (k.anmeldungen[was]) return {ok: false, grund: "Du bist schon angemeldet."};
-    if (k.pruefung) return {ok: false, grund: "Eine Prüfung läuft gerade."};
-    if (!Spiel.karriere.bezahlen(W.PRUEFUNG_GEBUEHR[was], "Prüfungsanmeldung " + was)) return {ok: false, grund: `Dir fehlen ${eur(W.PRUEFUNG_GEBUEHR[was] - Spiel.st.euro)} €.`};
-    k.anmeldungen[was] = true;
-    Spiel.geaendert ? Spiel.geaendert("anmeldung") : Spiel.speichern();
-    return {ok: true};
-  }
+  /* „pruefung“ ist gestrichen (P5b): Preis und Abbuchung der Prüfung stehen in Spiel.PRUEFUNG.GEBUEHR
+     (spiel/pruefung.js). Hier gibt es bewusst keinen zweiten Bezahlweg mehr. */
   if (art === "aussehen") {
     const a = Spiel.AUSSEHEN.find(x => x.id === was);
     if (!a) return {ok: false, grund: "Unbekannt."};
@@ -137,6 +134,7 @@ Spiel.shop.kaufen = function(id){
     }
     if (a.art === "akzent") k.aussehen.akzent = was; else k.aussehen.leiste = was;
     Spiel.geaendert ? Spiel.geaendert("aussehen") : Spiel.speichern();
+    Spiel.sofortSpeichern();                    /* bezahlt ist bezahlt: sofort auf die Platte, nicht erst nach der Entprellung */
     Spiel.melden("aussehen", tief(k.aussehen));
     return {ok: true};
   }

@@ -57,6 +57,7 @@ Spiel.playbooks.kaufen = function(skill){
   if (!Spiel.karriere.bezahlen(s.preis, "Playbook: " + s.name)) return {ok: false, grund: `Dir fehlen ${eur(s.preis - Spiel.st.euro)} €.`};
   Spiel.st.playbooks.aktiv.push(skill);
   Spiel.geaendert ? Spiel.geaendert("playbook") : Spiel.speichern();
+  Spiel.sofortSpeichern();                    /* bezahlt ist bezahlt: sofort auf die Platte, nicht erst nach der Entprellung */
   return {ok: true};
 };
 
@@ -65,6 +66,7 @@ Spiel.playbooks.ablegen = function(skill){
   if (!Spiel.playbooks.hat(skill)) return false;
   Spiel.st.playbooks.aktiv = Spiel.st.playbooks.aktiv.filter(x => x !== skill);
   Spiel.geaendert ? Spiel.geaendert("playbook") : Spiel.speichern();
+  Spiel.sofortSpeichern();                    /* Slotwechsel sofort festhalten (kein Geld, aber eine Entscheidung) */
   return true;
 };
 
@@ -74,6 +76,7 @@ Spiel.playbooks.slotKaufen = function(){
   if (!Spiel.karriere.bezahlen(preis, "Playbook-Slot")) return {ok: false, grund: `Dir fehlen ${eur(preis - Spiel.st.euro)} €.`};
   Spiel.st.playbooks.slots++;
   Spiel.geaendert ? Spiel.geaendert("slot") : Spiel.speichern();
+  Spiel.sofortSpeichern();                    /* bezahlt ist bezahlt: sofort auf die Platte, nicht erst nach der Entprellung */
   return {ok: true};
 };
 

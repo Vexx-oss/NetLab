@@ -56,33 +56,79 @@ function Zufall(seed){
 }
 
 /* Speicher: Cache mit Durchschreiben. SPEICHER hält alles, was gespeichert wird:
-   {lern:{…Lernmotor…}, labor:{…Spielstand…}, einst:{…}}. Plattform.ladenSync() füllt ihn beim Start. */
-const SPEICHER = { daten: {}, meldung: null, schmutzig: false, timer: null, schreiber: null };
+   {lern:{…Lernmotor…}, labor:{…Spielstand…}, einst:{…}}. Plattform.ladenSync() füllt ihn beim Start.
+
+   EINE Entprellung: 1500 ms nach der letzten Änderung wird geschrieben (SPEICHER.entprellung).
+   Vorher lagen ZWEI Schichten übereinander — 400 ms im Spiel (Spiel.autospeichern) und 2000 ms
+   hier. Gemessen (06.10.2026, Edge headless, 1366×768, Einzeldatei-Fassung): einfacher
+   Spiel.speichern()-Ruf 2010 ms, Netzwechsel 2415 ms, Auftragsabschluss 2436 ms bis zum
+   Schreibvorgang. Wer nicht warten will, ruft store.sofort() (im Spiel: Spiel.sofortSpeichern)
+   — das schreibt augenblicklich.
+
+   Zustand für die Kopfzeile (store.stand()): "schreibt" | "gesichert" | "fehler". Jede Änderung
+   meldet der Bus als "speicher-stand"; ein gescheiterter Schreibvorgang zusätzlich als
+   "speicher-fehler" (das Spiel zeigt daraus einen Hinweis — vorher blieb er stumm). */
+const SPEICHER = { daten: {}, meldung: null, schmutzig: false, timer: null, schreiber: null,
+                   entprellung: 1500, letzterErfolg: null, fehler: null, standKennung: null };
 const store = {
   get(k, d){ const v = SPEICHER.daten[k]; return v === undefined ? d : tief(v); },
   set(k, v){ SPEICHER.daten[k] = tief(v); store.markieren(); },
   markieren(){
     SPEICHER.schmutzig = true;
-    if (!SPEICHER.schreiber || typeof setTimeout === "undefined") return;
+    if (!SPEICHER.schreiber || typeof setTimeout === "undefined") { store.standMelden(); return; }
     if (SPEICHER.timer) clearTimeout(SPEICHER.timer);
-    SPEICHER.timer = setTimeout(store.sofort, 2000);
+    /* Der Zeitgeber fängt seine Ablehnung selbst ab: sonst stünde bei vollem Speicher eine
+       unbehandelte Promise-Ablehnung in der Konsole und niemand erführe davon. */
+    SPEICHER.timer = setTimeout(() => { SPEICHER.timer = null; store.sofort().catch(() => {}); }, SPEICHER.entprellung);
+    store.standMelden();
   },
-  /* sofort schreiben (beim Schließen, Moduswechsel, Export) */
+  /* sofort schreiben (beim Schließen, Moduswechsel, Export, Auftragsabschluss) */
   sofort(){
     if (SPEICHER.timer) { clearTimeout(SPEICHER.timer); SPEICHER.timer = null; }
-    if (!SPEICHER.schmutzig || !SPEICHER.schreiber) return Promise.resolve();
+    if (!SPEICHER.schmutzig || !SPEICHER.schreiber) { store.standMelden(); return Promise.resolve(false); }
     SPEICHER.schmutzig = false;
-    return Promise.resolve(SPEICHER.schreiber(SPEICHER.daten)).catch(e => { SPEICHER.schmutzig = true; throw e; });
+    /* scheitern merkt den Fehler und gibt ihn zurück — geworfen wird erst im Versprechen,
+       sonst flöge ein synchroner Wurf aus sofort() heraus (im Test aufgefallen). */
+    const scheitern = e => {
+      SPEICHER.schmutzig = true;                 /* nichts geht verloren: der nächste Versuch nimmt ihn mit */
+      SPEICHER.fehler = {name: (e && e.name) || "Fehler", text: String((e && e.message) || e || "unbekannt")};
+      store.standMelden();
+      return e instanceof Error ? e : new Error(String(e));
+    };
+    let p;
+    try { p = Promise.resolve(SPEICHER.schreiber(SPEICHER.daten)); }
+    catch (e) { return Promise.reject(scheitern(e)); }
+    return p.then(() => { SPEICHER.letzterErfolg = Date.now(); SPEICHER.fehler = null; store.standMelden(); return true; },
+                  e => { throw scheitern(e); });
+  },
+  /* Zustand des Speicherns: art = "schreibt" | "gesichert" | "fehler" (+ Fehlertext, Zeitpunkt) */
+  stand(){
+    if (SPEICHER.fehler) return {art: "fehler", fehler: SPEICHER.fehler, zeit: SPEICHER.letzterErfolg};
+    if (SPEICHER.schmutzig || SPEICHER.timer) return {art: "schreibt", fehler: null, zeit: SPEICHER.letzterErfolg};
+    return {art: "gesichert", fehler: null, zeit: SPEICHER.letzterErfolg};
+  },
+  /* Stand melden — nur bei echter Änderung, damit der Bus nicht bei jedem Tastendruck feuert */
+  standMelden(){
+    const s = store.stand(), k = s.art + "|" + (s.fehler ? s.fehler.name : "");
+    if (k === SPEICHER.standKennung) return s;
+    SPEICHER.standKennung = k;
+    Bus.senden("speicher-stand", s);
+    if (s.art === "fehler") Bus.senden("speicher-fehler", s.fehler);
+    return s;
   },
   /* vom Start aufgerufen, bevor der Lernmotor lädt */
   initialisieren(daten, schreiber, meldung){
+    if (SPEICHER.timer) { clearTimeout(SPEICHER.timer); SPEICHER.timer = null; }
     SPEICHER.daten = daten && typeof daten === "object" ? daten : {};
     SPEICHER.schreiber = schreiber || null;
     SPEICHER.meldung = meldung || null;
+    SPEICHER.fehler = null; SPEICHER.standKennung = null;
+    store.standMelden();
   },
   alles(){ return tief(SPEICHER.daten); },
-  schreiberSetzen(fn){ SPEICHER.schreiber = fn; if (SPEICHER.schmutzig) store.markieren(); },
+  schreiberSetzen(fn){ SPEICHER.schreiber = fn || null; if (SPEICHER.schmutzig) store.markieren(); },
   get meldung(){ return SPEICHER.meldung; },
+  get entprellungMs(){ return SPEICHER.entprellung; },
 };
 
 /* Frühstart: Der Lernmotor liest store schon beim Laden seines Skripts. Deshalb füllt dieser Block den

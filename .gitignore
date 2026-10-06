@@ -24,3 +24,10 @@ dist/
 # Messprofile und Bilder des Starttests (tools/starttest.py legt sie im TEMP an, falls jemand --bild . nutzt)
 _sonde-*/
 *.beiseite
+
+# Android-Fassung (android/): Zwischenstände und Signaturschlüssel bleiben lokal.
+# Die APK selbst gehört wie die .exe in den Ordner Programm/, nicht ins Git.
+android/bau/
+android/signatur/
+Programm/**/*.apk
+Programm/**/*.idsig

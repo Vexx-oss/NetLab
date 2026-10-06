@@ -131,6 +131,27 @@ UI.app = (() => {
     stufe: x => x == null ? "Stufe –" : `Stufe ${x}`,
     offen: x => x == null ? "0 offen" : `${zahlDe(x)} offen`,
   };
+  /* Speicher-Kennzeichen: drei Zustände, kein Klickziel, keine Animation, nur ein leiser Text.
+     Die Breite zählt (Telefon in beiden Ausrichtungen): auf sehr schmalen Geräten (≤ 380 px)
+     steht nur das Zeichen, das Ausführliche immer im Titel. Angeschlossen an Bus
+     „speicher-stand“ aus src/kern/basis.js. */
+  const STAND_TEXT = {schreibt: "… sichert", gesichert: "✓ gesichert", fehler: "⚠ nicht gesichert"};
+  const STAND_KURZ = {schreibt: "…", gesichert: "✓", fehler: "⚠"};
+  const schmal = () => typeof matchMedia !== "undefined" && matchMedia("(max-width: 380px)").matches;
+  function standZeigen(s){
+    if (!el.stand) return;
+    s = s && s.art ? s : store.stand();
+    const zeit = s.zeit ? new Date(s.zeit).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) : null;
+    el.stand.textContent = (schmal() ? STAND_KURZ : STAND_TEXT)[s.art] || "";
+    el.stand.title = s.art === "fehler"
+      ? `Spielstand NICHT gesichert (${s.fehler?.name || "Fehler"}): ${s.fehler?.text || ""}`
+      : s.art === "schreibt" ? "Der Spielstand wird geschrieben …"
+      : `Spielstand gesichert${zeit ? " um " + zeit : ""}`;
+  }
+  Bus.an("speicher-stand", standZeigen);
+  if (typeof matchMedia !== "undefined") {
+    try { matchMedia("(max-width: 380px)").addEventListener("change", () => standZeigen()); } catch (e) { /* alte Browser */ }
+  }
   function status(s = {}){
     /* Fortschritt zur nächsten Stufe als feiner Balken unter „Stufe N“ (Ruf UND Können zählen, der kleinere Anteil bestimmt) */
     if ("fortschritt" in s && el.werte?.stufe) {
@@ -178,13 +199,15 @@ UI.app = (() => {
       offen: wertEl("wert-offen", "postfach", "Offene Tickets im Postfach", () => ansicht("postfach")),
     };
     el.thema = knopf("sonne", "Hell/Dunkel", themaUmschalten);
+    el.stand = h("span", {class: "sp-leise", "aria-live": "polite", role: "status"});
     const kopf = h("header", {class: "kopf"},
       h("div", {class: "kopf-marke"},
         sv("svg", {viewBox: "0 0 32 32", width: 28, height: 28, class: "marke-sym", "aria-hidden": "true"},
           sv("rect", {x: 1.5, y: 1.5, width: 29, height: 29, rx: 8}),
           sv("path", {d: "M9 21V11h5v5h5v-5h4"}), sv("circle", {cx: 9, cy: 21, r: 2.2}), sv("circle", {cx: 23, cy: 11, r: 2.2}), sv("circle", {cx: 19, cy: 21, r: 2.2}), sv("path", {d: "M19 16v5"})),
         h("span", {class: "marke-name"}, "Netzwerk-Labor"),
-        h("span", {class: "marke-version", title: typeof LABOR_BAU !== "undefined" ? "Baukennung " + LABOR_BAU + " (aus dem Inhalt der Bausteine)" : ""}, "v" + (typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : "dev"))),
+        h("span", {class: "marke-version", title: typeof LABOR_BAU !== "undefined" ? "Baukennung " + LABOR_BAU + " (aus dem Inhalt der Bausteine)" : ""}, "v" + (typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : "dev")),
+        el.stand),
       h("div", {class: "kopf-werte"}, el.werte.euro.b, el.werte.ruf.b, el.werte.stufe.b, el.werte.offen.b),
       h("div", {class: "kopf-knoepfe"},
         knopf("suche", "Befehlspalette (Strg+K)", () => UI.palette.oeffnen(), "Strg+K"),
@@ -200,6 +223,7 @@ UI.app = (() => {
     const alt = {...wert}; for (const k of Object.keys(wert)) wert[k] = undefined;
     status(alt);
     themaAnwenden();
+    standZeigen(store.stand());          /* frisch aufgebaut: den letzten Speicherstand zeigen */
     dockZeichnen();
     const ziel = aktiv && ansichten.has(aktiv) ? aktiv : "labor";
     aktiv = null;

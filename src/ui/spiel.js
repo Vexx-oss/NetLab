@@ -43,6 +43,11 @@ UI.spiel = (() => {
     S.inst = r.inst; S.live = null; S.hilfeOffen = false; S.hilfeAnsicht = null; S.demo = null; S.coach = null;
     S.mappe = {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false};
     const niveau = Spiel.niveauVon(r.inst);
+    /* Sanftes Onboarding (Bau P7), Station 1: Die Entscheidung steht VOR `UI.labor.laden`, weil
+       das Laden die Auftragszeile sofort zeichnet – sonst käme die Begrüßungskarte erst beim
+       nächsten Neuzeichnen (gemessen: sie fehlte im ersten Bild). */
+    S.einstiegStart = Spiel.einstieg.begruessungNoetig();
+    S.einstiegSchluss = false;
     UI.labor.laden(r.netz, {titel: r.def.titel, verlauf: r.verlauf, auftrag: el => auftrag(el),
       ebene: UI.ebenen.fuerSkills(r.def.skills), ansichtMenue: niveau !== "E", fernwartung: r.def.fernwartung || null,
       fernInfo: r.def.fernwartung ? fernInfo(r.def, r.inst) : null,
@@ -51,10 +56,17 @@ UI.spiel = (() => {
     if (ansicht) UI.app.ansicht("labor");
     liveJetzt();
     seniorPlanen();
-    const coach = !Spiel.st.einstieg.fertig && r.def.id === Spiel.EINSTIEG_TICKET && coachStart();
+    /* Die Einführung FÜHRT die erste Handlung: Das Kabel-Werkzeug ist schon gewählt, wenn die
+       Begrüßung steht – der Rauchtest zieht das erste Kabel mit echten Mausereignissen, ohne die
+       Karte anzuklicken; ohne vorgewähltes Werkzeug würde er ein Gerät verschieben statt zu ziehen. */
+    if (S.einstiegStart) { try { UI.labor.werkzeug("kabel"); } catch (e) { /* egal */ } }
+    const coach = !S.einstiegStart && !Spiel.st.einstieg.fertig && r.def.id === Spiel.EINSTIEG_TICKET && coachStart();
     /* Beim ersten Öffnen klappt die Mappe einmal auf (Brief, oder Ziele, wenn der Brief im Postfach schon gelesen wurde).
-       Im ersten Auftrag übernehmen Willkommen und Coach diese Rolle. Prüfung: keine Mappe. */
-    if (erstesMal && !coach && r.inst.quelle !== "pruefung") mappeAuf(r.def.hotline ? "anruf" : briefGelesen ? "ziele" : "brief", true);
+       Im ersten Auftrag übernehmen Willkommen und Coach diese Rolle. Prüfung: keine Mappe.
+       `S.einstiegStart` zählt dabei wie der Coach: Die Begrüßungskarte erklärt den Auftrag – eine
+       zusätzlich aufklappende Mappe läge über der Zeichenfläche und verdeckte die Geräte
+       (gemessen: `tools/rauch.py` meldete „sw1 unter div.am-brief“). */
+    if (erstesMal && !coach && !S.einstiegStart && r.inst.quelle !== "pruefung") mappeAuf(r.def.hotline ? "anruf" : briefGelesen ? "ziele" : "brief", true);
     status();
   }
   /* Fernwartung (F2): Was zeigt der Bildschirm des Kunden? Das Ziel, das gerade nicht geht – als Symbol mit Namen. */
@@ -108,6 +120,7 @@ UI.spiel = (() => {
         h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfe, Nachschlagen, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
     const ungespeichert = Spiel.speichernErwartet(def, niveau) ? Spiel.ungespeicherteGeraete(inst) : [];
     el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, zeile,
+      S.einstiegStart ? einstiegKarte() : null,
       ungespeichert.length ? h("p", {class: "sp-ungespeichert"}, "💾 Nicht gespeichert: ", ungespeichert.map(g => g.name).join(", "),
         niveau === "AP2" ? " – die Abnahme startet die Geräte neu!" : " – nach einem Neustart wäre die Änderung weg.") : null,
       S.coach ? coachLeiste() : null,
@@ -451,6 +464,10 @@ UI.spiel = (() => {
     }
     /* Nachbesprechung in höchstens drei Blöcken (Design – Spielspaß 2.0, Hebel 1):
        ① Sterne + Lohn (Abzüge, Abzeichen, Tagesziel, Fertigkeit nur als kurze Zeile, wenn es sie gibt) · ② Dein Weg · ③ Merke */
+    /* Station 3 (Bau P7): einmaliges Abschluss-Feedback nach dem ersten bestandenen Auftrag.
+       `abschlussZeigen()` setzt das Kennzeichen in `st.einstieg` und liefert genau beim ersten Mal
+       true – ein alter Spielstand hat keine Begrüßung gesehen und bekommt hier nie etwas zu sehen. */
+    const einstiegSchluss = Spiel.einstieg.abschlussZeigen();
     const sterne = erg.sterne;
     const tagStand = erg.inst.quelle !== "pruefung" ? Spiel.tag.heute() : null;
     const feierabend = !!(tagStand && tagStand.fertig && !tagStand.abschlussGezeigt);
@@ -496,6 +513,10 @@ UI.spiel = (() => {
         h("div", {class: "sp-merke-fuss"},
           def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
           typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, "📖 Nachlesen") : null)) : null,
+      einstiegSchluss ? h("section", {class: "sp-block sp-einstieg sp-einstieg-schluss"},
+        h("h3", {}, "Willkommen angekommen"),
+        h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_LERNEN),
+        h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_WEG)) : null,
       h("div", {class: "sp-knoepfe"},
         weiterKnopf,
         h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("heute"); }}, "Übersicht"),
@@ -651,13 +672,37 @@ UI.spiel = (() => {
       h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer gross", onclick: () => { schliessen?.(); oeffnen(inst.iid); }}, angefangen ? "Weiterarbeiten ▸" : "Auftrag annehmen ▸"))));
   }
 
+  /* ---------- Sanftes Onboarding (Bau P7), Station 1: die Begrüßungskarte ----------
+     Sie sitzt IN der Auftragszeile (`.sp-auftrag`), nicht als Overlay über der Fläche. Grund:
+     `tools/rauch.py` zieht das erste Kabel mit echten Mausereignissen über Bildschirmkoordinaten
+     und prüft, dass in der Mitte JEDES Geräts das Gerät selbst liegt – ein Overlay über der
+     Zeichenfläche würde diese erste Handlung abfangen. Die Karte führt sie stattdessen: das
+     Kabel-Werkzeug ist schon gewählt (s. oeffnen), und der Weg steht als Text daneben. */
+  function einstiegKarte(){
+    const T = Spiel.EINSTIEG_TEXTE;
+    const wahl = weg => {
+      Spiel.einstieg.waehlen(weg);
+      S.einstiegStart = false;
+      if (weg === "umsehen") { UI.app.ansicht("heute"); return; }        /* im Hub umsehen; der Auftrag bleibt offen */
+      if (!S.coach && S.inst && Spiel.defVon(S.inst).id === Spiel.EINSTIEG_TICKET) coachStart();   /* Station 2 */
+      UI.labor.auftragNeu();
+    };
+    return h("div", {class: "sp-einstieg sp-einstieg-start"},
+      h("p", {class: "sp-einstieg-text"}, T.BEGRUESSUNG),
+      h("div", {class: "sp-einstieg-knoepfe"},
+        h("button", {type: "button", class: "knopf primaer", onclick: () => wahl("auftrag")}, T.WEG_AUFTRAG),
+        h("button", {type: "button", class: "knopf geist", onclick: () => wahl("umsehen")}, T.WEG_UMSEHEN)));
+  }
   /* ---------- Onboarding: erstes Ticket mit Coach-Hinweisen ---------- */
   /* Textdiät (A4): je Schritt genau ein Satz und ein Knopf; das passende Werkzeug ist schon gewählt.
      Einstieg in 90 s (Hebel 7): statt Willkommensfenster spricht der Senior in zwei kurzen Blasen (zusammen ≤ 25 Wörter);
      die zweite Blase kommt nach 2,6 s oder auf Klick. */
   const COACH = [
-    {blasen: [k => `Hallo, ich bin der Senior. ${(k.ansprechpartner?.name || k.name).split(" ")[0]} vom ${k.name} braucht uns!`,
-              () => "Ihre Kasse hat kein Kabel – zieh eins von der Kasse zum Switch."], werkzeug: "kabel", zeigen: ["kasse", "sw1"]},
+    /* Station 2 (Bau P7): EINE Anweisung statt der Sprechblase des Seniors. Sie nennt den WEG
+       (Kabel-Werkzeug), nicht die LÖSUNG: Das Ziel des Auftrags ist „Die Kasse druckt auf dem
+       Drucker“; welches Gerät seinen Link verloren hat und wo der Switch hängt, sieht der Spieler
+       selbst. Deshalb auch keine Geräte-Hervorhebung mehr – die zeigte genau das Paar. */
+    {text: Spiel.EINSTIEG_TEXTE.HINWEIS, werkzeug: "kabel", zeigen: []},
     {text: "Prüf es wie ein Profi: Zieh mit dem Ping-Werkzeug von der Kasse auf den Drucker.", werkzeug: "ping", zeigen: ["kasse", "drucker"]},
     {text: "Paket angekommen – jetzt fehlt nur noch die Abnahme.", werkzeug: "auswahl", zeigen: []},
   ];
@@ -666,7 +711,7 @@ UI.spiel = (() => {
     S.coach = {schritt: 0, blase: 0, neu: true};
     coachZeigen();
     UI.labor.auftragNeu();          /* Zeile sofort zeigen – vor dem Einpassen im nächsten Frame */
-    S.coach.timer = setTimeout(() => coachBlase(1), 2600);
+    if (COACH[0].blasen) S.coach.timer = setTimeout(() => coachBlase(1), 2600);
     return true;
   }
   function coachBlase(n){
@@ -689,7 +734,7 @@ UI.spiel = (() => {
     const def = S.inst ? Spiel.defVon(S.inst) : null, k = kunde(S.inst?.kunde || def?.kunde);
     const text = c.blasen ? c.blasen[S.coach.blase || 0](k) : c.text;
     const mehr = !!c.blasen && (S.coach.blase || 0) < c.blasen.length - 1;
-    const el = h("div", {class: "sp-coach" + (S.coach.neu ? " neu" : "") + (mehr ? " weiter" : ""), "data-hinweisquelle": "coach",
+    const el = h("div", {class: "sp-coach" + (!c.blasen ? " hinweis" : "") + (S.coach.neu ? " neu" : "") + (mehr ? " weiter" : ""), "data-hinweisquelle": "coach",
       title: mehr ? "Klick: weiter" : null, onclick: mehr ? () => coachBlase((S.coach.blase || 0) + 1) : null},
       h("span", {class: "sp-coach-sym", "aria-hidden": "true"}, "🧑‍🔧"), h("p", {class: "sp-blase"}, text),
       h("button", {type: "button", class: "knopf geist klein", onclick: e => { e.stopPropagation(); clearTimeout(S.coach?.timer); S.coach = null; Spiel.einstSetzen("coach", false); UI.labor.auftragNeu(); }}, "Hinweise aus"));

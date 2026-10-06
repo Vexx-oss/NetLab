@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Netzwerk-Labor für Android — Hülle um die Browser-Fassung.
+  Kein INTERNET-Recht: die Seite wird nicht aus dem Netz geladen, sondern aus den
+  Assets der App beantwortet (siehe MainActivity.shouldInterceptRequest). Damit kann
+  die App nichts nachladen, auch nicht versehentlich.
+
+  DREHUNG (geändert 06.10.2026, Fassung 1.2.1 / versionCode 10202)
+  Bis hierher stand android:screenOrientation="sensorLandscape" — die App war auf
+  Querformat festgenagelt. Jetzt steht dort ausdrücklich "unspecified", also die
+  Voreinstellung des Systems. Die Wahl ist begründet:
+    * "unspecified" überlässt die Entscheidung dem Nutzer und dem System. Ist die
+      Automatik-Drehung eingeschaltet, dreht die App in Hoch- und Querformat; ist sie
+      ausgeschaltet, bleibt die App in der Lage, die der Nutzer eingestellt hat. Die
+      App trägt beide Lagen, sie schreibt aber keine vor.
+    * "fullUser" wurde verworfen: das dreht auch dann, wenn der Nutzer die
+      Automatik-Drehung im System absichtlich abgeschaltet hat (im Liegen, im
+      Halter). Eine bewusste Systemeinstellung zu übergehen, ist kein Gewinn.
+    * "fullSensor" wurde verworfen: dreht zusätzlich kopfüber (180°) und übergeht die
+      Systemeinstellung ebenso. Ein kopfüber gehaltenes Lernspiel ist nichts wert.
+    * "portrait" wäre nur die Sperre in die andere Richtung — dieselbe Einschränkung,
+      die hier fallen soll.
+  screenOrientation steht genau einmal in dieser Datei: kein zweiter Stand.
+
+  configChanges — was hier NICHT steht, erzeugt die Activity neu, und onCreate ist die
+  einzige Stelle, die lädt. Die Liste ist deshalb vollständig zu halten:
+    orientation, screenSize, screenLayout, smallestScreenSize  → das Drehen selbst
+    keyboard, keyboardHidden, navigation, touchscreen          → Tastatur, Dock, Maus
+    density, uiMode, fontScale, colorMode                      → Anzeige, Schrift, Thema
+    locale, layoutDirection                                    → Sprache, Leserichtung
+  Diese Wechsel trägt die Seite selbst: die WebView wird nicht neu erzeugt, sie legt
+  sich nur neu aus, und die Seite reagiert auf die neue Größe. "colorMode" und
+  "locale" sind neu hinzugekommen — die App hat nur eine Sprache und keine
+  Farbmodus-Ressourcen, ein Neuerzeugen brächte also nichts, würde aber den
+  Spielstand im Arbeitsspeicher verwerfen. Für alles, was hier trotzdem fehlen kann
+  (z. B. grammaticalGender ab Android 14), liegt in MainActivity ein zweites Netz:
+  onSaveInstanceState/restoreState stellt die Seite ohne loadUrl wieder her.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="oss.vexx.netlab">
+    <!-- versionCode und versionName setzt android/bauen.py aus VERSION in bauen.py.
+         Hier stehen sie absichtlich nicht: ein zweiter Stand an dieser Stelle würde
+         irgendwann von der echten Version abweichen. -->
+
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_rund"
+        android:theme="@style/NetzwerkLabor"
+        android:hardwareAccelerated="true"
+        android:allowBackup="true"
+        android:supportsRtl="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="unspecified"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|touchscreen|density|uiMode|fontScale|colorMode|locale|layoutDirection"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

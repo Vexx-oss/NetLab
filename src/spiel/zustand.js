@@ -97,9 +97,47 @@ Spiel.skillsRegistrieren = function(){
 };
 Spiel.skill = id => (DATEN.skills || []).find(s => s.id === id) || {id, name: id, ap: "AP1", stufe: 1};
 
+/* Rollierende Zweitsicherung: der bisherige Stand wird unter einem zweiten Schlüssel weggelegt
+   (< "labor-sicherung"). Ohne `erzwingen` nur vor einer echten Migration (v < Spiel.VERSION) —
+   sonst wüchse der Spielstand bei jedem Start um eine Kopie. Eine Generation, gemessen 26.554 B.
+   `erzwingen = true` legt immer ab (vor einem Import, dort gibt es keine Versionsgrenze). */
+Spiel.SICHERUNG = "labor-sicherung";
+Spiel.SICHERUNG_FRISCH_MS = 60 * 1000;         /* so lange bleibt eine frische Sicherung stehen */
+Spiel.sicherungAnlegen = function(roh, erzwingen = false){
+  if (!roh || typeof roh !== "object" || Array.isArray(roh)) return false;
+  const v = typeof roh.v === "number" && isFinite(roh.v) ? roh.v : 0;
+  if (!erzwingen && v >= Spiel.VERSION) return false;
+  /* Eine gerade angelegte Sicherung (vor einem Import) wird nicht sofort überschrieben: sonst
+     ersetzte die Migration direkt nach dem Neuladen genau die Sicherung, die den Vorzustand hält. */
+  const alt = store.get(Spiel.SICHERUNG, null);
+  if (alt && typeof alt.zeit === "number" && jetzt() - alt.zeit < Spiel.SICHERUNG_FRISCH_MS) return false;
+  store.set(Spiel.SICHERUNG, {v, zeit: jetzt(), stand: roh});
+  return true;
+};
+Spiel.sicherung = function(){
+  const s = store.get(Spiel.SICHERUNG, null);
+  return s && s.stand ? s : null;
+};
+/* Einen eingelesenen Spielstand prüfen, BEVOR er den laufenden ersetzt.
+   Abgewiesen werden FREMDES (falsches Format) und ZU NEUES (Standversion über der des Programms).
+   Ein ALTER Stand ist ausdrücklich erlaubt — auch ohne v-Feld (Stände vor v:2): die Migration holt
+   ihn herein. Geprüft wird die Schemaversion (labor.v), nicht die Programmversion der Datei:
+   Programmkennungen wie „dev" oder Datumsbauten sind als Vergleich zu unzuverlässig. */
+Spiel.importPruefen = function(d){
+  if (!d || typeof d !== "object" || d.format !== "netzwerk-labor" || !d.speicher || typeof d.speicher !== "object")
+    return {ok: false, grund: "Das ist kein Netzwerk-Labor-Spielstand."};
+  const lab = d.speicher.labor;
+  const v = lab && typeof lab.v === "number" && isFinite(lab.v) ? lab.v : 0;
+  if (v > Spiel.VERSION)
+    return {ok: false, zuNeu: true, v, grund: `Dieser Spielstand stammt aus einer neueren Fassung (Stand v${v}); dieses Programm kennt nur v${Spiel.VERSION}.`};
+  return {ok: true, v};
+};
+
 Spiel.laden = function({neu = false} = {}){
   Spiel.skillsRegistrieren();
-  Spiel._st = neu ? Spiel.leererStand() : Spiel.migrieren(store.get("labor", null));
+  const roh = neu ? null : store.get("labor", null);
+  Spiel.sicherungAnlegen(roh);                 /* vor der Migration: den alten Stand weglegen */
+  Spiel._st = neu ? Spiel.leererStand() : Spiel.migrieren(roh);
   Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD, store.get("einst", {}) || {});
   for (const [name, fn] of Object.entries(Spiel.ergaenzer)) {
     try { fn(Spiel._st); } catch (e) { typeof console !== "undefined" && console.error("Spiel.ergaenzer." + name, e); }

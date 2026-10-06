@@ -17,8 +17,8 @@
   font:600 14px/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap; transition:background var(--dauer), border-color var(--dauer)}
 button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .wert .sym{flex:0 0 auto}
-.wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym{color:var(--accent)} .wert-offen .sym{color:var(--muted)}
-.wert-offen.hat{border-color:var(--accent); background:var(--accent-soft)} .wert-offen.hat .sym{color:var(--accent)}
+.wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym, .wert-offen.hat .sym{color:var(--accent)} .wert-offen .sym{color:var(--muted)}
+.wert-offen.hat{border-color:var(--accent); background:var(--accent-soft)} 
 .wert.leer .wert-zahl{color:var(--faint)}
 .wert.mit-fortschritt{position:relative; overflow:hidden}
 .wert.mit-fortschritt::after{content:""; position:absolute; left:0; bottom:0; height:3px; width:var(--fortschritt, 0%); background:var(--accent); border-radius:0 3px 3px 0; transition:width .6s ease}
@@ -28,13 +28,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 @keyframes wert-leuchten{0%{box-shadow:0 0 0 0 var(--ok); border-color:var(--ok)} 35%{box-shadow:0 0 0 5px transparent; background:var(--ok-soft)} 100%{box-shadow:0 0 0 0 transparent}}
 @keyframes wert-leuchten-runter{0%{box-shadow:0 0 0 0 var(--bad); border-color:var(--bad)} 35%{box-shadow:0 0 0 5px transparent; background:var(--bad-soft)} 100%{box-shadow:0 0 0 0 transparent}}
 .kopf-knoepfe{display:flex; align-items:center; gap:4px; flex:0 0 auto}
-.kopf-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:40px; height:40px; padding:0 10px; border-radius:10px; border:1px solid transparent; background:none; color:var(--muted);
+.kopf-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:40px; height:40px; padding:0 10px; border-radius:var(--radius); border:1px solid transparent; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer), border-color var(--dauer)}
 .kopf-knopf:hover{background:var(--panel-3); color:var(--ink)}
 .kopf-knopf.mit-text span{font:600 13px/1 var(--body)}
 .kopf-knopf.mit-text:first-child span{font:500 11px/1 var(--mono); color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:3px 5px}
-@media (max-width:1180px){ .kopf-knopf.mit-text:first-child span{display:none} .marke-version{display:none} }
-@media (max-width:980px){ .kopf-knopf.mit-text span{display:none} .wert-stufe{display:none} }
+@media (max-width:1180px){ .kopf-knopf.mit-text:first-child span, .marke-version{display:none}  }
+@media (max-width:980px){ .kopf-knopf.mit-text span, .wert-stufe{display:none}  }
 
 /* ---- Andock-Leiste ---- */
 .dock{grid-row:2; display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 0; background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; overflow-x:hidden}
@@ -51,7 +51,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 /* ---- Fläche und Ansichten ---- */
 .flaeche{grid-row:2; grid-column:2; position:relative; min-width:0; min-height:0; overflow:hidden}
 .ansicht{position:absolute; inset:0; overflow:auto}
-.ansicht[hidden]{display:none}
+.ansicht[hidden], .ex-text[hidden]{display:none}
 .platzhalter{max-width:520px; margin:12vh auto 0; padding:36px 32px; text-align:center; background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:var(--schatten)}
 .ph-sym{display:inline-flex; width:84px; height:84px; align-items:center; justify-content:center; border-radius:24px; background:var(--accent-soft); color:var(--accent); margin-bottom:16px}
 .platzhalter h2{font-size:28px; font-weight:800; margin-bottom:8px}
@@ -59,7 +59,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .ph-mehr{color:var(--muted); margin-bottom:22px}
 
 /* ---- Knöpfe (allgemein) ---- */
-.knopf{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 16px; border-radius:10px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink);
+.knopf{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 16px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink);
   font:600 14px/1 var(--body); transition:background var(--dauer), border-color var(--dauer), transform var(--dauer)}
 .knopf:hover{background:var(--panel-3); border-color:var(--accent)}
 .knopf:active{transform:translateY(1px)}
@@ -74,9 +74,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .toast.weg{opacity:0; transform:translateY(6px)}
 /* im Labor: oben rechts, neueste unten angehängt, kompakter */
 .toast-stapel.im-labor{transform:none; flex-direction:column; align-items:flex-start}
-.toast-stapel.im-labor .toast{max-width:100%}
+.toast-stapel.im-labor .toast{max-width:100%; padding:8px 6px 8px 10px; gap:10px}
 .lb-leinwand.unter-toast .lb-hinweis{visibility:hidden}
-.toast-stapel.im-labor .toast{padding:8px 6px 8px 10px; gap:10px}
 .toast-stapel.im-labor .toast-text{font-size:13.5px}
 .toast-stapel.im-labor .toast-sym{width:26px; height:26px}
 .toast-sym{display:inline-flex; flex:0 0 auto; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--panel-3); color:var(--muted)}
@@ -101,7 +100,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .menue-punkt:hover:not([disabled]), .menue-punkt:focus-visible{background:var(--panel-3); outline:none}
 .menue-punkt[disabled]{color:var(--faint); cursor:default}
 .menue-punkt .sym{color:var(--muted); flex:0 0 auto}
-.menue-punkt.gefahr{color:var(--bad)} .menue-punkt.gefahr .sym{color:var(--bad)}
+.menue-punkt.gefahr, .menue-punkt.gefahr .sym{color:var(--bad)} 
 .menue-leer-sym{width:16px; flex:0 0 auto}
 .menue-text{flex:1 1 auto}
 .menue-punkt kbd{margin-left:auto; color:var(--faint)}
@@ -111,7 +110,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .menue-ports{min-width:260px}
 .popover{max-width:none}
 .schnellwahl{display:grid; grid-template-columns:repeat(4, 76px); gap:4px; padding:2px}
-.sw-teil{display:flex; flex-direction:column; align-items:center; gap:2px; min-height:70px; padding:6px 2px; border:1px solid transparent; border-radius:10px; background:none; color:var(--ink); font:600 11.5px/1.1 var(--body)}
+.sw-teil{display:flex; flex-direction:column; align-items:center; gap:2px; min-height:70px; padding:6px 2px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--ink); font:600 11.5px/1.1 var(--body)}
 .sw-teil:hover, .sw-teil:focus-visible{background:var(--panel-3); border-color:var(--line-2); outline:none}
 
 /* ---- Befehlspalette ---- */
@@ -144,7 +143,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .dialog-huelle.da .dialog{transform:none}
 .dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line)}
 .dialog-kopf h2{font-size:22px; font-weight:800}
-.dialog-zu{margin-left:auto; display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center; border:0; border-radius:10px; background:none; color:var(--muted)}
+.dialog-zu{margin-left:auto; display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
 .dialog-zu:hover{background:var(--panel-3); color:var(--ink)}
 .dialog-inhalt{overflow:auto; padding:8px 22px 22px}
 .einst-abschnitt{padding:14px 0 6px; border-bottom:1px solid var(--line)}
@@ -157,7 +156,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .einst-steuer{flex:0 0 auto}
 .einst-zeile.gesperrt .einst-steuer{opacity:.4; filter:grayscale(1)}
 .einst-zeile.gesperrt strong{color:var(--muted)}
-.einst-grund{color:var(--warn) !important}
+.einst-text .einst-grund{color:var(--warn)}
 .einst-fuss{padding-top:14px; color:var(--faint); font-size:12.5px}
 .wahl{display:inline-flex; padding:3px; gap:2px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line)}
 .wahl-knopf{min-height:34px; padding:0 12px; border:0; border-radius:8px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
@@ -178,13 +177,10 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .kuerzel dd{margin:0; color:var(--muted); font-size:13.5px}
 @media (max-width:760px){ .kuerzel{grid-template-columns:1fr} .einst-zeile{flex-direction:column; align-items:flex-start} }
 
-html[data-bewegung="aus"] *, html[data-bewegung="aus"] *::before, html[data-bewegung="aus"] *::after{animation:none !important; transition:none !important}
-
 /* ---- „Erklär mir das“ (ui/erklaeren.js, Präfix ex-): Lehrtext erst auf Klick ---- */
 .ex{display:inline-flex; flex-direction:column; align-items:flex-start; gap:4px; max-width:100%}
 .ex-knopf{border:0; padding:2px 0; background:none; color:var(--accent); font:600 12.5px/1.3 var(--body); text-decoration:underline; text-underline-offset:3px; cursor:pointer}
 .ex-knopf:hover{color:var(--ink)}
 .ex-text{display:flex; flex-direction:column; gap:4px; padding:6px 10px; border-left:3px solid var(--accent); background:var(--panel-2); border-radius:0 8px 8px 0; color:var(--ink); font-size:13px; line-height:1.45}
 .ex-text p{margin:0}
-.ex-text[hidden]{display:none}
 .ex-quelle{color:var(--faint); font-size:11.5px}

@@ -65,6 +65,9 @@
     /* Erneuerung bei 50 % (Architektur § 10.3): Läuft noch eine gültige Lease, ist aber T1 erreicht, wird sie
        erneuert statt neu bezogen – dieselbe Adresse, dieselben Nachrichtentypen (request/ack), kein Discover. */
     const alt = z.dhcp[port];
+    /* Vor dem Löschen merken, ob eine echte Lease abgelaufen ist: `L.t > l.bis` ist die erste
+       Hälfte der Vertragsregel für DHCP_LEASE_EXPIRED (Architektur § 10.4). */
+    const abgelaufen = !!(alt && !alt.apipa && alt.bis != null && alt.bis <= L.t) ? alt : null;
     const erneuern = alt && !alt.apipa && alt.bis > L.t && alt.t1 != null && L.t >= alt.t1;
     if (!erneuern) delete z.dhcp[port];
     const ifc = L3().schnittstellen(L, g).find(i => i.port === port);
@@ -121,9 +124,17 @@
     const ip = apipaAdresse(ifc.mac);
     z.dhcp[port] = {ip, maske: "255.255.0.0", gw: "", dns: "", apipa: true, server: null, bis: L.t + 300000}; Sim._cacheNeu(L);
     const vorher = Sim._erster(L, idx0);
-    const grund = vorher && vorher.grund === "DHCP_POOL_EMPTY" ? "DHCP_POOL_EMPTY" : "DHCP_NO_OFFER";
-    const text = grund === "DHCP_POOL_EMPTY" ? `Der DHCP-Pool ist erschöpft. ${g.name} gibt sich selbst die APIPA-Adresse ${ip}/16.`
-                                             : `${g.name} bekommt kein DHCP-Angebot und gibt sich selbst die APIPA-Adresse ${ip}/16 (169.254.x.x). Damit erreicht es nur andere APIPA-Geräte.`;
+    /* Der Grund des Servers zählt, wenn er einen nennt – sonst entscheidet die Lage des Clients:
+       war eine Lease abgelaufen und kommt kein neues Angebot, ist DAS der Grund (Architektur § 10.4). */
+    const SERVERGRUENDE = ["DHCP_POOL_EMPTY", "DHCP_CONFLICT", "DHCP_RESERVED_BUSY", "DHCP_LEASE_EXPIRED"];
+    const grund = vorher && SERVERGRUENDE.includes(vorher.grund) ? vorher.grund
+                : abgelaufen ? "DHCP_LEASE_EXPIRED" : "DHCP_NO_OFFER";
+    const text = grund === "DHCP_LEASE_EXPIRED"
+      ? `Die Lease für ${abgelaufen.ip} ist abgelaufen (${Math.round(Math.max(0, L.t - abgelaufen.bis) / 1000)} s über der Ablaufzeit), ${g.name} bekommt kein neues Angebot und hat damit keine gültige Adresse mehr. Es gibt sich selbst die APIPA-Adresse ${ip}/16.`
+      : grund === "DHCP_POOL_EMPTY" ? `Der DHCP-Pool ist erschöpft. ${g.name} gibt sich selbst die APIPA-Adresse ${ip}/16.`
+      : grund === "DHCP_RESERVED_BUSY" ? `Die für ${g.name} reservierte Adresse ist belegt. ${g.name} bekommt kein Angebot und gibt sich selbst die APIPA-Adresse ${ip}/16.`
+      : grund === "DHCP_CONFLICT" ? `Im DHCP-Pool sind Adressen doppelt belegt, deshalb bleibt ${g.name} ohne Angebot und gibt sich selbst die APIPA-Adresse ${ip}/16.`
+      : `${g.name} bekommt kein DHCP-Angebot und gibt sich selbst die APIPA-Adresse ${ip}/16 (169.254.x.x). Damit erreicht es nur andere APIPA-Geräte.`;
     const e = Sim._log(L, "info", g.id, port, null, text, {grund, proto: "DHCP"});
     return {ok: false, grund, ursache: vorher ? vorher.grund : null, lease: null, apipa: ip, text, stelle: vorher || e};
   }

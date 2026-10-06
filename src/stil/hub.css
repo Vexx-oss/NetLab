@@ -28,7 +28,7 @@
 .hb-feier-knoepfe{display:flex; flex-direction:column; align-items:stretch; gap:6px; flex:none}
 .hb-aufwaermen h2, .hb-raetsel h2{font:800 22px/1.2 var(--display)}
 .hb-fortschritt{color:var(--muted); font-size:13px; margin:4px 0 10px}
-.hb-teilen{font:15px/1.6 var(--mono); padding:12px 14px; border-radius:10px; background:var(--panel-2); border:1px solid var(--line); margin:12px 0 8px; white-space:pre-wrap; user-select:all}
+.hb-teilen{font:15px/1.6 var(--mono); padding:12px 14px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line); margin:12px 0 8px; white-space:pre-wrap; user-select:all}
 .sp-raetsel .knopf{margin-left:6px}
 .sp-raetsel-zeile{letter-spacing:2px}
 @media (max-width:720px){ .hb-kacheln{grid-template-columns:1fr} .hb-seite{padding:20px 16px} }
@@ -40,7 +40,7 @@
 .dx-gruppe h4 small{color:var(--muted); font-weight:400}
 .dx-titel{font-size:12.5px; padding:2px 8px; border-radius:999px; background:color-mix(in srgb, var(--geld) 15%, var(--panel)); color:var(--geld)}
 .dx-raster{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px}
-.dx-karte{display:flex; gap:10px; align-items:center; padding:9px 11px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); text-align:left; font:inherit}
+.dx-karte{display:flex; gap:10px; align-items:center; padding:9px 11px; border-radius:var(--radius); border:1px solid var(--line); background:var(--panel-2); color:var(--ink); text-align:left; font:inherit}
 button.dx-karte{cursor:pointer}
 button.dx-karte:hover{border-color:var(--accent)}
 .dx-karte.unbekannt{border-style:dashed; color:var(--faint); background:none}
@@ -57,7 +57,6 @@ button.dx-karte:hover{border-color:var(--accent)}
 /* Erste Stunde: der Anruf klingelt auf der Hauptkarte */
 .hb-auftrag.klingelt{border-color:var(--ok)}
 .hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln 1.2s ease-in-out infinite}
-@media (prefers-reduced-motion: reduce){ .hb-auftrag.klingelt .sp-kunde-sym{animation:none} }
 /* § 20 F7: Wahl unter der Hauptkarte und Wochenziel */
 .hb-oder{grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin-top:-4px}
 .hb-oder small{color:var(--faint); font-size:12.5px}
@@ -71,3 +70,22 @@ button.dx-karte:hover{border-color:var(--accent)}
 .hb-woche-wahl{display:flex; flex-direction:column; gap:8px}
 .hb-woche-wahl .knopf{justify-content:flex-start; text-align:left}
 .hb-woche-wahl .knopf.an{border-color:var(--accent); background:var(--accent-soft)}
+
+/* ---------- Sanftes Onboarding (Bau P7) ----------
+   Die Klassen gehören zur Auftragszeile und zur Nachbesprechung (ui/spiel.js); sie stehen hier,
+   weil hub.css die passende Stildatei im Schreibbereich ist. Wichtig: Die Begrüßungskarte liegt
+   IN der Zeile über der Fläche – kein Overlay. Der Rauchtest zieht das erste Kabel mit echten
+   Mausereignissen; ein Overlay über der Zeichenfläche würde diese erste Handlung abfangen. */
+.sp-einstieg{display:flex; flex-direction:column; gap:8px; padding:12px 16px; border-radius:var(--radius)}
+.sp-einstieg-start{border:1px solid var(--accent); background:linear-gradient(90deg, var(--accent-soft), transparent 60%)}
+.sp-einstieg-text{font-size:15px; line-height:1.4; max-width:62ch}
+.sp-einstieg-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
+/* Station 2: eine ruhige Zeile statt der Sprechblase */
+.sp-coach.hinweis{align-items:center}
+.sp-coach.hinweis .sp-coach-sym{display:none}
+.sp-coach.hinweis .sp-blase{padding:0; background:none; border:0; font-size:15px; color:var(--ink)}
+/* Station 3: Abschluss-Feedback als eigener Block in der Nachbesprechung */
+.sp-einstieg-schluss{border-left:3px solid var(--accent); background:var(--accent-soft)}
+.sp-einstieg-schluss h3{font:800 15px/1.2 var(--display); margin-bottom:4px}
+.sp-einstieg-schluss p{font-size:15px; line-height:1.45; max-width:62ch}
+.sp-einstieg-schluss p + p{color:var(--muted); margin-top:4px}

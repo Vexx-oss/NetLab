@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dunkle Grundfläche des Spiels (#0E131B). Bewusst KEIN Fullscreen-Theme:
+         so bleiben Status- und Navigationsleiste eigene Bereiche und die Oberfläche
+         liegt nie unter Systemknöpfen. -->
+    <style name="NetzwerkLabor" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/hintergrund</item>
+        <item name="android:colorBackground">@color/hintergrund</item>
+        <item name="android:statusBarColor">@color/hintergrund</item>
+        <item name="android:navigationBarColor">@color/hintergrund</item>
+    </style>
+</resources>

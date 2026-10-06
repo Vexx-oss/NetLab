@@ -1,12 +1,15 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D
+status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D. 06.10.2026 Ruf „Substanz“ gebaut (§ 28): Speichern sichtbar und sofort, Auftragsvielfalt, mehr Inhalt, Minimalismus-Regelwerk, sanftes Onboarding – 251 Tests, Android-Fassung 1.2.1 (versionCode 10202)
 ---
 
 # 🎮 Design – Spielspaß 2.0
 
 ⬆️ [[10-Projekte/Lernprojekte/Netzwerk-Labor/Liesmich|Netzwerk-Labor]] · baut auf [[Plan – Ausbau 1.2]] (Phasen 0/A fertig) · Vertrag: [[Architektur]]
+
+> [!success] Stand 06.10.2026: Ruf „Substanz“ gebaut und gegengeprüft – Speichern, Vielfalt, Inhalt, Minimalismus, Onboarding
+> Auftragsabschluss schreibt jetzt nach **6,7 ms** statt 2436 ms und die Kopfzeile zeigt „✓ gesichert“ (drei Zustände, geprüft gegen den echten Schreibvorgang: 0 lügende Kennzeichen) · **58 Handaufträge × 12 Seeds = 616–627 verschiedene Netze** statt 58 starre, 696/696 deterministisch, 0 unlösbar, Altstände behalten ihr Netz · 12 neue Aufträge, **29 von 34 Grundcodes** im Spiel erreichbar, Storage-Kunde freigeschaltet · die drei dokumentierten DHCP-Gründe werden endlich wirklich ausgegeben (goldene Simulation unverändert) · `tools/ethos.py` mit 12 prüfbaren Regeln und eingefrorenem Stand · Shop **27–38 Kacheln → 2**, 4 Bedienelemente, Preiswiderspruch und eine wirkungslose Prüfungsanmeldung behoben · sanftes Onboarding statt Reingeworfenwerden. **251/251 Tests**, rauch 36/36, Android-APK 980.508 B. Einzelheiten: [[#28 · Ausbau 1.2 „Substanz“ – Stand (06.10.2026)]].
 
 > [!success] Stand 04.10.2026: Sitzung S1 „Sofortgefühl“ gebaut und im echten Programm abgenommen
 > Funktionsprobe-Szene + Nachbesprechung in drei Blöcken · Stufenregeln (Warnungen/Haken/Versuche) · Juice an 12 Stellen + Klang (leise, Leiste stumm) · Einstieg ohne Fenster mit zwei Senior-Blasen und erster Wahl · Kabel-Meldung kurz und unten. Messwerte, Entscheidungen und Bilder: [[#14 · Stand nach S1]]. Scorecard 2/4/12 neu bewertet: **26,0 → 28,4**. **Haltepunkt – S2 beginnt erst nach dem Anspielen.**
@@ -1379,3 +1382,103 @@ Exit-Code **0**, 10 s, **0** WebView2-Abstürze, keine Fehlerliste:
 
 **Nicht geprüft:** ein menschlicher Doppelklick (der Lauf startet das Programm selbst), Spielbarkeit über die
 Abnahme hinaus, Verhalten nach Windows-Neustart.
+
+## 28 · Ausbau 1.2 „Substanz“ – Stand (06.10.2026)
+
+**Kurz:** Sieben Baustellen dieser Runde sind gebaut und gemessen: Speichern ohne Verzögerung, Auftragsvielfalt
+über den Instanz-Seed, mehr Inhalt, drei echte DHCP-Gründe, ein prüfbares Minimalismus-Regelwerk, ein
+entschlackter Shop, ein Onboarding mit Begrüßung und Abschluss. Die Simulation ist gegenüber der Referenz
+unverändert, der Testlauf steht bei **251/251 grün**, der Rauchtest bei **36/36**.
+
+**Speichern.** `Spiel.sofortSpeichern()` hieß „sofort", schrieb aber nichts: es löschte nur den 400-ms-Timer,
+der eigentliche Schreibvorgang hing an der zweiten Entprellung im Store (2000 ms) — **0 Aufrufer**, gemessen
+**0** Schreibvorgänge direkt und **1** nach **2005 ms**. Der Auftragsabschluss schrieb erst **2436 ms** nach dem
+Abschluss. Jetzt:
+
+- **Eine Entprellung statt zwei:** `SPEICHER.entprellung = 1500 ms` (`kern/basis.js`), `Spiel.AUTOSPEICHERN_MS = 0`.
+  Gemessen mit demselben Skript vorher/nachher (Edge headless, Einzeldatei-Fassung, 1366×768):
+  `Spiel.speichern()` **2010 → 1512 ms**, Netzwechsel **2415 → 1515 ms**.
+- **Sofortschreiben** an Auftragsabschluss (bestanden **und** nicht bestanden), Ticket öffnen, Kauf
+  (Wartungsvertrag, Aussehen, Werkzeug, Playbook, Slot), Meilenstein (Aufstieg, Fest gesehen) und beim
+  Verstecken der App (`pagehide`/`beforeunload`/`visibilitychange`). Gemessen: Abschluss **6,7 ms**
+  (unabhängige Gegenprobe des Prüfers: 22 ms), Kauf **3,8 ms** (Prüfer: 24 ms), Verstecken der Seite
+  **0 → 1** Schreibvorgang im selben Moment.
+- **Kennzeichen in der Kopfzeile:** drei Zustände „… sichert" / „✓ gesichert" / „⚠ nicht gesichert"
+  (`role=status`, kein Klickziel, keine Animation), 52/67/100 px breit. Die Kopfzeile bleibt **49 px** hoch;
+  unter 380 px Breite steht die Kurzform (10 px). Gemessen in 412×915, 915×412 und 360×640: kein Überlauf,
+  kein abgeschnittener Text.
+- **Fehler werden geführt statt geschluckt:** ein voller Speicher (QuotaExceededError bei 4864 KB Füllung)
+  blieb vorher stumm. Jetzt bleibt der Stand „schmutzig", der Bus meldet `speicher-fehler`, es erscheint ein
+  Hinweis und das Kennzeichen steht auf „⚠ nicht gesichert" — ohne unbehandelte Promise-Ablehnung.
+- **Zwei Fenster:** der `storage`-Hörer warnt im nicht schreibenden Fenster, gedrosselt auf eine Warnung je
+  Minute. Gemessen: 5 Schreibvorgänge des zweiten Fensters → genau **1** Warnung.
+- **Rollierende Zweitsicherung** `labor-sicherung`: vor einer Migration und vor einem Import wird der bisherige
+  Stand weggelegt (eine Generation, rund 27 KB). Eine frische Sicherung wird 60 s lang nicht überschrieben —
+  sonst ersetzte die Migration direkt nach dem Neuladen genau die Import-Sicherung. Gemessen: Vorzustand
+  123,45 €, Import eines Standes mit 7 €, danach Neuladen — der importierte Stand läuft, die Sicherung mit
+  123,45 € steht weiter im Spielstand.
+- **Import-Versionsprüfung:** fremde Dateien und **zu neue** Stände (`labor.v > Spiel.VERSION`) werden
+  abgewiesen, **alte** Stände und solche ganz ohne `v`-Feld gehen durch (die Migration holt sie herein).
+  `Spiel.VERSION` bleibt **2**; die Prüfung hängt bewusst an der Schemaversion, nicht an der Programmversion
+  in der Datei.
+
+**Auftragsvielfalt.** Jeder handgeschriebene Auftrag war starr: das Netz war bei Instanz-Seed 1 und Seed
+987654321 in **46 von 46** Fällen byte-gleich. Jetzt baut `def.fuerSeed(seed)` die Fassung je Instanz-Seed,
+`def.fehlerstellen` nennt die gewählte Fehlerstelle nachprüfbar, und `Spiel.ticketGueltig(def)` prüft jede
+gewürfelte Fassung, bevor sie spielbar wird. 58 Handaufträge × 12 Seeds ergeben **627 verschiedene Netze**
+(Gegenprobe mit engerer Zählweise: 616), derselbe `(id, seed)` ist in **696/696** Paaren identisch, **0 von
+696** Fassungen unlösbar. Ein Altstand behält sein Netz (Kennwert `ee287645:12368` vor und nach dem Umbau
+gleich); Terminal-Aufträge bleiben bewusst fest. Vertrag: `Architektur.md` § 7.2.
+
+**Inhalt.** **12** neue Aufträge; **29 von 34** Grundcodes sind im Spiel erreichbar; der komplette
+`storage`-Kunde ist freigeschaltet (Karriere-Stufe 6, Schwelle 115 von 127 erreichbaren Ruf); die
+Test-Ausnahme „jede Fertigkeit …, außer Port-Security" ist ersetzt; neu ist der Test „kein toter Lehrtext"
+(jeder Grundcode aus `daten/lehrtexte.js` wird von einem Ticket oder Mini ausgelöst). **Offen und namentlich
+geführt: `STORM`** — eine L2-Schleife erstickt nur Broadcasts und bricht kein Erreichbarkeitsziel, der Code
+bleibt ohne Auftrag.
+
+**Simulation.** `DHCP_RESERVED_BUSY`, `DHCP_CONFLICT` und `DHCP_LEASE_EXPIRED` standen nur im Vertrag und
+wurden nie ausgegeben. Sie sind jetzt echt implementiert, mit Gegenproben je Grund; die goldene Simulation
+bleibt unverändert (`node tools/sim-stand.js`).
+
+**Minimalismus.** `tools/ethos.py` prüft **12** Regeln (Farbe/Radius/Schrift/Abstand nur aus Tokens, Dauer nur
+160/320 ms, kein `!important` außer Reset, `reduced-motion` genau einmal, jeder Selektor einmal, Längenzahl
+nur mit Einheit, z-index aus benannter Leiter, keine Blockdopplung, optional DOM-Budget) — mit `--stand`
+(Altlasten eingefroren, ROT nur bei Verschlechterung), `--gegenprobe` und `--dom`, eingebunden in
+`tools/test.sh`. Aufgeräumt wurde ohne Optikänderung: `!important` 9 → **0**, doppelt definierte Selektoren
+12 → **0**, Blockdopplungen 128 → **87**, `reduced-motion`-Blöcke 10 → **5**, Radien 156 → **122**. Der
+Aufräumlauf zählte 1924 → **1878** Zeilen; `ethos.py` meldet heute **1897** Zeilen in 21 Stildateien (danach
+kamen Stiländerungen aus Shop und Onboarding dazu).
+
+**Shop.** 27 bzw. 38 Kacheln → **2**; Text 4258 bzw. 6415 → **936** bzw. **862** Zeichen; 2,2 bzw. 3,0 → **1,0**
+Bildschirmhöhen; **4** Bedienelemente. Jede gestrichene Funktion lebt an belegtem Ort weiter (Verträge in der
+Kundenkarte, Prüfung im Lernstand, Aussehen in den Einstellungen, Playbooks als eine Liste mit einem
+Erklärsatz als Fußnote). Dabei fiel ein **echter Fehler** auf: die Prüfungsanmeldung im Shop war wirkungslos
+(sie setzte ein Feld, das kein Code liest) und kostete 60 € statt der tatsächlichen 40 € — es gibt jetzt genau
+eine Preisquelle (`Spiel.PRUEFUNG.GEBUEHR`).
+
+**Onboarding.** Ein frischer Start zeigte nur den Auftrag. Jetzt: Begrüßungskarte (**135** Zeichen, zwei Wege,
+genau einmal, bewusst kein Overlay), eine Anweisungszeile am Einstiegsauftrag (nennt Werkzeug und Richtung,
+nicht das Zielpaar) und zwei Sätze Abschluss-Feedback. Sichtbare Bedienelemente **31 → 27**; nach der Wahl
+wächst die Zeichenfläche um **82 px**. Altstände sehen nichts davon (die Begrüßung verlangt einen frischen
+Stand, der Abschluss zusätzlich, dass genau dieser Stand die Begrüßung gesehen hat). Feld: `Architektur.md` § 7.2.
+
+**Zahlen zum Stand (06.10.2026).**
+
+| Prüfung | Wert |
+|---|---|
+| `sh tools/test.sh` | **251/251 grün** (35 Testdateien, 76 Module), vorher 213 |
+| `node tools/sim-stand.js` | Simulation **unverändert** gegenüber dem Referenzstand |
+| `python tools/rauch.py` | **36/36 grün** |
+| `python tools/ethos.py` | **GRÜN** gegen `tests/stil-stand.json` |
+| Android-APK | `Programm/Netzwerk-Labor-1.2.1-Android.apk`, **980.508 B** |
+
+**Offen.** `STORM` ohne Auftrag (siehe Inhalt). Das Feierabend-Kennzeichen (`spiel/tag.js`, „Karte einmal
+zeigen") schreibt weiter über die Entprellung — der Auftragsabschluss unmittelbar davor ist sofort gesichert,
+im Absturzfall erschiene die Karte erneut. Für die rollierende Sicherung gibt es noch **keine
+Wiederherstellungs-Oberfläche**; sie liegt als `labor-sicherung` im Spielstand und wandert damit auch in
+einen Export.
+
+**Nicht geprüft:** kein Lauf auf einem echten Android-Gerät (nur Quellenlesung der Hülle und Messungen in
+Edge mit der eingehängten Android-Anpassung), kein Prozess-Tod unter Android (nur das Verstecken der Seite),
+keine Messung eines sehr großen Spielstands über 103 KB hinaus.

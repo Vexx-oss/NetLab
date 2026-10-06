@@ -45,10 +45,19 @@ python tools/einfach.py --pruefen              # nur prüfen
 python tools/einfach.py --ziel /tmp/spiel.html # woandershin
 ```
 
-Gemessener Stand: **2.193.460 Bytes (2,09 MB)**, 14 Schriften eingebettet,
+Gemessener Stand (06.10.2026): **2.263.054 Bytes (2,16 MB)**, 14 Schriften eingebettet,
 **0 Außenverweise**. Zum Vergleich: ohne eingebettete Schriften wären es 1,6 MB plus ein
 Ordner daneben — und genau dieser Ordner ist die Fehlerquelle, wenn jemand nur die
 `index.html` weiterreicht.
+
+> **Bekannter Schönheitsfehler bei den Schriften** (gemessen, nicht behoben):
+> `mimetypes.guess_type(".woff2")` liefert unter Windows `application/octet-stream`, weil
+> die Zuordnung aus der Registry kommt. In der Datei steht deshalb
+> `data:application/octet-stream;base64,…` statt `data:font/woff2;base64,…` — 14 Schriften
+> × 14 Zeichen = **196 Bytes größer als nötig**, und eine Suche nach `font/woff2` findet
+> nichts. Der Browser stört sich nicht daran (CSS-`@font-face` erzwingt den Typ nicht).
+> Wer es beheben will, setzt die Typen in `tools/einfach.py` fest — dann ändern sich aber
+> Größe und SHA256 der versionierten `docs/index.html`.
 
 > **Zeilenenden.** Der Bau liefert **LF**, auf jeder Plattform. Die Quellen sind gemischt
 > (61 Dateien CRLF, 101 LF, so gewachsen und bewusst nicht angefasst), im Repositorium gilt
@@ -208,6 +217,109 @@ CARGO_TARGET_DIR=<schneller-Ordner>/target cargo tauri build --no-bundle
 Die fertigen Programme und die Bildschirmfoto-Nachweise liegen **bewusst nicht im Git**
 (`.gitignore`): 8 MB `.exe` und 22 MB Beweismaterial gehören nicht in die Historie.
 
+## Die Android-App (`.apk`)
+
+Seit 06.10.2026 gibt es eine Android-Fassung: dieselbe Browser-Fassung in einer
+WebView-Hülle. Eigene Anleitung mit allen Grenzen: [`android/LIESMICH.md`](android/LIESMICH.md).
+
+```bash
+python android/bauen.py                 # Spiel → Einzeldatei → APK → Prüfung
+python android/bauen.py --ohne-spiel    # schneller, nimmt android/bau/spiel.html
+python android/bauen.py --nur-pruefen   # Signatur, Kennwerte, Assets prüfen
+```
+
+Ergebnis: `Programm/Netzwerk-Labor-<Version>-Android.apk` (0,94 MB, signiert).
+Nötig sind ein Android-SDK mit **build-tools ≥ 35** und ein JDK 17+.
+
+**Zwei Versionszahlen, zwei Bedeutungen** (06.10.2026): `versionName` ist die
+Spielversion aus `bauen.py` (`VERSION`) und bleibt **1.2.1**. `versionCode` ist die
+Bauzählung und steht als eigene Zahl in `android/bauen.py` (`VERSION_CODE`, jetzt
+**10202**) — aus 1.2.1 abgeleitet ergäbe sie 10201, also genau den Code der schon
+gebauten APK. Android verweigert die Installation über eine alte Fassung, wenn der Code
+nicht größer ist („App nicht installiert“). Deshalb ist er vom Namen entkoppelt und
+steigt mit jeder APK, die das Haus verlässt; `version_lesen()` bricht ab, wenn
+`VERSION_CODE` unter dem aus `versionName` ableitbaren Wert liegt.
+
+**Die App dreht frei.** Bis 06.10.2026 stand im Manifest
+`android:screenOrientation="sensorLandscape"` — Querformat festgenagelt. Jetzt steht dort
+`unspecified` (Systemvorgabe, gepackter Wert −1): mit eingeschalteter Automatik dreht
+die App in Hoch- und Querformat, bei ausgeschalteter bleibt sie in der Lage, die der
+Nutzer eingestellt hat. `fullUser` und `fullSensor` wurden verworfen, weil sie eine
+bewusste Systemeinstellung übergehen — die Begründung steht im Kopf von
+`android/huelle/AndroidManifest.xml`.
+
+Ein Dreh lädt die Seite **nicht** neu: `configChanges` fängt ihn ab (gepackt
+`0x40007ffc`: orientation, screenSize, screenLayout, smallestScreenSize, keyboard,
+keyboardHidden, navigation, touchscreen, density, uiMode, fontScale, colorMode, locale,
+layoutDirection), `onConfigurationChanged` lädt ausdrücklich nichts, und für den Fall
+einer trotzdem neu erzeugten Activity stellt `onSaveInstanceState`/`restoreState` die
+Seite ohne `loadUrl` wieder her. Der Spielstand liegt in `localStorage` unter
+`https://netzwerk-labor.local/` und überlebt auch das.
+
+Der Bau prüft diese Zusage selbst (Schritt 7) und wird rot, wenn eine Bedingung verletzt
+ist:
+
+1. badging darf kein `android.hardware.screen.landscape/-portrait` nennen,
+2. `screenOrientation` in der APK muss −1 sein,
+3. `configChanges` muss orientation und screenSize enthalten,
+4. **im Bytecode** der `classes.dex` in der APK darf `onConfigurationChanged` kein
+   `WebView.loadUrl` aufrufen (`dexdump -d`, gezählt wird je Methode). Rot wird der Bau,
+   sobald dort ein Aufruf steht; die Verteilung wird immer mitgedruckt (in der
+   eingefrorenen Fassung: `onCreate 1x` für den Start, `onReceivedError 1x` für den
+   Fehler-Rückfall). Das ist der Ersatz für den Gerätetest, der hier nicht möglich ist —
+   siehe „Ehrliche Grenzen“.
+
+Gemessen an der eingefrorenen APK vom 06.10.2026 (980.508 Bytes, SHA256 `46c90213…`,
+Seite darin `a2bba5cf…`):
+
+```
+package: name='oss.vexx.netlab' versionCode='10202' versionName='1.2.1' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
+uses-feature-not-required: name='android.hardware.touchscreen'
+```
+
+Kein `uses-permission` (die App darf nicht ins Netz), kein Orientierungsmerkmal.
+
+Zwei Läufe hintereinander ergeben denselben Inhalt, aber **nicht** dieselbe SHA256: die
+ZIP-Zeitstempel entstehen bei jedem Lauf neu. Die **Größe** taugt nicht als Kennung:
+`apksigner` hängt einen Signaturblock von genau 4.096 Bytes an, und davor wird auf eine
+4.096er-Grenze aufgefüllt. An der Endfassung nachgerechnet (Bytes aus der Datei selbst,
+„Nutzdaten" = komprimierte Daten plus lokale Köpfe):
+Nutzdaten 974.195 + Füllung 653 + Signaturblock 4.096 + Verzeichnis 1.542 + Abschluss
+22 = 980.508. Zuwächse bis zur nächsten Grenze verschwinden also in der Füllung — zuletzt
+wuchsen die Nutzdaten um 3.229 Bytes (970.966 → 974.195) und die Füllung schrumpfte um
+genau 3.229 Bytes (3.882 → 653): die Gesamtgröße blieb 980.508, obwohl die Seite eine
+andere war (`b2329e3a…` → `a2bba5cf…`). Wer eine APK wiedererkennt, nimmt die **SHA256**,
+nicht die Größe.
+
+| Baustein | Wo | Was |
+|---|---|---|
+| Bau | `android/bauen.py` | aapt2 → javac → d8 → zipalign → apksigner, ohne Gradle |
+| Hülle | `android/huelle/` | Manifest, `MainActivity.java`, Symbol, Thema |
+| Anpassung | `android/mobil/` | `mobil.css`/`mobil.js`, beim Bau hinter das Spiel gehängt |
+| Messen | `android/werkzeuge/mobilprobe.py` | Telefonmaße nachstellen, Kabelzug mit dem Finger, Bildschirmfoto |
+| Symbol | `android/werkzeuge/ikone.py` | aus den Farben des Spiels (Pillow) |
+
+Vier Dinge, die dabei gemessen wurden und leicht Zeit kosten, wenn man sie nicht weiß:
+
+1. **`d8` aus build-tools 34.0.0 ist unbrauchbar** — es bricht bei jeder
+   verschachtelten Klasse mit einer internen NullPointerException ab. Ab 36.0.0 geht es.
+   `android/bauen.py` nimmt die höchste vorhandene Fassung.
+2. **d8 ab build-tools 35 nimmt kein Verzeichnis mehr** als Eingabe, sondern
+   einzelne `.class`-Dateien.
+3. **`</head>` kommt in der gebauten Seite zweimal vor** — das Spiel liefert einer
+   Attrappe-Webseite im Labor eine HTML-Vorlage als Zeichenkette mit. Zum Einhängen
+   der Android-Anpassung wird deshalb die Stelle benannt (erstes `</head>` vor `<body>`,
+   letztes `</body>` am Dateiende), nicht gezählt.
+4. **`screenOrientation` frei heißt −1, nicht 0.** Im gepackten Manifest
+   (`aapt2 dump xmltree --file AndroidManifest.xml`) ist −1
+   `SCREEN_ORIENTATION_UNSPECIFIED`; **0 ist `SCREEN_ORIENTATION_LANDSCAPE`**, 6 war
+   `SCREEN_ORIENTATION_SENSOR_LANDSCAPE` (die alte Sperre). Eine Prüfung auf „0 = frei“
+   wäre also genau falsch herum. Ebenfalls gemessen: ein XML-Kommentar mit einer
+   Zeile aus Bindestrichen (`-----`) macht das Manifest ungültig — `--` ist in einem
+   XML-Kommentar verboten, aapt2 bricht dann ab.
+
+`src/` bleibt unangetastet: die Anpassung gilt nur für die App.
+
 ## Repo-Angaben setzen (Beschreibung, Homepage, Themen)
 
 Diese drei Angaben lassen sich **nicht** per `git push` setzen, sondern nur über die
@@ -237,6 +349,68 @@ Dafür braucht das Token zusätzlich **Contents: Read and write**.
 Alles andere ist in Abläufe gewandert und braucht kein Token von Hand: Prüfen
 (`pruefen.yml`), Veröffentlichen (`seite.yml`) und das Anlegen des Releases
 (`release.yml`).
+
+## Prüfwerkzeuge und die Testkette
+
+`sh tools/test.sh` führt die Prüfungen in dieser Reihenfolge aus; jeder Schritt bricht den
+Lauf ab, wenn er rot wird (gemessen an `tools/test.sh`, Zeilen 29–37):
+
+| Aufruf | Reihenfolge |
+|---|---|
+| `sh tools/test.sh` | 1. `python tools/ethos.py` · 2. `node tests/run.js` (Tests) |
+| `sh tools/test.sh --rauch` | 1. `node tests/run.js` · 2. `python tools/klassen.py` · 3. `python tools/ethos.py` · 4. `python tools/rauch.py` |
+
+> **Achtung, leicht zu verwechseln:** `tools/klassen.py` läuft **nur** mit `--rauch`, und
+> `ethos.py` steht dort **nach** `klassen.py` — im gewöhnlichen Lauf läuft `ethos.py`
+> dagegen **vor** den Tests. Wer „ethos läuft nach klassen.py" schreibt, meint den
+> Rauchtest-Pfad.
+
+Stand 06.10.2026: **251/251 grün, 35 Testdateien, 76 Module**. Neu in dieser Runde sind
+`tests/spiel-speichern.test.js`, `spiel-vielfalt`, `spiel-wirtschaft`, `spiel-einstieg` und
+`sim-dhcp-gruende`.
+
+### `tools/ethos.py` — Minimalismus als Regelwerk
+
+„Minimalistisch" ist als Adjektiv nicht prüfbar. `tools/ethos.py` macht daraus **zwölf
+Regeln** für `src/stil/*.css` und zählt Literale im Quelltext:
+
+| Nr | Regel |
+|---|---|
+| R1 | Farbe nur per Token — kein `#hex`/`rgb`/`hsl` außerhalb der Token-Blöcke |
+| R2 | Radius nur aus Tokens (`var(--radius…)`, `999px` Pille, `50%` Kreis) |
+| R3 | Schrift nur aus sechs Werten: 11, 12, 13, 15, 20, 28 px — kein `em`/`%`, keine halben Pixel |
+| R4 | Abstand nur aus der Skala {0, 4, 8, 12, 16, 24, 32} px (negative Gegenstücke erlaubt) |
+| R5 | Dauer nur aus {1 ms (Bewegung aus), 160 ms, 320 ms}; `var(--dauer)` erlaubt |
+| R6 | `z-index` nur aus der benannten Leiter {10, 20, … 80} |
+| R7 | `!important` nur in `basis.css` (Reset und Barrierefreiheit) |
+| R8 | genau **ein** zentraler `@media (prefers-reduced-motion)`-Block (`basis.css`) |
+| R9 | ein Selektor wird unter gleichen Bedingungen nur einmal definiert |
+| R10 | keine identischen Regelblöcke (gleicher Inhalt, gleiche Bedingungen) |
+| R11 | jede Zahl in einer Längen-Eigenschaft trägt eine Einheit |
+| R12 | höchstens 6 sichtbare Bedienelemente je Ansicht — **DOM-Messung im laufenden Programm** |
+
+```bash
+python tools/ethos.py                       # alle Regeln messen
+python tools/ethos.py --stand DATEI         # nur Verschlechterungen gegenüber DATEI sind rot
+python tools/ethos.py --neu --stand DATEI   # Stand aus dem Ist-Stand einfrieren
+python tools/ethos.py --gegenprobe          # baut absichtlich Verstöße ein — muss rot werden
+python tools/ethos.py --dom                 # Regel 12 im laufenden Programm messen (tools/cdp.py)
+python tools/ethos.py --lang                # alle Fundstellen statt der ersten fünf
+```
+
+* **Rückgabewert 1, sobald eine Regel rot ist.** Ohne `--stand` ist **jeder** Verstoß rot.
+* Mit `--stand tests/stil-stand.json` sind die Altlasten eingefroren: **grün heißt „nicht
+  schlechter als der Stand"**, nicht „jede Regel eingehalten". Die Meldung sagt das
+  ausdrücklich („Eingehalten ist damit nicht jede Regel — der Stand friert die Altlasten
+  ein").
+* `--gegenprobe` **dreht die Bedeutung des Rückgabewerts um**: 0 ist das gute Ergebnis (er
+  wurde rot), Vorbild `tools/rauch.py --gegenprobe`.
+* **Regel 12 braucht `--dom`** (Browser über `tools/cdp.py`); ohne das wird sie
+  übersprungen und im Bericht als „übersprungen" ausgewiesen — dann sind nur elf Regeln
+  prüfbar.
+* Gemessener Stand (06.10.2026): 21 Dateien, 1.897 Zeilen, 5.479 Deklarationen, 1.613
+  Regelblöcke, 1.574 verschiedene Selektor+Kontext — GRÜN; die Gegenprobe schlägt bei
+  allen elf prüfbaren Regeln an.
 
 ## Messen im echten Programm
 

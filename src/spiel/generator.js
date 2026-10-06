@@ -1,38 +1,56 @@
 "use strict";
 /* ---------- Ticket-Bau und Generator (Konzept § 8.1/8.2) ----------
-   Spiel.ticketBauen(spec) → Ticket-Definition (Architektur § 7.1) oder null (Fehler bricht kein Ziel).
+   Spiel.ticketBauen(spec, seed?) → Ticket-Definition (Architektur § 7.1) oder null (Fehler bricht kein Ziel).
      spec: {id, vorlage, vSeed, kunde, injektoren:[{name, ziel?:key, wahl?:zahl}], stufe, karriere, art,
             titel, briefing, symptom, erklaerung, quelle, hilfen, lohn, minuten, skills, vorhersage,
             ziele? (ersetzt die Vorlagen-Ziele), zusatzZiele? (auch Arbeitsziele befehl/antwort), maxZiele?, umbau?(netz, rollen, z), loesungExtra?[],
             loesung? (ersetzt die berechnete), loesungFn?(gesund, rollen), alleZiele?}
-   Die Netz-Fabrik baut die Vorlage mit vSeed immer gleich und setzt dieselben Fehler: deterministisch.
+   OHNE seed baut die Netz-Fabrik die Vorlage mit spec.vSeed – alles bleibt wie bisher (Generator, Tests).
+   MIT seed (P2 „Auftragsvielfalt“) entsteht das ganze Ticket aus diesem Seed: die Adressen der Vorlage, die
+   Zufallsparameter der Injektoren und – wo kein ziel/wahl steht – auch die Fehlerstelle. Jede Instanz desselben
+   Auftrags bekommt so ein eigenes Netz; dieselbe (id, seed) ergibt immer dasselbe Ticket (DATEN.ticketSpec merkt es).
+   def.fehlerstellen nennt die gewählten Stellen nachprüfbar; derselbe Fehler landet nie zweimal im selben Auftrag.
    Spiel.generiere(skill, seed, {stufe, kunde, art, flow}) → generiertes Ticket, registriert in Spiel.generierte.
      flow "geruest": ein Niveau tiefer, nur ein Ziel · flow "verwicklung": ein zweiter Fehler, der ein weiteres Ziel bricht
      (Flow-Regler, spiel/flow.js) – eigene ID, damit die gewöhnliche Fassung erhalten bleibt. */
 Spiel.generierte = Spiel.generierte || {};
 
-Spiel.ticketBauen = function(spec){
+Spiel.ticketBauen = function(spec, seed){
   const V = Spiel.vorlagen[spec.vorlage];
   if (!V) throw new Error("Unbekannte Vorlage: " + spec.vorlage);
   const vSeed = spec.vSeed ?? 1;
-  const bauen = () => V.bauen(Zufall(vSeed), {kunde: spec.kunde});
+  /* saat = der Seed, aus dem dieses Ticket entsteht: ohne seed der feste vSeed (wie bisher), mit seed der
+     Instanz-Seed (P2). Alle Zufallsströme hängen an saat, damit die Netz-Fabrik dasselbe Ticket wieder baut. */
+  const saat = seed == null ? vSeed : ((seed >>> 0) || 1);
+  const bauen = () => V.bauen(Zufall(saat), {kunde: spec.kunde});
   const gesund = bauen();
-  /* Fehler wählen: Kandidat je Injektor (fest per key oder per wahl) */
+  /* Fehler wählen: Kandidat je Injektor (fest per key, per wahl oder – mit Instanz-Seed – per Zufall).
+     belegt merkt sich je Injektor die schon verwendeten Stellen: derselbe Fehler kommt nicht zweimal vor. */
   const gewaehlt = [];
+  const belegt = new Map();
   for (const [i, s] of (spec.injektoren || []).entries()) {
     const inj = Spiel.INJEKTOREN[s.name];
     if (!inj) throw new Error("Unbekannter Injektor: " + s.name);
     const kand = inj.passt(gesund.netz, gesund.rollen) || [];
     if (!kand.length) return null;
-    const k = s.ziel != null ? kand.find(c => c.key === s.ziel) : kand[(s.wahl || 0) % kand.length];
+    const schon = belegt.get(s.name) || new Set();
+    let k = null;
+    if (s.ziel != null) k = kand.find(c => c.key === s.ziel);
+    else if (s.wahl != null) k = kand[(s.wahl || 0) % kand.length];
+    else if (seed != null) {
+      const frei = kand.filter(c => !schon.has(c.key));
+      if (!frei.length) return null;                                   /* jede Stelle dieses Injektors ist schon belegt */
+      k = frei[Zufall("stelle:" + saat + ":" + i).zahl(frei.length)];
+    } else k = kand[0];
     if (!k) throw new Error(`Injektor ${s.name}: Ziel ${s.ziel} passt nicht (möglich: ${kand.map(c => c.key).join(", ")})`);
-    const param = Object.assign({}, inj.param(gesund.netz, k, gesund.rollen, Zufall(vSeed * 31 + i + 7)), s.param || {});
+    schon.add(k.key); belegt.set(s.name, schon);
+    const param = Object.assign({}, inj.param(gesund.netz, k, gesund.rollen, Zufall(saat * 31 + i + 7)), s.param || {});
     gewaehlt.push({inj, k, param});
   }
   const fabrik = () => {
     const w = bauen();
-    if (spec.umbau) spec.umbau(w.netz, w.rollen, Zufall(vSeed + 99));
-    for (const g of gewaehlt) g.inj.anwenden(w.netz, g.k, g.param, Zufall(vSeed + 5));
+    if (spec.umbau) spec.umbau(w.netz, w.rollen, Zufall(saat + 99));
+    for (const g of gewaehlt) g.inj.anwenden(w.netz, g.k, g.param, Zufall(saat + 5));
     /* Startzustand ist gespeichert (running = startup): Der Fehler übersteht einen Neustart, ungespeichert ist nur, was der Spieler ändert */
     for (const g of Object.values(w.netz.geraete)) if (Modell.IOS[g.typ] && (g.startup || !spec.werkszustand?.includes(g.id))) Modell.speichern(g);
     return w.netz;
@@ -89,15 +107,47 @@ Spiel.ticketBauen = function(spec){
   return {
     id: spec.id, art: spec.art || "stoerung", stufe, karriere, kunde, reihe: spec.reihe,
     titel: spec.titel || Spiel.titelAusZiel(gebrochen[0]) || (erster ? erster.titel : "Störung"),   /* Kundensicht – der Injektor-Titel verriete die Ursache */
-    briefing: spec.briefing || Spiel.briefingText(kunde, symptom, Zufall(vSeed + 3)),
+    briefing: spec.briefing || Spiel.briefingText(kunde, symptom, Zufall(saat + 3)),
     symptom, skills, netz: fabrik, ziele: endZiele, hilfen, loesung,
     erklaerung: spec.erklaerung || gewaehlt.map(g => g.inj.erklaerung).filter(Boolean).join(" "),
     quelle: spec.quelle || (erster ? erster.quelle : "Network – Lernfassung"),
     lohn: spec.lohn || Spiel.lohnFuer(karriere, stufe), minuten: spec.minuten || (spec.art === "projekt" ? 15 : 3 + 2 * karriere),
     vorhersage: !!spec.vorhersage, generiert: !!spec.generiert,
     injektoren: gewaehlt.map(g => g.inj.name), gruende: gewaehlt.map(g => g.inj.gruende),
+    fehlerstellen: gewaehlt.map(g => ({injektor: g.inj.name, stelle: g.k.key})),   /* P2: nachprüfbar, welche Stelle je Injektor sitzt */
     vorlage: spec.vorlage, regressionOhne: spec.regressionOhne, regression: spec.regression,
   };
+};
+
+/* P2 „Auftragsvielfalt“: Selbstprüfung einer gebauten Definition – dieselben Kriterien, mit denen die Tests
+   Tickets prüfen (tests/tickets-generator.test.js): Start bricht die erwarteten Ziele, die Lösung heilt alle
+   Netzziele, und die gesunden Ziele der Vorlage gelten danach weiter. Die Seed-Fassung eines Handauftrags wird
+   nur übernommen, wenn sie das besteht; sonst bleibt die feste Fassung (vSeed) spielbar. Reine Prüfung. */
+Spiel.ticketGueltig = function(def){
+  if (!def || typeof def.netz !== "function" || !Array.isArray(def.ziele) || !Array.isArray(def.loesung)) return false;
+  const zielOk = (netz, z) => {
+    try {
+      const r = typeof Sim !== "undefined" && Sim.pruefeZiel ? Sim.pruefeZiel(netz, z) : Spiel.zielPruefen(netz, z, null);
+      return !!(r && r.ok);
+    } catch (e) { return false; }
+  };
+  try {
+    const start = def.netz(Zufall(1));
+    const erwartet = def.ziele.filter(z => z.erwartet);
+    const netzZiele = def.ziele.filter(z => !Spiel.istArbeitsziel(z));
+    for (const z of erwartet) if (zielOk(start, z)) return false;                      /* Fehler wirkt nicht */
+    if (!erwartet.length && netzZiele.length === def.ziele.length && !def.ziele.some(z => !zielOk(start, z))) return false;
+    const kopie = def.netz(Zufall(1));
+    if (typeof Spiel.loesungAnwenden === "function") Spiel.loesungAnwenden(kopie, def.loesung);
+    else for (const s of def.loesung) Spiel.schrittAnwendenRueckfall(kopie, s);
+    for (const z of netzZiele) if (!zielOk(kopie, z)) return false;                    /* Lösung heilt nicht alles */
+    const V = def.vorlage && Spiel.vorlagen[def.vorlage];
+    if (V) for (const z of V.bauen(Zufall(1), {kunde: def.kunde}).ziele) {              /* nichts, was vorher ging, darf kaputt sein */
+      if (/^\d/.test(String(z.nach))) continue;                                        /* Ziel per IP: die Adresse wechselt mit dem Seed */
+      if (!zielOk(kopie, z)) return false;
+    }
+    return true;
+  } catch (e) { return false; }
 };
 
 Spiel.lohnFuer = (karriere, stufe) => ({euro: 20 + 15 * (karriere || 1) + ({E: 0, AP1: 10, AP2: 25}[stufe] || 0), ruf: karriere >= 3 ? 2 : 1});

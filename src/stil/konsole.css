@@ -38,7 +38,7 @@
 .ist-aus .ko-schirm{filter:grayscale(1); opacity:.65}
 
 .ko-vorschlag, .ko-notiz{transition:none}
-.ko-vorschlag[hidden], .ko-notiz[hidden]{display:none}
+.ko-vorschlag[hidden], .ko-notiz[hidden], .ko-mit-vorschlag .ko-hilfe-bsp{display:none}
 .ko-vorschlag{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:8px 12px; border-top:1px solid var(--line); background:var(--accent-soft); font-size:13px}
 .ko-vorschlag-titel{font-weight:700; color:var(--accent)}
 .ko-vorschlag-knopf{border:1px solid var(--accent); background:var(--panel); color:var(--ink); border-radius:7px; padding:3px 8px; cursor:pointer}
@@ -47,7 +47,6 @@
 .ko-vorschlag-text{color:var(--muted); flex-basis:100%; line-height:1.4}
 .ko-hilfe{padding:7px 12px 9px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; line-height:1.7}
 .ko-hilfe code{font:12px var(--mono); color:var(--ink)}
-.ko-mit-vorschlag .ko-hilfe-bsp{display:none}
 /* Punktlinien (ipconfig): eine Zeile je Eintrag. Die Punkte beginnen mit 2 Zeichen und wachsen bis zur Originallänge,
    solange Platz ist – der Wert schrumpft nie (sonst bräche er an Bruchteilen eines Pixels um) und rutscht nur, wenn gar nichts
    mehr passt, als Ganzes in die nächste Zeile. */

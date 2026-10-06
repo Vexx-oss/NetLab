@@ -2,7 +2,7 @@
 .lb-inspektor.in{display:flex; flex-direction:column; overflow:hidden}
 .in-kopf{flex:0 0 auto; padding:14px 14px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
 .in-kopf-zeile{display:flex; align-items:center; gap:10px; min-width:0}
-.in-kopf-zeile > svg{flex:0 0 auto}
+.in-kopf-zeile > svg, .in-speichern .in-knopf{flex:0 0 auto}
 .in-kopf-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
 .in-kopf-text h3{font:800 19px/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .in-kopf-text span{color:var(--muted); font-size:12.5px}
@@ -16,7 +16,6 @@
 .in-chip.frei{background:transparent; border:1px dashed var(--line-2); color:var(--faint)}
 .in-speichern{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--radius-s); background:var(--warn-soft); color:var(--ink); font-size:12.5px; line-height:1.35}
 .in-speichern b{color:var(--warn)}
-.in-speichern .in-knopf{flex:0 0 auto}
 
 .in-reiter{flex:0 0 auto; display:flex; flex-wrap:wrap; gap:2px; padding:6px 10px 0; border-bottom:1px solid var(--line)}
 .in-tab{border:0; background:none; color:var(--muted); font:600 13px/1 var(--body); padding:9px 10px 10px; border-bottom:2px solid transparent; border-radius:6px 6px 0 0}
@@ -32,9 +31,9 @@
 .in-hinweis{color:var(--muted); font-size:13px; line-height:1.45}
 .in-hinweis.klein{font-size:12px}
 .in-hinweis.warn{color:var(--warn)}
-.in-hinweis.bad{color:var(--bad)}
+.in-hinweis.bad, .in-meldung.bad{color:var(--bad)}
 .in-hinweis code, .in-hinweis .mono{font-size:.95em}
-.in-leise{color:var(--faint); font-weight:400}
+.in-leise, .in-feld-titel small{color:var(--faint); font-weight:400}
 .in-leer, .in-fehler{color:var(--muted); padding:16px}
 .in-fehler{color:var(--bad)}
 
@@ -44,7 +43,6 @@
 .in-feld{display:flex; flex-direction:column; gap:3px; min-width:0}
 .in-feld.breit{grid-column:1 / -1}
 .in-feld-titel{font:600 11.5px/1.2 var(--body); color:var(--muted)}
-.in-feld-titel small{font-weight:400; color:var(--faint)}
 .in-eingabe, .in-auswahl{width:100%; min-width:0; height:34px; padding:0 9px; border:1px solid var(--line-2); border-radius:7px; background:var(--panel-2); color:var(--ink); font:500 13.5px var(--body);
   transition:border-color var(--dauer), background var(--dauer)}
 .in-eingabe.mono{font-family:var(--mono); font-size:13px}
@@ -55,7 +53,6 @@
 .in-auswahl{padding-right:4px; cursor:pointer}
 .in-feld.klein .in-eingabe, .in-feld.klein .in-auswahl{height:30px}
 .in-meldung{font-size:12px; line-height:1.35; color:var(--muted)}
-.in-meldung.bad{color:var(--bad)}
 .in-meldung.warn{color:var(--warn)}
 @keyframes in-wackeln{0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}}
 .in-eingabe.wackeln{animation:in-wackeln .25s 2}
@@ -76,10 +73,9 @@
 .in-knopf:hover{background:var(--panel-3); border-color:var(--accent)}
 .in-knopf.klein{min-height:28px; padding:0 9px; font-size:12.5px}
 .in-knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
-.in-knopf.primaer:hover{filter:brightness(1.08)}
+.in-knopf.primaer:hover, .in-knopf.warn:hover{filter:brightness(1.08)}
 .in-knopf.geist{background:none; border-color:transparent; color:var(--muted)}
 .in-knopf.warn{background:var(--warn); border-color:var(--warn); color:var(--accent-ink)}
-.in-knopf.warn:hover{filter:brightness(1.08)}
 /* Terminal/Konsole: Knopf im Kopf statt Reiter (Ausbau 1.2, A3) */
 .in-terminal{gap:5px}
 .in-terminal.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
@@ -101,7 +97,7 @@
 .in-tabelle td{padding:6px 6px; border-bottom:1px solid var(--line); vertical-align:middle}
 .in-tabelle tr:last-child td{border-bottom:0}
 .in-tabelle tr.klickbar{cursor:pointer}
-.in-tabelle tr.klickbar:hover td{background:var(--panel-2)}
+.in-tabelle tr.klickbar:hover td, .in-port-kopf:hover, .in-port.auf .in-port-kopf{background:var(--panel-2)}
 .in-tabelle .rechts{text-align:right}
 .in-tabelle.mono{font-family:var(--mono); font-size:12.5px}
 .in-gegen{color:var(--muted); font-size:12.5px}
@@ -109,7 +105,6 @@
 
 .in-portliste{display:flex; flex-direction:column; gap:4px}
 .in-port-kopf{display:grid; grid-template-columns:78px auto 1fr 1fr; align-items:end; gap:6px; padding:5px 6px; border-radius:8px}
-.in-port-kopf:hover, .in-port.auf .in-port-kopf{background:var(--panel-2)}
 .in-port-kopf .in-chip{align-self:center}
 .in-port-kopf .in-feld-titel{font-size:10.5px}
 .in-port-name{border:0; background:none; color:var(--ink); font:700 13px/1 var(--mono); text-align:left; padding:8px 0; cursor:pointer; align-self:center}
@@ -139,7 +134,7 @@
 .in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 10px; display:flex; flex-direction:column; gap:6px; animation:in-rein .2s ease-out}
 @keyframes in-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
 .in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
-.in-ent-code{margin:0; padding:7px 9px; border-radius:6px; background:var(--bg); color:var(--ok); font:500 12.5px/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
+.in-ent-code{margin:0; padding:7px 9px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 12.5px/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
 
 /* Lease-Tabelle im DHCP-Abschnitt (Architektur 10.6): eine Zeile je Lease, Zustand farbig ueber Tokens */
 .in-lease-tabelle{width:100%; border-collapse:collapse; margin-top:6px; font:500 12.5px/1.35 var(--body)}

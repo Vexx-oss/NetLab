@@ -6,21 +6,20 @@
 .ak-verdacht.gesetzt{border-color:color-mix(in srgb, var(--ok) 40%, var(--line)); background:color-mix(in srgb, var(--ok) 6%, var(--panel))}
 .ak-verdacht.ruhig{border-style:dashed; background:none}
 .ak-v-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
-.ak-v-kopf small{color:var(--muted); font-size:12px}
+.ak-v-kopf small, .ak-v-zeit{color:var(--muted); font-size:12px}
 .ak-v-satz{font-weight:700; margin:0}
-.ak-v-zeit{color:var(--muted); font-size:12px}
 .ak-v-zeit.gut{color:var(--ok)}
 .ak-schritt{margin:6px 0 0; color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em}
 .ak-chips{display:flex; flex-wrap:wrap; gap:6px}
 .ak-chip{min-height:30px; padding:4px 10px; border-radius:999px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 12.5px/1.2 var(--body); cursor:pointer; text-align:left}
 .ak-chip:hover{border-color:var(--accent)}
 .ak-chip.an{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
-.ak-ursachen .ak-chip{border-radius:10px}
+.ak-ursachen .ak-chip{border-radius:var(--radius)}
 .ak-geraet{width:100%}
 .ak-v-fuss{display:flex; justify-content:flex-end; gap:8px; margin-top:6px}
 .ak-karten h3{margin-bottom:6px}
 .ak-liste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
-.ak-karte{display:grid; grid-template-columns:auto minmax(0, 1fr) auto; gap:8px; align-items:start; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); border-left:3px solid var(--line-2)}
+.ak-karte{display:grid; grid-template-columns:auto minmax(0, 1fr) auto; gap:8px; align-items:start; padding:8px 10px; border-radius:var(--radius); border:1px solid var(--line); background:var(--panel-2); border-left:3px solid var(--line-2)}
 .ak-karte.ok{border-left-color:var(--ok)}
 .ak-karte.nicht{border-left-color:var(--bad)}
 .ak-karte.wichtig{border-color:color-mix(in srgb, var(--geld) 55%, var(--line))}

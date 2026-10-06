@@ -231,17 +231,46 @@ CLI.vorschlag(sitzung)       → nächster sinnvoller Befehl (Einstieg) | null
 
 Pflicht (Test): Jede Lösung erfüllt alle Ziele; das Start-Netz verletzt mindestens ein Ziel, und zwar mit dem erwarteten Grund.
 
-### 7.2 Spielstand (`store "labor"`, `v:1`)
+### 7.2 Spielstand (`store "labor"`, `v:2`)
 
-`{ v, euro, ruf, stufe, kunden:{[id]:{vertrag, ampel, seit, sterne:[]}}, postfach:[TicketInstanz], aktiv:iid|null, erledigt:[{id, sterne, tag, hilfe}], playbooks:{slots, aktiv:[skill]}, tag:{…Arbeitstag…}, zuletzt:ms, einst:{…} }`
+`{ v, euro, ruf, stufe, kunden:{[id]:{vertrag, ampel, seit, sterne:[]}}, postfach:[TicketInstanz], aktiv:iid|null, erledigt:[{id, sterne, tag, hilfe}], playbooks:{slots, aktiv:[skill]}, tag:{…Arbeitstag…}, zuletzt:ms, einstieg:{…} }`
+(Die Liste ist ein Auszug; weitere Felder u. a. `naechsteIid`, `buch`, `angebot`, `dex`, `tagesraetsel`, `tagebuch`. Die **Einstellungen** liegen NICHT hier, sondern unter dem eigenen Store-Schlüssel `"einst"` — `st.einst` gibt es nicht.)
 
-`TicketInstanz = { iid, ticketId, seed, netz, hilfeStufe, hilfen:[], start, frist|null, quelle:"postfach"|"wartung"|"wiederholung"|"generiert" }`
+`TicketInstanz = { iid, ticketId, seed, netz, hilfeStufe, hilfen:[], start, frist|null, quelle:"postfach"|"wartung"|"wiederholung"|"generiert"|"notfall"|"raetsel"|"pruefung"|"folge", vielfalt?, kuratiert?, kuratiertId?, klingelt? }`
+
+**Onboarding, nachgetragen 06.10.2026 (`spiel/erstestunde.js`):** `st.einstieg = { fertig, coach:{}, begruessung?:"auftrag"|"umsehen", abschluss?:true }`.
+`begruessung` setzt die Wahl der Begrüßungskarte — genau einmal, und nur in einem frischen Stand (`!fertig` **und** kein erledigter Auftrag). `abschluss` markiert die gezeigte Abschluss-Station und verlangt `begruessung` **und** `fertig`. Fehlt `einstieg` ganz oder steht `fertig: true`, sieht ein Altstand nichts davon (die Begrüßung entfällt, der Abschluss ebenso).
+
+**Auftragsvielfalt (neu 06.10.2026, `spiel/postfach.js` · `spiel/generator.js` · `daten/basis.js`)**
+
+Vorher war jeder handgeschriebene Auftrag starr: `def.netz` ignorierte den Instanz-Seed, das Netz war bei Seed 1 und Seed 987654321 in **46 von 46** Fällen byte-gleich. Jetzt:
+- `def.fuerSeed(seed)` liefert die Fassung je Instanz-Seed — Adressen, Ziele, Lösung und Hilfen werden mit dem Seed gebaut und je `(id, seed)` gemerkt (≤ 32 Fassungen je Ticket). Alle Zufallsströme kommen aus `Zufall(seed)`; ohne Seed bleibt die Definition **byte-gleich** wie vorher.
+- `def.fehlerstellen = [{injektor, stelle}]` — wo kein `ziel`/`wahl` festgeschrieben ist, wählt der Seed die Fehlerstelle; derselbe Fehler kommt nie zweimal im selben Auftrag vor.
+- `Spiel.ticketGueltig(def)` ist die Selbstprüfung jeder Seed-Fassung (Startbruch mit erwartetem Grund, Lösung heilt, Vorlagen-Regression). Fällt eine Fassung durch, bleibt die **feste** Fassung spielbar — eine gewürfelte Variante darf nie unlösbar werden.
+- Ausnahmen bleiben fest: Terminal-Aufträge (`spec.art === "terminal"`) und alles, was konkrete Werte in Lösung oder Befehlsmuster nennt, laufen weiter auf dem festen Netz.
+- **Spielstand:** neue Instanzen tragen `vielfalt: true`. Eine Instanz **ohne** dieses Feld (Altstand) behält ihre feste Fassung — ein laufender Auftrag wechselt sein Netz nie. Gemessen: Altstand `salon-02`, Netzkennwert `ee287645:12368` vor und nach dem Umbau gleich, Auftrag spielbar. `v` bleibt `2`.
+- Erreicht: 58 Handaufträge × 12 Seeds = **627 verschiedene Netze** (vorher 58), gleicher `(id, seed)` in 696/696 Paaren identisch, Massendurchspiel 696/696 grün.
 
 ### 7.3 Spiel-API (Auswahl)
 
 `Spiel.laden()`, `Spiel.st` (Zustand), `Spiel.postfach()`, `Spiel.oeffnen(iid)`, `Spiel.abnahme(inst)` → `[{ziel, ok, grund, trace}]` + Sterne, `Spiel.hilfe(inst)` → nächste Stufe, `Spiel.vorfuehren(inst)` → Lösungsschritte, `Spiel.tick(ms)` (Idle: Wartung, Einkommen, Ampeln), `Spiel.offlineBericht()`, `Spiel.mini()` → Mini-Ticket, `Spiel.generiere(skill, seed)` (Injektor-Generator), `Spiel.INJEKTOREN`.
 
 Bus-Ereignisse: `netz-geaendert`, `ticket-neu`, `ticket-geloest`, `zustand-geaendert`, `trace`, `modus` (leiste/voll), `hilfe`.
+
+### 7.4 Speichern — verbindlicher Vertrag (06.10.2026)
+
+| Punkt | Vertrag |
+|---|---|
+| Schlüssel | `labor` (Spielstand), `einst` (Einstellungen), `sandbox` (freies Labor), `labor-sicherung` (rollierende Zweitsicherung). Geschrieben wird der **ganze** Speicher als ein JSON unter dem einen Schlüssel `netzwerk-labor` — im Browser und in der Android-Fassung in `localStorage`, im Desktop-Programm über Tauri in `spielstand.json` |
+| Entprellung | **genau eine**: `SPEICHER.entprellung = 1500 ms` (`kern/basis.js`). `Spiel.speichern()` markiert nur „schmutzig"; geschrieben wird 1500 ms nach der **letzten** Änderung. `Spiel.AUTOSPEICHERN_MS = 0` — die frühere zweite Schicht (400 ms in `spiel/ticket.js`) ist entfallen |
+| Sofort schreiben | `store.sofort()`; im Spiel `Spiel.sofortSpeichern()` (Rückgabe immer erfüllt — ein Fehler ist bereits gemeldet). Aufrufer: Auftragsabschluss `spiel/abnahme.js` (bestanden **und** nicht bestanden), Ticket öffnen `spiel/ticket.js`, Käufe `spiel/wirtschaft.js` · `spiel/werkzeuge.js` · `spiel/playbooks.js`, Meilensteine `spiel/karriere.js` (Aufstieg, Fest gesehen), App in den Hintergrund `ui/start.js` (`pagehide`, `beforeunload`, `visibilitychange` → `hidden`) |
+| Kennzeichen | `store.stand()` → `{art:"schreibt"\|"gesichert"\|"fehler", fehler, zeit}`. Der Bus meldet jede echte Änderung als `speicher-stand`, ein Fehler zusätzlich als `speicher-fehler`. Die Kopfzeile zeigt daraus „… sichert / ✓ gesichert / ⚠ nicht gesichert" (`ui/app.js`, `role="status"`, kein Klickziel, keine Animation; unter 380 px Breite Kurzform) |
+| Fehler | Ein gescheiterter Schreibvorgang lässt `schmutzig` **stehen** (der nächste Versuch nimmt den Stand mit), füllt `SPEICHER.fehler` und meldet ihn über den Bus; der Entpreller fängt seine eigene Ablehnung ab. Vorher blieb ein voller Speicher stumm |
+| Sicherung | `Spiel.SICHERUNG = "labor-sicherung"`, Inhalt `{v, zeit, stand}`. Angelegt **vor einer Migration** (`v < Spiel.VERSION`) und **vor einem Import** (`Spiel.sicherungAnlegen(roh, true)`); eine frische Sicherung bleibt `Spiel.SICHERUNG_FRISCH_MS = 60 s` unangetastet, damit die Migration nach dem Neuladen die Import-Sicherung nicht ersetzt |
+| Import | `Spiel.importPruefen(d)`: fremdes Format (`format !== "netzwerk-labor"` oder fehlendes `speicher`) und **zu neue** Stände (`labor.v > Spiel.VERSION`) werden abgewiesen; **alte** Stände und Stände ganz ohne `v`-Feld sind erlaubt — die Migration holt sie herein. Geprüft wird die Schemaversion, nicht die Programmversion der Datei |
+| Nicht im Stand | Laufzeit je Instanz (`Spiel._lz`: Verlauf, Startnetz, Ziele, `letzteArbeit`) und alles, was `ui/` nur anzeigt. Ein Neuladen holt den **Stand** zurück, nicht die Sitzung |
+
+**Gemessen (06.10.2026, Edge headless, Einzeldatei-Fassung, 1366×768):** `Spiel.speichern()` 2010 → **1512 ms** bis zum Schreibvorgang, Netzwechsel 2415 → 1515 ms, Auftragsabschluss 2436 → **6,7 ms** (Gegenprobe des Prüfers: 22 ms), Kauf 3,8 ms (Prüfer: 24 ms), Verstecken der Seite 0 → 1 Schreibvorgang. Spielstand: **26.554 B** beim Start, 27.420 B nach einem Abschluss, 102.799 B bei 30 Postfach-Instanzen. Grenze: ein Prozess-Tod **ohne** `hidden`-Wechsel verliert die letzten ≤ 1500 ms.
 
 ## 8 · Plattform
 
@@ -602,11 +631,23 @@ snooping: { [port]: { verworfen:0 } }                                 // NEU: Z�
 
 | Code | Titel | Schicht | Ausgelöst wenn |
 |---|---|---|---|
-| `DHCP_LEASE_EXPIRED` | DHCP-Lease abgelaufen | 7 | Zugriff mit `L.t > l.bis` und kein neues Angebot |
-| `DHCP_RESERVED_BUSY` | Reservierte Adresse belegt | 7 | Reservierung zeigt auf eine belegte Adresse |
+| `DHCP_LEASE_EXPIRED` | DHCP-Lease abgelaufen | 7 | `L.t > l.bis` **und** kein neues Angebot: die Lease ist abgelaufen und der Client bekommt in diesem Lauf keine neue |
+| `DHCP_RESERVED_BUSY` | Reservierte Adresse belegt | 7 | Die Reservierung (MAC → IP) zeigt auf eine nicht freie Adresse (vergeben, doppelt belegt oder Gateway). Der Server lehnt ab und gibt **kein** Angebot — auch nicht aus dem freien Bereich |
 | `DHCP_ROGUE_OFFER` | Angebot von fremdem DHCP-Server | 7 | Client nimmt ein Angebot eines unerwarteten Servers |
 | `DHCP_SNOOPING_BLOCKED` | DHCP-Snooping blockiert | 2 | Server-Antwort an einem nicht vertrauten Switch-Port |
-| `DHCP_CONFLICT` | Adresskonflikt im Pool | 7 | Server findet eine doppelt belegte Adresse |
+| `DHCP_CONFLICT` | Adresskonflikt im Pool | 7 | Der Server prüft eine Adresse vor der Vergabe und findet sie auf **mehr als einem** Gerät; er überspringt sie und nennt diesen Grund. Bleibt dadurch keine Adresse frei, bleibt es bei DIESEM Grund — nicht bei `DHCP_POOL_EMPTY` |
+
+**Vorrang, wenn mehrere zutreffen** (der erste zutreffende gewinnt, in der Reihenfolge ihres Auftretens in der Trace):
+1. `DHCP_RESERVED_BUSY` — die Reservierung schlägt den Bereich, also auch dessen Gründe
+2. `DHCP_CONFLICT` — der Server hat eine doppelt belegte Adresse gefunden
+3. `DHCP_POOL_EMPTY` — der Pool ist erschöpft, ohne dass ein Konflikt im Spiel war
+4. `DHCP_LEASE_EXPIRED` — sonst: keine gültige Lease mehr und kein neues Angebot
+5. `DHCP_NO_OFFER` — sonst (kein Server, kein Pool für das Netz, keine Antwort)
+
+**Zwei Genauigkeiten, die beim Lesen der Trace helfen** (umgesetzt 06.10.2026, belegt durch `tests/sim-dhcp-gruende.test.js`, `tools/sim-stand.js` unverändert):
+- Der Client wiederholt den Discover bis zu 3×. Ein Grund des Servers steht deshalb einmal **je Versuch** in der Trace (im Referenzstand gilt das schon für `DHCP_POOL_EMPTY`, 4×). Das Ergebnis `grund` des Aufrufs ist genau einer.
+- `DHCP_CONFLICT` steht auch dann in der Trace, wenn danach noch eine andere Adresse vergeben wird — der Vertrag knüpft den Grund an das FINDEN, nicht an das Scheitern. Tickets, die den Konflikt als Fehler werten, prüfen deshalb zusätzlich `ok=false`.
+- Vor dem 06.10.2026 gab die Simulation diese drei Codes **nie** aus, obwohl sie hier standen: eine belegte Reservierung bekam still eine andere Adresse, ein Adresskonflikt erschien als `DHCP_POOL_EMPTY`, eine abgelaufene Lease als `DHCP_NO_OFFER`. Drei fertige Lehrtexte in `DATEN.lehrtexte` waren dadurch im Spiel unerreichbar.
 
 Jeder Code braucht: Eintrag in `Sim.GRUENDE`, Lehrtext in drei Tiefen in `DATEN.lehrtexte` **mit Quelle** (RFC 2131/2132, „IOS-ähnlich" kennzeichnen, wo es kein echtes Vorbild gibt), Injektor in `spiel/injektoren.js`, mindestens ein Ticket je Stufe, und Aufnahme in die Grundcode-Liste in `tests/sim-gruende.test.js` (sonst rot).
 

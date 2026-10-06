@@ -16,12 +16,12 @@
 .pa-kat{display:flex; flex-direction:column; align-items:center; gap:2px; width:66px; min-height:62px; padding:5px 2px 6px; border:1px solid transparent; border-radius:12px; background:none; color:var(--muted);
   font:600 11px/1.1 var(--body); transition:background var(--dauer), border-color var(--dauer), color var(--dauer)}
 .pa-kat:hover{background:var(--panel-3); color:var(--ink)}
-.pa-kat:hover .gb-kachel{stroke:var(--g)}
+.pa-kat:hover .gb-kachel, .pa-teil:hover .gb-kachel{stroke:var(--g)}
 .pa-kat.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 .pa-kat svg, .pa-teil svg{pointer-events:none; overflow:visible; flex:0 0 auto}
 .pa-fach{position:absolute; left:calc(100% + 6px); top:8px; z-index:40; width:268px; max-height:calc(100vh - 140px); overflow:auto; display:flex; flex-direction:column; gap:6px;
   padding:8px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten, 0 12px 32px rgba(0,0,0,.35)); animation:pa-rein .14s ease-out}
-.pa-fach[hidden]{display:none}
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim{display:none}
 .pa-fach.zieht{opacity:.35; pointer-events:none}
 @keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
 .pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:2px 2px 4px 6px}
@@ -32,13 +32,12 @@
 .pa-zuletzt small{color:var(--faint); font:700 10.5px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; padding:2px 4px}
 .pa-zuletzt-reihe{display:flex; gap:4px}
 .pa-liste{display:flex; flex-direction:column; gap:2px}
-.pa-teil{display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:4px 8px 4px 4px; border:1px solid transparent; border-radius:10px; background:none; color:var(--ink);
+.pa-teil{display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:4px 8px 4px 4px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--ink);
   text-align:left; cursor:grab; touch-action:none; user-select:none; transition:background var(--dauer), border-color var(--dauer)}
 .pa-teil:hover{background:var(--panel-3)}
-.pa-teil:hover .gb-kachel{stroke:var(--g)}
 .pa-teil.an{background:var(--accent-soft); border-color:var(--accent)}
 .pa-teil.klein{flex-direction:column; gap:1px; width:auto; min-width:64px; min-height:0; padding:4px 6px; font:600 11px/1.1 var(--body); color:var(--muted)}
-.pa-teil kbd{margin-left:auto; flex:0 0 auto}
+.pa-teil kbd, .auftrag-sandbox .knopf{margin-left:auto; flex:0 0 auto}
 .pa-text{display:flex; flex-direction:column; gap:1px; min-width:0}
 .pa-text b{font:700 14px/1.2 var(--body)}
 .pa-text small{color:var(--muted); font-size:12px; line-height:1.3}
@@ -50,20 +49,17 @@
 /* ---- Mitte: Auftrag, Fläche, Simulation ---- */
 .lb-mitte{display:flex; flex-direction:column; min-width:0; min-height:0}
 .lb-auftrag{position:relative; z-index:5; flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}   /* trägt die Auftragsmappe (spiel.css, am-) */
-.lb-auftrag:empty{display:none}
 .lb-auftrag-standard{display:flex; align-items:center; min-height:44px; padding:0 16px; font:700 15px/1 var(--display)}
 .auftrag-sandbox{display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 12px 8px 14px; background:linear-gradient(90deg, var(--accent-soft), transparent 55%)}
 .as-sym{display:inline-flex; flex:0 0 auto; width:38px; height:38px; align-items:center; justify-content:center; border-radius:11px; background:var(--panel-2); border:1px solid var(--line-2); color:var(--accent)}
 .as-text{display:flex; flex-direction:column; gap:2px; min-width:0}
 .as-text strong{font:800 17px/1.1 var(--display)}
 .as-text span{color:var(--muted); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.auftrag-sandbox .knopf{margin-left:auto; flex:0 0 auto}
 
-.lb-leinwand{position:relative; flex:1 1 auto; min-height:120px; overflow:hidden}
+.lb-leinwand{position:relative; flex:1 1 auto; min-height:120px; overflow:hidden; container-type:inline-size}
 .lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--bg); touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
 .lb-svg:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
-.lb-svg.greift{cursor:grabbing}
-.lb-svg.zieht, .lb-svg.zieht .ger{cursor:grabbing}
+.lb-svg.greift, .lb-svg.zieht, .lb-svg.zieht .ger{cursor:grabbing}
 .labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg{cursor:crosshair}
 .labor[data-werkzeug="platzieren"] .lb-svg{cursor:copy}
 .lb-raster-punkt{fill:var(--line)}
@@ -83,7 +79,7 @@
 .lb-wz{position:relative}
 .lb-wz-taste{position:absolute; right:2px; bottom:1px; font:600 9.5px/1 var(--mono); color:var(--faint); border:0; border-radius:3px; padding:1px 3px; background:var(--panel-2); pointer-events:none}
 .lb-wz.an .lb-wz-taste{color:var(--accent); background:transparent}
-.lb-wz:hover .lb-wz-taste{color:var(--muted)}
+.lb-wz:hover .lb-wz-taste, .lb-fern-schild.fertig .lb-fern-status{color:var(--muted)}
 .lb-knopf[disabled]{opacity:.35; cursor:default}
 .lb-knopf-text span{font:600 13px/1 var(--body)}
 .lb-zoomtext{min-width:64px; height:40px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 12.5px/1 var(--mono); font-variant-numeric:tabular-nums}
@@ -92,13 +88,10 @@
 .lb-ansicht{display:inline-flex; align-items:center; gap:7px; height:40px; padding:0 10px 0 11px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
 .lb-ansicht:hover{background:var(--panel-3); color:var(--ink)}
 .lb-ansicht-text{color:var(--ink)}
-.lb-gruppe[hidden]{display:none}
-.lb-hinweis{position:absolute; left:12px; bottom:12px; max-width:calc(100% - 440px); padding:7px 12px; border-radius:10px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
+.lb-hinweis{position:absolute; left:12px; bottom:12px; max-width:calc(100% - 440px); padding:7px 12px; border-radius:var(--radius); background:var(--glas); border:1px solid var(--line); color:var(--muted);
   font-size:12.5px; line-height:1.35; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.lb-hinweis:empty{display:none}
 @media (max-width:1100px){ .lb-hinweis{display:none} }
 /* Auch wenn die Fläche selbst schmal ist (z. B. breite Konsole im Inspektor): Hinweis weg statt schmaler Säule */
-.lb-leinwand{container-type:inline-size}
 @container (max-width:760px){ .lb-hinweis{display:none} }
 /* Fernwartung (E1): Fläche, Werkzeuge und Geräteleiste verdeckt */
 .labor.lb-fern .lb-svg, .labor.lb-fern .lb-leiste-oben, .labor.lb-fern .lb-leiste-unten, .labor.lb-fern .lb-geraete > *{visibility:hidden}
@@ -111,25 +104,23 @@
 .lb-fern-punkt{width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation:lb-fern-puls 2s ease-out infinite}
 @keyframes lb-fern-puls{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent)} 80%, 100%{box-shadow:0 0 0 8px transparent}}
 /* Bildschirm des Kunden: das Symptom als Bild (Ziel mit ✗), nicht als Satz – der steht im Titel */
-.lb-fern-schirm{position:relative; aspect-ratio:16/9; border-radius:10px; border:6px solid var(--panel-3); background:linear-gradient(160deg, color-mix(in srgb, var(--info) 22%, var(--bg)), var(--bg) 70%);
+.lb-fern-schirm{position:relative; aspect-ratio:16/9; border-radius:var(--radius); border:6px solid var(--panel-3); background:linear-gradient(160deg, color-mix(in srgb, var(--info) 22%, var(--bg)), var(--bg) 70%);
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; overflow:hidden}
 .lb-fern-schirm::after{content:""; position:absolute; left:50%; bottom:-6px; width:30%; height:6px; transform:translateX(-50%); background:var(--panel-3)}
 .lb-fern-symptom{position:relative; font-size:40px; line-height:1}
 .lb-fern-zielbild{display:block; width:64px; height:64px}
 .lb-fern-symptom-sym{display:block}
 .lb-fern-x{position:absolute; right:-14px; bottom:-6px; width:24px; height:24px; border-radius:50%; background:var(--bad); color:#fff; font:800 14px/24px var(--body); text-align:center; box-shadow:0 0 0 3px var(--bg)}
-.lb-fern-symptom-text{max-width:90%; padding:2px 8px; border-radius:6px; background:color-mix(in srgb, var(--bg) 70%, transparent); color:var(--ink); font:600 13px/1.4 var(--mono); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.lb-fern-symptom-text{max-width:90%; padding:2px 8px; border-radius:var(--radius-s); background:color-mix(in srgb, var(--bg) 70%, transparent); color:var(--ink); font:600 13px/1.4 var(--mono); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .lb-fern-geraet{display:flex; align-items:center; gap:10px}
 .lb-fern-geraet strong{font:700 15px/1.2 var(--body); color:var(--ink)}
 .lb-fern-bild{width:34px; height:34px; flex:0 0 auto}
 .lb-fern-kunde{margin:0; display:flex; align-items:center; gap:6px; font-size:13px}
 .lb-fern-kunde b{color:var(--ink)}
 .lb-fern-kunde-sym{display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:7px; background:color-mix(in srgb, var(--k, var(--accent)) 20%, var(--panel)); font-size:14px}
-@media (prefers-reduced-motion: reduce){ .lb-fern-punkt{animation:none} }
 /* Probe (§ 20 F4): ✓ auf dem Bildschirm, Verbindung getrennt, PC online */
 .lb-fern-schild.fertig .lb-fern-x{background:var(--ok); animation:lb-fern-ok .35s cubic-bezier(.3,1.6,.5,1) both}
 @keyframes lb-fern-ok{from{transform:scale(.3)} to{transform:none}}
-.lb-fern-schild.fertig .lb-fern-status{color:var(--muted)}
 .lb-fern-schild.fertig .lb-fern-punkt{background:var(--muted); animation:none}
 .lb-fern-online{margin-left:auto; color:var(--ok); font:700 12.5px/1 var(--body)}
 /* Fernwartung (F2): Geräteleiste weg, Terminal bekommt mehr als die Hälfte der Arbeitsfläche */
@@ -143,7 +134,7 @@
 .ger{cursor:grab}
 .ger-treffer{fill:transparent}
 .ger-auswahl{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4; opacity:0; transition:opacity var(--dauer)}
-.ger.gewaehlt .ger-auswahl{opacity:1}
+.ger.gewaehlt .ger-auswahl, .lb-sim:hover .lb-sim-griff::after{opacity:1}
 .ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.4}
 .ger.hover .gb-kachel{fill:var(--panel-3); stroke:var(--g)}
 /* TOPO-2: Beschriftungen der Fläche lesbar machen – keine Schrift unter 12 px.
@@ -184,21 +175,19 @@
 .ps-oben path{fill:var(--ok)} .ps-unten path{fill:var(--bad)} .ps-aus rect{fill:var(--warn)}
 .ps{cursor:help}
 .kabel-port{font:600 12px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round; pointer-events:none}
-.lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text{display:none}   /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
+   /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
 .ger-ip.kopierbar{cursor:pointer; pointer-events:auto}
 .ger-ip.kopierbar:hover, .ger-ip.kopierbar:focus-visible{fill:var(--accent); text-decoration:underline}
 .ger-ip.kopierbar:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip{display:none}
 .vlan-schild rect{fill:var(--kf); stroke:var(--bg); stroke-width:1.5}
 .vlan-schild text{font:700 10.5px/1 var(--mono); fill:var(--accent-ink)}
 .vlan-schild.trunk rect{fill:var(--panel-2); stroke:var(--ink)}
 .vlan-schild.trunk text{fill:var(--ink)}
-.vlan-schild{pointer-events:none}
+.vlan-schild, .zone, .karte, .gw-schild{pointer-events:none}
 
 /* ---- Zonen (Ebene IP-Netze) ---- */
 .zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
 .zone-d{--zf:var(--zone-d); --zl:var(--zone-d-linie)} .zone-e{--zf:var(--zone-e); --zl:var(--zone-e-linie)}
-.zone{pointer-events:none}
 .zone-flaeche{fill:var(--zf); stroke:var(--zl); stroke-width:1.5; stroke-linejoin:round}
 .zone-schild{fill:var(--panel); stroke:var(--zl); stroke-width:1.5}
 /* Zonenbeschriftung liegt auf dem Zonenschild (.zone-schild, fill:var(--panel)) – Kontur deshalb in --panel,
@@ -206,7 +195,6 @@
 .zone-text{font:700 12px/1 var(--mono); fill:var(--ink); paint-order:stroke; stroke:var(--panel); stroke-width:2.5px; stroke-linejoin:round}
 
 /* ---- Kärtchen (MAC/ARP/Routen) ---- */
-.karte, .gw-schild{pointer-events:none}
 .karte-rahmen{fill:var(--panel); stroke:var(--line-2); stroke-width:1}
 .karte-titel{font:700 11px/1 var(--body); fill:var(--accent)}
 .karte-zeile{font:500 10.5px/1 var(--mono); fill:var(--ink); white-space:pre}
@@ -259,15 +247,12 @@
 .labor.sim-zieht{cursor:ns-resize; user-select:none}
 .lb-sim-griff{position:absolute; top:-5px; left:0; right:0; height:10px; cursor:ns-resize; z-index:2}
 .lb-sim-griff::after{content:""; position:absolute; left:50%; top:3px; width:44px; height:4px; margin-left:-22px; border-radius:2px; background:var(--line-2); opacity:0; transition:opacity var(--dauer)}
-.lb-sim:hover .lb-sim-griff::after{opacity:1}
-.labor.sim-zu .lb-sim-griff{display:none}
 .lb-sim-kopf{display:flex; align-items:center; gap:8px; width:100%; height:38px; flex:0 0 auto; padding:0 14px; border:0; background:none; color:var(--muted); font:700 13px/1 var(--body); text-align:left; min-width:0}
 .lb-sim-kopf:hover{color:var(--ink); background:var(--panel-2)}
 .lb-sim-titel-text{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .lb-sim-pfeil{margin-left:auto; display:inline-flex; transition:transform .2s}
 .labor:not(.sim-zu) .lb-sim-pfeil{transform:rotate(180deg)}
 .lb-sim-inhalt{flex:1 1 auto; min-height:0; overflow:auto}
-.labor.sim-zu .lb-sim-inhalt{display:none}
 .lb-sim-platz{padding:12px 16px; color:var(--muted)}
 .lb-sim-platz strong{display:block; color:var(--ink); margin-bottom:4px}
 
@@ -275,7 +260,6 @@
 .lb-insp-huelle{position:relative; width:360px; display:flex; flex-direction:column; min-height:0; background:var(--panel); border-left:1px solid var(--line); transition:width .2s ease}
 .labor.insp-zu .lb-insp-huelle{width:0; border-left:0}
 .lb-inspektor{flex:1 1 auto; min-height:0; min-width:0; overflow:auto}
-.labor.insp-zu .lb-inspektor{display:none}
 .lb-lasche{position:absolute; right:100%; top:50%; transform:translateY(-50%); z-index:4; display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 8px; border:1px solid var(--line); border-right:0; border-radius:10px 0 0 10px;
   background:var(--glas); color:var(--muted); font:600 12.5px/1 var(--body); white-space:nowrap; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .lb-lasche:hover{color:var(--ink); background:var(--panel-3)}
@@ -288,8 +272,7 @@
 .lb-insp-platz{padding:16px; display:flex; flex-direction:column; gap:10px}
 .lb-insp-kopf{display:flex; align-items:center; gap:12px}
 .lb-insp-kopf h3{font-size:20px}
-.lb-insp-art{color:var(--muted); font-size:13px}
-.lb-insp-hinweis{color:var(--muted); font-size:13px}
+.lb-insp-art, .lb-insp-hinweis{color:var(--muted); font-size:13px}
 .lb-insp-ports{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:13px}
 .lb-st.st-oben{color:var(--ok)} .lb-st.st-unten{color:var(--bad)} .lb-st.st-aus{color:var(--warn)}
 .lb-konsole-kopf{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line)}
@@ -299,8 +282,6 @@
 
 @media (max-width:1100px){ .lb-insp-huelle{width:320px} }
 /* Ruhe beim Start: Inspektor erst mit der ersten Auswahl, Simulation erst mit der ersten Aufzeichnung */
-.labor.insp-wartet .lb-insp-huelle{display:none}
-.labor.sim-wartet .lb-sim{display:none}
 
 /* ---- Dock rechts (K1, Phase B): Inspektor · Simulation · Plan · Akte als Reiter ----
    Breite aus der Laborbreite: höchstens 40 % − Geräteleiste, so behält die Fläche ≥ 60 %. Eingeklappt: schmale Reiterleiste. */
@@ -318,7 +299,6 @@
 .lb-dock-einklappen:hover{background:var(--panel-3); color:var(--ink)}
 .lb-dock-inhalt{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .lb-dock-inhalt > *{flex:1 1 auto; min-height:0}
-.lb-dock-inhalt > [hidden]{display:none !important}
 .lb-plan, .lb-akte{overflow:auto}
 @container (max-width:380px){ .lb-dock-tab:not(.an) .lb-dock-titel{display:none} .lb-dock-tab{padding:0 8px} }
 .labor.dock-zu .lb-dock-reiter{flex-direction:column; align-items:center; border-bottom:0; padding:8px 0; gap:4px}

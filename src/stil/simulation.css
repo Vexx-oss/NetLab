@@ -24,7 +24,7 @@
 .si-zus p{margin:0; font-size:13px; line-height:1.4}
 .si-zus > p:first-of-type{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .si-zeile2, .si-statistik{grid-column:1 / -1}
-.si-statistik{color:var(--faint); font-size:12px !important}
+.si-zus .si-statistik{color:var(--faint); font-size:12px}
 .si-zus:has(.si-zeile2) .si-statistik{display:none}
 
 /* Umschalter (Ansicht, Tempo, MAC-Format): kleine Segmentknöpfe */
@@ -51,17 +51,16 @@
 .si-haupt{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(250px, 1fr)}
 .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr)}
 .si[data-breite="schmal"] .si-pdu{display:none}
-.si-liste{min-height:0; overflow:auto; padding:4px 6px 8px; outline:none}
+.si-liste{min-height:0; overflow:auto; padding:4px 6px 8px; outline:none; container-type:inline-size}
 .si-liste:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
-.si-pdu{min-height:0; overflow:auto; border-left:1px solid var(--line); background:var(--panel)}
+.si-pdu{min-height:0; overflow:auto; border-left:1px solid var(--line); background:var(--panel); container-type:inline-size}
 .si-hinweis{margin:6px 8px; color:var(--muted); font-size:12.5px}
 
 /* Ereigniszeile: Nr · Zeit · Gerät/Port · Art · Protokoll, darunter der Text (schmale Liste);
    ab 640 px Listenbreite alles in einer Zeile */
-.si-liste{container-type:inline-size}
 .si-zeile{display:grid; grid-template-columns:2.4em 5.2em minmax(0, 1fr) auto auto; grid-template-areas:"n t g a p" ". . x x x"; align-items:center; column-gap:6px; row-gap:1px;
-  padding:3px 6px; border-radius:6px; border-left:3px solid transparent; cursor:pointer; font-size:12.5px; line-height:1.35}
-.si-n{grid-area:n} .si-t{grid-area:t} .si-g{grid-area:g} .si-zeile > .si-art{grid-area:a} .si-p{grid-area:p} .si-x{grid-area:x}
+  padding:3px 6px; border-radius:var(--radius-s); border-left:3px solid transparent; cursor:pointer; font-size:12.5px; line-height:1.35}
+.si-zeile > .si-art{grid-area:a}
 @container (min-width:640px){
   .si-zeile{grid-template-columns:2.4em 5.4em minmax(7em, 10em) 7.6em 4.4em minmax(0, 1fr); grid-template-areas:"n t g a p x"}
 }
@@ -70,24 +69,23 @@
 .si-zeile.leise{color:var(--muted)}
 .si-zeile.drop{border-left-color:var(--bad); background:color-mix(in srgb, var(--bad) 7%, transparent)}
 .si-zeile.drop.aktuell{background:color-mix(in srgb, var(--bad) 14%, transparent)}
-.si-n{color:var(--faint); font:600 11px/1 var(--mono); text-align:right}
-.si-t{color:var(--muted); font:500 11.5px/1 var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
-.si-g{font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.si-n{grid-area:n; color:var(--faint); font:600 11px/1 var(--mono); text-align:right}
+.si-t{grid-area:t; color:var(--muted); font:500 11.5px/1 var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.si-g{grid-area:g; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .si-port{color:var(--muted); font:500 12px var(--mono)}
-.si-p{display:flex}
-.si-x{min-width:0}
+.si-p{grid-area:p; display:flex}
+.si-x{grid-area:x; min-width:0}
 .si-art{display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-size:12px; color:var(--muted)}
 .si-art svg path{fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
 .si-art[data-art="senden"]{color:var(--accent)}
 .si-art[data-art="empfangen"], .si-art[data-art="antworten"]{color:var(--ok)}
 .si-art[data-art="fluten"]{color:var(--warn)}
 .si-art[data-art="verwerfen"]{color:var(--bad); font-weight:700}
-.si-art[data-art="lernen"]{color:var(--info)}
+.si-art[data-art="lernen"], .si-kennung.gemeldet{color:var(--info)}
 .si-grundzeile{grid-column:3 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; padding:2px 0 3px; font-size:12px; color:var(--ink)}
 .si-grund{font:700 12px/1.6 var(--mono); padding:0 6px; border-radius:5px; background:var(--bad-soft); color:var(--bad)}
 .si-erklaerung{color:var(--ink)}
 .si-kennung{font-size:12px; font-weight:700}
-.si-kennung.gemeldet{color:var(--info)}
 .si-kennung.still{color:var(--warn)}
 .si-kennung.bad{color:var(--bad)}
 .si-skill, .si-quelle{color:var(--faint); font-size:12px}
@@ -95,7 +93,7 @@
 /* ---- Ansicht „Ergebnis“: wo es hängt ---- */
 .si-ergebnis{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:10px 14px 12px}
 .si-ergebnis h4{margin:0; font:800 13px/1.2 var(--display); color:var(--bad)}
-.si-problem{align-self:stretch; display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-radius:10px; border:1px solid color-mix(in srgb, var(--bad) 40%, var(--line)); background:color-mix(in srgb, var(--bad) 6%, var(--panel))}
+.si-problem{align-self:stretch; display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-radius:var(--radius); border:1px solid color-mix(in srgb, var(--bad) 40%, var(--line)); background:color-mix(in srgb, var(--bad) 6%, var(--panel))}
 .si-problem p{margin:0}
 .si-problem-kopf{display:flex; align-items:center; flex-wrap:wrap; gap:8px}
 .si-problem .si-knopf{align-self:flex-start}
@@ -128,7 +126,7 @@
 .pdu-schicht > summary{display:flex; align-items:center; gap:8px; padding:5px 8px; cursor:pointer; list-style:none}
 .pdu-schicht > summary::-webkit-details-marker{display:none}
 .pdu-schicht > summary:hover{background:var(--panel-2); border-radius:8px}
-.pdu-nr{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:6px; background:var(--panel-3); color:var(--muted); font:700 11px/1 var(--mono); flex:0 0 auto}
+.pdu-nr{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:var(--radius-s); background:var(--panel-3); color:var(--muted); font:700 11px/1 var(--mono); flex:0 0 auto}
 .pdu-schicht-titel{font-weight:700; white-space:nowrap}
 .pdu-kurz{color:var(--muted); font:500 12px var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
 .pdu-mark{margin-left:auto; flex:0 0 auto; padding:0 6px; border-radius:5px; background:var(--warn-soft); color:var(--warn); font:700 11px/1.6 var(--body)}
@@ -144,6 +142,5 @@
 .pdu-vorher{color:var(--warn); font-size:12px}
 .pdu-vorher s{color:var(--muted)}
 /* schmale PDU-Spalte: Feldname über dem Wert, damit MAC und IP ungebrochen in eine Zeile passen */
-.si-pdu{container-type:inline-size}
 @container (max-width:400px){ .pdu-feld{grid-template-columns:minmax(0, 1fr); gap:0; padding:3px 6px} .pdu-feld dt{font-size:12px} }
 .pdu-warum{margin:6px 0 0; padding:5px 8px; border-radius:7px; background:var(--info-soft); font-size:12px; line-height:1.45}

@@ -1,10 +1,11 @@
 "use strict";
 /* ---------- Spiel: ein Ticket bearbeiten ----------
    Start-Netz bauen (Fabrik + Fehler), Instanz öffnen, Verlauf (Rückgängig) je Instanz im Speicher,
-   Autospeichern nach jeder Änderung, Ziele live prüfen, Regressions-Grundlinie messen, zurücksetzen. */
+   nach jeder Änderung speichern (EINE Entprellung im Store, 1500 ms), Ziele live prüfen,
+   Regressions-Grundlinie messen, zurücksetzen. */
 
 Spiel._lz = Spiel._lz || {};                  /* Laufzeit je Instanz (nicht gespeichert): {verlauf, netz, startNetz, ziele} */
-Spiel.AUTOSPEICHERN_MS = 400;
+Spiel.AUTOSPEICHERN_MS = 0;                   /* keine eigene Verzögerung mehr — die eine Entprellung liegt im Store (store.entprellungMs, 1500 ms) */
 Spiel.ARBEIT_LUECKE_MS = 2 * 60 * 1000;       /* längere Pausen zählen nicht als Arbeitszeit */
 Spiel.REGRESSION_MAX = 45;                    /* höchstens so viele Paare messen */
 
@@ -52,6 +53,7 @@ Spiel.oeffnen = function(iid){
   Spiel.niveauAktualisieren();
   if (!inst.basis) Spiel.basisMessen(inst);
   Spiel.geaendert("ticket-geoeffnet");
+  Spiel.sofortSpeichern();                    /* ein offener Auftrag steht sofort auf der Platte */
   Spiel.melden("ticket-geoeffnet", {inst, def});
   return {inst, def, netz: inst.netz, verlauf: lz.verlauf};
 };
@@ -160,7 +162,7 @@ Spiel.regressionPruefen = function(inst, netz){
   return liste;
 };
 
-/* ---- Autospeichern und Arbeitszeit ---- */
+/* ---- Speichern und Arbeitszeit ---- */
 Spiel.hoererAnmelden = function(){
   if (Spiel._hoererAn) return;
   Spiel._hoererAn = true;
@@ -177,14 +179,22 @@ Spiel.hoererAnmelden = function(){
     Spiel.autospeichern();
   });
 };
+/* Nach jeder Änderung speichern. Die Verzögerung liegt ALLEIN im Store (basis.js):
+   hier wird nur „schmutzig“ markiert. Vorher lagen zwei Schichten übereinander (400 ms hier,
+   2000 ms dort) — gemessen 2415 ms bis zum Schreibvorgang nach einer Netzänderung. */
 Spiel.autospeichern = function(){
-  if (typeof setTimeout === "undefined") return Spiel.speichern();
-  if (Spiel._autoTimer) clearTimeout(Spiel._autoTimer);
-  Spiel._autoTimer = setTimeout(() => { Spiel._autoTimer = null; Spiel.speichern(); }, Spiel.AUTOSPEICHERN_MS);
-};
-Spiel.sofortSpeichern = function(){
-  if (Spiel._autoTimer) { clearTimeout(Spiel._autoTimer); Spiel._autoTimer = null; }
   Spiel.speichern();
+};
+/* Wirklich sofort schreiben (Auftragsabschluss, Ticket öffnen, Kauf, App in den Hintergrund).
+   Vorher hieß die Funktion nur so: sie löschte den 400-ms-Timer und rief Spiel.speichern(),
+   das seinerseits 2000 ms wartete — gemessen 0 Schreibvorgänge direkt, 1 nach 2005 ms.
+   Der Rückgabewert ist immer erfüllt: ein Schreibfehler ist bereits gemeldet (store.fehler und
+   Bus „speicher-fehler“, siehe basis.js) — ein unbehandeltes Versprechen wäre nur Lärm. */
+Spiel.sofortSpeichern = function(){
+  if (Spiel._trocken || !Spiel._st) return Promise.resolve(false);
+  Spiel.speichern();
+  const p = typeof store !== "undefined" && store.sofort ? store.sofort() : Promise.resolve(false);
+  return p.catch(() => false);
 };
 
 /* Geräte, die der Spieler geändert und nicht gespeichert hat (für den „Ungespeichert“-Hinweis) */

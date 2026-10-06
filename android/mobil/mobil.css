@@ -1,0 +1,376 @@
+/* ---------- Android-Anpassung (nur in der App) ----------
+   Wird beim APK-Bau hinter die Spielstile gehängt (android/bauen.py, Schritt 3).
+   Die Quellen in src/stil/ bleiben unangetastet: hier steht nur, was auf einem
+   Telefon anders sein muss als am Schreibtisch mit Maus.
+
+   Grundsätze:
+   - Finger sind ungenauer als ein Zeiger: kleiner wird hier nichts, nur größer.
+   - Der Bildschirm ist schmal und niedrig: dieselbe Fläche mit weniger Rand.
+   - `pointer: coarse` trifft Telefon und Tablet. Ein Windows-Rechner mit
+     Maus bleibt unberührt, auch wenn er die Android-Fassung anzeigt.
+
+   Aufbau dieser Datei:
+     1. Fingerregeln        — jede Berührungsfläche (Telefon UND Tablet)
+     2. Telefon-Anordnung   — kurze Seite ≤ 640 px: Kopf, Blätter, Daumenleisten
+   Gemessen wird mit android/werkzeuge/mobilprobe.py (siehe android/LIESMICH.md). */
+
+html, body { overscroll-behavior: none; }               /* kein Gummiband, kein Nachziehen */
+html { -webkit-tap-highlight-color: transparent; }      /* kein grauer Blitz beim Tippen */
+body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom der Seite */
+.lb-svg, .lb-geraete, .pa-fach, .lb-leiste-oben, .lb-leiste-unten {
+  -webkit-touch-callout: none;                          /* kein Kopieren-Menü beim Halten */
+}
+.lb-svg { touch-action: none; }                          /* bestätigt editor.css, hier sichtbar */
+/* Von mobil.js ergänzte Bedienelemente. Am Schreibtisch/Tablet unsichtbar — dort
+   gibt es die Schreibtisch-Anordnung, und ein zweiter Weg hinein verwirrt nur.
+   `.nl-fab` gehört hierher, obwohl seine Regeln erst in der Telefonstufe stehen:
+   ohne diese Zeile standen die beiden Knöpfe auf einem Tablet ungestylt (74×44 /
+   71×44 px, display=inline-block) über der Zeichenfläche — gemessen von
+   „mobil-pruefer“ am 06.10.2026. `nl-im-menue` ist hier NICHT dabei: das ist nur
+   eine Markierung an vorhandenen Kopfknöpfen, kein eigener Behälter. */
+.nl-mehr, .nl-menue, .nl-griff, .nl-fab { display: none; }
+
+/* ============================================================
+   1. Fingerregeln — für jedes Berührungsgerät
+   ============================================================ */
+@media (pointer: coarse) {
+  /* --- Trefferflächen: mindestens 44 px, wie in den Android-Richtlinien --- */
+  button { min-height: 40px; }
+  .lb-wz, .lb-knopf, .lb-ansicht { height: 44px; min-width: 44px; }
+  .lb-zoomtext { height: 44px; min-width: 68px; }
+  .pa-zu { width: 40px; height: 40px; }
+  .pa-kat { width: 72px; min-height: 66px; }
+  .pa-teil { min-height: 52px; }
+
+  /* --- Kopfzeile: die Höhe ist auf dem Telefon teuer (54 px von 336) ---
+     Auch die Breite muss stimmen: gemessen 40×44 auf dem Tablet (dort greift die
+     Telefon-Anordnung nicht, die Fingerregel aber schon). --- */
+  .kopf-knopf { min-width: 44px; min-height: 44px; }
+
+  /* --- Werkzeugleisten über der Fläche: umbrechen statt aus dem Bild laufen --- */
+  .lb-leiste-oben { flex-wrap: wrap; gap: 6px; }
+  .lb-gruppe { gap: 1px; }
+  .lb-hinweis { display: none; }                        /* kostet nur Platz, steht auch im Coach */
+
+  /* --- Tote Fläche rechts: ein Token-Leck in src/stil/editor.css ---
+     `.labor{grid-template-columns:auto minmax(0,1fr) var(--dock-b, 0px)}` — der
+     Rückfallwert 0px greift nie, weil `--dock-b` in basis.css global 76px ist (die
+     Breite der Navigationsspalte). Ist kein Dock da (.dock-da fehlt), bleibt die
+     dritte Spalte trotzdem 76 px breit und leer: gemessen 06.10.2026 in beiden
+     Ausrichtungen. Die Variable wird deshalb HIER am `.labor` auf 0 gesetzt — nicht
+     global, sonst verliert die Navigationsspalte ihre Breite. Ist das Dock da,
+     gewinnen die Regeln in editor.css (.dock-da / .dock-da.dock-zu). */
+  .labor:not(.dock-da) { --dock-b: 0px; }
+
+  /* --- Auftragsmappe und Coach (Startbild): die kleinsten Knöpfe auf Fingerbreite.
+     Gemessen 06.10.2026 im Startbild: „Hinweise aus“ 103×30, „Mehr“ 40×44,
+     „Auftrag lesen“ 41×44. Das allgemeine `button{min-height:40px}` greift dort
+     nicht, weil `.knopf.klein` (30 px) und `.am-mehr` (40 px) genauer sind. --- */
+  .knopf.klein { min-height: 44px; }
+  .am-mehr { min-width: 44px; padding: 0 12px; }
+  .am-lesen { min-width: 44px; }
+  .am-zu { width: 44px; height: 44px; }               /* Schließen der Auftragsmappe */
+  .am-tab { min-height: 44px; }
+
+  /* --- Hub „Heute“: `all:unset` setzt min-height auf auto zurück und schlägt
+     `button{min-height:44px}` (Element-Selektor). Gemessen 06.10.2026:
+     „Wochenziel wählen“ 108×21, „Die Kasse findet …“ 148×28. --- */
+  .hb-oder-zeile { min-height: 44px; display: inline-flex; align-items: center; }
+  .hb-woche-knopf { min-height: 44px; display: inline-flex; align-items: center; }
+
+  /* --- Die 44-px-Zusage gilt für JEDEN Knopf der App, nicht nur für die, die hier
+     namentlich stehen. `all:unset` in src/stil/hub.css und genaue Klassen wie
+     `.knopf.klein` (min-height:30px) schlagen jede Regel ohne !important, weil ein
+     Element-Selektor (0,0,1) gegen eine Klasse (0,1,0) verliert. Weil src/ tabu ist,
+     steht die Zusage hier mit !important — sie wächst nur nach unten, nie nach oben.
+
+     AUSNAHME `.sp-mail`: Das ist der Eintrag der Postfach-Liste — ein <button> und
+     zugleich ein Flex-Element der scrollenden Spalte `.sp-pf-liste`
+     (src/stil/spiel.css:204-205). Eine FESTE min-height ersetzt dort die automatische
+     Mindestgröße (`min-height:auto` = größte min-content-Größe), und damit darf der
+     Eintrag schrumpfen: im Querformat (363 px Höhe) wurde er auf 44 px gedrückt, die
+     Absenderzeile `.sp-mail-von` bekam 10 px statt 18 px und wurde mitten durch die
+     Buchstaben geschnitten — gemessen von „mobil-pruefer“ (10 px Platz, 18 px
+     gebraucht). Ohne feste min-height bleibt der Eintrag auf Inhaltshöhe, die Liste
+     scrollt stattdessen. Seine natürliche Höhe ist ~90-115 px, die 44-px-Zusage ist
+     damit ohnehin erfüllt. `min-height:auto` muss hier ausdrücklich stehen, weil die
+     ältere Regel `button{min-height:40px}` aus Teil 1 sonst weiter gilt.
+     Findet jemand einen zweiten solchen Listeneintrag, gehört er in dieselbe Ausnahme. --- */
+  button:not(.sp-mail) { min-height: 44px !important; }
+  .sp-mail { min-height: auto; }
+}
+
+/* Auf sehr schmalen Flächen (Telefon quer, ~700–1000 px) wird es eng.
+   Zuerst schrumpfen, was nur Komfort ist — die Zeichenfläche bleibt. */
+@media (max-width: 1000px) and (pointer: coarse) {
+  .lb-zoomtext { min-width: 56px; font-size: 11.5px; }
+  .pa-kat { width: 64px; min-height: 60px; }
+}
+
+/* ============================================================
+   2. Telefon-Anordnung
+   Gilt, wenn die KURZE Seite ≤ 640 px ist — also im Hochformat über die
+   Breite, im Querformat über die Höhe. Ein Tablet (800×1280, 1280×800)
+   behält die Schreibtisch-Anordnung; ein Telefon bekommt sie nie.
+   Die Blätter (Geräte, Dock) liegen in `position:fixed` AUSSERHALB des
+   Rasters: sie nehmen der Zeichenfläche keinen Pixel Breite.
+   ============================================================ */
+@media (pointer: coarse) and (max-width: 640px),
+       (pointer: coarse) and (max-height: 640px) {
+  :root {
+    --nl-kopf-h: 46px;      /* eine Kopfzeile (Querformat) */
+    --nl-nav-h: 54px;       /* untere Leiste im Daumenbereich */
+    --nl-wz-h: 52px;        /* Werkzeugzeile, ≤ 56 px wie gefordert */
+  }
+
+  /* ---------- Rahmen: Kopf oben, Fläche mittig, Navigation unten ---------- */
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  .kopf {
+    grid-row: 1; grid-column: 1;
+    min-height: var(--nl-kopf-h); height: auto;
+    flex-wrap: wrap; align-content: center; gap: 4px 6px;
+    padding: 2px calc(6px + env(safe-area-inset-right, 0px)) 2px calc(6px + env(safe-area-inset-left, 0px));
+    padding-top: calc(2px + env(safe-area-inset-top, 0px));
+  }
+  .flaeche { grid-row: 2; grid-column: 1; }
+  .ansicht { overscroll-behavior: contain; }
+
+  /* Geräteleiste und Dock sind Blätter (`position:fixed`) und damit aus dem Raster.
+     Das Raster hat deshalb nur noch EINE Spalte — sonst fällt `.lb-mitte` in die
+     erste (auto-)Spalte und wird 0 px breit (gemessen 06.10.2026). */
+  .labor { grid-template-columns: minmax(0, 1fr); }
+  .lb-mitte { grid-column: 1; }
+
+  /* ---------- Kopfzeile verdichten: EINE Zeile, 48 px ----------
+     Im Hochformat ist die Breite knapp und die Höhe teuer. Sichtbar bleiben das
+     Zeichen, die drei knappen Werte (Geld · Ruf · offene Tickets) und das ⋯-Menü.
+     Der Name steht auf dem Telefon im Startbildschirm, „Stufe“ versteckt schon
+     rahmen.css unter 980 px, und Hell/Dunkel, Einstellungen, Suche, Leiste und
+     Tastenkürzel liegen im ⋯-Menü (mobil.js). Gemessen: 97 px → 48 px. */
+  .kopf-marke { gap: 6px; }
+  .marke-sym { width: 26px; height: 26px; }
+  .marke-name { display: none; }
+  .marke-version { display: none; }
+  .kopf-werte { order: 2; flex: 0 0 auto; margin-left: auto; justify-content: flex-end; gap: 4px; }
+  .kopf-knoepfe { order: 3; margin-left: 4px; gap: 2px; }
+  .kopf-knopf { width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0; }
+  .kopf-knoepfe .kopf-knopf:not(.nl-mehr) { display: none; }
+  .nl-mehr { display: inline-flex; }                    /* sonst nirgends sichtbar */
+  .wert-stufe { display: none; }                        /* wie rahmen.css unter 980 px */
+  .wert {
+    flex: 0 0 auto;
+    height: 44px; min-height: 44px; padding: 0 8px; gap: 5px;
+    font-size: 12px; letter-spacing: 0;
+  }
+  .wert .sym { width: 15px; height: 15px; }
+
+  /* ---------- Navigationsspalte → untere Leiste (Daumenbereich) ---------- */
+  .dock {
+    grid-row: 3; grid-column: 1;
+    flex-direction: row; align-items: center; justify-content: space-between;
+    gap: 0;
+    height: calc(var(--nl-nav-h) + env(safe-area-inset-bottom, 0px));
+    padding: 0 calc(2px + env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) calc(2px + env(safe-area-inset-left, 0px));
+    border-right: 0; border-top: 1px solid var(--line);
+    overflow: visible; z-index: 30;
+  }
+  .dock-knopf {
+    flex: 1 1 0; min-width: 0; width: auto;
+    height: calc(var(--nl-nav-h) - 4px); min-height: 44px;
+    padding: 2px 0; gap: 2px; border-radius: 10px;
+  }
+  .dock-text { font: 600 9.5px/1.05 var(--body); white-space: nowrap; letter-spacing: 0; }
+  /* Der aktive Strich lag links außen — unten gehört er an die Oberkante des Knopfes */
+  .dock-knopf.an::before {
+    left: 30%; right: 30%; top: 0; bottom: auto; width: auto; height: 3px;
+    border-radius: 0 0 3px 3px;
+  }
+  .dock-zahl { top: 0; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; font: 700 10px/16px var(--body); }
+
+  /* ---------- Werkzeuge: EINE Zeile im Daumenbereich ----------
+     Die Leiste ist so breit wie ihr Inhalt (nicht bildschirmbreit): der leere Rest
+     der Zeile verdeckt dann keine Zeichenfläche — gemessen zählt die Hülle der
+     Leiste, und die war vorher 847 px breit bei 239 px Inhalt. */
+  .lb-leiste-oben {
+    top: auto; left: calc(6px + env(safe-area-inset-left, 0px));
+    right: auto; bottom: 6px;
+    width: max-content; max-width: calc(100% - 68px); height: var(--nl-wz-h);
+    align-items: center; flex-wrap: nowrap; gap: 4px;
+  }
+  .lb-leiste-unten {
+    right: calc(6px + env(safe-area-inset-right, 0px)); bottom: 6px;
+    height: var(--nl-wz-h); align-items: center;
+  }
+  .lb-gruppe { padding: 3px; gap: 0; border-radius: 12px; }
+  .lb-wz, .lb-knopf { height: 44px; min-width: 44px; padding: 0 5px; }
+  .lb-ansicht { height: 44px; min-width: 44px; padding: 0 7px; gap: 4px; }
+  /* Hochformat: der Ebenen-Name und der Pfeil sprengen die Zeile bei 360 px.
+     Der Knopf bleibt, das Menü dahinter nennt die Ebene weiterhin. */
+  .lb-ansicht-text, .lb-ansicht svg:last-of-type { display: none; }
+  .lb-zoomtext { min-width: 48px; height: 44px; padding: 0 4px; font-size: 11.5px; }
+
+  /* ---------- Geräteleiste → Blatt von unten, geöffnet mit dem + Knopf ---------- */
+  .lb-geraete {
+    position: fixed; left: 0; right: 0; top: auto;
+    bottom: var(--nl-nav-h);
+    bottom: calc(var(--nl-nav-h) + env(safe-area-inset-bottom, 0px));
+    width: auto; height: auto; max-height: 62vh; z-index: 40;
+    display: none;                                        /* zu = wirklich weg, nicht nur daneben */
+    flex-direction: row; align-items: center; justify-content: center; gap: 4px;
+    padding: 8px calc(8px + env(safe-area-inset-right, 0px)) 8px calc(8px + env(safe-area-inset-left, 0px));
+    border-right: 0; border-top: 1px solid var(--line-2);
+    border-radius: 16px 16px 0 0; box-shadow: var(--schatten);
+    overflow: visible;
+  }
+  html.nl-geraete-auf .lb-geraete { display: flex; animation: nl-blatt-auf .16s ease-out; }
+  .lb-geraete-titel { display: none; }                  /* der + Knopf sagt schon, was kommt */
+  .pa-kat { width: 76px; min-height: 64px; }
+  /* Das Fach öffnet nach OBEN aus dem Blatt heraus. editor-fach.js setzt `top`
+     inline — dagegen hilft nur !important (Anpassungsschicht, steht ganz hinten). */
+  .pa-fach {
+    left: 8px !important; right: 8px !important; top: auto !important;
+    bottom: calc(100% + 6px) !important; width: auto !important;
+    max-height: 54vh; overflow: auto;
+  }
+
+  /* ---------- Dock → Blatt von unten (hoch) bzw. von rechts (quer) ---------- */
+  .lb-dock {
+    position: fixed; left: 0; right: 0; top: auto;
+    bottom: var(--nl-nav-h);
+    bottom: calc(var(--nl-nav-h) + env(safe-area-inset-bottom, 0px));
+    width: auto; height: min(62vh, 520px); z-index: 45;
+    border-left: 0; border-top: 1px solid var(--line-2);
+    border-radius: 16px 16px 0 0; box-shadow: var(--schatten);
+    overflow: hidden;
+  }
+  .labor.dock-da .lb-dock { animation: nl-blatt-auf .16s ease-out; }
+  /* Bewusst NUR Deckkraft: eine Transformation am Blatt würde `position:fixed`
+     in seinem Inhalt (Menüs, Popover) auf das Blatt beziehen und verrutschen. */
+  @keyframes nl-blatt-auf { from { opacity: 0 } to { opacity: 1 } }
+  .lb-dock-reiter {
+    flex-wrap: wrap; align-items: center; gap: 4px;
+    padding: 6px 8px 0; overflow: visible;
+  }
+  .lb-dock-tab { min-height: 44px; min-width: 44px; padding: 0 10px; font-size: 12px; }
+  /* Nur der offene Reiter trägt seinen Namen — sonst passen vier Reiter nicht in 360 px */
+  .lb-dock-titel { display: none; }
+  .lb-dock-tab.an .lb-dock-titel { display: inline; }
+  .lb-dock-einklappen { width: 44px; height: 44px; }
+  .lb-dock-inhalt { overflow: auto; }
+
+  /* ---------- Schwebende Knöpfe im Daumenbereich ---------- */
+  .nl-fab {
+    position: absolute; z-index: 9;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 50px; height: 50px; min-width: 44px; min-height: 44px;
+    bottom: calc(var(--nl-wz-h) + 8px);
+    border: 1px solid var(--line-2); border-radius: 15px;
+    background: var(--leiste-bg); color: var(--ink);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .34);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .nl-fab:active, .nl-fab.an { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .nl-fab-text { font: 600 9.5px/1 var(--body); margin-top: 2px; letter-spacing: 0; }
+  .nl-fab-geraete { left: 6px; }
+  .nl-fab-dock { right: 6px; }
+
+  /* ---------- Griff am Dock-Blatt: zuschieben mit dem Finger ---------- */
+  .nl-griff {
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    height: 18px; margin: 4px auto 0; width: 96px; max-width: 60%;
+    border-radius: 999px; cursor: grab; touch-action: none;
+  }
+  .nl-griff::before {
+    content: ""; display: block; width: 46px; height: 4px; border-radius: 2px;
+    background: var(--line-2);
+  }
+
+  /* ---------- ⋯-Menü der Kopfzeile ---------- */
+  .nl-menue {
+    display: block;
+    position: fixed; z-index: 52; min-width: 216px; max-width: 300px;
+    padding: 6px; border-radius: 12px; background: var(--panel);
+    border: 1px solid var(--line-2); box-shadow: var(--schatten);
+  }
+  .nl-menue[hidden] { display: none; }
+  .nl-menue .menue-punkt { min-height: 44px; }
+
+  /* ---------- Auftrag: verdichtet, damit die Zeichenfläche hoch bleibt ---------- */
+  .lb-auftrag-standard { min-height: 40px; padding: 0 10px; font-size: 14px; }
+  .auftrag-sandbox { min-height: 44px; gap: 8px; padding: 4px 8px 4px 10px; }
+  .as-sym { width: 32px; height: 32px; border-radius: 10px; }
+  .as-text strong { font-size: 14.5px; }
+  .as-text span {
+    font-size: 11.5px; line-height: 1.25; white-space: normal;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  /* Der Zurücksetzen-Knopf trägt nur noch sein Symbol (Text bleibt im title) */
+  .auftrag-sandbox .knopf { font-size: 0; gap: 0; min-width: 44px; height: 44px; padding: 0 12px; }
+  .auftrag-sandbox .knopf svg { width: 18px; height: 18px; }
+
+  /* ---------- Bewährtes aus den Fingerregeln, hier verbindlich ---------- */
+  button { min-height: 44px; }
+  .knopf { min-height: 44px; }
+  .menue-punkt { min-height: 44px; }
+  .toast-knopf { min-height: 44px; }
+  .toast-zu { width: 44px; height: 44px; }
+  .lb-knopf-klein { min-height: 44px; }
+  .toast-stapel { bottom: calc(var(--nl-nav-h) + 12px); }
+  .toast-stapel.im-labor { left: 8px; right: 8px; width: auto; }
+}
+
+/* Querformat auf dem Telefon: mehr Breite, weniger Höhe.
+   Hier ist die HÖHE das knappe Gut (412 px), nicht die Breite (915 px). Deshalb wird
+   die Navigation eine schmale senkrechte Schiene links (56 px breit) statt einer
+   unteren Leiste (48 px hoch) — das gibt der Zeichenfläche 48 px Höhe zurück.
+   Gerechnet: 276 px hoch → Zoom 0,4234; 324 px hoch → (324−42−49)/470 ≈ 0,496.
+   Sieben Ziele à 52 px passen in 363 px; bei kleineren Geräten scrollt die Schiene. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 640px) {
+  :root { --nl-nav-h: 0px; }                            /* keine untere Leiste mehr */
+  .lb-auftrag-standard { min-height: 38px; }
+  .app {
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .kopf { grid-row: 1; grid-column: 1 / -1; }
+  .flaeche { grid-row: 2; grid-column: 2; }
+  .dock {
+    grid-row: 2; grid-column: 1;
+    flex-direction: column; align-items: center; justify-content: flex-start;
+    width: 56px; height: auto; min-height: 0;
+    padding: 2px 0 calc(2px + env(safe-area-inset-bottom, 0px)) calc(2px + env(safe-area-inset-left, 0px));
+    border-top: 0; border-right: 1px solid var(--line);
+    overflow-y: auto; overflow-x: hidden;
+  }
+  .dock-knopf { flex: 1 1 auto; width: 100%; height: auto; min-height: 44px; padding: 2px 0; }
+  .dock-knopf.an::before { left: 0; right: auto; top: 18%; bottom: 18%; width: 3px; height: auto; border-radius: 0 3px 3px 0; }
+
+  /* Querformat hat Breite genug: die Kopfzeile zeigt wieder alles in EINER Zeile —
+     Name, alle vier Werte und die vier Knöpfe. Das ⋯-Menü braucht es hier nicht. */
+  .marke-name { display: inline; font-size: 12.5px; }
+  .wert-stufe { display: inline-flex; }
+  .kopf-knoepfe .kopf-knopf { display: inline-flex; }
+  .kopf-knoepfe .kopf-knopf.nl-mehr { display: none; }   /* mehr Knöpfe als nötig wären nur Ballast */
+  .kopf-werte { order: 2; flex: 0 0 auto; margin-left: auto; justify-content: flex-end; }
+  .kopf-knoepfe { order: 3; margin-left: 4px; }
+
+  .lb-ansicht-text { display: inline; }
+  .lb-ansicht svg:last-of-type { display: block; }
+  /* Die Blätter stehen jetzt neben der Schiene, nicht darüber. */
+  .lb-geraete { left: 56px; }
+  .lb-dock {
+    left: auto; right: 0; top: var(--nl-kopf-h);
+    bottom: 0;
+    width: min(52%, 470px); height: auto;
+    border-left: 1px solid var(--line-2); border-top: 0;
+    border-radius: 16px 0 0 16px;
+  }
+  /* Die schwebenden Knöpfe teilen sich die Werkzeugzeile: in der Mitte ist Platz,
+     dadurch wächst die verdeckte Fläche nicht. */
+  .nl-fab { bottom: 5px; width: 44px; height: 44px; }
+  .nl-fab-geraete { left: 50%; right: auto; margin-left: -48px; }
+  .nl-fab-dock { left: 50%; right: auto; margin-left: 4px; }
+}

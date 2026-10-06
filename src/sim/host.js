@@ -255,13 +255,22 @@ Sim.host = (() => {
     if (besitzer.length === 1) return "vergeben";
     return null;
   }
-  function freieAdresse(L, g, pool, mac){
+  /* Sucht eine freie Adresse. `notiz` ist optional und wird gefüllt, wenn der Lauf an einer
+     Reservierung oder an doppelt belegten Adressen scheitert – der Aufrufer protokolliert das
+     dann mit dem passenden Grund (Architektur § 10.4: DHCP_RESERVED_BUSY, DHCP_CONFLICT). */
+  function freieAdresse(L, g, pool, mac, notiz){
     const z = Sim._z(L, g.id), leases = (z.leases ||= {});
     for (const [ip, l] of Object.entries(leases)) if (l.mac === mac && l.bis > L.t && IP.imNetz(ip, pool.netz, pool.maske)) return ip;
     const angeboten = new Set(Object.entries(L.dhcpAngebot).filter(([k]) => k.startsWith(g.id + "|") && !k.endsWith("|" + mac)).map(([, v]) => v));
-    /* Reservierung zuerst: sie schlägt den Bereich. */
+    /* Reservierung zuerst: sie schlägt den Bereich. Ist sie belegt, gibt es KEIN Angebot –
+       nicht etwa eine andere Adresse (Architektur § 10.4, Lehrtext „Reservierte Adresse belegt“:
+       „Der Server vergibt die reservierte Adresse dann nicht, und das Gerät bekommt kein Angebot.“). */
     const fest = reservierteIp(pool, mac);
-    if (fest && !angeboten.has(fest) && !adressProblem(L, g, pool, fest, mac)) return fest;
+    if (fest) {
+      const problem = angeboten.has(fest) ? "vergeben" : adressProblem(L, g, pool, fest, mac);
+      if (problem) { if (notiz) notiz.reservierung = {ip: fest, problem}; return null; }
+      return fest;
+    }
     for (let n = IP.zuZahl(pool.von), ende = IP.zuZahl(pool.bis); n <= ende; n++) {
       const ip = IP.zuText(n >>> 0);
       if (!IP.hostAdresse(ip, pool.maske)) continue;
@@ -269,8 +278,12 @@ Sim.host = (() => {
       if (angeboten.has(ip)) continue;
       const problem = adressProblem(L, g, pool, ip, mac);
       if (!problem) return ip;
-      /* Doppelt vergeben: vermerken, damit „show ip dhcp conflict“ es zeigen kann. */
-      if (problem === "konflikt") { const e = (leases[ip] ||= {mac: "", bis: 0}); e.konflikt = true; if (e.konfliktSeit == null) e.konfliktSeit = L.t; }
+      /* Doppelt vergeben: vermerken, damit „show ip dhcp conflict“ es zeigen kann. Der erste Fund
+         wird zusätzlich für den Grundcode gemerkt – EIN Grundcode je Vergabeversuch. */
+      if (problem === "konflikt") {
+        const e = (leases[ip] ||= {mac: "", bis: 0}); e.konflikt = true; if (e.konfliktSeit == null) e.konfliktSeit = L.t;
+        if (notiz && !notiz.konflikt) notiz.konflikt = ip;
+      }
     }
     return null;
   }
@@ -284,8 +297,27 @@ Sim.host = (() => {
     const z = Sim._z(L, g.id), leases = (z.leases ||= {});
     let typ, ip;
     if (a.typ === "discover") {
-      ip = freieAdresse(L, g, pool, a.clientMac);
-      if (!ip) { Sim._log(L, "verwerfen", g.id, wo, f, `Der Pool „${pool.name}“ auf ${g.name} ist erschöpft: Für ${a.clientMac} ist keine Adresse mehr frei. Es kommt kein Angebot.`, {grund: "DHCP_POOL_EMPTY"}); return; }
+      const notiz = {};
+      ip = freieAdresse(L, g, pool, a.clientMac, notiz);
+      /* Der Server hat beim Prüfen eine doppelt belegte Adresse gefunden und überspringt sie
+         (Architektur § 10.4: „Server findet eine doppelt belegte Adresse“) – der Grund wird
+         protokolliert, auch wenn danach noch eine andere Adresse frei ist. */
+      if (notiz.konflikt)
+        Sim._log(L, "info", g.id, wo, f, `${g.name} prüft ${notiz.konflikt} vor der Vergabe: Die Adresse ist doppelt belegt – mehr als ein Gerät trägt sie. Sie wird übersprungen.`, {grund: "DHCP_CONFLICT", proto: "DHCP"});
+      if (!ip) {
+        if (notiz.reservierung) {
+          const r = notiz.reservierung, wort = {vergeben: "bereits vergeben", konflikt: "doppelt belegt", gateway: "das Gateway"}[r.problem] || "belegt";
+          Sim._log(L, "verwerfen", g.id, wo, f, `Die für ${a.clientMac} reservierte Adresse ${r.ip} ist nicht frei (${wort}). ${g.name} vergibt sie nicht – es kommt kein Angebot.`, {grund: "DHCP_RESERVED_BUSY", proto: "DHCP"});
+          return;
+        }
+        /* Ist der Pool wegen doppelt belegter Adressen leer, steht der Grund schon oben –
+           dann wird hier kein zweiter genannt (sonst stünde POOL_EMPTY für einen Konflikt). */
+        Sim._log(L, "verwerfen", g.id, wo, f, notiz.konflikt
+          ? `Der Pool „${pool.name}“ auf ${g.name} hat keine freie Adresse mehr: Die übrigen Adressen sind doppelt belegt und werden übersprungen. Es kommt kein Angebot.`
+          : `Der Pool „${pool.name}“ auf ${g.name} ist erschöpft: Für ${a.clientMac} ist keine Adresse mehr frei. Es kommt kein Angebot.`,
+          notiz.konflikt ? {} : {grund: "DHCP_POOL_EMPTY"});
+        return;
+      }
       L.dhcpAngebot[g.id + "|" + a.clientMac] = ip; typ = "offer";
       Sim._log(L, "antworten", g.id, wo, f, `${g.name} bietet ${a.clientMac} die Adresse ${ip} aus dem Pool „${pool.name}“ an (DHCP Offer).`);
     } else if (a.typ === "request") {

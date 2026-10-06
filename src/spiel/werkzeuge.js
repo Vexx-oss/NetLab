@@ -23,6 +23,7 @@ Spiel.werkzeug.kaufen = function(id){
   if (!Spiel.karriere.bezahlen(w.preis, "Werkzeug: " + w.titel)) return {ok: false, grund: `Dir fehlen ${eur(w.preis - Spiel.st.euro)} €.`};
   Spiel.werkzeug.daten()[id] = true;
   Spiel.geaendert("werkzeug");
+  Spiel.sofortSpeichern();                    /* bezahlt ist bezahlt: sofort auf die Platte, nicht erst nach der Entprellung */
   Spiel.melden("werkzeug", {id});
   return {ok: true, satz: id === "kabeltester" ? "Ab jetzt: Rechtsklick auf ein Kabel – „Kabel testen“." : "Im AP-Niveau: ⋯-Menü im Auftrag – „Netzprüfer einschalten“."};
 };

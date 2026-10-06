@@ -15,11 +15,13 @@ Spiel.postfachZiel = () => Spiel.st.erledigt.length < 2 ? Spiel.POSTFACH_WAHL : 
 Spiel.WIEDERHOLUNG_NACH_MS = 15 * 60 * 1000;   /* Wiederholungsticket nach „Lösung vorführen“ erscheint später */
 Spiel.generierte = Spiel.generierte || {};
 
-/* Ticket-Definition zu einer ID: handgeschrieben, generiert oder (für Instanzen) neu generiert */
+/* Ticket-Definition zu einer ID: handgeschrieben, generiert oder (für Instanzen) neu generiert.
+   P2: Eine Instanz mit inst.vielfalt bekommt die Fassung ihres Instanz-Seeds (eigenes Netz je Instanz).
+   Alt-Instanzen ohne dieses Feld behalten die feste Fassung – ihr Netz wechselt nach dem Umbau nicht. */
 Spiel.ticketDef = function(id, inst){
   if (!id) return null;
   const d = (DATEN.tickets || []).find(t => t.id === id);
-  if (d) return d;
+  if (d) return inst && inst.vielfalt && typeof d.fuerSeed === "function" ? (d.fuerSeed(inst.seed) || d) : d;
   if (Spiel.generierte[id]) return Spiel.generierte[id];
   if (/-folge$/.test(id) && Spiel.varianten) {                 /* Folgeauftrag nach einem Provisorium (E1) */
     const basis = (DATEN.tickets || []).find(t => t.id === id.replace(/-folge$/, ""));
@@ -77,9 +79,17 @@ Spiel.instanzErstellen = function(o = {}){
   const flow = Spiel.flow && !o.ohneFlow && o.quelle !== "pruefung" && o.quelle !== "raetsel" ? Spiel.flow.fuer(def) : null;
   if (flow && gen) { const anders = Spiel.flow.anpassen(gen, def, flow); if (anders && anders.def) { gen = anders.gen; def = anders.def; } }
   const seed = o.seed ?? (gen ? gen.seed : Spiel.neuerSeed(def.id));
+  /* P2 „Auftragsvielfalt“: Ein NEUER Handauftrag bekommt Netz und Fehlerstelle aus seinem Instanz-Seed –
+     die Definition wird dafür je (id, seed) gebaut und gemerkt. Kann sie das nicht (z. B. eine handgeschriebene
+     Lösung mit fester Adresse), bleibt vielfalt false und das Netz ist wie bisher das feste aus vSeed. */
+  let vielfalt = false;
+  if (!gen && typeof def.fuerSeed === "function") {
+    const jeSeed = def.fuerSeed(seed);
+    if (jeSeed && jeSeed !== def) { def = jeSeed; vielfalt = true; }
+  }
   const netz = Spiel.startNetz(def, seed);
   const inst = {
-    iid: "i" + (st.naechsteIid++), ticketId: def.id, seed, netz,
+    iid: "i" + (st.naechsteIid++), ticketId: def.id, seed, netz, vielfalt,
     hilfeStufe: 0, hilfen: [], start: jetzt(), frist: typeof o.frist === "number" ? o.frist : null,
     quelle: o.quelle || "postfach", kunde: o.kunde || def.kunde || null,
     gelesen: false, ab: typeof o.ab === "number" ? o.ab : null,

@@ -4,7 +4,7 @@
 .sz-weiter{position:absolute; left:50%; top:12px; transform:translateX(-50%); padding:6px 11px; border-radius:999px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
   font:600 12px/1 var(--body); pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .sz-reaktion{position:absolute; transform:translate(-50%, -100%); display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border-radius:12px; background:var(--panel);
-  border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); font:700 13px/1.2 var(--body); white-space:nowrap; pointer-events:none; animation:sz-pop .32s cubic-bezier(.3,1.6,.5,1) both}
+  border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); font:700 13px/1.2 var(--body); white-space:nowrap; pointer-events:none; animation:sz-pop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
 .sz-reaktion.sz-gesperrt{border-color:var(--warn)}
 .sz-reaktion.sz-druckt, .sz-reaktion.sz-seite, .sz-reaktion.sz-adresse, .sz-reaktion.sz-haken, .sz-reaktion.sz-sicherung{border-color:var(--ok)}
 .sz-sym{font-size:16px; line-height:1}
@@ -35,7 +35,7 @@
 @media (prefers-reduced-motion: reduce){ .sz-buehne, .sz-reaktion, .sz-blase, .sz-druckt .sz-sym, .sz-balken i{animation:none} .sz-balken i{width:100%} }
 /* Eigene Probe je Form (§ 20 F4): Karte mitten auf der Fläche, höchstens ~3 s */
 .sz-form{position:absolute; left:50%; top:46%; transform:translate(-50%, -50%); width:min(420px, calc(100% - 32px)); padding:14px 16px; border-radius:16px;
-  background:var(--panel); border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); pointer-events:none; animation:sz-pop-mitte .32s cubic-bezier(.3,1.6,.5,1) both}
+  background:var(--panel); border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); pointer-events:none; animation:sz-pop-mitte var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
 .sz-form-kopf{font-size:14px; color:var(--muted); margin-bottom:8px}
 .sz-form-kopf b{color:var(--ink)}
 .sz-form-fuss{margin:8px 0 0; font-size:13px; color:var(--ok); font-weight:700}
@@ -48,7 +48,7 @@
 @keyframes sz-auflegen{0%{transform:none} 60%{transform:rotate(-135deg) translateY(4px)} 100%{transform:rotate(-135deg) translateY(4px); opacity:.55}}
 /* Plan-Audit: der Plan wird abgestempelt */
 .sz-audit{width:min(460px, calc(100% - 32px))}
-.sz-plan{position:relative; max-height:170px; overflow:hidden; border-radius:10px; background:var(--bg); display:flex; justify-content:center}
+.sz-plan{position:relative; max-height:170px; overflow:hidden; border-radius:var(--radius); background:var(--bg); display:flex; justify-content:center}
 .sz-plan .np-svg{width:100%; max-height:170px}
 .sz-plan-leer{font-size:56px; padding:20px}
 .sz-stempel{position:absolute; right:26px; top:58px; display:flex; flex-direction:column; align-items:center; padding:6px 12px; border:3px solid var(--ok); border-radius:8px;
