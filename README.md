@@ -140,6 +140,54 @@ automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: L
 
 ---
 
+## Mitmachen: holen, bauen, ziehen
+
+**Einmal holen** (git ist alles, was du brauchst — Node und Python nur zum Bauen und Testen):
+
+```bash
+git clone https://github.com/Vexx-oss/NetLab.git
+cd NetLab
+git switch ausbau-1.2          # der Zweig, in dem gearbeitet wird (und der veröffentlicht wird)
+```
+
+**Spielen ohne zu bauen:** [vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/) öffnen,
+oder die Einzeldatei aus dem [Release](https://github.com/Vexx-oss/NetLab/releases/latest)
+herunterladen. Beides ist immer der neueste Stand.
+
+**Selbst bauen** (die Reihenfolge ist wichtig, `bauen.py` zuerst):
+
+```bash
+python bauen.py                # src/ -> web/index.html
+python tools/einfach.py        # web/ -> docs/index.html   (dieselbe Datei als Netzwerk-Labor.html)
+sh tools/test.sh               # 251 Tests, headless in Node
+python tools/abnahme.py        # die ganze Kette in einem Befehl
+```
+
+Für die Android-Fassung kommt das Android-SDK dazu (`android/bauen.py`, ~5 s), für die
+Windows-Hülle Rust (`cargo tauri build`, Minuten). Genaueres steht in
+[`docs/Bauen.md`](docs/Bauen.md).
+
+**Updates ziehen** — je nachdem, was du benutzt:
+
+| Was du hast | Wie du aktualisierst |
+|---|---|
+| einen Klon | `git pull` — danach `python bauen.py` und `python tools/einfach.py`, wenn du die Seite selbst baust |
+| die Browser-Einzeldatei | neue aus dem [Release](https://github.com/Vexx-oss/NetLab/releases/latest) laden — oder einfach die Seite im Netz benutzen, die ist immer aktuell |
+| die App auf dem Telefon | neue `.apk` aus `Programm/` (bzw. vom Release) antippen und **über** die alte installieren — der `versionCode` steigt mit jeder Fassung, deshalb klappt das ohne Deinstallieren |
+| das Windows-Programm | `git pull`, dann `pwsh -File shell/entwickeln.ps1` (Debug, Sekunden) oder `cargo tauri build` in `shell/src-tauri` (Auslieferung) |
+
+**Wenn du selbst etwas änderst:** arbeite auf `ausbau-1.2`, halte dich an
+[`AGENTS.md`](AGENTS.md) (kurz: keine Prozesse nach Namen beenden, kein Push ohne Absprache,
+nichts behaupten, was nicht gemessen ist) — und am Ende die acht Schritte aus
+[`docs/SITZUNGSABSCHLUSS.md`](docs/SITZUNGSABSCHLUSS.md) durchgehen. Dort steht auch, wie die
+Fassungsnummer gezogen wird (`python tools/fassung-ziehen.py --neu 1.2.3 --setzen`) und wie man
+nachmisst, dass die Veröffentlichung wirklich den neuen Stand liefert.
+
+Ein Beitrag ist willkommen, wenn er **spielbar** bleibt: nach jedem Schritt muss das Spiel
+laufen, `sh tools/test.sh` grün sein und `python tools/ethos.py` nicht schlechter als der
+eingefrorene Stand. Ein grüner Test ohne Wirkung im Programm gilt hier ausdrücklich **nicht**
+als fertig.
+
 ## Für Interessierte: wie es gebaut ist
 
 Oberfläche und Logik in **schlichtem JavaScript ohne Bundler**; die Rust-Hülle ist dünn
