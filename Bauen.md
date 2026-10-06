@@ -208,6 +208,26 @@ CARGO_TARGET_DIR=<schneller-Ordner>/target cargo tauri build --no-bundle
 Die fertigen Programme und die Bildschirmfoto-Nachweise liegen **bewusst nicht im Git**
 (`.gitignore`): 8 MB `.exe` und 22 MB Beweismaterial gehören nicht in die Historie.
 
+## Repo-Angaben setzen (Beschreibung, Homepage, Themen)
+
+Diese drei Angaben lassen sich **nicht** per `git push` setzen, sondern nur über die
+GitHub-API mit einem Token — auf dem Entwicklungsrechner liegt keines (die API antwortet
+dort mit 401, gemessen 06.10.2026). Dafür gibt es ein Werkzeug:
+
+```bash
+python tools/repo-angaben.py              # Trockenlauf: zeigt nur, was gesetzt würde
+GH_TOKEN=ghp_xxx python tools/repo-angaben.py --setzen
+```
+
+Nötig ist ein **Fine-grained Token** mit Repository-Zugriff nur auf `NetLab` und der
+Berechtigung **Administration: Read and write** (GitHub → Settings → Developer settings →
+Personal access tokens). Das Token wird nur an `api.github.com` gesendet und nirgends
+gespeichert. Die Homepage ist bereits gesetzt; Beschreibung und Themen fehlen noch.
+
+Alles andere ist in Abläufe gewandert und braucht kein Token von Hand: Prüfen
+(`pruefen.yml`), Veröffentlichen (`seite.yml`) und das Anlegen des Releases
+(`release.yml`).
+
 ## Messen im echten Programm
 
 ```bash
