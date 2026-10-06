@@ -19,6 +19,7 @@ import datetime
 import json
 import re
 import shutil
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -125,9 +126,32 @@ def stile():
     return "\n".join(f"/* ---- {n} ---- */\n" + lies(d / n) for n in reihe)
 
 
+def baustempel() -> str:
+    """Zeitstempel fuer den Kopf der gebauten Seite — aus dem letzten Commit.
+
+    Frueher kam hier die aktuelle Uhrzeit hinein. Dadurch war die versionierte
+    `docs/index.html` nach JEDEM Bau „geaendert", auch wenn sich inhaltlich nichts tat —
+    ein Diff ueber eine Datei, die nur eine Zeit traegt. Beim Nachbauen liess sich so
+    nicht unterscheiden, was wirklich neu ist.
+
+    Jetzt ist der Stempel reproduzierbar: derselbe Stand ergibt denselben Bau. Er sagt,
+    aus welchem Commit die Seite stammt — was fuer eine veroeffentlichte Fassung die
+    nuetzlichere Auskunft ist als die Uhrzeit des Bauens. Ohne Git (Export, ZIP) bleibt
+    die Uhrzeit als Rueckfall.
+    """
+    try:
+        r = subprocess.run(["git", "log", "-1", "--format=%cd", "--date=format:%d.%m.%Y %H:%M"],
+                           cwd=HIER, capture_output=True, text=True, timeout=10)
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+
+
 def seite(schrift_link):
     NL = "\n"
-    kopf = f'"use strict";{NL}const LABOR_VERSION = "{VERSION}";{NL}const LABOR_BAU = "{datetime.datetime.now().strftime("%d.%m.%Y %H:%M")}";'
+    kopf = f'"use strict";{NL}const LABOR_VERSION = "{VERSION}";{NL}const LABOR_BAU = "{baustempel()}";'
     skripte = kopf + NL + NL.join(f"/* ---- {rel} ---- */{NL}" + quelle(rel).replace("</script", "<\\/script") for rel, _ in module())
     huelle = lies(SRC / "seite.html")
     return huelle.replace("/*STIL*/", stile()).replace("/*SKRIPTE*/", skripte).replace("<!--SCHRIFTEN-->", schrift_link)
