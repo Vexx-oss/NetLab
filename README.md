@@ -9,7 +9,7 @@ Lernspiel für **Fachinformatiker Systemintegration (IHK AP1/AP2)**. Kein Cisco-
 Läuft lokal und offline; nichts wird gesendet.
 
 ![Tests](https://github.com/Vexx-oss/NetLab/actions/workflows/pruefen.yml/badge.svg?branch=ausbau-1.2)
-![Tests grün](https://img.shields.io/badge/Tests-213%2F213%20gr%C3%BCn-brightgreen)
+![Tests grün](https://img.shields.io/badge/Tests-251%2F251%20gr%C3%BCn-brightgreen)
 ![JavaScript ohne Bundler](https://img.shields.io/badge/JavaScript-ohne%20Bundler-blue)
 ![Läuft offline](https://img.shields.io/badge/l%C3%A4uft-offline-informational)
 
@@ -41,10 +41,20 @@ gleiche Prüfsumme, nachgewiesen von `python tools/seite-pruefen.py`.
 
 Die Einzeldatei ist das **ganze Spiel in einer Datei** — Schriften eingebettet, kein
 Nachladen, kein Installieren, kein Internet. Windows, Linux, macOS: alles mit einem
-Browser. Belegt: 2.265.826 Bytes (2,16 MB), **0 Außenverweise** (geprüft über `<link>`,
+Browser. Belegt: 2.269.597 Bytes (2,16 MB), **0 Außenverweise** (geprüft über `<link>`,
 `<script src>`, `<img src>` und `url()`), Start im echten Browser über `file://` gemessen
-(`python tools/starttest.py`). Dieselbe Datei liegt als `Netzwerk-Labor.html` im
-Wurzelverzeichnis; beide müssen denselben SHA256 tragen (`tools/einfach.py`).
+(`python tools/starttest.py`).
+
+> **Warum dieselben 2,2 MB zweimal im Git liegen** (`Netzwerk-Labor.html` im
+> Wurzelverzeichnis und `docs/index.html`) — bewusst so, nicht versehentlich:
+> `docs/index.html` ist die Datei, die GitHub Pages ausliefert (`seite.yml` stellt genau
+> `docs/index.html` und `docs/bilder/` zusammen), und `Netzwerk-Labor.html` ist der
+> Ein-Klick-Download, auf den dieses README verweist. Beide entstehen aus demselben Bau
+> (`python tools/einfach.py`) und **müssen byte-gleich sein** — der Bau schreibt sie
+> nacheinander aus derselben Quelle; `python tools/seite-pruefen.py` prüft die Gleichheit.
+> Wer eine davon ändert oder löscht, bricht den jeweils anderen Weg. Die langen Notizen
+> liegen in `docs/` bzw. `docs/entwicklung/` und werden **nicht** veröffentlicht; die
+> Übersicht steht in [`docs/INHALT.md`](docs/INHALT.md).
 
 Gegenüber dem Windows-Programm fehlen nur die Fenster-Funktionen: Leiste am
 Bildschirmrand, Tray-Symbol, immer im Vordergrund, globales Tastenkürzel. Das Spiel sagt
@@ -199,14 +209,14 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 
 | Datei | Inhalt |
 |---|---|
-| [`Liesmich.md`](Liesmich.md) | Übersicht, Startanleitung, was in 1.1 neu ist |
-| [`Konzept – Netzwerk-Labor.md`](Konzept%20%E2%80%93%20Netzwerk-Labor.md) | Spezifikation |
-| [`Architektur.md`](Architektur.md) | verbindlicher Vertrag zwischen den Bausteinen |
-| [`Plan – Ausbau 1.2.md`](Plan%20%E2%80%93%20Ausbau%201.2.md) | Phasen, Stand, Messwerte |
-| [`Design – Spielspaß 2.0.md`](Design%20%E2%80%93%20Spielspa%C3%9F%202.0.md) | Befunde, zwölf Hebel, Scorecard |
-| [`CHANGELOG.md`](CHANGELOG.md) | was sich wann geändert hat |
-| [`Bauen.md`](Bauen.md) | Bauen, Testen, Messen, Ausliefern im Detail |
-| [`Mitmachen.md`](Mitmachen.md) | Arbeitsweise und Regeln für Beiträge |
+| [`Liesmich.md`](docs/Liesmich.md) | Übersicht, Startanleitung, was in 1.1 neu ist |
+| [`Konzept – Netzwerk-Labor.md`](<docs/entwicklung/Konzept – Netzwerk-Labor.md>) | Spezifikation |
+| [`Architektur.md`](docs/Architektur.md) | verbindlicher Vertrag zwischen den Bausteinen |
+| [`Plan – Ausbau 1.2.md`](<docs/entwicklung/Plan – Ausbau 1.2.md>) | Phasen, Stand, Messwerte |
+| [`Design – Spielspaß 2.0.md`](<docs/entwicklung/Design – Spielspaß 2.0.md>) | Befunde, zwölf Hebel, Scorecard |
+| [`CHANGELOG.md`](docs/CHANGELOG.md) | was sich wann geändert hat |
+| [`Bauen.md`](docs/Bauen.md) | Bauen, Testen, Messen, Ausliefern im Detail |
+| [`Mitmachen.md`](docs/Mitmachen.md) | Arbeitsweise und Regeln für Beiträge |
 | [`AGENTS.md`](AGENTS.md) | Betriebsregeln für Mensch und Modell |
 | [`LICENSE`](LICENSE) | Lizenz (PolyForm Noncommercial 1.0.0) — der verbindliche Text |
 | [`LIZENZ.md`](LIZENZ.md) | dieselbe Lizenz auf Deutsch, mit den Ausnahmen und den Schriftenlizenzen |

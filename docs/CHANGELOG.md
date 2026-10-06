@@ -2,8 +2,8 @@
 
 Der Verlauf ist aus der echten Commit-Historie abgeleitet, nicht aus Erinnerung. Die
 ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
-[`Design – Spielspaß 2.0.md`](Design%20%E2%80%93%20Spielspa%C3%9F%202.0.md) und
-[`Plan – Ausbau 1.2.md`](Plan%20%E2%80%93%20Ausbau%201.2.md).
+[`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
+[`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
 Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`.
 
@@ -141,8 +141,8 @@ behoben** (1280 × 800 und 720 × 640). Menüprobe, Dock-Probe und Testbatterie 
 - Bis hierher stand „Noch nicht festgelegt (alle Rechte vorbehalten)". Zwischenstand war
   **MIT** — das war zu weitgehend: MIT erlaubt ausdrücklich Verkauf und kommerzielle
   Nutzung, also genau das, was hier nicht gewollt ist.
-- Jetzt **PolyForm Noncommercial 1.0.0** in [`LICENSE`](LICENSE), erklärt in
-  [`LIZENZ.md`](LIZENZ.md). Die Wahl ist bewusst auf eine **anerkannte, fertig
+- Jetzt **PolyForm Noncommercial 1.0.0** in [`LICENSE`](../LICENSE), erklärt in
+  [`LIZENZ.md`](../LIZENZ.md). Die Wahl ist bewusst auf eine **anerkannte, fertig
   formulierte** Lizenz gefallen statt auf etwas Selbstgeschriebenes: Sie erlaubt alles
   Nicht-Kommerzielle (spielen, üben, unterrichten, studieren, weitergeben) und verbietet
   alles Kommerzielle, mit klaren Definitionen für „kommerziell", „Bildungseinrichtung"

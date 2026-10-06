@@ -1,7 +1,7 @@
 # Bauen, Testen, Ausliefern
 
 Alles, was du brauchst, um aus dem Quelltext ein spielbares Programm zu machen. Wenn du
-nur **spielen** willst: [README](README.md) → *Sofort spielen*.
+nur **spielen** willst: [README](../README.md) → *Sofort spielen*.
 
 ## Was du brauchst
 
@@ -172,7 +172,7 @@ Die Anleitungen kommen aus `Vorlagen/` — **eine** Quelle, kein zweiter Ort zum
 
 ### Eine Release anlegen
 
-**Das macht ein Ablauf** ([`.github/workflows/release.yml`](.github/workflows/release.yml)):
+**Das macht ein Ablauf** ([`.github/workflows/release.yml`](../.github/workflows/release.yml)):
 Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferungspaket und
 legt das Release mit den Anhängen an.
 
@@ -220,7 +220,7 @@ Die fertigen Programme und die Bildschirmfoto-Nachweise liegen **bewusst nicht i
 ## Die Android-App (`.apk`)
 
 Seit 06.10.2026 gibt es eine Android-Fassung: dieselbe Browser-Fassung in einer
-WebView-Hülle. Eigene Anleitung mit allen Grenzen: [`android/LIESMICH.md`](android/LIESMICH.md).
+WebView-Hülle. Eigene Anleitung mit allen Grenzen: [`android/LIESMICH.md`](../android/LIESMICH.md).
 
 ```bash
 python android/bauen.py                 # Spiel → Einzeldatei → APK → Prüfung
@@ -449,6 +449,6 @@ Spiel als die Quelle.
 |---|---|
 | `kein Node gefunden` | Node 24 installieren oder `NODE=/pfad/zu/node sh tools/test.sh` |
 | `sh tools/test.sh` bricht mit `dirname`-Fehler ab | Git-`/usr/bin` fehlt im `PATH`: `& "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'` |
-| `.exe` zeigt kein Fenster | `Programm/Integritaet-reparieren.cmd` (Details in [`Nachweise/1.2-Start/BEFUND.md`](Nachweise/1.2-Start/BEFUND.md)) |
+| `.exe` zeigt kein Fenster | `Programm/Integritaet-reparieren.cmd` (Details in [`Nachweise/1.2-Start/BEFUND.md`](../Nachweise/1.2-Start/BEFUND.md)) |
 | `einfach.py`: „Aussenverweise uebrig geblieben" | Eine neue Datei wird von außen geladen. Entweder einbetten oder bewusst im Spiel belassen und die Prüfliste in `tools/einfach.py` anpassen — **nicht** die Prüfung abschalten. |
 | `lernmotor.py` meldet ABWEICHUNG | Die Spielhalle ist weiter. `--neu-einlesen`, dann Tests und `node tools/sim-stand.js`. |

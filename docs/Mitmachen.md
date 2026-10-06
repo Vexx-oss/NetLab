@@ -1,6 +1,6 @@
 # Mitmachen
 
-Kurz und verbindlich. Die vollständigen Betriebsregeln stehen in [`AGENTS.md`](AGENTS.md) —
+Kurz und verbindlich. Die vollständigen Betriebsregeln stehen in [`AGENTS.md`](../AGENTS.md) —
 sie gelten für Menschen genauso wie für Modelle. Hier steht, was für einen Beitrag
 praktisch wichtig ist.
 
@@ -16,7 +16,7 @@ praktisch wichtig ist.
    wirkungslos, weil der Test nur den Prompt prüfte.
 
 3. **Vertrag zuerst.** Jede Änderung an Datenformen steht zuerst in
-   [`Architektur.md`](Architektur.md) — Datenform, Verhalten, Gründe, Trace-Format.
+   [`Architektur.md`](../docs/Architektur.md) — Datenform, Verhalten, Gründe, Trace-Format.
    Danach der Code. Nicht umgekehrt.
 
 4. **Nach jedem Commit den Stand nachziehen.** `Design – Spielspaß 2.0.md` (neuer
@@ -76,7 +76,7 @@ python tools/paket.py                               # Paket bauen und gegenprüf
 ```
 
 Dieselben Schritte laufen bei jedem Push automatisch
-([`.github/workflows/pruefen.yml`](.github/workflows/pruefen.yml)).
+([`.github/workflows/pruefen.yml`](../.github/workflows/pruefen.yml)).
 
 ## Determinismus
 
