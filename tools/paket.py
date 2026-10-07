@@ -133,6 +133,27 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
     else:
         print("  --ohne-exe: es entsteht die Browser-Fassung ohne .exe.")
 
+    # 2b · Ehrlicher Hinweis, wenn die .exe fehlt.
+    # Die Vorlagen beschreiben unter "Weg 2" das Windows-Programm. Fehlt die .exe im Paket,
+    # stuende dort eine Anleitung fuer eine Datei, die es nicht gibt — gemessen am Release
+    # 1.2.3: LIESMICH.txt und START-HIER.md verwiesen auf Netzwerk-Labor.exe, im ZIP lag
+    # nur die Browser-Fassung. Der Hinweis wird deshalb vorn an beide Texte angehaengt.
+    if not mitgelieferte_exe:
+        hinweis = (
+            "HINWEIS ZU DIESEM PAKET\n"
+            + "-" * 64 + "\n"
+            "Dieses Paket enthaelt die Browser-Fassung: Netzwerk-Labor.html.\n"
+            "Das Windows-Programm (Netzwerk-Labor.exe, rund 8 MB) ist NICHT enthalten -\n"
+            "es liegt bewusst nicht im Repositorium und wird auf dem Entwicklungsrechner\n"
+            "gebaut (docs/Bauen.md). Alles, was unten unter \"Weg 2\" steht, gilt erst,\n"
+            "wenn du es selbst gebaut hast.\n"
+            + "-" * 64 + "\n\n"
+        )
+        for name in ("LIESMICH.txt", "START-HIER.md"):
+            p = ordner / name
+            p.write_text(hinweis + p.read_text(encoding="utf-8"), encoding="utf-8")
+        print("  HINWEIS in LIESMICH.txt und START-HIER.md eingetragen (keine .exe im Paket).")
+
     # 3 · Inhaltsverzeichnis mit Pruefsummen schreiben.
     zeilen = [
         f"Netzwerk-Labor {ver} — Inhalt des Pakets",
