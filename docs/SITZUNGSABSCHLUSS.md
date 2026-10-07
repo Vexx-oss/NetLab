@@ -5,9 +5,9 @@ wann: Am Ende jeder Arbeitssitzung im Netzwerk-Labor — vor allem, wenn etwas a
 
 # Sitzungsabschluss: von der Änderung zur veröffentlichten Fassung
 
-Diese Reihenfolge ist am 06.10.2026 einmal **ganz** durchlaufen worden (Fassung 1.2.2) und hat
-dabei drei Fehler aufgedeckt, die sonst erst nach dem Push aufgefallen wären. Sie gilt für jede
-Sitzung, die den Zweig `ausbau-1.2` verändert.
+Diese Reihenfolge ist am 06.10.2026 (Fassung 1.2.2) und erneut am 07.10.2026 (Fassung 1.2.3) **ganz**
+durchlaufen worden und hat beim ersten Mal drei Fehler aufgedeckt, die sonst erst nach dem Push
+aufgefallen wären. Sie gilt für jede Sitzung, die den Zweig `ausbau-1.2` verändert.
 
 ## Voraussetzungen
 

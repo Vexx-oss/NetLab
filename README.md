@@ -257,9 +257,10 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 
 | Datei | Inhalt |
 |---|---|
-| [`Liesmich.md`](docs/Liesmich.md) | Übersicht, Startanleitung, was in 1.1 neu ist |
+| [`Liesmich.md`](docs/Liesmich.md) | Übersicht, Startanleitung, was in 1.2 neu ist |
 | [`Konzept – Netzwerk-Labor.md`](<docs/entwicklung/Konzept – Netzwerk-Labor.md>) | Spezifikation |
 | [`Architektur.md`](docs/Architektur.md) | verbindlicher Vertrag zwischen den Bausteinen |
+| [`Klassenraum – Umsetzungsreife Spezifikation.md`](<docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>) | Vertrag für den Klassenraum (Lehrer/Schüler) — **noch nicht umgesetzt**; vier Teil-Dokumente im Ordner daneben |
 | [`Plan – Ausbau 1.2.md`](<docs/entwicklung/Plan – Ausbau 1.2.md>) | Phasen, Stand, Messwerte |
 | [`Design – Spielspaß 2.0.md`](<docs/entwicklung/Design – Spielspaß 2.0.md>) | Befunde, zwölf Hebel, Scorecard |
 | [`CHANGELOG.md`](docs/CHANGELOG.md) | was sich wann geändert hat |
@@ -277,12 +278,22 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 
-Die `.exe` in `Programm/` stammt aus `v1.1`. Sie ist die einzige Fassung mit Leiste, Tray
-und globalem Tastenkürzel — aber nicht auf dem Stand von `ausbau-1.2`.
+Die `.exe` in `Programm/` ist auf dem Stand von `ausbau-1.2` (**1.2.3**, gebaut am 07.10.2026) und die
+einzige Fassung mit Leiste, Tray und globalem Tastenkürzel. Sie liegt nicht im Release (8 MB), sondern
+im Repositorium.
+
+## Klassenraum (in Arbeit)
+
+Die nächste Ausbaustufe ist der **Klassenraum**: Die Lehrkraft sagt einen kurzen Code an, jedes Gerät
+baut denselben Auftrag selbst — ohne Konto, ohne Server, ohne Netz; danach werden Ergebnis-Codes
+eingesammelt und als Ampel gezeigt. Die Fassung **1.2.3** liefert dafür die **umsetzungsreife
+Spezifikation**, noch keine Spielfunktion: im Spiel ist bisher nichts davon zu sehen. Vertrag und
+Belege: [`Klassenraum – Umsetzungsreife Spezifikation.md`](<docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>),
+Auftragstext: [`KLASSENRAUM-umsetzungsreif.md`](tools/auftraege/KLASSENRAUM-umsetzungsreif.md).
 
 ## Ehrliche Grenzen
 
-- **Die Windows-`.exe` ist 1.2.3 und ihr Start ist gemessen** (06.10.2026):
+- **Die Windows-`.exe` ist 1.2.3 und ihr Start ist gemessen** (07.10.2026):
   `python tools/q-echt.py` fuhr im echten Programm durch — erster Auftrag mit echter Maus
   gelöst, 5 ★, 0 Fehler, Fernwartungs-Schild sichtbar, keine JS-Fehler. Das ist ein
   Durchlauf auf **diesem** Rechner; andere Windows-Fassungen sind nicht geprüft.

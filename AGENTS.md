@@ -38,10 +38,13 @@ veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unt
 | Einzeldatei (auch die Wurzel-Datei) | `python tools/einfach.py` · `--ziel Netzwerk-Labor.html` | beide byte-gleich, `0 Außenverweise` |
 | Android-APK | `python android/bauen.py` | 7 Schritte, ~5 s, endet mit `GRUEN` |
 | PC-Hülle für die Entwicklungsrunde | `pwsh -File shell/entwickeln.ps1 -NurBauen` | Debug-Profil, ~4 s je Runde (Auslieferung bleibt `cargo tauri build`) |
-| Fassung ziehen (1.2.2 → 1.2.3) | `python tools/fassung-ziehen.py --neu 1.2.3` · `--setzen` | Trockenlauf zuerst; im `Cargo.lock` bleibt nur der eigene Block |
-| Tote Verweise finden | `python tools/repo-verweise-flicken.py` | prüft **jeden** relativen Verweis in jeder Markdown-Datei |
+| Fassung ziehen (1.2.3 → 1.2.4) | `python tools/fassung-ziehen.py --neu 1.2.4` · `--setzen` | Trockenlauf zuerst; im `Cargo.lock` bleibt nur der eigene Block; **`VERSION_CODE` in `android/bauen.py` von Hand nachziehen** (muss über dem aus `versionName` abgeleiteten Wert liegen) |
+| Tote Verweise finden | `python tools/repo-verweise-flicken.py` | prüft **jeden** relativen Verweis in jeder Markdown-Datei — **schreibt aber**: es setzt tote Verweise zuerst gerade |
 | Die drei Randbefunde nachmessen | `python tools/nachprobe-menuefix.py` | `GRÜN: alle drei Befunde behoben` |
 | Echtes Programm | `python tools/q-echt.py` | startet die `.exe`; siehe Befund unten |
+| Klassenraum-Codec messen | `& "<node>" tools\klassenraum-probe\A-codec-probe.js` | erschöpfender Code-Round-Trip über 2²⁰ Nutzlasten (~250 s), schreibt `Nachweise/Klassenraum/A-codec.json` |
+| Klassenraum-Server bauen | `cargo build --release` in `tools/klassenraum` | eine `.exe` **ohne jede Kiste** (322.560 B), `cargo test` 10/10 |
+| Klassenraum-Server prüfen | `pwsh -File tools\klassenraum-probe\C-http-probe.ps1` | 20 echte HTTP-Messungen, endet mit `20/20`, Port danach frei |
 
 Node liegt portabel unter `%LOCALAPPDATA%\node-portable\node-v24.21.0-win-x64\node.exe` (v24.21.0).
 

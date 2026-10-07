@@ -42,7 +42,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 REPO = "Vexx-oss/NetLab"
 DIST = Path(__file__).resolve().parent.parent / "dist"
 BESCHREIBUNG = ("Lernspiel fuer FISI (IHK AP1/AP2): Netzwerk-Simulator auf Frame-Ebene, "
-                "IOS-aehnliche Konsole, 37 Tickets plus Generator, laeuft offline.")
+                "IOS-aehnliche Konsole, handgeschriebene Auftraege plus Generator, laeuft offline.")
 HOMEPAGE = "https://vexx-oss.github.io/NetLab/"
 THEMEN = ["fisi", "netzwerk", "lernspiel", "simulator", "ihk", "ap1", "ap2",
           "ausbildung", "javascript", "offline"]

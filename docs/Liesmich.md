@@ -41,12 +41,13 @@ Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Man
 - **Der Shop ist stark reduziert:** zwei Kacheln statt eines Felds von 27–38 (je nach Spielstand), der Rest ist an seinen Ort gewandert. Wartungsverträge stehen in der Kundenakte, die Prüfungsanmeldung im Lernstand, Farben und Leisten in den Einstellungen. **Behoben:** die Prüfungsanmeldung im Shop war wirkungslos und kostete 60/90 €, während die Prüfung selbst 40/80 € abbuchte — es gibt jetzt genau eine Preisquelle (`Spiel.PRUEFUNG.GEBUEHR`).
 - **Begrüßung beim ersten Start:** eine Karte („Willkommen im Netzwerk-Labor! …“) mit zwei Wegen — „Zeig mir den ersten Auftrag“ oder „Erst umsehen“ —, danach **eine** Anweisungszeile am ersten Auftrag, die den Weg nennt statt der Lösung, und ein Schlusssatz nach der Abnahme. Ein Bestandsstand sieht nichts davon.
 - **Für Mitwirkende:** `python tools/ethos.py` prüft 12 Minimalismus-Regeln für die Stylesheets (`src/stil/*.css`) und läuft in `sh tools/test.sh` mit; die Testkette steht bei 251 Tests in 35 Dateien.
+- **1.2.3 (07.10.2026): keine neue Spielfunktion.** Diese Fassung liefert die **umsetzungsreife Spezifikation des Klassenraums** (Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst) samt einem eigenständigen Rust-Server als Probe. Im Spiel ist davon noch nichts zu sehen — der Vertrag steht in [[Klassenraum – Umsetzungsreife Spezifikation]], die vier Teil-Dokumente liegen im Ordner `docs/entwicklung/Klassenraum/`.
 
 ## Aufbau
 - [[Konzept – Netzwerk-Labor]] (Spezifikation) · [[Architektur]] (Vertrag zwischen den Bausteinen) · [[Opus-Auftrag – Netzwerk-Labor]] (ursprünglicher Bauauftrag) · [[Befund – Programm startet wieder]] (05.10.2026: WebView2-Ausfall und Reparatur)
-- **Ausbau 1.2 (läuft):** [[Plan – Ausbau 1.2]] (Phasen, Stand) · [[Design – Spielspaß 2.0]] (Befunde, 12 Hebel, Scorecard, Startblöcke für Opus)
+- **Ausbau 1.2 (läuft):** [[Plan – Ausbau 1.2]] (Phasen, Stand) · [[Design – Spielspaß 2.0]] (Befunde, 12 Hebel, Scorecard, Startblöcke für Opus) · [[Klassenraum – Umsetzungsreife Spezifikation]] (nächste Stufe, noch nicht umgesetzt)
 - `src/` Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · `shell/src-tauri/` Rust-Hülle · `tests/` (251 Tests in 35 Dateien, `sh tools/test.sh`) · `tools/` (bauen, testen, messen, ausliefern) · `Programm/` fertige Programme · `docs/` die Website-Fassung (erzeugt) · `fremd/` fremder Bestand (Lernmotor aus der Spielhalle)
-- Versionen: Git im Projektordner (Tags `endversion-1.0`, `v1.1`); die Endversion 1.0 liegt zusätzlich unter `Programm/Endversion-1.0/`.
+- Versionen: Git im Projektordner (Tags `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`); die Endversion 1.0 liegt zusätzlich unter `Programm/Endversion-1.0/`.
 
 ## Ehrliche Grenzen
 - Arbeitsspeicher im Leerlauf rund 0,5 GB (WebView2), CPU praktisch null.

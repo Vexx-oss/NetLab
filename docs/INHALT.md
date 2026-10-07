@@ -33,6 +33,8 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`entwicklung/Konzept – Netzwerk-Labor.md`](<entwicklung/Konzept – Netzwerk-Labor.md>) | Die Spezifikation des Spiels. |
 | [`entwicklung/Konzept – Lernplattform für Betriebe und Schulen.md`](<entwicklung/Konzept – Lernplattform für Betriebe und Schulen.md>) | Konzept für den Einsatz im Unterricht und in der Ausbildung. |
 | [`entwicklung/Befund – Programm startet wieder.md`](<entwicklung/Befund – Programm startet wieder.md>) | Der Befund zum Integritätslabel, das die `.exe` blockierte — samt Reparaturweg. |
+| [`entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md`](<entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>) | Vertrag für die nächste Stufe: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag — **noch nicht umgesetzt** (Fassung 1.2.3). |
+| [`entwicklung/Klassenraum/`](entwicklung/Klassenraum/Liesmich.md) | Die vier Teil-Dokumente zu diesem Vertrag (A Codec/Determinismus · B Oberfläche/Ablauf · C Rust/Live/QR · D Prüfung/Abnahme) mit allen Messprotokollen. |
 | [`entwicklung/Opus-Auftrag – Netzwerk-Labor.md`](<entwicklung/Opus-Auftrag – Netzwerk-Labor.md>) | Der ursprüngliche Auftrag, aus dem das Projekt entstand. |
 
 ## Wie dieses Verzeichnis aufgeräumt wurde
