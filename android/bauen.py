@@ -64,7 +64,7 @@ PAKET = "oss.vexx.netlab"
 # bauen.py (VERSION) und bleibt 1.2.1 — Bauzählung und Spielversion sind zwei Zahlen.
 # Aus VERSION 1.2.1 abgeleitet ergäbe sich 10201: genau der Code der bereits gebauten
 # APK. Deshalb 10202. Herleitung: 1*10000 + 2*100 + 2.
-VERSION_CODE = 10202
+VERSION_CODE = 10203
 
 SDK_ORTE = [
     Path(r"C:\Users\Student\android-sdk"),

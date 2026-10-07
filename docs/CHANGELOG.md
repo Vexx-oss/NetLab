@@ -5,7 +5,7 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
 [`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`.
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`.
 
 ---
 
@@ -131,6 +131,56 @@ Pakete mit derselben Nummer blieben unberührt, sonst wäre die Sperrdatei besch
   sichtbar, eigene Instanz wieder beendet.
 - Geprüft auf dem Endstand: 251/251 Tests grün, `ethos.py` GRÜN, 0 Klassen ohne CSS-Regel,
   `tools/menueprobe.py` 5 Profile / 49 Kriterien / 0 verletzt, `tools/seite-pruefen.py` GRÜN.
+
+---
+
+## 1.2.3 — Tag `v1.2.3` (Klassenraum-Spezifikation; Spiel unverändert)
+
+Diese Fassung bringt **keine neue Spielfunktion**. Sie liefert den Arbeitsauftrag „Klassenraum"
+(Lehrer-/Schüler-Instanz als Hobby-Ebene: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben
+Auftrag selbst — ohne Konto, Server oder Netz) in **umsetzungsreifer** Form: jede offene Frage
+entschieden, jede Zahl gemessen. Der Spielkern ist unverändert; geändert haben sich die
+Fassungsnummern und die Dokumentation.
+
+**Neu**
+
+- `docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md` — der Vertrag (Code-Format, API,
+  Speicherform, zwei Endpunkte, 40 Testfälle, Abnahme, Reihenfolge, Entscheidungen).
+- `docs/entwicklung/Klassenraum/` — vier Teil-Dokumente (A Codec/Determinismus · B Oberfläche/Ablauf ·
+  C Rust/Live/QR · D Prüfung/Abnahme) samt `Liesmich`.
+- `tools/auftraege/KLASSENRAUM-umsetzungsreif.md` — der geschärfte Auftragstext zum Weitergeben.
+- `tools/klassenraum/` — eigenständiger Rust-Server **ohne jede Kiste** (`Cargo.toml` ohne
+  `[dependencies]`), `GET /liste` und `POST /ergebnis`, idempotent, Datensparsamkeit erzwungen.
+- `tools/klassenraum-probe/` — wiederlaufbare Proben (Codec über alle 2²⁰ Nutzlasten, QR-Encoder mit
+  unabhängiger Python-Referenz, HTTP-Probe, Belegprüfer).
+
+**Gemessen (in dieser Fassung nachgerechnet)**
+
+| Prüfung | Ergebnis |
+|---|---|
+| `sh tools/test.sh` | **251/251 grün** (35 Testdateien, 76 Module) |
+| `python tools/ethos.py` · `tools/klassen.py` · `node tools/sim-stand.js` | GRÜN · 0 Klassen ohne CSS-Regel · Simulation unverändert |
+| `python bauen.py` | 107 Module, 1.699 KB → `web/index.html` (Version 1.2.3) |
+| `python tools/einfach.py` (+`--ziel`) | 2.269.597 B, **0 Außenverweise**, beide Erzeugnisse byte-gleich |
+| `python tools/seite-pruefen.py` | GRÜN — mit dem erwarteten Hinweis, dass die **alte** veröffentlichte Seite noch 1.2.2 lieferte |
+| `python android/bauen.py` | GRÜN — APK 1.2.3, versionCode 10203 (vorher musste `VERSION_CODE` von 10202 auf 10203 steigen, sonst verweigert Android den Bau über die alte Fassung) |
+| `python tools/q-echt.py` | `.exe` startet, erster Auftrag (`salon-01`) mit echter Maus gelöst, **5 ★**, 0 Fehler, 5 Bildschirmfotos, eigene Instanz wieder beendet |
+
+**Erzeugnisse**
+
+- Browser-Einzeldatei `docs/index.html` und `Netzwerk-Labor.html`: **2.269.597 B**,
+  SHA256 `0927CA947F31D226B072D4CF450AAE6A4439ECD7F83781388A2FA2E2F783E176` (beide gleich).
+- Windows-Programm `Programm/Netzwerk-Labor.exe`: **8.217.088 B**, SHA256
+  `5F6A8C8136700436FFFDB5DC249CFDFFE580A4D602F3694116EE253D716E3E12`, Produkt- und Dateiversion
+  **1.2.3**, Start gemessen (Bildschirmfotos in `Nachweise/1.2-Q/`).
+- Android `Programm/Netzwerk-Labor-1.2.3-Android.apk`: **988.700 B**, SHA256
+  `581D194C84238BA52D001369975FDD26276EB2145D8241F062188799D0F23E00`, versionCode **10203**,
+  versionName 1.2.3, signiert (v2+v3), keine Berechtigungen. Die 1.2.2 liegt daneben.
+
+**Nicht gemessen (ehrlich).** Rauchtest (`36/36`), Menüprobe und die fünf Vorführschritte des
+Klassenraums: Edge startet in der Werkzeug-Sandbox nicht. Der Klassenraum ist **nicht umgesetzt** —
+diese Fassung liefert die Spezifikation; der Server in der `.exe` (Stufe C1) ist beschrieben, aber nicht
+gebaut.
 
 ---
 

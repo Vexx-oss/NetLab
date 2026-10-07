@@ -813,3 +813,28 @@ Falle zuerst selbst ein falsches Ergebnis gemessen (14 Flächen unter 44 px) und
   (erster Lauf 3 m 11 s für die Abhängigkeiten).
 - `docs/index.html` und `Netzwerk-Labor.html` im Wurzelverzeichnis sind **dieselbe** Datei und
   müssen denselben SHA256 tragen.
+
+## 12 · Klassenraum — Spezifikation (07.10.2026, **noch nicht umgesetzt**)
+
+Der Auftrag [`../tools/auftraege/KLASSENRAUM.md`](../tools/auftraege/KLASSENRAUM.md) beschreibt die
+Lehrer-/Schüler-Instanz als Hobby-Ebene: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben
+Auftrag selbst — ohne Konto, ohne Server, ohne Netz. Die **umsetzungsreife Fassung** liegt in
+[`entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md`](<entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>)
+samt vier Teil-Dokumenten in `entwicklung/Klassenraum/`. **Gebaut ist nichts** — dieser Abschnitt hält
+fest, was mit der Umsetzung vertraglich gilt; bis dahin ist er eine Ankündigung, kein geltender Vertrag.
+
+| Gegenstand | Festlegung (gemessen belegt in der Spezifikation) |
+|---|---|
+| Auftragscode | `NL-XXXX-XX`, immer 10 Zeichen; 30 Bit (Sitzung 5 · Art 1 · Index 6 · Variante 8) + 2 Prüfzeichen (mod 31 / mod 32) |
+| Ergebnis-Code | `E-XXXX-XXX`; 25 Bit (Sitzung 5 · Platz 5 · halbe Sterne 4 · Fehlversuche 2 · Dauer 9 in 10-s-Einheiten) + 2 Prüfzeichen |
+| Speicher | **neuer Store-Schlüssel `klassenraum`** (neben `lern`, `labor`, `einst`, `sandbox`) mit Feld `fassung: 1`; Export `{format:"netzwerk-labor/klassenraum", …}` |
+| API | `Spiel.klassenraum` mit den acht Funktionen aus dem Auftrag plus `netzkennwert`, `tauglicheFertigkeiten`, `platz`/`platzSetzen`, `plaetze`/`plaetzeSetzen` |
+| Öffnungsweg | `Spiel.instanzErstellen({ticketId｜gen, seed, quelle:"klassenraum", ohneFlow:true})` → `inst.klassenraum = {sitzung, platz, code}` → `UI.spiel.oeffnen(iid)` |
+| Klassenraum-Abdruck | 6 Zeichen, FNV-1a über die kanonisch sortierte JSON-Abbildung von `{v, geraete, kabel}` (ohne `netz.zustand`) |
+| Live-Server (optional, Stufe C) | `GET /liste?auftrag=<Auftragscode>` und `POST /ergebnis` mit `{auftrag, code}` — der Server transportiert nur Codes, deutet nichts und ist in den Einstellungen **abschaltbar, Standard aus**; ohne ihn müssen A und B vollständig laufen |
+| QR-Code (Stufe D) | eigener Encoder ohne neue Kisten (alphanumerisch, Version 1, Stufe H), Rückgabe als SVG-Data-URI; Inhalt ist **genau** der Auftragscode |
+
+Die Dateien der Umsetzung: `src/spiel/klassenraum.js`, `src/ui/klassenraum.js`, `src/stil/klassenraum.css`,
+`tests/klassenraum.test.js`; additiv erlaubt sind `src/ui/app.js`, `src/ui/start.js` und der Store-Schlüssel
+in `src/spiel/zustand.js`. Erwartete Abnahme nach dem Einbau: 291/291 Tests grün, Filter `--klassenraum`
+40/40, `ethos.py` GRÜN, `klassen.py` 0, `sim-stand.js` unverändert.

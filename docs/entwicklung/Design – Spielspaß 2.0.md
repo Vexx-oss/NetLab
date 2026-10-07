@@ -1567,3 +1567,55 @@ Bildlauf erreichbar (Bildlaufgrenze, kein Abschneiden).
 Gestenleiste) sind auf dem Messplatz 0 px; Langdruck als Kontextmenü, eine echte Wischgeste am
 Dock-Blatt und das Treffen der Port-Punkte (Ø 11 px) mit dem Finger sind ungemessen; der Start der
 neu gebauten Release-`.exe` wurde in dieser Runde nicht gemessen.
+
+## 30 · Klassenraum: vom Auftrag zur umsetzungsreifen Spezifikation (06./07.10.2026)
+
+Der Auftrag „Klassenraum" (`tools/auftraege/KLASSENRAUM.md`, 06.10. 20:52) beschreibt die
+Lehrer-/Schüler-Instanz als Hobby-Ebene. Diese Sitzung hat ihn **nicht umgesetzt**, sondern bis zur
+Baureife durchgerechnet: vier Bereiche (Codec · Oberfläche · Rust/Live/QR · Prüfung), je ein
+Orchestrator mit drei Subagenten und zwei Iterationen, zusammen 16 Agents. Ergebnis:
+`docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md` plus vier Teil-Dokumente und der
+geschärfte Auftragstext `tools/auftraege/KLASSENRAUM-umsetzungsreif.md`.
+
+**Was gemessen ist.** Derselbe Code in zwei getrennten Node-Prozessen ergibt 12/12 denselben Auftrag
+(Seed, Netzkennwert); 92/92 gebaute Vertipper und 100 % von 10.000 Mutationen werden abgelehnt
+(unabhängige Gegenprüfung: 130.023.424 Ersetzungen, 3.047.424 Vertauschungen, 0 unbemerkt); 3.712
+Kanonisierungspaare, davon 94,83 % mit eigener Netzfassung, 192 Rückfälle = genau die drei
+Terminal-Aufträge; nur 24 von 27 Fertigkeiten sind adressierbar (drei haben keinen Injektor). Der
+optionale Server wurde wirklich gebaut (`tools/klassenraum/`, 322.560 B, `cargo test` 10/10,
+20/20 echte HTTP-Messungen); der QR-Encoder gegen eine unabhängig geschriebene Python-Referenz
+25/25 gleich und rückkodiert.
+
+**Verworfene Wege und Fehler — damit sie niemand wiederholt.**
+
+- **Die Kiste `qrcode` war der geplante Weg und ist gescheitert:** `cargo fetch` kann crates.io nicht
+  erreichen (`SEC_E_NO_CREDENTIALS`), `qrcode` liegt nicht im Cache (964 `.crate`, tauri-Baum). Der
+  QR-Encoder ist deshalb **abhängigkeitsfrei in Rust** entstanden — und das ist die bessere Fassung,
+  weil sie auch in einem frischen Klon ohne Netz baut.
+- **Zwei verschiedene Server-Feldformen.** Der erste Entwurf schickte `sitzung`/`platz`/`sterne`/
+  `dauerS`; die Gegenprüfung deckte auf, dass damit dieselbe Information doppelt übertragen wird und
+  widersprüchlich sein kann. Entscheidung: der Server transportiert **nur Codes**
+  (`{auftrag, code}`) — der gebaute Prototyp wird beim Einbau darauf umgestellt.
+- **Falsche Zwischenwerte in einem Teil-Dokument:** für das Formbeispiel `NL-4F7K-2Q` standen
+  `C1 ≡ 6`, `C2 ≡ 8`. Nachgerechnet ist `C1 = 159 mod 31 = 4` (Zeichen `E`) und
+  `C2 = 249 mod 32 = 25` (Zeichen `3`); gültig wäre `NL-4F7K-E3`. Die Folgerung war richtig, die
+  Zahlen nicht — korrigiert und als Korrektur gekennzeichnet.
+- **Die Startseiten-Annahme des Auftrags stimmt nicht:** die Code-Eingabezeile gehört nicht in
+  `src/ui/start.js` (dort läuft nur der Startvorgang), sondern in die Hub-Ansicht `heute`. Statt
+  `hub.js` anzufassen, hängt die neue Datei die Zeile über das Bus-Ereignis `ansicht` an — die
+  Datei-Liste des Auftrags bleibt damit eingehalten.
+- **Kanonisierungszweig ohne Messung:** der Fall „eigene Fassung erst nach 1..63 Schritten" trat in
+  5.440 geprüften Fällen **nie** auf. Die Schleife bleibt als Versicherung gegen Fassungsunterschiede
+  stehen, ist aber ausdrücklich kein gemessener Pfad.
+- **`versionCode` beim Fassungswechsel:** `python android/bauen.py` verweigert den Bau, wenn der
+  `versionCode` unter dem aus `versionName` abgeleiteten Wert liegt. Für 1.2.3 musste er von 10202
+  auf **10203** steigen (`android/bauen.py`) — `tools/fassung-ziehen.py` fasst ihn bewusst nicht an.
+
+**Nicht gemessen (ehrlich).** Rauchtest (`36/36`), Menüprobe und die fünf Vorführschritte: Edge startet
+in der Werkzeug-Sandbox nicht (eigene Prozess-Sandbox, `platform_channel.cc … Zugriff verweigert`).
+Der C1-Einbau in die `.exe` ist beschrieben, aber nicht gebaut; ein Handy-Scan des QR-Codes war ohne
+Fremdscanner nicht möglich; gemessen wurde nur über `127.0.0.1`, nicht in einem echten Klassennetz.
+
+**Offen für den Nutzer.** Vier Zeilen in `src/spiel/abnahme.js`, damit ein Klassenraum-Auftrag nicht
+als erledigt zählt und keinen Lohn zahlt (Verschärfung, braucht Freigabe); ohne sie gilt der
+Ist-Zustand. Und einmal die Vorführung mit zwei getrennten Edge-Profilen auf dem eigenen Rechner.
