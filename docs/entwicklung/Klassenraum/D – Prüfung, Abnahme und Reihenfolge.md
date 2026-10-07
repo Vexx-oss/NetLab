@@ -222,6 +222,12 @@ A die Spielbarkeit belegt hat.
 | `& "<node>" tests/run.js` | `251/251 grün (35 Testdateien, 76 Module)`, Exit 0 | **291/291 grün (36 Testdateien, 77 Module)** | keine der 251 bestehenden Tests darf rot werden |
 | `& "<node>" tests/run.js --klassenraum` | `0/0 grün (35 Testdateien, 76 Module)` — **erwartet** | **40/40 grün (36 Testdateien, 77 Module)** | nicht bei `0/0` bleiben; dann heißt die Datei nicht `tests/klassenraum.test.js` oder die Gruppe nicht `Klassenraum` |
 | `python bauen.py` | Exit 0, **0,17 s**, `web/index.html` 1.753.635 B | Dauer und Modulzahl dürfen steigen (**107 Module** heute) | die Fassungsnummer bleibt **1.2.2** (in dieser Ausbaustufe wird keine Fassung gezogen); Exit 0 |
+
+> [!success] ✅ Nachtrag vom 07.10.2026 (Leiter)
+> Die Zeile darüber beschreibt den Planungsstand dieser Sitzung und ist inzwischen **überholt**: Für die
+> Veröffentlichung wurde die Fassung auf **1.2.3** gezogen (`tools/fassung-ziehen.py --neu 1.2.3 --setzen`),
+> weil diese Sitzung ausgeliefert wurde. Der Sollwert für `bauen.py` lautet damit „Exit 0, Version **1.2.3**";
+> alles andere in dieser Tabelle gilt unverändert. Beleg: `docs/CHANGELOG.md`, Abschnitt 1.2.3.
 | `python tools/einfach.py` | Exit 0, **1,22 s**, 14 Schriften als Daten-URI, **0 Außenverweise**, `docs/index.html` 2.269.597 B | nur die Bytes (neue Quellen) | **0 Außenverweise** bleibt 0; Exit 0 |
 | `python tools/einfach.py --ziel Netzwerk-Labor.html` | Exit 0, **0,69 s**, dieselbe Ausgabe | dito | Wurzeldatei und `docs/index.html` bleiben **byte-gleich** zueinander |
 | `(Get-FileHash docs\index.html).Hash` / `(Get-FileHash Netzwerk-Labor.html).Hash` | beide `E44E4C6BADDCFB1E3549CF0C08B60DBB277641A50C9731FA2E504FADDCE213FD`, **nach dem Neubau unverändert** | ändert sich nur durch einen **bewussten** Neubau | die beiden Dateien bleiben zueinander byte-gleich; kein unbemerkter Hash-Wechsel |
