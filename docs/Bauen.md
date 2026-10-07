@@ -203,7 +203,7 @@ Tags `endversion-1.0` und `v1.1` haben aus demselben Grund bis heute kein Releas
 > und ein Release-Anhang braucht eine Person, die ihn anlegt. Die Datei ist textbasiert
 > und damit diffbar, wird bei inhaltlichen Änderungen mitgebaut und ist mit
 > `docs/index.html` byte-identisch. Die 8-MB-`.exe` bleibt weiter draußen — sie gehört
-> an eine Release.
+> an eine Release, und dort **hängt sie seit dem 07.10.2026 automatisch** (siehe unten).
 
 ## Die Windows-`.exe`
 
@@ -213,6 +213,22 @@ cd shell/src-tauri
 CARGO_TARGET_DIR=<schneller-Ordner>/target cargo tauri build --no-bundle
 # Ergebnis kopieren nach Programm/Netzwerk-Labor.exe
 ```
+
+**Automatisch im Release** (seit 07.10.2026): Der Ablauf
+[`.github/workflows/release.yml`](../.github/workflows/release.yml) hat einen zweiten Job
+(„Windows-Programm bauen und anhängen"), der auf `windows-latest` genau diese Reihenfolge
+fährt — `python bauen.py`, dann `cargo build --release --features custom-protocol` (dieselbe
+Bauart wie `cargo tauri build --no-bundle`, nur ohne die CLI) — die Fassung der `.exe` gegen
+den Tag prüft und sie als **`Netzwerk-Labor.exe`** an das Release hängt. Damit ist der
+Ein-Klick-Download stabil:
+
+```
+https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe
+```
+
+Auf dem Entwicklungsrechner bleibt der Weg oben für `Programm/Netzwerk-Labor.exe` — dieser
+Bau ist zusätzlich mit `python tools/q-echt.py` **gestartet** und geprüft worden
+(07.10.2026: 3 m 45 s, 8.217.088 B, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler).
 
 Die fertigen Programme und die Bildschirmfoto-Nachweise liegen **bewusst nicht im Git**
 (`.gitignore`): 8 MB `.exe` und 22 MB Beweismaterial gehören nicht in die Historie.

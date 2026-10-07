@@ -143,10 +143,10 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
             "HINWEIS ZU DIESEM PAKET\n"
             + "-" * 64 + "\n"
             "Dieses Paket enthaelt die Browser-Fassung: Netzwerk-Labor.html.\n"
-            "Das Windows-Programm (Netzwerk-Labor.exe, rund 8 MB) ist NICHT enthalten -\n"
-            "es liegt bewusst nicht im Repositorium und wird auf dem Entwicklungsrechner\n"
-            "gebaut (docs/Bauen.md). Alles, was unten unter \"Weg 2\" steht, gilt erst,\n"
-            "wenn du es selbst gebaut hast.\n"
+            "Das Windows-Programm (Netzwerk-Labor.exe, rund 8 MB) ist NICHT in diesem\n"
+            "Paket enthalten - es haengt als eigener Anhang an der Veroeffentlichung\n"
+            "(Release) oder wird selbst gebaut (docs/Bauen.md). Alles, was unten unter\n"
+            "\"Weg 2\" steht, gilt, sobald du die Datei hast.\n"
             + "-" * 64 + "\n\n"
         )
         for name in ("LIESMICH.txt", "START-HIER.md"):

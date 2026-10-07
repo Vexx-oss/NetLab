@@ -24,13 +24,18 @@ Läuft lokal und offline; nichts wird gesendet.
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)** (2,1 MB), Doppelklick | nur einen Browser |
 | **Zum Entpacken** | [Netzwerk-Labor-1.2.3-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, Anleitungen, Lizenztexte | nur einen Browser |
+| **Windows-Programm** | **[Netzwerk-Labor.exe herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe)** (8,2 MB) — mit Leiste am Bildschirmrand, Tray-Symbol und globalem Tastenkürzel | Windows 10/11 |
 
 Alle drei Wege liefern dieselbe Fassung `1.2.3`. Die Anhänge der Release laden **direkt
 herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umweg.
 
-> **Zur Windows-`.exe`:** Sie ist **1.2.3** (gebaut am 07.10.2026, SHA256 `5F6A8C81…3E12`) und bringt
-> Leiste, Tray und globales Tastenkürzel. Sie liegt **nicht im Release**, weil sie 8 MB groß ist und
-> nicht ins Git gehört — im Repositorium steht sie unter `Programm/Netzwerk-Labor.exe`.
+> **Zur Windows-`.exe`:** Sie ist **1.2.3** (gebaut am 07.10.2026, SHA256 `E2735D79…5DD68`) und bringt
+> Leiste, Tray und globales Tastenkürzel. Sie **hängt seit dem 07.10.2026 automatisch an jeder
+> Veröffentlichung** — gebaut von einem Windows-Läufer in
+> [`.github/workflows/release.yml`](.github/workflows/release.yml), damit der Download-Link stabil bleibt:
+> `https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe`. Ins Git gehört sie
+> weiterhin **nicht** (8 MB je Bau); auf dem Entwicklungsrechner liegt sie unter
+> `Programm/Netzwerk-Labor.exe`.
 > **Ihr Start ist gemessen:** die Abnahme `python tools/q-echt.py` lief im echten Programm
 > durch — Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler,
 > Fernwartungs-Schild sichtbar. Bilder: `Nachweise/1.2-Q/`.

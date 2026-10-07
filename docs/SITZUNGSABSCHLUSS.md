@@ -161,7 +161,7 @@ Drei Abläufe laufen dann von selbst — und man sollte wissen, was sie tun:
 |---|---|---|
 | `pruefen.yml` | Push auf `ausbau-1.2` | Tests auf GitHub |
 | `seite.yml` | Push auf `ausbau-1.2` | **veröffentlicht die Seite** (nur `docs/index.html` + `docs/bilder/`) |
-| `release.yml` | **Tag** | prüft, baut das Paket, legt das Release mit den Anhängen an |
+| `release.yml` | **Tag** | prüft, baut das Paket, legt das Release mit den Anhängen an; ein zweiter Job auf `windows-latest` baut die `.exe` und hängt sie ebenfalls an |
 
 ### 8. Nachmessen, was wirklich online steht
 
