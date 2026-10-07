@@ -89,16 +89,32 @@ jobs:
           EINZEL=$(ls dist/Netzwerk-Labor-*/Netzwerk-Labor.html)
           echo "Anhaenge: $ZIPS $EINZEL"
 
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            # Schon da (z. B. zweiter Anlauf): nur die Anhaenge erneuern.
-            echo "Release existiert bereits — Anhaenge werden ersetzt."
-            gh release upload "$TAG" $ZIPS "$EINZEL" --clobber
-          else
-            gh release create "$TAG" \
-              --title "Netzwerk-Labor ${TAG#v}" \
-              --generate-notes \
-              $ZIPS "$EINZEL"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --title "Netzwerk-Labor ${TAG#v}" --generate-notes
           fi
+
+          # Gleichnamige Anhaenge zuerst ausdruecklich entfernen, dann hochladen.
+          # `gh release upload --clobber` scheitert genau hier mit
+          #   HTTP 404: Not Found (…/releases/<id>/assets?name=Netzwerk-Labor.html)
+          # (gemessen am 07.10.2026 beim zweiten Anlauf fuer dasselbe Tag) — der
+          # Name ist nach dem Loeschen serverseitig kurz belegt. Deshalb: loeschen,
+          # kurz warten, hochladen, bei Fehlschlag wiederholen.
+          for f in $ZIPS "$EINZEL"; do
+            n=$(basename "$f")
+            gh release delete-asset "$TAG" "$n" -y >/dev/null 2>&1 && echo "Alter Anhang entfernt: $n"
+          done
+          sleep 5
+
+          ok=0
+          for versuch in 1 2 3; do
+            if gh release upload "$TAG" $ZIPS "$EINZEL"; then ok=1; break; fi
+            echo "Versuch $versuch gescheitert — neuer Versuch in 10 s"
+            sleep 10
+          done
+          [ "$ok" = "1" ] || { echo "FEHLER: Anhaenge konnten nicht hochgeladen werden."; exit 1; }
+
+          echo "Anhaenge im Release:"
+          gh release view "$TAG" --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
 
       - name: Ergebnis melden
         env:
@@ -166,5 +182,16 @@ jobs:
         run: |
           $tag = "${{ github.event.inputs.tag }}"
           if (-not $tag) { $tag = "${{ github.ref_name }}" }
-          gh release upload $tag dist/Netzwerk-Labor.exe --clobber
-          gh release view $tag
+          # Wie im Linux-Job: erst einen gleichnamigen alten Anhang entfernen, dann
+          # hochladen — `--clobber` scheitert beim Ersetzen mit HTTP 404.
+          gh release delete-asset $tag Netzwerk-Labor.exe -y 2>$null
+          Start-Sleep -Seconds 5
+          $ok = $false
+          foreach ($versuch in 1..3) {
+            gh release upload $tag dist/Netzwerk-Labor.exe
+            if ($LASTEXITCODE -eq 0) { $ok = $true; break }
+            "Versuch $versuch gescheitert — neuer Versuch in 10 s"
+            Start-Sleep -Seconds 10
+          }
+          if (-not $ok) { throw "Die .exe konnte nicht angehaengt werden." }
+          gh release view $tag --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
