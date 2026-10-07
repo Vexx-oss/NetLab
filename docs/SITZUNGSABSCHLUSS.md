@@ -163,6 +163,14 @@ Drei Abläufe laufen dann von selbst — und man sollte wissen, was sie tun:
 | `seite.yml` | Push auf `ausbau-1.2` | **veröffentlicht die Seite** (nur `docs/index.html` + `docs/bilder/`) |
 | `release.yml` | **Tag** | prüft, baut das Paket, legt das Release mit den Anhängen an; ein zweiter Job auf `windows-latest` baut die `.exe` und hängt sie ebenfalls an |
 
+**Ein Release erneut auslösen** — z. B. um die Anhänge zu erneuern, ohne ein neues Tag zu setzen:
+Actions → „Release anlegen" → *Run workflow* → Tag angeben; oder
+`gh workflow run release.yml -f tag=v1.2.3`. Der Ablauf ist idempotent (er ersetzt die Anhänge).
+**Gemessene Falle:** `gh release upload --clobber` scheitert beim Ersetzen gleichnamiger Anhänge mit
+`HTTP 404` auf `uploads.github.com`; der Ablauf löscht sie deshalb vorher ausdrücklich, wartet 5 s und
+wiederholt den Upload. Der zweite Job läuft nur, wenn der erste grün ist (`needs`) — ein rotes
+Release-Ergebnis heißt also: erst den Linux-Job ansehen.
+
 ### 8. Nachmessen, was wirklich online steht
 
 Nicht annehmen, dass ein grüner Ablauf das Richtige ausgeliefert hat:

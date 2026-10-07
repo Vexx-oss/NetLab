@@ -29,13 +29,14 @@ Läuft lokal und offline; nichts wird gesendet.
 Alle drei Wege liefern dieselbe Fassung `1.2.3`. Die Anhänge der Release laden **direkt
 herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umweg.
 
-> **Zur Windows-`.exe`:** Sie ist **1.2.3** (gebaut am 07.10.2026, SHA256 `E2735D79…5DD68`) und bringt
-> Leiste, Tray und globales Tastenkürzel. Sie **hängt seit dem 07.10.2026 automatisch an jeder
-> Veröffentlichung** — gebaut von einem Windows-Läufer in
-> [`.github/workflows/release.yml`](.github/workflows/release.yml), damit der Download-Link stabil bleibt:
-> `https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe`. Ins Git gehört sie
-> weiterhin **nicht** (8 MB je Bau); auf dem Entwicklungsrechner liegt sie unter
-> `Programm/Netzwerk-Labor.exe`.
+> **Zur Windows-`.exe`:** Sie ist **1.2.3** und bringt Leiste, Tray und globales Tastenkürzel.
+> Sie **hängt seit dem 07.10.2026 automatisch an jeder Veröffentlichung** — gebaut von einem
+> Windows-Läufer in [`.github/workflows/release.yml`](.github/workflows/release.yml), damit der
+> Download-Link stabil bleibt:
+> `https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe`
+> (Anhang: 8.211.456 B, SHA256 `28C7C6B4…E808`). Ins Git gehört sie weiterhin **nicht** (8 MB je Bau);
+> auf dem Entwicklungsrechner liegt sie unter `Programm/Netzwerk-Labor.exe` (8.217.088 B, SHA256
+> `E2735D79…5DD68` — Rust-Bauten sind nicht bit-gleich, beide melden 1.2.3).
 > **Ihr Start ist gemessen:** die Abnahme `python tools/q-echt.py` lief im echten Programm
 > durch — Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler,
 > Fernwartungs-Schild sichtbar. Bilder: `Nachweise/1.2-Q/`.

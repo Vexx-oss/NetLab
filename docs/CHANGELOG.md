@@ -177,6 +177,31 @@ Fassungsnummern und die Dokumentation.
   `581D194C84238BA52D001369975FDD26276EB2145D8241F062188799D0F23E00`, versionCode **10203**,
   versionName 1.2.3, signiert (v2+v3), keine Berechtigungen. Die 1.2.2 liegt daneben.
 
+**Nachtrag 07.10.2026 — die `.exe` hängt jetzt am Release**
+
+Bisher fehlte die Windows-Fassung im Release: der Ablauf läuft auf `ubuntu-latest` und kann keine
+Windows-`.exe` bauen, und ins Git gehört sie bewusst nicht (8 MB je Bau). Jetzt baut ein zweiter Job
+auf `windows-latest` sie und hängt sie an — für dieses Release gemessen:
+
+- `Netzwerk-Labor.exe`: **8.211.456 B**, Produkt- und Dateiversion **1.2.3**,
+  SHA256 `28C7C6B4F411D325F99380D92DB66E1D2FA6D569CDFB8F0A0471C6C8AAB7E808`; stabiler Link
+  `https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe` (geprüft:
+  `HTTP 200`, `Content-Disposition: attachment`).
+- Bauweg im Ablauf: `python bauen.py` → `cargo build --release --features custom-protocol`
+  (dieselbe Bauart wie `cargo tauri build --no-bundle`, nur ohne CLI). Laufzeiten des zweiten
+  Anlaufs: Linux-Job **62 s**, Windows-Job **425 s**.
+- Derselbe Weg auf dem Entwicklungsrechner ergibt eine **andere** Binärdatei (8.217.088 B, SHA256
+  `E2735D79…5DD68`) — Rust-Bauten sind nicht bit-gleich. Beide melden 1.2.3; der Start der lokalen
+  Fassung ist mit `python tools/q-echt.py` gemessen (Fenster offen, erster Auftrag mit echter Maus
+  gelöst, 5 ★, 0 Fehler).
+- **Gemessene Falle:** `gh release upload --clobber` scheitert beim Ersetzen gleichnamiger Anhänge
+  mit `HTTP 404` auf `uploads.github.com` (erster Anlauf rot, Windows-Job dadurch übersprungen).
+  Der Ablauf entfernt die alten Anhänge jetzt ausdrücklich, wartet 5 s und wiederholt den Upload —
+  zweiter Anlauf: **beide Jobs grün**.
+- Das Browser-Paket sagt den fehlenden Windows-Teil jetzt selbst: `tools/paket.py` hängt einen
+  Hinweis vor `LIESMICH.txt` und `START-HIER.md`, wenn keine `.exe` enthalten ist (vorher stand dort
+  eine Anleitung für eine Datei, die nicht im Paket lag).
+
 **Nicht gemessen (ehrlich).** Rauchtest (`36/36`), Menüprobe und die fünf Vorführschritte des
 Klassenraums: Edge startet in der Werkzeug-Sandbox nicht. Der Klassenraum ist **nicht umgesetzt** —
 diese Fassung liefert die Spezifikation; der Server in der `.exe` (Stufe C1) ist beschrieben, aber nicht
