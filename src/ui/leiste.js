@@ -12,7 +12,11 @@ UI.leiste = (() => {
   let root = null, karte = null, el = {}, auf = false, zuTimer = null, aufTimer = null, groesseMarke = 0;
   let mini = null;                 /* erst bei Bedarf anlegen (keine Aufrufe beim Laden) */
   let hilfe = null;
-  const miniEl = () => mini ||= h("div", {class: "lk-mini", "aria-label": "Mini-Ticket"});
+  let beobachter = null;           /* liest mit, wenn Baustein C ein Mini in den Bereich zeichnet */
+  const miniEl = () => {
+    if (!mini) { mini = h("div", {class: "lk-mini", "aria-label": "Mini-Ticket"}); miniBeobachten(); }
+    return mini;
+  };
   /* Eigener Bereich unter dem Ticket: der Hilfe-Knopf soll beim Scrollen nicht verschwinden (§ 5). */
   const hilfeEl = () => hilfe ||= h("div", {class: "lk-mini-hilfe", "aria-label": "Denkhilfe und Lernanker"});
 
@@ -37,6 +41,19 @@ UI.leiste = (() => {
     el.ruf = h("span", {class: "lk-wert lk-ruf", title: "Ruf", ...drag});
     el.offen = h("span", {class: "lk-offen", title: "Offene Tickets", ...drag});
     el.text = h("p", {class: "lk-text"});
+    /* Der Hilfe-Knopf sitzt in der STATUSZEILE, nicht im aufgeklappten Bereich: dort war er zugeklappt
+       von `overflow:hidden` abgeschnitten und erst nach 280 ms Mausberührung erreichbar
+       (Review Auffindbarkeit, Befund 5). Er klappt den vorhandenen Bereich `UI.leiste.miniHilfe` auf;
+       Inhalt und Stufenregel bleiben bei Baustein C (UI.karriere.miniZeichnen). Nur Maus, kein Fokusklau. */
+    el.hilfeKnopf = h("button", {type: "button", class: "lk-hilfe-knopf", tabindex: "-1",
+      "aria-label": "Denkhilfe und Lernanker öffnen", title: "Denkhilfe und Lernanker öffnen",
+      onmousedown: e => e.preventDefault(), onclick: () => hilfeOeffnen()}, UI.symbol("hilfe", 16));
+    /* Wartendes Mini-Ticket sichtbar machen: zugeklappt sah der Azubi nur €/h, Ruf und offene Tickets –
+       kein Zeichen, dass eine Mail auf Antwort wartet (dieselbe Review, Befund 5). */
+    el.miniWartet = h("button", {type: "button", class: "lk-mini-wartet", tabindex: "-1", hidden: true,
+      "aria-label": "Mini-Ticket wartet auf Antwort", title: "Ein Mini-Ticket wartet auf Antwort – hier aufklappen",
+      onmousedown: e => e.preventDefault(), onclick: () => aufklappen()},
+      h("span", {class: "lk-punkt"}), h("span", {}, "Mini"));
     const oeffnen = h("button", {type: "button", class: "lk-oeffnen", tabindex: "-1", title: "Vollansicht öffnen",
       onmousedown: e => e.preventDefault(), onclick: () => UI.modus("voll")}, UI.symbol("oeffnen", 18), h("span", {}, "öffnen"));
     const tray = Plattform.kann("tray");
@@ -45,7 +62,7 @@ UI.leiste = (() => {
     karte = h("div", {class: "leiste-karte"},
       h("div", {class: "lk-zeile"},
         h("div", {class: "lk-griff", title: "Ziehen, um die Leiste zu verschieben", ...drag}, UI.symbol("griff", 16)),
-        el.ampeln, h("div", {class: "lk-werte", ...drag}, el.euro, el.ruf, el.offen), oeffnen),
+        el.ampeln, h("div", {class: "lk-werte", ...drag}, el.euro, el.ruf, el.offen), el.miniWartet, el.hilfeKnopf, oeffnen),
       h("div", {class: "lk-auf"}, el.text, miniEl(), hilfeEl(), h("div", {class: "lk-fuss"}, h("span", {class: "lk-marke"}, "Netzwerk-Labor"), ausblenden)));
     root.append(karte);
     karte.addEventListener("pointerenter", () => {
@@ -88,6 +105,29 @@ UI.leiste = (() => {
     karte.classList.remove("auf");
     setTimeout(() => { if (!auf && karte) groesse(ZU); }, 200);
   }
+  /* Der Knopf in der Statuszeile öffnet den vorhandenen Hilfe-Bereich (nicht doppelt bauen: derselbe
+     DOM-Bereich `UI.leiste.miniHilfe`, den Baustein C füllt). */
+  function hilfeOeffnen(){
+    hilfeEl();
+    aufklappen();
+  }
+  /* „Mini wartet" heißt: im Mini-Bereich stehen unbeantwortete Antwortknöpfe (`.mk-optionen`).
+     Nach der Antwort zeichnet Baustein C dort das Ergebnis – dann verschwindet das Zeichen wieder.
+     Nur lesen, nichts anfassen: das Mini gehört Baustein C. */
+  function miniSignal(){
+    if (!el.miniWartet) return;
+    const wartet = !!(mini && typeof mini.querySelector === "function" && mini.querySelector(".mk-optionen"));
+    el.miniWartet.hidden = !wartet;
+  }
+  /* Wer ein Mini zeichnet, ruft nicht immer `status` – deshalb am Bereich selbst mitlesen.
+     Ohne MutationObserver (Node-Prüfstand) trägt der Weg über `status`/`zeichnen` das Zeichen. */
+  function miniBeobachten(){
+    if (beobachter || !mini || typeof MutationObserver !== "function") return;
+    try {
+      beobachter = new MutationObserver(() => miniSignal());
+      beobachter.observe(mini, {childList: true, subtree: true});
+    } catch (e) { beobachter = null; }
+  }
   /* Deckkraft/Ecke aus den Einstellungen */
   function darstellen(){
     if (!root) return;
@@ -110,6 +150,7 @@ UI.leiste = (() => {
     el.offen.replaceChildren(h("span", {class: "lk-punkt"}), h("span", {}, String(n)));
     el.offen.title = n === 1 ? "1 offenes Ticket" : `${n} offene Tickets`;
     el.text.textContent = z.text || (z.ampeln?.length ? "" : "Noch keine Kunden. Öffne das Labor und probier dich aus.");
+    miniSignal();
   }
   function status(s){ if (s && typeof s === "object") Object.assign(zustand, s); zeichnen(); }
 

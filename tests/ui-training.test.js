@@ -106,6 +106,11 @@ function uiPruefstand(){
           ansicht: name => rufe.push(["ansicht", name]), aktuell: null},
     spiel: {oeffnen: iid => rufe.push(["oeffnen", iid]), status: () => rufe.push(["status"]), _S: laborZustand},
     toast: (text, art, opt) => rufe.push(["toast", text, art, opt]),
+    /* Seit 07.10.2026 erklärt das Trainingsergebnis je offenem Ziel über UI.erklaeren (Review
+       „Lernwirkung", P2-5). Der Prüfstand braucht den Aufruf nachgebildet, sonst ist sein
+       Fehlversuchs-Fall rot, obwohl der Produktivcode richtig ist (im Bündel steht
+       src/ui/erklaeren.js vor src/ui/training.js). */
+    erklaeren: (code, niveau) => { rufe.push(["erklaeren", code, niveau]); return uiKnoten("div"); },
   };
   const bereich = {
     UI: UIstub, h: uiH, console, setTimeout: () => {},

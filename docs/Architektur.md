@@ -231,7 +231,7 @@ CLI.vorschlag(sitzung)       → nächster sinnvoller Befehl (Einstieg) | null
 
 Pflicht (Test): Jede Lösung erfüllt alle Ziele; das Start-Netz verletzt mindestens ein Ziel, und zwar mit dem erwarteten Grund.
 
-### 7.2 Spielstand (`store "labor"`, `v:2`)
+### 7.2 Spielstand (`store "labor"`, `v:3`)
 
 `{ v, euro, ruf, stufe, kunden:{[id]:{vertrag, ampel, seit, sterne:[]}}, postfach:[TicketInstanz], aktiv:iid|null, erledigt:[{id, sterne, tag, hilfe}], playbooks:{slots, aktiv:[skill]}, tag:{…Arbeitstag…}, zuletzt:ms, einstieg:{…} }`
 (Die Liste ist ein Auszug; weitere Felder u. a. `naechsteIid`, `buch`, `angebot`, `dex`, `tagesraetsel`, `tagebuch`. Die **Einstellungen** liegen NICHT hier, sondern unter dem eigenen Store-Schlüssel `"einst"` — `st.einst` gibt es nicht.)
@@ -327,6 +327,7 @@ Spiel.postfachZiel() → 2 | 3                  // bis zum 2. erledigten Auftrag
 ### 9.3 Welle 1, Sitzung S2 „Bogen“ (Hub, Tagesrätsel, Fehlerdex, Spieltagebuch)
 
 Spielstand **`v:2`** (Migration: fehlende Felder bekommen ihren Standardwert, ein `v:1`-Stand lädt unverändert weiter).
+*Aktueller Stand ist `v:3` — siehe § 13 (Feld `training`, 07.10.2026).*
 
 ```js
 st.dex          = { [injektor]: { gesehen:"2026-10-04", verstanden:null|"2026-10-05" } }
@@ -899,11 +900,38 @@ additiv in `src/ui/app.js`, `src/spiel/zustand.js`, `src/spiel/abnahme.js`, `src
 
 ### 13.5 Stand der Umsetzung (07.10.2026)
 
-**Gebaut und gemessen in dieser Sitzung** (Zahlen aus `node tests/run.js`, `python tools/ethos.py`,
-`python bauen.py`): Spielstand **`v:3`** mit `training`-Feld und Migration · `stufe: "azubi"` als Standard
-in `Spiel.EINST_STANDARD` · Trainingsinstanzen aus Postfach und Offen-Zähler herausgefiltert ·
-Training-Umleitung in `Spiel.abschliessen` · `training` in der Andock-Reihe · Symbol `lernen` ·
-Test `Spiel-Fluss: Zustand` auf die aktuelle Fassung gezogen. Die Bausteine A–J entstehen parallel;
-diese Zeile wird nach der Gesamtabnahme durch die echten Zahlen ersetzt.
+**Fertig und gemessen** (Fassung **1.2.4**, Zahlen aus `node tests/run.js`, `python tools/ethos.py`,
+`python tools/klassen.py`, `node tools/sim-stand.js`, `python tools/rauch.py`):
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` | **434/434 grün**, 50 Testdateien, 83 Module, exit 0, **0 übersprungen** |
+| `python tools/ethos.py` | **GRÜN** · `python tools/klassen.py` **0** |
+| `node tools/sim-stand.js` | Simulation unverändert |
+| `python tools/rauch.py` | **39/39** (echter Edge, 12 Ansichten × 3 Breiten — mit „Training") |
+| `python bauen.py` | 118 Module → `web/index.html` (Version 1.2.4) |
+| `docs/index.html` = `Netzwerk-Labor.html` | byte-gleich, 0 Außenverweise |
+
+Umgesetzt sind A–J aus § 13.4 sowie die Nacharbeit aus einer unabhängigen Gegenprüfung mit fünf Prüfern
+(Berichte: `docs/entwicklung/Review – *.md`). Über den Vertrag hinaus entstanden:
+
+* **Streifen entlasten**: im Fehlerfall nur Fehlertext + ersten Vorschlag, Rest aufklappbar
+  (`aria-expanded`) — vorher standen 1 279 Zeichen gleichzeitig da.
+* **Leiste**: Hilfe-Knopf in der Statuszeile (vorher hinter `overflow:hidden`/`opacity:0`, erreichbar erst
+  nach 280 ms Mausberührung) und ein Zeichen für ein wartendes Mini-Ticket.
+* **Trainingsergebnis** erklärt je offenem Ziel über `UI.erklaeren` und gruppiert die Gründe über
+  `Spiel.fehlschlaege` je Fertigkeit.
+* **`src/spiel/fehlertexte.js`** ist von 1 176 auf 158 Zeilen geschrumpft; die 82 Tabellenzeilen liegen als
+  `DATEN.fehlertexte` in `src/daten/fehlertexte.js` (Schichtregel § 7). `Spiel.FEHLERTEXTE` bleibt öffentlich.
+* **`tests/harness.js`** zählt Zusicherungen: ein Test mit 0 Zusicherungen gilt als **übersprungen** und wird
+  in der Schlusszeile als „davon N übersprungen" gemeldet — die Bauart, die schon einmal sieben Testgruppen
+  grün meldete, ohne dass sie etwas prüften.
+* **`tools/rauch.py`** hat jetzt einen Fall „Training". Vorher führte die feste Liste 11 Ansichten und die
+  neue war nicht dabei: 36/36 grün, ohne sie je zu öffnen.
+
+**Nicht geprüft:** das Pixelbild in einem Browser ist nicht angesehen (kein Bildschirmfoto); die
+Android-Fassung wurde nicht gebaut (`VERSION_CODE 10204` ist nachgezogen, die APK auf 1.2.3 bleibt gültig);
+`tools/menueprobe.py --datei web/index.html` ist **rot** (36/43, 44-px-Trefferflächen in den Editor-Menüs) —
+gemessen identisch zu `HEAD~1`, also **vorbestehend** und nicht aus diesem Bau.
 
 

@@ -28,7 +28,7 @@ veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unt
 
 | Zweck | Befehl | Erwartung |
 |---|---|---|
-| Tests | `sh tools/test.sh` | meldet `N/N grün` (Stand: **395**, 46 Testdateien, 81 Module – 07.10.2026) |
+| Tests | `sh tools/test.sh` | meldet `N/N grün` + `davon N übersprungen` (Stand: **434**, 50 Testdateien, 83 Module – 07.10.2026) |
 | + Rauchtest der Oberfläche | `sh tools/test.sh --rauch` | zusätzlich **39/39** (12 Ansichten × 3 Breiten, seit 07.10.2026 mit „Training") |
 | Gegen die Falle in Testnamen | `node tools/pruefe-namen-flicken.js [--setzen]` | findet `pruefe("…„…"…")`, das den Lauf mit `LADEFEHLER` (Exit 2) anhält — trockener Lauf zuerst |
 | Tiefe Menüebenen (Android und Web) | `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | **5 Profile, 49 Kriterien erfüllt, 0 verletzt** — Achtung: das prüft die **Android-Fassung** (Stand 1.2.3, ohne die Module der Hilfestellung vom 07.10.2026). Die Zahl ist grün, sagt über den aktuellen Quellstand aber **nichts**. Für den Web-Bau: `--datei web/index.html` (am 07.10.2026 **rot**: 36/43, 44-px-Trefferflächen in den Editor-Menüs — gemessen **identisch** zu `HEAD~1`, also vorbestehend) |

@@ -30,5 +30,12 @@
 .tr-ergebnis{display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--warn)}
 .tr-ergebnis.tr-gut{border-left-color:var(--ok)}
 .tr-offen{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted)}
+/* „Was schiefging" je Fertigkeit (Review Lernwirkung, P2-5): die Erklärung steht am Ziel,
+   die Zuordnung zum Thema hier – offen, weil genau das der Lernwert des Trainings ist. */
+.tr-fehler{padding:8px 12px; border-radius:var(--radius-s); background:var(--panel-2); border:1px solid var(--line); border-left:2px solid var(--warn)}
+.tr-fehler summary{font-size:13px; font-weight:700; color:var(--ink); cursor:pointer}
+.tr-fehler-gruppe{margin-top:8px}
+.tr-fehler-gruppe h4{font-size:13px; color:var(--warn)}
+.tr-fehler-liste{margin:4px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted)}
 .tr-lernen{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--ink)}
 @media (max-width: 900px){ .tr-liste{grid-template-columns:1fr} }

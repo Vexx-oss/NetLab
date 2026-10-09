@@ -22,11 +22,22 @@ UI.hilfe = (() => {
     } catch (e) { /* Baustein A fehlt oder klemmt – dann der Rückfall */ }
     return "Azubi";
   }
-  /* Vorrat aus Vertrag § 2.1 (nur Anzeige – verbraucht wird er in Spiel.stufe.hilfeZiehen). */
-  function kontoText(){
+  /* Vorrat aus Vertrag § 2.1 (nur Anzeige – verbraucht wird er in Spiel.stufe.hilfeZiehen).
+     Ein leerer Vorrat sperrt nichts: er ändert nur den Text – und der lautet laut Vertrag
+     „ab jetzt kostet es Sterne" (Stufe 4/5 = −½, Stufe 6 = −1). */
+  function kontoStand(){
     try {
       const s = typeof Spiel !== "undefined" && Spiel.stufe;
-      if (s && typeof s.konto === "function") { const k = s.konto(); if (k && k.gesamt != null) return `noch ${k.frei} von ${k.gesamt} Hilfen`; }
+      if (s && typeof s.konto === "function") {
+        const k = s.konto();
+        /* Ohne Vorrat (gesamt 0, z. B. kein offenes Ticket) gibt es nichts anzuzeigen – „Vorrat leer"
+           wäre dort falsch. Nur ein echter, aufgebrauchter Vorrat nennt die Vertragszeile. */
+        if (k && k.gesamt != null && Number(k.gesamt) > 0) {
+          const frei = Math.max(0, Number(k.frei) || 0);
+          return {leer: frei <= 0,
+            text: frei <= 0 ? "Vorrat leer – ab jetzt kostet es Sterne (Stufe 4/5: −½, Stufe 6: −1)" : `noch ${frei} von ${k.gesamt} Hilfen`};
+        }
+      }
     } catch (e) { /* ohne offene Instanz gibt es kein Konto */ }
     return null;
   }
@@ -63,7 +74,9 @@ UI.hilfe = (() => {
     const teile = [h("span", {class: "hl-bereich"}, v.art === "pruefen" ? v.bereich + " · ansehen" : v.bereich + " · ändern")];
     if (befehl) teile.push(h("button", {type: "button", class: "hl-knopf", title: "In die Eingabe übernehmen – Enter führt den Befehl aus",
       onclick: () => befehlSetzen(befehl, o)}, h("code", {}, befehl)));
-    if (v.art === "pruefen" && typeof o.ausfuehren === "function")
+    /* „Ausführen" nur beim ERSTEN Vorschlag: spart azubi-plus einen Knopf, und der zweite Vorschlag
+       geht weiterhin über „in die Eingabe" (der Azubi tippt oder klickt, nichts passiert von selbst). */
+    if (o.erster && v.art === "pruefen" && typeof o.ausfuehren === "function")
       teile.push(h("button", {type: "button", class: "hl-lauf", title: "Sofort ausführen – dieser Befehl ändert nichts", onclick: () => o.ausfuehren(befehl)}, "Ausführen"));
     if (v.syntax && v.syntax !== befehl) teile.push(h("span", {class: "hl-syntax"}, "Muster: " + v.syntax));
     if (v.erklaerung) teile.push(h("span", {class: "hl-erklaerung"}, v.erklaerung));
@@ -92,9 +105,26 @@ UI.hilfe = (() => {
 
   function kopfEl(){
     const teile = [h("span", {class: "hl-titel"}, "Hilfe"), h("span", {class: "hl-stufe"}, stufenName())];
-    const konto = kontoText();
-    if (konto) teile.push(h("span", {class: "hl-konto"}, konto));
+    const konto = kontoStand();
+    if (konto) teile.push(h("span", {class: "hl-konto" + (konto.leer ? " hl-vorrat-leer" : "")}, konto.text));
     return h("div", {class: "hl-kopf"}, teile);
+  }
+
+  /* Aufklapp-Zeile (task-21): im Fehlerfall steht nur das Nötigste da, alles andere kommt auf Klick.
+     Nur Maus, kein Fokusklau beim Zeichnen; `aria-expanded` sagt Screenreadern, was offen ist. */
+  let KLAPPEN = 0;
+  function klappeEl(beschriftung, kinder){
+    const kennung = "hl-klappinhalt-" + (++KLAPPEN);
+    const inhalt = h("div", {class: "hl-klappinhalt", id: kennung, hidden: true}, kinder);
+    const knopf = h("button", {type: "button", class: "hl-klappe", "aria-expanded": "false", "aria-controls": kennung});
+    const text = () => beschriftung + (inhalt.hidden ? " ▸" : " ▾");
+    knopf.textContent = text();
+    knopf.addEventListener("click", () => {
+      inhalt.hidden = !inhalt.hidden;
+      knopf.setAttribute("aria-expanded", String(!inhalt.hidden));
+      knopf.textContent = text();
+    });
+    return h("div", {class: "hl-mehr"}, knopf, inhalt);
   }
 
   /* ---------- der Streifen ---------- */
@@ -127,13 +157,41 @@ UI.hilfe = (() => {
       bruecke = {titel: fehlertext.titel, muster: fehlertext.muster, beispiel: fehlertext.beispiel || null, hinweis: null};
     const streifen = h("div", {class: "hl-streifen"});
     streifen.append(kopfEl());
-    if (fehlertext) streifen.append(h("div", {class: "hl-fehler"},
+    const fehlerEl = fehlertext ? h("div", {class: "hl-fehler"},
       h("span", {class: "hl-fehler-titel"}, fehlertext.titel),
-      h("span", {class: "hl-fehler-text"}, fehlertext.text)));
-    if (geruest) streifen.append(h("p", {class: "hl-geruest"}, h("span", {class: "hl-frage"}, "Was geht hier? "), geruest));
-    if (leiter.length) streifen.append(h("ol", {class: "hl-leiter"}, leiter.map(s => sprosseEl(s, o))));
-    if (vorschlaege.length) streifen.append(h("div", {class: "hl-vorschlaege"}, vorschlaege.map(v => vorschlagEl(v, o))));
-    if (bruecke) streifen.append(brueckeEl(bruecke));
+      h("span", {class: "hl-fehler-text"}, fehlertext.text)) : null;
+    const geruestEl = geruest ? h("p", {class: "hl-geruest"}, h("span", {class: "hl-frage"}, "Was geht hier? "), geruest) : null;
+    const leiterEl = leiter.length ? h("ol", {class: "hl-leiter"}, leiter.map(s => sprosseEl(s, o))) : null;
+    const brueckeTeil = bruecke ? brueckeEl(bruecke) : null;
+    if (letzterFehler) {
+      /* FEHLERFALL (task-21): eine Sache je Zustand – Fehlertext und der ERSTE Vorschlag. Gerüst,
+         Werkzeugleiter, Syntax-Brücke und weitere Vorschläge liegen hinter der Aufklapp-Zeile.
+         Es wird nichts verraten, was vorher nicht dastand: nur weniger gleichzeitig. */
+      if (fehlerEl) streifen.append(fehlerEl);
+      const erster = vorschlaege[0], weitere = vorschlaege.slice(1);
+      if (erster) streifen.append(h("div", {class: "hl-vorschlaege"}, vorschlagEl(erster, Object.assign({}, o, {erster: true}))));
+      const klappenTeile = [];
+      if (weitere.length) klappenTeile.push(h("div", {class: "hl-vorschlaege"}, weitere.map(v => vorschlagEl(v, Object.assign({}, o, {erster: false})))));
+      if (geruestEl) klappenTeile.push(geruestEl);
+      if (leiterEl) klappenTeile.push(leiterEl);
+      if (brueckeTeil) klappenTeile.push(brueckeTeil);
+      if (klappenTeile.length) {
+        /* Kurze Beschriftung: „Was geht hier?" und „So schreibt man das" stehen als Überschrift IN
+           den aufgeklappten Teilen – die Zeile selbst soll so wenig Text wie möglich kosten. */
+        const namen = [];
+        if (leiter.length) namen.push(`Werkzeugleiter (${leiter.length})`);
+        else if (weitere.length) namen.push(`Weitere Vorschläge (${weitere.length})`);
+        else namen.push("Mehr zeigen");
+        streifen.append(klappeEl(namen.join(" · "), klappenTeile));
+      }
+    } else {
+      /* OHNE Fehler bleibt es wie bisher: Gerüst, Werkzeugleiter und die Vorschläge stehen offen. */
+      if (geruestEl) streifen.append(geruestEl);
+      if (leiterEl) streifen.append(leiterEl);
+      if (vorschlaege.length) streifen.append(h("div", {class: "hl-vorschlaege"},
+        vorschlaege.map((v, i) => vorschlagEl(v, Object.assign({}, o, {erster: i === 0})))));
+      if (brueckeTeil) streifen.append(brueckeTeil);
+    }
     const leer = !geruest && !leiter.length && !vorschlaege.length && !bruecke && !fehlertext;
     container.replaceChildren();
     if (!leer) container.append(streifen);

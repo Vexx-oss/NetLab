@@ -9,6 +9,75 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 1.2.4
+
+**Hilfestellung — Hilfe dahin, wo der Azubi steht.** Ein Azubi kann die Syntaxen nicht kennen und hat im
+Spielflow keinen Zugriff auf eine Lernnotiz. Diese Fassung bringt die Hilfe dorthin, wo er steht: ins
+Terminal, in die kleinen Mails der Leiste und in einen Trainingsbereich abseits der Aufträge — und sie
+wächst **schrittweise** mit dem Bildungsstand.
+
+Vertrag: [`entwicklung/Hilfestellung – Stufen und Schnittstellen.md`](<entwicklung/Hilfestellung – Stufen und Schnittstellen.md>),
+gespiegelt in [`Architektur.md`](Architektur.md) § 13.
+
+### Neu
+
+- **Bildungsstand als eigene Achse**: `azubi` · `azubi-plus` · `geselle` · `meister` (Rang 1–4), wählbar in
+  den Einstellungen und in der Begrüßungskarte. Eine eigene Achse neben Erklärtiefe und Prüfungsstrenge.
+- **Hilfekonto je Ticket**: 6 / 4 / 2 / 0 freie Hilfen. Ein leerer Vorrat **sperrt nicht** — die nächste
+  Sprosse kostet dann Sterne wie bisher. Ein Azubi darf nie in einer Sackgasse landen.
+- **Terminal-Vorschlagsstreifen** unter dem Konsolenschirm: 29 belegte Befehle (22 „nur ansehen", 7
+  „ändert etwas") mit Syntax-Muster und Begründung, „Was geht hier?" je Konsolen-Modus, Syntax-Brücke nach
+  einem Fehler. Im Fehlerfall steht nur das Nötigste, der Rest kommt auf Klick.
+- **Lernanker in den Mini-Mails**: Hilfe-Knopf (Denkanstoß, **nie** die Lösung) und nach der Antwort ein
+  Anker ins Wiki. Die Denkhilfe ist jetzt **fragebezogen** (25 eigene Texte) statt fertigkeitsweit — vorher
+  bekamen alle sechs `lab.ping`-Fragen denselben Satz.
+- **Trainingsbereich**: eigene Ansicht mit 34 Szenarien, jede Fertigkeit mindestens einmal. Zahlt kein
+  Geld, keinen Ruf, erscheint nicht im Postfach — zählt nur für den Lernmotor. Das Ergebnis erklärt jetzt
+  je offenem Ziel und gruppiert die Gründe nach Fertigkeit.
+- **Fehlertexte**: 82 Katalogzeilen, jede echte Konsolenmeldung in Klartext in der Tiefe der Stufe.
+- **Anweisungszeile der ersten Stunde** je Stufe: `azubi` nennt den Weg, `meister` bekommt nichts Ungefragtes.
+- **Lernstand**: Abschnitt „Hilfe und Übung" je fälliger Fertigkeit mit Üben- und Wiki-Knopf.
+
+### Behoben
+
+- **Der Vorrat bezahlt jetzt wirklich.** Bis 1.2.3 richtete sich der Sternabzug allein nach `hilfeStufe`:
+  sechs „freie" Hilfen kosteten trotzdem 2 Sterne und 20 % Lohn — gemessen 3 Sterne statt 5. Jetzt zieht nur
+  eine **ungedeckte** Sprosse Sterne ab; ein Altstand zahlt unverändert.
+- **Hilfe wird je Fertigkeit verbucht.** `inst.hilfen` trägt jetzt `skill`; der Lernmotor entscheidet je
+  Fertigkeit statt einmal für alle. Vorher stieg eine mit der kostenlosen OSI-Checkliste gelöste Aufgabe im
+  Wiederholungsplan wie eine selbst gelöste (Kasten 0→0 mit Hilfe, 0→1 ohne).
+- **Ein Linux-Server bekam die Windows-Erklärung**: die Bereichs-Ableitung setzte für Endgeräte pauschal
+  `host`, bevor das Betriebssystem bekannt war. Steht der Bereich fest und nichts passt, kommt jetzt lieber
+  gar kein Kasten als eine fremde Erklärung.
+- **Der Rauchtest prüfte die Trainingsansicht nie.** `tools/rauch.py` führte eine feste Liste von 11
+  Ansichten; „training" fehlte. Er meldete 36/36 grün, ohne die neue Ansicht zu öffnen — jetzt 12 Fälle,
+  **39/39**.
+- **Die Stufenwahl war unsichtbar**: sie hing hinter dem Knopfblock der Begrüßungskarte, wer den blauen
+  Knopf drückte, hatte sie nie gesehen. Steht jetzt davor.
+- **Vier Dinge hießen „Stufe"**: die Kopfzeile zeigte `Stufe 2` (Karriere), während ihr eigener Tooltip
+  `Karriere-Stufe` sagte. Jetzt `Karriere 2`, `Bildungsstand …`, `Hilfe 3/6`, `Prüfungsstrenge je Ticket`.
+- **Der Hilfe-Knopf ist in der Leiste erreichbar**: bei 300 × 56 px lag er hinter `overflow:hidden` und
+  `opacity:0`, erreichbar erst nach 280 ms Mausberührung. Jetzt sitzt er in der Statuszeile (im echten Edge
+  nachgemessen: 34 × 32 px, `elementFromPoint` trifft ihn), und ein Zeichen meldet ein wartendes Mini-Ticket.
+- **Der Spielstand** wandert auf `v:3` (Feld `training`); ein v:2-Stand wird verlustfrei migriert (11 Punkte
+  geprüft, inklusive laufendem Ticket und Sicherung).
+
+### Prüfstand
+
+`node tests/run.js` **434/434 grün** (50 Testdateien, 83 Module, exit 0, 0 übersprungen) ·
+`python tools/ethos.py` GRÜN · `python tools/klassen.py` 0 · `node tools/sim-stand.js` unverändert ·
+`python tools/rauch.py` **39/39** (echter Edge, 12 Ansichten × 3 Breiten) ·
+`docs/index.html` und `Netzwerk-Labor.html` byte-gleich, 0 Außenverweise.
+
+**Nicht geprüft:** das Pixelbild im Browser ist nicht angesehen; die Android-Fassung wurde nicht gebaut
+(`VERSION_CODE` ist auf 10204 nachgezogen, die APK auf 1.2.3 bleibt gültig); drei Trainingsszenarien
+(`lab.portsec`, `lab.stp`, `lab.storage`) haben keinen Injektor und stehen als gesperrte Karten.
+
+Eine unabhängige Gegenprüfung mit fünf Prüfern hat sechs Befunde ergeben; die Berichte liegen unter
+`docs/entwicklung/Review – *.md`, die offenen Punkte darin sind benannt.
+
+---
+
 ## 1.2.1
 
 Nur die Lizenz — der Grund für eine eigene Fassung: **das Release `v1.2.0` enthielt noch

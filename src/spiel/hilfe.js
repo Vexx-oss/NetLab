@@ -115,8 +115,16 @@ Spiel.hilfeInhalt = function(inst, stufe){
  * auch die sechs angeblich freien des Azubi — der Vorrat war damit eine Anzeige ohne Zahlkraft
  * (Review „Lernwirkung", Befund P1-1: 3 Sterne statt 5). Die Deckung wird über
  * `Spiel.stufe.hilfeZiehen` verbucht; der Eintrag trägt dann `frei:true`, und `Spiel.hilfeAbzuege`
- * (abnahme.js) überspringt ihn. Ein leerer Vorrat sperrt nichts — er kostet nur. */
-Spiel.hilfe = function(inst){
+ * (abnahme.js) überspringt ihn. Ein leerer Vorrat sperrt nichts — er kostet nur.
+ *
+ * `o.skill` (task-19, Review-Befund P1-2): Die Sprosse merkt sich die FERTIGKEIT, zu der sie gezogen wurde.
+ * Ohne Angabe ist das die Hauptfertigkeit der Aufgabe (`def.skills[0]`) — die bestehenden Aufrufer
+ * (src/ui/spiel.js:316, src/ui/netzplan.js:128) rufen weiter ohne zweiten Parameter auf. Erst dadurch kann
+ * `Spiel.lernenNachAbnahme` die Hilfe je Fertigkeit verbuchen (vorher: ein binäres „hilfeStufe >= 4" für
+ * alle Fertigkeiten des Tickets). Ein Eintrag ganz OHNE Fertigkeit (Altstand, synthetische Tickets) zählt
+ * wie bisher binär — die Regeln stehen in `Spiel.hilfeFuerSkill` (lernen.js). */
+Spiel.hilfe = function(inst, o){
+  const wahl = (o && o.skill) || null;
   const alt = inst.hilfeStufe || 0;
   const neu = Math.min(6, alt + 1);
   if (neu > alt) {
@@ -128,12 +136,16 @@ Spiel.hilfe = function(inst){
     if (neu >= 4 && typeof Spiel.stufe !== "undefined" && Spiel.stufe && typeof Spiel.stufe.hilfeZiehen === "function") {
       try { gedeckt = !!Spiel.stufe.hilfeZiehen(inst).frei; } catch (e) { gedeckt = false; }
     }
+    /* Fertigkeit der Sprosse (task-19). Fehlt die Aufgabe (z. B. synthetisches Ticket im Test), bleibt sie
+       null; der Eintrag verhält sich dann wie ein Altstand ohne Zuordnung. */
+    const def = typeof Spiel.defVon === "function" ? Spiel.defVon(inst) : null;
+    const skill = wahl || (def && def.skills && def.skills[0]) || null;
     /* Einträge NUR hier schreiben — nicht in hilfeZiehen. Grund (gemessen 07.10.2026): hilfeZiehen läuft
        VOR der Erhöhung und schrieb deshalb `stufe: hilfeStufe + 1`, was beim sechsten Zug einen
        Phantom-Eintrag „Sprosse 7" erzeugte. Diese Funktion ist die einzige Stelle, die den Eintrag kennt. */
     const eintrag = inst.hilfen.filter(h => h && h.stufe === neu)[0];
-    if (eintrag) eintrag.frei = gedeckt;
-    else inst.hilfen.push({stufe: neu, frei: gedeckt, t: jetzt()});
+    if (eintrag) { eintrag.frei = gedeckt; eintrag.skill ||= skill; }
+    else inst.hilfen.push({stufe: neu, skill, frei: gedeckt, t: jetzt()});
   }
   if (neu === 6) Spiel.wiederholungAnlegen(inst);
   const inhalt = Spiel.hilfeInhalt(inst, neu);

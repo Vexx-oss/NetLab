@@ -1,6 +1,6 @@
 [package]
 name = "netzwerk-labor"
-version = "1.2.3"
+version = "1.2.4"
 description = "Netzwerk-Labor – Lernspiel für FISI (Desktop-Hülle)"
 edition = "2021"
 publish = false

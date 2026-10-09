@@ -279,6 +279,53 @@ gruppe("Spiel: Stufensystem", () => {
     erwarte.gleich(Spiel.stufe.konto(), null, "unbekannte iid -> null");
   }));
 
+  /* HilfenFrei und stufeInstanz waren ohne Testberührung (Review, task-23 C): die erste schreibt die
+     Zeile „noch N frei", die zweite findet das offene Ticket für alles, was ohne Argument fragt. */
+  pruefe('hilfenFrei(): die Zahl für „noch N frei" – je Ticket, nie negativ, nie ein Wurf', kapsel(() => {
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket()), 6, "azubi-Ticket ohne verbrauchte Hilfe");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket({stufe: "geselle"})), 2, "geselle-Ticket");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket({stufe: "meister"})), 0, "meister-Ticket");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket({hilfen: [{stufe: 1, t: 1}, {stufe: 2, t: 2}]})), 4, "zwei verbrauchte Hilfen");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket({hilfenFrei: 3})), 3, "die Zahl am Ticket gilt");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket({hilfenFrei: 0})), 0, "auch die Null gilt – kein Rückfall auf den Vorrat");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket({hilfenFrei: -4})), 0, "nie negativ");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket({hilfen: new Array(9).fill({})})), 0, "mehr Verbrauch als Vorrat -> 0");
+    for (const nichts of [null, undefined, 0, ""]) erwarte.gleich(Spiel.stufe.hilfenFrei(nichts), 0, "ohne Ticket 0 (" + JSON.stringify(nichts) + ")");
+    /* Zwei Flächen, eine Wahrheit: dieselbe Zahl wie konto().frei. */
+    const t = ticket({hilfenFrei: 2, hilfen: []});
+    erwarte.gleich(Spiel.stufe.hilfenFrei(t), Spiel.stufe.konto(t).frei, "hilfenFrei und konto stimmen überein");
+    /* Der Bildungsstand des Menschen ändert den Vorrat eines Tickets nicht (§ 2.1 „je Ticket"). */
+    Spiel.stufe.setzen("meister");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(ticket()), 6, "Ticket ohne eigene Stufe bleibt azubi – nicht der Mensch");
+    Spiel.stufe.setzen("azubi");
+  }));
+
+  pruefe("stufeInstanz(): das offene Ticket – aus st.aktiv, sonst null, ohne Wurf", kapsel(() => {
+    erwarte.gleich(Spiel.stufeInstanz(), null, "ohne offenes Ticket null");
+    const a = ticket({iid: "iA", hilfen: []});
+    Spiel._st.postfach = [a]; Spiel._st.aktiv = "iA";
+    erwarte.gleich(Spiel.stufeInstanz(), a, "das offene Ticket");
+    erwarte.gleich(Spiel.stufe.konto(), {frei: 6, gesamt: 6}, "und konto() nimmt dasselbe Ticket (eine Quelle)");
+    /* BEHOBEN 07.10.2026: Der Befund war richtig — § 2.1 nennt „noch freie Hilfen DIESER Instanz",
+       `konto()` fand das offene Ticket selbst, `hilfenFrei()` nicht und lieferte ohne Argument 0.
+       Der Lead hat `hilfenFrei(inst || Spiel.stufeInstanz())` gesetzt; hier steht jetzt die Behebung,
+       damit ein Rückfall auffällt. */
+    erwarte.gleich(Spiel.stufe.hilfenFrei(), 6, "ohne Argument das offene Ticket – wie konto()");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(), Spiel.stufe.konto().frei, "und dieselbe Zahl wie konto()");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(a), 6, "mit Instanz die richtige Zahl");
+    Spiel._st.aktiv = "gibtsnicht";
+    erwarte.gleich(Spiel.stufeInstanz(), null, "unbekannte iid -> null");
+    erwarte.gleich(Spiel.stufe.hilfenFrei(), 0, "ohne offenes Ticket wieder 0 – kein Wurf");
+    Spiel._st.aktiv = null; Spiel._st.postfach = [];
+    erwarte.gleich(Spiel.stufeInstanz(), null, "wieder geschlossen");
+    /* Weicht Spiel.aktiveInstanz ab (anderer Weg), gilt sie – der Rückfall bleibt trotzdem still. */
+    const alt = Spiel.aktiveInstanz;
+    try {
+      Spiel.aktiveInstanz = () => { throw new Error("kaputt"); };
+      erwarte.gleich(Spiel.stufeInstanz(), null, "ein werfender Weg -> null statt Ausnahme");
+    } finally { Spiel.aktiveInstanz = alt; }
+  }));
+
   /* Der Vorrat muss ZAHLEN, nicht nur sinken. Bis 07.10.2026 zog jede Sprosse 4–6 Sterne, auch die
      sechs angeblich freien des Azubi — gemessen im Review „Lernwirkung" (P1-1): 3 Sterne statt 5,
      Lohn −20 %, Tempo-Bonus weg, Wochenziel 0/5. Dieser Fall nagelt die Deckung fest. */
@@ -349,13 +396,14 @@ gruppe("Spiel: Stufensystem", () => {
     erwarte.enthaelt(e("geselle"), "Zwei Hilfen je Auftrag sind frei");
     erwarte.enthaelt(e("meister"), "Der Vorrat ist leer");
     erwarte.enthaelt(e("meister"), "nie den Auftrag", "meister: eine Sprosse sperrt nicht");
-    erwarte.enthaelt(f("azubi"), "6 Hilfen je Auftrag frei", "azubi: sechs freie Hilfen");
-    erwarte.enthaelt(f("azubi"), "1 Vorschlag im Terminal");
-    erwarte.enthaelt(f("azubi-plus"), "2 Vorschläge im Terminal");
-    erwarte.enthaelt(f("azubi-plus"), "4 Hilfen je Auftrag frei");
-    erwarte.enthaelt(f("geselle"), "2 Hilfen je Auftrag frei");
+    erwarte.enthaelt(f("azubi"), "Hilfe-Knopf im Mini-Ticket (6 frei)", "azubi: sechs freie Hilfen");
+    erwarte.enthaelt(f("azubi"), "und in der Leiste", "beide Flächen aus § 5 sind benannt");
+    erwarte.enthaelt(f("azubi"), "1 Vorschlag mit Syntax im Terminal");
+    erwarte.enthaelt(f("azubi-plus"), "2 Vorschläge mit Syntax im Terminal");
+    erwarte.enthaelt(f("azubi-plus"), "Hilfe-Knopf im Mini-Ticket (4 frei)");
+    erwarte.enthaelt(f("geselle"), "Hilfe-Knopf im Mini-Ticket (2 frei)");
     erwarte.enthaelt(f("geselle"), "Werkzeugleiter nach einem Fehler");
-    erwarte.enthaelt(f("meister"), "keine Vorschläge im Terminal");
+    erwarte.enthaelt(f("meister"), "kein Vorschlag im Terminal");
     erwarte.enthaelt(f("meister"), "kein Hilfe-Knopf in der Leiste");
     erwarte.enthaelt(f("meister"), "nur als Codes");
     for (const id of ["azubi", "azubi-plus", "geselle", "meister"]) {
@@ -459,7 +507,7 @@ gruppe("UI: Bildungsstand-Abschnitt", () => {
       erwarte.wahr(gesehen.includes("stufe:geselle") && gesehen.includes("niveau:AP1"), "gemeldet: " + gesehen.join(" | "));
       const hinweis = container.querySelector(".st-freigabe"), zeile = container.querySelector(".st-erklaerung");
       erwarte.gleich(hinweis.textContent, Spiel.stufe.freigabeText("geselle"), "der Freigabe-Hinweis passt zur neuen Stufe");
-      erwarte.enthaelt(hinweis.textContent, "2 Hilfen je Auftrag frei", "und nennt die Zahlen der neuen Stufe");
+      erwarte.enthaelt(hinweis.textContent, "Hilfe-Knopf im Mini-Ticket (2 frei)", "und nennt die Zahlen der neuen Stufe");
       erwarte.enthaelt(zeile.textContent, "Stufe 3 von 4", "die Erklärungszeile auch");
     } finally {
       for (const a of ab) a();

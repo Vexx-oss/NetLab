@@ -261,7 +261,10 @@ UI.spiel = (() => {
   function menue(e, inst, def){
     const r = e.currentTarget.getBoundingClientRect(), stufe = inst.hilfeStufe || 0;
     const eintraege = [
-      {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfe", sym: "hilfe", info: stufe ? `Stufe ${stufe}/6` : "vom Hinweis bis zur Lösung",
+      /* „Hilfe 3/6" statt „Stufe 3/6": das Wort „Stufe" bedeutet im Programm schon vier andere Dinge
+         (Karriere, Bildungsstand, Erklärtiefe, Prüfungsstrenge) — hier ist die Sprosse der Hilfeleiter
+         gemeint. Der Knopf daneben heißt ohnehin „Hilfe" (Review Auffindbarkeit, Befund 4). */
+      {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfe", sym: "hilfe", info: stufe ? `Hilfe ${stufe}/6` : "vom Hinweis bis zur Lösung",
         fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
     if (!def.fernwartung && !def.blatt) eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});

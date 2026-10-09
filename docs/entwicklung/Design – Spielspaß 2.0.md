@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D. 06.10.2026 Ruf „Substanz“ gebaut (§ 28): Speichern sichtbar und sofort, Auftragsvielfalt, mehr Inhalt, Minimalismus-Regelwerk, sanftes Onboarding – 251 Tests, Android-Fassung 1.2.1 (versionCode 10202)
+status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D. 06.10.2026 Ruf „Substanz“ gebaut (§ 28): Speichern sichtbar und sofort, Auftragsvielfalt, mehr Inhalt, Minimalismus-Regelwerk, sanftes Onboarding – 251 Tests, Android-Fassung 1.2.1 (versionCode 10202). 07.10.2026 Hilfestellung gebaut (§ 31: Bildungsstand-Stufen, Terminal-Streifen, Lernanker, Trainingsbereich) und mit fünf unabhängigen Prüfern gegengeprüft (§ 32) – **Fassung 1.2.4, 434 Tests, Rauchtest 39/39**
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -1697,4 +1697,65 @@ Jede Fläche fragt dieselbe Tabelle (`Spiel.stufe`), statt die Regel selbst nach
 * Die **Android-Fassung** wurde auf Wunsch des Nutzers nicht angefasst; `android/bauen.py` lief nicht.
 * Die drei Szenarien `lab.portsec`, `lab.stp`, `lab.storage` haben **keinen Injektor**; sie stehen im
   Trainingsbereich als gesperrte Karten mit Grund. Absicht: der Vorrat zeigt ehrlich, was es gibt.
+
+## 32 · Gegenprüfung und Auslieferung 1.2.4 (07.10.2026)
+
+Nach § 31 hat der Nutzer ein **Expertenteam zur Analyse** verlangt. Fünf unabhängige Prüfer (sechs Berichte)
+haben den Stand `c341c2d` gegen Vertrag, Lernwirkung, Auffindbarkeit, Wartbarkeit, Testqualität und Betrieb
+geprüft. Die Berichte liegen als `docs/entwicklung/Review – *.md` im Repositorium; dieser Abschnitt hält
+fest, was daraus **gebaut** wurde und was **offen** bleibt.
+
+### Was die Prüfung gefunden hat — und was daraus wurde
+
+| Befund | Quelle | Ergebnis |
+|---|---|---|
+| **Der Rauchtest öffnete die neue Ansicht nie.** `tools/rauch.py` führte eine feste Liste mit 11 Ansichten; „training" fehlte → 36/36 grün, ohne die Ansicht zu prüfen | Betrieb-Werkzeuge | **behoben**: 12 Fälle, **39/39** |
+| **Der Vorrat bezahlte keine Sterne.** Sechs „freie" Hilfen kosteten 2 Sterne und 20 % Lohn — gemessen 3 statt 5 Sterne | Lernwirkung (P1-1) | **behoben**: `Spiel.hilfeAbzuege` zieht nur ungedeckte Sprossen ab |
+| **Hilfe wurde nicht je Fertigkeit verbucht.** `inst.hilfen` ohne `skill`; die kostenlosen Sprossen 1–3 erreichten den Lernmotor nie | Lernwirkung (P1-2) | **behoben**: `{stufe, skill, frei, t}` + `Spiel.hilfeFuerSkill`; gemessen Kasten [0,0] geholfen vs. [0,1] unbeteiligt |
+| **Die Mini-Denkhilfe war fertigkeitsweit.** 26 von 27 Fertigkeiten haben mehrere Minis und bekamen denselben Satz | Lernwirkung (P2-1, vom Lead nachgemessen) | **behoben**: 25 fragebezogene Denkanstöße, `lab.ping` hat jetzt 6 verschiedene Texte |
+| **Die Stufenwahl war unsichtbar** — sie hing hinter dem Startknopf | Auffindbarkeit (1) | **behoben**: eine Zeile |
+| **Vier Dinge hießen „Stufe"** | Auffindbarkeit (4) | **behoben**: `Karriere`, `Bildungsstand`, `Hilfe 3/6`, `Prüfungsstrenge je Ticket` |
+| **Textwand**: 1 279 Zeichen gleichzeitig im Streifen | Auffindbarkeit (3) | **behoben**: im Fehlerfall nur Fehler + erster Vorschlag, Rest aufklappbar |
+| **Hilfe-Knopf in der Leiste unerreichbar** (hinter `overflow:hidden`, 280 ms Hover) | Auffindbarkeit (5) | **behoben**: Knopf in der Statuszeile; im echten Edge gemessen (34 × 32 px, `elementFromPoint` trifft) |
+| **Trainingsergebnis erklärte nichts** | Lernwirkung (P2-5) | **behoben**: `UI.erklaeren` je Ziel, Gründe je Fertigkeit gruppiert |
+| **40 Tests konnten sich selbst überspringen** und wurden grün gemeldet | Testqualität | **behoben**: `tests/harness.js` zählt Zusicherungen, „davon N übersprungen" in der Schlusszeile |
+| **`pruefung-wirkung.test.js` prüfte Quelltext, nicht Wirkung** | Testqualität (P1) | **behoben**: echte DOM-Tests für C und D |
+| **`fehlertexte.js` war ein Datenpaket in der Spielschicht** (1 176 Zeilen, ~1 015 Tabelle) | Wartbarkeit | **behoben**: Tabelle nach `src/daten/fehlertexte.js`, Auswerter 158 Zeilen |
+| **`Spiel.stufe.hilfenFrei()` ohne Argument lieferte 0**, obwohl § 2.1 „diese Instanz" sagt | Testqualität | **behoben**: nimmt jetzt das offene Ticket wie `konto()` |
+| **Fassung nicht gezogen / Release-Muster defekt** | Betrieb (P1) | **behoben**: README-Muster geradegezogen, Fassung auf **1.2.4** gezogen, `VERSION_CODE` 10204 |
+
+### Was die Prüfung offen gelassen hat (ehrlich)
+
+* **Die Ermäßigung ist entschieden, aber nicht ausdiskutiert.** Der Vertrag § 2.1 ließ zwei Lesungen zu
+  („gedeckt = kostenlos" gegen „kosten wie bisher"). Der Lead hat für **gedeckt = kostenlos** entschieden und
+  es im Vertrag nachgetragen — die andere Lesung stand ernsthaft im Raum.
+* **`ui/hilfe.js` prüft „erst nach Fehler" weiterhin selbst** (drei Stellen), statt `Spiel.stufe.wannPasst`
+  zu fragen — die Regel ist definiert, wird aber nachgebaut (Wartbarkeit, P2).
+* **`CLI.vorschlag`** ist als zweite Vorschlagsmaschine ungetestet und im Bau nicht erreichbar; in manchen
+  Modi ist sie **fähiger** als der Hauptweg (Wartbarkeit, P2).
+* **Mutationsprobe nur zu 5 von 12 Mutanten** gemessen — alle fünf erkannt, keiner grün (Testqualität).
+* **`UI.konsole.zuruecksetzen`** hat weiterhin keinen Test.
+* **`hilfeZiehen`** verbraucht nur den Zähler; den Eintrag schreibt `Spiel.hilfe`. Das ist richtig (die
+  Sprossennummer ist nur dort bekannt), aber die Schnittstelle ist damit feiner, als der Name vermuten lässt.
+* **Kein Test mit einem Menschen, kein Bildschirmfoto, keine Android-Messung.** Die Aussage „der Azubi meidet
+  die Hilfe" war eine begründete Erwartung aus Zahlen, keine Beobachtung — mit dem bezahlenden Vorrat ist sie
+  ohnehin entschärft.
+
+### Prüfstand 1.2.4
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` | **434/434 grün**, 50 Testdateien, 83 Module, exit 0, **0 übersprungen** |
+| `python tools/ethos.py` | GRÜN · `python tools/klassen.py` **0** |
+| `node tools/sim-stand.js` | Simulation unverändert |
+| `python tools/rauch.py` | **39/39** (echter Edge, 12 Ansichten × 3 Breiten) |
+| `python bauen.py` · `tools/einfach.py` | 118 Module, Version **1.2.4**; Einzeldatei 0 Außenverweise, byte-gleich |
+
+### Ein Satz zum Vorgehen
+
+Der Auftrag lautete „Setze alles um und deploye". Umgesetzt ist alles, was belegt war; **zwei Befunde habe
+ich bewusst nicht gebaut**, weil sie eine Entscheidung des Nutzers brauchen statt einer Zeile Code: die
+Ermäßigungs-Semantik des Vorrats (entschieden und dokumentiert) und die Staffelung der Flow-Noten „1–3 → n",
+die einen festgeschriebenen Test in `tests/spiel-flow.test.js` bricht. Beides steht oben unter „offen".
+
 

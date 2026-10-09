@@ -170,8 +170,11 @@ Spiel.stufe = (() => {
       if (!i) return null;
       return {frei: frei(i), gesamt: gesamt(i)};
     },
-    /* Nur die Zahl – für Flächen, die eine Zeile „noch 3 von 6 Hilfen" schreiben. */
-    hilfenFrei(inst){ return frei(inst); },
+    /* Nur die Zahl – für Flächen, die eine Zeile „noch 3 von 6 Hilfen" schreiben.
+       Ohne Argument gilt wie bei konto() das OFFENE Ticket (§ 2.1: „je Ticket"). Bis 07.10.2026
+       lieferte der Aufruf ohne Argument 0, weil hier nur `frei(inst)` stand — gemessen im Review
+       „Testqualität"; ein Aufrufer ohne Instanz hätte damit „kein Vorrat" angezeigt. */
+    hilfenFrei(inst){ return frei(inst || Spiel.stufeInstanz()); },
     /* Verbraucht genau EINE freie Hilfe dieses Tickets. Ein leerer Vorrat ist KEINE Sperre:
        frei:false heißt nur „jetzt kostet es Sterne" – der Aufrufer lässt die Sprosse offen.
        WICHTIG: Diese Funktion verbraucht nur den Zähler (`inst.hilfenFrei`). Den Eintrag in `inst.hilfen`
@@ -212,12 +215,14 @@ Spiel.stufe = (() => {
       const t = Spiel.STUFEN_SCHALTER;
       const vorrat = Spiel.HILFE_KONTO[d.id] || 0;
       const teile = [];
+      /* Wortlaut der beiden ersten Sätze: so steht es auch in der Oberfläche (Befund E, task-23) –
+         „mit Syntax" sagt dem Azubi, was der Vorschlag enthält, und meister bekommt die Einzahl. */
       teile.push(d.vorschlaege > 0
-        ? `${d.vorschlaege} ${d.vorschlaege === 1 ? "Vorschlag" : "Vorschläge"} im Terminal`
-        : "keine Vorschläge im Terminal");
+        ? `${d.vorschlaege} ${d.vorschlaege === 1 ? "Vorschlag" : "Vorschläge"} mit Syntax im Terminal`
+        : "kein Vorschlag im Terminal");
       if (t.leiter[d.id]) teile.push(d.leiter === "immer" ? "Werkzeugleiter immer sichtbar" : "Werkzeugleiter nach einem Fehler");
       else teile.push("keine Werkzeugleiter");
-      if (t.miniHilfe[d.id]) teile.push(`Hilfe-Knopf in Leiste und Mini-Ticket (${vorrat} ${vorrat === 1 ? "Hilfe" : "Hilfen"} je Auftrag frei)`);
+      if (t.miniHilfe[d.id]) teile.push(`Hilfe-Knopf im Mini-Ticket (${vorrat} frei) und in der Leiste (je Auftrag)`);
       else teile.push("kein Hilfe-Knopf in der Leiste");
       if (t.anker[d.id]) teile.push("Lernanker nach der Antwort");
       if (t.training[d.id]) teile.push("geführte Simulationen im Trainingsbereich");

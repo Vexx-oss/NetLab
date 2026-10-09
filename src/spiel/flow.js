@@ -27,13 +27,17 @@ Spiel.flow = (() => {
     if (sterne >= 5 && versuche <= 1 && hilfe < 3) return "g";
     return "n";
   }
-  function merken(skill, art){
+  /* o.geruestSofort: Ausnahme von „zwei Fehlschläge in Folge" — sie gilt nur für die tiefste Hilfe,
+     „Lösung vorführen" (Sprosse 6). Wer sie brauchte, bekommt den nächsten Auftrag dieser Fertigkeit
+     sofort mit Gerüst, statt auf den zweiten Fehlschlag zu warten (task-19, Punkt 3: staffeln statt
+     binär). Ohne das Merkmal ändert sich nichts — der Standard bleibt false. */
+  function merken(skill, art, o = {}){
     if (!skill || !["f", "n", "g"].includes(art)) return null;
     const d = daten(skill), vorher = d.stand, F = Spiel.FLOW;
     d.letzte.push(art);
     if (d.letzte.length > F.MERKEN) d.letzte.splice(0, d.letzte.length - F.MERKEN);
     const zuletzt = (n, x) => d.letzte.length >= n && d.letzte.slice(-n).every(y => y === x);
-    if (art === "f") d.stand = zuletzt(F.GERUEST_NACH, "f") ? "geruest" : "normal";
+    if (art === "f") d.stand = (o.geruestSofort || zuletzt(F.GERUEST_NACH, "f")) ? "geruest" : "normal";
     else if (art === "g") d.stand = zuletzt(F.VERWICKLUNG_NACH, "g") ? "verwicklung" : "normal";
     else d.stand = "normal";
     return {skill, vorher, stand: d.stand, art};
@@ -68,7 +72,7 @@ Spiel.flow = (() => {
   function nachAbschluss(inst, def, {sterne = 0} = {}){
     if (!inst || !def || inst.quelle === "pruefung" || inst.quelle === "raetsel") return null;
     const skill = (def.skills || [])[0];
-    return skill ? merken(skill, bewerten(inst, sterne)) : null;
+    return skill ? merken(skill, bewerten(inst, sterne), {geruestSofort: (inst.hilfeStufe || 0) >= 6}) : null;
   }
   return {alle, daten, an, bewerten, merken, fuer, anpassen, nachAbschluss, schieben,
     stand: skill => (alle()[skill] || {}).stand || "normal"};

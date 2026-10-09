@@ -60,11 +60,13 @@ PAKET = "oss.vexx.netlab"
 
 # versionCode der Android-Fassung. Er MUSS bei jeder veröffentlichten APK steigen:
 # Android verweigert die Installation über eine alte Fassung, wenn der Code nicht
-# größer ist („App nicht installiert“). versionName folgt weiter der Spielversion aus
-# bauen.py (VERSION) und bleibt 1.2.1 — Bauzählung und Spielversion sind zwei Zahlen.
-# Aus VERSION 1.2.1 abgeleitet ergäbe sich 10201: genau der Code der bereits gebauten
-# APK. Deshalb 10202. Herleitung: 1*10000 + 2*100 + 2.
-VERSION_CODE = 10203
+# größer ist („App nicht installiert“). versionName folgt der Spielversion aus
+# bauen.py (VERSION), der Code ist eine eigene Bauzählung.
+# Herleitung: 1*10000 + 2*100 + 4 = 10204 für die Spielversion 1.2.4.
+# Angehoben am 07.10.2026 mit dem Fassungszug 1.2.3 → 1.2.4: 10203 wäre kleiner als der
+# aus 1.2.4 abgeleitete Wert und der Bau bräche ab (android/bauen.py, version_lesen).
+# Die APK selbst wurde NICHT neu gebaut — Android ist nicht Teil dieses Auftrags.
+VERSION_CODE = 10204
 
 SDK_ORTE = [
     Path(r"C:\Users\Student\android-sdk"),

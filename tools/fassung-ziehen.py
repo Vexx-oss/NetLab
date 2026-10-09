@@ -48,7 +48,9 @@ AENDERUNGEN = [
     ("docs/Bauen.md", f"git push origin v{ALT}", f"git push origin v{NEU}"),
     ("README.md", f"Netzwerk-Labor-{ALT}-Browser.zip", f"Netzwerk-Labor-{NEU}-Browser.zip"),
     ("README.md", f"dieselbe Fassung `{ALT}`", f"dieselbe Fassung `{NEU}`"),
-    ("README.md", f"Sie ist **{ALT}** (gebaut am", f"Sie ist **{NEU}** (gebaut am"),
+    # Die .exe-Fassung wird 2026-10-07 als Code geschrieben (`` `1.2.4` ``), nicht mehr fett.
+    # Das Fett-Muster ist entfernt: es lief in „nicht gefunden" (Exit 1), obwohl die Zeile existiert.
+    ("README.md", f"Sie ist `{ALT}`", f"Sie ist `{NEU}`"),
     ("README.md", f"| `ausbau-1.2` ← **Standardzweig** | Version {ALT}:", f"| `ausbau-1.2` ← **Standardzweig** | Version {NEU}:"),
     ("README.md", f"- **Die Windows-`.exe` ist {ALT} und ihr Start ist gemessen**",
      f"- **Die Windows-`.exe` ist {NEU} und ihr Start ist gemessen**"),

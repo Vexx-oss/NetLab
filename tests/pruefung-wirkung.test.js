@@ -184,3 +184,196 @@ gruppe("Gegenprüfung: Wirkung vor Grün", () => {
     erwarte.gleich(fehlt, [], "Bausteine ohne Aufruf aus dem echten Weg (nicht fertig)");
   });
 });
+
+/* ==========================================================================================
+   TEIL 2 · WIRKUNG IM DOM, NICHT IM QUELLTEXT (P1 aus dem Betriebs-Review, task-23)
+
+   Die Prüfungen A–D oben lesen QUELLTEXT: `beleg()` ist `erwarte.wahr(!!f)` über einen Regex-Fund.
+   Ein Aufruf, der dasteht und nichts tut, bleibt dort grün. Genau so meldete `tools/rauch.py`
+   36/36, ohne die Trainingsansicht je zu öffnen.
+
+   Hier wird deshalb wirklich geklickt und wirklich aufgerufen — für C und D (für B gibt es mit
+   tests/spiel-hilfe-vorschlaege.test.js schon echte DOM-Tests):
+     C  Leiste: UI.leiste.aufbauen → echter „ui-bereit"-Hörer aus UI.karriere → Hilfe-Knopf klicken
+        → die Denkhilfe muss erscheinen, und zwar GENAU der Text aus Spiel.mini.hilfe (kein
+        Eigentext der Oberfläche), und sie darf die Lösung nicht verraten.
+     D  Training: UI.training.starten(<id>) wirklich aufrufen → die Instanz muss im Spielstand
+        liegen (quelle "training", richtiges Szenario), ohne Lohn, Ruf oder Postfach-Eintrag.
+
+   Eigenes DOM und eigener vm-Bereich (wie tests/ui-training.test.js und tests/spiel-mini-hilfe.test.js):
+   der Bereich bekommt das ECHTE Spiel (Spiel/DATEN/store aus diesem Testlauf) und lädt nur die
+   Oberflächendateien — so wirkt der Klick auf denselben Zustand, den die Tests darüber prüfen.
+   Die Datei bleibt damit auch allein lauffähig (node tests/pruefung-wirkung.test.js).
+   ========================================================================================== */
+
+const PW_DOM = (() => { try { return PW_HAT_FS && typeof document === "undefined"; } catch (e) { return false; } })();
+/* Im Alleinlauf (node tests/pruefung-wirkung.test.js) fehlt das Spiel – dann sagen die Testnamen
+   ausdrücklich, dass übersprungen wurde (kein stilles Grün). */
+const PW_SPIEL = (() => {
+  try { return PW_DOM && typeof Spiel === "object" && Spiel !== null && typeof store === "object" && typeof jetzt === "function"; }
+  catch (e) { return false; }
+})();
+const PW_DOM_ZUSATZ = PW_SPIEL ? "" : " (übersprungen: braucht Spiel, store und einen eigenen vm-Bereich – node tests/run.js)";
+
+/* --- DOM-Ersatz: dieselben Verträge wie h()/sv() aus src/ui/dom.js --- */
+function pwKnoten(tag){
+  const el = {
+    tag, kind: [], attrs: {}, _text: "", className: "", disabled: false, value: "", nodeType: 1, parentNode: null,
+    style: {setProperty(){}}, dataset: {}, innerHTML: "",
+    append(...k){
+      for (const roh of k.flat(Infinity)) {
+        if (roh == null || roh === false) continue;
+        const x = roh && roh.nodeType ? roh : pwTextknoten(roh);
+        x.parentNode = el; el.kind.push(x);
+      }
+    },
+    replaceChildren(...k){ el.kind = []; el.append(...k); },
+    setAttribute(k, v){ el.attrs[k] = String(v); },
+    getAttribute(k){ return el.attrs[k] == null ? null : el.attrs[k]; },
+    removeAttribute(k){ delete el.attrs[k]; },
+    addEventListener(name, fn){ el["on" + name] = fn; },
+    removeEventListener(){},
+    remove(){ const p = el.parentNode; if (p) { const i = p.kind.indexOf(el); if (i >= 0) p.kind.splice(i, 1); } },
+    classList: {add(c){ el.className = (el.className + " " + c).trim(); }, remove(){}, toggle(){}, contains(){ return false; }},
+    querySelector(sel){ const l = []; pwSammle(el, sel, l); return l[0] || null; },
+    querySelectorAll(sel){ const l = []; pwSammle(el, sel, l); return l; },
+    set textContent(v){ el._text = String(v); el.kind = []; },
+    get textContent(){ return el.kind.length ? el.kind.map(pwText).join("") : el._text; },
+  };
+  return el;
+}
+function pwTextknoten(t){ const n = pwKnoten("#text"); n.nodeType = 3; n._text = String(t); return n; }
+function pwKlassen(el){ return String(el.className || el.attrs.class || "").split(/\s+/).filter(Boolean); }
+function pwSammle(el, sel, liste){
+  const kl = sel.startsWith(".") ? sel.slice(1) : null;
+  if (kl && pwKlassen(el).includes(kl)) liste.push(el);
+  for (const k of el.kind || []) if (k && k.nodeType) pwSammle(k, sel, liste);
+}
+function pwText(k){ return k == null ? "" : typeof k === "string" ? k : k.textContent; }
+function pwH(tag, attrs = {}, ...kinder){
+  const el = pwKnoten(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") el.className = String(v);
+    else if (k === "html") el.innerHTML = String(v);
+    else if (k === "style" && typeof v === "object") { /* CSS-Variablen: für den Test bedeutungslos */ }
+    else if (k.startsWith("on") && typeof v === "function") el["on" + k.slice(2)] = v;
+    else if (k === "value") el.value = v;
+    else if (k === "disabled") el.disabled = !!v;
+    else if (v !== false && v != null) el.setAttribute(k, v === true ? "" : v);
+  }
+  el.append(...kinder);
+  return el;
+}
+
+/* --- Prüfstand: echtes Spiel, nachgebildeter App-Rahmen, nachgebildetes DOM ----------------
+   Nur die genannten src/ui-Dateien werden geladen; alles andere (UI.app, UI.spiel, Bus …) ist ein
+   Stummel, der die Aufrufe mitschreibt. So bleibt sichtbar, WAS die Oberfläche wirklich tut. */
+function pwPruefstand(uiDateien){
+  const fs = require("fs"), path = require("path"), vm = require("vm");
+  const gerufen = {ansichten: [], timers: [], oeffnen: [], toasts: []}, hoerer = {}, fehler = [];
+  const doc = pwKnoten("body");
+  doc.body = doc; doc.createElement = tag => pwKnoten(tag); doc.createElementNS = (ns, tag) => pwKnoten(tag);
+  doc.createTextNode = pwTextknoten; doc.addEventListener = () => {}; doc.removeEventListener = () => {};
+  const UI = {
+    startHaken: [], app: {registrieren(){}, einstellungAbschnitt(){}, aktualisieren(){}, ansicht: n => gerufen.ansichten.push(n)},
+    toast: (text, art) => gerufen.toasts.push([text, art]), symbol: () => pwKnoten("span"), klang: {spielen(){}},
+    buehneFrei: () => true, modus(){}, netzplan: {}, labor: {auftragNeu(){}},
+    spiel: {oeffnen: iid => gerufen.oeffnen.push(iid), status(){}, _S: {inst: null, live: null, demo: null, hilfeOffen: false}},
+  };
+  const Bus = {an: (name, fn) => { (hoerer[name] ||= []).push(fn); return () => {}; }, aus(){}, senden(){}};
+  const bereich = {
+    UI, Bus, Spiel, DATEN, store, document: doc, h: pwH, sv: pwH,
+    Plattform: {name: "browser", kann: () => ({ja: false, grund: "Test"}), fenster: {groesse: () => Promise.resolve()}},
+    klemme: (x, a, b) => Math.min(b, Math.max(a, x)), zahlDe: x => String(x), jetzt,
+    setTimeout: (fn, ms) => { gerufen.timers.push({fn, ms}); return gerufen.timers.length; },
+    clearTimeout(){}, setInterval: () => 0, clearInterval(){}, requestAnimationFrame: fn => { fn(); return 0; },
+    console: {log(){}, warn(){}, error: (...a) => fehler.push(a.map(String).join(" "))}, LABOR_VERSION: "test",
+  };
+  vm.createContext(bereich);
+  for (const f of uiDateien)
+    vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "src", "ui", f), "utf8"), bereich, {filename: "ui/" + f});
+  return {UI: bereich.UI, doc, gerufen, hoerer, fehler};
+}
+
+/* Eigener Stand je Test, danach alles zurück (wie in den übrigen spiel-Tests).
+   Prüft zuerst, ob das Spiel überhaupt geladen ist – im Alleinlauf wird sonst still übersprungen. */
+function pwKapsel(fn){
+  return () => {
+    if (!PW_SPIEL) return;
+    const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken, speicher: store.get("einst", null)};
+    try {
+      Spiel._trocken = true; Spiel._lz = {};
+      Spiel._st = Spiel.leererStand();
+      Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD);
+      fn();
+    } finally {
+      Spiel._st = alt.st; Spiel._einst = alt.einst; Spiel._lz = alt.lz; Spiel._trocken = alt.trocken;
+      store.set("einst", alt.speicher || {});
+    }
+  };
+}
+const pwKlick = el => { erwarte.wahr(!!el && typeof el.onclick === "function", "Klickziel vorhanden"); el.onclick({preventDefault(){}}); };
+
+gruppe("Gegenprüfung: Wirkung im DOM", () => {
+
+  pruefe("C · Wirkung: der Hilfe-Knopf der Leiste holt die Denkhilfe wirklich aus Spiel.mini.hilfe" + PW_DOM_ZUSATZ, pwKapsel(() => {
+    if (!PW_SPIEL) return;
+    const p = pwPruefstand(["leiste.js", "karriere.js"]);
+    erwarte.gleich(p.fehler, [], "die Oberfläche lädt ohne Fehler");
+    /* Ein Mini auf die Bühne stellen, für das es in dieser Stufe wirklich eine Denkhilfe gibt. */
+    const m = Spiel.mini.alle().find(x => !!Spiel.mini.hilfe(x.id, {nurSehen: true})) || null;
+    erwarte.wahr(!!m, "azubi (Standard) bekommt zu mindestens einem Mini eine Denkhilfe");
+    Spiel.mini.stand().aktuell = m.id;
+    const erwartet = Spiel.mini.hilfe(m.id, {nurSehen: true});
+    /* Der Weg der Leiste, wie ihn das Programm geht: Leiste aufbauen, echter „ui-bereit"-Hörer. */
+    const container = pwKnoten("div");
+    p.UI.leiste.aufbauen(container);
+    for (const fn of p.hoerer["ui-bereit"] || []) fn();
+    const t = p.gerufen.timers.find(x => x.ms === 300); if (t) t.fn();
+    const hilfe = p.UI.leiste.miniHilfe;
+    erwarte.wahr(!!hilfe, "UI.leiste.miniHilfe ist da (§ 5)");
+    erwarte.gleich(hilfe.querySelectorAll(".mk-hilfe-knopf").length, 1, "genau ein Hilfe-Knopf");
+    /* Klick: die Denkhilfe muss erscheinen – und zwar der Text des Moduls, nicht ein Eigentext. */
+    pwKlick(hilfe.querySelector(".mk-hilfe-knopf"));
+    const textEl = hilfe.querySelector(".mk-hilfe-text");
+    erwarte.wahr(!!textEl, "nach dem Klick steht die Denkhilfe in der Leiste");
+    erwarte.gleich(textEl.textContent, erwartet.text, "der Text kommt aus Spiel.mini.hilfe (keine zweite Wahrheit)");
+    erwarte.falsch(String(textEl.textContent).toLowerCase().includes(String(Spiel.mini.loesungText(m)).toLowerCase()),
+      "die Denkhilfe verrät die Lösung nicht (§ 5)");
+    /* Zweite Sprosse (azubi: zwei), danach ist die Frage erschöpft – der Knopf verschwindet. */
+    const zweite = Spiel.mini.hilfe(m.id, {nurSehen: true});
+    erwarte.wahr(!!zweite, "azubi bekommt eine zweite Sprosse");
+    pwKlick(hilfe.querySelector(".mk-hilfe-knopf"));
+    erwarte.gleich(hilfe.querySelector(".mk-hilfe-text").textContent, zweite.text, "die zweite Sprosse kommt ebenfalls aus dem Modul");
+    erwarte.gleich(hilfe.querySelectorAll(".mk-hilfe-knopf").length, 0, "danach ist die Frage erschöpft");
+    /* Der zweite Weg (§ 5): das Mini-Overlay zeigt denselben Knopf – mit einer noch offenen Frage
+       (die erste ist oben erschöpft: zwei Sprossen verbraucht). */
+    const m2 = Spiel.mini.alle().find(x => !!Spiel.mini.hilfe(x.id, {nurSehen: true}));
+    erwarte.wahr(!!m2, "eine zweite Frage mit offener Denkhilfe");
+    Spiel.mini.stand().aktuell = m2.id;
+    const p2 = pwPruefstand(["leiste.js", "karriere.js"]);
+    p2.UI.karriere.miniDialog();
+    const dialog = p2.doc.querySelector(".mk-dialog");
+    erwarte.wahr(!!dialog, "das Mini-Overlay steht");
+    erwarte.gleich(dialog.querySelectorAll(".mk-hilfe-knopf").length, 1, "und zeigt genau einen Hilfe-Knopf");
+  }));
+
+  pruefe("D · Wirkung: UI.training.starten legt wirklich eine Trainingsinstanz an" + PW_DOM_ZUSATZ, pwKapsel(() => {
+    if (!PW_SPIEL) return;
+    const p = pwPruefstand(["training.js"]);
+    erwarte.gleich(p.fehler, [], "die Ansicht lädt ohne Fehler");
+    const ziel = Spiel.training.liste().find(e => e.offen);
+    erwarte.wahr(!!ziel, "es gibt ein startbares Szenario");
+    const vorher = (Spiel.st.postfach || []).length;
+    p.UI.training.starten(ziel.id);                    /* der öffentliche Weg der Ansicht, wirklich gerufen */
+    erwarte.gleich(p.gerufen.oeffnen.length, 1, "genau ein Aufruf von UI.spiel.oeffnen");
+    const iid = p.gerufen.oeffnen[0];
+    const inst = Spiel.instanz(iid);
+    erwarte.wahr(!!inst, "die Instanz liegt im Spielstand – nicht nur der Aufruf im Quelltext");
+    erwarte.gleich(inst.quelle, "training", "sie kommt aus dem Trainingsbereich");
+    erwarte.gleich(inst.training, ziel.id, "und gehört zu diesem Szenario");
+    erwarte.gleich((Spiel.st.postfach || []).length, vorher + 1, "genau eine Instanz mehr");
+    erwarte.gleich([Spiel.st.euro, Spiel.st.ruf, Spiel.st.erledigt.length], [0, 0, 0], "Starten zahlt nichts (§ 6)");
+    erwarte.gleich(Spiel.training.stand().je[ziel.id], undefined, "ohne Abnahme kein Fortschritt im Stand");
+  }));
+});

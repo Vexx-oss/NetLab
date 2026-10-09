@@ -109,16 +109,19 @@ Spiel.mini.antworten = function(id, antwort){
 
 /* ---------- Denkhilfe und Lernanker (Vertrag § 2, § 5) ----------
    Spiel.mini.hilfe(id, {nurSehen}?) → {text, art:"denkhilfe"|"ausschnitt", frei, grund} | null   (NIE die Lösung)
-   Spiel.mini.anker(id)             → {titel, text, quelle, wiki:skillId|null} | null           (nach der Antwort)
+   Spiel.mini.anker(id)             → {titel, text, quelle, wiki:skillId|null, stichwort} | null (nach der Antwort)
 
    Stufen (§ 2): azubi zwei Sprossen je Frage · azubi-plus eine · geselle eine, erst nach einer falschen
-   Antwort · meister keine. Die Texte kommen aus dem Bestand (Spiel.SENIOR_FRAGEN, Spiel.WERKZEUGE) bzw.
-   aus einem Ausschnitt der Aufgabe — kein neues Datenpaket (§ 5). Jeder Text wird gegen
-   Spiel.mini.loesungText(m) geprüft und fällt sonst auf einen allgemeinen Denkanstoß zurück.
+   Antwort · meister keine. Sprosse 1 ist der Denkanstoß zu DIESER Frage: er kommt aus
+   DATEN.miniDenkhilfen (src/daten/mini-denkhilfen.js), sonst als Rückfall aus dem Fertigkeitssatz
+   (Spiel.SENIOR_FRAGEN, Spiel.WERKZEUGE) — kein neues Datenpaket im Spiel selbst (§ 5).
+   Jeder Text wird gegen Spiel.mini.loesungText(m) und die Optionen geprüft und fällt sonst auf einen
+   allgemeinen Denkanstoß zurück.
    Die Bedingung „erst nach einem Fehler" wird NICHT hier nachgebaut: sie kommt aus
    Spiel.stufe.wannPasst (Befund B2 der Gegenprüfung), `grund` von dort wird durchgereicht.
    Der bestehende Bewertungsweg bleibt unberührt: hilfe() und anker() rufen L.ueben nicht auf.
-   Alle Zugriffe auf Baustein A (Spiel.stufe) sind defensiv — ohne ihn gilt „azubi". */
+   Alle Zugriffe auf Baustein A (Spiel.stufe) und auf DATEN.miniDenkhilfen sind defensiv — ohne sie
+   gilt „azubi" bzw. der Fertigkeitssatz. */
 
 /* Rang 1..4 aus Baustein A; ohne Spiel.stufe (oder bei Wurf) Rückfall „azubi". */
 function miniRang(){
@@ -150,17 +153,16 @@ function miniWannPasst(flaeche, fehler){
   } catch (e) { /* Baustein A fehlt oder würfelt – Rückfall azubi */ }
   return {ja: true, grund: "Ohne Stufensystem gilt azubi: sofort sichtbar."};
 }
-/* Freie Hilfen dieser Stufe: Spiel.HILFE_KONTO (Baustein A) hat Vorrang, sonst Spiel.stufe.kann("konto"), sonst Vertrag. */
+/* Freie Hilfen dieser Stufe. Quelle ist der Vertrag § 2.1 über `Spiel.HILFE_KONTO` (Baustein A).
+   Die früheren zwei Rückfallzweige (`Spiel.stufe.kann("konto")` und `Spiel.MINI.HILFE_KONTO`) waren
+   nachweislich unerreichbar: `Spiel.HILFE_KONTO` ist eine feste Tabelle und antwortet für jede gültige
+   id — gefunden im Review „Testqualität" als toter Zweig (07.10.2026). Erhalten bleibt der Rückfall für
+   den Fall, dass Baustein A ganz fehlt (Testkapseln löschen `Spiel.HILFE_KONTO`), denn dann gilt der
+   Rückfall `Spiel.MINI.HILFE_KONTO` aus dem Vertrag. */
 function miniKonto(rang){
   const id = miniStufenId(rang);
-  try {
-    const k = Spiel.HILFE_KONTO;
-    if (k && typeof k[id] === "number") return Math.max(0, k[id]);
-    if (typeof Spiel.stufe !== "undefined" && Spiel.stufe && typeof Spiel.stufe.kann === "function") {
-      const n = Number(Spiel.stufe.kann("konto"));
-      if (!isNaN(n) && n >= 0) return n;
-    }
-  } catch (e) { /* Rückfall unten */ }
+  const k = Spiel.HILFE_KONTO;
+  if (k && typeof k[id] === "number") return Math.max(0, k[id]);
   return Spiel.MINI.HILFE_KONTO[id] || 0;
 }
 function miniKlein(x){ return String(x == null ? "" : x).toLowerCase().replace(/\s+/g, " ").trim(); }
@@ -189,18 +191,41 @@ function miniOhneLoesung(text, m, pruefeOptionen){
   if (pruefeOptionen) for (const o of miniOptionen(m)) if (miniNenntOption(t, o)) return null;
   return t;
 }
+/* Der Eintrag des Datenpakets zu genau dieser Frage – oder null (fehlendes Paket wirft nie). */
+function miniEigener(m){
+  try {
+    const d = typeof DATEN !== "undefined" && DATEN && DATEN.miniDenkhilfen;
+    const e = d && m && m.id ? d[m.id] : null;
+    return e && typeof e === "object" ? e : null;
+  } catch (e) { return null; }
+}
+/* Sprosse 1: erst der fragebezogene Denkanstoß (src/daten/mini-denkhilfen.js), dann der
+   Fertigkeitssatz (SENIOR_FRAGEN/WERKZEUGE) wie bisher – die Frage gewinnt gegen die Fertigkeit. */
 function miniDenktext(m){
+  const eigen = miniEigener(m);
+  if (eigen && typeof eigen.denkhilfe === "string" && eigen.denkhilfe.trim()) return eigen.denkhilfe.trim();
   const f = Spiel.SENIOR_FRAGEN && Spiel.SENIOR_FRAGEN[m.skill];
   const w = Spiel.WERKZEUGE && Spiel.WERKZEUGE[m.skill];
   return String(f || w || Spiel.MINI.DENKANSTOSS);
 }
-/* Ausschnitt aus der Aufgabe: der Schnappschuss, sonst der erste Satz der Frage. */
+/* Sprosse 2 (Ausschnitt): erst der eigene, wörtliche Ausschnitt der Frage, sonst der Schnappschuss,
+   sonst der erste Satz der Frage. */
 function miniAusschnitt(m){
+  const eigen = miniEigener(m);
+  if (eigen && typeof eigen.ausschnitt === "string" && eigen.ausschnitt.trim()) return eigen.ausschnitt.trim();
   const s = m.schnappschuss && m.schnappschuss.inhalt ? String(m.schnappschuss.inhalt).trim() : "";
   if (s) return s.split("\n").slice(0, 4).join("\n");
   const f = String(m.frage || "").trim();
   const i = f.search(/[.?!](\s|$)/);
   return i < 0 ? f : f.slice(0, i + 1);
+}
+/* Kernbegriff der Frage: für den Lernanker (Spiel.mini.anker.stichwort) und für die Oberfläche,
+   die damit den passenden Wiki-Abschnitt aufschlagen kann. Ohne eigenen Eintrag: der Name der
+   Fertigkeit – nie leer, nie ein Wurf. */
+function miniStichwort(m){
+  const eigen = miniEigener(m);
+  if (eigen && typeof eigen.stichwort === "string" && eigen.stichwort.trim()) return eigen.stichwort.trim();
+  return String(Spiel.skill(m.skill).name || m.skill);
 }
 
 /* Die nächste Denkhilfe. nurSehen:true fragt nur, ohne eine Sprosse zu verbrauchen (für den Knopf).
@@ -240,8 +265,11 @@ Spiel.mini.anker = function(id){
   if (!miniWannPasst("anker", Spiel.mini.stand().falschIds.includes(m.id)).ja) return null;
   const w = (typeof DATEN !== "undefined" && DATEN.wiki && DATEN.wiki[m.skill]) || null;
   const name = Spiel.skill(m.skill).name;
+  /* stichwort = Kernbegriff DIESER Frage (aus dem Datenpaket; sonst der Fertigkeitsname). Damit kann
+     die Oberfläche später den passenden Abschnitt aufschlagen – die Seite allein nennt ihn oft nicht. */
+  const stichwort = miniStichwort(m);
   const text = w
     ? `Diese Frage gehört zur Fertigkeit „${name}“. Im Wiki steht das Nachschlagen unter „${w.titel}“${w.merksatz ? ": " + w.merksatz : "."}`
     : `Diese Frage gehört zur Fertigkeit „${name}“. Dafür gibt es noch keine Wiki-Seite – die Quelle unten ist der Beleg.`;
-  return {titel: (w && w.titel) || name, text, quelle: String(m.quelle || (w && w.quelle) || ""), wiki: w ? m.skill : null};
+  return {titel: (w && w.titel) || name, text, quelle: String(m.quelle || (w && w.quelle) || ""), wiki: w ? m.skill : null, stichwort};
 };

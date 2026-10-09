@@ -43,17 +43,46 @@ Spiel.niveauAktualisieren = function(){
   return n;
 };
 
+/* Zählt eine gezogene Hilfe für DIESE Fertigkeit? (task-19, Review-Befund P1-2)
+   Quelle ist die Eintragsliste der Instanz (`inst.hilfen`). Jeder Eintrag trägt seit task-19 die
+   Fertigkeit, zu der die Sprosse gezogen wurde (`Spiel.hilfe`); Einträge ohne Zuordnung sind Altstände.
+
+   Regeln — bewusst je Fertigkeit, nicht je Ticket:
+   · Sprosse >= 4 zu dieser Fertigkeit               → true.  Bezahlte Hilfe: der Leitner-Kasten darf
+     nicht steigen (ein Erfolg mit Lösungshinweis ist kein Können), die Wiederholung kommt morgen.
+   · irgendeine Sprosse zu dieser Fertigkeit UND der Kasten steht noch auf 0 → true.  Genau der Fall
+     aus dem Review: Wer die kostenlose Leiter (Sprosse 1–3) benutzt, hatte den Stoff noch nie — der
+     erste Erfolg soll nicht als „gekonnt" in den Wiederholungsplan wandern (sonst überschätzt er die
+     Beherrschung genau bei Anfängern).
+   · Altstand OHNE Fertigkeit am Eintrag → wie bisher: eine Sprosse >= 4 gilt binär für alle
+     Fertigkeiten des Tickets, Sprossen 1–3 ändern nichts. Bestehende Spielstände werden dadurch
+     weder strenger noch billiger.
+   · ganz ohne Hilfe → false (Kasten steigt wie bisher).
+   Kein Wurf: fehlende Listen, fehlende Aufgabe und fehlender Lernmotor sind abgedeckt. */
+Spiel.hilfeFuerSkill = function(inst, def, id){
+  const eintraege = inst && Array.isArray(inst.hilfen) ? inst.hilfen : [];
+  const eigene = eintraege.filter(e => e && e.skill === id);
+  const alt = eintraege.filter(e => e && !e.skill);
+  const stufe = liste => liste.reduce((m, e) => Math.max(m, Number(e && e.stufe) || 0), 0);
+  if (stufe(eigene) >= 4) return true;
+  if (stufe(alt) >= 4) return true;
+  const kasten = typeof L !== "undefined" && L.box ? L.box(id) : 0;
+  return stufe(eigene) >= 1 && kasten === 0;
+};
+
 /* Lernmotor nach einer Abnahme. bestanden → je Fertigkeit L.ueben(id, true, {hilfe}); nicht bestanden →
-   einmal je Instanz L.ueben(id, false) und je fehlgeschlagenem Ziel ein Eintrag im Fehlerheft. */
+   einmal je Instanz L.ueben(id, false) und je fehlgeschlagenem Ziel ein Eintrag im Fehlerheft.
+   Die Hilfe wird JE FERTIGKEIT entschieden (task-19): früher galt „hilfeStufe >= 4" für alle
+   Fertigkeiten des Tickets gleich — eine mit der OSI-Checkliste gelöste Fertigkeit stieg damit im
+   Leitner-Plan wie eine selbst gelöste. */
 Spiel.lernenNachAbnahme = function(inst, def, abnahme){
   const skills = def.skills || [];
   const ergebnis = [];
   if (Spiel._trocken || typeof L === "undefined") return skills.map(id => ({id, name: Spiel.skill(id).name, vorher: 0, nachher: 0, stufe: "neu"}));
   Spiel.skillsRegistrieren();
   if (abnahme.bestanden) {
-    const hilfe = (inst.hilfeStufe || 0) >= 4;
     for (const id of skills) {
-      const r = L.ueben(id, true, {hilfe});
+      const r = L.ueben(id, true, {hilfe: Spiel.hilfeFuerSkill(inst, def, id)});
       ergebnis.push({id, name: Spiel.skill(id).name, vorher: r.vorher, nachher: r.nachher, stufe: L.stufeName(id)});
     }
   } else {

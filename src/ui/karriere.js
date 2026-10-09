@@ -414,7 +414,11 @@ UI.karriere = (() => {
       const schalter = (titel, key, text) => h("label", {class: "kr-einst"}, h("span", {}, titel, h("small", {}, text)),
         h("input", {type: "checkbox", checked: e[key] !== false, onchange: ev => Spiel.einstSetzen(key, ev.target.checked)}));
       el.append(
-        wahl("Niveau", "wahl", [["auto", "Automatisch (passt sich an)"], ["E", "Einstieg – erklärt alles"], ["AP1", "AP1 – Prüfungsform"], ["AP2", "AP2 – ohne Live-Ziele, Neustart-Test"]]),
+        /* „Prüfungsstrenge je Ticket" statt „Niveau": der Vertrag (§ 1) unterscheidet drei Achsen, und
+           „Erklärtiefe" (src/ui/app.js) hat dieselben Optionen E/AP1/AP2 — zwei gleich aussehende
+           Einstellungen mit verschiedenen Namen sind eine Verwechslungsfalle
+           (Review Auffindbarkeit, Befund 4). */
+        wahl("Prüfungsstrenge je Ticket", "wahl", [["auto", "Automatisch (passt sich an)"], ["E", "Einstieg – erklärt alles"], ["AP1", "AP1 – Prüfungsform"], ["AP2", "AP2 – ohne Live-Ziele, Neustart-Test"]]),
         wahl("Heute im Unterricht", "unterricht", [["", "– kein Thema –"], ...(DATEN.skills || []).filter(s => s.stufe <= 5).map(s => [s.id, s.name])]),
         schalter("Vorhersage vor dem Ping", "vorhersage", "Erst raten, dann sehen (Einstieg/AP1)"),
         schalter("Coach-Hinweise", "coach", "Tipps beim ersten Ticket"));

@@ -80,7 +80,20 @@ UI.lernstandHilfe = (() => {
 
   /* „Was gibt die geltende Stufe hier an Hilfe?" – die Stufe gilt global, deshalb für jede Zeile
      dieselbe Antwort. Sie kommt aus kann()/darf() und nicht aus einer zweiten Wahrheitstabelle. */
+  /* Der Satz kommt aus Spiel.stufe.freigabeText – EINE Quelle statt zweier Wahrheiten (task-23, E).
+     Die Oberfläche hängt nur noch „Stufe N von 4 · Name – " davor. Ohne Baustein A (oder wenn er
+     würfelt) baut der Rückfall unten denselben Satz aus denselben Vertragszahlen. */
+  function stufenSatz(){
+    const s = stufensystem();
+    if (s && typeof s.freigabeText === "function") {
+      try { const t = s.freigabeText(); if (t && String(t).trim()) return String(t).trim(); } catch (e) { /* Rückfall unten */ }
+    }
+    return null;
+  }
+
   function hilfeKurz(){
+    const satz = stufenSatz();
+    if (satz) return satz;
     const d = stufeDef(), teile = [];
     const v = Number(stufeKann("vorschlaege", d.vorschlaege)) || 0;
     teile.push(v > 0 ? `${v} ${v === 1 ? "Vorschlag" : "Vorschläge"} mit Syntax im Terminal` : "kein Vorschlag im Terminal");
@@ -94,10 +107,12 @@ UI.lernstandHilfe = (() => {
     return teile.join(" · ");
   }
 
-  /* Der sichtbare Hinweis: welche Stufe gilt und was sie freischaltet. */
+  /* Der sichtbare Hinweis: welche Stufe gilt und was sie freischaltet.
+     Der Inhalt ist der Satz aus Spiel.stufe (hilfeKurz) – hier steht nur die Überschrift davor. */
   function freigabeText(){
     const d = stufeDef();
-    return `Stufe ${d.rang} von 4 · ${d.name} – ${hilfeKurz()}.`;
+    const kern = String(hilfeKurz() || "").replace(/\.\s*$/, "");
+    return `Stufe ${d.rang} von 4 · ${d.name} – ${kern}.`;
   }
 
   /* ---------- Lernstand: fällig zuerst, dann was noch wackelt ---------- */

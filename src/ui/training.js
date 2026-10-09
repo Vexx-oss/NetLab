@@ -74,16 +74,51 @@ UI.training = (() => {
         h("li", {}, h("b", {}, s.titel), h("span", {}, " – " + s.frage)))) : null);
   }
 
+  /* Fehlschläge JE FERTIGKEIT: `Spiel.fehlschlaege` liefert {skill, text} – die kurze Aufzählung von
+     vorher sagte nicht, woran es lag, und welches Thema dahintersteckt. (Review Lernwirkung, P2-5) */
+  function fehlerGruppen(abnahme){
+    let liste = [];
+    try { liste = typeof Spiel.fehlschlaege === "function" ? (Spiel.fehlschlaege(abnahme) || []) : []; }
+    catch (e) { liste = []; }
+    const gruppen = [];
+    for (const f of liste) {
+      const id = String(f.skill || "");
+      let g = gruppen.find(x => x.id === id);
+      if (!g) { g = {id, name: skillName(id), gruende: []}; gruppen.push(g); }
+      if (f.text) g.gruende.push(f.text);
+    }
+    return gruppen.filter(g => g.gruende.length);
+  }
+  function skillName(id){
+    try {
+      if (typeof Spiel.skill === "function") { const s = Spiel.skill(id); if (s && s.name) return String(s.name); }
+    } catch (e) { /* Rückfall unten */ }
+    return String(id || "Fertigkeit").replace(/^lab\./, "");
+  }
+
   /* Ergebnis des letzten Durchgangs: erst hier wird der Lernstand sichtbar, den das Training bewegt hat. */
   function ergebnisKarte(){
-    const r = letztes, offen = (r.abnahme && r.abnahme.ergebnisse ? r.abnahme.ergebnisse : []).filter(e => e.ok === false);
+    const r = letztes, ab = r.abnahme || {}, niveau = ab.niveau || "E";
+    const offen = (ab.ergebnisse || []).filter(e => e.ok === false);
+    const gruppen = r.bestanden ? [] : fehlerGruppen(ab);
     return h("section", {class: "tr-ergebnis" + (r.bestanden ? " tr-gut" : "")},
       h("h3", {}, r.bestanden ? `Bestanden – ${sterneText(r.sterne)}` : `Noch nicht bestanden: ${r.titel}`),
       h("p", {class: "sp-leise"}, `„${r.titel}“ · Versuch ${r.versuch} · ` + (r.bestanden
         ? "der Durchgang ist abgeschlossen, der Lernstand steht unten."
         : "der Durchgang bleibt offen – reparieren und noch einmal abnehmen.")),
+      /* Erklärung je offenem Ziel – derselbe Weg wie im normalen Ergebnisbildschirm (src/ui/spiel.js:455):
+         Kurztitel plus „Erklär mir das" in der Tiefe des eigenen Niveaus. Ohne Lehrtext bleibt es beim Titel. */
       !r.bestanden && offen.length ? h("ul", {class: "tr-offen"}, offen.map(e =>
-        h("li", {}, h("b", {}, e.ziel.text || e.ziel.typ), e.grund ? h("span", {}, " – " + Spiel.grundTitel(e.grund)) : null))) : null,
+        h("li", {}, h("b", {}, e.ziel.text || e.ziel.typ),
+          e.grund ? h("p", {class: "tr-grund"}, Spiel.grundTitel(e.grund)) : h("p", {}, e.text || ""),
+          e.grund && niveau !== "AP2" ? UI.erklaeren(e.grund, niveau) : null))) : null,
+      /* Die Gründe gruppiert nach Fertigkeit: ein Trainingsfehlversuch ist so lehrreich wie ein
+         fehlgeschlagener Kundenauftrag – er kostet ja nichts (Vertrag § 6). */
+      gruppen.length ? h("details", {class: "tr-fehler", open: true},
+        h("summary", {}, `Was schiefging – ${gruppen.length} ${gruppen.length === 1 ? "Fertigkeit" : "Fertigkeiten"}`),
+        gruppen.map(g => h("section", {class: "tr-fehler-gruppe", "data-skill": g.id},
+          h("h4", {}, g.name),
+          h("ul", {class: "tr-fehler-liste"}, g.gruende.map(t => h("li", {}, t)))))) : null,
       r.lernen.length ? h("ul", {class: "tr-lernen"}, r.lernen.map(l =>
         h("li", {}, h("b", {}, l.name + ": "), `Lernstand ${l.vorher} → ${l.nachher} (${l.stufe})`))) : null,
       h("p", {class: "sp-leise"}, "Training zahlt kein Geld und keinen Ruf – es zählt nur für den Lernstand."),
