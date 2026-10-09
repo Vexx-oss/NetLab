@@ -72,6 +72,12 @@ function uesKnoten(tag){
     removeAttribute(k){ delete el.attrs[k]; if (k === "hidden") el.hidden = false; },
     addEventListener(art, fn){ (el._an[art] ||= []).push(fn); },
     removeEventListener(art, fn){ el._an[art] = (el._an[art] || []).filter(f => f !== fn); },
+    /* Maße nur, wenn der Fall sie setzt (`__rect`): sonst bleibt der Ersatz maßlos wie bisher. */
+    getClientRects(){ return el.__rect ? [el.__rect] : []; },
+    getBoundingClientRect(){ return el.__rect || {width: 200, height: 40, left: 0, top: 0, right: 200, bottom: 40}; },
+    contains(x){ let p = x; while (p) { if (p === el) return true; p = p.parentNode; } return false; },
+    focus(){}, blur(){},
+    get isConnected(){ let p = el; while (p.parentNode) p = p.parentNode; return !!p.__imBaum; },
     /* Klick wie mit der Maus: löst genau den Hörer aus, den h()/addEventListener gesetzt hat */
     klick(){ for (const fn of (el._an.click || []).slice()) fn({currentTarget: el, target: el, preventDefault(){}, stopPropagation(){}}); },
     querySelector(sel){ return uesFinde(el, sel)[0] || null; },
@@ -121,6 +127,7 @@ function uesFinde(el, sel){
 }
 function uesDocument(){
   const koerper = uesKnoten("body");
+  koerper.__imBaum = true;                      /* damit `isConnected` stimmt (toast.js fragt es ab) */
   return {
     readyState: "complete", body: koerper, documentElement: uesKnoten("html"), activeElement: null,
     createElement: tag => uesKnoten(tag), createElementNS: (ns, tag) => uesKnoten(tag),
@@ -138,7 +145,7 @@ function uesDocument(){
    geerbt, nur die vier Stellen, die den echten Ablauf noch einmal starten würden, sind ersetzt –
    `Spiel.abschliessen` liefert das bereits ECHT berechnete Ergebnis, `Spiel.abnahme` die echte
    Abnahme dazu. So bleibt der echte Spielstand unberührt und das Fenster bekommt echte Daten. */
-function uesWelt(){
+function uesWelt(opt = {}){
   const vm = require("vm"), fs = require("fs"), path = require("path");
   const dokument = uesDocument();
   const kopiert = [], toasts = [], ansichten = [];
@@ -156,6 +163,7 @@ function uesWelt(){
   SpielStub.szene = () => ({});
   const bereich = {
     document: dokument, console: {log(){}, error(){}, warn(){}, info(){}, debug(){}}, LABOR_VERSION: "test",
+    innerWidth: 1366, innerHeight: 768,                 /* wie im gemessenen Rauchtest-Fall (1366 × 768) */
     Spiel: SpielStub, DATEN, Bus: BusLeih, store, L, eur, zahlDe, heute, datumDe, jetzt,
     Plattform: {name: "browser", abzeichen(){}, an(){}, kann: () => ({ja: false}), fenster: {zeigen(){}}},
     setTimeout: () => 0, clearTimeout(){}, setInterval: () => 0, clearInterval(){},
@@ -192,8 +200,9 @@ function uesWelt(){
      bliebe unsichtbar. Mit einer Zusage aus dem Bereich greift `microtaskMode: "afterEvaluate"`. */
   const vmZusage = vm.runInContext("(wert) => Promise.resolve(wert)", bereich);
   UI.kopieren = text => { kopiert.push(text); return vmZusage(zustand.kopierOk); };
-  UI.toast = (text, art, opt) => { toasts.push([text, art, opt]); };
-  UI.toast.zu = () => {};
+  /* `echterToast`: die echte src/ui/toast.js laden (für die Platzierung des Hinweises); sonst die Attrappe. */
+  if (opt.echterToast) vm.runInContext(lies("src/ui/toast.js"), bereich, {filename: "src/ui/toast.js"});
+  else { UI.toast = (text, art, opt2) => { toasts.push([text, art, opt2]); }; UI.toast.zu = () => {}; }
   /* `UI.klassenraum.hilfeKnopf()` ist die öffentliche Fläche des „Ich hänge"-Knopfes (geprüft in
      tests/ui-klassenraum.test.js, samt Klickweg und ehrlicher Absage). HIER wird nur die VERDRAHTUNG
      geprüft: hängt spiel.js den gelieferten Knopf wirklich in die Mappe — und nur EINEN? Die Attrappe
@@ -216,6 +225,11 @@ function uesWelt(){
     /* Der echte Weg in den Auftrag: `oeffnen` zeichnet die Auftragszeile über `UI.labor.laden`. */
     spielOeffnen(iid){ bereich.__uesIid = iid; vm.runInContext("UI.spiel.oeffnen(globalThis.__uesIid);", bereich); },
     mappeAuf(reiter = "brief"){ bereich.__uesReiter = reiter; vm.runInContext("UI.spiel.mappeAuf(globalThis.__uesReiter);", bereich); },
+    /* Postfach aufschlagen — der echte Weg: UI.spiel.postfachAnsicht(container) */
+    postfach(container){ bereich.__uesC = container; vm.runInContext("UI.spiel.postfachAnsicht(globalThis.__uesC);", bereich); },
+    /* Der Hinweis, wie er in der Führung steht: Titel + Text + Aktion (mit echtem Edge gemessen 89 px hoch) */
+    toastZeigen(){ vm.runInContext("UI.toast('Neues Abzeichen – du hast den ersten Auftrag ohne Warnung abgeschlossen und alle Ziele erfüllt.', 'ok', {titel: 'Neues Abzeichen', dauer: 600000, aktion: {text: 'Ansehen', fn(){}}});", bereich); },
+    bus(name, daten){ BusLeih.senden(name, daten); },
     abmelden(){ for (const weg of haken.splice(0)) { try { weg(); } catch (e) { /* war schon abgemeldet */ } } },
   };
 }
@@ -453,5 +467,97 @@ gruppe("UI: Klassenraum-Auftrag im Labor" + UES_ZUSATZ, () => {
     console.log(`MESSUNG Mappe im Labor: Bedienelemente normal=${normal.knoepfe} · Klassenraum=${kl.knoepfe} · Brieftext ${normal.text.length}→${kl.text.length} Zeichen · Abdruck ${abdruck}`);
     erwarte.gleich(kl.knoepfe, normal.knoepfe + 1,
       `Bedienelemente in der Mappe: Klassenraum ${kl.knoepfe}, normal ${normal.knoepfe} — GENAU der eine Hilfeknopf kommt dazu`);
+  }));
+});
+
+/* ================= Gruppe: Postfach — der Hinweis verdeckt die Hauptaktion nicht =================
+   Rauchtest-Befund 09.10.2026: „✗ 1366 px Postfach „Auftrag annehmen ▸" ← Hauptaktion verdeckt von
+   toast-titel". Ursache (mit echtem Edge gemessen): Der im LABOR entstandene Hinweis behielt seine
+   Labormaße beim Ansichtswechsel (`inset: auto auto 12px 166px; width: 470px` → Rechteck x 166…636)
+   und lag damit über dem Knopf (x 539…743, y 690…738). Die längeren Berichte machen den Leser höher,
+   die Hauptaktion rutscht in die Zone des Hinweises. Der Hinweis steht deshalb im Postfach über der
+   LISTE; die Zahlen unten sind die gemessenen Rechtecke (1366 × 768, langer Bericht `praxis-04`). */
+gruppe("UI: Postfach — der Hinweis verdeckt die Hauptaktion nicht" + UES_ZUSATZ, () => {
+  if (!UES_KANN_LADEN) {
+    pruefe("UI-Postfach: nur unter node tests/run.js prüfbar", () => { erwarte.wahr(false, "require fehlt"); });
+    return;
+  }
+  const LISTE = {left: 98, top: 134, width: 400, height: 616, right: 498, bottom: 750};      /* gemessen */
+  const AKTION = {left: 539, top: 690, width: 204, height: 48, right: 743, bottom: 738};      /* gemessen */
+  const kapsel = fn => () => {
+    const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken};
+    const welten = [];
+    try {
+      Spiel._trocken = true; Spiel._lz = {};
+      Spiel._st = Spiel.leererStand();
+      Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD);
+      fn(welten);
+    } finally {
+      for (const w of welten) w.abmelden();
+      Spiel._st = alt.st; Spiel._einst = alt.einst; Spiel._lz = alt.lz; Spiel._trocken = alt.trocken;
+      if (jetzt && typeof jetzt.frei === "function") jetzt.frei();
+    }
+  };
+  /* Ein Postfach mit einem echten Auftrag aufschlagen und die gemessenen Maße setzen. */
+  function postfachMit(lang, welten){
+    const welt = uesWelt({echterToast: true}); welten.push(welt);
+    const kandidaten = DATEN.tickets.map(d => ({d, n: String(d.symptom || "").length}));
+    const ext = lang ? Math.max(...kandidaten.map(k => k.n)) : Math.min(...kandidaten.map(k => k.n));
+    const ziel = kandidaten.find(k => k.n === ext);
+    const inst = Spiel.instanzErstellen({ticketId: ziel.d.id});
+    Spiel._einst.wahl = Spiel.defVon(inst).stufe || "E";
+    welt.UI.spiel._S.postfachWahl = inst.iid;
+    const c = uesKnoten("div"); welt.dokument.body.append(c);
+    welt.postfach(c);
+    const liste = uesFinde(welt.dokument.body, ".sp-pf-liste")[0] || null;
+    if (liste) liste.__rect = Object.assign({}, LISTE);
+    const leser = uesFinde(welt.dokument.body, ".sp-leser")[0] || null;
+    const aktion = leser ? uesFinde(leser, ".knopf.primaer")[0] || null : null;
+    if (aktion) aktion.__rect = Object.assign({}, AKTION);
+    welt.toastZeigen();
+    const stapel = uesFinde(welt.dokument.body, ".toast-stapel")[0] || null;
+    return {welt, ziel, liste, aktion, stapel, symptom: ext,
+      links: stapel ? parseFloat(stapel.style.left) : NaN, breite: stapel ? parseFloat(stapel.style.width) : NaN};
+  }
+
+  pruefe("Langer Bericht (längstes echtes Symptom): der Hinweis steht über der Liste, nicht über der Aktion", kapsel(welten => {
+    const p = postfachMit(true, welten);
+    erwarte.wahr(!!p.liste, "die Auftragsliste steht im Postfach");
+    erwarte.wahr(!!p.aktion, "die Hauptaktion steht im Leser");
+    erwarte.wahr(p.symptom >= 415, `der längste echte Symptom-Text misst ${p.symptom} Zeichen (keine erfundene Zahl)`);
+    erwarte.gleich(p.links, LISTE.left, "der Hinweis beginnt an der Listenspalte");
+    erwarte.wahr(p.links + p.breite <= LISTE.right, `der Hinweis endet in der Listenspalte (${p.links + p.breite} ≤ ${LISTE.right})`);
+    erwarte.wahr(p.links + p.breite < AKTION.left,
+      `waagerecht disjunkt zur Hauptaktion (${p.links + p.breite} < ${AKTION.left}): eine Überdeckung ist damit bei JEDER Hinweishöhe ausgeschlossen`);
+    console.log(`MESSUNG Postfach: Symptom ${p.symptom} Zeichen · Hinweis x ${p.links}…${p.links + p.breite} · Aktion x ${AKTION.left}…${AKTION.right}`);
+  }));
+
+  pruefe("Gegenprobe: beim kürzesten echten Bericht ebenso wenig verdeckt", kapsel(welten => {
+    const p = postfachMit(false, welten);
+    erwarte.wahr(!!p.aktion, "die Hauptaktion steht im Leser");
+    erwarte.wahr(p.symptom > 0 && p.symptom < 415, `der kürzeste echte Symptom-Text misst ${p.symptom} Zeichen`);
+    erwarte.gleich(p.links, LISTE.left, "auch hier beginnt der Hinweis an der Listenspalte");
+    erwarte.wahr(p.links + p.breite < AKTION.left, "und bleibt links der Hauptaktion");
+  }));
+
+  pruefe("Ein im Labor entstandener Hinweis zieht beim Ansichtswechsel ins Postfach um", kapsel(welten => {
+    const welt = uesWelt({echterToast: true}); welten.push(welt);
+    /* Labor sichtbar (Leinwand mit Maß) – der Hinweis entsteht dort, wie in der Führung. */
+    const leinwand = uesKnoten("div"); leinwand.attrs.class = "lb-leinwand";
+    leinwand.__rect = {left: 150, top: 120, width: 800, height: 600, right: 950, bottom: 720};
+    welt.dokument.body.append(leinwand);
+    welt.toastZeigen();
+    const stapel = uesFinde(welt.dokument.body, ".toast-stapel")[0];
+    erwarte.gleich(parseFloat(stapel.style.left), 162, "im Labor steht der Hinweis am Rand der Zeichenfläche (150 + 12)");
+    /* Ansicht wechseln: Leinwand weg (hidden liefert keine rects), Postfach da. */
+    leinwand.__rect = null;
+    const c = uesKnoten("div"); welt.dokument.body.append(c);
+    welt.postfach(c);
+    const liste = uesFinde(welt.dokument.body, ".sp-pf-liste")[0];
+    if (liste) liste.__rect = Object.assign({}, LISTE);
+    welt.bus("ansicht", "postfach");
+    erwarte.gleich(parseFloat(stapel.style.left), LISTE.left,
+      "nach dem Ansichtswechsel steht er über der Liste — nicht mehr mit den Laboramaßen über der Aktion");
+    erwarte.wahr(parseFloat(stapel.style.left) + parseFloat(stapel.style.width) < AKTION.left, "und damit frei von der Hauptaktion");
   }));
 });

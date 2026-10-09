@@ -74,18 +74,21 @@ const FUll = /\b(irgendwie|halt|eben|einfach mal|sozusagen|gewissermaßen|quasi|
 const auffaellig = [];
 for (const z of zeilen) {
   const gruende = [];
+  /* Jedes Feld EINZELN prüfen – vorher wurden Titel und Symptom ohne Trenner verkettet, und die
+     Satzprüfung erfand daraus Sätze, die im Text nicht stehen (Befund von denkhilfen-2, 09.10.2026). */
   const gesamtText = z.felder.map(f => f[1]).join(" ");
+  const felderSätze = z.felder.flatMap(f => saetze(f[1]));
   if (z.titel.length > 46) gruende.push(`Titel ${z.titel.length} Zeichen`);
-  if (z.titel.length < 12) gruende.push(`Titel nur ${z.titel.length} Zeichen`);
+  if (z.titel.length < 15) gruende.push(`Titel nur ${z.titel.length} Zeichen`);
   if (z.symptom.length < 30) gruende.push(`Symptom nur ${z.symptom.length} Zeichen`);
   if (z.gesamt < 120) gruende.push(`Auftragstext gesamt nur ${z.gesamt} Zeichen`);
   if (!/[.!?]$/.test(z.symptom)) gruende.push("Symptom endet ohne Satzzeichen");
   if (FUll.test(gesamtText)) gruende.push("Füllwort");
   if (/\bTODO|XXX|lorem|\?\?\?/.test(gesamtText)) gruende.push("Platzhalter");
-  const ss = saetze(gesamtText);
-  const langerSatz = ss.find(s => woerter(s).length > 24);
-  if (langerSatz) gruende.push(`Satz mit ${woerter(langerSatz).length} Wörtern`);
-  if (ss.length && woerter(gesamtText).length / ss.length > 20) gruende.push("Sätze im Mittel sehr lang");
+  const langerSatz = felderSätze.find(s => woerter(s).length > 24);
+  if (langerSatz) gruende.push(`Satz mit ${woerter(langerSatz).length} Wörtern (in einem Feld)`);
+  const woerterGesamt = z.felder.reduce((p, f) => p + woerter(f[1]).length, 0);
+  if (felderSätze.length && woerterGesamt / felderSätze.length > 20) gruende.push("Sätze im Mittel sehr lang");
   if (gruende.length) auffaellig.push({ id: z.id, titel: z.titel, gruende });
 }
 console.log(`Aufträge mit Auffälligkeit: ${auffaellig.length} von ${zeilen.length}`);
@@ -95,39 +98,54 @@ for (const a of auffaellig) console.log(`  ${a.id.padEnd(16)} ${(a.titel || "").
    Rückgabewert 1, wenn ein Auftrag eine Regel verletzt. Die Regeln stehen in
    `docs/entwicklung/Stilfaden – Auftragstexte.md` § 1/§ 2/§ 5 und sind ABSICHTLICH hier
    nachgerechnet: das Tor muss dieselbe Zahl liefern wie der Bericht. */
-const ZEIT = /\b(seit|gestern|heute|heute morgen|heute früh|heute nachmittag|vorgestern|nach dem|nach der|beim|letzte woche|letzten|am wochenende|über nacht|seitdem|vorhin|eben|gerade eben|nacht)\b/i;
-const FOLGE = /\b(können nicht|kann nicht|können keine|steht still|steht|warten|müssen warten|geht nicht raus|kommt nicht raus|geht nichts|keine (?:karten)?zahlung|fällt aus|geht nur noch|müssen (?:wir )?(?:per hand|von hand|händisch)|keine bestellungen|kommt nicht (?:mehr )?(?:durch|raus|rein)|bleibt (?:die )?arbeit liegen|verdienen kein geld|läuft nicht mehr)\b/i;
-const VERSUCH = /\b(neu(?:ge)?startet|neu(?:ge)?start|neustart|probiert|versucht|getauscht|umgesteckt|gezogen|gesteckt|angeschlossen|umgesteckt|gefragt|nachgesehen|ausprobiert|resettet|zurückgesetzt|ab- und wieder angeschaltet|an- und ausgeschaltet)\b/i;
+/* Die vier Bausteine werden mit WEITEN Wortlisten gesucht. Sie sind eine Heuristik, kein Beweis:
+   die erste, zu enge Fassung meldete gute Texte als Verstoß (Befund 09.10.2026 – „nachgeschaut"
+   und „keine Termine, keine Besprechungen" fehlten). Was hier anschlägt, ist ein HINWEIS zum
+   Nachlesen; hart geprüft werden Länge, Satzzahl, Ursachenwörter und Titellänge. */
+const ZEIT = /\b(seit|gestern|heute|heute morgen|heute früh|heute nachmittag|heute vormittag|vorgestern|nach dem|nach der|beim|letzte woche|letzten|am wochenende|über nacht|seitdem|vorhin|eben|gerade eben|nacht|zum ersten|am montag|am dienstag|am mittwoch|am donnerstag|am freitag)\b/i;
+const FOLGE = /\b(können|kann|können wir|kann ich|können keine|steht still|steht|warten|müssen warten|geht nicht raus|kommt nicht raus|geht nichts|keine (?:karten)?zahlung|fällt aus|geht nur noch|müssen (?:wir )?(?:per hand|von hand|händisch)|keine bestellungen|kommt nicht (?:mehr )?(?:durch|raus|rein)|bleibt (?:die )?arbeit liegen|bleibt liegen|verdienen kein geld|läuft nicht mehr|keine termine|keine besprechungen|schlange|die hälfte|geht die hälfte|ohne (?:die|das|den) \w+ geht|sonst steht|steht die \w+ still|liegen bleibt|nicht rausschicken|nicht raus|kommt nicht an|nicht mehr an die|kostet|verlieren|fällt die \w+ aus)\b/i;
+const VERSUCH = /\b(neu(?:ge)?startet|neu gestartet|neu starten|neustart|neu eingerichtet|neu aufgesetzt|probiert|versucht|getauscht|umgesteckt|umgesteckt|gezogen|abgezogen|gesteckt|eingesteckt|angeschlossen|gefragt|nachgesehen|nachgeschaut|ausprobiert|resettet|zurückgesetzt|an- und ausgeschaltet|ab- und wieder angeschaltet|nachgetragen|zweimal|dreimal|mehrmals|extra)\b/i;
 const URSACHE = /\b(VLAN|Subnetzmaske|Subnet|Präfix|Gateway|Standardgateway|Route|Routing|DNS-Eintrag|DNS-Server|Trunk|Spanning Tree|STP|DHCP-Pool|DHCP-Server|Lease|Reservierung|Portsicherheit|Port-Security|ACL|NAT|Firewall-Regel|Doppelvergabe|Adresskonflikt|falsche Maske|Port ist down|VLAN-Fehler|Konfigurationsfehler)\b/i;
 const FUELLWORT = /\b(irgendwie|quasi|halt|eben mal|sozusagen|gewissermaßen|eventuell vielleicht|wie gesagt)\b/i;
 
 if (process.argv.includes("--tor")) {
-  const verstoesse = [];
+  const verstoesse = [], hinweise = [];
   for (const z of zeilen) {
     const s = kurz((z.felder.find(f => f[0] === "symptom") || ["", ""])[1]);
-    const g = [];
-    if (s.length < 180) g.push(`Symptom nur ${s.length} Zeichen (Soll 180–420)`);
-    if (s.length > 420) g.push(`Symptom ${s.length} Zeichen (Soll 180–420)`);
+    const hart = [], weich = [];
+    /* ---------- HART: diese Regeln entscheiden (messbar, nicht auslegbar) ---------- */
+    if (s.length < 180) hart.push(`Symptom nur ${s.length} Zeichen (Soll 180–420)`);
+    if (s.length > 420) hart.push(`Symptom ${s.length} Zeichen (Soll 180–420)`);
     const ss = saetze(s);
-    if (ss.length < 2) g.push(`nur ${ss.length} Satz (Soll 2–4)`);
-    if (ss.length > 4) g.push(`${ss.length} Sätze (Soll 2–4)`);
-    if (!ZEIT.test(s)) g.push("kein Anlass/Zeitmarke");
-    if (!FOLGE.test(s)) g.push("keine Folge für den Betrieb");
-    if (!VERSUCH.test(s)) g.push("kein ‚schon versucht‘");
-    const u = s.match(URSACHE);
-    if (u) g.push(`Ursache verraten: „${u[0]}“`);
+    if (ss.length < 2) hart.push(`nur ${ss.length} Satz (Soll 2–4)`);
+    if (ss.length > 4) hart.push(`${ss.length} Sätze (Soll 2–4)`);
+    if (z.titel.length < 15) hart.push(`Titel nur ${z.titel.length} Zeichen (Soll 15–46)`);
+    if (z.titel.length > 46) hart.push(`Titel ${z.titel.length} Zeichen (Soll 15–46)`);
     const f = s.match(FUELLWORT);
-    if (f) g.push(`Füllwort: „${f[0]}“`);
-    if (z.titel.length < 15) g.push(`Titel nur ${z.titel.length} Zeichen (Soll 15–46)`);
-    if (z.titel.length > 46) g.push(`Titel ${z.titel.length} Zeichen (Soll 15–46)`);
-    if (g.length) verstoesse.push({ id: z.id, titel: z.titel, g });
+    if (f) hart.push(`Füllwort: „${f[0]}“`);
+    /* Ursachenwörter: erlaubt ist, was der Kunde ABLIEST (zitierte Bildschirmmeldung, „von wegen …“,
+       „es steht …“). Verboten ist die eigene Deutung des Erzählers – ein Kunde diagnostiziert nicht. */
+    for (const m of s.matchAll(new RegExp(URSACHE.source, "gi"))) {
+      const davor = s.slice(Math.max(0, m.index - 40), m.index).toLowerCase();
+      const abgelesen = /(meldung|meldet|steht|zeigt|sagt|von wegen|an, dass|angesagt|bildschirm|display|fehlertext)/.test(davor);
+      if (!abgelesen) hart.push(`Ursache genannt (nicht abgelesen): „${m[0]}“`);
+    }
+    /* ---------- WEICH: Hinweise zum Nachlesen. Die vier Bausteine sind Sprache – eine Regex kann
+       sie nicht beweisen (Befund 09.10.2026: eine zu enge Fassung meldete sieben GUTE Texte). ---------- */
+    if (!ZEIT.test(s)) weich.push("kein Anlass/Zeitmarke gefunden (Hinweis)");
+    if (!FOLGE.test(s)) weich.push("keine Folge für den Betrieb gefunden (Hinweis)");
+    if (!VERSUCH.test(s)) weich.push("kein ‚schon versucht‘ gefunden (Hinweis)");
+    if (hart.length) verstoesse.push({ id: z.id, titel: z.titel, g: hart });
+    if (weich.length) hinweise.push({ id: z.id, titel: z.titel, g: weich });
   }
   console.log(`\n===== TOR (Stilfaden) =====`);
-  console.log(`Aufträge: ${zeilen.length} · ohne Verstoß: ${zeilen.length - verstoesse.length} · mit Verstoß: ${verstoesse.length}`);
-  for (const v of verstoesse) console.log(`  ${v.id.padEnd(18)} ${(v.titel || "").padEnd(30)} ${v.g.join(" · ")}`);
+  console.log(`Aufträge: ${zeilen.length} · ohne Verstoß: ${zeilen.length - verstoesse.length} · mit hartem Verstoß: ${verstoesse.length}`);
+  for (const v of verstoesse) console.log(`  ✗ ${v.id.padEnd(18)} ${(v.titel || "").padEnd(30)} ${v.g.join(" · ")}`);
   const je = new Map();
-  for (const v of verstoesse) for (const g of v.g) { const k = g.replace(/\d+/g, "N").split(" (")[0]; je.set(k, (je.get(k) || 0) + 1); }
-  console.log(`Häufigste Verstöße: ${[...je.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} (${n})`).join(" · ")}`);
+  for (const v of verstoesse) for (const g of v.g) { const k = g.replace(/\d+/g, "N").split(" (")[0].split(":")[0]; je.set(k, (je.get(k) || 0) + 1); }
+  console.log(`Harte Verstöße: ${[...je.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} (${n})`).join(" · ") || "keine"}`);
+  console.log(`\nHinweise (kein Verstoß, zum Nachlesen): ${hinweise.length} Aufträge`);
+  for (const h of hinweise) console.log(`  · ${h.id.padEnd(18)} ${(h.titel || "").padEnd(30)} ${h.g.join(" · ")}`);
   process.exitCode = verstoesse.length ? 1 : 0;
 }
 
@@ -137,6 +155,29 @@ if (process.argv.includes("--alle")) {
     console.log(`\n--- ${z.id} · ${z.titel} (${z.gesamt} Zeichen)`);
     for (const [f, t] of z.felder) console.log(`  [${f}] ${t}`);
   }
+}
+
+if (process.argv.includes("--doppelt")) {
+  /* Steht im Kundenbrief (`briefing`) dasselbe wie im Bericht (`symptom`)? Beide erscheinen im
+     Auftragsdetail untereinander (Befund von wiki-2, 09.10.2026). Gemessen wird die Überschneidung
+     der Wörter (ohne Stoppwörter) – ein Wert über 0,5 heißt: die Texte erzählen dasselbe. */
+  const STOPP = new Set(("der die das den dem des ein eine einen einem eines und oder aber wir ich sie er es uns unser unsere mein meine ihr ihre ist sind war waren hat haben habe hatte hatten sein zu zum zur mit von für auf an in im am beim nach bei dass nicht kein keine auch noch schon nur mal so wie was wer wo sich uns euch mich dich the a of to and").split(" "));
+  const worte = t => new Set(woerter(kurz(t).toLowerCase()).map(w => w.replace(/[^a-zäöüß0-9]/g, "")).filter(w => w.length > 3 && !STOPP.has(w)));
+  const werte = [];
+  for (const z of alle) {
+    const br = z.def.briefing || z.def.mail || "";
+    const sy = z.def.symptom || "";
+    if (!br || !sy) continue;
+    const a = worte(sy), b = worte(br);
+    let gemeinsam = 0; for (const w of a) if (b.has(w)) gemeinsam++;
+    const quote = a.size ? gemeinsam / a.size : 0;
+    werte.push({ id: z.id, zeichenBrief: kurz(br).length, zeichenSymptom: kurz(sy).length, gemeinsam, quote: Math.round(quote * 100) / 100 });
+  }
+  werte.sort((x, y) => y.quote - x.quote);
+  console.log(`\n===== ÜBERSCHNEIDUNG Kundenbrief ↔ Bericht (${werte.length} Aufträge mit beidem) =====`);
+  console.log(`Median der Überschneidung: ${werte.length ? werte[Math.floor(werte.length / 2)].quote : "—"}`);
+  console.log(`Über 0,50 (erzählen dasselbe): ${werte.filter(w => w.quote > 0.5).length}`);
+  for (const w of werte.slice(0, 10)) console.log(`  ${w.id.padEnd(18)} Brief ${String(w.zeichenBrief).padStart(4)} Z · Bericht ${String(w.zeichenSymptom).padStart(4)} Z · gemeinsam ${String(w.gemeinsam).padStart(3)} Wörter = ${(w.quote * 100).toFixed(0)}%`);
 }
 
 if (process.argv.includes("--minis")) {

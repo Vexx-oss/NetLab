@@ -2187,7 +2187,7 @@ dependencies = [
 
 [[package]]
 name = "netzwerk-labor"
-version = "2.0.4"
+version = "2.0.5"
 dependencies = [
  "gtk",
  "serde",

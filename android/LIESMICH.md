@@ -9,8 +9,8 @@ Die Android-Fassung des Netzwerk-Labors: eine WebView-Hülle um **dieselbe**
 Browser-Fassung, die auch die `.exe` und die Seite im Netz benutzen. Eine Quelle,
 kein zweiter Stand — es wird nichts nachgebaut und nichts gepflegt, was es doppelt gibt.
 
-**Fertige App:** `Programm/Netzwerk-Labor-2.0.4-Android.apk`, versionCode **10202**,
-versionName 2.0.4, signiert (v2 + v3), keine Berechtigungen, freie Drehung. Darin liegt
+**Fertige App:** `Programm/Netzwerk-Labor-2.0.5-Android.apk`, versionCode **10202**,
+versionName 2.0.5, signiert (v2 + v3), keine Berechtigungen, freie Drehung. Darin liegt
 genau die gemessene Seite: `assets/index.html`, 2.231.733 Bytes, SHA256
 `d58254c7875a8646cd8543c1ab6e652a0204eb408322289edac23961f25cc659` — selbst
 nachgemessen: das `assets/index.html` **in** der APK ist byte-gleich zu

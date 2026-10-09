@@ -15,8 +15,8 @@
   t({id: "salon-hotline", reihe: 6.5, kunde: "salon", karriere: 1, stufe: "E", form: "hotline", vorlage: "lan", vSeed: 25, minuten: 6,
     injektoren: [{name: "doppelte-ip", ziel: "buero"}],
     titel: "Mira ruft an: Mal geht’s, mal nicht",
-    briefing: "Hallo, hier ist Mira vom Salon! Seit gestern spinnt alles: Mal druckt die Kasse, mal nicht, und am Büro-PC ist das Internet mal da und mal weg. Ich werd noch verrückt!",
-    symptom: "Kasse und Büro-PC fallen abwechselnd aus.",
+    briefing: "Hallo, hier ist Mira vom Salon! Könnt ihr heute noch kommen? Die Kundschaft steht an der Kasse und ich werd noch verrückt!",
+    symptom: "Mira vom Salon ruft an, atemlos und laut. ‚Bei uns spinnt seit gestern alles‘, sagt sie, ‚mal druckt die Kasse, mal nicht, und am Büro-PC ist das Internet weg‘. Sie hat es mit einem Neustart des Routers probiert, geholfen hat das nicht. Weil die Kundschaft an der Kasse steht, bittet sie uns, heute noch nachzusehen.",
     hotline: {max: 3, fragen: [
       F("seit", "Seit wann genau – und hat sich da etwas verändert?", "Seit gestern. Meine Nichte hat ihren alten Laptop als neuen Büro-PC aufgestellt und „die Netzwerkdaten vom alten PC abgeschrieben“.", "gut",
         "„Seit wann, was hat sich geändert?“ ist die stärkste Frage: Fast jede Störung beginnt mit einer Änderung."),
@@ -38,7 +38,7 @@
     injektoren: [{name: "routerport-aus", ziel: "r1:Gi0/0"}],
     titel: "Kowalski ruft an: Internet weg",
     briefing: "Kowalski, Bäckerei. Internet ist weg. Überall. Die Kartenzahlung geht nicht, die Bestellungen gehen nicht raus. Machen Sie was.",
-    symptom: "Kein Gerät im Laden kommt ins Internet.",
+    symptom: "Kowalski von der Bäckerei ruft an, kurz angebunden. ‚Seit heute Morgen geht nichts mehr nach draußen‘, sagt er, ‚die Kartenzahlung fällt aus, und die Bestellungen gehen nicht raus‘. Im Laden druckt die Kasse weiter, nur ins Internet kommt kein einziges Gerät. Er hat einen Neustart probiert und alle Stecker nachgedrückt – ohne Erfolg, und ohne Kartenzahlung verdient er heute nichts.",
     hotline: {max: 3, fragen: [
       F("drinnen", "Geht im Laden selbst noch etwas – drucken, Kasse zum Büro-PC?", "Drucken geht, die Kasse findet den Bondrucker. Nur raus ins Internet nicht, an keinem Gerät.", "gut",
         "Grenzt sofort ein: Innen geht alles, also liegen Kabel, Switch und Adressen im LAN wohl richtig – es hakt am Weg nach draußen."),
@@ -60,7 +60,7 @@
     injektoren: [{name: "dhcp-aus", ziel: "srv"}],
     titel: "Albers ruft an: Arbeitsplätze ohne Netz",
     briefing: "Albers, Schreibbüro Wortgenau, guten Morgen. Beide Arbeitsplätze haben seit heute früh weder Intranet noch Internet. Ich erwarte eine zügige Lösung.",
-    symptom: "Beide Arbeitsplätze erreichen weder Intranet noch Internet.",
+    symptom: "Albers vom Schreibbüro Wortgenau ruft an, betont sachlich. ‚Seit heute früh haben beide Arbeitsplätze weder Intranet noch Internet‘, sagt er, ‚auf dem Bildschirm steht eine Adresse, die mit 169 anfängt‘. Der Drucker druckt seine Testseiten, das Telefon läuft. Neu gestartet wurde schon, umgesteckt auch – ohne Erfolg, und zwei Kundinnen warten auf ihre Manuskripte.",
     hotline: {max: 3, fragen: [
       F("adresse", "Können Sie mir vorlesen, was bei „IPv4-Adresse“ steht? (Windows-Taste, cmd, ipconfig)", "169.254.31.7. Sagt Ihnen das etwas?", "gut",
         "Eine Anleitung mit Klickweg macht eine Fachfrage beantwortbar – und 169.254 heißt fast immer: DHCP klappt nicht."),
@@ -80,9 +80,9 @@
   /* ===== Praxis: Port des Behandlungsraums im falschen VLAN ===== */
   t({id: "praxis-hotline", reihe: 4.5, kunde: "praxis", karriere: 3, stufe: "AP1", form: "hotline", vorlage: "praxis", vSeed: 49, minuten: 8,
     injektoren: [{name: "vlan-falsch", ziel: "behandlung"}],
-    titel: "Frau Krämer ruft an: Behandlungsraum ohne Akten",
+    titel: "Krämer ruft an: Behandlungsraum ohne Akten",
     briefing: "Krämer, Praxis Dr. Müller. Im Behandlungsraum geht seit heute Morgen nichts mehr – keine Patientenakte, kein Internet. Die nächste Patientin sitzt schon im Zimmer.",
-    symptom: "Der Behandlungsraum erreicht weder Server noch Internet.",
+    symptom: "Frau Krämer von der Praxis Müller ruft an, hörbar in Eile. ‚Seit heute Morgen geht im Behandlungsraum nichts mehr‘, sagt sie, ‚keine Patientenakte, kein Internet‘. Gestern wurde der Schreibtisch umgestellt und der Rechner an eine andere Dose gesteckt, geholfen hat das nicht. Sie bittet uns, sofort zu kommen, sonst warten die Patienten.",
     hotline: {max: 3, fragen: [
       F("umzug", "Was hat sich im Behandlungsraum verändert?", "Wir haben gestern den Schreibtisch umgestellt. Der Rechner hängt jetzt an der anderen Dose an der Wand.", "gut",
         "Änderung erfragen – eine andere Dose heißt ein anderer Switch-Port, und der kann anders eingestellt sein."),

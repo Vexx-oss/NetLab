@@ -18,14 +18,23 @@ UI.toast = (() => {
   /* In der Laboransicht unten links im freien Rand der Zeichenfläche (K6, Spielspaß 2.0): Den Rand hält das Einpassen
      frei, also liegt die Meldung nicht über Geräten und Beschriftungen. Oben rechts verdeckte sie Router und Internet,
      unten mittig die PCs. Rechts unten bleibt der Zoom-Knopf frei; der Werkzeug-Hinweis schweigt, solange sie steht. */
+  /* Im Postfach steht der Hinweis über der LISTE links (gemessen 09.10.2026, 1366 × 768): Der Leser hält
+     unten die Hauptaktion („Auftrag annehmen", sticky, Knopf 539…743 × 690…738). Unten MITTIG deckt der
+     Hinweis sie bei einem langen Bericht; ein im Labor entstandener Hinweis behielt sogar dessen Labormaße
+     beim Ansichtswechsel (x 166…636 — mitten über dem Knopf). Deshalb: linke Spalte, und `ansicht` richtet neu aus. */
   function ausrichten(st){
     const m = document.querySelector(".lb-leinwand");
     const r = m && m.getClientRects().length ? m.getBoundingClientRect() : null;
     const labor = !!(r && r.width > 300 && r.height > 200);
+    const liste = labor ? null : document.querySelector(".sp-pf-liste");
+    const rl = liste && liste.getClientRects().length ? liste.getBoundingClientRect() : null;
+    const postfach = !!(rl && rl.width > 200 && rl.height > 120);
     st.classList.toggle("im-labor", labor);
     if (labor) Object.assign(st.style, {left: `${Math.round(r.left + 12)}px`, right: "auto", top: "auto", bottom: `${Math.round(innerHeight - r.bottom + 12)}px`,
       width: `min(470px, ${Math.round(r.width - 120)}px)`});
-    else for (const k of ["left", "right", "top", "bottom", "width"]) st.style[k] = "";
+    else if (postfach) Object.assign(st.style, {left: `${Math.round(rl.left)}px`, right: "auto", top: "auto", bottom: `${Math.round(innerHeight - rl.bottom)}px`,
+      width: `${Math.round(Math.min(430, rl.width))}px`, transform: "none", alignItems: "stretch"});
+    else for (const k of ["left", "right", "top", "bottom", "width", "transform", "alignItems"]) st.style[k] = "";
   }
   /* Werkzeug-Hinweis (gleicher Platz) stummschalten, solange eine Meldung im Labor steht */
   function hinweisStill(st){
@@ -99,5 +108,8 @@ UI.toast = (() => {
   }
   /* Meldung mit dieser id schließen (z. B. „Alle Ziele erfüllt“, sobald die Abnahme läuft) */
   toast.zu = id => { if (stapel) for (const alt of $$(".toast", stapel)) if (alt.dataset.id === id) alt._schliessen?.(false, true); };
+  /* Beim Ansichtswechsel neu ausrichten: sonst behält ein im Labor entstandener Hinweis dessen Maße und
+     liegt danach über der Hauptaktion des Postfachs (gemessen mit echtem Edge, 09.10.2026). */
+  Bus.an("ansicht", () => { if (stapel && stapel.isConnected) ausrichten(stapel); });
   return toast;
 })();

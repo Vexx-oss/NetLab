@@ -23,7 +23,7 @@
     skills: ["lab.ip", "lab.gateway"],
     titel: "Zwei Zahlen für den Kassenhersteller",
     briefing: "Hi! Der Kassenhersteller richtet nächste Woche die Fernwartung ein und will vorher „die IP-Adresse der Kasse und das Standardgateway“ wissen. Ich hab keine Ahnung, wo das steht. Kannst du an der Kasse nachschauen und mir beides aufschreiben?\n\nLiebe Grüße aus dem Salon, Mira",
-    symptom: "Mira braucht die IP-Adresse und das Standardgateway der Kasse.",
+    symptom: "Mira vom Salon ruft an, gut gelaunt: Der Kassenhersteller braucht zwei Angaben von der Kasse. Seit gestern sucht Mira die Werte im Handbuch – ihre Adresse und die des Routers –, gefunden hat sie nichts. Einen Neustart hat sie auch schon probiert, er hat nichts geändert. Sie kann nicht nachsehen, wo die Angaben stehen, und bittet uns, ihr beide Zahlen aufzuschreiben.",
     erklaerung: "ipconfig zeigt unter Windows die IP-Konfiguration jedes Netzwerkadapters: IPv4-Adresse, Subnetzmaske und Standardgateway. Das Standardgateway ist der Router im eigenen Netz – an ihn schickt der Rechner alles, was nicht im eigenen Netz liegt. Mit ipconfig /all kommen MAC-Adresse, DHCP und DNS-Server dazu.",
     quelle: "Microsoft Learn: ipconfig · Network – Lernfassung",
     lohn: {euro: 30, ruf: 1}});
@@ -45,7 +45,7 @@
     skills: ["lab.gateway", "lab.ping"],
     titel: "Backstube offline – nur per Fernwartung",
     briefing: "Der PC in der Backstube kommt nicht ins Internet, die Bestellungen für morgen hängen. Ich steh im Laden. Die Fernwartung auf den Rechner hab ich dir freigeschaltet, da kommst du nur mit Befehlen ran. Bitte nicht wieder irgendwas umbauen, nur reparieren.\n\nH. Kowalski",
-    symptom: "PC-Backstube kommt nicht ins Internet; der Rest im Laden läuft.",
+    symptom: "Kowalski von der Bäckerei ruft an, knapp und müde. Seit gestern Abend kommt der PC in der Backstube nicht mehr ins Internet, die Bestellungen für morgen hängen in der Warteschlange. Im Laden läuft alles weiter, nur dieser eine Rechner kommt nicht raus. Er hat einen Neustart probiert und das Kabel umgesteckt, ohne Erfolg, und uns die Fernwartung freigeschaltet.",
     lohn: {euro: 50, ruf: 1}});
 
   /* ===== Stufe 2 · Schreibbüro: Linux-Server, Dienst per systemctl (AP1) ===== */
@@ -62,6 +62,6 @@
     skills: ["lab.ports", "lab.dns"],
     titel: "Intranet weg nach dem Update",
     briefing: "Guten Tag,\n1. das Intranet (server.buero.local) lädt seit dem Update gestern Abend nicht mehr;\n2. Dateiablage und Drucken funktionieren;\n3. der Server antwortet auf Ping.\nDer Server ist ein Linux-Rechner; Sie erreichen ihn über sein Terminal.\n\nKonrad Albers",
-    symptom: "Das Intranet lädt nicht; Dateien und Drucken gehen.",
+    symptom: "Albers vom Schreibbüro schreibt am Morgen: Das Intranet lädt seit gestern Abend nicht mehr, Dateiablage und Drucken gehen aber. Der Server läuft und antwortet auf Ping. Sein Dienstleister ist heute nicht erreichbar, nachgesehen hat seitdem niemand. Er bittet uns, im Terminal des Servers nachzusehen, weil das Intranet den ganzen Tag gebraucht wird und die Arbeit sonst steht.",
     lohn: {euro: 55, ruf: 1}});
 })();
