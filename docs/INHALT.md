@@ -79,8 +79,8 @@ Ergebnis kopieren, die eine Umleitung für Klassenraum-Aufträge, Auftrags-Deter
 Hilfevorrat, die geöffneten Trainingskarten, die Denkhilfen, Hilfe-Vorschläge der mittleren Ebene, Wiki
 mit IPv6 und WLAN, die Wache gegen die Lernmotor-Falle — dazu drei Nachträge aus dem laufenden Auftrag:
 **keine schnelle Wiederholung**, der **sichtbare nächste Schritt** und der **Fragen-Generator**. Die
-Fassung wurde auf **2.0.0** gezogen und gebaut; **veröffentlicht ist sie noch nicht** (Push und Tag nur mit
-Freigabe). Die gemessenen Zahlen stehen im [CHANGELOG](CHANGELOG.md) § 2.0.0, die Begründungen und die
+Fassung wurde auf **2.0.0** gezogen und gebaut — inzwischen steht sie auf **2.0.1** (Veröffentlichung des
+heutigen Standes, CHANGELOG-Abschnitt 2.0.1): **`v2.0.0` ist veröffentlicht**, `v2.0.1` folgt mit Freigabe. Die gemessenen Zahlen stehen im [CHANGELOG](CHANGELOG.md) § 2.0.0, die Begründungen und die
 verworfenen Versuche im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 33.
 
 Die **zweite Hälfte derselben Fassung** ist der **Öffnungsweg (Klassenraum Stufe A+B)**: der Auftragscode,

@@ -17,10 +17,11 @@ status: Übergabezettel — bewusst kurz. Jüngster Stand (Fassung 2.0.0 mit Fun
 
 **Drei Runden derselben Fassung sind gebaut und gemessen** — das Fundament, der Klassenraum-Öffnungsweg
 (Stufe A+B) und die Output-Runde (Trefferflächen, Altlasten, R12) —, alles zusammen ist als Fassung
-**2.0.0 ist veröffentlicht**: Release `v2.0.0` mit drei Anhängen, und die **Live-Seite ist byte-gleich
-zum lokalen Bau** (selbst nachgemessen: 2.829.477 B, `C3C51EDA…828E`, `LABOR_VERSION = "2.0.0"`). Offen ist,
-ob der **heutige** Stand (Output-Runde und 20-Geräte-Test) ein eigenes Tag und Release bekommt — nur mit
-Freigabe des Nutzers, je Handlung einzeln. Die Klassenraum-Stufen **C** (Live-Server) und **D** (QR) kommen
+**Die Fassung steht auf 2.0.1, die Veröffentlichung wird aufgefrischt.** Das Release `v2.0.0` (09.10.2026,
+14:44 UTC) war **älter** als die Output-Runde und hatte **keine APK**; weil es sich ohne `--force` nicht
+verschieben lässt (Hausregel), zieht die Fassung auf **2.0.1** und bekommt ein **neues Tag** — die CI baut
+daraus ein frisches Release mit der APK als **viertem** Anhang. **`v2.0.0` bleibt unverändert stehen.** Für
+Push und Tag gilt weiter die **Freigabe des Nutzers**, je Handlung einzeln. Die Klassenraum-Stufen **C** (Live-Server) und **D** (QR) kommen
 nach **E6** später.
 
 ## 2 · Was in dieser Sitzung entstanden ist
@@ -81,7 +82,7 @@ heißt: in dieser Sitzung nachgerechnet.
 
 | Prüfung | Ergebnis |
 |---|---|
-| `sh tools/test.sh` (Endstand mit Output-Runde und 20-Geräte-Test) | **733/733 grün**, 82 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| `sh tools/test.sh` (Endstand 2.0.1) | **734/734 grün**, 82 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
 | dieselbe Messung am Ende von Klassenraum A+B / des Fundaments | 661/661 (74/91) · 620/620 (70/90) (selbst gemessen) |
 | dieselbe Messung **vor** der Sitzung | 471/479 grün, **8 rot**, 55 Testdateien, 84 Module (Nullmessung des Leads) |
 | `node tests/run.js --klassenraum` | **104/104 grün** (selbst gemessen) — der Filter schneidet führende Striche ab (Befund **K2 behoben**); ein Filter **ohne** Treffer endet mit **Exit 1** und der Meldung „KEIN Test passt zum Filter … Das ist kein grüner Lauf." |
@@ -90,9 +91,9 @@ heißt: in dieser Sitzung nachgerechnet.
 | Menüprobe Web · Android | **45 erfüllt, 0 verletzt** · **49 erfüllt, 0 verletzt** (je 5 von 5 Profilen) (selbst gemessen) |
 | `tools/rauch.py` | **45/45** (14 Ansichten × 3 Breiten) (Lead; der Aufbau ist im Quelltext nachgezählt) |
 | R12 im Programm (`ethos.r12_js()`) | `klasse` **6/6**, `Auftrag` **3/3** (Lead) |
-| `python bauen.py` | **128 Module, 2225 KB** → `web/index.html`, Version **2.0.0** (Lead) |
-| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.829.477 B**, SHA256 `C3C51EDA…828E`, byte-gleich, **0 Außenverweise** (Lead; Bytes und Hash selbst nachgerechnet) |
-| Android-APK 2.0.0 (neu gebaut) | **1.164.828 B**, Signatur gültig — **die Größe ist stabil, der SHA256 nicht:** derselbe Quellstand ergibt bei jedem Bau **einen anderen Hash** (gemessen von `denkhilfen-2`: `2208C08A…` → `CF5F2905…`), die APK wird deshalb **ohne feste Prüfsumme** zitiert (Lead; die Größe habe ich selbst nachgerechnet) |
+| `python bauen.py` | **128 Module, 2239 KB** → `web/index.html`, Version **2.0.1** (Lead) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.830.266 B**, SHA256 `B0484888…BE0DC`, byte-gleich, **0 Außenverweise** (Lead; Größe und Hash selbst nachgerechnet) |
+| Android-APK **2.0.1** | **1.164.828 B**, Signatur gültig — **ohne Prüfsumme:** die APK ist **nicht reproduzierbar**, derselbe Quellstand ergibt bei jedem Bau einen anderen Hash (gemessen: `2208C08A…` → `CF5F2905…` → `60F4CF99…`), nur die **Größe** ist stabil (Lead; Größe selbst nachgerechnet) |
 | `tools/seite.py --pruefen` | GRÜN: **45 Dokumente** (Lead, nach dem Neubau) |
 
 **Vier Regeln, die diese Sitzung gesetzt hat:**
@@ -116,7 +117,7 @@ heißt: in dieser Sitzung nachgerechnet.
 | **a** | **`python tools/seite.py` erneut laufen lassen** — nach diesem Nachzug ist `docs/doku/` wieder älter als die Quellen; es sind dann **45** Dokumente | offen (Lead) |
 | **b** | **Stand-Tabelle in [`Architektur.md`](../Architektur.md)** nachziehen — gehört dem **Lead** | offen (Lead) |
 | **c** | **Lokal committen** — vorher die Zeilenenden prüfen (Byte-Vergleich, Schritt 6 des Protokolls) | offen (Lead) |
-| **d** | **Release auffrischen — nur mit Freigabe, je Handlung einzeln.** Zwei Wege: **neu taggen** (dann **2.0.1**, weil `v2.0.0` ohne `--force` nicht verschoben wird — Hausregel —, mit vollem Neubau) **oder** den Ablauf **„Release anlegen"** von Hand für `v2.0.0` anstoßen (laut Protokoll idempotent, ersetzt die Anhänge). Danach Schritt 8: nachmessen, was online steht. **Einmalig vorzubereiten:** die zwei Repository-Secrets für den Android-Anhang (siehe § 5) | offen, entscheidet der Nutzer |
+| **d** | **Tag `v2.0.1` setzen und pushen** (nur mit Freigabe des Nutzers) — die CI baut das frische Release mit **vier** Anhängen (Browser-ZIP, `.html`, `.exe`, **APK**); danach Schritt 8: nachmessen, was online steht. **Einmalig vorzubereiten:** die zwei Repository-Secrets für den Android-Anhang (siehe § 5) | bereit — Fassung ist gezogen, Freigabe fehlt |
 | **e** | **Desktop-Hülle / `.exe`** — im Release `v2.0.0` liegt eine; ob für den heutigen Stand eine neue gebaut wird, ist offen | offen (Lead) |
 | **f** | **Klassenraum:** Stufe **C** (Live-Server) und **D** (QR) nach **E6**; **O1** ist entschieden (Platzzahl bleibt im Datei-Dialog, kein siebtes Bedienelement) | offen — [`Architektur.md`](../Architektur.md) § 12 |
 
@@ -130,10 +131,10 @@ steht in [`Architektur.md`](../Architektur.md) § 12.1, die Bau-Entscheidungen *
 
 Offen bleibt nur:
 
-1. **Ob der heutige Stand ein eigenes Tag und Release bekommt.** `v2.0.0` ist seit 09.10.2026 online (Release
-   mit drei Anhängen, Seite byte-gleich zum lokalen Bau) — die Output-Runde und der 20-Geräte-Test sind aber
-   **jünger**. Push, Tag und Release gibt es nur auf ausdrückliche Freigabe, je Handlung einzeln
-   (siehe [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md), Schritt 7).
+1. **Freigabe für Push und Tag `v2.0.1`.** **Entschieden ist:** die Veröffentlichung trägt den heutigen Stand;
+   die Fassung ist auf **2.0.1** gezogen, das Tag ist vorbereitet. **Offen ist nur die Freigabe** — je
+   Handlung einzeln (siehe [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md), Schritt 7). `v2.0.0` bleibt
+   dabei unangetastet (kein `--force`).
 
    **Der Ablauf hängt künftig einen vierten Anhang an: die APK.** Der neue Job `android` in
    `.github/workflows/release.yml` holt den Signaturschlüssel aus **zwei Repository-Secrets** —
@@ -162,8 +163,9 @@ Offen bleibt nur:
   **eingefroren, nicht behoben**.
 * **Keine echte Unterrichtsstunde**, kein Test mit einem Menschen.
 * **Klassenraum Stufe C und D** (Live-Server, QR) sind **nicht gebaut** — nach E6 später.
-* **Online steht `v2.0.0`** — selbst nachgemessen: die Live-Seite ist **byte-gleich** zum lokalen Bau
-  (2.829.477 B, `C3C51EDA…828E`). Das **Release** `v2.0.0` (09.10.2026, 14:44 UTC) trägt drei Anhänge
+* **Online steht noch `v2.0.0`** — beim Schreiben selbst nachgemessen: die Live-Seite war byte-gleich zum
+  damaligen Bau (2.829.477 B, `C3C51EDA…828E`); nach dem Push liefert sie **2.0.1**. Das **Release**
+  `v2.0.0` (09.10.2026, 14:44 UTC) trägt drei Anhänge
   (Browser-ZIP, `.exe`, `.html`) und ist **älter** als die Output-Runde; die **APK liegt nicht** im Release —
   der Ablauf `.github/workflows/release.yml` wird gerade so erweitert, dass sie künftig **angehängt** wird
   (sonst bleibt die Android-Fassung für Nutzer unsichtbar). **Auffrischen:** neu taggen (**2.0.1**, voller
@@ -185,7 +187,7 @@ Offen bleibt nur:
 ```powershell
 cd 10-Projekte\Lernprojekte\Netzwerk-Labor
 $node = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64\node.exe"
-& $node tests/run.js          # muss 733/733 grün melden, 0 rot, 0 übersprungen
+& $node tests/run.js          # muss 734/734 grün melden, 0 rot, 0 übersprungen
 python tools/ethos.py         # GRUEN gegen tests/stil-stand.json (R12 nur mit --dom)
 python tools/klassen.py       # 0 Klassen ohne CSS-Regel
 node tools/sim-stand.js       # Simulation unverändert gegenüber dem Referenzstand

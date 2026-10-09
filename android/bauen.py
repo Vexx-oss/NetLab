@@ -68,8 +68,10 @@ PAKET = "oss.vexx.netlab"
 # Angehoben am 09.10.2026 mit dem Fassungszug 1.2.4 → 2.0.0: version_lesen leitet aus
 # versionName 2.0.0 den Wert 2*10000 + 0*100 + 0 = 20000 ab und bricht bei
 # `VERSION_CODE < abgeleitet` ab. 20001 liegt genau eine Bauzählung darüber.
-# Die APK selbst wurde NICHT neu gebaut — Android ist nicht Teil dieses Auftrags.
-VERSION_CODE = 20001
+# Angehoben am 09.10.2026 mit dem Fassungszug 2.0.0 → 2.0.1: abgeleitet wird jetzt
+# 2*10000 + 0*100 + 1 = 20001; die Hausregel verlangt einen Wert DARÜBER (nicht gleich),
+# damit eine APK mit gleichem versionName aber neuerem Bau installierbar bleibt → 20002.
+VERSION_CODE = 20002
 
 SDK_ORTE = [
     Path(r"C:\Users\Student\android-sdk"),

@@ -5,8 +5,59 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
 [`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`.
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0` (über die GitHub-API gemessen am 09.10.2026); **`v2.0.1` folgt** mit dem Auffrischen dieser Fassung.
 
+---
+
+## 2.0.1 — Veröffentlichung des heutigen Standes (09.10.2026)
+
+**Warum diese Fassung.** Die **Seite** war tagesaktuell (byte-gleich zum lokalen Bau), aber das **Release
+`v2.0.0`** stammt vom 09.10.2026, **14:44 UTC** — es ist **älter** als die Output-Runde und enthält **keine
+APK**. Ein Release lässt sich nicht ohne `--force` verschieben (Hausregel), also zieht die Fassung auf
+**2.0.1** und bekommt ein **neues Tag**; die CI baut daraus ein frisches Release, und der neue Android-Job
+hängt die APK als **vierten** Anhang an. **`v2.0.0` bleibt unverändert stehen** — es wird weder
+überschrieben noch verschoben.
+
+### Neu
+
+- **Platz und Abdruck am geöffneten Auftrag.** Die Azubi-Ansicht „Mitarbeit" hat jetzt ein Feld **Platz**
+  (1…31) und zeigt den **Klassenraum-Abdruck** des **tatsächlich geladenen** Netzes (`src/ui/klassenraum.js:265`,
+  `:268`, `:279`; B § 6.5).
+- **Das Namenstor in `tools/test.sh`.** Das Werkzeug `tools/pruefe-namen-flicken.js` fand die
+  Anführungszeichen-Falle in Testnamen — aber **niemand rief es auf**; sie hat am 09.10.2026 **dreimal** den
+  ganzen Lauf mit `LADEFEHLER` (Exit 2) angehalten. Jetzt läuft sein **Trockenlauf vor** den Tests (er
+  schreibt nichts), prüft jede Testdatei zusätzlich mit `node --check` und bricht mit Hilfetext ab
+  (`tools/test.sh:29-40`, `:44`, `:50`).
+- **Fassung 2.0.1 gezogen** — **18 Stellen, 0 Fehler** (Trockenlauf zuerst): `bauen.py`,
+  `shell/src-tauri/tauri.conf.json`, `Cargo.toml`, der **eigene** Block im `Cargo.lock`,
+  `.github/workflows/release.yml`, `docs/Bauen.md`, `README.md`, `android/LIESMICH.md`, `docs/Liesmich.md`,
+  `android/huelle/AndroidManifest.xml`. **`VERSION_CODE` 20002** von Hand: die Hausregel verlangt einen Wert
+  **über** dem aus `versionName 2.0.1` abgeleiteten 20001, damit eine APK mit gleichem Namen, aber neuerem
+  Bau installierbar bleibt (Begründung als Kommentar in `android/bauen.py:68-74`).
+- **Der Release-Ablauf hängt die APK an.** Ein eigener Job **`android`** lädt den Signaturschlüssel aus zwei
+  Repository-Secrets (`ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORT`) und hängt die APK als **vierten**
+  Anhang neben Browser-ZIP, `.html` und `.exe`. Fehlen die Secrets, bricht **nur dieser Job** mit klarer
+  Meldung ab — die drei anderen Anhänge kommen trotzdem, weil er mit `needs: release` **parallel** zum
+  Windows-Job läuft. Absicht: `android/signatur/` liegt **nicht** im Git, und `android/bauen.py` würde sonst
+  einen **neuen** Schlüssel erzeugen — eine APK, die sich nicht über eine alte Fassung installieren lässt,
+  wäre schlimmer als keine.
+
+### Prüfstand
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` | **734/734 grün**, 82 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| `python bauen.py` | **128 Module, 2239 KB**, Version **2.0.1** (Lead) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.830.266 B**, SHA256 `B048488874AA54C3A97F24CF2D8C462404A4AFC16BABE520F252421E23DBE0DC`, byte-gleich, **0 Außenverweise** (Lead; Größe und Hash selbst nachgerechnet) |
+| Android-APK 2.0.1 | **1.164.828 B**, Signatur gültig — **ohne Prüfsumme**, sie ist **nicht reproduzierbar**: derselbe Quellstand ergibt jedes Mal einen anderen Hash (die 2.0.0-APK hatte bei gleicher Größe wieder einen anderen, gemessen `60F4CF99…`) |
+| Fassung in den Erzeugnissen | **2.0.1** in `web/index.html`, `docs/index.html`, `Netzwerk-Labor.html`, `android/bau/assets/index.html` (selbst geprüft) |
+
+### Nicht geprüft (ehrlich)
+
+- **Der CI-Lauf ist nicht abgewartet:** ob das Release `v2.0.1` schon steht und ob der Android-Job
+  durchläuft, ist hier **nicht gemessen**; die zwei **Secrets** kann nur der Nutzer anlegen.
+- **Die Live-Seite** trug beim Schreiben noch die 2.0.0-Auslieferung; nach dem Push liefert sie 2.0.1.
+- Die APK steht hier **ohne Prüfsumme** — sie ist nicht byte-reproduzierbar, nur ihre **Größe** ist stabil.
 ---
 
 ## 2.0.0 — Output-Runde: Trefferflächen, Altlasten und R12 (09.10.2026)
