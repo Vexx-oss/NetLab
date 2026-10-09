@@ -3,6 +3,7 @@
    UI.leiste.aufbauen(container) / abbauen()      (UI.modus ruft das auf)
    UI.leiste.status({ampeln:[{name, farbe:"gruen"|"gelb"|"rot", zustand}], euroProStunde, ruf, offen, text})
    UI.leiste.miniBereich   DOM-Element für ein Mini-Ticket (Inhalt kommt vom Spiel; bleibt über Umbauten erhalten)
+   UI.leiste.miniHilfe     DOM-Element für Denkhilfe und Lernanker des Mini-Tickets (Vertrag § 5)
    Regeln: nur Maus, keine Tastatur, kein Ton, kein Fokusklau. 55 % deckend ohne Maus (einstellbar), voll deckend mit Maus,
    klappt bei Maus darüber auf (320×300) und 5 s nach dem Verlassen wieder zu (300×56). Ziehbar über die Griffleiste. */
 UI.leiste = (() => {
@@ -10,7 +11,10 @@ UI.leiste = (() => {
   const zustand = {ampeln: [], euroProStunde: null, ruf: null, offen: 0, text: "", titel: ""};
   let root = null, karte = null, el = {}, auf = false, zuTimer = null, aufTimer = null, groesseMarke = 0;
   let mini = null;                 /* erst bei Bedarf anlegen (keine Aufrufe beim Laden) */
+  let hilfe = null;
   const miniEl = () => mini ||= h("div", {class: "lk-mini", "aria-label": "Mini-Ticket"});
+  /* Eigener Bereich unter dem Ticket: der Hilfe-Knopf soll beim Scrollen nicht verschwinden (§ 5). */
+  const hilfeEl = () => hilfe ||= h("div", {class: "lk-mini-hilfe", "aria-label": "Denkhilfe und Lernanker"});
 
   const einstLeiste = () => Object.assign({deckkraft: 0.55, ecke: "ur"}, (store.get("einst", {}) || {}).leiste);
   const FARBE = {gruen: "ok", ok: "ok", green: "ok", gelb: "warn", warn: "warn", yellow: "warn", orange: "warn", rot: "bad", bad: "bad", red: "bad"};
@@ -42,7 +46,7 @@ UI.leiste = (() => {
       h("div", {class: "lk-zeile"},
         h("div", {class: "lk-griff", title: "Ziehen, um die Leiste zu verschieben", ...drag}, UI.symbol("griff", 16)),
         el.ampeln, h("div", {class: "lk-werte", ...drag}, el.euro, el.ruf, el.offen), oeffnen),
-      h("div", {class: "lk-auf"}, el.text, miniEl(), h("div", {class: "lk-fuss"}, h("span", {class: "lk-marke"}, "Netzwerk-Labor"), ausblenden)));
+      h("div", {class: "lk-auf"}, el.text, miniEl(), hilfeEl(), h("div", {class: "lk-fuss"}, h("span", {class: "lk-marke"}, "Netzwerk-Labor"), ausblenden)));
     root.append(karte);
     karte.addEventListener("pointerenter", () => {
       karte.classList.add("hover");
@@ -64,6 +68,7 @@ UI.leiste = (() => {
   function abbauen(){
     clearTimeout(zuTimer); clearTimeout(aufTimer); zuTimer = aufTimer = null;
     if (mini && mini.parentNode) mini.remove();
+    if (hilfe && hilfe.parentNode) hilfe.remove();
     root?.remove(); root = null; karte = null; el = {}; auf = false;
   }
   function groesse([b, hh]){
@@ -109,5 +114,7 @@ UI.leiste = (() => {
   function status(s){ if (s && typeof s === "object") Object.assign(zustand, s); zeichnen(); }
 
   return {aufbauen, abbauen, status, darstellen, aufklappen, zuklappen,
-          get miniBereich(){ return typeof document !== "undefined" ? miniEl() : null; }, get aufgebaut(){ return !!root; }, get offenAuf(){ return auf; }, get zustand(){ return {...zustand}; }};
+          get miniBereich(){ return typeof document !== "undefined" ? miniEl() : null; },
+          get miniHilfe(){ return typeof document !== "undefined" ? hilfeEl() : null; },
+          get aufgebaut(){ return !!root; }, get offenAuf(){ return auf; }, get zustand(){ return {...zustand}; }};
 })();

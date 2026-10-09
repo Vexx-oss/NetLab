@@ -39,7 +39,14 @@ function inhalt(f) {
   const t = fs.readFileSync(f, "utf8");
   return f === LM.pfad && LM.kopie ? t.replace(KOPF, "") : t;
 }
-const ctx = vm.createContext({console, setTimeout, clearTimeout, Date, Math, JSON, Intl});
+/* Der Testbereich bekommt `require`, `__dirname` und `__filename` mit: dadurch kann eine Testdatei
+   eine Datei aus `src/ui/` (oder einer anderen nicht-headless Schicht) selbst nachladen und genau die
+   Datei prüfen, die im Programm läuft. Ohne sie ist `typeof require === "undefined"` und ein Test, der
+   eine UI-Datei laden will, nimmt fälschlich einen Browser-Zweig. Gemessen und begründet von
+   `lernstand-hilfe` am 07.10.2026 (tests/run.js:42 war die Ursache von drei roten Tests).
+   Die Schichten mit `headless = False` werden weiterhin NICHT automatisch geladen — die UI-Schicht
+   braucht `document`, und tests.html enthält sie nicht. */
+const ctx = vm.createContext({console, setTimeout, clearTimeout, Date, Math, JSON, Intl, require, __dirname, __filename});
 const code = [`"use strict"; const LABOR_VERSION = "test";`];
 for (const f of module()) code.push(`/* ${path.relative(WURZEL, f)} */\n` + inhalt(f));
 code.push(fs.readFileSync(path.join(__dirname, "harness.js"), "utf8"));

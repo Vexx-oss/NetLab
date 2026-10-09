@@ -116,12 +116,15 @@ Spiel.aktiveInstanz = () => Spiel.st.aktiv ? Spiel.instanz(Spiel.st.aktiv) : nul
 Spiel.defVon = inst => inst ? Spiel.ticketDef(inst.ticketId, inst) : null;
 
 /* Sichtbare Tickets, sortiert: Fristen zuerst (früheste oben), dann – nach zwei gleichen Formen in Folge – die anderen Formen
-   vor der gesperrten (der Hub schlägt sie so nie als nächstes vor), dann Ungelesenes, dann nach Eingang */
+   vor der gesperrten (der Hub schlägt sie so nie als nächstes vor), dann Ungelesenes, dann nach Eingang.
+   „training" ist seit der Hilfestellung (07.10.2026) die dritte unsichtbare Quelle: Trainingsinstanzen liegen
+   im Spielstand (damit Spiel.oeffnen sie findet), gehören aber nicht ins Postfach und zählen nicht als offen –
+   verbindlich: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 6. */
 Spiel.postfach = function(){
   const t = jetzt();
   const sperre = Spiel.mischer ? Spiel.mischer.gesperrt(Spiel.formVerlauf()) : null;
   const gesperrt = i => sperre && Spiel.formVon(Spiel.defVon(i)) === sperre ? 1 : 0;
-  return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung" && i.quelle !== "raetsel").slice().sort((a, b) => {
+  return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung" && i.quelle !== "raetsel" && i.quelle !== "training").slice().sort((a, b) => {
     const fa = a.frist ?? Infinity, fb = b.frist ?? Infinity;
     if (fa !== fb) return fa - fb;
     if ((a.kuratiert || 99) !== (b.kuratiert || 99)) return (a.kuratiert || 99) - (b.kuratiert || 99);     /* erste Stunde: Folge vorn */

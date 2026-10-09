@@ -18,7 +18,9 @@ UI.bewegung = function(){
 };
 
 UI.app = (() => {
-  const REIHE = ["heute", "postfach", "labor", "kunden", "wiki", "lernstand", "shop"];
+  /* Reihenfolge der Andock-Knöpfe. „training" steht seit der Hilfestellung (07.10.2026) vor „lernstand":
+     der Trainingsbereich ist der Ort, an dem ein Azubi ohne Auftragsdruck übt (Vertrag § 6). */
+  const REIHE = ["heute", "postfach", "labor", "training", "kunden", "wiki", "lernstand", "shop"];
   const PLATZ = {
     postfach:  {titel: "Postfach",  symbol: "postfach",  text: "Hier landen die Aufträge deiner Kunden: Störungen, Projekte, Wartung.", mehr: "Das Postfach öffnet, sobald die Karriere eingebaut ist."},
     kunden:    {titel: "Kunden",    symbol: "kunden",    text: "Deine Kunden mit Vertrag, Ampel und Bewertungen.", mehr: "Die Kundenliste kommt mit der Karriere."},

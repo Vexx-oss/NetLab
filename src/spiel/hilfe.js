@@ -181,3 +181,159 @@ Spiel.seniorFaellig = function(inst){
   return jetzt() - (inst.fortschritt || inst.geoeffnet || jetzt()) >= Spiel.SENIOR_NACH_MS;
 };
 Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speichern(); };
+
+/* ===================================================================================================
+   TERMINAL-HILFE (Baustein B · Vertrag „Hilfestellung – Stufen und Schnittstellen" § 4)
+   Angefügt am Dateiende: die bestehende Hilfeleiter oben bleibt unverändert (sie gehört dem
+   Hilfeleiter-Baustein). Öffentliche Fläche – NUR diese vier Funktionen aufrufen:
+     Spiel.hilfe.passend({netz, id, modus, art, verlauf, letzterFehler, max}) -> [{…Vorschlag, warum}]
+     Spiel.hilfe.geruest({netz, id, modus, art})                              -> Text | null
+     Spiel.hilfe.leiter({netz, id, skill, letzterFehler})                     -> Spiel.LEITER + {vorschlag}
+     Spiel.hilfe.syntaxBruecke({netz, id, modus, text, fehler})               -> {titel, muster, beispiel} | null
+   Die ENTSCHEIDUNG (Stufe, Gerät, Modus, Anzahl) liegt hier, die Oberfläche zeichnet nur (Vertrag § 4.1).
+   Baustein A (Spiel.stufe) wird DEFENSIV gelesen: fehlt er oder kennt er die Stufe nicht, gilt der
+   Rückfall „azubi" (Vertrag § 3 Regel 1). Kein Aufruf hier wirft, kein Math.random, kein Date.now. */
+(() => {
+  /* Zahlen aus Vertrag § 2. Sie greifen nur, solange Spiel.stufe (Baustein A) fehlt oder unbekannt ist. */
+  const STUFEN = {
+    "azubi":      {rang: 1, vorschlaege: 1, leiter: "immer",      geruest: "ausfuehrlich"},
+    "azubi-plus": {rang: 2, vorschlaege: 2, leiter: "immer",      geruest: "knapp"},
+    "geselle":    {rang: 3, vorschlaege: 1, leiter: "nachfehler", geruest: "nein"},
+    "meister":    {rang: 4, vorschlaege: 0, leiter: "nein",       geruest: "nein"},
+  };
+  const daten = () => (typeof DATEN !== "undefined" && DATEN && DATEN.hilfen) || null;
+  const stufe = () => (typeof Spiel !== "undefined" && Spiel.stufe) || null;
+
+  function kennwerte(){
+    let id = null;
+    const s = stufe();
+    try { if (s && typeof s.id === "function") id = s.id(); } catch (e) { id = null; }
+    if (!id) { try { const e = (typeof store !== "undefined" && store.get) ? store.get("einst", {}) : null; if (e && e.stufe) id = e.stufe; } catch (e) { id = null; } }
+    return STUFEN[id] || STUFEN.azubi;                       /* unbekannt oder fehlend -> azubi */
+  }
+  /* Erst Spiel.stufe fragen (eine Quelle der Wahrheit), dann der eigene Rückfall. */
+  function kann(frage){
+    const s = stufe();
+    try { if (s && typeof s.kann === "function") { const w = s.kann(frage); if (w != null) return w; } } catch (e) { /* Rückfall */ }
+    return kennwerte()[frage];
+  }
+  const rang = () => { const r = Number(kann("rang")); return r >= 1 && r <= 4 ? r : 1; };
+
+  /* Geräteart-Schlüssel wie DATEN.hilfen.VORSCHLAEGE.geraet. */
+  function geraeteArt(netz, id){
+    const g = netz && netz.geraete ? netz.geraete[id] : null;
+    if (!g) return null;
+    if (g.typ === "firewall") return "fw";
+    if (typeof Modell === "undefined" || !Modell) return null;
+    if (Modell.IOS && Modell.IOS[g.typ]) return "ios";
+    if (Modell.HOST && Modell.HOST[g.typ]) {
+      const os = typeof Modell.osVon === "function" ? Modell.osVon(g) : "windows";
+      return os === "linux" ? "host-linux" : "host-windows";
+    }
+    return null;
+  }
+
+  /* Gab es einen Fehler? Ein Ergebnis der Konsole (mit prompt/geaendert) ohne fehler:true zählt nicht. */
+  function hatFehler(f){
+    if (!f) return false;
+    if (typeof f !== "object") return true;
+    if (f.fehler === true) return true;
+    if (f.fehler === false) return false;
+    if ("prompt" in f || "geaendert" in f) return false;
+    return true;
+  }
+
+  const leiterRang = bereich => {
+    const i = (Spiel.LEITER || []).findIndex(s => s.id === bereich);
+    return i < 0 ? 99 : i;                                   /* unbekannter Bereich ans Ende, nie verwerfen */
+  };
+  /* Reihenfolge: vorrang (Standard 0), dann Leiter-Reihenfolge von unten nach oben (OSI), dann Ebene, dann id. */
+  const sortiere = (a, b) => ((a.vorrang || 0) - (b.vorrang || 0)) || (leiterRang(a.bereich) - leiterRang(b.bereich)) ||
+    ((a.ebene || 1) - (b.ebene || 1)) || String(a.id).localeCompare(String(b.id));
+
+  function warum(v, o){
+    const s = (Spiel.LEITER || []).find(x => x.id === v.bereich);
+    if (hatFehler(o.letzterFehler)) return "Der letzte Befehl ging schief – nächster Prüfschritt" + (s ? " „" + s.titel + "\": " + s.frage : ".");
+    return s ? "Leiter „" + s.titel + "\": " + s.frage : "Nächster sinnvoller Schritt.";
+  }
+  /* Passende Vorschläge ohne Stufen-Grenze – Grundlage für passend() und leiter(). */
+  function kandidaten(o){
+    const d = daten(); if (!d || !Array.isArray(d.VORSCHLAEGE)) return [];
+    const art = geraeteArt(o.netz, o.id);
+    if (!art) return [];
+    const g = o.netz.geraete[o.id];
+    return d.VORSCHLAEGE.filter(v => v && v.id && v.bereich && v.befehl != null &&
+        (!v.geraet || v.geraet === "alle" || v.geraet === art) &&
+        (!v.nurTyp || v.nurTyp.includes(g.typ)) &&
+        (!v.modus || !v.modus.length || o.modus == null || v.modus.includes(o.modus)) &&
+        (!o.art || v.art === o.art))
+      .map(v => Object.assign({}, v, {warum: warum(v, o)}))
+      .sort(sortiere);
+  }
+
+  /* ---------- § 4.1: der Vorschlagsstreifen ---------- */
+  Spiel.hilfe.passend = function(o = {}){
+    const anzahl = Math.max(0, Number(kann("vorschlaege")) || 0);
+    if (!anzahl || !o.netz || !o.netz.geraete || !o.netz.geraete[o.id]) return [];
+    if (kann("leiter") === "nachfehler" && !hatFehler(o.letzterFehler)) return [];   /* geselle: nur nach Fehler */
+    const grenze = o.max == null ? anzahl : Math.max(0, Math.min(anzahl, Number(o.max) || 0));
+    if (!grenze) return [];
+    const alle = kandidaten(o);
+    const schon = new Set((o.verlauf || []).map(z => String(z).trim().toLowerCase()).filter(Boolean));
+    const frisch = alle.filter(v => !schon.has(String(v.befehl).trim().toLowerCase()));
+    /* Ist alles schon dagewesen, wieder von vorn – ein Azubi läuft nie in eine leere Hilfe (Vertrag § 2.1). */
+    return (frisch.length ? frisch : alle).slice(0, grenze);
+  };
+
+  /* ---------- § 4.1: „Was geht hier?" je Modus ---------- */
+  Spiel.hilfe.geruest = function(o = {}){
+    const d = daten(); if (!d || !d.GERUEST) return null;
+    const r = rang();
+    if (r >= 3) return null;                                  /* geselle und meister: kein Gerüst */
+    if (r >= 2 && kann("geruest") === "nein") return null;
+    const art = geraeteArt(o.netz, o.id); if (!art) return null;
+    const kasten = d.GERUEST[art]; if (!kasten) return null;
+    const ersatz = art === "ios" ? "priv" : art === "fw" ? "fwUser" : "host";
+    const text = kasten[o.modus] || kasten[ersatz];
+    if (!text) return null;
+    return r >= 2 ? String(text).split("\n")[0].trim() : String(text);   /* azubi-plus: knapper Text */
+  };
+
+  /* ---------- § 4.1: Werkzeugleiter (alle 6 Sprossen, je Sprosse der passende Befehl) ---------- */
+  Spiel.hilfe.leiter = function(o = {}){
+    const sicht = kann("leiter");
+    if (sicht === "nein") return [];
+    if (sicht === "nachfehler" && !hatFehler(o.letzterFehler)) return [];
+    const alle = kandidaten({netz: o.netz, id: o.id, modus: o.modus, art: o.art});
+    return (Spiel.LEITER || []).map(s => {
+      const v = alle.find(x => x.bereich === s.id) || null;
+      return Object.assign({}, s, {id: s.id, titel: s.titel, frage: s.frage, werkzeug: s.werkzeug,
+        vorschlag: v, dran: !!(o.skill && v && (v.skills || []).includes(o.skill))});
+    });
+  };
+
+  /* ---------- § 4.1: Syntax-Brücke nach einem Tippfehler oder auf „ich will X" ---------- */
+  Spiel.hilfe.syntaxBruecke = function(o = {}){
+    const d = daten(); if (!d || !d.SYNTAX) return null;
+    const r = rang();
+    if (r >= 4) return null;                                  /* meister: keine ungefragte Hilfe */
+    const fehler = hatFehler(o.fehler);
+    if (!fehler && r >= 2) return null;                       /* azubi-plus und geselle: nur nach Fehler */
+    const zeile = String(o.text == null ? "" : o.text).trim();
+    if (!zeile) return null;
+    const art = geraeteArt(o.netz, o.id);
+    if (!art) return null;
+    for (const schluessel of Object.keys(d.SYNTAX)) {
+      const e = d.SYNTAX[schluessel]; if (!e || !e.erkennt) continue;
+      let re; try { re = new RegExp(e.erkennt, "i"); } catch (err) { continue; }
+      if (!re.test(zeile)) continue;
+      const muster = art === "ios" ? e.ios : art === "fw" ? e.fw : art === "host-linux" ? e["host-linux"] : e.host;
+      if (!muster) continue;                                  /* passt, aber diese Geräteart kennt es nicht */
+      const bsp = e.beispiel && (e.beispiel[art] || (art === "host-windows" ? e.beispiel.host : null));
+      return {titel: e.titel || schluessel, muster: String(muster),
+        beispiel: r >= 2 ? null : (bsp == null ? null : String(bsp)),      /* knapp: nur das Muster */
+        hinweis: e.hinweis || null, schluessel};
+    }
+    return null;
+  };
+})();

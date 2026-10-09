@@ -41,8 +41,23 @@ html[data-modus="leiste"] body{overflow:hidden}
 .lk-text{font-size:13px; color:var(--muted); line-height:1.35}
 .lk-text:empty{display:none}
 .lk-mini{flex:1 1 auto; min-height:0; overflow:auto; border-radius:var(--radius)}
-.lk-mini:empty{display:none}
+.lk-mini:empty, .lk-mini-hilfe:empty{display:none}
 .lk-fuss{display:flex; align-items:center; margin-top:auto}
 .lk-marke{font:700 11px/1 var(--display); color:var(--faint); letter-spacing:.02em}
 .lk-klein{margin-left:auto; min-height:28px; padding:0 8px; border-radius:7px; border:1px solid var(--line); background:none; color:var(--muted); font:600 11.5px/1 var(--body)}
 .lk-klein:hover{color:var(--ink); border-color:var(--line-2)}
+/* ---------- Mini: Denkhilfe und Lernanker (Vertrag § 5) ----------
+   Der Hilfe-Bereich der Leiste (UI.leiste.miniHilfe) und die Bausteine, die UI.karriere.miniZeichnen
+   in der Leiste UND im Mini-Overlay zeigt. Diese Stil-Datei gehört dem Baustein „Leiste/Mini". */
+.lk-mini-hilfe{flex:0 1 auto; min-height:0; overflow:auto}
+.mk-hilfe-bereich{display:flex; flex-direction:column; gap:4px}
+.mk-hilfe{padding:4px 8px; border-radius:var(--radius-s); border-left:2px solid var(--accent); background:var(--panel-2)}
+.mk-hilfe.knapp{border-left-color:var(--warn)}
+.mk-hilfe-art{display:block; font-size:11px; color:var(--muted)}
+.mk-hilfe-text{margin:0; font-size:12px; line-height:1.35; white-space:pre-wrap}
+.mk-hilfe-vorrat{display:block; margin-top:4px; font-size:11px; color:var(--muted)}
+.mk-anker{margin-top:8px; padding:4px 8px; border-radius:var(--radius-s); background:var(--ok-soft)}
+.mk-anker-titel{display:block; font-size:12px}
+.mk-anker-text{margin:0; font-size:12px; line-height:1.35}
+.mk-anker-quelle{margin:0; font-size:11px; color:var(--muted)}
+.mk-hilfe-knopf, .mk-wiki-knopf{align-self:flex-start}

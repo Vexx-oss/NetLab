@@ -1,0 +1,45 @@
+/* ---------- Terminal-Hilfe: Vorschlagsstreifen unter dem Schirm (Vertrag § 4.1, Präfix hl-) ----------
+   Sitzt zwischen Schirm und Hilfezeile der Konsole: „Was geht hier?", die sechs Sprossen der
+   Werkzeugleiter, anklickbare Vorschläge und die Syntax-Brücke. Alles ist per Maus bedienbar;
+   der Streifen nimmt keinen Fokus (erst ein Klick setzt den Befehl in die Eingabe). Farben und
+   Abstände kommen wie überall aus den Tokens in basis.css. */
+.hl-huelle{display:block; min-height:0; background:var(--panel); flex:0 0 auto}
+.hl-huelle:not(.hl-mit){display:none}
+.hl-streifen{display:flex; flex-direction:column; gap:8px; padding:8px 12px; max-height:200px; overflow:auto;
+  border-top:1px solid var(--line); background:var(--panel); font-size:12px}
+.hl-kopf{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.hl-titel{color:var(--accent); font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
+.hl-stufe{border:1px solid var(--line-2); border-radius:999px; padding:0 8px; color:var(--muted); font-size:11px}
+.hl-konto{color:var(--faint); font-size:11px}
+.hl-geruest{margin:0; color:var(--ink); line-height:1.5; white-space:pre-line}
+.hl-frage{color:var(--accent); font-weight:700}
+.hl-fehler{display:flex; flex-direction:column; gap:4px; padding:8px; border-left:2px solid var(--bad);
+  border-radius:var(--radius-xs); background:var(--bad-soft)}
+.hl-fehler-titel{color:var(--bad); font-weight:700}
+.hl-fehler-text{color:var(--ink); line-height:1.5}
+.hl-leiter{display:flex; flex-wrap:wrap; gap:4px 8px; margin:0; padding:0; list-style:none}
+.hl-sprosse{display:flex; align-items:baseline; gap:4px; min-width:0}
+.hl-sprosse-knopf{border:1px solid var(--line-2); border-radius:var(--radius-xs); padding:0 8px; min-height:24px;
+  background:var(--panel-2); color:var(--ink); font-size:12px}
+.hl-sprosse-knopf:hover{border-color:var(--accent); color:var(--accent)}
+.hl-sprosse-titel{color:var(--muted); font-weight:700}
+.hl-sprosse-text{color:var(--faint)}
+.hl-dran .hl-sprosse-titel{color:var(--warn)}
+.hl-vorschlaege{display:flex; flex-direction:column; gap:8px}
+.hl-vorschlag{display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding:8px; border-left:2px solid var(--accent);
+  border-radius:var(--radius-xs); background:var(--accent-soft)}
+.hl-bereich{color:var(--accent); font-size:11px; letter-spacing:.08em; text-transform:uppercase}
+.hl-knopf{border:1px solid var(--accent); border-radius:var(--radius-s); padding:0 8px; min-height:24px; background:var(--panel); color:var(--ink)}
+.hl-knopf code{font:600 12px/1.4 var(--mono)}
+.hl-knopf:hover{background:var(--accent); color:var(--accent-ink)}
+.hl-lauf{border:1px dashed var(--line-2); border-radius:var(--radius-s); padding:0 8px; min-height:24px; background:transparent; color:var(--muted); font-size:11px}
+.hl-lauf:hover{border-color:var(--accent); color:var(--accent); background:var(--panel-3)}
+.hl-syntax{color:var(--muted); flex-basis:100%}
+.hl-erklaerung{color:var(--ink); flex-basis:100%}
+.hl-warum{color:var(--faint); flex-basis:100%; font-size:11px}
+.hl-bruecke{display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding:8px; border:1px solid var(--warn);
+  border-radius:var(--radius-s); background:var(--panel-2)}
+.hl-bruecke-titel{color:var(--warn); font-weight:700}
+.hl-bruecke-muster{color:var(--ink); font:600 12px/1.4 var(--mono)}
+.hl-bruecke-beispiel{color:var(--muted)}
+.hl-bruecke-hinweis{color:var(--faint); flex-basis:100%}

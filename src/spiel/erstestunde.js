@@ -77,6 +77,14 @@ Spiel.ersteStunde = (() => {
     abholen(){ const e = wartend; wartend = null; return e; },
     /* Für die Anzeige: welcher Schritt, wie viele geschafft */
     stand(){ const r = offen(); return {aktiv: aktiv(), geschafft: Spiel.ERSTE_STUNDE.length - r.length, gesamt: Spiel.ERSTE_STUNDE.length, naechster: r[0] ? r[0].id : null}; },
+    /* Baustein F: die Anweisungszeile der ersten Stunde nach Stufe. Der Einstiegsschritt (Kabel,
+       Ticket salon-01) bekommt sie – als WEG, nicht als Lösung; jeder andere Schritt nicht.
+       Ohne Argument gilt der erste offene Schritt; azubi/azubi-plus bekommen Text, geselle/meister null. */
+    anweisung(schritt){
+      const s = typeof schritt === "string" ? Spiel.ERSTE_STUNDE.find(x => x.id === schritt) : schritt;
+      const e = s || offen()[0] || null;
+      return e && e.ticket ? Spiel.einstieg.anweisung({id: e.ticket}) : null;
+    },
   };
 })();
 
@@ -112,9 +120,42 @@ Spiel.EINSTIEG_TEXTE = {
      verloren hat, sieht der Spieler selbst; der Switch ist der offensichtliche Verteiler in der
      Zeichnung und hilft als Richtung, ohne die Diagnose abzunehmen. */
   HINWEIS: "Wähle das Kabel-Werkzeug (K) und zieh vom Gerät ohne Link ein Kabel zum Switch.",
+  /* Baustein F: derselbe Weg, knapper – für azubi-plus (Vertrag § 2: „ja, knapper Text").
+     Weiterhin der WEG, nicht die LÖSUNG: kein Gerätepaar, kein Ziel. */
+  HINWEIS_KNAPP: "Kabel-Werkzeug (K): das Gerät ohne Link mit dem Switch verbinden.",
+  /* Baustein F: die Frage über der Stufenwahl in der Begrüßungskarte (zwei Sätze, wie die übrigen Karten). */
+  STUFE_FRAGE: "Wie viel Hilfe darf es sein? Umstellen geht jederzeit in den Einstellungen.",
   SCHLUSS_LERNEN: "Das war Schicht 1: Ohne Kabel kein Link – deshalb fängt jede Fehlersuche beim Stecker an.",
   SCHLUSS_WEG: "Aufträge kommen ins Postfach, gelöst wird im Labor, danach prüft der Kunde in der Abnahme.",
 };
+
+/* ---------- Baustein F: der Bildungsstand im Einstieg (Vertrag § 1, § 2) ----------
+   Die vier Stufen stehen dort zur Wahl, wo der Mensch sie zuerst sieht: in der Begrüßungskarte
+   (Station 1; gezeichnet wird sie von src/ui/spiel.js, die Wahl hängt src/ui/start.js an).
+   Je Stufe EIN Satz, was sich ändert – kein Katalog, keine Zahlenwand.
+   Die Namen kommen aus Spiel.STUFE (Baustein A) und werden nur gelesen, wenn es ihn gibt;
+   fehlt er, gelten die vier festen Namen hier. Nichts hierin wirft (Vertrag § 3, Regel 1). */
+Spiel.EINSTIEG_STUFEN = [
+  {id: "azubi",      rang: 1, kurz: "Azubi",   name: "Azubi (1. Lehrjahr)",            satz: "Vorschläge, Befehlsgerüst und Werkzeugleiter sind immer sichtbar – sechs Hilfen je Auftrag sind frei."},
+  {id: "azubi-plus", rang: 2, kurz: "Azubi+",  name: "Azubi (fortgeschritten)",        satz: "Vorschläge und Gerüst bleiben, die Texte werden knapper – vier Hilfen je Auftrag sind frei."},
+  {id: "geselle",    rang: 3, kurz: "Geselle", name: "Geselle / Prüfungsvorbereitung", satz: "Hilfen erscheinen erst nach einem Fehler – zwei Hilfen je Auftrag sind frei."},
+  {id: "meister",    rang: 4, kurz: "Meister", name: "Meister / Profi",                satz: "Keine ungefragte Hilfe und keine Vorschläge – du arbeitest ohne Netz."},
+];
+/* Der Bildungsstand, defensiv gelesen: über Spiel.stufe (Baustein A), sonst aus einst.stufe,
+   sonst „azubi“. Kein Wurf, wenn beides fehlt oder Unsinn dasteht. */
+Spiel.einstiegStufe = function(){
+  try {
+    if (typeof Spiel.stufe !== "undefined" && Spiel.stufe && typeof Spiel.stufe.id === "function") {
+      const id = Spiel.stufe.id();
+      if (Spiel.EINSTIEG_STUFEN.some(s => s.id === id)) return id;
+    }
+  } catch (e) { /* Baustein A fehlt oder wirft – der Rückfall unten gilt */ }
+  const roh = Spiel.einst ? Spiel.einst.stufe : null;
+  return Spiel.EINSTIEG_STUFEN.some(s => s.id === roh) ? roh : "azubi";
+};
+/* Was eine Stufe an Hilfe bedeutet: für azubi ausführlich, für azubi-plus knapp, sonst keine
+   ungefragte Anweisung. Die Anweisungszeile der ersten Stunde (Station 2) hängt daran. */
+Spiel.EINSTIEG_ANWEISUNG = {azubi: "ausfuehrlich", "azubi-plus": "knapp", geselle: "keine", meister: "keine"};
 
 Spiel.einstieg = (() => {
   /* Fehlt `einstieg` ganz (sehr alter Stand, Teststand), gilt das Onboarding als vorbei. */
@@ -130,8 +171,49 @@ Spiel.einstieg = (() => {
     Spiel.melden("einstieg", {schritt: "begruessung", weg: e.begruessung});
     return e.begruessung;
   }
-  /* Station 2: die Anweisung gilt nur für den Einstiegsauftrag. */
-  const hinweisFuer = def => (def && def.id === Spiel.EINSTIEG_TICKET) ? Spiel.EINSTIEG_TEXTE.HINWEIS : null;
+  /* ---- Baustein F: Bildungsstand (nur lesen und über Spiel.stufe.setzen schreiben) ---- */
+  const alsId = id => (Spiel.EINSTIEG_STUFEN.some(s => s.id === id) ? id : null);
+  /* Die vier Stufen mit je einem Satz; die Namen kommen aus Spiel.STUFE, wenn es sie gibt. */
+  const stufen = () => {
+    let namen = null;
+    try { if (typeof Spiel.stufe !== "undefined" && Spiel.stufe && typeof Spiel.stufe.alle === "function") namen = Spiel.stufe.alle(); }
+    catch (e) { namen = null; }
+    return Spiel.EINSTIEG_STUFEN.map(s => {
+      const d = Array.isArray(namen) ? namen.find(x => x && x.id === s.id) : null;
+      return d ? Object.assign({}, s, {name: d.name || s.name, kurz: d.kurz || s.kurz, rang: d.rang || s.rang}) : Object.assign({}, s);
+    });
+  };
+  /* Ein Satz zur Stufe – ohne Argument zur eingestellten; unbekannte ID zählt als „azubi“. */
+  const stufeSatz = id => (Spiel.EINSTIEG_STUFEN.find(s => s.id === (alsId(id) || Spiel.einstiegStufe())) || Spiel.EINSTIEG_STUFEN[0]).satz;
+  /* Die Wahl steht auf der Begrüßungskarte und damit genau so lange wie diese (Station 1). */
+  const stufeNoetig = (st = Spiel.st) => begruessungNoetig(st);
+  /* Die Wahl aus der Begrüßung: schreibt über Spiel.stufe.setzen (Vertrag § 3, Regel 3) und zieht
+     damit auch die Erklärtiefe nach. Fehlt Baustein A, schreibt der offizielle Setter des Spiels;
+     beide Wege sind defensiv, keiner wirft. Direkt in den Store schreibt niemand. */
+  function stufeWaehlen(id){
+    const gewaehlt = alsId(id) || "azubi";
+    let gesetzt = gewaehlt;
+    try {
+      if (typeof Spiel.stufe !== "undefined" && Spiel.stufe && typeof Spiel.stufe.setzen === "function") {
+        const r = Spiel.stufe.setzen(gewaehlt);
+        if (r && r.id) gesetzt = r.id;
+      } else if (typeof Spiel.einstSetzen === "function") {
+        Spiel.einstSetzen("stufe", gewaehlt);
+      }
+    } catch (e) { typeof console !== "undefined" && console.warn("Bildungsstand", e); }
+    Spiel.melden("einstieg", {schritt: "stufe", stufe: gesetzt});
+    return gesetzt;
+  }
+  /* Station 2: die Anweisungszeile der ersten Stunde – nur für den Einstiegsauftrag und nur,
+     wenn die Stufe eine ungefragte Anweisung will. Sie nennt den WEG, nie die Lösung. */
+  function anweisung(def){
+    if (!def || def.id !== Spiel.EINSTIEG_TICKET) return null;
+    const id = Spiel.einstiegStufe();
+    const art = Spiel.EINSTIEG_ANWEISUNG[id];
+    if (art !== "ausfuehrlich" && art !== "knapp") return null;
+    return {stufe: id, text: art === "knapp" ? Spiel.EINSTIEG_TEXTE.HINWEIS_KNAPP : Spiel.EINSTIEG_TEXTE.HINWEIS};
+  }
+  const hinweisFuer = def => { const a = anweisung(def); return a ? a.text : null; };
   const abschlussNoetig = (st = Spiel.st) => { const e = daten(st); return !!e.begruessung && !!e.fertig && !e.abschluss; };
   function abschlussZeigen(st = Spiel.st){
     if (!abschlussNoetig(st)) return false;
@@ -140,5 +222,6 @@ Spiel.einstieg = (() => {
     Spiel.melden("einstieg", {schritt: "abschluss"});
     return true;
   }
-  return {daten, begruessungNoetig, waehlen, hinweisFuer, abschlussNoetig, abschlussZeigen};
+  return {daten, begruessungNoetig, waehlen, hinweisFuer, abschlussNoetig, abschlussZeigen,
+    stufen, stufeSatz, stufeNoetig, stufeWaehlen, anweisung};
 })();

@@ -1619,3 +1619,82 @@ Fremdscanner nicht möglich; gemessen wurde nur über `127.0.0.1`, nicht in eine
 **Offen für den Nutzer.** Vier Zeilen in `src/spiel/abnahme.js`, damit ein Klassenraum-Auftrag nicht
 als erledigt zählt und keinen Lohn zahlt (Verschärfung, braucht Freigabe); ohne sie gilt der
 Ist-Zustand. Und einmal die Vorführung mit zwei getrennten Edge-Profilen auf dem eigenen Rechner.
+
+## 31 · Hilfestellung: Hilfe dahin, wo der Azubi steht (07.10.2026)
+
+**Auftrag des Nutzers.** „Ein Azubi kann die ganzen Syntaxe nicht kennen, aber im Spielflow hat er keinen
+Zugriff auf eine Unterstützung. Als Azubi sollte man vorgegebene Vorschläge haben, mit denen man
+troubleshooten kann. Auch die kleinen Mails, die im Leistenmodus beantwortet werden, bieten sich als
+Schnittstelle zum Verankern des Wissens an. Die Unterstützung sollte schrittweise zur Verfügung stehen.
+Der Trainingsbereich sollte um Simulationen abseits der Aufträge erweitert werden."
+
+**Vertrag.** [`Hilfestellung – Stufen und Schnittstellen.md`](<Hilfestellung – Stufen und Schnittstellen.md>)
+(§ 1–§ 9), gespiegelt in [[Architektur]] § 13. Dort stehen die vier Stufen, das Hilfekonto, die Datenformen
+und die Schreibrechte je Baustein.
+
+### Der Kern in drei Sätzen
+
+Bisher gab es **eine** Achse für „wie viel Hilfe" (Erklärtiefe `E`/`AP1`/`AP2`) — die war eine
+Textlängen-Einstellung, keine Aussage über den Menschen. Jetzt gibt es den **Bildungsstand** als eigene
+Achse: `azubi` · `azubi-plus` · `geselle` · `meister`, mit einer **Rangzahl 1–4**, über die verglichen wird.
+Jede Fläche fragt dieselbe Tabelle (`Spiel.stufe`), statt die Regel selbst nachzubauen.
+
+### Was gebaut wurde
+
+| Baustein | Was der Spieler davon sieht |
+|---|---|
+| **A · Stufensystem** | Einstellungen → „Bildungsstand": vier Stufen mit Erklärung und der Zeile, was gerade freigeschaltet ist. Die Wahl sitzt außerdem in der Begrüßungskarte des ersten Starts. |
+| **B · Terminal-Hilfe** | Ein Vorschlagsstreifen **unter** dem Konsolenschirm: anklickbare, belegte Befehle (22 „nur ansehen", 7 „ändert etwas") mit Syntax-Muster und einem Satz Begründung; „Was geht hier?" je Konsolen-Modus; nach einem Fehler die Syntax-Brücke. |
+| **C · Lernanker** | Die Mini-Mails in der Leiste haben einen Hilfe-Knopf (Denkanstoß, **nie** die Lösung) und nach der Antwort einen Anker: wo das im Wiki steht, mit Quelle. |
+| **D · Trainingsbereich** | Eigene Ansicht „Training": 34 Szenarien abseits der Aufträge, ohne Geld, ohne Ruf, ohne Postfach — nur für den Lernmotor. |
+| **E · Fehlertexte** | 82 Katalogzeilen: jede echte Konsolenmeldung in Klartext, in der Tiefe der Stufe. |
+| **F · Einstieg** | Anweisungszeile der ersten Stunde je Stufe: `azubi` nennt den **Weg**, `meister` bekommt keine ungefragte Anweisung. |
+| **G/H · Inhalt und Lernstand** | 34 Szenarien mit belegter Quelle · im Lernstand ein Abschnitt „Hilfe und Übung" je fälliger Fertigkeit mit Üben- und Wiki-Knopf. |
+
+### Die vier Regeln, die den Auftrag tragen
+
+1. **Schrittweise, nie alles auf einmal.** Vorrat je Ticket: `azubi` 6 · `azubi-plus` 4 · `geselle` 2 ·
+   `meister` 0 freie Hilfen. Ein leerer Vorrat **sperrt nicht** — die nächste Sprosse kostet dann Sterne
+   wie bisher. Ein Azubi darf nie in einer Sackgasse landen.
+2. **Nie die Lösung.** `Spiel.mini.hilfe` liefert einen Denkanstoß, und ein Test prüft gegen
+   `Spiel.mini.loesungText`, dass der Lösungstext nicht darin vorkommt.
+3. **Der Vorrat gehört dem Ticket.** Wer mitten im Auftrag auf „Meister" umstellt, verliert den Vorrat des
+   offenen Tickets nicht (§ 2.1).
+4. **Keine zweite Wahrheit.** „Hat diese Stufe die Fläche?" ist `darf()`, „Wann erscheint sie?" ist
+   `wann()`/`wannPasst()` (§ 2.2). Jede Fläche fragt dort — keine baut die Fehler-Regel selbst nach.
+
+### Was der Bau an Fehlern zutage gefördert hat
+
+* **Ein echter Produktionsfehler** (von einem Test aufgedeckt, nicht von einem Menschen): Ein Linux-Server
+  bekam „Diesen Befehl kennt die Eingabeaufforderung nicht" erklärt, weil `lageVon` in `src/spiel/fehlertexte.js`
+  für Endgeräte pauschal `"host"` setzte, bevor das Betriebssystem bekannt war. Bereich wird jetzt streng
+  gefiltert: steht er fest und nichts passt, kommt **lieber gar kein Kasten** als eine fremde Erklärung.
+* **Drei Vertragslücken**, von der unabhängigen Gegenprüfung gefunden (Befund B1/B2/B3): ein Widerspruch in
+  der Tabelle („azubi-plus" — kürzere Texte oder nicht?), ein nicht abfragbares „erst nach Fehler" und zwei
+  Tabellenzeilen ohne Abfrageweg. Alle drei sind im Vertrag entschieden und im Code nachgezogen.
+* **Ein Test, der grün war, ohne zu prüfen:** `tests/run.js` gab dem Testbereich kein `require`. Sieben
+  UI-nahe Testgruppen nahmen deshalb fälschlich einen Browser-Zweig und **übersprangen sich selbst**. Behoben.
+* **Zwei Syntaxfehler durch typografische Anführungszeichen** in deutschen Testnamen haben je einmal die
+  ganze Suite angehalten (Exit 2, kein Test läuft). Dafür gibt es jetzt
+  `tools/pruefe-namen-flicken.js` — es findet die Falle, bevor der Lauf sie findet.
+
+### Gemessen (07.10.2026)
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` | **391/391 grün**, 46 Testdateien, 81 Module, exit 0 — drei Läufe hintereinander |
+| `python tools/ethos.py` | **GRÜN** |
+| `python tools/klassen.py` | **0 Klassen ohne CSS-Regel** |
+| `node tools/sim-stand.js` | „Simulation unverändert gegenüber dem Referenzstand" |
+| `python bauen.py` | 116 Module → `web/index.html`, `web/tests.html` |
+
+### Nicht geprüft — ehrlich
+
+* **Kein Browser, kein CDP in dieser Umgebung.** Belegt ist der Aufrufweg in einer DOM-Attrappe und dass
+  die gebaute Seite fehlerfrei entsteht — **nicht** das Pixelbild. `tools/rauch.py` und `ethos.py --dom`
+  (R12: höchstens 6 Bedienelemente je Ansicht) liefen **nicht**; der Vorschlagsstreifen fügt Knöpfe hinzu,
+  R12 ist damit **ungemessen**.
+* Die **Android-Fassung** wurde auf Wunsch des Nutzers nicht angefasst; `android/bauen.py` lief nicht.
+* Die drei Szenarien `lab.portsec`, `lab.stp`, `lab.storage` haben **keinen Injektor**; sie stehen im
+  Trainingsbereich als gesperrte Karten mit Grund. Absicht: der Vorrat zeigt ehrlich, was es gibt.
+

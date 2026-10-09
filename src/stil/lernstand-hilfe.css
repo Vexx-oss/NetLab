@@ -1,0 +1,19 @@
+/* ---------- Lernstand: Abschnitt „Hilfe und Übung" (Baustein H) ----------
+   Vertrag: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 2, § 8.
+   Nur Tokens aus basis.css, Abstände aus der Skala {0,4,8,12,16,24,32}, Schrift aus {11,12,13,15,20,28}px. */
+
+.lh-abschnitt{margin-top:24px; padding:16px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
+.lh-kopf{display:flex; flex-direction:column; align-items:flex-start; gap:4px}
+.lh-kopf h3{font-size:20px}
+.lh-stufe{color:var(--ink)}
+.lh-hinweis{color:var(--muted); font-size:13px}
+.lh-einstellungen{margin-top:8px}
+.lh-zeilen{display:flex; flex-direction:column; gap:8px; margin-top:16px}
+.lh-zeile{display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
+.lh-text{display:flex; flex-direction:column; gap:4px; flex:1 1 auto; min-width:0}
+.lh-name{font-size:15px}
+.lh-box,.lh-hilfe{color:var(--muted); font-size:12px}
+.lh-knoepfe{display:flex; gap:8px; flex:0 0 auto}
+.lh-ueben,.lh-wiki{min-width:64px}   /* „Üben“ und „Wiki“ gleich breit – die Zeilen stehen ruhig untereinander */
+.lh-leer{margin-top:12px; color:var(--muted)}
+.lh-fuss{margin-top:12px; color:var(--faint); font-size:12px}

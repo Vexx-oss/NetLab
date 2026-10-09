@@ -1,0 +1,10 @@
+/* ---------- Baustein F: Bildungsstand in der Begrüßung (src/ui/start.js) ----------
+   Die Wahl sitzt IN der Begrüßungskarte (.sp-einstieg-start, hub.css) und bringt keinen eigenen
+   Kasten mit: vier Knöpfe in einer Reihe, darunter EIN Satz zu der Stufe, die gerade gilt.
+   Ausgeblendet wird die Anweisungszeile über [hidden]; das erledigt basis.css zentral. */
+.sp-stufe{display:flex; flex-direction:column; gap:8px; padding-top:8px; border-top:1px solid var(--line)}
+.sp-stufe-frage{margin:0; font-size:13px; color:var(--muted)}
+.sp-stufe-wahl{display:flex; flex-wrap:wrap; gap:8px}
+.sp-stufe-knopf{padding:4px 12px; font-size:13px; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:999px; cursor:pointer}
+.sp-stufe-knopf.an{color:var(--ink); background:var(--accent-soft); border-color:var(--accent); font-weight:700}
+.sp-stufe-satz{margin:0; font-size:13px; line-height:1.4; color:var(--muted); max-width:62ch}

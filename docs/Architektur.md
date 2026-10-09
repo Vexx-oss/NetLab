@@ -838,3 +838,72 @@ Die Dateien der Umsetzung: `src/spiel/klassenraum.js`, `src/ui/klassenraum.js`, 
 `tests/klassenraum.test.js`; additiv erlaubt sind `src/ui/app.js`, `src/ui/start.js` und der Store-Schlüssel
 in `src/spiel/zustand.js`. Erwartete Abnahme nach dem Einbau: 291/291 Tests grün, Filter `--klassenraum`
 40/40, `ethos.py` GRÜN, `klassen.py` 0, `sim-stand.js` unverändert.
+
+## 13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag
+
+Der vollständige Vertrag steht in
+[`entwicklung/Hilfestellung – Stufen und Schnittstellen.md`](<entwicklung/Hilfestellung – Stufen und Schnittstellen.md>).
+Dieser Abschnitt hält nur fest, was **für den ganzen Bau** gilt; bei Widerspruch gilt der Vertragstext.
+
+**Anlass (Auftrag des Nutzers, 07.10.2026):** Ein Azubi kann die Syntaxen nicht kennen, hat aber im
+Spielflow keinen Zugriff auf eine Lernnotiz. Die Hilfe muss dorthin, wo er steht: ins **Terminal**, in die
+**Leiste** (die kleinen Mails) und in einen **Trainingsbereich abseits der Aufträge** — und sie muss
+**schrittweise** mit dem Bildungsstand wachsen.
+
+### 13.1 Die drei Achsen (nicht verwechseln)
+
+| Achse | Feld | Werte | Bedeutung |
+|---|---|---|---|
+| **Bildungsstand** (neu) | `Spiel.einst.stufe` | `azubi` \| `azubi-plus` \| `geselle` \| `meister` | Voreinstellung des **Menschen**. Wird nie automatisch geändert. |
+| Erklärtiefe | `Spiel.einst.niveau` | `E` \| `AP1` \| `AP2` | Wie ausführlich Konsole und Simulation erklären. |
+| Prüfungsstrenge | `Spiel.einst.wahl`, `inst.niveau` | `auto` \| `E` \| `AP1` \| `AP2` | Wie streng ein einzelnes Ticket bewertet wird. |
+
+`Spiel.stufe.setzen(id)` zieht `einst.niveau` nach, lässt es aber einzeln verstellbar.
+
+### 13.2 Neue und geänderte Datenformen
+
+| Gegenstand | Festlegung |
+|---|---|
+| Rang | `Spiel.stufe.rang(id)` → 1…4; verglichen wird **immer** über den Rang, nie über den Namen. Rückfall bei fehlendem/unbekanntem Wert: `azubi` (kein Wurf). |
+| Hilfekonto je Ticket | `Spiel.HILFE_KONTO = {azubi:6, "azubi-plus":4, geselle:2, meister:0}`; gezählt wird **je Ticket** über `Spiel.stufe.hilfeZiehen(inst)`. Ein leerer Vorrat **sperrt nicht** — die nächste Sprosse kostet dann Sterne wie bisher. Ein Azubi darf nie in einer Sackgasse landen. |
+| Vorschläge | `DATEN.hilfen.VORSCHLAEGE` (`src/daten/hilfen.js`); `bereich` ist **immer** eine `Spiel.LEITER[].id` (`link`, `vlan`, `ip`, `gateway`, `route`, `dienst`), damit Leiter und Vorschlag dieselbe Sprache sprechen. `art` ∈ {`pruefen`, `aendern`}. |
+| Entscheidung | `Spiel.hilfe.passend/geruest/leiter/syntaxBruecke` (`src/spiel/hilfe.js`, **nur angefügt**). Die Oberfläche entscheidet nichts selbst. |
+| Fehlertexte | `Spiel.fehlertext({netz, id, modus, art, eingabe, ausgabe, fehler})` (`src/spiel/fehlertexte.js`), Tiefe aus `Spiel.stufe.text(...)`. |
+| Mini-Anker | `Spiel.mini.hilfe(id)` (Denkhilfe, **nie** die Lösung) und `Spiel.mini.anker(id)` (`{titel, text, quelle, wiki}`), beides in `src/spiel/mini.js`. |
+| Training | `Spiel.st.training = {je: {[szenarioId]: {versucht, bestanden, bestes}}}` — **Spielstand `v:3`** (Migration ergänzt das Feld). Szenarien: `DATEN.trainings` (`src/daten/trainings.js`), Logik `Spiel.training` (`src/spiel/training.js`). |
+
+### 13.3 Verhalten, das vertraglich feststeht
+
+1. **Training zahlt nichts.** Kein Geld, kein Ruf, kein Karrierefortschritt, kein Eintrag in `st.erledigt`,
+   keine Wochenwertung, kein Postfach. Es zählt nur für den Lernmotor (`L.ueben`) und den Trainingsstand.
+   Durchgesetzt an **einer** Stelle: erste Zeile von `Spiel.abschliessen` leitet `quelle === "training"` um.
+2. **`quelle: "training"` ist unsichtbar.** `Spiel.postfach()` filtert sie heraus (wie `pruefung` und
+   `raetsel`), damit `Spiel.offen()`, die Kopfzeile und die Postfach-Ansicht sie nicht mitzählen.
+3. **Die Hilfe ist schrittweise.** Je Stufe 0/1/2 Vorschläge (`meister` 0), Denkhilfe bei jedem Mini
+   (`azubi`/`azubi-plus`), nach falscher Antwort (`geselle`), gar nicht (`meister`).
+4. **Nichts wird ungefragt verraten.** `Spiel.mini.hilfe` liefert **nie** den Lösungstext; ein Test prüft das
+   gegen `Spiel.mini.loesungText`.
+5. **Kein Baustein ohne Aufruf.** Jede neue Fläche wird aus dem echten Weg gerufen (Terminal-Zeile,
+   Leisten-Knopf, Ansicht) — grüne Tests ohne Aufruf gelten als **nicht fertig** (AGENTS.md).
+
+### 13.4 Dateien der Umsetzung
+
+`src/spiel/stufensystem.js` · `src/ui/stufensystem.js` · `src/stil/stufensystem.css` ·
+`src/daten/hilfen.js` · `src/spiel/hilfe.js` (nur angefügt) · `src/ui/hilfe.js` · `src/stil/hilfe.css` ·
+`src/spiel/fehlertexte.js` · `src/ui/konsole.js` · `src/cli/parser.js` · `src/cli/entspricht.js` ·
+`src/spiel/mini.js` · `src/ui/leiste.js` · `src/ui/karriere.js` · `src/stil/leiste.css` ·
+`src/daten/trainings.js` · `src/spiel/training.js` · `src/ui/training.js` · `src/stil/training.css` ·
+`src/ui/lernstand-hilfe.js` · `src/ui/start.js` · `src/spiel/erstestunde.js` ·
+additiv in `src/ui/app.js`, `src/spiel/zustand.js`, `src/spiel/abnahme.js`, `src/spiel/postfach.js`,
+`src/ui/geraetebilder.js`.
+
+### 13.5 Stand der Umsetzung (07.10.2026)
+
+**Gebaut und gemessen in dieser Sitzung** (Zahlen aus `node tests/run.js`, `python tools/ethos.py`,
+`python bauen.py`): Spielstand **`v:3`** mit `training`-Feld und Migration · `stufe: "azubi"` als Standard
+in `Spiel.EINST_STANDARD` · Trainingsinstanzen aus Postfach und Offen-Zähler herausgefiltert ·
+Training-Umleitung in `Spiel.abschliessen` · `training` in der Andock-Reihe · Symbol `lernen` ·
+Test `Spiel-Fluss: Zustand` auf die aktuelle Fassung gezogen. Die Bausteine A–J entstehen parallel;
+diese Zeile wird nach der Gesamtabnahme durch die echten Zahlen ersetzt.
+
+

@@ -13,10 +13,42 @@ UI.konsole = (() => {
   const SITZ = new WeakMap();
   const OFFEN = new Set();               /* sichtbare Terminals (für zuruecksetzen) */
   const KZ = new WeakMap();              /* container → Terminal-Zustand */
+  /* Terminal-Hilfe (Baustein B, Vertrag § 4.1): Der Vorschlagsstreifen hängt als K.hilfeEl unter dem
+     Schirm, UI.hilfe.aktualisieren wird nach JEDER ausgeführten Zeile gerufen, und der Einstiegs-
+     Vorschlag (ko-vorschlag) hat genau eine Quelle: Spiel.hilfe.passend. */
   const MAX_BLOECKE = 800, MAX_VERLAUF = 100;
 
   const niveau = () => (store.get("einst", {}) || {}).niveau || "E";
   const cli = () => (typeof CLI !== "undefined" && CLI && typeof CLI.eingabe === "function") ? CLI : null;
+  /* Bildungsstand (Vertrag § 1/§ 2): Baustein A liefert Spiel.stufe. Fehlt er noch, gilt „azubi" –
+     dieselben Zahlen wie in Spiel.hilfe, damit Terminal, Vorschlag und Streifen nie auseinanderlaufen. */
+  const STUFE_RUECKFALL = {
+    "azubi":      {einstieg: true,  tipps: "alle"},
+    "azubi-plus": {einstieg: true,  tipps: "fehler"},
+    "geselle":    {einstieg: false, tipps: "fehler"},
+    "meister":    {einstieg: false, tipps: "keine"},
+  };
+  function stufeFeld(frage, rueckfall){
+    try {
+      const s = typeof Spiel !== "undefined" && Spiel.stufe;
+      if (s && typeof s.kann === "function") { const w = s.kann(frage); if (w != null) return w; }
+    } catch (e) { /* Baustein A fehlt oder klemmt – Rückfall */ }
+    return rueckfall;
+  }
+  function stufeKennwerte(){
+    try {
+      const s = typeof Spiel !== "undefined" && Spiel.stufe;
+      if (s && typeof s.id === "function") { const id = s.id(); if (id && STUFE_RUECKFALL[id]) return STUFE_RUECKFALL[id]; }
+    } catch (e) { /* Rückfall */ }
+    return STUFE_RUECKFALL[(store.get("einst", {}) || {}).stufe] || STUFE_RUECKFALL.azubi;
+  }
+  /* § 2, Zeile „Konsole (CLI): einstieg, Tipps": azubi/azubi-plus mit Einstieg, geselle/meister ohne. */
+  function sitzungStufe(){
+    const k = stufeKennwerte();
+    const tipps = String(stufeFeld("tipps", k.tipps));
+    const einstieg = !!stufeFeld("einstieg", k.einstieg) && tipps !== "keine";
+    return {einstieg, tipps};
+  }
 
   function sitzungHolen(netz, id, verlauf){
     let m = SITZ.get(netz); if (!m) SITZ.set(netz, m = new Map());
@@ -25,7 +57,8 @@ UI.konsole = (() => {
     if (verlauf) S.verlauf = verlauf;
     const c = cli();
     if (c && !S.sitzung && typeof c.sitzung === "function") {
-      try { S.sitzung = c.sitzung(netz, id, {verlauf: S.verlauf, einstieg: niveau() === "E", tipps: {E: "alle", AP1: "fehler", AP2: "keine"}[niveau()] || "alle"}); S.fehler = null; }
+      const st = sitzungStufe();
+      try { S.sitzung = c.sitzung(netz, id, {verlauf: S.verlauf, einstieg: st.einstieg, tipps: st.tipps}); S.fehler = null; }
       catch (e) { console.error("CLI.sitzung", e); S.fehler = String(e && e.message || e); }
     }
     return S;
@@ -39,6 +72,24 @@ UI.konsole = (() => {
     const g = K.netz.geraete[K.id];
     return K.host ? "C:\\>" : `${g ? g.name : "Gerät"}>`;
   }
+
+  /* ---------- Terminal-Hilfe (Baustein B, Vertrag § 4.1) ---------- */
+  function hilfeStreifen(K, letzterFehler){
+    if (!K || !K.hilfeEl || typeof UI.hilfe === "undefined" || !UI.hilfe || typeof UI.hilfe.aktualisieren !== "function") return;
+    try {
+      UI.hilfe.aktualisieren(K, {
+        letzterFehler: letzterFehler !== undefined ? letzterFehler : K.S.letzterFehler,
+        text: K.S.letzteZeile,
+        ausfuehren: befehl => {
+          if (K.eingabeEl.disabled) return;
+          K.eingabeEl.value = K.S.entwurf = "";
+          ausfuehren(K, befehl);
+          try { if (K.eingabeEl.isConnected) K.eingabeEl.focus({preventScroll: true}); } catch (e) { /* Bedienkomfort */ }
+        },
+      });
+    } catch (e) { console.error("UI.hilfe.aktualisieren", e); }
+  }
+  function hilfeUndVorschlag(K, letzterFehler){ vorschlag(K, letzterFehler); hilfeStreifen(K, letzterFehler); }
 
   /* ---------- Aufbau ---------- */
   function oeffnen(container, netz, id, verlauf, opt = {}){
@@ -61,6 +112,7 @@ UI.konsole = (() => {
     K.schirmEl = h("div", {class: "ko-schirm", role: "log", "aria-label": `Konsole ${g.name}`, tabindex: "-1"},
       K.ausgabeEl, K.notizEl, h("div", {class: "ko-zeile"}, K.promptEl, K.eingabeEl));
     K.vorschlagEl = h("div", {class: "ko-vorschlag", hidden: true});
+    K.hilfeEl = h("div", {class: "hl-huelle", hidden: true});          /* Streifen: UI.hilfe zeichnet hinein */
     const hilfe = K.host
       ? [h("kbd", {}, "↑"), h("kbd", {}, "↓"), " Verlauf · ", h("kbd", {}, "Tab"), " ergänzt",
          h("span", {class: "ko-hilfe-bsp"}, " · z. B. ", h("code", {}, K.linux ? "ip a" : "ipconfig"), ", ", h("code", {}, K.linux ? "ping -c 4 192.168.1.1" : "ping 192.168.1.1"))]
@@ -68,7 +120,7 @@ UI.konsole = (() => {
     const kopf = h("div", {class: "ko-kopf"},
       h("span", {class: "ko-titel"}, K.linux ? `Terminal · ${g.name}` : K.host ? `Eingabeaufforderung · ${g.name}` : `Konsole · ${g.name}`, h("span", {class: "ko-art"}, K.linux ? "Linux-artig (bash)" : K.host ? "Windows-artig" : "IOS-ähnlich")),
       h("button", {type: "button", class: "ko-knopf", title: "Bildschirm leeren (Verlauf bleibt)", onclick: () => { K.S.bloecke = []; K.ausgabeEl.replaceChildren(); K.eingabeEl.focus(); }}, "Leeren"));
-    container.append(kopf, K.schirmEl, K.vorschlagEl, h("div", {class: "ko-hilfe"}, hilfe));
+    container.append(kopf, K.schirmEl, K.vorschlagEl, K.hilfeEl, h("div", {class: "ko-hilfe"}, hilfe));
 
     for (const b of K.S.bloecke) K.ausgabeEl.append(blockEl(b));
     if (!K.S.bloecke.length) begruessung(K, g);
@@ -84,7 +136,7 @@ UI.konsole = (() => {
 
     if (!K.abmelden) K.abmelden = Bus.an("netz-geaendert", () => {
       if (!container.isConnected) { K.abmelden?.(); K.abmelden = null; OFFEN.delete(K); return; }
-      zustand(K);
+      zustand(K); hilfeUndVorschlag(K);
     });
     OFFEN.add(K);
     zustand(K);
@@ -95,7 +147,7 @@ UI.konsole = (() => {
       K.notizEl.replaceChildren(h("span", {class: "ko-sym", "aria-hidden": "true"}, "↳"),
         (opt.notiz || "Aus dem Inspektor übernommen.") + " ", h("kbd", {}, "Enter"), " führt alle Zeilen aus, ", h("kbd", {}, "Esc"), " verwirft.");
     }
-    groesse(K); vorschlag(K); runter(K);
+    groesse(K); hilfeUndVorschlag(K); runter(K);
     if (opt.fokus !== false && !K.eingabeEl.disabled) setTimeout(() => { if (K.eingabeEl.isConnected) { K.eingabeEl.focus({preventScroll: true}); const n = K.eingabeEl.value.length; K.eingabeEl.setSelectionRange(n, n); } }, 0);
   }
 
@@ -154,13 +206,13 @@ UI.konsole = (() => {
   function ausfuehren(K, zeile){
     const c = cli(), S = K.S;
     block(K, "echo", zeile, promptText(K));
-    if (!c) { block(K, "info", "Die Konsole ist in dieser Fassung noch nicht verfügbar."); return; }
-    if (!S.sitzung) { sitzungHolen(K.netz, K.id, S.verlauf); if (!S.sitzung) { block(K, "fehler", "% Keine Sitzung: " + (S.fehler || "unbekannter Fehler")); return; } }
+    if (!c) { block(K, "info", "Die Konsole ist in dieser Fassung noch nicht verfügbar."); hilfeStreifen(K, null); return; }
+    if (!S.sitzung) { sitzungHolen(K.netz, K.id, S.verlauf); if (!S.sitzung) { block(K, "fehler", "% Keine Sitzung: " + (S.fehler || "unbekannter Fehler")); hilfeStreifen(K, null); return; } }
     if (zeile.trim() && S.frage == null && S.hist[S.hist.length - 1] !== zeile) { S.hist.push(zeile); if (S.hist.length > MAX_VERLAUF) S.hist.shift(); }
     S.histPos = null;
     let r;
     try { r = c.eingabe(S.sitzung, zeile); }
-    catch (e) { console.error("CLI.eingabe", e); block(K, "fehler", "% Interner Fehler der Konsole: " + (e && e.message || e)); S.frage = null; return; }
+    catch (e) { console.error("CLI.eingabe", e); block(K, "fehler", "% Interner Fehler der Konsole: " + (e && e.message || e)); S.frage = null; S.letzterFehler = {fehler: true, befehl: zeile}; hilfeStreifen(K, S.letzterFehler); return; }
     S.frage = null;
     let aus = r && r.ausgabe != null ? String(r.ausgabe) : "";
     /* Rückfrage (z. B. „Destination filename [startup-config]?“): kein Prompt, letzte Zeile ohne Zeilenende */
@@ -172,6 +224,9 @@ UI.konsole = (() => {
     /* Phase C: Paket auf der Fläche abspielen (die Simulation frischt sich nur auf), Link zur Aufzeichnung, Beweis für die Akte */
     if (r && r.trace && UI.labor.netz === K.netz) { try { UI.labor.zeigeTrace(r.trace, {quelle: "terminal", wechseln: false}); } catch (e) { console.error(e); } block(K, "pakete", r.trace); }
     if (r && zeile.trim()) Bus.senden("befehl", {netz: K.netz, id: K.id, befehl: zeile.trim(), ergebnis: r});
+    S.letzteZeile = zeile;                                     /* für die Syntax-Brücke */
+    S.letzterFehler = (r && r.fehler) ? r : null;              /* geselle sieht den Streifen nur nach Fehlern */
+    hilfeStreifen(K, r);                                       /* UI.hilfe.aktualisieren(K, {letzterFehler: r}) – nach JEDER Zeile */
   }
   function ausfuehrenAlles(K, text){
     const zeilen = String(text).replace(/\r/g, "").split("\n");
@@ -179,7 +234,7 @@ UI.konsole = (() => {
     for (const z of zeilen) ausfuehren(K, z);
     K.eingabeEl.value = K.S.entwurf = "";
     K.notizEl.hidden = true;
-    groesse(K); zustand(K); vorschlag(K); runter(K);
+    groesse(K); zustand(K); hilfeUndVorschlag(K); runter(K);
   }
 
   function taste(K, e){
@@ -244,7 +299,7 @@ UI.konsole = (() => {
     else if (/\(config[^)]*\)#\s*$/.test(p) && cli() && S.sitzung) {       /* Strg+C/Strg+Z im Konfig-Modus = end */
       try { const r = cli().eingabe(S.sitzung, "end"); if (r && r.ausgabe) block(K, "aus", r.ausgabe); } catch (e) { console.error(e); }
     }
-    zustand(K); vorschlag(K); runter(K);
+    zustand(K); hilfeUndVorschlag(K); runter(K);
   }
   function einfuegen(K, e){
     const text = (e.clipboardData || window.clipboardData)?.getData("text") || "";
@@ -255,7 +310,7 @@ UI.konsole = (() => {
     const rest = zeilen.pop();                                              /* letzte Zeile ohne Zeilenende bleibt in der Eingabe */
     for (const z of zeilen) ausfuehren(K, z);
     el.value = K.S.entwurf = rest; K.notizEl.hidden = true;
-    groesse(K); zustand(K); vorschlag(K); runter(K);
+    groesse(K); zustand(K); hilfeUndVorschlag(K); runter(K);
   }
 
   /* Befehlsblock aus dem Inspektor: nötige Moduswechsel davor, „end“ danach (IOS) */
@@ -269,11 +324,26 @@ UI.konsole = (() => {
     return (user ? "enable\nconfigure terminal\n" : priv ? "configure terminal\n" : "") + code + "\nend";
   }
 
-  function vorschlag(K){
+  /* Der Einstiegs-Vorschlag hat EINE Quelle: Spiel.hilfe.passend (Baustein B). Nur wenn dieser
+     Baustein fehlt (Testfassung ohne Daten), greift CLI.vorschlag als Rückfall. */
+  function vorschlag(K, letzterFehler){
     const c = cli(), el = K.vorschlagEl;
     el.hidden = true; el.replaceChildren(); K.container.classList.remove("ko-mit-vorschlag");
-    if (niveau() !== "E" || !c || typeof c.vorschlag !== "function" || !K.S.sitzung || K.eingabeEl.disabled) return;
-    let v; try { v = c.vorschlag(K.S.sitzung); } catch (e) { console.error(e); return; }
+    if (!c || !K.S.sitzung || K.eingabeEl.disabled) return;
+    const S = K.S;
+    const ausSpielHilfe = typeof Spiel !== "undefined" && Spiel.hilfe && typeof Spiel.hilfe.passend === "function" &&
+      typeof DATEN !== "undefined" && DATEN && DATEN.hilfen;
+    let v = null;
+    if (ausSpielHilfe) {
+      let p = null;
+      try {
+        p = Spiel.hilfe.passend({netz: K.netz, id: K.id, modus: S.sitzung.modus, verlauf: S.hist,
+          letzterFehler: letzterFehler !== undefined ? letzterFehler : S.letzterFehler, max: 1});
+      } catch (e) { console.error("Spiel.hilfe.passend", e); }
+      if (p && p.length) v = {befehl: p[0].befehl, text: p[0].erklaerung || p[0].warum};
+    } else if (typeof c.vorschlag === "function") {
+      try { v = c.vorschlag(S.sitzung); } catch (e) { console.error(e); return; }
+    }
     if (!v) return;
     const befehl = typeof v === "string" ? v : v.befehl, text = typeof v === "string" ? null : (v.text || v.erklaerung);
     if (!befehl) return;
@@ -293,7 +363,7 @@ UI.konsole = (() => {
     for (const K of OFFEN) if (K.netz === netz && K.id === id && K.container.isConnected) {
       K.ausgabeEl.append(blockEl({art: "info", text: nachricht}));
       sitzungHolen(netz, id, S.verlauf);
-      zustand(K); vorschlag(K); runter(K);
+      zustand(K); hilfeUndVorschlag(K); runter(K);
     }
   }
 

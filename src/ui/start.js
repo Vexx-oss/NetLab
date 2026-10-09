@@ -106,6 +106,105 @@ UI.starten = function(){
   Bus.senden("ui-bereit", {});
 };
 
+/* ---------- Baustein F: Bildungsstand in der Begrüßung (Vertrag § 1, § 2) ----------
+   Die vier Stufen stehen IN der bestehenden Begrüßungskarte (`.sp-einstieg-start`, Station 1 des
+   sanften Onboardings), nicht in einer zweiten Karte daneben: eine Wahl, ein Klick, danach geht der
+   Einstieg wie vorher weiter. Danach richtet sich die Anweisungszeile der ersten Stunde nach der
+   Stufe: azubi bekommt den WEG genannt (nicht die Lösung), azubi-plus denselben Weg knapper,
+   geselle und meister keine ungefragte Anweisung.
+
+   Angeschlossen wird ohne fremde Datei: `#labor-auftrag` entsteht an genau einer Stelle
+   (`UI.labor.auftragNeu`, src/ui/editor.js). Der Start umhüllt sie und zieht nach jedem Zeichnen
+   nach – die Wahl und die Zeile werden also wirklich gezeichnet, nicht nur berechnet. */
+UI.einstiegStufe = (() => {
+  const T = () => Spiel.EINSTIEG_TEXTE;
+  /* Lesen und Schreiben laufen ausschließlich über Spiel.einstieg bzw. Spiel.stufe (Baustein A/F). */
+  const noetig = () => { try { return !!Spiel.einstieg.stufeNoetig(); } catch (e) { return false; } };
+  const aktuell = () => { try { return Spiel.einstiegStufe(); } catch (e) { return "azubi"; } };
+  const saetze = () => { try { return Spiel.einstieg.stufen(); } catch (e) { return []; } };
+
+  /* Die Wahlfläche: die vier Stufen als Knöpfe, darunter der Satz der gewählten Stufe.
+     Zeigen (Maus/Tastatur) erklärt, Klicken setzt – beides ohne die Karte zu schließen. */
+  function karte(){
+    const liste = saetze();
+    if (!liste.length) return null;
+    const jetzt = aktuell();
+    const zeile = h("p", {class: "sp-stufe-satz"}, Spiel.einstieg.stufeSatz(jetzt));
+    const zeigen = id => { zeile.textContent = Spiel.einstieg.stufeSatz(id); };
+    const knopf = d => h("button", {type: "button", role: "radio", class: "sp-stufe-knopf" + (d.id === jetzt ? " an" : ""),
+      "aria-checked": String(d.id === jetzt), "data-stufe": d.id, title: d.name + " – " + d.satz,
+      onclick: () => waehlen(d.id), onmouseenter: () => zeigen(d.id), onfocus: () => zeigen(d.id)}, d.kurz);
+    const gruppe = h("div", {class: "sp-stufe-wahl", role: "radiogroup", "aria-label": "Bildungsstand"}, liste.map(knopf));
+    const kasten = h("div", {class: "sp-stufe", "data-stufe": jetzt},
+      h("p", {class: "sp-stufe-frage"}, T().STUFE_FRAGE), gruppe, zeile);
+    function waehlen(id){
+      const gesetzt = Spiel.einstieg.stufeWaehlen(id);
+      for (const b of gruppe.querySelectorAll(".sp-stufe-knopf")) {
+        const an = b.getAttribute("data-stufe") === gesetzt;
+        b.classList.toggle("an", an);
+        b.setAttribute("aria-checked", String(an));
+      }
+      zeigen(gesetzt);
+      kasten.setAttribute("data-stufe", gesetzt);
+    }
+    return kasten;
+  }
+
+  /* Die Wahl in die vorhandene Begrüßungskarte hängen – nur dort, nur solange sie steht, nur einmal. */
+  function einhaengen(wurzel){
+    const w = wurzel || (typeof document !== "undefined" ? document : null);
+    if (!w || !noetig()) return false;
+    const ziel = w.querySelector(".sp-einstieg-start");
+    if (!ziel || ziel.querySelector(".sp-stufe")) return false;
+    const k = karte();
+    if (!k) return false;
+    ziel.append(k);
+    return true;
+  }
+
+  /* Die Anweisungszeile der ersten Stunde nach der Stufe richten (Station 2; sie kommt aus ui/spiel.js). */
+  function anweisungRichten(wurzel){
+    const w = wurzel || (typeof document !== "undefined" ? document : null);
+    if (!w) return false;
+    const coach = w.querySelector('.sp-coach[data-hinweisquelle="coach"]');
+    if (!coach) return false;
+    /* meister: keine ungefragte Anweisung – jeder Coach-Schritt wäre eine. */
+    if (aktuell() === "meister") { coach.hidden = true; return true; }
+    const blase = coach.querySelector(".sp-blase");
+    const text = blase ? String(blase.textContent || "") : "";
+    if (text !== T().HINWEIS) return false;               /* ein späterer Coach-Schritt – unberührt */
+    const a = Spiel.einstieg.anweisung({id: Spiel.EINSTIEG_TICKET});
+    if (!a) { coach.hidden = true; return true; }         /* geselle: erst nach einem Fehler */
+    if (a.text !== text) blase.textContent = a.text;      /* azubi-plus: derselbe Weg, knapper */
+    return true;
+  }
+
+  function nachziehen(wurzel){
+    let n = 0;
+    try { if (einhaengen(wurzel)) n++; } catch (e) { console.error("Stufenwahl", e); }
+    try { if (anweisungRichten(wurzel)) n++; } catch (e) { console.error("Anweisungszeile", e); }
+    return n;
+  }
+
+  /* Der Anschluss an den echten Weg: #labor-auftrag wird nur über UI.labor.auftragNeu gefüllt. */
+  function einrichten(){
+    const labor = UI.labor;
+    if (!labor || typeof labor.auftragNeu !== "function" || labor.auftragNeu.__einstiegStufe) return false;
+    const alt = labor.auftragNeu;
+    const neu = function(){ const r = alt.apply(this, arguments); nachziehen(); return r; };
+    neu.__einstiegStufe = true;
+    labor.auftragNeu = neu;
+    nachziehen();
+    return true;
+  }
+
+  return {karte, einhaengen, anweisungRichten, nachziehen, einrichten};
+})();
+
+/* Beim Start einhängen – VOR „ui-bereit“: dort öffnet src/ui/spiel.js den ersten Auftrag samt
+   Begrüßungskarte; danach wäre die Wahl im ersten Bild nicht dabei (Lehre aus dem Bau P7). */
+(UI.startHaken ||= []).push(() => UI.einstiegStufe.einrichten());
+
 if (typeof document !== "undefined") {
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => UI.starten());
   else UI.starten();

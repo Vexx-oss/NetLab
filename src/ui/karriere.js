@@ -3,7 +3,7 @@
    Logik in spiel/karriere.js, wirtschaft.js, wartung.js, playbooks.js, offline.js, mini.js, tag.js, pruefung.js.
    Takt: Spiel.tick alle 60 s und beim Sichtbarwerden (Zeit über Zeitstempel, nicht über Ticks). */
 UI.karriere = (() => {
-  const K = {wikiWahl: null, wikiSuche: "", shopOffen: {playbooks: false, aussehen: false}, mini: {antwort: null, ergebnis: null, auswahl: [], links: null}};
+  const K = {wikiWahl: null, wikiSuche: "", shopOffen: {playbooks: false, aussehen: false}, mini: {antwort: null, ergebnis: null, auswahl: [], links: null, hilfe: null}};
   const kd = id => Spiel.karriere.kunde(id);
   const AMPEL = {gruen: ["ok", "●", "läuft"], gelb: ["warn", "▲", "Frist überschritten"], rot: ["bad", "■", "steht – kein Geld"]};
   const NIV = {E: "Einstieg", AP1: "AP1", AP2: "AP2"};
@@ -315,7 +315,86 @@ UI.karriere = (() => {
   }
   function wikiOeffnen(skill){ K.wikiWahl = skill; UI.app.ansicht("wiki"); }
 
-  /* ---------- Leiste: Status und Mini-Ticket (nur Maus) ---------- */
+  /* ---------- Leiste: Status und Mini-Ticket (nur Maus) ----------
+     hilfeZiel = UI.leiste.miniHilfe: in der Leiste steht Denkhilfe und Anker in einem eigenen Bereich,
+     im Overlay (ohne hilfeZiel) im Kartenrand. Beide Wege zeigen denselben Knopf – genau einen je Zustand. */
+  function miniZeichnen(el, {gross = false, hilfeZiel = null, schliessen = null} = {}){
+    if (hilfeZiel && hilfeZiel.replaceChildren) hilfeZiel.replaceChildren();
+    if (!el || !Spiel._st) return;
+    const m = K.mini.ergebnis ? Spiel.mini.von(K.mini.ergebnis.id) : Spiel.mini.naechstes();
+    if (!m) { el.replaceChildren(h("p", {class: "mk-leer"}, "Gerade kein Mini-Ticket.")); return; }
+    if (K.mini.hilfe && K.mini.hilfe.id !== m.id) K.mini.hilfe = null;
+    const neu = () => miniZeichnen(el, {gross, hilfeZiel, schliessen});
+    const kopf = h("div", {class: "mk-kopf"}, h("span", {class: "sp-chip niv-" + m.stufe}, NIV[m.stufe]), h("span", {class: "mk-skill"}, Spiel.karriere.skillName(m.skill)));
+    const teile = [kopf, h("p", {class: "mk-frage"}, m.frage)];
+    if (m.schnappschuss && m.schnappschuss.inhalt) teile.push(h("pre", {class: "mk-schnapp"}, m.schnappschuss.inhalt));
+    const fertig = res => { K.mini.ergebnis = Object.assign({id: m.id}, res); K.mini.auswahl = []; K.mini.links = null; K.mini.hilfe = null; neu(); leisteStatus(); UI.spiel?.status?.(); };
+    /* Denkhilfe (§ 5): der Text kommt aus Spiel.mini.hilfe – dort steht auch die Stufenregel und der
+       Schutz gegen die Lösung. Hier wird nur gezeigt und geklickt; nurSehen verbraucht keine Sprosse. */
+    const hilfeTeil = () => {
+      const offen = K.mini.hilfe && K.mini.hilfe.id === m.id ? K.mini.hilfe : null;
+      const naechste = Spiel.mini.hilfe(m.id, {nurSehen: true});
+      if (!offen && !naechste) return null;
+      const kinder = [];
+      if (offen) kinder.push(h("div", {class: "mk-hilfe" + (offen.frei ? "" : " knapp")},
+        h("b", {class: "mk-hilfe-art"}, offen.art === "ausschnitt" ? "🔎 Ausschnitt aus der Aufgabe" : "💡 Denkhilfe"),
+        h("p", {class: "mk-hilfe-text"}, offen.text),
+        offen.frei ? null : h("small", {class: "mk-hilfe-vorrat"}, "Der Vorrat an freien Hilfen ist aufgebraucht – die Hilfe bleibt.")));
+      if (naechste) kinder.push(h("button", {type: "button", class: "mk-klein mk-hilfe-knopf", tabindex: "-1",
+        onmousedown: e => e.preventDefault(),
+        onclick: () => { const naechsterText = Spiel.mini.hilfe(m.id); if (naechsterText) K.mini.hilfe = Object.assign({id: m.id}, naechsterText); neu(); }},
+        offen ? "Noch eine Denkhilfe" : "Denkhilfe"));
+      return kinder.length ? h("div", {class: "mk-hilfe-bereich"}, ...kinder) : null;
+    };
+    if (K.mini.ergebnis) {
+      const e = K.mini.ergebnis;
+      teile.push(h("div", {class: "mk-ergebnis " + (e.richtig ? "ok" : "bad")}, h("b", {}, e.richtig ? `✓ Richtig! +${e.lohn} €` : "✗ Nicht ganz."),
+        e.richtig ? null : h("p", {}, "Richtig: " + e.loesung), h("p", {}, e.erklaerung)),
+        h("button", {type: "button", class: "mk-knopf", onclick: () => { K.mini.ergebnis = null; K.mini.hilfe = null; neu(); }}, "Nächstes ▸"));
+      /* Lernanker: nach der Antwort, mit belegter Quelle und Verweis auf UI.wiki.oeffnen (§ 5). */
+      const a = Spiel.mini.anker(m.id);
+      const anker = a ? h("div", {class: "mk-anker"},
+        h("b", {class: "mk-anker-titel"}, "📌 Lernanker: " + a.titel),
+        h("p", {class: "mk-anker-text"}, a.text),
+        a.quelle ? h("p", {class: "mk-anker-quelle"}, "Quelle: " + a.quelle) : null,
+        a.wiki ? h("button", {type: "button", class: "mk-klein mk-wiki-knopf", tabindex: "-1", onmousedown: e2 => e2.preventDefault(),
+          onclick: () => { if (schliessen) schliessen(); UI.wiki?.oeffnen?.(a.wiki); }}, "Im Wiki nachschlagen") : null) : null;
+      if (hilfeZiel) hilfeZiel.replaceChildren(anker || "");
+      else if (anker) teile.push(anker);
+      el.replaceChildren(h("div", {class: "mk" + (gross ? " gross" : "")}, teile)); return;
+    }
+    if (m.art === "wahl" || m.art === "vorhersage") {
+      teile.push(h("div", {class: "mk-optionen"}, m.optionen.map((o, i) => h("button", {type: "button", class: "mk-knopf", onclick: () => fertig(Spiel.mini.antworten(m.id, i))}, o))));
+    } else if (m.art === "reihenfolge") {
+      const aus = K.mini.auswahl;
+      teile.push(h("p", {class: "mk-hinweis"}, "In der richtigen Reihenfolge antippen:"),
+        h("div", {class: "mk-optionen"}, m.optionen.map((o, i) => h("button", {type: "button", class: "mk-knopf" + (aus.includes(i) ? " gewaehlt" : ""), disabled: aus.includes(i),
+          onclick: () => { aus.push(i); if (aus.length === m.optionen.length) fertig(Spiel.mini.antworten(m.id, aus.slice())); else neu(); }},
+          aus.includes(i) ? `${aus.indexOf(i) + 1}. ${o}` : o))),
+        aus.length ? h("button", {type: "button", class: "mk-klein", onclick: () => { K.mini.auswahl = []; neu(); }}, "↺ neu anfangen") : null);
+    } else if (m.art === "zuordnen") {
+      const paare = K.mini.auswahl, links = m.optionen.links, rechts = m.optionen.rechts;
+      const belegtL = new Set(paare.map(p => p[0])), belegtR = new Set(paare.map(p => p[1]));
+      teile.push(h("p", {class: "mk-hinweis"}, K.mini.links == null ? "Links antippen, dann das passende Rechts:" : `„${links[K.mini.links]}“ gehört zu …`),
+        h("div", {class: "mk-zuordnen"},
+          h("div", {}, links.map((o, i) => h("button", {type: "button", class: "mk-knopf" + (K.mini.links === i ? " an" : "") + (belegtL.has(i) ? " gewaehlt" : ""), disabled: belegtL.has(i),
+            onclick: () => { K.mini.links = i; neu(); }}, belegtL.has(i) ? `${o} ✓` : o))),
+          h("div", {}, rechts.map((o, j) => h("button", {type: "button", class: "mk-knopf" + (belegtR.has(j) ? " gewaehlt" : ""), disabled: belegtR.has(j) || K.mini.links == null,
+            onclick: () => { paare.push([K.mini.links, j]); K.mini.links = null; if (paare.length === Math.min(links.length, rechts.length)) fertig(Spiel.mini.antworten(m.id, paare.slice())); else neu(); }}, o)))),
+        paare.length ? h("button", {type: "button", class: "mk-klein", onclick: () => { K.mini.auswahl = []; K.mini.links = null; neu(); }}, "↺ neu anfangen") : null);
+    }
+    const ht = hilfeTeil();
+    if (hilfeZiel) hilfeZiel.replaceChildren(ht || "");
+    else if (ht) teile.push(ht);
+    el.replaceChildren(h("div", {class: "mk" + (gross ? " gross" : "")}, teile));
+  }
+  function miniDialog(){
+    const ziel = h("div", {class: "mk-dialog"});
+    const zu = overlay(h("div", {}, h("h2", {}, "Mini-Ticket"), ziel, h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Schließen"))));
+    miniZeichnen(ziel, {gross: true, schliessen: zu});
+  }
+  /* Der Weg der Leiste: Ticket in UI.leiste.miniBereich, Denkhilfe und Anker in UI.leiste.miniHilfe (§ 5). */
+  const leisteMini = () => miniZeichnen(UI.leiste.miniBereich, {hilfeZiel: UI.leiste.miniHilfe});
   function leisteStatus(){
     if (!Spiel._st) return;
     const ampeln = Spiel.karriere.vertragskunden().map(id => ({name: kd(id).name, farbe: Spiel.wartung.ampelBei(id), zustand: AMPEL[Spiel.wartung.ampelBei(id)]?.[2] || ""}));
@@ -325,49 +404,6 @@ UI.karriere = (() => {
     const sd = Spiel.karriere.stufeDef(Spiel.st.stufe);
     UI.leiste.status({ampeln, euroProStunde: Spiel.euroProStunde(), ruf: Spiel.st.ruf, offen, text, titel: `Stufe ${Spiel.st.stufe} · ${sd ? sd.name : ""}`});
   }
-  function miniZeichnen(el, {gross = false} = {}){
-    if (!el || !Spiel._st) return;
-    const m = K.mini.ergebnis ? Spiel.mini.von(K.mini.ergebnis.id) : Spiel.mini.naechstes();
-    if (!m) { el.replaceChildren(h("p", {class: "mk-leer"}, "Gerade kein Mini-Ticket.")); return; }
-    const kopf = h("div", {class: "mk-kopf"}, h("span", {class: "sp-chip niv-" + m.stufe}, NIV[m.stufe]), h("span", {class: "mk-skill"}, Spiel.karriere.skillName(m.skill)));
-    const teile = [kopf, h("p", {class: "mk-frage"}, m.frage)];
-    if (m.schnappschuss && m.schnappschuss.inhalt) teile.push(h("pre", {class: "mk-schnapp"}, m.schnappschuss.inhalt));
-    const fertig = res => { K.mini.ergebnis = Object.assign({id: m.id}, res); K.mini.auswahl = []; K.mini.links = null; miniZeichnen(el, {gross}); leisteStatus(); UI.spiel?.status?.(); };
-    if (K.mini.ergebnis) {
-      const e = K.mini.ergebnis;
-      teile.push(h("div", {class: "mk-ergebnis " + (e.richtig ? "ok" : "bad")}, h("b", {}, e.richtig ? `✓ Richtig! +${e.lohn} €` : "✗ Nicht ganz."),
-        e.richtig ? null : h("p", {}, "Richtig: " + e.loesung), h("p", {}, e.erklaerung)),
-        h("button", {type: "button", class: "mk-knopf", onclick: () => { K.mini.ergebnis = null; miniZeichnen(el, {gross}); }}, "Nächstes ▸"));
-      el.replaceChildren(h("div", {class: "mk" + (gross ? " gross" : "")}, teile)); return;
-    }
-    if (m.art === "wahl" || m.art === "vorhersage") {
-      teile.push(h("div", {class: "mk-optionen"}, m.optionen.map((o, i) => h("button", {type: "button", class: "mk-knopf", onclick: () => fertig(Spiel.mini.antworten(m.id, i))}, o))));
-    } else if (m.art === "reihenfolge") {
-      const aus = K.mini.auswahl;
-      teile.push(h("p", {class: "mk-hinweis"}, "In der richtigen Reihenfolge antippen:"),
-        h("div", {class: "mk-optionen"}, m.optionen.map((o, i) => h("button", {type: "button", class: "mk-knopf" + (aus.includes(i) ? " gewaehlt" : ""), disabled: aus.includes(i),
-          onclick: () => { aus.push(i); if (aus.length === m.optionen.length) fertig(Spiel.mini.antworten(m.id, aus.slice())); else miniZeichnen(el, {gross}); }},
-          aus.includes(i) ? `${aus.indexOf(i) + 1}. ${o}` : o))),
-        aus.length ? h("button", {type: "button", class: "mk-klein", onclick: () => { K.mini.auswahl = []; miniZeichnen(el, {gross}); }}, "↺ neu anfangen") : null);
-    } else if (m.art === "zuordnen") {
-      const paare = K.mini.auswahl, links = m.optionen.links, rechts = m.optionen.rechts;
-      const belegtL = new Set(paare.map(p => p[0])), belegtR = new Set(paare.map(p => p[1]));
-      teile.push(h("p", {class: "mk-hinweis"}, K.mini.links == null ? "Links antippen, dann das passende Rechts:" : `„${links[K.mini.links]}“ gehört zu …`),
-        h("div", {class: "mk-zuordnen"},
-          h("div", {}, links.map((o, i) => h("button", {type: "button", class: "mk-knopf" + (K.mini.links === i ? " an" : "") + (belegtL.has(i) ? " gewaehlt" : ""), disabled: belegtL.has(i),
-            onclick: () => { K.mini.links = i; miniZeichnen(el, {gross}); }}, belegtL.has(i) ? `${o} ✓` : o))),
-          h("div", {}, rechts.map((o, j) => h("button", {type: "button", class: "mk-knopf" + (belegtR.has(j) ? " gewaehlt" : ""), disabled: belegtR.has(j) || K.mini.links == null,
-            onclick: () => { paare.push([K.mini.links, j]); K.mini.links = null; if (paare.length === Math.min(links.length, rechts.length)) fertig(Spiel.mini.antworten(m.id, paare.slice())); else miniZeichnen(el, {gross}); }}, o)))),
-        paare.length ? h("button", {type: "button", class: "mk-klein", onclick: () => { K.mini.auswahl = []; K.mini.links = null; miniZeichnen(el, {gross}); }}, "↺ neu anfangen") : null);
-    }
-    el.replaceChildren(h("div", {class: "mk" + (gross ? " gross" : "")}, teile));
-  }
-  function miniDialog(){
-    const ziel = h("div", {class: "mk-dialog"});
-    const zu = overlay(h("div", {}, h("h2", {}, "Mini-Ticket"), ziel, h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Schließen"))));
-    miniZeichnen(ziel, {gross: true});
-  }
-
   /* ---------- Einstellungen ---------- */
   function abschnitte(){
     UI.app.einstellungAbschnitt("Lernen", el => {
@@ -483,7 +519,7 @@ UI.karriere = (() => {
     setTimeout(() => {
       try {
         takt(); offlineZeigen();
-        miniZeichnen(UI.leiste.miniBereich);
+        leisteMini();
         festPlanen(600);
       } catch (e) { console.error("Karriere-Start", e); }
     }, 300);
@@ -492,7 +528,7 @@ UI.karriere = (() => {
   });
   Bus.an("zustand-geaendert", () => leisteStatus());
   Bus.an("aufstieg", () => festPlanen(1200));
-  Bus.an("mini", () => { if (!K.mini.ergebnis) miniZeichnen(UI.leiste.miniBereich); });
+  Bus.an("mini", () => { if (!K.mini.ergebnis) leisteMini(); });
 
   return {kundenAnsicht, shopAnsicht, lernstandAnsicht, wikiAnsicht, wikiOeffnen, miniZeichnen, miniDialog, pruefungUebersicht, pruefungAbgeben, leisteStatus, tagKarte, training};
 })();

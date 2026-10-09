@@ -52,8 +52,10 @@ gruppe("Spiel-Fluss: Zustand", () => {
     erwarte.gleich(st.kunden.salon.sterne, []);
     erwarte.gleich(st.erledigt.length, 1);
     erwarte.gleich(Spiel.migrieren(null).v, Spiel.VERSION);
-    erwarte.gleich(st.v, 2, "v:1 wird zu v:2");
+    erwarte.gleich(st.v, Spiel.VERSION, "v:1 wird auf die aktuelle Fassung gehoben");
     erwarte.gleich([st.dex, st.tagesraetsel, st.tagebuch], [{}, {serie: 0}, []], "v:2-Felder ergänzt");
+    /* v:3 (Hilfestellung): der Trainingsstand wird ergänzt – auch aus einem v:2-Stand ohne das Feld */
+    erwarte.gleich(st.training, {je: {}}, "v:3-Feld training ergänzt");
     const kaputt = Spiel.migrieren({v: 2, dex: [1], tagesraetsel: "x", tagebuch: {a: 1}});
     erwarte.gleich([kaputt.dex, kaputt.tagesraetsel, kaputt.tagebuch], [{}, {serie: 0}, []], "kaputte v:2-Felder repariert");
     erwarte.gleich(Spiel.migrieren([1, 2]).postfach, []);

@@ -82,9 +82,18 @@ Spiel.kundenSatz = function(kundeId, art, seed){
 };
 
 /* Spiel.abschliessen(inst, abnahme) → Ergebnis für den Ergebnisbildschirm.
-   Nicht bestanden: nichts wird abgezogen, das Ticket bleibt offen (Lernmotor und Fehlerheft werden informiert). */
+   Nicht bestanden: nichts wird abgezogen, das Ticket bleibt offen (Lernmotor und Fehlerheft werden informiert).
+
+   Trainingsinstanzen (quelle "training", Hilfestellung 07.10.2026) werden HIER umgeleitet, und zwar als
+   allererste Zeile: Training zahlt kein Geld, keinen Ruf, keinen Karrierefortschritt und erscheint nicht
+   in der Wochenwertung — verbindlich: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 6.
+   Die Umleitung steht bewusst vor jedem Nebeneffekt (Zeitbuchung, Lernen, Abzeichen, Kundenakte), sonst
+   wäre die Zusage „Training zahlt nichts" nur halb wahr. */
 Spiel.abschliessen = function(inst, abnahme){
   const def = Spiel.defVon(inst);
+  if (inst && inst.quelle === "training" && typeof Spiel.training !== "undefined" && Spiel.training.abnehmen) {
+    return Spiel.training.abnehmen(inst.iid, abnahme || Spiel.abnahme(inst));
+  }
   abnahme = abnahme || Spiel.abnahme(inst);
   const lz = Spiel.laufzeit(inst);
   if (lz.letzteArbeit) { inst.zeitMs = (inst.zeitMs || 0) + Math.min(jetzt() - lz.letzteArbeit, Spiel.ARBEIT_LUECKE_MS); lz.letzteArbeit = jetzt(); }

@@ -1,0 +1,34 @@
+/* ---------- Trainingsbereich (ui/training.js): Karten der Übungsszenarien ----------
+   Nur Tokens aus basis.css, nur die Skalen aus tools/ethos.py (Abstand 0/4/8/12/16/24/32,
+   Schrift 11/12/13/15/20/28). Keine Farbe als Literal, kein !important, keine eigenen Zeiten. */
+.tr-seite{height:100%; overflow:auto; padding:16px 24px 32px; display:flex; flex-direction:column; gap:16px; background:var(--bg); scrollbar-width:thin}
+.tr-kopf h2{font-size:28px; font-weight:800; font-family:var(--display)}
+.tr-kopf p{margin-top:4px}
+.tr-liste{display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px}
+.tr-karte{display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--line-2)}
+.tr-karte:hover{border-color:var(--line-2)}
+.tr-basis{border-top-color:var(--accent)}
+.tr-stoerung{border-top-color:var(--warn)}
+.tr-pruefung{border-top-color:var(--info)}
+.tr-karte.tr-fertig{border-top-color:var(--ok)}
+.tr-kopf-zeile{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
+.tr-kopf-zeile h3, .tr-ergebnis h3{font-size:20px; font-weight:800; font-family:var(--display)}
+.tr-marke{padding:4px 8px; border-radius:999px; background:var(--panel-3); color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; white-space:nowrap}
+.tr-summe, .tr-text{font-size:13px; color:var(--muted)}
+.tr-meta{font-size:12px; color:var(--faint)}
+.tr-stand-zeile{font-size:12px; color:var(--ink)}
+.tr-geruest{padding:8px 12px; border-radius:var(--radius-s); background:var(--panel-2); border:1px solid var(--line)}
+.tr-geruest summary{font-size:12px; font-weight:700; color:var(--accent); cursor:pointer}
+.tr-tipp{margin-top:8px; font-size:13px; color:var(--ink)}
+.tr-schritte{margin:8px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--ink)}
+.tr-werkzeug{margin-top:4px; font-size:12px; color:var(--muted)}
+.tr-leiter{margin:8px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted)}
+.tr-leiter b{color:var(--ink)}
+.tr-quelle{font-size:11px; color:var(--faint)}
+.tr-knoepfe{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:4px}
+.tr-grund{font-size:12px; color:var(--warn)}
+.tr-ergebnis{display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--warn)}
+.tr-ergebnis.tr-gut{border-left-color:var(--ok)}
+.tr-offen{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted)}
+.tr-lernen{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--ink)}
+@media (max-width: 900px){ .tr-liste{grid-template-columns:1fr} }
