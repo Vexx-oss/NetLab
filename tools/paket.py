@@ -78,6 +78,31 @@ def lizenz_texte() -> list[str]:
 def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
     ver = version()
     ordner = DIST / f"{ORDNERNAME}-{ver}"
+
+    # 1 · Reste frueherer Fassungen wegraeumen.
+    # `dist/` ist git-ignoriert und sammelt sich ueber die Sitzungen an. Gemessen am 09.10.2026
+    # lagen dort gleichzeitig `Netzwerk-Labor-1.2.1-Windows.zip`, `…-1.2.4-Windows.zip` und
+    # `…-1.2.4-Browser.zip` — und der Release-Ablauf sammelt mit `ls dist/*.zip` ALLE ein. Ein
+    # einziger Lauf haette also drei Pakete an eine Veroeffentlichung gehaengt, darunter zwei
+    # fremde Fassungen. Was hier nicht entsteht, hat in `dist/` nichts zu suchen.
+    if DIST.is_dir():
+        entfernt = 0
+        for alt in sorted(DIST.iterdir()):
+            if alt.resolve() == ordner.resolve():
+                continue
+            if not alt.name.startswith("Netzwerk-Labor-"):
+                continue
+            if alt.is_dir():
+                shutil.rmtree(alt, ignore_errors=True)
+            else:
+                try:
+                    alt.unlink()
+                except OSError:
+                    pass
+            entfernt += 1
+        if entfernt:
+            print(f"  dist/ aufgeraeumt: {entfernt} Reste frueherer Fassungen entfernt.")
+
     if ordner.exists():
         shutil.rmtree(ordner)
     ordner.mkdir(parents=True)
@@ -114,6 +139,20 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
         if not quelle.is_file():
             raise SystemExit(f"FEHLER: Lizenztext fehlt: {quelle}")
         shutil.copy2(quelle, ordner / "LIZENZEN" / name)
+
+    # Die Dokumentation als Ordner dazu (seit 07.10.2026). Sie liegt fertig erzeugt in
+    # `docs/doku/` (tools/seite.py, deterministisch) und wird nur kopiert — kein Bau im Paket.
+    # Warum ueberhaupt: wer das Spiel herunterlaedt, arbeitet oft OHNE Netz (das ist der Sinn
+    # der Einzeldatei). Die Doku war bis dahin nur online erreichbar. Der Ordner ist
+    # eigenstaendig: er verlinkt untereinander, braucht keine Schriften von aussen und
+    # stoert den Spielstart nicht (das Spiel ist eine einzelne HTML-Datei daneben).
+    doku = HIER / "docs" / "doku"
+    if doku.is_dir():
+        shutil.copytree(doku, ordner / "doku")
+        anzahl = sum(1 for _ in (ordner / "doku").rglob("*.html"))
+        print(f"  Doku beigelegt: {anzahl} HTML-Seiten aus docs/doku/")
+    else:
+        print("  HINWEIS: docs/doku/ fehlt — Paket kommt ohne Doku (python tools/seite.py baut sie).")
 
     mitgelieferte_exe = False
     if mit_exe:

@@ -27,7 +27,7 @@ src/ ──python bauen.py──▶ web/index.html ──python tools/einfach.py
 |---|---|---|
 | `python bauen.py` | `web/index.html` + `web/tests.html` (107 Module) | Sekunden |
 | `python tools/einfach.py` | `docs/index.html` — das Spiel als **eine** Datei | Sekunden |
-| `python tools/paket.py` | `dist/` — Ordner + ZIP für eine Release, geprüft | Sekunden |
+| `python tools/paket.py` | `dist/` — Ordner + ZIP für eine Release, geprüft (mit `.exe`, wenn `Programm/` sie hat → `-Windows.zip`, sonst `-Browser.zip`) | Sekunden |
 | `cargo tauri build --no-bundle` | `netzwerk-labor.exe` (Rust-Hülle) | Minuten |
 
 `python bauen.py` muss **immer vor** `cargo tauri build` laufen — die Hülle lädt `web/`.
@@ -147,8 +147,8 @@ Ablauf eine Concurrency-Gruppe je Zweig; zusätzlich läuft er nachts um 03:17 U
 ## Das Auslieferungspaket
 
 ```bash
-python tools/paket.py               # -> dist/Netzwerk-Labor-<Version>-Windows.zip
-python tools/paket.py --ohne-exe    # nur die Browser-Fassung (klein)
+python tools/paket.py               # mit .exe, falls Programm/ sie hat -> ...-Windows.zip
+python tools/paket.py --ohne-exe    # nur die Browser-Fassung -> ...-Browser.zip (so im Release)
 python tools/paket.py --nur-ordner  # Ordner bauen, kein ZIP
 ```
 
@@ -157,16 +157,27 @@ Das Werkzeug baut die Einzeldatei frisch, sammelt alles Nötige ein, schreibt ei
 und jede Datei Byte für Byte gegen den Ordner. Ein Paket, das sich nicht öffnen lässt,
 fällt hier auf und nicht beim Nutzer.
 
-Gebaut wird `dist/Netzwerk-Labor-<version>-Windows.zip` mit dem Inhalt `Netzwerk-Labor-<version>/`:
+Gebaut wird `dist/Netzwerk-Labor-<version>-<Windows|Browser>.zip` mit dem Inhalt
+`Netzwerk-Labor-<version>/`. Welche der beiden Varianten entsteht, entscheidet **eine** Sache —
+ob `Programm/Netzwerk-Labor.exe` da ist (oder `--ohne-exe` gesetzt wird):
 
 ```
 Netzwerk-Labor.html            das Spiel als Einzeldatei (überall spielbar)
-Netzwerk-Labor.exe             Windows-Programm mit Leiste und Tray
-Integritaet-reparieren.cmd     falls die .exe kein Fenster zeigt
+Netzwerk-Labor.exe             Windows-Programm mit Leiste und Tray   (nur Windows-Variante)
+Integritaet-reparieren.cmd     falls die .exe kein Fenster zeigt       (nur Windows-Variante)
+doku/                          die ganze Doku als lesbare Seiten (seit 07.10.2026)
 START-HIER.md / LIESMICH.txt   Anleitung zum Losspielen
 LIZENZ.md / LIZENZEN/          Lizenz des Programms und der Schriften
 SIZES.txt                      Inhalt, Größen, Prüfsummen
 ```
+
+> **`--ohne-exe` ist im Release-Ablauf Pflicht.** Ohne den Schalter nimmt `paket.py` die
+> **lokale** `Programm/Netzwerk-Labor.exe`, wenn sie existiert — und die ist meist veraltet.
+> Gemessen am 09.10.2026: sie meldete noch `1.2.3`, wäre aber als
+> `Netzwerk-Labor-1.2.4-Windows.zip` veröffentlicht worden. Die echte `.exe` baut der
+> Windows-Job in `release.yml` aus dem Tag und prüft dort, dass ihre `ProductVersion` zum Tag
+> passt; der Linux-Job liefert deshalb nur die Browser-Fassung. `doku/` kommt in **beide**
+> Varianten, denn wer die Einzeldatei herunterlädt, arbeitet oft ohne Netz.
 
 Die Anleitungen kommen aus `Vorlagen/` — **eine** Quelle, kein zweiter Ort zum Pflegen.
 
@@ -182,7 +193,8 @@ git push origin v1.2.4
 ```
 
 Nach etwa einer Minute steht das Release unter
-*Releases* — mit dem ZIP und der Einzeldatei `Netzwerk-Labor.html` als Anhänge.
+*Releases* — mit dem ZIP und der Einzeldatei `Netzwerk-Labor.html` als Anhänge; die
+Windows-`.exe` folgt aus dem zweiten Job (Windows-Läufer, einige Minuten später).
 
 > **Warum ein Ablauf und nicht von Hand:** Ein Release über die API anzulegen braucht ein
 > Token mit Schreibrecht. Auf dem Entwicklungsrechner liegt keines (die API antwortet dort

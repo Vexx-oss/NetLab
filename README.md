@@ -23,23 +23,37 @@ Läuft lokal und offline; nichts wird gesendet.
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)** (2,1 MB), Doppelklick | nur einen Browser |
-| **Zum Entpacken** | [Netzwerk-Labor-1.2.4-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, Anleitungen, Lizenztexte | nur einen Browser |
+| **Zum Entpacken** | [Netzwerk-Labor-1.2.4-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner**, Anleitungen, Lizenztexte | nur einen Browser |
 | **Windows-Programm** | **[Netzwerk-Labor.exe herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe)** (8,2 MB) — mit Leiste am Bildschirmrand, Tray-Symbol und globalem Tastenkürzel | Windows 10/11 |
 
-Alle drei Wege liefern dieselbe Fassung `1.2.4`. Die Anhänge der Release laden **direkt
+Alle Wege liefern dieselbe Fassung `1.2.4`. Die Anhänge der Release laden **direkt
 herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umweg.
+
+> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-1.2.4-Browser.zip` — das Spiel
+> als Einzeldatei, **die ganze Doku im Ordner `doku/`**, Anleitungen und Lizenztexte; kommt aus dem
+> Linux-Job und ist deshalb **ohne** `.exe` (`tools/paket.py --ohne-exe`). (2) `Netzwerk-Labor.html`
+> — dieselbe Einzeldatei einzeln, für den stabilen Download-Link. (3) `Netzwerk-Labor.exe` — das
+> Windows-Programm, gebaut vom Windows-Läufer **aus dem Tag**; der Job prüft vor dem Anhängen, dass
+> die `ProductVersion` der `.exe` zum Tag passt. Das Browser-ZIP enthält bewusst **keine** `.exe`:
+> der Linux-Job hätte sonst die lokale, veraltete Datei aus `Programm/` mitverpackt (gemessen am
+> 09.10.2026: sie meldete noch `1.2.3`).
 
 > **Zur Windows-`.exe`:** Sie ist `1.2.4` und bringt Leiste, Tray und globales Tastenkürzel.
 > Sie **hängt seit dem 07.10.2026 automatisch an jeder Veröffentlichung** — gebaut von einem
 > Windows-Läufer in [`.github/workflows/release.yml`](.github/workflows/release.yml), damit der
 > Download-Link stabil bleibt:
 > `https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe`
-> (Anhang: 8.211.456 B, SHA256 `28C7C6B4…E808`). Ins Git gehört sie weiterhin **nicht** (8 MB je Bau);
-> auf dem Entwicklungsrechner liegt sie unter `Programm/Netzwerk-Labor.exe` (8.217.088 B, SHA256
-> `E2735D79…5DD68` — Rust-Bauten sind nicht bit-gleich, beide melden 1.2.3).
-> **Ihr Start ist gemessen:** die Abnahme `python tools/q-echt.py` lief im echten Programm
-> durch — Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler,
-> Fernwartungs-Schild sichtbar. Bilder: `Nachweise/1.2-Q/`.
+> (die Zahlen des aktuellen Anhangs stehen in der Release und in
+> [`docs/CHANGELOG.md`](docs/CHANGELOG.md) — Rust-Bauten sind **nicht** bit-gleich, ein SHA256
+> gilt deshalb nur für genau den Bau, den er beschreibt).
+> Ins Git gehört sie weiterhin **nicht** (8 MB je Bau). **Die Datei unter
+> `Programm/Netzwerk-Labor.exe` ist die lokale und derzeit veraltet** — sie meldet `1.2.3` vom
+> 07.10.2026, also den Stand *vor* der Hilfestellung (8.217.088 B, SHA256 `E2735D79…5DD68`).
+> Nimm die `.exe` aus der Release, nicht aus dem Arbeitsverzeichnis.
+> **Der Start der 1.2.3 war gemessen:** die Abnahme `python tools/q-echt.py` lief im echten
+> Programm durch — Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler,
+> Fernwartungs-Schild sichtbar. Bilder: `Nachweise/1.2-Q/`. Für die 1.2.4 ist dieser Lauf
+> **nicht** wiederholt; die Fassung ist über Tests, Rauchtest und die Seitenprüfung belegt.
 
 `Netzwerk-Labor.html` liegt direkt im Repositorium, damit der Download **einen Klick**
 braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft —
@@ -284,9 +298,12 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 
-Die `.exe` in `Programm/` ist auf dem Stand von `ausbau-1.2` (**1.2.3**, gebaut am 07.10.2026) und die
-einzige Fassung mit Leiste, Tray und globalem Tastenkürzel. Sie liegt nicht im Release (8 MB), sondern
-im Repositorium.
+Die `.exe` in `Programm/` ist **veraltet**: sie meldet **1.2.3** (gebaut am 07.10.2026) und stammt damit
+aus der Zeit vor der Hilfestellung. Sie liegt nicht im Git (8 MB). Die **aktuelle** `.exe` baut der
+Windows-Läufer bei jeder Veröffentlichung aus dem Tag und hängt sie an das Release — stabiler Link:
+`https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe`. Wer die `.exe` bewusst
+lokal neu bauen will: `python bauen.py`, dann `cargo build --release --features custom-protocol` in
+`shell/src-tauri` (siehe [`docs/Bauen.md`](docs/Bauen.md)).
 
 ## Klassenraum (in Arbeit)
 

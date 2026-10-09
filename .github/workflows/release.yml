@@ -9,11 +9,14 @@ name: Release anlegen
 # GITHUB_TOKEN, und mit `permissions: contents: write` darf er Releases anlegen.
 #
 # Was angehaengt wird (drei Anhaenge):
-#   * Netzwerk-Labor-<fassung>-Browser.zip   — Paket aus tools/paket.py (Linux-Job)
+#   * Netzwerk-Labor-<fassung>-Browser.zip   — Paket aus `tools/paket.py --ohne-exe` (Linux-Job)
+#                                              NUR die Browser-Fassung; `--ohne-exe` ist Pflicht,
+#                                              sonst nimmt das Werkzeug die lokale, veraltete
+#                                              `Programm/Netzwerk-Labor.exe` mit (gemessen 09.10.2026)
 #   * Netzwerk-Labor.html                    — Einzeldatei, stabiler Name fuer
 #                                              /releases/latest/download/Netzwerk-Labor.html
-#   * Netzwerk-Labor.exe                     — Windows-Programm, gebaut im Windows-Job
-#                                              (stabiler Name: .../latest/download/Netzwerk-Labor.exe)
+#   * Netzwerk-Labor.exe                     — Windows-Programm, gebaut im Windows-Job aus DIESEM
+#                                              Commit (stabiler Name: .../latest/download/Netzwerk-Labor.exe)
 #
 # Die .exe liegt weiterhin NICHT im Git (8 MB, jeder Bau eine neue Binaerdatei). Bis zum
 # 07.10.2026 fehlte sie deshalb ganz im Release; seit dem 07.10.2026 baut der zweite Job
@@ -64,8 +67,16 @@ jobs:
           python tools/einfach.py
           python tools/einfach.py --pruefen docs/index.html
 
-      - name: Auslieferungspaket bauen
-        run: python tools/paket.py
+      # `--ohne-exe` ist PFLICHT, nicht Geschmack: ohne den Schalter nimmt `tools/paket.py`
+      # `Programm/Netzwerk-Labor.exe`, wenn sie da ist — und das ist die LOKALE, meist veraltete
+      # Binärdatei. Gemessen am 09.10.2026: sie trug noch 1.2.3, wäre aber als
+      # `Netzwerk-Labor-1.2.4-Windows.zip` veröffentlicht worden. Die echte `.exe` baut der
+      # Windows-Job unten aus DIESEM Commit und hängt sie einzeln an (Prüfung dort: ProductVersion
+      # muss zum Tag passen). Der Linux-Job liefert deshalb nur die Browser-Fassung, und die heißt
+      # dann auch so: `Netzwerk-Labor-<fassung>-Browser.zip` — genau der Name, den README.md und
+      # docs/Liesmich.md verlinken.
+      - name: Auslieferungspaket bauen (Browser-Fassung)
+        run: python tools/paket.py --ohne-exe
 
       - name: Tag bestimmen
         id: tag

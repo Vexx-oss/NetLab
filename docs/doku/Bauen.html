@@ -91,7 +91,7 @@ img{max-width:100%;height:auto}
                               │                                             │
                               │                                             └─▶ EINE Datei, überall spielbar
                               └─▶ Vorlage für die Rust-Hülle (shell/) ──▶ Netzwerk-Labor.exe</code></pre>
-<div class="dk-tabelle"><table><thead><tr><th>Befehl</th><th>Ergebnis</th><th>Dauer</th></tr></thead><tbody><tr><td><code>python bauen.py</code></td><td><code>web/index.html</code> + <code>web/tests.html</code> (107 Module)</td><td>Sekunden</td></tr><tr><td><code>python tools/einfach.py</code></td><td><code>docs/index.html</code> — das Spiel als <strong>eine</strong> Datei</td><td>Sekunden</td></tr><tr><td><code>python tools/paket.py</code></td><td><code>dist/</code> — Ordner + ZIP für eine Release, geprüft</td><td>Sekunden</td></tr><tr><td><code>cargo tauri build --no-bundle</code></td><td><code>netzwerk-labor.exe</code> (Rust-Hülle)</td><td>Minuten</td></tr></tbody></table></div>
+<div class="dk-tabelle"><table><thead><tr><th>Befehl</th><th>Ergebnis</th><th>Dauer</th></tr></thead><tbody><tr><td><code>python bauen.py</code></td><td><code>web/index.html</code> + <code>web/tests.html</code> (107 Module)</td><td>Sekunden</td></tr><tr><td><code>python tools/einfach.py</code></td><td><code>docs/index.html</code> — das Spiel als <strong>eine</strong> Datei</td><td>Sekunden</td></tr><tr><td><code>python tools/paket.py</code></td><td><code>dist/</code> — Ordner + ZIP für eine Release, geprüft (mit <code>.exe</code>, wenn <code>Programm/</code> sie hat → <code>-Windows.zip</code>, sonst <code>-Browser.zip</code>)</td><td>Sekunden</td></tr><tr><td><code>cargo tauri build --no-bundle</code></td><td><code>netzwerk-labor.exe</code> (Rust-Hülle)</td><td>Minuten</td></tr></tbody></table></div>
 <p><code>python bauen.py</code> muss <strong>immer vor</strong> <code>cargo tauri build</code> laufen — die Hülle lädt <code>web/</code>.</p>
 <h2 id="die-einzeldatei">Die Einzeldatei</h2>
 <p>Der wichtigste Befehl für die Auslieferung. Er hängt die Schriften als Daten-URI in die Seite und <strong>verweigert den Bau</strong>, wenn ein Außenverweis übrig bleibt (<code>&lt;link&gt;</code>, <code>&lt;script src&gt;</code>, <code>&lt;img src&gt;</code>, <code>url()</code> auf eine Schriftdatei). Damit kann keine Fassung entstehen, die heimlich nachlädt.</p>
@@ -132,23 +132,27 @@ python tools/starttest.py pfad/zur/datei.html --bild beweis.png</code></pre>
 <p>Der Gegenbeweis liegt vor: Lauf <code>37367258747</code> (Job „Bauen und prüfen") hatte <strong>alle 13 Schritte erfolgreich</strong>, einschließlich Einzeldatei und Bilderprüfung. Derselbe Stand ist zusätzlich hier nachgestellt und grün: <code>python tools/ci-nachbau.py</code>.</p>
 <p>Nachholen von Hand: <em>Actions → Prüfen → Run workflow</em>. Damit sich nichts staut, hat der Ablauf eine Concurrency-Gruppe je Zweig; zusätzlich läuft er nachts um 03:17 UTC.</p>
 <h2 id="das-auslieferungspaket">Das Auslieferungspaket</h2>
-<pre><code class="sprache-bash">python tools/paket.py               # -&gt; dist/Netzwerk-Labor-&lt;Version&gt;-Windows.zip
-python tools/paket.py --ohne-exe    # nur die Browser-Fassung (klein)
+<pre><code class="sprache-bash">python tools/paket.py               # mit .exe, falls Programm/ sie hat -&gt; ...-Windows.zip
+python tools/paket.py --ohne-exe    # nur die Browser-Fassung -&gt; ...-Browser.zip (so im Release)
 python tools/paket.py --nur-ordner  # Ordner bauen, kein ZIP</code></pre>
 <p>Das Werkzeug baut die Einzeldatei frisch, sammelt alles Nötige ein, schreibt ein <code>SIZES.txt</code> mit Prüfsummen und <strong>liest das ZIP danach zurück</strong>: CRC32 für jeden Eintrag, und jede Datei Byte für Byte gegen den Ordner. Ein Paket, das sich nicht öffnen lässt, fällt hier auf und nicht beim Nutzer.</p>
-<p>Gebaut wird <code>dist/Netzwerk-Labor-&lt;version&gt;-Windows.zip</code> mit dem Inhalt <code>Netzwerk-Labor-&lt;version&gt;/</code>:</p>
+<p>Gebaut wird <code>dist/Netzwerk-Labor-&lt;version&gt;-&lt;Windows|Browser&gt;.zip</code> mit dem Inhalt <code>Netzwerk-Labor-&lt;version&gt;/</code>. Welche der beiden Varianten entsteht, entscheidet <strong>eine</strong> Sache — ob <code>Programm/Netzwerk-Labor.exe</code> da ist (oder <code>--ohne-exe</code> gesetzt wird):</p>
 <pre><code>Netzwerk-Labor.html            das Spiel als Einzeldatei (überall spielbar)
-Netzwerk-Labor.exe             Windows-Programm mit Leiste und Tray
-Integritaet-reparieren.cmd     falls die .exe kein Fenster zeigt
+Netzwerk-Labor.exe             Windows-Programm mit Leiste und Tray   (nur Windows-Variante)
+Integritaet-reparieren.cmd     falls die .exe kein Fenster zeigt       (nur Windows-Variante)
+doku/                          die ganze Doku als lesbare Seiten (seit 07.10.2026)
 START-HIER.md / LIESMICH.txt   Anleitung zum Losspielen
 LIZENZ.md / LIZENZEN/          Lizenz des Programms und der Schriften
 SIZES.txt                      Inhalt, Größen, Prüfsummen</code></pre>
+<blockquote>
+<p><strong><code>--ohne-exe</code> ist im Release-Ablauf Pflicht.</strong> Ohne den Schalter nimmt <code>paket.py</code> die <strong>lokale</strong> <code>Programm/Netzwerk-Labor.exe</code>, wenn sie existiert — und die ist meist veraltet. Gemessen am 09.10.2026: sie meldete noch <code>1.2.3</code>, wäre aber als <code>Netzwerk-Labor-1.2.4-Windows.zip</code> veröffentlicht worden. Die echte <code>.exe</code> baut der Windows-Job in <code>release.yml</code> aus dem Tag und prüft dort, dass ihre <code>ProductVersion</code> zum Tag passt; der Linux-Job liefert deshalb nur die Browser-Fassung. <code>doku/</code> kommt in <strong>beide</strong> Varianten, denn wer die Einzeldatei herunterlädt, arbeitet oft ohne Netz.</p>
+</blockquote>
 <p>Die Anleitungen kommen aus <code>Vorlagen/</code> — <strong>eine</strong> Quelle, kein zweiter Ort zum Pflegen.</p>
 <h3 id="eine-release-anlegen">Eine Release anlegen</h3>
 <p><strong>Das macht ein Ablauf</strong> (<span class="dk-tot" title="„../.github/workflows/release.yml“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>.github/workflows/release.yml</code></span>): Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferungspaket und legt das Release mit den Anhängen an.</p>
 <pre><code class="sprache-bash">git tag -a v1.2.4 -m "Netzwerk-Labor 1.2.4"
 git push origin v1.2.4</code></pre>
-<p>Nach etwa einer Minute steht das Release unter <em>Releases</em> — mit dem ZIP und der Einzeldatei <code>Netzwerk-Labor.html</code> als Anhänge.</p>
+<p>Nach etwa einer Minute steht das Release unter <em>Releases</em> — mit dem ZIP und der Einzeldatei <code>Netzwerk-Labor.html</code> als Anhänge; die Windows-<code>.exe</code> folgt aus dem zweiten Job (Windows-Läufer, einige Minuten später).</p>
 <blockquote>
 <p><strong>Warum ein Ablauf und nicht von Hand:</strong> Ein Release über die API anzulegen braucht ein Token mit Schreibrecht. Auf dem Entwicklungsrechner liegt keines (die API antwortet dort mit 401, gemessen 06.10.2026). Ein Ablauf bekommt von GitHub ein <code>GITHUB_TOKEN</code> und darf mit <code>permissions: contents: write</code> Releases anlegen.</p>
 </blockquote>

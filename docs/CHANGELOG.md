@@ -76,6 +76,32 @@ gespiegelt in [`Architektur.md`](Architektur.md) § 13.
 Eine unabhängige Gegenprüfung mit fünf Prüfern hat sechs Befunde ergeben; die Berichte liegen unter
 `docs/entwicklung/Review – *.md`, die offenen Punkte darin sind benannt.
 
+### Nachtrag: die Auslieferung selbst (09.10.2026)
+
+Beim Nachziehen der Veröffentlichung fielen drei Fehler in der **Auslieferung** auf — keiner davon im
+Spiel:
+
+- **Das Release hätte die veraltete `.exe` als neue Fassung verpackt.** Der Linux-Job rief
+  `tools/paket.py` ohne Schalter; das Werkzeug nimmt dann `Programm/Netzwerk-Labor.exe`, wenn sie
+  existiert. Gemessen: die lokale Datei meldete noch **1.2.3**, das Paket hieße
+  `Netzwerk-Labor-1.2.4-Windows.zip`. Jetzt heißt der Schritt `--ohne-exe`; der Linux-Job liefert nur
+  die `Netzwerk-Labor-<fassung>-Browser.zip` — genau der Name, den dieses Dokument und
+  [`Liesmich.md`](Liesmich.md) verlinken. Die echte `.exe` kommt aus dem Windows-Job, der vor dem
+  Anhängen prüft, dass ihre `ProductVersion` zum Tag passt.
+- **Die Doku ist jetzt im Paket.** Wer die Einzeldatei herunterlädt, arbeitet oft ohne Netz — die
+  Doku war bis dahin nur online erreichbar. `tools/paket.py` legt `docs/doku/` als Ordner `doku/`
+  bei; das ZIP wächst dadurch von 0,97 auf 1,43 MB (39 statt 9 Einträge).
+- **Zwei Doku-Angaben waren schlicht falsch.** `docs/Liesmich.md` behauptete, die alte Adresse
+  `…/Side-Project/` werde von GitHub umgeleitet — **gemessen: HTTP 404**; lebend ist ausschließlich
+  `…/NetLab/`. Und `README.md` nannte die lokale `.exe` „auf dem Stand von `ausbau-1.2`", obwohl sie
+  `1.2.3` meldet und der Zweig `1.2.4` ist. Beides korrigiert.
+
+Dazu: `Programm/Netzwerk-Labor.exe` bleibt bewusst liegen (AGENTS.md: der Ordner wird nicht geleert)
+und ist jetzt als **veraltet** gekennzeichnet statt als aktuell.
+
+**Neu im Ablauf:** `.github/workflows/seite.yml` veröffentlicht zusätzlich `docs/doku/`, und ein
+Schritt prüft den Stand, der wirklich hochgeht (`python3 tools/seite.py --pruefen`).
+
 ---
 
 ## 1.2.1
