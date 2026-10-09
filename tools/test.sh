@@ -26,11 +26,15 @@ NODE=$(finde_node) || {
   exit 1
 }
 
-# Die Anfuehrungszeichen-Falle (`„…"` mit ASCII-Ende) hat am 09.10.2026 DREIMAL den ganzen Lauf
-# angehalten: SyntaxError -> LADEFEHLER -> Exit 2, keine einzige Zahl, jedes Mal mehrere Minuten
-# Stillstand. Das Namenswerkzeug findet sie - aber niemand rief es auf. Deshalb laeuft sein
-# TROCKENLAUF jetzt VOR den Tests (es schreibt nichts, kein --setzen): es prueft jede Testdatei
-# ausserdem mit `node --check` und endet ungleich 0, sobald eine nicht laedt.
+# Die Anfuehrungszeichen-Falle (`„…"` mit ASCII-Ende) hat am 09.10.2026 FUENFMAL zugeschlagen, davon
+# DREIMAL so, dass der ganze Lauf stehenblieb: SyntaxError -> LADEFEHLER -> Exit 2, keine einzige
+# Zahl, jedes Mal mehrere Minuten Stillstand. Die beiden anderen Faelle (Produktivcode und ein
+# erwarte-Text) fand `node --check` sofort - Glueck, kein Verdienst. Das Namenswerkzeug findet die
+# Falle - aber niemand rief es auf. Deshalb laeuft sein TROCKENLAUF jetzt VOR den Tests (es
+# schreibt nichts, kein --setzen): es prueft jede Testdatei ausserdem mit `node --check` und endet
+# ungleich 0, sobald eine nicht laedt.
+# Offen (Befund von uebergabe-ui): das Werkzeug sieht bisher nur `pruefe(...)`-Namen, nicht die
+# Texte in `erwarte(...)` - genau dort hat sie zweimal zugeschlagen. Die Erweiterung ist beauftragt.
 pruefe_namen() {
   "$NODE" tools/pruefe-namen-flicken.js || {
     echo "ABBRUCH: mindestens eine Testdatei laedt nicht (siehe oben)." >&2
