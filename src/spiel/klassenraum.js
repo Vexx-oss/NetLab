@@ -249,6 +249,50 @@ Spiel.klassenraum = (() => {
     return {ok: true, sitzung: r.sitzung, platz: r.platz, sterne: r.sterne, dauerS: r.dauerS, versuche: r.versuche, code: r.code || null};
   }
 
+  /* ---------- Hilfecode (Säule 5, Architektur § 12.4): der Azubi sagt, wo er hängt ----------
+     Der Code trägt Sitzung, Platz und zwei Zählerstände – sonst nichts: kein Name, keine Bewertung,
+     keine Rangfolge. Die Lehrkraft tippt ihn in ihr BESTEHENDES Feld „Ergebnis-Codes" (kein neues
+     Bedienelement, R12 bleibt 6).
+     Die Zähler kommen aus `Spiel.zieleStatus(inst)` (ticket.js:106-111): eine Liste je Ziel mit
+     `ok = true | false | null` (null, wenn die Simulation fehlt). `schritt` = erfüllte Ziele,
+     `offen` = alles Übrige — so gilt immer `schritt + offen = gesamt`, und ein nicht beweisbares Ziel
+     zählt NICHT als geschafft. Bewusst die reine `zieleStatus`, nicht `zieleLive` (das schreibt Laufzeit). */
+  function hilfeCode(inst){
+    if (!inst || typeof inst !== "object") return {fehler: "auftrag", grund: "Kein Auftrag übergeben."};
+    const kr = inst.klassenraum;
+    if (!kr || typeof kr !== "object" || Array.isArray(kr)) return {fehler: "auftrag", grund: "Dieser Auftrag kam nicht über einen Klassenraum-Code."};
+    if (!Number.isInteger(kr.sitzung) || kr.sitzung < 1 || kr.sitzung > 31)
+      return {fehler: "sitzung", grund: `inst.klassenraum.sitzung muss 1..31 sein (ist: ${JSON.stringify(kr.sitzung)}).`};
+    const platz = Number.isInteger(kr.platz) ? kr.platz : 0;
+    if (platz < 0 || platz > 31) return {fehler: "auftrag", grund: `inst.klassenraum.platz muss 0..31 sein (ist: ${JSON.stringify(kr.platz)}).`};
+    const status = typeof Spiel.zieleStatus === "function" ? (Spiel.zieleStatus(inst) || []) : [];
+    const gesamt = status.length;
+    if (!gesamt) return {fehler: "auftrag", grund: "Zu diesem Auftrag gibt es keine Ziele – ein Hilfecode hätte nichts zu sagen."};
+    const schritt = status.filter(s => s && s.ok === true).length;
+    const offen = Math.max(0, gesamt - schritt);
+    if (schritt > 31 || offen > 31)
+      return {fehler: "fassung", grund: `Dieser Auftrag hat ${gesamt} Ziele – das 5-Bit-Feld des Hilfecodes trägt höchstens 31.`};
+    const c = C();
+    if (!c || typeof c.hilfeBauen !== "function") return OHNE_CODEC;
+    const code = c.hilfeBauen({sitzung: kr.sitzung, platz, schritt, offen});
+    if (typeof code !== "string" || !code) return {fehler: "fassung", grund: "Der Codec konnte keinen Hilfecode bauen."};
+    return code;
+  }
+
+  function hilfeLesen(eingabe){
+    const c = C();
+    if (!c || typeof c.hilfeLesen !== "function") return OHNE_CODEC;
+    let r = null;
+    try { r = c.hilfeLesen(eingabe); } catch (e) { return {fehler: "prüfziffer", grund: "Der Hilfecode ließ sich nicht lesen."}; }
+    if (r === null || r === undefined) return null;
+    if (r.ok !== true) {
+      const e = {fehler: r.fehler || "prüfziffer", grund: r.grund || "Dieser Hilfecode ist nicht gültig."};
+      if (typeof r.hinweis === "string" && r.hinweis) e.hinweis = r.hinweis;
+      return e;
+    }
+    return {ok: true, sitzung: r.sitzung, platz: r.platz, schritt: r.schritt, offen: r.offen, code: r.code};
+  }
+
   /* Idempotent: Schlüssel ist der PLATZ, der erste Eintrag gewinnt (§ 5.1, § 6.2). */
   function ergebnisEintragen(eingabe){
     const gelesen = ergebnisLesen(eingabe);
@@ -390,7 +434,7 @@ Spiel.klassenraum = (() => {
     return daten;
   }
 
-  return {erzeugen, ausCode, sitzung, ergebnisCode, ergebnisLesen, ergebnisEintragen,
+  return {erzeugen, ausCode, sitzung, ergebnisCode, ergebnisLesen, ergebnisEintragen, hilfeCode, hilfeLesen,
     exportieren, importieren, netzkennwert, tauglicheFertigkeiten, platz, platzSetzen, plaetze, plaetzeSetzen,
     abnehmen, tabellen};
 })();

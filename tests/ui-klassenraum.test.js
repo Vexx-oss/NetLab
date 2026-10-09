@@ -129,7 +129,14 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
         dialogZu: () => { if (dialoge.length) dialoge[dialoge.length - 1].zu = true; },
         aktuell: "heute",
       },
-      spiel: {oeffnen: iid => rufe.push(["spiel-oeffnen", iid]), get inst(){ return rufe.inst || null; }},
+      /* `spiel` wie das echte Spiel: `oeffnen(iid)` merkt sich die Instanz — sonst könnte keine
+         Ansicht je „ein Auftrag ist offen" sehen (genau daran hing der „Ich hänge"-Knopf: ohne
+         offene Instanz sagt er ehrlich ab, und der Test hätte nur die Absage geprüft). Die Rufe
+         werden weiter mitgeschrieben; der GETEILTE Zustand wird NICHT geöffnet (`Spiel.instanz`
+         ist eine reine Abfrage), damit dieser Prüfstand die folgenden Dateien nicht verändert. */
+      spiel: {
+        oeffnen: iid => { rufe.push(["spiel-oeffnen", iid]); rufe.inst = Spiel.instanz(iid) || rufe.inst || null; return rufe.inst; },
+        get inst(){ return rufe.inst || null; }},
       hub: {kopieren: (text, ok) => rufe.push(["kopieren", text, ok])},
       toast: (text, art, opt) => rufe.push(["toast", text, art, opt]),
     };
@@ -197,6 +204,32 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     return treffer;
   }
 
+  /* ================= HILFECODE-VERTRAG (task-56) =================
+     `Spiel.klassenraum.hilfeCode(inst)` → "H-XXXX-XX", `hilfeLesen(code)` → {ok, sitzung, platz,
+     schritt, offen} bzw. {fehler, grund}. Ist die echte API da, wird SIE benutzt — nichts ersetzt.
+     Fehlt sie noch, prüft dieser Test die Oberfläche gegen genau diesen Vertrag (Attrappen), und
+     die Attrappen werden im `finally` WIEDER ENTFERNT: kein Test verändert die Welt für die
+     folgenden Dateien (Lehre aus dem wiki-2-Befund vom 10.10.2026). */
+  const KL_HILFE_STUB = "H-2M7K-9Q";
+  const klOhneStriche = s => String(s == null ? "" : s).trim().toUpperCase().replace(/-/g, "");
+  function klMitHilfeApi(fn){
+    const K = Spiel.klassenraum;
+    if (typeof K.hilfeCode === "function" && typeof K.hilfeLesen === "function") return fn({echt: true});
+    const hatteCode = Object.prototype.hasOwnProperty.call(K, "hilfeCode");
+    const hatteLesen = Object.prototype.hasOwnProperty.call(K, "hilfeLesen");
+    const altCode = K.hilfeCode, altLesen = K.hilfeLesen;
+    if (!hatteCode) K.hilfeCode = inst => (inst && inst.klassenraum)
+      ? KL_HILFE_STUB : {fehler: "auftrag", grund: "Es ist kein Klassenraum-Auftrag offen."};
+    if (!hatteLesen) K.hilfeLesen = code => klOhneStriche(code) === klOhneStriche(KL_HILFE_STUB)
+      ? {ok: true, sitzung: 0, platz: 7, schritt: 2, offen: 3}
+      : {fehler: "prüfziffer", grund: "Dieser Hilfecode ist nicht gültig."};
+    try { return fn({echt: false}); }
+    finally {
+      if (hatteCode) K.hilfeCode = altCode; else delete K.hilfeCode;
+      if (hatteLesen) K.hilfeLesen = altLesen; else delete K.hilfeLesen;
+    }
+  }
+
   if (!KL_KLAR.laden) { pruefe("Klassenraum-Ansichten: nur unter node tests/run.js prüfbar", () => { erwarte.wahr(false, "require fehlt"); }); return; }
 
   pruefe("Der Codec aus Bereich A ist da — ohne ihn prüft diese Datei nichts", () => klKapsel(() => {
@@ -235,12 +268,12 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(p.rufe.filter(r => r[0] === "kopieren").map(r => r[1]), [s.code], "kopiert wird derselbe Code");
   }));
 
-  pruefe("Lehrkraft: sechs sichtbare Bedienelemente, Azubi: drei — ein siebtes gibt es nicht (B § 2.1/2.2, R12)", () => klKapsel(() => {
+  pruefe("Lehrkraft: sechs sichtbare Bedienelemente, Azubi: fünf — mehr als sechs gibt es nicht (B § 2.1/2.2, R12)", () => klKapsel(() => {
     const p = klPruefstand();
     p.start();
     const steuer = c => klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
     erwarte.gleich(steuer(p.zeige(0)), 6, "select, Code anzeigen, Code kopieren, textarea, Eintragen, Datei…");
-    erwarte.gleich(steuer(p.zeige(1)), 3, "Auftragscode, Platz, Auftrag öffnen");
+    erwarte.gleich(steuer(p.zeige(1)), 5, "Auftragscode, Platz, Auftrag öffnen, Ich hänge, Hilfecode kopieren — die Grenze 6 bleibt");
   }));
 
   pruefe("Ampel: 0 Ergebnisse dunkel, halb voll gelb, alles grün — Median ist der OBERERE (B § 9)", () => klKapsel(() => {
@@ -542,5 +575,88 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     schmuggel.textContent = "Anna · 2 Punkte";
     c.append(schmuggel);
     erwarte.wahr(klPersonenWoerter(c).length > 0, "der Wächter findet den Schmuggel im DOM");
+    /* Dieselbe Prüfung für die AZUBI-Ansicht — dort steht der Hilfecode. */
+    klMitHilfeApi(() => {
+      const cs = p.zeige(1);
+      const s = klSitzung("salon-terminal");
+      Spiel.klassenraum.plaetzeSetzen(20);
+      const form = klFinde(cs, "form")[0];
+      p.K._A.code.value = s.code;
+      p.K._A.platz.value = "7";
+      form.ausloesen("submit");
+      klKnopf(cs, "Ich hänge").click();
+      erwarte.passt(klText(klFinde(cs, ".kl-gross")[0]), /H-[0-9A-Z]{4}-[0-9A-Z]{2}/, "auch dort steht ein echter Hilfecode");
+      erwarte.gleich(klPersonenWoerter(cs), [], "und keinen Namen, keine Note, keinen Rang");
+    });
   }));
+
+  pruefe('Azubi: „Ich hänge" zeigt einen echten Hilfecode — ohne Auftrag sagt er ehrlich ab (3.0, Säule 5)', () => klKapsel(() => klMitHilfeApi(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(1);
+    erwarte.gleich(klFinde(c, "button").length + klFinde(c, "input").length, 5, "fünf Bedienelemente in der Azubi-Ansicht");
+    /* Ohne offenen Auftrag: ehrlich, kein leerer Code, keine erfundene Zahl. */
+    klKnopf(c, "Ich hänge").click();
+    erwarte.enthaelt(klText(c), "kein Klassenraum-Auftrag offen", "ohne Auftrag sagt der Knopf, dass es nichts zu melden gibt");
+    erwarte.falsch(/H-[0-9A-Z]{4}-[0-9A-Z]{2}/.test(klText(c)), "und es steht kein Hilfecode da");
+    /* Mit offenem Auftrag — über den echten Weg (Platzzahl, Code, Platz → „Auftrag öffnen"). */
+    const s = klSitzung("salon-terminal");
+    Spiel.klassenraum.plaetzeSetzen(20);
+    const form = klFinde(c, "form")[0];
+    p.K._A.code.value = s.code;
+    p.K._A.platz.value = "7";
+    form.ausloesen("submit");
+    erwarte.gleich(p.rufe.filter(r => r[0] === "spiel-oeffnen").length, 1, "der Auftrag ist jetzt offen");
+    klKnopf(c, "Ich hänge").click();
+    const code = klFinde(c, ".kl-gross").map(x => klText(x)).find(t => /^H-/.test(t));
+    erwarte.passt(code, /^H-[0-9A-Z]{4}-[0-9A-Z]{2}$/, "der Hilfecode hat die gedruckte Form H-XXXX-XX");
+    erwarte.enthaelt(klText(klFinde(c, ".kl-gross")[0]), code, "und steht in der großen Zeile zum Ablesen");
+    /* Kopieren über den Hausweg. */
+    klKnopf(c, "Hilfecode kopieren").click();
+    erwarte.gleich(p.rufe.filter(r => r[0] === "kopieren").map(r => r[1]), [code], "der Kopierknopf kopiert genau diesen Code");
+    /* Und nochmal drücken: der Zähler darf sich ändern, der Code bleibt gültig. */
+    klKnopf(c, "Ich hänge").click();
+    erwarte.passt(klText(klFinde(c, ".kl-gross")[0]), /H-[0-9A-Z]{4}-[0-9A-Z]{2}/, "auch der zweite Aufruf liefert einen gültigen Code");
+  })));
+
+  pruefe("Lehrkraft: ein H-Code wird als Klartext gelesen und NIE als Ergebnis eingetragen (3.0, Säule 5)", () => klKapsel(() => klMitHilfeApi(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s = klSitzung("salon-terminal");
+    Spiel.klassenraum.plaetzeSetzen(20);
+    p.K.lehrerWieder();
+    /* Einen ECHTEN Hilfecode bauen (nie einen erfundenen) und seine Zahlen vom Codec holen. */
+    const inst = Spiel.instanzErstellen({ticketId: s.ticketId, seed: s.seed, quelle: "klassenraum", ohneFlow: true});
+    inst.klassenraum = {sitzung: s.id, platz: 7, code: s.code};
+    const hCode = Spiel.klassenraum.hilfeCode(inst);
+    erwarte.passt(hCode, /^H-[0-9A-Z]{4}-[0-9A-Z]{2}$/, "der Codec baut einen Hilfecode der gedruckten Form");
+    const gelesen = Spiel.klassenraum.hilfeLesen(hCode);
+    erwarte.gleich(gelesen.ok, true, "und derselbe Code lässt sich wieder lesen");
+    const erwartet = `Platz ${gelesen.platz} hängt: ${gelesen.schritt} von ${gelesen.schritt + gelesen.offen} Zielen erfüllt`;
+    p.K._L.codes.value = hCode;
+    klKnopf(c, "Eintragen").click();
+    const aus = klFinde(c, ".kl-hinweis").map(x => klText(x)).join(" | ");
+    erwarte.enthaelt(aus, erwartet, "der Hilfecode wird als Klartext gelesen (Platz und Zähler)");
+    erwarte.enthaelt(aus, "1 Hilferuf gelesen", "die Summe nennt ihn Hilferuf, nicht Ergebnis");
+    erwarte.falsch(aus.includes("1 eingetragen"), 'keine Zeile meldet ein eingetragenes Ergebnis');
+    erwarte.enthaelt(aus, "0 eingetragen", "die Summe sagt ausdrücklich: nichts eingetragen");
+    /* DIE Zusicherung: ein H-Code ist kein Ergebnis — der Ergebnissatz bleibt leer. */
+    erwarte.gleich(Object.keys(Spiel.klassenraum.sitzung().ergebnisse).length, 0, "kein Ergebnis eingetragen");
+    /* Auch klein und ohne Striche erkannt (die Lehrkraft tippt ab, was dasteht) — und weiter kein Ergebnis. */
+    p.K._L.codes.value = hCode.replace(/-/g, "").toLowerCase();
+    klKnopf(c, "Eintragen").click();
+    erwarte.gleich(Object.keys(Spiel.klassenraum.sitzung().ergebnisse).length, 0, "auch klein/ohne Striche kein Ergebnis");
+    /* Ein ABGESCHNITTENER H-Code geht den Hilfeweg (Präfix entscheidet) — mit A's Erklärung und
+       weiterhin ohne Ergebnis. */
+    p.K._L.codes.value = hCode.slice(0, 5);
+    klKnopf(c, "Eintragen").click();
+    erwarte.gleich(Object.keys(Spiel.klassenraum.sitzung().ergebnisse).length, 0, "ein kaputter H-Code wird nicht eingetragen");
+    erwarte.enthaelt(klFinde(c, ".kl-hinweis").map(x => klText(x)).join(" | "), "1 unlesbar", "und als unlesbar gezählt");
+    /* Und ein echter E-Code geht weiterhin durch — der H-Zweig frisst ihn nicht. */
+    p.K._L.codes.value = klErgebnis(s.id, 5, 4, 80000, 1);
+    klKnopf(c, "Eintragen").click();
+    erwarte.gleich(Object.keys(Spiel.klassenraum.sitzung().ergebnisse).length, 1, "ein E-Code wird weiterhin eingetragen");
+    erwarte.enthaelt(klFinde(c, ".kl-hinweis").map(x => klText(x)).join(" | "), "1 eingetragen", "und als eingetragen gemeldet");
+  })));
 });

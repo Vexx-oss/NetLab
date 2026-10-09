@@ -958,7 +958,7 @@ also entsteht **kein neues Bedienelement** und die Regel R12 bleibt bei 6.
 
 | Punkt | Festlegung |
 |---|---|
-| Form | **`H-XXXX-XX`** — immer 10 Zeichen, wie `NL-` und `E-` |
+| Form | **`H-XXXX-XX`** — **9 Zeichen**: `H` + Bindestrich (**2**) + **4** Nutzzeichen + Bindestrich (**1**) + **2** Prüfzeichen. *Korrektur vom 09.10.2026 (zweite):* die erste Fassung sagte „immer 10 Zeichen" — das ist die Länge von `NL-XXXX-XX`, weil dort das Präfix **zweistellig** ist. Der Hilfecode ist ein Zeichen kürzer und wird genauso normalisiert (führendes `H` nur abschneiden, wenn danach genau **6** Zeichen bleiben) |
 | Alphabet | dasselbe 32-Zeichen-Alphabet (`ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, **kein I, O, 0, 1**) |
 | Prüfzeichen | **dieselben zwei** wie bei den anderen Codes: `C1 = Σ i·v(i) mod 31`, `C2 = Σ (2i+1)·v(i) mod 32` |
 | Nutzteil | **20 Bit = 4 Zeichen × 5 Bit**: `sitzung` 5 (1..31) · `platz` 5 (0..31) · `schritt` 5 (erfüllte Ziele, 0..31) · `offen` 5 (offene Ziele, 0..31). Dazu die **zwei Prüfzeichen** = zusammen die bekannten **6 Zeichen** (`H-XXXX-XX`). *Korrektur vom 09.10.2026:* die erste Fassung dieses Absatzes sprach von „30 Bit Nutzteil … reserviert 10" — das war ein Rechenfehler der Leitung, denn 10 Zeichen sind 6 Zeichen = 4 Nutz- + 2 Prüfzeichen. Die Form gewinnt (sie ist an allen Stellen dieselbe und passt zu `NL-`), der Round-Trip ist **2²⁰**, nicht 2³⁰ |
@@ -967,6 +967,18 @@ also entsteht **kein neues Bedienelement** und die Regel R12 bleibt bei 6.
 | Fehlerverhalten | **nie eine Ausnahme**; leer/`null` → `null`; ungültig → `{fehler, grund}` mit den wörtlichen Texten aus `A – Codec…md` § 1.5 |
 | API | `Spiel.klassenraum.hilfeCode(inst)` → `"H-XXXX-XX"` · `Spiel.klassenraum.hilfeLesen(code)` → `{ok, sitzung, platz, schritt, offen}` |
 | **Kein Personenbezug** | Der Code trägt **Sitzung, Platz und Zählerstände** — keinen Namen, keine Note, keinen Rang, keine Sterne. Das ist die Nutzerentscheidung („Lehreraufträge werden NICHT bewertet") in einer Datenform; ein Test wacht darüber |
+| Ein `H`-Code ist **kein** Ergebnis | `ergebnisEintragen(code)` weist ihn mit `{fehler:"länge"}` ab und **ändert nichts** — gemessen. Er kann also nie in die Ampel laufen; er erscheint dort nur als Klartextzeile |
+
+**Gemessen bei der Umsetzung (09.10.2026):** Round-Trip erschöpfend über **1 015 808** gültige Nutzlasten
+(31 · 32 · 32 · 32 = 2²⁰ minus der 32 768 mit `sitzung = 0`) — **0 Abweichungen**, 1 842 ms; alle
+**32 768** `sitzung = 0`-Fälle → `{fehler:"fassung"}`; **86/86** Tippfehler und Vertauschungen erkannt;
+`name`, `note`, `rang`, `punkte` am Eingangsobjekt ändern den Code **nicht** (belegt mit zwei Codes);
+Determinismus über einen zweiten Prozess und einen zweiten vm-Kontext.
+
+*Zwei Korrekturen der Leitung an diesem Abschnitt (Bit-Rechnung, Zeichenlänge) sind absichtlich stehen
+gelassen: sie zeigen, dass der Vertrag vor dem Bau geschrieben wurde **und** dass der Bau ihn prüft —
+beide Fehler hat die Umsetzung gefunden, nicht die Leitung.*
+
 | Anzeige bei der Lehrkraft | Klartext in der bestehenden Ausgabe, z. B. „**Platz 7 hängt: 2 von 5 Zielen erfüllt**" — **kein** neues Feld. Ein `H`-Code ist **kein** Ergebnis und darf nicht als solches eingetragen werden |
 
 ## 13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag

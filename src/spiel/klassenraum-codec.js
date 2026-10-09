@@ -361,6 +361,7 @@ const KlassenraumCodec = (() => {
     ALPHABET, BASIS, KANON_FENSTER, TABELLE_AUFTRAEGE_LAENGE, TABELLE_SKILLS_LAENGE,
     wert, zeichen, pruefsummen, entkernen,
     auftragBauen, auftragLesen, ergebnisBauen, ergebnisLesen,
+    hilfeBauen, hilfeLesen,                  /* § 12.4: der Hilfecode H-XXXX-XX */
     abdruck, netzkennwert: abdruck,          /* § 5 nennt die API-Funktion `netzkennwert` */
     kanonSeed, tabellen,
     kanonisch, fnv1a,                        /* für Nachrechnungen (A:459: fnv1a("A") = 3289118412) */

@@ -52,11 +52,13 @@ UI.klassenraum = (() => {
     });
     return aus;
   }
-  /* Der gedruckte HILFECODE (3.0, Säule 5, Weg A): `H-XXXX-XX`, zehn Zeichen, gleiche Form wie
-     `NL-XXXX-XX` und `E-XXXX-XXX`. Er ist KEIN Ergebnis — er sagt, WO jemand hängt.
-     Erkannt wird groß/klein und mit oder ohne Trennstriche (die Lehrkraft tippt ab, was dasteht);
-     gelesen wird trotzdem das ORIGINAL, denn die Normalisierung gehört dem Codec in A. */
-  const istHilfecode = s => /^H[0-9A-Z]{6}$/.test(String(s == null ? "" : s).trim().toUpperCase().replace(/-/g, ""));
+  /* Der HILFECODE (3.0, Säule 5, Weg A; Architektur § 12.4): gedruckt `H-XXXX-XX` — neun Zeichen
+     (`H-` + 4 Nutzzeichen + `-` + 2 Prüfzeichen). Er ist KEIN Ergebnis — er sagt, WO jemand hängt.
+     Entschieden wird am PRÄFIX, und zwar VOR dem Eintragen: `H…` geht immer den Hilfeweg
+     (ein Ergebnis-Code beginnt mit `E`, ein Auftragscode mit `NL`). So bekommt die Lehrkraft auch
+     bei einem abgeschnittenen oder verwechselten Code die Erklärung des Codec statt nur „unlesbar"
+     — und ein H-Code kann gar nicht erst in den Ergebnissatz laufen. */
+  const istHilfecode = s => /^H/i.test(String(s == null ? "" : s).trim());
   /* Die Ampel (B § 9): fertig = belegte Plätze, offen = plaetze − fertig, Median = OBERER Median
      der gültigen Dauern > 0, auf ganze Sekunden. Ohne eingestellte Platzzahl bleibt sie gelb und
      sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3).
@@ -238,7 +240,10 @@ UI.klassenraum = (() => {
         const h = kann("hilfeLesen") ? ruf("hilfeLesen", stueck) : null;
         if (!h || h.fehler || h.ok === false){
           unlesbar++;
-          zeilen.push(`Zeile ${zeile} · ${(h && h.grund) || "Hilfecodes liest diese Fassung noch nicht."}`);
+          /* A's Erklärung wörtlich weitergeben (z. B. „Das sieht nach einem Auftragscode aus
+             (NL-…). Hier gehört der Hilfecode hin (H-…).") — die Lehrkraft soll wissen, was zu tun ist. */
+          const grund = (h && h.grund) || "Hilfecodes liest diese Fassung noch nicht.";
+          zeilen.push(`Zeile ${zeile} · ${grund}${h && h.hinweis ? " " + h.hinweis : ""}`);
           continue;
         }
         const ziele = (Number(h.schritt) || 0) + (Number(h.offen) || 0);
