@@ -863,17 +863,12 @@ button.dx-karte:hover{border-color:var(--accent)}
 
 /* ---- inspektor.css ---- */
 /* ---------- Inspektor (ui/inspektor.js) – nur Tokens aus basis.css ---------- */
-/* FALLE, gemessen 09.10.2026 (bewusst NICHT repariert, s. unten): Diese Datei ist CRLF und ihre
-   LETZTEN ZEHN ZEILEN (Byte-Zeilen 132-141, Lease-Tabelle) tragen je ein ZUSAETZLICHES einzelnes CR —
-   Muster `CR CR LF` statt `CR LF`, bei Byte 11401-11404 sogar vier CR in Folge. Zusammen 12 einzelne CR
-   an den Bytes 10778, 10887, 10995, 11186, 11265, 11322, 11357, 11401, 11402, 11403, 11435, 11487.
-   Zwei Folgen, beide nachgemessen:
-     - im Textmodus gelesen hat die Datei 153 Zeilen statt 141 (jedes CR gilt als Umbruch),
-     - git fuehrt sie deshalb als BINAER (`i/-text w/-text`, von der Leitung gemessen): `git diff` und
-       jeder Zeilenenden-Vergleich sind dort blind.
-   Wer hier arbeitet: byteweise schreiben und die vorhandenen Enden erhalten. Ein normalisierender
-   Editor entfernt die 12 CR und stellt die Datei in git von binaer auf Text um — das erzeugt
-   einen scheinbar riesigen Diff. Deshalb bleiben sie in dieser Runde stehen. */
+/* BEHOBEN (10.10.2026, task-51): Diese Datei trug 12 einzelne CR (Muster `CR CR LF`, in den letzten zehn
+   Byte-Zeilen, Lease-Tabelle). Folge: git hielt sie fuer BINAER (`git ls-files --eol` = `i/-text w/-text`),
+   `git diff` und jeder Zeilenenden-Vergleich waren dort blind. Die 12 CR sind byteweise entfernt, die
+   CRLF-Zeilenenden sind unangetastet (vorher 12 467 B, 164 CR-Bytes = 152 CRLF + 12 einzelne).
+   Wer hier arbeitet: byteweise schreiben und CRLF erhalten — ein normalisierender Editor stellt die
+   ganze Datei um und erzeugt einen Scheindiff ueber alle Zeilen. */
 .lb-inspektor.in{display:flex; flex-direction:column; overflow:hidden}
 .in-kopf{flex:0 0 auto; padding:14px 14px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
 .in-kopf-zeile{display:flex; align-items:center; gap:10px; min-width:0}
@@ -1005,27 +1000,15 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
 .in-ent-code{margin:0; padding:7px 9px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 12.5px/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
 
-
 /* Lease-Tabelle im DHCP-Abschnitt (Architektur 10.6): eine Zeile je Lease, Zustand farbig ueber Tokens */
-
 .in-lease-tabelle{width:100%; border-collapse:collapse; margin-top:6px; font:500 12.5px/1.35 var(--body)}
-
 .in-lease-tabelle th{text-align:left; padding:5px 7px; color:var(--faint); font:700 11px/1 var(--body); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--line)}
-
 .in-lease-tabelle td{padding:5px 7px; border-bottom:1px solid var(--line-2)}
-
 .in-lease-tabelle tr:last-child td{border-bottom:none}
-
 .in-lease-aktiv{color:var(--ok)}
-
 .in-lease-reserviert{color:var(--accent)}
-
-
-
 .in-lease-alt td{opacity:.62}
-
 .in-lease-konflikt td{background:var(--bad-soft)}
-
 
 /* ---- juice.css ---- */
 /* ---------- Spielgefühl (ui/juice.js, Präfix jc-): jede Handlung antwortet in ≤ 320 ms (eine Stufe der Dauer-Leiter), sanft statt grell ----------
@@ -1079,26 +1062,28 @@ button.dx-karte:hover{border-color:var(--accent)}
 /* Knöpfe geben beim Drücken nach (ohne Klasse, gilt überall) */
 .knopf:active, .lb-wz:active, .lb-knopf:active, .pa-kat:active, .pa-teil:active, .dock-knopf:active, .am-zu:active{transform:scale(.96)}
 
-/* Bewegung aus: KEIN eigener Block mehr (task-38, R8). basis.css:91 (prefers-reduced-motion) und
-   basis.css:93 (html[data-bewegung="aus"]) schalten Animation und Übergang global ab — dieselbe
-   Begründung wie in naechster.css:7. Der Zustand bleibt an der FARBE erkennbar: die Rückmeldungen
-   dieses Bausteins tragen ohnehin eine Farbe (--ok/--warn/--ok-soft), nicht nur die Bewegung.
+/* Bewegung aus: kein eigener MEDIEN-Block (task-38, R8) — basis.css bleibt der EINE zentrale Block
+   (91: Dauer global 1 ms; 93: bei „Bewegung aus" alles ab, html[data-bewegung="aus"]). Der Zustand
+   bleibt an der FARBE erkennbar: die Rückmeldungen dieses Bausteins tragen ohnehin eine Farbe
+   (--ok/--warn/--ok-soft), nicht nur die Bewegung.
 
-   ZWEI SELEKTOREN SIND HIER BEWUSST REGEL-LOS (Befund der unabhängigen Prüfung § 4a, nachgemessen):
-     .ger[class*="jc-"] .gb     deckte die vier Geräte-Klassen ab, die es gibt — sie stehen oben einzeln:
-                                .ger.jc-plop .gb · .ger.jc-atmen .gb · .ger.jc-wackeln .gb · .ger.jc-sperre .gb
-     .kabel[class*="jc-"] *     deckte die drei animierten Kabel-Kinder ab — sie stehen oben einzeln:
-                                .kabel.jc-einrasten .kabel-linie · .kabel-trunk-aussen · .ps-oben path
-   Beide hatten im entfernten @media (prefers-reduced-motion)-Block `animation:none`. Wirkung heute:
-   bei „Bewegung reduzieren" laufen diese Animationen 1 ms statt gar nicht — sie erreichen ihren
-   Endzustand, weil basis.css:91 die Dauer global auf 1 ms setzt (dieselbe Bauart wie die fünf
-   Endzustände in szene.css). Bei „Bewegung aus" schaltet basis.css:93 weiterhin alles ab; im echten
-   Programm gemessen: animationName none, 0 laufende Animationen an allen vier Zielen. Das Verhalten
-   ist damit abgedeckt, nicht vergessen.
-   Dass die Selektoren leben, ist gemessen: `UI.juice(el, "einrasten", …)` läuft auf Kabel-Elementen
-   (src/ui/editor-werkzeuge.js:307 und :353; `Z.kEl` hält die <g class="kabel">, editor.js:352), und mit
-   „voll" tragen .kabel-linie/.kabel-trunk-aussen `jc-einrasten`, .ps-oben path `jc-led`,
-   .ger.jc-plop .gb `jc-plop` — je 0,32 s, je 1 laufende Animation. */
+   WIEDERHERGESTELLT (task-52, Befund der unabhängigen Prüfung § 4a): Diese zwei Selektoren hatten ihre
+   `animation:none`-Regel in einem eigenen Medienblock für `prefers-reduced-motion`. Beim Zusammenlegen auf
+   EINEN zentralen Block ist die Regel entfallen — ein Verlust, auch wenn basis.css:91 die Wirkung
+   zufällig abdeckte (dort liefen sie mit 1 ms statt gar nicht). Sie steht hier wieder, in R8-konformer
+   Form: nicht als zweiter Medienblock, sondern am Haus-Signal `html[data-bewegung="reduziert"]`.
+   Das ist genau die Menge des alten Medienblocks und mehr — app.js:48 setzt das Attribut aus
+   UI.bewegung(), und das liefert „reduziert" bei Einstellung „Reduziert" ODER bei
+   prefers-reduced-motion (app.js:16); die Einstellung schreibt das Attribut sofort (app.js:311).
+   Die Selektoren leben: `.kabel[class*="jc-"] *` deckt die Kinder eines einrastenden Kabels ab
+   (UI.juice(el,"einrasten"), editor-werkzeuge.js:307 und :353; Z.kEl hält die <g class="kabel">,
+   editor.js:352), `.ger[class*="jc-"] .gb` das innere Bild eines antwortenden Geräts (.gb trägt die
+   Geometrie, die Gruppe selbst ihre Position). Von den sieben Selektoren des alten Blocks brauchen die
+   fünf übrigen diese Regel nicht mehr: sie tragen ihren Endzustand in der Zustandsregel (szene.css).
+   Heute greift zusätzlich schon die JS-Seite: `UI.juice` setzt die Klasse nur bei UI.bewegung()==="voll"
+   (juice.js:10) — diese Regel ist das Netz darunter, falls das jemand ändert. */
+html[data-bewegung="reduziert"] .ger[class*="jc-"] .gb,
+html[data-bewegung="reduziert"] .kabel[class*="jc-"] *{animation:none}
 
 /* ---- karriere.css ---- */
 /* ---------- Karriere-Oberfläche (ui/karriere.js): Kunden, Shop, Lernstand, Wiki, Mini-Tickets ---------- */
@@ -2486,7 +2471,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 <script>
 "use strict";
 const LABOR_VERSION = "2.0.0";
-const LABOR_BAU = "e5d4a864";
+const LABOR_BAU = "d9854d0b";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -30283,6 +30268,7 @@ UI.spiel = (() => {
       inhalt = h("div", {class: "am-brief"},
         h("div", {class: "am-absender"}, h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
           h("span", {}, h("b", {}, ap.name || k.name), ap.rolle ? `, ${ap.rolle}` : "", ` · ${k.name}`)),
+        klassenraumZeile(),
         h("div", {class: "am-text"}, absaetze(sichtbar)),
         kurz ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { m.mehr = true; UI.labor.auftragNeu(); }}, "mehr lesen") : null,
         def.symptom ? h("p", {class: "am-symptom"}, h("b", {}, "Symptom: "), def.symptom) : null,
@@ -30294,6 +30280,20 @@ UI.spiel = (() => {
     return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
   }
   /* Flow-Regler (§ 20 F6): Gerüst – die Frage des Seniors steht gleich da (frei), in Brief und Zielen */
+  /* Klassenraum am geöffneten Auftrag (B § 3.3: „B und C messen denselben Abdruck"): Der Azubi muss
+     SEHEN, welcher Platz er ist – er tippt ihn später in die Ampel der Lehrkraft ein – und welchen
+     Netz-Abdruck sein Auftrag trägt. Reiner TEXT: kein Bedienelement, keine neue Klasse; bei einem
+     normalen Auftrag bleibt die Zeile weg (Gegenprobe im Test). */
+  function klassenraumZeile(){
+    const inst = S.inst;
+    if (!inst || !(inst.quelle === "klassenraum" || inst.klassenraum)) return null;
+    const platz = Number(inst.klassenraum && inst.klassenraum.platz) || 0;
+    let abdruck = null;
+    try { abdruck = typeof Spiel.klassenraum?.netzkennwert === "function" && inst.netz ? Spiel.klassenraum.netzkennwert(inst.netz) : null; } catch (e) { abdruck = null; }
+    const teile = [h("b", {}, "🏫 Klassenraum-Auftrag"), " · ", platz >= 1 ? `Platz ${platz}` : "ohne Platz"];
+    if (abdruck) teile.push(" · Netz-Abdruck ", h("b", {}, abdruck));
+    return h("p", {class: "sp-leise"}, teile);
+  }
   function geruestTipp(def){
     const frage = S.inst && S.inst.flow === "geruest" ? (def.hilfen?.frage || [])[0] : null;
     return frage ? h("p", {class: "am-geruest"}, h("span", {"aria-hidden": "true"}, "🧭 "), h("b", {}, "Der Senior: "), `„${frage}“`,
