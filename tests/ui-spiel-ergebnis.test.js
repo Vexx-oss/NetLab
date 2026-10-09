@@ -173,7 +173,15 @@ function uesWelt(){
   if (!UI || typeof UI !== "object") throw new Error("src/ui/dom.js hat kein UI angelegt");
   UI.app = {aktuell: "labor", status(){}, aktualisieren(){}, registrieren(){}, einstellungAbschnitt(){}, dialogOeffnen(){}, dialogZu(){},
     ansicht(n){ UI.app.aktuell = n; ansichten.push(n); }};
-  UI.labor = {netz: null, laden(){}, auftragNeu(){}, werkzeug(){}, auffrischen(){}, fern: null, fernwartung(){}};
+  /* Der Labor-Aufbau wird ECHT gefahren: `UI.spiel.oeffnen` ruft `UI.labor.laden(netz, {auftrag})`,
+     `auftragNeu` zeichnet die Auftragszeile samt Mappe neu — nur so lässt sich die Auftragsmappe
+     (`.am-mappe`) prüfen, statt sie nachzubauen. */
+  const labor = {netz: null, fern: null, aufbau: null, zeile: uesKnoten("div"), werkzeug(){}, auffrischen(){}, fernwartung(){},
+    laden(netz, o){ labor.netz = netz; labor.aufbau = o || null; labor.zeile = uesKnoten("div"); dokument.body.append(labor.zeile);
+      if (labor.aufbau?.auftrag) labor.aufbau.auftrag(labor.zeile); },
+    auftragNeu(){ if (labor.aufbau?.auftrag) { labor.zeile.replaceChildren(); labor.aufbau.auftrag(labor.zeile); } }};
+  UI.labor = labor;
+  UI.symbol = () => uesKnoten("span");
   UI.ebenen = {fuerSkills: () => null}; UI.blatt = {zeichnen(){}}; UI.wiki = {oeffnen(){}};
   UI.bewegung = () => "aus";                                   /* ohne Zähl-Animation: keine Uhr im Test */
   UI.klang = {spielen(){}}; UI.erklaeren = () => uesKnoten("div"); UI.ereignisse = {vormerken(){}};
@@ -189,7 +197,7 @@ function uesWelt(){
   vm.runInContext(lies("src/ui/spiel.js"), bereich, {filename: "src/ui/spiel.js"});
   if (!UI.spiel || typeof UI.spiel !== "object") throw new Error("src/ui/spiel.js hat sich nicht als UI.spiel angemeldet");
   return {
-    UI, dokument, kopiert, toasts, ansichten, zustand,
+    UI, dokument, kopiert, toasts, ansichten, zustand, labor,
     /* Klick im Bereich auslösen: nur dort fließen die Mikrotasks ab (siehe microtaskMode oben) */
     knopfKlick(text){
       const alle = uesFinde(dokument.body, "button");
@@ -199,6 +207,9 @@ function uesWelt(){
       vm.runInContext("globalThis.__uesKnopf.klick();", bereich);
     },
     fensterOeffnen(){ vm.runInContext("UI.spiel.abnahmeAnfordern();", bereich); },
+    /* Der echte Weg in den Auftrag: `oeffnen` zeichnet die Auftragszeile über `UI.labor.laden`. */
+    spielOeffnen(iid){ bereich.__uesIid = iid; vm.runInContext("UI.spiel.oeffnen(globalThis.__uesIid);", bereich); },
+    mappeAuf(reiter = "brief"){ bereich.__uesReiter = reiter; vm.runInContext("UI.spiel.mappeAuf(globalThis.__uesReiter);", bereich); },
     abmelden(){ for (const weg of haken.splice(0)) { try { weg(); } catch (e) { /* war schon abgemeldet */ } } },
   };
 }
@@ -362,4 +373,70 @@ gruppe("UI: Ergebnis kopieren" + UES_ZUSATZ, () => {
       }
     });
   }
+});
+
+/* ================= Gruppe: Klassenraum im geöffneten Auftrag =================
+   Befund (mit echtem Edge gemessen, von `injektoren`): Im geöffneten Auftrag war der Platz nicht
+   sichtbar — `src/ui/spiel.js` kannte `inst.klassenraum` nicht. Genau das ist der Klassenraum-Fall:
+   ein Code, 20 Geräte, jeder mit seinem Platz. Geprüft wird am ECHTEN Weg: `UI.spiel.oeffnen` baut die
+   Auftragszeile über `UI.labor.laden`, `UI.spiel.mappeAuf("brief")` öffnet die Mappe (wie der Knopf
+   „Auftrag lesen“). Platz und Netz-Abdruck müssen im Brief stehen — und beim normalen Auftrag NICHT. */
+gruppe("UI: Klassenraum-Auftrag im Labor" + UES_ZUSATZ, () => {
+  if (!UES_KANN_LADEN) {
+    pruefe("UI-Klassenraum: nur unter node tests/run.js prüfbar", () => { erwarte.wahr(false, "require fehlt"); });
+    return;
+  }
+  const KNOEPFE = "button, input, select, textarea, [role=button]";
+  /* Kapsel wie in der Gruppe oben; die Welten melden sich am Ende selbst ab. */
+  const kapsel = fn => () => {
+    const welten = [];
+    const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken};
+    try {
+      Spiel._trocken = true; Spiel._lz = {};
+      Spiel._st = Spiel.leererStand();
+      Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD);
+      fn(welten);
+    } finally {
+      for (const w of welten) w.abmelden();
+      Spiel._st = alt.st; Spiel._einst = alt.einst; Spiel._lz = alt.lz; Spiel._trocken = alt.trocken;
+      if (jetzt && typeof jetzt.frei === "function") jetzt.frei();
+    }
+  };
+  /* Einen Auftrag öffnen und die Mappe aufschlagen: `quelle` entscheidet Klassenraum oder normal. */
+  function karte(quelle, welten){
+    const welt = uesWelt(); welten.push(welt);
+    const o = {ticketId: "salon-05", seed: 5};
+    if (quelle === "klassenraum") o.quelle = "klassenraum";
+    const inst = Spiel.instanzErstellen(o);
+    if (quelle === "klassenraum") inst.klassenraum = {sitzung: 3, platz: 7, code: "NL-XXXX-XX"};
+    Spiel._einst.wahl = Spiel.defVon(inst).stufe || "E";     /* wie Spiel.testlauf: das Niveau des Tickets */
+    welt.UI.spiel._S.inst = inst;
+    welt.spielOeffnen(inst.iid);
+    welt.mappeAuf("brief");
+    const mappe = uesFinde(welt.dokument.body, ".am-mappe")[0] || null;
+    return {welt, inst, mappe, text: mappe ? uesText(mappe) : "", knoepfe: mappe ? uesFinde(mappe, KNOEPFE).length : -1};
+  }
+
+  pruefe("Der geöffnete Klassenraum-Auftrag zeigt Platz und Netz-Abdruck — ein normaler Auftrag nicht", kapsel(welten => {
+    const normal = karte("postfach", welten);
+    const kl = karte("klassenraum", welten);
+    erwarte.wahr(!!normal.mappe, "die Mappe des normalen Auftrags steht im Dokument");
+    erwarte.wahr(!!kl.mappe, "die Mappe des Klassenraum-Auftrags steht im Dokument");
+    erwarte.gleich(kl.inst.quelle, "klassenraum", "die Quelle der geprüften Instanz ist klassenraum");
+    const abdruck = Spiel.klassenraum.netzkennwert(kl.inst.netz);
+    erwarte.wahr(typeof abdruck === "string" && abdruck.length === 6, `der Abdruck ist sechs Zeichen (ist ${abdruck})`);
+    /* (a) Klassenraum: Platz UND Abdruck im Brief */
+    erwarte.enthaelt(kl.text, "Klassenraum-Auftrag", "der Brief nennt den Klassenraum-Auftrag");
+    erwarte.enthaelt(kl.text, "Platz 7", "der Platz steht im Brief (der Azubi tippt ihn später in die Ampel)");
+    erwarte.enthaelt(kl.text, abdruck, "der Netz-Abdruck steht im Brief (der Vergleich „B und C messen denselben Abdruck“)");
+    /* (b) Gegenprobe: der normale Auftrag zeigt nichts davon */
+    erwarte.falsch(normal.text.includes("Klassenraum"), "Gegenprobe: kein Klassenraum im Brief");
+    erwarte.falsch(normal.text.includes("Platz 7"), "Gegenprobe: kein Platz im Brief");
+    erwarte.falsch(normal.text.includes("Netz-Abdruck"), "Gegenprobe: kein Abdruck im Brief");
+    /* (c) Reiner Text: die Zahl der fassbaren Bedienelemente in der Mappe steigt nicht. */
+    erwarte.wahr(normal.knoepfe > 0, `die Mappe hat Bedienelemente (${normal.knoepfe}) — sonst prüfte der Vergleich nichts`);
+    console.log(`MESSUNG Mappe im Labor: Bedienelemente normal=${normal.knoepfe} · Klassenraum=${kl.knoepfe} · Brieftext ${normal.text.length}→${kl.text.length} Zeichen · Abdruck ${abdruck}`);
+    erwarte.gleich(kl.knoepfe, normal.knoepfe,
+      `Bedienelemente in der Mappe: Klassenraum ${kl.knoepfe}, normal ${normal.knoepfe} — die Zeile fügt keinen Knopf hinzu`);
+  }));
 });

@@ -92,7 +92,7 @@ heißt: in dieser Sitzung nachgerechnet.
 | R12 im Programm (`ethos.r12_js()`) | `klasse` **6/6**, `Auftrag` **3/3** (Lead) |
 | `python bauen.py` | **128 Module, 2225 KB** → `web/index.html`, Version **2.0.0** (Lead) |
 | Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.829.477 B**, SHA256 `C3C51EDA…828E`, byte-gleich, **0 Außenverweise** (Lead; Bytes und Hash selbst nachgerechnet) |
-| Android-APK 2.0.0 (neu gebaut) | **1.164.828 B**, SHA256 `2208C08A…7BDD`, Signatur gültig (Lead; Bytes und Hash selbst nachgerechnet) |
+| Android-APK 2.0.0 (neu gebaut) | **1.164.828 B**, Signatur gültig — **die Größe ist stabil, der SHA256 nicht:** derselbe Quellstand ergibt bei jedem Bau **einen anderen Hash** (gemessen von `denkhilfen-2`: `2208C08A…` → `CF5F2905…`), die APK wird deshalb **ohne feste Prüfsumme** zitiert (Lead; die Größe habe ich selbst nachgerechnet) |
 | `tools/seite.py --pruefen` | GRÜN: **45 Dokumente** (Lead, nach dem Neubau) |
 
 **Vier Regeln, die diese Sitzung gesetzt hat:**
@@ -116,7 +116,7 @@ heißt: in dieser Sitzung nachgerechnet.
 | **a** | **`python tools/seite.py` erneut laufen lassen** — nach diesem Nachzug ist `docs/doku/` wieder älter als die Quellen; es sind dann **45** Dokumente | offen (Lead) |
 | **b** | **Stand-Tabelle in [`Architektur.md`](../Architektur.md)** nachziehen — gehört dem **Lead** | offen (Lead) |
 | **c** | **Lokal committen** — vorher die Zeilenenden prüfen (Byte-Vergleich, Schritt 6 des Protokolls) | offen (Lead) |
-| **d** | **Release auffrischen — nur mit Freigabe, je Handlung einzeln.** Zwei Wege: **neu taggen** (dann **2.0.1**, weil `v2.0.0` ohne `--force` nicht verschoben wird — Hausregel —, mit vollem Neubau) **oder** den Ablauf **„Release anlegen"** von Hand für `v2.0.0` anstoßen (laut Protokoll idempotent, ersetzt die Anhänge). Danach Schritt 8: nachmessen, was online steht | offen, entscheidet der Nutzer |
+| **d** | **Release auffrischen — nur mit Freigabe, je Handlung einzeln.** Zwei Wege: **neu taggen** (dann **2.0.1**, weil `v2.0.0` ohne `--force` nicht verschoben wird — Hausregel —, mit vollem Neubau) **oder** den Ablauf **„Release anlegen"** von Hand für `v2.0.0` anstoßen (laut Protokoll idempotent, ersetzt die Anhänge). Danach Schritt 8: nachmessen, was online steht. **Einmalig vorzubereiten:** die zwei Repository-Secrets für den Android-Anhang (siehe § 5) | offen, entscheidet der Nutzer |
 | **e** | **Desktop-Hülle / `.exe`** — im Release `v2.0.0` liegt eine; ob für den heutigen Stand eine neue gebaut wird, ist offen | offen (Lead) |
 | **f** | **Klassenraum:** Stufe **C** (Live-Server) und **D** (QR) nach **E6**; **O1** ist entschieden (Platzzahl bleibt im Datei-Dialog, kein siebtes Bedienelement) | offen — [`Architektur.md`](../Architektur.md) § 12 |
 
@@ -134,6 +134,16 @@ Offen bleibt nur:
    mit drei Anhängen, Seite byte-gleich zum lokalen Bau) — die Output-Runde und der 20-Geräte-Test sind aber
    **jünger**. Push, Tag und Release gibt es nur auf ausdrückliche Freigabe, je Handlung einzeln
    (siehe [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md), Schritt 7).
+
+   **Der Ablauf hängt künftig einen vierten Anhang an: die APK.** Der neue Job `android` in
+   `.github/workflows/release.yml` holt den Signaturschlüssel aus **zwei Repository-Secrets** —
+   `ANDROID_KEYSTORE_B64` und `ANDROID_KEYSTORE_PASSWORT`. **Was der Nutzer einmalig anlegen muss:**
+   Repository → Settings → Secrets and variables → Actions → diese zwei Secrets. **Was passiert, wenn er es
+   nicht tut:** nur dieser Job bricht mit klarer Meldung ab — die **APK entfällt, die drei anderen Anhänge
+   (Browser-ZIP, `.html`, `.exe`) kommen trotzdem**, weil der Android-Job mit `needs: release` **parallel**
+   zum Windows-Job läuft und ihn nicht mitreißt. Das ist Absicht: `android/signatur/` liegt **nicht** im Git,
+   und `android/bauen.py` würde sonst **einen neuen Schlüssel** erzeugen — eine APK, die sich nicht über eine
+   alte Fassung installieren lässt, wäre schlimmer als keine.
 
 ## 6 · Was ehrlich offen blieb
 

@@ -123,9 +123,11 @@ Zusammenschluss, nur zwei Selektoren verschwanden (beide aus dem gelöschten R8-
   `platz` > 31 wird **still auf 31 geklemmt** (harte Obergrenze je Sitzung), ein **doppelter Platz** lässt den
   ersten Eintrag gewinnen, und **zwei Sitzungen gleichzeitig gehen nicht** (`sitzung` ist ein Einzelfeld —
   nur Export/Import holt die alte zurück).
-- **Erzeugnisse:** APK neu gebaut **1.164.828 B**, SHA256
-  `2208C08A61E81E8039F197FC082CB653F211ACD89851A69E7884B7F375CC7BDD`; Einzeldatei unverändert
-  **2.829.477 B**, `C3C51EDA…828E` — und die **Live-Seite ist byte-gleich** dazu (selbst nachgemessen).
+- **Erzeugnisse:** APK neu gebaut **1.164.828 B** — **die Größe ist stabil, der SHA256 nicht:** derselbe
+  Quellstand ergibt bei jedem Bau **einen anderen Hash** (gemessen: `2208C08A…` → `CF5F2905…`), die APK wird
+  deshalb **ohne feste Prüfsumme** zitiert. Einzeldatei unverändert **2.829.477 B**, `C3C51EDA…828E` — sie
+  **ist** reproduzierbar, ebenso die `.exe` —, und die **Live-Seite ist byte-gleich** dazu (selbst
+  nachgemessen).
 ---
 
 ## 2.0.0 — Klassenraum Stufe A+B (09.10.2026)
@@ -215,7 +217,7 @@ sind damit **überholt**.
 
 **Erneut überholt** durch die **Output-Runde** und ihren Nachtrag (Abschnitt ganz oben): dort stehen die
 gültigen Erzeugnisse dieser Fassung (Einzeldatei **2.829.477 B**, SHA256 `C3C51EDA…828E`; APK
-**1.164.828 B**, SHA256 `2208C08A…7BDD`).
+**1.164.828 B** — **ohne** Prüfsumme, sie hebt sich bei jedem Bau auf).
 
 **Neue Dateien dieser Stufe** — Bytes und SHA256 vom Chronisten über den Arbeitsbaum gerechnet, **alle
 LF, 0 CRLF**:
@@ -406,8 +408,8 @@ fertig wurden. Sein Fazit gilt weiter: *591 von 593 grün heißt nicht fertig.*
   des Nutzers. Tag- und Zweigzeile im Kopf dieses Dokuments bleiben deshalb unverändert.
 - **Überholt** — zuerst durch die Klassenraum-Stufe A+B, dann durch die **Output-Runde** (jeweils
   Abschnitte weiter oben). Gültig sind die Erzeugnisse der Output-Runde samt Nachtrag: Einzeldatei
-  **2.829.477 B**, SHA256 `C3C51EDA…828E`; APK **1.164.828 B**, SHA256 `2208C08A…7BDD`. Die hier genannten
-  Werte waren der Stand **nach dem Fundament**.
+  **2.829.477 B**, SHA256 `C3C51EDA…828E`; APK **1.164.828 B** (**Größe** stabil, **Hash** nicht — er ändert
+  sich bei jedem Bau). Die hier genannten Werte waren der Stand **nach dem Fundament**.
 
 ### Neue Dateien dieser Fassung (Bytes und SHA256)
 

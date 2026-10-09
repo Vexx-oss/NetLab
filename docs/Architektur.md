@@ -916,7 +916,7 @@ Eingriff in `src/ui/hub.js`.
 | **R12 im laufenden Programm** | **`klasse` 6/6 ✓ · `Auftrag` 3/3 ✓** — Vorschrift unverändert aus `ethos.py`, drei Breiten, zwei Zustände, vier Gegenproben |
 | `python bauen.py` | **128 Module**, 2238 KB → `web/index.html`, Fassung **2.0.0** |
 | `docs/index.html` = `Netzwerk-Labor.html` | **byte-gleich**, 2 829 477 B, SHA256 `C3C51EDA…828E`, 0 Außenverweise |
-| Android | `Netzwerk-Labor-2.0.0-Android.apk`, 1 160 732 B, SHA256 `A27751B2…F93733`, Signatur gültig |
+| Android | `Netzwerk-Labor-2.0.0-Android.apk`, 1 164 828 B — **die APK ist nicht byte-reproduzierbar**: derselbe Quellstand ergibt dieselbe Größe, aber bei jedem Bau einen anderen SHA256. Deshalb wird hier **kein Hash** zitiert (die früher genannten `A9526120…`, `2208C08A…` und `CF5F2905…` sind drei Bauten desselben Standes); die Signatur ist mit dem Originalschlüssel vom 06.10.2026 gültig. Der Release-Ablauf hängt sie seit 09.10.2026 als **vierten** Anhang an und bricht ohne die zwei Repository-Secrets ab, damit keine fremd signierte Fassung entsteht |
 | Desktop (Auslieferung) | **Release**-Bau `Programm/Netzwerk-Labor.exe`, 8 630 272 B, 2.0.0; Sonden: 10 Ansichten, `klassenraum`+`mitarbeit` da, `.st-knopf` 44 px, `.menue` z-index 50 |
 
 **Der Codec ist erschöpfend belegt** (gemessen von der Umsetzung, nicht abgeleitet): Auftragscode
