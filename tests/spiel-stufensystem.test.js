@@ -260,8 +260,7 @@ gruppe("Spiel: Stufensystem", () => {
     erwarte.gleich(gesehen[6].frei, false, "die siebte ist nicht mehr frei");
     erwarte.enthaelt(gesehen[6].grund, "kostet Sterne", "der Grund sagt: kostet Sterne, sperrt nicht");
     erwarte.gleich(a.hilfenFrei, 0, "der Zähler steht am Ticket");
-    erwarte.gleich(a.hilfen.length, 6, "sechs gezogene Hilfen stehen in inst.hilfen");
-    erwarte.gleich(a.hilfen.map(h => h.frei), [true, true, true, true, true, true]);
+    erwarte.gleich(a.hilfen.length, 0, "hilfeZiehen verbraucht nur den Zähler — den Eintrag schreibt Spiel.hilfe");
     erwarte.gleich(Spiel.stufe.konto(a), {frei: 0, gesamt: 6}, "Konto danach");
     erwarte.gleich(Spiel.stufe.hilfeZiehen(a).frei, false, "bleibt false, wirft nicht");
     /* genau EINE: zweimal ziehen kostet zwei */
@@ -278,6 +277,49 @@ gruppe("Spiel: Stufensystem", () => {
     erwarte.gleich(Spiel.stufe.konto(), {frei: 0, gesamt: 6}, "offenes Ticket");
     Spiel._st.aktiv = "gibtsnicht";
     erwarte.gleich(Spiel.stufe.konto(), null, "unbekannte iid -> null");
+  }));
+
+  /* Der Vorrat muss ZAHLEN, nicht nur sinken. Bis 07.10.2026 zog jede Sprosse 4–6 Sterne, auch die
+     sechs angeblich freien des Azubi — gemessen im Review „Lernwirkung" (P1-1): 3 Sterne statt 5,
+     Lohn −20 %, Tempo-Bonus weg, Wochenziel 0/5. Dieser Fall nagelt die Deckung fest. */
+  pruefe("Der Vorrat bezahlt: gedeckte Sprossen kosten keine Sterne, ungedeckte schon", kapsel(() => {
+    /* Spiel.hilfeInhalt braucht ein echtes Netz (naechsteDiagnose/geraetName) — sonst wirft es.
+       Das Niveau wird auf dem OFFIZIELLEN Weg gepinnt (`einst.wahl = "E"`, Vertrag § 1) und nicht über
+       `inst.niveau`: `Spiel.niveauVon` überschreibt ein gesetztes `inst.niveau`, sobald `inst.niveauWahl`
+       nicht zur aktuellen Wahl passt (lernen.js:34) — ein vorheriger Test kann dort ein AP-Niveau
+       hinterlassen haben, und dann käme der „Ohne Verdacht"-Abzug von −½ ★ dazu. Genau diese Falle hat
+       dieser Test beim ersten Lauf aufgedeckt (4.5 statt 5, dann 2.5 statt 3). */
+    const altWahl = Spiel.einst.wahl;
+    Spiel.einst.wahl = "E";
+    const netz = DATEN.beispiele.salon();
+    const ticket = stufe => Object.assign({iid: "iV" + (stufe || "a"), ticketId: "salon-01", netz, hilfeStufe: 0, hilfen: [], abnahmen: 0, quelle: "postfach"}, stufe ? {stufe} : {});
+    Spiel.stufe.setzen("azubi");
+
+    /* sechs Hilfen am Azubi-Ticket: alle gedeckt -> kein Hilfe-Abzug, fünf Sterne (§ 2.1) */
+    const a = ticket();
+    /* Nullprobe entfällt: die Sternzahl hing am Niveau des offenen Tickets, nicht am Vorrat. */
+    for (let n = 0; n < 6; n++) Spiel.hilfe(a);
+    erwarte.gleich(a.hilfeStufe, 6, "sechs Sprossen gezogen");
+    erwarte.gleich(a.hilfen.map(h => h.stufe), [1, 2, 3, 4, 5, 6], "genau sechs Einträge, keine Phantom-Sprosse");
+    erwarte.gleich(a.hilfen.map(h => h.frei), [false, false, false, true, true, true], "erst ab Sprosse 4 wird der Vorrat beansprucht");
+    erwarte.gleich(Spiel.hilfeAbzuege(a), [], "gedeckt = kostenlos");
+    erwarte.gleich(a.hilfenFrei, 0, "der Vorrat ist dabei vollständig aufgebraucht");
+    erwarte.gleich(Spiel.sterneBerechnen(a).abzuege, [], "kein einziger Hilfe-Abzug im Ergebnis");
+    erwarte.gleich(Spiel.sterneBerechnen(a).sterne, 5, "sechs gedeckte Hilfen kosten keinen Stern");
+
+    /* ein Meister-Ticket hat keinen Vorrat -> dieselben Sprossen kosten wie bisher */
+    const m = ticket("meister");
+    for (let n = 0; n < 6; n++) Spiel.hilfe(m);
+    erwarte.gleich(m.hilfen.map(h => h.frei), [false, false, false, false, false, false], "kein Vorrat: nichts gedeckt");
+    erwarte.gleich(Spiel.hilfeAbzuege(m).map(x => x.sterne), [0.5, 0.5, 1], "ungedeckt = kostet");
+    erwarte.gleich(Spiel.sterneBerechnen(m).sterne, 3, "3 Sterne, wie vor der Änderung");
+
+    /* ein ALTER Stand ohne `frei`-Merkmal bleibt so streng wie bisher (nichts wird nachträglich billiger) */
+    const alt = {iid: "iX", netz, hilfeStufe: 6, hilfen: [{stufe: 4}, {stufe: 5}, {stufe: 6}], abnahmen: 0, quelle: "postfach"};
+    erwarte.gleich(Spiel.hilfeAbzuege(alt).map(x => x.sterne), [0.5, 0.5, 1], "Altstand zahlt weiter");
+    erwarte.gleich(Spiel.sterneBerechnen(alt).sterne, 3, "Altstand: 3 Sterne");
+    Spiel.einst.wahl = altWahl;                       /* gepinnte Wahl zurückgeben */
+    Spiel.stufe.setzen("azubi");
   }));
 
   pruefe("text(): liefert den Text der Stufe und nie null/undefined", kapsel(() => {

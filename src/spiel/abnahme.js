@@ -46,12 +46,36 @@ Spiel.abnahme = function(inst, {neustartTest = true} = {}){
 
 /* Sterne: 5, minus Hilfen (Stufe 4: −½, 5: −½, 6: −1), minus ½ bei AP1, wenn ein Neustart die Lösung löschen würde,
    minus Versuchsabzug ab dem 2. Abnahmeversuch (Stufenregeln: AP1 −½, AP2 −1, je einmal). Mindestens 1. */
+/* Abzug der Hilfestufen 4–6 — aber NUR für Sprossen, die der Vorrat nicht gedeckt hat.
+ *
+ * Warum das eine eigene Funktion ist (07.10.2026): Bis hierher richtete sich der Abzug allein nach
+ * `inst.hilfeStufe`. Damit kostete der Sechs-Vorrat aus Vertrag § 2.1 („azubi") NICHTS — wer sechs
+ * Hilfen zog, verlor trotzdem 2 Sterne. Gemessen im Review „Lernwirkung" (Befund P1-1): 3 Sterne statt 5,
+ * Lohn 30 → 24 €, Tempo-Bonus weg, Wochenziel 0/5. Das traf genau den Azubi, für den der Vorrat gedacht
+ * ist, und den Meister nie. Nach § 2.1 ist ein leerer Vorrat KEINE Sperre — die nächste Sprosse „kostet
+ * Sterne wie bisher". Also: gedeckt = kostenlos, ungedeckt = kostet.
+ *
+ * `Spiel.hilfe` markiert jede gezogene Sprosse mit `frei:true`, solange der Vorrat reicht (es ruft dabei
+ * `Spiel.stufe.hilfeZiehen`). Sprossen ohne dieses Merkmal — und alle Hilfen aus Ständen, die vor dieser
+ * Änderung gezogen wurden — zählen wie bisher. Ein alter Spielstand wird dadurch nicht schlechter. */
+Spiel.hilfeAbzuege = function(inst){
+  const h = (inst && inst.hilfeStufe) || 0;
+  const stufen = [{ab: 4, text: "Hilfe: Bereich markiert", sterne: 0.5},
+                  {ab: 5, text: "Hilfe: konkreter Hinweis", sterne: 0.5},
+                  {ab: 6, text: "Hilfe: Lösung vorgeführt", sterne: 1}];
+  const gezogen = (inst && inst.hilfen) || [];
+  const ungedeckt = n => {
+    const e = gezogen.find(x => x && x.stufe === n);
+    if (!e) return true;                 /* kein Eintrag (alter Stand oder fremde Quelle): wie bisher zählen */
+    return e.frei !== true;              /* ausdrücklich gedeckt -> kostenlos */
+  };
+  const raus = [];
+  for (const s of stufen) if (h >= s.ab && ungedeckt(s.ab)) raus.push({text: s.text, sterne: s.sterne});
+  return raus;
+};
+
 Spiel.sterneBerechnen = function(inst, {niveau, neustartVerlust} = {}){
-  const abzuege = [];
-  const h = inst.hilfeStufe || 0;
-  if (h >= 4) abzuege.push({text: "Hilfe: Bereich markiert", sterne: 0.5});
-  if (h >= 5) abzuege.push({text: "Hilfe: konkreter Hinweis", sterne: 0.5});
-  if (h >= 6) abzuege.push({text: "Hilfe: Lösung vorgeführt", sterne: 1});
+  const abzuege = Spiel.hilfeAbzuege(inst);
   if (neustartVerlust && niveau === "AP1") abzuege.push({text: "Nicht gespeichert: Nach einem Neustart wäre die Änderung weg", sterne: 0.5});
   const versuch = (inst.abnahmen || 0) + 1, abzug = Spiel.regeln(inst).versuchAbzug;
   if (abzug && versuch >= 2) abzuege.push({text: `${versuch}. Abnahmeversuch – im ${niveau || "AP"}-Niveau zählt der erste wie in der Prüfung`, sterne: abzug});

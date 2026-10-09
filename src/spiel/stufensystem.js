@@ -173,15 +173,17 @@ Spiel.stufe = (() => {
     /* Nur die Zahl – für Flächen, die eine Zeile „noch 3 von 6 Hilfen" schreiben. */
     hilfenFrei(inst){ return frei(inst); },
     /* Verbraucht genau EINE freie Hilfe dieses Tickets. Ein leerer Vorrat ist KEINE Sperre:
-       frei:false heißt nur „jetzt kostet es Sterne" – der Aufrufer lässt die Sprosse offen. */
+       frei:false heißt nur „jetzt kostet es Sterne" – der Aufrufer lässt die Sprosse offen.
+       WICHTIG: Diese Funktion verbraucht nur den Zähler (`inst.hilfenFrei`). Den Eintrag in `inst.hilfen`
+       schreibt der Aufrufer, der die Sprossennummer kennt — hier wäre sie falsch: beim Aufruf VOR der
+       Erhöhung entstünde `hilfeStufe + 1`, was beim sechsten Zug einen Phantom-Eintrag „Sprosse 7"
+       erzeugte (gemessen 07.10.2026). */
     hilfeZiehen(inst){
       if (!inst || typeof inst !== "object") return {frei: false, grund: "Kein Ticket offen."};
       const war = frei(inst);
       if (war <= 0) return {frei: false, grund: "Keine freie Hilfe mehr – die nächste Sprosse kostet Sterne."};
       const neu = war - 1;
       inst.hilfenFrei = neu;
-      if (!Array.isArray(inst.hilfen)) inst.hilfen = [];
-      inst.hilfen.push({stufe: (inst.hilfeStufe || 0) + 1, frei: true, t: jetzt()});
       Spiel.speichern();
       return {frei: true, grund: neu > 0 ? `Noch ${neu} freie ${neu === 1 ? "Hilfe" : "Hilfen"}.` : "Das war die letzte freie Hilfe."};
     },

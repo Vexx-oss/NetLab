@@ -32,7 +32,9 @@ UI.training = (() => {
       h("header", {class: "tr-kopf"},
         h("h2", {}, "Training"),
         h("p", {class: "sp-leise"}, "Üben abseits der Aufträge: kein Lohn, kein Ruf, kein Postfach. Was du hier schaffst, zählt für deinen Lernstand."),
-        h("p", {class: "tr-summe"}, `${bestanden} von ${liste.length} Szenarien bestanden · ${versuche} ${versuche === 1 ? "Durchgang" : "Durchgänge"} · Stufe ${stufe}`,
+        /* „Bildungsstand" statt „Stufe": sonst stehen im selben Fenster zwei verschiedene „Stufen"
+           (Kopfzeile = Karriere, hier = Bildungsstand). Review Auffindbarkeit, Befund 4. */
+        h("p", {class: "tr-summe"}, `${bestanden} von ${liste.length} Szenarien bestanden · ${versuche} ${versuche === 1 ? "Durchgang" : "Durchgänge"} · Bildungsstand ${stufe}`,
           gefuehrt ? " – geführte Simulation" : " – Liste ohne Gerüst")),
       letztes ? ergebnisKarte() : null,
       h("div", {class: "tr-liste"}, liste.map(karte)));

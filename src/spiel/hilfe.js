@@ -108,12 +108,32 @@ Spiel.hilfeInhalt = function(inst, stufe){
   return r;
 };
 
-/* Nächste Hilfestufe freischalten (kostet ggf. Sterne) → Inhalt der neuen Stufe */
+/* Nächste Hilfestufe freischalten (kostet ggf. Sterne) → Inhalt der neuen Stufe
+ *
+ * „Kostet ggf." ist wörtlich gemeint, seit 07.10.2026: Die Sprossen 1–3 sind immer frei, die Sprossen
+ * 4–6 kosten nur, wenn der Vorrat aus Vertrag § 2.1 erschöpft ist. Vorher zog jede Sprosse 4–6 Sterne,
+ * auch die sechs angeblich freien des Azubi — der Vorrat war damit eine Anzeige ohne Zahlkraft
+ * (Review „Lernwirkung", Befund P1-1: 3 Sterne statt 5). Die Deckung wird über
+ * `Spiel.stufe.hilfeZiehen` verbucht; der Eintrag trägt dann `frei:true`, und `Spiel.hilfeAbzuege`
+ * (abnahme.js) überspringt ihn. Ein leerer Vorrat sperrt nichts — er kostet nur. */
 Spiel.hilfe = function(inst){
-  const neu = Math.min(6, (inst.hilfeStufe || 0) + 1);
-  if (neu > (inst.hilfeStufe || 0)) {
+  const alt = inst.hilfeStufe || 0;
+  const neu = Math.min(6, alt + 1);
+  if (neu > alt) {
     inst.hilfeStufe = neu;
-    inst.hilfen.push({stufe: neu, t: jetzt()});
+    if (!Array.isArray(inst.hilfen)) inst.hilfen = [];
+    /* Deckung NUR für die Sprossen 4–6 anfragen: 1–3 kosten ohnehin nichts, und ein Verbrauch dort
+       würde dem Azubi den Vorrat wegnehmen, bevor er ihn braucht. */
+    let gedeckt = false;
+    if (neu >= 4 && typeof Spiel.stufe !== "undefined" && Spiel.stufe && typeof Spiel.stufe.hilfeZiehen === "function") {
+      try { gedeckt = !!Spiel.stufe.hilfeZiehen(inst).frei; } catch (e) { gedeckt = false; }
+    }
+    /* Einträge NUR hier schreiben — nicht in hilfeZiehen. Grund (gemessen 07.10.2026): hilfeZiehen läuft
+       VOR der Erhöhung und schrieb deshalb `stufe: hilfeStufe + 1`, was beim sechsten Zug einen
+       Phantom-Eintrag „Sprosse 7" erzeugte. Diese Funktion ist die einzige Stelle, die den Eintrag kennt. */
+    const eintrag = inst.hilfen.filter(h => h && h.stufe === neu)[0];
+    if (eintrag) eintrag.frei = gedeckt;
+    else inst.hilfen.push({stufe: neu, frei: gedeckt, t: jetzt()});
   }
   if (neu === 6) Spiel.wiederholungAnlegen(inst);
   const inhalt = Spiel.hilfeInhalt(inst, neu);

@@ -183,6 +183,11 @@ FAELLE = [
     ("Kunden", "__rauch.ansicht('kunden')", [".kr-kunde .ka-zeile .knopf", ".kr-kunde h3"], None),
     ("Wiki", "__rauch.ansicht('wiki')", ["input[type=search]"], None),
     ("Lernstand", "__rauch.ansicht('lernstand')", [".kr-kopf .knopf", ".kr-kopf h2"], None),
+    # „Training" kam 07.10.2026 mit der Hilfestellung dazu. Sie fehlte in dieser Liste, und DAS ist die
+    # gefährlichste Art Lücke: der Rauchtest meldete 36/36 grün, ohne die neue Ansicht je zu öffnen
+    # (gefunden von `lernstand-hilfe` am 07.10.2026). Erster Knopf ist „Starten (n min)" im ersten
+    # Szenario; der Kopf trägt die Summenzeile.
+    ("Training", "__rauch.ansicht('training')", [".tr-karte .tr-knoepfe .knopf.primaer", ".tr-kopf .tr-summe"], None),
     ("Shop", "__rauch.ansicht('shop')", [".kr-ware .knopf.primaer", ".kr-ware", ".kr-kopf h2"], None),
 ]
 

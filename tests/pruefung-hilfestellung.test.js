@@ -189,7 +189,11 @@ gruppe("Gegenprüfung: Stufen und Rückfall (§ 1–§ 3)", () => {
     for (let n = 0; n < 8; n++) gezogen.push(Spiel.stufe.hilfeZiehen(a));
     erwarte.gleich(gezogen.slice(0, 6).map(r => r.frei), Array(6).fill(true), "sechs freie Hilfen");
     erwarte.gleich(gezogen.slice(6).map(r => r.frei), [false, false], "danach nur noch nicht-frei");
-    erwarte.gleich(a.hilfen.length, 6, "genau sechs Einträge in inst.hilfen");
+    /* Seit 07.10.2026 verbraucht hilfeZiehen NUR den Zähler: den Eintrag in inst.hilfen schreibt Spiel.hilfe,
+       weil nur dort die Sprossennummer bekannt ist (vorher entstand beim sechsten Zug ein Phantom „Sprosse 7").
+       Der Vorrat sinkt trotzdem — das ist der Punkt dieser Prüfung. */
+    erwarte.gleich(a.hilfen.length, 0, "hilfeZiehen selbst schreibt keinen Eintrag");
+    erwarte.gleich(a.hilfenFrei, 0, "der Vorrat ist trotzdem aufgebraucht");
     erwarte.gleich(Spiel.stufe.hilfeZiehen(a).grund.includes("kostet Sterne"), true, "der Grund nennt die Kosten, nicht eine Sperre");
     /* Ein meister-Ticket hat keinen Vorrat – die Sprosse bleibt trotzdem offen (kein Wurf, kein Riegel). */
     const m = ticket({iid: "vM", stufe: "meister"});

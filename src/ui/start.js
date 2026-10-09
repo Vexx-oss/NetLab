@@ -150,7 +150,10 @@ UI.einstiegStufe = (() => {
     return kasten;
   }
 
-  /* Die Wahl in die vorhandene Begrüßungskarte hängen – nur dort, nur solange sie steht, nur einmal. */
+  /* Die Wahl in die vorhandene Begrüßungskarte hängen – nur dort, nur solange sie steht, nur einmal.
+     Sie kommt VOR den Knopfblock: stand sie dahinter (bis 07.10.2026 `ziel.append(k)`), klickte ein
+     Azubi den auffälligen blauen „Zeig mir den ersten Auftrag" und hatte die Wahl nie gesehen — die
+     Karte kommt nicht wieder. Gemessen im Review „Auffindbarkeit", Befund 1 (P1). */
   function einhaengen(wurzel){
     const w = wurzel || (typeof document !== "undefined" ? document : null);
     if (!w || !noetig()) return false;
@@ -158,7 +161,9 @@ UI.einstiegStufe = (() => {
     if (!ziel || ziel.querySelector(".sp-stufe")) return false;
     const k = karte();
     if (!k) return false;
-    ziel.append(k);
+    const knoepfe = ziel.querySelector(".sp-einstieg-knoepfe");
+    if (knoepfe && knoepfe.parentNode === ziel) ziel.insertBefore(k, knoepfe);
+    else ziel.append(k);                       /* Rückfall: Karte ohne Knopfblock (älterer Stand) */
     return true;
   }
 

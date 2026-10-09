@@ -130,7 +130,10 @@ UI.app = (() => {
   const FORMAT = {
     euro: x => x == null ? "– €" : `${eur(x)} €`,
     ruf: x => x == null ? "Ruf –" : `Ruf ${zahlDe(Math.round(x))}`,
-    stufe: x => x == null ? "Stufe –" : `Stufe ${x}`,
+    /* „Karriere" statt „Stufe": das Programm benutzt „Stufe" für vier Dinge (Karriere, Bildungsstand,
+       Erklärtiefe, Hilfeleiter). Der Tooltip dieser Fläche sagte schon immer „Karriere-Stufe", die
+       sichtbare Beschriftung widersprach ihm (Review Auffindbarkeit, Befund 4, 07.10.2026). */
+    stufe: x => x == null ? "Karriere –" : `Karriere ${x}`,
     offen: x => x == null ? "0 offen" : `${zahlDe(x)} offen`,
   };
   /* Speicher-Kennzeichen: drei Zustände, kein Klickziel, keine Animation, nur ein leiser Text.
