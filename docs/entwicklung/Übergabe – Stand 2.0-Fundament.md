@@ -17,11 +17,11 @@ status: Übergabezettel — bewusst kurz. Jüngster Stand (Fassung 2.0.0 mit Fun
 
 **Drei Runden derselben Fassung sind gebaut und gemessen** — das Fundament, der Klassenraum-Öffnungsweg
 (Stufe A+B) und die Output-Runde (Trefferflächen, Altlasten, R12) —, alles zusammen ist als Fassung
-**Die Fassung steht auf 2.0.1, die Veröffentlichung wird aufgefrischt.** Das Release `v2.0.0` (09.10.2026,
-14:44 UTC) war **älter** als die Output-Runde und hatte **keine APK**; weil es sich ohne `--force` nicht
-verschieben lässt (Hausregel), zieht die Fassung auf **2.0.1** und bekommt ein **neues Tag** — die CI baut
-daraus ein frisches Release mit der APK als **viertem** Anhang. **`v2.0.0` bleibt unverändert stehen.** Für
-Push und Tag gilt weiter die **Freigabe des Nutzers**, je Handlung einzeln. Die Klassenraum-Stufen **C** (Live-Server) und **D** (QR) kommen
+**Die Fassung steht auf 2.0.2 und ist veröffentlicht.** Nacheinander sind **`v2.0.0`** (09.10., 14:44 UTC),
+**`v2.0.1`** (16:40 UTC) und **`v2.0.2`** (17:07 UTC) erschienen; die **Live-Seite ist byte-gleich** zum
+lokalen 2.0.2-Bau (2.874.964 B, `E913A613…37F3`, selbst nachgerechnet). **`v2.0.0` und `v2.0.1` bleiben
+unverändert stehen** (kein `--force`). Offen sind nur: die zwei **Repository-Secrets** für den Android-Anhang
+und die Frage, ob das Release `v2.0.2` noch die **`.exe`** bekommt. Die Klassenraum-Stufen **C** (Live-Server) und **D** (QR) kommen
 nach **E6** später.
 
 ## 2 · Was in dieser Sitzung entstanden ist
@@ -69,6 +69,14 @@ Berichte: [Review – 2.0-Fundament](<Review – 2.0-Fundament.md>) ·
 [Review – Klassenraum A+B](<Review – Klassenraum A+B.md>) ·
 [Befund – Output-Runde](<Befund – Output-Runde.md>) · [Befund – 27 von 27](<Befund – 27 von 27.md>).
 
+**Vierte Runde — Inhalte und Diagnose (2.0.2).** Minis **92 → 116**, Denkhilfen **91 → 115** (neu:
+`src/daten/mini-denkhilfen3.js` mit **24** Anstößen); Injektoren **39 → 45**, Trainingskarten **34 → 40**,
+vier vorher ungenutzte Grundcodes belegt; die Ampel der Lehrkraft zeigt jetzt **„Fortschritt: 7 von 20
+offen · 3 Abgaben in den letzten 5 Minuten · letzte Abgabe vor 2 Minuten"** — **nur anonyme Zahlen**, kein
+Name, kein Rang, kein neues Bedienelement; der Android-Job **warnt** bei fehlenden Secrets statt rot zu
+werden. Selbst nachgezählt: **116 Minis**, **115 Denkhilfen** (60 + 31 + 24), **45 Injektoren**, **40
+Karten**; `mini-link-2` bleibt als einziges Mini ohne Eintrag (absichtlich).
+
 **Nachzügler derselben Runde:** `tests/klassen-20.test.js` (20 Geräte aus **einem** Code, Ampel **20/20**,
 349 ms) · [Markt – Monetarisierung](<Markt – Monetarisierung.md>) (Marktteil mit 20 Quellen, 9
 Wettbewerbern und dem Abschnitt „was NICHT funktionieren wird") ·
@@ -82,7 +90,7 @@ heißt: in dieser Sitzung nachgerechnet.
 
 | Prüfung | Ergebnis |
 |---|---|
-| `sh tools/test.sh` (Endstand 2.0.1) | **734/734 grün**, 82 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| `sh tools/test.sh` (Endstand 2.0.2) | **750/750 grün**, 84 Testdateien, 92 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
 | dieselbe Messung am Ende von Klassenraum A+B / des Fundaments | 661/661 (74/91) · 620/620 (70/90) (selbst gemessen) |
 | dieselbe Messung **vor** der Sitzung | 471/479 grün, **8 rot**, 55 Testdateien, 84 Module (Nullmessung des Leads) |
 | `node tests/run.js --klassenraum` | **104/104 grün** (selbst gemessen) — der Filter schneidet führende Striche ab (Befund **K2 behoben**); ein Filter **ohne** Treffer endet mit **Exit 1** und der Meldung „KEIN Test passt zum Filter … Das ist kein grüner Lauf." |
@@ -91,9 +99,9 @@ heißt: in dieser Sitzung nachgerechnet.
 | Menüprobe Web · Android | **45 erfüllt, 0 verletzt** · **49 erfüllt, 0 verletzt** (je 5 von 5 Profilen) (selbst gemessen) |
 | `tools/rauch.py` | **45/45** (14 Ansichten × 3 Breiten) (Lead; der Aufbau ist im Quelltext nachgezählt) |
 | R12 im Programm (`ethos.r12_js()`) | `klasse` **6/6**, `Auftrag` **3/3** (Lead) |
-| `python bauen.py` | **128 Module, 2239 KB** → `web/index.html`, Version **2.0.1** (Lead) |
-| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.830.266 B**, SHA256 `B0484888…BE0DC`, byte-gleich, **0 Außenverweise** (Lead; Größe und Hash selbst nachgerechnet) |
-| Android-APK **2.0.1** | **1.164.828 B**, Signatur gültig — **ohne Prüfsumme:** die APK ist **nicht reproduzierbar**, derselbe Quellstand ergibt bei jedem Bau einen anderen Hash (gemessen: `2208C08A…` → `CF5F2905…` → `60F4CF99…`), nur die **Größe** ist stabil (Lead; Größe selbst nachgerechnet) |
+| `python bauen.py` | **129 Module, 2282 KB** → `web/index.html`, Version **2.0.2** (Lead) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.874.964 B**, SHA256 `E913A613…37F3`, byte-gleich, **0 Außenverweise** und **live byte-gleich** (Lead; Größe, Hash und Live-Vergleich selbst nachgerechnet) |
+| Android-APK **2.0.2** | **1.177.116 B**, Signatur gültig — **ohne Prüfsumme:** die APK ist **nicht reproduzierbar**, derselbe Quellstand ergibt bei jedem Bau einen anderen Hash, nur die **Größe** ist stabil (Lead; Größe selbst nachgerechnet) |
 | `tools/seite.py --pruefen` | GRÜN: **45 Dokumente** (Lead, nach dem Neubau) |
 
 **Vier Regeln, die diese Sitzung gesetzt hat:**
@@ -117,7 +125,7 @@ heißt: in dieser Sitzung nachgerechnet.
 | **a** | **`python tools/seite.py` erneut laufen lassen** — nach diesem Nachzug ist `docs/doku/` wieder älter als die Quellen; es sind dann **45** Dokumente | offen (Lead) |
 | **b** | **Stand-Tabelle in [`Architektur.md`](../Architektur.md)** nachziehen — gehört dem **Lead** | offen (Lead) |
 | **c** | **Lokal committen** — vorher die Zeilenenden prüfen (Byte-Vergleich, Schritt 6 des Protokolls) | offen (Lead) |
-| **d** | **Tag `v2.0.1` setzen und pushen** (nur mit Freigabe des Nutzers) — die CI baut das frische Release mit **vier** Anhängen (Browser-ZIP, `.html`, `.exe`, **APK**); danach Schritt 8: nachmessen, was online steht. **Einmalig vorzubereiten:** die zwei Repository-Secrets für den Android-Anhang (siehe § 5) | bereit — Fassung ist gezogen, Freigabe fehlt |
+| **d** | **Online nachmessen (Schritt 8):** Release **`v2.0.2`** prüfen — beim Messen hatte es **zwei** Anhänge (Browser-ZIP, `.html`), die **`.exe` fehlte**, die **APK fehlt** (Secrets). **Einmalig vorzubereiten:** die zwei Repository-Secrets für den Android-Anhang (siehe § 5) | Tag ist gesetzt, Nachmessung offen (Lead) |
 | **e** | **Desktop-Hülle / `.exe`** — im Release `v2.0.0` liegt eine; ob für den heutigen Stand eine neue gebaut wird, ist offen | offen (Lead) |
 | **f** | **Klassenraum:** Stufe **C** (Live-Server) und **D** (QR) nach **E6**; **O1** ist entschieden (Platzzahl bleibt im Datei-Dialog, kein siebtes Bedienelement) | offen — [`Architektur.md`](../Architektur.md) § 12 |
 
@@ -187,7 +195,7 @@ Offen bleibt nur:
 ```powershell
 cd 10-Projekte\Lernprojekte\Netzwerk-Labor
 $node = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64\node.exe"
-& $node tests/run.js          # muss 734/734 grün melden, 0 rot, 0 übersprungen
+& $node tests/run.js          # muss 750/750 grün melden, 0 rot, 0 übersprungen
 python tools/ethos.py         # GRUEN gegen tests/stil-stand.json (R12 nur mit --dom)
 python tools/klassen.py       # 0 Klassen ohne CSS-Regel
 node tools/sim-stand.js       # Simulation unverändert gegenüber dem Referenzstand

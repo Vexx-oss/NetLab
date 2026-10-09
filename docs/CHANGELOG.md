@@ -5,8 +5,62 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
 [`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0` (über die GitHub-API gemessen am 09.10.2026); **`v2.0.1` folgt** mit dem Auffrischen dieser Fassung.
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, **`v2.0.2`** (über die GitHub-API gemessen am 09.10.2026).
 
+---
+
+## 2.0.2 — Inhalte und Diagnose (09.10.2026)
+
+**Warum diese Fassung.** Nach **2.0.1** sind drei Ströme gelandet — zwei für die **Inhalte**, einer für die
+**Diagnose** —, und der heutige Stand soll veröffentlicht werden. Deshalb zieht die Fassung nach
+Hausverfahren weiter. **`v2.0.0` und `v2.0.1` bleiben unverändert stehen** (kein `--force`, kein
+Verschieben); `v2.0.2` ist die neue.
+
+### Neu
+
+- **Inhalte A — Minis und Denkhilfen.** Minis **92 → 116**, Denkhilfen **91 → 115**; die **24** neuen
+  Denkanstöße stehen in der neuen Datei `src/daten/mini-denkhilfen3.js`. Wirkung (Angaben der Leitung):
+  **116 von 116** festen Minis kommen in **200 Zügen** dran, davon **24 von 24** neu; auf Niveau **E** sind
+  es 57 Minis mit **0** Verstößen gegen die Niveau-Vorliebe. Eine **festgenagelte Zahl** in
+  `tests/mini-wiederholung.test.js` (92) ist durch eine **inhaltliche** Zusicherung plus Untergrenze ersetzt
+  — sie wäre sonst bei jedem Ausbau wieder gebrochen. Selbst nachgezählt: **116 Minis**, **115 Denkhilfen**
+  (60 + 31 + 24) und weiterhin genau **ein** Mini ohne Eintrag (`mini-link-2`, absichtlich reserviert).
+- **Inhalte B — Injektoren und Trainingskarten.** Injektoren **39 → 45**, Trainingskarten **34 → 40**; vier
+  vorher ungenutzte Grundcodes sind jetzt belegt (**DEVICE_OFF**, **DHCP_POOL_EMPTY**, **DHCP_RESERVED_BUSY**,
+  **DHCP_CONFLICT**; ungenutzt 7 → 3). Je Injektor **Bruch und Heilung gemessen** (48 Tickets, 0 leer), der
+  Fehlerdex hat **45** Einträge ohne Lücke, **jeder** mit Gruppe, Symptom und Erkennungszeichen (Angaben der
+  Leitung; Injektoren und Karten selbst nachgezählt).
+- **Diagnose ohne Bewertung.** Die Ampel der Lehrkraft hat eine neue Zeile: „**Fortschritt: 7 von 20 offen ·
+  3 Abgaben in den letzten 5 Minuten · letzte Abgabe vor 2 Minuten**". **Nur anonyme Zahlen** — kein Name,
+  kein Rang, kein Vergleich zwischen Azubis, **kein neues Bedienelement**. R12 im echten Browser
+  nachgemessen: `Klasse` **6/6**, `Auftrag` **3/3** an drei Breiten, mit vier Gegenproben.
+- **Release-Job.** Der Android-Job **warnt** jetzt, wenn die zwei Secrets fehlen, statt rot zu werden —
+  drei Zustände, damit ein fehlender Schlüssel nicht wie ein kaputter Bau aussieht.
+
+### Prüfstand
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` | **750/750 grün**, 84 Testdateien, 92 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| `python bauen.py` | **129 Module, 2282 KB**, Version **2.0.2** (Lead) — eine Datei kam dazu |
+| Fassung | **2.0.2** in `web/index.html`, `docs/index.html`, `Netzwerk-Labor.html`, `android/bau/assets/index.html` (selbst geprüft) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.874.964 B**, SHA256 `E913A613E8E13680C0A3486BDB20A005FA8B407C37267FCE6780132F724737F3`, byte-gleich, **0 Außenverweise** (Lead; Größe und Hash selbst nachgerechnet) |
+| Android-APK 2.0.2 | **1.177.116 B**, Signatur gültig — **ohne Prüfsumme**, sie ist **nicht reproduzierbar** (selbst gemessen) |
+| Menüprobe Web · Android | **45 erfüllt / 0 verletzt** · **49 erfüllt / 0 verletzt** (je 5 von 5 Profilen, selbst gemessen gegen die 2.0.2-Bauten) |
+| Rauchtest · `tools/klassen.py` · `tools/ethos.py` · `node tools/sim-stand.js` | **45/45** · **0** Klassen ohne CSS-Regel · **GRUEN** · Simulation **unverändert** (Lead) |
+| `tools/seite.py --pruefen` | GRÜN, **45 Dokumente** (Lead) |
+| Fassungszug | `tools/fassung-ziehen.py --neu 2.0.2 --setzen` — Trockenlauf und Lauf **0 Fehler**; **`VERSION_CODE` 20003** von Hand (Hausregel: über dem aus `versionName 2.0.2` abgeleiteten 20002) |
+| Online (über die GitHub-API gemessen) | Tags `v2.0.0`, `v2.0.1`, `v2.0.2`; Release **`v2.0.2`** vom 09.10.2026, **17:07 UTC**, mit **zwei** Anhängen (Browser-ZIP, `.html`) — die **`.exe` fehlt** in diesem Release (v2.0.0 und v2.0.1 hatten sie; der Windows-Job kann beim Messen noch gelaufen sein), die **APK fehlt** (die zwei Secrets). Die Live-Seite ist **2.874.964 B** groß, meldet **2.0.2** und ist **byte-gleich** zum lokalen Bau (selbst nachgerechnet: `E913A613…37F3`) |
+
+### Nicht geprüft (ehrlich)
+
+- **Der CI-Lauf ist nicht abgewartet:** ob das Release `v2.0.2` noch die `.exe` bekommt und ob der
+  Android-Job mit den Secrets die APK anhängt, ist hier **nicht gemessen**.
+- **Kein Browserbild** dieser Fassung und keine echte Unterrichtsstunde: die Diagnose-Zeile ist über
+  DOM-Attrappen und die R12-Messung im echten Browser belegt, **nicht** im Bild.
+- Die APK steht **ohne Prüfsumme** — nur ihre **Größe** ist stabil.
+- Die Zahl „57 Minis auf Niveau E" ist eine **Angabe der Leitung**; die eigene Zählung des Chronisten
+  benutzt eine andere Feldlesart und wird hier deshalb **nicht** als Gegenprobe genannt.
 ---
 
 ## 2.0.1 — Veröffentlichung des heutigen Standes (09.10.2026)
