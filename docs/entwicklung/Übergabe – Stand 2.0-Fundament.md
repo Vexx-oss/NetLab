@@ -83,16 +83,23 @@ Lauf des Leads übernommen. „Selbst gemessen" heißt: in dieser Sitzung nachge
 | **c** | **Lokal committen** — vorher die Zeilenenden prüfen (Byte-Vergleich, Schritt 6 des Protokolls) | offen (Lead) |
 | **d** | **Push und Tag `v2.0.0`** — je Handlung **einzeln** freigeben lassen; danach Schritt 8: nachmessen, was wirklich online steht | offen, entscheidet der Nutzer |
 | **e** | **`.exe` neu bauen** (Rust) — in dieser Sitzung **nicht** geschehen; die APK ist gebaut | offen, wenn gewünscht |
-| **f** | **Klassenraum umsetzen** (Stufen A/B/E/F, ohne QR und ohne Server in der `.exe`) — wartet auf E1–E8 | offen, 6–9 Sitzungen |
+| **f** | **Klassenraum — Öffnungsweg:** **Stufe A+B (Code-Erzeugung, Lehrkräfte-Ansicht, „Code eingeben") ist NOCH NICHT gebaut**; der Rust-Server und der QR-Weg kommen nach **E6** später. Die **Annahmehälfte** (Umleitung nach E2) ist mit 2.0.0 fertig | offen — Entscheidungen in [`Architektur.md`](../Architektur.md) § 12.1 |
 
-## 5 · Was nur der Nutzer entscheiden kann
+## 5 · Was entschieden ist — und was nur der Nutzer entscheiden kann
+
+**Entschieden am 09.10.2026, wörtlich: „Nein, Lehreraufträge sollen nicht bewertet werden."** Damit gibt es
+**keine Note, keine Punkte, keine Rangfolge und keinen Vergleich zwischen Azubis**; ein Klassenraum-Auftrag
+zählt ausschließlich für den Lernstand des Einzelnen. Die im Fahrplan genannte Alternative — eine **eigene
+Auswertung statt eines Filters** — **entfällt**: die Umleitung nach E2 ist die ganze Lösung, und das
+ausgelieferte Verhalten von 2.0.0 erfüllt sie bereits. Die vollständige Entscheidungstabelle **E1–E8** steht
+in [`Architektur.md`](../Architektur.md) § 12.1 (E1, E2, E4, E8 umgesetzt; E3, E5, E6 entschieden bzw.
+offen; E7 überholt) — dort nachsehen, hier nicht wiederholen.
+
+Offen bleibt nur:
 
 1. **Ob veröffentlicht wird.** Push, Tag und Release gibt es nur auf ausdrückliche Freigabe, und zwar je
    Handlung einzeln (siehe [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md), Schritt 7). Die
    **Zielnummer 2.0.0** ist entschieden (Auftrag „bis zum Production Release").
-2. **Die acht Entscheidungen E1–E8** des Klassenraums; die schwerste ist keine technische: *Soll ein
-   Klassenraum-Auftrag bewertet werden?* Wenn ja, braucht es eine eigene Auswertung statt eines Filters —
-   und dann die Frage nach **Noten**, die dieses Spiel bisher bewusst nicht stellt.
 
 ## 6 · Was ehrlich offen blieb
 

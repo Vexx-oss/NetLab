@@ -815,14 +815,17 @@ Falle zuerst selbst ein falsches Ergebnis gemessen (14 Flächen unter 44 px) und
 - `docs/index.html` und `Netzwerk-Labor.html` im Wurzelverzeichnis sind **dieselbe** Datei und
   müssen denselben SHA256 tragen.
 
-## 12 · Klassenraum — Spezifikation (07.10.2026, **noch nicht umgesetzt**)
+## 12 · Klassenraum — Spezifikation (07.10.2026; **Annahmehälfte gebaut, Öffnungsweg offen**)
 
 Der Auftrag [`../tools/auftraege/KLASSENRAUM.md`](../tools/auftraege/KLASSENRAUM.md) beschreibt die
 Lehrer-/Schüler-Instanz als Hobby-Ebene: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben
 Auftrag selbst — ohne Konto, ohne Server, ohne Netz. Die **umsetzungsreife Fassung** liegt in
 [`entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md`](<entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>)
-samt vier Teil-Dokumenten in `entwicklung/Klassenraum/`. **Gebaut ist nichts** — dieser Abschnitt hält
-fest, was mit der Umsetzung vertraglich gilt; bis dahin ist er eine Ankündigung, kein geltender Vertrag.
+samt vier Teil-Dokumenten in `entwicklung/Klassenraum/`. **Gebaut ist die Annahmehälfte** — ein Auftrag
+mit `quelle: "klassenraum"` wird richtig behandelt (§ 12.1, E1/E2/E4/E8, `src/spiel/klassenraum.js`).
+**Nicht gebaut ist der Öffnungsweg**: es gibt im Produkt noch keine Code-Erzeugung, keine Lehrkräfte-Ansicht
+und keinen Weg „Code eingeben". Bis dahin ist dieser Abschnitt für den Öffnungsweg eine Ankündigung,
+für die Annahmehälfte ein geltender Vertrag.
 
 | Gegenstand | Festlegung (gemessen belegt in der Spezifikation) |
 |---|---|
@@ -839,6 +842,29 @@ Die Dateien der Umsetzung: `src/spiel/klassenraum.js`, `src/ui/klassenraum.js`, 
 `tests/klassenraum.test.js`; additiv erlaubt sind `src/ui/app.js`, `src/ui/start.js` und der Store-Schlüssel
 in `src/spiel/zustand.js`. Erwartete Abnahme nach dem Einbau: 291/291 Tests grün, Filter `--klassenraum`
 40/40, `ethos.py` GRÜN, `klassen.py` 0, `sim-stand.js` unverändert.
+
+### 12.1 Entscheidungen des Nutzers (09.10.2026)
+
+Die acht Entscheidungen E1–E8 aus [`Entwurf – Klassenraum-Umsetzung.md`](<entwicklung/Entwurf – Klassenraum-Umsetzung.md>) § 8
+sind damit entschieden: sieben folgen der Empfehlung der Prüfer, die achte hat der Nutzer selbst beantwortet.
+
+| | Frage | Entscheidung | Stand |
+|---|---|---|---|
+| **E1** | Ist der Klassenraum-Auftrag im Postfach sichtbar? | **herausfiltern** wie `training` | **umgesetzt** (`postfach.js:137`, `hub.js:58`, Ereignistakt `ereignisse.js:138`) |
+| **E2** | Verfälscht er die Karriere? | **nein** — Umleitung wie beim Training | **umgesetzt** (`abnahme.js:126`, `src/spiel/klassenraum.js`) |
+| **E3** | Überstimmt die Lehreransage den Bildungsstand? | **nein** — der Bildungsstand ist die Voreinstellung des Menschen | offen (mit Stufe B) |
+| **E4** | Wessen Hilfevorrat gilt? | Ticket-Stufe **ausdrücklich** setzen | **umgesetzt** (`Spiel.stufe.ticketStufeSetzen`) |
+| **E5** | Sieht die Lehrkraft, wie viel Hilfe nötig war? | **nein für 1.3** | entschieden, nicht gebaut |
+| **E6** | Live-Server (C) und QR (D) jetzt? | **später** — A und B tragen den Unterricht ohne Netz | offen |
+| **E7** | Sollzahlen nach dem Einbau | seinerzeit 461 + 41 ≈ 502 | überholt: heute **620/620** (70 Testdateien, 90 Module) |
+| **E8** | Beweist der Netzkennwert „alle haben denselben Auftrag"? | **nein** — über `def.id` vergleichen | **umgesetzt** (`tests/klassenraum-determinismus.test.js`) |
+
+**Und die Frage, die keine Technik ist — entschieden am 09.10.2026: Ein Klassenraum-Auftrag wird NICHT
+bewertet.** Keine Note, keine Punkte, keine Rangfolge, kein Vergleich zwischen Azubis; der Auftrag zählt
+ausschließlich für den Lernstand des Einzelnen. Damit entfällt die „eigene Auswertung statt eines Filters",
+die der Fahrplan als Alternative genannt hatte — **die Umleitung nach E2 ist die ganze Lösung.** Das
+ausgelieferte Verhalten 2.0.0 erfüllt diese Entscheidung bereits; wer später doch bewerten will, ändert
+einen Vertrag und nicht eine Einstellung.
 
 ## 13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag
 
