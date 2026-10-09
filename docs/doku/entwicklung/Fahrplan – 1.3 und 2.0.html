@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fahrplan 1.3 / 2.0 — was zu entscheiden ist · Netzwerk-Labor</title>
+<meta name="description" content="---.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Fahrplan 1.3 / 2.0 — was zu entscheiden ist</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-das-kurzurteil">1 · Das Kurzurteil</a></li>
+<li><a href="#2-was-die-funf-prufer-gefunden-haben-jeder-fund-mit-beleg">2 · Was die fünf Prüfer gefunden haben (jeder Fund mit Beleg)</a></li>
+<li style="margin-left:16px"><a href="#zwei-fehler-die-heute-im-code-stehen">Zwei Fehler, die heute im Code stehen</a></li>
+<li style="margin-left:16px"><a href="#ein-fehler-der-erst-im-klassenzimmer-auftritt">Ein Fehler, der erst im Klassenzimmer auftritt</a></li>
+<li style="margin-left:16px"><a href="#ein-fehler-den-die-spezifikation-selbst-nicht-kennt">Ein Fehler, den die Spezifikation selbst nicht kennt</a></li>
+<li style="margin-left:16px"><a href="#eine-stille-falle-bei-der-hilfe">Eine stille Falle bei der Hilfe</a></li>
+<li style="margin-left:16px"><a href="#was-im-stoff-fehlt-gemessen-nicht-geschatzt">Was im Stoff fehlt (gemessen, nicht geschätzt)</a></li>
+<li style="margin-left:16px"><a href="#und-die-kosten-ehrlich-nach-oben-korrigiert">Und die Kosten, ehrlich nach oben korrigiert</a></li>
+<li><a href="#3-wo-die-entwurfe-sich-widersprechen">3 · Wo die Entwürfe sich widersprechen</a></li>
+<li><a href="#4-was-in-keinem-entwurf-stand-und-jetzt-drin-ist">4 · Was in keinem Entwurf stand (und jetzt drin ist)</a></li>
+<li><a href="#5-was-ich-als-nachstes-bauen-wurde-in-dieser-reihenfolge">5 · Was ich als Nächstes bauen würde — in dieser Reihenfolge</a></li>
+<li><a href="#6-was-nicht-gebaut-werden-sollte">6 · Was nicht gebaut werden sollte</a></li>
+<li><a href="#7-was-nur-der-nutzer-entscheiden-kann">7 · Was nur der Nutzer entscheiden kann</a></li>
+<li><a href="#8-prufstand">8 · Prüfstand</a></li>
+</ul>
+</nav><hr>
+<p>tags: [FISI, Lernspiel, Netzwerk, Fahrplan, Entscheidung] erstellt: 2026-10-09 status: Entscheidungsvorlage — fünf unabhängige Expertenentwürfe zusammengeführt; <strong>nichts davon ist gebaut</strong></p>
+<hr>
+<h1 id="fahrplan-1-3-2-0-was-zu-entscheiden-ist">Fahrplan 1.3 / 2.0 — was zu entscheiden ist</h1>
+<blockquote>
+<p><strong>Was diese Datei ist.</strong> Am 09.10.2026 haben <strong>fünf unabhängige Prüfer</strong> je einen Entwurf geschrieben (zusammen 1 454 Zeilen, alle unter <span class="dk-tot" title="„.“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>docs/entwicklung/Entwurf – *.md</code></span>). Diese Datei führt sie zusammen: was gemessen ist, wo sie sich widersprechen, was <strong>nichts</strong> von ihnen abdeckt, und was ich als Nächstes bauen würde. <strong>Gebaut ist nichts davon</strong> — Stand bleibt Fassung 1.2.4, 461 Tests grün.</p>
+<p><strong>Die Einzelentwürfe</strong> (jeder mit eigenen Belegen, Messungen und „nicht geprüft"-Abschnitten): · <a href="../entwicklung/Entwurf%20%E2%80%93%20Klassenraum-Umsetzung.html">Klassenraum-Umsetzung</a> · <a href="../entwicklung/Entwurf%20%E2%80%93%20Tutor%20auf%20Sprachmodell.html">Tutor auf Sprachmodell</a> · <a href="../entwicklung/Entwurf%20%E2%80%93%20Mitnehmbarer%20Lernstand.html">Mitnehmbarer Lernstand</a> · <a href="../entwicklung/Entwurf%20%E2%80%93%20Inhaltsl%C3%BCcken.html">Inhaltslücken</a> · <a href="../entwicklung/Entwurf%20%E2%80%93%20Gegenpr%C3%BCfung%20und%20Lehrersicht.html">Gegenprüfung und Lehrersicht</a></p>
+</blockquote>
+<h2 id="1-das-kurzurteil">1 · Das Kurzurteil</h2>
+<p><strong>Die richtige nächste Fassung ist nicht der Klassenraum-Server und nicht der Tutor.</strong> Es ist die <strong>Übergabe</strong>: ein Rechner, viele Azubis. Ein Übergabeknopf („Neuer Azubi an diesem Rechner") und ein „Ergebnis kopieren" im Abschluss-Fenster. Ein halber Tag Arbeit, kein Server, kein Netz, keine Datenschutzfrage — und die <strong>Voraussetzung für jeden</strong> größeren Schritt.</p>
+<p>Der Grund ist unbequem einfach: <strong>ohne Übergabe ist das Spiel in der zweiten Unterrichtsstunde unbrauchbar.</strong> <code>src/ui/spiel.js:857</code> lädt beim Start den offenen Auftrag des Vorgängers; <code>Spiel.neu()</code> existiert (<code>zustand.js:174</code>), ruft aber keine Oberfläche auf. Der zweite Azubi am selben Rechner steckt im Auftrag des ersten — und niemand kann das im Spiel beheben.</p>
+<h2 id="2-was-die-funf-prufer-gefunden-haben-jeder-fund-mit-beleg">2 · Was die fünf Prüfer gefunden haben (jeder Fund mit Beleg)</h2>
+<h3 id="zwei-fehler-die-heute-im-code-stehen">Zwei Fehler, die heute im Code stehen</h3>
+<p><strong>2.1 Ein Lernstand wird still weggeworfen — auch bei der eigenen Fassung.</strong> <code>fremd/lernmotor.js:39</code> liest:</p>
+<pre><code class="sprache-js">let st = (() =&gt; { const s = store.get("lern", null); return s &amp;&amp; s.v === 1 ? s : leer(); })();</code></pre>
+<p><code>s.v === 1</code> ist streng und <strong>ohne Migration</strong>. Der Spielstand macht es richtig (<code>zustand.js:46</code> hebt an, <code>:126-134</code> lehnt mit Satz ab); der Lernmotor <strong>wirft weg</strong>. Wer je eine Fassung 2.0 baut, die den Lernstand anfasst, löscht den Fortschritt jedes Azubis — lautlos.</p>
+<p><strong>2.2 Und er hält ihn im Verschluss.</strong> <code>:40</code> <code>const save = () =&gt; store.set("lern", st)</code>. Wer einen importierten Lernstand <strong>nach</strong> dem Start in den Speicher legt, verliert ihn beim nächsten <code>save()</code> — der Motor schreibt sein altes Objekt zurück. <strong>Diese Abhängigkeit stand in keinem der vier Entwürfe</strong>; die Gegenprüfung hat sie gefunden.</p>
+<h3 id="ein-fehler-der-erst-im-klassenzimmer-auftritt">Ein Fehler, der erst im Klassenzimmer auftritt</h3>
+<p><strong>2.3 Ein Klassenraum-Auftrag verfälscht die Karriere.</strong> Für <code>quelle:"pruefung"</code> und <code>"raetsel"</code> gibt es <strong>elf</strong> Filterstellen (<code>woche.js:10,12,16</code> · <code>abzeichen.js:13</code> · <code>formen.js:43</code> · <code>erstestunde.js:26</code> · <code>tag.js:45</code> · <code>hub.js:54</code> · <code>verdacht.js:20</code> · <code>karriere.js:103</code> · <code>postfach.js:79</code> · <code>ui/spiel.js:69,475</code>). <code>abnahme.js:118</code> leitet <strong>nur</strong> <code>training</code> um. Für einen Klassenraum-Auftrag filtert <strong>nichts</strong> — <code>kundenakte.js:54</code> zählt sogar ganz ohne Quellfilter.</p>
+<p><strong>Gemessen an einem Lauf</strong> (<code>salon-01</code>, Seed 7, ohne Hilfe, Bildungsstand E): <strong>+33 € · +1 Ruf · <code>erledigt</code>-Eintrag · Wochenziel „ohne Hilfe" erfüllt · Kundensterne <code>[] → [5]</code> · Kundenampel „grün"</strong>. Zwanzig Azubis mit demselben Code = eine Woche Karriere gratis. Die Lösung ist <strong>symmetrisch zum Trainingsweg</strong> — eine Zeile neben <code>abnahme.js:118</code>; der Klassenraum-Zweig muss <code>Spiel.lernenNachAbnahme</code> dann selbst rufen, wie <code>Spiel.training.abnehmen</code> es tut (<code>training.js:230</code>), damit der Lernwert bleibt. <strong>Ohne diese Zeile darf der Klassenraum nicht in eine Klasse.</strong></p>
+<h3 id="ein-fehler-den-die-spezifikation-selbst-nicht-kennt">Ein Fehler, den die Spezifikation selbst nicht kennt</h3>
+<p><strong>2.4 Derselbe Code ergibt je Gerät einen anderen Auftrag.</strong> <code>postfach.js:79</code> baut den Flow nur ohne <code>ohneFlow</code>. Gemessen: derselbe Code (<code>lab.vlan</code>, Seed 5) ergibt je lokalem Flow-Stand <code>gen-lab.vlan-5</code> (2 Ziele) / <code>-geruest</code> (1 Ziel) / <code>-verwicklung</code>. Der Azubi bekäme einen anderen Auftrag als seine Nachbarin. <strong>Und schärfer als zunächst gedacht:</strong> Geräte und Kabelliste bleiben in allen drei Fällen <strong>gleich</strong> — der <strong>Netzkennwert</strong> (§ 2.7, der „Klassenraum-Abdruck") würde die Abweichung <strong>nicht bemerken</strong>. Es braucht darum einen <code>def.id</code>-Vergleich im Testplan (neuer Fall Nr. 41).</p>
+<h3 id="eine-stille-falle-bei-der-hilfe">Eine stille Falle bei der Hilfe</h3>
+<p><strong>2.5 Der Hilfevorrat ist für ein Klassenraum-Ticket still immer „azubi-6".</strong> Gemessen: <code>Spiel.stufe.konto(inst)</code> = <code>{frei:6, gesamt:6}</code> — auch wenn der Mensch auf „meister" steht (<code>stufensystem.js:95</code>, <code>alsTicketId</code> fällt auf <code>EINST_STANDARD</code> zurück). Sechs Sprossen landen alle auf <code>def.skills[0]</code>, <code>Spiel.hilfeAbzuege</code> bleibt leer. Die Ticket-Stufe muss ausdrücklich gesetzt werden — sonst ist <strong>derselbe Code je Gerät verschieden teuer</strong>.</p>
+<h3 id="was-im-stoff-fehlt-gemessen-nicht-geschatzt">Was im Stoff fehlt (gemessen, nicht geschätzt)</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Lücke</th><th>Zahl</th><th>Wirkung</th></tr></thead><tbody><tr><td><strong>Denkhilfen</strong></td><td><strong>67 von 92</strong> Minis ohne eigenen Anstoß, verteilt auf <strong>26 Fertigkeiten</strong>; nur <code>lab.ping</code> ist vollständig (6/6), <code>lab.gateway</code> hat <strong>0</strong> bei 5 Minis</td><td>greift in <strong>jeder</strong> Sitzung; ~3 Sitzungen</td></tr><tr><td><strong>Hilfe-Vorschläge</strong></td><td><strong>10 von 27</strong> Fertigkeiten haben <strong>keinen</strong>; <strong>Ebene 2 existiert 0×</strong> (die Leiter springt von „ansehen" direkt zu „ändern"); Firewall hat <strong>1</strong></td><td>greift bei jedem Fehler; 2–3 Sitzungen</td></tr><tr><td><strong>Lehrtexte</strong></td><td><strong>9 von 27</strong> Fertigkeiten ohne</td><td>Nachschlagen erklärt den Fehler nicht</td></tr><tr><td><strong>Drei gesperrte Trainingskarten</strong></td><td><code>lab.portsec</code>, <code>lab.stp</code>, <code>lab.storage</code> haben <strong>keinen Injektor</strong></td><td>sichtbarer Defekt: anklickbar, geht nie auf</td></tr><tr><td><strong>IPv6</strong></td><td><strong>0 Treffer</strong> im ganzen Quelltext</td><td>ganzes Prüfungsgebiet fehlt</td></tr><tr><td><strong>WLAN/Access Point</strong></td><td>nur Erzähltext (30 Treffer, alle Geschichte/Beratung)</td><td>ganzes Prüfungsgebiet fehlt</td></tr><tr><td><strong>Virtualisierung</strong></td><td><strong>ein Halbsatz</strong></td><td>Prüfungsthema fehlt</td></tr><tr><td><strong>Dünnste Fertigkeit</strong></td><td><code>lab.storage</code> — 2 Wiki-Abschnitte, 0 Lehrtexte, 1 Mini, 0 Denkhilfen, 0 Vorschläge, Training <strong>gesperrt</strong></td><td>und die vier dünnsten sind <strong>alle AP2</strong></td></tr></tbody></table></div>
+<h3 id="und-die-kosten-ehrlich-nach-oben-korrigiert">Und die Kosten, ehrlich nach oben korrigiert</h3>
+<p>Die Spezifikation veranschlagte den Klassenraum mit <strong>4,5–5,5 Sitzungen</strong>. Nach der Prüfung sind es <strong>8–11,5</strong> — Stufe A allein „≈ 1" veranschlagt, gebraucht <strong>2–3</strong>; dazu zwei Sitzungen, die in <strong>keiner</strong> Liste der Spezifikation stehen (Nachziehen E, Übergabe/Fassung F). Und der Encoder ist mit „0,5 Sitzung" <strong>um Faktor 2–3</strong> zu klein geschätzt (die Proben im Repo: 1 318 und 1 977 Zeilen).</p>
+<h2 id="3-wo-die-entwurfe-sich-widersprechen">3 · Wo die Entwürfe sich widersprechen</h2>
+<ul><li><strong>Zwei Codes — Doppelarbeit?</strong> <strong>Nein.</strong> Der Vorführ-Code <code>E-XXXX-XXX</code> (25 Bit, für den Beamer) und ein Lernstand-Code <code>L-…</code> sind sauber getrennt: die 25 Bit fassen nur <strong>2–4</strong> Fertigkeiten, nicht 27. Ein gemeinsamer Code wäre 56 Zeichen lang und damit für den Vorführzweck unbrauchbar. Empfehlung: **ein Codec, zwei Nutzlasten** — Alphabet, Prüfsumme und die eingefrorene Fertigkeitstabelle werden geteilt. <strong>Die Naht</strong>, die vor Stufe A in die Spezifikation gehört: <code>ergebnisEintragen(code)</code> ist für <strong>einen</strong> Code gebaut, der Lernstand-Entwurf braucht <strong>zwei</strong> Felder je Platz.</li><li><strong>Der Tutor gehört hinten angestellt.</strong> Sein Hauptbeleg sind die **67 Fälle, in denen die Tabelle versagt**. Stehen die 67 Texte, verliert er seinen Beleg — und die Prüfer haben gezeigt, dass er <strong>denselben</strong> Mangel behebt, den die Denkhilfen schon adressieren.</li><li><strong>Reihenfolge klar:</strong> erst Inhaltslücken (Punkte 0–3, ~7 Sitzungen, kein Vertragsrisiko), dann Klassenraum (8–11,5). Zusammen 15–18,5 Sitzungen — nicht in eine Woche.</li></ul>
+<h2 id="4-was-in-keinem-entwurf-stand-und-jetzt-drin-ist">4 · Was in keinem Entwurf stand (und jetzt drin ist)</h2>
+<ol><li><strong>Die Lernmotor-Falle</strong> (§ 2.2) — gefunden von der Gegenprüfung.</li><li><strong>Die Übergabe an den nächsten Azubi</strong> (§ 1) — der Kernbefund der Lehrersicht, gegen alle vier geprüft.</li><li><strong>Die Differenzierung fehlt.</strong> Das <a href="../entwicklung/Konzept%20%E2%80%93%20Lernplattform%20f%C3%BCr%20Betriebe%20und%20Schulen.html">Konzept – Lernplattform</a> nennt sie (§ 108, 261), die Spezifikation kennt nur <strong>eine</strong> Sitzung für alle: 20 Azubis, alle derselbe Auftrag. Für starke und schwache Azubis im selben Raum ist das zu wenig.</li><li><strong>Drei Entwürfe nannten drei Testzahlen</strong> (434 / 395 / keine) — heute sind es <strong>461</strong>. Eine Messung vor dem Bau; im Projekt ist schon mehrfach gegen veraltete Zahlen gebaut worden.</li></ol>
+<h2 id="5-was-ich-als-nachstes-bauen-wurde-in-dieser-reihenfolge">5 · Was ich als Nächstes bauen würde — in dieser Reihenfolge</h2>
+<div class="dk-tabelle"><table><thead><tr><th></th><th>Schritt</th><th>Aufwand</th><th>Warum zuerst</th></tr></thead><tbody><tr><td><strong>0</strong></td><td><strong>Übergabe + Ergebnis zurückgeben</strong> („Neuer Azubi", „Ergebnis kopieren")</td><td><strong>0,5–1 Sitzung</strong></td><td>Ohne das ist das Spiel ab der zweiten Stunde unbenutzbar; kein Server, kein Netz, keine Datenschutzfrage. Die Voraussetzung für alles Weitere.</td></tr><tr><td><strong>1</strong></td><td><strong>Karriere-Filter für Klassenraum</strong> (§ 2.3) — eine Zeile + Test</td><td><strong>0,5 Sitzung</strong></td><td>Eine Zeile verhindert, dass 20 Azubis sich eine Woche Fortschritt schenken. Muss <strong>vor</strong> dem ersten echten Unterrichtseinsatz stehen.</td></tr><tr><td><strong>2</strong></td><td><strong>Die 67 Denkhilfen + Hilfe-Vorschläge</strong> (Ebene 2, Firewall, Symptom-Einstieg)</td><td><strong>~7 Sitzungen</strong></td><td>Greift in jeder Sitzung, kein Vertragsrisiko, kein Sim-Risiko. Der größte Nutzen je Sitzung.</td></tr><tr><td><strong>3</strong></td><td><strong>Die drei gesperrten Trainingskarten</strong> (Injektoren für <code>portsec</code>, <code>stp</code>, <code>storage</code>)</td><td><strong>1–2 Sitzungen</strong></td><td>Ein sichtbarer Defekt: die Karten sind anklickbar und gehen nie auf.</td></tr><tr><td><strong>4</strong></td><td><strong>Lernmotor-Falle entschärfen</strong> (§ 2.1/2.2) — Migration statt Wegwerfen, Import vor dem ersten Lesen</td><td><strong>0,5 Sitzung</strong></td><td>Klein, aber es ist die Stelle, an der eine 2.0 den Fortschritt aller löschen würde.</td></tr><tr><td><strong>5</strong></td><td><strong>Klassenraum</strong> — Stufen A/B/E/F, ohne QR und ohne Server-in-der-<code>.exe</code></td><td><strong>6–9 Sitzungen</strong></td><td>Erst jetzt: es braucht die Entscheidungen E1–E8 und die Karriere-Regel aus Schritt 1.</td></tr><tr><td><strong>6</strong></td><td><strong>Inhaltliche Breite</strong>: IPv6 → WLAN/AP → Virtualisierung</td><td><strong>je 3–6 Sitzungen</strong></td><td>Deckt ganze Prüfungsgebiete ab, braucht aber vorher Vertragsarbeit in <a href="../Architektur.html">Architektur.md</a>.</td></tr><tr><td><strong>7</strong></td><td><strong>Tutor auf Sprachmodell</strong> — nur als Zugabe, nur nach B1–B4</td><td><strong>offen</strong></td><td>Sein Hauptbeleg („67 Fälle") ist nach Schritt 2 weg. Vertagen.</td></tr></tbody></table></div>
+<h2 id="6-was-nicht-gebaut-werden-sollte">6 · Was <strong>nicht</strong> gebaut werden sollte</h2>
+<ul><li><strong>Kein Signaturschutz für Codes.</strong> Eine 64-Byte-Signatur macht aus 29 Zeichen <strong>132</strong>; das Geheimnis läge im offenen Repositorium, und eine Serverprüfung widerspricht dem Vertrag „ein Code, kein Server, kein Konto". Prüfsumme (Tippfehler), Plausibilität (markieren statt ablehnen) und Ehrlichkeit genügen für ein Lernspiel <strong>ohne Noten</strong>.</li><li><strong>Kein Tutor dort, wo die Lösung ein einzelner Fakt ist</strong> (Mini-Tickets, Prüfungsfragen). Die Prüfkette fängt die <strong>wörtliche</strong> Lösung sicher ab — eine <strong>Paraphrase</strong> besteht jede Textprüfung. Dagegen hilft kein Filter, nur diese Regel.</li><li><strong>Kein lokales Modell</strong> in der 2,5-MB-Einzeldatei. Auf dem Papier plausibel, <strong>nicht gemessen</strong>, und die Gewichte passen nicht zur Datei.</li><li><strong>Nichts, was Determinismus, Offline-Betrieb oder die 461 Tests aufgibt.</strong> Eine 2.0, die davon etwas verliert, ist ein Rückschritt mit größerer Nummer.</li></ul>
+<h2 id="7-was-nur-der-nutzer-entscheiden-kann">7 · Was nur der Nutzer entscheiden kann</h2>
+<p>Die acht Entscheidungen aus <a href="../entwicklung/Entwurf%20%E2%80%93%20Klassenraum-Umsetzung.html">§ 8 des Klassenraum-Entwurfs</a>, die wichtigsten vier:</p>
+<div class="dk-tabelle"><table><thead><tr><th></th><th>Frage</th><th>Empfehlung der Prüfer</th></tr></thead><tbody><tr><td><strong>E1</strong></td><td>Zählt ein Klassenraum-Ticket im Postfach und im Offen-Zähler mit?</td><td><strong>Filtern wie <code>training</code></strong> — sonst blockiert es seine eigene <code>ticketId</code> (<code>postfach.js:156</code>, gemessen)</td></tr><tr><td><strong>E2</strong></td><td>Verfälscht der Klassenraum die Karriere?</td><td><strong>Umleiten</strong> — eine Zeile neben <code>abnahme.js:118</code>, Lernwert über <code>lernenNachAbnahme</code> erhalten</td></tr><tr><td><strong>E3</strong></td><td>Überstimmt die Lehreransage den Bildungsstand?</td><td><strong>Nein.</strong> Der Bildungsstand ist die Voreinstellung des Menschen (Vertrag § 1); höchstens anzeigen</td></tr><tr><td><strong>E4</strong></td><td>Wessen Hilfevorrat gilt?</td><td><strong>Der des Schülers auf seinem Gerät</strong> — aber die Ticket-Stufe muss ausdrücklich gesetzt werden, sonst ist derselbe Code je Gerät verschieden teuer</td></tr></tbody></table></div>
+<p><strong>Und eine Frage, die keine Technik ist:</strong> Ob ein Klassenraum-Auftrag <strong>bewertet</strong> werden soll. Wenn ja, braucht es eine eigene Auswertung statt eines Filters — und dann stellt sich die Frage nach Noten, die dieses Spiel bisher bewusst nicht stellt.</p>
+<h2 id="8-prufstand">8 · Prüfstand</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Prüfung</th><th>Ergebnis</th></tr></thead><tbody><tr><td><code>node tests/run.js</code></td><td><strong>461/461 grün</strong> (53 Testdateien, 83 Module, exit 0, 0 übersprungen)</td></tr><tr><td><code>python tools/ethos.py</code></td><td>GRÜN · <code>python tools/klassen.py</code> <strong>0</strong></td></tr><tr><td><code>node tools/sim-stand.js</code></td><td>Simulation unverändert</td></tr><tr><td><code>python tools/seite.py --pruefen</code></td><td><strong>GRÜN</strong> — 34 Dokumente, kein toter Verweis</td></tr><tr><td><code>python bauen.py</code></td><td>118 Module → <code>web/index.html</code> (Version 1.2.4)</td></tr><tr><td><code>cargo test --release</code> in <code>tools/klassenraum</code></td><td><strong>10/10</strong> · <code>C-qr-rust</code> <strong>5/5</strong> · <code>klassenraum.exe</code> 322 560 B</td></tr></tbody></table></div>
+<p><strong>Nicht geprüft — ehrlich.</strong> Kein Browser, keine Bildschirmfotos, <strong>keine echte Unterrichtsstunde</strong>. Die Codec-Zahlen der Spezifikation wurden nicht nachgerechnet. Die HTTP-Probe des Rust-Servers lief in dieser Umgebung <strong>nicht durch</strong> — der erste neue Ergebnis-POST antwortet <strong>507</strong> statt 201, weil der Server seine Ablagedatei nicht schreiben kann (Sandbox-Schreibrecht vermutet, <strong>kein</strong> Serverfehler nachgewiesen; nach dem Lauf waren keine <code>klassenraum</code>-Prozesse und die Ports frei). Der Sollwert 20/20 ist erst außerhalb dieser Sandbox belegbar. <strong>Der Unterrichtserfolg ist nicht messbar — nur die Lücken sind belegt.</strong></p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

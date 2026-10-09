@@ -55,6 +55,20 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`entwicklung/Review – Betrieb-Werkzeuge.md`](<entwicklung/Review – Betrieb-Werkzeuge.md>) | Die Prüfwerkzeuge selbst: welches misst was, und der Befund, dass der Rauchtest eine feste Ansichtsliste führte — die neue Ansicht fehlte darin. |
 | [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31/§ 32 | Der Bau der Hilfestellung und die Auslieferung 1.2.4 — inklusive dem, was bewusst **nicht** gebaut wurde. |
 
+## Fahrplan 1.3 / 2.0 — Entscheidungsvorlage (09.10.2026)
+
+Fünf unabhängige Prüfer haben je einen Entwurf geschrieben (1 454 Zeilen). **Gebaut ist nichts davon** —
+der Stand bleibt Fassung 1.2.4. Die Synthese ist der Einstieg, die fünf Entwürfe sind die Belege.
+
+| Datei | Wofür |
+|---|---|
+| [`entwicklung/Fahrplan – 1.3 und 2.0.md`](<entwicklung/Fahrplan – 1.3 und 2.0.md>) | **Hier anfangen.** Was die fünf Prüfer fanden, wo sie sich widersprechen, was keiner abdeckt, die empfohlene Reihenfolge (Übergabe → Karriere-Filter → 67 Denkhilfen → …) und die acht Entscheidungen, die nur der Nutzer treffen kann. |
+| [`entwicklung/Entwurf – Klassenraum-Umsetzung.md`](<entwicklung/Entwurf – Klassenraum-Umsetzung.md>) | Die 286-KB-Spezifikation gegen den heutigen Code gemessen: was vorhanden ist, was fehlt, die 40 Testfälle, sechs Widersprüche. **Aufwand ehrlich nach oben korrigiert: 8–11,5 Sitzungen statt 4,5–5,5.** |
+| [`entwicklung/Entwurf – Gegenprüfung und Lehrersicht.md`](<entwicklung/Entwurf – Gegenprüfung und Lehrersicht.md>) | Der fünfte Blickwinkel: die 90 Minuten einer Unterrichtsstunde Minute für Minute, drei belegte Abbruchstellen — und die zwei gefundenen Fehler, die in **keinem** anderen Entwurf stehen. |
+| [`entwicklung/Entwurf – Mitnehmbarer Lernstand.md`](<entwicklung/Entwurf – Mitnehmbarer Lernstand.md>) | Was ein Code tragen kann: gemessene Nutzlastgrößen, warum es **zwei** Codes braucht, und die Falle in `fremd/lernmotor.js:39`. |
+| [`entwicklung/Entwurf – Tutor auf Sprachmodell.md`](<entwicklung/Entwurf – Tutor auf Sprachmodell.md>) | Machbarkeit und **Risiko** eines Sprachmodells als Tutor: Urteil „lohnt unter Bedingungen", die Prüfkette gegen das Lösungsverbot, Offline-Bruch, Datenschutz. |
+| [`entwicklung/Entwurf – Inhaltslücken.md`](<entwicklung/Entwurf – Inhaltslücken.md>) | Was der Stoff nicht hergibt: 67 Minis ohne Denkanstoß, 10 Fertigkeiten ohne Hilfe-Vorschlag, IPv6 = 0 Treffer, drei gesperrte Trainingskarten. |
+
 ## Wie dieses Verzeichnis aufgeräumt wurde
 
 Bis zum 06.10.2026 lagen zwölf Notizen im Wurzelverzeichnis; ein Besucher sah sie vor dem

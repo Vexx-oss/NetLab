@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf – Mitnehmbarer Lernstand · Netzwerk-Labor</title>
+<meta name="description" content="---.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Entwurf – Mitnehmbarer Lernstand</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#0-kurzfassung">0 · Kurzfassung</a></li>
+<li><a href="#1-was-ist-uberhaupt-mitzunehmen">1 · Was ist überhaupt mitzunehmen?</a></li>
+<li style="margin-left:16px"><a href="#1-1-gemessene-gro-en-ein-gefullter-stand-echter-spielweg">1.1 Gemessene Größen (ein gefüllter Stand, echter Spielweg)</a></li>
+<li style="margin-left:16px"><a href="#1-2-fortschritt-oder-momentaufnahme">1.2 Fortschritt oder Momentaufnahme?</a></li>
+<li><a href="#2-ein-code-oder-zwei">2 · Ein Code oder zwei?</a></li>
+<li style="margin-left:16px"><a href="#2-1-der-vorhandene-ergebnis-code">2.1 Der vorhandene Ergebnis-Code</a></li>
+<li style="margin-left:16px"><a href="#2-2-rechnung-warum-das-nicht-reicht">2.2 Rechnung: warum das nicht reicht</a></li>
+<li style="margin-left:16px"><a href="#2-3-empfehlung-zwei-codes-ein-codec">2.3 Empfehlung: zwei Codes, ein Codec</a></li>
+<li><a href="#3-der-lernstand-code">3 · Der Lernstand-Code</a></li>
+<li style="margin-left:16px"><a href="#3-1-nutzlast-layout-vorschlag">3.1 Nutzlast-Layout (Vorschlag)</a></li>
+<li style="margin-left:16px"><a href="#3-2-langen-gerechnet-27-fertigkeiten-prufsumme-10-bit-eingerechnet">3.2 Längen (gerechnet, 27 Fertigkeiten, Prüfsumme 10 Bit eingerechnet)</a></li>
+<li style="margin-left:16px"><a href="#3-3-fassungen-v-3-heute-v-4-morgen">3.3 Fassungen: v:3 heute, v:4 morgen</a></li>
+<li style="margin-left:16px"><a href="#3-4-tippfehler">3.4 Tippfehler</a></li>
+<li><a href="#4-missbrauch-manipulation-grenzen">4 · Missbrauch, Manipulation, Grenzen</a></li>
+<li><a href="#5-der-lehrerfall-ohne-server">5 · Der Lehrerfall ohne Server</a></li>
+<li style="margin-left:16px"><a href="#5-1-die-haltung-der-spezifikation">5.1 Die Haltung der Spezifikation</a></li>
+<li style="margin-left:16px"><a href="#5-2-die-kleinste-losung-ohne-server">5.2 Die kleinste Lösung (ohne Server)</a></li>
+<li style="margin-left:16px"><a href="#5-3-qr-spater-nicht-zuerst">5.3 QR (später, nicht zuerst)</a></li>
+<li><a href="#6-aufwand-und-reihenfolge">6 · Aufwand und Reihenfolge</a></li>
+<li><a href="#7-grenzen-dieses-entwurfs-ehrlich">7 · Grenzen dieses Entwurfs (ehrlich)</a></li>
+</ul>
+</nav><h1 id="entwurf-mitnehmbarer-lernstand">Entwurf – Mitnehmbarer Lernstand</h1>
+<blockquote>
+<p><strong>Auftrag (E3).</strong> Im Klassenzimmer ist der Spielstand eine Browser-Ablage: Rechner gewechselt = Fortschritt weg. Dieser Text prüft, ob ein <strong>mitnehmbarer Lernstand-Code</strong> das löst, und entwirft ihn. <strong>Kein Code, kein Umbau.</strong> Alle Zahlen sind in dieser Sitzung gemessen (Probe über <code>node</code> stdin: echte headless-Module, <code>Spiel._trocken = true</code>, Node v24.21.0); fremde Messungen sind als solche gekennzeichnet. Nicht gemessene Punkte stehen ausdrücklich als „nicht gemessen“ da.</p>
+</blockquote>
+<hr>
+<h2 id="0-kurzfassung">0 · Kurzfassung</h2>
+<ol><li><strong>Es braucht zwei Codes.</strong> Der vorhandene Ergebnis-Code <code>E-XXXX-XXX</code> trägt <strong>25 Bit</strong> Nutzlast (Spezifikation § 2.2) — darin haben <strong>2 bis 4 Fertigkeiten</strong> Platz, nicht 27. Ein Lernstand-Code ist außerdem ein anderer Zweck: der Ergebnis-Code ist zum <strong>Vorführen am Beamer</strong> gedacht, der Lernstand-Code zum <strong>Mitnehmen über einen Rechnerwechsel</strong>.</li><li><strong>Ein Codec, zwei Nutzlasten.</strong> Alphabet (32 Zeichen = 5 Bit), Prüfsumme (mod 31/mod 32), Kanonisierung und die eingefrorene Fertigkeits-Tabelle werden <strong>wiederverwendet</strong>; neu ist nur das Nutzlast-Layout und das Präfix <code>L-</code>. Zwei Implementierungen wären die teure Variante, zwei Layouts sind die billige.</li><li><strong>Vorgeschlagene Länge: 8 bis 40 Zeichen, je nach Lernstand.</strong> Belegtmaske (27 Bit) + 6 Bit je <em>angefasster</em> Fertigkeit (Kasten 3 Bit, Fälligkeit 3 Bit) + 10 Bit Prüfsumme → <strong>8 Zeichen</strong> bei leerem Stand, <strong>22</strong> bei 12 Fertigkeiten, <strong>40</strong> bei allen 27 (gemessen: 27 Fertigkeiten sind heute die Obergrenze).</li><li><strong>Kein Signatur-Schutz.</strong> Ein Lernspiel ohne Noten braucht keine Kryptografie; eine Signatur kostet <strong>+103 Zeichen</strong> (64-Byte-Signatur bei 5 Bit/Zeichen) und schützt nichts, was ein Lehrer nicht sowieso durch Hinsehen prüft. Prüfsumme (Tippfehler) und Plausibilität (Kästen fallen nicht ohne Fehler) genügen.</li><li><strong>Der Datei-Export löst den Rechnerwechsel schon</strong> (<code>src/ui/karriere.js:442-446</code>, gemessen <strong>57.577 Zeichen</strong> für einen gefüllten Stand). Der Code ist nicht die Rettung, sondern der <strong>kleine Weg</strong> für den Fall „kein Dateisystem, nur eine Tafel und ein Stift“.</li></ol>
+<hr>
+<h2 id="1-was-ist-uberhaupt-mitzunehmen">1 · Was ist überhaupt mitzunehmen?</h2>
+<h3 id="1-1-gemessene-gro-en-ein-gefullter-stand-echter-spielweg">1.1 Gemessene Größen (ein gefüllter Stand, echter Spielweg)</h3>
+<p>Gefüllt wurde über den echten Weg: <code>Spiel.laden()</code> → <code>Spiel.postfachAuffuellen()</code> → 8 Aufträge öffnen, lösen, abnehmen, abschließen; danach jede der 27 Fertigkeiten 4× über <code>L.ueben</code> geübt und 12 Fehler über <code>L.fehler</code> eingetragen. <code>Spiel._trocken = true</code> (keine Schreibzugriffe).</p>
+<div class="dk-tabelle"><table><thead><tr><th>Speicher</th><th>Schlüssel</th><th>leer</th><th>gefüllt</th><th>Anteil</th></tr></thead><tbody><tr><td>Spielstand <code>Spiel.st</code></td><td><code>labor</code></td><td>304</td><td><strong>27.673</strong></td><td>davon <code>postfach</code> <strong>25.509 = 92 %</strong></td></tr><tr><td>Lernstand <code>L.st</code></td><td><code>lern</code></td><td>60</td><td><strong>3.040</strong></td><td>davon <code>units</code> 2.149 · <code>fehler</code> 819</td></tr><tr><td>Einstellungen</td><td><code>einst</code></td><td>167 (<code>EINST_STANDARD</code>)</td><td>167</td><td>–</td></tr><tr><td><strong>Exportdatei</strong> (so, wie <code>exportieren</code> sie schreibt)</td><td>–</td><td>–</td><td><strong>57.577 Zeichen (≈ 56 KB)</strong></td><td>2 Leerzeichen Einrückung</td></tr></tbody></table></div>
+<p><strong>Obergrenzen</strong> (künstlich gefüllt, um das Wachstum zu zeigen):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Teil</th><th>Füllung</th><th>Größe</th></tr></thead><tbody><tr><td><code>L.st.log</code></td><td>3000 Einträge (Deckel laut Lernmotor)</td><td><strong>157.001</strong></td></tr><tr><td><code>L.st.fehler</code></td><td>200 Einträge (Deckel)</td><td>19.491</td></tr><tr><td><code>L.st.tage</code></td><td>200 Tage</td><td>3.001</td></tr><tr><td><code>L.st</code> gesamt</td><td>worst case</td><td><strong>179.547</strong></td></tr></tbody></table></div>
+<p><strong>Wachstum je Einheit:</strong> 12.740 Zeichen je Postfach-Instanz (das <strong>generierte Netz</strong> steckt mit drin), 136 Zeichen je erledigtem Ticket, 79,6 Zeichen je angefasster Fertigkeit.</p>
+<h3 id="1-2-fortschritt-oder-momentaufnahme">1.2 Fortschritt oder Momentaufnahme?</h3>
+<p><code>Spiel.st</code> hat <strong>28 Felder</strong> (gemessen): <code>abzeichen, aktiv, angebot, buch, dex, einstieg, ereignisse, erledigt, ersteStunde, euro, flow, karriere, kunden, kundenakte, naechsteIid, playbooks, post, postfach, ruf, schulden, stufe, tag, tagebuch, tagesraetsel, training, v, werkzeuge, zuletzt</code>.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Kategorie</th><th>Felder</th><th>Mitnehmen?</th></tr></thead><tbody><tr><td><strong>Fortschritt</strong> (klein, personengebunden)</td><td><code>euro</code>, <code>ruf</code>, <code>stufe</code>, <code>kunden</code>, <code>playbooks</code>, <code>training</code>, <code>abzeichen</code>, <code>dex</code>, <code>karriere</code>, <code>werkzeuge</code></td><td><strong>ja</strong> — zusammen wenige hundert Zeichen</td></tr><tr><td><strong>Momentaufnahme</strong> (groß, austauschbar)</td><td><code>postfach</code> (92 %!), <code>aktiv</code>, <code>angebot</code>, <code>post</code></td><td><strong>nein</strong> — die Aufträge werden deterministisch neu erzeugt (§ 2.1 der Spezifikation)</td></tr><tr><td><strong>Historie</strong> (wächst monoton)</td><td><code>erledigt</code>, <code>buch</code>, <code>tagebuch</code>, <code>ereignisse</code>, <code>flow</code>, <code>ersteStunde</code>, <code>tagesraetsel</code>, <code>schulden</code></td><td><strong>nein</strong> für den Code, <strong>ja</strong> für die Datei</td></tr><tr><td><strong>Technik</strong></td><td><code>v</code>, <code>naechsteIid</code>, <code>zuletzt</code></td><td><code>v</code> ja (Fassung), Rest nein</td></tr></tbody></table></div>
+<p><strong>Lernstand <code>L.st</code>:</strong> <code>units</code> (Kästen, Fälligkeiten, richtig/falsch) ist der Kern. <code>tage</code> trägt die Serie, <code>fehler</code> das Fehlerheft (gedeckelt), <code>tests</code> die Prüfungsnotizen. <strong><code>log</code> ist Ballast</strong>: bis zu 3000 Einträge/157 KB, nur für die Behalten-Quote nötig — ein Code darf ihn nicht tragen.</p>
+<p><strong>Kleinste sinnvolle Nutzlast für den Lernstand:</strong> <code>{id: [box, due]}</code> für 27 Fertigkeiten = <strong>772 Zeichen</strong> (gemessen), Beispiel <code>["lab.link",[1,"2026-10-10"]]</code>. Der Löwenanteil ist das <strong>Datum</strong> (10 Zeichen je Fertigkeit) — im Code wird daraus ein <strong>Fälligkeits-Korb</strong> (3 Bit), nicht ein Datum.</p>
+<p><strong>Behauptung:</strong> Der Lernstand ist der einzige Teil, der im Klassenzimmer wirklich fehlt. <strong>Beleg:</strong> 92 % des Spielstands sind Momentaufnahme; die Datei (57.577 Zeichen) existiert schon als Weg. <strong>Aufwand:</strong> 0 (nur Auswahl-Entscheidung). <strong>Risiko:</strong> klein — wer den ganzen Karrierestand mitnehmen will, braucht weiterhin die Datei (das ist in Ordnung und steht so in der Oberfläche, <code>karriere.js:439</code>).</p>
+<hr>
+<h2 id="2-ein-code-oder-zwei">2 · Ein Code oder zwei?</h2>
+<h3 id="2-1-der-vorhandene-ergebnis-code">2.1 Der vorhandene Ergebnis-Code</h3>
+<pre><code>gedruckt   E-XXXX-XXX      immer genau 10 Zeichen
+Nutzlast   25 Bit: sitzung 5 | platz 5 | sterne 4 | versuche 2 | dauer 9
+Prüfsumme  10 Bit: C1 = (1v₀+2v₁+3v₂+4v₃) mod 31, C2 = (1v₀+3v₁+5v₂+7v₃) mod 32</code></pre>
+<p>(Beleg: <code>docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md</code> § 2.2; Round-Trip dort über 335.168 Fälle verlustfrei.)</p>
+<h3 id="2-2-rechnung-warum-das-nicht-reicht">2.2 Rechnung: warum das nicht reicht</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Nutzlast je Fertigkeit</th><th>Fertigkeiten in 25 Bit</th></tr></thead><tbody><tr><td>5 Bit (nur Kasten-Stufe)</td><td><strong>5</strong></td></tr><tr><td>6 Bit (Kasten 3 + Fälligkeit 3)</td><td><strong>4</strong></td></tr><tr><td>7 Bit</td><td><strong>3</strong></td></tr><tr><td>9 Bit (Kasten 3 + Fälligkeit 6)</td><td><strong>2</strong></td></tr></tbody></table></div>
+<p>Heute gibt es <strong>27 Fertigkeiten</strong> (gemessen: <code>DATEN.skills.length = 27</code> und <code>L.SKILLS</code> nach <code>Spiel.laden()</code> = <strong>27</strong>). In die 25 Bit passen also <strong>2 bis 5</strong> — der Faktor zur Wirklichkeit ist 5 bis 13.</p>
+<p><strong>Beides in einen Code</strong> hieße: 25 Bit Ergebnis + 189 Bit Lernstand (Variante aus § 3) + 10 Bit Prüfsumme = <strong>56 Zeichen</strong>. Damit wäre der Vorführzweck zerstört: der Ergebnis-Code soll <strong>angesagt</strong> und in Sekunden abgetippt werden (10 Zeichen), der Lernstand-Code darf länger sein, weil er <strong>selten</strong> und in Ruhe übertragen wird.</p>
+<h3 id="2-3-empfehlung-zwei-codes-ein-codec">2.3 Empfehlung: zwei Codes, ein Codec</h3>
+<div class="dk-tabelle"><table><thead><tr><th></th><th>Ergebnis-Code</th><th>Lernstand-Code (neu)</th></tr></thead><tbody><tr><td>Präfix</td><td><code>E-</code></td><td><code>L-</code></td></tr><tr><td>Zweck</td><td>Vorführen/Vergleichen am Beamer, Sammlung je Sitzung</td><td>Mitnehmen des Lernstands auf einen anderen Rechner</td></tr><tr><td>Nutzlast</td><td>25 Bit (unverändert)</td><td>27 Bit Maske + 6 Bit je befasster Fertigkeit</td></tr><tr><td>Länge</td><td>10 Zeichen (unverändert)</td><td>8–40 Zeichen (§ 3)</td></tr><tr><td>Wer tippt</td><td>Lehrkraft</td><td>Schüler/in, einmal je Gerätewechsel</td></tr></tbody></table></div>
+<p><strong>Was die Dopplung kostet</strong> (Aufwand, nicht Laufzeit):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Posten</th><th>Aufwand</th><th>Anmerkung</th></tr></thead><tbody><tr><td>Alphabet, Prüfsummen-Polynome, Kanonisierung</td><td><strong>0</strong></td><td>aus dem vorhandenen Codec übernommen</td></tr><tr><td>Fertigkeits-Index-Tabelle (27 IDs)</td><td><strong>0</strong></td><td>dieselbe eingefrorene Tabelle wie in § 2.4 der Spezifikation</td></tr><tr><td>Neues Nutzlast-Layout + Encoder/Decoder</td><td>0,5 Sitzung</td><td>reine Bitarithmetik, in Node prüfbar</td></tr><tr><td>Oberfläche (Code zeigen/eintippen, Vorschau, Sicherung)</td><td>0,5–1 Sitzung</td><td>Muster vorhanden (<code>Spiel.klassenraum</code> + Einstellungen „Spielstand“)</td></tr><tr><td>Tests (Round-Trip, Tippfehler, Fassungen, Grenzen)</td><td>0,5 Sitzung</td><td>Vorbild: 40 Fälle im Klassenraum-Testplan</td></tr></tbody></table></div>
+<p><strong>Risiko der Dopplung:</strong> zwei Formate müssen erklärt werden. Gegenmittel: <strong>ein</strong> Ort in den Einstellungen, der beide zeigt („Zeigen (Beamer)“ / „Mitnehmen“), und <strong>ein</strong> Hilfetext, der sagt, wofür welcher Code ist.</p>
+<hr>
+<h2 id="3-der-lernstand-code">3 · Der Lernstand-Code</h2>
+<h3 id="3-1-nutzlast-layout-vorschlag">3.1 Nutzlast-Layout (Vorschlag)</h3>
+<pre><code>Alphabet   ABCDEFGHJKLMNPQRSTUVWXYZ23456789         (32 Zeichen = 5 Bit, kein I, O, 0, 1)
+gedruckt   L-XXXX-XXXX-…                            Vierergruppen, immer mit Präfix
+Nutzlast   v 3 | platz 5 | 27-Bit-Belegtmaske | je belegter Fertigkeit 6 Bit (Kasten 3 | Fälligkeit 3)
+Prüfsumme  10 Bit wie beim Auftrags-/Ergebnis-Code (mod 31, mod 32)</code></pre>
+<ul><li><code>v</code> = Fassung des Lernstand-Formats (nicht des Spielstands, § 3.3).</li><li><code>platz</code> = Sitzplatz 0..31 (dieselbe anonyme Kennung wie im Ergebnis-Code; <strong>kein Klarname möglich</strong>).</li><li><strong>Belegtmaske</strong> = eine Fertigkeit, die nie angefasst wurde, braucht keine 6 Bit. Der Code wächst mit dem Lernstand — das ist gewollt: ein Anfänger tippt 8 Zeichen, ein Fortgeschrittener 22–40.</li><li><code>Kasten</code> 0..5 (Lernmotor-Deckel) → 3 Bit. <code>Fälligkeit</code> als Korb: 0 = heute/überfällig, 1 = 1–2 Tage, 2 = 3–6, 3 = 7–13, 4 = 14+, 5 = „später/30 Tage“, 6/7 frei → 3 Bit. <strong>Genauigkeit geht verloren</strong> (kein exaktes Datum) — für „wie weit ist die Klasse“ reicht der Korb.</li></ul>
+<h3 id="3-2-langen-gerechnet-27-fertigkeiten-prufsumme-10-bit-eingerechnet">3.2 Längen (gerechnet, 27 Fertigkeiten, Prüfsumme 10 Bit eingerechnet)</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Variante</th><th>Nutzlast</th><th>Zeichen</th><th>gedruckt</th></tr></thead><tbody><tr><td>nur Kästen, fest (3 Bit × 27)</td><td>81 Bit</td><td><strong>19</strong></td><td><code>L-XXXX-XXXX-XXXX-XXXX-XXX</code></td></tr><tr><td>Maske + 4 Bit (Kastenstufe 2 + Fälligkeitsstufe 2)</td><td>135 Bit</td><td><strong>29</strong></td><td>8 Gruppen</td></tr><tr><td><strong>Maske + 6 Bit (empfohlen)</strong> leer → 12 → 27 belegt</td><td>27 → 99 → 189 Bit</td><td><strong>8 → 22 → 40</strong></td><td>2 → 6 → 10 Gruppen</td></tr><tr><td>fest, Kasten 3 + Fälligkeit 6 Bit</td><td>243 Bit</td><td>51</td><td>13 Gruppen</td></tr><tr><td>fest, Kasten 3 + Fälligkeit 10 Bit (exaktes Datum)</td><td>351 Bit</td><td>73</td><td>19 Gruppen</td></tr></tbody></table></div>
+<p><strong>Behauptung:</strong> Ein Lernstand-Code bleibt tippbar, wenn er sich nach dem Lernstand richtet. <strong>Beleg:</strong> Die Tabelle ist aus dem gemessenen Aufbau gerechnet (27 Fertigkeiten, 1 Bit ≈ 1 Zeichen bei 5 Bit/Zeichen); die Zahl der heute vorhandenen Fertigkeiten ist gemessen (27). <strong>Aufwand:</strong> im Codec enthalten. <strong>Risiko:</strong> Bei 40 Zeichen wird das Abtippen mühsam → dann QR (§ 5.3).</p>
+<h3 id="3-3-fassungen-v-3-heute-v-4-morgen">3.3 Fassungen: <code>v:3</code> heute, <code>v:4</code> morgen</h3>
+<p>Gemessen:</p>
+<ul><li><code>Spiel.VERSION = 3</code> (<code>src/spiel/zustand.js:16</code>), und <code>migrieren</code> hebt alte Stände an: <code>st.v = Math.max(zahl(st.v, 0), Spiel.VERSION)</code> (<code>:53</code>) — <strong>alte Stände werden ergänzt, nie verworfen</strong>.</li><li>Ein <strong>zu neuer</strong> Spielstand wird <strong>abgelehnt</strong> statt halb geladen: <code>laden()</code> gibt `{ok:false, zuNeu:true, grund:"Dieser Spielstand stammt aus einer neueren Fassung (Stand vN); dieses Programm kennt nur v3."}<code>(</code>:146-148`).</li><li>Der <strong>Lernmotor ist strenger und stiller</strong>: `let st = (() =&gt; { const s = store.get("lern", null); return s &amp;&amp; s.v === 1 ? s : leer(); })();<code>(</code>fremd/lernmotor.js:39<code>) — passt</code>v` nicht <strong>exakt</strong>, wird der Lernstand <strong>ohne Meldung weggeworfen</strong>. Das ist die gefährlichste Stelle des ganzen Themas.</li></ul>
+<p><strong>Regeln für den Lernstand-Code:</strong></p>
+<ol><li>Der Code trägt seine <strong>eigene</strong> Fassung (<code>v</code> 3 Bit), unabhängig von <code>Spiel.VERSION</code>.</li><li><strong>Alter Code → neues Spiel:</strong> immer lesbar. Neue Fertigkeiten sind einfach nicht in der Maske = „neu“ (<code>L.box</code> 0). Fällt eine Fertigkeit weg, wird sie beim Import ignoriert (Index unbekannt).</li><li><strong>Neuer Code → altes Spiel:</strong> <strong>ablehnen mit Satz</strong>, nicht halb importieren — genau wie <code>laden()</code> es beim Spielstand schon tut.</li><li><strong>Import überschreibt nie still:</strong> erst Vorschau („Klasse 8b, 14 von 27 Fertigkeiten, Serie 3 Tage“), dann Sicherung wie beim Datei-Import (<code>Spiel.sicherungAnlegen</code>, <code>src/ui/karriere.js:460</code>), dann erst schreiben.</li><li>Die <strong>Index-Tabelle wird nur angehängt</strong> (nie eingeschoben) — Regel aus Spezifikation § 2.4; freie Indizes liefern dort <code>{fehler:"fassung"}</code>.</li></ol>
+<h3 id="3-4-tippfehler">3.4 Tippfehler</h3>
+<p>Die Prüfsumme wird <strong>wörtlich vom vorhandenen Codec übernommen</strong> (10 Bit, zwei Polynome mod 31/mod 32). Deren Wirkung ist dort gemessen (fremde Messung, Spezifikation § 2.1): <strong>92/92</strong> gebaute Vertipper abgelehnt, im ganzen Raum <strong>130.023.424</strong> Ersetzungen und <strong>3.047.424</strong> Vertauschungen ohne einen unbemerkten Fehler, 10.000 wohlgeformte Zufallscodes → <strong>99,84 %</strong> abgelehnt. Für den Lernstand-Code gilt dieselbe Größenordnung, <strong>sofern</strong> die Prüfsumme über <strong>alle</strong> Zeichen läuft — bei variablem Layout heißt das: erst <code>v</code>/<code>platz</code>/Maske/Paare kanonisieren, dann rechnen, dann prüfen.</p>
+<hr>
+<h2 id="4-missbrauch-manipulation-grenzen">4 · Missbrauch, Manipulation, Grenzen</h2>
+<p><strong>Behauptung: Für dieses Spiel ist Kryptografie die falsche Antwort.</strong></p>
+<ul><li><strong>Beleg (Kosten):</strong> Eine Signatur (z. B. Ed25519, 64 Byte = 512 Bit) verlängert den Code um <strong>103 Zeichen</strong> (5 Bit/Zeichen) — aus 29 würden <strong>132</strong>; das ist nicht mehr abtippbar. HMAC scheidet aus, weil das Geheimnis im offenen Repositorium stünde. Eine Prüfung auf einem Server widerspricht der Spezifikation („Ein Code, kein Server, kein Konto“, § 1).</li><li><strong>Beleg (Wert):</strong> Es gibt <strong>keine Noten</strong>. <code>Spiel.st.ruf</code> und <code>euro</code> sind Spielwerte; wer sie fälscht, betrügt sich um die eigene Übung. Der Klassenraum-Ergebnis-Code hat dasselbe „Problem“ und wird bewusst nicht geschützt.</li><li><strong>Was billig ist und bleibt:</strong></li></ul>
+<ol><li><strong>Prüfsumme</strong> gegen Vertipper (schon bezahlt, § 3.4).</li><li><strong>Plausibilität</strong> beim Import: Kasten 5 ohne einen einzigen Treffer ist auffällig; <code>Fälligkeit</code> muss in den Körben liegen; Serie ≤ Lerntage; die Belegtmaske darf nicht mehr Fertigkeiten zeigen, als es gibt. Solche Codes werden <strong>nicht abgelehnt</strong>, aber <strong>markiert</strong> („ungewöhnlich“) — Ehrlichkeit statt Gitter.</li><li><strong>Die pädagogische Antwort:</strong> Ein Lehrer, der wissen will, ob jemand rechnen kann, lässt rechnen. Der Code ersetzt keine Prüfung, er ersetzt das Abschreiben vom Nachbarn.</li></ol>
+<ul><li><strong>Was nie kommt:</strong> Signatur, Konto, Cloud-Sync, Serverpflicht. <strong>Aufwand:</strong> 0 (Nichtstun ist hier die Entscheidung). <strong>Risiko:</strong> Ein Schüler kann einen fremden Code abgeben. Gegenmittel: <code>platz</code> (Sitzplatz) und die mündliche Nachfrage — dasselbe Risiko wie beim Ergebnis-Code heute.</li></ul>
+<hr>
+<h2 id="5-der-lehrerfall-ohne-server">5 · Der Lehrerfall ohne Server</h2>
+<h3 id="5-1-die-haltung-der-spezifikation">5.1 Die Haltung der Spezifikation</h3>
+<p>Wörtlich (§ 4.3, „Entscheidung des Leiters“): <em>„der Server transportiert **nur Codes</em>* – kein <code>platz</code>, keine <code>sterne</code>, keine <code>dauerS</code>. Der Ergebnis-Code trägt alles … Damit gibt es <strong>eine</strong> Quelle der Wahrheit … und keine Möglichkeit, Klarnamen einzuschmuggeln.“* Und (§ 4.3, Ende): <em>„**Ohne Server keine Fehlermeldung</em>* – die Live-Fläche bleibt aus, A und B laufen vollständig.“*</p>
+<p>Daraus folgt für den Lernstand: <strong>Der Code ist die Wahrheit, das Gerät der Lehrkraft ist nur Ablage.</strong></p>
+<h3 id="5-2-die-kleinste-losung-ohne-server">5.2 Die kleinste Lösung (ohne Server)</h3>
+<p><strong>Ein Code je Schüler reicht</strong> — die Lehrkraft sammelt sie ein und tippt sie in eine Liste, die es schon gibt: <code>store "klassenraum"</code> mit <code>ergebnisEintragen</code> (idempotent über <code>platz</code>, erster Eintrag gewinnt, Spezifikation § 2.5). Erweiterung:</p>
+<ol><li>Der Lernstand-Code trägt <strong>denselben <code>platz</code></strong> wie der Ergebnis-Code → Zuordnung Code ↔ Sitzplatz.</li><li>Die Klassenliste bekommt je Platz <strong>zwei Felder</strong>: letzter Ergebnis-Code, letzter Lernstand-Code.</li><li>Ein <strong>Zeitstempel</strong> („eingegangen“) liegt schon im Entwurf (<code>GET /liste</code> → <code>eingegangen</code>); ohne Server setzt ihn das Lehrer-Gerät beim Eintippen.</li><li><strong>Ablage ohne Server:</strong> die Liste als <strong>Datei</strong> exportieren/importieren (<code>store.alles()</code> → JSON, Muster: <code>karriere.js:442-446</code>) plus die vorhandene Tabelle. Kein Netz, kein Konto, kein Server.</li><li><strong>Die Anzeige, die die Frage beantwortet:</strong> „14 von 27 Fertigkeiten im Klassenschnitt, 6 Schüler ohne Code diese Woche, schwächste Fertigkeit: <code>lab.vlan</code>“ — das ist eine Auswertung über die eingesammelten Codes, <strong>auf dem Lehrer-Gerät</strong>, nicht auf einem Server.</li></ol>
+<p><strong>Aufwand:</strong> 1 Sitzung (die Sammel-Liste existiert, es kommen ein Feld und eine Auswertung hinzu). <strong>Risiko:</strong> Abtippen von 30 Codes à 8–40 Zeichen ist mühsam → deshalb QR, aber erst danach.</p>
+<h3 id="5-3-qr-spater-nicht-zuerst">5.3 QR (später, nicht zuerst)</h3>
+<p>Der vorhandene Encoder ist laut Spezifikation § 4.4 <strong>alphanumerisch, Version 1, Stufe H</strong> und trägt <strong>genau den 10-Zeichen-Auftragscode</strong>. Ein 29-Zeichen-Lernstandscode passt dort <strong>nicht</strong> hinein; es bräuchte eine größere QR-Version. <strong>Nicht gemessen</strong> (ich habe keine QR-Kapazität nachgerechnet) — deshalb steht sie hinten in der Reihenfolge. Nutzen: die Lehrkraft <strong>scannt</strong> ab, statt zu tippen; der Code bleibt derselbe.</p>
+<hr>
+<h2 id="6-aufwand-und-reihenfolge">6 · Aufwand und Reihenfolge</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Rang</th><th>Was</th><th>Aufwand</th><th>Warum</th></tr></thead><tbody><tr><td><strong>Schon da</strong></td><td>Datei-Export/Import des ganzen Speichers</td><td>0</td><td>löst den Rechnerwechsel vollständig (57.577 Zeichen gemessen)</td></tr><tr><td><strong>Zuerst</strong></td><td>Lernstand-Code: Layout, Prüfsumme, Kanonisierung, Tests</td><td><strong>1–1,5 Sitzungen</strong></td><td>der einzige Weg ohne Dateisystem; Round-Trip in Node prüfbar</td></tr><tr><td><strong>Dann</strong></td><td>Oberfläche: „Mitnehmen“ (Code zeigen) + „Einlesen“ (Vorschau, Sicherung, Ablehnung zu neuer Codes)</td><td><strong>0,5–1 Sitzung</strong></td><td>ohne Vorschau ist ein Fehlgriff ein verlorener Lernstand</td></tr><tr><td><strong>Dann</strong></td><td>Klassen-Sammelliste + Auswertung auf dem Lehrer-Gerät</td><td><strong>1 Sitzung</strong></td><td>beantwortet „wie weit ist die Klasse“ ohne Server</td></tr><tr><td><strong>Später</strong></td><td>QR für den Lernstand-Code (größere Version)</td><td>1 Sitzung</td><td>Komfort, kein Inhalt</td></tr><tr><td><strong>Nie</strong></td><td>Signatur, Konto, Cloud, Serverpflicht</td><td>–</td><td>Widerspruch zu „Ein Code, kein Server, kein Konto“; Kosten &gt; Nutzen</td></tr></tbody></table></div>
+<hr>
+<h2 id="7-grenzen-dieses-entwurfs-ehrlich">7 · Grenzen dieses Entwurfs (ehrlich)</h2>
+<ul><li><strong>Nicht gemessen:</strong> das Verhalten von <code>localStorage</code> an seiner Größengrenze (der Browser-Speicher ist endlich; der gefüllte Stand braucht ~31 KB, die Datei 56 KB — beides wirkt harmlos, ist aber <strong>nicht</strong> gegen das Limit geprüft). Ebenfalls <strong>nicht gemessen</strong>: QR-Kapazitäten (§ 5.3) und das Verhalten auf Android (die Android-Fassung ist laut Nutzerentscheidung nicht Teil dieses Auftrags).</li><li><strong>Nicht entworfen:</strong> ein Weg, den <em>kompletten</em> Karrierestand per Code zu übertragen — er ist mit 92 % Momentaufnahme zu groß und wird es bleiben. Dafür bleibt die Datei.</li><li><strong>Verlust im Entwurf:</strong> der Lernstand-Code verliert das <strong>exakte Fälligkeitsdatum</strong> (nur Körbe), den <strong>Übungsverlauf</strong> (<code>log</code>) und die Prüfungsnotizen (<code>tests</code>). Der Lernstand <em>bleibt</em> erhalten, seine Feingranularität nicht.</li><li><strong>Der Lernmotor ist die harte Kante:</strong> <code>fremd/lernmotor.js:39</code> wirft einen Lernstand mit unbekanntem <code>v</code> <strong>still</strong> weg. Wer den Code importiert, muss den Lernstand <strong>schreiben, bevor</strong> ein Programmteil ihn liest — sonst ist der Import wirkungslos. Das ist der erste Testfall der Umsetzung, nicht der letzte.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

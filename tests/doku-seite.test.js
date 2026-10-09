@@ -111,6 +111,20 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
     erwarte.enthaelt(r.ausgabe, "29 Dokumente", "alle 29 Dokumente erzeugt");
   });
 
+  /* Wie viele Dokumente hat die Quelle? Gezählt, nicht geschrieben — sonst wird diese Datei bei
+     jedem neuen Dokument rot (am 09.10.2026 passiert, als fünf Entwürfe dazukamen). */
+  const quellzahl = () => {
+    let n = 0;
+    for (const wurzel of ["README.md", "AGENTS.md"]) if (fs.existsSync(path.join(WURZEL, wurzel))) n++;
+    (function sammle(ordner){
+      for (const e of fs.readdirSync(ordner, {withFileTypes: true})) {
+        const p = path.join(ordner, e.name);
+        if (e.isDirectory()) sammle(p); else if (e.name.endsWith(".md")) n++;
+      }
+    })(path.join(WURZEL, "docs"));
+    return n;
+  };
+
   pruefe("Jede erzeugte Seite hat <h1>, Inhalt, Fussleiste und den Weg zum Spiel", () => {
     const basis = path.join(WURZEL, "docs", "doku");
     erwarte.wahr(fs.existsSync(basis), "docs/doku/ wurde gebaut (python tools/seite.py)");
@@ -121,7 +135,8 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
         if (e.isDirectory()) sammle(p); else if (e.name.endsWith(".html")) dateien.push(p);
       }
     })(basis);
-    erwarte.gleich(dateien.length, 30, "29 Dokumente + Uebersicht");
+    const soll = quellzahl();
+    erwarte.gleich(dateien.length, soll + 1, `${soll} Dokumente + Uebersicht`);
     for (const d of dateien) {
       const t = fs.readFileSync(d, "utf8");
       const kurz = path.relative(WURZEL, d);
@@ -137,8 +152,9 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
     erwarte.wahr(fs.existsSync(uebersicht), "docs/doku/index.html existiert");
     const t = fs.readFileSync(uebersicht, "utf8");
     for (const g of ["Einstieg", "Betrieb", "Entwicklung", "Review"]) erwarte.enthaelt(t, `<h2>${g}</h2>`, `Gruppe ${g}`);
-    erwarte.gleich((t.match(/class="dk-karte"/g) || []).length, 29, "29 Karten — eine je Dokument");
-    erwarte.enthaelt(t, "29 Dokumente", "die Zahl wird beim Bauen gezählt");
+    const soll = quellzahl();
+    erwarte.gleich((t.match(/class="dk-karte"/g) || []).length, soll, `${soll} Karten — eine je Dokument`);
+    erwarte.enthaelt(t, `${soll} Dokumente`, "die Zahl wird beim Bauen gezählt");
   });
 
   pruefe("Der Bau ist deterministisch: zweimal bauen ergibt dieselben Bytes", () => {
