@@ -150,8 +150,8 @@ SIZES.txt                      Inhalt, Größen, Prüfsummen</code></pre>
 <p>Die Anleitungen kommen aus <code>Vorlagen/</code> — <strong>eine</strong> Quelle, kein zweiter Ort zum Pflegen.</p>
 <h3 id="eine-release-anlegen">Eine Release anlegen</h3>
 <p><strong>Das macht ein Ablauf</strong> (<span class="dk-tot" title="„../.github/workflows/release.yml“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>.github/workflows/release.yml</code></span>): Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferungspaket und legt das Release mit den Anhängen an.</p>
-<pre><code class="sprache-bash">git tag -a v2.0.1 -m "Netzwerk-Labor 2.0.1"
-git push origin v2.0.1</code></pre>
+<pre><code class="sprache-bash">git tag -a v2.0.2 -m "Netzwerk-Labor 2.0.2"
+git push origin v2.0.2</code></pre>
 <p>Nach etwa einer Minute steht das Release unter <em>Releases</em> — mit dem ZIP und der Einzeldatei <code>Netzwerk-Labor.html</code> als Anhänge; die Windows-<code>.exe</code> folgt aus dem zweiten Job (Windows-Läufer, einige Minuten später).</p>
 <blockquote>
 <p><strong>Warum ein Ablauf und nicht von Hand:</strong> Ein Release über die API anzulegen braucht ein Token mit Schreibrecht. Auf dem Entwicklungsrechner liegt keines (die API antwortet dort mit 401, gemessen 06.10.2026). Ein Ablauf bekommt von GitHub ein <code>GITHUB_TOKEN</code> und darf mit <code>permissions: contents: write</code> Releases anlegen.</p>

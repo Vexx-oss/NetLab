@@ -2470,8 +2470,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 <div id="app" aria-live="off"></div>
 <script>
 "use strict";
-const LABOR_VERSION = "2.0.1";
-const LABOR_BAU = "d9854d0b";
+const LABOR_VERSION = "2.0.2";
+const LABOR_BAU = "334f5362";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -12013,6 +12013,120 @@ Object.assign(DATEN.lehrtexte, {
   });
 })();
 
+/* ---- daten/mini-denkhilfen3.js ---- */
+"use strict";
+/* ---------- Fragebezogene Denkanstöße, Teil 3 (task-53, Ausbau 3.0) ----------
+   DATEN.miniDenkhilfen["mini-sto-2"] = {denkhilfe, ausschnitt?, stichwort}
+
+   WARUM DIESE DATEI. Teil 1 (mini-denkhilfen.js, 25 Einträge) und Teil 2
+   (mini-denkhilfen2.js, 31 Einträge) bleiben unangetastet. Hier stehen die Denkanstöße zu den
+   24 Minis, die mit dem Inhaltsausbau dazugekommen sind. Angehängt wird IDEMPOTENT und
+   reihenfolge-unabhängig — genau wie in Teil 2:
+     DATEN.miniDenkhilfen = Object.assign(DATEN.miniDenkhilfen || {}, { … });
+   Der Name sortiert hinter „mini-denkhilfen2.js" ('2' 0x32 < '3' 0x33) und vor „mini.js"
+   ('-' 0x2D < '.' 0x2E), die Schicht `daten` lädt alphabetisch (bauen.py, tests/run.js) —
+   dieselbe Begründung wie im Kopf von Teil 2.
+
+   DREI REGELN (Kopfkommentar der Grunddatei, bindend):
+     · DENKHILFE zeigt die Richtung, nie das Ergebnis — kein Lösungstext, keine wörtliche Option.
+       Der Wächter `miniOhneLoesung` (src/spiel/mini.js) prüft das bei jedem Aufruf.
+     · AUSSCHNITT ist die zweite Sprosse für azubi und muss ein WÖRTLICHER Ausschnitt aus `frage`
+       oder `schnappschuss.inhalt` sein.
+     · STICHWORT ist der Kernbegriff der Frage und kommt auf der Wiki-Seite der Fertigkeit NICHT
+       vor (gemessen am sichtbaren Wiki-Text: titel, kurz, abschnitte, merksatz, pruefungstipp,
+       quelle). Geprüft in tests/mini-ausbau.test.js.
+   LF-Zeilenenden, kein DOM, deterministisch (reine Daten). */
+(() => {
+  /* Kurzschreiber wie in den Grunddateien: D(denkhilfe, stichwort, ausschnitt?) */
+  const D = (denkhilfe, stichwort, ausschnitt) => ausschnitt
+    ? {denkhilfe, ausschnitt, stichwort}
+    : {denkhilfe, stichwort};
+
+  DATEN.miniDenkhilfen = Object.assign(DATEN.miniDenkhilfen || {}, {
+    /* ---- lab.storage: NAS, SAN, iSCSI ---- */
+    "mini-sto-2": D("Speicher gibt es auf drei Ebenen: Einer gibt fertige Dateien heraus, einer gibt rohe Blöcke heraus, einer hängt direkt am Rechner. Welcher verwaltet das Dateisystem selbst?",
+      "Dateidienst"),
+    "mini-sto-3": D("Ein Server soll seine Platten über das vorhandene Netz anbieten. Welche Ebene wird dabei übertragen — fertige Dateien oder rohe Blöcke — und welches Protokoll trägt sie?",
+      "Blockprotokoll", "Blockspeicher über das normale LAN"),
+    "mini-sto-4": D("Zwei Arten, Speicher anzubieten: Die eine gibt fertige Dateien heraus, die andere überlässt die Formatierung dem Rechner. Welche Beschreibung passt zu welcher Abkürzung?",
+      "Speicherart", "Welche Aufgabe gehört zu welcher Speicherart?"),
+
+    /* ---- lab.stp: Wurzel und Nachrichten ---- */
+    "mini-stp-3": D("Einer muss die Rechnung machen: Wer hat die kleinste Kennung — und von wem aus werden dann alle Wege gemessen?",
+      "Wurzelwahl", "Wer berechnet bei Spanning Tree den Baum?"),
+    "mini-stp-4": D("Bevor der erste Nutzframe läuft, müssen sich die Switches einig sein: Wer ist der Chef, und welche Leitung darf ruhen? Wie redet man darüber, wenn noch kein Nutzverkehr fließt?",
+      "STP-Nachrichten", "vor dem ersten Nutzverkehr"),
+
+    /* ---- lab.nat: Zuordnung ---- */
+    "mini-nat-5": D("Viele innere Adressen teilen sich eine äußere. Woran erkennt der Router später, welcher Rechner gemeint ist, wenn die Antwort zurückkommt?",
+      "NAT-Zuordnung", "Wo findet der Router die Antwort auf eine übersetzte Verbindung wieder?"),
+
+    /* ---- lab.tcp: Verzicht und Verlust ---- */
+    "mini-tcp-4": D("Für Sprache zählt jede Millisekunde Wartezeit. Welches Transportprotokoll verzichtet deshalb auf Anklopfen und Bestätigungen — und was nimmt es dafür in Kauf?",
+      "Echtzeit", "die keine Verzögerung verträgt"),
+    "mini-tcp-5": D("Der Empfänger wiederholt dieselbe Bestätigungsnummer. Was sagt er damit — und warum ist sofort neu senden besser als abwarten?",
+      "Sofortwiederholung", "Ein Segment fehlt, danach kommen drei gleiche Bestätigungen"),
+
+    /* ---- lab.dns: Richtung und Erreichbarkeit ---- */
+    "mini-dns-4": D("Einträge gibt es in beide Richtungen: einmal sucht man zu einem Namen die Adresse, einmal umgekehrt. Welche Richtung braucht ein Mailserver, um zu prüfen, wer da schreibt?",
+      "Reverse-Zone", "Wozu dient ein PTR-Eintrag im DNS?"),
+    "mini-dns-5": D("Der Name kommt nicht an. Bevor du beim Dienst suchst: Kann der Rechner den Server überhaupt erreichen, den er fragen soll?",
+      "Erreichbarkeitsprüfung", "Was prüfst du zuerst?"),
+
+    /* ---- lab.dhcp: geliehene Adresse ---- */
+    "mini-dhcp-4": D("Die Adresse ist geliehen, nicht geschenkt. Wer verlängert wann — und was macht der Server mit einer Adresse, deren Zeit abgelaufen ist?",
+      "Leihfrist", "Ein Client erneuert seine Lease nicht"),
+
+    /* ---- lab.arp: Meldung ohne Frage ---- */
+    "mini-arp-4": D("Eigentlich antwortet man nur auf eine Frage. Hier meldet sich ein Gerät von selbst — warum tut es das, und wem nützt diese Meldung?",
+      "Selbstankündigung", "ohne dass jemand gefragt hat"),
+
+    /* ---- lab.subnetz: /30 und Zusammenfassen ---- */
+    "mini-sub-5": D("Zwei Router, eine Leitung: Wie viele Adressen braucht der Block wirklich — Netzadresse und Rundruf zählen mit?",
+      "Punkt-zu-Punkt", "einer Leitung zwischen genau zwei Routern"),
+    "mini-sub-6": D("Zwei benachbarte /24 sollen zu einer einzigen Zeile werden. Wie viele führende Bits haben beide gemeinsam — und was bedeutet das für den Präfix?",
+      "Supernetting", "sollen als EINE Route stehen"),
+
+    /* ---- lab.vlan: Werkszustand und Umstecken ---- */
+    "mini-vlan-4": D("Ein frischer Switch hat noch keine Konfiguration. Ist ein nicht eingerichteter Port deshalb wirklich abgeschaltet — oder gehört er längst zu einem Netz?",
+      "Werkskonfiguration", "den niemand eingerichtet hat"),
+    "mini-vlan-5": D("Steckt die Gruppenzugehörigkeit im Gerät oder im Anschluss? Wenn der PC den Anschluss wechselt, wer muss dann angepasst werden?",
+      "Portbindung", "Ein PC zieht von Fa0/1"),
+
+    /* ---- lab.trunk: ungleiche Enden ---- */
+    "mini-trunk-4": D("Ein Trunk trägt getaggte Frames — und eine Gruppe läuft ohne Tag mit. Was passiert, wenn die beiden Enden dabei nicht dasselbe meinen?",
+      "Mismatch-Meldung", "doch es fließen kaum Frames"),
+
+    /* ---- lab.portsec: wer trägt ein ---- */
+    "mini-psec-4": D("Wer trägt die erlaubten Adressen ein — der Mensch oder der Switch? Was spart der Zusatz, wenn das erste Gerät an diesem Port ein neues ist?",
+      "Selbstlernen am Port", "Was bewirkt der Zusatz sticky"),
+
+    /* ---- lab.switch: Domänen ---- */
+    "mini-sw-4": D("Rundrufe stoppen an der Gruppengrenze. Wie viele solcher Grenzen gibt es, wenn drei Gruppen nebeneinander liegen — und was verbindet sie erst wieder?",
+      "Domänengrenze"),
+
+    /* ---- lab.ip: reservierte Bereiche ---- */
+    "mini-ip-4": D("Drei Bereiche sind für den Hausgebrauch reserviert und tauchen deshalb nie im weltweiten Netz auf. Gehört die Adresse der Frage dazu?",
+      "reservierte Bereiche", "Welche Adresse ist nach RFC 1918 privat?"),
+
+    /* ---- lab.netz: Blockgrenze ---- */
+    "mini-netz-4": D("Rechne mit der Maske nach: In welchem Block liegt jede der beiden Adressen? Erst wenn beide im selben Block liegen, fragt der PC direkt.",
+      "Netzgrenze", "PC 172.16.5.10/26 pingt 172.16.5.70/26"),
+
+    /* ---- lab.route: Herkunft der Route ---- */
+    "mini-route-5": D("Beide Wege führen zum Ziel und passen gleich genau. Gibt es eine Zahl, die die Herkunft der Route bewertet — und wer gewinnt bei Gleichstand?",
+      "Routeherkunft", "Was entscheidet?"),
+
+    /* ---- lab.fw: laufende Verbindungen ---- */
+    "mini-fw-4": D("Die Firewall kennt die Verbindungen, die gerade laufen. Muss die Antwort auf eine erlaubte Anfrage deshalb noch einmal eigens erlaubt werden?",
+      "Zustandstabelle", "Welche Regel braucht eine zustandsbehaftete Firewall NICHT?"),
+
+    /* ---- lab.ports: zwei Portnummern ---- */
+    "mini-port-4": D("Zwei Portnummern stecken in jedem Paket: die des Dienstes und die des Absenders. Welche davon steht im Ziel, wenn ein Client eine Webseite öffnet?",
+      "Quellport", "Welcher Port steht im Ziel des ersten Pakets?"),
+  });
+})();
+
 /* ---- daten/mini.js ---- */
 "use strict";
 /* ---------- Mini-Tickets für die Leiste (Konzept § 3.2 „Mini“) ----------
@@ -12380,7 +12494,119 @@ Object.assign(DATEN.lehrtexte, {
     m("cli-systemctl-1", "lab.ports", "AP1", "wahl", "Das Intranet lädt nicht. Welcher Befehl behebt das?",
       ["sudo systemctl start apache2", "systemctl status apache2", "ping apache2", "sudo ip link set eth0 up"], 0,
       "„inactive (dead)“ heißt: Der Webserver-Dienst läuft nicht. systemctl start startet ihn (mit Root-Rechten, daher sudo); status zeigt nur an. Mit systemctl enable startet er künftig auch nach einem Neustart.", "systemctl(1), freedesktop.org",
-      ["log", "$ systemctl status apache2\n○ apache2.service - Apache HTTP Server\n     Active: inactive (dead)"])
+      ["log", "$ systemctl status apache2\n○ apache2.service - Apache HTTP Server\n     Active: inactive (dead)"]),
+
+    /* ---------- Ausbau 3.0, Inhalt A (task-53): 24 weitere Minis. NUR ANGEHÄNGT — die IDs
+       darüber stehen in eingefrorenen Tabellen, Einschieben würde sie verschieben.
+       Jedes dieser Minis hat einen eigenen Denkanstoß in src/daten/mini-denkhilfen3.js. ---------- */
+
+    /* ---- Speicher: NAS, SAN, iSCSI ---- */
+    m("sto-2", "lab.storage", "E", "wahl", "Welches Gerät stellt im LAN fertige Dateien über SMB bereit?",
+      ["Ein NAS", "Ein SAN", "Eine DAS-Platte"], 0,
+      "Ein NAS ist ein Dateiserver im LAN: Er gibt Dateien über SMB oder NFS heraus und verwaltet das Dateisystem selbst. Ein SAN liefert Blöcke, eine DAS-Platte hängt direkt am Rechner.", "SNIA-Begriffe NAS/SAN"),
+    m("sto-3", "lab.storage", "AP2", "wahl", "Welches Protokoll trägt Blockspeicher über das normale LAN?",
+      ["iSCSI", "SMB", "NFS", "HTTP"], 0,
+      "iSCSI kapselt SCSI-Blöcke in TCP/IP (Port 3260) und trägt sie über das vorhandene Netz. SMB und NFS sind Dateidienste, HTTP ist ein Web-Protokoll.", "SNIA-Begriffe NAS/SAN"),
+    m("sto-4", "lab.storage", "AP2", "zuordnen", "Welche Aufgabe gehört zu welcher Speicherart?",
+      {links: ["NAS", "SAN"], rechts: ["Dateien über SMB oder NFS", "Blockspeicher über iSCSI"]}, [[0, 0], [1, 1]],
+      "NAS gibt Dateien heraus (der Server verwaltet das Dateisystem), SAN gibt Blöcke heraus (der Rechner formatiert sie selbst). Das ist der Kern des Unterschieds.", "SNIA-Begriffe NAS/SAN"),
+
+    /* ---- Spanning Tree ---- */
+    m("stp-3", "lab.stp", "AP2", "wahl", "Wer berechnet bei Spanning Tree den Baum?",
+      ["Die Root-Bridge", "Der schnellste Port", "Der DHCP-Server"], 0,
+      "STP wählt eine Wurzel: die Bridge mit der kleinsten Bridge-ID. Von ihr aus berechnet jeder Switch den kürzesten Weg — die übrigen Wege werden blockiert.", NW),
+    m("stp-4", "lab.stp", "AP2", "vorhersage", "Zwei Switches tauschen vor dem ersten Nutzverkehr eigene Nachrichten aus. Wozu?",
+      ["Um die Wurzel zu wählen und Wege zu sperren", "Um IP-Adressen zu verteilen", "Um Frames zu verschlüsseln"], 0,
+      "STP spricht über eigene Nachrichten (BPDUs): Damit wählen die Switches die Wurzel und einigen sich, welche Ports blockieren. Kommen solche Nachrichten an einem Access-Port an, schaltet BPDU Guard ihn ab.", NW),
+
+    /* ---- NAT ---- */
+    m("nat-5", "lab.nat", "AP2", "wahl", "Wo findet der Router die Antwort auf eine übersetzte Verbindung wieder?",
+      ["In seiner Übersetzungstabelle", "Im DNS-Cache", "Im DHCP-Lease"], 0,
+      "Der Router führt Buch über jede übersetzte Verbindung (show ip nat translations). Ohne diese Zuordnung wüsste er nicht, an welchen inneren Rechner eine Antwort gehört.", AP),
+
+    /* ---- TCP: UDP und Verlust ---- */
+    m("tcp-4", "lab.tcp", "AP1", "wahl", "Welches Transportprotokoll passt zu einer Sprachverbindung, die keine Verzögerung verträgt?",
+      ["UDP", "TCP", "ICMP"], 0,
+      "UDP schickt ohne Verbindungsaufbau und ohne Bestätigung — dadurch entsteht keine Wartezeit. Verlorene Pakete muss die Anwendung selbst verkraften. ICMP ist kein Transportprotokoll.", TC),
+    m("tcp-5", "lab.tcp", "AP2", "vorhersage", "Ein Segment fehlt, danach kommen drei gleiche Bestätigungen. Was tut TCP?",
+      ["Es sendet das fehlende Segment sofort neu", "Es bricht die Verbindung ab", "Es wartet die Zeitüberschreitung ab"], 0,
+      "Drei doppelte Bestätigungen mit derselben Nummer sind das Signal, sofort neu zu senden (Fast Retransmit) — der Sender wartet nicht auf seinen Zeitgeber.", TC),
+
+    /* ---- DNS: Rückwärtsauflösung und Fehlersuche ---- */
+    m("dns-4", "lab.dns", "AP2", "wahl", "Wozu dient ein PTR-Eintrag im DNS?",
+      ["Adresse zu Name (Rückwärtsauflösung)", "Name zu Adresse", "Port zu Dienst"], 0,
+      "A- und AAAA-Einträge lösen vorwärts auf (Name zu Adresse). PTR steht in der Reverse-Zone und löst rückwärts auf (Adresse zu Name) — Mailserver prüfen damit, ob ein Absender echt wirkt.", NW),
+    m("dns-5", "lab.dns", "AP1", "wahl", "Ein Name lässt sich nicht auflösen, der DNS-Server ist eingetragen. Was prüfst du zuerst?",
+      ["Ob der DNS-Server erreichbar ist", "Ob der Webserver läuft", "Ob der Browser aktuell ist"], 0,
+      "Erst die Kette vom eigenen Rechner zum Server: Adresse, Gateway, DNS-Server. Ein Ping auf den eingetragenen Server trennt in einem Schritt den Fehler auf dem Weg von einem Fehler im Dienst.", NW),
+
+    /* ---- DHCP: Lease-Ablauf ---- */
+    m("dhcp-4", "lab.dhcp", "AP2", "vorhersage", "Ein Client erneuert seine Lease nicht. Was folgt daraus?",
+      ["Die Adresse wird nach Ablauf wieder frei", "Der Client behält sie dauerhaft", "Der Server startet neu"], 0,
+      "Jede Lease läuft ab. Erneuert der Client nicht (erster Versuch bei der Hälfte der Laufzeit), fällt die Adresse nach Ablauf zurück in den Pool und kann neu vergeben werden.", NW),
+
+    /* ---- ARP: ungefragte Antwort ---- */
+    m("arp-4", "lab.arp", "AP2", "wahl", "Ein Gerät meldet seine Adresse, ohne dass jemand gefragt hat. Wie heißt das?",
+      ["Gratuitous ARP", "Proxy ARP", "Reverse ARP"], 0,
+      "Ein Gratuitous ARP kündigt die eigene Zuordnung ungefragt an — etwa nach einem Wechsel — und frischt so die Caches der Nachbarn auf. Genau dieses Vertrauen macht ARP-Spoofing möglich.", NW),
+
+    /* ---- Subnetting: /30 und Zusammenfassen ---- */
+    m("sub-5", "lab.subnetz", "AP2", "wahl", "Welche Maske passt zu einer Leitung zwischen genau zwei Routern?",
+      ["255.255.255.252", "255.255.255.192", "255.255.255.0"], 0,
+      "Ein /30 hat vier Adressen: Netzadresse, zwei Hosts, Broadcastadresse. Für eine Punkt-zu-Punkt-Strecke ist das genau richtig — /29 und größer verschwenden Adressen.", SU),
+    m("sub-6", "lab.subnetz", "AP2", "wahl", "Zwei Netze 10.1.0.0/24 und 10.1.1.0/24 sollen als EINE Route stehen. Welche?",
+      ["10.1.0.0/23", "10.1.0.0/24", "10.1.0.0/22"], 0,
+      "Zusammenfassen heißt: gemeinsame führende Bits finden. Zwei /24 ergeben ein /23 (10.1.0.0 bis 10.1.1.255). Ein /22 würde vier Netze umfassen und damit auch fremde Adressen mitnehmen.", SU),
+
+    /* ---- VLAN: Werkszustand und Umstecken ---- */
+    m("vlan-4", "lab.vlan", "AP1", "wahl", "In welchem VLAN steckt ein Switchport, den niemand eingerichtet hat?",
+      ["In VLAN 1", "In VLAN 0", "In gar keinem"], 0,
+      "Ab Werk steckt jeder Port in VLAN 1. Ein vergessener Port ist dadurch nicht abgeschaltet — er ist im Standard-VLAN erreichbar, und das ist oft die ungewollte Lücke.", VL),
+    m("vlan-5", "lab.vlan", "AP2", "vorhersage", "Ein PC zieht von Fa0/1 (VLAN 10) auf Fa0/2 (VLAN 20). Was muss geschehen, damit er im Verwaltungsnetz bleibt?",
+      ["Fa0/2 muss in VLAN 10 gebracht werden", "Nichts — das VLAN folgt dem Gerät", "Der PC braucht eine neue MAC-Adresse"], 0,
+      "Das VLAN hängt am Port, nicht am Gerät. Nach dem Umstecken muss der neue Port im richtigen VLAN stehen, sonst landet der PC in einem anderen Netz.", VL),
+
+    /* ---- Trunk: ungleiche Enden ---- */
+    m("trunk-4", "lab.trunk", "AP2", "wahl", "Zwei Switches sind als Trunk verbunden, doch es fließen kaum Frames. Was prüfst du?",
+      ["Ob beide Enden dasselbe Native VLAN nutzen", "Ob beide Switches gleich heißen", "Ob ein PC angeschlossen ist"], 0,
+      "Ungleiche Native VLANs an den beiden Enden sind ein Klassiker: Ungetaggte Frames landen auf der Gegenseite im falschen VLAN. Der Switch meldet das ausdrücklich.", VL),
+
+    /* ---- Port-Security: gelernte MAC ---- */
+    m("psec-4", "lab.portsec", "AP2", "wahl", "Was bewirkt der Zusatz sticky bei Port-Security?",
+      ["Der Switch übernimmt die zuerst gelernte MAC selbst", "Der Port wird zum Trunk", "Die MAC wird im VLAN gespeichert"], 0,
+      "Mit sticky trägt der Switch die zuerst gelernte MAC in die laufende Konfiguration ein. Ohne diesen Zusatz müsste man jede erlaubte Adresse von Hand eintragen.", NW),
+
+    /* ---- Switch: Domänen ---- */
+    m("sw-4", "lab.switch", "AP1", "wahl", "Ein Switch hat drei VLANs. Wie viele Domänen für Rundrufe entstehen?",
+      ["Drei Domänen", "Eine Domäne", "Keine Domäne"], 0,
+      "Jedes VLAN ist eine eigene Domäne für Rundrufe; erst ein Router verbindet sie. Ohne VLANs wäre es genau eine — wie bei einem Hub.", NW),
+
+    /* ---- IP: private Adressen ---- */
+    m("ip-4", "lab.ip", "E", "wahl", "Welche Adresse ist nach RFC 1918 privat?",
+      ["10.5.5.5", "11.0.0.5", "192.169.1.5"], 0,
+      "Privat sind 10.0.0.0/8, 172.16.0.0/12 und 192.168.0.0/16. 11.0.0.0/8 und 192.169.0.0/16 liegen daneben und sind öffentlich.", SU, null,
+      {art: "privat", ip: "10.5.5.5", erwartet: true}),
+
+    /* ---- Netzgrenze ---- */
+    m("netz-4", "lab.netz", "AP1", "vorhersage", "PC 172.16.5.10/26 pingt 172.16.5.70/26. Wie geht der PC vor?",
+      ["Er schickt das Paket ans Standardgateway", "Er fragt direkt per ARP nach .70", "Er verwirft das Paket"], 0,
+      "Bei /26 umfasst jeder Block 64 Adressen. .10 liegt in 0 bis 63, .70 in 64 bis 127: Das Ziel ist damit fremd, und der PC schickt es ans Gateway. Nur bei gleichem Netz fragt er direkt.", SU, null,
+      {art: "gleich", ip: "172.16.5.10", ip2: "172.16.5.70", maske: "255.255.255.192", erwartet: false}),
+
+    /* ---- Route: zwei Wege zum selben Ziel ---- */
+    m("route-5", "lab.route", "AP2", "wahl", "Zwei Routen zeigen auf dasselbe Ziel, aber über verschiedene Next Hops. Was entscheidet?",
+      ["Die Administrative Distanz, dann die Metrik", "Die Reihenfolge im Skript", "Das Alter der Route"], 0,
+      "Bei gleichem Präfix gewinnt die Route mit der kleineren Administrative Distanz (direkt 0, statisch 1, OSPF 110). Ist sie gleich, entscheidet die Metrik.", AP),
+
+    /* ---- Firewall: zustandsbehaftet ---- */
+    m("fw-4", "lab.fw", "AP2", "wahl", "Welche Regel braucht eine zustandsbehaftete Firewall NICHT?",
+      ["Eine Erlaubnis für den Rückverkehr", "Eine Erlaubnis für ausgehendes HTTPS", "Eine Sperre am Ende des Regelwerks"], 0,
+      "Die Firewall kennt die offenen Verbindungen und lässt die Antworten darauf von selbst zurück. Eine zweite Regel dafür wäre doppelt — und eine zusätzliche Fehlerquelle.", PL),
+
+    /* ---- Ports: Quell- und Zielport ---- */
+    m("port-4", "lab.ports", "AP2", "wahl", "Ein Client öffnet eine Webseite. Welcher Port steht im Ziel des ersten Pakets?",
+      ["443", "Ein hoher Port über 49152", "53"], 0,
+      "Der Client wählt für sich einen hohen Quellport, das Ziel ist der Port des Dienstes (443 bei HTTPS). Quell- und Zielport zu verwechseln ist der klassische Fehler in Firewall-Regeln.", TC),
   );
 })();
 
@@ -13718,7 +13944,77 @@ DATEN.trainings = [
      "SAN nennen und den Transport zuordnen: iSCSI 3260 im eigenen Speichernetz.",
      "Im Modell das NAS als Dateiserver in Betrieb nehmen (Adresse, Maske, Gateway) und die Freigabe nutzen.",
      "Gegenprobe: Warum ein NAS für eine Datenbank ungeeignet ist – Dateizugriff mit Sperren statt Blockzugriff."],
-   quelle: "Storage-Konzeptatlas · IANA Port Number Registry (445, 2049, 3260)"}
+   quelle: "Storage-Konzeptatlas · IANA Port Number Registry (445, 2049, 3260)"},
+
+  /* ---------- Ausbau 3.0: sechs weitere Fehlerbilder (task-54) ----------
+     Jede Karte gehört zu einem Injektor, der den Fehler wirklich ins Netz bringt: Startnetz bricht,
+     Lösung heilt (gemessen in tests/injektoren-ausbau.test.js). Die Reihenfolge der Liste bleibt –
+     angehängt wird nur hinten (Regel 2 der eingefrorenen Tabellen). */
+  {id: "tr-strom-aus", titel: "Kein Link – das Gerät hat keinen Strom", skill: "lab.link", geraet: "alle",
+   art: "stoerung", minuten: 6, geruest: true, niveau: "AP1",
+   beschreibung: "Ein Arbeitsplatz ist nicht erreichbar, und am Switch bleibt der Port dunkel – das Kabel steckt aber. Der Rechner ist ausgeschaltet: Netzschalter, Steckdosenleiste oder Netzteilschalter. Du prüfst von unten nach oben: erst Strom und Link, dann alles Weitere. Ein ausgeschaltetes Gerät sieht am Switch aus wie ein gezogenes Kabel.",
+   tipp: "Schicht 1 zuerst: Leuchtet am Gerät überhaupt etwas? Eine abschaltbare Steckdosenleiste ist der klassische Übeltäter – und ein stromloses Gerät ist kein Kabelproblem.",
+   schritte: ["Am Gerät nachsehen: Leuchtet eine Lampe, läuft ein Lüfter, zeigt der Bildschirm etwas?",
+     "Stromversorgung prüfen: Netzschalter, Netzteilschalter, Steckdosenleiste, Kaltgerätestecker.",
+     "Am Switch den Port ansehen: kein Link (dunkel) bei steckendem Kabel deutet auf ein stromloses Gerät.",
+     "Gerät einschalten und warten, bis es gebootet hat.",
+     "Erneut messen: Port-LED an, Ping geht durch, danach die Anwendung prüfen."],
+   quelle: "Fragen – Netzwerke planen (Fehlersuche nach OSI von unten)"},
+
+  {id: "tr-dhcp-pool-leer", titel: "Der Adresspool ist erschöpft", skill: "lab.dhcp", geraet: "alle",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Ein neu gestarteter Rechner bekommt keine Adresse und zeigt „Autokonfiguration IPv4-Adresse: 169.254.…“. Der DHCP-Server läuft, antwortet aber mit keinem Angebot, weil sein Pool keine freie Adresse mehr hat. Du prüfst den Poolbereich: Steht der Start auf einer fest vergebenen Adresse wie dem Gateway, ist für Clients nichts übrig.",
+   tipp: "Der Server schweigt nicht, er HAT nichts zu vergeben. Vergleiche Start und Anzahl des Pools mit den Adressen, die im Netz schon fest vergeben sind – das Gateway gehört nicht in den Pool.",
+   schritte: ["Am Client messen: `ipconfig` – steht dort eine 169.254-Adresse (APIPA)?",
+     "Am Server den Pool ansehen: Start, Anzahl und die ausgeschlossenen Bereiche.",
+     "Prüfen, ob Start und Anzahl nur fest vergebene Adressen umfassen (Gateway, Server, Drucker).",
+     "Pool auf freie Adressen legen: Start hinter die festen Adressen, Anzahl groß genug.",
+     "Client neu starten und messen: Er bekommt eine Adresse aus dem Pool, Gateway und DNS stimmen."],
+   quelle: "Network – Lernfassung (§ 9 DHCP) · RFC 2131 · Cisco IOS DHCP Server Configuration Guide"},
+
+  {id: "tr-dhcp-reserviert", titel: "Die reservierte Adresse ist belegt", skill: "lab.dhcp", geraet: "alle",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Ein einzelner Rechner bekommt keine Adresse, obwohl der Pool voller freier Adressen ist. Für seine MAC-Adresse ist eine feste Adresse reserviert – und die trägt schon ein anderes Gerät. Der Server vergibt die reservierte Adresse dann nicht einfach anders: Es kommt gar kein Angebot, der Rechner fällt auf APIPA zurück.",
+   tipp: "Der Server hat für dieses Gerät eine Zusage. Prüf die Reservierung: Auf welche Adresse zeigt sie, und wem gehört diese Adresse bereits?",
+   schritte: ["Am Client messen: keine Adresse, 169.254.… (APIPA) – nur dieser eine Rechner ist betroffen.",
+     "Am Server die Reservierungen ansehen: MAC-Adresse des Clients und die zugeordnete IP.",
+     "Diese IP im Netz suchen: Wer trägt sie noch (Gateway, Server, fest eingetragenes Gerät)?",
+     "Reservierung auf eine freie Adresse außerhalb des Pools legen oder löschen.",
+     "Client neu starten und messen: Er bekommt genau die reservierte Adresse."],
+   quelle: "RFC 2131 (§ 4.3.1, „manual allocation“) · RFC 2132 (Option 50 Requested IP Address)"},
+
+  {id: "tr-dhcp-konflikt", titel: "Adresskonflikt im Pool", skill: "lab.dhcp", geraet: "alle",
+   art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
+   beschreibung: "Wieder bekommt ein Client keine Adresse – diesmal, weil eine Adresse im Pool doppelt vergeben ist: Zwei Geräte tragen dieselbe IP. Der DHCP-Server prüft jede Adresse vor der Vergabe, findet den Konflikt und überspringt sie. Betrifft das alle Adressen des Pools, bleibt der Client ohne Angebot.",
+   tipp: "Der Server prüft vor der Vergabe, ob eine Adresse schon benutzt wird. Such die Adresse, die zwei Geräte gleichzeitig tragen – und prüf, ob sie im DHCP-Bereich liegt.",
+   schritte: ["Am Client messen: keine Adresse, APIPA – weitere Clients sind nicht betroffen.",
+     "Am Server die Konfliktliste ansehen (Anzeige „Adresskonflikt“) und die betroffene Adresse notieren.",
+     "Im Netz nachsehen, wer diese Adresse trägt: Findet sich dieselbe IP auf zwei Geräten?",
+     "Die feste Adresse aus dem DHCP-Bereich herausnehmen (oder eines der Geräte umadressieren).",
+     "Client neu starten und messen: Er bekommt eine freie Adresse, kein Konflikt mehr."],
+   quelle: "RFC 5227 (IPv4 Address Conflict Detection) · RFC 2131 · IOS-ähnlich (Anzeige)"},
+
+  {id: "tr-route-maske", titel: "Die Route hat die falsche Maske", skill: "lab.route", geraet: "router",
+   art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
+   beschreibung: "Die Zentrale erreicht die Filiale nicht mehr, obwohl in der Routingtabelle eine Route in das Filialnetz steht. Die Maske dieser Route ist zu klein: Sie deckt nur einen Teil des Netzes ab, die Adressen der Filialgeräte liegen außerhalb. Die Pakete nehmen deshalb die Default-Route und verschwinden ins Internet – der Anwender sieht nur eine Zeitüberschreitung.",
+   tipp: "Eine Route besteht aus Netz UND Maske. Prüf in der Routingtabelle beides zusammen: Wie viele Adressen deckt die eingetragene Maske ab – und wo liegen die Geräte der Filiale wirklich?",
+   schritte: ["Vom Zentrale-Rechner zur Filiale pingen: Zeitüberschreitung, nicht „Netz nicht erreichbar“.",
+     "In der Routingtabelle der Zentrale die Route ins Filialnetz suchen (Netz und Präfixlänge).",
+     "Nachrechnen: Welche Adressen deckt diese Maske ab? Liegt die Filialadresse darin?",
+     "Route mit der richtigen Maske neu setzen (alte zuerst entfernen).",
+     "Erneut messen: Ping und Dateifreigabe zwischen Zentrale und Filiale gehen wieder."],
+   quelle: "RFC 792 (Destination Unreachable) · Cisco: Understanding the Ping and Traceroute Commands · Fragen – Netzwerke planen (Routing)"},
+
+  {id: "tr-dns-falsches-geraet", titel: "Der Name zeigt auf das falsche Gerät", skill: "lab.dns", geraet: "host",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Das Intranet ist über den Namen nicht mehr erreichbar – über die IP-Adresse aber schon. Der DNS-Eintrag des Namens zeigt auf ein anderes Gerät als den Server: Auf dem falschen Rechner läuft der Dienst nicht, die Verbindung wird sofort abgelehnt. Der Name löst also auf, nur eben falsch.",
+   tipp: "Der Name funktioniert – nur nicht auf dem richtigen Ziel. Vergleiche die aufgelöste Adresse mit der Adresse des Servers: Wem gehört die Adresse, auf die der Name zeigt?",
+   schritte: ["Den Namen auflösen lassen (`nslookup` oder `ping name`) und die Adresse notieren.",
+     "Dieselbe Verbindung per IP-Adresse versuchen: Klappt sie, liegt es an der Namensauflösung.",
+     "Die Adresse aus der Auflösung im Netz suchen: Welches Gerät trägt sie?",
+     "Am DNS-Server den Eintrag auf die richtige Adresse des Servers ändern.",
+     "Erneut messen: Der Name löst auf den Server auf, die Seite lädt."],
+   quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035"}
 ];
 
 /* ---- daten/wiki.js ---- */
@@ -15558,7 +15854,14 @@ Spiel.DEX_SYMPTOM = {
   /* Ausbau 1.3: die drei Fehlerarten, die je eine gesperrte Trainingskarte geöffnet haben */
   "portsec-fremde-mac":  "„Am Besprechungsplatz steckt das Kabel, die Lampe leuchtet – aber kein einziges Paket kommt durch.“",
   "stp-doppelkabel":     "„Seit dem Umbau ist das ganze Netz lahm: Seiten laden ewig oder gar nicht, und keiner hat etwas geändert.“",
-  "nas-ohne-adresse":    "„Unser neues NAS ist angekabelt und leuchtet – aber kein Rechner findet die Ablage.“"
+  "nas-ohne-adresse":    "„Unser neues NAS ist angekabelt und leuchtet – aber kein Rechner findet die Ablage.“",
+  /* Ausbau 3.0 (task-54): sechs weitere Fehlerarten – Strom, Adressvergabe (drei Fälle), Route, Name */
+  "geraet-stromlos":        "„Der Rechner am Platz ist tot – kein Licht, kein Lüfter, kein Bild.“",
+  "dhcp-pool-zu-klein":     "„Ein neu aufgestellter Rechner bekommt keine Adresse und keine Verbindung.“",
+  "dhcp-adresse-reserviert": "„Nur der eine Rechner am Fenster bekommt keine Adresse – alle anderen schon.“",
+  "dhcp-adresskonflikt":    "„Ein Rechner bekommt keine Adresse, und im Haus heißt es, eine Adresse sei doppelt vergeben.“",
+  "route-maske-falsch":     "„Die Filiale ist nicht mehr erreichbar, obwohl in der Zentrale alles läuft.“",
+  "dns-eintrag-falsch":     "„Unsere Intranet-Seite geht über den Namen nicht mehr auf – über die Adresse schon.“"
 };
 
 Spiel.dex.daten = function(){
@@ -18048,6 +18351,146 @@ Spiel.INJEKTOREN = (() => {
       konkret: [`${name(n, k.geraet)} hat keine IP-Adresse. Ohne Adresse gibt es kein Ziel, an das ein Frame gehen könnte – die Freigabe ist deshalb für niemanden erreichbar.`]}),
     erklaerung: "Ein NAS stellt Dateien über das LAN bereit (SMB auf TCP 445, NFS auf 2049) und ist ein eigenständiges Gerät im Netz. Wie jeder Server braucht es eine feste Adresse aus dem eigenen Netz, die passende Maske und – für andere Netze – ein Gateway. Ohne Adresse gibt es kein Ziel, an das ein Frame gehen könnte: Der Switch kennt nur MAC-Adressen in seinem VLAN, kein „NAS“. Deshalb bekommt der neue Dateiserver die Adresse des alten, damit alle ihn unter derselben Nummer finden; ein SAN dagegen stellt Blockspeicher bereit (iSCSI auf 3260), den ein Server wie eine eigene Platte nutzt.",
     quelle: "Storage-Konzeptatlas · IANA Port Number Registry (445, 2049, 3260)"});
+
+  /* ---------- Schicht 3: Strom, Adressvergabe, Name, Route (Ausbau 3.0, task-54) ----------
+     Sechs zusätzliche Fehlerbilder. Vier davon lösen Grundcodes aus, die bis hierher KEIN Injektor
+     auslöste (DEVICE_OFF, DHCP_POOL_EMPTY, DHCP_RESERVED_BUSY, DHCP_CONFLICT – gemessen über
+     `i.gruende` aller Injektoren gegen `Sim.GRUENDE`). Kein neuer Grundcode, keine Änderung an
+     `src/sim/`: alle sechs arbeiten mit vorhandenen Mechaniken. Gemessen (tests/injektoren-ausbau.test.js):
+     Startnetz bricht, Lösung heilt, die zugehörige Trainingskarte öffnet und ist lösbar. */
+  /* Erster DHCP-Pool eines Geräts – reine Lesehilfe für die drei Adressvergabe-Fälle. */
+  const poolVon = (n, id) => {
+    const g = n.geraete[id];
+    const d = g && ((g.running.dienste && g.running.dienste.dhcp) || g.running.dhcp);
+    const p = d && Array.isArray(d.pools) ? d.pools[0] : null;
+    return p && p.netz && p.maske ? p : null;
+  };
+
+  /* Gerät ohne Strom: Der Rechner ist ausgeschaltet. Alles, was VON ihm kommt, endet mit DEVICE_OFF
+     (src/sim/aufrufe.js:52-55), und am Switch erlischt der Link. Gewählt werden nur Endgeräte der
+     Vorlage (r.clients) – so ist der erste gebrochene Zielgrund DEVICE_OFF und nicht der eines
+     unbeteiligten Servers. */
+  neu({name: "geraet-stromlos", titel: "Gerät ohne Strom", skills: ["lab.link"], gruende: ["DEVICE_OFF", "ARP_NO_REPLY", "LINK_DOWN", "TIMEOUT", "DHCP_NO_OFFER"],
+    vorlagen: ["lan", "buero", "standorte"],
+    passt: (n, r) => (r.clients || []).filter(id => n.geraete[id] && n.geraete[id].an !== false).map(id => ({key: id, geraet: id})),
+    anwenden(n, k){ Modell.geraetSetzen(n, k.key, "an", false); },
+    loesung: (n, k) => [{aktion: "an", geraet: k.key,
+      text: `${name(n, k.key)} wieder einschalten (Netzschalter, Steckdose, Netzteil prüfen) – erst danach hat der Switchport wieder Link.`}],
+    hilfen: (n, k) => ({frage: ["Das Kabel steckt, der Switchport bleibt aber dunkel. Was muss ein Gerät tun, damit sein Netzwerkanschluss überhaupt leuchtet?"],
+      bereich: [{geraet: k.key}],
+      konkret: [`${name(n, k.key)} ist ausgeschaltet. Ohne Strom gibt es keinen Link – auch wenn Kabel, Port und Konfiguration stimmen.`]}),
+    erklaerung: "Ein ausgeschaltetes Gerät ist im Netz nicht vorhanden: Seine Schnittstellen sind ohne Link, es sendet nichts und antwortet auf nichts. Für den Switch sieht das aus wie ein gezogenes Kabel. Deshalb prüft man vor jeder Fehlersuche auf höheren Schichten zuerst Strom, Kabel und Link – die Steckdosenleiste ist der klassische Übeltäter.",
+    quelle: "Fragen – Netzwerke planen (Fehlersuche nach OSI von unten)"});
+
+  /* DHCP-Pool ohne freie Adresse: Start = Gateway, eine Adresse. Der einzige Kandidat ist damit das
+     Gateway selbst – der Server vergibt nichts und meldet DHCP_POOL_EMPTY (src/sim/host.js:247-256, 318). */
+  neu({name: "dhcp-pool-zu-klein", titel: "DHCP-Pool ohne freie Adresse", skills: ["lab.dhcp"], gruende: ["DHCP_POOL_EMPTY", "DHCP_NO_OFFER"],
+    vorlagen: ["buero"],
+    passt: (n, r) => { const p = poolVon(n, r.server); return p && p.gw ? [{key: "pool", geraet: r.server, pool: Object.assign({}, p)}] : []; },
+    anwenden(n, k){ Modell.setzen(n, k.geraet, "dienste.dhcp.pools", [Object.assign({}, k.pool, {start: k.pool.gw, anzahl: 1})]); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"dienste.dhcp.pools": [Object.assign({}, k.pool)]},
+      text: `Pool „${k.pool.name}“ wieder auf freie Adressen legen (Start ${k.pool.start}, ${k.pool.anzahl} Adressen): Start und Anzahl zeigen auf das Gateway ${k.pool.gw} – dort ist nichts zu vergeben.`}],
+    hilfen: (n, k) => ({frage: ["Der Server läuft, der Client fragt brav an – und bekommt trotzdem nichts. Schau in den Pool: Welche Adressen darf der Server überhaupt vergeben?"],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`Der Pool „${k.pool.name}“ beginnt bei ${k.pool.gw} und umfasst ${k.pool.anzahl} Adresse – das ist das Gateway. Der Server hat also keine freie Adresse.`]}),
+    erklaerung: "Ein DHCP-Pool ist ein Bereich freier Adressen (Start bis Start + Anzahl). Liegt dieser Bereich auf dem Gateway oder auf sonst einer fest vergebenen Adresse, hat der Server nichts zu vergeben: Er schickt kein Angebot, und der Client gibt sich selbst eine Notadresse aus 169.254.0.0/16 (APIPA). Pool vergrößern oder verschieben.",
+    quelle: "Network – Lernfassung (§ 9 DHCP) · RFC 2131 · Cisco IOS DHCP Server Configuration Guide"});
+
+  /* Reservierte Adresse belegt: Für die MAC des Clients ist eine Adresse reserviert – und die ist das
+     Gateway. Eine belegte Reservierung ergibt KEIN Ausweichangebot (src/sim/host.js:265-272) → DHCP_RESERVED_BUSY. */
+  neu({name: "dhcp-adresse-reserviert", titel: "Reservierte Adresse ist belegt", skills: ["lab.dhcp"], gruende: ["DHCP_RESERVED_BUSY", "DHCP_NO_OFFER"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const p = poolVon(n, r.server), c = (r.clients || [])[0];
+      const mac = c && n.geraete[c] && n.geraete[c].hw && n.geraete[c].hw.macs && n.geraete[c].hw.macs.eth0;
+      return (p && p.gw && c && mac) ? [{key: c, geraet: r.server, client: c, mac, pool: Object.assign({}, p)}] : [];
+    },
+    anwenden(n, k){ Modell.setzen(n, k.geraet, "dienste.dhcp.pools",
+      [Object.assign({}, k.pool, {reservierungen: [{mac: k.mac, ip: k.pool.gw, name: n.geraete[k.client].name}]})]); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"dienste.dhcp.pools": [Object.assign({}, k.pool)]},
+      text: `Reservierung für ${name(n, k.client)} entfernen (oder auf eine freie Adresse legen) – ${k.pool.gw} ist das Gateway, keine Geräteadresse.`}],
+    hilfen: (n, k) => ({frage: ["Der Pool hat freie Adressen, der Server hat eine feste Zuordnung für diesen Rechner – und trotzdem kommt kein Angebot. Welche Adresse steht in der Reservierung, und wem gehört sie?"],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`Für ${name(n, k.client)} ist ${k.pool.gw} reserviert – das ist das Gateway. Eine belegte Reservierung wird nicht durch eine andere Adresse ersetzt: Es kommt gar kein Angebot.`]}),
+    erklaerung: "Eine Reservierung (MAC → IP) ist eine feste Zusage. Ist die reservierte Adresse schon vergeben, vergibt der Server sie nicht einfach anders – das Gerät bekommt gar kein Angebot und fällt auf APIPA zurück. Reservierte Adressen gehören außerhalb des freien Bereichs und dürfen nirgends statisch eingetragen sein.",
+    quelle: "RFC 2131 (§ 4.3.1 „manual allocation“) · RFC 2132 (Option 50 Requested IP Address)"});
+
+  /* Adresskonflikt im Pool: Die Adresse, die der Pool vergibt, tragen ZWEI Geräte (Drucker und die
+     Verwaltungsadresse des Switches). Der Server prüft vor der Vergabe, findet den Konflikt und
+     überspringt die Adresse – der Pool ist damit leer (src/sim/host.js:253-255, 283-286, 306, 315-318). */
+  neu({name: "dhcp-adresskonflikt", titel: "Adresskonflikt im DHCP-Pool", skills: ["lab.dhcp"], gruende: ["DHCP_CONFLICT", "DHCP_NO_OFFER", "DUP_IP"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const p = poolVon(n, r.server), d = r.drucker, sw = (r.switches || [])[0];
+      const ip = d && n.geraete[d] && n.geraete[d].running.if && n.geraete[d].running.if.eth0 && n.geraete[d].running.if.eth0.ip;
+      const svi = sw && n.geraete[sw] && n.geraete[sw].running.svi && n.geraete[sw].running.svi["1"];
+      return (p && ip && sw && svi) ? [{key: d, geraet: r.server, drucker: d, switch: sw, ip,
+        pool: Object.assign({}, p), svi: Object.assign({}, svi)}] : [];
+    },
+    anwenden(n, k){
+      /* 1) Ein zweites Gerät trägt dieselbe Adresse (der Switch bekommt die Verwaltungsadresse des Druckers). */
+      Modell.setzen(n, k.switch, "svi.1", {ip: k.ip, maske: k.pool.maske, shutdown: false});
+      /* 2) Der Pool vergibt genau diese Adresse – sonst gäbe es Ausweichadressen und keinen Konflikt. */
+      Modell.setzen(n, k.geraet, "dienste.dhcp.pools", [Object.assign({}, k.pool, {start: k.ip, anzahl: 1})]);
+    },
+    loesung: (n, k) => [
+      {geraet: k.switch, setzen: {"svi.1": Object.assign({}, k.svi)},
+       text: `${name(n, k.switch)}: Verwaltungsadresse (interface vlan 1) entfernen – ${k.ip} gehört ${name(n, k.drucker)}.`},
+      {geraet: k.geraet, setzen: {"dienste.dhcp.pools": [Object.assign({}, k.pool)]},
+       text: `Pool „${k.pool.name}“ wieder auf freie Adressen legen (Start ${k.pool.start}, ${k.pool.anzahl} Adressen).`}],
+    hilfen: (n, k) => ({frage: ["Der Pool ist groß genug, der Server läuft – und der Client bekommt trotzdem nichts. Was tut der Server, bevor er eine Adresse vergibt, und was findet er hier?"],
+      bereich: [{geraet: k.geraet}, {geraet: k.switch}],
+      konkret: [`${k.ip} ist doppelt vergeben: ${name(n, k.drucker)} trägt sie fest, und ${name(n, k.switch)} hat sie als Verwaltungsadresse. Genau diese Adresse vergibt der Pool – der Server erkennt den Konflikt und überspringt sie.`]}),
+    erklaerung: "Vor der Vergabe prüft der DHCP-Server, ob eine Adresse schon benutzt wird. Trägt sie mehr als ein Gerät, gilt sie als Konflikt: Der Server vergibt sie nicht und vermerkt sie in der Konfliktliste (show ip dhcp conflict). Sind alle Adressen des Pools betroffen, bekommt der Client kein Angebot. Feste Adressen gehören außerhalb des DHCP-Bereichs – und dürfen nur einmal vergeben sein.",
+    quelle: "RFC 5227 (IPv4 Address Conflict Detection) · RFC 2131 · IOS-ähnlich (Anzeige)"});
+
+  /* Route mit falscher Maske: Die Route in die Filiale ist da, deckt aber nur ein Viertel des Netzes ab
+     (255.255.255.240 = /28). Die Adressen .21 und .22 liegen außerhalb, das Paket fällt auf die
+     Default-Route und verschwindet im Internet (Grundcode NO_ROUTE, wie beim fehlenden Eintrag). */
+  neu({name: "route-maske-falsch", titel: "Route mit falscher Maske", skills: ["lab.route", "lab.cli"], gruende: ["NO_ROUTE", "NO_RETURN_ROUTE", "HOST_UNREACHABLE", "TIMEOUT"],
+    vorlagen: ["standorte"],
+    passt: (n, r) => {
+      const id = r.router, liste = (n.geraete[id] && n.geraete[id].running.routen) || [];
+      const i = liste.findIndex(x => x.netz !== "0.0.0.0");
+      return i >= 0 ? [{key: id, geraet: id, index: i, route: Object.assign({}, liste[i]), routen: liste.map(x => Object.assign({}, x))}] : [];
+    },
+    anwenden(n, k){
+      Modell.setzen(n, k.geraet, "routen",
+        n.geraete[k.geraet].running.routen.map((x, i) => i === k.index ? Object.assign({}, x, {maske: "255.255.255.240"}) : x));
+    },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {routen: k.routen},
+      text: `${name(n, k.geraet)}: Route ${k.route.netz} wieder mit der richtigen Maske ${k.route.maske} eintragen (die eingetragene /28 deckt nur ein Viertel des Netzes ab) – auf der Konsole: „no ip route ${k.route.netz} 255.255.255.240 ${k.route.nh}“ und „ip route ${k.route.netz} ${k.route.maske} ${k.route.nh}“.`}],
+    hilfen: (n, k) => ({frage: ["Die Route in die Filiale steht in der Tabelle – und die Pakete gehen trotzdem ins Internet. Vergleiche die Maske der Route mit der Maske der Adressen in der Filiale."],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`Die Route ${k.route.netz} ist mit /28 (255.255.255.240) eingetragen und deckt nur die Adressen bis .14 ab. Die Geräte der Filiale liegen aber bei .21 und .22 – die Route passt nicht, das Paket nimmt die Default-Route.`]}),
+    erklaerung: "Eine Route besteht aus Netz UND Maske: Erst beide zusammen sagen, welche Adressen sie umfasst. Eine zu kleine Maske (hier /28 statt /24) lässt die Route in der Tabelle stehen, greift aber für die meisten Adressen des Netzes nicht – die Pakete laufen in die Default-Route und damit ins Internet, wo sie verworfen werden. Genau deshalb prüft man in „show ip route“ Netz und Präfixlänge gemeinsam.",
+    quelle: "RFC 792 (Destination Unreachable) · Cisco: Understanding the Ping and Traceroute Commands · Fragen – Netzwerke planen (Routing)"});
+
+  /* DNS-Eintrag zeigt auf das falsche Gerät: Der Name löst auf, aber auf den Drucker. Der Client
+     verbindet sich auf den falschen Rechner – der hat keinen Webserver und antwortet mit RST
+     (Grundcode PORT_CLOSED). Kein DNS_FAIL: Der Name ist ja bekannt. */
+  neu({name: "dns-eintrag-falsch", titel: "Name zeigt auf das falsche Gerät", skills: ["lab.dns"], gruende: ["PORT_CLOSED", "SERVICE_OFF", "TIMEOUT", "ARP_NO_REPLY"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const d = n.geraete[r.server] && n.geraete[r.server].running.dienste && n.geraete[r.server].running.dienste.dns;
+      const liste = (d && d.eintraege) || [];
+      const i = liste.findIndex(e => /^server\./i.test(String(e.name)));
+      const ziel = r.drucker && n.geraete[r.drucker] && n.geraete[r.drucker].running.if && n.geraete[r.drucker].running.if.eth0
+        && n.geraete[r.drucker].running.if.eth0.ip;
+      return (i >= 0 && ziel) ? [{key: r.server, geraet: r.server, index: i, ziel, name: liste[i].name, ip: liste[i].ip,
+        eintraege: liste.map(e => Object.assign({}, e))}] : [];
+    },
+    anwenden(n, k){
+      Modell.setzen(n, k.geraet, "dienste.dns.eintraege",
+        n.geraete[k.geraet].running.dienste.dns.eintraege.map((e, i) => i === k.index ? Object.assign({}, e, {ip: k.ziel}) : e));
+    },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"dienste.dns.eintraege": k.eintraege},
+      text: `${name(n, k.geraet)}: DNS-Eintrag ${k.name} wieder auf ${k.ip} zeigen lassen – im Moment zeigt er auf den Drucker (${k.ziel}).`}],
+    hilfen: (n, k) => ({frage: ["Der Name lässt sich auflösen – die Seite kommt trotzdem nicht. Auf WELCHE Adresse löst der Name denn auf, und was steht dort für ein Gerät?"],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`${k.name} löst auf ${k.ziel} auf – das ist der Drucker. Auf Port 80 lauscht dort niemand, die Verbindung wird sofort abgelehnt.`]}),
+    erklaerung: "Ein DNS-Eintrag verbindet einen Namen mit einer Adresse. Zeigt er auf das falsche Gerät, klappt die Namensauflösung trotzdem – der Client verbindet sich nur mit dem falschen Rechner. Ist dort der Dienst nicht eingerichtet, antwortet er mit einem Verbindungsabbruch (TCP-RST). Deshalb prüft man bei „Name geht nicht“ zuerst, auf welche Adresse er auflöst (nslookup) und ob dort der erwartete Dienst läuft.",
+    quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035"});
 
   return I;
 })();
@@ -27851,8 +28294,17 @@ UI.klassenraum = (() => {
   }
   /* Die Ampel (B § 9): fertig = belegte Plätze, offen = plaetze − fertig, Median = OBERER Median
      der gültigen Dauern > 0, auf ganze Sekunden. Ohne eingestellte Platzzahl bleibt sie gelb und
-     sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3). */
-  function ampel(sitzung){
+     sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3).
+
+     ZWEITE ZEILE: DIE DIAGNOSE OHNE BEWERTUNG (3.0, Säule 5, Weg A). Die Lehrkraft fragt im
+     Unterricht nicht „wie gut ist einer?", sondern „wo steht die Klasse?" — und die Antwort sind
+     AUSSCHLIESSLICH anonyme Zahlen: wie viele Plätze offen sind (mit der Klassengröße als Nenner),
+     wie viele Abgaben in den letzten fünf Minuten kamen und wie frisch die letzte ist.
+     KEIN Name, KEIN Rang, KEINE Sternesumme je Person, KEIN Vergleich zwischen Azubis; der Median
+     steht schon in der Ampel und wird hier NICHT wiederholt. Alles kommt aus der lokalen Sitzung
+     (`store "klassenraum"`) — kein Server, kein Netz. Die Uhr kommt als Zahl herein (`jetztMs`),
+     damit die Rechnung prüfbar bleibt: ohne Uhr wird keine Zeit behauptet. */
+  function ampel(sitzung, jetztMs){
     const s = sitzung || {};
     const werte = Object.keys(s.ergebnisse || {}).map(k => s.ergebnisse[k]).filter(x => x && typeof x === "object");
     const plaetze = Math.max(0, Number(s.plaetze) || 0);
@@ -27875,7 +28327,27 @@ UI.klassenraum = (() => {
       dauerS: typeof x.dauerS === "number" && x.dauerS > 0 ? x.dauerS : null,
       versuche: Math.max(0, Number(x.versuche) || 0),
     }));
-    return {farbe, summe: "Ampel: " + teile.join(" · "), fertig, plaetze, offen: plaetze > 0 ? Math.max(0, plaetze - fertig) : null, median, zeilen};
+    return Object.assign({farbe, summe: "Ampel: " + teile.join(" · "), fertig, plaetze,
+      offen: plaetze > 0 ? Math.max(0, plaetze - fertig) : null, median, zeilen},
+      fortschrittZahlen(werte, plaetze, fertig, jetztMs));
+  }
+
+  /* Die anonymen Diagnosezahlen — reine Rechnung, keine Namen weit und breit. */
+  function fortschrittZahlen(werte, plaetze, fertig, jetztMs){
+    const FENSTER_MS = 5 * 60 * 1000;
+    const offene = Math.max(0, plaetze - fertig);
+    const mitZeit = werte.map(x => x.zeit).filter(t => typeof t === "number" && isFinite(t));
+    const uhr = typeof jetztMs === "number" && isFinite(jetztMs);
+    const frische = uhr ? mitZeit.filter(t => jetztMs - t >= 0 && jetztMs - t <= FENSTER_MS).length : null;
+    const letzteSek = uhr && mitZeit.length ? Math.max(0, Math.round((jetztMs - Math.max(...mitZeit)) / 1000)) : null;
+    const zeitText = s => s < 60 ? "gerade eben" : s < 120 ? "vor 1 Minute" : `vor ${Math.round(s / 60)} Minuten`;
+    const teile = [];
+    if (plaetze > 0) teile.push(`${offene} von ${plaetze} offen`);
+    else teile.push(fertig ? `${fertig} ${fertig === 1 ? "Abgabe" : "Abgaben"}` : "noch keine Abgaben");
+    if (frische != null) teile.push(frische === 1 ? "1 Abgabe in den letzten 5 Minuten" : `${frische} Abgaben in den letzten 5 Minuten`);
+    if (letzteSek != null) teile.push(`letzte Abgabe ${zeitText(letzteSek)}`);
+    return {offenVon: plaetze > 0 ? {offen: offene, plaetze} : null, frische, letzteSek,
+      fortschritt: "Fortschritt: " + teile.join(" · ")};
   }
 
   /* ---------------- gemeinsame Bausteine ---------------- */
@@ -27907,6 +28379,7 @@ UI.klassenraum = (() => {
     L.hinweis = h("div", {class: "kl-block"}, hinweisZeile("kl-hinweis", ""));
     L.lampe = h("span", {class: "kl-lampe"});
     L.summe = hinweisZeile("kl-detail", "");
+    L.fortschritt = hinweisZeile("kl-detail", "");
     L.tafel = h("div", {class: "kl-tafel"});
     L.codes = h("textarea", {class: "kl-feld kl-breit", rows: "6", "aria-label": "Ergebnis-Codes",
       placeholder: "Einen Code je Zeile oder alles auf einmal einfügen.",
@@ -27933,6 +28406,10 @@ UI.klassenraum = (() => {
           L.hinweis),
         h("div", {class: "kl-ampel"},
           h("div", {class: "kl-summe"}, L.lampe, L.summe),
+          /* Die Diagnosezeile (3.0, Säule 5): NUR Text, kein Bedienelement — die Lehrkraft-Ansicht
+             bleibt bei sechs (R12). Sie ergänzt die Ampel um „wie viele offen / wie viele gerade
+             abgegeben / wie frisch die letzte ist" und wiederholt den Median nicht. */
+          L.fortschritt,
           L.tafel),
         h("div", {class: "kl-form"},
           hinweisZeile("kl-etikett", "Ergebnis-Codes"), L.codes,
@@ -27951,9 +28428,10 @@ UI.klassenraum = (() => {
     L.code.textContent = (s && s.code) || ABDRUCK_LEER;
     const ab = abdruck();
     L.abdruck.textContent = ab || ABDRUCK_LEER;
-    const a = ampel(s);
+    const a = ampel(s, jetzt());                    /* die Uhr nur für „letzte 5 Minuten" */
     L.lampe.className = "kl-lampe" + (a.farbe ? " " + a.farbe : "");
     L.summe.textContent = a.summe;
+    L.fortschritt.textContent = a.fortschritt;
     L.tafel.replaceChildren(...a.zeilen.map(z => h("div", {class: "kl-zeile"},
       hinweisZeile("kl-platz", z.platz >= 1 ? `Platz ${z.platz}` : "ohne Platz"),
       hinweisZeile("kl-sterne", sterneText(z.sterne)),

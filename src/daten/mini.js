@@ -364,6 +364,118 @@
     m("cli-systemctl-1", "lab.ports", "AP1", "wahl", "Das Intranet lädt nicht. Welcher Befehl behebt das?",
       ["sudo systemctl start apache2", "systemctl status apache2", "ping apache2", "sudo ip link set eth0 up"], 0,
       "„inactive (dead)“ heißt: Der Webserver-Dienst läuft nicht. systemctl start startet ihn (mit Root-Rechten, daher sudo); status zeigt nur an. Mit systemctl enable startet er künftig auch nach einem Neustart.", "systemctl(1), freedesktop.org",
-      ["log", "$ systemctl status apache2\n○ apache2.service - Apache HTTP Server\n     Active: inactive (dead)"])
+      ["log", "$ systemctl status apache2\n○ apache2.service - Apache HTTP Server\n     Active: inactive (dead)"]),
+
+    /* ---------- Ausbau 3.0, Inhalt A (task-53): 24 weitere Minis. NUR ANGEHÄNGT — die IDs
+       darüber stehen in eingefrorenen Tabellen, Einschieben würde sie verschieben.
+       Jedes dieser Minis hat einen eigenen Denkanstoß in src/daten/mini-denkhilfen3.js. ---------- */
+
+    /* ---- Speicher: NAS, SAN, iSCSI ---- */
+    m("sto-2", "lab.storage", "E", "wahl", "Welches Gerät stellt im LAN fertige Dateien über SMB bereit?",
+      ["Ein NAS", "Ein SAN", "Eine DAS-Platte"], 0,
+      "Ein NAS ist ein Dateiserver im LAN: Er gibt Dateien über SMB oder NFS heraus und verwaltet das Dateisystem selbst. Ein SAN liefert Blöcke, eine DAS-Platte hängt direkt am Rechner.", "SNIA-Begriffe NAS/SAN"),
+    m("sto-3", "lab.storage", "AP2", "wahl", "Welches Protokoll trägt Blockspeicher über das normale LAN?",
+      ["iSCSI", "SMB", "NFS", "HTTP"], 0,
+      "iSCSI kapselt SCSI-Blöcke in TCP/IP (Port 3260) und trägt sie über das vorhandene Netz. SMB und NFS sind Dateidienste, HTTP ist ein Web-Protokoll.", "SNIA-Begriffe NAS/SAN"),
+    m("sto-4", "lab.storage", "AP2", "zuordnen", "Welche Aufgabe gehört zu welcher Speicherart?",
+      {links: ["NAS", "SAN"], rechts: ["Dateien über SMB oder NFS", "Blockspeicher über iSCSI"]}, [[0, 0], [1, 1]],
+      "NAS gibt Dateien heraus (der Server verwaltet das Dateisystem), SAN gibt Blöcke heraus (der Rechner formatiert sie selbst). Das ist der Kern des Unterschieds.", "SNIA-Begriffe NAS/SAN"),
+
+    /* ---- Spanning Tree ---- */
+    m("stp-3", "lab.stp", "AP2", "wahl", "Wer berechnet bei Spanning Tree den Baum?",
+      ["Die Root-Bridge", "Der schnellste Port", "Der DHCP-Server"], 0,
+      "STP wählt eine Wurzel: die Bridge mit der kleinsten Bridge-ID. Von ihr aus berechnet jeder Switch den kürzesten Weg — die übrigen Wege werden blockiert.", NW),
+    m("stp-4", "lab.stp", "AP2", "vorhersage", "Zwei Switches tauschen vor dem ersten Nutzverkehr eigene Nachrichten aus. Wozu?",
+      ["Um die Wurzel zu wählen und Wege zu sperren", "Um IP-Adressen zu verteilen", "Um Frames zu verschlüsseln"], 0,
+      "STP spricht über eigene Nachrichten (BPDUs): Damit wählen die Switches die Wurzel und einigen sich, welche Ports blockieren. Kommen solche Nachrichten an einem Access-Port an, schaltet BPDU Guard ihn ab.", NW),
+
+    /* ---- NAT ---- */
+    m("nat-5", "lab.nat", "AP2", "wahl", "Wo findet der Router die Antwort auf eine übersetzte Verbindung wieder?",
+      ["In seiner Übersetzungstabelle", "Im DNS-Cache", "Im DHCP-Lease"], 0,
+      "Der Router führt Buch über jede übersetzte Verbindung (show ip nat translations). Ohne diese Zuordnung wüsste er nicht, an welchen inneren Rechner eine Antwort gehört.", AP),
+
+    /* ---- TCP: UDP und Verlust ---- */
+    m("tcp-4", "lab.tcp", "AP1", "wahl", "Welches Transportprotokoll passt zu einer Sprachverbindung, die keine Verzögerung verträgt?",
+      ["UDP", "TCP", "ICMP"], 0,
+      "UDP schickt ohne Verbindungsaufbau und ohne Bestätigung — dadurch entsteht keine Wartezeit. Verlorene Pakete muss die Anwendung selbst verkraften. ICMP ist kein Transportprotokoll.", TC),
+    m("tcp-5", "lab.tcp", "AP2", "vorhersage", "Ein Segment fehlt, danach kommen drei gleiche Bestätigungen. Was tut TCP?",
+      ["Es sendet das fehlende Segment sofort neu", "Es bricht die Verbindung ab", "Es wartet die Zeitüberschreitung ab"], 0,
+      "Drei doppelte Bestätigungen mit derselben Nummer sind das Signal, sofort neu zu senden (Fast Retransmit) — der Sender wartet nicht auf seinen Zeitgeber.", TC),
+
+    /* ---- DNS: Rückwärtsauflösung und Fehlersuche ---- */
+    m("dns-4", "lab.dns", "AP2", "wahl", "Wozu dient ein PTR-Eintrag im DNS?",
+      ["Adresse zu Name (Rückwärtsauflösung)", "Name zu Adresse", "Port zu Dienst"], 0,
+      "A- und AAAA-Einträge lösen vorwärts auf (Name zu Adresse). PTR steht in der Reverse-Zone und löst rückwärts auf (Adresse zu Name) — Mailserver prüfen damit, ob ein Absender echt wirkt.", NW),
+    m("dns-5", "lab.dns", "AP1", "wahl", "Ein Name lässt sich nicht auflösen, der DNS-Server ist eingetragen. Was prüfst du zuerst?",
+      ["Ob der DNS-Server erreichbar ist", "Ob der Webserver läuft", "Ob der Browser aktuell ist"], 0,
+      "Erst die Kette vom eigenen Rechner zum Server: Adresse, Gateway, DNS-Server. Ein Ping auf den eingetragenen Server trennt in einem Schritt den Fehler auf dem Weg von einem Fehler im Dienst.", NW),
+
+    /* ---- DHCP: Lease-Ablauf ---- */
+    m("dhcp-4", "lab.dhcp", "AP2", "vorhersage", "Ein Client erneuert seine Lease nicht. Was folgt daraus?",
+      ["Die Adresse wird nach Ablauf wieder frei", "Der Client behält sie dauerhaft", "Der Server startet neu"], 0,
+      "Jede Lease läuft ab. Erneuert der Client nicht (erster Versuch bei der Hälfte der Laufzeit), fällt die Adresse nach Ablauf zurück in den Pool und kann neu vergeben werden.", NW),
+
+    /* ---- ARP: ungefragte Antwort ---- */
+    m("arp-4", "lab.arp", "AP2", "wahl", "Ein Gerät meldet seine Adresse, ohne dass jemand gefragt hat. Wie heißt das?",
+      ["Gratuitous ARP", "Proxy ARP", "Reverse ARP"], 0,
+      "Ein Gratuitous ARP kündigt die eigene Zuordnung ungefragt an — etwa nach einem Wechsel — und frischt so die Caches der Nachbarn auf. Genau dieses Vertrauen macht ARP-Spoofing möglich.", NW),
+
+    /* ---- Subnetting: /30 und Zusammenfassen ---- */
+    m("sub-5", "lab.subnetz", "AP2", "wahl", "Welche Maske passt zu einer Leitung zwischen genau zwei Routern?",
+      ["255.255.255.252", "255.255.255.192", "255.255.255.0"], 0,
+      "Ein /30 hat vier Adressen: Netzadresse, zwei Hosts, Broadcastadresse. Für eine Punkt-zu-Punkt-Strecke ist das genau richtig — /29 und größer verschwenden Adressen.", SU),
+    m("sub-6", "lab.subnetz", "AP2", "wahl", "Zwei Netze 10.1.0.0/24 und 10.1.1.0/24 sollen als EINE Route stehen. Welche?",
+      ["10.1.0.0/23", "10.1.0.0/24", "10.1.0.0/22"], 0,
+      "Zusammenfassen heißt: gemeinsame führende Bits finden. Zwei /24 ergeben ein /23 (10.1.0.0 bis 10.1.1.255). Ein /22 würde vier Netze umfassen und damit auch fremde Adressen mitnehmen.", SU),
+
+    /* ---- VLAN: Werkszustand und Umstecken ---- */
+    m("vlan-4", "lab.vlan", "AP1", "wahl", "In welchem VLAN steckt ein Switchport, den niemand eingerichtet hat?",
+      ["In VLAN 1", "In VLAN 0", "In gar keinem"], 0,
+      "Ab Werk steckt jeder Port in VLAN 1. Ein vergessener Port ist dadurch nicht abgeschaltet — er ist im Standard-VLAN erreichbar, und das ist oft die ungewollte Lücke.", VL),
+    m("vlan-5", "lab.vlan", "AP2", "vorhersage", "Ein PC zieht von Fa0/1 (VLAN 10) auf Fa0/2 (VLAN 20). Was muss geschehen, damit er im Verwaltungsnetz bleibt?",
+      ["Fa0/2 muss in VLAN 10 gebracht werden", "Nichts — das VLAN folgt dem Gerät", "Der PC braucht eine neue MAC-Adresse"], 0,
+      "Das VLAN hängt am Port, nicht am Gerät. Nach dem Umstecken muss der neue Port im richtigen VLAN stehen, sonst landet der PC in einem anderen Netz.", VL),
+
+    /* ---- Trunk: ungleiche Enden ---- */
+    m("trunk-4", "lab.trunk", "AP2", "wahl", "Zwei Switches sind als Trunk verbunden, doch es fließen kaum Frames. Was prüfst du?",
+      ["Ob beide Enden dasselbe Native VLAN nutzen", "Ob beide Switches gleich heißen", "Ob ein PC angeschlossen ist"], 0,
+      "Ungleiche Native VLANs an den beiden Enden sind ein Klassiker: Ungetaggte Frames landen auf der Gegenseite im falschen VLAN. Der Switch meldet das ausdrücklich.", VL),
+
+    /* ---- Port-Security: gelernte MAC ---- */
+    m("psec-4", "lab.portsec", "AP2", "wahl", "Was bewirkt der Zusatz sticky bei Port-Security?",
+      ["Der Switch übernimmt die zuerst gelernte MAC selbst", "Der Port wird zum Trunk", "Die MAC wird im VLAN gespeichert"], 0,
+      "Mit sticky trägt der Switch die zuerst gelernte MAC in die laufende Konfiguration ein. Ohne diesen Zusatz müsste man jede erlaubte Adresse von Hand eintragen.", NW),
+
+    /* ---- Switch: Domänen ---- */
+    m("sw-4", "lab.switch", "AP1", "wahl", "Ein Switch hat drei VLANs. Wie viele Domänen für Rundrufe entstehen?",
+      ["Drei Domänen", "Eine Domäne", "Keine Domäne"], 0,
+      "Jedes VLAN ist eine eigene Domäne für Rundrufe; erst ein Router verbindet sie. Ohne VLANs wäre es genau eine — wie bei einem Hub.", NW),
+
+    /* ---- IP: private Adressen ---- */
+    m("ip-4", "lab.ip", "E", "wahl", "Welche Adresse ist nach RFC 1918 privat?",
+      ["10.5.5.5", "11.0.0.5", "192.169.1.5"], 0,
+      "Privat sind 10.0.0.0/8, 172.16.0.0/12 und 192.168.0.0/16. 11.0.0.0/8 und 192.169.0.0/16 liegen daneben und sind öffentlich.", SU, null,
+      {art: "privat", ip: "10.5.5.5", erwartet: true}),
+
+    /* ---- Netzgrenze ---- */
+    m("netz-4", "lab.netz", "AP1", "vorhersage", "PC 172.16.5.10/26 pingt 172.16.5.70/26. Wie geht der PC vor?",
+      ["Er schickt das Paket ans Standardgateway", "Er fragt direkt per ARP nach .70", "Er verwirft das Paket"], 0,
+      "Bei /26 umfasst jeder Block 64 Adressen. .10 liegt in 0 bis 63, .70 in 64 bis 127: Das Ziel ist damit fremd, und der PC schickt es ans Gateway. Nur bei gleichem Netz fragt er direkt.", SU, null,
+      {art: "gleich", ip: "172.16.5.10", ip2: "172.16.5.70", maske: "255.255.255.192", erwartet: false}),
+
+    /* ---- Route: zwei Wege zum selben Ziel ---- */
+    m("route-5", "lab.route", "AP2", "wahl", "Zwei Routen zeigen auf dasselbe Ziel, aber über verschiedene Next Hops. Was entscheidet?",
+      ["Die Administrative Distanz, dann die Metrik", "Die Reihenfolge im Skript", "Das Alter der Route"], 0,
+      "Bei gleichem Präfix gewinnt die Route mit der kleineren Administrative Distanz (direkt 0, statisch 1, OSPF 110). Ist sie gleich, entscheidet die Metrik.", AP),
+
+    /* ---- Firewall: zustandsbehaftet ---- */
+    m("fw-4", "lab.fw", "AP2", "wahl", "Welche Regel braucht eine zustandsbehaftete Firewall NICHT?",
+      ["Eine Erlaubnis für den Rückverkehr", "Eine Erlaubnis für ausgehendes HTTPS", "Eine Sperre am Ende des Regelwerks"], 0,
+      "Die Firewall kennt die offenen Verbindungen und lässt die Antworten darauf von selbst zurück. Eine zweite Regel dafür wäre doppelt — und eine zusätzliche Fehlerquelle.", PL),
+
+    /* ---- Ports: Quell- und Zielport ---- */
+    m("port-4", "lab.ports", "AP2", "wahl", "Ein Client öffnet eine Webseite. Welcher Port steht im Ziel des ersten Pakets?",
+      ["443", "Ein hoher Port über 49152", "53"], 0,
+      "Der Client wählt für sich einen hohen Quellport, das Ziel ist der Port des Dienstes (443 bei HTTPS). Quell- und Zielport zu verwechseln ist der klassische Fehler in Firewall-Regeln.", TC),
   );
 })();

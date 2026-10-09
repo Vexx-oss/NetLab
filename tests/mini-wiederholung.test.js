@@ -3,7 +3,7 @@
    Daten/Verhalten: src/spiel/mini.js (Rotation + Sperrfenster) · src/spiel/mischer.js (Inhalt im Postfach).
 
    DER BEFUND, DEN DIESE DATEI OFFENLEGT (gemessen am 09.10.2026 über den echten Weg
-   naechstes()+antworten(), 92 Minis, 27 Fertigkeiten):
+   naechstes()+antworten(), fester Mini-Bestand, 27 Fertigkeiten):
      vorher  20 Runden → nur 11 verschiedene Minis, 9 Wiederholungen, kleinster Abstand 7 Runden.
      nachher 20 Runden → 20 verschiedene Minis, 0 Wiederholungen; 40 Runden → 40 verschiedene.
    Ursache war der Filter in `fuerSkill`: war „nicht in s.zuletzt“ leer, fiel er auf ALLE Minis der
@@ -284,15 +284,22 @@ gruppe("Mini: Generierte Fragen (task-18)", () => {
     return folge;
   };
 
-  pruefe("Der feste Bestand bleibt die feste Liste: 92 Minis, keine generierte Frage darin", kapsel(() => {
+  pruefe("Der feste Bestand bleibt die feste Liste: keine generierte Frage darin", kapsel(() => {
     erwarte.wahr(!!(typeof Spiel.fragen !== "undefined" && Spiel.fragen && typeof Spiel.fragen.fuerSkill === "function"),
       "Spiel.fragen fehlt – der Generator ist nicht geladen");
-    erwarte.gleich(Spiel.mini.alle().length, 92, "die feste Liste hat 92 Minis");
-    erwarte.falsch(Spiel.mini.alle().some(m => String(m.id).startsWith("gf-")), "eine generierte Frage steht in alle()");
+    /* KEINE exakte Zahl mehr (09.10.2026, Inhalt-Ausbau task-53): die feste Liste ist von 92 auf 116
+       Minis gewachsen. Geprüft wird die Zusicherung, um die es geht – der feste Bestand enthält keine
+       generierte Frage – und eine UNTERGRENZE, damit ein leerer oder halbierter Bestand auffällt.
+       Eine Obergrenze wäre wieder eine eingefrorene Zahl. */
+    const bestand = Spiel.mini.alle();
+    erwarte.wahr(bestand.every(m => !m.generiert), "eine generierte Frage steht im festen Bestand");
+    erwarte.falsch(bestand.some(m => String(m.id).startsWith("gf-")), "eine generierte Frage steht in alle()");
+    erwarte.wahr(bestand.length >= 100, `der feste Bestand ist zu klein: ${bestand.length}`);
     erwarte.gleich(Spiel.mini.alle().filter(m => m.skill === "lab.ping").length, 6, "lab.ping bleibt bei sechs Minis");
     erwarte.falsch(!!(DATEN.miniDenkhilfen || {})["mini-link-2"], "mini-link-2 hat weiterhin keinen Denkhilfen-Eintrag");
+    const vorher = bestand.length;
     neu();
-    erwarte.gleich(Spiel.mini.alle().length, 92, "auch nach einem frischen Stand: 92");
+    erwarte.gleich(Spiel.mini.alle().length, vorher, "ein frischer Stand ändert den festen Bestand nicht");
   }));
 
   pruefe("Erschöpfte Fertigkeit: die generierte Frage kommt, wird gefunden und beantwortet", kapsel(() => {

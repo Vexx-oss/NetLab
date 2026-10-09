@@ -34,19 +34,24 @@ gruppe("Spiel: Bogen (S2)", () => {
   };
 
   /* ---------- Fehlerdex ---------- */
-  /* Fehlerarten des Ausbaus 1.3 – sie heben die Zahl der Dex-Einträge von 36 auf 39. Belegt in
-     tests/injektoren-neu.test.js (Wirkung) und tests/tickets-generator.test.js (je ein Fall); ihre Gruppe
-     ergibt sich aus skills[0] (src/spiel/dex.js: DEX_GRUPPEN), ihr Symptom steht in DEX_SYMPTOM. */
-  const DEX_NEU = ["portsec-fremde-mac", "stp-doppelkabel", "nas-ohne-adresse"];
-  pruefe("Fehlerdex: genau die 39 Fehlerarten, jede mit Gruppe, Symptom, Erkennungszeichen", kapsel(() => {
+  /* Die namentlich benannten Fehlerarten der Ausbauten 1.3 (drei) und 3.0 (sechs). Ihre Gruppe ergibt
+     sich aus skills[0] (src/spiel/dex.js: DEX_GRUPPEN), ihr Symptom steht in DEX_SYMPTOM.
+     Dieser Test trägt bewusst KEINE feste Anzahl mehr: `36 + DEX_NEU.length` brach bei jeder
+     Erweiterung (dreimal an einem Tag). Abgeleitet wird jetzt aus dem Bestand, und geprüft wird
+     stattdessen, DASS jede Fehlerart eine Gruppe, ein Symptom und ein Erkennungszeichen hat —
+     eine Fehlerart ohne Symptom ist damit ein Befund und keine stille Lücke. */
+  const DEX_PFLICHT = ["portsec-fremde-mac", "stp-doppelkabel", "nas-ohne-adresse",
+    "geraet-stromlos", "dhcp-pool-zu-klein", "dhcp-adresse-reserviert", "dhcp-adresskonflikt",
+    "route-maske-falsch", "dns-eintrag-falsch"];
+  pruefe("Fehlerdex: jede Fehlerart hat Gruppe, Symptom und Erkennungszeichen", kapsel(() => {
     const ids = Object.keys(Spiel.INJEKTOREN).sort(), liste = Spiel.dex.liste();
-    erwarte.gleich(ids.length, 36 + DEX_NEU.length, "36 Fehlerarten bis 1.2 + die drei neuen");
-    erwarte.gleich(DEX_NEU.filter(n => !ids.includes(n)), [], "die drei neuen Fehlerarten stehen im Dex");
-    erwarte.gleich(liste.map(e => e.id).sort(), ids, "Dex = Injektoren");
+    erwarte.gleich(liste.map(e => e.id).sort(), ids, "Dex = Injektoren (keine Lücke, kein Zuviel)");
+    erwarte.gleich(DEX_PFLICHT.filter(n => !ids.includes(n)), [], "die neun benannten Fehlerarten stehen im Dex");
     erwarte.gleich(liste.filter(e => e.gruppe === "weitere").map(e => e.id), [], "jede Fehlerart hat eine Gruppe");
+    erwarte.gleich(liste.filter(e => !Spiel.DEX_SYMPTOM[e.id]).map(e => e.id), [], "jede Fehlerart hat ein Symptom");
     erwarte.gleich(liste.filter(e => !e.symptom || !e.erkennen.length || !e.erklaerung).map(e => e.id), [], "Symptom, Erkennen, Erklärung");
     erwarte.wahr(liste.every(e => e.zustand === "unbekannt" && e.ab >= 1), "frisch: alles unbekannt, mit Stufe");
-    erwarte.gleich(Spiel.dex.gruppen().reduce((s, g) => s + g.gesamt, 0), 36 + DEX_NEU.length, "Gruppen decken alles ab");
+    erwarte.gleich(Spiel.dex.gruppen().reduce((s, g) => s + g.gesamt, 0), liste.length, "Gruppen decken alles ab");
   }));
 
   pruefe("Fehlerdex: erst beim Abschluss, ohne bezahlte Hilfe = verstanden, übersteht Neustart", kapsel(() => {
@@ -60,7 +65,7 @@ gruppe("Spiel: Bogen (S2)", () => {
     erwarte.gleich(e2.dex.neu.map(n => [n.id, n.zustand]), [["ip-tippfehler", "gesehen"]]);
     Spiel.sofortSpeichern(); Spiel._st = null; Spiel.laden();
     erwarte.gleich([z("kabel-fehlt"), z("ip-tippfehler"), z("maske-falsch")], ["verstanden", "gesehen", "unbekannt"], "nach Neustart");
-    erwarte.gleich(Spiel.dex.zaehlen(), {gesamt: 36 + DEX_NEU.length, gesehen: 2, verstanden: 1});
+    erwarte.gleich(Spiel.dex.zaehlen(), {gesamt: Spiel.dex.liste().length, gesehen: 2, verstanden: 1});
   }));
 
   pruefe("Fehlerdex: Gruppe komplett verstanden → Ehrentitel genau einmal", kapsel(() => {

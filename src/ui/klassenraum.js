@@ -188,9 +188,10 @@ UI.klassenraum = (() => {
     L.code.textContent = (s && s.code) || ABDRUCK_LEER;
     const ab = abdruck();
     L.abdruck.textContent = ab || ABDRUCK_LEER;
-    const a = ampel(s);
+    const a = ampel(s, jetzt());                    /* die Uhr nur für „letzte 5 Minuten" */
     L.lampe.className = "kl-lampe" + (a.farbe ? " " + a.farbe : "");
     L.summe.textContent = a.summe;
+    L.fortschritt.textContent = a.fortschritt;
     L.tafel.replaceChildren(...a.zeilen.map(z => h("div", {class: "kl-zeile"},
       hinweisZeile("kl-platz", z.platz >= 1 ? `Platz ${z.platz}` : "ohne Platz"),
       hinweisZeile("kl-sterne", sterneText(z.sterne)),

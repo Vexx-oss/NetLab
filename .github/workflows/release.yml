@@ -30,8 +30,8 @@ name: Release anlegen
 # 07.10.2026: 3 m 45 s, 8.217.088 B, Start mit tools/q-echt.py geprueft).
 #
 # Aufruf: Tag setzen und pushen.
-#   git tag -a v2.0.1 -m "Netzwerk-Labor 2.0.1"
-#   git push origin v2.0.1
+#   git tag -a v2.0.2 -m "Netzwerk-Labor 2.0.2"
+#   git push origin v2.0.2
 on:
   push:
     tags:

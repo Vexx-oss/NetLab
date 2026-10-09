@@ -533,5 +533,145 @@ Spiel.INJEKTOREN = (() => {
     erklaerung: "Ein NAS stellt Dateien über das LAN bereit (SMB auf TCP 445, NFS auf 2049) und ist ein eigenständiges Gerät im Netz. Wie jeder Server braucht es eine feste Adresse aus dem eigenen Netz, die passende Maske und – für andere Netze – ein Gateway. Ohne Adresse gibt es kein Ziel, an das ein Frame gehen könnte: Der Switch kennt nur MAC-Adressen in seinem VLAN, kein „NAS“. Deshalb bekommt der neue Dateiserver die Adresse des alten, damit alle ihn unter derselben Nummer finden; ein SAN dagegen stellt Blockspeicher bereit (iSCSI auf 3260), den ein Server wie eine eigene Platte nutzt.",
     quelle: "Storage-Konzeptatlas · IANA Port Number Registry (445, 2049, 3260)"});
 
+  /* ---------- Schicht 3: Strom, Adressvergabe, Name, Route (Ausbau 3.0, task-54) ----------
+     Sechs zusätzliche Fehlerbilder. Vier davon lösen Grundcodes aus, die bis hierher KEIN Injektor
+     auslöste (DEVICE_OFF, DHCP_POOL_EMPTY, DHCP_RESERVED_BUSY, DHCP_CONFLICT – gemessen über
+     `i.gruende` aller Injektoren gegen `Sim.GRUENDE`). Kein neuer Grundcode, keine Änderung an
+     `src/sim/`: alle sechs arbeiten mit vorhandenen Mechaniken. Gemessen (tests/injektoren-ausbau.test.js):
+     Startnetz bricht, Lösung heilt, die zugehörige Trainingskarte öffnet und ist lösbar. */
+  /* Erster DHCP-Pool eines Geräts – reine Lesehilfe für die drei Adressvergabe-Fälle. */
+  const poolVon = (n, id) => {
+    const g = n.geraete[id];
+    const d = g && ((g.running.dienste && g.running.dienste.dhcp) || g.running.dhcp);
+    const p = d && Array.isArray(d.pools) ? d.pools[0] : null;
+    return p && p.netz && p.maske ? p : null;
+  };
+
+  /* Gerät ohne Strom: Der Rechner ist ausgeschaltet. Alles, was VON ihm kommt, endet mit DEVICE_OFF
+     (src/sim/aufrufe.js:52-55), und am Switch erlischt der Link. Gewählt werden nur Endgeräte der
+     Vorlage (r.clients) – so ist der erste gebrochene Zielgrund DEVICE_OFF und nicht der eines
+     unbeteiligten Servers. */
+  neu({name: "geraet-stromlos", titel: "Gerät ohne Strom", skills: ["lab.link"], gruende: ["DEVICE_OFF", "ARP_NO_REPLY", "LINK_DOWN", "TIMEOUT", "DHCP_NO_OFFER"],
+    vorlagen: ["lan", "buero", "standorte"],
+    passt: (n, r) => (r.clients || []).filter(id => n.geraete[id] && n.geraete[id].an !== false).map(id => ({key: id, geraet: id})),
+    anwenden(n, k){ Modell.geraetSetzen(n, k.key, "an", false); },
+    loesung: (n, k) => [{aktion: "an", geraet: k.key,
+      text: `${name(n, k.key)} wieder einschalten (Netzschalter, Steckdose, Netzteil prüfen) – erst danach hat der Switchport wieder Link.`}],
+    hilfen: (n, k) => ({frage: ["Das Kabel steckt, der Switchport bleibt aber dunkel. Was muss ein Gerät tun, damit sein Netzwerkanschluss überhaupt leuchtet?"],
+      bereich: [{geraet: k.key}],
+      konkret: [`${name(n, k.key)} ist ausgeschaltet. Ohne Strom gibt es keinen Link – auch wenn Kabel, Port und Konfiguration stimmen.`]}),
+    erklaerung: "Ein ausgeschaltetes Gerät ist im Netz nicht vorhanden: Seine Schnittstellen sind ohne Link, es sendet nichts und antwortet auf nichts. Für den Switch sieht das aus wie ein gezogenes Kabel. Deshalb prüft man vor jeder Fehlersuche auf höheren Schichten zuerst Strom, Kabel und Link – die Steckdosenleiste ist der klassische Übeltäter.",
+    quelle: "Fragen – Netzwerke planen (Fehlersuche nach OSI von unten)"});
+
+  /* DHCP-Pool ohne freie Adresse: Start = Gateway, eine Adresse. Der einzige Kandidat ist damit das
+     Gateway selbst – der Server vergibt nichts und meldet DHCP_POOL_EMPTY (src/sim/host.js:247-256, 318). */
+  neu({name: "dhcp-pool-zu-klein", titel: "DHCP-Pool ohne freie Adresse", skills: ["lab.dhcp"], gruende: ["DHCP_POOL_EMPTY", "DHCP_NO_OFFER"],
+    vorlagen: ["buero"],
+    passt: (n, r) => { const p = poolVon(n, r.server); return p && p.gw ? [{key: "pool", geraet: r.server, pool: Object.assign({}, p)}] : []; },
+    anwenden(n, k){ Modell.setzen(n, k.geraet, "dienste.dhcp.pools", [Object.assign({}, k.pool, {start: k.pool.gw, anzahl: 1})]); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"dienste.dhcp.pools": [Object.assign({}, k.pool)]},
+      text: `Pool „${k.pool.name}“ wieder auf freie Adressen legen (Start ${k.pool.start}, ${k.pool.anzahl} Adressen): Start und Anzahl zeigen auf das Gateway ${k.pool.gw} – dort ist nichts zu vergeben.`}],
+    hilfen: (n, k) => ({frage: ["Der Server läuft, der Client fragt brav an – und bekommt trotzdem nichts. Schau in den Pool: Welche Adressen darf der Server überhaupt vergeben?"],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`Der Pool „${k.pool.name}“ beginnt bei ${k.pool.gw} und umfasst ${k.pool.anzahl} Adresse – das ist das Gateway. Der Server hat also keine freie Adresse.`]}),
+    erklaerung: "Ein DHCP-Pool ist ein Bereich freier Adressen (Start bis Start + Anzahl). Liegt dieser Bereich auf dem Gateway oder auf sonst einer fest vergebenen Adresse, hat der Server nichts zu vergeben: Er schickt kein Angebot, und der Client gibt sich selbst eine Notadresse aus 169.254.0.0/16 (APIPA). Pool vergrößern oder verschieben.",
+    quelle: "Network – Lernfassung (§ 9 DHCP) · RFC 2131 · Cisco IOS DHCP Server Configuration Guide"});
+
+  /* Reservierte Adresse belegt: Für die MAC des Clients ist eine Adresse reserviert – und die ist das
+     Gateway. Eine belegte Reservierung ergibt KEIN Ausweichangebot (src/sim/host.js:265-272) → DHCP_RESERVED_BUSY. */
+  neu({name: "dhcp-adresse-reserviert", titel: "Reservierte Adresse ist belegt", skills: ["lab.dhcp"], gruende: ["DHCP_RESERVED_BUSY", "DHCP_NO_OFFER"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const p = poolVon(n, r.server), c = (r.clients || [])[0];
+      const mac = c && n.geraete[c] && n.geraete[c].hw && n.geraete[c].hw.macs && n.geraete[c].hw.macs.eth0;
+      return (p && p.gw && c && mac) ? [{key: c, geraet: r.server, client: c, mac, pool: Object.assign({}, p)}] : [];
+    },
+    anwenden(n, k){ Modell.setzen(n, k.geraet, "dienste.dhcp.pools",
+      [Object.assign({}, k.pool, {reservierungen: [{mac: k.mac, ip: k.pool.gw, name: n.geraete[k.client].name}]})]); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"dienste.dhcp.pools": [Object.assign({}, k.pool)]},
+      text: `Reservierung für ${name(n, k.client)} entfernen (oder auf eine freie Adresse legen) – ${k.pool.gw} ist das Gateway, keine Geräteadresse.`}],
+    hilfen: (n, k) => ({frage: ["Der Pool hat freie Adressen, der Server hat eine feste Zuordnung für diesen Rechner – und trotzdem kommt kein Angebot. Welche Adresse steht in der Reservierung, und wem gehört sie?"],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`Für ${name(n, k.client)} ist ${k.pool.gw} reserviert – das ist das Gateway. Eine belegte Reservierung wird nicht durch eine andere Adresse ersetzt: Es kommt gar kein Angebot.`]}),
+    erklaerung: "Eine Reservierung (MAC → IP) ist eine feste Zusage. Ist die reservierte Adresse schon vergeben, vergibt der Server sie nicht einfach anders – das Gerät bekommt gar kein Angebot und fällt auf APIPA zurück. Reservierte Adressen gehören außerhalb des freien Bereichs und dürfen nirgends statisch eingetragen sein.",
+    quelle: "RFC 2131 (§ 4.3.1 „manual allocation“) · RFC 2132 (Option 50 Requested IP Address)"});
+
+  /* Adresskonflikt im Pool: Die Adresse, die der Pool vergibt, tragen ZWEI Geräte (Drucker und die
+     Verwaltungsadresse des Switches). Der Server prüft vor der Vergabe, findet den Konflikt und
+     überspringt die Adresse – der Pool ist damit leer (src/sim/host.js:253-255, 283-286, 306, 315-318). */
+  neu({name: "dhcp-adresskonflikt", titel: "Adresskonflikt im DHCP-Pool", skills: ["lab.dhcp"], gruende: ["DHCP_CONFLICT", "DHCP_NO_OFFER", "DUP_IP"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const p = poolVon(n, r.server), d = r.drucker, sw = (r.switches || [])[0];
+      const ip = d && n.geraete[d] && n.geraete[d].running.if && n.geraete[d].running.if.eth0 && n.geraete[d].running.if.eth0.ip;
+      const svi = sw && n.geraete[sw] && n.geraete[sw].running.svi && n.geraete[sw].running.svi["1"];
+      return (p && ip && sw && svi) ? [{key: d, geraet: r.server, drucker: d, switch: sw, ip,
+        pool: Object.assign({}, p), svi: Object.assign({}, svi)}] : [];
+    },
+    anwenden(n, k){
+      /* 1) Ein zweites Gerät trägt dieselbe Adresse (der Switch bekommt die Verwaltungsadresse des Druckers). */
+      Modell.setzen(n, k.switch, "svi.1", {ip: k.ip, maske: k.pool.maske, shutdown: false});
+      /* 2) Der Pool vergibt genau diese Adresse – sonst gäbe es Ausweichadressen und keinen Konflikt. */
+      Modell.setzen(n, k.geraet, "dienste.dhcp.pools", [Object.assign({}, k.pool, {start: k.ip, anzahl: 1})]);
+    },
+    loesung: (n, k) => [
+      {geraet: k.switch, setzen: {"svi.1": Object.assign({}, k.svi)},
+       text: `${name(n, k.switch)}: Verwaltungsadresse (interface vlan 1) entfernen – ${k.ip} gehört ${name(n, k.drucker)}.`},
+      {geraet: k.geraet, setzen: {"dienste.dhcp.pools": [Object.assign({}, k.pool)]},
+       text: `Pool „${k.pool.name}“ wieder auf freie Adressen legen (Start ${k.pool.start}, ${k.pool.anzahl} Adressen).`}],
+    hilfen: (n, k) => ({frage: ["Der Pool ist groß genug, der Server läuft – und der Client bekommt trotzdem nichts. Was tut der Server, bevor er eine Adresse vergibt, und was findet er hier?"],
+      bereich: [{geraet: k.geraet}, {geraet: k.switch}],
+      konkret: [`${k.ip} ist doppelt vergeben: ${name(n, k.drucker)} trägt sie fest, und ${name(n, k.switch)} hat sie als Verwaltungsadresse. Genau diese Adresse vergibt der Pool – der Server erkennt den Konflikt und überspringt sie.`]}),
+    erklaerung: "Vor der Vergabe prüft der DHCP-Server, ob eine Adresse schon benutzt wird. Trägt sie mehr als ein Gerät, gilt sie als Konflikt: Der Server vergibt sie nicht und vermerkt sie in der Konfliktliste (show ip dhcp conflict). Sind alle Adressen des Pools betroffen, bekommt der Client kein Angebot. Feste Adressen gehören außerhalb des DHCP-Bereichs – und dürfen nur einmal vergeben sein.",
+    quelle: "RFC 5227 (IPv4 Address Conflict Detection) · RFC 2131 · IOS-ähnlich (Anzeige)"});
+
+  /* Route mit falscher Maske: Die Route in die Filiale ist da, deckt aber nur ein Viertel des Netzes ab
+     (255.255.255.240 = /28). Die Adressen .21 und .22 liegen außerhalb, das Paket fällt auf die
+     Default-Route und verschwindet im Internet (Grundcode NO_ROUTE, wie beim fehlenden Eintrag). */
+  neu({name: "route-maske-falsch", titel: "Route mit falscher Maske", skills: ["lab.route", "lab.cli"], gruende: ["NO_ROUTE", "NO_RETURN_ROUTE", "HOST_UNREACHABLE", "TIMEOUT"],
+    vorlagen: ["standorte"],
+    passt: (n, r) => {
+      const id = r.router, liste = (n.geraete[id] && n.geraete[id].running.routen) || [];
+      const i = liste.findIndex(x => x.netz !== "0.0.0.0");
+      return i >= 0 ? [{key: id, geraet: id, index: i, route: Object.assign({}, liste[i]), routen: liste.map(x => Object.assign({}, x))}] : [];
+    },
+    anwenden(n, k){
+      Modell.setzen(n, k.geraet, "routen",
+        n.geraete[k.geraet].running.routen.map((x, i) => i === k.index ? Object.assign({}, x, {maske: "255.255.255.240"}) : x));
+    },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {routen: k.routen},
+      text: `${name(n, k.geraet)}: Route ${k.route.netz} wieder mit der richtigen Maske ${k.route.maske} eintragen (die eingetragene /28 deckt nur ein Viertel des Netzes ab) – auf der Konsole: „no ip route ${k.route.netz} 255.255.255.240 ${k.route.nh}“ und „ip route ${k.route.netz} ${k.route.maske} ${k.route.nh}“.`}],
+    hilfen: (n, k) => ({frage: ["Die Route in die Filiale steht in der Tabelle – und die Pakete gehen trotzdem ins Internet. Vergleiche die Maske der Route mit der Maske der Adressen in der Filiale."],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`Die Route ${k.route.netz} ist mit /28 (255.255.255.240) eingetragen und deckt nur die Adressen bis .14 ab. Die Geräte der Filiale liegen aber bei .21 und .22 – die Route passt nicht, das Paket nimmt die Default-Route.`]}),
+    erklaerung: "Eine Route besteht aus Netz UND Maske: Erst beide zusammen sagen, welche Adressen sie umfasst. Eine zu kleine Maske (hier /28 statt /24) lässt die Route in der Tabelle stehen, greift aber für die meisten Adressen des Netzes nicht – die Pakete laufen in die Default-Route und damit ins Internet, wo sie verworfen werden. Genau deshalb prüft man in „show ip route“ Netz und Präfixlänge gemeinsam.",
+    quelle: "RFC 792 (Destination Unreachable) · Cisco: Understanding the Ping and Traceroute Commands · Fragen – Netzwerke planen (Routing)"});
+
+  /* DNS-Eintrag zeigt auf das falsche Gerät: Der Name löst auf, aber auf den Drucker. Der Client
+     verbindet sich auf den falschen Rechner – der hat keinen Webserver und antwortet mit RST
+     (Grundcode PORT_CLOSED). Kein DNS_FAIL: Der Name ist ja bekannt. */
+  neu({name: "dns-eintrag-falsch", titel: "Name zeigt auf das falsche Gerät", skills: ["lab.dns"], gruende: ["PORT_CLOSED", "SERVICE_OFF", "TIMEOUT", "ARP_NO_REPLY"],
+    vorlagen: ["buero"],
+    passt: (n, r) => {
+      const d = n.geraete[r.server] && n.geraete[r.server].running.dienste && n.geraete[r.server].running.dienste.dns;
+      const liste = (d && d.eintraege) || [];
+      const i = liste.findIndex(e => /^server\./i.test(String(e.name)));
+      const ziel = r.drucker && n.geraete[r.drucker] && n.geraete[r.drucker].running.if && n.geraete[r.drucker].running.if.eth0
+        && n.geraete[r.drucker].running.if.eth0.ip;
+      return (i >= 0 && ziel) ? [{key: r.server, geraet: r.server, index: i, ziel, name: liste[i].name, ip: liste[i].ip,
+        eintraege: liste.map(e => Object.assign({}, e))}] : [];
+    },
+    anwenden(n, k){
+      Modell.setzen(n, k.geraet, "dienste.dns.eintraege",
+        n.geraete[k.geraet].running.dienste.dns.eintraege.map((e, i) => i === k.index ? Object.assign({}, e, {ip: k.ziel}) : e));
+    },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"dienste.dns.eintraege": k.eintraege},
+      text: `${name(n, k.geraet)}: DNS-Eintrag ${k.name} wieder auf ${k.ip} zeigen lassen – im Moment zeigt er auf den Drucker (${k.ziel}).`}],
+    hilfen: (n, k) => ({frage: ["Der Name lässt sich auflösen – die Seite kommt trotzdem nicht. Auf WELCHE Adresse löst der Name denn auf, und was steht dort für ein Gerät?"],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`${k.name} löst auf ${k.ziel} auf – das ist der Drucker. Auf Port 80 lauscht dort niemand, die Verbindung wird sofort abgelehnt.`]}),
+    erklaerung: "Ein DNS-Eintrag verbindet einen Namen mit einer Adresse. Zeigt er auf das falsche Gerät, klappt die Namensauflösung trotzdem – der Client verbindet sich nur mit dem falschen Rechner. Ist dort der Dienst nicht eingerichtet, antwortet er mit einem Verbindungsabbruch (TCP-RST). Deshalb prüft man bei „Name geht nicht“ zuerst, auf welche Adresse er auflöst (nslookup) und ob dort der erwartete Dienst läuft.",
+    quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035"});
+
   return I;
 })();

@@ -175,6 +175,28 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
   const klErgebnis = (sitzung, platz, sterne, zeitMs, abnahmen) =>
     Spiel.klassenraum.ergebnisCode({klassenraum: {sitzung, platz}, zeitMs, abnahmen: abnahmen || 1}, {bestanden: true, sterne});
 
+  /* ================= WÄCHTER DER NUTZERENTSCHEIDUNG (3.0, Säule 5) =================
+     „Lehreraufträge werden NICHT bewertet" — keine Note, keine Punkte, keine Rangfolge, kein
+     Vergleich zwischen Azubis. Das ist keine Anzeige-Frage, sondern eine Entscheidung, und deshalb
+     bewacht sie ein TEST, keine Vereinbarung (Konzept Säule 5: „Das höchste Risiko im ganzen
+     Konzept — sobald eine Lehrkraft sieht, WER hängt, ist die Bewertung nur ein kleiner Schritt").
+     Beide Helfer stehen absichtlich im Test und nicht im Produktivcode: der Wächter soll die
+     Anzeige prüfen, nicht ein Teil von ihr sein. */
+  const KL_PERSONEN = /name|schueler|schüler|note|zensur|rang|bewertung|punkte/i;
+  /* Personenbezogene FELDER in einem Datensatz (Sitzung, Ergebnissatz) — Namen, Noten, Ränge. */
+  const klPersonenFelder = obj => Object.keys(obj || {}).filter(k => KL_PERSONEN.test(k));
+  /* Personenbezogene WÖRTER im DOM: jedes Attribut und der gesamte Text des Baums. */
+  function klPersonenWoerter(el){
+    const treffer = [];
+    if (KL_PERSONEN.test(klText(el))) treffer.push(klText(el).slice(0, 80));
+    const lauf = k => {
+      for (const [n, w] of Object.entries(k.attrs || {})) if (KL_PERSONEN.test(String(w))) treffer.push(`${n}="${String(w).slice(0, 40)}"`);
+      for (const kind of k.kinder) if (kind && kind.tag) lauf(kind);
+    };
+    lauf(el);
+    return treffer;
+  }
+
   if (!KL_KLAR.laden) { pruefe("Klassenraum-Ansichten: nur unter node tests/run.js prüfbar", () => { erwarte.wahr(false, "require fehlt"); }); return; }
 
   pruefe("Der Codec aus Bereich A ist da — ohne ihn prüft diese Datei nichts", () => klKapsel(() => {
@@ -452,5 +474,73 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(toasts[0][2], "ok", "als Erfolg");
     erwarte.gleich(toasts[0][3].id, "klassenraum-code", "mit fester id");
     erwarte.gleich(toasts[0][3].titel, "Für die Lehrkraft", "und Titel");
+  }));
+
+  pruefe("Diagnose ohne Bewertung: anonyme Fortschrittszahlen in der Ampel-Region (3.0, Säule 5, Weg A)", () => klKapsel(() => {
+    const p = klPruefstand();
+    const T = KL_T0;
+    /* 20 Plätze, 13 Abgaben → 7 offen. Drei Abgaben im letzten Fenster, die jüngste vor zwei Minuten. */
+    const ergebnisse = {};
+    for (let i = 1; i <= 10; i++) ergebnisse[i] = {platz: i, sterne: 4, dauerS: 60 + i, versuche: 0, zeit: T - 60 * 60 * 1000};
+    ergebnisse[12] = {platz: 12, sterne: 4, dauerS: 120, versuche: 0, zeit: T - 4 * 60 * 1000};
+    ergebnisse[13] = {platz: 13, sterne: 5, dauerS: 90, versuche: 0, zeit: T - 3 * 60 * 1000};
+    ergebnisse[14] = {platz: 14, sterne: 5, dauerS: 80, versuche: 0, zeit: T - 2 * 60 * 1000};
+    const a = p.K.ampel({plaetze: 20, ergebnisse}, T);
+    erwarte.enthaelt(a.fortschritt, "7 von 20 offen", "die offenen Plätze MIT der Klassengröße");
+    erwarte.enthaelt(a.fortschritt, "3 Abgaben in den letzten 5 Minuten", "die Abgaben des letzten Fensters");
+    erwarte.enthaelt(a.fortschritt, "letzte Abgabe vor 2 Minuten", "und wie frisch die jüngste ist");
+    erwarte.falsch(a.fortschritt.includes("Median"), "der Median steht schon in der Ampel — die Zeile wiederholt ihn nicht");
+    erwarte.falsch(KL_PERSONEN.test(a.fortschritt), "und kein personenbezogenes Wort steht in der Zeile");
+    /* Ohne Uhr wird keine Zeit behauptet — die Rechnung ist prüfbar, nicht „ungefähr jetzt". */
+    const ohneUhr = p.K.ampel({plaetze: 20, ergebnisse});
+    erwarte.enthaelt(ohneUhr.fortschritt, "7 von 20 offen", "die Zahl der Offenen braucht keine Uhr");
+    erwarte.falsch(ohneUhr.fortschritt.includes("Minute"), "ohne Uhr keine Zeitaussage");
+    /* Im DOM: die Zeile steht in der Ampel-Region — und es bleibt bei sechs Bedienelementen (R12). */
+    p.start();
+    const c = p.zeige(0);
+    klSitzung("salon-terminal");
+    Spiel.klassenraum.plaetzeSetzen(20);
+    p.K.lehrerWieder();
+    erwarte.enthaelt(klText(klFinde(c, ".kl-ampel")[0]), "Fortschritt: 20 von 20 offen", "die Diagnose steht in der Ampel-Region");
+    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
+    erwarte.gleich(steuer, 6, "kein neues Bedienelement — weiterhin sechs");
+  }));
+
+  pruefe("Wächter: kein personenbezogenes FELD in Sitzung und Ergebnissen (3.0, Säule 5)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const s = klSitzung("salon-terminal");
+    erwarte.gleich(Object.keys(s).length, 15, "die Sitzung führt fünfzehn Felder");
+    erwarte.gleich(Object.keys(s).sort().join(","),
+      "art,code,dauerMin,eigene,ergebnisse,erstellt,id,index,plaetze,schritte,seed,skill,ticketId,titel,variante",
+      "genau diese fünfzehn — kein Namens-, Noten- oder Rangfeld");
+    erwarte.gleich(klPersonenFelder(s), [], "kein Feld der Sitzung ist personenbezogen");
+    /* Einen ECHTEN Ergebnissatz erzeugen und seine Felder prüfen. */
+    const r = Spiel.klassenraum.ergebnisEintragen(klErgebnis(s.id, 5, 4, 80000, 1));
+    erwarte.gleich(r.ok, true, "das Ergebnis ist eingetragen");
+    const eintrag = Object.values(Spiel.klassenraum.sitzung().ergebnisse)[0];
+    erwarte.gleich(Object.keys(eintrag).length, 7, "ein Ergebnissatz führt sieben Felder");
+    erwarte.gleich(Object.keys(eintrag).sort().join(","), "code,dauerS,platz,quelle,sterne,versuche,zeit",
+      "genau diese sieben — kein Name, keine Note");
+    erwarte.gleich(klPersonenFelder(eintrag), [], "kein personenbezogenes Feld im Ergebnissatz");
+    /* GEGENPROBE: der Wächter ist scharf — eingeschmuggelt heißt gefunden. */
+    erwarte.gleich(klPersonenFelder({platz: 5, sterne: 4, name: "Anna", note: 2, rang: 1}), ["name", "note", "rang"],
+      "ein eingeschmuggeltes Feld wird gefunden (sonst wäre der Wächter nur eine Behauptung)");
+  }));
+
+  pruefe("Wächter: kein personenbezogenes WORT im DOM der Lehrkraft-Ansicht (3.0, Säule 5)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s = klSitzung("salon-terminal");
+    Spiel.klassenraum.plaetzeSetzen(20);
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(s.id, 5, 4, 80000, 1));
+    p.K.lehrerWieder();
+    erwarte.gleich(klPersonenWoerter(c), [], "kein Name, keine Note, kein Rang, keine Punkte im DOM der Ansicht");
+    /* GEGENPROBE: dasselbe eingeschmuggelt in den DOM — der Wächter muss es finden. */
+    const schmuggel = klKnoten("span");
+    schmuggel.textContent = "Anna · 2 Punkte";
+    c.append(schmuggel);
+    erwarte.wahr(klPersonenWoerter(c).length > 0, "der Wächter findet den Schmuggel im DOM");
   }));
 });

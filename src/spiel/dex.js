@@ -59,7 +59,14 @@ Spiel.DEX_SYMPTOM = {
   /* Ausbau 1.3: die drei Fehlerarten, die je eine gesperrte Trainingskarte geöffnet haben */
   "portsec-fremde-mac":  "„Am Besprechungsplatz steckt das Kabel, die Lampe leuchtet – aber kein einziges Paket kommt durch.“",
   "stp-doppelkabel":     "„Seit dem Umbau ist das ganze Netz lahm: Seiten laden ewig oder gar nicht, und keiner hat etwas geändert.“",
-  "nas-ohne-adresse":    "„Unser neues NAS ist angekabelt und leuchtet – aber kein Rechner findet die Ablage.“"
+  "nas-ohne-adresse":    "„Unser neues NAS ist angekabelt und leuchtet – aber kein Rechner findet die Ablage.“",
+  /* Ausbau 3.0 (task-54): sechs weitere Fehlerarten – Strom, Adressvergabe (drei Fälle), Route, Name */
+  "geraet-stromlos":        "„Der Rechner am Platz ist tot – kein Licht, kein Lüfter, kein Bild.“",
+  "dhcp-pool-zu-klein":     "„Ein neu aufgestellter Rechner bekommt keine Adresse und keine Verbindung.“",
+  "dhcp-adresse-reserviert": "„Nur der eine Rechner am Fenster bekommt keine Adresse – alle anderen schon.“",
+  "dhcp-adresskonflikt":    "„Ein Rechner bekommt keine Adresse, und im Haus heißt es, eine Adresse sei doppelt vergeben.“",
+  "route-maske-falsch":     "„Die Filiale ist nicht mehr erreichbar, obwohl in der Zentrale alles läuft.“",
+  "dns-eintrag-falsch":     "„Unsere Intranet-Seite geht über den Namen nicht mehr auf – über die Adresse schon.“"
 };
 
 Spiel.dex.daten = function(){
