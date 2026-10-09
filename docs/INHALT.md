@@ -62,6 +62,7 @@ der Stand bleibt Fassung 1.2.4. Die Synthese ist der Einstieg, die fünf Entwür
 
 | Datei | Wofür |
 |---|---|
+| [`entwicklung/Übergabe – Stand 09.10.2026.md`](<entwicklung/Übergabe – Stand 09.10.2026.md>) | **Für den Neustart.** Bewusst kurz: wo wir stehen, was gilt, was als Nächstes zu tun ist, welche drei Fehler noch im Code stehen. Ein neuer Lauf liest zuerst diese Datei. |
 | [`entwicklung/Fahrplan – 1.3 und 2.0.md`](<entwicklung/Fahrplan – 1.3 und 2.0.md>) | **Hier anfangen.** Was die fünf Prüfer fanden, wo sie sich widersprechen, was keiner abdeckt, die empfohlene Reihenfolge (Übergabe → Karriere-Filter → 67 Denkhilfen → …) und die acht Entscheidungen, die nur der Nutzer treffen kann. |
 | [`entwicklung/Entwurf – Klassenraum-Umsetzung.md`](<entwicklung/Entwurf – Klassenraum-Umsetzung.md>) | Die 286-KB-Spezifikation gegen den heutigen Code gemessen: was vorhanden ist, was fehlt, die 40 Testfälle, sechs Widersprüche. **Aufwand ehrlich nach oben korrigiert: 8–11,5 Sitzungen statt 4,5–5,5.** |
 | [`entwicklung/Entwurf – Gegenprüfung und Lehrersicht.md`](<entwicklung/Entwurf – Gegenprüfung und Lehrersicht.md>) | Der fünfte Blickwinkel: die 90 Minuten einer Unterrichtsstunde Minute für Minute, drei belegte Abbruchstellen — und die zwei gefundenen Fehler, die in **keinem** anderen Entwurf stehen. |

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übergabe — Stand nach der Sitzung vom 09.10.2026 · Netzwerk-Labor</title>
+<meta name="description" content="---.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Übergabe — Stand nach der Sitzung vom 09.10.2026</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-wo-wir-stehen-in-einem-satz">1 · Wo wir stehen (in einem Satz)</a></li>
+<li><a href="#2-was-in-dieser-sitzung-entstanden-ist">2 · Was in dieser Sitzung entstanden ist</a></li>
+<li><a href="#3-was-gerade-gilt-nicht-neu-herleiten-sondern-benutzen">3 · Was gerade GILT (nicht neu herleiten, sondern benutzen)</a></li>
+<li><a href="#4-was-als-nachstes-zu-tun-ist">4 · Was als Nächstes zu tun ist</a></li>
+<li><a href="#5-was-nur-der-nutzer-entscheiden-kann">5 · Was nur der Nutzer entscheiden kann</a></li>
+<li><a href="#6-drei-fehler-die-die-prufung-gefunden-hat-und-die-noch-im-code-stehen">6 · Drei Fehler, die die Prüfung gefunden hat und die noch im Code stehen</a></li>
+<li><a href="#7-womit-man-anfangt-wenn-man-neu-startet">7 · Womit man anfängt, wenn man neu startet</a></li>
+</ul>
+</nav><hr>
+<p>tags: [FISI, Lernspiel, Netzwerk, Übergabe, Kontext] erstellt: 2026-10-09 status: Übergabezettel — bewusst kurz. Für einen Neustart gedacht: hier steht, was ein neuer Lauf wissen muss, ohne 40 Dateien zu lesen.</p>
+<hr>
+<h1 id="ubergabe-stand-nach-der-sitzung-vom-09-10-2026">Übergabe — Stand nach der Sitzung vom 09.10.2026</h1>
+<blockquote>
+<p><strong>Warum diese Datei so kurz ist.</strong> Der Kontext eines Laufs ist teuer. Diese Datei ist so gebaut, dass ein neuer Lauf in <strong>einer</strong> Minute weiß, wo er steht, was gerade gilt und was als Nächstes zu tun ist — mit Verweisen statt Wiederholungen. Wer mehr braucht, folgt den Links.</p>
+</blockquote>
+<h2 id="1-wo-wir-stehen-in-einem-satz">1 · Wo wir stehen (in einem Satz)</h2>
+<p>Fassung <strong>1.2.4</strong> ist gebaut, getestet, getaggt, veröffentlicht und live; zusätzlich ist seit 09.10.2026 die <strong>Doku als Build</strong> mit ausgeliefert. Der nächste Schritt ist <strong>nicht</strong> gebaut — er ist geplant und wartet auf eine Entscheidung (siehe § 4).</p>
+<h2 id="2-was-in-dieser-sitzung-entstanden-ist">2 · Was in dieser Sitzung entstanden ist</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Was</th><th>Stand</th><th>Wo es steht</th></tr></thead><tbody><tr><td><strong>Hilfestellung</strong> (Bildungsstufen, Hilfekonto, Terminal-Streifen, Lernanker, Trainingsbereich)</td><td>gebaut, 1.2.4</td><td><a href="../CHANGELOG.html">CHANGELOG 1.2.4</a> · <a href="../entwicklung/Hilfestellung%20%E2%80%93%20Stufen%20und%20Schnittstellen.html">Hilfestellung – Stufen und Schnittstellen</a></td></tr><tr><td><strong>Doku als Build</strong> — 29 Markdown-Dateien als lesbare Seiten unter <code>/doku/</code></td><td>gebaut, live</td><td><code>tools/md.py</code> · <code>tools/seite.py</code> · <a href="../INHALT.html">INHALT.md</a></td></tr><tr><td><strong>Auslieferung korrigiert</strong> — veraltete <code>.exe</code> wäre als neue Fassung verpackt worden; Doku jetzt im Browser-ZIP</td><td>gebaut</td><td><a href="../CHANGELOG.html">CHANGELOG, Nachtrag</a> · <code>.github/workflows/release.yml</code></td></tr><tr><td><strong>Fahrplan 1.3 / 2.0</strong> — fünf unabhängige Expertenentwürfe, 1 454 Zeilen</td><td><strong>geplant, nichts gebaut</strong></td><td><a href="../entwicklung/Fahrplan%20%E2%80%93%201.3%20und%202.0.html">Fahrplan – 1.3 und 2.0</a></td></tr><tr><td><strong>Team-Größe</strong> — <code>maxMembers</code> von 8 auf 16</td><td>eingetragen, wirkt nach Neustart</td><td><code>~/.dsh/profiles/desktop/cordis.patch.yml</code> · <a href="../SITZUNGSABSCHLUSS.html">SITZUNGSABSCHLUSS</a> Regel 6</td></tr></tbody></table></div>
+<h2 id="3-was-gerade-gilt-nicht-neu-herleiten-sondern-benutzen">3 · Was gerade GILT (nicht neu herleiten, sondern benutzen)</h2>
+<p><strong>Prüfstand</strong> — diese Zahlen sind gemessen, nicht geschätzt:</p>
+<pre><code>node tests/run.js            461/461 grün (53 Testdateien, 83 Module, 0 übersprungen)
+python tools/ethos.py        GRÜN          python tools/klassen.py   0
+node tools/sim-stand.js      unverändert   python tools/rauch.py     39/39 (echter Edge)
+python tools/seite.py --pruefen   GRÜN: 35 Dokumente, kein toter Verweis
+python bauen.py              118 Module, Version 1.2.4</code></pre>
+<p><strong>Veröffentlicht</strong> (alles erreichbar, geprüft): <code>vexx-oss.github.io/NetLab/</code> (Spiel) · <code>…/NetLab/doku/</code> (Doku) · Release <code>v1.2.4</code> mit drei Anhängen. <strong>Achtung:</strong> die lebende Adresse ist <code>…/NetLab/</code>. <code>…/Side-Project/</code> gibt <strong>HTTP 404</strong> — ein alter Kommentar behauptete eine Umleitung; das war falsch.</p>
+<p><strong>Drei Fallen, die Zeit gekostet haben</strong> (stehen ausführlich in <a href="../AGENTS.html">AGENTS.md</a>):</p>
+<ul><li><code>bash.exe</code> scheitert in dieser Umgebung (Signal-Pipe, Win32-Fehler 5) → Tests direkt mit <code>node tests/run.js</code>.</li><li>Ein Test ohne Zusicherungen galt früher als grün → <code>tests/harness.js</code> meldet jetzt „davon N übersprungen".</li><li>In Doku-Tests keine feste Dokumentzahl verdrahten — sie wächst (genau daran wurde ein Test rot).</li></ul>
+<h2 id="4-was-als-nachstes-zu-tun-ist">4 · Was als Nächstes zu tun ist</h2>
+<p><strong>Empfehlung, in dieser Reihenfolge</strong> (Begründung im <a href="../entwicklung/Fahrplan%20%E2%80%93%201.3%20und%202.0.html">Fahrplan</a>):</p>
+<div class="dk-tabelle"><table><thead><tr><th></th><th>Schritt</th><th>Aufwand</th><th>Status</th></tr></thead><tbody><tr><td><strong>0</strong></td><td><strong>Übergabe + „Ergebnis kopieren"</strong> — „Neuer Azubi an diesem Rechner". Ohne das steckt der zweite Azubi im Auftrag des ersten (<code>src/ui/spiel.js:857</code>), und das Spiel ist ab der zweiten Unterrichtsstunde unbrauchbar</td><td><strong>0,5–1 Sitzung</strong></td><td>offen</td></tr><tr><td><strong>1</strong></td><td><strong>Karriere-Filter für Klassenraum</strong> — eine Zeile neben <code>src/spiel/abnahme.js:118</code>. Heute filtert für <code>klasse…</code> <strong>nichts</strong>: gemessen <strong>+33 €, +1 Ruf</strong>, Wochenziel erfüllt, Kundenampel „grün"</td><td><strong>0,5 Sitzung</strong></td><td>offen</td></tr><tr><td><strong>2</strong></td><td><strong>67 Denkhilfen</strong> (67 von 92 Minis ohne eigenen Anstoß) + Hilfe-Vorschläge (Ebene 2 fehlt <strong>vollständig</strong>, 10 Fertigkeiten ohne einen einzigen)</td><td>~7 Sitzungen</td><td>offen</td></tr><tr><td><strong>3</strong></td><td>Drei gesperrte Trainingskarten (<code>lab.portsec</code>, <code>lab.stp</code>, <code>lab.storage</code> haben keinen Injektor)</td><td>1–2 Sitzungen</td><td>offen</td></tr><tr><td><strong>4</strong></td><td>Lernmotor-Falle (<code>fremd/lernmotor.js:39</code> wirft einen Lernstand mit <code>v !== 1</code> <strong>still</strong> weg)</td><td>0,5 Sitzung</td><td>offen</td></tr><tr><td><strong>5</strong></td><td>Klassenraum (Stufen A/B/E/F, ohne QR und ohne Server in der <code>.exe</code>)</td><td>6–9 Sitzungen</td><td>braucht E1–E8</td></tr></tbody></table></div>
+<h2 id="5-was-nur-der-nutzer-entscheiden-kann">5 · Was nur der Nutzer entscheiden kann</h2>
+<p>Die <strong>acht Entscheidungen E1–E8</strong> aus <a href="../entwicklung/Entwurf%20%E2%80%93%20Klassenraum-Umsetzung.html">§ 8 des Klassenraum-Entwurfs</a>; die vier wichtigsten stehen als Tabelle im Fahrplan § 7. Die schwerste ist keine technische Frage: <strong>Soll ein Klassenraum-Auftrag bewertet werden?</strong> Wenn ja, braucht es eine eigene Auswertung statt eines Filters — und dann stellt sich die Frage nach <strong>Noten</strong>, die dieses Spiel bisher bewusst nicht stellt.</p>
+<h2 id="6-drei-fehler-die-die-prufung-gefunden-hat-und-die-noch-im-code-stehen">6 · Drei Fehler, die die Prüfung gefunden hat und die noch im Code stehen</h2>
+<ol><li><strong>Ein Lernstand wird still weggeworfen</strong> — <code>fremd/lernmotor.js:39</code> (<code>s.v === 1</code>, ohne Migration) und <code>:40</code> hält ihn im Verschluss: ein Import <strong>nach</strong> dem Start geht beim nächsten <code>save()</code> verloren.</li><li><strong>Ein Klassenraum-Auftrag verfälscht die Karriere</strong> — elf Filterstellen nehmen nur <code>pruefung</code>/<code>raetsel</code> aus, <code>abnahme.js:118</code> leitet nur <code>training</code> um.</li><li><strong>Derselbe Code ergibt je Gerät einen anderen Auftrag</strong> — <code>postfach.js:79</code>; und der „Klassenraum-Abdruck" würde es <strong>nicht</strong> merken, weil Geräte und Kabel gleich bleiben (neuer Testfall Nr. 41 nötig).</li></ol>
+<h2 id="7-womit-man-anfangt-wenn-man-neu-startet">7 · Womit man anfängt, wenn man neu startet</h2>
+<pre><code class="sprache-powershell">cd 10-Projekte\Lernprojekte\Netzwerk-Labor
+$node = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64\node.exe"
+&amp; $node tests/run.js          # muss 461/461 grün melden
+git status -sb                # muss "## ausbau-1.2...origin/ausbau-1.2" ohne Änderungen melden</code></pre>
+<p>Danach <strong>eine</strong> Datei lesen, je nach Auftrag: den <a href="../entwicklung/Fahrplan%20%E2%80%93%201.3%20und%202.0.html">Fahrplan</a> für die Richtung, <a href="../Architektur.html">ARCHITEKTUR § 13</a> für die Hilfestellung, <a href="../SITZUNGSABSCHLUSS.html">SITZUNGSABSCHLUSS</a> für das Ende einer Sitzung.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>
