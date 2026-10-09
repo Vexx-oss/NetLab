@@ -11,7 +11,14 @@
    wie der nächste Auftrag gebaut und begleitet wird.
    Einstellung einst.anpassung = "auto" (Standard) | "manuell" (nichts passt sich an).
    st.flow = { [skill]: {letzte:["f"|"n"|"g"] (höchstens 5), stand:"normal"|"geruest"|"verwicklung"} }
-   inst.flow = "geruest"|"verwicklung"|null – beim Erstellen festgehalten, ändert sich mitten im Auftrag nicht. */
+   inst.flow = "geruest"|"verwicklung"|null – beim Erstellen festgehalten, ändert sich mitten im Auftrag nicht.
+
+   WER BEKOMMT KEINEN REGLER (Klassenraum, Fahrplan § 2.4): Ein Auftrag aus einem Klassenraum-Code muss allein aus
+   (Code, Seed) entstehen. Der Stand kommt aus der Lern-Geschichte DIESES Geräts (st.flow[fertigkeit].stand) und ist
+   aus (Code, Seed) NICHT ableitbar — deshalb schließt Spiel.instanzErstellen die Quelle „klassenraum“ genauso aus wie
+   „pruefung“ und „raetsel“ (src/spiel/postfach.js:84). Gemessen vor der Behebung: derselbe Code (lab.vlan, Seed 5)
+   ergab je Gerät „gen-lab.vlan-5“ / „-geruest“ / „-verwicklung“ bei gleicher Geräte- und Kabelliste.
+   Test: tests/klassenraum-determinismus.test.js. */
 Spiel.FLOW = {GERUEST_NACH: 2, VERWICKLUNG_NACH: 3, MERKEN: 5};
 Spiel.flow = (() => {
   const alle = (st = Spiel.st) => (st.flow && typeof st.flow === "object" && !Array.isArray(st.flow) ? st.flow : (st.flow = {}));

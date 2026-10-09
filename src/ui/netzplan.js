@@ -4,16 +4,102 @@
                                                    „Plan ↔ Labor“ für das gewählte Gerät, Fuß: „Abweichungen markieren“
    UI.netzplan.anheften(inst)                      Reiter „Plan“ im Dock freigeben und zeigen (aus Mappe oder ⋯-Menü)
    Der Plan kommt aus Spiel.plan.fuer(inst) – also aus dem Soll-Netz, nie mit dem Fehler. Klick auf ein Plan-Gerät
-   wählt es im Labor; ist der Reiter offen, bleibt er stehen (die Auswahl gehört dann zum Vergleich). */
+   wählt es im Labor; ist der Reiter offen, bleibt er stehen (die Auswahl gehört dann zum Vergleich).
+
+   NÄCHSTER SCHRITT (Fahrplan 1.3/2.0, Nutzerauftrag „bei Bedarf den nächsten Schritt zeigen“):
+   Der Knopf „Nächster Schritt“ im Fuß fragt `Spiel.naechsterBedarf` (src/spiel/naechster.js) und hebt
+   das betroffene Gerät hervor – im Labor (UI.labor.hervorheben, der Computer pulsiert), im Plan
+   (nst-dran) und am zuständigen Dock-Reiter (nst-puls). Fehlt das Gerät im Labor, zeigt ein Zeiger
+   (nst-zeiger) im Plan darauf. Ungefragt erscheint sie nur, wenn die Stufe es erlaubt und der Azubi
+   eine Weile nicht weiterkommt (meister nie, Architektur § 13.3 Punkt 3) – und sie verschwindet
+   wieder, sobald der Schritt getan ist oder die Anzeigezeit um ist. */
 UI.netzplan = (() => {
-  const S = {ansicht: "zeichnung"};
+  const S = {ansicht: "zeichnung", fuehrung: null, gezeigt: null, fehler: false, timer: null, puls: null};
   const ART = {netzplan: ["Netzplan", "So soll das Netz aussehen – die IT-Dokumentation."],
     skizze: ["Skizze vom Kunden", "So hat der Kunde es aufgemalt – Adressen stehen in der Tabelle."],
     tabelle: ["Adresstabelle", "Mit Lücken (?): Gateway und DNS leitest du selbst her."]};
   const HOST = {pc: true, server: true, nas: true};
 
+  /* ---------- Nächster-Schritt-Führung (nur auf Bedarf) ----------
+     Bereich des Schritts -> Dock-Reiter, der pulsieren darf. „mappe“ und „labor“ haben keinen
+     Reiter: dort pulsiert das Gerät im Labor, und „mappe“ öffnet auf Knopfdruck die Auftragsmappe. */
+  const TAB = {terminal: "terminal", plan: "plan", akte: "akte"};
+  const schrittSchluessel = s => s ? [s.geraet || "", s.bereich || "", s.text || ""].join("|") : "";
+  const naechsterJetzt = inst => { try { return Spiel.naechster(inst); } catch (e) { console.error("Nächster Schritt", e); return null; } };
+  const bedarf = (inst, angefordert) => {
+    try { return Spiel.naechsterBedarf(inst, {jetztMs: jetzt(), angefordert, fehler: !!S.fehler}); }
+    catch (e) { console.error("Nächster Schritt", e); return {ja: false, grund: "Die Führung ist gerade nicht verfügbar.", schritt: null}; }
+  };
+  /* Den Dock-Reiter des Schritts pulsieren lassen (die Reiter baut src/ui/editor.js:158-163). */
+  function reiterPuls(bereich){
+    const id = TAB[bereich];
+    if (!id) return;
+    let knopf = null;
+    try { knopf = typeof document !== "undefined" && document.querySelector ? document.querySelector('.lb-dock-tab[data-reiter="' + id + '"]') : null; } catch (e) { knopf = null; }
+    if (!knopf || !knopf.classList || typeof knopf.classList.add !== "function") return;   /* ohne Dock (Mappe) nichts zu tun */
+    knopf.classList.add("nst-puls");
+    S.puls = {knopf, timer: setTimeout(() => { try { knopf.classList.remove("nst-puls"); } catch (e) { /* egal */ } }, Spiel.FUEHRUNG_ZEIGEN_MS)};
+  }
+  function verstecken(){
+    S.fuehrung = null;
+    if (!S.puls) return;
+    try { S.puls.knopf.classList.remove("nst-puls"); } catch (e) { /* ohne DOM nichts zu tun */ }
+    if (S.puls.timer) clearTimeout(S.puls.timer);
+    S.puls = null;
+  }
+  function zeigen(inst, schritt, {oeffnen = false} = {}){
+    S.fuehrung = {schritt, bis: jetzt() + Spiel.FUEHRUNG_ZEIGEN_MS};
+    /* Der Computer pulsiert im Labor – nur, wenn es ihn dort gibt (sonst zeigt der Plan den Zeiger). */
+    if (schritt.geraet && inst.netz.geraete[schritt.geraet]) UI.labor.hervorheben([{geraet: schritt.geraet}], Spiel.FUEHRUNG_ZEIGEN_MS);
+    reiterPuls(schritt.bereich);
+    if (!oeffnen) return;
+    const id = TAB[schritt.bereich];
+    if (id) UI.labor.dock?.(id);
+    else if (schritt.bereich === "mappe") UI.spiel?.mappeAuf?.("ziele");
+  }
+  /* Die EINE Stelle, die den Bedarf auswertet: erscheinen lassen, stehen lassen oder verstecken.
+     „Nicht dauernd blinken“: je Stillstand wird sie EINMAL gezeigt — wer sie weggeklickt oder
+     auslaufen lassen hat, bekommt sie erst wieder, wenn ein anderer Schritt oder neuer Fortschritt
+     da ist (`stand`). */
+  function pruefen(inst){
+    if (S.timer) { clearTimeout(S.timer); S.timer = null; }
+    const n = naechsterJetzt(inst);
+    if (S.fuehrung) {
+      /* Getan, ein anderer Schritt oder die Anzeigezeit um: die alte Führung verschwindet. */
+      if (!n || schrittSchluessel(n) !== schrittSchluessel(S.fuehrung.schritt) || jetzt() >= S.fuehrung.bis) verstecken();
+      if (S.fuehrung) return;
+    }
+    const stand = [schrittSchluessel(n), inst.fortschritt || inst.geoeffnet || 0].join("#");
+    if (S.gezeigt === stand) return;
+    const b = bedarf(inst, false);
+    if (b.ja) { S.gezeigt = stand; zeigen(inst, b.schritt); return; }
+    /* Noch nicht fällig: genau dann wieder nachsehen, wenn die Wartezeit um ist. */
+    const rest = Spiel.FUEHRUNG_NACH_MS - Spiel.naechsterWartezeit(inst, jetzt());
+    if (b.schritt && rest > 0 && typeof setTimeout === "function") S.timer = setTimeout(() => { S.timer = null; neu(); }, Math.max(1000, rest));
+  }
+  /* Der Knopf: gefragt ist nicht verraten – hier bekommt sie jede Stufe, auch meister (§ 13.3 Punkt 3). */
+  function anfordern(inst){
+    const b = bedarf(inst, true);
+    if (!b.ja) { UI.toast(b.grund, "ok", {dauer: 3000}); return; }
+    S.gezeigt = [schrittSchluessel(b.schritt), inst.fortschritt || inst.geoeffnet || 0].join("#");
+    zeigen(inst, b.schritt, {oeffnen: true});
+    neu();
+  }
+  /* Der Hinweiskasten im Plan: der Satz des offenen Ziels und ein Weg, ihn wegzulegen. */
+  function hinweis(nst, inst){
+    const fehlt = !!(nst.geraet && !inst.netz.geraete[nst.geraet]);
+    const name = nst.geraet && typeof Spiel.geraetName === "function" ? Spiel.geraetName(inst.netz, nst.geraet) : "";
+    return h("div", {class: "nst-hinweis", role: "status"},
+      h("strong", {}, "Nächster Schritt"),
+      h("p", {class: "nst-text"}, nst.text + (fehlt ? ` — ${name} fehlt im Labor, der Pfeil im Plan zeigt darauf.` : "")),
+      h("button", {type: "button", class: "knopf klein geist", onclick: () => { verstecken(); neu(); }}, "Alles klar"));
+  }
+  const knopfNaechster = inst => h("button", {type: "button", class: "knopf klein geist",
+    title: "Zeigt den nächsten nötigen Schritt – die Lösung verrät er nicht", onclick: () => anfordern(inst)}, "Nächster Schritt");
+
   function zeichnen(c, inst, {mappe = false} = {}){
     if (!c || !inst) return;
+    pruefen(inst);                          /* erst entscheiden (erscheint / verschwindet), dann zeichnen */
     let plan;
     try { plan = Spiel.plan.fuer(inst, {breite: Math.max(240, (c.clientWidth || 400) - 30)}); } catch (e) { console.error("Netzplan", e); c.replaceChildren(h("p", {class: "np-leer"}, "Für diesen Auftrag gibt es keinen Plan.")); return; }
     const art = plan.art, ansicht = art === "tabelle" ? "tabelle" : S.ansicht;
@@ -25,22 +111,26 @@ UI.netzplan = (() => {
       art !== "tabelle" && !auditZiel(inst) ? h("div", {class: "np-wahl", role: "group", "aria-label": "Plan-Ansicht"}, wahl("zeichnung", "Zeichnung"), wahl("tabelle", "Tabelle")) : null);
     const auswahl = !mappe && UI.labor.netz === inst.netz ? UI.labor.auswahl?.geraet : null;
     const audit = auditZiel(inst);
-    const inhalt = ansicht === "zeichnung" && !audit ? zeichnung(plan, art, auswahl) : tabelle(plan, auswahl, audit ? {inst, ziel: audit, c, mappe} : null);
+    const nst = S.fuehrung ? S.fuehrung.schritt : null;
+    /* Zeiger nur, wo das Gerät im Labor wirklich fehlt – sonst pulsiert es dort selbst. */
+    const dran = nst ? {geraet: nst.geraet, zeiger: !!(nst.geraet && !inst.netz.geraete[nst.geraet])} : null;
+    const inhalt = ansicht === "zeichnung" && !audit ? zeichnung(plan, art, auswahl, dran) : tabelle(plan, auswahl, audit ? {inst, ziel: audit, c, mappe} : null, dran);
     /* Ist ein Gerät gewählt, steht „Plan ↔ Labor“ oben – das ist der Vergleich, um den es geht */
-    const teile = [kopf, auditZiel(inst) ? h("p", {class: "np-audit-hinweis"}, "Klick auf jeden Wert, der nicht zum Netz passt (✗). Noch ein Klick nimmt die Markierung zurück.") : null,
+    const teile = [kopf, nst ? hinweis(nst, inst) : null,
+      auditZiel(inst) ? h("p", {class: "np-audit-hinweis"}, "Klick auf jeden Wert, der nicht zum Netz passt (✗). Noch ein Klick nimmt die Markierung zurück.") : null,
       !mappe && auswahl ? vergleich(inst, plan, auswahl) : null, h("div", {class: "np-flaeche"}, inhalt)].filter(Boolean);
-    if (mappe) teile.push(h("div", {class: "np-fuss"}, h("button", {type: "button", class: "knopf", onclick: () => anheften(inst)}, "Neben das Labor heften ▸")));
+    if (mappe) teile.push(h("div", {class: "np-fuss"}, knopfNaechster(inst), h("button", {type: "button", class: "knopf", onclick: () => anheften(inst)}, "Neben das Labor heften ▸")));
     else {
       if (!auswahl) teile.push(h("p", {class: "np-hinweis"}, "Klick im Labor oder hier auf ein Gerät: Plan und Labor stehen dann nebeneinander."));
       const kostet = (inst.hilfeStufe || 0) < 4;
-      teile.push(h("div", {class: "np-fuss"}, h("button", {type: "button", class: "knopf klein geist", title: "Zeigt, welche Geräte vom Plan abweichen – zählt wie die Hilfestufe „Bereich zeigen“",
+      teile.push(h("div", {class: "np-fuss"}, knopfNaechster(inst), h("button", {type: "button", class: "knopf klein geist", title: "Zeigt, welche Geräte vom Plan abweichen – zählt wie die Hilfestufe „Bereich zeigen“",
         onclick: () => markieren(inst)}, "Abweichungen markieren", kostet ? h("small", {}, " −½ ★") : null)));
     }
     c.replaceChildren(h("div", {class: "np np-" + art}, ...teile));
   }
 
   /* SVG: Linien, dann Geräte mit Name und Adresszeilen (Schrift 15/14 px, gezeichnet in Plan-Einheiten) */
-  function zeichnung(plan, art, auswahl){
+  function zeichnung(plan, art, auswahl, dran){
     const pos = Object.fromEntries(plan.knoten.map(k => [k.id, k]));
     const svg = sv("svg", {class: "np-svg", viewBox: `0 0 ${plan.breite} ${plan.hoehe}`, role: "img", "aria-label": ART[art][0],
       style: `--np-b:${plan.breite}px`});
@@ -60,9 +150,12 @@ UI.netzplan = (() => {
     }
     svg.append(linien);
     for (const k of plan.knoten) {
-      const g = sv("g", {class: "np-geraet typ-" + k.typ + (k.id === auswahl ? " gewaehlt" : ""), transform: `translate(${k.x} ${k.y})`, "data-id": k.id, tabindex: "0",
+      const dranHier = !!(dran && dran.geraet === k.id);
+      const g = sv("g", {class: "np-geraet typ-" + k.typ + (k.id === auswahl ? " gewaehlt" : "") + (dranHier ? " nst-dran" : ""), transform: `translate(${k.x} ${k.y})`, "data-id": k.id, tabindex: "0",
         role: "button", "aria-label": k.name, onclick: () => waehlen(k.id), onkeydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); waehlen(k.id); } }});
       g.append(sv("rect", {class: "np-ring", x: -30, y: -28, width: 60, height: 56, rx: 12}));
+      /* Zeiger auf ein Gerät, das im LABOR fehlt – im Plan steht es (Soll-Netz), dort zeigt der Pfeil hin. */
+      if (dranHier && dran.zeiger) g.append(sv("path", {class: "nst-zeiger", d: "M0,-40 L-11,-62 L11,-62 Z", "aria-hidden": "true"}));
       const bild = UI.geraetebild(k.typ, k.skin); bild.setAttribute("transform", "scale(0.72)");
       if (art === "skizze") bild.setAttribute("filter", "url(#np-hand)");
       g.append(bild);
@@ -75,7 +168,7 @@ UI.netzplan = (() => {
 
   /* Plan-Audit: das Arbeitsziel des Auftrags (oder null) */
   function auditZiel(inst){ const def = Spiel.defVon(inst); return def ? (def.ziele || []).find(z => z.typ === "audit") || null : null; }
-  function tabelle(plan, auswahl, audit){
+  function tabelle(plan, auswahl, audit, dran){
     const zelle = (w, kl = "") => h("td", {class: (w === "?" ? "np-luecke " : "") + kl}, w === "" || w == null ? "–" : String(w));
     /* Audit: Werte sind Knöpfe – markiert = „stimmt nicht“ */
     const pruef = (r, feld, w) => {
@@ -86,7 +179,7 @@ UI.netzplan = (() => {
     };
     return h("table", {class: "np-tabelle" + (audit ? " np-audit" : "")},
       h("thead", {}, h("tr", {}, ["Gerät", "Anschluss", "IP-Adresse", "Maske", "Gateway", "DNS", "VLAN"].map(t => h("th", {}, t)))),
-      h("tbody", {}, plan.tabelle.map(r => h("tr", {class: r.id === auswahl ? "gewaehlt" : "", onclick: () => waehlen(r.id)},
+      h("tbody", {}, plan.tabelle.map(r => h("tr", {class: (r.id === auswahl ? "gewaehlt" : "") + (dran && dran.geraet === r.id ? " nst-dran" : ""), onclick: () => waehlen(r.id)},
         h("th", {scope: "row"}, r.name), zelle(r.port, "mono"), pruef(r, "ip", r.ip), pruef(r, "maske", r.maske),
         HOST[r.typ] ? pruef(r, "gw", r.gw) : zelle("", "mono"), HOST[r.typ] ? pruef(r, "dns", r.dns) : zelle("", "mono"), zelle(r.vlan ?? "")))));
   }
@@ -146,7 +239,11 @@ UI.netzplan = (() => {
     if (!c || c.hidden || !inst || UI.labor.netz !== inst.netz) return;
     zeichnen(c, inst);
   }
-  for (const e of ["auswahl", "netz-geaendert", "dock"]) Bus.an(e, () => requestAnimationFrame(neu));
+  for (const e of ["auswahl", "netz-geaendert", "dock", "arbeit-geaendert", "hilfe"]) Bus.an(e, () => requestAnimationFrame(neu));
+  /* Der letzte Terminalbefehl entscheidet bei „geselle“, ob die Führung erscheinen darf — dieselbe
+     Quelle wie der Hilfestreifen (src/ui/konsole.js:226-228): JEDER Befehl setzt den Zustand neu,
+     ein gelungener nimmt ihn zurück. */
+  Bus.an("befehl", o => { S.fehler = !!(o && o.ergebnis && o.ergebnis.fehler); requestAnimationFrame(neu); });
 
-  return {zeichnen, anheften, markieren, neu, zeichnung};
+  return {zeichnen, anheften, markieren, neu, zeichnung, naechsterZeigen: inst => anfordern(inst || UI.spiel?.inst), verstecken, _S: S};
 })();

@@ -3,7 +3,12 @@
    Höchstens eines je 15 (normal) bzw. 30 (selten) Minuten AKTIVER Zeit, Einstellung aus/selten/normal (Standard selten).
    Jedes Ereignis erklärt, warum so etwas in echt passiert. Nie Fortschrittsverlust (R6): Stufe, Aufträge, Kunden bleiben;
    Netzänderungen laufen über den Verlauf (Strg+Z). Deterministisch: Wahl aus Spielstand-Zähler, nicht aus Math.random.
-   Nicht in Prüfung, Tagesrätsel und im allerersten Auftrag. */
+   Nicht in Prüfung, Tagesrätsel, Trainingsdurchgang, Klassenraum-Auftrag und im allerersten Auftrag:
+   Training und Klassenraum zahlen laut Architektur § 13.3 Punkt 1 KEIN Geld und KEINEN Ruf – der Takt
+   würde das über `weiterempfehlung` (Ruf +1, Zeile 87) und „Provider anrufen" (Ruf +1, Zeile 145) sowie
+   über die dabei entstehenden Tickets umgehen. Gemessen (diese Sitzung, 40 erzwungene Takte je Quelle,
+   gleicher Auftrag): klassenraum 40 Treffer / 8 × Ruf / 16 neue Tickets / Provider-Störung, training
+   zeichengleich – nach der Sperre beide 0, der normale Auftrag unverändert 40/8. */
 Spiel.EREIGNIS_TAKT = {selten: 30 * 60 * 1000, normal: 15 * 60 * 1000};
 Spiel.ereignisse = {};
 Spiel.ereignisse.daten = (st = Spiel.st) => {
@@ -126,7 +131,11 @@ Spiel.ereignisse.ausloesen = function(id, ctx = {}){
 Spiel.ereignisse.tick = function({inst} = {}){
   if (Spiel.ersteStunde && Spiel.ersteStunde.ruhig()) return null;        /* erste Stunde: das erste Ereignis ist ein harmloses */
   if (!Spiel.ereignisse.faellig()) return null;
-  if (inst && (inst.quelle === "pruefung" || inst.quelle === "raetsel" || Spiel.defVon(inst).id === Spiel.EINSTIEG_TICKET)) return null;
+  /* Sperre je Quelle: Prüfung, Tagesrätsel, TRAINING und KLASSENRAUM bleiben still – die beiden letzten
+     zahlen laut Architektur § 13.3 Punkt 1 kein Geld und keinen Ruf, `weiterempfehlung` (Zeile 87) und
+     „Provider anrufen" (Zeile 145) würden genau das tun (gemessen: 8 × +1 Ruf in 40 Takten) und dabei
+     noch Karriere-Tickets anlegen. Der Einstiegsauftrag bleibt aus einem eigenen Grund still. */
+  if (inst && (inst.quelle === "pruefung" || inst.quelle === "raetsel" || inst.quelle === "training" || inst.quelle === "klassenraum" || Spiel.defVon(inst).id === Spiel.EINSTIEG_TICKET)) return null;
   const d = Spiel.ereignisse.daten(), def = inst ? Spiel.defVon(inst) : null;
   const z = Zufall(`ereignis-wahl:${d.n}:${Spiel.st.erledigt.length}`);
   const passend = Object.entries(Spiel.EREIGNISSE).filter(([, E]) => { try { return E.bedingung({inst, def, z}); } catch (e) { return false; } });

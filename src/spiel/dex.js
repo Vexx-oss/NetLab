@@ -55,7 +55,11 @@ Spiel.DEX_SYMPTOM = {
   "portfwd-falsch":     "„Der Webshop ist von außen nicht erreichbar, intern schon.“",
   "dmz-regel-fehlt":    "„Von außen erreicht niemand unseren Webserver.“",
   "fremder-dhcp":       "„Alle Rechner haben eine Adresse – und trotzdem kommt keiner mehr ins Internet. Ging vorher.“",
-  "snooping-ohne-trust": "„Der Server läuft doch – warum bekommt trotzdem kein Rechner eine Adresse?“"
+  "snooping-ohne-trust": "„Der Server läuft doch – warum bekommt trotzdem kein Rechner eine Adresse?“",
+  /* Ausbau 1.3: die drei Fehlerarten, die je eine gesperrte Trainingskarte geöffnet haben */
+  "portsec-fremde-mac":  "„Am Besprechungsplatz steckt das Kabel, die Lampe leuchtet – aber kein einziges Paket kommt durch.“",
+  "stp-doppelkabel":     "„Seit dem Umbau ist das ganze Netz lahm: Seiten laden ewig oder gar nicht, und keiner hat etwas geändert.“",
+  "nas-ohne-adresse":    "„Unser neues NAS ist angekabelt und leuchtet – aber kein Rechner findet die Ablage.“"
 };
 
 Spiel.dex.daten = function(){

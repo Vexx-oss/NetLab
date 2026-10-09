@@ -3,11 +3,49 @@
    Spiel.mini.naechstes() → Mini (Auswahl: Unterrichtsthema → fällige Fertigkeiten → häufige Fehler → schwächste der Stufe)
    Spiel.mini.antworten(id, antwort) → {richtig, erklaerung, lohn, loesung}   (Lernmotor + kleiner Lohn)
    Spiel.mini.fuerSkill(skill), Spiel.mini.setzen(id)   (Training aus Lernstand und Playbooks)
-   Antwortformen: wahl/vorhersage = Index · reihenfolge = Indexliste · zuordnen = Paare [links, rechts]. */
+   Antwortformen: wahl/vorhersage = Index · reihenfolge = Indexliste · zuordnen = Paare [links, rechts].
+
+   ---------- WIEDERHOLUNGSSPERRE (task-16, Nutzerauftrag „Aufträge dürfen sich nicht so schnell wiederholen“) ----------
+   VORHER (gemessen, 20 Runden über den echten Weg naechstes()+antworten()): nur 11 verschiedene
+   Minis, 9 Wiederholungen, kleinster Abstand 7 Runden. Ursache: `fuerSkill` filterte die Minis einer
+   Fertigkeit nach „nicht in s.zuletzt“ und fiel, sobald dieser Filter leer war, auf ALLE Minis zurück –
+   die meisten Fertigkeiten haben nur 3–5 Minis. Dieselbe Frage kam also nach drei Runden wieder.
+
+   JETZT: ROTATION statt Filter. Je Fertigkeit kommt jedes Mini einmal dran, bevor sich eines
+   wiederholt; bei echter Erschöpfung das am LÄNGSTEN nicht gespielte (nicht ein beliebiges).
+   Der Zustand liegt im Spielstand (`st.mini`), übersteht einen Neustart und ist deterministisch:
+   der Reihenfolge-Zufall kommt ausschließlich aus `Zufall()` (src/kern/basis.js), nie aus Math.random.
+
+     st.mini.zug      Anzahl der beantworteten Minis (Zugnummer; fehlt sie, gilt richtig+falsch)
+     st.mini.gespielt {[miniId]: Zugnummer der letzten Antwort} – 0/fehlend = noch nie gespielt
+     st.mini.zuletzt  die letzten 25 beantworteten Minis = das Sperrfenster (Spiel.MINI.SPERRE)
+
+   Ein Mini ist GESPERRT, solange es in `zuletzt` steht: es kommt erst wieder, wenn 25 andere Minis
+   beantwortet wurden ODER es keine Alternative mehr gibt. `naechstes()` probiert dann lieber die
+   nächste Fertigkeit, statt dasselbe Mini erneut zu liefern. Alte Spielstände ohne `zug`/`gespielt`
+   bekommen beides aus `richtig+falsch` und `zuletzt` rekonstruiert (stand()) – kein Bruch.
+
+   GENERIERTE FRAGEN (task-18, eingehängt). `Spiel.fragen` (src/spiel/fragen.js) erzeugt aus geprüften
+   Vorlagen immer neue Aufgaben. Sie laufen NICHT in `Spiel.mini.alle()` mit – an dieser Liste hängen
+   Zusicherungen über den FESTEN Bestand (92 Minis, lab.ping genau 6, mini-link-2 ohne Denkhilfe).
+   Erreicht werden sie an genau zwei Stellen:
+     · `fuerSkill(skill, {ohne})`: gibt es ein frisches festes Mini, gewinnt es (Rotation). Ist die
+       Fertigkeit erschöpft, kommt die generierte Frage; sonst wie bisher das am längsten nicht
+       gespielte feste Mini. Der Seed kommt aus dem Spielstand (Zugnummer + Fortschritt dieser
+       Fertigkeit), nie aus der Uhr – dieselbe Lage ergibt dieselbe Frage.
+     · `von(id)`: die ID `gf-<vorlage>-<seed>` trägt die Frage in sich und wird daraus wieder
+       aufgebaut; sie braucht keinen Eintrag im Spielstand und übersteht einen Neustart.
+   Eine generierte Frage hat keinen Denkhilfen-Eintrag: `hilfe` fällt für sie auf den Fertigkeitssatz
+   zurück (kein Sonderweg, § 5). */
 Spiel.mini = {};
 /* SPROSSEN = Denkhilfen je Frage nach Bildungsstand (Vertrag § 2) · HILFE_KONTO = freie Hilfen je Mini-Runde (§ 2.1).
    Beide Zahlen stehen im Vertrag. Liegt Spiel.HILFE_KONTO aus Baustein A vor, hat es Vorrang (miniKonto). */
 Spiel.MINI = {LOHN: {E: 2, AP1: 3, AP2: 5}, SPERRE: 25,
+  /* Anteil der generierten Fragen an den Runden (task-18): jede dritte Frage darf eine generierte
+     sein. Ohne diese Aufteilung gewänne die generierte Frage JEDE Runde – sie ist immer „noch nie
+     gespielt“ – und die feste Rotation der übrigen Fertigkeiten käme nie mehr dran (gemessen: 3 statt
+     8 Fertigkeiten in 20 Runden, 51 statt 65 feste Minis in 120 Runden). 0 schaltet sie ab. */
+  GENERIERT: 3,
   SPROSSEN: {azubi: 2, "azubi-plus": 1, geselle: 1, meister: 0},
   HILFE_KONTO: {azubi: 6, "azubi-plus": 4, geselle: 2, meister: 0},
   DENKANSTOSS: "Was in der Aufgabe entscheidet? Such die eine Angabe, die den Unterschied macht, und prüf sie gegen die Regel."};
@@ -20,10 +58,34 @@ Spiel.mini.stand = function(){
      Minis (für „geselle erst nach einer falschen Antwort"). Alte Stände bekommen beides leer. */
   if (!Array.isArray(s.hilfen)) s.hilfen = [];
   if (!Array.isArray(s.falschIds)) s.falschIds = [];
+  /* Wiederholungssperre (task-16): alte und halbe Stände in die neue Form bringen, ohne zu werfen.
+     `zuletzt` kaputt → leer · `zug` fehlt → aus den Antwortzählern · `gespielt` fehlt → aus dem
+     Sperrfenster rekonstruieren (ältester Eintrag = kleinste Zugnummer). Ein Stand von vor dem Umbau
+     vergisst so seine Reihenfolge nicht. */
+  if (!Array.isArray(s.zuletzt)) s.zuletzt = [];
+  if (typeof s.richtig !== "number" || !isFinite(s.richtig)) s.richtig = 0;
+  if (typeof s.falsch !== "number" || !isFinite(s.falsch)) s.falsch = 0;
+  if (typeof s.zug !== "number" || !isFinite(s.zug) || s.zug < 0) s.zug = s.richtig + s.falsch;
+  if (!s.gespielt || typeof s.gespielt !== "object" || Array.isArray(s.gespielt)) s.gespielt = {};
+  if (!Object.keys(s.gespielt).length && s.zuletzt.length) {
+    s.zuletzt.forEach((id, i) => { if (id && s.gespielt[id] == null) s.gespielt[id] = i + 1; });
+  }
   return s;
 };
 Spiel.mini.alle = () => (DATEN.mini || []).filter(m => m && m.id && m.skill);
-Spiel.mini.von = id => Spiel.mini.alle().find(m => m.id === id) || null;
+/* DIE QUELLE DER AUSWAHL – der eine Einspeisepunkt für generierte Fragen (task-18, siehe Kopf).
+   Heute ist das der feste Bestand aus DATEN.mini. Wer hier erweitert, erweitert die Auswahl überall
+   (fuerSkill, naechstes, von), ohne die Rotation unten anzufassen. */
+Spiel.mini.quelle = () => Spiel.mini.alle();
+Spiel.mini.von = function(id){
+  const m = Spiel.mini.quelle().find(x => x.id === id);
+  if (m) return m;
+  /* Generierte Frage (task-18): `gf-<vorlage>-<seed>` baut sie selbst wieder auf – auch nach einem
+     Neustart, ohne Eintrag im Spielstand (Spiel.fragen.von greift auf den Zwischenspeicher und
+     sonst auf die ID zurück). */
+  const F = typeof Spiel.fragen !== "undefined" && Spiel.fragen;
+  return (F && typeof F.von === "function" && F.von(id)) || null;
+};
 
 /* passend zum Niveau: E-Spieler bekommen E und AP1, AP2-Spieler alles */
 Spiel.mini.passtNiveau = function(m){
@@ -31,13 +93,61 @@ Spiel.mini.passtNiveau = function(m){
   if (n === "E") return m.stufe !== "AP2";
   return true;
 };
-Spiel.mini.fuerSkill = function(skill, {ohne = []} = {}){
+/* Zugnummer eines Minis: 0 = noch nie gespielt, sonst der Zug der letzten Antwort. */
+function miniZug(s, id){
+  const z = s.gespielt[id];
+  return typeof z === "number" && isFinite(z) ? z : 0;
+}
+/* ROTATION: am längsten nicht gespielt zuerst. Bei Gleichstand entscheidet eine deterministische
+   Mischung aus (Fertigkeit, Zugnummer, Kennung): derselbe Spielstand ergibt dieselbe Reihenfolge,
+   ein neuer Zug mischt die noch nie gespielten Minis neu. Kein Datum, kein Math.random. */
+function miniReihe(kand, s){
+  const zug = s.zug || 0;
+  return kand
+    .map(m => ({m, z: miniZug(s, m.id), t: Zufall("mini-reihe:" + m.skill + ":" + zug + ":" + m.id).zahl(1000000)}))
+    .sort((a, b) => a.z - b.z || a.t - b.t || (a.m.id < b.m.id ? -1 : a.m.id > b.m.id ? 1 : 0))
+    .map(x => x.m);
+}
+/* Die Sperre: dieses Mini stand in den letzten Spiel.MINI.SPERRE Antworten (Fenster = `zuletzt`). */
+Spiel.mini.gesperrt = function(id){ return Spiel.mini.stand().zuletzt.includes(id); };
+/* EINE generierte Frage dieser Fertigkeit (task-18) oder null.
+   Der Seed kommt aus dem Spielstand: alle Antworten (`s.zug`) plus die Zahl der festen Minis DIESER
+   Fertigkeit, die schon dran waren. Mit jeder Antwort ändert er sich, ohne Antwort bleibt er gleich –
+   dieselbe Lage ergibt dieselbe Frage, und die ID `gf-<vorlage>-<seed>` ist daraus wieder herstellbar.
+   `ohne` bekommt zusätzlich das Sperrfenster: was gerade dran war, wird nicht noch einmal erzeugt.
+   Zum Niveau passende Fragen zuerst; der Generator würfelt seine Vorlage, deshalb wird mit den
+   nächsten Seeds nachgefragt (begrenzt). Findet sich nichts Passendes, gilt derselbe Rückfall wie bei
+   den festen Minis – „nichts Passendes“ heißt dort nicht „nichts“ (passtNiveau ist eine Vorliebe). */
+function miniGeneriert(skill, s, ohne){
+  const F = typeof Spiel.fragen !== "undefined" && Spiel.fragen;
+  if (!F || typeof F.fuerSkill !== "function") return null;      /* ohne task-18: nur feste Minis */
+  const fest = Spiel.mini.quelle().filter(m => m.skill === skill);
+  const basis = (s.zug || 0) + fest.filter(m => miniZug(s, m.id) > 0).length;
+  let erster = null;
+  for (let versuch = 0; versuch < 4; versuch++) {
+    const g = F.fuerSkill(skill, {ohne, seed: basis + versuch});
+    if (!g) continue;
+    if (Spiel.mini.passtNiveau(g)) return g;
+    if (!erster) erster = g;
+  }
+  return erster;
+}
+/* Das nächste Mini EINER Fertigkeit (Training, Playbooks, naechstes).
+   Reihenfolge: frisches festes Mini (Rotation) → generierte Frage (task-18) → das am längsten nicht
+   gespielte feste Mini. Mit `gesperrt:true` kommt null heraus, wenn nichts Frisches da ist; so kann
+   naechstes() die nächste Fertigkeit probieren, statt eine Frage von eben zu wiederholen. */
+Spiel.mini.fuerSkill = function(skill, {ohne = [], gesperrt = false} = {}){
   const s = Spiel.mini.stand();
-  const kand = Spiel.mini.alle().filter(m => m.skill === skill && !ohne.includes(m.id));
-  if (!kand.length) return null;
-  const frisch = kand.filter(m => !s.zuletzt.includes(m.id) && Spiel.mini.passtNiveau(m));
-  const liste = frisch.length ? frisch : kand;
-  return liste[Zufall(skill + ":" + s.richtig + ":" + s.falsch + ":" + heute()).zahl(liste.length)];
+  const kand = Spiel.mini.quelle().filter(m => m.skill === skill && !ohne.includes(m.id));
+  /* Zum Niveau passende Minis zuerst; gibt es keine, zählt der ganze Bestand (wie bisher). */
+  const passt = kand.filter(m => Spiel.mini.passtNiveau(m));
+  const reihe = miniReihe(passt.length ? passt : kand, s);
+  const frisch = reihe.find(m => !Spiel.mini.gesperrt(m.id));
+  if (frisch) return frisch;
+  const g = miniGeneriert(skill, s, ohne.concat(s.zuletzt));
+  if (g) return g;
+  if (gesperrt) return null;
+  return reihe[0] || null;
 };
 Spiel.mini.setzen = function(id){ Spiel.mini.stand().aktuell = id; Spiel.speichern(); };
 
@@ -46,7 +156,7 @@ Spiel.mini.naechstes = function(){
   if (s.aktuell && Spiel.mini.von(s.aktuell)) return Spiel.mini.von(s.aktuell);
   const st = Spiel.st;
   const freigegeben = (DATEN.skills || []).filter(x => (x.stufe || 1) <= Math.max(1, st.stufe)).map(x => x.id);
-  const vorhanden = new Set(Spiel.mini.alle().map(m => m.skill));
+  const vorhanden = new Set(Spiel.mini.quelle().map(m => m.skill));
   const kandidaten = [];
   const u = Spiel.einst && Spiel.einst.unterricht;
   if (u) kandidaten.push(u);
@@ -55,13 +165,43 @@ Spiel.mini.naechstes = function(){
     kandidaten.push(...L.haeufigeFehler(14).map(f => f.id).filter(id => String(id).startsWith("lab.")));
     kandidaten.push(...freigegeben.slice().sort((a, b) => L.box(a) - L.box(b)));
   } else kandidaten.push(...freigegeben);
-  for (const skill of kandidaten) {
-    if (!vorhanden.has(skill)) continue;
-    const m = Spiel.mini.fuerSkill(skill);
-    if (m && !s.zuletzt.slice(-6).includes(m.id)) { s.aktuell = m.id; Spiel.speichern(); return m; }
+  /* Erst eine Fertigkeit mit einem freien (nicht gesperrten) Mini – lieber die nächste Fertigkeit als
+     dieselbe Frage noch einmal. Die Sperre gewinnt also gegen die Reihenfolge der Kandidaten.
+     Die Köpfe werden nach Art getrennt: feste Minis (Rotation) und generierte Fragen (task-18). */
+  const letzter = s.zuletzt.length ? Spiel.mini.von(s.zuletzt[s.zuletzt.length - 1]) : null;
+  const letzteFertigkeit = letzter ? letzter.skill : null;
+  const feste = [], generierte = [], schonDa = new Set();
+  kandidaten.forEach((skill, rang) => {
+    if (schonDa.has(skill) || !vorhanden.has(skill)) return;
+    schonDa.add(skill);
+    const k = Spiel.mini.fuerSkill(skill, {gesperrt: true});
+    if (!k) return;
+    (k.generiert ? generierte : feste).push({skill, m: k, rang});
+  });
+  /* Aus den Köpfen gewinnt der am LÄNGSTEN nicht gespielte. Bei Gleichstand – typisch, solange es
+     noch nie gespielte Minis gibt – zuerst eine ANDERE Fertigkeit als die zuletzt gespielte (das
+     mischt die Themen), dann die Reihenfolge des Lernstands (Unterricht, fällig, Fehler, schwächste).
+     Ohne diese Auswahl bliebe die Rotation an den ersten Fertigkeiten hängen und der Rest des
+     Vorrats käme nie dran. */
+  const ordnen = liste => liste.slice().sort((a, b) =>
+    miniZug(s, a.m.id) - miniZug(s, b.m.id)
+    || (a.skill === letzteFertigkeit ? 1 : 0) - (b.skill === letzteFertigkeit ? 1 : 0)
+    || a.rang - b.rang
+    || (a.m.id < b.m.id ? -1 : a.m.id > b.m.id ? 1 : 0));
+  const nimm = liste => { const l = ordnen(liste); return l.length ? l[0].m : null; };
+  /* Jede Spiel.MINI.GENERIERT-te Frage darf generiert sein, sonst gewinnt die feste Rotation.
+     Die Aufteilung hängt nur an der Zugnummer (Spielstand), nicht an der Uhr. */
+  const anteil = Math.max(0, Number(Spiel.MINI.GENERIERT) || 0);
+  const generierteDran = anteil > 0 && (s.zug + 1) % anteil === 0;
+  let m = (generierteDran ? nimm(generierte) : null) || nimm(feste) || nimm(generierte);
+  /* Echte Erschöpfung (keine Fertigkeit frei, keine generierte Frage): das am längsten nicht
+     gespielte Mini des ganzen Vorrats. Ist auch das nicht frei, greift überhaupt erst eine
+     Wiederholung – dann ebenfalls das am längsten nicht gespielte. */
+  if (!m) {
+    const frei = Spiel.mini.quelle().filter(x => !s.zuletzt.includes(x.id));
+    const reihe = frei.length ? miniReihe(frei, s) : miniReihe(Spiel.mini.quelle(), s);
+    m = reihe[0] || null;
   }
-  const rest = Spiel.mini.alle().filter(m => !s.zuletzt.includes(m.id));
-  const m = rest.length ? rest[Zufall("rest:" + s.richtig + s.falsch).zahl(rest.length)] : Spiel.mini.alle()[0] || null;
   if (m) { s.aktuell = m.id; Spiel.speichern(); }
   return m;
 };
@@ -88,6 +228,17 @@ Spiel.mini.antworten = function(id, antwort){
   const richtig = Spiel.mini.pruefen(m, antwort);
   s.aktuell = null;
   s.zuletzt.push(m.id); if (s.zuletzt.length > Spiel.MINI.SPERRE) s.zuletzt.splice(0, s.zuletzt.length - Spiel.MINI.SPERRE);
+  /* Wiederholungssperre (task-16): Zugnummer fortschreiben und merken, wann dieses Mini dran war.
+     `zuletzt` ist zugleich das Sperrfenster (die letzten Spiel.MINI.SPERRE Antworten). */
+  s.zug = (s.zug || 0) + 1;
+  s.gespielt[m.id] = s.zug;
+  /* Der Merker wächst nur mit dem Vorrat (92 feste Minis). Für einen späteren Generator (task-18)
+     bleibt er gedeckelt: die ältesten Einträge fallen zuerst weg. */
+  const merker = Object.keys(s.gespielt);
+  if (merker.length > 400) {
+    merker.sort((a, b) => s.gespielt[a] - s.gespielt[b]);
+    for (const alt of merker.slice(0, merker.length - 400)) delete s.gespielt[alt];
+  }
   if (richtig) s.richtig++;
   else {
     s.falsch++;

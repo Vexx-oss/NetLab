@@ -53,22 +53,41 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`entwicklung/Review – Testqualität.md`](<entwicklung/Review – Testqualität.md>) | Die **Mutationsprobe**: künstlich eingebaute Fehler, und wie viele Tests sie fangen. Fünf Mutanten gemessen, alle erkannt; dazu die Lücke in „Wirkung vor Grün". |
 | [`entwicklung/Review – Betrieb.md`](<entwicklung/Review – Betrieb.md>) | Spielstand-Migration v:2 → v:3 in elf Punkten, Byte-Gleichheit der Erzeugnisse, und warum die Fassung gezogen werden musste. |
 | [`entwicklung/Review – Betrieb-Werkzeuge.md`](<entwicklung/Review – Betrieb-Werkzeuge.md>) | Die Prüfwerkzeuge selbst: welches misst was, und der Befund, dass der Rauchtest eine feste Ansichtsliste führte — die neue Ansicht fehlte darin. |
-| [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31/§ 32 | Der Bau der Hilfestellung und die Auslieferung 1.2.4 — inklusive dem, was bewusst **nicht** gebaut wurde. |
+| [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31–§ 33 | Der Bau der Hilfestellung, die Auslieferung 1.2.4 und (in § 33) das **2.0-Fundament** — inklusive dem, was bewusst **nicht** gebaut und was **verworfen** wurde. |
 
 ## Fahrplan 1.3 / 2.0 — Entscheidungsvorlage (09.10.2026)
 
-Fünf unabhängige Prüfer haben je einen Entwurf geschrieben (1 454 Zeilen). **Gebaut ist nichts davon** —
-der Stand bleibt Fassung 1.2.4. Die Synthese ist der Einstieg, die fünf Entwürfe sind die Belege.
+Fünf unabhängige Prüfer haben je einen Entwurf geschrieben (1 454 Zeilen). Sie sind die Vorlage für die
+Bauten der Sitzung vom 09.10.2026 geworden: der Fahrplan bleibt der Einstieg, die fünf Entwürfe sind die
+Belege — und der Stand dessen, was daraus gebaut wurde, steht im
+[jüngsten Übergabezettel](<entwicklung/Übergabe – Stand 2.0-Fundament.md>).
 
 | Datei | Wofür |
 |---|---|
-| [`entwicklung/Übergabe – Stand 09.10.2026.md`](<entwicklung/Übergabe – Stand 09.10.2026.md>) | **Für den Neustart.** Bewusst kurz: wo wir stehen, was gilt, was als Nächstes zu tun ist, welche drei Fehler noch im Code stehen. Ein neuer Lauf liest zuerst diese Datei. |
+| [`entwicklung/Übergabe – Stand 09.10.2026.md`](<entwicklung/Übergabe – Stand 09.10.2026.md>) | Die **Vorgängerfassung** des Übergabezettels: der Stand der Entscheidungsvorlage, als noch nichts gebaut war. Bewusst kurz: wo wir standen, was galt, welche drei Fehler im Code standen. Jüngster Stand ist [Übergabe – Stand 2.0-Fundament](<entwicklung/Übergabe – Stand 2.0-Fundament.md>). |
 | [`entwicklung/Fahrplan – 1.3 und 2.0.md`](<entwicklung/Fahrplan – 1.3 und 2.0.md>) | **Hier anfangen.** Was die fünf Prüfer fanden, wo sie sich widersprechen, was keiner abdeckt, die empfohlene Reihenfolge (Übergabe → Karriere-Filter → 67 Denkhilfen → …) und die acht Entscheidungen, die nur der Nutzer treffen kann. |
 | [`entwicklung/Entwurf – Klassenraum-Umsetzung.md`](<entwicklung/Entwurf – Klassenraum-Umsetzung.md>) | Die 286-KB-Spezifikation gegen den heutigen Code gemessen: was vorhanden ist, was fehlt, die 40 Testfälle, sechs Widersprüche. **Aufwand ehrlich nach oben korrigiert: 8–11,5 Sitzungen statt 4,5–5,5.** |
 | [`entwicklung/Entwurf – Gegenprüfung und Lehrersicht.md`](<entwicklung/Entwurf – Gegenprüfung und Lehrersicht.md>) | Der fünfte Blickwinkel: die 90 Minuten einer Unterrichtsstunde Minute für Minute, drei belegte Abbruchstellen — und die zwei gefundenen Fehler, die in **keinem** anderen Entwurf stehen. |
 | [`entwicklung/Entwurf – Mitnehmbarer Lernstand.md`](<entwicklung/Entwurf – Mitnehmbarer Lernstand.md>) | Was ein Code tragen kann: gemessene Nutzlastgrößen, warum es **zwei** Codes braucht, und die Falle in `fremd/lernmotor.js:39`. |
 | [`entwicklung/Entwurf – Tutor auf Sprachmodell.md`](<entwicklung/Entwurf – Tutor auf Sprachmodell.md>) | Machbarkeit und **Risiko** eines Sprachmodells als Tutor: Urteil „lohnt unter Bedingungen", die Prüfkette gegen das Lösungsverbot, Offline-Bruch, Datenschutz. |
 | [`entwicklung/Entwurf – Inhaltslücken.md`](<entwicklung/Entwurf – Inhaltslücken.md>) | Was der Stoff nicht hergibt: 67 Minis ohne Denkanstoß, 10 Fertigkeiten ohne Hilfe-Vorschlag, IPv6 = 0 Treffer, drei gesperrte Trainingskarten. |
+
+## Das 2.0-Fundament — gebaut, Fassung 2.0.0 (09.10.2026)
+
+Was der Fahrplan als Entscheidungsvorlage beschrieb, ist in dieser Sitzung gebaut worden: Übergabe und
+Ergebnis kopieren, die eine Umleitung für Klassenraum-Aufträge, Auftrags-Determinismus, der ehrliche
+Hilfevorrat, die geöffneten Trainingskarten, die Denkhilfen, Hilfe-Vorschläge der mittleren Ebene, Wiki
+mit IPv6 und WLAN, die Wache gegen die Lernmotor-Falle — dazu drei Nachträge aus dem laufenden Auftrag:
+**keine schnelle Wiederholung**, der **sichtbare nächste Schritt** und der **Fragen-Generator**. Die
+Fassung wurde auf **2.0.0** gezogen und gebaut; **veröffentlicht ist sie noch nicht** (Push und Tag nur mit
+Freigabe). Die gemessenen Zahlen stehen im [CHANGELOG](CHANGELOG.md) § 2.0.0, die Begründungen und die
+verworfenen Versuche im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 33.
+
+| Datei | Wofür |
+|---|---|
+| [`entwicklung/Übergabe – Stand 2.0-Fundament.md`](<entwicklung/Übergabe – Stand 2.0-Fundament.md>) | **Für den Neustart.** Der jüngste Übergabezettel, bewusst kurz: was diese Sitzung gebaut hat, welche vier Regeln jetzt gelten, was als Nächstes zu tun ist. Ein neuer Lauf liest zuerst diese Datei. |
+| [`entwicklung/Befund – Lernmotor-Falle.md`](<entwicklung/Befund – Lernmotor-Falle.md>) | Die Falle in `fremd/lernmotor.js` mit Datei:Zeile — was auf unserer Seite behoben ist, was nur in der FISI-Spielhalle behoben werden kann, samt Änderungsvorschlag. Vorlage für den Nutzer, nicht ausgeführt. |
+| [`entwicklung/Review – 2.0-Fundament.md`](<entwicklung/Review – 2.0-Fundament.md>) | Die **unabhängige Gegenprüfung** des Fundaments: jede Behauptung der Teammates mit eigenem Befehl oder Zitat nachgemessen, mit Restzweifeln und dem, was nicht geprüft werden konnte. |
 
 ## Wie dieses Verzeichnis aufgeräumt wurde
 

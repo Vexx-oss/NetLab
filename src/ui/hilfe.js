@@ -69,9 +69,22 @@ UI.hilfe = (() => {
     try { el.setSelectionRange(befehl.length, befehl.length); } catch (e) { /* z. B. bei <input type=number> */ }
   }
 
+  /* Welche Sprosse der Vorschlag ist – aus `ebene`, nicht aus `art` (task-8, 09.10.2026).
+     Vertrag § 4: `ebene: 1..3` mit „1 = harmlos ansehen, 3 = ändert etwas". Bis heute stand hier nur
+     „ansehen"/„ändern" aus `art` – eine Ebene 2 („genauer nachsehen, ohne etwas zu ändern") war damit
+     für den Azubi unsichtbar, obwohl `Spiel.hilfe` sie längst kennt. Die Wörter für 1 und 3 bleiben
+     wörtlich wie vorher; nur die mittlere Sprosse bekommt ihr eigenes Wort. */
+  const EBENE_TEXT = {1: " · ansehen", 2: " · genauer nachsehen", 3: " · ändern"};
+  function bereichText(v){
+    const e = Number(v && v.ebene);
+    if (EBENE_TEXT[e]) return String(v.bereich) + EBENE_TEXT[e];
+    /* Kein `ebene` (Altbestand, synthetischer Vorschlag): wie vorher nach `art` entscheiden. */
+    return String(v && v.bereich) + (v && v.art === "pruefen" ? " · ansehen" : " · ändern");
+  }
+
   function vorschlagEl(v, o){
     const befehl = String(v.befehl == null ? "" : v.befehl);
-    const teile = [h("span", {class: "hl-bereich"}, v.art === "pruefen" ? v.bereich + " · ansehen" : v.bereich + " · ändern")];
+    const teile = [h("span", {class: "hl-bereich"}, bereichText(v))];
     if (befehl) teile.push(h("button", {type: "button", class: "hl-knopf", title: "In die Eingabe übernehmen – Enter führt den Befehl aus",
       onclick: () => befehlSetzen(befehl, o)}, h("code", {}, befehl)));
     /* „Ausführen" nur beim ERSTEN Vorschlag: spart azubi-plus einen Knopf, und der zweite Vorschlag
@@ -127,6 +140,22 @@ UI.hilfe = (() => {
     return h("div", {class: "hl-mehr"}, knopf, inhalt);
   }
 
+  /* Die geübte Fertigkeit: die ausdrücklich übergebene, sonst die Hauptfertigkeit des OFFENEN Auftrags
+     (Spiel.stufeInstanz + Spiel.defVon – beides öffentliche Fläche). Nötig, weil UI.konsole den Streifen
+     ohne `skill` zeichnet (konsole.js:80) und Spiel.hilfe.leiter bewusst keinen globalen Zustand liest:
+     ohne diesen Schritt wäre `dran` in der echten Oberfläche NIE wahr und zehn Fertigkeiten hätten keine
+     hervorgehobene Sprosse (task-28, Befund A3). Beschafft wird hier nur die Fertigkeit – WELCHER
+     Vorschlag je Sprosse gilt, entscheidet weiterhin Spiel.hilfe (Vertrag § 4.1). */
+  function skillJetzt(o){
+    if (o && o.skill) return String(o.skill);
+    try {
+      const inst = typeof Spiel.stufeInstanz === "function" ? Spiel.stufeInstanz() : null;
+      const def = inst && typeof Spiel.defVon === "function" ? Spiel.defVon(inst) : null;
+      const erst = def && def.skills && def.skills[0];
+      return erst ? String(erst) : null;
+    } catch (e) { return null; }                       /* ohne offenen Auftrag keine Fertigkeit */
+  }
+
   /* ---------- der Streifen ---------- */
   function zeichnen(container, o = {}){
     if (!container) return null;
@@ -137,10 +166,11 @@ UI.hilfe = (() => {
     const letzterFehler = fehlerOderNull(o.letzterFehler);
     const text = o.text != null ? o.text : (letzterFehler && letzterFehler.befehl) || "";
     const frage = {netz, id, modus, art: o.art, verlauf: o.verlauf || (sitzung && sitzung.historie) || null, letzterFehler, max: o.max};
+    const skill = skillJetzt(o);
     let geruest = null, leiter = [], vorschlaege = [], bruecke = null, fehlertext = null;
     if (sp && netz && id != null) {
       try { if (typeof sp.geruest === "function") geruest = sp.geruest(frage); } catch (e) { console.error("Spiel.hilfe.geruest", e); }
-      try { if (typeof sp.leiter === "function") leiter = sp.leiter(Object.assign({}, frage, {skill: o.skill})) || []; } catch (e) { console.error("Spiel.hilfe.leiter", e); }
+      try { if (typeof sp.leiter === "function") leiter = sp.leiter(Object.assign({}, frage, {skill})) || []; } catch (e) { console.error("Spiel.hilfe.leiter", e); }
       try { if (typeof sp.passend === "function") vorschlaege = sp.passend(frage) || []; } catch (e) { console.error("Spiel.hilfe.passend", e); }
       try {
         if (typeof sp.syntaxBruecke === "function" && (letzterFehler || text))

@@ -1,0 +1,19 @@
+/* ---------- Nächster-Schritt-Führung (nst- · Fahrplan 1.3/2.0, Labor und Baucanvas) ----------
+   NUR AUF BEDARF: Der Hinweiskasten erscheint auf Knopfdruck oder wenn der Azubi eine Weile nicht
+   weiterkommt (Spiel.naechsterBedarf) — und verschwindet mit dem Schritt. WO es fehlt, zeigen das
+   pulsierende Gerät im Netzplan, der Zeiger auf ein im Labor fehlendes Gerät und der pulsierende
+   Dock-Reiter. Den Rahmen (.np-fuss), die Knöpfe (.knopf/.geist) und den Lauf im Labor (.hl-ring)
+   stellen die vorhandenen Regeln. Abstände nur aus der Skala von tools/ethos.py R4: {0,4,8,12,16,24,32}px.
+   Bewegung schalten basis.css:91/93 global ab (prefers-reduced-motion, data-bewegung="aus") — deshalb
+   bleibt der Zustand auch ohne Animation an der FARBE erkennbar, nicht nur am Blinken. */
+.nst-hinweis{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--line); border-left:3px solid var(--warn); border-radius:var(--radius-s); background:var(--warn-soft)}
+.nst-hinweis strong{font-size:13px; color:var(--ink)}
+.nst-text{flex:1 1 200px; margin:0; font-size:13px; line-height:1.35; color:var(--ink)}
+.np-geraet.nst-dran .np-ring{stroke:var(--warn); animation:nst-puls-ring 320ms ease-in-out infinite alternate}
+@keyframes nst-puls-ring{50%{stroke-width:7; stroke-opacity:.35}}
+.nst-zeiger{fill:var(--warn); animation:nst-zeiger 320ms ease-in-out infinite alternate}
+@keyframes nst-zeiger{50%{transform:translateY(-6px)}}
+.nst-puls{animation:nst-puls 320ms ease-in-out infinite alternate}
+@keyframes nst-puls{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--warn) 55%, transparent)} 50%{box-shadow:0 0 0 6px transparent}}
+/* In der Adresstabelle (AP2, keine Zeichnung) trägt die Zeile die Marke – der Pfeil entfällt dort. */
+.np-tabelle tr.nst-dran{box-shadow:inset 3px 0 0 var(--warn)}

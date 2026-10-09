@@ -417,5 +417,121 @@ Spiel.INJEKTOREN = (() => {
     erklaerung: "DHCP-Snooping schützt vor fremden DHCP-Servern: Nur an „vertrauten“ Ports dürfen Server-Antworten (Offer, Ack) hereinkommen, alle anderen Ports dürfen nur Anfragen stellen. Ist der Port zum echten Server nicht als vertraut eingetragen, wirft der Switch dessen Antworten weg – die Clients bekommen keine Adresse, obwohl der Server läuft.",
     quelle: "RFC 2131 · IOS-ähnlich (Snooping ist eine Switch-Funktion)"});
 
+  /* ---------- Schicht 2: Port-Security, Schleifen, Speichernetze (lab.portsec · lab.stp · lab.storage) ----------
+     Diese drei Fertigkeiten hatten bis 1.3 keinen Injektor; ihre Trainingskarten waren gesperrt
+     (src/spiel/training.js:129 injektorDa → liste() offen:false, starten() lehnt ab). Jeder Fall unten ist
+     gemessen (tests/injektoren-neu.test.js, tests/tickets-generator.test.js): Der Fehler bricht ein Ziel der
+     Vorlage mit dem angegebenen Grund, die Lösung heilt es, und die Karte ist danach startbar. */
+  /* Aus einer MAC-Adresse eine andere machen (letztes Nibble gekippt): deterministisch, ohne Zufall.
+     Ein Port, der auf diese fremde MAC eingestellt ist, sieht das angeschlossene Gerät als Verstoß. */
+  const fremdMac = mac => String(mac).replace(/.$/, c => (parseInt(c, 16) ^ 1).toString(16));
+  /* Alle freien Ports eines Switches (freiSwitchPort oben liefert nur den ersten). */
+  const freieSwitchPorts = (n, sw, anzahl) => Object.keys(n.geraete[sw].running.ports).filter(p => !Modell.kabelAn(n, sw, p)).slice(0, anzahl);
+
+  /* Port-Security steht auf der MAC eines fremden Geräts: Der Port ist auf ein anderes Gerät festgelegt, das
+     erste Frame des angeschlossenen Geräts ist ein Verstoß → der Switch schaltet den Port ab
+     (err-disabled, src/sim/switch.js:84-99; Grund PORTSEC_VIOLATION). Gemessen: In lan/praxis/standorte/dmz
+     bricht das erste Ziel mit PORTSEC_VIOLATION. buero steht NICHT in `vorlagen`: dort holen sich die Rechner
+     ihre Adresse per DHCP, deshalb meldet der Lauf dort zuerst DHCP_NO_OFFER/DNS_NO_SERVER – der Grundcode
+     würde am Trainingsergebnis die falsche Erklärung anzeigen. */
+  neu({name: "portsec-fremde-mac", titel: "Port-Security auf fremder MAC", skills: ["lab.portsec", "lab.switch"],
+    gruende: ["PORTSEC_VIOLATION", "LINK_DOWN", "ARP_NO_REPLY", "TIMEOUT"], vorlagen: ["lan", "praxis", "standorte", "dmz"],
+    passt: (n, r) => (r.hosts || []).filter(id => n.geraete[id] && amSwitch(n, id)).map(id => {
+      const s = amSwitch(n, id);
+      return {key: id, geraet: s.geraet, port: s.port, host: id, mac: n.geraete[id].hw.macs.eth0};
+    }),
+    anwenden(n, k){
+      const mac = k.mac || n.geraete[k.host]?.hw?.macs?.eth0 || "";
+      Modell.setzen(n, k.geraet, `ports.${k.port}.portSecurity`, {max: 1, macs: [fremdMac(mac)], verstoss: "shutdown"});
+    },
+    loesung: (n, k) => [
+      {aktion: "errdisable", geraet: k.geraet, port: k.port,
+       text: `${name(n, k.geraet)} ${k.port}: err-disabled aufheben – im Inspektor „Port zurücksetzen“, auf der Konsole „interface ${lang(k.port)}“ → „shutdown“ → „no shutdown“.`},
+      {geraet: k.geraet, setzen: {[`ports.${k.port}.portSecurity`]: {max: 1, macs: [k.mac], verstoss: "shutdown"}},
+       text: `${name(n, k.geraet)}: Port-Security auf die MAC von ${name(n, k.host)} (${k.mac}) umtragen – erst danach bleibt der Port oben.`}],
+    hilfen: (n, k) => ({frage: ["Das Kabel steckt, die Adresse stimmt – und trotzdem geht kein einziges Paket durch. Was kann einen Switchport außer „shutdown“ noch dichtmachen?"],
+      bereich: [{geraet: k.geraet, port: k.port}],
+      konkret: [`Auf ${name(n, k.geraet)} steht am Port ${k.port} „Port-Security“ mit einer festen MAC-Adresse. ${name(n, k.host)} hat eine andere – der Switch hat den Port deshalb abgeschaltet (err-disabled).`]}),
+    erklaerung: "Port-Security merkt sich, welche MAC-Adressen an einem Switchport erlaubt sind. Eine fremde MAC ist ein Verstoß; bei „violation shutdown“ schaltet der Switch den Port ab (err-disabled). Aus diesem Zustand kommt er nur mit „shutdown“ und „no shutdown“ zurück – und nur, wenn die Ursache behoben ist: entweder die erlaubte Adresse berichtigen oder das fremde Gerät entfernen. Sonst sperrt der nächste Rahmen den Port sofort wieder. Fachlich ist die Funktion richtig: Sie verhindert, dass ein fremdes Gerät an einen festen Platz gesteckt wird.",
+    quelle: "Cisco Catalyst Software Configuration Guide: Configuring Port Security · Network – Lernfassung (§ 9 MAC Flooding, Abwehr Port Security)"});
+
+  /* Zwei Kabel zwischen demselben Switch-Paar bilden eine Layer-2-Schleife. Ohne Spanning Tree kreisen die
+     Broadcasts, bis das Ereignis-Budget greift: der Lauf bricht mit `abbruch: "STORM"` ab
+     (src/sim/engine.js:18, 119-124). Gemessen: Mit ZWEI Leitungen bricht in standorte jedes Ziel mit STORM;
+     ein einzelnes zweites Kabel erzeugt keinen Sturm, weil kein Kreis entsteht. STP ist in der Simulation
+     nicht nachgebildet (src/sim/switch.js:5) – die Lösung ist deshalb das Ziehen der zweiten Leitung. */
+  neu({name: "stp-doppelkabel", titel: "Doppelte Verbindung zwischen zwei Switches", skills: ["lab.stp", "lab.switch"],
+    gruende: ["STORM", "TIMEOUT"], vorlagen: ["standorte"],
+    passt: (n, r) => {
+      /* Das Ziel dieses Falls sind zwei verschiedene Rechner der Vorlage (das eigene Ziel unten) – ohne sie
+         gäbe es nichts zu prüfen. */
+      const von = (r.clients || [])[0], nach = (r.clients || [])[1];
+      if (!von || !nach || von === nach || !n.geraete[von] || !n.geraete[nach]) return [];
+      const sws = Object.values(n.geraete).filter(g => g.typ === "switch");
+      for (let i = 0; i < sws.length; i++) for (let j = i + 1; j < sws.length; j++) {
+        const a = freieSwitchPorts(n, sws[i].id, 2), b = freieSwitchPorts(n, sws[j].id, 2);
+        if (a.length === 2 && b.length === 2) return [{key: `${sws[i].id}|${sws[j].id}`, geraet: sws[i].id, gegen: sws[j].id,
+          a1: a[0], a2: a[1], b1: b[0], b2: b[1], von, nach}];
+      }
+      return [];
+    },
+    anwenden(n, k){
+      for (const [pa, pb] of [[k.a1, k.b1], [k.a2, k.b2]]) {
+        const v = Modell.verbinden(n, {geraet: k.geraet, port: pa}, {geraet: k.gegen, port: pb});
+        if (v && v.fehler) throw new Error("stp-doppelkabel: " + v.fehler);
+      }
+    },
+    /* Ein eigenes Ziel statt der Vorlagenziele: Der Sturm bricht ohnehin alles, und die Vorlage beginnt in
+       buero mit einem DHCP-Ziel – das erklärte am Trainingsergebnis den falschen Grund. */
+    ziele: (n, k) => (k.von && n.geraete[k.von] && n.geraete[k.nach])
+      ? [{typ: "erreichbar", von: k.von, nach: k.nach, proto: "icmp", text: `${name(n, k.von)} und ${name(n, k.nach)} erreichen sich`}] : [],
+    /* Beide zusätzlichen Leitungen zurückbauen: Der Netzplan kennt zwischen den beiden Switches keine
+       direkte Verbindung, und Spiel.plan.abweichungen zählt auch Kabel. Bliebe eine Leitung liegen, wiche das
+       Netz nach der Lösung weiter vom Plan ab. Jeder Schritt nennt sein Gerät – daran misst
+       tests/spiel-plan.test.js, dass die Lösung genau die abweichenden Geräte anfasst. */
+    loesung: (n, k) => [
+      {aktion: "trennen", geraet: k.gegen, a: {geraet: k.gegen, port: k.b2},
+       text: `Die zusätzliche Leitung zwischen ${name(n, k.geraet)} und ${name(n, k.gegen)} entfernen (Kabel an ${name(n, k.gegen)} ${k.b2} abziehen) – sie bildet mit der zweiten den Kreis.`},
+      {aktion: "trennen", geraet: k.geraet, a: {geraet: k.geraet, port: k.a1},
+       text: `Auch die zweite Zusatzleitung (${name(n, k.geraet)} ${k.a1}) abziehen: ${name(n, k.geraet)} und ${name(n, k.gegen)} waren doppelt verbunden – der Plan kennt zwischen ihnen keine direkte Leitung.`}],
+    hilfen: (n, k) => ({frage: ["Zwei Wege zwischen zwei Switches sind einer zu viel, solange niemand Frames blockiert. Welches Protokoll macht das – und arbeitet es hier?"],
+      bereich: [{geraet: k.geraet}, {geraet: k.gegen}],
+      konkret: [`${name(n, k.geraet)} und ${name(n, k.gegen)} sind doppelt verbunden (${k.a1}/${k.b1} und ${k.a2}/${k.b2}). Broadcasts laufen im Kreis; der Lauf bricht mit „Broadcast-Sturm“ ab. Zieh die zweite Leitung.`]}),
+    erklaerung: "Zwei Switches, zwei Kabel, kein Spanning Tree: Ein Broadcast wird über beide Wege weitergeleitet und läuft im Kreis. Bei jedem Umlauf kommen Frames hinzu, bis das Netz steht – ein Broadcast-Sturm. Genau dagegen arbeitet Spanning Tree (IEEE 802.1D): Er wählt eine Wurzel und blockiert redundante Ports, sodass nur ein Weg aktiv bleibt. In diesem Modell ist STP nicht nachgebildet; die Schleife endet erst, wenn die zweite Leitung gezogen ist. Erkennbar ist sie am Abbruch „Broadcast-Sturm“ in der Ereignisliste – hohe Last ohne Nutzverkehr.",
+    quelle: "Fragen – Netzwerke planen (Wozu STP?) · IEEE 802.1D"});
+
+  /* Der alte Dateiserver ist durch ein NAS ersetzt worden – mit derselben ID, am selben Switchport, aber ohne
+     Konfiguration. Keine Vorlage enthält ein NAS (gemessen), der Injektor legt es deshalb selbst an (Muster
+     „fremder-dhcp“, das einen fremden Router baut). Dass das NAS die ID des Servers bekommt, ist Absicht: So
+     zeigt das FREIGABEZIEL der Vorlage („… erreicht die Dateifreigabe“) auf das NAS, und der Fehler ist ohne
+     eigenes Ziel messbar – ein Ziel auf ein Gerät, das es im gesunden Netz nicht gibt, würde ticketBauen
+     verwerfen (src/spiel/generator.js:79-84 prüft gegen das gesunde Netz). Gemessen: ohne Adresse bricht das
+     Freigabeziel mit NO_IP; mit IP/Maske/Gateway liefert das NAS die Freigabe (SMB, Port 445) wieder aus.
+     buero und praxis bleiben draußen: Dort ist der Server auch DHCP- bzw. DNS-Server, sein Ersatz bräche Ziele,
+     die ein NAS nicht heilen kann. */
+  neu({name: "nas-ohne-adresse", titel: "Neues NAS ohne Adresse", skills: ["lab.storage", "lab.ip"],
+    gruende: ["NO_IP", "ARP_NO_REPLY", "TIMEOUT", "SERVICE_OFF"], vorlagen: ["standorte"],
+    passt: (n, r) => {
+      const id = r.server, g = id ? n.geraete[id] : null, s = id ? amSwitch(n, id) : null;
+      if (!g || !s) return [];
+      const i = hIf(n, id);
+      return [{key: id, geraet: id, switch: s.geraet, port: s.port, x: g.x, y: g.y,
+        ip: i.ip, maske: i.maske, gw: i.gw, dns: i.dns, name: "NAS-Projekte"}];
+    },
+    anwenden(n, k){
+      Modell.entfernen(n, k.key);                                  /* der alte Dateiserver weicht dem NAS */
+      Modell.geraet(n, "nas", {id: k.key, name: k.name || "NAS-Projekte", x: k.x, y: k.y});
+      const v = Modell.verbinden(n, {geraet: k.key, port: "eth0"}, {geraet: k.switch, port: k.port});
+      if (v && v.fehler) throw new Error("nas-ohne-adresse: " + v.fehler);
+      Modell.setzen(n, k.key, "dienste.datei", {an: true});         /* die Freigabe ist da – nur der Weg fehlt */
+    },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"if.eth0.ip": k.ip, "if.eth0.maske": k.maske, "if.eth0.gw": k.gw, "if.eth0.dns": k.dns},
+      text: `${name(n, k.geraet)}: die Adresse des alten Dateiservers eintragen (${k.ip}, Maske ${k.maske}, Gateway ${k.gw}) – dann ist die Freigabe über SMB (Port 445) wieder erreichbar.`}],
+    hilfen: (n, k) => ({frage: ["An der Stelle des Dateiservers steht jetzt ein NAS. Der Ping geht nicht einmal los – was fehlt einem Gerät, das frisch ausgepackt im Schrank stand?"],
+      bereich: [{geraet: k.geraet}],
+      konkret: [`${name(n, k.geraet)} hat keine IP-Adresse. Ohne Adresse gibt es kein Ziel, an das ein Frame gehen könnte – die Freigabe ist deshalb für niemanden erreichbar.`]}),
+    erklaerung: "Ein NAS stellt Dateien über das LAN bereit (SMB auf TCP 445, NFS auf 2049) und ist ein eigenständiges Gerät im Netz. Wie jeder Server braucht es eine feste Adresse aus dem eigenen Netz, die passende Maske und – für andere Netze – ein Gateway. Ohne Adresse gibt es kein Ziel, an das ein Frame gehen könnte: Der Switch kennt nur MAC-Adressen in seinem VLAN, kein „NAS“. Deshalb bekommt der neue Dateiserver die Adresse des alten, damit alle ihn unter derselben Nummer finden; ein SAN dagegen stellt Blockspeicher bereit (iSCSI auf 3260), den ein Server wie eine eigene Platte nutzt.",
+    quelle: "Storage-Konzeptatlas · IANA Port Number Registry (445, 2049, 3260)"});
+
   return I;
 })();

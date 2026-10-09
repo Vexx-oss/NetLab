@@ -27,12 +27,26 @@
      Spiel.stufe.erklaerung()       -> "ausfuehrlich" | "knapp" | "nurcodes"
      Spiel.stufe.konto([inst])      -> {frei, gesamt} für ein Ticket (ohne Ticket null)
      Spiel.stufe.hilfeZiehen(inst)  -> {frei, grund}; verbraucht EINE freie Hilfe, wenn vorhanden
+     Spiel.stufe.ticketStufeSetzen(inst, [id]) -> setzt die Ticket-Stufe AUSDRÜCKLICH (Fahrplan § 2.5);
+                                       ohne id gilt der Bildungsstand des Menschen auf diesem Gerät
      Spiel.stufe.text(a, k, n)      -> Text der Stufe, nie null
      Spiel.stufe.erklaerungText(id?)-> eine Zeile: was diese Stufe bedeutet (kein DOM)
      Spiel.stufe.freigabeText(id?)  -> eine Zeile: was diese Stufe freischaltet (kein DOM)
 
    Regeln: kein Wurf bei fehlendem/unbekanntem einst.stufe (Rückfall "azubi"), kein Math.random,
-   kein Date.now. Ein leerer Vorrat SPERRT nicht – er kostet Sterne wie bisher (das regelt der Aufrufer). */
+   kein Date.now. Ein leerer Vorrat SPERRT nicht – er kostet Sterne wie bisher (das regelt der Aufrufer).
+
+   DIE TICKET-STUFE WIRD AUSDRÜCKLICH GESETZT (Fahrplan „1.3 und 2.0" § 2.5, Entwurf E4).
+   Bis 09.10.2026 las `alsTicketId` für ein Ticket ohne eigene Stufe `Spiel.EINST_STANDARD` –
+   eine stille Konstante: `Spiel.stufe.konto(inst)` lieferte {frei:6, gesamt:6} auch dann, wenn der
+   Mensch auf „meister" stand, und sechs Sprossen waren kostenlos (`Spiel.hilfeAbzuege` blieb leer).
+   Jetzt gilt: Trägt das Ticket eine Stufe, gilt sie (§ 2.1 „je Ticket" – ein späteres Umstellen des
+   Menschen ändert sie NICHT). Trägt es keine, wird die Stufe des Menschen auf DIESEM Gerät
+   (`Spiel.einst.stufe`, Rückfall azubi) ausdrücklich am Ticket eingetragen – und zwar dort, wo der
+   Vorrat wirklich gebraucht wird: beim offenen Ticket (`konto()`/`hilfenFrei()` ohne Instanz, das ist
+   der Weg der Oberfläche) und beim Ziehen einer Sprosse (`Spiel.hilfe`). `Spiel.EINST_STANDARD` ist
+   als Vorratsquelle ersatzlos entfallen; für Tickets, die nie durch die Hand des Spiels gehen
+   (Attrappen, Altstände), gilt der Vertragsrückfall azubi. */
 
 /* Rückfall für alles Unbekannte. */
 Spiel.STUFE_RUECKFALL = "azubi";
@@ -88,13 +102,25 @@ Spiel.stufe = (() => {
   };
   const alsDef = id => Spiel.STUFE.find(s => s.id === alsId(id));
   /* Vorrat eines Tickets: die Stufe des TICKETS, nicht die des Menschen.
-     Hat das Ticket keine eigene Stufe (so entsteht es heute in Spiel.instanzErstellen), gilt die
-     Voreinstellung "azubi" – NICHT die gerade gewählte Stufe des Menschen. Die Stufe ist eine
-     Voreinstellung für das, was der Mensch zu sehen bekommt; der Vorrat eines Tickets darf sich
-     nicht dadurch ändern, dass jemand später „Meister" einstellt (§ 2.1 „je Ticket"). */
+     Trägt das Ticket keine eigene Stufe, gilt der Vertragsrückfall azubi (§ 2.1) – NIE der stille
+     Standard `Spiel.EINST_STANDARD`. Dass ein Ticket ohne eigene Stufe trotzdem mit dem richtigen
+     Vorrat spielt, besorgt `setzeTicketStufe` unten: die Stufe wird beim ersten echten Zugriff
+     AUSDRÜCKLICH am Ticket eingetragen. */
   const alsTicketId = inst => (inst && inst.stufe !== undefined && inst.stufe !== null)
     ? alsId(inst.stufe)
-    : (Spiel.EINST_STANDARD && Spiel.EINST_STANDARD.stufe !== undefined ? alsId(Spiel.EINST_STANDARD.stufe) : Spiel.STUFE_RUECKFALL);
+    : Spiel.STUFE_RUECKFALL;
+  /* Die Stufe eines Tickets AUSDRÜCKLICH setzen und zurückgeben (idempotent, wirft nie).
+     Ohne `id` gilt der Bildungsstand des Menschen auf diesem Gerät (`Spiel.einst.stufe`, Rückfall
+     azubi) – der Vorrat des Schülers gilt, aber nie still der Standard. Eine übergebene id gewinnt
+     und wird ebenfalls geprüft (unbekannt -> azubi); ein Klassenraum darf damit z. B. „azubi" für
+     alle Geräte festschreiben. Steht die Stufe schon am Ticket, bleibt sie unberührt (§ 2.1). */
+  const setzeTicketStufe = (inst, id) => {
+    const neu = id === undefined || id === null ? alsId() : alsId(id);
+    if (!inst || typeof inst !== "object") return neu;
+    if (inst.stufe !== undefined && inst.stufe !== null) return alsId(inst.stufe);
+    try { inst.stufe = neu; } catch (e) { /* eingefrorenes Ticket: dann gilt der Rückfall in alsTicketId */ }
+    return neu;
+  };
   const gesamt = inst => Spiel.HILFE_KONTO[alsTicketId(inst)] || 0;
   /* Freie Hilfen: steht die Zahl am Ticket, gilt sie; sonst Vorrat minus verbrauchte Hilfen. */
   const frei = inst => {
@@ -168,17 +194,33 @@ Spiel.stufe = (() => {
       return {ja: false, grund: "diese Stufe will keine Hilfe"};
     },
     erklaerung(){ return alsDef().erklaerung; },
-    /* Ohne Argument: das offene Ticket (Spiel.st.aktiv). Ohne Ticket: null. */
+    /* Ohne Argument: das offene Ticket (Spiel.st.aktiv). Ohne Ticket: null.
+       Das OFFENE Ticket bekommt dabei seine Stufe ausdrücklich eingetragen (setzeTicketStufe):
+       es ist das Ticket, an dem der Schüler auf diesem Gerät arbeitet. Wird eine Instanz
+       ÜBERGEBEN, wird nichts geschrieben – fremde Attrappen und Altstände bleiben unberührt
+       und spielen mit dem Vertragsrückfall azubi. */
     konto(inst){
       const i = inst || Spiel.stufeInstanz();
       if (!i) return null;
+      if (!inst) setzeTicketStufe(i);
       return {frei: frei(i), gesamt: gesamt(i)};
     },
     /* Nur die Zahl – für Flächen, die eine Zeile „noch 3 von 6 Hilfen" schreiben.
-       Ohne Argument gilt wie bei konto() das OFFENE Ticket (§ 2.1: „je Ticket"). Bis 07.10.2026
-       lieferte der Aufruf ohne Argument 0, weil hier nur `frei(inst)` stand — gemessen im Review
-       „Testqualität"; ein Aufrufer ohne Instanz hätte damit „kein Vorrat" angezeigt. */
-    hilfenFrei(inst){ return frei(inst || Spiel.stufeInstanz()); },
+       Ohne Argument gilt wie bei konto() das OFFENE Ticket (§ 2.1: „je Ticket") – und wie dort wird
+       seine Stufe ausdrücklich eingetragen. Bis 07.10.2026 lieferte der Aufruf ohne Argument 0, weil
+       hier nur `frei(inst)` stand — gemessen im Review „Testqualität"; ein Aufrufer ohne Instanz
+       hätte damit „kein Vorrat" angezeigt. */
+    hilfenFrei(inst){
+      const i = inst || Spiel.stufeInstanz();
+      if (!inst) setzeTicketStufe(i);
+      return frei(i);
+    },
+    /* Die Stufe eines Tickets AUSDRÜCKLICH setzen (Fahrplan § 2.5 / Entwurf E4) und zurückgeben.
+       Ohne `id` gilt der Bildungsstand des Menschen auf diesem Gerät (Spiel.einst.stufe, Rückfall
+       azubi); eine übergebene id gewinnt (z. B. „azubi" als Ansage für alle Geräte eines Klassenraums).
+       Idempotent: steht die Stufe schon am Ticket, bleibt sie (§ 2.1 – ein späteres Umstellen des
+       Menschen ändert den Vorrat eines Tickets nicht). Wirft nie, auch nicht ohne Ticket. */
+    ticketStufeSetzen(inst, id){ return setzeTicketStufe(inst, id); },
     /* Verbraucht genau EINE freie Hilfe dieses Tickets. Ein leerer Vorrat ist KEINE Sperre:
        frei:false heißt nur „jetzt kostet es Sterne" – der Aufrufer lässt die Sprosse offen.
        WICHTIG: Diese Funktion verbraucht nur den Zähler (`inst.hilfenFrei`). Den Eintrag in `inst.hilfen`

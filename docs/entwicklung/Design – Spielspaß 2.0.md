@@ -1759,3 +1759,118 @@ Ermäßigungs-Semantik des Vorrats (entschieden und dokumentiert) und die Staffe
 die einen festgeschriebenen Test in `tests/spiel-flow.test.js` bricht. Beides steht oben unter „offen".
 
 
+
+
+---
+
+## 33 · Das 2.0-Fundament (09.10.2026)
+
+Der Auftrag des Nutzers lautete **„arbeite alles bis zum Production Release aus"**. § 32 endete mit einer
+Entscheidungsvorlage (fünf Entwürfe, **nichts gebaut**, siehe [Fahrplan 1.3/2.0](<Fahrplan – 1.3 und 2.0.md>)).
+Dieser Abschnitt beschreibt, was daraus in **einer** Sitzung gebaut, gemessen und als Fassung **2.0.0**
+ausgeliefert wurde — und was dabei **verworfen** wurde.
+
+Gearbeitet haben **zwölf Bau-Tasks** und zwei Prüf-Tasks, jeder mit **eigenem Schreibbereich** (eine Datei,
+ein Schreiber), dazu drei Nachträge aus dem laufenden Auftrag des Nutzers: keine schnelle Wiederholung,
+der sichtbare nächste Schritt, generierte Fragen. Die Zahlen in einem Satz: Testlauf **471/479 → 620/620**
+(8 rot → 0 rot), Testdateien **55 → 70**, Module **84 → 90** im Testlauf und **118 → 126** im Bau, Fassung
+**1.2.4 → 2.0.0**.
+
+### Was gebaut wurde — je Baustein der Beleg
+
+| Baustein | Beleg (gemessen) | Wo |
+|---|---|---|
+| **Übergabe** „Neuer Azubi an diesem Rechner" | die acht roten `UI: Übergabe › …` der Nullmessung sind grün; Abschnitt mit vier Wegen, Escape schließt, Fehlschlag lädt **nicht** neu | `src/spiel/uebergabe.js` · `src/ui/uebergabe.js` · `src/stil/uebergabe.css` |
+| **Ergebnis kopieren** | Klartext aus `Spiel.ergebnisText`, Knopf im Abschlussfenster (`src/ui/spiel.js:543`); `Spiel.ergebnisKurz` bekam einen echten Aufrufer (`:511`) | `src/spiel/ergebnis.js` · `src/ui/spiel.js` |
+| **Klassenraum ohne Karriereschaden** | vorher (Fahrplan, vom Prüfer exakt reproduziert) **+33 € / +1 Ruf**; nachher 0 € / 0 Ruf, kein `erledigt`, keine Kundenampel — Lernstand steigt trotzdem | `src/spiel/klassenraum.js` · Umleitung `src/spiel/abnahme.js:126-127` |
+| **Auftrags-Determinismus** | derselbe Code + Seed ⇒ derselbe `def.id`, unabhängig vom lokalen Flow-Stand | `src/spiel/postfach.js` · `flow.js` |
+| **Hilfevorrat** | Vorrat folgt dem Bildungsstand (**6/4/2/0**), die Stufe steht ausdrücklich am Ticket; leerer Vorrat sperrt nicht | `src/spiel/stufensystem.js` · `hilfe.js` |
+| **Drei Trainingskarten geöffnet** | 34 Szenarien: vorher 31 offen / **3 gesperrt**, nachher alle drei startbar; Injektoren **36 → 39**; `show spanning-tree`-Schritt entfernt | `src/spiel/injektoren.js` · `src/daten/trainings.js` |
+| **Denkhilfen** | **91 von 92** Minis mit eigenem Anstoß (vorher 25; 60 in der Grunddatei, 31 in der Zusatzdatei); der Prüfer hat **91 von 91** über den echten Weg beim Spieler nachgewiesen | `src/daten/mini-denkhilfen.js` · `mini-denkhilfen2.js` |
+| **Hilfe-Vorschläge Ebene 2** | **44** statt 29 (Ebene 1 = 22, **Ebene 2 = 15**, Ebene 3 = 7); **27 von 27** Fertigkeiten abgedeckt (vorher 10 ohne) | `src/daten/hilfen.js` |
+| **Wiki 2.0** | 27 Seiten, 95 Abschnitte; IPv6 auf fünf Seiten, WLAN/Access Point auf drei; keine toten `siehe`-Verweise | `src/daten/wiki.js` |
+| **Lernmotor-Wache** | Wächtertest gegen direkte `store.get/set("lern")`-Aufrufe; der Gegenversuch macht ihn nachweislich rot | `tests/lernmotor-wache.test.js` · [Befund](<Befund – Lernmotor-Falle.md>) |
+| **Keine schnelle Wiederholung** | 20 Runden über den echten Weg: vorher **11 verschiedene Minis / 9 Wiederholungen**, nachher **20 / 0**; 40 Runden → 40 verschiedene; Zustand in `st.mini`, Migration alter Stände | `src/spiel/mini.js` · `mischer.js` |
+| **Nächster Schritt sichtbar** | `Spiel.naechster` → `{geraet, ziel, text, bereich}`; ungefragt erst nach **90 s** ohne Fortschritt, `geselle` nach Fehler, `meister` nie; Anzeige **15 s** | `src/spiel/naechster.js` · `src/ui/netzplan.js` · `src/stil/naechster.css` |
+| **Fragen-Generator** | **11 Vorlagen**, **20 Denkfehler**, Lösung wird ausgerechnet (Test über ≥ 200 Seeds); deterministisch, Id `gf-<vorlage>-<seed>` übersteht den Neustart | `src/daten/fragen-vorlagen.js` · `src/spiel/fragen.js` |
+
+### Verworfen — und warum das hier steht
+
+1. **`lab.stp` über EIN zweites Kabel.** Gemessen: **kein** Sturm (Ziel blieb ok, `abbruch: null`). Erst
+   **zwei parallele** Kabel zwischen denselben Switches ergeben reproduzierbar `abbruch === "STORM"`.
+   *Lehre:* Ein Injektor, der nichts bricht, wird von `ticketBauen` zu Recht verworfen — wer ihn trotzdem
+   einbaut, baut eine Karte, die nichts tut. Außerdem verlangte der Kartentext ein Kommando
+   (`show spanning-tree`), das es im Spiel **nicht gibt**; der Schritt ist entfernt.
+2. **Den Lernmotor selbst reparieren.** Verworfen. `fremd/lernmotor.js` trägt im Kopf „FREMDE DATEI — NICHT
+   HIER BEARBEITEN", die Quelle liegt außerhalb des Projektordners (AGENTS.md Regel 3) und hat beim Laden
+   **Vorrang** — eine Änderung an der Kopie hätte auf diesem Rechner nachweislich **keine** Wirkung gehabt.
+   Stattdessen: Wächtertest auf unserer Seite + Änderungsvorschlag als Vorlage im
+   [Befund](<Befund – Lernmotor-Falle.md>).
+3. **Elf Karriere-Filter nachziehen.** Verworfen zugunsten **einer** Umleitung (Entwurf E2): sie steht
+   **vor** jedem Nebeneffekt, also entsteht nie ein Klassenraum-Eintrag in `st.erledigt` — die elf Filter
+   sind toter Vorsorge-Code und bleiben es bewusst.
+4. **Schwache Ebene-2-Vorschläge durch Abschalten der Prüfung „retten".** Vier Ebene-2-Vorschläge erschienen
+   nie, weil Ebene-1-Zwillinge sie verdeckten. Verworfen wurde das Abschalten; gebaut wurde je ein eigener,
+   fachlich passender Befehl. *Lehre:* Eine Prüfung, die stört, ist meistens ein Hinweis auf fehlenden
+   Inhalt, nicht auf eine falsche Regel.
+5. **`Spiel.ergebnisKurz` entfernen.** Der Prüfer fand die Funktion **ohne Aufrufer** („Wirkung vor Grün"
+   verletzt). Verworfen wurde das Löschen, gebaut ein echter Aufrufer: die Kurzfassung steht als Untertitel
+   im Abschlussfenster.
+6. **Die E1-Begründung des Entwurfs ist nur halb richtig.** Gemessen: der Offen-Zähler entfällt, die
+   `ticketId`-Blockade **bleibt** — bewusst so gelassen, symmetrisch zu `training`/`pruefung`/`raetsel`.
+   *Lehre:* Ein Entwurf ist eine Behauptung; erst die Messung entscheidet, welche Hälfte trägt.
+7. **Ein Schwarm aus 15 Teammitgliedern** war am 05.10.2026 gescheitert — drei von vier brachen mitten in
+   der Arbeit ab. Diese Sitzung zeigt den Gegenweg, und sie zeigt ihn als **Beobachtung, nicht als neue
+   Regel**: eine Datei, ein Schreiber; Shared Tasks mit Schreibbereich; Änderungen an fremden Dateien
+   **über den Lead**; ein Prüfer, der niemandes Arbeit bestätigt, ohne selbst zu messen.
+
+### Vier Messpunkte — und warum der Zwischenstand nicht der Endstand ist
+
+| Zeit | Messung | Was daran hing |
+|---|---|---|
+| vor der Sitzung | **471/479 grün, 8 rot** (55 Testdateien, 84 Module) | die acht roten `UI: Übergabe › …` aus einer Hinterlassenschaft |
+| 15:25 | **562/570 grün, 8 rot** (66 Testdateien, 90 Module) | drei davon inhaltlich: `portsec-fremde-mac` brach mit `TIMEOUT` statt `PORTSEC_VIOLATION`, `stp-doppelkabel` heilte in `standorte` nicht, der Netzplan-Test meldete Abweichungen |
+| 15:31 | **591/593 grün, 2 rot** (69 Testdateien, 90 Module) | übrig: `Fragen-Generator` und `Spiel: naechster Schritt` — beide gehörten Bausteinen, die **nach** dem Abzug entstanden |
+| Endlauf | **620/620 grün, 0 rot**, 0 übersprungen (70 Testdateien, 90 Module) | vom Chronisten selbst gemessen, Exit 0 |
+
+Zwischendurch war auch `ethos.py` **kurz rot** (`R5 Dauer nur 1/160/320 ms`: 70 → 73 Zeitwerte um 15:30,
+um 15:31:10 wieder GRÜN) — der Prüfer konnte die drei Werte keiner Zeile zuordnen. Der Satz, der daraus
+bleibt, steht schon im Review: **591 von 593 grün heißt nicht fertig.**
+
+### Prüfstand 2.0.0
+
+| Prüfung | Ergebnis | Quelle |
+|---|---|---|
+| `node tests/run.js` | **620/620 grün**, 70 Testdateien, 90 Module, **0 übersprungen**, Exit 0 | selbst gemessen |
+| vor der Sitzung | 471/479 grün, **8 rot**, 55 Testdateien, 84 Module | Nullmessung des Leads |
+| `python tools/ethos.py` | „GRUEN: keine Regel schlechter als tests\stil-stand.json" (R4 = 539) | selbst gemessen |
+| `python tools/klassen.py` | „0 Klassen ohne CSS-Regel" | selbst gemessen |
+| `node tools/sim-stand.js` | 12/12 „unverändert" | selbst gemessen |
+| `python bauen.py` | **126 Module, 2133 KB**, Version **2.0.0** | Lead |
+| `python tools/einfach.py` (+`--ziel`) | **2.720.252 B**, **0 Außenverweise**, beide byte-gleich, SHA256 `3822D6B5…F6` | Lead (Bytes und Hash nachgerechnet) |
+| `python tools/seite.py --pruefen` | GRÜN: 39 Dokumente, kein toter Verweis | Lead |
+| `python tools/seite-pruefen.py` | GRÜN; **online liegt noch 1.2.4** (nicht gepusht) | Lead |
+| `python android/bauen.py` | APK 2.0.0, **1.127.964 B**, SHA256 `DB11BF88…AC1`, `versionCode` **20001** | Lead (Bytes und Hash nachgerechnet) |
+| Fassung gezogen | **16 Stellen**, 0 Fehler; `VERSION_CODE` von Hand auf 20001 | Lead |
+
+### Was NICHT geprüft ist — ehrlich
+
+* **Kein Browserlauf und kein Bild.** `tools/rauch.py`, `tools/menueprobe.py`, keine Pixelmessung, kein
+  Bildschirmfoto. Die Oberflächen-Wirkung ist über DOM-Attrappen und Quelltext belegt — nicht im Bild.
+* **Keine echte Unterrichtsstunde**, kein Test mit einem Menschen.
+* **Die `.exe` wurde nicht neu gebaut** und nicht gestartet; `tools/q-echt.py` lief nicht, ihre
+  Fassungsnummer ist nicht gemessen.
+* **`tools/seite.py` lief vor dem Stand-Nachziehen** — die Doku-Seiten unter `docs/doku/` sind für die vier
+  Dokumente dieses Nachziehens älter als ihre Quellen und müssen vor einem Commit neu erzeugt werden.
+* **Nicht gepusht, kein Tag.** `v2.0.0` und der Push stehen aus (nur mit Freigabe des Nutzers); die
+  veröffentlichte Seite liefert weiterhin 1.2.4.
+* Die Testzahl **620** kommt aus dem Lauf; statisch gezählt sind es **613** `pruefe(`-Stellen in den 70
+  Testdateien. Die Differenz entsteht durch Tests in Schleifen — **nicht aufgeklärt**, wie viele genau.
+* Der Prüfer hat den **Lernmotor-Befund** (`s.v === 1` ohne Migration) **nicht selbst nachgemessen** und
+  die **FISI-Spielhalle** nicht geöffnet; ihre 86 Zeilen sind gelesen, nicht gemessen.
+
+### Ein Satz zum Vorgehen
+
+Zwölf Schreiber mit getrennten Schreibbereichen, ein Prüfer, der jede Zahl selbst nachzählt, und ein Lead,
+der fremde Dateien zusammenführt: Das war der Gegenversuch zum gescheiterten Schwarm vom 05.10.2026 — und
+der Grund, warum am Ende **eine** Zahl steht, die niemand schätzen musste: **620/620, 0 übersprungen.**

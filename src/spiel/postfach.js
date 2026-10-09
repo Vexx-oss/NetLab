@@ -75,8 +75,14 @@ Spiel.instanzErstellen = function(o = {}){
     def = Spiel.ticketDef(o.ticketId);
     if (!def) throw new Error("Unbekanntes Ticket: " + o.ticketId);
   }
-  /* Flow-Regler (§ 20 F6): Stand der Hauptfertigkeit festhalten; Generiertes kommt eine Nummer kleiner bzw. größer */
-  const flow = Spiel.flow && !o.ohneFlow && o.quelle !== "pruefung" && o.quelle !== "raetsel" ? Spiel.flow.fuer(def) : null;
+  /* Flow-Regler (§ 20 F6): Stand der Hauptfertigkeit festhalten; Generiertes kommt eine Nummer kleiner bzw. größer.
+     Quellen OHNE Regler: Prüfung und Tagesrätsel (eigene Wege) und der KLASSENRAUM. Dessen Auftrag muss allein aus
+     (Code, Seed) entstehen – der Flow-Stand gehört dem EINZELNEN Gerät (Lern-Geschichte, flow.js:46-52) und machte
+     sonst denselben Code je Gerät zu einem anderen Auftrag: gemessen (lab.vlan, Seed 5) „gen-lab.vlan-5“ /
+     „-geruest“ / „-verwicklung“ (Fahrplan § 2.4, Test Nr. 41 in tests/klassenraum-determinismus.test.js).
+     `ohneFlow: true` bleibt zusätzlich möglich, für die Quelle „klassenraum“ ist es nicht mehr nötig. */
+  const ohneRegler = o.quelle === "pruefung" || o.quelle === "raetsel" || o.quelle === "klassenraum";
+  const flow = Spiel.flow && !o.ohneFlow && !ohneRegler ? Spiel.flow.fuer(def) : null;
   if (flow && gen) { const anders = Spiel.flow.anpassen(gen, def, flow); if (anders && anders.def) { gen = anders.gen; def = anders.def; } }
   const seed = o.seed ?? (gen ? gen.seed : Spiel.neuerSeed(def.id));
   /* P2 „Auftragsvielfalt“: Ein NEUER Handauftrag bekommt Netz und Fehlerstelle aus seinem Instanz-Seed –
@@ -119,12 +125,16 @@ Spiel.defVon = inst => inst ? Spiel.ticketDef(inst.ticketId, inst) : null;
    vor der gesperrten (der Hub schlägt sie so nie als nächstes vor), dann Ungelesenes, dann nach Eingang.
    „training" ist seit der Hilfestellung (07.10.2026) die dritte unsichtbare Quelle: Trainingsinstanzen liegen
    im Spielstand (damit Spiel.oeffnen sie findet), gehören aber nicht ins Postfach und zählen nicht als offen –
-   verbindlich: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 6. */
+   verbindlich: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 6.
+   „klassenraum" ist seit dem 2.0-Fundament die vierte unsichtbare Quelle (Entscheidung E1, Fahrplan § 7):
+   ein Auftrag aus einem Lehrercode liegt ebenfalls in st.postfach – Spiel.instanz und Spiel.oeffnen finden ihn –,
+   gehört aber nicht in die sichtbare Liste und nicht in die Zähler. Die Flow-Regel bleibt unberührt: `ohneRegler`
+   in instanzErstellen schließt die Quelle bereits ein. */
 Spiel.postfach = function(){
   const t = jetzt();
   const sperre = Spiel.mischer ? Spiel.mischer.gesperrt(Spiel.formVerlauf()) : null;
   const gesperrt = i => sperre && Spiel.formVon(Spiel.defVon(i)) === sperre ? 1 : 0;
-  return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung" && i.quelle !== "raetsel" && i.quelle !== "training").slice().sort((a, b) => {
+  return Spiel.st.postfach.filter(i => !(i.ab && i.ab > t) && i.quelle !== "pruefung" && i.quelle !== "raetsel" && i.quelle !== "training" && i.quelle !== "klassenraum").slice().sort((a, b) => {
     const fa = a.frist ?? Infinity, fb = b.frist ?? Infinity;
     if (fa !== fb) return fa - fb;
     if ((a.kuratiert || 99) !== (b.kuratiert || 99)) return (a.kuratiert || 99) - (b.kuratiert || 99);     /* erste Stunde: Folge vorn */

@@ -934,4 +934,128 @@ Android-Fassung wurde nicht gebaut (`VERSION_CODE 10204` ist nachgezogen, die AP
 `tools/menueprobe.py --datei web/index.html` ist **rot** (36/43, 44-px-Trefferflächen in den Editor-Menüs) —
 gemessen identisch zu `HEAD~1`, also **vorbestehend** und nicht aus diesem Bau.
 
+## 14 · 2.0-Fundament — Übergabe, Ergebnis, Klassenraum (09.10.2026) — verbindlicher Vertrag
+
+**Anlass.** Der [Fahrplan 1.3/2.0](<entwicklung/Fahrplan – 1.3 und 2.0.md>) nennt die Schritte 0–4 als das,
+was vor jedem Klassenzimmer-Einsatz stehen muss. Diese Sitzung baut sie mit 15 getrennt schreibenden
+Teammitgliedern; die Schreibrechte stehen als Shared Tasks im Sitzungsprotokoll und in
+`docs/entwicklung/Übergabe – Stand 2.0-Fundament.md`. Dieser Abschnitt hält fest, was **für den ganzen Bau**
+gilt; bei Widerspruch gilt der Einzelvertrag des jeweiligen Bausteins.
+
+### 14.1 Neue und geänderte Datenformen
+
+| Gegenstand | Festlegung |
+|---|---|
+| Übergabe | `Spiel.uebergabe({lernstandBehalten = true})` → `{ok, lernstandBehalten, vorher, nachher}` in `src/spiel/uebergabe.js`. Schreibt `Spiel.st.uebergabe = {t, lernstandBehalten}` in den Spielstand; `Spiel.uebergabeLetzte()` liefert denselben Eintrag oder `null`. Kein DOM (Schichtregel § 7). |
+| Ergebnis | `Spiel.ergebnisText(inst, erg?)` und `Spiel.ergebnisKurz(inst, erg?)` in `src/spiel/ergebnis.js` — reiner, kopierbarer Klartext bzw. eine Zeile. Beide sind **zugesagte Schnittstelle** für den Knopf „Ergebnis kopieren" im Abschlussfenster. |
+| Klassenraum | Vierte Quelle `quelle: "klassenraum"`, behandelt in `Spiel.klassenraum.abnehmen(inst, abnahme)` (`src/spiel/klassenraum.js`), aufgerufen über **eine** Umleitung in `Spiel.abschliessen` neben dem Trainingszweig. |
+| Denkhilfen | `DATEN.miniDenkhilfen` bleibt die eine Tabelle. Ergänzungen aus einer zweiten Datei geschehen **idempotent** (`Object.assign(DATEN.miniDenkhilfen \|\| {}, {…})`); der Dateiname muss **nach** `mini-denkhilfen.js` sortieren, weil `bauen.py:60` und `tests/run.js:32` die Schicht alphabetisch laden. |
+| Lernmotor | Der Lernstand (`store "lern"`) wird ausschließlich über die `L.*`-API gelesen und geschrieben. Kein Modul unter `src/` ruft `store.get("lern")` oder `store.set("lern")` direkt auf. |
+
+### 14.2 Verhalten, das vertraglich feststeht
+
+1. **Die Übergabe lässt den Lernstand stehen** (er gehört dem Lernmotor, nicht dem Spielstand). Mit
+   `lernstandBehalten: false` wird er gelöscht — und zwar über `L.reset()` **vor** `Spiel.laden()`, weil der
+   Motor seinen Stand im Verschluss hält und ein von außen geleerter Speicher bei ihm unbemerkt bliebe.
+   Einstellungen (`store "einst"`) bleiben in jedem Fall. Nach der Übergabe ist **kein** offener Auftrag mehr da.
+2. **Der Klassenraum zahlt nichts** — kein Geld, kein Ruf, kein `st.erledigt`, keine Wochenwertung, keine
+   Abzeichen —, aber der **Lernwert bleibt**: der Klassenraum-Zweig ruft `Spiel.lernenNachAbnahme` selbst, wie
+   es der Trainingsweg tut. Eine Umleitung an **einer** Stelle statt elf Filter an elf Stellen; die Umleitung
+   steht vor jedem Nebeneffekt, also auch vor dem `st.erledigt.push`.
+3. **Derselbe Code ergibt denselben Auftrag.** Code + Seed bestimmen den Auftrag bis auf `def.id`; der lokale
+   Flow-Stand darf ihn nicht verändern, sonst bekäme der Nachbar am Nebentisch einen anderen Auftrag.
+4. **Der Hilfevorrat folgt dem eingestellten Bildungsstand.** Die Ticket-Stufe wird ausdrücklich gesetzt; der
+   Rückfall auf den Standard ist kein stiller Ersatz. Ein leerer Vorrat sperrt weiterhin nicht (§ 13.2).
+5. **Der Lernmotor bleibt fremd.** Änderungen an `fremd/lernmotor.js` sind verboten (Kopf der Datei); die
+   Quelle liegt außerhalb des Projektordners und hat beim Laden Vorrang. Unsere Seite sichert ein Wächtertest.
+6. **Kein Baustein ohne Aufruf.** Jede neue Fläche wird aus dem echten Weg gerufen — grüne Tests ohne Aufruf
+   gelten als **nicht fertig** (AGENTS.md).
+
+### 14.3 Dateien der Umsetzung
+
+`src/spiel/uebergabe.js` · `src/spiel/ergebnis.js` · `src/ui/uebergabe.js` · `src/stil/uebergabe.css` ·
+`src/spiel/klassenraum.js` · `src/spiel/abnahme.js` · `src/spiel/postfach.js` · `src/spiel/flow.js` ·
+`src/spiel/stufensystem.js` · `src/spiel/hilfe.js` · `src/spiel/injektoren.js` · `src/sim/engine.js` ·
+`src/daten/trainings.js` · `src/daten/lehrtexte.js` · `src/daten/mini-denkhilfen.js` ·
+`src/daten/mini-denkhilfen2.js` · `src/daten/hilfen.js` · `src/daten/wiki.js` · `src/ui/hilfe.js` ·
+`src/ui/spiel.js`
+
+### 14.4 Stand der Umsetzung (09.10.2026, gemessen)
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` | **620/620 grün**, 70 Testdateien, 90 Module, **0 übersprungen** |
+| `python tools/ethos.py` | **GRÜN** · `python tools/klassen.py` **0 Klassen ohne CSS-Regel** |
+| `node tools/sim-stand.js` | Simulation unverändert gegenüber dem Referenzstand |
+| `python tools/seite.py --pruefen` | **GRÜN** — 39 Dokumente, kein toter Verweis |
+| `python bauen.py` | 126 Module, 2133 KB → `web/index.html`, Fassung **2.0.0** |
+| `docs/index.html` = `Netzwerk-Labor.html` | **byte-gleich**, SHA256 `3822D6B5…95F6`, 0 Außenverweise |
+| Android | `Netzwerk-Labor-2.0.0-Android.apk`, 1 127 964 B, SHA256 `db11bf88…FAC1`, Signatur gültig |
+
+Nullmessung VOR dieser Sitzung: **471/479 grün, 8 rot** (alle acht `UI: Übergabe › …`, Hinterlassenschaft
+eines abgebrochenen Laufs), 55 Testdateien, 84 Module, Fassung 1.2.4. Die Sitzung hat die acht roten
+zuerst auf 0 gebracht und danach 141 Prüfungen ergänzt (479 → von 55 auf 70 Testdateien, 84 → 90 Module).
+
+**Nicht geprüft — ehrlich:** kein Browserlauf (`tools/rauch.py`, `tools/menueprobe.py`), keine echte
+Unterrichtsstunde, die `.exe` wurde **nicht** neu gebaut (Rust-Bau, nicht Teil dieses Auftrags), und die
+veröffentlichte Seite ist unverändert **1.2.4**, weil nicht gepusht wurde.
+
+## 15 · Nachtrag des Nutzers: Wiederholungssperre, Führung, generierte Fragen (09.10.2026) — Vertrag
+
+**Anlass.** Nach dem Fahrplan-Auftrag verlangte der Nutzer vier Dinge: (1) Aufträge dürfen sich in einer
+Sitzung nicht schnell wiederholen („wenn man mehrere Mini-Tickets abarbeitet, kommt sehr schnell mehrmals
+dasselbe"), (2) im Labor/Baucanvas soll bei Bedarf der nächste nötige Schritt gezeigt werden — „indem ein
+Computer oder der Menüpunkt pulsiert oder ein Pfeil darauf zeigt", (3) Fragen sollen möglichst immer neu
+generiert werden, „so dass tendenziell jeder User eine sehr eigene Experience haben kann", (4) alles bis zum
+Production Release ausarbeiten.
+
+### 15.1 Neue und geänderte Datenformen
+
+| Gegenstand | Festlegung |
+|---|---|
+| Wiederholungssperre | `Spiel.st.mini` trägt zwei neue Felder: `zug` (Zugnummer) und `gespielt` (Mini-id → Zugnummer). `zuletzt` bleibt das Sperrfenster (25). Pro Fertigkeit kommt jedes Mini einmal, danach das am längsten nicht gespielte. Alte oder beschädigte Stände werden rekonstruiert, nie geworfen. |
+| Mischung | `Spiel.MINI.GENERIERT = 3` — jede dritte Frage darf generiert sein, damit die feste Rotation wirksam bleibt. |
+| Generierte Fragen | `DATEN.fragenVorlagen` (11 Vorlagen) und `DATEN.fragenDenkfehler` (20 Denkfehler-Arten) in `src/daten/fragen-vorlagen.js`; `Spiel.fragen.erzeuge/erzeugeVoll/fuerSkill/merken/von/ausId/alle` in `src/spiel/fragen.js`. Id: `gf-<vorlage>-<seed>`, aus sich selbst wiederherstellbar. Generierte Fragen stehen **nicht** in `Spiel.mini.alle()`. |
+| Nächster Schritt | `Spiel.naechster(inst)` → `{geraet, ziel, text, bereich}` oder ehrlich `null`; dazu `Spiel.naechsterBedarf/-Wartezeit/-Wann/-Stufe`, `FUEHRUNG_NACH_MS` 90 s, `FUEHRUNG_ZEIGEN_MS` 15 s, `NAECHSTER_WANN` (`azubi`/`azubi-plus` „nachzeit", `geselle` „nachfehler", `meister` „nein"). |
+| Vierte Quelle | `quelle: "klassenraum"` ist aus dem sichtbaren Postfach, dem Offen-Zähler und der „Heute"-Kachel ausgenommen (wie `training`) und nimmt am Ereignistakt **nicht** teil. |
+
+### 15.2 Verhalten, das vertraglich feststeht
+
+1. **Rotation statt Filter.** Jedes Mini einer Fertigkeit kommt einmal dran, bevor sich eines wiederholt;
+   bei echter Erschöpfung das am längsten nicht gespielte. Der Sprung auf „alle Kandidaten", der die
+   Wiederholung erzeugte, ist entfernt. Alles deterministisch über `Zufall`, kein `Math.random`, kein Datum.
+2. **Die Führung verrät nichts.** Der Statustext der Simulation *ist* die Lösung („An PC-Kasse eth0 steckt
+   kein Kabel."). Bei Netz-Zielen zeigt der Fingerzeig deshalb nur Gerätename und Zieltext, nie die Ursache.
+   Sie erscheint **nur auf Bedarf** (Knopfdruck oder 90 s ohne Fortschritt), einmal je Stillstand, und
+   verschwindet, sobald der Schritt getan ist; `meister` bekommt sie nie ungefragt (§ 13.3 Punkt 3).
+3. **Generierte Fragen sind bewiesen richtig.** Es gibt keinen Menschen, der sie vorher liest: die Vorlage
+   rechnet ihre Lösung selbst, der Generator lässt nur Fragen durch, bei denen genau **eine** Option besteht,
+   und der Test rechnet mit eigener Arithmetik nach und prüft jede falsche Option gegen die dokumentierte
+   Denkfehler-Menge.
+4. **§ 13.3.1 gilt auch über den Ereignisweg.** Der 20-Sekunden-Ereignistakt nimmt `training` und
+   `klassenraum` aus — vorher zahlten beide über `weiterempfehlung` Ruf und legten neue Tickets an.
+5. **Die Wiki zeigt nur, was das Spiel kann** — oder kennzeichnet den Befehl ausdrücklich als echtes Gerät
+   („Echtes IOS, nicht das Labor"). Ein Wächter führt jede Rezeptzeile mit Prompt in der echten CLI aus.
+
+### 15.3 Dateien der Umsetzung
+
+`src/spiel/mini.js` · `src/spiel/mischer.js` · `src/daten/fragen-vorlagen.js` · `src/spiel/fragen.js` ·
+`src/spiel/naechster.js` · `src/ui/netzplan.js` · `src/stil/naechster.css` · `src/spiel/ereignisse.js` ·
+`src/spiel/hub.js` · `src/daten/hilfen.js` · `src/spiel/hilfe.js` · `src/ui/hilfe.js` ·
+`src/daten/mini-denkhilfen.js` · `src/daten/mini-denkhilfen2.js` · `src/daten/wiki.js` ·
+`src/ui/spiel.js` · `src/spiel/dex.js`
+
+### 15.4 Stand
+
+Vollständig umgesetzt und gemessen; die Zahlen stehen in § 14.4. Einzelbelege je Baustein:
+`docs/entwicklung/Review – 2.0-Fundament.md` (unabhängige Gegenprüfung), `docs/CHANGELOG.md` und
+`docs/entwicklung/Übergabe – Stand 2.0-Fundament.md`.
+
+**Offen und bewusst so gelassen:** `Spiel.hilfe.passend` ist nicht skill-abhängig (der Streifen zeigt den
+ersten sortierten Vorschlag; die zur Fertigkeit passende Sprosse wird über `leiter` hervorgehoben); die
+`ticketId`-Blockade beim Nachfüllen gilt symmetrisch für alle unsichtbaren Quellen; die `.exe` ist nicht
+neu gebaut.
+
+
+
 

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🧠 Befund – die Lernmotor-Falle · Netzwerk-Labor</title>
+<meta name="description" content="---.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">🧠 Befund – die Lernmotor-Falle</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-der-befund-zwei-zeilen-code-zwei-fallen">1 · Der Befund — zwei Zeilen Code, zwei Fallen</a></li>
+<li><a href="#2-welche-datei-wirklich-geladen-wird-gemessen-nicht-angenommen">2 · Welche Datei wirklich geladen wird — gemessen, nicht angenommen</a></li>
+<li><a href="#3-was-auf-unserer-seite-behoben-ist">3 · Was auf unserer Seite behoben ist</a></li>
+<li><a href="#4-was-nur-in-der-fisi-spielhalle-zu-beheben-ist">4 · Was nur in der FISI-Spielhalle zu beheben ist</a></li>
+<li><a href="#5-der-gegenversuch-die-wache-wird-nachweislich-rot">5 · Der Gegenversuch: die Wache wird nachweislich rot</a></li>
+<li><a href="#6-anderungsvorschlag-fur-die-fisi-spielhalle-vorlage-nicht-ausgefuhrt">6 · Änderungsvorschlag für die FISI-Spielhalle (Vorlage — nicht ausgeführt)</a></li>
+<li><a href="#7-was-nach-einer-motor-anderung-hier-nachzuziehen-ist">7 · Was nach einer Motor-Änderung hier nachzuziehen ist</a></li>
+<li><a href="#8-nicht-gepruft">8 · Nicht geprüft</a></li>
+<li><a href="#9-belege-in-dieser-sitzung-ausgefuhrt">9 · Belege (in dieser Sitzung ausgeführt)</a></li>
+</ul>
+</nav><hr>
+<p>typ: befund erstellt: 2026-10-09 aktualisiert: 2026-10-09 status: fertig — unsere Seite ist gesichert und gemessen; die Motor-Änderung ist eine Vorlage für die FISI-Spielhalle und NICHT ausgeführt tags: [FISI, Lernspiel, Netzwerk, Lernmotor, Befund, Falle]</p>
+<hr>
+<h1 id="befund-die-lernmotor-falle">🧠 Befund – die Lernmotor-Falle</h1>
+<blockquote>
+<p>[!danger] Kurzfassung Der Lernmotor (Fahrplan 1.3/2.0 § 2.1 und § 2.2) hat <strong>zwei</strong> Fallen: er wirft einen Lernstand mit <code>v !== 1</code> <strong>still</strong> weg, und er hält seinen Stand <strong>im Verschluss</strong> — ein Import nach dem Start ist beim nächsten <code>save()</code> verloren. <strong>Beide sind von unserer Seite nicht heilbar</strong>, denn der Motor gehört der FISI-Spielhalle. Auf unserer Seite ist deshalb getan, was hier möglich ist: die Übergabe setzt den Lernstand <strong>über den Motor</strong> zurück (<code>L.reset()</code> VOR <code>Spiel.laden()</code>), die Speicherfüllung läuft <strong>vor dem ersten Lesen</strong> des Motors, und eine <strong>Wache</strong> in <span class="dk-tot" title="„../../tests/lernmotor-wache.test.js“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">tests/lernmotor-wache.test.js</span> wird rot, sobald jemand im <code>src/</code> an der <code>L.*</code>-API vorbei direkt in <code>store["lern"]</code> schreibt. Der Änderungsvorschlag für die Spielhalle steht in <strong>§ 6</strong> — als Vorlage, <strong>nicht ausgeführt</strong>.</p>
+</blockquote>
+<h2 id="1-der-befund-zwei-zeilen-code-zwei-fallen">1 · Der Befund — zwei Zeilen Code, zwei Fallen</h2>
+<p>Der Motor liest seinen Stand <strong>einmal beim Laden seines Skripts</strong> und hält ihn danach im Verschluss:</p>
+<pre><code class="sprache-js">let st = (() =&gt; { const s = store.get("lern", null); return s &amp;&amp; s.v === 1 ? s : leer(); })();
+const save = () =&gt; store.set("lern", st);</code></pre>
+<div class="dk-tabelle"><table><thead><tr><th>Falle</th><th>Was passiert</th><th>Warum es still ist</th></tr></thead><tbody><tr><td><strong>A · Wegwerfen</strong></td><td><code>s.v === 1</code> ist streng und <strong>ohne Migration</strong>. Ein Stand mit <code>v: 2</code> (oder ohne <code>v</code>) wird durch <code>leer()</code> ersetzt.</td><td>Es gibt <strong>keine Meldung</strong>, keinen Rückfall, keine Sicherung. Der ganze Fortschritt eines Azubis ist weg.</td></tr><tr><td><strong>B · Verschluss</strong></td><td>Wer einen importierten Stand <strong>nach</strong> dem Start in den Speicher legt, wird nicht gehört: <code>save()</code> schreibt das <strong>alte Objekt des Motors</strong> zurück.</td><td>Der Import scheitert <strong>lautlos</strong> — und schlimmer: der nächste <code>save()</code> <strong>überschreibt</strong> den Import mit dem Stand des <strong>vorigen</strong> Azubis.</td></tr></tbody></table></div>
+<p><strong>Die Zeilennummern, die der Fahrplan nennt, sind die der Kopie.</strong> Gemessen (Test 2 der Wache):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Falle A liest</th><th>Falle B schreibt</th></tr></thead><tbody><tr><td><code>fremd/lernmotor.js</code> (Kopie <strong>mit</strong> 26-zeiligem Herkunftskopf)</td><td><code>:39</code></td><td><code>:40</code></td></tr><tr><td><code>../FISI-Spielhalle/src/lernmotor.js</code> (Quelle, <strong>die wirklich geladen wird</strong>)</td><td><code>:13</code></td><td><code>:14</code></td></tr></tbody></table></div>
+<p>Beide Nummernpaare sind richtig — sie zählen nur verschiedene Dateien. Wer in der Spielhalle etwas ändert, muss <code>:13/:14</code> treffen, nicht <code>:39/:40</code>.</p>
+<h2 id="2-welche-datei-wirklich-geladen-wird-gemessen-nicht-angenommen">2 · Welche Datei wirklich geladen wird — gemessen, nicht angenommen</h2>
+<blockquote>
+<p>[!warning] Die Kopie ist nicht die geladene Datei <code>fremd/lernmotor.js</code> trägt im Kopf „FREMDE DATEI — NICHT HIER BEARBEITEN". Auf <strong>diesem</strong> Rechner ist sie nicht nur verboten zu ändern, sie wäre auch <strong>wirkungslos</strong>: die danebenliegende Spielhalle hat Vorrang.</p>
+</blockquote>
+<p><strong>Was vorliegt</strong> (Dateisystem, 09.10.2026):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Größe</th><th>Zeilen</th><th>SHA256 (ganze Datei)</th><th>geändert</th></tr></thead><tbody><tr><td><code>../FISI-Spielhalle/src/lernmotor.js</code></td><td>4 221 B</td><td>86</td><td><code>66084B817C8912783C49ED27C4B2876B5FF6794050FD17078C29DE2BB8788490</code></td><td>29.09.2026, 15:57:38</td></tr><tr><td><code>fremd/lernmotor.js</code> (Kopie)</td><td>5 595 B</td><td>112 = 26 Kopf + 86 Rumpf</td><td><code>8C36309FD29612E77F1E578E8609C6681F0C47528183263234F12096FC6FE98F</code></td><td>05.10.2026, 21:17:39</td></tr></tbody></table></div>
+<p><strong>Die Auswahlregel</strong> steht wörtlich in <code>tests/run.js:13-20</code> (gleiche Logik in <code>bauen.py:92-95</code>):</p>
+<pre><code class="sprache-js">const LERNMOTOR_QUELLE = path.resolve(WURZEL, "..", "FISI-Spielhalle", "src", "lernmotor.js");
+const LERNMOTOR_KOPIE = path.join(WURZEL, "fremd", "lernmotor.js");
+function lernmotor() {
+  if (fs.existsSync(LERNMOTOR_QUELLE)) return { pfad: LERNMOTOR_QUELLE, kopie: false };
+  if (fs.existsSync(LERNMOTOR_KOPIE)) return { pfad: LERNMOTOR_KOPIE, kopie: true };
+  throw new Error("Kein Lernmotor gefunden: …");
+}</code></pre>
+<p><strong>Die Messung</strong> (Nachbau genau dieser Auswahl in einem Node-Einzeiler, dazu der Testlauf selbst):</p>
+<pre><code>quelleVorhanden: true      kopieVorhanden: true
+geladen:  C:\…\Lernprojekte\FISI-Spielhalle\src\lernmotor.js      kopieFlag: false
+Testlauf: Geladener Lernmotor → ../FISI-Spielhalle/src/lernmotor.js · Spielhalle liegt daneben → sie hat Vorrang
+Testlauf: Gegenprobe Motor    → ../FISI-Spielhalle/src/lernmotor.js:13 liest · ../FISI-Spielhalle/src/lernmotor.js:14 schreibt
+bauen.py: if LERNMOTOR_QUELLE.is_file(): return LERNMOTOR_QUELLE, False</code></pre>
+<p><strong>Abgleich Kopie ↔ Quelle</strong> — <code>python tools/lernmotor.py</code>:</p>
+<pre><code>Kopie    fremd\lernmotor.js  (86 Zeilen, SHA256 66084b817c891278…)
+Quelle   …\FISI-Spielhalle\src\lernmotor.js  (86 Zeilen, SHA256 66084b817c891278…)
+  GRUEN: GLEICH — die Kopie entspricht der Quelle Zeile fuer Zeile.</code></pre>
+<p><strong>Folgerung (belegt):</strong> Der Rumpf ist gleich, also verhält sich die Kopie heute identisch — sie wird aber <strong>nicht gelesen</strong>. Eine Änderung an <code>fremd/lernmotor.js</code> würde auf diesem Rechner am Testlauf <strong>und</strong> am Bau vorbeigehen. Eine Änderung gehört in die Spielhalle und wird mit <code>python tools/lernmotor.py --neu-einlesen</code> übernommen, nie umgekehrt.</p>
+<h2 id="3-was-auf-unserer-seite-behoben-ist">3 · Was auf unserer Seite behoben ist</h2>
+<p><strong>3.1 Die Übergabe geht über den Motor, nicht am Motor vorbei.</strong> <span class="dk-tot" title="„../../src/spiel/uebergabe.js“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>src/spiel/uebergabe.js</code></span> ruft bei <code>lernstandBehalten:false</code> <strong><code>L.reset()</code> VOR <code>Spiel.laden()</code></strong> (<code>:34</code>, Begründung im Kopfkommentar <code>:20-24</code>). Ein direktes Löschen des Speicherschlüssels wäre genau Falle B: der Motor hätte seinen alten Stand beim nächsten <code>save()</code> zurückgeschrieben. <code>L.reset()</code> schreibt <strong>über den Motor</strong> (<code>fremd/lernmotor.js:109</code>).</p>
+<p><strong>3.2 Der Speicher ist gefüllt, bevor der Motor liest.</strong> <code>src/kern/basis.js:134-147</code> (Frühstart) füllt <code>SPEICHER</code> aus <code>window.__LABOR_SPEICHER__</code> bzw. <code>localStorage</code> — und <code>kern</code> steht in der Ladereihenfolge <strong>vor</strong> <code>@lernmotor</code> (<code>tests/run.js:23-26</code>, <code>bauen.py:38-39</code>). Damit ist die Reihenfolge „Import vor dem ersten Lesen" für den <strong>gespeicherten</strong> Stand eingehalten.</p>
+<p><strong>3.3 Die Wache.</strong> <span class="dk-tot" title="„../../tests/lernmotor-wache.test.js“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">tests/lernmotor-wache.test.js</span> prüft sieben Dinge; die tragende Zusage lautet: <strong>im ganzen <code>src/</code> greift niemand direkt auf <code>store</code> „lern" zu</strong> — der Lernstand geht ausschließlich über die <code>L.*</code>-API. Gemessen hält das heute:</p>
+<pre><code>Wache src/ → 122 Dateien geprüft · 0 Verstöße   (die Zahl wächst mit dem Projekt; die Wache verlangt mindestens 100)
+Gegenprobe Motor → ../FISI-Spielhalle/src/lernmotor.js:13 liest · ../FISI-Spielhalle/src/lernmotor.js:14 schreibt
+Gegenprobe eingeschleust → 5/5 Schreibweisen gefunden · 0 Fehlalarm in Prosa und Kommentar
+Falle von außen → Motor sieht den Fremdstand: false · Speicher hält ihn nach save(): false
+17/17 grün (Filter lernmotor), davon 0 übersprungen</code></pre>
+<p>Die Wache erkennt vier Muster — <code>store.get/set("lern")</code>, <code>store["lern"]</code>, <code>SPEICHER.daten.lern</code>, <code>SPEICHER.daten["lern"]</code> — außerhalb von Kommentaren und meldet <strong>Datei:Zeile</strong>. Sie ist gegen ein stilles Grün gesichert: sie verlangt <strong>mindestens 100</strong> gefundene Dateien und <code>src/spiel/uebergabe.js</code> im Suchlauf, und die beiden Gegenproben würden einen kaputten Detektor sofort melden.</p>
+<p><strong>3.4 Der vierte Teil: <code>lernstandBehalten:false</code> scheitert nicht still.</strong> Entweder die Übergabe leert den Stand <strong>wirklich</strong> (Motor <strong>und</strong> Speicher) oder sie lehnt mit einem Grund ab — ein <code>ok:true</code> bei noch vorhandenem Lernstand ist verboten. Zusätzlich: nach <code>L.reset()</code> schreibt der Motor weiter, und eine Marke, die nur im Verschluss lebte, kommt <strong>nicht</strong> zurück.</p>
+<h2 id="4-was-nur-in-der-fisi-spielhalle-zu-beheben-ist">4 · Was nur in der FISI-Spielhalle zu beheben ist</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Falle</th><th>Auf unserer Seite möglich?</th><th>Begründung</th></tr></thead><tbody><tr><td><strong>A · <code>v !== 1</code> wird still weggeworfen</strong></td><td><strong>teilweise</strong> — siehe Kasten unten</td><td>Der Motor liest beim Laden seines Skripts. Was <strong>vor</strong> ihm läuft (<code>kern/basis.js</code>), könnte den Speicher vorher migrieren. Eine zweite Stelle für dieselbe Datenform wäre aber ein Vertragsbruch (AGENTS.md: „Vertrag zuerst"); geprüft oder gebaut ist das <strong>nicht</strong>.</td></tr><tr><td><strong>B · Verschluss: Import nach dem Start ist verloren</strong></td><td><strong>nein</strong></td><td>Es gibt keine öffentliche Funktion, die dem Motor einen Stand <strong>setzt</strong>. <code>L.reset()</code> kann nur leeren; die API kennt sonst nur <code>ueben</code>, <code>fehler</code>, <code>test</code> — jeder von ihnen schreibt <strong>Daten</strong>, nicht nur den Stand. Ein Import von einer Datei kann den Speicher aber erst füllen, <strong>nachdem</strong> der Motor geladen ist.</td></tr></tbody></table></div>
+<blockquote>
+<p>[!note]- Warum ein „Import vor dem ersten Lesen" im Programm nicht geht Für den <strong>gespeicherten</strong> Stand geht es (Frühstart, § 3.2). Für einen <strong>von Hand eingelesenen</strong> Lernstand (Datei/Code aus einem anderen Rechner) geht es nicht: der Importknopf wird gedrückt, <strong>nachdem</strong> die Seite geladen ist und der Motor sein <code>st</code> längst im Verschluss hält. Man müsste die Seite neu starten, damit der Import vor dem ersten Lesen im Speicher liegt — genau diese Reihenfolge-Abhängigkeit nennt der Entwurf „Mitnehmbarer Lernstand" § 7 den „ersten Testfall der Umsetzung" (zitiert nach <code>docs/entwicklung/Entwurf – Gegenprüfung und Lehrersicht.md:154</code>).</p>
+</blockquote>
+<p><strong>Nicht empfohlen, nur der Vollständigkeit halber:</strong> <code>L.st</code> gibt das <strong>lebende</strong> Objekt des Motors zurück (<code>fremd/lernmotor.js:111</code>, <code>get st(){ return st; }</code>). Ein <code>Object.assign(L.st, fremd)</code> würde den laufenden Motor umbiegen — aber geschrieben wird erst beim nächsten <code>save()</code>, und den löst nur der Motor selbst aus. Das ist ein Eingriff in fremdes Eigentum <strong>und nicht geprüft</strong>; wir bauen es nicht.</p>
+<h2 id="5-der-gegenversuch-die-wache-wird-nachweislich-rot">5 · Der Gegenversuch: die Wache wird nachweislich rot</h2>
+<p>Gefordert war: „setz testweise einen direkten <code>store.get("lern")</code>-Aufruf ein, beleg, dass dein Wächter rot wird, und nimm ihn wieder zurück."</p>
+<p><strong>Was ich getan habe — und was nicht.</strong> Der Schreibauftrag dieses Schritts umfasst <strong>nur</strong> zwei Dateien (<code>tests/lernmotor-wache.test.js</code> und diesen Befund); <code>src/</code> durfte ich nicht anfassen. Ein Zwischenstand in <code>src/</code> wäre zudem für alle parallel arbeitenden Prüfungen sichtbar gewesen — jede lädt <code>src/</code> vollständig. Der Gegenversuch lief deshalb <strong>in meiner eigenen Datei</strong>: ich habe den echten Aufruf <code>const LMW_GEGENPROBE = store.get("lern", null);</code> <strong>in die Wache selbst</strong> gesetzt und den Suchlauf für die Dauer des Versuchs zusätzlich auf <code>tests/</code> gerichtet.</p>
+<pre><code>✗ Lernmotor-Wache › Wächter: im ganzen src/ geht der Lernstand nur über die L.*-API
+6/7 grün, 1 ROT      Exit-Code 1</code></pre>
+<p>Danach beides zurückgenommen; der nächste Lauf war wieder <strong>17/17 grün, Exit-Code 0</strong>. Der Detektor selbst ist dauerhaft belegt: Gegenprobe 2 findet die <strong>echten</strong> Zugriffe in <code>../FISI-Spielhalle/src/lernmotor.js:13/:14</code>, Gegenprobe 3 findet <strong>5 von 5</strong> eingeschleusten Schreibweisen und löst bei Prosa und Kommentaren <strong>keinen</strong> Fehlalarm aus.</p>
+<p><strong>Ehrliche Grenze:</strong> die genaue Liste der in diesem roten Lauf gemeldeten Dateien habe ich <strong>nicht</strong> mitgeschrieben (mein Ausgabefilter schnitt sie weg). Dass der Lauf rot wurde, ist belegt; <strong>welche</strong> Dateien in der Meldung standen, ist <strong>nicht geprüft</strong>. Die scharfe Fassung gegen <code>src/</code> kann jeder mit Schreibrecht so nachfahren (setzt voraus, dass <code>src/</code> bearbeitet werden darf; Zeilenenden bleiben LF):</p>
+<pre><code class="sprache-powershell">$f = "src\spiel\uebergabe.js"
+$alt = [System.IO.File]::ReadAllText($f)
+[System.IO.File]::WriteAllText($f, $alt + "`nconst _lmwProbe = store.get(`"lern`", null);`n")
+&amp; "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64\node.exe" tests/run.js "Wächter"   # → rot, Exit 1, Meldung nennt src/spiel/uebergabe.js
+[System.IO.File]::WriteAllText($f, $alt)                                                     # exakt zurück</code></pre>
+<h2 id="6-anderungsvorschlag-fur-die-fisi-spielhalle-vorlage-nicht-ausgefuhrt">6 · Änderungsvorschlag für die FISI-Spielhalle (Vorlage — nicht ausgeführt)</h2>
+<blockquote>
+<p>[!todo] Diese Datei ist eine <strong>Vorlage für den Nutzer</strong> Geändert wird <code>../FISI-Spielhalle/src/lernmotor.js</code> — <strong>außerhalb</strong> dieses Projektordners. AGENTS.md Regel 3 verbietet Änderungen dort; dieser Auftrag hat es <strong>nicht</strong> getan. Nach der Änderung: <code>python tools/lernmotor.py --neu-einlesen</code>, dann Tests, dann den Befund und die Wache nachziehen (§ 7).</p>
+</blockquote>
+<p><strong>Vorschlag A — migrieren statt wegwerfen</strong> (Falle A; Muster ist der Spielstand: <code>src/spiel/zustand.js:47-53</code> hebt alte Stände an — <code>st.v = Math.max(zahl(st.v, 0), Spiel.VERSION)</code> —, <code>:142-150</code> lehnt zu neue <strong>mit Satz</strong> ab):</p>
+<pre><code class="sprache-js">const FASSUNG = 1;
+const leer = () =&gt; ({v:FASSUNG, units:{}, log:[], fehler:[], tage:{}, tests:[]});
+
+/* Nimmt einen beliebigen gespeicherten Stand herein. Alte Fassungen werden aufgefüllt statt verworfen;
+   eine zu neue wird NICHT still gelöscht, sondern mit Grund abgelehnt (Muster: Spiel.importPruefen). */
+function herein(s){
+  if (!s || typeof s !== "object" || Array.isArray(s)) return {st: leer(), grund: null, migriert: false};
+  const v = typeof s.v === "number" &amp;&amp; isFinite(s.v) ? s.v : 0;
+  if (v &gt; FASSUNG) return {st: null, grund: `Lernstand aus neuerer Fassung (v${v}); dieser Motor kennt nur v${FASSUNG}.`, migriert: false};
+  const st = Object.assign({v: FASSUNG}, s);          /* vorhandene Felder bleiben erhalten */
+  if (!st.units  || typeof st.units !== "object" || Array.isArray(st.units)) st.units = {};
+  if (!st.tage   || typeof st.tage  !== "object" || Array.isArray(st.tage))  st.tage  = {};
+  if (!Array.isArray(st.log))    st.log    = [];
+  if (!Array.isArray(st.fehler)) st.fehler = [];
+  if (!Array.isArray(st.tests))  st.tests  = [];
+  return {st, grund: null, migriert: v !== FASSUNG};
+}
+
+let ladeGrund = null;
+let st = (() =&gt; { const r = herein(store.get("lern", null)); ladeGrund = r.grund; return r.st || leer(); })();
+const save = () =&gt; store.set("lern", st);</code></pre>
+<p><strong>Vorschlag B — ein Import, der ankommt</strong> (Falle B): eine öffentliche Funktion, die den Stand <strong>setzt</strong> und <strong>selbst speichert</strong>. Damit ist die Reihenfolge „Import vor dem ersten Lesen" nicht mehr nötig:</p>
+<pre><code class="sprache-js">/* Import von außen (Datei, Code, Klassenraum). Ersetzt den Stand des Motors und schreibt ihn sofort. */
+function importieren(neu){
+  const r = herein(neu);
+  if (!r.st) return {ok: false, grund: r.grund};       /* ehrlich ablehnen statt still leeren */
+  st = r.st;
+  save();
+  return {ok: true, migriert: r.migriert};
+}</code></pre>
+<p><strong>Zum Schluss in die Rückgabe des Motors</strong> (<code>return {…}</code>) aufnehmen: <code>importieren, get ladeGrund(){ return ladeGrund; }</code> — dazu <code>FASSUNG</code> statt der festen <code>1</code> in <code>leer()</code>.</p>
+<p><strong>Warum beides zusammen.</strong> A allein rettet den Fortschritt bei einer Formatänderung, B allein rettet den Import. Zusammen sind es rund zwanzig Zeilen in <strong>einer</strong> Datei, und die Zusage des Fahrplans („Mitnehmbarer Lernstand") wird einlösbar. Die Oberfläche muss danach <strong>nichts</strong> um sortieren: sie ruft <code>L.importieren(...)</code> statt in den Speicher zu schreiben — genau das, was die Wache in § 3.3 rot macht, wenn es jemand anders versucht.</p>
+<p><strong>Was die Spielhalle ausdrücklich NICHT tun sollte:</strong> den Stand weiterhin still durch <code>leer()</code> ersetzen und <code>save()</code> unverändert lassen. Dann bleibt dieser Befund bestehen, und der Import bleibt eine Falle, die nur beim Neustart der Seite funktioniert.</p>
+<h2 id="7-was-nach-einer-motor-anderung-hier-nachzuziehen-ist">7 · Was nach einer Motor-Änderung hier nachzuziehen ist</h2>
+<ol><li><code>python tools/lernmotor.py</code> — meldet <strong>ABWEICHUNG</strong>, solange die Kopie hinterherhinkt.</li><li><code>python tools/lernmotor.py --neu-einlesen</code> — übernimmt die neue Quelle in die Kopie (nie umgekehrt).</li><li><code>&amp; "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'</code> — der ganze Lauf. Erwartung: die Wache bleibt grün — <strong>außer</strong> die Motor-Änderung berührt die zwei Zugriffe auf <code>store</code> „lern", dann meldet sie sich (Punkt 5).</li><li><code>node tools/sim-stand.js</code> — die Simulation darf sich <strong>nicht</strong> verändert haben.</li><li><strong>Diese Datei und <code>tests/lernmotor-wache.test.js</code> nachziehen.</strong> Gegenprobe 2 erwartet <strong>genau zwei</strong> Zugriffe auf <code>store</code> „lern" (lesen beim Laden, schreiben in <code>save()</code>) und die strenge Prüfung <code>s.v === 1</code>. Genau dafür steht in ihrer Fehlermeldung, was dann zu tun ist — sie ist der Wecker, der meldet: „dieser Befund ist überholt".</li></ol>
+<h2 id="8-nicht-gepruft">8 · Nicht geprüft</h2>
+<ul><li><strong>Der Motor wurde nicht geändert.</strong> Die Vorschläge aus § 6 sind <strong>nicht ausgeführt</strong> und **nicht getestet** — sie sind eine Vorlage. Ob <code>herein()</code> wirklich jeden Altstand rettet, ist damit offen.</li><li><strong>Die FISI-Spielhalle wurde nicht bearbeitet</strong> (Regel 3). Ihre 86 Zeilen sind gelesen, nicht gemessen.</li><li><strong>Der Gegenversuch lief nicht gegen <code>src/</code></strong> — mein Schreibrecht umfasst nur meine zwei Dateien. Der genaue Inhalt der roten Meldung ist nicht mitgeschrieben (§ 5).</li><li><strong>Nicht geprüft: der Browser.</strong> Alle Messungen laufen über <code>tests/run.js</code> in einem vm-Zusammenhang. Der Frühstart (<code>basis.js:137-147</code>) greift nur mit <code>window</code>; im Testlauf startet der Speicher deshalb <strong>leer</strong>. Ob sich ein Import im echten Browser (localStorage, Tauri-Initialisierungsskript) gleich verhält, ist <strong>nicht</strong> gemessen.</li><li><strong>Nicht geprüft: die gebaute Fassung.</strong> <code>grep</code> findet die beiden Zeilen in <code>Netzwerk-Labor.html:2536</code> und <code>docs/index.html:2536</code> — ob diese Dateien zum aktuellen Quellstand passen, ist <strong>nicht</strong> geprüft (<code>python bauen.py</code> wurde nicht ausgeführt).</li><li><strong>Nicht geprüft: der Gesamtstand der Tests.</strong> Meine Läufe sind gefiltert; <code>tests/run.js:60-67</code> bewertet nur die <strong>gedruckte</strong> Ausgabe. Belegt sind 17/17 grün <strong>im Filter</strong> und „davon 0 übersprungen" für den ganzen Lauf — <strong>nicht</strong> die Gesamtzahl grüner Tests.</li><li><strong>Nicht geprüft: andere Rechner.</strong> Ob dort eine Spielhalle danebenliegt und welche Fassung sie hat, ist hier nicht messbar (nur die Dateisysteme dieses Rechners).</li><li><strong>Nicht geprüft: die Behelfslösung über <code>L.st</code></strong> (§ 4) — sie ist beschrieben, nicht ausprobiert.</li><li><strong>Fremder Zwischenstand:</strong> Ein Lauf während dieser Arbeit endete mit <code>LADEFEHLER</code> (Exit 2) aus <code>tests/klassenraum-hilfevorrat.test.js</code> („Vorrat je Bildungsstand"), einer parallel in Arbeit befindlichen Datei eines anderen Auftrags. Der Lauf danach war wieder grün. Das gehört <strong>nicht</strong> zu diesem Befund und ist hier nur vermerkt, damit die Zahl nicht später verwirrt.</li></ul>
+<h2 id="9-belege-in-dieser-sitzung-ausgefuhrt">9 · Belege (in dieser Sitzung ausgeführt)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Zweck</th><th>Befehl / Handlung</th><th>Ergebnis</th></tr></thead><tbody><tr><td>Kopie ↔ Quelle</td><td><code>python tools/lernmotor.py</code></td><td><code>GRUEN: GLEICH — die Kopie entspricht der Quelle Zeile fuer Zeile.</code></td></tr><tr><td>Auswahlregel</td><td>Node-Einzeiler mit <code>tests/run.js:13-20</code></td><td><code>geladen = …\FISI-Spielhalle\src\lernmotor.js</code>, <code>kopieFlag = false</code></td></tr><tr><td>Vorrang auch im Bau</td><td><code>bauen.py:92-95</code> gelesen</td><td><code>if LERNMOTOR_QUELLE.is_file(): return LERNMOTOR_QUELLE, False</code></td></tr><tr><td>Wache</td><td><code>node tests/run.js lernmotor</code></td><td><code>17/17 grün</code>, Exit 0; <code>Wache src/ → 122 Dateien geprüft · 0 Verstöße</code></td></tr><tr><td>Gegenversuch</td><td>Verstoß in die Wache gesetzt, Suchlauf zusätzlich auf <code>tests/</code></td><td><code>✗ …</code>, <code>6/7 grün, 1 ROT</code>, Exit 1 — danach zurückgenommen</td></tr><tr><td>Falle B live</td><td>Test „Falle (gemessen)"</td><td><code>Motor sieht den Fremdstand: false · Speicher hält ihn nach save(): false</code></td></tr><tr><td>Zeilenenden</td><td>Byte-Zählung</td><td>Quelle, Kopie, <code>tests/spiel-uebergabe.test.js</code>, <code>src/spiel/uebergabe.js</code> und die beiden neuen Dateien: <strong>LF</strong>, 0 × CRLF</td></tr></tbody></table></div>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

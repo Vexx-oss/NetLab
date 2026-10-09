@@ -444,6 +444,17 @@ UI.spiel = (() => {
     if (aussenZu) o.addEventListener("click", e => { if (e.target === o) zu(); });
     return zu;
   }
+  /* ---------- Ergebnis kopieren (Fahrplan 1.3/2.0, Schritt 0) ----------
+     Den Klartext aus `src/spiel/ergebnis.js` in die Zwischenablage – Muster samt Toast: src/ui/hub.js:122-126.
+     Der Text entsteht erst beim Klick: ein Fehler in `Spiel.ergebnisText` darf das Fenster nicht schon beim
+     Aufbau umwerfen. Hier steht bewusst KEIN `zu()`: der Knopf soll das Fenster zum Lesen offen lassen.
+     Der Knopfblock wird vor `const zu = overlay(...)` (:507) gebaut – ein `zu()` beim AUFBAU wäre ein Fehler;
+     beim Klick ist `zu` längst gesetzt, genau das tut der Nachbar „Übersicht“ (gemessen in
+     tests/ui-spiel-ergebnis.test.js). */
+  async function ergebnisKopieren(inst, erg){
+    const ok = await UI.kopieren(Spiel.ergebnisText(inst, erg));
+    UI.toast(ok ? "Ergebnis kopiert – einfach einfügen." : "Kopieren ging nicht – markier den Text und kopier ihn selbst.", ok ? "ok" : "warn", {id: "kopieren", dauer: 3000});
+  }
   function ergebnisZeigen(erg){
     const def = erg.def, k = kunde(erg.inst.kunde || def.kunde), niveau = erg.abnahme.niveau;
     if (!erg.bestanden) {
@@ -492,13 +503,20 @@ UI.spiel = (() => {
     ].filter(Boolean);
     const merke = merkeText(def, erg.abnahme.niveau);
     const skill = (def.skills || [])[0];
+    /* Die Einzeiler-Zusammenfassung als sichtbare Zeile. Grund (Befund der Gegenprüfung task-14):
+       `Spiel.ergebnisKurz` hatte KEINEN Aufrufer im Programm — nur Tests, also „Wirkung vor Grün“
+       verletzt. Gelesen wird beim Aufbau; liefert sie nichts, bleibt die Zeile weg und das Fenster
+       steht trotzdem. Der Text verrät nichts, was hier nicht ohnehin steht: Titel, Kunde, Sterne,
+       Dauer und Hilfestufe sind die Zahlen dieses Auftrags, keine Lösung. */
+    const kurz = typeof Spiel.ergebnisKurz === "function" ? String(Spiel.ergebnisKurz(erg.inst, erg) || "").trim() : "";
     const weiterKnopf = erg.wahl
       ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Nächsten Auftrag wählen ▸")
       : erg.naechstes ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); oeffnen(erg.naechstes); }}, "Nächstes Ticket ▸") : null;
     const zu = overlay(h("div", {class: "sp-ergebnis"},
       h("section", {class: "sp-block sp-block-lohn"},
         h("div", {class: "sp-erg-kopf"}, h("span", {class: "sp-kunde-sym gross", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
-          h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"))),
+          h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"),
+            kurz ? h("p", {class: "sp-leise"}, kurz) : null)),
         h("div", {class: "sp-lohn-reihe"}, sternEl,
           h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`),
             erg.lohn.tempo || erg.lohn.verdacht || erg.lohn.variante ? h("small", {}, "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "", erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : "",
@@ -522,6 +540,7 @@ UI.spiel = (() => {
         h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_WEG)) : null,
       h("div", {class: "sp-knoepfe"},
         weiterKnopf,
+        h("button", {type: "button", class: "knopf geist", onclick: () => ergebnisKopieren(erg.inst, erg)}, "Ergebnis kopieren"),
         h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("heute"); }}, "Übersicht"),
         feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, "🌙 Feierabend: zur Leiste") : null)), "erfolg");
     zaehlen(euroEl, erg.euro);

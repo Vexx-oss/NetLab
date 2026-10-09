@@ -1,0 +1,12 @@
+/* ---------- Übergabe an den nächsten Azubi (Fahrplan 1.3/2.0, Schritt 0) ----------
+   Nur das, was dieser Dialog ZUSÄTZLICH braucht. Den Rahmen (.sp-overlay/.sp-karte) und die
+   Knöpfe (.knopf/.knopf.primaer/.knopf.geist) stellen die vorhandenen Regeln.
+   Abstände nur aus der Skala von tools/ethos.py R4: {0,4,8,12,16,24,32}px — 6px und 10px
+   waren der erste Entwurf und haben ethos rot gemacht (R4 539 → 542). */
+.uz-uebergabe{max-width:520px}
+.uz-was{display:grid; gap:4px; margin:12px 0; padding:8px 12px; border-radius:var(--radius-s); background:var(--panel-2)}
+.uz-was p{margin:0}
+.uz-frage{margin:12px 0 4px; font-weight:600}
+.uz-knoepfe{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px}
+.uz-knoepfe .knopf{display:flex; flex-direction:column; align-items:flex-start; gap:4px; text-align:left}
+.uz-knoepfe .knopf small{font-weight:400; opacity:.75}

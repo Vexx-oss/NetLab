@@ -20,8 +20,10 @@
    STICHWORT ist der Kernbegriff der Frage (für `Spiel.mini.anker.stichwort`, damit die Oberfläche
    später den passenden Wiki-Abschnitt aufschlagen kann). Aufgenommen wurden hier die Minis, deren
    Kernbegriff auf der Wiki-Seite ihrer Fertigkeit NICHT vorkommt – gemessen am sichtbaren Wiki-Text
-   (titel, kurz, abschnitte, merksatz, pruefungstipp, quelle) am 09.10.2026: **alle 25** Einträge
-   unten stehen dort nicht (Test: tests/spiel-mini-denktexte.test.js, Schwelle 20).
+   (titel, kurz, abschnitte, merksatz, pruefungstipp, quelle): am 09.10.2026 für die 25 Einträge aus
+   task-20, in dieser Sitzung erneut nachgemessen für die 35 aus task-6 – **alle 60** Einträge dieser
+   Datei stehen dort nicht (Tests: tests/spiel-mini-denktexte.test.js, Schwelle 20;
+   tests/denkhilfen-teil1.test.js für die 35 aus task-6).
    Beispiel: „U.U.U“ fehlt auf `lab.ping`, steht aber in DATEN.lehrtexte.NO_ROUTE.AP2.
 
    Für alle übrigen Minis gilt weiter der Fertigkeitssatz aus Spiel.SENIOR_FRAGEN / Spiel.WERKZEUGE.
@@ -92,5 +94,104 @@
       "RST", "der Server lauscht nur auf 443"),
     "mini-fw-3": D("In welcher Reihenfolge liest eine Firewall ihre Regeln – und welche Zeile trifft den Verkehr aus dem LAN zuerst?",
       "first match"),
+
+    /* ============ Teil 1 (task-6): 35 weitere Minis mit eigenem Denkanstoß ============
+       Die 25 Einträge darüber stammen aus task-20; die folgenden 35 sind die erste Hälfte des
+       Fahrplans 1.3/2.0, Schritt 2 (task-6). Aufbau, Regeln und Kurzschreiber D bleiben gleich;
+       gegengelesen wird das in tests/denkhilfen-teil1.test.js.
+       mini-link-2 bleibt bewusst ohne Eintrag (reserviert; tests/spiel-mini-denktexte.test.js
+       braucht mindestens ein Mini, das auf den Fertigkeitssatz zurückfällt). */
+
+    /* ---- lab.gateway: drei Modul-Minis und die beiden Terminal-Minis am Gateway ---- */
+    "mini-gw-1": D("Im Schnappschuss ist eine Zeile leer geblieben. Vergleiche die drei Einträge: Welche Angabe fehlt – und wohin schickt ein PC ein Ziel, das nicht in seinem eigenen Netz liegt?",
+      "kein Weg ins Internet", "Standardgateway :"),
+    "mini-gw-2": D("Rechne die Maske aus: In welchem Netz steht der PC, in welchem das eingetragene Gerät – und kann der PC ein Gerät in einem fremden Netz überhaupt direkt ansprechen?",
+      "Gateway außerhalb des eigenen Netzes", "mit Gateway 192.168.6.1"),
+    "mini-gw-3": D("Der PC muss dieses Gerät ohne Umweg erreichen können. Welche Adresse des Routers liegt deshalb in seinem eigenen Netz – und welche Adressen im Netz sind schon für anderes reserviert?",
+      "Router-Adresse im LAN", "an einem PC als Standardgateway"),
+    "mini-cli-ipconfig-1": D("Lies die Ausgabe von oben nach unten: In welchem Netz steht dieser PC – und welche der drei Zeilen entscheidet, wer Pakete für ein fremdes Ziel übernimmt?",
+      "Ziel außerhalb des eigenen Netzes", "Standardgateway . . : 192.168.1.1"),
+    "mini-cli-netsh-1": D("Gesucht ist ein Befehl, der Adresse, Maske und den Weg nach draußen in einem Zug setzt. Welches Werkzeug verwaltet die Adapter-Einstellungen – und welches der genannten zeigt nur an?",
+      "Gateway per Windows-Befehl setzen", "per Befehl das Standardgateway"),
+
+    /* ---- lab.ip: zwei Modul-Minis und das Terminal-Mini zu den Linux-Gegenstücken ---- */
+    "mini-ip-1": D("Eine Rechneradresse muss zwei Proben bestehen: Sie darf nicht für Netz oder Rundruf reserviert sein – und sie muss im Netz der Frage liegen. Prüf jede der vier Adressen an beiden Proben.",
+      "vergebbare Hostadresse", "darf ein PC im Netz"),
+    "mini-ip-2": D("Ein Konflikt entsteht nicht durch eine fehlende Einstellung, sondern durch eine Adresse, die zweimal vergeben wurde. Wie merkt ein Rechner, dass seine Adresse noch jemand anderes benutzt?",
+      "doppelt vergebene Adresse", "meldet beim Start einen Adresskonflikt"),
+    "mini-cli-linux-1": D("Drei Aufgaben, drei Paare: eigene Adresse ansehen, den Weg zum Ziel verfolgen, die Routentabelle zeigen. Welches Linux-Werkzeug übernimmt welche dieser Aufgaben?",
+      "Linux-Gegenstück", "Linux-Gegenstück zu"),
+
+    /* ---- lab.subnetz ---- */
+    "mini-sub-1": D("Rechne die Maske in eine Blockgröße um: Wie viele Adressen umfasst jeder Block – und in welchem Block liegt die Adresse aus der Frage?",
+      "Netzadresse im richtigen Block", "die Netzadresse von"),
+    "mini-sub-3": D("Zähl zuerst die Hostbits hinter dem Präfix. Von den Adressen eines Blocks gehen zwei für Netz und Rundruf ab – wie viele bleiben für Rechner übrig?",
+      "nutzbare Hosts pro Netz", "/28-Netz"),
+    "mini-sub-4": D("Jede Stelle weniger im Präfix verdoppelt den Adressraum. Zähl die Hostbits hinter jedem Schrägstrich: Welcher Eintrag hat die meisten, welcher die wenigsten?",
+      "meiste Hosts zuerst", "die meisten zuerst"),
+
+    /* ---- lab.dhcp ---- */
+    "mini-dhcp-1": D("Vier Nachrichten, zwei Rollen: Wer muss zuerst fragen – und wer darf erst nach dieser Frage antworten? Prüf jede Nachricht darauf, ob sie vom Kunden oder vom Server stammt.",
+      "Ablauf der Adressvergabe", "die vier Nachrichten"),
+    "mini-dhcp-2": D("Diese Adresse stammt nicht von einem Server: Der Bereich ist für den Notfall gedacht, in dem sich ein Rechner selbst eine Adresse gibt. Wen hat er vorher vergeblich gefragt?",
+      "selbst vergebene Notadresse", "Adresse 169.254.12.7"),
+    "mini-dhcp-3": D("Der Kunde sucht seinen Server per Rundruf, und ein Router reicht Rundrufe nicht weiter. Welche Aufgabe muss deshalb die Schnittstelle am Client-Netz übernehmen?",
+      "Rundruf über die Netzgrenze", "in einem anderen Netz"),
+
+    /* ---- lab.ports ---- */
+    "mini-port-1": D("Ordne nicht nach der Zahl, sondern nach der Aufgabe: Welcher Dienst öffnet eine Shell, welcher überträgt Dateien, welcher liefert Webseiten – und welcher davon ist die verschlüsselte Fassung?",
+      "Standardport der Dienste", "ihren Standardport"),
+    "mini-port-2": D("Der Ping beweist, dass der Weg bis zum Server steht. Die Ablehnung kommt trotzdem – von wem also, und was fehlt dort auf der oberen Ebene?",
+      "Dienst lauscht nicht auf dem Port", "der Browser meldet"),
+    "mini-port-3": D("Ein geschlossener Port weist eine neue Verbindung sofort und aktiv ab. Welche der vier Antworten ist diese Abweisung – und welche käme von einem lauschenden Dienst oder von einer stummen Firewall?",
+      "Reset auf geschlossenen Port", "wenn auf einem TCP-Port nichts lauscht"),
+
+    /* ---- lab.cli ---- */
+    "mini-cli-1": D("Vier Ebenen, zwei Fragen: Erst klärt sich, WIE VIEL du darfst, dann, WIE ENG dein Ziel ist. Frag bei jedem Prompt, welche der beiden Fragen er beantwortet.",
+      "Reihenfolge der Modi", "die Modi von IOS"),
+    "mini-cli-2": D("Anzeigebefehle gehören in die privilegierte Ebene. Was musst du voranstellen, damit ein solcher Befehl auch aus der Konfigurationsebene läuft?",
+      "do-Präfix im Konfigurationsmodus", "und willst die Schnittstellen sehen"),
+    "mini-cli-3": D("Drei IOS-Meldungen, drei Ursachen: Die eine heißt sinngemäß kenne ich nicht, die andere gib mehr ein – diese hier hat einen dritten Grund. Was ist an deiner Eingabe mehrdeutig?",
+      "mehrdeutige Abkürzung", "\u201E% Ambiguous command\u201C"),
+
+    /* ---- lab.speichern ---- */
+    "mini-save-1": D("Zwei Fassungen der Konfiguration liegen an verschiedenen Orten: Die eine gilt nur, solange das Gerät läuft. Welche ist flüchtig – und welche überlebt einen Neustart?",
+      "flüchtige Konfiguration im RAM", "Wo liegt die running-config"),
+    "mini-save-2": D("Vier Befehle, vier Wirkungen: einer kopiert, einer startet neu, einer löscht, einer zeigt an. Welcher kopiert aus der laufenden in die dauerhafte Fassung?",
+      "dauerhaft sichern", "sichert deine Änderungen dauerhaft"),
+    "mini-save-3": D("Zwei Speicherorte, zwei Löschbefehle: Der eine wischt nur die gespeicherte Konfiguration weg. Was legt ein Switch an anderer Stelle ab – und erwischt der Löschbefehl das auch?",
+      "VLAN-Datenbank überlebt write erase", "\u201Ewrite erase\u201C und \u201Ereload\u201C"),
+
+    /* ---- lab.trunk ---- */
+    "mini-trunk-1": D("Ein Kabel, viele Netze: Woran erkennt die Gegenstelle, zu welchem Netz ein Frame gehört – und wie viele Netze darf ein solcher Anschluss gleichzeitig tragen?",
+      "Trunk gegen Access-Port", "einen Trunk-Port von einem Access-Port"),
+    "mini-trunk-2": D("Auf jedem Trunk läuft genau ein Netz ohne Etikett – sonst wüsste die Gegenstelle nicht, wohin damit. Welches Netz ist das, wenn beide Enden nichts anderes vereinbart haben?",
+      "ungetaggte Frames", "802.1Q-Trunk ohne Tag"),
+    "mini-trunk-3": D("Vergleiche das Netz der PCs mit der Liste im Schnappschuss – und prüfe danach, ob die Ursache eher in dieser Liste oder in der Betriebsart des Anschlusses liegt.",
+      "erlaubte VLAN-Liste am Trunk", "Vlans allowed on trunk"),
+
+    /* ---- lab.rostick ---- */
+    "mini-ros-1": D("Ein einziger Anschluss trägt mehrere Netze, und der Router bekommt für jedes Netz eine eigene logische Schnittstelle. Wie heißt dieses Verfahren – und was braucht der Anschluss am Switch dafür?",
+      "Router mit Unterschnittstellen", "Was ist Router-on-a-Stick"),
+    "mini-ros-2": D("Drei Befehle, drei Abhängigkeiten: Welcher schafft erst den Kontext, in dem der nächste überhaupt etwas bewirkt? Frag bei jedem, was IOS verweigert, solange er fehlt.",
+      "Reihenfolge der Subinterface-Befehle", "Reihenfolge der Befehle"),
+    "mini-ros-3": D("Der Name hinter dem Punkt ist nur ein Etikett. Entscheidend ist die Nummer, die in der Zeile selbst steht – und welche Nummer die Frames der PCs tragen. Passen beide zusammen?",
+      "dot1Q-Zahl gegen VLAN-Nummer", "\u201Eencapsulation dot1Q 21\u201C"),
+
+    /* ---- lab.acl ---- */
+    "mini-acl-1": D("Eine ACL ist eine Liste mit einer festen Leserichtung. Was passiert mit den Zeilen, die nach dem ersten Treffer noch darunter stehen?",
+      "Leserichtung der Regeln", "eine Access-Liste ausgewertet"),
+    "mini-acl-2": D("Am Ende einer Liste steht eine Zeile, die niemand getippt hat – und sie ist nicht freundlich. Was macht eine ACL mit einem Paket, für das keine Zeile passt?",
+      "implizites deny am Listenende", "unsichtbar am Ende jeder ACL"),
+    "mini-acl-3": D("Eine Wildcard ist eine Vergleichsmaske: Eine 1 heißt, diese Stelle ist egal; eine 0 heißt, hier muss es passen. Zähl die egal-Stellen und ordne jeder Wildcard die passende Reichweite zu.",
+      "Nullen und Einsen der Wildcard", "Welche Wildcard bedeutet was"),
+
+    /* ---- lab.route ---- */
+    "mini-route-1": D("Sie passt auf jedes Ziel, ist aber die ungenaueste Route von allen. Wann greift sie deshalb – und was gilt, wenn eine genauere Route vorhanden ist?",
+      "Route für alle übrigen Ziele", "Was ist die Default-Route"),
+    "mini-route-2": D("Drei Angaben gehören in eine statische Route: Zielnetz, Maske und der nächste Sprung. In welcher Reihenfolge erwartet das Gerät sie – und wo steht der nächste Sprung?",
+      "Zielnetz, Maske und nächster Sprung", "Welcher Befehl schickt"),
+    "mini-route-3": D("Die Anfrage kommt an – nur die Antwort findet keinen Weg. Was macht ein Router mit einem Paket, dessen Rückweg fehlt, und was merkt der Absender davon?",
+      "fehlende Rückroute", "der Ziel-Router hat keine Rückroute"),
   };
 })();

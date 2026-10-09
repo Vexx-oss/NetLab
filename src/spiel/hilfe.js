@@ -122,8 +122,19 @@ Spiel.hilfeInhalt = function(inst, stufe){
  * (src/ui/spiel.js:316, src/ui/netzplan.js:128) rufen weiter ohne zweiten Parameter auf. Erst dadurch kann
  * `Spiel.lernenNachAbnahme` die Hilfe je Fertigkeit verbuchen (vorher: ein binäres „hilfeStufe >= 4" für
  * alle Fertigkeiten des Tickets). Ein Eintrag ganz OHNE Fertigkeit (Altstand, synthetische Tickets) zählt
- * wie bisher binär — die Regeln stehen in `Spiel.hilfeFuerSkill` (lernen.js). */
+ * wie bisher binär — die Regeln stehen in `Spiel.hilfeFuerSkill` (lernen.js).
+ *
+ * `inst.stufe` (task-4, Fahrplan § 2.5 / Entwurf E4): Diese Funktion setzt die Stufe des Tickets
+ * AUSDRÜCKLICH, BEVOR die erste Sprosse den Vorrat belastet (`Spiel.stufe.ticketStufeSetzen`). Bis
+ * 09.10.2026 fehlte das: ein Ticket ohne eigene Stufe hing am stillen Standard `EINST_STANDARD`
+ * (gemessen `Spiel.stufe.konto(inst)` = {frei:6, gesamt:6} auch bei „meister"), sechs Sprossen waren
+ * kostenlos und `Spiel.hilfeAbzuege` blieb leer. Quelle der Stufe ist der Bildungsstand des Schülers
+ * auf diesem Gerät; steht die Stufe schon am Ticket, bleibt sie (§ 2.1). */
 Spiel.hilfe = function(inst, o){
+  try {
+    if (inst && typeof inst === "object" && typeof Spiel.stufe !== "undefined" && Spiel.stufe
+        && typeof Spiel.stufe.ticketStufeSetzen === "function") Spiel.stufe.ticketStufeSetzen(inst);
+  } catch (e) { /* ohne Baustein A gilt der Rückfall azubi (Vertrag § 3, Regel 1) */ }
   const wahl = (o && o.skill) || null;
   const alt = inst.hilfeStufe || 0;
   const neu = Math.min(6, alt + 1);
@@ -328,8 +339,18 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
     const alle = kandidaten(o);
     const schon = new Set((o.verlauf || []).map(z => String(z).trim().toLowerCase()).filter(Boolean));
     const frisch = alle.filter(v => !schon.has(String(v.befehl).trim().toLowerCase()));
+    /* Kein Befehl zweimal im Streifen (task-28, Befund A4): Zwei Einträge mit demselben Befehl sind
+       derselbe Knopf – der zuerst sortierte gewinnt (vorrang, Leiter-Reihenfolge, Ebene, id).
+       Die Daten tragen seit task-28 keinen solchen Zwilling mehr; diese Zeile hält es auch dann,
+       wenn später wieder einer dazukommt. */
+    const ohneDoppel = [];
+    for (const v of (frisch.length ? frisch : alle)) {
+      const t = String(v.befehl).trim().toLowerCase();
+      if (ohneDoppel.some(x => String(x.befehl).trim().toLowerCase() === t)) continue;
+      ohneDoppel.push(v);
+    }
     /* Ist alles schon dagewesen, wieder von vorn – ein Azubi läuft nie in eine leere Hilfe (Vertrag § 2.1). */
-    return (frisch.length ? frisch : alle).slice(0, grenze);
+    return ohneDoppel.slice(0, grenze);
   };
 
   /* ---------- § 4.1: „Was geht hier?" je Modus ---------- */
@@ -346,14 +367,26 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
     return r >= 2 ? String(text).split("\n")[0].trim() : String(text);   /* azubi-plus: knapper Text */
   };
 
-  /* ---------- § 4.1: Werkzeugleiter (alle 6 Sprossen, je Sprosse der passende Befehl) ---------- */
+  /* ---------- § 4.1: Werkzeugleiter (alle 6 Sprossen, je Sprosse der passende Befehl) ----------
+     `o.skill` ist die geübte Fertigkeit. Fehlt sie, wird KEINE Sprosse hervorgehoben – diese Funktion
+     liest bewusst keinen globalen Zustand (kein offenes Ticket), damit ihr Ergebnis nur von ihren
+     Argumenten abhängt. Wer die Fertigkeit kennt (die Oberfläche aus dem offenen Auftrag), gibt sie mit;
+     das tut UI.hilfe.zeichnen (src/ui/hilfe.js). */
   Spiel.hilfe.leiter = function(o = {}){
     if (!wannPasst("leiter", hatFehler(o.letzterFehler))) return [];
+    const skill = o.skill ? String(o.skill) : null;
     const alle = kandidaten({netz: o.netz, id: o.id, modus: o.modus, art: o.art});
     return (Spiel.LEITER || []).map(s => {
-      const v = alle.find(x => x.bereich === s.id) || null;
+      /* Je Sprosse der Vorschlag, der zur geübten Fertigkeit gehört – sonst der erste.
+         Vorher galt `dran` nur für den ersten Kandidaten der Sprosse; damit hatten zehn
+         Fertigkeiten nie eine hervorgehobene Sprosse, obwohl sie einen Vorschlag haben
+         (task-28/Befund A3: lab.switch, lab.subnetz, lab.dhcp, lab.tcp, lab.trunk,
+         lab.rostick, lab.portfwd, lab.portsec, lab.stp, lab.storage). */
+      const imBereich = alle.filter(x => x.bereich === s.id);
+      const treffer = skill ? imBereich.find(x => (x.skills || []).includes(skill)) : null;
+      const v = treffer || imBereich[0] || null;
       return Object.assign({}, s, {id: s.id, titel: s.titel, frage: s.frage, werkzeug: s.werkzeug,
-        vorschlag: v, dran: !!(o.skill && v && (v.skills || []).includes(o.skill))});
+        vorschlag: v, dran: !!treffer});
     });
   };
 

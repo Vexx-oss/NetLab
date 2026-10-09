@@ -149,10 +149,12 @@ gruppe("Daten: Trainings", () => {
   });
 
   pruefe("jedes Szenario mit Injektoren ist über Spiel.instanzErstellen baubar; ohne Injektor ist es Vorrat", () => {
-    /* Am 09.10.2026 gemessen: für diese drei Fertigkeiten gibt es noch keinen Injektor (Spiel.INJEKTOREN).
-       Ihre Szenarien stehen als Vorrat in der Liste, starten() kann sie erst mit Injektor bauen.
-       Kommt ein Injektor dazu, wird dieser Test rot – dann gehört „geraet“ nachgezogen. */
-    const OHNE_INJEKTOR = ["lab.portsec", "lab.stp", "lab.storage"];
+    /* Am 09.10.2026 gemessen: für diese drei Fertigkeiten gab es noch keinen Injektor (Spiel.INJEKTOREN).
+       Ihre Szenarien standen als Vorrat in der Liste, starten() konnte sie erst mit Injektor bauen.
+       Seit dem Ausbau 1.3 hat jede Fertigkeit einen Injektor (src/spiel/injektoren.js: portsec-fremde-mac,
+       stp-doppelkabel, nas-ohne-adresse) – die Liste ist deshalb leer. Kommt eine Fertigkeit ohne Injektor
+       hinzu, gehört sie hier namentlich eingetragen UND ihr „geraet“ auf null zurückgesetzt. */
+    const OHNE_INJEKTOR = [];
     const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken};
     try {
       Spiel._trocken = true; Spiel._lz = {};

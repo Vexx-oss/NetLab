@@ -112,11 +112,19 @@ Spiel.kundenSatz = function(kundeId, art, seed){
    allererste Zeile: Training zahlt kein Geld, keinen Ruf, keinen Karrierefortschritt und erscheint nicht
    in der Wochenwertung — verbindlich: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 6.
    Die Umleitung steht bewusst vor jedem Nebeneffekt (Zeitbuchung, Lernen, Abzeichen, Kundenakte), sonst
-   wäre die Zusage „Training zahlt nichts" nur halb wahr. */
+   wäre die Zusage „Training zahlt nichts" nur halb wahr.
+
+   Klassenraum-Aufträge (quelle "klassenraum", Architektur § 12) werden aus demselben Grund an DERSELBEN
+   Stelle umgeleitet: sie zahlen nichts und zählen nicht zur Karriere (Entwurf § 4.5/E2). Der Zweig ruft
+   Spiel.lernenNachAbnahme selbst, damit der Lernwert bleibt – die Einzelheiten stehen in
+   src/spiel/klassenraum.js. */
 Spiel.abschliessen = function(inst, abnahme){
   const def = Spiel.defVon(inst);
   if (inst && inst.quelle === "training" && typeof Spiel.training !== "undefined" && Spiel.training.abnehmen) {
     return Spiel.training.abnehmen(inst.iid, abnahme || Spiel.abnahme(inst));
+  }
+  if (inst && inst.quelle === "klassenraum" && typeof Spiel.klassenraum !== "undefined" && Spiel.klassenraum.abnehmen) {
+    return Spiel.klassenraum.abnehmen(inst, abnahme || Spiel.abnahme(inst));
   }
   abnahme = abnahme || Spiel.abnahme(inst);
   const lz = Spiel.laufzeit(inst);

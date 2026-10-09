@@ -15,9 +15,10 @@
    · geraet    = Geräteklasse, auf der der erzeugte Fall sitzt, in der Sprache von src/spiel/training.js:
                  "host" (Endgerät: PC, Server, NAS) · "switch" · "router" · "firewall" · "alle"
                  (mehrere Klassen, das Gerät hängt am Seed). Die Klasse ist aus den Injektoren der Fertigkeit
-                 GEMESSEN (Spiel.INJEKTOREN × Spiel.vorlagen), nicht geraten. null heißt: für diese
-                 Fertigkeit gibt es noch keinen Injektor – das Szenario ist ein Vorratseintrag
-                 (lab.portsec, lab.stp, lab.storage), starten() kann es erst mit Injektor bauen.
+                 GEMESSEN (Spiel.INJEKTOREN × Spiel.vorlagen), nicht geraten. null hieße: für diese Fertigkeit
+                 gibt es keinen Injektor – dann ist das Szenario ein Vorratseintrag, den starten() erst mit
+                 Injektor bauen kann. Seit 1.3 gibt es für jede der 27 Fertigkeiten einen Injektor; die drei
+                 früheren Vorratseinträge (lab.portsec, lab.stp, lab.storage) sind damit startbar.
    · quelle    = belegbare Quelle: Vault-Notizname und/oder RFC bzw. Hersteller-Doku. Jeder Teil (getrennt
                  durch „ · ") steht wörtlich in den Quellen derselben Fertigkeit – in DATEN.lehrtexte
                  (je Grundcode) oder in DATEN.wiki[skill].quelle/.belege. Nichts ist erfunden.
@@ -346,9 +347,9 @@ DATEN.trainings = [
    quelle: "05-AP2-Infrastruktur-Sicherheit · Infrastruktur & Sicherheit – Visuelle Lernnotiz (Firmennetz mit DMZ und VLANs)"},
 
   /* ---------- lab.portsec: Port-Security ---------- */
-  {id: "tr-portsec-dose", titel: "Fremdes Gerät an der Netzwerkdose", skill: "lab.portsec", geraet: null,
+  {id: "tr-portsec-dose", titel: "Fremdes Gerät an der Netzwerkdose", skill: "lab.portsec", geraet: "switch",
    art: "basis", minuten: 7, geruest: true, niveau: "E",
-   beschreibung: "In einem Besprechungsraum hängt ein Switchport, an dem jeder sein Notebook anstecken kann. Mit Port-Security erlaubst du genau eine MAC-Adresse; bei einem Verstoß geht der Port in den Zustand err-disabled. Zurück kommt er nur mit `shutdown` und `no shutdown` – und erst, nachdem die Ursache behoben ist.",
+   beschreibung: "In einem Besprechungsraum hängt ein Switchport, an dem jeder sein Notebook anstecken kann. Mit Port-Security erlaubst du genau eine MAC-Adresse; bei einem Verstoß geht der Port in den Zustand err-disabled. Zurück kommt er nur mit `shutdown` und `no shutdown` – und erst, nachdem die Ursache behoben ist. Im erzeugten Übungsfall ist der Port schon auf die MAC eines anderen Geräts eingestellt: Das angeschlossene Gerät ist damit der Verstoß.",
    tipp: "Port-Security zählt MAC-Adressen. Was passiert bei einem Verstoß – und wie kommt der Port wieder zurück?",
    schritte: ["Am Port Fa0/10 `switchport port-security` einschalten.",
      "`switchport port-security maximum 1` setzen und eine erlaubte MAC festlegen.",
@@ -358,26 +359,26 @@ DATEN.trainings = [
    quelle: "Cisco Catalyst Software Configuration Guide: Configuring Port Security · Network – Lernfassung (§ 9 MAC Flooding, Abwehr Port Security)"},
 
   /* ---------- lab.stp: Schleifen und Spanning Tree ---------- */
-  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", geraet: null,
+  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", geraet: "switch",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
-   beschreibung: "Zwei Switches sind versehentlich doppelt verbunden, und das Netz wird plötzlich sehr langsam: Broadcasts kreisen zwischen beiden Geräten und vervielfachen sich. Du erkennst das an hoher Last ohne Nutzverkehr und behebst es, indem du die zweite Leitung entfernst oder Spanning Tree arbeiten lässt.",
-   tipp: "Zwei Wege zwischen zwei Switches sind einer zu viel, solange niemand Frames blockiert. Welches Protokoll macht das?",
+   beschreibung: "Zwei Switches sind versehentlich doppelt verbunden, und das Netz wird plötzlich sehr langsam: Broadcasts kreisen zwischen beiden Geräten und vervielfachen sich, bis die Simulation mit „Broadcast-Sturm“ abbricht. Du erkennst das an hoher Last ohne Nutzverkehr und behebst es, indem du die zusätzlichen Leitungen zurückbaust – Spanning Tree würde genau das automatisch tun, ist in dieser Simulation aber nicht nachgebildet.",
+   tipp: "Zwei Wege zwischen zwei Switches sind einer zu viel, solange niemand Frames blockiert. Welches Protokoll macht das – und arbeitet es hier?",
    schritte: ["Die zweite Verbindung zwischen den Switches suchen (Kabelplan oder Anzeige im Modell).",
-     "Beobachten: Broadcasts laufen über beide Wege, die Last steigt ohne echten Verkehr.",
-     "Zweite Leitung entfernen – das Netz beruhigt sich sofort.",
-     "Spanning Tree einschalten und dieselbe Doppelverbindung wieder herstellen: Ein Port geht in Blocking, kein Sturm.",
-     "Mit `show spanning-tree` den blockierten Port benennen."],
+     "Einen Ping starten und die Ereignisliste lesen: Der Lauf endet mit „Broadcast-Sturm“, nicht mit einem fehlenden Kabel.",
+     "Die zusätzlichen Leitungen entfernen (beide Enden prüfen) – das Netz beruhigt sich sofort.",
+     "Erneut messen: Der Ping muss durchgehen, „Broadcast-Sturm“ darf nicht wiederkommen.",
+     "Gegenprobe im Kopf: Was Spanning Tree (IEEE 802.1D) bei zwei Wegen tut – ein Port geht in Blocking. Diese Simulation kennt kein STP, deshalb bleibt nur das Ziehen der zusätzlichen Leitungen."],
    quelle: "Fragen – Netzwerke planen (Wozu STP?) · IEEE 802.1D"},
 
   /* ---------- lab.storage: NAS, SAN und Speichernetze ---------- */
-  {id: "tr-storage-nas-san", titel: "NAS oder SAN?", skill: "lab.storage", geraet: null,
+  {id: "tr-storage-nas-san", titel: "NAS oder SAN?", skill: "lab.storage", geraet: "host",
    art: "basis", minuten: 10, geruest: true, niveau: "E",
    beschreibung: "Ein NAS stellt Dateien über das LAN bereit (SMB auf TCP 445, NFS auf 2049), ein SAN stellt Blockspeicher bereit, den ein Server wie eine eigene Platte nutzt (iSCSI auf 3260). Du ordnest beide Aufgaben zu und begründest, warum ein Dateiserver für die Abteilung ein NAS ist und eine Datenbank Blockspeicher braucht.",
    tipp: "Frag zuerst: Wer greift zu – Menschen auf Dateien oder ein Server auf Blöcke?",
    schritte: ["Anforderungen sammeln: Dateien für Menschen oder ein Blockgerät für einen Server?",
      "NAS nennen und den Dienst zuordnen: SMB 445 beziehungsweise NFS 2049.",
      "SAN nennen und den Transport zuordnen: iSCSI 3260 im eigenen Speichernetz.",
-     "Im Modell ein NAS als Dateiserver aufstellen und eine Freigabe nutzen.",
+     "Im Modell das NAS als Dateiserver in Betrieb nehmen (Adresse, Maske, Gateway) und die Freigabe nutzen.",
      "Gegenprobe: Warum ein NAS für eine Datenbank ungeeignet ist – Dateizugriff mit Sperren statt Blockzugriff."],
    quelle: "Storage-Konzeptatlas · IANA Port Number Registry (445, 2049, 3260)"}
 ];

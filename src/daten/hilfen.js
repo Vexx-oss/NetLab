@@ -70,9 +70,9 @@ DATEN.hilfen = {
      befehl: "ip r", syntax: "ip r",
      erklaerung: "Die Routentabelle des Servers – die Zeile „default via …\" ist sein Gateway.",
      geraet: "host-linux", modus: [], ebene: 1, art: "pruefen"},
-    {id: "ip-ios-setzen", bereich: "ip", skills: ["lab.ip"],
+    {id: "ip-ios-setzen", bereich: "ip", skills: ["lab.ip"], nurTyp: ["router"],
      befehl: "ip address 192.168.10.1 255.255.255.0", syntax: "ip address <IP> <Maske>",
-     erklaerung: "Adresse und Maske auf die gewählte Schnittstelle – Router-Port oder SVI.",
+     erklaerung: "Adresse und Maske auf die gewählte Router-Schnittstelle – physischer Port oder Subinterface.",
      geraet: "ios", modus: ["if", "subif"], ebene: 3, art: "aendern"},
     {id: "ip-win-setzen", bereich: "ip", skills: ["lab.ip"],
      befehl: "netsh interface ip set address \"Ethernet\" static 192.168.10.10 255.255.255.0 192.168.10.1",
@@ -150,6 +150,97 @@ DATEN.hilfen = {
      befehl: "show running-config", syntax: "show running-config",
      erklaerung: "Regeln, Zonen und NAT der Firewall: Die erste passende Regel gewinnt.",
      geraet: "fw", modus: ["fwPriv"], ebene: 1, art: "pruefen"},
+
+    /* ================= Ebene 2 (task-8, 09.10.2026): „genauer nachsehen, ohne etwas zu ändern" =================
+       Der Vertrag (§ 4) kennt drei Ebenen: 1 = harmlos ansehen, 3 = ändert etwas. Die mittlere war bis heute
+       0-mal belegt – die Leiter sprang von „ansehen" direkt zu „ändern" (Entwurf – Inhaltslücken § 3).
+       Ebene 2 ist der prüfende Schritt dazwischen (Cache, Lease, Status, Verbindungsaufbau): Er liest tiefer
+       oder sendet eine Anfrage, ändert aber NIE eine Konfiguration – deshalb tragen alle Ebene-2-Einträge
+       `art: "pruefen"`. Sichtbar wird die Ebene in src/ui/hilfe.js („· ansehen" / „· genauer nachsehen" / „· ändern").
+       Hier stehen außerdem die zehn Fertigkeiten, für die es bis heute keinen einzigen Vorschlag gab
+       (lab.netz · lab.arp · lab.subnetz · lab.dhcp · lab.tcp · lab.rostick · lab.portfwd · lab.portsec ·
+       lab.stp · lab.storage) und zwei zusätzliche Sprossen für die Firewall, die nur eine hatte.
+       Jeder Befehl ist in src/cli/ios-befehle.js, src/cli/host-windows.js oder src/cli/host-linux.js belegt.
+
+       NACHTRAG task-28 (09.10.2026), zwei Regeln aus der Gegenprüfung – sie gelten für ALLE Einträge oben:
+       1. KEIN Befehl darf auf demselben Gerät zweimal im Katalog stehen. `passend` filtert den Verlauf über
+          den Befehlstext (src/spiel/hilfe.js) – ein Zwilling mit demselben Befehl ist damit entweder vom
+          früher sortierten Eintrag verdeckt oder mit ihm zusammen gefiltert: er erscheint NIE. Vier
+          Ebene-2-Einträge waren so unsichtbar (ip-ios-subif, ip-linux-nas, dienst-fw-zonen,
+          link-switch-schleife). Sie tragen jetzt je einen eigenen Befehl – dieselbe Anzeige, andere Frage
+          gibt es nicht mehr, und `passend` wirft doppelte Befehle zusätzlich selbst heraus.
+       2. KEIN Befehl darf auf einem Gerät angeboten werden, das ihn ablehnt: `nurTyp` richtig setzen
+          (ip-ios-setzen galt am Switch, dort gibt es keine L3-Subinterfaces → nurTyp router). */
+
+    /* ---- IP und Maske: Wer liegt im eigenen Netz, welche Adresse hat das Gerät? ---- */
+    {id: "ip-win-arp", bereich: "ip", skills: ["lab.arp", "lab.netz"],
+     befehl: "arp -a", syntax: "arp -a",
+     erklaerung: "Der ARP-Cache des PCs: Hier stehen nur Nachbarn aus dem eigenen Netz – fremde Ziele werden nie per ARP gesucht.",
+     geraet: "host-windows", modus: [], ebene: 2, art: "pruefen"},
+    {id: "ip-ios-arp", bereich: "ip", skills: ["lab.arp", "lab.netz"],
+     befehl: "show ip arp", syntax: "show ip arp",
+     erklaerung: "Die ARP-Tabelle des Geräts: Welche Adresse im eigenen Netz wurde schon aufgelöst – und über welche Schnittstelle?",
+     geraet: "ios", modus: ["user", "priv"], ebene: 2, art: "pruefen"},
+    {id: "ip-win-maske", bereich: "ip", skills: ["lab.subnetz", "lab.netz"],
+     befehl: "netsh interface ip show config", syntax: "netsh interface ip show config",
+     erklaerung: "Zeigt die Maske als Präfix und in Punktschreibweise – die Maske, mit der dieser PC rechnet.",
+     geraet: "host-windows", modus: [], ebene: 2, art: "pruefen"},
+    {id: "ip-ios-dhcp-binding", bereich: "ip", skills: ["lab.dhcp"], nurTyp: ["router"],
+     befehl: "show ip dhcp binding", syntax: "show ip dhcp binding",
+     erklaerung: "Welche Adresse hat der Router schon vergeben, an welche MAC und bis wann? Eine leere Liste heißt: Es hat noch kein Client gefragt.",
+     geraet: "ios", modus: ["priv"], ebene: 2, art: "pruefen"},
+    {id: "ip-ios-dhcp-pool", bereich: "ip", skills: ["lab.dhcp"], nurTyp: ["router"],
+     befehl: "show ip dhcp pool", syntax: "show ip dhcp pool",
+     erklaerung: "Zeigt Netz, Gateway und Auslastung des Pools – sind noch freie Adressen übrig, oder ist der Pool erschöpft?",
+     geraet: "ios", modus: ["priv"], ebene: 2, art: "pruefen"},
+    {id: "ip-ios-subif", bereich: "ip", skills: ["lab.rostick"], nurTyp: ["router"],
+     befehl: "show interfaces", syntax: "show interfaces",
+     erklaerung: "Schnittstellen im Detail: Jedes Subinterface zeigt „Encapsulation 802.1Q, Vlan ID“ und seine Adresse.",
+     geraet: "ios", modus: ["user", "priv"], ebene: 2, art: "pruefen"},
+    {id: "ip-fw-schnittstellen", bereich: "ip", skills: ["lab.fw", "lab.dmz", "lab.portfwd"],
+     befehl: "show ip interface brief", syntax: "show ip interface brief",
+     erklaerung: "Die Schnittstellen der Firewall: Steht jede Zone (innen, außen, DMZ) auf up? Ein Interface down sperrt diese Seite.",
+     geraet: "fw", modus: ["fwUser", "fwPriv"], ebene: 2, art: "pruefen"},
+
+    /* ---- VLAN: Trägt der Port zum Router die VLANs der Subinterfaces? ---- */
+    {id: "vlan-switch-rostick", bereich: "vlan", skills: ["lab.rostick", "lab.trunk"], nurTyp: ["switch"],
+     befehl: "show interfaces status", syntax: "show interfaces status",
+     erklaerung: "Die Spalte „Vlan“ zeigt am Port zum Router „trunk“ – nur so trägt er die VLANs der Subinterfaces.",
+     geraet: "ios", modus: ["user", "priv"], ebene: 2, art: "pruefen"},
+
+    /* ---- Route: der Weg aus der Firewall heraus ---- */
+    {id: "route-fw-tabelle", bereich: "route", skills: ["lab.fw", "lab.dmz"],
+     befehl: "show ip route", syntax: "show ip route",
+     erklaerung: "Die Routentabelle der Firewall: Kennt sie das Netz hinter sich und den Weg nach außen – und über welche Schnittstelle?",
+     geraet: "fw", modus: ["fwUser", "fwPriv"], ebene: 2, art: "pruefen"},
+
+    /* ---- ACL und Dienst: NAT, TCP-Aufbau, Dateidienst ---- */
+    {id: "dienst-ios-nat", bereich: "dienst", skills: ["lab.portfwd", "lab.nat"], nurTyp: ["router"],
+     befehl: "show ip nat translations", syntax: "show ip nat translations",
+     erklaerung: "Welche innere Adresse wurde nach außen übersetzt? Eine Port-Weiterleitung steht hier als feste Regel mit Protokoll und Port.",
+     geraet: "ios", modus: ["priv"], ebene: 2, art: "pruefen"},
+    {id: "dienst-win-tcp", bereich: "dienst", skills: ["lab.tcp"],
+     befehl: "curl http://192.168.10.20", syntax: "curl http://<Host>",
+     erklaerung: "Der TCP-Aufbau läuft wirklich ab (SYN, SYN/ACK, ACK) – die Ereignisliste der Simulation zeigt ihn Schritt für Schritt.",
+     geraet: "host-windows", modus: [], ebene: 2, art: "pruefen"},
+    {id: "dienst-linux-datei", bereich: "dienst", skills: ["lab.storage"],
+     befehl: "systemctl status smbd", syntax: "systemctl status <Dienst>",
+     erklaerung: "Läuft der Dateidienst (Samba/SMB)? Ohne ihn antwortet das Gerät auf Ping, aber an Port 445 nimmt niemand eine Verbindung an.",
+     geraet: "host-linux", modus: [], ebene: 2, art: "pruefen"},
+
+    /* ---- Link: Port-Security, Schleife und der Link zum Speicher ---- */
+    {id: "link-switch-portsec", bereich: "link", skills: ["lab.portsec", "lab.switch"], nurTyp: ["switch"],
+     befehl: "show port-security", syntax: "show port-security",
+     erklaerung: "Erlaubte MAC-Adressen und Verstöße je Port: Ein Port auf err-disabled fällt hier zuerst auf.",
+     geraet: "ios", modus: ["user", "priv"], ebene: 2, art: "pruefen"},
+    {id: "link-switch-schleife", bereich: "link", skills: ["lab.stp", "lab.switch"], nurTyp: ["switch"],
+     befehl: "show cdp neighbors", syntax: "show cdp neighbors",
+     erklaerung: "Steht derselbe Nachbar zweimal in der Liste, hängen zwei Kabel zwischen denselben Switches – eine Schleife.",
+     geraet: "ios", modus: ["user", "priv"], ebene: 2, art: "pruefen"},
+    {id: "link-linux-nas", bereich: "link", skills: ["lab.storage", "lab.link"],
+     befehl: "ip link", syntax: "ip link",
+     erklaerung: "Ist eth0 des Servers oder NAS oben? NO-CARRIER heißt: kein Link – dann kommt kein Frame an.",
+     geraet: "host-linux", modus: [], ebene: 2, art: "pruefen"},
   ],
 
   /* „Was geht hier?" je CLI-Modus. Erste Zeile = Kurzfassung, ab der zweiten Zeile ausführlich. */

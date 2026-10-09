@@ -51,7 +51,11 @@ Spiel.hub.naechster = function(){
   const aktiv = Spiel.aktiveInstanz && Spiel.aktiveInstanz();
   const liste = Spiel.postfach();
   const angefangen = liste.filter(i => i.geoeffnet).sort((a, b) => b.geoeffnet - a.geoeffnet)[0] || null;   /* zuletzt angefangener */
-  const inst = aktiv && aktiv.quelle !== "raetsel" && aktiv.quelle !== "pruefung" ? aktiv : angefangen || liste[0] || null;
+  /* Die unsichtbaren Quellen bleiben draußen (Entscheidung task-30, begründet): training und klassenraum
+     liegen seit E1 nicht mehr in Spiel.postfach(); die Kachel ist die sichtbare „was jetzt dran ist“-
+     Fläche und darf keinen Auftrag als nächsten zeigen (samt Lohnversprechen), der nichts zahlt und im
+     Postfach fehlt. pruefung und raetsel waren schon immer ausgenommen. */
+  const inst = aktiv && aktiv.quelle !== "raetsel" && aktiv.quelle !== "pruefung" && aktiv.quelle !== "training" && aktiv.quelle !== "klassenraum" ? aktiv : angefangen || liste[0] || null;
   if (!inst) return {art: "leer"};
   const def = Spiel.defVon(inst), k = Spiel.kundenDaten(inst.kunde || def.kunde);
   return {art: inst === aktiv || inst.geoeffnet ? "weiter" : "neu", iid: inst.iid, titel: def.titel,

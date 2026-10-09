@@ -83,7 +83,12 @@ function main() {
       console.log((setzen ? "flicke " : "würde flicken ") + rel + ": " + anzahl + " pruefe()-Name(n)");
       if (setzen) { fs.writeFileSync(datei, neu, "utf8"); geflickt++; }
     }
-    if (setzen || !anzahl) {
+    /* Die Ladbarkeit wird IMMER geprüft. Vorher stand hier `if (setzen || !anzahl)` — damit
+       wurde genau die Datei übersprungen, die geflickt werden müsste, und der Trockenlauf meldete
+       „0 laden nicht", während `node --check` im selben Moment Exit 1 lieferte (gemessen am
+       09.10.2026 von der Gegenprüfung, Beleg im Review – 2.0-Fundament.md). Ein Namensmuster, das
+       geflickt würde, und eine Datei, die nicht lädt, sind zwei verschiedene Befunde. */
+    {
       const fehler = ladbar(datei);
       if (fehler !== true) { kaputt.push(rel + " — " + fehler); console.log("LÄDT NICHT " + rel + ": " + fehler); }
     }

@@ -65,8 +65,11 @@ PAKET = "oss.vexx.netlab"
 # Herleitung: 1*10000 + 2*100 + 4 = 10204 für die Spielversion 1.2.4.
 # Angehoben am 07.10.2026 mit dem Fassungszug 1.2.3 → 1.2.4: 10203 wäre kleiner als der
 # aus 1.2.4 abgeleitete Wert und der Bau bräche ab (android/bauen.py, version_lesen).
+# Angehoben am 09.10.2026 mit dem Fassungszug 1.2.4 → 2.0.0: version_lesen leitet aus
+# versionName 2.0.0 den Wert 2*10000 + 0*100 + 0 = 20000 ab und bricht bei
+# `VERSION_CODE < abgeleitet` ab. 20001 liegt genau eine Bauzählung darüber.
 # Die APK selbst wurde NICHT neu gebaut — Android ist nicht Teil dieses Auftrags.
-VERSION_CODE = 10204
+VERSION_CODE = 20001
 
 SDK_ORTE = [
     Path(r"C:\Users\Student\android-sdk"),

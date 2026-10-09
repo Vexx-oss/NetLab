@@ -9,6 +9,228 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.0.0 — Production Release: das 2.0-Fundament (09.10.2026)
+
+**Dreizehn Bausteine, die kein neues Spiel sind, sondern seine Voraussetzungen.** Der
+[Fahrplan 1.3/2.0](<entwicklung/Fahrplan – 1.3 und 2.0.md>) hatte fünf Entwürfe vorgelegt; diese Fassung
+baut die Fundamenthälfte daraus: zwei Azubis nacheinander am selben Rechner, ein kopierbares Ergebnis,
+Klassenraum ohne Karriereschaden, derselbe Auftrag auf jedem Gerät, ein ehrlicher Hilfevorrat, geöffnete
+Trainingskarten, Denkhilfen für fast alle Minis, Hilfe-Vorschläge der mittleren Ebene, ein Wiki mit IPv6
+und WLAN, eine Wache gegen die Lernmotor-Falle — und drei Nachträge aus dem laufenden Auftrag des Nutzers:
+**keine schnelle Wiederholung**, ein **sichtbarer nächster Schritt** und **generierte Fragen**.
+
+Verträge: [`Architektur.md`](Architektur.md) § 12/§ 13. Berichte:
+[Review – 2.0-Fundament](<entwicklung/Review – 2.0-Fundament.md>) (unabhängige Gegenprüfung),
+[Befund – Lernmotor-Falle](<entwicklung/Befund – Lernmotor-Falle.md>),
+[Übergabe – Stand 2.0-Fundament](<entwicklung/Übergabe – Stand 2.0-Fundament.md>) (der neue Übergabezettel).
+
+### Neu
+
+- **Übergabe — „Neuer Azubi an diesem Rechner".** `Spiel.uebergabe({lernstandBehalten})` setzt den
+  Spielstand zurück, lässt Einstellungen stehen und den Lernstand wahlweise auch; `Spiel.uebergabeLetzte`
+  berichtet, was zuletzt übergeben wurde. Die Oberfläche hat dafür einen eigenen Einstellungsabschnitt mit
+  vier Wegen — **Behalten**, **Löschen**, **Erst sichern** (exportiert und übergibt **nicht**),
+  **Abbrechen** —, Escape schließt den Dialog, nach dem Zurücksetzen wird kalt neu geladen. Damit steckt
+  der zweite Azubi nicht mehr im Auftrag des ersten.
+- **Ergebnis kopieren.** `Spiel.ergebnisText(inst, erg)` baut den mehrzeiligen Klartext eines
+  abgeschlossenen Auftrags, `Spiel.ergebnisKurz` eine Einzeiler-Zusammenfassung. Im Abschlussfenster steht
+  jetzt ein Knopf **„Ergebnis kopieren"** (`src/ui/spiel.js:543`), der erst beim Klick textet
+  (`UI.kopieren`), damit ein Fehler im Text das Fenster nicht schon beim Öffnen zerlegt.
+- **Klassenraum-Aufträge verfälschen die Karriere nicht mehr.** EINE Umleitung in
+  `src/spiel/abnahme.js:126-127` schickt `quelle === "klassenraum"` in `Spiel.klassenraum.abnehmen` — **vor**
+  jedem Nebeneffekt. Kein Geld, kein Ruf, kein `st.erledigt`, keine Wochenwertung, keine Abzeichen, kein
+  Karriere-Ereignis; der **Lernwert bleibt** (`Spiel.lernenNachAbnahme`). Elf Filterstellen mussten dadurch
+  **nicht** nachgezogen werden — sie sind toter Vorsorge-Code (Entwurf E2).
+- **Derselbe Auftrag auf jedem Gerät.** Derselbe Code und derselbe Seed ergeben denselben Auftrag,
+  unabhängig vom lokalen Flow-Stand. Bewiesen wird das über `def.id` — Ziele, Geräte und Kabellisten sind in
+  allen Flow-Ständen gleich und hätten die Abweichung **nicht** bemerkt.
+- **Ehrlicher Hilfevorrat.** Die Ticket-Stufe wird ausdrücklich gesetzt; der Vorrat richtet sich nach dem
+  eingestellten Bildungsstand (6/4/2/0) statt still nach dem Standard. Ein leerer Vorrat **sperrt nicht**
+  (Vertrag § 13.2).
+- **Drei gesperrte Trainingskarten sind offen.** Neue Injektoren `portsec-fremde-mac`, `stp-doppelkabel`
+  (zwei parallele Kabel, reproduzierbar `abbruch === "STORM"`) und `nas-ohne-adresse`; die Injektorenzahl
+  steigt damit von 36 auf **39** (der Prüfer hat 39 Injektoren = 39 Dex-Einträge = 39 Gruppen-Summe
+  nachgezählt). Der Kartenschritt „Mit `show spanning-tree` den blockierenden Port benennen" wurde
+  **entfernt** — dieses Kommando gibt es im Spiel nicht.
+- **Denkhilfen statt eines Fertigkeitssatzes für alle.** Eigene Denkanstöße für **91 der 92** Minis
+  (vorher 25; **60** in der Grunddatei, **31** in der Zusatzdatei); `mini-link-2` bleibt bewusst ohne
+  Eintrag, weil ein Test genau das verlangt. Die zweite
+  Datei hängt idempotent an (`DATEN.miniDenkhilfen = Object.assign(...)`), damit die Ladereihenfolge keine
+  Einträge frisst. Der Prüfer hat **91 von 91** über den echten Weg beim Spieler nachgewiesen — nicht nur
+  im Datenbestand.
+- **Hilfe-Vorschläge der mittleren Ebene.** **44** Vorschläge statt 29: Ebene 1 = 22, **Ebene 2 = 15**
+  (vorher 0), Ebene 3 = 7. Alle **27** Fertigkeiten haben jetzt mindestens einen Vorschlag (vorher waren
+  10 ohne). `bereich` bleibt ausschließlich eine Leiter-id (`link`, `vlan`, `ip`, `gateway`, `route`,
+  `dienst`), `art` ausschließlich `pruefen`/`aendern`.
+- **Wiki 2.0.** Die dünnsten Seiten sind gefüllt, **IPv6** (fünf Seiten mit eigenem Abschnitt) und
+  **WLAN/Access Point** sind als Nachschlagewissen nachgetragen — als Abschnitte in bestehenden
+  Fertigkeiten, **ohne** neue Fertigkeit (die Skill-Tabelle ist für den Klassenraum-Codec eingefroren).
+- **Lernmotor-Wache.** Ein Wächtertest beweist, dass im gesamten `src/` niemand `store.get("lern")` /
+  `store.set("lern")` direkt aufruft — der Lernstand geht nur über die `L.*`-API. Der Gegenversuch (ein
+  eingebauter Direktaufruf) macht den Test nachweislich rot; danach wurde er zurückgenommen.
+- **Keine schnelle Wiederholung.** `Spiel.mini` rotiert jetzt statt zu filtern: je Fertigkeit kommt jedes
+  Mini einmal dran, bevor sich eines wiederholt, und bei echter Erschöpfung das **am längsten nicht
+  gespielte**. Gemessene Wirkung über den echten Weg (`naechstes()` + `antworten()`): vorher **20 Runden →
+  11 verschiedene Minis, 9 Wiederholungen**; nachher **20 Runden → 20 verschiedene, 0 Wiederholungen**,
+  40 Runden → 40 verschiedene. Der Zustand liegt in `st.mini` und übersteht einen Neustart; alte
+  Spielstände werden rekonstruiert. Der Auftragsmischer nimmt einen bereits offenen Inhalt nicht mehr in
+  den Topf.
+- **Der nächste nötige Schritt wird gezeigt.** `Spiel.naechster(inst)` liefert
+  `{geraet, ziel, text, bereich}` — gelesen aus den offenen Zielen und den Plan-Abweichungen, **keine neue
+  Wahrheit**. Die Oberfläche hebt das Gerät im Netzplan hervor (pulsieren); die Führung kommt **nur auf
+  Bedarf**: `azubi`/`azubi-plus` nach **90 s** ohne Fortschritt, `geselle` erst nach einem Fehler,
+  `meister` **nie** ungefragt (gefragt bekommt sie jeder), Anzeigedauer **15 s**. Der Text verrät die
+  Lösung nicht: er sagt, *wo* es hakt, nicht *warum*.
+- **Fragen-Generator.** Aus **11 geprüften Vorlagen** und einem Katalog von **20 Denkfehlern** entstehen
+  immer neue Aufgaben — deterministisch aus dem Seed, mit selbst ausgerechneter Lösung (der Test führt
+  ≥ 200 Seeds durch). Generierte Fragen laufen **nicht** in den festen Bestand (92 Minis) hinein, sondern
+  werden an genau zwei Stellen eingehängt; ihre Id `gf-<vorlage>-<seed>` trägt die Frage in sich und
+  übersteht einen Neustart.
+
+### Behoben
+
+- **Die acht roten `UI: Übergabe › …`** aus der Hinterlassenschaft eines abgebrochenen Laufs sind grün. Die
+  Ursache lag **in der Attrappe des Tests, nicht im Produktivcode** — der Prüfer hat das mit drei Proben und
+  einem Gegenversuch belegt ([Review § 3](<entwicklung/Review – 2.0-Fundament.md>)); die Zusicherungen
+  wurden **nicht** abgeschwächt.
+- **Das Namens-Werkzeug verschwieg genau den Fall, für den es da ist.** `node tools/pruefe-namen-flicken.js`
+  meldete „0 laden nicht" (Exit 0), während `tests/hilfe-ebene2.test.js` in diesem Fenster **nicht ladbar**
+  war — der Testlauf hätte dort mit **Exit 2** abgebrochen. Ursache war `tools/pruefe-namen-flicken.js:86`;
+  nach der Korrektur meldet das Werkzeug **66 Dateien geprüft, 0 geschrieben, 0 laden nicht** (vom Prüfer
+  nachgemessen, Review § 4.4).
+- **Ein Klassenraum-Auftrag verfälschte die Karriere** — im Fahrplan mit **+33 € / +1 Ruf** belegt und vom
+  Prüfer auf dem ungefilterten Pfad exakt reproduziert. Jetzt: 0 € / 0 Ruf, kein `erledigt`-Eintrag, keine
+  Kundenampel — während der Lernstand sehr wohl steigt.
+- **Derselbe Code ergab je Gerät einen anderen Auftrag** (`postfach.js`, lokaler Flow-Stand). Jetzt
+  identisch — über `def.id` bewiesen.
+- **Der Hilfevorrat war still der Standard-Vorrat**, auch wenn der Mensch auf „meister" stand: sechs
+  Sprossen landeten auf `def.skills[0]`. Jetzt gilt der eingestellte Bildungsstand.
+- **Ein Kartenschritt verlangte ein Kommando, das es nicht gibt** (`show spanning-tree`) — der Schritt ist
+  entfernt, die Karte ist spielbar.
+- **`Spiel.ergebnisKurz` hatte keinen Aufrufer** („Wirkung vor Grün" verletzt). Entschieden wurde **nicht**
+  entfernen, sondern einen echten Aufrufer bauen: die Kurzfassung steht jetzt als Untertitel im
+  Abschlussfenster (`src/ui/spiel.js:511`).
+- **Fehlerdex nachgezogen**: alle 39 Injektoren haben Gruppe, Symptom, Erkennungszeichen und Erklärung;
+  sieben Grundcodes **ohne** Injektor bleiben ausdrücklich benannt (der Prüfer hat die Zahlen des
+  Eigentümers nachgezählt und eine zu starke Aussage korrigiert — `OFFEN` fehlt in `Sim.GRUENDE`, wird aber
+  in `src/spiel/dex.js:77` bewusst abgefangen).
+
+### Verworfen — und warum das hier steht
+
+- **`lab.stp` über EIN zweites Kabel:** gemessen **kein** Sturm (Ziel blieb ok, `abbruch: null`). Erst
+  **zwei parallele** Kabel ergeben reproduzierbar einen Sturm. Ein erster Injektorversuch wäre also ein
+  Injektor geworden, der nichts bricht — `ticketBauen` verwirft solche Fälle zu Recht.
+- **Den Lernmotor selbst reparieren:** verworfen. `fremd/lernmotor.js` trägt „FREMDE DATEI — NICHT HIER
+  BEARBEITEN", die Quelle liegt außerhalb des Projektordners und hat beim Laden **Vorrang** — eine
+  Änderung an der Kopie hätte auf diesem Rechner nachweislich **keine** Wirkung. Stattdessen Wächtertest +
+  Befunddokument mit Änderungsvorschlag für die FISI-Spielhalle.
+- **Elf Karriere-Filter nachziehen:** verworfen zugunsten **einer** Umleitung (Entwurf E2).
+- **Vier Ebene-2-Vorschläge, die nie erschienen** (von Ebene-1-Zwillingen verdeckt): nicht die Prüfung
+  abschalten, sondern je einen eigenen, fachlich passenden Befehl ergänzen.
+- **`Spiel.ergebnisKurz` entfernen:** verworfen, siehe „Behoben" — ein Aufrufer ist billiger als eine
+  gelöschte Funktion.
+- **Die E1-Begründung des Entwurfs ist nur halb richtig:** der Offen-Zähler entfällt, die
+  `ticketId`-Blockade bleibt (gemessen) — bewusst symmetrisch zu `training`/`pruefung`/`raetsel` gelassen.
+- **Ein Schwarm aus 15 Teammitgliedern** war am 05.10.2026 gescheitert (drei von vier brachen mitten in der
+  Arbeit ab). Diese Sitzung zeigt den Gegenweg — als **Beobachtung**, nicht als neue Regel: eine Datei, ein
+  Schreiber, Shared Tasks mit Schreibbereichen, Änderungen an fremden Dateien **über den Lead**.
+
+### Prüfstand
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` (vom Chronisten selbst gemessen) | **620/620 grün** (70 Testdateien, 90 Module), **davon 0 übersprungen**, Exit 0 |
+| dieselbe Messung **vor** der Sitzung (Nullmessung des Leads) | 471/479 grün, **8 rot** (alle acht `UI: Übergabe › …`), 55 Testdateien, 84 Module |
+| `python tools/ethos.py` · `tools/klassen.py` · `node tools/sim-stand.js` (selbst gemessen) | GRÜN · **0** Klassen ohne CSS-Regel · Simulation **unverändert** (12/12) |
+| `python bauen.py` (Lead) | **126 Module, 2133 KB** → `web/index.html`, **Version 2.0.0** |
+| `python tools/einfach.py` + `--ziel Netzwerk-Labor.html` (Lead) | **0 Außenverweise**, beide byte-gleich — Bytes und SHA256 vom Chronisten nachgerechnet (unten) |
+| `python tools/seite.py --pruefen` (Lead) | GRÜN: 39 Dokumente, kein toter Verweis, jede Seite mit `<h1>` und Fußzeile |
+| `python tools/seite-pruefen.py` (Lead) | GRÜN — mit dem erwarteten Hinweis, dass die **online** veröffentlichte Seite noch **1.2.4** liefert (es wurde nicht gepusht) |
+| `python android/bauen.py` (Lead) | GRÜN — APK 2.0.0, `versionCode` **20001** (`VERSION_CODE` musste von Hand über den abgeleiteten Wert 20000 steigen) |
+
+**Zwischenstand, der nicht als Endstand durchging:** der Prüfer maß um 15:31 **591/593 grün, 2 rot** — die
+zwei roten Zeilen (`Fragen-Generator`, `Spiel: naechster Schritt`) gehörten Bausteinen, die erst danach
+fertig wurden. Sein Fazit gilt weiter: *591 von 593 grün heißt nicht fertig.*
+
+### Erzeugnisse
+
+- Browser-Einzeldatei `docs/index.html` = `Netzwerk-Labor.html`: **2.720.252 B**,
+  SHA256 `3822D6B5C03C8D216EF588DD693E2D95DB6FFE2C0F22B21276C050EDE7F095F6` (beide gleich, vom Chronisten
+  gerechnet), `LABOR_VERSION = "2.0.0"`, 0 Außenverweise.
+- Android `Programm/Netzwerk-Labor-2.0.0-Android.apk`: **1.127.964 B**,
+  SHA256 `DB11BF88C1B3431909E20C08209BB9EE08B291BD2BE004568D84C711A569FAC1` (vom Chronisten nachgerechnet),
+  versionName 2.0.0, `versionCode` 20001, signiert, keine Berechtigungen.
+- **Die `.exe` wurde in dieser Fassung NICHT neu gebaut** (Rust-Bau, nicht Teil dieses Auftrags); sie meldet
+  deshalb weiterhin eine ältere Fassung. Ihre Fassungsnummer ist hier **nicht gemessen**.
+- **Nicht gepusht, kein Tag.** `v2.0.0` und der Push stehen aus — beides nur mit ausdrücklicher Freigabe
+  des Nutzers. Tag- und Zweigzeile im Kopf dieses Dokuments bleiben deshalb unverändert.
+
+### Neue Dateien dieser Fassung (Bytes und SHA256)
+
+Alle Werte mit `Get-FileHash -Algorithm SHA256` über den Arbeitsbaum gerechnet (Chronist). Die vier
+Dokumente des Stand-Nachziehens (`CHANGELOG`, `INHALT`, `Design – Spielspaß 2.0.md`,
+`Übergabe – Stand 2.0-Fundament.md`) stehen hier **nicht** — eine Datei kann ihren eigenen Hash nicht
+enthalten.
+
+| Datei | Bytes | SHA256 |
+|---|---|---|
+| `src/spiel/uebergabe.js` | 4.539 | `DB6AB3376989A48B7DC9B2A6C334E9E8BBAF7D8443E442C2A81E835597C803C7` |
+| `src/spiel/ergebnis.js` | 10.154 | `51103A2F6085A0C9FAB9B9A98B8C43E8EB29479773670BDD92F3D0BCB26C45DF` |
+| `src/spiel/klassenraum.js` | 4.122 | `1F4F9BFE73AB19D36C0356E106DAA3E79E8B56FA06F5BC95AA25FD123E928B5A` |
+| `src/spiel/naechster.js` | 9.422 | `EE37C873ADE2D9C487C0B0A9E45958E00167434C931EBDEEB86F86DA79367CAB` |
+| `src/spiel/fragen.js` | 7.542 | `D97F5ABAB5B930C5CAE72BBD78BAD0C458D719B41B0085202E8B2C7E1D6B77B4` |
+| `src/daten/fragen-vorlagen.js` | 17.987 | `EC96F562354A2B2C1057A3B5EA34A3F140918AAAC37919CD245C0640ECA49C10` |
+| `src/daten/mini-denkhilfen2.js` | 10.619 | `3061A66AE662C13465AE6BD8F19E0521D77087E8F62C7A6AEE5DD08EC76DE6BD` |
+| `src/ui/uebergabe.js` | 5.304 | `F3A3DC7378F7CFE4490CE4E63B7F09587D12D8108554CC59FCD29114B1F81A6B` |
+| `src/stil/uebergabe.css` | 881 | `5FFF076690A7BFE4F55772A74DBFA2CA5D9E1D661523313B839441220151FDB2` |
+| `src/stil/naechster.css` | 1.855 | `6EFFE6F53E8B2B95E14DF9A6122C3FB522056094FB6A207D81861E9A7D4D2264` |
+| `tests/2.0-abnahme.test.js` | 23.454 | `C07E06745EE295F106D060AE49D36FD34447AC84FBF9FFFC4DCAF352B621CF0A` |
+| `tests/spiel-uebergabe.test.js` | 14.882 | `B2FDDD3D097E13821AF43C3EF9E4208072813337A5B6618092FBBB55B5F3B4E1` |
+| `tests/ui-uebergabe.test.js` | 14.114 | `F125293B629A3FD7F2FAAF1F88A19CA3C9EA22CB358CE16105FBD1EF12883B55` |
+| `tests/spiel-ergebnis.test.js` | 13.336 | `51646BB4AE82F1D1E308A465DF70405E148FF3C398E379B5AFB6F3EB3FBD0B07` |
+| `tests/ui-spiel-ergebnis.test.js` | 24.063 | `3927FD7EA310D15E6C5344BAF54C49D84F56E5340C72C9C5B36862364C8B8229` |
+| `tests/klassenraum-karriere.test.js` | 22.704 | `7473F7F3F44DB0EDD78D3E9786C4BCB85EBA30BCD96EB22DABDCE12FA5542952` |
+| `tests/klassenraum-determinismus.test.js` | 11.258 | `A8D717F357996B60DCC2C8FD62808C00DCE44013E4598255F60802A994FA3B87` |
+| `tests/klassenraum-hilfevorrat.test.js` | 8.338 | `B3474ACBAE50D61A4608CA1F00C2B9C147C33B0B2F73537A4C2D5B166E52BC7B` |
+| `tests/injektoren-neu.test.js` | 9.166 | `F218929D3326FA713A4B2652D2A7AA8E244CB88A2C87CA213BFCD4D01E6A127B` |
+| `tests/denkhilfen-teil1.test.js` | 9.970 | `2DFD18328D4CCE378E0B589F0FD677299BD8AC5C32928E5A4E1DD4A57B8DD400` |
+| `tests/denkhilfen-teil2.test.js` | 10.081 | `B32A025FBBE3D4A00BC3F9F50E4D00395972C5DBBF7F4FBF2253DE3B1E867ED1` |
+| `tests/hilfe-ebene2.test.js` | 40.607 | `6398027468B2AA1C21A1D85C67A19FB68929C679DECFF389C6A78780CF26D1BA` |
+| `tests/wiki-2.0.test.js` | 13.647 | `E125DE42E35FE5C2A8C159C208BCAF192DC86F3AB8617168F2D676346CAFCDE4` |
+| `tests/lernmotor-wache.test.js` | 14.996 | `A1386F3BDAAD0232525F38A1941D441358F84879EB54DA9C6FDE16FAC4F79B8C` |
+| `tests/mini-wiederholung.test.js` | 22.323 | `9DDC9E0801BA1AE621894C48866079E90B3AF36E25FD037966854E11C8E4A0CF` |
+| `tests/naechster-schritt.test.js` | 20.002 | `E4157F91E48B31CA4A7418E366B792710900DDC573552F7884131259075A1DDD` |
+| `tests/fragen-generator.test.js` | 21.406 | `2E8C8BCE1DD2FCFCC6D9DD688696712BED737DF419F32B0FE7332476F7767B23` |
+| `docs/entwicklung/Befund – Lernmotor-Falle.md` | 19.137 | `FCDD716293D113CE8866DF745BFF558312EE60E410B90E9E8D498C943A54FE47` |
+| `docs/entwicklung/Review – 2.0-Fundament.md` | 44.744 | `84F6A75C032E1C4FCD61552E8E443C578855F996CECD8E422F61E52B53A966E7` |
+
+**Geändert** (ohne Hash, weil teils danach noch vom Fassungszug berührt):
+`src/spiel/abnahme.js` · `postfach.js` · `flow.js` · `stufensystem.js` · `hilfe.js` · `mini.js` ·
+`mischer.js` · `injektoren.js` · `dex.js` · `ereignisse.js` · `hub.js` · `src/daten/hilfen.js` ·
+`mini-denkhilfen.js` · `trainings.js` · `wiki.js` · `src/ui/spiel.js` · `netzplan.js` · `src/ui/hilfe.js` ·
+`tests/daten-trainings.test.js` · `tickets-generator.test.js` · `spiel-bogen.test.js` ·
+`tools/pruefe-namen-flicken.js` — dazu die Fassungsstellen (`bauen.py`, `shell/src-tauri/Cargo.toml`,
+`tauri.conf.json`, `android/bauen.py`, `android/LIESMICH.md`, `docs/Bauen.md`, `docs/Liesmich.md`) und die
+Dokumente dieses Stand-Nachziehens.
+
+### Nicht geprüft (ehrlich)
+
+- **Kein Browserlauf.** `tools/rauch.py` und `tools/menueprobe.py` liefen **nicht**, es gibt kein
+  Bildschirmfoto und keine Pixelmessung dieser Fassung. Die Wirkung der Oberfläche ist über DOM-Attrappen
+  und Quelltext belegt, **nicht** im gezeichneten Bild.
+- **Keine echte Unterrichtsstunde**, kein Test mit einem Menschen.
+- **Die `.exe` wurde nicht neu gebaut** und **nicht** gestartet; `tools/q-echt.py` lief nicht.
+- **Die veröffentlichte Seite ist unverändert 1.2.4**, weil nicht gepusht wurde. `tools/seite-pruefen.py`
+  meldet das ausdrücklich (Baukennung online `109f7738`, lokal `c3fff0b3`).
+- **`tools/seite.py` lief vor dem Stand-Nachziehen** — die Doku-Seiten unter `docs/doku/` wurden um
+  **15:56:28** erzeugt (gemessen an `docs/doku/CHANGELOG.html`) und sind damit **älter** als die vier
+  Dokumente dieses Nachziehens; vor einem Commit muss `python tools/seite.py` erneut laufen.
+- Die Testzahl **620** stammt aus dem Lauf (`tests/run.js` führt jeden `pruefe`-Aufruf aus, auch in
+  Schleifen); statisch gezählt hat der Chronist **613** `pruefe(`-Stellen in 70 Testdateien. Die Differenz
+  erklärt sich durch Tests, die in Schleifen erzeugt werden — **nicht aufgeklärt**, wie viele es genau sind.
+
+---
+
 ## 1.2.4
 
 **Hilfestellung — Hilfe dahin, wo der Azubi steht.** Ein Azubi kann die Syntaxen nicht kennen und hat im

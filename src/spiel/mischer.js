@@ -4,7 +4,15 @@
    Angebote: zuerst neue Form UND neuer Kunde, dann neue Form, dann neuer Kunde. Formen, die lange nicht dran waren, wiegen
    mehr. Waren die letzten zwei Abschlüsse dieselbe Form, ist sie gesperrt: nie dieselbe Form mehr als zweimal in Folge.
    Liegt kein Story-Auftrag im Postfach, ist der nächste (nach Reihe, nicht gesperrt) immer dabei – die Geschichte stockt nie.
-   Spiel.mischer.waehlen ist rein (kein Ticketbau) – so lässt sich die Vielfalt an tausend Postfächern prüfen. */
+   Spiel.mischer.waehlen ist rein (kein Ticketbau) – so lässt sich die Vielfalt an tausend Postfächern prüfen.
+
+   DOPPELTER INHALT IM POSTFACH (task-16, nachgemessen und behoben). Für ein generiertes Angebot ist
+   (Form, Kunde) der Inhalt; die Zahlen darin sind ohnehin neu (Spiel.neuerSeed). Vorher stand die
+   Dopplung nur als Vorliebe in den drei Stufen – bei kleinem Topf nahm die vierte Stufe („irgendetwas“)
+   ein Angebot, das schon offen lag. Gemessen über den echten Weg (Spiel.postfachAuffuellen, 4
+   Karriere-Stufen × 10 Verläufe, je 30 Runden): vorher 21 von 1200 Auffüll-Runden mit doppeltem Inhalt,
+   nachher 0. Die harte Sperre unten gilt nur für generierte Kandidaten; Story-Aufträge sind über ihre
+   ticketId schon ausgeschlossen und dürfen die Geschichte nicht verstopfen. */
 Spiel.mischer = {};
 Spiel.mischer.gesperrt = verlauf => { const n = (verlauf || []).length; return n >= 2 && verlauf[n - 1] === verlauf[n - 2] ? verlauf[n - 1] : null; };
 
@@ -13,7 +21,13 @@ Spiel.mischer.waehlen = function({kandidaten, offen = [], verlauf = [], n = 1, z
   const seit = form => { const i = verlauf.lastIndexOf(form); return i < 0 ? verlauf.length + 3 : verlauf.length - 1 - i; };
   const gewicht = k => (k.gewicht || 1) * (1 + Math.min(6, seit(k.form)));
   const gewaehlt = [];
-  let pool = (kandidaten || []).filter(k => k.form !== sperre);
+  /* Harte Sperre gegen doppelten Inhalt: (Form, Kunde) liegt schon im Postfach → nicht in den Topf.
+     Der Null-Trenner hält „a“ + „bc“ und „ab“ + „c“ auseinander; fehlt Form oder Kunde, greift die
+     Sperre nicht (dann ist der Inhalt nicht bestimmbar). */
+  const inhalt = k => (k && k.form != null && k.kunde != null) ? k.form + "\u0000" + k.kunde : null;
+  const offenInhalt = new Set(offen.map(inhalt).filter(Boolean));
+  const doppelt = k => !!k.gen && offenInhalt.has(inhalt(k));
+  let pool = (kandidaten || []).filter(k => k.form !== sperre && !doppelt(k));
   if (n > 0 && !offen.some(o => o.story)) {
     const story = pool.filter(k => k.story).sort((a, b) => a.rang - b.rang)[0];
     if (story) { gewaehlt.push(story); pool = pool.filter(x => x.schluessel !== story.schluessel); }
