@@ -174,6 +174,7 @@ UI.spiel = (() => {
       inhalt = h("div", {class: "am-brief"},
         h("div", {class: "am-absender"}, h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
           h("span", {}, h("b", {}, ap.name || k.name), ap.rolle ? `, ${ap.rolle}` : "", ` · ${k.name}`)),
+        klassenraumZeile(),
         h("div", {class: "am-text"}, absaetze(sichtbar)),
         kurz ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { m.mehr = true; UI.labor.auftragNeu(); }}, "mehr lesen") : null,
         def.symptom ? h("p", {class: "am-symptom"}, h("b", {}, "Symptom: "), def.symptom) : null,
