@@ -5,8 +5,65 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
 [`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, **`v2.0.2`** (über die GitHub-API gemessen am 09.10.2026).
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, `v2.0.2` (über die GitHub-API gemessen am 09.10.2026); **`v2.0.3` folgt**.
 
+---
+
+## 2.0.3 — Der Hilfecode (09.10.2026)
+
+**Warum diese Fassung.** Der letzte offene Punkt aus **Säule 5** des
+[Konzepts 3.0](<entwicklung/Konzept – 3.0.md>) war die Rückmeldung „**wer hängt wo**" — **ohne** Bewertung.
+2.0.3 baut den Weg **A**: einen Hilfecode, der ohne Server, ohne Konto und ohne Netz auskommt.
+**`v2.0.0`, `v2.0.1` und `v2.0.2` bleiben unverändert stehen** (kein `--force`).
+
+### Neu
+
+- **Hilfecode `H-XXXX-XX`** — **9 Zeichen**: 4 Nutzzeichen + 2 Prüfzeichen, **20 Nutzbit** für
+  `sitzung · platz · schritt · offen`. `Spiel.klassenraum.hilfeCode(inst)` (`src/spiel/klassenraum.js:260`)
+  und `hilfeLesen(code)` (`:282`), Vertrag in [`Architektur.md`](Architektur.md) § 12.4.
+  **Kein Personenbezug, keine Bewertung:** am Eingangsobjekt gesetzte `name`-, `note`-, `rang`- und
+  `punkte`-Felder ändern den Code **nicht**. Ein Auftrag ohne Ziele bekommt eine ehrliche Absage statt eines
+  Codes, ein Auftrag mit mehr als 31 Zielen wird als `fassung`-Fehler abgewiesen (`:270`, `:274`).
+- **Ein Knopf in der Auftragsmappe des Labors: „Ich hänge".** Er **zeigt den Hilfecode im Knopf** und kopiert
+  ihn beim Klick (`src/ui/klassenraum.js:389-400`); ohne offenen Auftrag sagt er ehrlich ab. Er sitzt
+  **nicht** in der Azubi-Ansicht „Auftrag" — die bleibt bei **3** Bedienelementen (siehe „Fehler auf dem Weg").
+- **Die Lehrkraft liest den Code in ihrer bestehenden Block-Ausgabe** als Klartext: „Platz 7 hängt: 0 von 3
+  Zielen erfüllt" — **kein neues Feld, kein neues Bedienelement**.
+
+### Prüfstand
+
+| Prüfung | Ergebnis |
+|---|---|
+| `node tests/run.js` | **761/761 grün**, 85 Testdateien, 92 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| Hilfecode-Round-Trip | **1.015.808** gültige Nutzlasten, **0** Abweichungen; **32.768/32.768** `sitzung = 0` → `{fehler:"fassung"}`; **86/86** Tippfehler erkannt (Lead) |
+| `name` · `note` · `rang` · `punkte` am Eingangsobjekt | ändern den Code **nicht** (Lead) |
+| Fassung | **2.0.3** in `web/index.html`, `docs/index.html`, `Netzwerk-Labor.html`, `android/bau/assets/index.html` (selbst geprüft) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.887.206 B**, SHA256 `07752AF4220453A327FED13D9CCE39861BD97D6A5AA0FE0B33DCEA4CB711E99B`, byte-gleich, **0 Außenverweise** (selbst gemessen) |
+| Rauchtest · R12 im echten Browser | **45/45** · `Klasse` **6/6**, `Auftrag` **3/3**, drei Breiten, vier Gegenproben (Lead) |
+| `tools/klassen.py` · `tools/ethos.py` · `node tools/sim-stand.js` | **0** · **GRUEN** · Simulation **unverändert** (Lead) |
+| Online (GitHub-API, selbst gemessen) | Tags bis **`v2.0.2`**; **`v2.0.3` ist noch nicht getaggt**, und die Live-Seite liefert noch den **2.0.2**-Bau (2.874.964 B, `E913A613…`) |
+
+### Fehler auf dem Weg (ehrlich)
+
+- **Zwei Fehler im eigenen Vertrag**, gefunden von `klassenraum-karriere` und in
+  [`Architektur.md`](Architektur.md) § 12.4 als **Korrekturen der Leitung** stehen gelassen: die Bit-Rechnung
+  nannte „30 Bit / reserviert 10" statt **20 Bit**, und die Zeichenlänge **10 statt 9**.
+- **Eine falsche R12-Grenze.** Die Leitung hatte für die Azubi-Ansicht **6** vorgegeben — Spezifikation
+  `B § 2.2` und `R12_GRENZEN` in `tools/ethos.py` sagen **3** (selbst nachgesehen:
+  `R12_GRENZEN = {"mitarbeit": 3}`). Der Einbau stand damit bei **5 von 3 → Verstoß**. **Die Browser-Messung
+  hat es gefunden, bevor es in die Auslieferung ging**; danach ist der Knopf in die **Laboransicht**
+  umgezogen (die keine R12-Ansicht ist), und „Auftrag" ist wieder bei **3**.
+- **Fünf Anführungszeichen-Unfälle an einem Tag:** jedes Mal `SyntaxError` → `LADEFEHLER` → Exit 2, keine
+  Zahl, mehrere Minuten Stillstand. Deshalb läuft das Namenswerkzeug seit 2.0.1 als **Tor vor** dem Testlauf.
+  *Nachtrag:* der Kommentar in `tools/test.sh:29` sagt noch „**dreimal**" — er ist nachzuziehen.
+
+### Nicht geprüft (ehrlich)
+
+- **Der CI-Lauf für `v2.0.3` ist nicht abgewartet:** Tag und Release stehen noch aus, die Live-Seite liefert
+  noch 2.0.2.
+- **Kein Browserbild** dieser Fassung und keine echte Unterrichtsstunde; die R12-Zahlen sind im echten
+  Browser gemessen, die Klartext-Zeile der Lehrkraft ist über DOM-Attrappen belegt.
+- **Eine APK für 2.0.3 ist beim Schreiben nicht gebaut** — im Ordner `Programm/` liegt keine.
 ---
 
 ## 2.0.2 — Inhalte und Diagnose (09.10.2026)
@@ -50,7 +107,7 @@ Verschieben); `v2.0.2` ist die neue.
 | Rauchtest · `tools/klassen.py` · `tools/ethos.py` · `node tools/sim-stand.js` | **45/45** · **0** Klassen ohne CSS-Regel · **GRUEN** · Simulation **unverändert** (Lead) |
 | `tools/seite.py --pruefen` | GRÜN, **45 Dokumente** (Lead) |
 | Fassungszug | `tools/fassung-ziehen.py --neu 2.0.2 --setzen` — Trockenlauf und Lauf **0 Fehler**; **`VERSION_CODE` 20003** von Hand (Hausregel: über dem aus `versionName 2.0.2` abgeleiteten 20002) |
-| Online (über die GitHub-API gemessen) | Tags `v2.0.0`, `v2.0.1`, `v2.0.2`; Release **`v2.0.2`** vom 09.10.2026, **17:07 UTC**, mit **zwei** Anhängen (Browser-ZIP, `.html`) — die **`.exe` fehlt** in diesem Release (v2.0.0 und v2.0.1 hatten sie; der Windows-Job kann beim Messen noch gelaufen sein), die **APK fehlt** (die zwei Secrets). Die Live-Seite ist **2.874.964 B** groß, meldet **2.0.2** und ist **byte-gleich** zum lokalen Bau (selbst nachgerechnet: `E913A613…37F3`) |
+| Online (über die GitHub-API gemessen) | Tags `v2.0.0`, `v2.0.1`, `v2.0.2`; Release **`v2.0.2`** vom 09.10.2026, **17:07 UTC**, mit **drei** Anhängen (Browser-ZIP, **`.exe`**, `.html`) — bei der ersten Messung fehlte die `.exe` noch, der Windows-Job lief nach; die **APK fehlt** (die zwei Secrets). Die Live-Seite ist **2.874.964 B** groß, meldet **2.0.2** und ist **byte-gleich** zum lokalen Bau (selbst nachgerechnet: `E913A613…37F3`) |
 
 ### Nicht geprüft (ehrlich)
 

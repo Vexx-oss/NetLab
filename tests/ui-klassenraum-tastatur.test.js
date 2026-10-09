@@ -235,6 +235,7 @@
     "  plaetze: () => 0, platz: () => 0, plaetzeSetzen: n => { globalThis.__ktAufrufe.plaetzeSetzen.push(n); return {ok: true}; },",
     "  platzSetzen: n => { globalThis.__ktAufrufe.platzSetzen.push(n); return {ok: true}; },",
     "  ergebnisEintragen: () => ({neu: true, platz: 1, sterne: 5}),",
+    "  hilfeCode: inst => (inst && inst.klassenraum ? 'H-4F7K-2Q' : null),",
     "};",
   ].join("\n");
 
@@ -253,7 +254,11 @@
      Die Liste bleibt als Zählung erhalten (0), damit ein künftiger Befund hier nicht still verschwindet. */
   const BEFUNDE = [];
 
-  gruppe("UI: Klassenraum mit der Tastatur" + ZUSATZ, () => {
+  /* Der Name dieser Gruppe an EINER Stelle: die Vollständigkeitsprüfung leitet daraus die Zahl der
+     registrierten Fälle ab (statt eine Zahl festzunageln, die beim nächsten Ausbau bricht). */
+  const KT_GRUPPE = "UI: Klassenraum mit der Tastatur";
+
+  gruppe(KT_GRUPPE + ZUSATZ, () => {
     /* ---------- 1 · Startseiten-Zeile: Feld, Label, Enter ---------- */
     pruefe("1 · Startseiten-Zeile: hängt sich ein, Feld ist beschriftet, Enter öffnet den Auftrag" + ZUSATZ, () => {
       if (!KANN_LADEN) return;
@@ -570,9 +575,64 @@
       GEPRUEFT.push("9 Ergebnis-Toast: Kopier-Knopf erreichbar; Maus UND Tastatur halten an; Fokus wird gerettet");
     });
 
+    /* ---------- 10 · Die Mappe: „Ich hänge" (3.0, Säule 5, Weg A) ----------
+       Der Knopf ist am 10.10.2026 aus der Ansicht „Auftrag" (Grenze 3) in die Auftragsmappe des Labors
+       umgezogen. Gebaut wird er von `UI.klassenraum.hilfeKnopf()` (klassenraum.js:397-420, exportiert
+       :509); die Mappe hängt genau diesen Bauer ein (spiel.js:205). Hier wird DERSELBE Knopf wirklich
+       gebaut und bedient — was der Mappen-Rahmen drumherum tut, steht unten als „nicht prüfbar“. */
+    pruefe("10 · Mappe: „Ich hänge“ ist ein echter Knopf, tut das Richtige und sagt ehrlich ab" + ZUSATZ, () => {
+      if (!KANN_LADEN) return;
+      const st = ktStand(["klassenraum.js"], [
+        "globalThis.__ktAufrufe = {ausCode: [], erzeugen: [], geoeffnet: [], platzSetzen: [], plaetzeSetzen: [], toasts: []};",
+        "globalThis.__ktSitzung = null;",
+        KODEC,
+        "Spiel.ticketReihe = () => [];",
+        "UI.spiel = {inst: null, oeffnen: () => {}};",
+        "UI.hub = {kopieren: t => globalThis.__ktAufrufe.kopiert = t};",
+        "UI.toast = (text, art, o) => { globalThis.__ktAufrufe.toasts.push({text: String(text), art, id: o && o.id}); return {schliessen(){}}; };",
+      ]);
+      erwarte.gleich(typeof st.UI.klassenraum.hilfeKnopf, "function", "UI.klassenraum.hilfeKnopf ist die öffentliche Fläche (klassenraum.js:509)");
+      const spielQuelle = require("fs").readFileSync(require("path").join(__dirname, "..", "src", "ui", "spiel.js"), "utf8");
+      erwarte.enthaelt(spielQuelle, "UI.klassenraum?.hilfeKnopf", "die Mappe hängt ihn ein (spiel.js:205)");
+      const k = st.UI.klassenraum.hilfeKnopf();
+      erwarte.gleich(k.tag, "button", "ein echter Knopf – per Tab erreichbar");
+      erwarte.gleich(k.attrs.type, "button", "type=button");
+      erwarte.gleich(k.attrs.tabindex, undefined, "ohne tabindex (die DOM-Reihenfolge gilt)");
+      erwarte.enthaelt(String(k.attrs["aria-label"]), "Ich hänge", "mit sprechender Beschriftung: " + k.attrs["aria-label"]);
+      erwarte.gleich(fokussierbar({ nodeType: 1, kinder: [k] }).length, 1, "und er zählt als fokussierbares Element");
+      const letzterToast = () => st.aufrufe.toasts[st.aufrufe.toasts.length - 1] || {};
+      /* (1) Ohne offenen Auftrag: ehrliche Absage, kein erfundener Code (klassenraum.js:408) */
+      k.click();
+      erwarte.gleich(letzterToast().art, "warn", "ohne Auftrag kommt eine Warnung");
+      erwarte.enthaelt(letzterToast().text, "kein Klassenraum-Auftrag offen", "mit dem ehrlichen Grund");
+      erwarte.enthaelt(String(k.textContent), "Ich hänge", "und der Knopf zeigt keinen erfundenen Code");
+      erwarte.wahr(st.aufrufe.kopiert == null, "und kopiert nichts");
+      /* (2) Mit offenem Auftrag: der echte Code steht IM Knopf und ist gleich kopiert (:415-417) */
+      st.lauf("UI.spiel.inst = {klassenraum: {sitzung: 1, platz: 3, code: 'NL-4F7K-2Q'}};", "auftrag");
+      k.click();
+      erwarte.gleich(String(k.textContent), "H-4F7K-2Q", "der Hilfecode steht im Knopf");
+      erwarte.gleich(st.aufrufe.kopiert, "H-4F7K-2Q", "und ist gleich kopiert");
+      erwarte.gleich(k.classList.contains("kl-hilfe-code"), true, "der Knopf schaltet in die Code-Schrift");
+      /* (3) Zweiter Klick kopiert denselben Code noch einmal (:406) */
+      st.aufrufe.kopiert = null;
+      k.click();
+      erwarte.gleich(st.aufrufe.kopiert, "H-4F7K-2Q", "ein zweiter Klick kopiert erneut");
+      /* (4) Fehlweg Codec: der Grund kommt durch, nichts wird erfunden (:411-412) */
+      st.lauf("Spiel.klassenraum.hilfeCode = () => ({fehler: 'x', grund: 'Kein Platz gemeldet.', hinweis: 'Sag den Platz.'});", "fehlweg");
+      st.UI.klassenraum.hilfeKnopf().click();
+      erwarte.enthaelt(letzterToast().text, "Kein Platz gemeldet.", "ein Codec-Fehler wird mit seinem Grund gemeldet");
+      erwarte.enthaelt(letzterToast().text, "Sag den Platz.", "samt Hinweis");
+      /* (5) Fehlweg API: ehrliche Absage statt leerer Anzeige (:409) */
+      st.lauf("delete Spiel.klassenraum.hilfeCode;", "ohne-api");
+      st.UI.klassenraum.hilfeKnopf().click();
+      erwarte.enthaelt(letzterToast().text, "kann diese Fassung noch nicht", "fehlt der Codec, sagt der Knopf das ehrlich");
+      GEPRUEFT.push("10 Mappe „Ich hänge“: echter Knopf, Code im Knopf + kopiert, drei ehrliche Absagen");
+    });
+
     /* ---------- Gegenprobe: der Test misst wirklich die Tasten-Hörer ---------- */
     pruefe("Gegenprobe: ohne die Hörer tun Enter und Absenden nichts — der Test misst die Hörer" + ZUSATZ, () => {
       if (!KANN_LADEN) return;
+      const vorherGezaehlt = GEPRUEFT.length;   /* abgeleitet: die Gegenprobe darf NICHTS hinzufügen */
       const st = ktStand(["klassenraum.js"], [
         "globalThis.__ktAufrufe = {ausCode: [], erzeugen: [], geoeffnet: [], platzSetzen: [], plaetzeSetzen: []};",
         "globalThis.__ktSitzung = null;",
@@ -597,13 +657,24 @@
       form.listeners.submit = [];                       /* den submit-Hörer wegnehmen */
       ktFeuer(form, "submit", {});
       erwarte.gleich(st.aufrufe.ausCode, [], "ohne Hörer öffnet auch das Absenden nichts — Fall 6 misst den Hörer");
-      erwarte.gleich(GEPRUEFT.length, 9, "die Gegenprobe zählt nicht als eigener geprüfter Punkt");
+      erwarte.gleich(GEPRUEFT.length, vorherGezaehlt, "die Gegenprobe zählt nicht als eigener geprüfter Punkt (vorher " + vorherGezaehlt + ")");
     });
 
-    /* ---------- Schluss: die Zahlen ---------- */
+    /* ---------- Schluss: die Zahlen ----------
+       KEINE festgenagelte Fallzahl: die Sollzahl wird aus den Fällen ABGELEITET, die in dieser Gruppe
+       wirklich registriert sind (Rahmen des Testlaufs: `TESTS.liste`). Ein neuer Fall erhöht die Zahl
+       damit von selbst; fällt ein Fall aus (wie am 10.10.2026 „5 · Ansicht Auftrag“ bei fünf statt drei
+       Stationen), meldet genau diese Zusicherung ihn — statt einer Konstante, die still veraltet. */
     pruefe("Vollständigkeit: geprüfte, nicht prüfbare und gemessene Befunde werden gezählt" + ZUSATZ, () => {
       if (!KANN_LADEN) return;
-      erwarte.gleich(GEPRUEFT.length, 9, "geprüfte Punkte (9 erwartet): " + GEPRUEFT.join(" · "));
+      const registriert = (typeof TESTS !== "undefined" && Array.isArray(TESTS.liste) ? TESTS.liste : [])
+        .map(t => String(t.name)).filter(n => n.indexOf(KT_GRUPPE) === 0);
+      const istRahmen = n => /Gegenprobe:/.test(n) || /Vollständigkeit:/.test(n);
+      const rahmen = registriert.filter(istRahmen), inhalt = registriert.filter(n => !istRahmen(n));
+      erwarte.wahr(inhalt.length >= 9, "inhaltliche Fälle in dieser Gruppe: " + inhalt.length + " – " + inhalt.join(" · "));
+      erwarte.gleich(rahmen.length, 2, "die zwei Rahmenfälle (Gegenprobe, Vollständigkeit): " + rahmen.length);
+      /* Der Kern: JEDER registrierte inhaltliche Fall hat sich beim Laufen auch angemeldet. */
+      erwarte.gleich(GEPRUEFT.length, inhalt.length, "jeder inhaltliche Fall hat sich angemeldet (" + inhalt.length + " registriert, " + GEPRUEFT.length + " gemeldet): " + GEPRUEFT.join(" · "));
       erwarte.gleich(NICHT_PRUEFBAR.length, 3, "nicht prüfbare Punkte (3 erwartet): " + NICHT_PRUEFBAR.map(x => x.stelle).join(" · "));
       for (const n of NICHT_PRUEFBAR) erwarte.wahr(n.grund.length > 20, "Grund benannt für " + n.stelle);
       /* Offene Befunde: KEINE. Die beiden vom 09.10.2026 sind am 10.10.2026 behoben und in Fall 9

@@ -198,7 +198,12 @@ UI.spiel = (() => {
     try { abdruck = typeof Spiel.klassenraum?.netzkennwert === "function" && inst.netz ? Spiel.klassenraum.netzkennwert(inst.netz) : null; } catch (e) { abdruck = null; }
     const teile = [h("b", {}, "🏫 Klassenraum-Auftrag"), " · ", platz >= 1 ? `Platz ${platz}` : "ohne Platz"];
     if (abdruck) teile.push(" · Netz-Abdruck ", h("b", {}, abdruck));
-    return h("p", {class: "sp-leise"}, teile);
+    /* „Ich hänge" (3.0, Säule 5, Weg A): HIER hängt der Azubi — der Knopf holt den Hilfecode,
+       zeigt ihn im Knopf und kopiert ihn beim Klick. Die Kette samt ehrlicher Absage liegt in
+       `UI.klassenraum.hilfeKnopf()` (öffentliche Fläche, dort auch geprüft); diese Datei hängt ihn
+       nur ein. Fehlt der Baustein in einer schmalen Fassung, bleibt die Zeile reiner Text. */
+    const knopf = typeof UI.klassenraum?.hilfeKnopf === "function" ? UI.klassenraum.hilfeKnopf() : null;
+    return h("p", {class: "sp-leise"}, teile, knopf ? " " : null, knopf);
   }
   function geruestTipp(def){
     const frage = S.inst && S.inst.flow === "geruest" ? (def.hilfen?.frage || [])[0] : null;

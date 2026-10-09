@@ -23,13 +23,13 @@ Läuft lokal und offline; nichts wird gesendet.
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)** (2,1 MB), Doppelklick | nur einen Browser |
-| **Zum Entpacken** | [Netzwerk-Labor-2.0.2-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner**, Anleitungen, Lizenztexte | nur einen Browser |
+| **Zum Entpacken** | [Netzwerk-Labor-2.0.3-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner**, Anleitungen, Lizenztexte | nur einen Browser |
 | **Windows-Programm** | **[Netzwerk-Labor.exe herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe)** (8,2 MB) — mit Leiste am Bildschirmrand, Tray-Symbol und globalem Tastenkürzel | Windows 10/11 |
 
-Alle Wege liefern dieselbe Fassung `2.0.2`. Die Anhänge der Release laden **direkt
+Alle Wege liefern dieselbe Fassung `2.0.3`. Die Anhänge der Release laden **direkt
 herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umweg.
 
-> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-2.0.2-Browser.zip` — das Spiel
+> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-2.0.3-Browser.zip` — das Spiel
 > als Einzeldatei, **die ganze Doku im Ordner `doku/`**, Anleitungen und Lizenztexte; kommt aus dem
 > Linux-Job und ist deshalb **ohne** `.exe` (`tools/paket.py --ohne-exe`). (2) `Netzwerk-Labor.html`
 > — dieselbe Einzeldatei einzeln, für den stabilen Download-Link. (3) `Netzwerk-Labor.exe` — das
@@ -38,7 +38,7 @@ herunter** (gemessen: `Content-Disposition: attachment`) — ein Klick, kein Umw
 > der Linux-Job hätte sonst die lokale, veraltete Datei aus `Programm/` mitverpackt (gemessen am
 > 09.10.2026: sie meldete noch `1.2.3`).
 
-> **Zur Windows-`.exe`:** Sie ist `2.0.2` und bringt Leiste, Tray und globales Tastenkürzel.
+> **Zur Windows-`.exe`:** Sie ist `2.0.3` und bringt Leiste, Tray und globales Tastenkürzel.
 > Sie **hängt seit dem 07.10.2026 automatisch an jeder Veröffentlichung** — gebaut von einem
 > Windows-Läufer in [`.github/workflows/release.yml`](.github/workflows/release.yml), damit der
 > Download-Link stabil bleibt:
@@ -294,7 +294,7 @@ Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.
 
 | Zweig / Tag | Inhalt |
 |---|---|
-| `ausbau-1.2` ← **Standardzweig** | Version 2.0.2: Ausbau 1.2 (Geräte-Fächer, Auftragsmappe, DHCP-Tiefe), Auslieferung als Einzeldatei, Lizenz PolyForm Noncommercial. **Hier spielt die Browser-Fassung.** |
+| `ausbau-1.2` ← **Standardzweig** | Version 2.0.3: Ausbau 1.2 (Geräte-Fächer, Auftragsmappe, DHCP-Tiefe), Auslieferung als Einzeldatei, Lizenz PolyForm Noncommercial. **Hier spielt die Browser-Fassung.** |
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 
@@ -316,7 +316,7 @@ Auftragstext: [`KLASSENRAUM-umsetzungsreif.md`](tools/auftraege/KLASSENRAUM-umse
 
 ## Ehrliche Grenzen
 
-- **Die Windows-`.exe` ist 2.0.2 und ihr Start ist gemessen** (07.10.2026):
+- **Die Windows-`.exe` ist 2.0.3 und ihr Start ist gemessen** (07.10.2026):
   `python tools/q-echt.py` fuhr im echten Programm durch — erster Auftrag mit echter Maus
   gelöst, 5 ★, 0 Fehler, Fernwartungs-Schild sichtbar, keine JS-Fehler. Das ist ein
   Durchlauf auf **diesem** Rechner; andere Windows-Fassungen sind nicht geprüft.

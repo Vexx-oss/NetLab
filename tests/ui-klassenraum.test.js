@@ -268,12 +268,12 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(p.rufe.filter(r => r[0] === "kopieren").map(r => r[1]), [s.code], "kopiert wird derselbe Code");
   }));
 
-  pruefe("Lehrkraft: sechs sichtbare Bedienelemente, Azubi: fünf — mehr als sechs gibt es nicht (B § 2.1/2.2, R12)", () => klKapsel(() => {
+  pruefe("Lehrkraft: sechs sichtbare Bedienelemente, Azubi: drei — mehr gibt es nicht (B § 2.1/2.2, R12)", () => klKapsel(() => {
     const p = klPruefstand();
     p.start();
     const steuer = c => klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
     erwarte.gleich(steuer(p.zeige(0)), 6, "select, Code anzeigen, Code kopieren, textarea, Eintragen, Datei…");
-    erwarte.gleich(steuer(p.zeige(1)), 5, "Auftragscode, Platz, Auftrag öffnen, Ich hänge, Hilfecode kopieren — die Grenze 6 bleibt");
+    erwarte.gleich(steuer(p.zeige(1)), 3, "Auftragscode, Platz, Auftrag öffnen — die Azubi-Ansicht hat ihre EIGENE Grenze 3 (B § 2.2)");
   }));
 
   pruefe("Ampel: 0 Ergebnisse dunkel, halb voll gelb, alles grün — Median ist der OBERERE (B § 9)", () => klKapsel(() => {
@@ -575,48 +575,39 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     schmuggel.textContent = "Anna · 2 Punkte";
     c.append(schmuggel);
     erwarte.wahr(klPersonenWoerter(c).length > 0, "der Wächter findet den Schmuggel im DOM");
-    /* Dieselbe Prüfung für die AZUBI-Ansicht — dort steht der Hilfecode. */
-    klMitHilfeApi(() => {
-      const cs = p.zeige(1);
-      const s = klSitzung("salon-terminal");
-      Spiel.klassenraum.plaetzeSetzen(20);
-      const form = klFinde(cs, "form")[0];
-      p.K._A.code.value = s.code;
-      p.K._A.platz.value = "7";
-      form.ausloesen("submit");
-      klKnopf(cs, "Ich hänge").click();
-      erwarte.passt(klText(klFinde(cs, ".kl-gross")[0]), /H-[0-9A-Z]{4}-[0-9A-Z]{2}/, "auch dort steht ein echter Hilfecode");
-      erwarte.gleich(klPersonenWoerter(cs), [], "und keinen Namen, keine Note, keinen Rang");
-    });
   }));
 
-  pruefe('Azubi: „Ich hänge" zeigt einen echten Hilfecode — ohne Auftrag sagt er ehrlich ab (3.0, Säule 5)', () => klKapsel(() => klMitHilfeApi(() => {
+  pruefe('„Ich hänge" für die Auftragsmappe: EIN Knopf zeigt den Code und kopiert ihn (3.0, Säule 5)', () => klKapsel(() => klMitHilfeApi(() => {
     const p = klPruefstand();
     p.start();
+    /* 1 · ohne offenen Klassenraum-Auftrag: ehrliche Absage, kein erfundener Code */
+    const kalt = p.K.hilfeKnopf();
+    erwarte.gleich(klText(kalt), "Ich hänge", 'der Knopf heißt „Ich hänge"');
+    kalt.click();
+    const warnungen = p.rufe.filter(r => r[0] === "toast");
+    erwarte.gleich(warnungen.length, 1, "genau eine Meldung");
+    erwarte.enthaelt(warnungen[0][1], "kein Klassenraum-Auftrag offen", "und sie sagt ehrlich, dass es nichts zu melden gibt");
+    erwarte.gleich(warnungen[0][2], "warn", "als Warnung, nicht als Erfolg");
+    erwarte.gleich(klText(kalt), "Ich hänge", "der Knopf erfindet keinen Code");
+    /* 2 · mit offenem Auftrag (echter Weg: Platzzahl, Code, Platz → öffnen) */
     const c = p.zeige(1);
-    erwarte.gleich(klFinde(c, "button").length + klFinde(c, "input").length, 5, "fünf Bedienelemente in der Azubi-Ansicht");
-    /* Ohne offenen Auftrag: ehrlich, kein leerer Code, keine erfundene Zahl. */
-    klKnopf(c, "Ich hänge").click();
-    erwarte.enthaelt(klText(c), "kein Klassenraum-Auftrag offen", "ohne Auftrag sagt der Knopf, dass es nichts zu melden gibt");
-    erwarte.falsch(/H-[0-9A-Z]{4}-[0-9A-Z]{2}/.test(klText(c)), "und es steht kein Hilfecode da");
-    /* Mit offenem Auftrag — über den echten Weg (Platzzahl, Code, Platz → „Auftrag öffnen"). */
     const s = klSitzung("salon-terminal");
     Spiel.klassenraum.plaetzeSetzen(20);
     const form = klFinde(c, "form")[0];
     p.K._A.code.value = s.code;
     p.K._A.platz.value = "7";
     form.ausloesen("submit");
-    erwarte.gleich(p.rufe.filter(r => r[0] === "spiel-oeffnen").length, 1, "der Auftrag ist jetzt offen");
-    klKnopf(c, "Ich hänge").click();
-    const code = klFinde(c, ".kl-gross").map(x => klText(x)).find(t => /^H-/.test(t));
-    erwarte.passt(code, /^H-[0-9A-Z]{4}-[0-9A-Z]{2}$/, "der Hilfecode hat die gedruckte Form H-XXXX-XX");
-    erwarte.enthaelt(klText(klFinde(c, ".kl-gross")[0]), code, "und steht in der großen Zeile zum Ablesen");
-    /* Kopieren über den Hausweg. */
-    klKnopf(c, "Hilfecode kopieren").click();
-    erwarte.gleich(p.rufe.filter(r => r[0] === "kopieren").map(r => r[1]), [code], "der Kopierknopf kopiert genau diesen Code");
-    /* Und nochmal drücken: der Zähler darf sich ändern, der Code bleibt gültig. */
-    klKnopf(c, "Ich hänge").click();
-    erwarte.passt(klText(klFinde(c, ".kl-gross")[0]), /H-[0-9A-Z]{4}-[0-9A-Z]{2}/, "auch der zweite Aufruf liefert einen gültigen Code");
+    erwarte.gleich(p.rufe.filter(r => r[0] === "spiel-oeffnen").length, 1, "der Auftrag ist offen");
+    const k = p.K.hilfeKnopf();
+    k.click();
+    erwarte.passt(klText(k), /^H-[0-9A-Z]{4}-[0-9A-Z]{2}$/, "der Knopf ZEIGT den echten Hilfecode");
+    erwarte.gleich(p.rufe.filter(r => r[0] === "kopieren").map(r => r[1]), [klText(k)], "und kopiert ihn beim selben Klick");
+    erwarte.gleich(klPersonenWoerter(k), [], "kein Name, keine Note, kein Rang am Knopf");
+    /* 3 · zweiter Klick kopiert DENSELBEN Code noch einmal — der Zähler darf sich nicht heimlich ändern */
+    const vorher = klText(k);
+    k.click();
+    erwarte.gleich(p.rufe.filter(r => r[0] === "kopieren").map(r => r[1]), [vorher, vorher], "zweiter Klick kopiert denselben Code");
+    erwarte.gleich(klText(k), vorher, "und der Code bleibt stehen");
   })));
 
   pruefe("Lehrkraft: ein H-Code wird als Klartext gelesen und NIE als Ergebnis eingetragen (3.0, Säule 5)", () => klKapsel(() => klMitHilfeApi(() => {

@@ -1280,6 +1280,13 @@ html[data-bewegung="reduziert"] .kabel[class*="jc-"] *{animation:none}
 .kl-start-feld{padding:8px 12px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel-2); color:var(--ink); font:500 15px/1.3 var(--mono); width:200px}
 .kl-start-knopf{flex:0 0 auto}
 
+/* --- „Ich hänge" in der Auftragsmappe des Labors (3.0, Säule 5, Weg A) ---
+   EIN Knopf, der den Hilfecode selbst zeigt und beim Klick kopiert — die Hilfe kostet damit nur
+   ein Bedienelement. Doppelte Klasse, weil klassenraum.css alphabetisch VOR rahmen.css gebaut wird
+   und `.knopf.klein` sonst die Schriftgröße gewinnt. */
+.kl-hilfe{margin-left:8px; vertical-align:middle}
+.kl-hilfe.kl-hilfe-code{color:var(--accent); font-size:15px; letter-spacing:.08em; white-space:nowrap; user-select:all}
+
 /* ---- kompetenz.css ---- */
 /* Kompetenzkarte im Lernstand (E2, Hebel 11a) – Präfix kk- */
 .kk-karte{padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
@@ -2470,8 +2477,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 <div id="app" aria-live="off"></div>
 <script>
 "use strict";
-const LABOR_VERSION = "2.0.2";
-const LABOR_BAU = "334f5362";
+const LABOR_VERSION = "2.0.3";
+const LABOR_BAU = "413adf41";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -18882,6 +18889,11 @@ const KlassenraumCodec = (() => {
     keinSeed: id => `Für die Fertigkeit ${id} liefert kein Seed im Fenster (${KANON_FENSTER}) einen spielbaren Auftrag.`,
     hinweisErgebnis: "Das sieht nach einem Ergebnis-Code aus (E-…). Hier gehört der Auftragscode hin (NL-…).",
     hinweisAuftrag: "Das sieht nach einem Auftragscode aus (NL-…). Hier gehört der Ergebnis-Code hin (E-…).",
+    /* Hilfecode (§ 12.4): dieselbe Form und dieselbe Prüfsumme, andere Bedeutung der Nutzzeichen. */
+    laengeHilfe: n => `Der Hilfecode hat ${n} Zeichen – er braucht 6 (gedruckt z. B. H-XXXX-XX).`,
+    hinweisAuftragHilfe: "Das sieht nach einem Auftragscode aus (NL-…). Hier gehört der Hilfecode hin (H-…).",
+    hinweisErgebnisHilfe: "Das sieht nach einem Ergebnis-Code aus (E-…). Hier gehört der Hilfecode hin (H-…).",
+    sitzungNull: "Dieser Hilfecode trägt keine gültige Sitzung (0) – er stammt aus einer anderen Fassung.",
   };
 
   /* ---------- Normalisierung (§ 1.1) ----------
@@ -19024,6 +19036,55 @@ const KlassenraumCodec = (() => {
       code, nutzzeichen: nz, prüfzeichen: pz, C1: p.C1, C2: p.C2};
   }
 
+  /* ---------- Hilfecode `H-XXXX-XX` (§ 12.4, „wo hängt der Azubi") ----------
+     Form und Prüfsumme wie der Auftragscode: 4 Nutzzeichen + 2 Prüfzeichen, Gewichte 1..4, mod 31/32.
+     Nutzlast 20 Bit: `sitzung` 5 · `platz` 5 · `schritt` 5 (erfüllte Ziele) · `offen` 5 (offene Ziele).
+     KEIN Name, KEINE Bewertung, keine Punkte — der Code trägt vier Zahlen und sonst nichts.
+     `sitzung` 0 ist ungültig (Sitzungen sind 1..31): der Encoder gibt dort `null`, der Leser `fassung`. */
+  function hilfeBauen(felder){
+    const f = felder || {};
+    const ganz = (v, max, min) => (Number.isInteger(v) && v >= min && v <= max) ? v : null;
+    const sitzung = ganz(f.sitzung, 31, 1), platz = ganz(f.platz, 31, 0);
+    const schritt = ganz(f.schritt, 31, 0), offen = ganz(f.offen, 31, 0);
+    if (sitzung === null || platz === null || schritt === null || offen === null) return null;
+    const n = ((sitzung << 15) | (platz << 10) | (schritt << 5) | offen) >>> 0;
+    const werte = [(n >>> 15) & 31, (n >>> 10) & 31, (n >>> 5) & 31, n & 31];
+    const p = pruefsummen(werte);
+    return "H-" + werte.map(zeichen).join("") + "-" + p.z1 + p.z2;
+  }
+
+  /* Hilfecode lesen (§ 1.5): nie eine Ausnahme, leer → null, jeder Fehler → {fehler, grund}.
+     Reihenfolge wie bei den anderen Lesern: Länge → Fremdzeichen → Prüfsumme → Feldbereiche. */
+  function hilfeLesen(roh){
+    const k = entkernen(roh, "H", 6);
+    if (k === null) return null;
+    if (k.rest.length !== 6) {
+      const r = {ok: false, fehler: "länge", grund: TEXT.laengeHilfe(k.rest.length), art: "hilfe", länge: k.rest.length, erwartet: 6};
+      if (k.rest.length === 8 && k.rest.startsWith("NL")) r.hinweis = TEXT.hinweisAuftragHilfe;
+      else if (k.rest.length === 8 && k.rest.startsWith("E")) r.hinweis = TEXT.hinweisErgebnisHilfe;
+      return r;
+    }
+    const fremd = fremdzeichen(k.rest);
+    if (fremd.length) return {ok: false, fehler: "zeichen", grund: TEXT.zeichen, art: "hilfe", zeichen: fremd.join(""), fremdzeichen: fremd.join(""), länge: 6};
+
+    const nz = k.rest.slice(0, 4), pz = k.rest.slice(4, 6);
+    const werte = [...nz].map(wert);
+    const p = pruefsummen(werte);
+    if (p.z1 !== pz[0] || p.z2 !== pz[1]) {
+      const falsch = [];
+      if (p.z1 !== pz[0]) falsch.push("C1");
+      if (p.z2 !== pz[1]) falsch.push("C2");
+      return {ok: false, fehler: "prüfziffer", grund: TEXT.pruefziffer, art: "hilfe", erwartet: p.z1 + p.z2, gefunden: pz, falsch, C1: p.C1, C2: p.C2};
+    }
+
+    const n = ((werte[0] << 15) | (werte[1] << 10) | (werte[2] << 5) | werte[3]) >>> 0;
+    const sitzung = (n >>> 15) & 31, platz = (n >>> 10) & 31, schritt = (n >>> 5) & 31, offen = n & 31;
+    const code = "H-" + nz + "-" + pz;
+    if (sitzung === 0)
+      return {ok: false, fehler: "fassung", grund: TEXT.sitzungNull, art: "hilfe", code, sitzung, platz, schritt, offen};
+    return {ok: true, sitzung, platz, schritt, offen, code, nutzzeichen: nz, prüfzeichen: pz, C1: p.C1, C2: p.C2};
+  }
+
   /* ---------- Netzkennwert (§ 4.2, „Klassenraum-Abdruck") ----------
      Kanonische JSON-Abbildung (Objektschlüssel rekursiv sortiert, UTF-16-Reihenfolge → locale-frei),
      FNV-1a über UTF-16-Codeeinheiten (bewusst ohne Buffer/TextEncoder: Browser, Einzeldatei und
@@ -19117,6 +19178,7 @@ const KlassenraumCodec = (() => {
     ALPHABET, BASIS, KANON_FENSTER, TABELLE_AUFTRAEGE_LAENGE, TABELLE_SKILLS_LAENGE,
     wert, zeichen, pruefsummen, entkernen,
     auftragBauen, auftragLesen, ergebnisBauen, ergebnisLesen,
+    hilfeBauen, hilfeLesen,                  /* § 12.4: der Hilfecode H-XXXX-XX */
     abdruck, netzkennwert: abdruck,          /* § 5 nennt die API-Funktion `netzkennwert` */
     kanonSeed, tabellen,
     kanonisch, fnv1a,                        /* für Nachrechnungen (A:459: fnv1a("A") = 3289118412) */
@@ -19375,6 +19437,50 @@ Spiel.klassenraum = (() => {
     return {ok: true, sitzung: r.sitzung, platz: r.platz, sterne: r.sterne, dauerS: r.dauerS, versuche: r.versuche, code: r.code || null};
   }
 
+  /* ---------- Hilfecode (Säule 5, Architektur § 12.4): der Azubi sagt, wo er hängt ----------
+     Der Code trägt Sitzung, Platz und zwei Zählerstände – sonst nichts: kein Name, keine Bewertung,
+     keine Rangfolge. Die Lehrkraft tippt ihn in ihr BESTEHENDES Feld „Ergebnis-Codes" (kein neues
+     Bedienelement, R12 bleibt 6).
+     Die Zähler kommen aus `Spiel.zieleStatus(inst)` (ticket.js:106-111): eine Liste je Ziel mit
+     `ok = true | false | null` (null, wenn die Simulation fehlt). `schritt` = erfüllte Ziele,
+     `offen` = alles Übrige — so gilt immer `schritt + offen = gesamt`, und ein nicht beweisbares Ziel
+     zählt NICHT als geschafft. Bewusst die reine `zieleStatus`, nicht `zieleLive` (das schreibt Laufzeit). */
+  function hilfeCode(inst){
+    if (!inst || typeof inst !== "object") return {fehler: "auftrag", grund: "Kein Auftrag übergeben."};
+    const kr = inst.klassenraum;
+    if (!kr || typeof kr !== "object" || Array.isArray(kr)) return {fehler: "auftrag", grund: "Dieser Auftrag kam nicht über einen Klassenraum-Code."};
+    if (!Number.isInteger(kr.sitzung) || kr.sitzung < 1 || kr.sitzung > 31)
+      return {fehler: "sitzung", grund: `inst.klassenraum.sitzung muss 1..31 sein (ist: ${JSON.stringify(kr.sitzung)}).`};
+    const platz = Number.isInteger(kr.platz) ? kr.platz : 0;
+    if (platz < 0 || platz > 31) return {fehler: "auftrag", grund: `inst.klassenraum.platz muss 0..31 sein (ist: ${JSON.stringify(kr.platz)}).`};
+    const status = typeof Spiel.zieleStatus === "function" ? (Spiel.zieleStatus(inst) || []) : [];
+    const gesamt = status.length;
+    if (!gesamt) return {fehler: "auftrag", grund: "Zu diesem Auftrag gibt es keine Ziele – ein Hilfecode hätte nichts zu sagen."};
+    const schritt = status.filter(s => s && s.ok === true).length;
+    const offen = Math.max(0, gesamt - schritt);
+    if (schritt > 31 || offen > 31)
+      return {fehler: "fassung", grund: `Dieser Auftrag hat ${gesamt} Ziele – das 5-Bit-Feld des Hilfecodes trägt höchstens 31.`};
+    const c = C();
+    if (!c || typeof c.hilfeBauen !== "function") return OHNE_CODEC;
+    const code = c.hilfeBauen({sitzung: kr.sitzung, platz, schritt, offen});
+    if (typeof code !== "string" || !code) return {fehler: "fassung", grund: "Der Codec konnte keinen Hilfecode bauen."};
+    return code;
+  }
+
+  function hilfeLesen(eingabe){
+    const c = C();
+    if (!c || typeof c.hilfeLesen !== "function") return OHNE_CODEC;
+    let r = null;
+    try { r = c.hilfeLesen(eingabe); } catch (e) { return {fehler: "prüfziffer", grund: "Der Hilfecode ließ sich nicht lesen."}; }
+    if (r === null || r === undefined) return null;
+    if (r.ok !== true) {
+      const e = {fehler: r.fehler || "prüfziffer", grund: r.grund || "Dieser Hilfecode ist nicht gültig."};
+      if (typeof r.hinweis === "string" && r.hinweis) e.hinweis = r.hinweis;
+      return e;
+    }
+    return {ok: true, sitzung: r.sitzung, platz: r.platz, schritt: r.schritt, offen: r.offen, code: r.code};
+  }
+
   /* Idempotent: Schlüssel ist der PLATZ, der erste Eintrag gewinnt (§ 5.1, § 6.2). */
   function ergebnisEintragen(eingabe){
     const gelesen = ergebnisLesen(eingabe);
@@ -19516,7 +19622,7 @@ Spiel.klassenraum = (() => {
     return daten;
   }
 
-  return {erzeugen, ausCode, sitzung, ergebnisCode, ergebnisLesen, ergebnisEintragen,
+  return {erzeugen, ausCode, sitzung, ergebnisCode, ergebnisLesen, ergebnisEintragen, hilfeCode, hilfeLesen,
     exportieren, importieren, netzkennwert, tauglicheFertigkeiten, platz, platzSetzen, plaetze, plaetzeSetzen,
     abnehmen, tabellen};
 })();
@@ -28292,6 +28398,13 @@ UI.klassenraum = (() => {
     });
     return aus;
   }
+  /* Der HILFECODE (3.0, Säule 5, Weg A; Architektur § 12.4): gedruckt `H-XXXX-XX` — neun Zeichen
+     (`H-` + 4 Nutzzeichen + `-` + 2 Prüfzeichen). Er ist KEIN Ergebnis — er sagt, WO jemand hängt.
+     Entschieden wird am PRÄFIX, und zwar VOR dem Eintragen: `H…` geht immer den Hilfeweg
+     (ein Ergebnis-Code beginnt mit `E`, ein Auftragscode mit `NL`). So bekommt die Lehrkraft auch
+     bei einem abgeschnittenen oder verwechselten Code die Erklärung des Codec statt nur „unlesbar"
+     — und ein H-Code kann gar nicht erst in den Ergebnissatz laufen. */
+  const istHilfecode = s => /^H/i.test(String(s == null ? "" : s).trim());
   /* Die Ampel (B § 9): fertig = belegte Plätze, offen = plaetze − fertig, Median = OBERER Median
      der gültigen Dauern > 0, auf ganze Sekunden. Ohne eingestellte Platzzahl bleibt sie gelb und
      sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3).
@@ -28463,8 +28576,27 @@ UI.klassenraum = (() => {
     const stuecke = zerlegen(L.codes.value);
     if (!stuecke.length) return;
     const zeilen = [], gesehen = new Map();
-    let neu = 0, doppelt = 0, fremd = 0, unlesbar = 0;
+    let neu = 0, doppelt = 0, fremd = 0, unlesbar = 0, hilfen = 0;
     for (const {zeile, stueck} of stuecke){
+      /* Ein H-Code ist KEIN Ergebnis (3.0, Säule 5): er sagt, WO jemand hängt, und wird als
+         Klartext gelesen — NIE eingetragen. Diese Verzweigung steht deshalb VOR dem Eintragen;
+         so kann ein Hilfecode gar nicht erst im Ergebnissatz landen. Nur Platz und Zähler,
+         kein Name, keine Note, kein Rang. */
+      if (istHilfecode(stueck)){
+        const h = kann("hilfeLesen") ? ruf("hilfeLesen", stueck) : null;
+        if (!h || h.fehler || h.ok === false){
+          unlesbar++;
+          /* A's Erklärung wörtlich weitergeben (z. B. „Das sieht nach einem Auftragscode aus
+             (NL-…). Hier gehört der Hilfecode hin (H-…).") — die Lehrkraft soll wissen, was zu tun ist. */
+          const grund = (h && h.grund) || "Hilfecodes liest diese Fassung noch nicht.";
+          zeilen.push(`Zeile ${zeile} · ${grund}${h && h.hinweis ? " " + h.hinweis : ""}`);
+          continue;
+        }
+        const ziele = (Number(h.schritt) || 0) + (Number(h.offen) || 0);
+        hilfen++;
+        zeilen.push(`Zeile ${zeile} · Platz ${h.platz} hängt: ${Number(h.schritt) || 0} von ${ziele} Zielen erfüllt`);
+        continue;
+      }
       const r = ruf("ergebnisEintragen", stueck);
       if (!r || r.fehler){ if (r && r.fehler === "sitzung") fremd++; else unlesbar++; zeilen.push(`Zeile ${zeile} · ${(r && r.grund) || "unlesbar"}`); continue; }
       if (r.neu === false){
@@ -28480,6 +28612,7 @@ UI.klassenraum = (() => {
       zeilen.push(`Zeile ${zeile} · Platz ${r.platz} · ${sterneText(Math.round((Number(r.sterne) || 0) * 2))} · eingetragen`);
     }
     const summe = [`${neu} eingetragen`, doppelt ? `${doppelt} doppelt` : null, fremd ? `${fremd} fremde Sitzung` : null,
+      hilfen ? `${hilfen} Hilferuf${hilfen === 1 ? "" : "e"} gelesen` : null,
       unlesbar ? `${unlesbar} unlesbar` : null].filter(Boolean).join(" · ");
     L.codes.value = "";
     L.hinweis.replaceChildren(hinweisZeile("kl-hinweis", summe), ...zeilen.map(z => hinweisZeile("kl-hinweis", z)));
@@ -28599,6 +28732,42 @@ UI.klassenraum = (() => {
     return inst;
   }
 
+  /* „Ich hänge" (3.0, Säule 5, Weg A) — EIN Knopf für die Auftragsmappe des LABORS.
+     Öffentliche Fläche: `UI.klassenraum.hilfeKnopf()`; `spiel.js` hängt ihn neben die Klassenraum-
+     Zeile. Er holt den Hilfecode (`hilfeCode(inst)`), zeigt ihn IM Knopf und kopiert ihn beim
+     Klick; ein zweiter Klick kopiert denselben Code noch einmal. Warum nur EIN Bedienelement:
+     die Laboransicht ist keine R12-Ansicht, aber je weniger desto besser — und der Code steht so
+     direkt neben „Klassenraum-Auftrag · Platz 7" (dort hängt der Azubi; die Ansicht „Auftrag" hat
+     ihre eigene Grenze 3 und bleibt bei drei, B § 2.2). Ehrlich in jedem Fehlweg: kein Auftrag →
+     Absage; API fehlt → Absage; Codec-Fehler → A's `grund` (mit `hinweis`). Der Code trägt Platz
+     und Zähler — NIE einen Namen, NIE eine Note, NIE einen Rang. */
+  function hilfeKnopf(){
+    const knopf = h("button", {type: "button", class: "knopf geist klein kl-hilfe",
+      "aria-label": "Ich hänge – Hilfecode zeigen und kopieren"}, "Ich hänge");
+    let code = null;
+    const melde = (text, art) => UI.toast(text, art, {id: "kl-hilfe", dauer: art === "warn" ? 9000 : 6000});
+    const kopiere = text => {
+      const k = UI.hub?.kopieren || UI.kopieren;                 /* Hausweg; die schmale Fassung kennt nur UI.kopieren */
+      if (typeof k === "function") return void k(text, "Hilfecode kopiert – zeig ihn deiner Lehrkraft.");
+      melde("Kopieren ging nicht – schreib den Code ab: " + text, "warn");
+    };
+    knopf.addEventListener("click", () => {
+      if (code) return void kopiere(code);                       /* zweiter Klick: noch einmal kopieren */
+      const inst = UI.spiel?.inst || (typeof Spiel !== "undefined" ? Spiel.inst : null);
+      if (!inst || !inst.klassenraum) return melde("Es ist kein Klassenraum-Auftrag offen – es gibt nichts zu melden.", "warn");
+      if (!kann("hilfeCode")) return melde("Hilfecodes kann diese Fassung noch nicht – sag es deiner Lehrkraft mündlich.", "warn");
+      const r = ruf("hilfeCode", inst);
+      if (typeof r !== "string" || !r){
+        return melde(((r && r.grund) || "Es gibt gerade nichts zu melden.") + (r && r.hinweis ? " " + r.hinweis : ""), "warn");
+      }
+      code = r;
+      knopf.textContent = r;                                     /* der Code STEHT im Knopf … */
+      knopf.classList.add("kl-hilfe-code");                      /* … größer, in der Code-Schrift … */
+      kopiere(r);                                                /* … und ist gleich kopiert. */
+    });
+    return knopf;
+  }
+
   /* ---------------- Startseiten-Zeile (B § 4, Entscheidung L5: Haken auf Bus „ansicht“) ----------------
      Kein Eingriff in hub.js: die Zeile hängt sich idempotent in die vorhandene `.hb-seite`. Sie
      verschwindet mit jedem Neuaufbau des Hubs (hub.js:63 `replaceChildren`) von selbst und wird
@@ -28686,7 +28855,7 @@ UI.klassenraum = (() => {
   });
 
   return {ampel, zerlegen, dauerText, sterneText, oeffnen, startZeile, startEinhaengen, ergebnisToast,
-    lehrerZeigen, lehrerWieder, schuelerZeigen, schuelerWieder, abschnitt, abdruck, _L: L, _A: A};
+    lehrerZeigen, lehrerWieder, schuelerZeigen, schuelerWieder, abschnitt, abdruck, hilfeKnopf, _L: L, _A: A};
 })();
 
 /* ---- ui/konsole.js ---- */
@@ -30770,7 +30939,12 @@ UI.spiel = (() => {
     try { abdruck = typeof Spiel.klassenraum?.netzkennwert === "function" && inst.netz ? Spiel.klassenraum.netzkennwert(inst.netz) : null; } catch (e) { abdruck = null; }
     const teile = [h("b", {}, "🏫 Klassenraum-Auftrag"), " · ", platz >= 1 ? `Platz ${platz}` : "ohne Platz"];
     if (abdruck) teile.push(" · Netz-Abdruck ", h("b", {}, abdruck));
-    return h("p", {class: "sp-leise"}, teile);
+    /* „Ich hänge" (3.0, Säule 5, Weg A): HIER hängt der Azubi — der Knopf holt den Hilfecode,
+       zeigt ihn im Knopf und kopiert ihn beim Klick. Die Kette samt ehrlicher Absage liegt in
+       `UI.klassenraum.hilfeKnopf()` (öffentliche Fläche, dort auch geprüft); diese Datei hängt ihn
+       nur ein. Fehlt der Baustein in einer schmalen Fassung, bleibt die Zeile reiner Text. */
+    const knopf = typeof UI.klassenraum?.hilfeKnopf === "function" ? UI.klassenraum.hilfeKnopf() : null;
+    return h("p", {class: "sp-leise"}, teile, knopf ? " " : null, knopf);
   }
   function geruestTipp(def){
     const frage = S.inst && S.inst.flow === "geruest" ? (def.hilfen?.frage || [])[0] : null;

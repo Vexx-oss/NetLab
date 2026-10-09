@@ -61,3 +61,10 @@
 .kl-start-etikett{color:var(--muted); font-size:12px}
 .kl-start-feld{padding:8px 12px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel-2); color:var(--ink); font:500 15px/1.3 var(--mono); width:200px}
 .kl-start-knopf{flex:0 0 auto}
+
+/* --- „Ich hänge" in der Auftragsmappe des Labors (3.0, Säule 5, Weg A) ---
+   EIN Knopf, der den Hilfecode selbst zeigt und beim Klick kopiert — die Hilfe kostet damit nur
+   ein Bedienelement. Doppelte Klasse, weil klassenraum.css alphabetisch VOR rahmen.css gebaut wird
+   und `.knopf.klein` sonst die Schriftgröße gewinnt. */
+.kl-hilfe{margin-left:8px; vertical-align:middle}
+.kl-hilfe.kl-hilfe-code{color:var(--accent); font-size:15px; letter-spacing:.08em; white-space:nowrap; user-select:all}

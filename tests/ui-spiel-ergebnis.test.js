@@ -194,6 +194,12 @@ function uesWelt(){
   UI.kopieren = text => { kopiert.push(text); return vmZusage(zustand.kopierOk); };
   UI.toast = (text, art, opt) => { toasts.push([text, art, opt]); };
   UI.toast.zu = () => {};
+  /* `UI.klassenraum.hilfeKnopf()` ist die öffentliche Fläche des „Ich hänge"-Knopfes (geprüft in
+     tests/ui-klassenraum.test.js, samt Klickweg und ehrlicher Absage). HIER wird nur die VERDRAHTUNG
+     geprüft: hängt spiel.js den gelieferten Knopf wirklich in die Mappe — und nur EINEN? Die Attrappe
+     gibt deshalb einen MARKIERTEN Knopf zurück, den der Test im DOM wiederfindet. */
+  UI.klassenraum = {hilfeKnopf: () => { const b = dokument.createElement("button"); b.className = "knopf kl-hilfe";
+    b.textContent = "Ich hänge"; b.setAttribute("data-attrappe", "hilfe"); return b; }};
   vm.runInContext(lies("src/ui/spiel.js"), bereich, {filename: "src/ui/spiel.js"});
   if (!UI.spiel || typeof UI.spiel !== "object") throw new Error("src/ui/spiel.js hat sich nicht als UI.spiel angemeldet");
   return {
@@ -433,10 +439,19 @@ gruppe("UI: Klassenraum-Auftrag im Labor" + UES_ZUSATZ, () => {
     erwarte.falsch(normal.text.includes("Klassenraum"), "Gegenprobe: kein Klassenraum im Brief");
     erwarte.falsch(normal.text.includes("Platz 7"), "Gegenprobe: kein Platz im Brief");
     erwarte.falsch(normal.text.includes("Netz-Abdruck"), "Gegenprobe: kein Abdruck im Brief");
-    /* (c) Reiner Text: die Zahl der fassbaren Bedienelemente in der Mappe steigt nicht. */
+    /* (c) Seit 09.10.2026 trägt die Zeile GENAU EINEN Knopf: „Ich hänge" (3.0, Säule 5, Weg A) —
+       er zeigt den Hilfecode und kopiert ihn beim Klick. Vorher war die Zeile reiner Text; die
+       Entscheidung der Leitung setzt die Hilfe in die MAPPE (dort hängt der Azubi), nicht in die
+       Ansicht „Auftrag" (die hat ihre eigene Grenze 3, B § 2.2). Die Laboransicht ist keine
+       R12-Ansicht — trotzdem bleibt es bei EINEM Bedienelement statt zweien. */
+    const hilfe = uesFinde(kl.mappe, KNOEPFE).find(k => uesText(k).includes("Ich hänge")) || null;
+    erwarte.wahr(!!hilfe, 'die Mappe des Klassenraum-Auftrags trägt den Knopf „Ich hänge"');
+    erwarte.gleich(hilfe && hilfe.getAttribute("data-attrappe"), "hilfe",
+      "und es ist GENAU der Knopf aus UI.klassenraum.hilfeKnopf() (die Verdrahtung, nicht ein Nachbau)");
+    erwarte.falsch(normal.text.includes("Ich hänge"), "Gegenprobe: der normale Auftrag hat ihn nicht");
     erwarte.wahr(normal.knoepfe > 0, `die Mappe hat Bedienelemente (${normal.knoepfe}) — sonst prüfte der Vergleich nichts`);
     console.log(`MESSUNG Mappe im Labor: Bedienelemente normal=${normal.knoepfe} · Klassenraum=${kl.knoepfe} · Brieftext ${normal.text.length}→${kl.text.length} Zeichen · Abdruck ${abdruck}`);
-    erwarte.gleich(kl.knoepfe, normal.knoepfe,
-      `Bedienelemente in der Mappe: Klassenraum ${kl.knoepfe}, normal ${normal.knoepfe} — die Zeile fügt keinen Knopf hinzu`);
+    erwarte.gleich(kl.knoepfe, normal.knoepfe + 1,
+      `Bedienelemente in der Mappe: Klassenraum ${kl.knoepfe}, normal ${normal.knoepfe} — GENAU der eine Hilfeknopf kommt dazu`);
   }));
 });

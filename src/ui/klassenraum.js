@@ -328,13 +328,6 @@ UI.klassenraum = (() => {
       placeholder: "0"});
     A.hinweis = hinweisZeile("kl-hinweis", "Kein Auftrag offen – tippe den Code ein, den deine Lehrkraft ansagt.");
     A.abdruck = h("span", {class: "kl-code"}, ABDRUCK_LEER);
-    /* „Ich hänge" (3.0, Säule 5, Weg A): der Azubi sagt, WO er hängt — als Hilfecode `H-XXXX-XX`,
-       den er abliest und die Lehrkraft in ihr BESTEHENDES Feld „Ergebnis-Codes" tippt. Kein Server,
-       keine Bewertung: der Code trägt Platz und Zähler, keinen Namen. Die Anzeige ist Text
-       (`kl-code` in `kl-gross`, dieselbe große Zeile wie der Auftragscode der Lehrkraft). */
-    A.hilfeCode = h("span", {class: "kl-code"}, ABDRUCK_LEER);
-    A.hilfeKnopf = h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: hilfeZeigen}, "Ich hänge");
-    A.hilfeKopieren = h("button", {type: "button", class: "knopf kl-knopf", onclick: hilfeKopieren}, "Hilfecode kopieren");
     const form = h("form", {class: "kl-form", onsubmit: e => { e.preventDefault(); schuelerOeffnen(); }},
       hinweisZeile("kl-etikett", "Auftragscode"), A.code,
       hinweisZeile("kl-etikett", "Platz"), A.platz,
@@ -345,11 +338,7 @@ UI.klassenraum = (() => {
         form,
         h("div", {class: "kl-karte"},
           hinweisZeile("kl-etikett", "Stand"), A.hinweis,
-          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), A.abdruck),
-          h("div", {class: "kl-block"}, hinweisZeile("kl-etikett", "Wenn du nicht weiterkommst"),
-            A.hilfeKnopf, A.hilfeKopieren),
-          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Hilfecode für deine Lehrkraft"),
-            h("div", {class: "kl-gross"}, A.hilfeCode))))));
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), A.abdruck)))));
     schuelerFuellen();
   }
   function schuelerWieder(){ if (A.hinweis) schuelerFuellen(); }
@@ -397,33 +386,40 @@ UI.klassenraum = (() => {
     return inst;
   }
 
-  /* „Ich hänge" (3.0, Säule 5, Weg A). Drei ehrliche Wege, keiner erfindet etwas:
-     kein offener Auftrag → sagen, dass es nichts zu melden gibt; API fehlt → sagen, dass diese
-     Fassung es noch nicht kann; sonst → den ECHTEN Code aus `hilfeCode(inst)` zeigen.
-     Der Code trägt Sitzung, Platz und Zähler — keinen Namen, keine Note, keinen Rang. */
-  function hilfeZeigen(){
-    const inst = UI.spiel?.inst;
-    if (!inst || !inst.klassenraum) {
-      A.hilfeCode.textContent = ABDRUCK_LEER;
-      return schuelerHinweis("Es ist kein Klassenraum-Auftrag offen – es gibt nichts zu melden.", false);
-    }
-    if (!kann("hilfeCode")) {
-      A.hilfeCode.textContent = ABDRUCK_LEER;
-      return schuelerHinweis("Hilfecodes kann diese Fassung noch nicht – sag es deiner Lehrkraft mündlich.", false);
-    }
-    const r = ruf("hilfeCode", inst);
-    if (typeof r !== "string" || !r) {
-      A.hilfeCode.textContent = ABDRUCK_LEER;
-      return schuelerHinweis((r && r.grund) || "Es gibt gerade nichts zu melden.", false);
-    }
-    A.hilfeCode.textContent = r;
-    schuelerHinweis(`Zeig den Hilfecode deiner Lehrkraft – sie tippt ihn in ihr Feld „Ergebnis-Codes".`, true);
-  }
-  function hilfeKopieren(){
-    const code = String(A.hilfeCode.textContent || "").trim();
-    if (!code || code === ABDRUCK_LEER) return schuelerHinweis(`Erst „Ich hänge" drücken – dann steht der Hilfecode da.`, false);
-    if (UI.hub?.kopieren) return void UI.hub.kopieren(code, "Hilfecode kopiert – zeig ihn deiner Lehrkraft.");
-    UI.toast("Kopieren ging nicht – schreib den Code von der Anzeige ab.", "warn", {id: "kopieren", dauer: 3000});
+  /* „Ich hänge" (3.0, Säule 5, Weg A) — EIN Knopf für die Auftragsmappe des LABORS.
+     Öffentliche Fläche: `UI.klassenraum.hilfeKnopf()`; `spiel.js` hängt ihn neben die Klassenraum-
+     Zeile. Er holt den Hilfecode (`hilfeCode(inst)`), zeigt ihn IM Knopf und kopiert ihn beim
+     Klick; ein zweiter Klick kopiert denselben Code noch einmal. Warum nur EIN Bedienelement:
+     die Laboransicht ist keine R12-Ansicht, aber je weniger desto besser — und der Code steht so
+     direkt neben „Klassenraum-Auftrag · Platz 7" (dort hängt der Azubi; die Ansicht „Auftrag" hat
+     ihre eigene Grenze 3 und bleibt bei drei, B § 2.2). Ehrlich in jedem Fehlweg: kein Auftrag →
+     Absage; API fehlt → Absage; Codec-Fehler → A's `grund` (mit `hinweis`). Der Code trägt Platz
+     und Zähler — NIE einen Namen, NIE eine Note, NIE einen Rang. */
+  function hilfeKnopf(){
+    const knopf = h("button", {type: "button", class: "knopf geist klein kl-hilfe",
+      "aria-label": "Ich hänge – Hilfecode zeigen und kopieren"}, "Ich hänge");
+    let code = null;
+    const melde = (text, art) => UI.toast(text, art, {id: "kl-hilfe", dauer: art === "warn" ? 9000 : 6000});
+    const kopiere = text => {
+      const k = UI.hub?.kopieren || UI.kopieren;                 /* Hausweg; die schmale Fassung kennt nur UI.kopieren */
+      if (typeof k === "function") return void k(text, "Hilfecode kopiert – zeig ihn deiner Lehrkraft.");
+      melde("Kopieren ging nicht – schreib den Code ab: " + text, "warn");
+    };
+    knopf.addEventListener("click", () => {
+      if (code) return void kopiere(code);                       /* zweiter Klick: noch einmal kopieren */
+      const inst = UI.spiel?.inst || (typeof Spiel !== "undefined" ? Spiel.inst : null);
+      if (!inst || !inst.klassenraum) return melde("Es ist kein Klassenraum-Auftrag offen – es gibt nichts zu melden.", "warn");
+      if (!kann("hilfeCode")) return melde("Hilfecodes kann diese Fassung noch nicht – sag es deiner Lehrkraft mündlich.", "warn");
+      const r = ruf("hilfeCode", inst);
+      if (typeof r !== "string" || !r){
+        return melde(((r && r.grund) || "Es gibt gerade nichts zu melden.") + (r && r.hinweis ? " " + r.hinweis : ""), "warn");
+      }
+      code = r;
+      knopf.textContent = r;                                     /* der Code STEHT im Knopf … */
+      knopf.classList.add("kl-hilfe-code");                      /* … größer, in der Code-Schrift … */
+      kopiere(r);                                                /* … und ist gleich kopiert. */
+    });
+    return knopf;
   }
 
   /* ---------------- Startseiten-Zeile (B § 4, Entscheidung L5: Haken auf Bus „ansicht“) ----------------
@@ -513,5 +509,5 @@ UI.klassenraum = (() => {
   });
 
   return {ampel, zerlegen, dauerText, sterneText, oeffnen, startZeile, startEinhaengen, ergebnisToast,
-    lehrerZeigen, lehrerWieder, schuelerZeigen, schuelerWieder, abschnitt, abdruck, _L: L, _A: A};
+    lehrerZeigen, lehrerWieder, schuelerZeigen, schuelerWieder, abschnitt, abdruck, hilfeKnopf, _L: L, _A: A};
 })();
