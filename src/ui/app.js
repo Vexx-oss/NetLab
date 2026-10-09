@@ -249,6 +249,40 @@ UI.app = (() => {
     const kasten = h("div", {class: "dialog " + klasse, role: "dialog", "aria-modal": "true", "aria-label": titel},
       h("div", {class: "dialog-kopf"}, h("h2", {}, titel), zu), h("div", {class: "dialog-inhalt"}, inhalt));
     const huelle = h("div", {class: "dialog-huelle", onpointerdown: e => { if (e.target === huelle) dialogZu(); }}, kasten);
+    /* Ziehen am KOPF (Nutzerbefund: der Auftragsdialog stand starr in der Mitte und verdeckte genau
+       die Fläche, die man beim Lesen sehen will). Pointer-Events — Maus, Finger und Stift gleich;
+       NICHT am Inhalt, sonst könnte man Text nicht mehr markieren. Geklemmt, damit kein Dialog aus
+       dem sichtbaren Bereich geschoben werden kann, und ohne gemerkte Lage: jeder Dialog startet
+       wieder mittig (deterministisch), weil hier jedes Mal ein frischer Kasten entsteht.
+       `transform` statt `left/top`: kein Layout-Sprung, die Hülle bleibt die Zentrierung. */
+    const kopf = kasten.querySelector(".dialog-kopf");
+    if (kopf) kopf.addEventListener("pointerdown", e => {
+      if (e.target.closest && e.target.closest("button")) return;      /* der Schließen-Knopf bleibt ein Knopf */
+      if (typeof e.clientX !== "number" || !kasten.getBoundingClientRect) return;
+      e.preventDefault();                                             /* keine Textauswahl beim Ziehen */
+      const start = {x: e.clientX, y: e.clientY};
+      const basis = kasten.getBoundingClientRect();                   /* die zentrierte Grundlage */
+      const rand = 12, vw = () => (typeof innerWidth === "number" ? innerWidth : 0), vh = () => (typeof innerHeight === "number" ? innerHeight : 0);
+      const grenzen = () => ({minX: rand - basis.left, maxX: vw() - rand - basis.right,
+                              minY: rand - basis.top, maxY: vh() - rand - basis.bottom});
+      const bewegen = ev => {
+        const b = grenzen();
+        const dx = Math.max(b.minX, Math.min(b.maxX, ev.clientX - start.x));
+        const dy = Math.max(b.minY, Math.min(b.maxY, ev.clientY - start.y));
+        kasten.style.transform = `translate(${Math.round(dx)}px, ${Math.round(dy)}px)`;
+      };
+      const loslassen = () => {
+        kopf.removeEventListener("pointermove", bewegen);
+        kopf.removeEventListener("pointerup", loslassen);
+        kopf.removeEventListener("pointercancel", loslassen);
+        kopf.classList.remove("zieht");
+      };
+      kopf.setPointerCapture?.(e.pointerId);
+      kopf.classList.add("zieht");
+      kopf.addEventListener("pointermove", bewegen);
+      kopf.addEventListener("pointerup", loslassen);
+      kopf.addEventListener("pointercancel", loslassen);
+    });
     huelle.addEventListener("keydown", e => {
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); dialogZu(); }
       if (e.key === "Tab") {         /* Fokus im Dialog halten */

@@ -159,7 +159,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .dialog{width:min(720px, 100%); max-height:calc(100vh - 48px); display:flex; flex-direction:column; border-radius:18px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
   transform:translateY(8px) scale(.99); transition:transform var(--dauer) ease}
 .dialog-huelle.da .dialog{transform:none}
-.dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line)}
+.dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line); cursor:grab; touch-action:none}
+.dialog-kopf.zieht{cursor:grabbing}
 .dialog-kopf h2{font-size:22px; font-weight:800}
 .dialog-zu{margin-left:auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
 .dialog-inhalt{overflow:auto; padding:8px 22px 22px}

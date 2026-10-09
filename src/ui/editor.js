@@ -280,28 +280,62 @@ UI.labor = (() => {
     Z.geplant = true;
     requestAnimationFrame(() => { Z.geplant = false; zeichnen(); });
   }
+  /* Ein Fehler beim Zeichnen darf NIE die Zeichnung des VORIGEN Auftrags stehen lassen. Deshalb:
+     erst leeren, dann in EINEM Schutz zeichnen. Scheitert es, ist die Fläche leer UND der Fehler steht
+     als Hinweis darauf (`.lb-hinweis`, aria-live) — statt stillschweigend der alten Topologie
+     (Befund des Nutzers: „nur die Auftragszeile oben wechselt, die Fläche nicht"). */
+  function zeichenFehler(e){
+    if (!Z.el.hinweis) return;
+    Z.zeichenFehlerAktiv = true;
+    Z.el.hinweis.textContent = "Die Fläche ließ sich nicht zeichnen: " + ((e && e.message) || e || "unbekannter Fehler") + " – bitte den Auftrag neu öffnen.";
+  }
   function zeichnen(){
     if (!Z.svg || !Z.netz || !Z.root?.isConnected) return;
     const netz = Z.netz, ebene = UI.ebenen.aktuell;
-    Z.root.dataset.ebene = ebene;
-    const eb = UI.ebenen.LISTE.find(l => l.id === ebene), et = Z.el.ansicht?.querySelector(".lb-ansicht-text");
-    if (et) et.textContent = eb ? eb.name : ebene;
-    Z.warn = new Map();
-    try { for (const w of Modell.pruefen(netz)) { if (!Z.warn.has(w.geraet)) Z.warn.set(w.geraet, []); const l = Z.warn.get(w.geraet); if (!l.includes(w.text)) l.push(w.text); } }
-    catch (e) { console.error("Modell.pruefen", e); }
-    Z.ohne = UI.ebenen.zonen(netz).ohne;
-    versatzBerechnen();
+    /* ZUERST leeren: ab hier steht keine alte Topologie mehr auf der Fläche. */
     for (const n of ["zonen", "kabel", "geraete", "karten"]) Z.s[n].replaceChildren();
     Z.gEl.clear(); Z.kEl.clear();
-    if (ebene === "ip") UI.ebenen.zeichneZonen(Z.s.zonen, netz, pos);
-    for (const k of netz.kabel) { const el = kabelGruppe(k); Z.kEl.set(k.id, el); Z.s.kabel.append(el); }
-    for (const g of Object.values(netz.geraete)) { const el = geraetGruppe(g); Z.gEl.set(g.id, el); Z.s.geraete.append(el); }
-    Z.karten = UI.ebenen.zeichneKarten(Z.s.karten, netz, pos, ebene);
-    Z.el.leer.hidden = Object.keys(netz.geraete).length > 0;
-    if (Z.hover && !netz.geraete[Z.hover]) Z.hover = null;
-    F.hoverZeichnen?.();
-    knoepfeAktualisieren();
+    try {
+      Z.root.dataset.ebene = ebene;
+      const eb = UI.ebenen.LISTE.find(l => l.id === ebene), et = Z.el.ansicht?.querySelector(".lb-ansicht-text");
+      if (et) et.textContent = eb ? eb.name : ebene;
+      Z.warn = new Map();
+      try { for (const w of Modell.pruefen(netz)) { if (!Z.warn.has(w.geraet)) Z.warn.set(w.geraet, []); const l = Z.warn.get(w.geraet); if (!l.includes(w.text)) l.push(w.text); } }
+      catch (e) { console.error("Modell.pruefen", e); }
+      Z.ohne = UI.ebenen.zonen(netz).ohne;
+      versatzBerechnen();
+      if (ebene === "ip") UI.ebenen.zeichneZonen(Z.s.zonen, netz, pos);
+      for (const k of netz.kabel) { const el = kabelGruppe(k); Z.kEl.set(k.id, el); Z.s.kabel.append(el); }
+      for (const g of Object.values(netz.geraete)) { const el = geraetGruppe(g); Z.gEl.set(g.id, el); Z.s.geraete.append(el); }
+      Z.karten = UI.ebenen.zeichneKarten(Z.s.karten, netz, pos, ebene);
+      Z.el.leer.hidden = Object.keys(netz.geraete).length > 0;
+      if (Z.hover && !netz.geraete[Z.hover]) Z.hover = null;
+      F.hoverZeichnen?.();
+      knoepfeAktualisieren();
+      if (Z.zeichenFehlerAktiv && Z.el.hinweis) { Z.el.hinweis.textContent = ""; Z.zeichenFehlerAktiv = false; }
+    } catch (e) {
+      console.error("Zeichnen", e);
+      zeichenFehler(e);
+    }
   }
+  /* Zeigt die Fläche wirklich das geladene Netz? Merkmal sind die `data-id` der gezeichneten Geräte
+     gegen `Z.netz.geraete` (Vorgabe der Leitung). */
+  function zeigtGeladenesNetz(){
+    if (!Z.svg || !Z.netz || !Z.root?.isConnected) return false;
+    const gezeichnet = new Set([...Z.s.geraete.querySelectorAll("g[data-id]")].map(g => g.getAttribute("data-id")));
+    const soll = Object.keys(Z.netz.geraete);
+    return soll.length > 0 && gezeichnet.size === soll.length && soll.every(id => gezeichnet.has(id));
+  }
+  /* Ein wieder sichtbar gewordenes Labor zieht nach: `laden()` zeichnet nicht, wenn die Ansicht gerade
+     nicht da ist (`Z.root?.isConnected`), und `zeigen()`/`wieder()` decken nur ihre eigenen Wege ab.
+     Der Haken hängt am Bus-Ereignis „ansicht" (app.js:102) — ohne Fremdeingriff in app.js. */
+  function nachziehen(){
+    if (!Z.netz || !Z.svg || !Z.root?.isConnected) return;
+    if (zeigtGeladenesNetz()) return;
+    zeichnen();
+    einpassen(false);
+  }
+  Bus.an("ansicht", name => { if (name === "labor") requestAnimationFrame(() => nachziehen()); });
   function knoepfeAktualisieren(){
     const v = Z.verlauf; if (!v || !Z.el.zurueck) return;
     const l = v.liste || [];
