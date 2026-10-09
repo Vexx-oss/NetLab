@@ -72,6 +72,11 @@ const KlassenraumCodec = (() => {
     keinSeed: id => `Für die Fertigkeit ${id} liefert kein Seed im Fenster (${KANON_FENSTER}) einen spielbaren Auftrag.`,
     hinweisErgebnis: "Das sieht nach einem Ergebnis-Code aus (E-…). Hier gehört der Auftragscode hin (NL-…).",
     hinweisAuftrag: "Das sieht nach einem Auftragscode aus (NL-…). Hier gehört der Ergebnis-Code hin (E-…).",
+    /* Hilfecode (§ 12.4): dieselbe Form und dieselbe Prüfsumme, andere Bedeutung der Nutzzeichen. */
+    laengeHilfe: n => `Der Hilfecode hat ${n} Zeichen – er braucht 6 (gedruckt z. B. H-XXXX-XX).`,
+    hinweisAuftragHilfe: "Das sieht nach einem Auftragscode aus (NL-…). Hier gehört der Hilfecode hin (H-…).",
+    hinweisErgebnisHilfe: "Das sieht nach einem Ergebnis-Code aus (E-…). Hier gehört der Hilfecode hin (H-…).",
+    sitzungNull: "Dieser Hilfecode trägt keine gültige Sitzung (0) – er stammt aus einer anderen Fassung.",
   };
 
   /* ---------- Normalisierung (§ 1.1) ----------
@@ -212,6 +217,55 @@ const KlassenraumCodec = (() => {
     return {ok: true, sitzung: (n >>> 20) & 31, platz: (n >>> 15) & 31,
       sterne: sterneHalbe / 2, sterneHalbe, versuche: (n >>> 9) & 3, dauerS: (n & 511) * 10,
       code, nutzzeichen: nz, prüfzeichen: pz, C1: p.C1, C2: p.C2};
+  }
+
+  /* ---------- Hilfecode `H-XXXX-XX` (§ 12.4, „wo hängt der Azubi") ----------
+     Form und Prüfsumme wie der Auftragscode: 4 Nutzzeichen + 2 Prüfzeichen, Gewichte 1..4, mod 31/32.
+     Nutzlast 20 Bit: `sitzung` 5 · `platz` 5 · `schritt` 5 (erfüllte Ziele) · `offen` 5 (offene Ziele).
+     KEIN Name, KEINE Bewertung, keine Punkte — der Code trägt vier Zahlen und sonst nichts.
+     `sitzung` 0 ist ungültig (Sitzungen sind 1..31): der Encoder gibt dort `null`, der Leser `fassung`. */
+  function hilfeBauen(felder){
+    const f = felder || {};
+    const ganz = (v, max, min) => (Number.isInteger(v) && v >= min && v <= max) ? v : null;
+    const sitzung = ganz(f.sitzung, 31, 1), platz = ganz(f.platz, 31, 0);
+    const schritt = ganz(f.schritt, 31, 0), offen = ganz(f.offen, 31, 0);
+    if (sitzung === null || platz === null || schritt === null || offen === null) return null;
+    const n = ((sitzung << 15) | (platz << 10) | (schritt << 5) | offen) >>> 0;
+    const werte = [(n >>> 15) & 31, (n >>> 10) & 31, (n >>> 5) & 31, n & 31];
+    const p = pruefsummen(werte);
+    return "H-" + werte.map(zeichen).join("") + "-" + p.z1 + p.z2;
+  }
+
+  /* Hilfecode lesen (§ 1.5): nie eine Ausnahme, leer → null, jeder Fehler → {fehler, grund}.
+     Reihenfolge wie bei den anderen Lesern: Länge → Fremdzeichen → Prüfsumme → Feldbereiche. */
+  function hilfeLesen(roh){
+    const k = entkernen(roh, "H", 6);
+    if (k === null) return null;
+    if (k.rest.length !== 6) {
+      const r = {ok: false, fehler: "länge", grund: TEXT.laengeHilfe(k.rest.length), art: "hilfe", länge: k.rest.length, erwartet: 6};
+      if (k.rest.length === 8 && k.rest.startsWith("NL")) r.hinweis = TEXT.hinweisAuftragHilfe;
+      else if (k.rest.length === 8 && k.rest.startsWith("E")) r.hinweis = TEXT.hinweisErgebnisHilfe;
+      return r;
+    }
+    const fremd = fremdzeichen(k.rest);
+    if (fremd.length) return {ok: false, fehler: "zeichen", grund: TEXT.zeichen, art: "hilfe", zeichen: fremd.join(""), fremdzeichen: fremd.join(""), länge: 6};
+
+    const nz = k.rest.slice(0, 4), pz = k.rest.slice(4, 6);
+    const werte = [...nz].map(wert);
+    const p = pruefsummen(werte);
+    if (p.z1 !== pz[0] || p.z2 !== pz[1]) {
+      const falsch = [];
+      if (p.z1 !== pz[0]) falsch.push("C1");
+      if (p.z2 !== pz[1]) falsch.push("C2");
+      return {ok: false, fehler: "prüfziffer", grund: TEXT.pruefziffer, art: "hilfe", erwartet: p.z1 + p.z2, gefunden: pz, falsch, C1: p.C1, C2: p.C2};
+    }
+
+    const n = ((werte[0] << 15) | (werte[1] << 10) | (werte[2] << 5) | werte[3]) >>> 0;
+    const sitzung = (n >>> 15) & 31, platz = (n >>> 10) & 31, schritt = (n >>> 5) & 31, offen = n & 31;
+    const code = "H-" + nz + "-" + pz;
+    if (sitzung === 0)
+      return {ok: false, fehler: "fassung", grund: TEXT.sitzungNull, art: "hilfe", code, sitzung, platz, schritt, offen};
+    return {ok: true, sitzung, platz, schritt, offen, code, nutzzeichen: nz, prüfzeichen: pz, C1: p.C1, C2: p.C2};
   }
 
   /* ---------- Netzkennwert (§ 4.2, „Klassenraum-Abdruck") ----------

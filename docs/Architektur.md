@@ -961,8 +961,8 @@ also entsteht **kein neues Bedienelement** und die Regel R12 bleibt bei 6.
 | Form | **`H-XXXX-XX`** — immer 10 Zeichen, wie `NL-` und `E-` |
 | Alphabet | dasselbe 32-Zeichen-Alphabet (`ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, **kein I, O, 0, 1**) |
 | Prüfzeichen | **dieselben zwei** wie bei den anderen Codes: `C1 = Σ i·v(i) mod 31`, `C2 = Σ (2i+1)·v(i) mod 32` |
-| Nutzteil | **30 Bit = 6 Zeichen × 5 Bit**: `sitzung` 5 (1..31) · `platz` 5 (0..31) · `schritt` 5 (erfüllte Ziele, 0..31) · `offen` 5 (offene Ziele, 0..31) · **reserviert 10** (muss **0** sein) |
-| Reservierte Bits | beim Lesen ≠ 0 → `{fehler:"fassung"}` — so bleibt Raum für eine spätere Fassung, ohne die Form zu brechen |
+| Nutzteil | **20 Bit = 4 Zeichen × 5 Bit**: `sitzung` 5 (1..31) · `platz` 5 (0..31) · `schritt` 5 (erfüllte Ziele, 0..31) · `offen` 5 (offene Ziele, 0..31). Dazu die **zwei Prüfzeichen** = zusammen die bekannten **6 Zeichen** (`H-XXXX-XX`). *Korrektur vom 09.10.2026:* die erste Fassung dieses Absatzes sprach von „30 Bit Nutzteil … reserviert 10" — das war ein Rechenfehler der Leitung, denn 10 Zeichen sind 6 Zeichen = 4 Nutz- + 2 Prüfzeichen. Die Form gewinnt (sie ist an allen Stellen dieselbe und passt zu `NL-`), der Round-Trip ist **2²⁰**, nicht 2³⁰ |
+| Ungültige Bitlage | **`sitzung = 0`** ist die einzige Lage, die der Encoder nie erzeugt (Sitzungen sind 1..31) → beim Lesen `{fehler:"fassung"}` mit dem Grund „…trägt keine gültige Sitzung (0) – er stammt aus einer anderen Fassung." Das ersetzt das gestrichene reservierte Feld: es ist der einzige Bitraum, den diese Form für eine spätere Fassung offenlässt, und er wird **erschöpfend** geprüft (alle 32 768 Nutzlasten mit `sitzung = 0`) |
 | Normalisierung | wie bei den anderen Codes: Großbuchstaben, alles außer `[0-9A-Z]` weg, führendes `H` nur abschneiden, wenn danach **genau 6** Zeichen bleiben |
 | Fehlerverhalten | **nie eine Ausnahme**; leer/`null` → `null`; ungültig → `{fehler, grund}` mit den wörtlichen Texten aus `A – Codec…md` § 1.5 |
 | API | `Spiel.klassenraum.hilfeCode(inst)` → `"H-XXXX-XX"` · `Spiel.klassenraum.hilfeLesen(code)` → `{ok, sitzung, platz, schritt, offen}` |

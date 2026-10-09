@@ -372,7 +372,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(klFinde(p.seite, ".kl-start").length, 1, "der Haken hängt sie wieder ein");
   }));
 
-  pruefe("„Datei…“ benutzt den Hausdialog mit Escape statt eines eigenen Overlays (B § 10, app.js:246-265)", () => klKapsel(() => {
+  pruefe('„Datei…“ benutzt den Hausdialog mit Escape statt eines eigenen Overlays (B § 10, app.js:246-265)', () => klKapsel(() => {
     const p = klPruefstand();
     p.start();
     const c = p.zeige(0);
@@ -391,7 +391,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(p.dialoge[0].zu, true, "Escape schließt den Dialog");
   }));
 
-  pruefe("Ergebnis-Code kommt über den Bus-Kanal „klassenraum“ — dezent als Toast (B § 7)", () => klKapsel(() => {
+  pruefe('Ergebnis-Code kommt über den Bus-Kanal „klassenraum“ — dezent als Toast (B § 7)', () => klKapsel(() => {
     const p = klPruefstand();
     p.start();
     const s = klSitzung("salon-terminal");
@@ -410,7 +410,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(p.rufe.filter(r => r[0] === "toast").length, 1, "ohne Code bleibt es still");
   }));
 
-  pruefe("Einstellungsabschnitt „Klassenraum“ baut Haus-DOM und schreibt die Einstellung (B § 11)", () => klKapsel(() => {
+  pruefe('Einstellungsabschnitt „Klassenraum“ baut Haus-DOM und schreibt die Einstellung (B § 11)', () => klKapsel(() => {
     const p = klPruefstand();
     p.start();
     const el = klKnoten("div");

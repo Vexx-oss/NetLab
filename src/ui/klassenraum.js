@@ -53,8 +53,10 @@ UI.klassenraum = (() => {
     return aus;
   }
   /* Der gedruckte HILFECODE (3.0, Säule 5, Weg A): `H-XXXX-XX`, zehn Zeichen, gleiche Form wie
-     `NL-XXXX-XX` und `E-XXXX-XXX`. Er ist KEIN Ergebnis — er sagt, WO jemand hängt. */
-  const istHilfecode = s => /^H-[0-9A-Z]{4}-[0-9A-Z]{2}$/i.test(String(s == null ? "" : s).trim());
+     `NL-XXXX-XX` und `E-XXXX-XXX`. Er ist KEIN Ergebnis — er sagt, WO jemand hängt.
+     Erkannt wird groß/klein und mit oder ohne Trennstriche (die Lehrkraft tippt ab, was dasteht);
+     gelesen wird trotzdem das ORIGINAL, denn die Normalisierung gehört dem Codec in A. */
+  const istHilfecode = s => /^H[0-9A-Z]{6}$/.test(String(s == null ? "" : s).trim().toUpperCase().replace(/-/g, ""));
   /* Die Ampel (B § 9): fertig = belegte Plätze, offen = plaetze − fertig, Median = OBERER Median
      der gültigen Dauern > 0, auf ganze Sekunden. Ohne eingestellte Platzzahl bleibt sie gelb und
      sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3).
