@@ -35,3 +35,10 @@ android/bau/
 android/signatur/
 Programm/**/*.apk
 Programm/**/*.idsig
+
+# Zugangsdaten und Schluesseldateien NIE ins Repositorium (auch nicht versehentlich).
+# Anlass 09.10.2026: eine vorbereitete Secret-Datei in Programm/ waere von git add -A erfasst worden.
+*SECRETS*.txt
+*secret*.txt
+*passwoerter*.txt
+*zugang*.txt
