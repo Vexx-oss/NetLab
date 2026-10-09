@@ -4,9 +4,14 @@ Diese Übersicht sammelt, was **nicht** Quelltext ist: Verträge, Pläne, Befund
 den Verlauf. Der Einstieg ins Projekt steht in [`../README.md`](../README.md), die
 Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 
-> **Nicht veröffentlicht.** Auf GitHub Pages landen nur `docs/index.html` und `docs/bilder/`
-> (so stellt es `.github/workflows/seite.yml` zusammen). Alles hier ist für Mitlesende im
-> Repositorium und wird **nicht** ausgeliefert.
+> **Seit 07.10.2026 veröffentlicht.** Bis Fassung 1.2.3 landeten auf GitHub Pages nur
+> `docs/index.html` und `docs/bilder/`. Jetzt stellt `.github/workflows/seite.yml` zusätzlich
+> die Doku als **durchsuchbare Seite** unter `/doku/` dazu: `tools/seite.py` wandelt die
+> Markdown-Dateien dieses Verzeichnisses samt `README.md` und `AGENTS.md` in HTML um
+> (`tools/md.py`, nur Python-Standardbibliothek — die CI hat keine Zusatzpakete).
+> Das Erzeugnis liegt in `docs/doku/` und ist versioniert, wie `docs/index.html` es auch ist.
+> Wer eine Notiz hinzufügt, trägt sie hier ein und lässt `python tools/seite.py --pruefen`
+> laufen; der Bau prüft, dass keine Datei fehlt und kein `[[…]]`-Verweis offen bleibt.
 
 ## Was gilt (verbindlich)
 
@@ -36,6 +41,19 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md`](<entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>) | Vertrag für die nächste Stufe: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag — **noch nicht umgesetzt** (Fassung 1.2.3). |
 | [`entwicklung/Klassenraum/`](entwicklung/Klassenraum/Liesmich.md) | Die vier Teil-Dokumente zu diesem Vertrag (A Codec/Determinismus · B Oberfläche/Ablauf · C Rust/Live/QR · D Prüfung/Abnahme) mit allen Messprotokollen. |
 | [`entwicklung/Opus-Auftrag – Netzwerk-Labor.md`](<entwicklung/Opus-Auftrag – Netzwerk-Labor.md>) | Der ursprüngliche Auftrag, aus dem das Projekt entstand. |
+
+## Entwicklung: die Hilfestellung und ihre Gegenprüfung (07.10.2026)
+
+| Datei | Wofür |
+|---|---|
+| [`entwicklung/Hilfestellung – Stufen und Schnittstellen.md`](<entwicklung/Hilfestellung – Stufen und Schnittstellen.md>) | **Der Vertrag** der Hilfestellung: vier Bildungsstufen, Hilfekonto je Ticket, Datenformen `DATEN.hilfen`/`DATEN.trainings`, Schreibrechte je Baustein, Abnahmekriterien. Gespiegelt in [`Architektur.md`](Architektur.md) § 13. |
+| [`entwicklung/Review – Lernwirkung.md`](<entwicklung/Review – Lernwirkung.md>) | Führt die Hilfe zum Lernen? Der wichtigste Bericht: zwei P1 (Vorrat ohne Zahlkraft, fehlende Lernverbuchung je Fertigkeit), und was gut ist. Mit Selbstkorrekturen des Prüfers. |
+| [`entwicklung/Review – Auffindbarkeit.md`](<entwicklung/Review – Auffindbarkeit.md>) | Findet ein Azubi die Hilfe? Gemessen an einer DOM-Attrappe: Stufenwahl hinter dem Startknopf, vier Bedeutungen von „Stufe", 1 279 Zeichen Textwand, unerreichbarer Leisten-Knopf. |
+| [`entwicklung/Review – Wartbarkeit.md`](<entwicklung/Review – Wartbarkeit.md>) | Doppelte Wahrheiten, Kopplung, defensive Rückfälle (17 „ist Baustein A da?"-Prüfungen: 11 nötig, 6 entfernbar), Testabdeckung. |
+| [`entwicklung/Review – Testqualität.md`](<entwicklung/Review – Testqualität.md>) | Die **Mutationsprobe**: künstlich eingebaute Fehler, und wie viele Tests sie fangen. Fünf Mutanten gemessen, alle erkannt; dazu die Lücke in „Wirkung vor Grün". |
+| [`entwicklung/Review – Betrieb.md`](<entwicklung/Review – Betrieb.md>) | Spielstand-Migration v:2 → v:3 in elf Punkten, Byte-Gleichheit der Erzeugnisse, und warum die Fassung gezogen werden musste. |
+| [`entwicklung/Review – Betrieb-Werkzeuge.md`](<entwicklung/Review – Betrieb-Werkzeuge.md>) | Die Prüfwerkzeuge selbst: welches misst was, und der Befund, dass der Rauchtest eine feste Ansichtsliste führte — die neue Ansicht fehlte darin. |
+| [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31/§ 32 | Der Bau der Hilfestellung und die Auslieferung 1.2.4 — inklusive dem, was bewusst **nicht** gebaut wurde. |
 
 ## Wie dieses Verzeichnis aufgeräumt wurde
 

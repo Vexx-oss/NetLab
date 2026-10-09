@@ -303,7 +303,7 @@ gruppe("Terminal-Hilfe: Vorschläge", () => {
     mitStufe("meister", () => erwarte.gleich(Spiel.hilfe.leiter({netz: n, id: "r1", modus: "priv"}).length, 0, "meister: keine Leiter"));
   });
 
-  pruefe("syntaxBruecke(): Tippfehler → Muster der richtigen Geräteart; ungefragt nur bei azubi", () => {
+  pruefe("syntaxBruecke(): Tippfehler → Muster der richtigen Geräteart; ungefragt bei azubi und azubi-plus", () => {
     const n = netzMitAdressen();
     const f = {fehler: true};
     mitStufe("azubi", () => {
@@ -324,9 +324,14 @@ gruppe("Terminal-Hilfe: Vorschläge", () => {
     mitStufe("azubi-plus", () => {
       const b = Spiel.hilfe.syntaxBruecke({netz: n, id: "pc1", modus: "host", text: "ip adresse setzen", fehler: f});
       erwarte.gleich(b.beispiel, null, "azubi-plus: knapp, ohne Beispiel");
-      erwarte.gleich(Spiel.hilfe.syntaxBruecke({netz: n, id: "pc1", modus: "host", text: "ip adresse setzen", fehler: null}), null, "azubi-plus: nur nach Fehler");
+      /* § 2 (Zeile „Tipp zu falschem Befehl") nennt „nur nach Fehler" NUR für geselle: azubi-plus sieht
+         die Brücke auch ungefragt, nur knapp (seit task-25 steht das in Spiel.STUFEN_WANN.syntaxBruecke). */
+      erwarte.wahr(Spiel.hilfe.syntaxBruecke({netz: n, id: "pc1", modus: "host", text: "ip adresse setzen", fehler: null}) !== null, "azubi-plus: auch ohne Fehler");
     });
-    mitStufe("geselle", () => erwarte.wahr(Spiel.hilfe.syntaxBruecke({netz: n, id: "r1", modus: "priv", text: "route anlegen", fehler: f}) !== null, "geselle: knapp nach Fehler"));
+    mitStufe("geselle", () => {
+      erwarte.wahr(Spiel.hilfe.syntaxBruecke({netz: n, id: "r1", modus: "priv", text: "route anlegen", fehler: f}) !== null, "geselle: knapp nach Fehler");
+      erwarte.gleich(Spiel.hilfe.syntaxBruecke({netz: n, id: "r1", modus: "priv", text: "route anlegen", fehler: null}), null, "geselle: nur nach Fehler");
+    });
     mitStufe("meister", () => erwarte.gleich(Spiel.hilfe.syntaxBruecke({netz: n, id: "r1", modus: "priv", text: "ip adress", fehler: f}), null, "meister: keine ungefragte Hilfe"));
   });
 

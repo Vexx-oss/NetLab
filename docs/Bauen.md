@@ -381,9 +381,13 @@ Lauf ab, wenn er rot wird (gemessen an `tools/test.sh`, Zeilen 29–37):
 > dagegen **vor** den Tests. Wer „ethos läuft nach klassen.py" schreibt, meint den
 > Rauchtest-Pfad.
 
-Stand 06.10.2026: **251/251 grün, 35 Testdateien, 76 Module**. Neu in dieser Runde sind
-`tests/spiel-speichern.test.js`, `spiel-vielfalt`, `spiel-wirtschaft`, `spiel-einstieg` und
-`sim-dhcp-gruende`.
+Stand 07.10.2026: **434/434 grün, 50 Testdateien, 83 Module, davon 0 übersprungen**. Neu in dieser
+Runde sind die Hilfestellung (`spiel-stufensystem`, `spiel-hilfe-lernverbuchung`, `spiel-mini-denktexte`,
+`spiel-hilfe-streifen`, `spiel-leiste-hilfe`, `spiel-training`, `ui-training`, `spiel-einstieg-stufe`,
+`spiel-fehlertexte`, `daten-trainings`, `spiel-lernstand-hilfe`) sowie die beiden Gegenprüfungen
+(`pruefung-hilfestellung`, `pruefung-wirkung`) und `doku-seite`. Die Schlusszeile meldet jetzt auch
+**„davon N übersprungen"** — ein Test ohne eine einzige Zusicherung gilt als übersprungen und nicht
+mehr stillschweigend als grün.
 
 ### `tools/ethos.py` — Minimalismus als Regelwerk
 

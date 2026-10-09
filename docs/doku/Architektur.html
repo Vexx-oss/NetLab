@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🧱 Architektur – Netzwerk-Labor · Netzwerk-Labor</title>
+<meta name="description" content="Der Vertrag zwischen den Bausteinen: Datenformen, Verhalten, Gruende, Trace-Format.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">🧱 Architektur – Netzwerk-Labor</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-grundsatze">1 · Grundsätze</a></li>
+<li><a href="#2-build-und-ordner">2 · Build und Ordner</a></li>
+<li><a href="#3-kern-kern-basis-js-kern-netz-js">3 · Kern (kern/basis.js, kern/netz.js)</a></li>
+<li><a href="#4-modell-konfiguration-ist-daten">4 · Modell (Konfiguration ist Daten)</a></li>
+<li><a href="#5-simulation-sim">5 · Simulation (Sim)</a></li>
+<li style="margin-left:16px"><a href="#5-1-aufrufe-verandern-netz-zustand-nie-die-konfig">5.1 Aufrufe (verändern netz.zustand, nie die Konfig)</a></li>
+<li style="margin-left:16px"><a href="#5-2-trace-reine-daten-die-ui-spielt-nur-ab">5.2 Trace (reine Daten, die UI spielt nur ab)</a></li>
+<li style="margin-left:16px"><a href="#5-3-grunde-codes">5.3 Gründe (Codes)</a></li>
+<li style="margin-left:16px"><a href="#5-4-laufzeit-netz-zustand-id">5.4 Laufzeit (netz.zustand[id])</a></li>
+<li><a href="#6-konsole-cli">6 · Konsole (CLI)</a></li>
+<li><a href="#7-spiel-spiel">7 · Spiel (Spiel)</a></li>
+<li style="margin-left:16px"><a href="#7-1-ticket-daten-in-daten-tickets-js-daten-tickets">7.1 Ticket (Daten in daten/tickets-*.js → DATEN.tickets)</a></li>
+<li style="margin-left:16px"><a href="#7-2-spielstand-store-labor-v-3">7.2 Spielstand (store "labor", v:3)</a></li>
+<li style="margin-left:16px"><a href="#7-3-spiel-api-auswahl">7.3 Spiel-API (Auswahl)</a></li>
+<li style="margin-left:16px"><a href="#7-4-speichern-verbindlicher-vertrag-06-10-2026">7.4 Speichern — verbindlicher Vertrag (06.10.2026)</a></li>
+<li><a href="#8-plattform">8 · Plattform</a></li>
+<li><a href="#9-oberflache-ui">9 · Oberfläche (UI)</a></li>
+<li style="margin-left:16px"><a href="#9-1-labor-seit-ausbau-1-2-phase-a-aufraumen">9.1 Labor seit Ausbau 1.2 (Phase A „Aufräumen“)</a></li>
+<li style="margin-left:16px"><a href="#9-2-welle-1-sitzung-s1-sofortgefuhl-design-spielspa-2-0">9.2 Welle 1, Sitzung S1 „Sofortgefühl“ (Design – Spielspaß 2.0)</a></li>
+<li style="margin-left:16px"><a href="#9-3-welle-1-sitzung-s2-bogen-hub-tagesratsel-fehlerdex-spieltagebuch">9.3 Welle 1, Sitzung S2 „Bogen“ (Hub, Tagesrätsel, Fehlerdex, Spieltagebuch)</a></li>
+<li style="margin-left:16px"><a href="#9-4-welle-2-phase-b-netzplan-dock-akte-verdacht">9.4 Welle 2, Phase B „Netzplan, Dock, Akte, Verdacht“</a></li>
+<li style="margin-left:16px"><a href="#9-5-welle-2-phase-c-terminal">9.5 Welle 2, Phase C „Terminal“</a></li>
+<li style="margin-left:16px"><a href="#9-6-welle-3-e1-formen-wahl-ereignisse-provisorium">9.6 Welle 3, E1 „Formen, Wahl, Ereignisse, Provisorium“</a></li>
+<li style="margin-left:16px"><a href="#9-7-welle-3-e2-kundenakte-und-kompetenzkarte">9.7 Welle 3, E2 „Kundenakte und Kompetenzkarte“</a></li>
+<li style="margin-left:16px"><a href="#9-8-auftrag-p-politur-und-bindung-design-spielspa-2-0-20-21">9.8 Auftrag P „Politur und Bindung“ (Design – Spielspaß 2.0, § 20/§ 21)</a></li>
+<li><a href="#10-dhcp-tiefe-d1-aus-plan-ausbau-1-2-md-verbindlicher-vertrag">10 · DHCP-Tiefe (D1 aus Plan – Ausbau 1.2.md) — verbindlicher Vertrag</a></li>
+<li style="margin-left:16px"><a href="#10-1-konfiguration-geraet-running-wandert-in-den-spielstand-erweitert">10.1 Konfiguration (geraet.running, wandert in den Spielstand) — ERWEITERT</a></li>
+<li style="margin-left:16px"><a href="#10-2-laufzeit-netz-zustand-id-erweitert">10.2 Laufzeit (netz.zustand[id]) — ERWEITERT</a></li>
+<li style="margin-left:16px"><a href="#10-3-verhalten-simulation">10.3 Verhalten (Simulation)</a></li>
+<li style="margin-left:16px"><a href="#10-4-neue-grunde-codes-genau-diese-funf-keine-weiteren">10.4 Neue Gründe (Codes) — genau diese fünf, keine weiteren</a></li>
+<li style="margin-left:16px"><a href="#10-5-trace-unverandert-im-format">10.5 Trace — unverändert im Format</a></li>
+<li style="margin-left:16px"><a href="#10-6-oberflache-und-konsole">10.6 Oberfläche und Konsole</a></li>
+<li style="margin-left:16px"><a href="#10-7-definition-fertig-neun-punkte-aus-phase-d">10.7 Definition „fertig" (neun Punkte aus Phase D)</a></li>
+<li style="margin-left:16px"><a href="#10-8-arbeitsteilung-schreibrechte-damit-sich-niemand-uberschreibt">10.8 Arbeitsteilung (Schreibrechte, damit sich niemand überschreibt)</a></li>
+<li style="margin-left:16px"><a href="#10-9-stand-der-umsetzung-05-10-2026-abends-nachgetragen">10.9 Stand der Umsetzung (05.10.2026, abends nachgetragen)</a></li>
+<li><a href="#11-tiefe-menuebenen-und-bau-06-10-2026-vertrag-fur-die-anpassungsschicht">11 · Tiefe Menüebenen und Bau (06.10.2026) — Vertrag für die Anpassungsschicht</a></li>
+<li style="margin-left:16px"><a href="#11-1-menuplatzierung-in-zwei-durchgangen-messen">11.1 Menüplatzierung: in zwei Durchgängen messen</a></li>
+<li style="margin-left:16px"><a href="#11-2-dock-blatt-ui-editor-js-android-mobil-mobil-css">11.2 Dock-Blatt (ui/editor.js, android/mobil/mobil.css)</a></li>
+<li style="margin-left:16px"><a href="#11-3-terminal-reiter-ui-terminal-js-stil-terminal-css">11.3 Terminal-Reiter (ui/terminal.js, stil/terminal.css)</a></li>
+<li style="margin-left:16px"><a href="#11-4-nur-eine-bildlaufleiste-je-blatt">11.4 Nur EINE Bildlaufleiste je Blatt</a></li>
+<li style="margin-left:16px"><a href="#11-5-trefferflachen-auf-fingergeraten">11.5 Trefferflächen auf Fingergeräten</a></li>
+<li style="margin-left:16px"><a href="#11-6-werkzeuge-fur-diese-schicht">11.6 Werkzeuge für diese Schicht</a></li>
+<li style="margin-left:16px"><a href="#11-7-bau">11.7 Bau</a></li>
+<li><a href="#12-klassenraum-spezifikation-07-10-2026-noch-nicht-umgesetzt">12 · Klassenraum — Spezifikation (07.10.2026, noch nicht umgesetzt)</a></li>
+<li><a href="#13-hilfestellung-stufen-und-schnittstellen-07-10-2026-verbindlicher-vertrag">13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag</a></li>
+<li style="margin-left:16px"><a href="#13-1-die-drei-achsen-nicht-verwechseln">13.1 Die drei Achsen (nicht verwechseln)</a></li>
+<li style="margin-left:16px"><a href="#13-2-neue-und-geanderte-datenformen">13.2 Neue und geänderte Datenformen</a></li>
+<li style="margin-left:16px"><a href="#13-3-verhalten-das-vertraglich-feststeht">13.3 Verhalten, das vertraglich feststeht</a></li>
+<li style="margin-left:16px"><a href="#13-4-dateien-der-umsetzung">13.4 Dateien der Umsetzung</a></li>
+<li style="margin-left:16px"><a href="#13-5-stand-der-umsetzung-07-10-2026">13.5 Stand der Umsetzung (07.10.2026)</a></li>
+</ul>
+</nav><hr>
+<p>tags: [FISI, Lernspiel, Architektur] erstellt: 2026-09-30 status: verbindlicher Vertrag zwischen den Bausteinen (Stand Bau 30.09./01.10.2026)</p>
+<hr>
+<h1 id="architektur-netzwerk-labor">🧱 Architektur – Netzwerk-Labor</h1>
+<p>⬆️ <a href="Liesmich.html">Netzwerk-Labor</a> · Spezifikation: <a href="entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html">Konzept – Netzwerk-Labor</a></p>
+<p>Diese Notiz ist der <strong>Vertrag</strong> zwischen den Bausteinen. Wer ein Modul baut, hält sich an die Namen, Datenformen und Aufrufe hier. Wer etwas ändern muss, ändert es <strong>hier zuerst</strong>.</p>
+<h2 id="1-grundsatze">1 · Grundsätze</h2>
+<ul><li><strong>Eigenes Desktop-Programm</strong> (Tauri 2). Die Spielhalle bleibt unberührt; nur <code>lernmotor.js</code> wird zur Bauzeit aus <code>../FISI-Spielhalle/src/</code> eingebunden (Konzept § 8.3).</li><li><strong>Schlichtes JavaScript</strong>, keine ES-Module, kein npm, kein Bundler. Jede Datei ist ein klassisches Skript. <code>bauen.py</code> hängt sie in fester Reihenfolge zusammen.</li><li><strong>Namensräume statt Globals-Wildwuchs.</strong> Jede Schicht hat genau ein globales Objekt, das ihre <em>erste</em> Datei anlegt, alle weiteren erweitern es:</li></ul>
+<div class="dk-tabelle"><table><thead><tr><th>Schicht</th><th>Objekt</th><th>Erste Datei</th><th>DOM?</th><th>Zeit/Zufall?</th></tr></thead><tbody><tr><td>Kern</td><td><code>IP</code>, <code>Bus</code>, <code>Zufall</code>, <code>store</code>, <code>heute</code>, <code>plusTage</code>, <code>tageZwischen</code>, <code>tief</code>, <code>esc</code></td><td><code>kern/basis.js</code>, <code>kern/netz.js</code></td><td>nein</td><td>nur <code>jetzt()</code> in basis</td></tr><tr><td>Modell</td><td><code>Modell</code></td><td><code>modell/geraete.js</code></td><td>nein</td><td>nein</td></tr><tr><td>Simulation</td><td><code>Sim</code></td><td><code>sim/engine.js</code></td><td><strong>nie</strong></td><td><strong>nie</strong> (virtuelle Zeit, Seed)</td></tr><tr><td>Konsole</td><td><code>CLI</code></td><td><code>cli/parser.js</code></td><td><strong>nie</strong></td><td><strong>nie</strong></td></tr><tr><td>Spiel</td><td><code>Spiel</code></td><td><code>spiel/zustand.js</code></td><td>nein</td><td>nur über <code>jetzt()</code></td></tr><tr><td>Daten</td><td><code>DATEN</code></td><td><code>daten/lehrtexte.js</code></td><td>nein</td><td>nein</td></tr><tr><td>Plattform</td><td><code>Plattform</code></td><td><code>plattform/plattform.js</code></td><td>ja</td><td>ja</td></tr><tr><td>Oberfläche</td><td><code>UI</code></td><td><code>ui/dom.js</code></td><td>ja</td><td>ja</td></tr><tr><td>Lernmotor</td><td><code>L</code></td><td>Spielhalle <code>lernmotor.js</code></td><td>nein</td><td>Datum</td></tr></tbody></table></div>
+<ul><li><code>sim/</code>, <code>cli/</code>, <code>modell/</code>, <code>kern/</code>, <code>spiel/</code>, <code>daten/</code> laufen <strong>headless in Node</strong> (<code>tests/run.js</code>). Deshalb: kein <code>document</code>, kein <code>window</code>, kein <code>Date.now()</code>/<code>Math.random()</code> in <code>sim/</code> und <code>cli/</code>. Spiel nutzt <code>jetzt()</code> aus basis (in Tests ersetzbar).</li><li>Deutsche Bezeichner wie in der Spielhalle. Anrede im Spiel „du“.</li></ul>
+<h2 id="2-build-und-ordner">2 · Build und Ordner</h2>
+<pre><code>Netzwerk-Labor/
+  bauen.py             → web/index.html (Einzeldatei + web/schriften/), --paket → Browser-ZIP (Nebenprodukt)
+  src/seite.html       Hülle mit /*STIL*/, /*SKRIPTE*/, &lt;!--SCHRIFTEN--&gt;
+  src/stil/*.css       Reihenfolge in bauen.py (STILE)
+  src/**/*.js          Reihenfolge in bauen.py (MODULE)
+  shell/src-tauri/     Tauri-Projekt (frontendDist = ../../web)
+  tests/               harness.js, run.js (Node), tests.html (Browser), *.test.js
+  tools/               messen.ps1, linux-bauen.sh, cdp.py (Test im echten Programm), klassen.py (Klassen ↔ CSS), rauch.py (Rauchtest der Oberfläche)
+  web/                 Build-Ausgabe</code></pre>
+<p><strong>Neue Datei?</strong> In <code>bauen.py</code> in <code>MODULE</code> (bzw. <code>STILE</code>) an der richtigen Stelle eintragen, und – falls headless-fähig – in <code>tests/run.js</code> in <code>HEADLESS</code>. Eine Datei, die nicht in <code>MODULE</code> steht, existiert für das Programm nicht.</p>
+<p>Tests: <code>sh tools/test.sh [filter]</code> (Node 24 portabel; früher WSL). Testdateien nutzen <code>pruefe(name, fn)</code> und <code>erwarte</code>-Hilfen aus <code>tests/harness.js</code>. Die Tests laden <code>ui/</code> nicht – dafür gibt es <code>sh tools/test.sh --rauch</code>: Node-Tests, <code>tools/klassen.py</code> (muss 0 melden) und <code>tools/rauch.py</code> (jede Ansicht in 1366/960/720 px in Edge headless: Hauptaktion sichtbar und anklickbar, kein waagerechter Überlauf, keine JS-Fehler; <code>--exe</code> prüft das echte Programm).</p>
+<h2 id="3-kern-kern-basis-js-kern-netz-js">3 · Kern (<code>kern/basis.js</code>, <code>kern/netz.js</code>)</h2>
+<ul><li><code>store.get(k, d)</code>, <code>store.set(k, v)</code> – synchron, Cache mit Durchschreiben (Konzept § 9.3). Schlüssel: <code>"lern"</code> (Lernmotor), <code>"labor"</code> (Spielstand), <code>"einst"</code> (Einstellungen).</li><li><code>heute()</code>, <code>plusTage(tag, n)</code>, <code>tageZwischen(a, b)</code> – wie Spielhalle (der Lernmotor braucht sie).</li><li><code>jetzt()</code> – Millisekunden; in Tests über <code>jetzt.setzen(ms)</code> steuerbar.</li><li><code>Bus.an(name, fn)</code>, <code>Bus.aus(name, fn)</code>, <code>Bus.senden(name, daten)</code>.</li><li><code>Zufall(seed)</code> → <code>{zahl(n), wahl(arr), mischen(arr), kommazahl()}</code> (deterministisch, mulberry32).</li><li><code>tief(x)</code> tiefe Kopie (JSON-sicher), <code>esc(s)</code> HTML-Escape.</li><li><code>IP</code>: <code>zuZahl(s)</code>, <code>zuText(n)</code>, <code>gueltig(s)</code>, <code>maskeGueltig(s)</code>, <code>praefix(maske)</code>, <code>maske(praefix)</code>, <code>netz(ip, maske)</code>, <code>broadcast(ip, maske)</code>, <code>gleichesNetz(a, b, maske)</code>, <code>imNetz(ip, netz, maske)</code>, <code>wildcardPasst(ip, basis, wc)</code>, <code>privat(ip)</code>, <code>apipa(ip)</code>, <code>cidr(ip, maske)</code> → <code>"192.168.1.0/24"</code>, <code>macCisco(mac)</code> → <code>"0060.2f3a.1b01"</code>, <code>macWindows(mac)</code> → <code>"00-60-2F-3A-1B-01"</code>.</li></ul>
+<h2 id="4-modell-konfiguration-ist-daten">4 · Modell (Konfiguration ist Daten)</h2>
+<p>Ein <strong>Netz</strong> ist reines JSON:</p>
+<pre><code class="sprache-js">{ v:1,
+  geraete: { [id]: Geraet },
+  kabel:   [ { id:"k1", a:{geraet:"pc1", port:"eth0"}, b:{geraet:"sw1", port:"Fa0/1"} } ],
+  zustand: { _uhr:0, [id]: Laufzeit }      // Laufzeit der Simulation (ARP, MAC-Tabellen …), siehe § 5.4
+}</code></pre>
+<p><strong>Geraet</strong></p>
+<pre><code class="sprache-js">{ id:"r1", typ:"pc"|"server"|"switch"|"router"|"firewall"|"internet"|"nas",
+  skin:null|"laptop"|"drucker"|"kasse"|"tablet",      // nur Optik bei pc
+  name:"R1", x:400, y:200, an:true,
+  hw:{ macs:{ "Gi0/0":"00:1a:2b:3c:4d:01", … } },     // je physischem Port, fest
+  running: Konfig, startup: Konfig|null,              // null = Werkszustand (kein startup-config)
+  flash: { vlans:{ "1":{name:"default"}, "10":{name:"Verwaltung"} } }   // nur switch: vlan.dat
+}</code></pre>
+<p><strong>Ports je Typ</strong> (<code>Modell.PORTS</code>): pc/server <code>["eth0"]</code> · nas <code>["eth0","eth1"]</code> · switch <code>Fa0/1…Fa0/24, Gi0/1, Gi0/2</code> · router <code>Gi0/0, Gi0/1, Gi0/2</code> · firewall <code>Gi0/0…Gi0/3</code> · internet <code>wan0…wan3</code>. Subinterfaces (<code>Gi0/0.10</code>) sind nur Konfiguration, keine Ports.</p>
+<p><strong>Konfig je Typ</strong> (Werkszustand = <code>Modell.werkszustand(typ)</code>):</p>
+<pre><code class="sprache-js">// pc, server, nas
+{ hostname:"PC1",
+  if:{ eth0:{ an:true, dhcp:false, ip:"", maske:"", gw:"", dns:"" } },
+  dienste:{ http:{an:true}, https:{an:false}, dns:{an:false, eintraege:[{name:"intranet.salon.local", ip:"192.168.1.5"}]},
+            dhcp:{an:false, pools:[{name, netz, maske, gw, dns, start, anzahl}]}, datei:{an:false}, ssh:{an:false}, druck:{an:false} } }
+// Dienst → Port: http tcp/80, https tcp/443, dns udp/53, dhcp udp/67, datei tcp/445, ssh tcp/22, druck tcp/9100 (Modell.DIENSTPORTS)
+
+// switch  (VLANs stehen in geraet.flash.vlans, NICHT in der Konfig – wie vlan.dat)
+{ hostname:"Switch", enableSecret:null, banner:"",
+  ports:{ "Fa0/1":{ modus:"access"|"trunk", accessVlan:1, trunkErlaubt:"all"|[1,10,20], nativeVlan:1, shutdown:false, beschreibung:"",
+                    portSecurity:null|{max:1, verstoss:"shutdown", macs:[]} }, … },
+  svi:{ "1":{ ip:"", maske:"", shutdown:true } },
+  defaultGateway:"" }
+
+// router
+{ hostname:"Router", enableSecret:null, banner:"",
+  if:{ "Gi0/0":{ ip:"", maske:"", shutdown:true, beschreibung:"", nat:null|"inside"|"outside", aclIn:null, aclOut:null, helper:[] },
+       "Gi0/0.10":{ vlan:10, nativ:false, ip:"", maske:"", shutdown:false, beschreibung:"", nat:null, aclIn:null, aclOut:null, helper:[] } },
+  routen:[ { netz:"10.0.2.0", maske:"255.255.255.0", nh:"10.0.1.2"|null, aus:"Gi0/1"|null, ad:1 } ],
+  acls:{ "10":{ typ:"standard", benannt:false, regeln:[Regel] }, "GAST":{ typ:"erweitert", benannt:true, regeln:[Regel] } },
+  nat:{ statisch:[{ innen:"192.168.1.10", aussen:"203.0.113.10", proto:null|"tcp"|"udp", innenPort:null, aussenPort:null }],
+        dynamisch:[{ acl:"1", aus:"Gi0/1", overload:true }] },
+  dhcp:{ ausgeschlossen:[{von:"192.168.10.1", bis:"192.168.10.9"}], pools:[{ name:"LAN", netz:"192.168.10.0", maske:"255.255.255.0", gw:"192.168.10.1", dns:"" }] } }
+
+// Regel (ACL)
+{ aktion:"permit"|"deny", proto:"ip"|"tcp"|"udp"|"icmp",
+  quelle:{ip:"192.168.1.0", wc:"0.0.0.255"}, ziel:{ip:"0.0.0.0", wc:"255.255.255.255"},   // any = 0.0.0.0/255.255.255.255, host = wc 0.0.0.0
+  zielPort:null|{op:"eq"|"neq"|"gt"|"lt"|"range", ports:[80]}, quellPort:null|{…}, icmpTyp:null|"echo"|"echo-reply" }
+// Standard-ACL: nur quelle, proto "ip". Implizites deny any am Ende.
+
+// firewall (herstellerneutral)
+{ hostname:"FW1",
+  if:{ "Gi0/0":{ ip:"", maske:"", zone:"innen"|"aussen"|"dmz"|null, shutdown:false } },
+  routen:[…wie router…],
+  regeln:[ { id:"r1", von:"innen", nach:"aussen", proto:"ip"|"tcp"|"udp"|"icmp", quelle:"any"|"192.168.1.0/24", ziel:"any"|"cidr", port:null|443, aktion:"erlauben"|"verwerfen", aktiv:true, text:"" } ],
+  nat:{ quellNat:[{von:"innen", nach:"aussen"}], weiterleitung:[{ proto:"tcp", aussenPort:443, ziel:"172.16.0.10", zielPort:443 }] } }
+// Erste passende Regel gewinnt, am Ende implizit verwerfen, zustandsbehaftet (Rückverkehr erlaubt).
+
+// internet (Kulisse, nicht konfigurierbar im Spiel)
+{ hostname:"Internet",
+  if:{ wan0:{ ip:"203.0.113.1", maske:"255.255.255.252" }, … },
+  routen:[ {netz:"203.0.113.16", maske:"255.255.255.240", nh:"203.0.113.2"} ],
+  server:[ { name:"www.beispiel.de", ip:"198.51.100.10", dienste:["http","https"] }, { name:"dns.beispiel.de", ip:"198.51.100.53", dienste:["dns"] } ] }
+// Verwirft Pakete mit privater Quelladresse (Grund NAT_MISSING).</code></pre>
+<p><strong>Modell-API</strong> (<code>modell/*.js</code>): <code>Modell.neu()</code>, <code>Modell.geraet(netz, typ, {id?, name?, x, y, skin?})</code> (legt an, vergibt MACs), <code>Modell.entfernen(netz, id)</code>, <code>Modell.ports(geraet)</code>, <code>Modell.verbinden(netz, a, b)</code> (<code>a</code>/<code>b</code> = <code>{geraet, port?}</code>; ohne Port → nächster freier passender) → Kabel oder <code>{fehler}</code>, <code>Modell.trennen(netz, kabelId)</code>, <code>Modell.kabelAn(netz, id, port)</code> → <code>{kabel, gegen:{geraet,port}}|null</code>, <code>Modell.freierPort(netz, id)</code>, <code>Modell.linkOben(netz, kabel)</code> → <code>{oben, grund}</code>, <code>Modell.konfig(geraet)</code> (= running), <code>Modell.setzen(netz, id, pfad, wert)</code> (Pfad wie <code>"if.eth0.gw"</code>), <code>Modell.speichern(geraet)</code> (running → startup), <code>Modell.neustart(netz, id)</code> (running := tief(startup) oder Werkszustand, Laufzeit leeren), <code>Modell.kopie(netz)</code>, <code>Modell.pruefen(netz)</code> → Warnungen <code>[{geraet, feld, text, code}]</code> (Live-Prüfung: „10.0.0.5/24 liegt nicht im Netz von Gateway 10.0.1.1“), <code>Modell.gleich(a, b)</code>.</p>
+<p><strong>Rückgängig</strong> (<code>modell/verlauf.js</code>): <code>Modell.verlauf(netz)</code> → <code>{aendern(beschreibung, fn), zurueck(), vor(), kannZurueck, kannVor, liste}</code>. Schnappschuss-basiert (Netz ist klein), höchstens 100 Schritte. <strong>Jede</strong> UI- und Konsolenänderung geht über <code>aendern</code>. Danach <code>Bus.senden("netz-geaendert", {netz, beschreibung})</code>.</p>
+<h2 id="5-simulation-sim">5 · Simulation (<code>Sim</code>)</h2>
+<h3 id="5-1-aufrufe-verandern-netz-zustand-nie-die-konfig">5.1 Aufrufe (verändern <code>netz.zustand</code>, nie die Konfig)</h3>
+<pre><code class="sprache-js">Sim.ping(netz, vonId, ziel, {anzahl:4, ttl:null, quelle:null})   // ziel = IP oder Gerätename (DNS)
+  → { ok, antworten:[{ok, grund|null, rtt, ttl, von}], trace, text }
+Sim.traceroute(netz, vonId, zielIp, {maxHops:30})  → { hops:[{nr, ip|null, grund|null}], ok, trace }
+Sim.tcp(netz, vonId, ziel, port)                  → { ok, grund, trace }       // Handshake SYN, SYN/ACK, ACK (+FIN)
+Sim.http(netz, vonId, url)                        → { ok, status, grund, trace } // DNS + TCP 80/443 + GET
+Sim.dns(netz, vonId, name)                        → { ok, ip, grund, trace }
+Sim.dhcp(netz, vonId, port="eth0")                → { ok, lease|null, grund, trace } // DORA; bei Fehlschlag APIPA
+Sim.adresse(netz, id, port)                       → { ip, maske, gw, dns, quelle:"statisch"|"dhcp"|"apipa"|"keine" }
+Sim.pruefeZiel(netz, ziel)                         → { ok, grund, trace, text }   // Ziel siehe § 7.1; nutzt eine Kopie
+Sim.GRUENDE[code] → { titel, skill, schicht }      // Lehrtexte in DATEN.lehrtexte[code]</code></pre>
+<p>Hosts mit <code>dhcp:true</code> und ohne gültige Lease holen sich zuerst per DHCP eine Adresse (sichtbar in derselben Trace). Scheitert das: APIPA 169.254.x.x und Grund <code>DHCP_NO_OFFER</code>.</p>
+<h3 id="5-2-trace-reine-daten-die-ui-spielt-nur-ab">5.2 Trace (reine Daten, die UI spielt nur ab)</h3>
+<pre><code class="sprache-js">Trace = { start, ende, ereignisse:[Ereignis], abbruch:null|"STORM", zusammenfassung:"…" }
+Ereignis = {
+  n:1, t:0.8,                       // laufende Nr., virtuelle Zeit in ms
+  art:"senden"|"empfangen"|"weiterleiten"|"fluten"|"verwerfen"|"antworten"|"lernen"|"info",
+  geraet:"sw1", port:"Fa0/1"|null,
+  nach:{geraet, port}|null,         // bei "senden": Gegenstelle des Kabels
+  frame: Frame,                     // Kopie, unveränderlich
+  proto:"ARP"|"ICMP"|"TCP"|"UDP"|"DHCP"|"DNS"|"HTTP",
+  grund:null|"ARP_NO_REPLY"|…,      // bei verwerfen/info
+  text:"SW1 kennt MAC 00:1a… noch nicht und flutet in VLAN 10"   // kurzer Klartext
+}
+Frame = {
+  eth:{ src, dst, typ:"ARP"|"IPv4", vlan:null|10 },            // vlan = 802.1Q-Tag (nur auf Trunk sichtbar)
+  arp:null|{ op:"request"|"reply", senderMac, senderIp, targetMac, targetIp },
+  ip:null|{ src, dst, ttl, proto:"ICMP"|"TCP"|"UDP", id },
+  icmp:null|{ typ:"echo-request"|"echo-reply"|"unreachable"|"time-exceeded", code:null|"net"|"host"|"port"|"admin", seq },
+  udp:null|{ src, dst }, tcp:null|{ src, dst, flags:["SYN","ACK"], seq, ack },
+  app:null|{ proto:"DHCP"|"DNS"|"HTTP", info:"DHCP Discover", felder:{…} }
+}</code></pre>
+<p>Ereignis-Budget je Lauf 5000; gerissen → <code>abbruch:"STORM"</code>, Grund <code>STORM</code>. Virtuelle Zeit: 1 ms je Kabel, Timeout Ping 2000 ms (IOS) bzw. 4000 ms (Windows).</p>
+<h3 id="5-3-grunde-codes">5.3 Gründe (Codes)</h3>
+<p><code>LINK_DOWN, PORT_SHUTDOWN, NO_IP, ARP_NO_REPLY, DROP_VLAN, TRUNK_NOT_ALLOWED, NATIVE_MISMATCH, NO_GATEWAY, GW_WRONG_SUBNET, GW_UNREACHABLE, WRONG_MASK, NO_ROUTE, NO_RETURN_ROUTE, TTL_EXPIRED, ACL_DENY, FW_DENY, NAT_MISSING, DUP_IP, DHCP_NO_OFFER, DHCP_POOL_EMPTY, DNS_FAIL, DNS_NO_SERVER, PORT_CLOSED, SERVICE_OFF, STORM, PORTSEC_VIOLATION, DEVICE_OFF, HOST_UNREACHABLE, TIMEOUT</code></p>
+<p><code>Sim.GRUENDE[code] = {titel, skill:"lab.*", schicht:1..7}</code>. Lehrtexte in drei Tiefen stehen in <code>DATEN.lehrtexte[code] = {E, AP1, AP2, quelle}</code> (E erklärt, AP1 knapp, AP2 nur, was das Gerät melden würde).</p>
+<h3 id="5-4-laufzeit-netz-zustand-id">5.4 Laufzeit (<code>netz.zustand[id]</code>)</h3>
+<p><code>{ arp:{ [ip]:{mac, bis} }, mac:{ [vlan]:{ [mac]:{port, bis} } }, leases:{ [ip]:{mac, bis} }, dhcp:{ [port]:{ip, maske, gw, dns, server, bis} }, nat:[…], fw:[…] }</code> plus <code>zustand._uhr</code> (virtuelle Zeit, läuft über Läufe weiter). MAC-Alterung 300 s, ARP 14400 s (Router) bzw. 120 s (Host, vereinfacht). Link down leert die MAC-Einträge dieses Ports; IP-Änderung leert den ARP-Cache des Geräts (<code>Modell.setzen</code> erledigt das).</p>
+<h2 id="6-konsole-cli">6 · Konsole (<code>CLI</code>)</h2>
+<pre><code class="sprache-js">CLI.sitzung(netz, geraetId, {verlauf?}) → Sitzung      // IOS für switch/router/firewall(Grundzüge), Windows-Terminal für pc/server/nas
+CLI.eingabe(sitzung, zeile)  → { ausgabe:"…", prompt:"R1(config-if)#", geaendert:bool, befehl:"interface gigabitEthernet0/0" }
+CLI.tab(sitzung, zeile)      → { zeile, vorschlaege:[] }
+CLI.prompt(sitzung)          → "R1#"
+CLI.runningConfig(geraet)    → Text (show running-config)
+CLI.entspricht(geraet, pfad, wert) → "interface Gi0/0\n ip address 10.0.0.1 255.255.255.0" | null   // „entspricht:“-Zeile der GUI
+CLI.anwenden(netz, geraetId, befehle) → { ok, fehler:[] }   // mehrzeiliger Block ab privilegiertem Modus, für Lösungen und Tests
+CLI.vorschlag(sitzung)       → nächster sinnvoller Befehl (Einstieg) | null</code></pre>
+<p>Änderungen der Konsole laufen über <code>Modell.setzen</code>/Verlauf (eine Quelle der Wahrheit). <code>ping</code>/<code>traceroute</code>/<code>tracert</code>/<code>nslookup</code>/<code>ipconfig /renew</code> rufen <code>Sim</code> und formatieren wie IOS bzw. Windows (<code>.!!!!</code>, „Antwort von …“).</p>
+<h2 id="7-spiel-spiel">7 · Spiel (<code>Spiel</code>)</h2>
+<h3 id="7-1-ticket-daten-in-daten-tickets-js-daten-tickets">7.1 Ticket (Daten in <code>daten/tickets-*.js</code> → <code>DATEN.tickets</code>)</h3>
+<pre><code class="sprache-js">{ id:"salon-01", art:"stoerung"|"projekt"|"wartung"|"mini", stufe:"E"|"AP1"|"AP2", karriere:1,
+  kunde:"salon", titel:"Drucker nicht erreichbar", briefing:"Hallo, …", symptom:"Kasse druckt nicht",
+  skills:["lab.gateway"],
+  netz:(z) =&gt; Netz,                  // Fabrik; z = Zufall(seed) für Varianten; liefert das GESUNDE oder Start-Netz
+  fehler:[{ injektor:"gw-falsch", auf:"pc-kasse", param:{} }],     // optional, auf das Netz angewendet
+  ziele:[ { typ:"erreichbar", von:"pc-kasse", nach:"drucker", proto:"icmp"|"tcp"|"http"|"dns", port:null, text:"Kasse erreicht Drucker" },
+          { typ:"blockiert",  von:"gast", nach:"server", proto:"tcp", port:445, text:"Gäste kommen nicht an die Dateifreigabe" },
+          { typ:"dhcp", von:"pc2", text:"PC2 bekommt per DHCP eine Adresse" },
+          { typ:"konfig", geraet:"sw1", pfad:"ports.Fa0/5.accessVlan", wert:20, text:"…" },
+          { typ:"gespeichert", geraet:"r1", text:"Konfiguration gesichert" } ],
+  hilfen:{ frage:["…"], bereich:[{geraet:"pc-kasse"}], konkret:["…"] },
+  loesung:[ { geraet:"pc-kasse", setzen:{ "if.eth0.gw":"192.168.1.1" }, text:"Gateway korrigieren" },
+            { geraet:"r1", cli:"conf t\ninterface Gi0/1\nno shutdown\nend", text:"Schnittstelle einschalten" } ],
+  erklaerung:"…", quelle:"Network – Lernfassung", lohn:{ euro:40, ruf:1 } }</code></pre>
+<p>Pflicht (Test): Jede Lösung erfüllt alle Ziele; das Start-Netz verletzt mindestens ein Ziel, und zwar mit dem erwarteten Grund.</p>
+<h3 id="7-2-spielstand-store-labor-v-3">7.2 Spielstand (<code>store "labor"</code>, <code>v:3</code>)</h3>
+<p><code>{ v, euro, ruf, stufe, kunden:{[id]:{vertrag, ampel, seit, sterne:[]}}, postfach:[TicketInstanz], aktiv:iid|null, erledigt:[{id, sterne, tag, hilfe}], playbooks:{slots, aktiv:[skill]}, tag:{…Arbeitstag…}, zuletzt:ms, einstieg:{…} }</code> (Die Liste ist ein Auszug; weitere Felder u. a. <code>naechsteIid</code>, <code>buch</code>, <code>angebot</code>, <code>dex</code>, <code>tagesraetsel</code>, <code>tagebuch</code>. Die <strong>Einstellungen</strong> liegen NICHT hier, sondern unter dem eigenen Store-Schlüssel <code>"einst"</code> — <code>st.einst</code> gibt es nicht.)</p>
+<p><code>TicketInstanz = { iid, ticketId, seed, netz, hilfeStufe, hilfen:[], start, frist|null, quelle:"postfach"|"wartung"|"wiederholung"|"generiert"|"notfall"|"raetsel"|"pruefung"|"folge", vielfalt?, kuratiert?, kuratiertId?, klingelt? }</code></p>
+<p><strong>Onboarding, nachgetragen 06.10.2026 (<code>spiel/erstestunde.js</code>):</strong> <code>st.einstieg = { fertig, coach:{}, begruessung?:"auftrag"|"umsehen", abschluss?:true }</code>. <code>begruessung</code> setzt die Wahl der Begrüßungskarte — genau einmal, und nur in einem frischen Stand (<code>!fertig</code> <strong>und</strong> kein erledigter Auftrag). <code>abschluss</code> markiert die gezeigte Abschluss-Station und verlangt <code>begruessung</code> <strong>und</strong> <code>fertig</code>. Fehlt <code>einstieg</code> ganz oder steht <code>fertig: true</code>, sieht ein Altstand nichts davon (die Begrüßung entfällt, der Abschluss ebenso).</p>
+<p><strong>Auftragsvielfalt (neu 06.10.2026, <code>spiel/postfach.js</code> · <code>spiel/generator.js</code> · <code>daten/basis.js</code>)</strong></p>
+<p>Vorher war jeder handgeschriebene Auftrag starr: <code>def.netz</code> ignorierte den Instanz-Seed, das Netz war bei Seed 1 und Seed 987654321 in <strong>46 von 46</strong> Fällen byte-gleich. Jetzt:</p>
+<ul><li><code>def.fuerSeed(seed)</code> liefert die Fassung je Instanz-Seed — Adressen, Ziele, Lösung und Hilfen werden mit dem Seed gebaut und je <code>(id, seed)</code> gemerkt (≤ 32 Fassungen je Ticket). Alle Zufallsströme kommen aus <code>Zufall(seed)</code>; ohne Seed bleibt die Definition <strong>byte-gleich</strong> wie vorher.</li><li><code>def.fehlerstellen = [{injektor, stelle}]</code> — wo kein <code>ziel</code>/<code>wahl</code> festgeschrieben ist, wählt der Seed die Fehlerstelle; derselbe Fehler kommt nie zweimal im selben Auftrag vor.</li><li><code>Spiel.ticketGueltig(def)</code> ist die Selbstprüfung jeder Seed-Fassung (Startbruch mit erwartetem Grund, Lösung heilt, Vorlagen-Regression). Fällt eine Fassung durch, bleibt die <strong>feste</strong> Fassung spielbar — eine gewürfelte Variante darf nie unlösbar werden.</li><li>Ausnahmen bleiben fest: Terminal-Aufträge (<code>spec.art === "terminal"</code>) und alles, was konkrete Werte in Lösung oder Befehlsmuster nennt, laufen weiter auf dem festen Netz.</li><li><strong>Spielstand:</strong> neue Instanzen tragen <code>vielfalt: true</code>. Eine Instanz <strong>ohne</strong> dieses Feld (Altstand) behält ihre feste Fassung — ein laufender Auftrag wechselt sein Netz nie. Gemessen: Altstand <code>salon-02</code>, Netzkennwert <code>ee287645:12368</code> vor und nach dem Umbau gleich, Auftrag spielbar. <code>v</code> bleibt <code>2</code>.</li><li>Erreicht: 58 Handaufträge × 12 Seeds = <strong>627 verschiedene Netze</strong> (vorher 58), gleicher <code>(id, seed)</code> in 696/696 Paaren identisch, Massendurchspiel 696/696 grün.</li></ul>
+<h3 id="7-3-spiel-api-auswahl">7.3 Spiel-API (Auswahl)</h3>
+<p><code>Spiel.laden()</code>, <code>Spiel.st</code> (Zustand), <code>Spiel.postfach()</code>, <code>Spiel.oeffnen(iid)</code>, <code>Spiel.abnahme(inst)</code> → <code>[{ziel, ok, grund, trace}]</code> + Sterne, <code>Spiel.hilfe(inst)</code> → nächste Stufe, <code>Spiel.vorfuehren(inst)</code> → Lösungsschritte, <code>Spiel.tick(ms)</code> (Idle: Wartung, Einkommen, Ampeln), <code>Spiel.offlineBericht()</code>, <code>Spiel.mini()</code> → Mini-Ticket, <code>Spiel.generiere(skill, seed)</code> (Injektor-Generator), <code>Spiel.INJEKTOREN</code>.</p>
+<p>Bus-Ereignisse: <code>netz-geaendert</code>, <code>ticket-neu</code>, <code>ticket-geloest</code>, <code>zustand-geaendert</code>, <code>trace</code>, <code>modus</code> (leiste/voll), <code>hilfe</code>.</p>
+<h3 id="7-4-speichern-verbindlicher-vertrag-06-10-2026">7.4 Speichern — verbindlicher Vertrag (06.10.2026)</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Punkt</th><th>Vertrag</th></tr></thead><tbody><tr><td>Schlüssel</td><td><code>labor</code> (Spielstand), <code>einst</code> (Einstellungen), <code>sandbox</code> (freies Labor), <code>labor-sicherung</code> (rollierende Zweitsicherung). Geschrieben wird der <strong>ganze</strong> Speicher als ein JSON unter dem einen Schlüssel <code>netzwerk-labor</code> — im Browser und in der Android-Fassung in <code>localStorage</code>, im Desktop-Programm über Tauri in <code>spielstand.json</code></td></tr><tr><td>Entprellung</td><td><strong>genau eine</strong>: <code>SPEICHER.entprellung = 1500 ms</code> (<code>kern/basis.js</code>). <code>Spiel.speichern()</code> markiert nur „schmutzig"; geschrieben wird 1500 ms nach der <strong>letzten</strong> Änderung. <code>Spiel.AUTOSPEICHERN_MS = 0</code> — die frühere zweite Schicht (400 ms in <code>spiel/ticket.js</code>) ist entfallen</td></tr><tr><td>Sofort schreiben</td><td><code>store.sofort()</code>; im Spiel <code>Spiel.sofortSpeichern()</code> (Rückgabe immer erfüllt — ein Fehler ist bereits gemeldet). Aufrufer: Auftragsabschluss <code>spiel/abnahme.js</code> (bestanden <strong>und</strong> nicht bestanden), Ticket öffnen <code>spiel/ticket.js</code>, Käufe <code>spiel/wirtschaft.js</code> · <code>spiel/werkzeuge.js</code> · <code>spiel/playbooks.js</code>, Meilensteine <code>spiel/karriere.js</code> (Aufstieg, Fest gesehen), App in den Hintergrund <code>ui/start.js</code> (<code>pagehide</code>, <code>beforeunload</code>, <code>visibilitychange</code> → <code>hidden</code>)</td></tr><tr><td>Kennzeichen</td><td><code>store.stand()</code> → <code>{art:"schreibt"\|"gesichert"\|"fehler", fehler, zeit}</code>. Der Bus meldet jede echte Änderung als <code>speicher-stand</code>, ein Fehler zusätzlich als <code>speicher-fehler</code>. Die Kopfzeile zeigt daraus „… sichert / ✓ gesichert / ⚠ nicht gesichert" (<code>ui/app.js</code>, <code>role="status"</code>, kein Klickziel, keine Animation; unter 380 px Breite Kurzform)</td></tr><tr><td>Fehler</td><td>Ein gescheiterter Schreibvorgang lässt <code>schmutzig</code> <strong>stehen</strong> (der nächste Versuch nimmt den Stand mit), füllt <code>SPEICHER.fehler</code> und meldet ihn über den Bus; der Entpreller fängt seine eigene Ablehnung ab. Vorher blieb ein voller Speicher stumm</td></tr><tr><td>Sicherung</td><td><code>Spiel.SICHERUNG = "labor-sicherung"</code>, Inhalt <code>{v, zeit, stand}</code>. Angelegt <strong>vor einer Migration</strong> (<code>v &lt; Spiel.VERSION</code>) und <strong>vor einem Import</strong> (<code>Spiel.sicherungAnlegen(roh, true)</code>); eine frische Sicherung bleibt <code>Spiel.SICHERUNG_FRISCH_MS = 60 s</code> unangetastet, damit die Migration nach dem Neuladen die Import-Sicherung nicht ersetzt</td></tr><tr><td>Import</td><td><code>Spiel.importPruefen(d)</code>: fremdes Format (<code>format !== "netzwerk-labor"</code> oder fehlendes <code>speicher</code>) und <strong>zu neue</strong> Stände (<code>labor.v &gt; Spiel.VERSION</code>) werden abgewiesen; <strong>alte</strong> Stände und Stände ganz ohne <code>v</code>-Feld sind erlaubt — die Migration holt sie herein. Geprüft wird die Schemaversion, nicht die Programmversion der Datei</td></tr><tr><td>Nicht im Stand</td><td>Laufzeit je Instanz (<code>Spiel._lz</code>: Verlauf, Startnetz, Ziele, <code>letzteArbeit</code>) und alles, was <code>ui/</code> nur anzeigt. Ein Neuladen holt den <strong>Stand</strong> zurück, nicht die Sitzung</td></tr></tbody></table></div>
+<p><strong>Gemessen (06.10.2026, Edge headless, Einzeldatei-Fassung, 1366×768):</strong> <code>Spiel.speichern()</code> 2010 → <strong>1512 ms</strong> bis zum Schreibvorgang, Netzwechsel 2415 → 1515 ms, Auftragsabschluss 2436 → <strong>6,7 ms</strong> (Gegenprobe des Prüfers: 22 ms), Kauf 3,8 ms (Prüfer: 24 ms), Verstecken der Seite 0 → 1 Schreibvorgang. Spielstand: <strong>26.554 B</strong> beim Start, 27.420 B nach einem Abschluss, 102.799 B bei 30 Postfach-Instanzen. Grenze: ein Prozess-Tod <strong>ohne</strong> <code>hidden</code>-Wechsel verliert die letzten ≤ 1500 ms.</p>
+<h2 id="8-plattform">8 · Plattform</h2>
+<pre><code class="sprache-js">Plattform = { name:"tauri"|"browser", version,
+  ladenSync() → { daten:Object|null, meldung:String|null },   // Tauri: window.__LABOR_SPEICHER__ (vom Rust-Initialisierungsskript gesetzt)
+  speichern(daten) → Promise,                                 // Tauri: invoke("speichern", {json}) atomar + Sicherungen
+  fenster:{ modus("leiste"|"voll"|"tray"), immerOben(b), position(ecke) },
+  abzeichen(n, text),  benachrichtigen(text),  autostart(b) → Promise,
+  datei:{ exportieren(name, text) → Promise, importieren() → Promise&lt;String|null&gt; },
+  kann(funktion) → { ja, grund },   // "immerOben","tray","autostart","hotkey","leiste","klickdurch","vollbildErkennen","benachrichtigen"
+  an(ereignis, fn) }                 // "tray-klick", "zweiter-start", "hotkey", "ruhe"</code></pre>
+<p>Rust-Befehle (Tauri <code>invoke</code>): <code>speichern{json}</code>, <code>fenster_modus{modus}</code>, <code>immer_oben{an}</code>, <code>abzeichen{n, text}</code>, <code>autostart{an}</code>, <code>autostart_status</code>, <code>exportieren{name, inhalt}</code>, <code>importieren</code>, <code>plattform_info</code> → <code>{os, sitzung:"x11"|"wayland"|"windows", kann:{…}}</code>.</p>
+<h2 id="9-oberflache-ui">9 · Oberfläche (<code>UI</code>)</h2>
+<ul><li><strong>Ein Fenster, zwei Ansichten</strong>: <code>UI.modus("voll"|"leiste")</code>. Vollansicht: Kopfzeile (Euro, Ruf, Stufe, Postfach-Zähler) · Andock-Leiste links (Postfach · Labor · Kunden · Wiki · Lernstand · Shop) · Arbeitsfläche. Beim Wechsel zur Leiste wird das DOM der Vollansicht abgebaut.</li><li><strong>Labor</strong>: Geräteleiste · SVG-Fläche · Inspektor rechts · Simulation unten · Auftragsleiste oben (live ✓).</li><li>Zeigerereignisse, kein HTML5-Drag-and-Drop. Farben immer mit Text/Symbol. <code>prefers-reduced-motion</code> respektieren. Hell- und Dunkelmodus.</li></ul>
+<h3 id="9-1-labor-seit-ausbau-1-2-phase-a-aufraumen">9.1 Labor seit Ausbau 1.2 (Phase A „Aufräumen“)</h3>
+<ul><li><strong>Geräte-Fächer</strong> (<code>ui/editor-fach.js</code>, Präfix <code>pa-</code>): <code>UI.KATEGORIEN = [{id, titel, kurz, typ, skin, taste, text}]</code> (endgeraete · server · netzwerk · aussen; Platz für drahtlos/zubehoer), jedes <code>UI.GERAETE</code>-Element trägt <code>kategorie</code> und <code>kurz</code>. Eine Kategorie öffnet ein Fach daneben, höchstens eins offen. Tasten: <code>1–4</code> Fach, im offenen Fach <code>1…n</code> Gerät, <code>Esc</code> zu. Zuletzt benutzt: <code>store "einst"</code> → <code>labor.zuletzt = [{typ, skin}]</code> (max. 3). Platzieren ist ein Zwischenwerkzeug: danach gilt wieder das Werkzeug davor.</li><li><strong>Ebenen</strong> sind ein Ansicht-Menü (<code>Umschalt+1…5</code>). <code>UI.ebenen.setzen(id, {merken})</code> – <code>merken:false</code> für Ticket-Vorgaben; <code>UI.ebenen.gemerkt()</code> (eigene Wahl, Freies Labor); <code>UI.ebenen.fuerSkills(skills)</code> → Standardansicht eines Tickets (erster Skill mit eigener Ebene, sonst <code>ip</code>).</li><li><strong><code>UI.labor.laden(netz, {titel, verlauf, auftrag, ebene?, ansichtMenue?, sandbox?})</code></strong>: <code>ebene</code> setzt die Ansicht ohne sie zu merken, <code>ansichtMenue:false</code> blendet das Menü aus (Einstiegsaufträge). Nach <code>laden</code> sind Inspektor und Simulation unsichtbar, bis zur ersten Auswahl bzw. ersten Aufzeichnung (die das Panel einmal öffnet). Neu: <code>UI.labor.einsetzen(typ, skin)</code> (Mitte der Fläche).</li><li><strong>Auftragszeile + Auftragsmappe</strong> (<code>ui/spiel.js</code>, Präfix <code>am-</code>): eine Zeile (Kunde · Titel · <code>Ziele x/y</code> · Auftrag lesen · Abnahme · ⋯), Mappe mit Reitern Brief/Ziele klappt beim ersten Öffnen einer Instanz einmal auf (nicht im Coach-Auftrag, nicht in der Prüfung). Hilfe steckt im „⋯“-Menü. <strong>Genau ein <code>.primaer</code> je Zustand</strong>: hat ein offenes Feld (Mappe, Hilfeleiter) einen eigenen Hauptknopf, verliert die Abnahme ihre Hervorhebung.</li><li><strong>Eine Quelle für Hinweise</strong>: Ein Element mit <code>data-hinweisquelle</code> in der Auftragszeile (Coach) schaltet den Werkzeug-Hinweis der Fläche stumm. Toasts: höchstens einer gleichzeitig; ein verdrängter Toast mit Aktion kommt einmal nach.</li><li><strong>Lehrtexte auf Klick</strong>: <code>UI.erklaeren(code, niveau)</code> (Präfix <code>ex-</code>) zeigt <code>DATEN.lehrtexte[code]</code> erst auf „Erklär mir das“, dann auf Wunsch ausführlicher (AP1 → E), zuletzt die Quelle.</li><li><strong>Inspektor</strong>: Reiter beginnen mit „Übersicht“; Terminal/Konsole ist ein Knopf im Kopf (<code>K.reiter = "konsole"</code> bleibt der interne Zustand, <code>UI.inspektor.reiter(c, "konsole")</code> gilt weiter).</li></ul>
+<h3 id="9-2-welle-1-sitzung-s1-sofortgefuhl-design-spielspa-2-0">9.2 Welle 1, Sitzung S1 „Sofortgefühl“ (Design – Spielspaß 2.0)</h3>
+<pre><code class="sprache-js">Spiel.regeln(inst) → { niveau, warnungen:bool, liveHaken:bool, liveGrund:bool, versuchAbzug:0|0.5|1 }
+  // Stufenregeln (Design § 6): E: Warnungen an, Haken mit Grund, Versuche frei
+  //   AP1: Warnungen erst ab Hilfestufe 2, Haken ohne Grund, −½ ★ ab dem 2. Abnahmeversuch (einmalig)
+  //   AP2: keine Warnungen, Haken erst bei der Abnahme, −1 ★ ab dem 2. Versuch (einmalig). Prüfung: wie AP2, ohne Abzug.
+inst.abnahmen                     // Zahl der Abnahmeversuche (gab es schon); Spiel.abnahme zählt hoch
+Spiel.szene(inst, abnahme) → [ { ziel, art:"druckt"|"seite"|"adresse"|"gesperrt"|"haken"|"sicherung",
+                                  pfad:[geraeteId], von, ende:geraeteId, text } ]   // headless, aus der Trace der Abnahme
+Spiel.geaenderteGeraete(inst) → [geraeteId]   // Diff gegen das Startnetz: Konfig, Strom, startup, Kabel, neu
+Spiel.tonPegel(ton, {modus, fokus}) → 0..1    // "aus"→0; Leiste oder ohne Fokus → 0; "leise" 0.18, "normal" 0.4
+store "einst".ton = "aus"|"leise"|"normal"    // Standard "leise" (Spiel.EINST_STANDARD)
+Spiel.postfachZiel() → 2 | 3                  // bis zum 2. erledigten Auftrag zwei Angebote verschiedener Kunden (erste Wahl), dann 3</code></pre>
+<ul><li><strong>Funktionsprobe</strong> (<code>ui/szene.js</code>, Präfix <code>sz-</code>): nach bestandener Abnahme 2–6 s im Labor – geänderte Geräte pulsieren, je Ziel (max. 4, AP1/AP2 max. 2) fährt ein Paket den Pfad, das Endgerät reagiert, der Kunde spricht an seinem Gerät. Überspringbar (Esc, Klick, Leertaste); bei reduzierter Bewegung eine Haken-Liste (1,2 s). Danach der Ergebnisdialog mit höchstens drei Blöcken (<code>.sp-block</code>): Sterne + Lohn · Dein Weg · Merke.</li><li><strong><code>UI.labor.laden(…, {warnungen: () =&gt; bool})</code></strong>: steuert die „!“-Warnungen auf der Fläche und im Inspektor (Kopf-Chip, Abschnitt Hinweise, gelbe Feldwarnungen). Ohne Angabe: an.</li><li><strong>Spielgefühl</strong>: <code>UI.juice(el, art)</code> setzt kurz die Klasse <code>jc-&lt;art&gt;</code> (nichts bei Bewegung „aus“); <code>UI.klang.spielen(name)</code> (<code>ui/klang.js</code>, WebAudio, keine Dateien) → <code>true</code>, wenn hörbar gespielt.</li><li><strong>Bühne frei?</strong> <code>UI.buehneFrei()</code> – Abzeichen, Kundenpost und Aufstiegsfeier warten, solange ein Dialog (<code>.sp-overlay</code>) oder die Funktionsprobe (<code>.sz-buehne</code>) läuft. <code>UI.toast.zu(id)</code> schließt eine Meldung. Einstieg: <code>UI.spiel.mess</code> = <code>{t0, ersteHandlung, erfolg}</code> (ms seit Seitenstart).</li></ul>
+<h3 id="9-3-welle-1-sitzung-s2-bogen-hub-tagesratsel-fehlerdex-spieltagebuch">9.3 Welle 1, Sitzung S2 „Bogen“ (Hub, Tagesrätsel, Fehlerdex, Spieltagebuch)</h3>
+<p>Spielstand <strong><code>v:2</code></strong> (Migration: fehlende Felder bekommen ihren Standardwert, ein <code>v:1</code>-Stand lädt unverändert weiter). <em>Aktueller Stand ist <code>v:3</code> — siehe § 13 (Feld <code>training</code>, 07.10.2026).</em></p>
+<pre><code class="sprache-js">st.dex          = { [injektor]: { gesehen:"2026-10-04", verstanden:null|"2026-10-05" } }
+                  // gesehen = Auftrag mit dieser Fehlerart bestanden; verstanden = bestanden ohne bezahlte Hilfe (Hilfestufe &lt; 4).
+                  // Erst beim Abschluss erfasst – ein offener Auftrag verrät seine Ursache nie über den Dex (R1).
+st.tagesraetsel = { serie:0, [tag]: { nr, niveau, sterne, sek, hilfe, versuche, ziele:["g"|"y"|"w"], zeile } }
+st.tagebuch     = [ { t, art:"sitzung", bis } | { t, art:"auftrag-ende", id, form, quelle, niveau, sek, sterne, hilfe, versuche, weiter:null|bool } ]  // höchstens 500
+st.tag.aufwaermen = 0..n                                   // Mini-Karten im Aufwärmen heute
+inst.zielErst   = [ versuchNr|null ]                       // je Ziel: in welchem Abnahmeversuch zuerst erfüllt (Spiel.abnahme)
+inst.quelle     = … | "raetsel"                            // Tagesrätsel: nicht im Postfach, verfällt am Folgetag
+
+Spiel.dex.liste() → [ {id, titel, gruppe, zustand:"unbekannt"|"gesehen"|"verstanden", ab:stufe, symptom, erkennen:[text], erklaerung, quelle, gesehen, verstanden} ]
+Spiel.dex.gruppen() → [ {id, titel, ehrentitel, ids:[injektor], verstanden, gesamt, fertig} ]
+Spiel.dex.erfassen(inst, def) → {neu:[{id, titel, zustand}], titel:[ehrentitel]}      // aus Spiel.abschliessen
+Spiel.tagebuch.sitzung() · .auftragEnde(inst, def, abnahme) · .weiter() · .aktiv() · .auswertung() → Text (zum Kopieren)
+Spiel.raetsel.nummer(tag) · .def(tag, niveau) · .heute() · .starten() → inst · .teilen(tag) → Text
+Spiel.hub.stand() → { tag, serie:{tage, urlaub, frei, zurueck}, naechster, aufwaermen:{ziel, erledigt}, raetsel, post, tagesziel, feierabend:null|{bilanz, ausblick} }
+Spiel.hub.serie(tageSet, heute) → { tage, urlaub, frei }   // Serie mit Urlaubstagen: 2 Tage je Kalenderwoche fehlen erlaubt</code></pre>
+<ul><li><strong>Tagesrätsel:</strong> Fertigkeit und Netz hängen nur an Datum und Niveau: <code>Spiel.generiere(skill, seed, {stufe})</code> mit <code>skill = Zufall("raetsel:"+tag+":"+niveau).wahl(Spiel.RAETSEL.SKILLS[niveau])</code> und festem Seed je Tag/Niveau – alle in der Klasse bekommen dasselbe Netz, ohne Server. Nummer = Tage seit 01.10.2026 + 1. Teilen-Text verrät die Ursache nicht (🟩 erster Versuch, 🟨 späterer, ⬜ nicht erreicht – je Ziel).</li><li><strong>Hub „Heute“</strong> (<code>ui/hub.js</code>, Präfix <code>hb-</code>): Startansicht (außer im allerersten Auftrag). Datumszeile + Serie, eine Karte „Dein nächster Auftrag“ mit dem einzigen Hauptknopf, drei Kacheln (Aufwärmen · Tagesrätsel · Post bzw. Fehlerdex), nach dem Tagesziel Feierabend mit Bilanz und einem Ausblick auf morgen. Platzbudget: ≤ 40 Wörter, 1 Hauptknopf.</li><li><strong>Fehlerdex</strong> im Lernstand (Abschnitt <code>#dex</code>); <strong>Spieltagebuch</strong> zum Kopieren in Einstellungen und Lernstand. <code>UI.kopieren(text) → Promise&lt;bool&gt;</code> (Zwischenablage mit Rückfall).</li></ul>
+<h3 id="9-4-welle-2-phase-b-netzplan-dock-akte-verdacht">9.4 Welle 2, Phase B „Netzplan, Dock, Akte, Verdacht“</h3>
+<pre><code class="sprache-js">Spiel.plan.sollNetz(inst)      → Netz   // Startnetz + Referenzlösung = so soll es sein (Störung: gesund, Projekt: Ziel). Nie mit Fehler.
+Spiel.plan.aus(netz, {art, verdeckt}) → Plan
+Plan = { art:"netzplan"|"skizze"|"tabelle", breite, hoehe,
+         knoten:[ {id, name, typ, skin, x, y, ebene, adressen:[{port, ip, maske, vlan}], zeigen:[text]} ],
+         linien:[ {a:{id, port}, b:{id, port}, trunk:bool, vlan:null|n} ],
+         netze:[ {cidr, vlan, geraete:[id]} ],
+         tabelle:[ {id, name, port, ip, maske, gw, dns, vlan, dhcp:bool} ],   // verdeckte Felder = "?"
+         verdeckt:[ {id, feld} ] }
+Spiel.plan.art(inst) → "netzplan" (E) | "skizze" (AP1, Tabelle daneben) | "tabelle" (AP2, Gateway/DNS der Rechner verdeckt) | ticket.plan.art
+Spiel.plan.fuer(inst) → Plan (gecacht je Instanz)
+Spiel.plan.diff(a, b) → [ {geraet, pfad, soll, ist} | {geraet, kabel:"fehlt"|"zuviel", gegen} ]   // Konfig (running), Strom, VLAN-Datenbank, Kabel
+Spiel.plan.abweichungen(inst) → [geraeteId]          // Plan ↔ Labor, für „Abweichungen markieren“ (kostet wie Hilfestufe 4)
+
+inst.akte     = [ {n, t, art:"ping"|"trace"|"kabel"|"befehl"|"plan", von, nach, befund, schicht:null|1..7, grund:null|code, ok, wichtig:false} ]
+Spiel.akte.ausPing(inst, {von, nach, ergebnis}) · .ausKabeltest(inst, {kabel, oben, grund}) · .stern(inst, n) · .liste(inst)
+  // befund = was ein echtes Werkzeug zeigt („Zeitüberschreitung“, „Zielhost nicht erreichbar“); Grund/Schicht nur im Einstieg sichtbar
+inst.verdacht = { schicht, ursache:injektor, geraet, t, vorEingriff:bool, treffer:null|"schicht"|"ursache"|"voll" }
+Spiel.verdacht.optionen(inst) → { schichten:[{n, name, text}], ursachen:[{id, titel, schicht}] (4 Fehlerarten, eine richtig), geraete:[{id, name}] } | null
+Spiel.verdacht.setzen(inst, {schicht, ursache, geraet}) · .bewerten(inst) → {treffer, gesetzt, vorEingriff, richtig:{ursache, schicht, geraete}, text}
+  // Ursachen sind Fehlerarten (= Fehlerdex-Einträge), nicht Simulationsgründe: „Falsches Standardgateway“ statt „Gateway antwortet nicht“
+  // E freiwillig (+10 % Lohn bei vollem Treffer vor dem Eingriff), AP1 ohne Verdacht −½ ★, AP2 −1 ★ (Spiel.regeln(inst).verdacht)
+st.werkzeuge  = { kabeltester:bool, netzpruefer:bool }   // Shop „Werkzeuge“; inst.netzpruefer = true schaltet die „!“ im AP-Niveau zu</code></pre>
+<ul><li><strong>Dock</strong> (<code>ui/editor.js</code>, Präfix <code>lb-dock</code>): ein Bereich rechts mit Reitern Inspektor · Simulation · Plan · Akte (Terminal folgt in C). Ein Reiter erscheint erst, wenn er Inhalt hat; ist keiner da, gibt es kein Dock (R5). Breite <code>clamp(260px, 40% − 72px, 440px)</code> der Laborbreite → die Fläche behält ≥ 60 %. Die Simulation liegt nicht mehr unten. <code>UI.labor.dock(reiter|null)</code>, <code>UI.labor.dockReiter(id, {titel, symbol, verfuegbar})</code>; <code>inspektor(zu)</code> und <code>simulation(zu)</code> gelten weiter.</li><li><strong>Netzplan</strong> (<code>ui/netzplan.js</code>, Präfix <code>np-</code>): Reiter „Plan“ im Dock und in der Auftragsmappe; Zeichnung automatisch in Ebenen ausgerichtet (Internet → Router/Firewall → Switches → Endgeräte), Schrift ≥ 14 px, Tabelle daneben. Klick auf ein Plan-Gerät hebt es im Labor hervor und wählt es.</li><li><strong>Akte</strong> (<code>ui/akte.js</code>, Präfix <code>ak-</code>): Reiter „Akte“ – Verdacht oben, darunter Beweiskarten (neueste zuerst, ★ markiert).</li></ul>
+<h3 id="9-5-welle-2-phase-c-terminal">9.5 Welle 2, Phase C „Terminal“</h3>
+<pre><code class="sprache-js">Modell.osVon(geraet) → "windows" | "linux" | "ios" | null     // pc → windows, server/nas → linux (geraet.os übersteuert), switch/router/firewall → ios
+CLI.sitzung(netz, id, {verlauf, einstieg, tipps:"alle"|"fehler"|"keine"})   // Tipp-Zeilen: Einstieg alle, AP1 nur nach Fehlern, AP2 keine
+CLI.eingabe(s, zeile) → { …, befund?:"eine Zeile für die Akte", ok?:bool }   // Diagnosebefehle (ipconfig, ping, nslookup, ip a, dig, systemctl status …)
+CLI.host.*                                // gemeinsame Helfer (cli/host-terminal.js); Befehle: cli/host-windows.js, cli/host-linux.js
+CLI.traceMerken(netz, trace)              // letzte Aufzeichnung je Netz – tcpdump zeigt sie
+inst.befehle = [ {t, geraet, befehl, ok} ]                      // ausgeführte Terminalbefehle (für Zielart „befehl“, Abzeichen „Von unten nach oben“)
+inst.antworten = { [ziel.id]: "eingetragener Wert" }             // Zielart „antwort“ (Eingabe in der Mappe)</code></pre>
+<p><strong>Arbeitsziele (C4, <code>spiel/arbeitsziele.js</code>):</strong> Netzziele prüft die Simulation am Netz; Arbeitsziele prüfen, was der Spieler im Auftrag <em>getan</em> hat. <code>Sim.pruefeZiel</code> kennt sie nicht – nur <code>Spiel.zielPruefen(netz, ziel, inst)</code>.</p>
+<pre><code class="sprache-js">Ziel {typ:"befehl", geraet, muster:"^ipconfig( /all)?$", beispiel:"ipconfig", text}
+     // erfüllt, wenn ein passender Befehl (Regex, ohne Groß/klein) im Auftrag auf dem Gerät fehlerfrei lief
+Ziel {typ:"antwort", id:"ip", frage:"Welche IP-Adresse hat die Kasse?", pruefen:{art:"ip"|"maske"|"gw"|"dns"|"mac", geraet, port?:"eth0"}, text}
+     // Soll kommt immer aus dem aktuellen Netz (Sim.adresse bzw. hw.macs) – nie aus dem Ticket; MAC in jeder Schreibweise
+Spiel.istArbeitsziel(ziel) · Spiel.arbeitsziel(inst, ziel, netz?) → {ok, grund:null|"BEFEHL_FEHLT"|"ANTWORT_FEHLT"|"ANTWORT_FALSCH", text}
+Spiel.antwortSoll(netz, ziel) → "192.168.1.10" | null · Spiel.antwortGleich(art, a, b) · Spiel.antwortSetzen(inst, ziel, wert) → Prüfergebnis (Bus „antwort“)
+Spiel.arbeitszieleErfuellen(inst)            // Durchspiel-Test: Befehle aus ziel.beispiel im Terminal ausführen, Antworten aus dem Netz eintragen
+Lösungsschritt {geraet, terminal:"netsh interface ip set address …", text}   // läuft in einer Terminal-Sitzung (Windows/Linux) auf dem Gerät
+ticket.art = … | "terminal"                  // Terminal-Auftrag: Arbeitsziele + ggf. ein Netzziel; ohne Fehler im Netz erlaubt (nur Arbeitsziele)</code></pre>
+<ul><li><strong>Windows (cmd):</strong> ipconfig (/all /release /renew /flushdns /displaydns) · ping (-n -l -t) · tracert · pathping · arp -a/-d · nslookup (auch interaktiv) · getmac · route print/add/delete · netstat -an · curl · telnet · netsh interface ip show config / set address … static|dhcp / set dns · hostname · whoami · systeminfo · type …\hosts · <strong>powershell</strong> (Test-NetConnection, Resolve-DnsName, Get-NetIPConfiguration).</li><li><strong>Linux (bash):</strong> ip a/r/link · sudo ip addr add|flush · sudo ip route add|replace|del default · sudo ip link set eth0 up|down · ping -c · traceroute · dig · nslookup · host · ss -tulpn · curl · cat /etc/resolv.conf|hosts|hostname · systemctl status|start|stop|restart|is-active (apache2, named, isc-dhcp-server, smbd, ssh, cups) · sudo tcpdump -n · hostnamectl · whoami.</li><li>Ändern geht nur über netsh/route bzw. sudo ip/systemctl – immer über den Verlauf (Rückgängig). <strong>Simulation:</strong> Ist der eingetragene DNS-Server das Gerät selbst, antwortet der eigene Dienst lokal (Loopback) statt per ARP ins Leere.</li><li><strong>Terminal im Dock</strong> (<code>ui/terminal.js</code>, Präfix <code>tm-</code>): Reiter „Terminal“ mit einer Sitzung je Gerät (Reiterchen oben), Doppelklick auf ein Gerät oder Taste <code>T</code> öffnet sie; „Pakete ansehen ▸“ nach Befehlen mit Aufzeichnung; Diagnosebefehle legen Beweiskarten in die Akte (Bus <code>befehl</code>).</li></ul>
+<h3 id="9-6-welle-3-e1-formen-wahl-ereignisse-provisorium">9.6 Welle 3, E1 „Formen, Wahl, Ereignisse, Provisorium“</h3>
+<p><strong>Auftragsformen</strong> (<code>spiel/formen.js</code>): <code>Spiel.FORMEN[form] = {titel, sym, text}</code> für <code>stoerung</code>, <code>projekt</code>, <code>terminal</code>, <code>forensik</code> (Fernwartung: Netz unsichtbar, nur das Terminal eines Rechners), <code>audit</code> (Kundenplan prüfen), <code>beratung</code> (Adressplan rechnen), <code>hotline</code> (Rückfragen am Telefon, dann Störung). <code>Spiel.formVon(def)</code> → <code>def.form || def.art</code> (wartung → stoerung). Generierte Formen:</p>
+<pre><code class="sprache-js">inst.gen = {skill, seed, opts} | {form:"forensik"|"audit"|"beratung", seed, opts:{stufe, kunde}}
+Spiel.generiereForm(form, seed, opts) → def      // deterministisch, id "form-&lt;form&gt;-&lt;kunde&gt;-&lt;stufe|auto&gt;-&lt;seed&gt;", registriert in Spiel.generierte
+Spiel.risikoVon(def) → {stufe:1..3, text:"gering"|"mittel"|"hoch"}   // aus dem Niveau: Abzüge je Versuch (E 0, AP1 ½, AP2 1 ★)</code></pre>
+<p><strong>Neue Arbeitsziele</strong> (wie <code>befehl</code>/<code>antwort</code>, geprüft mit <code>inst</code>):</p>
+<pre><code class="sprache-js">Ziel {typ:"tabelle", id, basis:"192.168.20.0/24", zeilen:[{name, hosts}], spalten:["netz","praefix","erster","letzter","broadcast"], text}
+inst.tabelle  = { ["zeile.spalte"]: "Eingabe" }     // Soll aus den IP-Helfern (Spiel.beratung.soll(ziel)), Vergleich ohne Leerzeichen; Präfix „/26“ oder „26“
+Ziel {typ:"audit", fehler:["id.feld"], text}        // die 1–3 Abweichungen im Kundenplan (def.kundenplan)
+inst.audit    = ["id.feld", …]                       // markierte Zellen; erfüllt = alle gefunden, nichts Falsches markiert
+def.kundenplan = Plan (wie Spiel.plan.aus) mit 1–3 geänderten Tabellenwerten
+Ziel {typ:"notiz", min:20, text}                     // Änderungsnotiz für den Kunden (Variante „sauber“)
+inst.notiz    = "…"
+def.hotline   = { anruf:"…", max:3, fragen:[{id, text, antwort, wert:"gut"|"neutral"|"schlecht", warum}] }
+inst.hotline  = { gefragt:[id], fertig:bool }       // Bewertung: gute Fragen → Ruf; Antworten als Karten in der Akte (art "hotline")</code></pre>
+<p><strong>Postfach als Wahl</strong> (<code>spiel/mischer.js</code>): nach der Einstiegs-Wahl 3 Angebote (ab Stufe 2: 4), möglichst verschiedene Formen und Kunden. Je Form ist höchstens ein Angebot neu im Postfach; die Story-Reihenfolge der Handtickets bleibt je Form erhalten.</p>
+<pre><code class="sprache-js">Spiel.mischer.waehlen({kandidaten:[{form, kunde, gewicht, schluessel}], offen:[{form, kunde}], verlauf:[form], n, z}) → [kandidat]   // rein, ohne Ticketbau
+Spiel.mischer.gesperrt(verlauf) → form|null          // die Form der letzten zwei Abschlüsse, wenn gleich
+Spiel.postfach()                                     // gesperrte Form steht unten – der Hub schlägt sie nie als nächstes vor
+st.erledigt[i].form                                  // Form jedes Abschlusses (Mischer, Tagebuch)</code></pre>
+<p><strong>Provisorium oder sauber?</strong> (<code>spiel/varianten.js</code>): Handtickets mit Änderungen an IOS-Geräten (Liste <code>Spiel.VARIANTEN_TICKETS</code>) bieten beim ersten Öffnen eine Wahl. <em>Provisorium:</em> nur die Netzziele, kein Neustart-Test, Lohn × 0,6, Schuld → nach 3 weiteren Abschlüssen kommt der Folgeauftrag („Das Provisorium von neulich …“: dasselbe Netz, der Fehler ist nach einem Neustart zurück, Ziele + Sicherung). <em>Sauber:</em> Netzziele + „gespeichert“ je geändertem IOS-Gerät + Änderungsnotiz (<code>notiz</code>), Lohn × 1,2.</p>
+<pre><code class="sprache-js">inst.variante = null|"provisorium"|"sauber"          // ohne Wahl gelten die Grundziele
+Spiel.varianten.fuer(def) → [{id, titel, text, lohnFaktor}] | null
+Spiel.varianten.ziele(inst) → Ziele der gewählten Variante · Spiel.varianten.waehlen(inst, id)
+st.schulden = [ {id, ticket, kunde, seit:erledigtAnzahl, faellig:erledigtAnzahl+3, folge:iid|null, erledigt:bool} ]
+Folgeauftrag-id "&lt;ticket&gt;-folge" (Spiel.varianten.folgeDef(def))</code></pre>
+<p><strong>Ereignisse</strong> (<code>spiel/ereignisse.js</code>, Einstellung <code>st.einst.ereignisse = "aus"|"selten"|"normal"</code>, Standard „selten“): höchstens eines je 15 (normal) bzw. 30 (selten) Minuten aktiver Zeit; deterministisch aus Spielstand-Seed und Zähler; jedes mit Erklärsatz; nie Fortschrittsverlust (Stufe, Aufträge, Kunden bleiben; Netzänderungen laufen über den Verlauf).</p>
+<pre><code class="sprache-js">Spiel.EREIGNISSE[id] = {titel, sym, bedingung(ctx) → bool, ausloesen(ctx) → {text, warum, aktion?}}
+   // stromausfall (offener Auftrag mit IOS-Gerät: alle IOS-Geräte neu starten – nur Gespeichertes bleibt), kabelschaden,
+   // provider (Internet beim Kunden aus, bis „Provider anrufen“), praktikant (zweiter kleiner Fehler), weiterempfehlung (neuer Kunde
+   // bietet einen Auftrag an), notfall (Notfall-Auftrag mit Frist – du wählst die Reihenfolge)
+st.ereignisse = { aktivMs, letzteMs, n, liste:[{t, id, kunde, text}] }
+Spiel.ereignisse.tick(ms) → Ereignis|null · .ausloesen(id, ctx) (Tests) · .aktivZaehlen(ms)</code></pre>
+<h3 id="9-7-welle-3-e2-kundenakte-und-kompetenzkarte">9.7 Welle 3, E2 „Kundenakte und Kompetenzkarte“</h3>
+<p><strong>Kundenakte</strong> (<code>spiel/kundenakte.js</code>, Oberfläche in der Ansicht „Kunden“, Präfix <code>ka-</code>):</p>
+<pre><code class="sprache-js">st.kundenakte = { [kunde]: { punkte:0, atlas:[geraeteId], kapitel:0..3, gelesen:[nr], antworten:{[nr]: index} } }
+Spiel.kundenakte.daten(kunde) · .vertrauen(kunde) → 1..5          // aus Punkten: ★ ≥ 4,5 +1 · „sauber“ +1 · Notfall rechtzeitig +1 · Provisorium 0
+Spiel.kundenakte.atlasNetz(kunde) → Netz                           // das dokumentierte Netz des Kunden (Vorlage mit festem Seed) für den Plan-Erzeuger
+Spiel.kundenakte.atlas(kunde) → {plan, hell:[id], gesamt, komplett}  // Geräte leuchten, an denen man gearbeitet hat (geändert oder geprüft)
+Spiel.kundenakte.nachAbschluss(inst, def, abnahme, {geaendert, variante}) → {neuHell:[id], vertrauen:{vorher, nachher}, kapitel:nr|null}
+Spiel.kundenakte.kapitel(kunde) → [{nr, titel, frei:bool, ab:vertrauen, gelesen}] · .lesen(kunde, nr) · .antworten(kunde, nr, i) → {richtig, erklaerung}
+Spiel.kundenakte.baustellen(kunde) → offene Schulden (Provisorium, Folgeauftrag noch nicht erledigt)
+DATEN.geschichten[kunde] = [ {nr:1..3, ab:2..4, titel, text, senior, frage:{text, optionen, richtig, erklaerung}, quelle} ]</code></pre>
+<p>Kapitel 1 öffnet bei Vertrauen 2, Kapitel 2 bei 3, Kapitel 3 bei 4. Jedes Kapitel: kurze Szene beim Kunden mit kleiner Wendung, ein Satz des Seniors (Haltung: Gegenfrage statt Lösung, trocken-warm), eine Frage mit Erklärung, Quelle für die fachliche Aussage.</p>
+<p><strong>Kompetenzkarte</strong> (<code>spiel/kompetenz.js</code>, im Lernstand statt der Fertigkeiten-Liste, Präfix <code>kk-</code>):</p>
+<pre><code class="sprache-js">Spiel.KOMPETENZ_REGIONEN = [ {id, titel, skills:[id…]} ]          // 6 Regionen, zusammen genau die 27 Fertigkeiten aus DATEN.skills
+Spiel.kompetenz.karte() → { regionen:[{id, titel, felder:[{id, name, zustand, box, nachbarn:[id]}]}], sichtbar, gesamt:27 }
+   // zustand: "nebel" (weder geübt noch neben einem geübten Feld noch freigeschaltet) | "offen" | Lernmotor-Stufe („angefangen“ … „gemeistert ★“)</code></pre>
+<h3 id="9-8-auftrag-p-politur-und-bindung-design-spielspa-2-0-20-21">9.8 Auftrag P „Politur und Bindung“ (Design – Spielspaß 2.0, § 20/§ 21)</h3>
+<p><strong>Erste Stunde</strong> (<code>spiel/erstestunde.js</code>, § 20 F3): Ein neuer Spielstand bekommt statt Zufall eine gestaltete Folge der ersten sechs Aufträge; danach füllt der Mischer.</p>
+<pre><code class="sprache-js">Spiel.ERSTE_STUNDE = [ {id:"kabel", ticket:"salon-01"}, {id:"stoerung", ticket:"salon-02"}, {id:"hotline", ticket:"salon-hotline", klingelt:true},
+                       {id:"fernwartung", form:"forensik", opts:{kunde:"salon"}}, {id:"variante", ticket:"salon-05"},
+                       {id:"empfehlung", form:"audit", ereignis:"weiterempfehlung", opts:{kunde:"baeckerei"}} ]
+st.ersteStunde = { fertig:bool, ereignis:bool }      // nur ein NEUER Stand beginnt mit fertig:false (Spiel.ergaenzer.ersteStunde);
+                                                     // fehlt das Feld (alter Stand, Tests mit leererStand): vorbei
+inst.kuratiert = 1..6 · inst.kuratiertId = "hotline" … · inst.klingelt = true   // Postfach-Reihenfolge, Anruf
+Spiel.ersteStunde.aktiv() · .auffuellen() → [inst] · .ruhig() · .abholen() → Karte|null · .stand() → {aktiv, geschafft, gesamt, naechster}
+ergebnis.ereignis = {id:"anruf"|"weiterempfehlung", sym, titel, text, warum?, aktion:"abheben"|"neu", iid}   // Spiel.abschliessen
+Spiel.ereignisse.ausloesen(id, {inst?, form?, kunde?, stufe?})   // ohne inst gilt der offene Auftrag; form/kunde/stufe sind Wünsche</code></pre>
+<ul><li><code>Spiel.postfachAuffuellen</code> legt während der ersten Stunde die <strong>nächsten zwei offenen Schritte</strong> bereit (die Reihenfolge bleibt eine Wahl) und ruft weder Mischer noch Geschichtsreihe. Die Weiterempfehlung löst aus, sobald sie einer der nächsten zwei Schritte ist (nach dem vierten Abschluss) und bringt den Plan-Audit; zufällige Ereignisse ruhen bis dahin (<code>ruhig()</code>). Fehlen die Aufträge der Folge (andere Daten, Testtickets), gilt die erste Stunde als vorbei.</li><li><code>Spiel.postfach()</code> sortiert nach Frist, dann <code>kuratiert</code>, dann wie bisher. Der Hub zeigt einen klingelnden Anruf als Hauptkarte („Mira Kaya ruft an“, „Rangehen ▸“).</li><li>Oberfläche: <code>UI.ereignisse.vormerken(e)</code> zeigt die Karte, sobald kein Dialog und keine Funktionsprobe mehr läuft (Anruf mit grünem „Rangehen ▸“ und Klang <code>klingeln</code>, Weiterempfehlung mit „Ansehen ▸“ → <code>UI.spiel.imPostfach(iid)</code>); Postfach-Karte mit Marke „☎ klingelt“.</li></ul>
+<p><strong>Probe je Form</strong> (<code>spiel/szene.js</code> + <code>ui/szene.js</code>, § 20 F4): eigene, höchstens rund 3 s lange Funktionsprobe für die neuen Formen, überspringbar wie die Paket-Szene.</p>
+<pre><code class="sprache-js">Spiel.szeneForm(inst) → null (Störung, Projekt, Terminal: Paket-Szene genügt)
+  | {art:"hotline", person, symbol, farbe, satz, minuten}          // Hörer wird aufgelegt, Dank, Gesprächsdauer (statt Sprechblase)
+  | {art:"fernwartung", geraet, name}                              // Sitzungsfenster: ✓ auf dem Bildschirm, „Verbindung getrennt“, „online ✓“ – dann das Netz
+  | {art:"audit", kunde, korrigiert, tag}                          // Stempel „GEPRÜFT ✓“ mit Datum auf der Skizze des Netzes
+  | {art:"adressplan", basis, bereiche:[{name, netz, praefix, links, breite}]}   // Bereiche leuchten nacheinander im Adressraum (Prozent)
+UI.szene.abspielen(zeilen, {…, form, aufdecken})   // Hotline/Fernwartung: höchstens 1 Paketweg; Audit/Adressplan: keine Paketfahrt
+UI.labor.fernFertig()                               // Sitzungsfenster in den Zustand „getrennt“; aufdecken() hebt die Fernwartung auf (auch beim Überspringen)</code></pre>
+<p><strong>Vertrauen zahlt aus</strong> (<code>spiel/kundenakte.js</code>, § 20 F5 – R4 „jede Belohnung öffnet etwas“):</p>
+<pre><code class="sprache-js">Spiel.VERTRAUEN_LOHN = {empfehlung:3, rabatt:4, rabattAnteil:0.2}
+st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stufe früher offen
+st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
+inst.empfehlung = "salon"                           // Auftrag, den eine Empfehlung gebracht hat
+Spiel.kundenakte.empfehlen(von) → Karte {id:"empfehlung", sym, titel, text, warum, aktion:"neu", iid, kunde, von, neu}
+Spiel.kundenakte.empfohlen(id) · .rabatt(kunde) → 0|0.2 (ohne Nebenwirkung) · .belohnungen(kunde) → [{ab, art, da, text}]
+Spiel.kundenakte.nachAbschluss(…) → {…, empfehlung:Karte|null, rabatt:bool}
+Spiel.karriere.kunde(id) → {…, vertragPreisVoll, vertragRabatt, vertragPreis (mit Rabatt)}
+Spiel.karriere.kundeOffen(id)                       // empfohlen: Ruf der Stufe davor genügt
+ergebnis.karten = [Ereignis der ersten Stunde, Empfehlung]   // UI.ereignisse.vormerken – nacheinander, nie zwei auf einmal
+Spiel.hub.ausblick()                                // „Morgen: …“ Folgeauftrag → Notfall → Kapitel (eine saubere Arbeit entfernt) → Postfach → Fertigkeit → Rätsel</code></pre>
+<ul><li>Ab Vertrauen 3 empfiehlt der Kunde einmal weiter: Der nächste noch verschlossene Kunde kommt eine Stufe früher und schickt sofort einen generierten Auftrag; sind alle offen, kommt ein Auftrag des Kunden mit den wenigsten Abschlüssen. In der ersten Stunde wartet die Empfehlung, bis die Folge durch ist. Der Mischer nimmt empfohlene Kunden eine Stufe früher in die Generatoren auf.</li><li>Ab Vertrauen 4 kostet der Wartungsvertrag bei diesem Kunden 20 % weniger (Shop-Eintrag, Kauf, Kundenkarte).</li></ul>
+<p><strong>Flow-Regler</strong> (<code>spiel/flow.js</code>, § 20 F6 / Hebel 12):</p>
+<pre><code class="sprache-js">Spiel.FLOW = {GERUEST_NACH:2, VERWICKLUNG_NACH:3, MERKEN:5}
+st.flow = { [skill]: {letzte:["f"|"n"|"g"], stand:"normal"|"geruest"|"verwicklung"} }
+einst.anpassung = "auto" (Standard) | "manuell"
+inst.flow = "geruest"|"verwicklung"|null            // beim Erstellen festgehalten (Hauptfertigkeit def.skills[0])
+Spiel.flow.bewerten(inst, sterne) → "f" (bezahlte Hilfe ≥ Stufe 4 oder ≥ 2 Abnahmen) | "g" (5 ★, erste Abnahme, Senior nicht gefragt) | "n"
+Spiel.flow.merken(skill, art) · .fuer(def) · .anpassen(gen, def, stand) → {gen, def}|null · .nachAbschluss(inst, def, {sterne}) → {skill, vorher, stand, art}
+Spiel.generiere(skill, seed, {…, flow})              // "geruest": ein Niveau tiefer, ein Ziel · "verwicklung": zweiter Injektor, der ein weiteres Ziel bricht
+Spiel.regeln(inst) → {…, flow}                       // Gerüst: Warnungen, Haken, Grund wie im Einstieg, kein Versuchsabzug · Verwicklung: keine Warnungen
+ergebnis.flow                                         // Zeile im Ergebnis, wenn sich der Stand ändert</code></pre>
+<ul><li><code>Spiel.instanzErstellen</code> hält <code>inst.flow</code> fest und baut Generiertes neu: Formen ein Niveau tiefer/höher (<code>gen.opts.stufe</code>, z. B. Plan-Audit 1 statt 2 Fehler), Störungen über <code>gen.opts.flow</code> – beides steht in <code>gen.opts</code>, das Neuladen baut dieselbe Fassung. Handgeschriebene Aufträge ändern nur Begleitung (Tipp, Regeln), nie ihren Fehler.</li><li>Oberfläche: Gerüst – die Frage des Seniors steht in Brief und Zielen der Mappe; Marken „🧭 mit Gerüst“ / „🔥 kniffliger“ im Postfach; Verwicklung – kein Hilfsangebot des Seniors (<code>Spiel.seniorFaellig</code>). Einstellung „Anpassung“ unter Darstellung.</li></ul>
+<p><strong>Hub-Wahl und Wochenziel</strong> (<code>spiel/hub.js</code>, <code>spiel/woche.js</code>, § 20 F7):</p>
+<pre><code class="sprache-js">Spiel.hub.weitere(n=2) → [{iid, titel (≤ 3 Wörter + „…“), voll, form, klingelt}]   // neben der Hauptkarte; Spiel.hub.stand().weitere
+Spiel.WOCHENZIELE = [ {id, text, kurz, soll, ist(st, montag)} ]                  // dex · ohneHilfe · formen · raetsel · glanz
+st.wochenziel = {woche:"2026-10-05" (Montag), id, erreicht}                      // gilt nur in dieser Kalenderwoche
+Spiel.woche.vorschlaege() → 3 (Seed = Montag, für alle gleich) · .waehlen(id) · .stand() → {…, ist, soll, erreicht}|null · .pruefen() → {text, ruf:1}|null
+ergebnis.woche                                                                     // „🎯 Wochenziel geschafft: … · +1 Ruf“</code></pre>
+<p>Der Hub bleibt bei einem Hauptknopf und ≤ 40 Wörtern: „oder:“ mit zwei kleinen Zeilen (Formsymbol + Titelanfang), Fußzeile „Heute 1/3 · Woche 0/3 Rätsel“ bzw. „Wochenziel wählen“ (Dialog mit drei Vorschlägen und „Später“).</p>
+<p><strong>Rauchtest der Oberfläche</strong> (<code>tools/rauch.py</code>, § 20 F8): siehe § 2.</p>
+<hr>
+<h2 id="10-dhcp-tiefe-d1-aus-plan-ausbau-1-2-md-verbindlicher-vertrag">10 · DHCP-Tiefe (D1 aus <code>Plan – Ausbau 1.2.md</code>) — verbindlicher Vertrag</h2>
+<p><em>Festgelegt 05.10.2026 vor der ersten Zeile Code. Datenformen zuerst hier, dann im Code (Leitplanke 1).</em></p>
+<p><strong>Regressionsschutz zuerst:</strong> <code>tools/sim-stand.js</code> friert die Ereignisse der Simulation ein (<code>Nachweise/sim-stand.json</code>). Nach <strong>jeder</strong> Änderung an <code>src/sim/</code> und <code>src/modell/</code> laufen lassen: <code>node tools/sim-stand.js</code> → muss „Simulation unverändert" melden, außer der Änderungsteil ist gewollt und im Bericht benannt. Zusätzlich bleiben die 207 Tests grün.</p>
+<h3 id="10-1-konfiguration-geraet-running-wandert-in-den-spielstand-erweitert">10.1 Konfiguration (<code>geraet.running</code>, wandert in den Spielstand) — ERWEITERT</h3>
+<pre><code class="sprache-js">/* Router/Firewall als DHCP-Server: running.dhcp */
+dhcp = {
+  an: false,                       // NEU: Server an/aus (bisher immer an, sobald Pools existieren)
+  pools: [{
+    name, netz, maske, gw, dns,    // vorhanden
+    start: "", anzahl: 50,         // NEU beim Router (Host kennt sie schon) – wie host.js
+    domain: "",                    // NEU: Option 15
+    leaseS: 86400,                 // NEU: Lease-Dauer in Sekunden; 0/fehlend = Sim.T.LEASE
+    reservierungen: [              // NEU: feste Zuordnung MAC → IP
+      { mac:"02:00:...", ip:"192.168.10.20", name:"drucker" }
+    ]
+  }],
+  ausgeschlossen: [{von, bis}],    // vorhanden
+}
+/* Host (pc/server/nas) als DHCP-Server: running.dienste.dhcp – bekommt dieselben Pool-Felder
+   (start, anzahl, domain, leaseS, reservierungen). `ausgeschlossen` gilt auch hier (heute nicht). */
+/* Switch: running.snooping */
+snooping = { an:false, vertraut:["Gi0/1"] }   // NEU: DHCP-Snooping, vertraute Ports (Richtung Server)</code></pre>
+<p><strong>Einheitlichkeit ist Pflicht:</strong> Ein Router-Pool und ein Host-Pool haben dieselbe Form. Die heute unterschiedliche Feldliste (Router ohne <code>start</code>/<code>anzahl</code>, Host ohne <code>ausgeschlossen</code>) wird zusammengeführt. Fehlende Felder werden <strong>defensiv</strong> gelesen (Standard), damit alte Spielstände laden.</p>
+<h3 id="10-2-laufzeit-netz-zustand-id-erweitert">10.2 Laufzeit (<code>netz.zustand[id]</code>) — ERWEITERT</h3>
+<pre><code class="sprache-js">leases: { [ip]: { mac, bis, t1, t2, hostname, abgelaufen:false } }   // t1/t2 NEU (ms), abgelaufen NEU
+dhcp:   { [port]: { ip, maske, gw, dns, server, bis, t1, t2, domain } }  // t1/t2/domain NEU (Client-Sicht)
+snooping: { [port]: { verworfen:0 } }                                 // NEU: Zähler je Switch-Port</code></pre>
+<p><code>t1 = bis - leaseDauer/2</code> (Erneuerung bei 50 %), <code>t2 = bis - leaseDauer/8</code> (Rebind, nur Anzeige). Alte Leases ohne <code>t1/t2</code> werden als „kein T1 bekannt" behandelt, nicht als Fehler.</p>
+<h3 id="10-3-verhalten-simulation">10.3 Verhalten (Simulation)</h3>
+<ol><li><strong>Ablauf in virtueller Zeit.</strong> Ist <code>L.t &gt; l.bis</code>, gilt die Lease als abgelaufen: <code>Sim.adresse</code> liefert <code>quelle:"keine"</code>, und der nächste <code>Sim.ping</code>/<code>Sim.dhcp</code> holt neu (bestehendes <code>brauchtDhcp</code>). <strong>Kein</strong> neues Ereignis, kein Timer, keine neue <code>art</code> – der Ablauf wird beim Zugriff festgestellt, nicht nebenher. Damit bleibt der Trace für bestehende Läufe unverändert.</li><li><strong>Erneuerung bei 50 %.</strong> <code>dhcpHolen</code> unterscheidet: gültige Lease vorhanden und <code>L.t &gt;= t1</code> → <strong>Renew</strong> (Unicast Request an den Server, danach Ack; Typ <code>request</code>/<code>ack</code> wie bisher, damit die Feldmenge <code>["discover","offer","request","ack"]</code> erhalten bleibt). Sonst wie heute Discover.</li><li><strong>Reservierung.</strong> Passt die Client-MAC auf einen Eintrag, wird <strong>diese</strong> IP angeboten (auch wenn sie außerhalb <code>start..anzahl</code> liegt), aber nur, wenn sie frei ist. Nicht freie Reservierung → kein Angebot, Grund <code>DHCP_RESERVED_BUSY</code>.</li><li><strong>Optionen.</strong> Der Ack trägt zusätzlich <code>domain</code> (Option 15). <code>leaseS</code> kommt aus dem Pool.</li><li><strong>Adresskonflikt.</strong> Vor dem Angebot prüft der Server die Adresse gegen alle Geräte und fremden Leases; ist sie doppelt belegt → nächste Adresse, und der Konflikt wird vermerkt: <code>leases[ip].konflikt = true</code> mit Zeitpunkt. <code>show ip dhcp conflict</code> gibt diese Zeilen aus (heute feste Kopfzeile ohne Daten).</li><li><strong>Rogue-DHCP.</strong> Ein zweiter DHCP-Server im selben LAN ist erlaubt; der Client nimmt das <strong>erste</strong> Angebot. Der fremde Server kann ein falsches Gateway/DNS verteilen. Erkennbar an <code>show ip dhcp binding</code> (unbekannte MAC) und am Symptom „falsches Gateway". Neuer Grund <code>DHCP_ROGUE_OFFER</code> (Schicht 7) für den Fall, dass ein Angebot von einem nicht vorgesehenen Server kommt und der Client es annimmt.</li><li><strong>DHCP-Snooping.</strong> Am Switch mit <code>snooping.an</code>: DHCP-<strong>Server</strong>-Nachrichten (UDP 67 → 68, Offer/Ack) von einem <strong>nicht vertrauten</strong> Port werden verworfen; der Zähler steigt, der Client bekommt kein Angebot. Neuer Grund <code>DHCP_SNOOPING_BLOCKED</code> (Schicht 2). Client-Nachrichten (Discover/Request, Port 68 → 67) sind immer erlaubt.</li></ol>
+<h3 id="10-4-neue-grunde-codes-genau-diese-funf-keine-weiteren">10.4 Neue Gründe (Codes) — genau diese fünf, keine weiteren</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Code</th><th>Titel</th><th>Schicht</th><th>Ausgelöst wenn</th></tr></thead><tbody><tr><td><code>DHCP_LEASE_EXPIRED</code></td><td>DHCP-Lease abgelaufen</td><td>7</td><td><code>L.t &gt; l.bis</code> <strong>und</strong> kein neues Angebot: die Lease ist abgelaufen und der Client bekommt in diesem Lauf keine neue</td></tr><tr><td><code>DHCP_RESERVED_BUSY</code></td><td>Reservierte Adresse belegt</td><td>7</td><td>Die Reservierung (MAC → IP) zeigt auf eine nicht freie Adresse (vergeben, doppelt belegt oder Gateway). Der Server lehnt ab und gibt <strong>kein</strong> Angebot — auch nicht aus dem freien Bereich</td></tr><tr><td><code>DHCP_ROGUE_OFFER</code></td><td>Angebot von fremdem DHCP-Server</td><td>7</td><td>Client nimmt ein Angebot eines unerwarteten Servers</td></tr><tr><td><code>DHCP_SNOOPING_BLOCKED</code></td><td>DHCP-Snooping blockiert</td><td>2</td><td>Server-Antwort an einem nicht vertrauten Switch-Port</td></tr><tr><td><code>DHCP_CONFLICT</code></td><td>Adresskonflikt im Pool</td><td>7</td><td>Der Server prüft eine Adresse vor der Vergabe und findet sie auf <strong>mehr als einem</strong> Gerät; er überspringt sie und nennt diesen Grund. Bleibt dadurch keine Adresse frei, bleibt es bei DIESEM Grund — nicht bei <code>DHCP_POOL_EMPTY</code></td></tr></tbody></table></div>
+<p><strong>Vorrang, wenn mehrere zutreffen</strong> (der erste zutreffende gewinnt, in der Reihenfolge ihres Auftretens in der Trace):</p>
+<ol><li><code>DHCP_RESERVED_BUSY</code> — die Reservierung schlägt den Bereich, also auch dessen Gründe</li><li><code>DHCP_CONFLICT</code> — der Server hat eine doppelt belegte Adresse gefunden</li><li><code>DHCP_POOL_EMPTY</code> — der Pool ist erschöpft, ohne dass ein Konflikt im Spiel war</li><li><code>DHCP_LEASE_EXPIRED</code> — sonst: keine gültige Lease mehr und kein neues Angebot</li><li><code>DHCP_NO_OFFER</code> — sonst (kein Server, kein Pool für das Netz, keine Antwort)</li></ol>
+<p><strong>Zwei Genauigkeiten, die beim Lesen der Trace helfen</strong> (umgesetzt 06.10.2026, belegt durch <code>tests/sim-dhcp-gruende.test.js</code>, <code>tools/sim-stand.js</code> unverändert):</p>
+<ul><li>Der Client wiederholt den Discover bis zu 3×. Ein Grund des Servers steht deshalb einmal <strong>je Versuch</strong> in der Trace (im Referenzstand gilt das schon für <code>DHCP_POOL_EMPTY</code>, 4×). Das Ergebnis <code>grund</code> des Aufrufs ist genau einer.</li><li><code>DHCP_CONFLICT</code> steht auch dann in der Trace, wenn danach noch eine andere Adresse vergeben wird — der Vertrag knüpft den Grund an das FINDEN, nicht an das Scheitern. Tickets, die den Konflikt als Fehler werten, prüfen deshalb zusätzlich <code>ok=false</code>.</li><li>Vor dem 06.10.2026 gab die Simulation diese drei Codes <strong>nie</strong> aus, obwohl sie hier standen: eine belegte Reservierung bekam still eine andere Adresse, ein Adresskonflikt erschien als <code>DHCP_POOL_EMPTY</code>, eine abgelaufene Lease als <code>DHCP_NO_OFFER</code>. Drei fertige Lehrtexte in <code>DATEN.lehrtexte</code> waren dadurch im Spiel unerreichbar.</li></ul>
+<p>Jeder Code braucht: Eintrag in <code>Sim.GRUENDE</code>, Lehrtext in drei Tiefen in <code>DATEN.lehrtexte</code> <strong>mit Quelle</strong> (RFC 2131/2132, „IOS-ähnlich" kennzeichnen, wo es kein echtes Vorbild gibt), Injektor in <code>spiel/injektoren.js</code>, mindestens ein Ticket je Stufe, und Aufnahme in die Grundcode-Liste in <code>tests/sim-gruende.test.js</code> (sonst rot).</p>
+<h3 id="10-5-trace-unverandert-im-format">10.5 Trace — unverändert im Format</h3>
+<p>Keine neue <code>art</code>, kein neues Feld im Ereignisobjekt. <code>tests/sim-gruende.test.js</code> prüft die Schlüsselmenge eines Ereignisses <strong>exakt</strong> (Zeile ~244) und führt <code>ARTEN</code>/<code>PROTOS</code> als geschlossene Listen. Neue DHCP-Nachrichten (Renew) nutzen die vorhandenen Typen <code>request</code>/<code>ack</code>; neue <code>app.felder</code> sind erlaubt (sie erscheinen in der PDU-Ansicht und sind dort gewollt).</p>
+<h3 id="10-6-oberflache-und-konsole">10.6 Oberfläche und Konsole</h3>
+<ul><li><strong>Lease-Tabelle</strong> (neu, <code>ui/inspektor.js</code>, Router- und Server-Reiter „NAT/DHCP" bzw. „Dienste"): Gerät · IP · MAC · Restlaufzeit · Zustand (aktiv/abgelaufen/reserviert). Quelle ist <code>Sim.leases(netz, id)</code> – heute vorhanden, aber von keiner UI benutzt.</li><li><strong>Pool-Formular</strong> um <code>start</code>, <code>anzahl</code>, <code>domain</code>, <code>leaseS</code>, <code>reservierungen</code> erweitern (Router <strong>und</strong> Host gleich).</li><li><strong>Switch-Reiter</strong>: Schalter „DHCP-Snooping" und die vertrauten Ports.</li><li><code>show ip dhcp binding|pool|conflict</code> gilt <strong>auch auf Server-Hosts</strong> (heute nur Router), <code>binding</code> zeigt Restzeit und Zustand, <code>conflict</code> die echten Konflikte, <code>pool</code> rechnet <code>start</code>/<code>anzahl</code> und Ausschlüsse korrekt (heute „ganzes Subnetz").</li><li>Windows <code>ipconfig /all</code>: Lease erhalten/erstellt/ablauf (aus <code>t1/t2/bis</code>), DHCP-Server. Linux: <code>dhclient</code> und <code>ip a</code> mit echter Restlaufzeit (heute fest <code>86234sec</code>).</li><li>IOS-Poolmodus: <code>lease</code>, <code>domain-name</code>, <code>network</code>, <code>default-router</code>, <code>dns-server</code>, <code>host</code>/<code>hardware-address</code> (Reservierung).</li></ul>
+<h3 id="10-7-definition-fertig-neun-punkte-aus-phase-d">10.7 Definition „fertig" (neun Punkte aus Phase D)</h3>
+<p>① Architektur (dieser Abschnitt) ② Sim-Verhalten + Gründe ③ CLI (IOS <em>und</em> Host) ④ Oberfläche ⑤ Lehrtext E/AP1/AP2 mit Quelle ⑥ 3–5 Fehlerinjektoren ⑦ mindestens ein Ticket je Stufe, automatisch validiert ⑧ Tests ⑨ Wiki-Eintrag + Skill im Lernmotor. Fehlt einer, gilt D1 als nicht eingebaut.</p>
+<h3 id="10-8-arbeitsteilung-schreibrechte-damit-sich-niemand-uberschreibt">10.8 Arbeitsteilung (Schreibrechte, damit sich niemand überschreibt)</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Wer</th><th>Dateien (nur diese)</th></tr></thead><tbody><tr><td>Simulation</td><td><code>src/modell/**</code>, <code>src/sim/**</code></td></tr><tr><td>Konsole</td><td><code>src/cli/**</code></td></tr><tr><td>Oberfläche</td><td><code>src/ui/**</code>, <code>src/stil/**</code></td></tr><tr><td>Inhalte</td><td><code>src/daten/**</code>, <code>src/spiel/**</code></td></tr><tr><td>Lead</td><td><code>Architektur.md</code>, <code>bauen.py</code>, <code>tools/**</code>, Tests, Commits</td></tr></tbody></table></div>
+<p>Änderungen an einer fremden Datei gehen über den Lead. Kein Mitglied committet selbst.</p>
+<h3 id="10-9-stand-der-umsetzung-05-10-2026-abends-nachgetragen">10.9 Stand der Umsetzung (05.10.2026, abends nachgetragen)</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Punkt aus § 10.7</th><th>Stand</th></tr></thead><tbody><tr><td>① Vertrag</td><td>fertig (dieser Abschnitt)</td></tr><tr><td>② Sim-Verhalten und Gründe</td><td><strong>fertig</strong> – alle sieben Punkte aus § 10.3 gebaut, fünf Grundcodes angelegt und ausgelöst (<code>src/sim/</code>)</td></tr><tr><td>③ Konsole</td><td><strong>fertig</strong> – <code>show ip dhcp binding\|pool\|conflict</code> auch auf Server-Hosts, <code>lease</code>, <code>domain-name</code>, <code>hardware-address</code>; der Pool-Modus war bis 05.10. wirkungslos (siehe unten)</td></tr><tr><td>④ Oberfläche</td><td><strong>offen</strong> – Lease-Tabelle, erweiterte Pool-Felder und Snooping-Schalter fehlen</td></tr><tr><td>⑤ Lehrtexte</td><td><strong>fertig</strong> – drei Tiefen mit Quelle je Code (<code>src/daten/lehrtexte.js</code>)</td></tr><tr><td>⑥ Fehlerinjektoren</td><td><strong>offen</strong></td></tr><tr><td>⑦ Tickets je Stufe</td><td><strong>offen</strong></td></tr><tr><td>⑧ Tests</td><td><strong>teilweise</strong> – sieben neue Fälle in <code>tests/sim-gruende.test.js</code>, ein Regressionsfall für den Pool-Modus in <code>tests/cli-ios-ssh.test.js</code>; 213 grün</td></tr><tr><td>⑨ Wiki + Lernmotor-Skill</td><td><strong>offen</strong></td></tr></tbody></table></div>
+<p><strong>Nachtrag 05.10.2026, 19:40 – Lauf im echten Programm:</strong> <code>Programm/Netzwerk-Labor.exe</code> startet wieder. Ursache der Blockade war das Integritätslabel „Niedrig" des Vaults (nicht WebView2, kein Windows-Neustart nötig); Reparatur und Messwerte in <code>Design – Spielspaß 2.0.md</code> § 27, Beweise in <code>Nachweise/1.2-Start/BEFUND.md</code>. Die Punkte ④–⑨ bleiben wie sie sind; alle Prüfungen, die bisher nur im Rauchtest liefen, sind ab jetzt im echten Programm möglich.</p>
+<p><strong>Wichtiger Befund zur Konsole:</strong> Der gesamte DHCP-Pool-Modus war wirkungslos. Jeder Handler las den Zustand in einen Klon, änderte den Klon und schrieb danach erneut einen frischen Klon zurück — also den unveränderten Stand. Dazu fehlte den Positionsargumenten das <code>n</code>, sodass die Werte nicht einmal in <code>a</code> landeten. Aufgefallen ist das nie, weil der vorhandene Test nur den <strong>Prompt</strong> prüfte, nicht die Wirkung. Behoben mit <code>dhcpArbeiten()</code> (einmal lesen, ändern, einmal schreiben) und einem Test, der den Zustand nach jedem Befehl prüft.</p>
+<p><strong>Noch offen in der Konsole:</strong> <code>ip address</code> im Reservierungs-Untermodus wird nicht erkannt (der <code>ip</code>-Zweig am Konfigurationsmodus fängt es ab). Die reservierte IP ist über die Datenform und den Oberflächen-Inspektor setzbar.</p>
+<p><strong>Lauf im echten Programm:</strong> wieder möglich (gemessen 05.10.2026, 19:26). <code>Programm/Netzwerk-Labor.exe</code> startet mit Standardprofil, Fenster „Netzwerk-Labor“, 0 Abstürze der WebView2-Laufzeit. Die frühere Blockade kam vom Integritätslabel „Niedrig“ des Vaults (Überrest der Werkzeug-Sandbox), nicht vom Programm; Einzelheiten und Beweise in <code>Nachweise/1.2-Start/BEFUND.md</code>, Reparatur wiederholbar über <code>Programm/Integritaet-reparieren.cmd</code>. <code>tools/q-echt.py</code> ist für den Lauf fertig; die Bilder gehören nach <code>Nachweise/1.2-Q/</code>. <strong>Regressionsschutz:</strong> <code>node tools/sim-stand.js</code> vergleicht die Simulation gegen <code>Nachweise/sim-stand.json</code> (12 Szenarien, 403 Ereignisse) und meldet jede Abweichung mit Stelle und Art. Nach jeder Änderung an <code>src/sim/</code> oder <code>src/modell/</code> laufen lassen — zusammen mit <code>node tests/run.js</code>. <strong>Betriebsregeln und Werkzeuge (Auftrag R, Schritt 1, 05.10.2026):</strong> Die verbindlichen Regeln für jede weitere Arbeit stehen in <code>AGENTS.md</code> im Projektordner. Kurz: keine Prozesse nach Namen beenden (nur eigene PIDs), kein Push, kein Zweigwechsel, keine Dateien außerhalb des Projekts ändern, nichts behaupten, was nicht gemessen ist. Dazu die Zeilenenden-Regel (<code>git ls-files --eol</code>, danach <code>git diff --stat</code> gegen <code>--ignore-cr-at-eol</code>) und „senkrechter Schnitt vor Breite“.</p>
+<p>Die <strong>Simulations-Referenz liegt versioniert</strong> in <code>tests/sim-stand.json</code> (vorher <code>Nachweise/</code>, das nicht im Git liegt – Befund M3). <code>node tools/sim-stand.js</code> vergleicht gegen diese Datei. Die <strong>Zeilenenden</strong> sind über <code>.gitattributes</code> (<code>* text=auto eol=lf</code>, Binärdateien ausgenommen) vereinheitlicht.</p>
+<p><strong>Betriebsbefund (Design § 25) – überholt:</strong> <code>python tools/q-echt.py</code> startet die <code>.exe</code> wieder. Der Befund <code>failed to create webview</code>, <code>HRESULT(0x800700AA)</code> (16:11:40 und 16:14:18) hatte als Ursache das Integritätslabel „Niedrig“ des Vaults; ein Windows-Neustart war nie nötig (gemessen 05.10.2026, 19:26–19:35). Beweise: <code>Nachweise/1.2-Start/BEFUND.md</code>.</p>
+<h2 id="11-tiefe-menuebenen-und-bau-06-10-2026-vertrag-fur-die-anpassungsschicht">11 · Tiefe Menüebenen und Bau (06.10.2026) — Vertrag für die Anpassungsschicht</h2>
+<p>Neu gefasst nach einer Sitzung, in der ein Expertenteam die Oberfläche in einem echten Browser und im echten WebView2-Fenster vermessen hat. Die Zahlen stehen in <code>CHANGELOG.md</code> (Abschnitt 1.2.2), in <code>android/LIESMICH.md</code> (Nachtrag) und in <code>Nachweise/experten/</code>; hier steht <strong>was gilt</strong>.</p>
+<h3 id="11-1-menuplatzierung-in-zwei-durchgangen-messen">11.1 Menüplatzierung: in zwei Durchgängen messen</h3>
+<p><code>UI.menue(x, y, eintraege, {oben})</code> und <code>UI.menue.popover(...)</code> hängen das Element an <code>document.body</code> und klemmen <code>left</code>/<code>top</code> gegen <code>innerWidth</code>/<code>innerHeight</code> (Rand 6 px). <strong>Vertrag:</strong> Gemessen wird mit der Klasse <code>.nl-messend</code> (<code>animation:none; visibility:hidden</code>) — <strong>nicht</strong> mit <code>hidden</code> (<code>display:none</code>) und <strong>nicht</strong> mit laufender Einblend-Animation.</p>
+<ul><li><code>display:none</code> liefert für jedes Rechteck 0. Die Klemmung rechnet dann mit Höhe 0, und ein 26-zeiliges Menü lief 506 px aus dem Fenster (selbst gemessen 06.10.2026; der erste, verworfene Versuch dieser Reparatur).</li><li>Die Animation <code>menue-auf</code> beginnt mit <code>scale(.98)</code> und verschiebt das Rechteck — gemessen würde die Klemmung 2 % zu klein rechnen.</li><li><strong>Vorher</strong> (bis 06.10.2026) wurde ohne Messklasse gerechnet; ein Port-Menü mit 26 Einträgen ragte 3–4 px unten heraus (menu-auditor, 1280 × 800 und 720 × 640 — je gemessen). Mit der Messklasse: <strong>0 px</strong> in beiden Fenstern (<code>python tools/nachprobe-menuefix.py</code>).</li></ul>
+<h3 id="11-2-dock-blatt-ui-editor-js-android-mobil-mobil-css">11.2 Dock-Blatt (<code>ui/editor.js</code>, <code>android/mobil/mobil.css</code>)</h3>
+<ul><li>Der Reiter des <strong>bereits offenen</strong> Bereichs ist der Einklapp-Schalter (<code>onclick: () =&gt; an ? dockZu() : dockZeigen(id)</code>). Wer den Inhalt messen will, darf ihn nicht anklicken, sondern muss ihn messen, wie er ist.</li><li>Eingeklappt ist nicht „leer“: <code>dockZu()</code> setzt <code>dock-zu</code> am <code>.labor</code>; die Anpassungsschicht nimmt dann den Inhalt aus dem Fluss (<code>display:none</code>) und schrumpft das Blatt auf die Reiterleiste (<code>height:auto; bottom:auto</code>). Vorher blieb eine 412 × 520 px große, deckende Fläche stehen — die Trefferprobe auf die Werkzeugknöpfe landete auf <code>lb-dock</code>. Jetzt 412 × 109 px, 6 Knöpfe, 0 nicht treffbar.</li><li>Der Reiterstreifen wird ohne <code>null</code>-Kinder gebaut: <code>replaceChildren(null)</code> erzeugt den **Text „null“**. Deshalb <code>.filter(Boolean)</code>.</li><li>Der Dock-Knopf (<code>.nl-fab-dock</code>) liegt bei offenem Blatt darunter (<code>z-index</code> 9 gegen 45) und wird in der Anpassungsschicht ausgeblendet, statt als toter Knopf stehenzubleiben.</li></ul>
+<h3 id="11-3-terminal-reiter-ui-terminal-js-stil-terminal-css">11.3 Terminal-Reiter (<code>ui/terminal.js</code>, <code>stil/terminal.css</code>)</h3>
+<p>Bei mehr Sitzungen als Platz: der Streifen ist <code>overflow-x:auto</code> mit <strong>sichtbarem</strong> Rollbalken (<code>scrollbar-width:thin</code>), und nach jedem Neuaufbau wird der <strong>aktive</strong> Reiter ausdrücklich ins Bild gesetzt (<code>scrollLeft</code> aus <code>offsetLeft</code>/<code>offsetWidth</code>, mit <code>Math.max(0, …)</code> nach links begrenzt). <code>scrollIntoView({inline:"nearest"})</code> allein genügte nicht — selbst gemessen blieb der vierte Reiter bei 1280 × 800 rechts draußen.</p>
+<h3 id="11-4-nur-eine-bildlaufleiste-je-blatt">11.4 Nur EINE Bildlaufleiste je Blatt</h3>
+<p>In der Auftragsmappe scrollt <code>.am-inhalt</code>; der Netzplan darin hat keinen eigenen Bildlaufbereich mehr (<code>.am-plan{max-height:none; overflow:visible}</code>). Zwei ineinander begrenzte Bereiche ergaben zwei Leisten nebeneinander (menu-auditor, 1280 × 800).</p>
+<h3 id="11-5-trefferflachen-auf-fingergeraten">11.5 Trefferflächen auf Fingergeräten</h3>
+<p><code>mobil.css</code> sichert <strong>jede</strong> Fläche auf 44 px. <code>button:not(.sp-mail){min-height:44px !important}</code> deckt nur die <strong>Höhe</strong> — Breiten aus Klassen (<code>width:40px</code> in <code>.dialog-zu</code>, <code>.pa-zu</code>, <code>.wahl-knopf</code>, <code>.lb-dock-einklappen</code>) schlagen den Element-Selektor und müssen einzeln gehoben werden. Der Griff am Dock-Blatt (<code>.nl-griff</code>) ist ein <code>div</code> mit <code>role=button</code> und wird von <code>button{…}</code> gar nicht erfasst. Wer eine neue Fläche baut, prüft sie mit <code>tools/menueprobe.py</code> — nicht am Augenschein.</p>
+<h3 id="11-6-werkzeuge-fur-diese-schicht">11.6 Werkzeuge für diese Schicht</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Zweck</th><th>Befehl</th><th>Erwartung</th></tr></thead><tbody><tr><td>Tiefe Menüebenen (Web und Android)</td><td><code>python tools/menueprobe.py --datei android/bau/assets/index.html --lauf</code></td><td>5 Profile, 49 Kriterien, 0 verletzt</td></tr><tr><td>Dock und Auftragsmappe</td><td><code>python Nachweise/experten/dock-pruefung.py</code></td><td>Reparatur bestätigt</td></tr><tr><td>Die drei Randbefunde</td><td><code>python tools/nachprobe-menuefix.py</code></td><td>GRÜN, alle drei behoben</td></tr><tr><td>Telefonmaße</td><td><code>python android/werkzeuge/mobilprobe.py --lauf --port 0</code></td><td>12 von 12 gewerteten Profilen grün</td></tr></tbody></table></div>
+<p><strong>Wichtig beim Messen mit <code>mobilprobe</code>/<code>menueprobe</code>:</strong> ohne <code>Emulation.setTouchEmulationEnabled</code> ist <code>(pointer: coarse)</code> falsch und <strong>keine</strong> Mobil-Regel greift. Der superviser hat sich mit dieser Falle zuerst selbst ein falsches Ergebnis gemessen (14 Flächen unter 44 px) und es widerrufen.</p>
+<h3 id="11-7-bau">11.7 Bau</h3>
+<ul><li><code>python bauen.py</code> → <code>web/</code>, <strong>0,14 s</strong>; <code>python tools/einfach.py</code> → <code>docs/index.html</code>, <strong>1,3 s</strong>; <code>python android/bauen.py</code> (7 Schritte, mit Spiel) → <strong>5,1 s</strong> (Median mehrerer Läufe: 5,59 s; Zeitfresser d8 1,36 s, javac 1,00 s).</li><li>Die Schrift-Einbettung nimmt den MIME-Typ aus <code>tools/einfach.py</code> <code>FESTE_TYPEN</code>, nicht aus <code>mimetypes.guess_type</code> (Windows-Registry): sonst <code>application/octet-stream</code> statt <code>font/woff2</code>, 14-mal, 196 Bytes größer und nicht byte-gleich zu einem Bau auf Linux.</li><li>PC-Hülle: Auslieferung <code>cargo tauri build</code> (241 s, mit <code>cargo build --release</code> davor 661 s); Entwicklungsrunde <code>pwsh -File shell/entwickeln.ps1 -NurBauen</code> → Debug-Profil, <strong>4,2 s</strong> je Runde (erster Lauf 3 m 11 s für die Abhängigkeiten).</li><li><code>docs/index.html</code> und <code>Netzwerk-Labor.html</code> im Wurzelverzeichnis sind <strong>dieselbe</strong> Datei und müssen denselben SHA256 tragen.</li></ul>
+<h2 id="12-klassenraum-spezifikation-07-10-2026-noch-nicht-umgesetzt">12 · Klassenraum — Spezifikation (07.10.2026, <strong>noch nicht umgesetzt</strong>)</h2>
+<p>Der Auftrag <span class="dk-tot" title="„../tools/auftraege/KLASSENRAUM.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>../tools/auftraege/KLASSENRAUM.md</code></span> beschreibt die Lehrer-/Schüler-Instanz als Hobby-Ebene: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst — ohne Konto, ohne Server, ohne Netz. Die <strong>umsetzungsreife Fassung</strong> liegt in <a href="entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html"><code>entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md</code></a> samt vier Teil-Dokumenten in <code>entwicklung/Klassenraum/</code>. <strong>Gebaut ist nichts</strong> — dieser Abschnitt hält fest, was mit der Umsetzung vertraglich gilt; bis dahin ist er eine Ankündigung, kein geltender Vertrag.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Gegenstand</th><th>Festlegung (gemessen belegt in der Spezifikation)</th></tr></thead><tbody><tr><td>Auftragscode</td><td><code>NL-XXXX-XX</code>, immer 10 Zeichen; 30 Bit (Sitzung 5 · Art 1 · Index 6 · Variante 8) + 2 Prüfzeichen (mod 31 / mod 32)</td></tr><tr><td>Ergebnis-Code</td><td><code>E-XXXX-XXX</code>; 25 Bit (Sitzung 5 · Platz 5 · halbe Sterne 4 · Fehlversuche 2 · Dauer 9 in 10-s-Einheiten) + 2 Prüfzeichen</td></tr><tr><td>Speicher</td><td><strong>neuer Store-Schlüssel <code>klassenraum</code></strong> (neben <code>lern</code>, <code>labor</code>, <code>einst</code>, <code>sandbox</code>) mit Feld <code>fassung: 1</code>; Export <code>{format:"netzwerk-labor/klassenraum", …}</code></td></tr><tr><td>API</td><td><code>Spiel.klassenraum</code> mit den acht Funktionen aus dem Auftrag plus <code>netzkennwert</code>, <code>tauglicheFertigkeiten</code>, <code>platz</code>/<code>platzSetzen</code>, <code>plaetze</code>/<code>plaetzeSetzen</code></td></tr><tr><td>Öffnungsweg</td><td><code>Spiel.instanzErstellen({ticketId｜gen, seed, quelle:"klassenraum", ohneFlow:true})</code> → <code>inst.klassenraum = {sitzung, platz, code}</code> → <code>UI.spiel.oeffnen(iid)</code></td></tr><tr><td>Klassenraum-Abdruck</td><td>6 Zeichen, FNV-1a über die kanonisch sortierte JSON-Abbildung von <code>{v, geraete, kabel}</code> (ohne <code>netz.zustand</code>)</td></tr><tr><td>Live-Server (optional, Stufe C)</td><td><code>GET /liste?auftrag=&lt;Auftragscode&gt;</code> und <code>POST /ergebnis</code> mit <code>{auftrag, code}</code> — der Server transportiert nur Codes, deutet nichts und ist in den Einstellungen <strong>abschaltbar, Standard aus</strong>; ohne ihn müssen A und B vollständig laufen</td></tr><tr><td>QR-Code (Stufe D)</td><td>eigener Encoder ohne neue Kisten (alphanumerisch, Version 1, Stufe H), Rückgabe als SVG-Data-URI; Inhalt ist <strong>genau</strong> der Auftragscode</td></tr></tbody></table></div>
+<p>Die Dateien der Umsetzung: <code>src/spiel/klassenraum.js</code>, <code>src/ui/klassenraum.js</code>, <code>src/stil/klassenraum.css</code>, <code>tests/klassenraum.test.js</code>; additiv erlaubt sind <code>src/ui/app.js</code>, <code>src/ui/start.js</code> und der Store-Schlüssel in <code>src/spiel/zustand.js</code>. Erwartete Abnahme nach dem Einbau: 291/291 Tests grün, Filter <code>--klassenraum</code> 40/40, <code>ethos.py</code> GRÜN, <code>klassen.py</code> 0, <code>sim-stand.js</code> unverändert.</p>
+<h2 id="13-hilfestellung-stufen-und-schnittstellen-07-10-2026-verbindlicher-vertrag">13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag</h2>
+<p>Der vollständige Vertrag steht in <a href="entwicklung/Hilfestellung%20%E2%80%93%20Stufen%20und%20Schnittstellen.html"><code>entwicklung/Hilfestellung – Stufen und Schnittstellen.md</code></a>. Dieser Abschnitt hält nur fest, was <strong>für den ganzen Bau</strong> gilt; bei Widerspruch gilt der Vertragstext.</p>
+<p><strong>Anlass (Auftrag des Nutzers, 07.10.2026):</strong> Ein Azubi kann die Syntaxen nicht kennen, hat aber im Spielflow keinen Zugriff auf eine Lernnotiz. Die Hilfe muss dorthin, wo er steht: ins <strong>Terminal</strong>, in die <strong>Leiste</strong> (die kleinen Mails) und in einen <strong>Trainingsbereich abseits der Aufträge</strong> — und sie muss <strong>schrittweise</strong> mit dem Bildungsstand wachsen.</p>
+<h3 id="13-1-die-drei-achsen-nicht-verwechseln">13.1 Die drei Achsen (nicht verwechseln)</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Achse</th><th>Feld</th><th>Werte</th><th>Bedeutung</th></tr></thead><tbody><tr><td><strong>Bildungsstand</strong> (neu)</td><td><code>Spiel.einst.stufe</code></td><td><code>azubi</code> \</td><td><code>azubi-plus</code> \</td><td><code>geselle</code> \</td><td><code>meister</code></td><td>Voreinstellung des <strong>Menschen</strong>. Wird nie automatisch geändert.</td></tr><tr><td>Erklärtiefe</td><td><code>Spiel.einst.niveau</code></td><td><code>E</code> \</td><td><code>AP1</code> \</td><td><code>AP2</code></td><td>Wie ausführlich Konsole und Simulation erklären.</td></tr><tr><td>Prüfungsstrenge</td><td><code>Spiel.einst.wahl</code>, <code>inst.niveau</code></td><td><code>auto</code> \</td><td><code>E</code> \</td><td><code>AP1</code> \</td><td><code>AP2</code></td><td>Wie streng ein einzelnes Ticket bewertet wird.</td></tr></tbody></table></div>
+<p><code>Spiel.stufe.setzen(id)</code> zieht <code>einst.niveau</code> nach, lässt es aber einzeln verstellbar.</p>
+<h3 id="13-2-neue-und-geanderte-datenformen">13.2 Neue und geänderte Datenformen</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Gegenstand</th><th>Festlegung</th></tr></thead><tbody><tr><td>Rang</td><td><code>Spiel.stufe.rang(id)</code> → 1…4; verglichen wird <strong>immer</strong> über den Rang, nie über den Namen. Rückfall bei fehlendem/unbekanntem Wert: <code>azubi</code> (kein Wurf).</td></tr><tr><td>Hilfekonto je Ticket</td><td><code>Spiel.HILFE_KONTO = {azubi:6, "azubi-plus":4, geselle:2, meister:0}</code>; gezählt wird <strong>je Ticket</strong> über <code>Spiel.stufe.hilfeZiehen(inst)</code>. Ein leerer Vorrat <strong>sperrt nicht</strong> — die nächste Sprosse kostet dann Sterne wie bisher. Ein Azubi darf nie in einer Sackgasse landen.</td></tr><tr><td>Vorschläge</td><td><code>DATEN.hilfen.VORSCHLAEGE</code> (<code>src/daten/hilfen.js</code>); <code>bereich</code> ist <strong>immer</strong> eine <code>Spiel.LEITER[].id</code> (<code>link</code>, <code>vlan</code>, <code>ip</code>, <code>gateway</code>, <code>route</code>, <code>dienst</code>), damit Leiter und Vorschlag dieselbe Sprache sprechen. <code>art</code> ∈ {<code>pruefen</code>, <code>aendern</code>}.</td></tr><tr><td>Entscheidung</td><td><code>Spiel.hilfe.passend/geruest/leiter/syntaxBruecke</code> (<code>src/spiel/hilfe.js</code>, <strong>nur angefügt</strong>). Die Oberfläche entscheidet nichts selbst.</td></tr><tr><td>Fehlertexte</td><td><code>Spiel.fehlertext({netz, id, modus, art, eingabe, ausgabe, fehler})</code> (<code>src/spiel/fehlertexte.js</code>), Tiefe aus <code>Spiel.stufe.text(...)</code>.</td></tr><tr><td>Mini-Anker</td><td><code>Spiel.mini.hilfe(id)</code> (Denkhilfe, <strong>nie</strong> die Lösung) und <code>Spiel.mini.anker(id)</code> (<code>{titel, text, quelle, wiki}</code>), beides in <code>src/spiel/mini.js</code>.</td></tr><tr><td>Training</td><td><code>Spiel.st.training = {je: {[szenarioId]: {versucht, bestanden, bestes}}}</code> — <strong>Spielstand <code>v:3</code></strong> (Migration ergänzt das Feld). Szenarien: <code>DATEN.trainings</code> (<code>src/daten/trainings.js</code>), Logik <code>Spiel.training</code> (<code>src/spiel/training.js</code>).</td></tr></tbody></table></div>
+<h3 id="13-3-verhalten-das-vertraglich-feststeht">13.3 Verhalten, das vertraglich feststeht</h3>
+<ol><li><strong>Training zahlt nichts.</strong> Kein Geld, kein Ruf, kein Karrierefortschritt, kein Eintrag in <code>st.erledigt</code>, keine Wochenwertung, kein Postfach. Es zählt nur für den Lernmotor (<code>L.ueben</code>) und den Trainingsstand. Durchgesetzt an <strong>einer</strong> Stelle: erste Zeile von <code>Spiel.abschliessen</code> leitet <code>quelle === "training"</code> um.</li><li><strong><code>quelle: "training"</code> ist unsichtbar.</strong> <code>Spiel.postfach()</code> filtert sie heraus (wie <code>pruefung</code> und <code>raetsel</code>), damit <code>Spiel.offen()</code>, die Kopfzeile und die Postfach-Ansicht sie nicht mitzählen.</li><li><strong>Die Hilfe ist schrittweise.</strong> Je Stufe 0/1/2 Vorschläge (<code>meister</code> 0), Denkhilfe bei jedem Mini (<code>azubi</code>/<code>azubi-plus</code>), nach falscher Antwort (<code>geselle</code>), gar nicht (<code>meister</code>).</li><li><strong>Nichts wird ungefragt verraten.</strong> <code>Spiel.mini.hilfe</code> liefert <strong>nie</strong> den Lösungstext; ein Test prüft das gegen <code>Spiel.mini.loesungText</code>.</li><li><strong>Kein Baustein ohne Aufruf.</strong> Jede neue Fläche wird aus dem echten Weg gerufen (Terminal-Zeile, Leisten-Knopf, Ansicht) — grüne Tests ohne Aufruf gelten als <strong>nicht fertig</strong> (AGENTS.md).</li></ol>
+<h3 id="13-4-dateien-der-umsetzung">13.4 Dateien der Umsetzung</h3>
+<p><code>src/spiel/stufensystem.js</code> · <code>src/ui/stufensystem.js</code> · <code>src/stil/stufensystem.css</code> · <code>src/daten/hilfen.js</code> · <code>src/spiel/hilfe.js</code> (nur angefügt) · <code>src/ui/hilfe.js</code> · <code>src/stil/hilfe.css</code> · <code>src/spiel/fehlertexte.js</code> · <code>src/ui/konsole.js</code> · <code>src/cli/parser.js</code> · <code>src/cli/entspricht.js</code> · <code>src/spiel/mini.js</code> · <code>src/ui/leiste.js</code> · <code>src/ui/karriere.js</code> · <code>src/stil/leiste.css</code> · <code>src/daten/trainings.js</code> · <code>src/spiel/training.js</code> · <code>src/ui/training.js</code> · <code>src/stil/training.css</code> · <code>src/ui/lernstand-hilfe.js</code> · <code>src/ui/start.js</code> · <code>src/spiel/erstestunde.js</code> · additiv in <code>src/ui/app.js</code>, <code>src/spiel/zustand.js</code>, <code>src/spiel/abnahme.js</code>, <code>src/spiel/postfach.js</code>, <code>src/ui/geraetebilder.js</code>.</p>
+<h3 id="13-5-stand-der-umsetzung-07-10-2026">13.5 Stand der Umsetzung (07.10.2026)</h3>
+<p><strong>Fertig und gemessen</strong> (Fassung <strong>1.2.4</strong>, Zahlen aus <code>node tests/run.js</code>, <code>python tools/ethos.py</code>, <code>python tools/klassen.py</code>, <code>node tools/sim-stand.js</code>, <code>python tools/rauch.py</code>):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Prüfung</th><th>Ergebnis</th></tr></thead><tbody><tr><td><code>node tests/run.js</code></td><td><strong>434/434 grün</strong>, 50 Testdateien, 83 Module, exit 0, <strong>0 übersprungen</strong></td></tr><tr><td><code>python tools/ethos.py</code></td><td><strong>GRÜN</strong> · <code>python tools/klassen.py</code> <strong>0</strong></td></tr><tr><td><code>node tools/sim-stand.js</code></td><td>Simulation unverändert</td></tr><tr><td><code>python tools/rauch.py</code></td><td><strong>39/39</strong> (echter Edge, 12 Ansichten × 3 Breiten — mit „Training")</td></tr><tr><td><code>python bauen.py</code></td><td>118 Module → <code>web/index.html</code> (Version 1.2.4)</td></tr><tr><td><code>docs/index.html</code> = <code>Netzwerk-Labor.html</code></td><td>byte-gleich, 0 Außenverweise</td></tr></tbody></table></div>
+<p>Umgesetzt sind A–J aus § 13.4 sowie die Nacharbeit aus einer unabhängigen Gegenprüfung mit fünf Prüfern (Berichte: <code>docs/entwicklung/Review – *.md</code>). Über den Vertrag hinaus entstanden:</p>
+<ul><li><strong>Streifen entlasten</strong>: im Fehlerfall nur Fehlertext + ersten Vorschlag, Rest aufklappbar (<code>aria-expanded</code>) — vorher standen 1 279 Zeichen gleichzeitig da.</li><li><strong>Leiste</strong>: Hilfe-Knopf in der Statuszeile (vorher hinter <code>overflow:hidden</code>/<code>opacity:0</code>, erreichbar erst nach 280 ms Mausberührung) und ein Zeichen für ein wartendes Mini-Ticket.</li><li><strong>Trainingsergebnis</strong> erklärt je offenem Ziel über <code>UI.erklaeren</code> und gruppiert die Gründe über <code>Spiel.fehlschlaege</code> je Fertigkeit.</li><li><strong><code>src/spiel/fehlertexte.js</code></strong> ist von 1 176 auf 158 Zeilen geschrumpft; die 82 Tabellenzeilen liegen als <code>DATEN.fehlertexte</code> in <code>src/daten/fehlertexte.js</code> (Schichtregel § 7). <code>Spiel.FEHLERTEXTE</code> bleibt öffentlich.</li><li><strong><code>tests/harness.js</code></strong> zählt Zusicherungen: ein Test mit 0 Zusicherungen gilt als <strong>übersprungen</strong> und wird in der Schlusszeile als „davon N übersprungen" gemeldet — die Bauart, die schon einmal sieben Testgruppen grün meldete, ohne dass sie etwas prüften.</li><li><strong><code>tools/rauch.py</code></strong> hat jetzt einen Fall „Training". Vorher führte die feste Liste 11 Ansichten und die neue war nicht dabei: 36/36 grün, ohne sie je zu öffnen.</li></ul>
+<p><strong>Nicht geprüft:</strong> das Pixelbild in einem Browser ist nicht angesehen (kein Bildschirmfoto); die Android-Fassung wurde nicht gebaut (<code>VERSION_CODE 10204</code> ist nachgezogen, die APK auf 1.2.3 bleibt gültig); <code>tools/menueprobe.py --datei web/index.html</code> ist <strong>rot</strong> (36/43, 44-px-Trefferflächen in den Editor-Menüs) — gemessen identisch zu <code>HEAD~1</code>, also <strong>vorbestehend</strong> und nicht aus diesem Bau.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

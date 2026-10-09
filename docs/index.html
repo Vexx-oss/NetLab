@@ -2293,7 +2293,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 <script>
 "use strict";
 const LABOR_VERSION = "1.2.4";
-const LABOR_BAU = "dcd337f6";
+const LABOR_BAU = "109f7738";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -5938,7 +5938,15 @@ const CLI = (() => {
 /* ---------- Konsole: GUI ↔ Befehl, Befehlsblöcke, Vorschläge ----------
    CLI.entspricht(geraet, pfad, wert) → Befehlsblock für die „entspricht:“-Zeile im Inspektor | null
    CLI.anwenden(netz, id, text, {verlauf?}) → {ok, fehler:[{nr, zeile, meldung}]}   (ab privilegiertem Modus, Rückfragen automatisch)
-   CLI.vorschlag(sitzung) → {befehl, text} | null   (Einstieg: nächster sinnvoller Befehl) */
+   CLI.vorschlag(sitzung) → {befehl, text} | null   (Einstieg: nächster sinnvoller Befehl)
+     ROLLE (Review „Testqualität", 09.10.2026): Das ist der RÜCKFALL, nicht mehr der Hauptweg.
+     Im Programm holt UI.konsole den Vorschlag aus Spiel.hilfe.passend (DATEN.hilfen, Vertrag § 4.1);
+     diese Funktion greift nur, wenn Spiel.hilfe/DATEN.hilfen fehlen (src/ui/konsole.js:334-346).
+     Sie bleibt, weil sie in einzelnen Modi genauer ist als der Hauptweg — sie kennt den Kontext der
+     SITZUNG (config/if/vlan/line/dhcp: was fehlt genau an DIESEM Objekt) und liefert dort den
+     nächsten Teilschritt („network “, „password “, „encapsulation dot1Q 10“, „no shutdown“).
+     Löschen wäre ein Funktionsverlust für Fassungen ohne DATEN.hilfen.
+     Sie ist je Modus gedeckt von tests/cli-vorschlag.test.js. */
 (() => {
   const C = CLI, h = C.h;
 
@@ -6119,7 +6127,7 @@ const CLI = (() => {
     return lauf();
   };
 
-  /* ---------- Vorschlag für den Einstieg ---------- */
+  /* ---------- Vorschlag für den Einstieg: Rückfall für Fassungen ohne DATEN.hilfen (s. Kopfkommentar) ---------- */
   const V = (befehl, text) => ({befehl, text});
   C.vorschlag = function(s){
     if (!s || s.rueckfrage) return null;
@@ -15882,11 +15890,26 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
       .sort(sortiere);
   }
 
+  /* WANN erscheint eine Fläche? Das beantwortet Baustein A (Spiel.stufe.wannPasst) – die Regel wird
+     hier NICHT nachgebaut (Befund B2, letzter Rest: vorher stand „nachfehler" an drei Stellen im
+     Terminal). Fehlt Spiel.stufe, gilt das bisherige Verhalten: azubi und azubi-plus sehen alles
+     sofort, geselle erst nach einem Fehler, meister nichts. */
+  function wannPasst(flaeche, fehler){
+    try {
+      const s = typeof Spiel !== "undefined" && Spiel.stufe;
+      if (s && typeof s.wannPasst === "function") {
+        const r = s.wannPasst(flaeche, {fehler: !!fehler});
+        if (r && typeof r.ja === "boolean") return r.ja;
+      }
+    } catch (e) { /* Baustein A fehlt oder würfelt – Rückfall unten */ }
+    return rang() < 3 || (rang() === 3 && !!fehler);
+  }
+
   /* ---------- § 4.1: der Vorschlagsstreifen ---------- */
   Spiel.hilfe.passend = function(o = {}){
     const anzahl = Math.max(0, Number(kann("vorschlaege")) || 0);
     if (!anzahl || !o.netz || !o.netz.geraete || !o.netz.geraete[o.id]) return [];
-    if (kann("leiter") === "nachfehler" && !hatFehler(o.letzterFehler)) return [];   /* geselle: nur nach Fehler */
+    if (!wannPasst("vorschlaege", hatFehler(o.letzterFehler))) return [];   /* geselle: nur nach Fehler */
     const grenze = o.max == null ? anzahl : Math.max(0, Math.min(anzahl, Number(o.max) || 0));
     if (!grenze) return [];
     const alle = kandidaten(o);
@@ -15912,9 +15935,7 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
 
   /* ---------- § 4.1: Werkzeugleiter (alle 6 Sprossen, je Sprosse der passende Befehl) ---------- */
   Spiel.hilfe.leiter = function(o = {}){
-    const sicht = kann("leiter");
-    if (sicht === "nein") return [];
-    if (sicht === "nachfehler" && !hatFehler(o.letzterFehler)) return [];
+    if (!wannPasst("leiter", hatFehler(o.letzterFehler))) return [];
     const alle = kandidaten({netz: o.netz, id: o.id, modus: o.modus, art: o.art});
     return (Spiel.LEITER || []).map(s => {
       const v = alle.find(x => x.bereich === s.id) || null;
@@ -15927,9 +15948,9 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
   Spiel.hilfe.syntaxBruecke = function(o = {}){
     const d = daten(); if (!d || !d.SYNTAX) return null;
     const r = rang();
-    if (r >= 4) return null;                                  /* meister: keine ungefragte Hilfe */
     const fehler = hatFehler(o.fehler);
-    if (!fehler && r >= 2) return null;                       /* azubi-plus und geselle: nur nach Fehler */
+    /* „wann erscheint die Brücke" steht in Spiel.STUFEN_WANN.syntaxBruecke – nicht hier. */
+    if (!wannPasst("syntaxBruecke", fehler)) return null;
     const zeile = String(o.text == null ? "" : o.text).trim();
     if (!zeile) return null;
     const art = geraeteArt(o.netz, o.id);
@@ -18504,12 +18525,16 @@ Spiel.STUFEN_SCHALTER = Object.freeze({
 
 /* WANN erscheint eine Fläche? — die zweite Frage, getrennt von „hat sie überhaupt" (Befund B2).
    Wer nur darf() fragt, weiß nicht, ob die Fläche sofort oder erst nach einem Fehler kommt.
-   Jede Fläche soll wannPasst() benutzen statt die Fehler-Bedingung selbst nachzubauen. */
+   Jede Fläche soll wannPasst() benutzen statt die Fehler-Bedingung selbst nachzubauen.
+   `vorschlaege` und `syntaxBruecke` sind die beiden Flächen der Terminal-Hilfe (Vertrag § 4.1);
+   sie standen bis 09.10.2026 nur im Terminal nachgebaut da (Review „Testqualität", Rest von B2). */
 Spiel.STUFEN_WANN = Object.freeze({
-  leiter:    Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
-  anker:     Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
-  miniHilfe: Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
-  wasGeht:   Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  leiter:        Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  anker:         Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  miniHilfe:     Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  wasGeht:       Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  vorschlaege:   Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  syntaxBruecke: Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
 });
 
 Spiel.stufe = (() => {

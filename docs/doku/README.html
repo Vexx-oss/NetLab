@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Netzwerk-Labor · Netzwerk-Labor</title>
+<meta name="description" content="Was das Spiel ist, wie man es startet und was es kann.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Netzwerk-Labor</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#sofort-spielen">Sofort spielen</a></li>
+<li><a href="#die-ersten-funf-minuten">Die ersten fünf Minuten</a></li>
+<li><a href="#was-drin-ist">Was drin ist</a></li>
+<li><a href="#mitmachen-holen-bauen-ziehen">Mitmachen: holen, bauen, ziehen</a></li>
+<li><a href="#fur-interessierte-wie-es-gebaut-ist">Für Interessierte: wie es gebaut ist</a></li>
+<li style="margin-left:16px"><a href="#ein-hinweis-zum-nachbauen">Ein Hinweis zum Nachbauen</a></li>
+<li><a href="#dokumente">Dokumente</a></li>
+<li><a href="#stand">Stand</a></li>
+<li><a href="#klassenraum-in-arbeit">Klassenraum (in Arbeit)</a></li>
+<li><a href="#ehrliche-grenzen">Ehrliche Grenzen</a></li>
+</ul>
+</nav><h1 id="netzwerk-labor">Netzwerk-Labor</h1>
+<p><strong>Ein Netzwerk-Simulator zum Spielen: Du bist das Ein-Mann-Systemhaus.</strong> Kunden schicken Tickets („Die Kasse druckt nicht mehr"), du löst sie in einem echten Simulator — Geräte verkabeln, IP, VLAN, Routen, ACL, NAT, DHCP, DNS, Firewall. Jedes Paket ist wirklich unterwegs, Frame für Frame, und du siehst, wo und warum es verworfen wird.</p>
+<p>Lernspiel für <strong>Fachinformatiker Systemintegration (IHK AP1/AP2)</strong>. Kein Cisco-Produkt. Läuft lokal und offline; nichts wird gesendet.</p>
+<p><img src="https://github.com/Vexx-oss/NetLab/actions/workflows/pruefen.yml/badge.svg?branch=ausbau-1.2" alt="Tests"> <img src="https://img.shields.io/badge/Tests-251/251 grün-brightgreen" alt="Tests grün"> <img src="https://img.shields.io/badge/JavaScript-ohne Bundler-blue" alt="JavaScript ohne Bundler"> <img src="https://img.shields.io/badge/läuft-offline-informational" alt="Läuft offline"></p>
+<p><img src="../bilder/topologie.jpg" alt="Topologie der Arztpraxis mit Adressschildern, VLAN-Flächen und den drei Werkzeugen"></p>
+<hr>
+<h2 id="sofort-spielen">Sofort spielen</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Weg</th><th>Wie</th><th>Was du brauchst</th></tr></thead><tbody><tr><td><strong>Im Browser</strong></td><td><strong><a href="https://vexx-oss.github.io/NetLab/">vexx-oss.github.io/NetLab</a></strong> öffnen</td><td>nur einen Browser</td></tr><tr><td><strong>Eine Datei</strong></td><td><strong><a href="https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html">Netzwerk-Labor.html herunterladen</a></strong> (2,1 MB), Doppelklick</td><td>nur einen Browser</td></tr><tr><td><strong>Zum Entpacken</strong></td><td><a href="https://github.com/Vexx-oss/NetLab/releases/latest">Netzwerk-Labor-1.2.4-Browser.zip</a>: Spiel, Anleitungen, Lizenztexte</td><td>nur einen Browser</td></tr><tr><td><strong>Windows-Programm</strong></td><td><strong><a href="https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe">Netzwerk-Labor.exe herunterladen</a></strong> (8,2 MB) — mit Leiste am Bildschirmrand, Tray-Symbol und globalem Tastenkürzel</td><td>Windows 10/11</td></tr></tbody></table></div>
+<p>Alle drei Wege liefern dieselbe Fassung <code>1.2.4</code>. Die Anhänge der Release laden <strong>direkt herunter</strong> (gemessen: <code>Content-Disposition: attachment</code>) — ein Klick, kein Umweg.</p>
+<blockquote>
+<p><strong>Zur Windows-<code>.exe</code>:</strong> Sie ist <code>1.2.4</code> und bringt Leiste, Tray und globales Tastenkürzel. Sie <strong>hängt seit dem 07.10.2026 automatisch an jeder Veröffentlichung</strong> — gebaut von einem Windows-Läufer in <span class="dk-tot" title="„.github/workflows/release.yml“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>.github/workflows/release.yml</code></span>, damit der Download-Link stabil bleibt: <code>https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe</code> (Anhang: 8.211.456 B, SHA256 <code>28C7C6B4…E808</code>). Ins Git gehört sie weiterhin <strong>nicht</strong> (8 MB je Bau); auf dem Entwicklungsrechner liegt sie unter <code>Programm/Netzwerk-Labor.exe</code> (8.217.088 B, SHA256 <code>E2735D79…5DD68</code> — Rust-Bauten sind nicht bit-gleich, beide melden 1.2.3). <strong>Ihr Start ist gemessen:</strong> die Abnahme <code>python tools/q-echt.py</code> lief im echten Programm durch — Fenster offen, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler, Fernwartungs-Schild sichtbar. Bilder: <code>Nachweise/1.2-Q/</code>.</p>
+</blockquote>
+<p><code>Netzwerk-Labor.html</code> liegt direkt im Repositorium, damit der Download <strong>einen Klick</strong> braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft — gleiche Prüfsumme, nachgewiesen von <code>python tools/seite-pruefen.py</code>.</p>
+<p>Die Einzeldatei ist das <strong>ganze Spiel in einer Datei</strong> — Schriften eingebettet, kein Nachladen, kein Installieren, kein Internet. Windows, Linux, macOS: alles mit einem Browser. Belegt: 2.269.597 Bytes (2,16 MB), <strong>0 Außenverweise</strong> (geprüft über <code>&lt;link&gt;</code>, <code>&lt;script src&gt;</code>, <code>&lt;img src&gt;</code> und <code>url()</code>), Start im echten Browser über <code>file://</code> gemessen (<code>python tools/starttest.py</code>).</p>
+<blockquote>
+<p><strong>Warum dieselben 2,2 MB zweimal im Git liegen</strong> (<code>Netzwerk-Labor.html</code> im Wurzelverzeichnis und <code>docs/index.html</code>) — bewusst so, nicht versehentlich: <code>docs/index.html</code> ist die Datei, die GitHub Pages ausliefert (<code>seite.yml</code> stellt genau <code>docs/index.html</code> und <code>docs/bilder/</code> zusammen), und <code>Netzwerk-Labor.html</code> ist der Ein-Klick-Download, auf den dieses README verweist. Beide entstehen aus demselben Bau (<code>python tools/einfach.py</code>) und <strong>müssen byte-gleich sein</strong> — der Bau schreibt sie nacheinander aus derselben Quelle; <code>python tools/seite-pruefen.py</code> prüft die Gleichheit. Wer eine davon ändert oder löscht, bricht den jeweils anderen Weg. Die langen Notizen liegen in <code>docs/</code> bzw. <code>docs/entwicklung/</code> und werden <strong>nicht</strong> veröffentlicht; die Übersicht steht in <a href="INHALT.html"><code>docs/INHALT.md</code></a>.</p>
+</blockquote>
+<p>Gegenüber dem Windows-Programm fehlen nur die Fenster-Funktionen: Leiste am Bildschirmrand, Tray-Symbol, immer im Vordergrund, globales Tastenkürzel. Das Spiel sagt das an der passenden Stelle selbst an.</p>
+<blockquote>
+<p><strong>Windows-Programm, falls kein Fenster erscheint:</strong> <code>Integritaet-reparieren.cmd</code> doppelklicken. Der gemessene Grund ist ein Integritätslabel „Niedrig" auf dem Ordner (Überrest einer Werkzeug-Sandbox): die <code>.exe</code> erbt es, läuft als Low-Prozess und darf <code>%LOCALAPPDATA%</code> nicht beschreiben, worauf die WebView2-Laufzeit ihr Profil nicht anlegen kann (<code>failed to create webview</code>, <code>0x800700AA</code>). Details: <span class="dk-tot" title="„Nachweise/1.2-Start/BEFUND.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>Nachweise/1.2-Start/BEFUND.md</code></span>.</p>
+</blockquote>
+<p>Die <strong>Spielstände von Browser- und Windows-Fassung sind getrennt</strong> und werden nicht geteilt: Browser im <code>localStorage</code>, Windows unter <code>%APPDATA%\de.fisi.netzwerklabor\spielstand.json</code>.</p>
+<hr>
+<h2 id="die-ersten-funf-minuten">Die ersten fünf Minuten</h2>
+<ol><li><strong>Postfach</strong> öffnen und die erste Kundenmail lesen.</li><li><strong>„Auftrag annehmen"</strong> — das Netz erscheint im Labor.</li><li>Ein Gerät <strong>anklicken</strong>: rechts zeigt der <strong>Inspektor</strong> Adressen, Ports, VLAN, Routen, ACL, NAT; der Reiter <strong>Konsole</strong> ist das IOS-ähnliche Terminal.</li><li><strong>Werkzeuge</strong> oben links in der Laborfläche, Kurztaste in Klammern: <strong>V</strong> auswählen und verschieben · <strong>K</strong> Kabel verlegen · <strong>P</strong> Ping-Werkzeug (jeweils von Gerät zu Gerät ziehen). Gerät <strong>doppelklicken</strong> oder <strong>T</strong> öffnet sein Terminal.</li><li>Nach einem Ping unten <strong>„In Simulation öffnen"</strong>: das Paket Schritt für Schritt, Schicht für Schicht.</li><li>Zum Schluss <strong>„Abnahme anfordern"</strong> — der Kunde prüft selbst nach, auch ob du dabei etwas anderes kaputt gemacht hast.</li></ol>
+<p><strong>Fehler kosten nichts.</strong> Die Hilfeleiter (Checkliste, Werkzeugtipp, Frage vom Senior) ist am Anfang gratis und führt notfalls bis zur vorgeführten Lösung.</p>
+<div class="dk-html"><table>
+<tr>
+<td width="50%"><img src="../bilder/einstieg.jpg" alt="Erster Auftrag mit Ticket, Zielen und Hinweis"><br><em>Der erste Auftrag: Ticket, Ziele, Senioren-Hinweis.</em></td>
+<td width="50%"><img src="../bilder/konsole.jpg" alt="IOS-ähnliche Konsole und Windows-Terminal bei der Fehlersuche"><br><em>Konsole und Terminal bei der Fehlersuche.</em></td>
+</tr>
+<tr>
+<td width="50%"><img src="../bilder/simulation.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und PDU-Ansicht"><br><em>Simulation auf Frame-Ebene: 42 Ereignisse, Filter, PDU-Ansicht.</em></td>
+<td width="50%"><img src="../bilder/hilfe.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
+</tr>
+</table></div>
+<p>Weitere Bilder und die Herkunft jeder Aufnahme: <a href="bilder/HERKUNFT.html"><code>docs/bilder/HERKUNFT.md</code></a>.</p>
+<hr>
+<h2 id="was-drin-ist">Was drin ist</h2>
+<p><strong>Simulation auf Frame-Ebene.</strong> ARP, Switching mit MAC-Lernen, VLAN und 802.1Q, Router-on-a-Stick, statische Routen, ICMP (Timeout gegen unreachable, TTL), ACL, NAT/PAT, DHCP mit Relay, Reservierung, Lease-Laufzeit und Snooping, DNS, TCP-Handshake, HTTP, Firewall mit Zonen und Port-Weiterleitung, Internet als Kulisse, Broadcast-Sturm. Jede Antwort ist aus Paketen hergeleitet, nichts ist vorgetäuscht.</p>
+<p><strong>IOS-ähnliche Konsole.</strong> Modi, Kurzformen, <code>?</code>, Tab-Vervollständigung, <code>do</code>, running/startup-config, <code>write erase</code>. Dazu ein Windows-Terminal (<code>ipconfig</code>, <code>ping</code>, <code>tracert</code>, <code>arp -a</code>, <code>nslookup</code>). Befehle, die nicht belegt sind, werden als solche gekennzeichnet.</p>
+<p><strong>Aufträge.</strong> 37 handgeschriebene Tickets in 5 Karrierestufen (Salon, Bäckerei, Schreibbüro, Arztpraxis, Autohaus, Mittelstand) inklusive 4 Projekten, dazu unbegrenzt generierte Tickets aus 5 Netzvorlagen × 30 Fehlerinjektoren — jede Variante wird automatisch geprüft. 83 Mini-Tickets für die Leiste.</p>
+<p><strong>Spielschichten.</strong> Hilfeleiter 0–6, Abnahme mit Regressions- und Neustart-Test (nur Gespeichertes überlebt), Sterne, Euro und Ruf, Wartungsverträge, Playbooks, Offline-Bericht, Prüfungstag nach IHK-Notenschlüssel.</p>
+<p><strong>Lernen statt Klicken.</strong> Können ist die Währung: Wer etwas sicher beherrscht, darf es automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: Leitner-Fächer, 1/3/7/14/30 Tage), Fehler landen im Fehlerheft, 15 Abzeichen belohnen Arbeitsweisen.</p>
+<div class="dk-html"><table>
+<tr>
+<td width="50%"><img src="../bilder/postfach.jpg" alt="Postfach mit Kundenmails, Symptom aus Kundensicht"><br><em>Aufträge kommen als Kundenmail — Symptom, nicht Ursache.</em></td>
+<td width="50%"><img src="../bilder/kompetenzkarte.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
+</tr>
+</table></div>
+<hr>
+<h2 id="mitmachen-holen-bauen-ziehen">Mitmachen: holen, bauen, ziehen</h2>
+<p><strong>Einmal holen</strong> (git ist alles, was du brauchst — Node und Python nur zum Bauen und Testen):</p>
+<pre><code class="sprache-bash">git clone https://github.com/Vexx-oss/NetLab.git
+cd NetLab
+git switch ausbau-1.2          # der Zweig, in dem gearbeitet wird (und der veröffentlicht wird)</code></pre>
+<p><strong>Spielen ohne zu bauen:</strong> <a href="https://vexx-oss.github.io/NetLab/">vexx-oss.github.io/NetLab</a> öffnen, oder die Einzeldatei aus dem <a href="https://github.com/Vexx-oss/NetLab/releases/latest">Release</a> herunterladen. Beides ist immer der neueste Stand.</p>
+<p><strong>Selbst bauen</strong> (die Reihenfolge ist wichtig, <code>bauen.py</code> zuerst):</p>
+<pre><code class="sprache-bash">python bauen.py                # src/ -&gt; web/index.html
+python tools/einfach.py        # web/ -&gt; docs/index.html   (dieselbe Datei als Netzwerk-Labor.html)
+sh tools/test.sh               # 251 Tests, headless in Node
+python tools/abnahme.py        # die ganze Kette in einem Befehl</code></pre>
+<p>Für die Android-Fassung kommt das Android-SDK dazu (<code>android/bauen.py</code>, ~5 s), für die Windows-Hülle Rust (<code>cargo tauri build</code>, Minuten). Genaueres steht in <a href="Bauen.html"><code>docs/Bauen.md</code></a>.</p>
+<p><strong>Updates ziehen</strong> — je nachdem, was du benutzt:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Was du hast</th><th>Wie du aktualisierst</th></tr></thead><tbody><tr><td>einen Klon</td><td><code>git pull</code> — danach <code>python bauen.py</code> und <code>python tools/einfach.py</code>, wenn du die Seite selbst baust</td></tr><tr><td>die Browser-Einzeldatei</td><td>neue aus dem <a href="https://github.com/Vexx-oss/NetLab/releases/latest">Release</a> laden — oder einfach die Seite im Netz benutzen, die ist immer aktuell</td></tr><tr><td>die App auf dem Telefon</td><td>neue <code>.apk</code> aus <code>Programm/</code> (bzw. vom Release) antippen und <strong>über</strong> die alte installieren — der <code>versionCode</code> steigt mit jeder Fassung, deshalb klappt das ohne Deinstallieren</td></tr><tr><td>das Windows-Programm</td><td><code>git pull</code>, dann <code>pwsh -File shell/entwickeln.ps1</code> (Debug, Sekunden) oder <code>cargo tauri build</code> in <code>shell/src-tauri</code> (Auslieferung)</td></tr></tbody></table></div>
+<p><strong>Wenn du selbst etwas änderst:</strong> arbeite auf <code>ausbau-1.2</code>, halte dich an <a href="AGENTS.html"><code>AGENTS.md</code></a> (kurz: keine Prozesse nach Namen beenden, kein Push ohne Absprache, nichts behaupten, was nicht gemessen ist) — und am Ende die acht Schritte aus <a href="SITZUNGSABSCHLUSS.html"><code>docs/SITZUNGSABSCHLUSS.md</code></a> durchgehen. Dort steht auch, wie die Fassungsnummer gezogen wird (<code>python tools/fassung-ziehen.py --neu 1.2.3 --setzen</code>) und wie man nachmisst, dass die Veröffentlichung wirklich den neuen Stand liefert.</p>
+<p>Ein Beitrag ist willkommen, wenn er <strong>spielbar</strong> bleibt: nach jedem Schritt muss das Spiel laufen, <code>sh tools/test.sh</code> grün sein und <code>python tools/ethos.py</code> nicht schlechter als der eingefrorene Stand. Ein grüner Test ohne Wirkung im Programm gilt hier ausdrücklich <strong>nicht</strong> als fertig.</p>
+<h2 id="fur-interessierte-wie-es-gebaut-ist">Für Interessierte: wie es gebaut ist</h2>
+<p>Oberfläche und Logik in <strong>schlichtem JavaScript ohne Bundler</strong>; die Rust-Hülle ist dünn (Tauri 2, Fenster, Leiste, Tray, Speichern, Autostart). <code>src/</code> ist in Schichten gelegt — <code>kern</code> · <code>modell</code> · <code>sim</code> · <code>cli</code> · <code>daten</code> · <code>spiel</code> · <code>plattform</code> · <code>ui</code> · <code>stil</code>. <code>sim/</code> und <code>cli/</code> laufen <strong>headless</strong>: kein DOM, keine Uhr, kein Zufall ohne Seed. Das ist die Grundlage dafür, dass die Simulation reproduzierbar getestet werden kann.</p>
+<pre><code>107 Module · 20.706 Zeilen JavaScript · 35 Testdateien · 251/251 Tests grün</code></pre>
+<pre><code class="sprache-bash">python bauen.py                      # src/ -&gt; web/index.html (Einzeldatei-Bau des Programms)
+python tools/einfach.py              # web/ -&gt; docs/index.html (DAS Spiel als eine Datei)
+sh tools/test.sh                     # Tests headless in Node — meldet 251/251 grün
+node tools/sim-stand.js              # Simulation gegen den versionierten Referenzstand
+python tools/klassen.py              # Abgleich: Klassen im JS &lt;-&gt; Regeln im CSS
+python tools/ethos.py                # 12 Minimalismus-Regeln gegen tests/stil-stand.json
+python tools/starttest.py            # startet docs/index.html im echten Browser und misst
+python tools/menueprobe.py --lauf    # die tiefen Menüebenen in 5 Profilen messen
+python tools/paket.py                # Auslieferungspaket -&gt; dist/ (Ordner + ZIP, geprüft)
+python tools/lernmotor.py            # Kopie des Lernmotors gegen die Spielhalle prüfen
+python android/bauen.py              # Spiel -&gt; Einzeldatei -&gt; APK -&gt; Prüfung (~5 s)
+python tools/abnahme.py              # die ganze Kette: 14 Prüfungen, ein Befehl</code></pre>
+<p><code>python tools/abnahme.py</code> läuft in einem Durchgang durch alles: Tests, Klassen-Abgleich, Simulations-Referenz, Lernmotor (drei Nachweise), beide Bauwege, Einzeldatei, Start im echten Browser, Paketbau und die Gegenprobe am entpackten Paket. Gemessener Stand: <strong>14/14 grün</strong> (rund 65 s).</p>
+<p><code>tools/test.sh</code> braucht Node. In eingeschränkten Umgebungen verlässlich:</p>
+<pre><code class="sprache-bash">&amp; "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'</code></pre>
+<p>Die <strong>Windows-<code>.exe</code></strong> baut man selbst (Rust und WebView2 nötig, <code>python bauen.py</code> immer zuerst):</p>
+<pre><code class="sprache-bash">cd shell/src-tauri
+CARGO_TARGET_DIR=&lt;schneller-Ordner&gt;/target cargo tauri build --no-bundle</code></pre>
+<h3 id="ein-hinweis-zum-nachbauen">Ein Hinweis zum Nachbauen</h3>
+<p>Seit dem Grundgerüst holten <code>bauen.py</code>, <code>tests/run.js</code> und <code>tools/sim-stand.js</code> den Lernmotor aus <code>../FISI-Spielhalle/src/lernmotor.js</code> — also <strong>von außerhalb dieses Repositoriums</strong>. Ein frischer Klon ließ sich damit weder bauen noch testen, und auf GitHub schon gar nicht. Seit dem 05.10.2026 liegt der Stand als <code>fremd/lernmotor.js</code> im Repo, mit Herkunft und Prüfsumme im Kopf. Liegt die Spielhalle daneben, hat sie Vorrang. Drei Werkzeuge weisen das nach:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Befehl</th><th>Was er beweist</th></tr></thead><tbody><tr><td><code>python tools/lernmotor.py</code></td><td>die Kopie entspricht der Quelle Zeile für Zeile (oder meldet die Abweichung)</td></tr><tr><td><code>python tools/lernmotor-bau.py</code></td><td>der Bau ist <strong>mit und ohne</strong> Spielhalle byte-gleich</td></tr><tr><td><code>python tools/lernmotor-rueckfall.py</code></td><td>Tests <strong>und</strong> Simulationsvergleich laufen auch ohne Spielhalle</td></tr></tbody></table></div>
+<hr>
+<h2 id="dokumente">Dokumente</h2>
+<p>Die Notizen sind Obsidian-Dateien (Wikilinks); als Text sind sie ebenso lesbar.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Inhalt</th></tr></thead><tbody><tr><td><a href="Liesmich.html"><code>Liesmich.md</code></a></td><td>Übersicht, Startanleitung, was in 1.2 neu ist</td></tr><tr><td><a href="entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html"><code>Konzept – Netzwerk-Labor.md</code></a></td><td>Spezifikation</td></tr><tr><td><a href="Architektur.html"><code>Architektur.md</code></a></td><td>verbindlicher Vertrag zwischen den Bausteinen</td></tr><tr><td><a href="entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html"><code>Klassenraum – Umsetzungsreife Spezifikation.md</code></a></td><td>Vertrag für den Klassenraum (Lehrer/Schüler) — <strong>noch nicht umgesetzt</strong>; vier Teil-Dokumente im Ordner daneben</td></tr><tr><td><a href="entwicklung/Plan%20%E2%80%93%20Ausbau%201.2.html"><code>Plan – Ausbau 1.2.md</code></a></td><td>Phasen, Stand, Messwerte</td></tr><tr><td><a href="entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html"><code>Design – Spielspaß 2.0.md</code></a></td><td>Befunde, zwölf Hebel, Scorecard</td></tr><tr><td><a href="CHANGELOG.html"><code>CHANGELOG.md</code></a></td><td>was sich wann geändert hat</td></tr><tr><td><a href="Bauen.html"><code>Bauen.md</code></a></td><td>Bauen, Testen, Messen, Ausliefern im Detail</td></tr><tr><td><a href="Mitmachen.html"><code>Mitmachen.md</code></a></td><td>Arbeitsweise und Regeln für Beiträge</td></tr><tr><td><a href="AGENTS.html"><code>AGENTS.md</code></a></td><td>Betriebsregeln für Mensch und Modell</td></tr><tr><td><span class="dk-tot" title="„LICENSE“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>LICENSE</code></span></td><td>Lizenz (PolyForm Noncommercial 1.0.0) — der verbindliche Text</td></tr><tr><td><span class="dk-tot" title="„LIZENZ.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>LIZENZ.md</code></span></td><td>dieselbe Lizenz auf Deutsch, mit den Ausnahmen und den Schriftenlizenzen</td></tr></tbody></table></div>
+<h2 id="stand">Stand</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Zweig / Tag</th><th>Inhalt</th></tr></thead><tbody><tr><td><code>ausbau-1.2</code> ← <strong>Standardzweig</strong></td><td>Version 1.2.4: Ausbau 1.2 (Geräte-Fächer, Auftragsmappe, DHCP-Tiefe), Auslieferung als Einzeldatei, Lizenz PolyForm Noncommercial. <strong>Hier spielt die Browser-Fassung.</strong></td></tr><tr><td><code>master</code>, Tag <code>v1.1</code></td><td>Version 1.1</td></tr><tr><td>Tag <code>endversion-1.0</code></td><td>Rückfallstand 1.0</td></tr></tbody></table></div>
+<p>Die <code>.exe</code> in <code>Programm/</code> ist auf dem Stand von <code>ausbau-1.2</code> (<strong>1.2.3</strong>, gebaut am 07.10.2026) und die einzige Fassung mit Leiste, Tray und globalem Tastenkürzel. Sie liegt nicht im Release (8 MB), sondern im Repositorium.</p>
+<h2 id="klassenraum-in-arbeit">Klassenraum (in Arbeit)</h2>
+<p>Die nächste Ausbaustufe ist der <strong>Klassenraum</strong>: Die Lehrkraft sagt einen kurzen Code an, jedes Gerät baut denselben Auftrag selbst — ohne Konto, ohne Server, ohne Netz; danach werden Ergebnis-Codes eingesammelt und als Ampel gezeigt. Die Fassung <strong>1.2.3</strong> liefert dafür die <strong>umsetzungsreife Spezifikation</strong>, noch keine Spielfunktion: im Spiel ist bisher nichts davon zu sehen. Vertrag und Belege: <a href="entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html"><code>Klassenraum – Umsetzungsreife Spezifikation.md</code></a>, Auftragstext: <span class="dk-tot" title="„tools/auftraege/KLASSENRAUM-umsetzungsreif.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>KLASSENRAUM-umsetzungsreif.md</code></span>.</p>
+<h2 id="ehrliche-grenzen">Ehrliche Grenzen</h2>
+<ul><li><strong>Die Windows-<code>.exe</code> ist 1.2.4 und ihr Start ist gemessen</strong> (07.10.2026): <code>python tools/q-echt.py</code> fuhr im echten Programm durch — erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler, Fernwartungs-Schild sichtbar, keine JS-Fehler. Das ist ein Durchlauf auf <strong>diesem</strong> Rechner; andere Windows-Fassungen sind nicht geprüft.</li><li><strong>Die <code>.exe</code> ist nicht signiert</strong> → SmartScreen-Hinweis beim ersten Start.</li><li><strong>Die Linux-Pakete sind Stand 1.0</strong> und enthalten die Neuerungen von 1.1 und 1.2 nicht.</li><li>Arbeitsspeicher im Leerlauf rund <strong>0,5 GB</strong> (WebView2 mit GPU-, Netzwerk- und Renderprozessen); die CPU ist praktisch null. Gemessen, nicht geschätzt.</li><li>Linux wurde nur in <strong>WSLg</strong> getestet, nicht auf einem echten GNOME/KDE — dort gibt es keinen Tray-Dienst.</li><li>Ob ein Browser <code>localStorage</code> für eine per Doppelklick geöffnete Datei (<code>file://</code>) dauerhaft behält, ist <strong>nicht gemessen</strong>.</li><li><strong>Die Lizenz erlaubt kein Geldverdienen.</strong> Spielen, Üben und Unterricht — auch in Schulen und Bildungseinrichtungen — sind frei. Verkaufen, kommerzielles Nutzen und Weitergeben unter eigener Flagge sind <strong>nicht</strong> erlaubt; dafür braucht es eine gesonderte Erlaubnis. Details: <span class="dk-tot" title="„LIZENZ.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>LIZENZ.md</code></span>, verbindlich: <span class="dk-tot" title="„LICENSE“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>LICENSE</code></span> (PolyForm Noncommercial 1.0.0).</li><li><strong>Der Quelltext ist hier öffentlich einsehbar, die gebaute Fassung ist es nicht.</strong> GitHub erlaubt jedem, ein öffentliches Repositorium zu forken — das ist eine Bedingung der Plattform und lässt sich nicht abschalten. Wer eine Fassung **weitergeben oder hosten** will, braucht dafür die Erlaubnis des Urhebers. Wer den Code ganz unter Verschluss halten will, muss das Repositorium auf <strong>privat</strong> stellen; dann ist allerdings auch nichts mehr einsehbar.</li></ul>
+<p>Schriften: Atkinson Hyperlegible, Bricolage Grotesque, JetBrains Mono — SIL Open Font License 1.1, Lizenztexte liegen bei. Inhalte nach bestem Wissen aus den Lernnotizen einer FISI-Umschulung geprüft; im Zweifel gilt euer Unterricht.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

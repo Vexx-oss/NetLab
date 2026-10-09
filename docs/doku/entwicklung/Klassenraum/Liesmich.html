@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klassenraum – Arbeitsordner · Netzwerk-Labor</title>
+<meta name="description" content="Einstieg in die vier Teil-Dokumente des Klassenraum-Vertrags.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Klassenraum – Arbeitsordner</span>
+<a href="../../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#aufbau">Aufbau</a></li>
+<li><a href="#was-gemessen-ist-und-was-nicht">Was gemessen ist – und was nicht</a></li>
+</ul>
+</nav><hr>
+<p>tags: [FISI, Lernspiel, Netzwerk, Klassenraum] erstellt: 2026-10-06 aktualisiert: 2026-10-07 status: fertig – umsetzungsreife Spezifikation, Umsetzung noch nicht begonnen</p>
+<hr>
+<h1 id="klassenraum-arbeitsordner">Klassenraum – Arbeitsordner</h1>
+<p>Hier liegt die <strong>umsetzungsreife Fassung</strong> des Arbeitsauftrags <span class="dk-tot" title="„../../../tools/auftraege/KLASSENRAUM.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>../../../tools/auftraege/KLASSENRAUM.md</code></span> (Lehrer-/Schüler-Instanz als Hobby-Fassung). Der Auftrag selbst bleibt unangetastet; dieser Ordner beantwortet die Fragen, die er offen lässt, und belegt jede Antwort mit einer Messung.</p>
+<p><strong>Einstieg:</strong> die Endfassung <a href="../../entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html"><code>../Klassenraum – Umsetzungsreife Spezifikation.md</code></a> – sie ist der Vertrag, aus dem gebaut wird. Wer bauen will, nimmt zusätzlich den geschärften Auftragstext <span class="dk-tot" title="„../../../tools/auftraege/KLASSENRAUM-umsetzungsreif.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>../../../tools/auftraege/KLASSENRAUM-umsetzungsreif.md</code></span>.</p>
+<h2 id="aufbau">Aufbau</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Inhalt</th></tr></thead><tbody><tr><td><a href="../../entwicklung/Klassenraum/A%20%E2%80%93%20Codec%20und%20Determinismus.html"><code>A – Codec und Determinismus.md</code></a></td><td>Code-Format <code>NL-XXXX-XX</code>, Prüfsumme, Bit-Budget, Seed-Kanonisierung, <code>Spiel.klassenraum</code>-API, Ergebnis-Code <code>E-XXXX-XXX</code>, Speicherform, Netzkennwert</td></tr><tr><td><a href="../../entwicklung/Klassenraum/B%20%E2%80%93%20Oberfl%C3%A4che%20und%20Ablauf.html"><code>B – Oberfläche und Ablauf.md</code></a></td><td>zwei Ansichten, DOM/Klassen/Tokens, alle Texte wörtlich, Startseiten-Zeile, Beamer-Lesbarkeit, Ampel, Export/Import, Server-Schalter</td></tr><tr><td><a href="../../entwicklung/Klassenraum/C%20%E2%80%93%20Rust%2C%20Live%20und%20QR.html"><code>C – Rust, Live und QR.md</code></a></td><td>Server in der <code>.exe</code> (C1), gebautes eigenständiges Binary (C2), zwei Endpunkte, CORS/Ports/Grenzen, abhängigkeitsfreier QR-Encoder</td></tr><tr><td><a href="../../entwicklung/Klassenraum/D%20%E2%80%93%20Pr%C3%BCfung%2C%20Abnahme%20und%20Reihenfolge.html"><code>D – Prüfung, Abnahme und Reihenfolge.md</code></a></td><td>40 Testfälle, Abnahmebefehle mit Sollzahlen, Vorführdrehbuch, Risiken, Definition of Done, Architektur-Vorschlag</td></tr></tbody></table></div>
+<p>Wiederlaufbare Proben: <span class="dk-tot" title="„../../../tools/klassenraum-probe/“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>../../../tools/klassenraum-probe/</code></span> (Codec-Messung, QR-Referenz, HTTP-Probe) · gebauter Server: <span class="dk-tot" title="„../../../tools/klassenraum/“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>../../../tools/klassenraum/</code></span> · Messdateien und Fotos: <code>Nachweise/Klassenraum/</code> (nicht im Git).</p>
+<h2 id="was-gemessen-ist-und-was-nicht">Was gemessen ist – und was nicht</h2>
+<p><strong>Belegt:</strong> Determinismus über zwei getrennte Prozesse (12/12 Codes gleich), 92/92 Vertipper und 100 % der 10.000 Mutationen abgelehnt, 3.712 Kanonisierungspaare mit 94,83 % eigener Netzfassung, Export/Import verlustfrei, C2-Server gebaut (322.560 B, <code>cargo test</code> 10/10, HTTP-Probe 20/20), QR-Encoder gegen eine unabhängige Referenz 25/25 gleich und rückkodiert, Baukette byte-gleich, <code>node tests/run.js</code> 251/251.</p>
+<p><strong>Nicht gemessen (ehrlich):</strong> Rauchtest und Menüprobe (Edge startet in der Werkzeug-Sandbox nicht), echte Vorführung mit zwei Browserprofilen oder Telefonen, Handy-Scan des QR-Codes, C1-Laufzeitbeweis, Firewall-Abfrage.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../../index.html">Übersicht</a>
+<a href="../../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

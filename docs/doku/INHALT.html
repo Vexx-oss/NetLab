@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>📚 Die Notizen dieses Projekts · Netzwerk-Labor</title>
+<meta name="description" content="Die Notizen dieses Projekts — was gilt, was geschehen ist.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">📚 Die Notizen dieses Projekts</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#was-gilt-verbindlich">Was gilt (verbindlich)</a></li>
+<li><a href="#was-geschehen-ist-verlauf">Was geschehen ist (Verlauf)</a></li>
+<li><a href="#entwicklung-plane-befunde-konzepte">Entwicklung: Pläne, Befunde, Konzepte</a></li>
+<li><a href="#entwicklung-die-hilfestellung-und-ihre-gegenprufung-07-10-2026">Entwicklung: die Hilfestellung und ihre Gegenprüfung (07.10.2026)</a></li>
+<li><a href="#wie-dieses-verzeichnis-aufgeraumt-wurde">Wie dieses Verzeichnis aufgeräumt wurde</a></li>
+</ul>
+</nav><h1 id="die-notizen-dieses-projekts">📚 Die Notizen dieses Projekts</h1>
+<p>Diese Übersicht sammelt, was <strong>nicht</strong> Quelltext ist: Verträge, Pläne, Befunde, Konzepte und den Verlauf. Der Einstieg ins Projekt steht in <a href="README.html"><code>../README.md</code></a>, die Betriebsregeln für Mitarbeit und Modelle in <a href="AGENTS.html"><code>../AGENTS.md</code></a>.</p>
+<blockquote>
+<p><strong>Seit 07.10.2026 veröffentlicht.</strong> Bis Fassung 1.2.3 landeten auf GitHub Pages nur <code>docs/index.html</code> und <code>docs/bilder/</code>. Jetzt stellt <code>.github/workflows/seite.yml</code> zusätzlich die Doku als <strong>durchsuchbare Seite</strong> unter <code>/doku/</code> dazu: <code>tools/seite.py</code> wandelt die Markdown-Dateien dieses Verzeichnisses samt <code>README.md</code> und <code>AGENTS.md</code> in HTML um (<code>tools/md.py</code>, nur Python-Standardbibliothek — die CI hat keine Zusatzpakete). Das Erzeugnis liegt in <code>docs/doku/</code> und ist versioniert, wie <code>docs/index.html</code> es auch ist. Wer eine Notiz hinzufügt, trägt sie hier ein und lässt <code>python tools/seite.py --pruefen</code> laufen; der Bau prüft, dass keine Datei fehlt und kein <code>[[…]]</code>-Verweis offen bleibt.</p>
+</blockquote>
+<h2 id="was-gilt-verbindlich">Was gilt (verbindlich)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Wofür</th></tr></thead><tbody><tr><td><a href="Architektur.html"><code>Architektur.md</code></a></td><td>Der Vertrag zwischen den Bausteinen: Datenformen, Verhalten, Gründe, Trace-Format. Änderungen an Datenformen stehen <strong>zuerst</strong> hier.</td></tr><tr><td><a href="Bauen.html"><code>Bauen.md</code></a></td><td>Bauen, Testen, Messen, Ausliefern im Detail — inklusive der gemessenen Fallen (d8, <code>&lt;/head&gt;</code>, <code>screenOrientation</code>, MIME-Typ der Schriften).</td></tr><tr><td><a href="SITZUNGSABSCHLUSS.html"><code>SITZUNGSABSCHLUSS.md</code></a></td><td>Die acht Schritte am Ende einer Sitzung: aufräumen, Fassung ziehen, prüfen, bauen, Stand nachziehen, committen, veröffentlichen, nachmessen — mit den Regeln, die aus Fehlern stammen.</td></tr><tr><td><a href="Mitmachen.html"><code>Mitmachen.md</code></a></td><td>Arbeitsweise und Regeln für Beiträge.</td></tr><tr><td><a href="Liesmich.html"><code>Liesmich.md</code></a></td><td>Übersicht für Leser: was das Spiel ist, wie man es startet, was es kann.</td></tr></tbody></table></div>
+<h2 id="was-geschehen-ist-verlauf">Was geschehen ist (Verlauf)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Wofür</th></tr></thead><tbody><tr><td><a href="CHANGELOG.html"><code>CHANGELOG.md</code></a></td><td>Was sich wann geändert hat — aus der echten Commit-Historie abgeleitet, nicht aus Erinnerung.</td></tr></tbody></table></div>
+<h2 id="entwicklung-plane-befunde-konzepte">Entwicklung: Pläne, Befunde, Konzepte</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Wofür</th></tr></thead><tbody><tr><td><a href="entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html"><code>entwicklung/Design – Spielspaß 2.0.md</code></a></td><td>Die große Design-Notiz: Befunde, Hebel, Messwerte, verworfene Versuche — je Runde ein Abschnitt.</td></tr><tr><td><a href="entwicklung/Plan%20%E2%80%93%20Ausbau%201.2.html"><code>entwicklung/Plan – Ausbau 1.2.md</code></a></td><td>Phasen, Stand und Messwerte des Ausbaus 1.2.</td></tr><tr><td><a href="entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html"><code>entwicklung/Konzept – Netzwerk-Labor.md</code></a></td><td>Die Spezifikation des Spiels.</td></tr><tr><td><a href="entwicklung/Konzept%20%E2%80%93%20Lernplattform%20f%C3%BCr%20Betriebe%20und%20Schulen.html"><code>entwicklung/Konzept – Lernplattform für Betriebe und Schulen.md</code></a></td><td>Konzept für den Einsatz im Unterricht und in der Ausbildung.</td></tr><tr><td><a href="entwicklung/Befund%20%E2%80%93%20Programm%20startet%20wieder.html"><code>entwicklung/Befund – Programm startet wieder.md</code></a></td><td>Der Befund zum Integritätslabel, das die <code>.exe</code> blockierte — samt Reparaturweg.</td></tr><tr><td><a href="entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html"><code>entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md</code></a></td><td>Vertrag für die nächste Stufe: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag — <strong>noch nicht umgesetzt</strong> (Fassung 1.2.3).</td></tr><tr><td><a href="entwicklung/Klassenraum/Liesmich.html"><code>entwicklung/Klassenraum/</code></a></td><td>Die vier Teil-Dokumente zu diesem Vertrag (A Codec/Determinismus · B Oberfläche/Ablauf · C Rust/Live/QR · D Prüfung/Abnahme) mit allen Messprotokollen.</td></tr><tr><td><a href="entwicklung/Opus-Auftrag%20%E2%80%93%20Netzwerk-Labor.html"><code>entwicklung/Opus-Auftrag – Netzwerk-Labor.md</code></a></td><td>Der ursprüngliche Auftrag, aus dem das Projekt entstand.</td></tr></tbody></table></div>
+<h2 id="entwicklung-die-hilfestellung-und-ihre-gegenprufung-07-10-2026">Entwicklung: die Hilfestellung und ihre Gegenprüfung (07.10.2026)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Wofür</th></tr></thead><tbody><tr><td><a href="entwicklung/Hilfestellung%20%E2%80%93%20Stufen%20und%20Schnittstellen.html"><code>entwicklung/Hilfestellung – Stufen und Schnittstellen.md</code></a></td><td><strong>Der Vertrag</strong> der Hilfestellung: vier Bildungsstufen, Hilfekonto je Ticket, Datenformen <code>DATEN.hilfen</code>/<code>DATEN.trainings</code>, Schreibrechte je Baustein, Abnahmekriterien. Gespiegelt in <a href="Architektur.html"><code>Architektur.md</code></a> § 13.</td></tr><tr><td><a href="entwicklung/Review%20%E2%80%93%20Lernwirkung.html"><code>entwicklung/Review – Lernwirkung.md</code></a></td><td>Führt die Hilfe zum Lernen? Der wichtigste Bericht: zwei P1 (Vorrat ohne Zahlkraft, fehlende Lernverbuchung je Fertigkeit), und was gut ist. Mit Selbstkorrekturen des Prüfers.</td></tr><tr><td><a href="entwicklung/Review%20%E2%80%93%20Auffindbarkeit.html"><code>entwicklung/Review – Auffindbarkeit.md</code></a></td><td>Findet ein Azubi die Hilfe? Gemessen an einer DOM-Attrappe: Stufenwahl hinter dem Startknopf, vier Bedeutungen von „Stufe", 1 279 Zeichen Textwand, unerreichbarer Leisten-Knopf.</td></tr><tr><td><a href="entwicklung/Review%20%E2%80%93%20Wartbarkeit.html"><code>entwicklung/Review – Wartbarkeit.md</code></a></td><td>Doppelte Wahrheiten, Kopplung, defensive Rückfälle (17 „ist Baustein A da?"-Prüfungen: 11 nötig, 6 entfernbar), Testabdeckung.</td></tr><tr><td><a href="entwicklung/Review%20%E2%80%93%20Testqualit%C3%A4t.html"><code>entwicklung/Review – Testqualität.md</code></a></td><td>Die <strong>Mutationsprobe</strong>: künstlich eingebaute Fehler, und wie viele Tests sie fangen. Fünf Mutanten gemessen, alle erkannt; dazu die Lücke in „Wirkung vor Grün".</td></tr><tr><td><a href="entwicklung/Review%20%E2%80%93%20Betrieb.html"><code>entwicklung/Review – Betrieb.md</code></a></td><td>Spielstand-Migration v:2 → v:3 in elf Punkten, Byte-Gleichheit der Erzeugnisse, und warum die Fassung gezogen werden musste.</td></tr><tr><td><a href="entwicklung/Review%20%E2%80%93%20Betrieb-Werkzeuge.html"><code>entwicklung/Review – Betrieb-Werkzeuge.md</code></a></td><td>Die Prüfwerkzeuge selbst: welches misst was, und der Befund, dass der Rauchtest eine feste Ansichtsliste führte — die neue Ansicht fehlte darin.</td></tr><tr><td><a href="entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html"><code>entwicklung/Design – Spielspaß 2.0.md</code></a> § 31/§ 32</td><td>Der Bau der Hilfestellung und die Auslieferung 1.2.4 — inklusive dem, was bewusst <strong>nicht</strong> gebaut wurde.</td></tr></tbody></table></div>
+<h2 id="wie-dieses-verzeichnis-aufgeraumt-wurde">Wie dieses Verzeichnis aufgeräumt wurde</h2>
+<p>Bis zum 06.10.2026 lagen zwölf Notizen im Wurzelverzeichnis; ein Besucher sah sie vor dem Quelltext. Auf Wunsch wurden sie hierher gezogen — <strong>mit</strong> <code>git mv</code>, damit die Versionsgeschichte jeder Datei erhalten bleibt, und mit angepassten Verweisen (<code>tools/repo-aufraeumen.py</code>, <code>tools/repo-verweise-flicken.py</code>; der zweite Lauf prüft <strong>jeden</strong> relativen Verweis in <strong>jeder</strong> Markdown-Datei gegen die Wirklichkeit).</p>
+<p>Im Wurzelverzeichnis bleiben nur, was man dort erwartet: <code>README.md</code>, <code>CHANGELOG.md</code> (Konvention auf GitHub), <code>LICENSE</code>, <code>LIZENZ.md</code>, <code>AGENTS.md</code>, <code>.gitignore</code>, <code>.gitattributes</code>, <code>index.html</code> (Weiterleitung für Pages), die Baueingänge <code>bauen.py</code> und <code>schriften.css</code> sowie die Ordner <code>src/</code>, <code>tests/</code>, <code>tools/</code>, <code>android/</code>, <code>shell/</code>, <code>schriften/</code>, <code>Vorlagen/</code>, <code>Programm/</code>, <code>fremd/</code> und <code>docs/</code>.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

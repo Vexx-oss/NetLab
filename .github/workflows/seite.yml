@@ -1,8 +1,14 @@
 name: Spiel veröffentlichen
 
 # Stellt das Spiel als EINZELDATEI auf GitHub Pages.
-# Ergebnis: https://vexx-oss.github.io/Side-Project/ — ein Klick, spielt sofort im
-# Browser. Kein Download, kein Entpacken, keine Installation.
+# Ergebnis: https://vexx-oss.github.io/NetLab/ — ein Klick, spielt sofort im
+# Browser; dazu seit 07.10.2026 die Doku unter https://vexx-oss.github.io/NetLab/doku/.
+# Kein Download, kein Entpacken, keine Installation.
+#
+# ACHTUNG: Der Kommentar nannte die Adresse früher „…/Side-Project/". Gemessen am 09.10.2026:
+# diese Adresse antwortet mit HTTP 404, lebend ist ausschließlich „…/NetLab/" (so steht es auch
+# in README.md und in tools/seite-pruefen.py). Wer die Adresse sucht: `NetLab` ist der Repositorium-
+# Name, `Side-Project` war ein Arbeitstitel.
 #
 # Dieser Ablauf baut ABSICHTLICH nichts: Bauen und Prüfen macht „Prüfen"
 # (.github/workflows/pruefen.yml) bei jedem Push. Hier wird nur die fertige,
@@ -61,14 +67,29 @@ jobs:
             echo "::notice title=Pages noch aus::Es wird nichts veröffentlicht. Einmalig einschalten: Settings -> Pages -> Build and deployment -> Source: 'GitHub Actions'. Danach läuft dieser Ablauf von selbst."
           fi
 
+      # Seit 07.10.2026 wird auch die DOKU ausgeliefert (vorher nur das Spiel). `docs/doku/` ist
+      # versioniert (wie `docs/index.html`) und wird deshalb nur kopiert, nicht im Ablauf gebaut:
+      # so bleibt der Deploy kurz und man sieht im Repositorium, was ausgeliefert wird.
+      # `docs/bilder/HERKUNFT.md` wird ausgelassen — rohes Markdown gehört nicht ins Netz, und die
+      # Datei steht als eigenes Dokument in der Doku (`docs/doku/HERKUNFT.html`).
       - name: Seiten zusammenstellen
         if: steps.frage.outputs.an == 'ja'
         run: |
           mkdir -p _site
           cp docs/index.html _site/index.html
-          cp -r docs/bilder _site/bilder
+          mkdir -p _site/bilder
+          find docs/bilder -maxdepth 1 -type f ! -name '*.md' -exec cp {} _site/bilder/ \;
+          cp -r docs/doku _site/doku
           touch _site/.nojekyll
-          ls -la _site
+          test -f _site/doku/index.html
+          ls -la _site _site/doku | head -40
+
+      # Gegenprüfung des Standes, der WIRKLICH hochgeht: fehlt eine Dokumentseite, bleibt ein
+      # `[[…]]`-Verweis offen oder zeigt ein relativer Verweis ins Leere, bricht der Lauf ab,
+      # statt eine kaputte Doku zu veröffentlichen.
+      - name: Doku gegenprüfen (versionierter Stand)
+        if: steps.frage.outputs.an == 'ja'
+        run: python3 tools/seite.py --pruefen
 
       - uses: actions/upload-pages-artifact@v3
         if: steps.frage.outputs.an == 'ja'

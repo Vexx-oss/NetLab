@@ -2,7 +2,15 @@
 /* ---------- Konsole: GUI ↔ Befehl, Befehlsblöcke, Vorschläge ----------
    CLI.entspricht(geraet, pfad, wert) → Befehlsblock für die „entspricht:“-Zeile im Inspektor | null
    CLI.anwenden(netz, id, text, {verlauf?}) → {ok, fehler:[{nr, zeile, meldung}]}   (ab privilegiertem Modus, Rückfragen automatisch)
-   CLI.vorschlag(sitzung) → {befehl, text} | null   (Einstieg: nächster sinnvoller Befehl) */
+   CLI.vorschlag(sitzung) → {befehl, text} | null   (Einstieg: nächster sinnvoller Befehl)
+     ROLLE (Review „Testqualität", 09.10.2026): Das ist der RÜCKFALL, nicht mehr der Hauptweg.
+     Im Programm holt UI.konsole den Vorschlag aus Spiel.hilfe.passend (DATEN.hilfen, Vertrag § 4.1);
+     diese Funktion greift nur, wenn Spiel.hilfe/DATEN.hilfen fehlen (src/ui/konsole.js:334-346).
+     Sie bleibt, weil sie in einzelnen Modi genauer ist als der Hauptweg — sie kennt den Kontext der
+     SITZUNG (config/if/vlan/line/dhcp: was fehlt genau an DIESEM Objekt) und liefert dort den
+     nächsten Teilschritt („network “, „password “, „encapsulation dot1Q 10“, „no shutdown“).
+     Löschen wäre ein Funktionsverlust für Fassungen ohne DATEN.hilfen.
+     Sie ist je Modus gedeckt von tests/cli-vorschlag.test.js. */
 (() => {
   const C = CLI, h = C.h;
 
@@ -183,7 +191,7 @@
     return lauf();
   };
 
-  /* ---------- Vorschlag für den Einstieg ---------- */
+  /* ---------- Vorschlag für den Einstieg: Rückfall für Fassungen ohne DATEN.hilfen (s. Kopfkommentar) ---------- */
   const V = (befehl, text) => ({befehl, text});
   C.vorschlag = function(s){
     if (!s || s.rueckfrage) return null;

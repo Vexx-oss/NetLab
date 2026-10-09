@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Herkunft der Bilder · Netzwerk-Labor</title>
+<meta name="description" content="Herkunft und Lizenz der Bilder in diesem Ordner.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Herkunft der Bilder</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<h1 id="herkunft-der-bilder">Herkunft der Bilder</h1>
+<p>Diese Bilder sind <strong>Ausschnitte aus den Abnahme-Nachweisen</strong> des Projekts, keine gestellten Aufnahmen. Quelldatei, Pruefsumme und Groesse stehen unten; die Originale liegen unter <code>Nachweise/</code> (nicht im Git, weil 22 MB Beweismaterial).</p>
+<p>Bearbeitung: <strong>nur auf Breite skaliert und als JPEG gespeichert.</strong> Nicht beschnitten, nicht retuschiert.</p>
+<p><strong>Die Bilder zeigen die Fassung 1.1.0</strong> — die Nachweise wurden vor dem Versionssprung auf 1.2.0 aufgenommen. Die Oberflaeche ist dieselbe; die kleinen Ziffern in der Kopfzeile der Bilder sind der einzige Unterschied. Neue Nachweise werden mit der jeweils aktuellen Fassung erzeugt.</p>
+<p>Neu bauen: <code>python tools/bilder.py</code> · Pruefen: <code>python tools/bilder.py --pruefen</code></p>
+<div class="dk-tabelle"><table><thead><tr><th>Bild</th><th>aus Nachweise/</th><th>Groesse</th><th>SHA256 (Bild)</th></tr></thead><tbody><tr><td><code>topologie.jpg</code></td><td><code>1.2-Topo/topo-praxis-mit-tasten.png</code></td><td>102,251 B</td><td>208e48bd03accc6b</td></tr><tr><td><code>einstieg.jpg</code></td><td><code>1.2-Phase-A/nachher-1366-1-start.png</code></td><td>90,960 B</td><td>35dad476e939bfe3</td></tr><tr><td><code>konsole.jpg</code></td><td><code>1.2-C/c-1366-3-terminal-diagnose.png</code></td><td>151,061 B</td><td>4a768c2dfe7a6014</td></tr><tr><td><code>simulation.jpg</code></td><td><code>1.2-Phase-A/nachher-1366-8-sim.png</code></td><td>106,088 B</td><td>9fd0246ca8916486</td></tr><tr><td><code>kompetenzkarte.jpg</code></td><td><code>1.2-E2/e2-1366-5-kompetenzkarte.png</code></td><td>119,266 B</td><td>b732452c9c14d15f</td></tr><tr><td><code>ergebnis.jpg</code></td><td><code>1.2-S2/s2-1366-1-erster-auftrag.png</code></td><td>73,753 B</td><td>3160af377bdc6e54</td></tr><tr><td><code>postfach.jpg</code></td><td><code>1.2-C/c-1366-1-postfach.png</code></td><td>110,112 B</td><td>ec5426eb6e9dabfe</td></tr><tr><td><code>hilfe.jpg</code></td><td><code>1.2-C/c-1366-8-hilfe-naechste-diagnose.png</code></td><td>112,689 B</td><td>6c72c5f6d77ee865</td></tr></tbody></table></div>
+<h2 id="was-auf-welchem-bild-zu-sehen-ist">Was auf welchem Bild zu sehen ist</h2>
+<ul><li><strong><code>topologie.jpg</code></strong> — Topologie der Arztpraxis mit Adressschildern, VLAN-Flaechen und den drei Werkzeugen</li><li><strong><code>einstieg.jpg</code></strong> — Der erste Auftrag „Kasse ohne Netz“: Ticket, Ziele, Senioren-Hinweis, Labor</li><li><strong><code>konsole.jpg</code></strong> — IOS-aehnliche Konsole und Windows-Terminal bei der Fehlersuche (ping, nslookup)</li><li><strong><code>simulation.jpg</code></strong> — Simulation auf Frame-Ebene: 42 Ereignisse, Filter nach ARP/ICMP, PDU-Ansicht</li><li><strong><code>kompetenzkarte.jpg</code></strong> — Lernstand: Kompetenzkarte, Fehlerheft, Stufen „neu“ bis „gemeistert“</li><li><strong><code>ergebnis.jpg</code></strong> — Abnahme bestanden: Sterne, Lohn, Abzeichen, „Merke“-Kasten mit Lernquelle</li><li><strong><code>postfach.jpg</code></strong> — Postfach: Kundenmails mit Symptom aus Kundensicht</li><li><strong><code>hilfe.jpg</code></strong> — Die Hilfeleiter: naechste Diagnose vorschlagen, Fehler kostet nichts</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

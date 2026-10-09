@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AGENTS.md – Betriebsregeln für das Netzwerk-Labor · Netzwerk-Labor</title>
+<meta name="description" content="Betriebsregeln fuer Mitarbeit und Modelle: Verbote, Befehle, Zeilenenden, Ablage.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">AGENTS.md – Betriebsregeln für das Netzwerk-Labor</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#absolute-verbote">Absolute Verbote</a></li>
+<li><a href="#befehle">Befehle</a></li>
+<li><a href="#zeilenenden-bewahren">Zeilenenden bewahren</a></li>
+<li><a href="#arbeitsweise">Arbeitsweise</a></li>
+<li><a href="#ablage">Ablage</a></li>
+</ul>
+</nav><h1 id="agents-md-betriebsregeln-fur-das-netzwerk-labor">AGENTS.md – Betriebsregeln für das Netzwerk-Labor</h1>
+<p>Gilt für <strong>jedes</strong> Modell und jeden Menschen, der in diesem Projekt arbeitet. Kurz, verbindlich, ohne Ausnahmen. Vorbild für diese Datei: docs/entwicklung/Design – Spielspaß 2.0.md § 24 (Auftrag „R“, Punkt 1).</p>
+<h2 id="absolute-verbote">Absolute Verbote</h2>
+<ol><li><strong>Beende NIE Prozesse nach Namen oder Muster.</strong> Nicht <code>msedgewebview2</code>, nicht <code>msedge</code>, nicht <code>explorer</code>, nicht <code>python</code>, nicht <code>node</code>. Du darfst <strong>höchstens eine PID beenden, die du in dieser Sitzung selbst gestartet hast</strong> — und nur diese. Starte nichts neu, starte Windows nicht neu. <em>Grund (belegt):</em> Am 05.10.2026 wurden 13 <code>msedgewebview2.exe</code> zwangsweise beendet, darunter die Hosts der Windows-Shell. <em>Nachtrag 05.10.2026, 19:30:</em> Dieser Zusammenhang war eine Fehldeutung – die <code>.exe</code> startet wieder (Ursache war das Integritätslabel „Niedrig“ des Vaults, siehe Befund unten). Die Regel gilt unverändert.</li><li>**Kein <code>git push</code>, kein <code>--force</code>, kein <code>reset --hard</code>, kein Zweigwechsel, kein Commit auf <code>master</code>, keine Zweige löschen.** Gearbeitet wird auf <code>ausbau-1.2</code>.</li><li><strong>Keine Dateien außerhalb des Projektordners ändern.</strong> Die Ordner <code>Nachweise/</code> und <code>Programm/</code> werden <strong>nicht</strong> gelöscht (dort liegen Bildschirmfoto-Nachweise und die gebauten Programme).</li><li><strong>Keine Software installieren oder deinstallieren.</strong></li><li><strong>Behaupte nichts, was du nicht in dieser Sitzung gemessen hast.</strong> „Wahrscheinlich“, „vermutlich“ und „nicht geprüft“ müssen genau so dastehen.</li></ol>
+<h2 id="befehle">Befehle</h2>
+<p><strong>Am Ende jeder Sitzung:</strong> <a href="SITZUNGSABSCHLUSS.html"><code>docs/SITZUNGSABSCHLUSS.md</code></a> — die acht Schritte von „aufräumen" bis „nachmessen, was online steht", samt der Regeln, die aus Fehlern stammen (Fassung ziehen, Zeilenenden prüfen, erzeugen und gegenprüfen, Stand nachziehen, veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unten.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Zweck</th><th>Befehl</th><th>Erwartung</th></tr></thead><tbody><tr><td>Tests</td><td><code>sh tools/test.sh</code></td><td>meldet <code>N/N grün</code> + <code>davon N übersprungen</code> (Stand: <strong>434</strong>, 50 Testdateien, 83 Module – 07.10.2026)</td></tr><tr><td>+ Rauchtest der Oberfläche</td><td><code>sh tools/test.sh --rauch</code></td><td>zusätzlich <strong>39/39</strong> (12 Ansichten × 3 Breiten, seit 07.10.2026 mit „Training")</td></tr><tr><td>Gegen die Falle in Testnamen</td><td><code>node tools/pruefe-namen-flicken.js [--setzen]</code></td><td>findet <code>pruefe("…„…"…")</code>, das den Lauf mit <code>LADEFEHLER</code> (Exit 2) anhält — trockener Lauf zuerst</td></tr><tr><td>Tiefe Menüebenen (Android und Web)</td><td><code>python tools/menueprobe.py --datei android/bau/assets/index.html --lauf</code></td><td><strong>5 Profile, 49 Kriterien erfüllt, 0 verletzt</strong> — Achtung: das prüft die <strong>Android-Fassung</strong> (Stand 1.2.3, ohne die Module der Hilfestellung vom 07.10.2026). Die Zahl ist grün, sagt über den aktuellen Quellstand aber <strong>nichts</strong>. Für den Web-Bau: <code>--datei web/index.html</code> (am 07.10.2026 <strong>rot</strong>: 36/43, 44-px-Trefferflächen in den Editor-Menüs — gemessen <strong>identisch</strong> zu <code>HEAD~1</code>, also vorbestehend)</td></tr><tr><td>Simulation gegen Referenzstand</td><td><code>node tools/sim-stand.js</code></td><td>„Simulation unverändert gegenüber dem Referenzstand“</td></tr><tr><td>Klassen ↔ CSS</td><td><code>python tools/klassen.py</code></td><td><code>0 Klassen ohne CSS-Regel</code></td></tr><tr><td>Regelwerk (Minimalismus)</td><td><code>python tools/ethos.py</code></td><td><code>GRUEN: keine Regel schlechter als tests/stil-stand.json</code></td></tr><tr><td>Bauen (Browser-Fassung)</td><td><code>python bauen.py</code></td><td>immer <strong>vor</strong> <code>cargo tauri build</code></td></tr><tr><td>Einzeldatei (auch die Wurzel-Datei)</td><td><code>python tools/einfach.py</code> · <code>--ziel Netzwerk-Labor.html</code></td><td>beide byte-gleich, <code>0 Außenverweise</code></td></tr><tr><td>Android-APK</td><td><code>python android/bauen.py</code></td><td>7 Schritte, ~5 s, endet mit <code>GRUEN</code></td></tr><tr><td>PC-Hülle für die Entwicklungsrunde</td><td><code>pwsh -File shell/entwickeln.ps1 -NurBauen</code></td><td>Debug-Profil, ~4 s je Runde (Auslieferung bleibt <code>cargo tauri build</code>)</td></tr><tr><td>Fassung ziehen (1.2.3 → 1.2.4)</td><td><code>python tools/fassung-ziehen.py --neu 1.2.4</code> · <code>--setzen</code></td><td>Trockenlauf zuerst; im <code>Cargo.lock</code> bleibt nur der eigene Block; <strong><code>VERSION_CODE</code> in <code>android/bauen.py</code> von Hand nachziehen</strong> (muss über dem aus <code>versionName</code> abgeleiteten Wert liegen)</td></tr><tr><td>Tote Verweise finden</td><td><code>python tools/repo-verweise-flicken.py</code></td><td>prüft <strong>jeden</strong> relativen Verweis in jeder Markdown-Datei — <strong>schreibt aber</strong>: es setzt tote Verweise zuerst gerade</td></tr><tr><td>Die drei Randbefunde nachmessen</td><td><code>python tools/nachprobe-menuefix.py</code></td><td><code>GRÜN: alle drei Befunde behoben</code></td></tr><tr><td>Echtes Programm</td><td><code>python tools/q-echt.py</code></td><td>startet die <code>.exe</code>; siehe Befund unten</td></tr><tr><td>Klassenraum-Codec messen</td><td><code>&amp; "&lt;node&gt;" tools\klassenraum-probe\A-codec-probe.js</code></td><td>erschöpfender Code-Round-Trip über 2²⁰ Nutzlasten (~250 s), schreibt <code>Nachweise/Klassenraum/A-codec.json</code></td></tr><tr><td>Klassenraum-Server bauen</td><td><code>cargo build --release</code> in <code>tools/klassenraum</code></td><td>eine <code>.exe</code> <strong>ohne jede Kiste</strong> (322.560 B), <code>cargo test</code> 10/10</td></tr><tr><td>Klassenraum-Server prüfen</td><td><code>pwsh -File tools\klassenraum-probe\C-http-probe.ps1</code></td><td>20 echte HTTP-Messungen, endet mit <code>20/20</code>, Port danach frei</td></tr></tbody></table></div>
+<p>Node liegt portabel unter <code>%LOCALAPPDATA%\node-portable\node-v24.21.0-win-x64\node.exe</code> (v24.21.0).</p>
+<p><strong>In eingeschränkten Umgebungen</strong> (z. B. einer Werkzeug-Sandbox) startet <code>sh tools/test.sh</code> nicht, wenn <code>sh.exe</code> direkt aufgerufen wird: dann fehlt <code>dirname</code>, weil Git-<code>/usr/bin</code> nicht im PATH liegt, und das Skript sucht <code>tests/run.js</code> im falschen Ordner. Verlässlich ist:</p>
+<pre><code>&amp; "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'</code></pre>
+<p><strong>Die <code>.exe</code> startet wieder</strong> (Stand 05.10.2026, 19:30 – Befund und Beweise in <code>Nachweise/1.2-Start/BEFUND.md</code>). Der frühere Befund „startet nicht“ war falsch gedeutet: Nicht die zwangsweise beendeten <code>msedgewebview2.exe</code> waren die Ursache, sondern das <strong>Integritätslabel „Niedrig“</strong> auf dem Vault (Überrest der Werkzeug-Sandbox). Davon erbt <code>Programm/Netzwerk-Labor.exe</code>, läuft dadurch als Low-Prozess und darf <code>%LOCALAPPDATA%</code> nicht beschreiben; die WebView2-Laufzeit kann ihr Profil nicht anlegen und bricht ab (<code>failed to create webview</code>, <code>0x800700AA</code>/<code>0x8000FFFF</code>, Exception <code>0x80000003</code>). <strong>Reparatur (ohne Administratorrechte, wiederholbar):</strong> Doppelklick auf <code>Programm/Integritaet-reparieren.cmd</code> oder <code>icacls Programm /setintegritylevel (OI)(CI)Medium /T</code> + <code>icacls Programm/Netzwerk-Labor.exe /setintegritylevel Medium</code>. Der alte Befund in <code>Design – Spielspaß 2.0.md</code> § 25 und in <code>docs/Architektur.md</code> ist damit überholt.</p>
+<h2 id="zeilenenden-bewahren">Zeilenenden bewahren</h2>
+<p>Mehrere Dateien haben CRLF, andere LF, einzelne gemischt (die Design-Notiz: 1156 × CRLF, 43 × LF). <strong>Vor</strong> dem Bearbeiten und <strong>nach</strong> jeder Bearbeitung prüfen:</p>
+<pre><code>git ls-files --eol &lt;Datei&gt;                              # wie liegt die Datei im Index / im Arbeitsbaum?
+git diff --stat &lt;Datei&gt;                                 # mit Zeilenenden
+git diff --stat --ignore-cr-at-eol &lt;Datei&gt;              # ohne Zeilenenden</code></pre>
+<p>Weichen die Zahlen <strong>stark</strong> voneinander ab (Beispiel aus § 24: <code>engine.js</code> mit 265 Zeilen gegen 6 echte), hast du die Zeilenenden der ganzen Datei umgestellt: Datei aus Git wiederherstellen (nur wenn sie vorher sauber war) und so bearbeiten, dass die vorhandenen Enden erhalten bleiben — mit einem Skript, das die Zeilen einzeln ersetzt bzw. beim Anhängen das überwiegende Ende der Datei übernimmt. Ein Editor, der beim Speichern normalisiert, ist dafür ungeeignet.</p>
+<h2 id="arbeitsweise">Arbeitsweise</h2>
+<ul><li><strong>Senkrechter Schnitt vor Breite.</strong> Lieber eine Funktion vollständig — Modell, Simulation, Konsole, Oberfläche, Lehrtext, Fehlerinjektor, Ticket, Test — als fünf halbe Funktionen. Nach jedem Schritt muss etwas <strong>spielbar</strong> sein.</li><li><strong>Wirkung vor Grün.</strong> Ein Baustein zählt erst, wenn er im Programm vorkommt. Grüne Tests ohne Aufruf aus Ticket oder Oberfläche gelten als <strong>nicht fertig</strong>. <em>Belegtes Gegenbeispiel:</em> Der gesamte DHCP-Pool-Modus der Konsole war seit 1.0 wirkungslos, weil der Test nur den Prompt prüfte (gefunden 05.10.2026). Ein Test, der nur den Prompt prüft, ist kein Test.</li><li><strong>Vertrag zuerst.</strong> Jede Änderung an Datenformen steht zuerst in <code>docs/Architektur.md</code> (Datenform, Verhalten, Gründe, Trace-Format). Danach der Code.</li><li><strong>Selbst und nacheinander.</strong> Keine Agentenschwärme: Ein Schwarm riss zweimal das Limit, und drei von vier Teammitgliedern brachen am 05.10.2026 mitten in der Arbeit ab, ohne etwas zu hinterlassen.</li><li><strong>Nach jedem Commit den Stand nachziehen.</strong> <code>docs/entwicklung/Design – Spielspaß 2.0.md</code> (neuer Abschnitt) und <code>docs/Architektur.md</code> (Stand-Tabelle) müssen den echten Zustand zeigen. Kein Commit ohne Stand.</li><li><strong>Tests statt Augenschein, wo es geht.</strong> Nach jeder Änderung an <code>src/sim/</code> oder <code>src/modell/</code> zusätzlich <code>node tools/sim-stand.js</code> laufen lassen und jede Abweichung benennen: gewollt oder ungewollt.</li><li><strong>Determinismus.</strong> Kein <code>Math.random</code> ohne Seed, kein Datum, keine Uhr in <code>src/sim/</code> und <code>src/cli/</code>.</li><li><strong>Ehrlich berichten.</strong> Stand nachzählen statt schätzen, offen sagen, was <strong>nicht</strong> geprüft wurde. Antworten auf Deutsch.</li></ul>
+<h2 id="ablage">Ablage</h2>
+<ul><li><code>src/</code> – Code in Schichten: <code>kern</code> · <code>modell</code> · <code>sim</code> · <code>cli</code> · <code>daten</code> · <code>spiel</code> · <code>plattform</code> · <code>ui</code> · <code>stil</code></li><li><code>tests/</code> – Tests (<code>sh tools/test.sh</code>), dazu die versionierte Simulations-Referenz <code>tests/sim-stand.json</code></li><li><code>tools/</code> – Bau-, Mess- und Prüfwerkzeuge</li><li><code>Programm/</code> – gebaute Programme · <code>Nachweise/</code> – Bildschirmfotos und Messdateien (<strong>beide nicht im Git</strong>)</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

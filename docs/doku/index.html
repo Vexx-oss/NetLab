@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dokumentation · Netzwerk-Labor</title>
+<meta name="description" content="Alle Dokumente des Netzwerk-Labors auf einer Seite.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Dokumentation</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<h1>Dokumentation</h1>
+<p class="dk-hinweis">29 Dokumente, aus dem Repositorium erzeugt — dieselben Dateien, die im Ordner <code>docs/</code> liegen (plus <code>README.md</code> und <code>AGENTS.md</code>). Nichts hiervon wird von Hand gepflegt.</p>
+<h2>Einstieg</h2>
+<ul class="dk-liste">
+<li><a class="dk-karte" href="INHALT.html"><b>📚 Die Notizen dieses Projekts</b><span>Die Notizen dieses Projekts — was gilt, was geschehen ist.</span></a></li>
+<li><a class="dk-karte" href="Liesmich.html"><b>🖧 Netzwerk-Labor</b><span>Uebersicht fuer Leser in Kurzform.</span></a></li>
+<li><a class="dk-karte" href="README.html"><b>Netzwerk-Labor</b><span>Was das Spiel ist, wie man es startet und was es kann.</span></a></li>
+</ul>
+<h2>Betrieb</h2>
+<ul class="dk-liste">
+<li><a class="dk-karte" href="AGENTS.html"><b>AGENTS.md – Betriebsregeln für das Netzwerk-Labor</b><span>Betriebsregeln fuer Mitarbeit und Modelle: Verbote, Befehle, Zeilenenden, Ablage.</span></a></li>
+<li><a class="dk-karte" href="Architektur.html"><b>🧱 Architektur – Netzwerk-Labor</b><span>Der Vertrag zwischen den Bausteinen: Datenformen, Verhalten, Gruende, Trace-Format.</span></a></li>
+<li><a class="dk-karte" href="Bauen.html"><b>Bauen, Testen, Ausliefern</b><span>Bauen, Testen, Messen, Ausliefern im Detail — samt der gemessenen Fallen.</span></a></li>
+<li><a class="dk-karte" href="CHANGELOG.html"><b>Änderungsverlauf</b><span>Was sich wann geaendert hat — aus der echten Commit-Historie.</span></a></li>
+<li><a class="dk-karte" href="Mitmachen.html"><b>Mitmachen</b><span>Arbeitsweise und Regeln fuer Beitraege.</span></a></li>
+<li><a class="dk-karte" href="SITZUNGSABSCHLUSS.html"><b>Sitzungsabschluss: von der Änderung zur veröffentlichten Fassung</b><span>Die acht Schritte am Ende einer Sitzung, mit den Regeln aus Fehlern.</span></a></li>
+</ul>
+<h2>Review</h2>
+<ul class="dk-liste">
+<li><a class="dk-karte" href="entwicklung/Review%20%E2%80%93%20Auffindbarkeit.html"><b>🔎 Review – Auffindbarkeit und Spielerführung (Aufgabe R5)</b><span>⬆️ Netzwerk-Labor · Vertrag: Hilfestellung – Stufen und Schnittstellen · Rolle: Prüfer für Auffindbarkeit.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Review%20%E2%80%93%20Betrieb-Werkzeuge.html"><b>Review – Betrieb-Werkzeuge (R2, Teil A und B)</b><span>Weil Quellstand, docs/index.html und web/index.html dieselbe Kennung tragen, messen die Browser-Werkzeuge.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Review%20%E2%80%93%20Betrieb.html"><b>Review – Betrieb und Auslieferung</b><span>* Der Code ist betriebsreif.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Review%20%E2%80%93%20Lernwirkung.html"><b>Review – Lernwirkung: Führt die Hilfestellung zum Lernen oder nur zum Durchkommen?</b><span>⬆️ Netzwerk-Labor · Vertrag: Hilfestellung – Stufen und Schnittstellen · Auftrag: task-13 (R1).</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Review%20%E2%80%93%20Testqualit%C3%A4t.html"><b>🔬 Review – Testqualität (task-15, Qualitätsingenieur)</b><span>⬆️ Netzwerk-Labor · Vertrag: Hilfestellung – Stufen und Schnittstellen · Architektur.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Review%20%E2%80%93%20Wartbarkeit.html"><b>🔍 Review – Wartbarkeit der Bausteine „Hilfestellung"</b><span>⬆️ Netzwerk-Labor · Auftrag: task-14 · Vertrag: Hilfestellung – Stufen und Schnittstellen · Architektur: Architektur.</span></a></li>
+</ul>
+<h2>Entwicklung</h2>
+<ul class="dk-liste">
+<li><a class="dk-karte" href="bilder/HERKUNFT.html"><b>Herkunft der Bilder</b><span>Herkunft und Lizenz der Bilder in diesem Ordner.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Befund%20%E2%80%93%20Programm%20startet%20wieder.html"><b>🖧 Befund – das Netzwerk-Labor startet wieder</b><span>Der Befund zum Integritaetslabel, das die .exe blockierte — samt Reparaturweg.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html"><b>🎮 Design – Spielspaß 2.0</b><span>Die grosse Design-Notiz: Befunde, Hebel, Messwerte, verworfene Versuche.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Hilfestellung%20%E2%80%93%20Stufen%20und%20Schnittstellen.html"><b>🪜 Hilfestellung – Stufen und Schnittstellen (verbindlicher Vertrag)</b><span>Der Vertrag der stufenweisen Hilfestellung: Bildungsstand, Vorrat, Schnittstellen.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html"><b>Klassenraum – Umsetzungsreife Spezifikation</b><span>Vertrag fuer die naechste Stufe: ein Code, derselbe Auftrag auf jedem Geraet.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Klassenraum/A%20%E2%80%93%20Codec%20und%20Determinismus.html"><b>A · Codec und Determinismus (Bereich A des Auftrags „Klassenraum")</b><span>Stand: 2026-10-06 · Zweig ausbau-1.2 · nichts committet, nichts gepusht.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Klassenraum/B%20%E2%80%93%20Oberfl%C3%A4che%20und%20Ablauf.html"><b>B · Oberfläche und Ablauf (Bereich B des Auftrags „Klassenraum")</b><span>---.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Klassenraum/C%20%E2%80%93%20Rust%2C%20Live%20und%20QR.html"><b>C · Rust: Live-Server (C1/C2) und QR-Code (D)</b><span>---.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Klassenraum/D%20%E2%80%93%20Pr%C3%BCfung%2C%20Abnahme%20und%20Reihenfolge.html"><b>D · Prüfung, Abnahme und Reihenfolge</b><span>---.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Klassenraum/Liesmich.html"><b>Klassenraum – Arbeitsordner</b><span>Einstieg in die vier Teil-Dokumente des Klassenraum-Vertrags.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Konzept%20%E2%80%93%20Lernplattform%20f%C3%BCr%20Betriebe%20und%20Schulen.html"><b>Konzept – Lernplattform für Betriebe und Schulen</b><span>Konzept fuer den Einsatz im Unterricht und in der Ausbildung.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html"><b>🖧 Konzept – Netzwerk-Labor (Arbeitstitel)</b><span>Die Spezifikation des Spiels.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Opus-Auftrag%20%E2%80%93%20Netzwerk-Labor.html"><b>🤖 Opus-Auftrag – Netzwerk-Labor</b><span>Der urspruengliche Auftrag, aus dem das Projekt entstand.</span></a></li>
+<li><a class="dk-karte" href="entwicklung/Plan%20%E2%80%93%20Ausbau%201.2.html"><b>🗺️ Plan – Ausbau 1.2 „Übersichtlich, abwechslungsreich, mit echtem Terminal"</b><span>Phasen, Stand und Messwerte des Ausbaus 1.2.</span></a></li>
+</ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

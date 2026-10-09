@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🤖 Opus-Auftrag – Netzwerk-Labor · Netzwerk-Labor</title>
+<meta name="description" content="Der urspruengliche Auftrag, aus dem das Projekt entstand.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">🤖 Opus-Auftrag – Netzwerk-Labor</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<hr>
+<p>tags: [FISI, Lernspiel, Auftrag] erstellt: 2026-09-30 aktualisiert: 2026-09-30 (Desktop-Programm mit Tauri)</p>
+<hr>
+<h1 id="opus-auftrag-netzwerk-labor">🤖 Opus-Auftrag – Netzwerk-Labor</h1>
+<p>⬆️ <a href="../Liesmich.html">Netzwerk-Labor</a> · Grundlage: <a href="../entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html">Konzept – Netzwerk-Labor</a></p>
+<p>Den Block unten in eine neue Sitzung kopieren (Arbeitsordner: <code>Documents\Joshua</code>, Modell Opus). Er ist absichtlich eigenständig. <strong>Eine Phase je Sitzung</strong> ist am robustesten: für die nächste den Block wiederverwenden und <code>PHASE</code> austauschen. <strong>Phase 0 immer allein</strong>, sie enthält die ganze Infrastruktur (Rust-Build, Linux-Umgebung, Fensterverhalten).</p>
+<pre><code class="sprache-text">Du baust das „Netzwerk-Labor“: ein Lernspiel für FISI-Auszubildende, in dem man als Ein-Mann-Systemhaus
+Netzwerk-Tickets in einem echten Netzwerk-Simulator löst (Diagramm + Konfig-Panels + IOS-ähnliche Konsole),
+mit Karriere- und Idle-Schicht. Es ist ein EIGENSTÄNDIGES DESKTOP-PROGRAMM für Windows (.exe) und Linux,
+das sich am Bildschirmrand still und minimal verhält, ohne die Sicht des Nutzers zu verdecken.
+Die Spezifikation liegt fertig vor. Setze sie um, entscheide Details selbst, halte Entscheidungen im Log fest.
+
+PHASE: 0 (Hülle und Grundlage, siehe Konzept § 11). Erst danach Phase 1.
+
+ZUERST LESEN (in dieser Reihenfolge, vollständig):
+1. 10-Projekte/Lernprojekte/Netzwerk-Labor/Konzept – Netzwerk-Labor.md   ← Spezifikation, verbindlich
+   (für Phase 0 besonders § 9 „Technik und Desktop-Hülle“ mit 9.1–9.8, dazu § 11 und § 12)
+2. 10-Projekte/Lernprojekte/FISI-Spielhalle/Plan – Spielhalle 2.0.md und Liesmich.md   ← Vorbild und Konventionen
+3. FISI-Spielhalle/src/kern.js, lernmotor.js, ui.js, stil.css, tests.html und bauen.py
+   ← so ist die Spielhalle gebaut; das Labor nutzt DENSELBEN Lernmotor (zur Bauzeit eingebunden, nicht kopiert)
+4. Stoffquellen für spätere Lehrtexte in 20-Bereiche/Umschulung/Netzwerk/: Network – Lernfassung.md,
+   VLAN – Lernfassung.md (enthält Cisco-Befehle), TCP – Lernfassung.md, 04-AP1-Netzwerk.md,
+   07-Uebungen-Subnetting-Szenarien.md, Fragen – Netzwerke planen.md
+
+TECHNIK (entschieden, nicht neu verhandeln)
+- Tauri 2 als Hülle, Oberfläche und Spiellogik in schlichtem JavaScript (kein Bundler, kein TypeScript, kein npm für die App).
+  Tauri lädt den von bauen.py gebauten Ordner web/; API über app.withGlobalTauri (window.__TAURI__) – vorher in der
+  aktuellen Tauri-Doku gegenprüfen, die Konfiguration kann sich geändert haben.
+- Rust-Seite dünn halten (Fenster, Tray, Speichern, Autostart, Einzelinstanz; grob &lt; 500 Zeilen).
+- Der Kern kennt nur die Plattform-Schnittstelle (src/plattform/plattform.js), nie Tauri direkt. Zwei Umsetzungen:
+  plattform-tauri.js und plattform-browser.js (Browser-Fassung als Einzeldatei über bauen.py --paket).
+  plattform.kann("...") blendet Nicht-Unterstütztes aus, mit einem Satz Begründung. Es darf nie etwas brechen.
+- Speichern: Cache mit Durchschreiben, damit `store.get/set` des Lernmotors synchron bleiben. Rust schreibt atomar
+  (temporäre Datei, dann umbenennen), 5 rotierende Sicherungen, Versionsfeld, Export/Import per Dateidialog.
+- Ein Fenster, zwei Ansichten (Leiste/Voll) plus Tray. Leiste: rahmenlos, klein, halbdurchsichtig, ohne Fokus,
+  nur Maus, kein Ton, neue Tickets nur als Zähler/Punkt. Regeln in Konzept § 9.7 sind verbindlich.
+- Zeigerereignisse statt HTML5-Drag-and-Drop; konservatives CSS; Schriften lokal (woff2), keine externen Anfragen.
+- sim/ und cli/ greifen NIE auf DOM, Datum oder Zufall direkt zu (Zufall nur über übergebenen Seed).
+- Simulation = ereignisgesteuert auf Frame-Ebene, Ergebnis eine Trace als reine Daten (für spätere Phasen).
+- Deutsche Oberfläche, Anrede „du“. Keine erfundenen Fachinhalte, jeder Lehrtext mit Quelle, Unbelegtes als „IOS-ähnlich“.
+  Kein Cisco-Logo, keine Cisco-Symbole. Fertigkeiten heißen lab.*, Thema „Netzwerk“.
+
+UMGEBUNG (am 30.09.2026 auf diesem Rechner geprüft)
+- Vorhanden: Rust 1.97.1 (cargo, rustc), Visual Studio 2022 Community (C++-Arbeitslast NICHT geprüft), WebView2 154,
+  Python 3.14, Git, Docker, WSL2 mit Ubuntu 26.04 (WSLg: Wayland, DISPLAY=:0 für XWayland).
+- Fehlt: Node, tauri-cli. In der WSL-Ubuntu fehlt ALLES (gcc, cargo, node, pkg-config, WebKitGTK-Entwicklungspakete).
+- Der Nutzer hat Werkzeug-Installationen ausdrücklich erlaubt. Trotzdem: Vor jeder Installation mit Adminrechten
+  (winget, sudo apt) einen Satz „was und warum“ nennen, nur installieren, was Phase 0 braucht (Konzept § 9.8,
+  erste vier Zeilen), Versionen ins Log. Paketnamen auf Ubuntu 26.04 mit apt-cache prüfen. Beim WSL-Start erscheint
+  eine Netzwerkwarnung (Fallback VirtioProxy); falls apt deshalb scheitert, Ursache klären statt umgehen.
+- Der erste Rust-Build dauert Minuten: im Hintergrund laufen lassen, nicht danebenstehen.
+
+ABNAHME PHASE 0 (sichtbare Abläufe, nicht „Modul existiert“)
+  1. Netzwerk-Labor.exe startet per Doppelklick unter Windows; die Linux-Fassung startet in WSLg.
+     Probiere in WSLg beides: mit GDK_BACKEND=x11 (XWayland) und ohne (Wayland).
+  2. Leiste ⇄ Vollansicht per Klick, im selben Fenster; die Vollansicht baut ihr DOM beim Wechsel ab.
+  3. Tray-Symbol; ein simuliertes Ticket (Testknopf) setzt Punkt und Zähler, OHNE Fokus, Ton oder Pop-up.
+  4. Neustart des Programms behält den Zustand; beschädigte Datei → letzte Sicherung wird geladen und gemeldet.
+  5. Zweiter Start holt die Leiste nach vorn statt ein zweites Programm zu öffnen.
+  6. Die Tabelle aus Konzept § 9.4 ist je System ausgefüllt (getestet, nicht angenommen), Rückfall-Anzeigen funktionieren.
+  7. Browser-Fassung (bauen.py --paket): START.html öffnet per Doppelklick, Konsole ohne Fehler.
+  8. Lernmotor eingebunden: eine lab.*-Fertigkeit erscheint im Lernstand; tests.html grün, Node-Lauf (tests/run.js) grün.
+  9. Leerlaufwerte (CPU, Speicher) in Tray und Leiste gemessen, Windows und Linux, Zahlen im Log. Keine Grenzwerte erfinden.
+
+VORGEHEN
+1. Kurze Architekturskizze in Netzwerk-Labor/Architektur.md (Plattform-Schnittstelle, Speichern, Fensterzustände,
+   Datenmodell-Entwurf für Gerät/Kabel/Config/Frame/Trace), dann sofort bauen. Nicht auf Freigabe warten.
+2. Zuerst der dünnste Durchstich: leeres Fenster → Leiste ⇄ Voll → Tray → Speichern. Dann Linux. Dann verbreitern.
+3. Nach jedem größeren Baustein: Tests grün, dann EINE gezielte Sichtprüfung im echten Programm (Bildschirmfoto).
+   Keine endlosen Prüfschleifen. Fehler gezielt beheben.
+4. Logge in 90-Werkstatt/Logs/&lt;Datum&gt;.md: was gebaut, was geprüft (mit Zahlen), was bewusst vereinfacht, was offen.
+5. Am Ende: beide Fassungen frisch bauen, Windows-exe aus leerem Ordner starten, Linux-Fassung in WSLg starten.
+
+ANTI-MUSTER (aus früheren Läufen)
+- Nicht Module „neben das System“ schreiben: Tests grün, im Programm null Wirkung.
+- Nicht behaupten, etwas sei geprüft, wenn nur der Code gelesen wurde. Ehrlich berichten, was gelaufen ist und was nicht.
+- Fensterfunktionen NICHT als „geht“ melden, bevor sie auf dem jeweiligen System gesehen wurden (WSLg ≠ echtes GNOME/KDE).
+- Kein Aufblähen: Nur 7 Gerätetypen im Spiel, Tiefe im Verhalten. Streichliste im Konzept § 12 beachten.
+
+Wenn du an einer Stelle wirklich nicht weiterkommst, wähle die einfachere Lösung, dokumentiere sie und melde sie im
+Abschlussbericht. Frage nur bei echten Blockaden. Unbeantwortet bleibt die Linux-Frage (welche Distribution/Oberfläche):
+baue für „GNOME unter Wayland“ als schwächsten Fall.</code></pre>
+<h2 id="vorlage-fur-folgephasen">Vorlage für Folgephasen</h2>
+<p>Gleicher Block, <code>PHASE</code> und Leseliste anpassen. Installationsregel und Anti-Muster bleiben.</p>
+<div class="dk-tabelle"><table><thead><tr><th>PHASE</th><th>Zusatz zum Block</th></tr></thead><tbody><tr><td>1</td><td>Konzept §§ 3–5 und 7 vollständig lesen. Abnahme: Ticket „Salon: Drucker nicht erreichbar“ von Anfang bis Abnahme im <strong>Programm</strong> lösbar, Golden-Traces grün, Bedienung nach § 7</td></tr><tr><td>2</td><td>Konzept § 6 vollständig lesen, IOS-Ausgaben belegen (Cisco-Doku), <code>write erase</code>/<code>vlan.dat</code>-Verhalten vor dem Einbau an einer Quelle prüfen</td></tr><tr><td>3</td><td>Reason-Codes und Lehrtexte aus § 5.4 vervollständigen; TCP-Handshake im PDU-Inspektor</td></tr><tr><td>4</td><td>Ticket-Generator und Injektoren nach § 8.2 <strong>mit</strong> automatischer Ticketprüfung; Prüfungstag aus der Spielhalle wiederverwenden</td></tr><tr><td>5</td><td>Leiste bei 320 × 220 px prüfen; Ticket-Eingang ohne Fokusklau <strong>auf beiden Systemen</strong> testen; Playbooks an <code>L.istFaellig</code> koppeln; Vollbild-Ausblendung (Windows)</td></tr></tbody></table></div>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

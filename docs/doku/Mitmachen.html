@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mitmachen · Netzwerk-Labor</title>
+<meta name="description" content="Arbeitsweise und Regeln fuer Beitraege.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Mitmachen</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#die-funf-regeln-die-alles-andere-erklaren">Die fünf Regeln, die alles andere erklären</a></li>
+<li><a href="#bevor-du-etwas-anderst">Bevor du etwas änderst</a></li>
+<li><a href="#zeilenenden-bewahren">Zeilenenden bewahren</a></li>
+<li><a href="#was-gepruft-wird">Was geprüft wird</a></li>
+<li><a href="#determinismus">Determinismus</a></li>
+<li><a href="#wo-was-hingehort">Wo was hingehört</a></li>
+<li><a href="#ein-beitrag-im-ablauf">Ein Beitrag im Ablauf</a></li>
+</ul>
+</nav><h1 id="mitmachen">Mitmachen</h1>
+<p>Kurz und verbindlich. Die vollständigen Betriebsregeln stehen in <a href="AGENTS.html"><code>AGENTS.md</code></a> — sie gelten für Menschen genauso wie für Modelle. Hier steht, was für einen Beitrag praktisch wichtig ist.</p>
+<h2 id="die-funf-regeln-die-alles-andere-erklaren">Die fünf Regeln, die alles andere erklären</h2>
+<ol><li><strong>Senkrechter Schnitt vor Breite.</strong> Lieber eine Funktion vollständig — Modell, Simulation, Konsole, Oberfläche, Lehrtext, Fehlerinjektor, Ticket, Test — als fünf halbe. Nach jedem Schritt muss etwas <strong>spielbar</strong> sein.</li></ol>
+<ol><li><strong>Wirkung vor Grün.</strong> Ein Baustein zählt erst, wenn er im Programm vorkommt. Grüne Tests ohne Aufruf aus einem Ticket oder der Oberfläche gelten als <strong>nicht fertig</strong>. <em>Belegtes Gegenbeispiel:</em> Der gesamte DHCP-Pool-Modus der Konsole war seit 1.0 wirkungslos, weil der Test nur den Prompt prüfte.</li></ol>
+<ol><li><strong>Vertrag zuerst.</strong> Jede Änderung an Datenformen steht zuerst in <a href="Architektur.html"><code>Architektur.md</code></a> — Datenform, Verhalten, Gründe, Trace-Format. Danach der Code. Nicht umgekehrt.</li></ol>
+<ol><li><strong>Nach jedem Commit den Stand nachziehen.</strong> <code>Design – Spielspaß 2.0.md</code> (neuer Abschnitt) und <code>Architektur.md</code> (Stand-Tabelle) müssen den echten Zustand zeigen. Kein Commit ohne Stand.</li></ol>
+<ol><li><strong>Ehrlich berichten.</strong> Stand nachzählen statt schätzen. Offen sagen, was <strong>nicht</strong> geprüft wurde — „nicht geprüft" ist eine zulässige und erwünschte Angabe, „wahrscheinlich" ohne Messung nicht.</li></ol>
+<h2 id="bevor-du-etwas-anderst">Bevor du etwas änderst</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Thema</th><th>Regel</th></tr></thead><tbody><tr><td>Zweig</td><td>Gearbeitet wird auf <code>ausbau-1.2</code>. Kein Commit auf <code>master</code>. Kein <code>push</code>, kein <code>--force</code>, kein <code>reset --hard</code>, keine Zweige löschen.</td></tr><tr><td>Prozesse</td><td><strong>Niemals</strong> Prozesse nach Namen beenden (nicht <code>msedgewebview2</code>, nicht <code>node</code>, nicht <code>python</code>). Höchstens eine PID, die du in dieser Sitzung selbst gestartet hast.</td></tr><tr><td>Ordner</td><td><code>Nachweise/</code> und <code>Programm/</code> werden <strong>nicht</strong> gelöscht — dort liegen Bildschirmfoto-Nachweise und gebaute Programme.</td></tr><tr><td>Installation</td><td>Keine Software installieren oder deinstallieren.</td></tr><tr><td>Zeilenenden</td><td>Siehe unten.</td></tr><tr><td>Antworten</td><td>Auf Deutsch.</td></tr></tbody></table></div>
+<h2 id="zeilenenden-bewahren">Zeilenenden bewahren</h2>
+<p>Mehrere Dateien haben CRLF, andere LF, einzelne gemischt. Ein Editor, der beim Speichern normalisiert, ist dafür <strong>ungeeignet</strong> — er erzeugt Diffs über die ganze Datei. Vor dem Bearbeiten und nach jeder Änderung prüfen:</p>
+<pre><code class="sprache-bash">git ls-files --eol &lt;Datei&gt;                    # wie liegt die Datei im Index / im Arbeitsbaum?
+git diff --stat &lt;Datei&gt;                       # mit Zeilenenden
+git diff --stat --ignore-cr-at-eol &lt;Datei&gt;    # ohne Zeilenenden</code></pre>
+<p>Weichen die Zahlen stark voneinander ab (Beispiel aus der Design-Notiz: <code>engine.js</code> mit 265 Zeilen gegen 6 echte), hast du die Enden der ganzen Datei umgestellt. Dann: Datei aus Git wiederherstellen und mit einem Skript bearbeiten, das <strong>die vorhandenen Enden erhält</strong>.</p>
+<h2 id="was-gepruft-wird">Was geprüft wird</h2>
+<p>Jeder Beitrag muss diese Befehle grün hinterlassen:</p>
+<pre><code class="sprache-bash">sh tools/test.sh            # 213/213 grün
+python tools/klassen.py     # 0 Klassen ohne CSS-Regel
+node tools/sim-stand.js     # Simulation unverändert gegenüber dem Referenzstand</code></pre>
+<p>Nach jeder Änderung an <code>src/sim/</code> oder <code>src/modell/</code> <strong>zusätzlich</strong> <code>node tools/sim-stand.js</code> — und jede Abweichung benennen: gewollt oder ungewollt.</p>
+<p>Berührt dein Beitrag die Auslieferung, kommen dazu:</p>
+<pre><code class="sprache-bash">python tools/einfach.py --pruefen docs/index.html   # Einzeldatei ohne Außenverweise
+python tools/starttest.py                           # startet sie im echten Browser
+python tools/paket.py                               # Paket bauen und gegenprüfen</code></pre>
+<p>Dieselben Schritte laufen bei jedem Push automatisch (<span class="dk-tot" title="„../.github/workflows/pruefen.yml“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>.github/workflows/pruefen.yml</code></span>).</p>
+<h2 id="determinismus">Determinismus</h2>
+<p>In <code>src/sim/</code> und <code>src/cli/</code>: <strong>kein</strong> <code>Math.random</code> ohne Seed, <strong>keine</strong> Uhr, <strong>kein</strong> Datum. Nur so lassen sich Simulationen reproduzieren und gegen <code>tests/sim-stand.json</code> prüfen.</p>
+<h2 id="wo-was-hingehort">Wo was hingehört</h2>
+<ul><li><code>src/kern</code> · <code>src/modell</code> · <code>src/sim</code> · <code>src/cli</code> — headless, keine DOM-Berührung</li><li><code>src/daten</code> — Tickets, Vorlagen, Injektoren, Texte</li><li><code>src/spiel</code> — Karriere, Lernstand, Abzeichen, Regeln</li><li><code>src/plattform</code> — Fenster, Leiste, Tray, Speichern</li><li><code>src/ui</code> · <code>src/stil</code> — Oberfläche und Gestaltung</li><li><code>tests/</code> — Tests, dazu die versionierte Referenz <code>tests/sim-stand.json</code></li><li><code>tools/</code> — Bau-, Mess- und Prüfwerkzeuge</li><li><code>web/</code> und <code>docs/</code> — <strong>erzeugt</strong>, nicht von Hand bearbeiten</li><li><code>fremd/</code> — fremder Bestand (Lernmotor). Änderungen gehören in die FISI-Spielhalle und werden danach mit <code>python tools/lernmotor.py --neu-einlesen</code> übernommen.</li></ul>
+<h2 id="ein-beitrag-im-ablauf">Ein Beitrag im Ablauf</h2>
+<ol><li>Issue oder Absprache — was soll danach <strong>spielbar</strong> anders sein?</li><li>Vertrag in <code>Architektur.md</code>, falls sich Datenformen ändern.</li><li>Code <strong>und</strong> Test, der die Wirkung prüft (nicht nur den Prompt).</li><li><code>sh tools/test.sh</code> und <code>node tools/sim-stand.js</code>.</li><li>Stand in <code>Design – Spielspaß 2.0.md</code> und die Stand-Tabelle in <code>Architektur.md</code>.</li><li>Commit, der sagt <strong>warum</strong>, nicht nur was.</li></ol>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

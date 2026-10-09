@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🖧 Netzwerk-Labor · Netzwerk-Labor</title>
+<meta name="description" content="Uebersicht fuer Leser in Kurzform.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">🖧 Netzwerk-Labor</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#starten">▶ Starten</a></li>
+<li><a href="#was-drin-ist-version-1-0">Was drin ist (Version 1.0)</a></li>
+<li><a href="#neu-in-1-1-aus-dem-durchspielen-im-echten-programm">Neu in 1.1 (aus dem Durchspielen im echten Programm)</a></li>
+<li><a href="#neu-in-1-2-ausbau-stand-06-10-2026">Neu in 1.2 (Ausbau, Stand 06.10.2026)</a></li>
+<li><a href="#aufbau">Aufbau</a></li>
+<li><a href="#ehrliche-grenzen">Ehrliche Grenzen</a></li>
+</ul>
+</nav><hr>
+<p>tags: [FISI, Lernspiel, Netzwerk] erstellt: 2026-09-30 aktualisiert: 2026-10-06 status: Version 1.2 (Browser-Einzeldatei + Windows-.exe + Android-.apk; Linux-Pakete Stand 1.0) – wird ausgebaut</p>
+<hr>
+<h1 id="netzwerk-labor">🖧 Netzwerk-Labor</h1>
+<p>Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Mann-Systemhaus löst du Netzwerk-Tickets in einem echten Simulator (Diagramm, Konfig-Panels, IOS-ähnliche Konsole). Können ist die Währung: Wer etwas sicher beherrscht, darf es automatisieren. Wer nicht weiterkommt, bekommt eine Hilfeleiter bis zur vorgeführten Lösung.</p>
+<h2 id="starten">▶ Starten</h2>
+<ul><li><strong>Im Browser, ohne Download:</strong> <a href="https://vexx-oss.github.io/NetLab/">vexx-oss.github.io/NetLab</a> – ein Klick, spielt sofort. Kein Entpacken, keine Installation, kein Internet. (Das Repositorium hieß früher <code>Side-Project</code>; GitHub leitet die alte Adresse um.)</li><li><strong>Eine Datei für alles:</strong> <code>docs/index.html</code> bzw. <code>Netzwerk-Labor.html</code> aus dem Release-ZIP – das ganze Spiel in <strong>einer</strong> HTML-Datei, Schriften eingebettet, läuft per Doppelklick auf Windows, Linux und macOS. Gebaut von <code>python tools/einfach.py</code>.</li><li><strong>Windows-Programm:</strong> <code>Programm/Netzwerk-Labor.exe</code> per Doppelklick (SmartScreen: „Weitere Informationen → Trotzdem ausführen“). Bringt zusätzlich Leiste, Tray und globales Tastenkürzel.</li><li><strong>Android:</strong> <code>Programm/Netzwerk-Labor-1.2.4-Android.apk</code> aufs Telefon kopieren und antippen (einmal „Unbekannte Apps installieren“ erlauben). Kein Play Store, kein Konto, <strong>keine Berechtigung</strong> — die App darf nicht einmal ins Netz. <strong>Hoch- und Querformat:</strong> die App dreht frei (im Manifest <code>screenOrientation="unspecified"</code> statt der früheren Querformat-Sperre); ein Dreh lädt die Seite <strong>nicht</strong> neu und kostet keinen Spielstand. Bauzählung <code>versionCode 10202</code> bei unveränderter Spielversion <code>versionName 1.2.4</code> — nur mit größerem Code lässt sich die neue APK über die alte installieren. Bauen und alle Grenzen: <span class="dk-tot" title="„android/LIESMICH“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">Netzwerk-Labor für Android</span>. <strong>Nach dem 06.10.2026 neu gebaut</strong> (988.700 Bytes): elf Fehler in den tief genesteten Menüs behoben — zu kleine Trefferflächen (40 × 44 und 96 × 18 px), ein eingeklapptes Dock-Blatt, das 412 × 520 px deckend über der Leinwand stehenblieb, das Wort „null“ im Reiterstreifen, ein Menü, das unten aus dem Fenster ragte. Gemessen mit <code>tools/menueprobe.py</code>: 5 Profile, 49 Kriterien erfüllt, 0 verletzt.</li><li><strong>Linux:</strong> <code>Programm/linux/</code> – <code>.deb</code> (Ubuntu/Debian) oder AppImage, <strong>Stand 1.0</strong> (für 1.1/1.2 vorerst keine eigene Linux-Fassung). Details und was auf welchem System geht: <span class="dk-tot" title="„Programm/PLATTFORM“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">PLATTFORM</span>.</li><li><strong>Auslieferungspaket bauen:</strong> <code>python tools/paket.py</code> → <code>dist/Netzwerk-Labor-&lt;Version&gt;-Windows.zip</code> mit Einzeldatei, <code>.exe</code>, Anleitung und Lizenztexten.</li><li>Anleitung für die Klasse: <code>Vorlagen/LIESMICH.txt</code> (Quelle) → liegt im Paket als <code>LIESMICH.txt</code>.</li></ul>
+<h2 id="was-drin-ist-version-1-0">Was drin ist (Version 1.0)</h2>
+<ul><li><strong>Simulation</strong> auf Frame-Ebene: ARP, Switching mit MAC-Lernen, VLAN/802.1Q, Router-on-a-Stick, statische Routen, ICMP (Timeout vs. unreachable, TTL), ACL, NAT/PAT, DHCP mit Relay, DNS, TCP-Handshake, HTTP, Firewall mit Zonen und Port-Weiterleitung, Internet als Kulisse, Broadcast-Sturm. Jede Antwort ist aus Paketen hergeleitet; die Simulation spielt Schritt für Schritt ab (PDU-Ansicht).</li><li><strong>Konsole</strong> IOS-ähnlich (Modi, Kurzformen, <code>?</code>, Tab, <code>do</code>, running/startup, <code>write erase</code>/<code>vlan.dat</code>) und Windows-Terminal (<code>ipconfig</code>, <code>ping</code>, <code>tracert</code>, <code>arp -a</code>, <code>nslookup</code>).</li><li><strong>Spiel:</strong> 58 handgeschriebene Tickets in 6 Karrierestufen (Azubi, Geselle, Fachkraft, Spezialist, Senior, Storage &amp; Cloud) bei 7 Kunden (Salon Lockenwerk, Bäckerei Kornblume, Schreibbüro Wortgenau, Hausarztpraxis Dr. Müller, Autohaus Brenner, Kessler Feinmechanik GmbH, Planwerk Architekten) inkl. 4 Projekte; unbegrenzt generierte Tickets (5 Netzvorlagen × 36 Fehlerinjektoren, jede Variante automatisch geprüft); 92 Mini-Tickets für die Leiste; Hilfeleiter 0–6; Abnahme mit Regressions- und Neustart-Test; Sterne, Euro, Ruf; Wartungsverträge, Playbooks, Offline-Bericht; Prüfungstag nach IHK-Notenschlüssel; Lernmotor der Spielhalle (Wiederholung nach Plan).</li><li><strong>Desktop:</strong> ein Fenster, zwei Ansichten (Vollansicht ⇄ Leiste am Bildschirmrand), Tray mit Punkt, Strg+Alt+L, Einzelinstanz, Autostart auf Wunsch, Spielstand atomar mit 5 Sicherungen, Export/Import.</li></ul>
+<h2 id="neu-in-1-1-aus-dem-durchspielen-im-echten-programm">Neu in 1.1 (aus dem Durchspielen im echten Programm)</h2>
+<ul><li><strong>Konsole, Simulations-Panel und PDU-Ansicht</strong> sind jetzt richtig gestaltet (die Stylesheets fehlten in 1.0 ganz): dunkles Terminal, Inspektor wird für 80-Zeichen-Tabellen breiter; Ereignisliste mit Abspielsteuerung, Filter und Paketfeldern Schicht für Schicht. Normales Verwerfen (fremde Broadcasts, erstes Paket während ARP) gilt nicht mehr als „Problem“.</li><li><strong>Einstieg:</strong> Coach-Hinweis erscheint sofort und wählt das passende Werkzeug vor; Meldungen verdecken die Geräte nicht mehr; Vorhersage-Dialog rechts, damit das Netz sichtbar bleibt.</li><li><strong>Motivation mit Lernwert:</strong> 15 Abzeichen für Arbeitsweisen (selbst finden, vorher denken, verteilt üben), Fortschrittsbalken zur nächsten Stufe, Feierabend-Bilanz beim Tagesziel mit den morgen fälligen Themen.</li><li><strong>Prüfungstag und generierte Tickets</strong> nennen das Symptom aus Kundensicht statt der Ursache.</li><li><strong>Leiste:</strong> aufgeklappt 320 × 300 (Mini-Ticket passt ohne Scrollen), Ecke aus den Einstellungen wirkt jetzt.</li><li><strong>Spielstand:</strong> zusätzlich „vorheriger Stand“ (alle 15 min), wird bei beschädigter Datei zuerst geladen.</li><li>Kleinere Fehler: Strg+C bei Konsolen-Rückfragen, Shop-Texte, Hilfeleiter-Höhe, Einpassen der Ansicht.</li></ul>
+<h2 id="neu-in-1-2-ausbau-stand-06-10-2026">Neu in 1.2 (Ausbau, Stand 06.10.2026)</h2>
+<ul><li><strong>Speichern ist sichtbar.</strong> In der Kopfzeile steht „… sichert“, „✓ gesichert“ oder „⚠ nicht gesichert“; ein gescheiterter Schreibvorgang wird gemeldet statt verschwiegen. Ein abgeschlossener Auftrag und jeder Kauf gehen <strong>sofort</strong> auf die Platte — vorher dauerte es bis zu rund 2,4 s (gemessen: 2.436 ms bis zum Schreibvorgang beim Auftragsabschluss).</li><li><strong>Zwei Fenster:</strong> Läuft das Spiel zweimal auf demselben Spielstand, warnt es: „Es gewinnt, wer zuletzt schreibt — bitte nur in einem Fenster spielen.“</li><li><strong>Aufträge sind vielfältig.</strong> Derselbe Auftrag sieht bei jedem Durchgang anders aus (Adressen, Fehlerstelle): das Netz entsteht aus dem Seed der Instanz statt aus einem festen. Jede Fassung wird auf Lösbarkeit geprüft, ein laufender Auftrag behält sein Netz, Terminal-Aufträge bleiben bewusst fest.</li><li><strong>58 Aufträge statt 37:</strong> zwölf neue, davon neun in den Stufen 3–6 und drei Sicherheits-Aufträge. <strong>Stufe 6 „Storage &amp; Cloud“ ist jetzt erreichbar</strong> — Schwelle 115 Ruf: 114 aus den Stufen 1–5, 13 aus den drei NAS-Aufträgen bei Planwerk Architekten.</li><li><strong>Der Shop ist stark reduziert:</strong> zwei Kacheln statt eines Felds von 27–38 (je nach Spielstand), der Rest ist an seinen Ort gewandert. Wartungsverträge stehen in der Kundenakte, die Prüfungsanmeldung im Lernstand, Farben und Leisten in den Einstellungen. <strong>Behoben:</strong> die Prüfungsanmeldung im Shop war wirkungslos und kostete 60/90 €, während die Prüfung selbst 40/80 € abbuchte — es gibt jetzt genau eine Preisquelle (<code>Spiel.PRUEFUNG.GEBUEHR</code>).</li><li><strong>Begrüßung beim ersten Start:</strong> eine Karte („Willkommen im Netzwerk-Labor! …“) mit zwei Wegen — „Zeig mir den ersten Auftrag“ oder „Erst umsehen“ —, danach <strong>eine</strong> Anweisungszeile am ersten Auftrag, die den Weg nennt statt der Lösung, und ein Schlusssatz nach der Abnahme. Ein Bestandsstand sieht nichts davon.</li><li><strong>Für Mitwirkende:</strong> <code>python tools/ethos.py</code> prüft 12 Minimalismus-Regeln für die Stylesheets (<code>src/stil/*.css</code>) und läuft in <code>sh tools/test.sh</code> mit; die Testkette steht bei 434 Tests in 50 Dateien (0 übersprungen).</li><li><strong>1.2.4 (07.10.2026): die Hilfestellung.</strong> Vier Bildungsstufen (Azubi · Azubi+ · Geselle · Meister) mit einem Hilfekonto je Auftrag, ein Vorschlagsstreifen unter dem Konsolenschirm mit 29 belegten Befehlen, ein Lernanker in den Mini-Mails der Leiste und ein Trainingsbereich abseits der Aufträge. Der Vertrag steht in <a href="entwicklung/Hilfestellung%20%E2%80%93%20Stufen%20und%20Schnittstellen.html">Hilfestellung – Stufen und Schnittstellen</a>, die unabhängige Gegenprüfung mit fünf Prüfern in <code>docs/entwicklung/Review – *.md</code>.</li><li><strong>1.2.3 (07.10.2026): keine neue Spielfunktion.</strong> Diese Fassung liefert die <strong>umsetzungsreife Spezifikation des Klassenraums</strong> (Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst) samt einem eigenständigen Rust-Server als Probe. Im Spiel ist davon noch nichts zu sehen — der Vertrag steht in <a href="entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html">Klassenraum – Umsetzungsreife Spezifikation</a>, die vier Teil-Dokumente liegen im Ordner <code>docs/entwicklung/Klassenraum/</code>.</li></ul>
+<h2 id="aufbau">Aufbau</h2>
+<ul><li><a href="entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html">Konzept – Netzwerk-Labor</a> (Spezifikation) · <a href="Architektur.html">Architektur</a> (Vertrag zwischen den Bausteinen) · <a href="entwicklung/Opus-Auftrag%20%E2%80%93%20Netzwerk-Labor.html">Opus-Auftrag – Netzwerk-Labor</a> (ursprünglicher Bauauftrag) · <a href="entwicklung/Befund%20%E2%80%93%20Programm%20startet%20wieder.html">Befund – Programm startet wieder</a> (05.10.2026: WebView2-Ausfall und Reparatur)</li><li><strong>Ausbau 1.2 (läuft):</strong> <a href="entwicklung/Plan%20%E2%80%93%20Ausbau%201.2.html">Plan – Ausbau 1.2</a> (Phasen, Stand) · <a href="entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html">Design – Spielspaß 2.0</a> (Befunde, 12 Hebel, Scorecard, Startblöcke für Opus) · <a href="entwicklung/Klassenraum%20%E2%80%93%20Umsetzungsreife%20Spezifikation.html">Klassenraum – Umsetzungsreife Spezifikation</a> (nächste Stufe, noch nicht umgesetzt)</li><li><code>src/</code> Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · <code>shell/src-tauri/</code> Rust-Hülle · <code>tests/</code> (434 Tests in 50 Dateien, <code>sh tools/test.sh</code>) · <code>tools/</code> (bauen, testen, messen, ausliefern) · <code>Programm/</code> fertige Programme · <code>docs/</code> die Website-Fassung (erzeugt) samt <code>docs/doku/</code> (die Doku als durchsuchbare Seite, <code>python tools/seite.py</code>) · <code>fremd/</code> fremder Bestand (Lernmotor aus der Spielhalle)</li><li>Versionen: Git im Projektordner (Tags <code>endversion-1.0</code>, <code>v1.1</code>, <code>v1.2.0</code>, <code>v1.2.1</code>, <code>v1.2.2</code>, <code>v1.2.3</code>); die Endversion 1.0 liegt zusätzlich unter <code>Programm/Endversion-1.0/</code>.</li></ul>
+<h2 id="ehrliche-grenzen">Ehrliche Grenzen</h2>
+<ul><li>Arbeitsspeicher im Leerlauf rund 0,5 GB (WebView2), CPU praktisch null.</li><li>Linux nur in WSLg getestet, nicht auf echtem GNOME/KDE; dort kein Tray-Dienst.</li><li>Konsole „IOS-ähnlich“, kein Cisco-Nachbau; OSPF und IPv6 fehlen noch, und Spanning Tree (<code>lab.stp</code>) hat bis jetzt keinen eigenen handgeschriebenen Auftrag. Die frühere Lücke „Storage-Kunde (Stufe 6) nicht erreichbar“ ist seit dem Ausbau 1.2 geschlossen.</li><li><strong>Die Android-App ist auf keinem echten Gerät gestartet</strong> (kein Telefon, kein Emulator vorhanden — auch am 06.10.2026 nicht, <code>adb devices</code> war leer). Geprüft ist die <em>Seite in der App</em> in einem echten Browser mit Telefonmaßen — dort funktioniert auch das Kabelziehen mit dem Finger. Dass ein Dreh die Seite nicht neu lädt, ist <strong>nicht am Gerät</strong> gemessen, sondern im gepackten Manifest (<code>screenOrientation=-1</code>, <code>configChanges=0x40007ffc</code>) und im Java belegt. Was auf Android offen ist, steht in <span class="dk-tot" title="„android/LIESMICH“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">Netzwerk-Labor für Android</span>.</li></ul>
+<p>Verwandt: <a href="Liesmich.html">FISI-Spielhalle</a> (liefert den Lernmotor) · <a href="Liesmich.html">Karriere – Storage &amp; Cloud</a> (späteres Ziel Stufe 6)</p>
+<p>⬆️ <a href="Liesmich.html">Lernprojekte</a> · 🏠 <span class="dk-tot" title="„Start“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">Start</span></p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

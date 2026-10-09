@@ -506,7 +506,12 @@ gruppe("UI: Lernstand-Hilfe", () => {
     /* Rahmen-Ersatz: alles, was nicht zu diesem Baustein gehört. */
     vm.runInContext([
       "UI.symbol = (n, g) => sv('svg', {class: 'sym-' + n, width: g || 20});",
-      "UI.leiste = {aufgebaut: false, aufbauen(){}, abbauen(){}};",
+      /* `status` gehört dazu: `src/ui/karriere.js:533` hängt einen `zustand-geaendert`-Hörer an,
+         der `UI.leiste.status({...})` ruft (karriere.js:405). Fehlte die Methode, warf der Hörer bei
+         JEDEM gemeldeten Zustand einen TypeError, den `src/kern/basis.js:35` still verschluckt —
+         gemessen 52× auf stderr in einem Testlauf (Befund von `terminal-hilfe`, 09.10.2026).
+         Ein Fehler, der 52× verschluckt wird, versteckt echte Fehler. */
+      "UI.leiste = {aufgebaut: false, aufbauen(){}, abbauen(){}, status(){}};",
       "UI.palette = {oeffnen(){}, schliessen(){}, get offen(){ return false; }};",
       "UI.menue = {zu(){}};",
       "UI.labor = {zeigen: c => c.replaceChildren(h('div', {class: 'labor-ersatz'}))};",

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sitzungsabschluss: von der Änderung zur veröffentlichten Fassung · Netzwerk-Labor</title>
+<meta name="description" content="Die acht Schritte am Ende einer Sitzung, mit den Regeln aus Fehlern.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Sitzungsabschluss: von der Änderung zur veröffentlichten Fassung</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#voraussetzungen">Voraussetzungen</a></li>
+<li><a href="#die-acht-schritte">Die acht Schritte</a></li>
+<li style="margin-left:16px"><a href="#1-aufraumen-bevor-irgendetwas-gebaut-wird">1. Aufräumen, bevor irgendetwas gebaut wird</a></li>
+<li style="margin-left:16px"><a href="#2-fassung-ziehen-an-allen-stellen-und-vorsichtig-im-cargo-lock">2. Fassung ziehen — an allen Stellen, und vorsichtig im Cargo.lock</a></li>
+<li style="margin-left:16px"><a href="#3-prufen-und-bauen-in-dieser-reihenfolge">3. Prüfen und bauen, in dieser Reihenfolge</a></li>
+<li style="margin-left:16px"><a href="#4-die-exe-nur-wenn-du-die-minuten-hast-dann-aber-messen">4. Die .exe — nur wenn du die Minuten hast, dann aber messen</a></li>
+<li style="margin-left:16px"><a href="#5-stand-nachziehen-kein-commit-ohne-stand">5. Stand nachziehen — kein Commit ohne Stand</a></li>
+<li style="margin-left:16px"><a href="#6-committen-lokal-ohne-freigabe">6. Committen (lokal, ohne Freigabe)</a></li>
+<li style="margin-left:16px"><a href="#7-veroffentlichen-nur-mit-ausdrucklicher-freigabe">7. Veröffentlichen — nur mit ausdrücklicher Freigabe</a></li>
+<li style="margin-left:16px"><a href="#8-nachmessen-was-wirklich-online-steht">8. Nachmessen, was wirklich online steht</a></li>
+<li><a href="#harte-regeln-die-aus-fehlern-stammen">Harte Regeln, die aus Fehlern stammen</a></li>
+<li><a href="#was-am-ende-dastehen-muss">Was am Ende dastehen muss</a></li>
+</ul>
+</nav><hr>
+<p>name: Sitzungsabschluss Netzwerk-Labor wann: Am Ende jeder Arbeitssitzung im Netzwerk-Labor — vor allem, wenn etwas ausgeliefert werden soll</p>
+<hr>
+<h1 id="sitzungsabschluss-von-der-anderung-zur-veroffentlichten-fassung">Sitzungsabschluss: von der Änderung zur veröffentlichten Fassung</h1>
+<p>Diese Reihenfolge ist am 06.10.2026 (Fassung 1.2.2) und erneut am 07.10.2026 (Fassung 1.2.3) <strong>ganz</strong> durchlaufen worden und hat beim ersten Mal drei Fehler aufgedeckt, die sonst erst nach dem Push aufgefallen wären. Sie gilt für jede Sitzung, die den Zweig <code>ausbau-1.2</code> verändert.</p>
+<h2 id="voraussetzungen">Voraussetzungen</h2>
+<ul><li><code>AGENTS.md</code> gelesen. Sie verbietet <code>git push</code>, Tags und Zweigwechsel **ohne ausdrückliche Freigabe des Nutzers** — jede dieser Handlungen einzeln erfragen, nicht pauschal.</li><li>Kein Prozess wird nach Namen beendet. Nur, was diese Sitzung selbst gestartet hat (PID).</li><li>Der Nutzer entscheidet, ob überhaupt veröffentlicht wird. Ohne ihn: lokal committen, Ende.</li></ul>
+<h2 id="die-acht-schritte">Die acht Schritte</h2>
+<h3 id="1-aufraumen-bevor-irgendetwas-gebaut-wird">1. Aufräumen, bevor irgendetwas gebaut wird</h3>
+<p>Ein einziges Suchen-und-Ersetzen ist <strong>verboten</strong>, seit <code>cargo check</code>/Änderungen passiert sind, ist nichts mehr sicher. Stattdessen:</p>
+<pre><code class="sprache-powershell">git status --porcelain                 # was ist überhaupt offen?
+git ls-files | Measure-Object          # Bestand zählen, nicht schätzen</code></pre>
+<ul><li>Erzeugnisse gehören nicht ins Git (<code>web/</code>, <code>dist/</code>, <code>android/bau/</code>, <code>shell/src-tauri/target/</code>, <code>Programm/*.exe</code>, <code>Programm/*.apk</code>, <code>Nachweise/</code>) — prüfen, dass sie draußen sind.</li><li>Beim Verschieben von Dateien <strong><code>git mv</code></strong> benutzen (die Versionsgeschichte bleibt erhalten) und danach <strong>jeden</strong> relativen Verweis prüfen, nicht nur die offensichtlichen. Zwei Werkzeuge dafür liegen in <code>tools/</code>: <code>repo-aufraeumen.py</code> (verschiebt und schreibt Verweise neu) und <code>repo-verweise-flicken.py</code> (setzt tote Verweise gerade und prüft am Ende jede Markdown-Datei gegen die Wirklichkeit).</li></ul>
+<h3 id="2-fassung-ziehen-an-allen-stellen-und-vorsichtig-im-cargo-lock">2. Fassung ziehen — an allen Stellen, und vorsichtig im <code>Cargo.lock</code></h3>
+<pre><code class="sprache-powershell">python tools/fassung-ziehen.py            # Trockenlauf
+python tools/fassung-ziehen.py --setzen</code></pre>
+<blockquote>
+<p>Alle hier genannten Werkzeuge liegen in <code>tools/</code> und sind damit <strong>versioniert</strong> — in einem frischen Klon also vorhanden. Wer ein neues Werkzeug baut, legt es ebenfalls dorthin und trägt es in die Befehlstabelle in <code>AGENTS.md</code> ein. Unter <code>Nachweise/</code> liegt nichts, was Git kennt.</p>
+</blockquote>
+<p>Betroffene Stellen: <code>bauen.py</code> (<code>VERSION</code>), <code>shell/src-tauri/Cargo.toml</code>, <code>shell/src-tauri/tauri.conf.json</code>, <code>shell/src-tauri/Cargo.lock</code> (<strong>nur</strong> der eigene Block — im <code>Cargo.lock</code> tragen fremde Pakete dieselbe Nummer; ein blindes Ersetzen beschädigt die Sperrdatei), dazu die Doku: README (ZIP-Name, Fassungsangaben), <code>docs/Bauen.md</code> (Tag-Beispiel), <code>android/LIESMICH.md</code> und <code>docs/Liesmich.md</code> (APK-Dateiname), <code>android/huelle/AndroidManifest.xml</code> (Kommentar), <code>.github/workflows/release.yml</code> (Beispielbefehl).</p>
+<p>Nicht anfassen: der <code>CHANGELOG</code>-Verlauf alter Fassungen, <code>Design</code>/<code>Plan</code>-Notizen (das sind Protokolle), und <code>versionCode</code> in <code>android/bauen.py</code> — Bauzählung und Spielversion sind zwei Zahlen.</p>
+<h3 id="3-prufen-und-bauen-in-dieser-reihenfolge">3. Prüfen und bauen, in dieser Reihenfolge</h3>
+<pre><code class="sprache-powershell">sh tools/test.sh                       # erwartet: 434/434 grün, 0 übersprungen (Stand 07.10.2026)
+python tools/ethos.py                  # GRUEN gegen tests/stil-stand.json
+python tools/klassen.py                # 0 Klassen ohne CSS-Regel
+node tools/sim-stand.js                # Simulation unverändert
+python bauen.py                        # src/ -&gt; web/
+python tools/einfach.py                # web/ -&gt; docs/index.html
+python tools/einfach.py --ziel Netzwerk-Labor.html
+python tools/seite-pruefen.py          # docs/index.html eigenständig und mit Schriften
+python android/bauen.py                # ~5 s, endet GRUEN</code></pre>
+<p>Danach <strong>gegenprüfen</strong>, dass die Fassung wirklich drinsteckt:</p>
+<pre><code class="sprache-powershell">Select-String -Path docs\index.html -Pattern 'const LABOR_VERSION'   # muss die neue Nummer zeigen
+(Get-FileHash docs\index.html).Hash
+(Get-FileHash Netzwerk-Labor.html).Hash                              # muss gleich sein</code></pre>
+<p>Die letzte Zeile ist keine Kleinigkeit: <code>docs/index.html</code> ist das, was GitHub Pages ausliefert, <code>Netzwerk-Labor.html</code> ist der Ein-Klick-Download. <strong>Beide müssen byte-gleich sein.</strong></p>
+<p>Für die Fassung der Oberfläche (Android + Telefonmaße):</p>
+<pre><code class="sprache-powershell">python tools/menueprobe.py --datei android/bau/assets/index.html --lauf   # 5 Profile, 49 Kriterien, 0 verletzt
+python android/werkzeuge/mobilprobe.py --geraet pixel7 --ausrichtung hoch,quer --lauf --mit-ansichten --port 0</code></pre>
+<h3 id="4-die-exe-nur-wenn-du-die-minuten-hast-dann-aber-messen">4. Die <code>.exe</code> — nur wenn du die Minuten hast, dann aber <strong>messen</strong></h3>
+<p>Die <code>.exe</code> liegt nicht im Git und wird vom Release-Ablauf <strong>nicht</strong> gebaut; sie muss auf dem Entwicklungsrechner entstehen (06.10.2026: 4 m 25 s).</p>
+<pre><code class="sprache-powershell">cd shell/src-tauri
+cargo tauri build --no-bundle
+cd ../..
+Copy-Item "shell\src-tauri\target\release\netzwerk-labor.exe" "Programm\Netzwerk-Labor.exe" -Force
+python tools/q-echt.py                 # MUSS laufen: Fenster offen, erster Auftrag gelöst, 0 Fehler</code></pre>
+<p>Die Fassung in der Binärdatei gegenprüfen (nicht behaupten, nachsehen):</p>
+<pre><code class="sprache-powershell">(Get-Item "Programm\Netzwerk-Labor.exe").VersionInfo | Select-Object ProductVersion, FileVersion</code></pre>
+<p>Wenn <code>icacls Programm\Netzwerk-Labor.exe</code> <strong>kein</strong> Integritätslabel zeigt, ist alles gut (Standard ist Mittel). Steht dort „Niedrig", startet die WebView2 nicht — dann <code>Programm\Integritaet-reparieren.cmd</code>.</p>
+<h3 id="5-stand-nachziehen-kein-commit-ohne-stand">5. Stand nachziehen — kein Commit ohne Stand</h3>
+<p>Pflicht laut <code>AGENTS.md</code>:</p>
+<ul><li><code>docs/CHANGELOG.md</code>: neuer Abschnitt mit <strong>gemessenen</strong> Zahlen, und am Ende die erzeugten Dateien mit Bytes und SHA256.</li><li><code>docs/Architektur.md</code>: Stand-Tabelle und, wenn sich ein Vertrag geändert hat, der Vertrag.</li><li><code>docs/entwicklung/Design – Spielspaß 2.0.md</code>: neuer Abschnitt — auch die <strong>verworfenen</strong> Versuche gehören hinein, sonst tritt der nächste Mensch in dasselbe Loch.</li><li><code>docs/INHALT.md</code>, wenn Dateien umgezogen sind.</li></ul>
+<p>Zahlen <strong>nachzählen</strong>, nicht schätzen. Wenn sich eine Datei geändert hat, ändert sich ihr SHA256 — dann steht in der Doku der alte Wert und niemand merkt es.</p>
+<h3 id="6-committen-lokal-ohne-freigabe">6. Committen (lokal, ohne Freigabe)</h3>
+<pre><code class="sprache-powershell">git add &lt;die geänderten Dateien&gt;       # keine Erzeugnisse, keine fremden Dateien
+git status --short                     # prüfen, was wirklich im Index liegt
+git -c i18n.commitEncoding=UTF-8 commit -F &lt;Nachrichtendatei&gt;</code></pre>
+<ul><li>Die Nachrichtendatei nach UTF-8 schreiben und mit <code>-F</code> übergeben — <code>-m</code> verstümmelt Umlaute.</li><li><strong>Vor</strong> dem Commit prüfen, ob die Bearbeitung die <strong>Zeilenenden</strong> umgestellt hat. Die Falle: <code>git diff --numstat</code> und <code>--ignore-cr-at-eol</code> können <strong>identisch</strong> aussehen, obwohl der ganze Dateiinhalt von LF auf CRLF gedreht wurde. Verlässlich ist ein Byte-Vergleich:</li></ul>
+<pre><code class="sprache-powershell">  python -c "import subprocess,sys; p=r'&lt;Projekt&gt;'; f='src/ui/datei.js'; a=open(p+'/'+f,'rb').read(); k=subprocess.run(['git','-C',p,'show','HEAD:'+f],capture_output=True).stdout; z=lambda b:(b.count(b'\r\n'), b.count(b'\n')-b.count(b'\r\n')); print('Arbeitsbaum',z(a),'HEAD',z(k))"</code></pre>
+<p>Weichen die Zahlen ab, mit <code>roh.replace(b'\r\n', b'\n')</code> bzw. umgekehrt zurückstellen und die Datei <strong>nicht</strong> aus Git wiederherstellen (die eigenen Änderungen wären weg).</p>
+<h3 id="7-veroffentlichen-nur-mit-ausdrucklicher-freigabe">7. Veröffentlichen — <strong>nur mit ausdrücklicher Freigabe</strong></h3>
+<pre><code class="sprache-powershell">git push origin ausbau-1.2
+git tag -a v1.2.2 -m "Netzwerk-Labor 1.2.2"      # Nummer aus bauen.py — hier steht sie als Beispiel
+git push origin v1.2.2</code></pre>
+<p>Drei Abläufe laufen dann von selbst — und man sollte wissen, was sie tun:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Ablauf</th><th>Auslöser</th><th>Wirkung</th></tr></thead><tbody><tr><td><code>pruefen.yml</code></td><td>Push auf <code>ausbau-1.2</code></td><td>Tests auf GitHub</td></tr><tr><td><code>seite.yml</code></td><td>Push auf <code>ausbau-1.2</code></td><td><strong>veröffentlicht die Seite</strong> (nur <code>docs/index.html</code> + <code>docs/bilder/</code>)</td></tr><tr><td><code>release.yml</code></td><td><strong>Tag</strong></td><td>prüft, baut das Paket, legt das Release mit den Anhängen an; ein zweiter Job auf <code>windows-latest</code> baut die <code>.exe</code> und hängt sie ebenfalls an</td></tr></tbody></table></div>
+<p><strong>Ein Release erneut auslösen</strong> — z. B. um die Anhänge zu erneuern, ohne ein neues Tag zu setzen: Actions → „Release anlegen" → <em>Run workflow</em> → Tag angeben; oder <code>gh workflow run release.yml -f tag=v1.2.3</code>. Der Ablauf ist idempotent (er ersetzt die Anhänge). <strong>Gemessene Falle:</strong> <code>gh release upload --clobber</code> scheitert beim Ersetzen gleichnamiger Anhänge mit <code>HTTP 404</code> auf <code>uploads.github.com</code>; der Ablauf löscht sie deshalb vorher ausdrücklich, wartet 5 s und wiederholt den Upload. Der zweite Job läuft nur, wenn der erste grün ist (<code>needs</code>) — ein rotes Release-Ergebnis heißt also: erst den Linux-Job ansehen.</p>
+<h3 id="8-nachmessen-was-wirklich-online-steht">8. Nachmessen, was wirklich online steht</h3>
+<p>Nicht annehmen, dass ein grüner Ablauf das Richtige ausgeliefert hat:</p>
+<pre><code class="sprache-powershell"># Ergebnis der Abläufe (ohne Token möglich)
+Invoke-RestMethod "https://api.github.com/repos/Vexx-oss/NetLab/actions/runs?per_page=10" -Headers @{ "User-Agent" = "NetLab" }
+# Release und Anhänge
+Invoke-RestMethod "https://api.github.com/repos/Vexx-oss/NetLab/releases/latest" -Headers @{ "User-Agent" = "NetLab" }
+# die veröffentlichte Seite gegen die eigene Datei
+Invoke-WebRequest "https://vexx-oss.github.io/NetLab/index.html" -OutFile "$env:TEMP\live.html" -Headers @{ "User-Agent" = "NetLab" }
+(Get-FileHash "$env:TEMP\live.html").Hash
+(Get-FileHash docs\index.html).Hash          # muss gleich sein</code></pre>
+<p>Zum Prüfen der Ladelinks <code>System.Net.Http.HttpClient</code> benutzen, nicht <code>Invoke-WebRequest -Method Head</code>: das fragt in dieser Umgebung nach Eingaben und bricht ab. Erwartet wird <code>Content-Disposition: attachment</code> — sonst ist der „Ein-Klick-Download" keiner.</p>
+<h2 id="harte-regeln-die-aus-fehlern-stammen">Harte Regeln, die aus Fehlern stammen</h2>
+<ol><li><strong>Ein grüner Ablauf ist kein Beweis.</strong> Nach dem Aufräumen vom 06.10.2026 scheiterte <code>seite.yml</code> einmalig im letzten Schritt (<code>deploy-pages</code>), obwohl an den veröffentlichten Dateien nichts geändert worden war. Erst prüfen (<code>git diff</code> gegen den Vorgänger-Commit, Live-Seite hashen), dann handeln. Ohne Token hilft kein Re-Run über die API — dann einen <strong>leeren Commit mit Begründung</strong> pushen, der den Ablauf erneut auslöst.</li><li><strong>Den Zustand nach dem Klick messen, nicht davor.</strong> Ein Klick auf den Reiter des *bereits offenen* Bereichs klappt ihn ein. Wer vor dem Klick misst, hält das Zuklappen für leeren Inhalt. (Hat in dieser Sitzung zweimal zu falschen Befunden geführt.)</li><li><strong><code>display:none</code> heißt „nicht messbar".</strong> Ein unsichtbares Element liefert für jedes Rechteck<ol><li>Zum Messen <code>visibility:hidden</code> und Animationen aus.</li></ol></li><li><strong>Nichts behaupten, was nicht in dieser Sitzung gemessen wurde.</strong> „Nicht geprüft" darf dastehen — es ist ehrlicher als eine geglättete Zusammenfassung.</li><li><strong>Der Nutzer entscheidet über Veröffentlichung.</strong> Push, Tag und Release je einzeln freigeben lassen; im Zweifel nur lokal committen und fragen.</li></ol>
+<h2 id="was-am-ende-dastehen-muss">Was am Ende dastehen muss</h2>
+<p>Ein Satz je Punkt, mit Zahl:</p>
+<ul><li>Fassung in allen Erzeugnissen (Browser-Einzeldatei, <code>.exe</code>, <code>.apk</code>) — mit SHA256 bzw. Versionsangabe.</li><li>Testergebnis (<code>N/N grün</code>), <code>ethos</code>, <code>klassen</code>, <code>sim-stand</code>, <code>seite-pruefen</code>.</li><li>Was <strong>nicht</strong> geprüft werden konnte, ausdrücklich.</li><li>Die Adressen, an denen es steht: Seite, Release, Anhänge.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

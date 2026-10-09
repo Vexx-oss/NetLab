@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bauen, Testen, Ausliefern · Netzwerk-Labor</title>
+<meta name="description" content="Bauen, Testen, Messen, Ausliefern im Detail — samt der gemessenen Fallen.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Bauen, Testen, Ausliefern</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#was-du-brauchst">Was du brauchst</a></li>
+<li><a href="#die-vier-bausteine">Die vier Bausteine</a></li>
+<li><a href="#die-einzeldatei">Die Einzeldatei</a></li>
+<li style="margin-left:16px"><a href="#beweisen-dass-sie-lauft">Beweisen, dass sie läuft</a></li>
+<li style="margin-left:16px"><a href="#automatisch-veroffentlichen">Automatisch veröffentlichen</a></li>
+<li style="margin-left:16px"><a href="#wenn-ein-pruflauf-als-cancelled-mit-0-schritten-dasteht">Wenn ein Prüflauf als „cancelled" mit 0 Schritten dasteht</a></li>
+<li><a href="#das-auslieferungspaket">Das Auslieferungspaket</a></li>
+<li style="margin-left:16px"><a href="#eine-release-anlegen">Eine Release anlegen</a></li>
+<li><a href="#die-windows-exe">Die Windows-.exe</a></li>
+<li><a href="#die-android-app-apk">Die Android-App (.apk)</a></li>
+<li><a href="#repo-angaben-setzen-beschreibung-homepage-themen">Repo-Angaben setzen (Beschreibung, Homepage, Themen)</a></li>
+<li><a href="#prufwerkzeuge-und-die-testkette">Prüfwerkzeuge und die Testkette</a></li>
+<li style="margin-left:16px"><a href="#tools-ethos-py-minimalismus-als-regelwerk">tools/ethos.py — Minimalismus als Regelwerk</a></li>
+<li><a href="#messen-im-echten-programm">Messen im echten Programm</a></li>
+<li><a href="#der-lernmotor">Der Lernmotor</a></li>
+<li><a href="#wenn-etwas-klemmt">Wenn etwas klemmt</a></li>
+</ul>
+</nav><h1 id="bauen-testen-ausliefern">Bauen, Testen, Ausliefern</h1>
+<p>Alles, was du brauchst, um aus dem Quelltext ein spielbares Programm zu machen. Wenn du nur <strong>spielen</strong> willst: <a href="README.html">README</a> → <em>Sofort spielen</em>.</p>
+<h2 id="was-du-brauchst">Was du brauchst</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Werkzeug</th><th>Wofür</th><th>Bemerkung</th></tr></thead><tbody><tr><td><strong>Python 3</strong></td><td>alle Bau- und Prüfwerkzeuge</td><td>keine Pakete nötig außer Pillow für <code>tools/bilder.py</code></td></tr><tr><td><strong>Node 24</strong></td><td>Tests</td><td>portabel unter <code>%LOCALAPPDATA%\node-portable</code>, sonst aus dem <code>PATH</code></td></tr><tr><td><strong>Rust + Tauri 2</strong></td><td>nur für die Windows-<code>.exe</code></td><td>dazu WebView2 (bringt Windows 10/11 mit)</td></tr></tbody></table></div>
+<p><code>sh tools/test.sh</code> sucht Node in dieser Reihenfolge: <code>$NODE</code>, dann der portable Ordner, dann <code>node</code> aus dem <code>PATH</code>. Auf GitHub läuft derselbe Befehl.</p>
+<h2 id="die-vier-bausteine">Die vier Bausteine</h2>
+<pre><code>src/ ──python bauen.py──▶ web/index.html ──python tools/einfach.py──▶ docs/index.html
+                              │                                             │
+                              │                                             └─▶ EINE Datei, überall spielbar
+                              └─▶ Vorlage für die Rust-Hülle (shell/) ──▶ Netzwerk-Labor.exe</code></pre>
+<div class="dk-tabelle"><table><thead><tr><th>Befehl</th><th>Ergebnis</th><th>Dauer</th></tr></thead><tbody><tr><td><code>python bauen.py</code></td><td><code>web/index.html</code> + <code>web/tests.html</code> (107 Module)</td><td>Sekunden</td></tr><tr><td><code>python tools/einfach.py</code></td><td><code>docs/index.html</code> — das Spiel als <strong>eine</strong> Datei</td><td>Sekunden</td></tr><tr><td><code>python tools/paket.py</code></td><td><code>dist/</code> — Ordner + ZIP für eine Release, geprüft</td><td>Sekunden</td></tr><tr><td><code>cargo tauri build --no-bundle</code></td><td><code>netzwerk-labor.exe</code> (Rust-Hülle)</td><td>Minuten</td></tr></tbody></table></div>
+<p><code>python bauen.py</code> muss <strong>immer vor</strong> <code>cargo tauri build</code> laufen — die Hülle lädt <code>web/</code>.</p>
+<h2 id="die-einzeldatei">Die Einzeldatei</h2>
+<p>Der wichtigste Befehl für die Auslieferung. Er hängt die Schriften als Daten-URI in die Seite und <strong>verweigert den Bau</strong>, wenn ein Außenverweis übrig bleibt (<code>&lt;link&gt;</code>, <code>&lt;script src&gt;</code>, <code>&lt;img src&gt;</code>, <code>url()</code> auf eine Schriftdatei). Damit kann keine Fassung entstehen, die heimlich nachlädt.</p>
+<pre><code class="sprache-bash">python tools/einfach.py                        # -&gt; docs/index.html
+python tools/einfach.py --pruefen              # nur prüfen
+python tools/einfach.py --ziel /tmp/spiel.html # woandershin</code></pre>
+<p>Gemessener Stand (06.10.2026): <strong>2.263.054 Bytes (2,16 MB)</strong>, 14 Schriften eingebettet, <strong>0 Außenverweise</strong>. Zum Vergleich: ohne eingebettete Schriften wären es 1,6 MB plus ein Ordner daneben — und genau dieser Ordner ist die Fehlerquelle, wenn jemand nur die <code>index.html</code> weiterreicht.</p>
+<blockquote>
+<p><strong>Bekannter Schönheitsfehler bei den Schriften</strong> (gemessen, nicht behoben): <code>mimetypes.guess_type(".woff2")</code> liefert unter Windows <code>application/octet-stream</code>, weil die Zuordnung aus der Registry kommt. In der Datei steht deshalb <code>data:application/octet-stream;base64,…</code> statt <code>data:font/woff2;base64,…</code> — 14 Schriften × 14 Zeichen = <strong>196 Bytes größer als nötig</strong>, und eine Suche nach <code>font/woff2</code> findet nichts. Der Browser stört sich nicht daran (CSS-<code>@font-face</code> erzwingt den Typ nicht). Wer es beheben will, setzt die Typen in <code>tools/einfach.py</code> fest — dann ändern sich aber Größe und SHA256 der versionierten <code>docs/index.html</code>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Zeilenenden.</strong> Der Bau liefert <strong>LF</strong>, auf jeder Plattform. Die Quellen sind gemischt (61 Dateien CRLF, 101 LF, so gewachsen und bewusst nicht angefasst), im Repositorium gilt laut <code>.gitattributes</code> aber LF. Ohne Normalisierung erbte <code>docs/index.html</code> 23.838 CRLF: Git führte die Datei als „ständig geändert", und der Bau auf Linux wäre nicht byte-gleich zum Bau auf Windows. Deshalb lesen <code>bauen.py</code>, <code>tools/einfach.py</code> und <code>tools/bilder.py</code> mit Normalisierung und schreiben mit <code>newline="\n"</code>.</p>
+</blockquote>
+<h3 id="beweisen-dass-sie-lauft">Beweisen, dass sie läuft</h3>
+<p><code>--pruefen</code> sagt nur, dass die Datei eigenständig <strong>ist</strong>. Ob das Spiel darin startet, sagt <code>tools/starttest.py</code>: es lädt die Datei in einem echten Browser über <code>file://</code> (genau der Weg eines Doppelklicks) und misst am geladenen Dokument.</p>
+<pre><code class="sprache-bash">python tools/starttest.py                          # docs/index.html
+python tools/starttest.py pfad/zur/datei.html --bild beweis.png</code></pre>
+<p>Gemessen werden <code>#app</code>-Inhalt, sichtbarer Textanfang, CSS-Blätter und -Regeln, ob jede der drei Schriften <strong>wirklich geladen und wirklich benutzt</strong> wird, und JS-Fehler.</p>
+<blockquote>
+<p><strong>Eine Falle, die dokumentiert bleiben soll:</strong> <code>document.fonts.check('16px "Bricolage Grotesque"')</code> meldet <code>false</code> — die Schrift gibt es nur in Gewicht 600 und 800, und die Abfrage ohne Gewicht fragt 400 ab. Ein Test, der das nicht weiß, meldet einen Fehler, den es nicht gibt. <code>tools/starttest.py</code> prüft darum je Familie das Gewicht, das es wirklich gibt (400 / 800 / 400).</p>
+</blockquote>
+<h3 id="automatisch-veroffentlichen">Automatisch veröffentlichen</h3>
+<p><code>.github/workflows/seite.yml</code> stellt die fertige, versionierte <code>docs/index.html</code> bei jedem Push auf <code>ausbau-1.2</code> auf GitHub Pages. Danach ist das Spiel unter <strong>https://vexx-oss.github.io/NetLab/</strong> mit einem Klick spielbar.</p>
+<p><strong>Die eine Einstellung, die nur im Browser geht:</strong> <em>Settings → Pages → Build and deployment → **Source: „GitHub Actions"</em><strong>. Solange Pages aus ist, wird der Deploy-Schritt übersprungen und der Lauf bleibt </strong>grün** — er meldet in einer Notiz, was fehlt. Nach dem Einschalten läuft er von selbst.</p>
+<blockquote>
+<p><strong>Wenn die Adresse trotzdem 404 liefert</strong> (gemessen 06.10.2026): Die Antwort war <code>Site not found · GitHub Pages</code>, obwohl der Ablauf grün war und <code>deploy-pages</code> erfolgreich meldete. Diese Kombination heißt: Es wurde veröffentlicht, aber die <strong>Quelle</strong> in den Einstellungen ist nicht „GitHub Actions" — dann wird eine Seite aus einem Zweig erwartet.</p>
+<p>Deshalb funktioniert jetzt <strong>beides</strong>:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Quelle in den Einstellungen</th><th>Was veröffentlicht wird</th></tr></thead><tbody><tr><td>„GitHub Actions"</td><td><code>docs/index.html</code> aus dem Ablauf</td></tr><tr><td>Ein Zweig, Ordner <code>/</code></td><td><code>index.html</code> im Wurzelverzeichnis — eine Weiterleitung auf <code>Netzwerk-Labor.html</code></td></tr></tbody></table></div>
+<p>Ohne die Weiterleitung im Wurzelverzeichnis findet Pages bei einer Zweig-Quelle keine <code>index.html</code> und antwortet mit 404. Die Weiterleitung ist absichtlich doppelt abgesichert: <code>meta refresh</code>, <code>location.replace</code> und ein sichtbarer Link.</p>
+</blockquote>
+<blockquote>
+<p><strong>Warum der Ablauf nicht selbst baut und keinen zweiten Job hat</strong> (gemessen 05.10.2026): Zwei Dinge gingen schief, beide nachgestellt und behoben.</p>
+<ol><li><code>actions/configure-pages</code> mit <code>enablement: true</code> sollte Pages selbst einschalten. Laut Aktionsquelle braucht das ein Token <strong>jenseits</strong> des Standard-<code>GITHUB_TOKEN</code> (PAT mit <code>repo</code>-Recht oder GitHub App mit <code>administration:write</code>). Der Schritt scheiterte und riss den ganzen Lauf mit — die Tests liefen nicht einmal.</li><li>Ein zweiter Job („Ist Pages eingeschaltet?") wartete auf einen freien Läufer. Die Läufe brauchten an diesem Abend 5–11 Minuten Anlauf; nach <strong>902 Sekunden</strong> brach GitHub den <em>gesamten</em> Lauf ab, auch den bereits erfolgreichen Teil. Deshalb ist die Prüfung jetzt ein Schritt im selben Job, und der Ablauf baut nicht mehr selbst — das macht <code>pruefen.yml</code>.</li></ol>
+<p><code>python tools/ablaeufe.py</code> prüft beides dauerhaft: kein <code>enablement: true</code>, keine unbedingte Veröffentlichung, kein zweiter Job.</p>
+</blockquote>
+<h3 id="wenn-ein-pruflauf-als-cancelled-mit-0-schritten-dasteht">Wenn ein Prüflauf als „cancelled" mit 0 Schritten dasteht</h3>
+<p>Gemessen am 05.10.2026: Mehrere Läufe von <code>pruefen.yml</code> bekamen <strong>keinen Läufer</strong> zugeteilt, blieben rund 15 Minuten in der Warteschlange und wurden dann von GitHub abgebrochen — Status <code>cancelled</code>, 0 Schritte, kein Runner. Das ist Verhalten der Plattform, <strong>kein Testergebnis</strong>: es wurde nichts gemessen, also ist auch nichts rot.</p>
+<p>Der Gegenbeweis liegt vor: Lauf <code>37367258747</code> (Job „Bauen und prüfen") hatte <strong>alle 13 Schritte erfolgreich</strong>, einschließlich Einzeldatei und Bilderprüfung. Derselbe Stand ist zusätzlich hier nachgestellt und grün: <code>python tools/ci-nachbau.py</code>.</p>
+<p>Nachholen von Hand: <em>Actions → Prüfen → Run workflow</em>. Damit sich nichts staut, hat der Ablauf eine Concurrency-Gruppe je Zweig; zusätzlich läuft er nachts um 03:17 UTC.</p>
+<h2 id="das-auslieferungspaket">Das Auslieferungspaket</h2>
+<pre><code class="sprache-bash">python tools/paket.py               # -&gt; dist/Netzwerk-Labor-&lt;Version&gt;-Windows.zip
+python tools/paket.py --ohne-exe    # nur die Browser-Fassung (klein)
+python tools/paket.py --nur-ordner  # Ordner bauen, kein ZIP</code></pre>
+<p>Das Werkzeug baut die Einzeldatei frisch, sammelt alles Nötige ein, schreibt ein <code>SIZES.txt</code> mit Prüfsummen und <strong>liest das ZIP danach zurück</strong>: CRC32 für jeden Eintrag, und jede Datei Byte für Byte gegen den Ordner. Ein Paket, das sich nicht öffnen lässt, fällt hier auf und nicht beim Nutzer.</p>
+<p>Gebaut wird <code>dist/Netzwerk-Labor-&lt;version&gt;-Windows.zip</code> mit dem Inhalt <code>Netzwerk-Labor-&lt;version&gt;/</code>:</p>
+<pre><code>Netzwerk-Labor.html            das Spiel als Einzeldatei (überall spielbar)
+Netzwerk-Labor.exe             Windows-Programm mit Leiste und Tray
+Integritaet-reparieren.cmd     falls die .exe kein Fenster zeigt
+START-HIER.md / LIESMICH.txt   Anleitung zum Losspielen
+LIZENZ.md / LIZENZEN/          Lizenz des Programms und der Schriften
+SIZES.txt                      Inhalt, Größen, Prüfsummen</code></pre>
+<p>Die Anleitungen kommen aus <code>Vorlagen/</code> — <strong>eine</strong> Quelle, kein zweiter Ort zum Pflegen.</p>
+<h3 id="eine-release-anlegen">Eine Release anlegen</h3>
+<p><strong>Das macht ein Ablauf</strong> (<span class="dk-tot" title="„../.github/workflows/release.yml“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>.github/workflows/release.yml</code></span>): Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferungspaket und legt das Release mit den Anhängen an.</p>
+<pre><code class="sprache-bash">git tag -a v1.2.4 -m "Netzwerk-Labor 1.2.4"
+git push origin v1.2.4</code></pre>
+<p>Nach etwa einer Minute steht das Release unter <em>Releases</em> — mit dem ZIP und der Einzeldatei <code>Netzwerk-Labor.html</code> als Anhänge.</p>
+<blockquote>
+<p><strong>Warum ein Ablauf und nicht von Hand:</strong> Ein Release über die API anzulegen braucht ein Token mit Schreibrecht. Auf dem Entwicklungsrechner liegt keines (die API antwortet dort mit 401, gemessen 06.10.2026). Ein Ablauf bekommt von GitHub ein <code>GITHUB_TOKEN</code> und darf mit <code>permissions: contents: write</code> Releases anlegen.</p>
+</blockquote>
+<blockquote>
+<p><strong>Die <code>.exe</code> ist nicht im Release</strong>, weil sie nicht im Git liegt (8 MB). Im Paket steht dann der Browser-Hinweis. Wer die Windows-Fassung anhängen will: <code>.exe</code> bauen (siehe unten), <code>python tools/paket.py</code> laufen lassen und das entstandene <code>dist/Netzwerk-Labor-&lt;Version&gt;-Windows.zip</code> im Release-Bildschirm von Hand hineinziehen.</p>
+</blockquote>
+<p>Ein Tag allein ist noch kein Release: <strong>GitHub legt Releases nie von selbst an.</strong> Der Reiter „Releases" bleibt leer, bis ein Ablauf oder ein Mensch einen anlegt. Die älteren Tags <code>endversion-1.0</code> und <code>v1.1</code> haben aus demselben Grund bis heute kein Release.</p>
+<blockquote>
+<p><strong>Warum <code>Netzwerk-Labor.html</code> zusätzlich im Repositorium liegt</strong> (2,2 MB, gegen die Regel „keine gebauten Dateien im Git"): Ein Download-Weg muss <strong>einen</strong> Klick brauchen, und ein Release-Anhang braucht eine Person, die ihn anlegt. Die Datei ist textbasiert und damit diffbar, wird bei inhaltlichen Änderungen mitgebaut und ist mit <code>docs/index.html</code> byte-identisch. Die 8-MB-<code>.exe</code> bleibt weiter draußen — sie gehört an eine Release, und dort <strong>hängt sie seit dem 07.10.2026 automatisch</strong> (siehe unten).</p>
+</blockquote>
+<h2 id="die-windows-exe">Die Windows-<code>.exe</code></h2>
+<pre><code class="sprache-bash">python bauen.py                                    # zuerst!
+cd shell/src-tauri
+CARGO_TARGET_DIR=&lt;schneller-Ordner&gt;/target cargo tauri build --no-bundle
+# Ergebnis kopieren nach Programm/Netzwerk-Labor.exe</code></pre>
+<p><strong>Automatisch im Release</strong> (seit 07.10.2026): Der Ablauf <span class="dk-tot" title="„../.github/workflows/release.yml“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>.github/workflows/release.yml</code></span> hat einen zweiten Job („Windows-Programm bauen und anhängen"), der auf <code>windows-latest</code> genau diese Reihenfolge fährt — <code>python bauen.py</code>, dann <code>cargo build --release --features custom-protocol</code> (dieselbe Bauart wie <code>cargo tauri build --no-bundle</code>, nur ohne die CLI) — die Fassung der <code>.exe</code> gegen den Tag prüft und sie als <strong><code>Netzwerk-Labor.exe</code></strong> an das Release hängt. Damit ist der Ein-Klick-Download stabil:</p>
+<pre><code>https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe</code></pre>
+<p>Auf dem Entwicklungsrechner bleibt der Weg oben für <code>Programm/Netzwerk-Labor.exe</code> — dieser Bau ist zusätzlich mit <code>python tools/q-echt.py</code> <strong>gestartet</strong> und geprüft worden (07.10.2026: 3 m 45 s, 8.217.088 B, erster Auftrag mit echter Maus gelöst, 5 ★, 0 Fehler).</p>
+<p>Die fertigen Programme und die Bildschirmfoto-Nachweise liegen <strong>bewusst nicht im Git</strong> (<code>.gitignore</code>): 8 MB <code>.exe</code> und 22 MB Beweismaterial gehören nicht in die Historie.</p>
+<h2 id="die-android-app-apk">Die Android-App (<code>.apk</code>)</h2>
+<p>Seit 06.10.2026 gibt es eine Android-Fassung: dieselbe Browser-Fassung in einer WebView-Hülle. Eigene Anleitung mit allen Grenzen: <span class="dk-tot" title="„../android/LIESMICH.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>android/LIESMICH.md</code></span>.</p>
+<pre><code class="sprache-bash">python android/bauen.py                 # Spiel → Einzeldatei → APK → Prüfung
+python android/bauen.py --ohne-spiel    # schneller, nimmt android/bau/spiel.html
+python android/bauen.py --nur-pruefen   # Signatur, Kennwerte, Assets prüfen</code></pre>
+<p>Ergebnis: <code>Programm/Netzwerk-Labor-&lt;Version&gt;-Android.apk</code> (0,94 MB, signiert). Nötig sind ein Android-SDK mit <strong>build-tools ≥ 35</strong> und ein JDK 17+.</p>
+<p><strong>Zwei Versionszahlen, zwei Bedeutungen</strong> (06.10.2026): <code>versionName</code> ist die Spielversion aus <code>bauen.py</code> (<code>VERSION</code>) und bleibt <strong>1.2.1</strong>. <code>versionCode</code> ist die Bauzählung und steht als eigene Zahl in <code>android/bauen.py</code> (<code>VERSION_CODE</code>, jetzt <strong>10202</strong>) — aus 1.2.1 abgeleitet ergäbe sie 10201, also genau den Code der schon gebauten APK. Android verweigert die Installation über eine alte Fassung, wenn der Code nicht größer ist („App nicht installiert“). Deshalb ist er vom Namen entkoppelt und steigt mit jeder APK, die das Haus verlässt; <code>version_lesen()</code> bricht ab, wenn <code>VERSION_CODE</code> unter dem aus <code>versionName</code> ableitbaren Wert liegt.</p>
+<p><strong>Die App dreht frei.</strong> Bis 06.10.2026 stand im Manifest <code>android:screenOrientation="sensorLandscape"</code> — Querformat festgenagelt. Jetzt steht dort <code>unspecified</code> (Systemvorgabe, gepackter Wert −1): mit eingeschalteter Automatik dreht die App in Hoch- und Querformat, bei ausgeschalteter bleibt sie in der Lage, die der Nutzer eingestellt hat. <code>fullUser</code> und <code>fullSensor</code> wurden verworfen, weil sie eine bewusste Systemeinstellung übergehen — die Begründung steht im Kopf von <code>android/huelle/AndroidManifest.xml</code>.</p>
+<p>Ein Dreh lädt die Seite <strong>nicht</strong> neu: <code>configChanges</code> fängt ihn ab (gepackt <code>0x40007ffc</code>: orientation, screenSize, screenLayout, smallestScreenSize, keyboard, keyboardHidden, navigation, touchscreen, density, uiMode, fontScale, colorMode, locale, layoutDirection), <code>onConfigurationChanged</code> lädt ausdrücklich nichts, und für den Fall einer trotzdem neu erzeugten Activity stellt <code>onSaveInstanceState</code>/<code>restoreState</code> die Seite ohne <code>loadUrl</code> wieder her. Der Spielstand liegt in <code>localStorage</code> unter <code>https://netzwerk-labor.local/</code> und überlebt auch das.</p>
+<p>Der Bau prüft diese Zusage selbst (Schritt 7) und wird rot, wenn eine Bedingung verletzt ist:</p>
+<ol><li>badging darf kein <code>android.hardware.screen.landscape/-portrait</code> nennen,</li><li><code>screenOrientation</code> in der APK muss −1 sein,</li><li><code>configChanges</code> muss orientation und screenSize enthalten,</li><li><strong>im Bytecode</strong> der <code>classes.dex</code> in der APK darf <code>onConfigurationChanged</code> kein <code>WebView.loadUrl</code> aufrufen (<code>dexdump -d</code>, gezählt wird je Methode). Rot wird der Bau, sobald dort ein Aufruf steht; die Verteilung wird immer mitgedruckt (in der eingefrorenen Fassung: <code>onCreate 1x</code> für den Start, <code>onReceivedError 1x</code> für den Fehler-Rückfall). Das ist der Ersatz für den Gerätetest, der hier nicht möglich ist — siehe „Ehrliche Grenzen“.</li></ol>
+<p>Gemessen an der eingefrorenen APK vom 06.10.2026 (980.508 Bytes, SHA256 <code>46c90213…</code>, Seite darin <code>a2bba5cf…</code>):</p>
+<pre><code>package: name='oss.vexx.netlab' versionCode='10202' versionName='1.2.1' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
+uses-feature-not-required: name='android.hardware.touchscreen'</code></pre>
+<p>Kein <code>uses-permission</code> (die App darf nicht ins Netz), kein Orientierungsmerkmal.</p>
+<p>Zwei Läufe hintereinander ergeben denselben Inhalt, aber <strong>nicht</strong> dieselbe SHA256: die ZIP-Zeitstempel entstehen bei jedem Lauf neu. Die <strong>Größe</strong> taugt nicht als Kennung: <code>apksigner</code> hängt einen Signaturblock von genau 4.096 Bytes an, und davor wird auf eine 4.096er-Grenze aufgefüllt. An der Endfassung nachgerechnet (Bytes aus der Datei selbst, „Nutzdaten" = komprimierte Daten plus lokale Köpfe): Nutzdaten 974.195 + Füllung 653 + Signaturblock 4.096 + Verzeichnis 1.542 + Abschluss 22 = 980.508. Zuwächse bis zur nächsten Grenze verschwinden also in der Füllung — zuletzt wuchsen die Nutzdaten um 3.229 Bytes (970.966 → 974.195) und die Füllung schrumpfte um genau 3.229 Bytes (3.882 → 653): die Gesamtgröße blieb 980.508, obwohl die Seite eine andere war (<code>b2329e3a…</code> → <code>a2bba5cf…</code>). Wer eine APK wiedererkennt, nimmt die <strong>SHA256</strong>, nicht die Größe.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Baustein</th><th>Wo</th><th>Was</th></tr></thead><tbody><tr><td>Bau</td><td><code>android/bauen.py</code></td><td>aapt2 → javac → d8 → zipalign → apksigner, ohne Gradle</td></tr><tr><td>Hülle</td><td><code>android/huelle/</code></td><td>Manifest, <code>MainActivity.java</code>, Symbol, Thema</td></tr><tr><td>Anpassung</td><td><code>android/mobil/</code></td><td><code>mobil.css</code>/<code>mobil.js</code>, beim Bau hinter das Spiel gehängt</td></tr><tr><td>Messen</td><td><code>android/werkzeuge/mobilprobe.py</code></td><td>Telefonmaße nachstellen, Kabelzug mit dem Finger, Bildschirmfoto</td></tr><tr><td>Symbol</td><td><code>android/werkzeuge/ikone.py</code></td><td>aus den Farben des Spiels (Pillow)</td></tr></tbody></table></div>
+<p>Vier Dinge, die dabei gemessen wurden und leicht Zeit kosten, wenn man sie nicht weiß:</p>
+<ol><li><strong><code>d8</code> aus build-tools 34.0.0 ist unbrauchbar</strong> — es bricht bei jeder verschachtelten Klasse mit einer internen NullPointerException ab. Ab 36.0.0 geht es. <code>android/bauen.py</code> nimmt die höchste vorhandene Fassung.</li><li><strong>d8 ab build-tools 35 nimmt kein Verzeichnis mehr</strong> als Eingabe, sondern einzelne <code>.class</code>-Dateien.</li><li><strong><code>&lt;/head&gt;</code> kommt in der gebauten Seite zweimal vor</strong> — das Spiel liefert einer Attrappe-Webseite im Labor eine HTML-Vorlage als Zeichenkette mit. Zum Einhängen der Android-Anpassung wird deshalb die Stelle benannt (erstes <code>&lt;/head&gt;</code> vor <code>&lt;body&gt;</code>, letztes <code>&lt;/body&gt;</code> am Dateiende), nicht gezählt.</li><li><strong><code>screenOrientation</code> frei heißt −1, nicht 0.</strong> Im gepackten Manifest (<code>aapt2 dump xmltree --file AndroidManifest.xml</code>) ist −1 <code>SCREEN_ORIENTATION_UNSPECIFIED</code>; <strong>0 ist <code>SCREEN_ORIENTATION_LANDSCAPE</code></strong>, 6 war <code>SCREEN_ORIENTATION_SENSOR_LANDSCAPE</code> (die alte Sperre). Eine Prüfung auf „0 = frei“ wäre also genau falsch herum. Ebenfalls gemessen: ein XML-Kommentar mit einer Zeile aus Bindestrichen (<code>-----</code>) macht das Manifest ungültig — <code>--</code> ist in einem XML-Kommentar verboten, aapt2 bricht dann ab.</li></ol>
+<p><code>src/</code> bleibt unangetastet: die Anpassung gilt nur für die App.</p>
+<h2 id="repo-angaben-setzen-beschreibung-homepage-themen">Repo-Angaben setzen (Beschreibung, Homepage, Themen)</h2>
+<p>Diese drei Angaben lassen sich <strong>nicht</strong> per <code>git push</code> setzen, sondern nur über die GitHub-API mit einem Token — auf dem Entwicklungsrechner liegt keines (die API antwortet dort mit 401, gemessen 06.10.2026). Dafür gibt es ein Werkzeug:</p>
+<pre><code class="sprache-bash">python tools/repo-angaben.py              # Trockenlauf: zeigt nur, was gesetzt würde
+GH_TOKEN=ghp_xxx python tools/repo-angaben.py --setzen</code></pre>
+<p>Nötig ist ein <strong>Fine-grained Token</strong> mit Repository-Zugriff nur auf <code>NetLab</code> und der Berechtigung <strong>Administration: Read and write</strong> (GitHub → Settings → Developer settings → Personal access tokens). Das Token wird nur an <code>api.github.com</code> gesendet und nirgends gespeichert. Die Homepage ist bereits gesetzt; Beschreibung und Themen fehlen noch.</p>
+<p>Dasselbe Werkzeug kann die <strong>Windows-Fassung an ein Release hängen</strong> — die 8-MB-<code>.exe</code> liegt nicht im Git und kann deshalb vom Release-Ablauf nicht mitgebaut werden:</p>
+<pre><code class="sprache-bash">python tools/paket.py                                        # erzeugt dist/*-Windows.zip
+GH_TOKEN=ghp_xxx python tools/repo-angaben.py --hochladen    # hängt sie an das Release</code></pre>
+<p>Dafür braucht das Token zusätzlich <strong>Contents: Read and write</strong>.</p>
+<p>Alles andere ist in Abläufe gewandert und braucht kein Token von Hand: Prüfen (<code>pruefen.yml</code>), Veröffentlichen (<code>seite.yml</code>) und das Anlegen des Releases (<code>release.yml</code>).</p>
+<h2 id="prufwerkzeuge-und-die-testkette">Prüfwerkzeuge und die Testkette</h2>
+<p><code>sh tools/test.sh</code> führt die Prüfungen in dieser Reihenfolge aus; jeder Schritt bricht den Lauf ab, wenn er rot wird (gemessen an <code>tools/test.sh</code>, Zeilen 29–37):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Aufruf</th><th>Reihenfolge</th></tr></thead><tbody><tr><td><code>sh tools/test.sh</code></td><td>1. <code>python tools/ethos.py</code> · 2. <code>node tests/run.js</code> (Tests)</td></tr><tr><td><code>sh tools/test.sh --rauch</code></td><td>1. <code>node tests/run.js</code> · 2. <code>python tools/klassen.py</code> · 3. <code>python tools/ethos.py</code> · 4. <code>python tools/rauch.py</code></td></tr></tbody></table></div>
+<blockquote>
+<p><strong>Achtung, leicht zu verwechseln:</strong> <code>tools/klassen.py</code> läuft <strong>nur</strong> mit <code>--rauch</code>, und <code>ethos.py</code> steht dort <strong>nach</strong> <code>klassen.py</code> — im gewöhnlichen Lauf läuft <code>ethos.py</code> dagegen <strong>vor</strong> den Tests. Wer „ethos läuft nach klassen.py" schreibt, meint den Rauchtest-Pfad.</p>
+</blockquote>
+<p>Stand 07.10.2026: <strong>434/434 grün, 50 Testdateien, 83 Module, davon 0 übersprungen</strong>. Neu in dieser Runde sind die Hilfestellung (<code>spiel-stufensystem</code>, <code>spiel-hilfe-lernverbuchung</code>, <code>spiel-mini-denktexte</code>, <code>spiel-hilfe-streifen</code>, <code>spiel-leiste-hilfe</code>, <code>spiel-training</code>, <code>ui-training</code>, <code>spiel-einstieg-stufe</code>, <code>spiel-fehlertexte</code>, <code>daten-trainings</code>, <code>spiel-lernstand-hilfe</code>) sowie die beiden Gegenprüfungen (<code>pruefung-hilfestellung</code>, <code>pruefung-wirkung</code>) und <code>doku-seite</code>. Die Schlusszeile meldet jetzt auch <strong>„davon N übersprungen"</strong> — ein Test ohne eine einzige Zusicherung gilt als übersprungen und nicht mehr stillschweigend als grün.</p>
+<h3 id="tools-ethos-py-minimalismus-als-regelwerk"><code>tools/ethos.py</code> — Minimalismus als Regelwerk</h3>
+<p>„Minimalistisch" ist als Adjektiv nicht prüfbar. <code>tools/ethos.py</code> macht daraus <strong>zwölf Regeln</strong> für <code>src/stil/*.css</code> und zählt Literale im Quelltext:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Nr</th><th>Regel</th></tr></thead><tbody><tr><td>R1</td><td>Farbe nur per Token — kein <code>#hex</code>/<code>rgb</code>/<code>hsl</code> außerhalb der Token-Blöcke</td></tr><tr><td>R2</td><td>Radius nur aus Tokens (<code>var(--radius…)</code>, <code>999px</code> Pille, <code>50%</code> Kreis)</td></tr><tr><td>R3</td><td>Schrift nur aus sechs Werten: 11, 12, 13, 15, 20, 28 px — kein <code>em</code>/<code>%</code>, keine halben Pixel</td></tr><tr><td>R4</td><td>Abstand nur aus der Skala {0, 4, 8, 12, 16, 24, 32} px (negative Gegenstücke erlaubt)</td></tr><tr><td>R5</td><td>Dauer nur aus {1 ms (Bewegung aus), 160 ms, 320 ms}; <code>var(--dauer)</code> erlaubt</td></tr><tr><td>R6</td><td><code>z-index</code> nur aus der benannten Leiter {10, 20, … 80}</td></tr><tr><td>R7</td><td><code>!important</code> nur in <code>basis.css</code> (Reset und Barrierefreiheit)</td></tr><tr><td>R8</td><td>genau <strong>ein</strong> zentraler <code>@media (prefers-reduced-motion)</code>-Block (<code>basis.css</code>)</td></tr><tr><td>R9</td><td>ein Selektor wird unter gleichen Bedingungen nur einmal definiert</td></tr><tr><td>R10</td><td>keine identischen Regelblöcke (gleicher Inhalt, gleiche Bedingungen)</td></tr><tr><td>R11</td><td>jede Zahl in einer Längen-Eigenschaft trägt eine Einheit</td></tr><tr><td>R12</td><td>höchstens 6 sichtbare Bedienelemente je Ansicht — <strong>DOM-Messung im laufenden Programm</strong></td></tr></tbody></table></div>
+<pre><code class="sprache-bash">python tools/ethos.py                       # alle Regeln messen
+python tools/ethos.py --stand DATEI         # nur Verschlechterungen gegenüber DATEI sind rot
+python tools/ethos.py --neu --stand DATEI   # Stand aus dem Ist-Stand einfrieren
+python tools/ethos.py --gegenprobe          # baut absichtlich Verstöße ein — muss rot werden
+python tools/ethos.py --dom                 # Regel 12 im laufenden Programm messen (tools/cdp.py)
+python tools/ethos.py --lang                # alle Fundstellen statt der ersten fünf</code></pre>
+<ul><li><strong>Rückgabewert 1, sobald eine Regel rot ist.</strong> Ohne <code>--stand</code> ist <strong>jeder</strong> Verstoß rot.</li><li>Mit <code>--stand tests/stil-stand.json</code> sind die Altlasten eingefroren: **grün heißt „nicht schlechter als der Stand"**, nicht „jede Regel eingehalten". Die Meldung sagt das ausdrücklich („Eingehalten ist damit nicht jede Regel — der Stand friert die Altlasten ein").</li><li><code>--gegenprobe</code> <strong>dreht die Bedeutung des Rückgabewerts um</strong>: 0 ist das gute Ergebnis (er wurde rot), Vorbild <code>tools/rauch.py --gegenprobe</code>.</li><li><strong>Regel 12 braucht <code>--dom</code></strong> (Browser über <code>tools/cdp.py</code>); ohne das wird sie übersprungen und im Bericht als „übersprungen" ausgewiesen — dann sind nur elf Regeln prüfbar.</li><li>Gemessener Stand (06.10.2026): 21 Dateien, 1.897 Zeilen, 5.479 Deklarationen, 1.613 Regelblöcke, 1.574 verschiedene Selektor+Kontext — GRÜN; die Gegenprobe schlägt bei allen elf prüfbaren Regeln an.</li></ul>
+<h2 id="messen-im-echten-programm">Messen im echten Programm</h2>
+<pre><code class="sprache-bash">python tools/cdp.py start --frisch     # startet die .exe mit Fernsteuerungs-Port
+python tools/cdp.py eval "&lt;js&gt;"        # JavaScript auswerten
+python tools/cdp.py shot bild.png      # Bildschirmfoto
+python tools/cdp.py stop               # beendet nur die eigene Instanz</code></pre>
+<p><code>python tools/q-echt.py</code> fährt damit eine vollständige Abnahme im echten Programm: erster Auftrag per echter Maus, Sprechblase, Fernwartung, Bildschirmfotos.</p>
+<blockquote>
+<p><strong>Wenn das Programm schon läuft</strong>, bricht <code>tools/cdp.py</code> mit einer Meldung ab und beendet <strong>nichts</strong>. Das ist Absicht (AGENTS.md Regel 1): Fremde Prozesse werden nicht angefasst. Also erst das laufende Programm über das Tray-Symbol beenden.</p>
+</blockquote>
+<h2 id="der-lernmotor">Der Lernmotor</h2>
+<p>Das Netzwerk-Labor und die FISI-Spielhalle teilen sich <strong>einen</strong> Lernmotor.</p>
+<pre><code class="sprache-bash">python tools/lernmotor.py                  # Kopie gegen Quelle prüfen
+python tools/lernmotor.py --neu-einlesen   # Kopie bewusst erneuern
+python tools/lernmotor-bau.py              # Bau mit und ohne Spielhalle byte-gleich?</code></pre>
+<p><code>fremd/lernmotor.js</code> liegt im Repo und macht es allein baubar. Liegt die Spielhalle daneben, hat sie Vorrang. Der Herkunftskopf in der Kopie wird beim Bau <strong>abgeschnitten</strong>, damit beide Wege byte-gleich bauen — sonst hätte die Kopie 1.000 Bytes mehr Inhalt im Spiel als die Quelle.</p>
+<h2 id="wenn-etwas-klemmt">Wenn etwas klemmt</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Bild</th><th>Ursache und Abhilfe</th></tr></thead><tbody><tr><td><code>kein Node gefunden</code></td><td>Node 24 installieren oder <code>NODE=/pfad/zu/node sh tools/test.sh</code></td></tr><tr><td><code>sh tools/test.sh</code> bricht mit <code>dirname</code>-Fehler ab</td><td>Git-<code>/usr/bin</code> fehlt im <code>PATH</code>: <code>&amp; "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'</code></td></tr><tr><td><code>.exe</code> zeigt kein Fenster</td><td><code>Programm/Integritaet-reparieren.cmd</code> (Details in <span class="dk-tot" title="„../Nachweise/1.2-Start/BEFUND.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>Nachweise/1.2-Start/BEFUND.md</code></span>)</td></tr><tr><td><code>einfach.py</code>: „Aussenverweise uebrig geblieben"</td><td>Eine neue Datei wird von außen geladen. Entweder einbetten oder bewusst im Spiel belassen und die Prüfliste in <code>tools/einfach.py</code> anpassen — <strong>nicht</strong> die Prüfung abschalten.</td></tr><tr><td><code>lernmotor.py</code> meldet ABWEICHUNG</td><td>Die Spielhalle ist weiter. <code>--neu-einlesen</code>, dann Tests und <code>node tools/sim-stand.js</code>.</td></tr></tbody></table></div>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

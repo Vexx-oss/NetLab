@@ -21,6 +21,10 @@ _probe-browser/
 
 # Auslieferungspakete (tools/paket.py): erzeugt, einige MB, gehoeren an eine Release, nicht ins Git
 dist/
+# Der Auslieferungsordner der Pages-Seite (tools/seite.py legt ihn an, .github/workflows/seite.yml
+# stellt ihn zusammen). Er ist ein reines Erzeugnis aus docs/index.html + docs/doku/; die Quellen
+# liegen versioniert in docs/. Ohne diese Zeile nimmt ein `git add -A` den ganzen Ordner mit.
+_site/
 # Messprofile und Bilder des Starttests (tools/starttest.py legt sie im TEMP an, falls jemand --bild . nutzt)
 _sonde-*/
 *.beiseite

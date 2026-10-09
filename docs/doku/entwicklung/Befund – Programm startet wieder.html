@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🖧 Befund – das Netzwerk-Labor startet wieder · Netzwerk-Labor</title>
+<meta name="description" content="Der Befund zum Integritaetslabel, das die .exe blockierte — samt Reparaturweg.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">🖧 Befund – das Netzwerk-Labor startet wieder</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-was-kaputt-war">1 · Was kaputt war</a></li>
+<li><a href="#2-ursache-belegt-die-herkunft-ist-vermutung">2 · Ursache (belegt) – die Herkunft ist Vermutung</a></li>
+<li><a href="#3-reparatur-ohne-administratorrechte-etwa-eine-sekunde">3 · Reparatur (ohne Administratorrechte, etwa eine Sekunde)</a></li>
+<li><a href="#4-was-ausgeschlossen-wurde-jeweils-gemessen">4 · Was ausgeschlossen wurde (jeweils gemessen)</a></li>
+<li><a href="#5-prufung">5 · Prüfung</a></li>
+<li><a href="#6-was-man-daraus-fur-die-prufung-mitnimmt">6 · Was man daraus für die Prüfung mitnimmt</a></li>
+<li><a href="#7-nicht-gepruft-offen">7 · Nicht geprüft / offen</a></li>
+<li><a href="#verwandt">Verwandt</a></li>
+</ul>
+</nav><hr>
+<p>typ: befund erstellt: 2026-10-05 aktualisiert: 2026-10-05 status: fertig tags: [FISI, Lernspiel, Netzwerk, Betrieb]</p>
+<hr>
+<h1 id="befund-das-netzwerk-labor-startet-wieder">🖧 Befund – das Netzwerk-Labor startet wieder</h1>
+<blockquote>
+<p>[!success] ✅ Kurzfassung (05.10.2026, abends) Das Desktop-Programm <code>Programm/Netzwerk-Labor.exe</code> startet wieder: Fenster „Netzwerk-Labor“, Laboransicht v1.1.0, eigenes Profil unter <code>%LOCALAPPDATA%\de.fisi.netzwerklabor\EBWebView</code>, <strong>0</strong> Abstürze der WebView2-Laufzeit. Ursache war <strong>nicht</strong> das Programm und <strong>nicht</strong> WebView2, sondern das <strong>Integritätslabel „Niedrig“</strong> des Vaults. Reparatur: eine Sekunde <code>icacls</code>, ohne Administratorrechte.</p>
+</blockquote>
+<p>!<span class="dk-tot" title="„N1 Integritätsstufen.excalidraw“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">N1 Integritätsstufen.excalidraw</span></p>
+<h2 id="1-was-kaputt-war">1 · Was kaputt war</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Beobachtung</th><th>Messwert</th></tr></thead><tbody><tr><td>Start bricht ab</td><td><code>failed to create webview</code>, <code>HRESULT(0x800700AA)</code> (16:11 und 16:14) bzw. <code>0x8000FFFF</code></td></tr><tr><td>Ereignisprotokoll</td><td><strong>53</strong> „Application Error“ (Id 1000) seit 14:00 – <strong>alle</strong> <code>msedgewebview2.exe</code>, <strong>keiner</strong> zu <code>Netzwerk-Labor.exe</code></td></tr><tr><td>Speicherabbild</td><td><code>Failed to create directory …\de.fisi.netzwerklabor\EBWebView, last error is 5</code> (Fehler 5 = Zugriff verweigert)</td></tr><tr><td>Ausnahme</td><td><code>0x80000003</code> (STATUS_BREAKPOINT) an stets derselben Offset – ein fatales Chromium-CHECK</td></tr></tbody></table></div>
+<blockquote>
+<p>[!note]- 📖 Begriffe <strong>Integritätslabel (Mandatory Integrity Control, MIC):</strong> Windows hängt an Objekte (Dateien, Ordner, Prozesse) eine Stufe: Niedrig · Mittel · Hoch · System. Ein Prozess darf nur auf Objekte <strong>bis zu seiner Stufe</strong> schreiben. <strong>Niedrig-Prozess:</strong> Läuft eine <code>.exe</code> aus einer niedrig gelabelten Datei, startet Windows sie selbst als Niedrig-Prozess – deshalb war auch der über den Aufgabenplaner gestartete Prozess Niedrig, obwohl <code>cmd.exe</code> Mittel war. <strong>WebView2:</strong> Die Chromium-Laufzeit, mit der Tauri-Programme ihre Oberfläche zeichnen. Sie legt beim Start ein Profil (<code>EBWebView</code>) an – genau das scheiterte. <strong>DACL ist nicht Integrität:</strong> Die Zugriffsliste (DACL) gab <code>Student</code> Vollzugriff – geprüft, in Ordnung. Die Sperre kam von der <strong>Integritätsstufe</strong>. Das ist der klassische Stolperstein.</p>
+</blockquote>
+<h2 id="2-ursache-belegt-die-herkunft-ist-vermutung">2 · Ursache (belegt) – die Herkunft ist Vermutung</h2>
+<p><strong>Belegt:</strong> Der Vault <code>C:\Users\Student\Documents\Joshua</code> trägt das Integritätslabel <strong>„Niedrig“</strong> (<code>SYSTEM_MANDATORY_LABEL_ACE</code>, Policy-Maske <code>0x1</code> = <em>no write up</em>). Das Label vererbt sich auf alle Dateien darin – auch auf <code>Programm\Netzwerk-Labor.exe</code>. Der Prozess startet dadurch als <strong>Niedrig</strong> und darf <code>%LOCALAPPDATA%</code> (Mittel) nicht beschreiben; <code>msedgewebview2.exe</code> konnte sein Profil nicht anlegen und brach ab.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Pfad</th><th>Label vorher</th><th>Label nachher</th></tr></thead><tbody><tr><td><code>Programm\Netzwerk-Labor.exe</code></td><td><strong>NIEDRIG</strong> (0x1)</td><td>Mittel</td></tr><tr><td><code>Programm\</code> (Ordner)</td><td><strong>NIEDRIG</strong> (0x1)</td><td>Mittel</td></tr><tr><td><code>Programm\Endversion-1.1\Netzwerk-Labor.exe</code></td><td><strong>NIEDRIG</strong> (0x1)</td><td>Mittel (mitrepariert)</td></tr><tr><td>Vault-Wurzel</td><td><strong>NIEDRIG</strong> (0x1)</td><td>unverändert</td></tr><tr><td><code>%LOCALAPPDATA%\de.fisi.netzwerklabor</code></td><td>kein Label</td><td>kein Label</td></tr><tr><td>Kontrolle <code>C:\Windows\System32\notepad.exe</code></td><td>kein Label</td><td>kein Label</td></tr></tbody></table></div>
+<p><strong>Vermutung (nicht bewiesen):</strong> Das Label stammt aus einer Werkzeug-Sandbox (<code>workspace-write</code>), die den Arbeitsordner für sich beschreibbar labelt. Indizien: am Vault stehen die Nicht-Standard-ACEs <code>S-1-4-871264674-728394573:(W,D,DC)</code> und <code>Jeder:(DENY)(DC)</code>. Wer sie gesetzt hat und wann, ist <strong>nicht</strong> gemessen.</p>
+<h2 id="3-reparatur-ohne-administratorrechte-etwa-eine-sekunde">3 · Reparatur (ohne Administratorrechte, etwa eine Sekunde)</h2>
+<pre><code>icacls "&lt;Projekt&gt;\Programm" /setintegritylevel (OI)(CI)Medium /T /C
+icacls "&lt;Projekt&gt;\Programm\Netzwerk-Labor.exe" /setintegritylevel Medium</code></pre>
+<p>Als Doppelklick: <code>Programm\Integritaet-reparieren.cmd</code>.</p>
+<blockquote>
+<p>[!warning] ⚠️ Wiederholungsgefahr Die Vault-Wurzel bleibt „Niedrig“ – jede <strong>neu</strong> im Vault angelegte Datei erbt das. Ein künftig im Vault gebautes Programm wäre wieder betroffen; eine Kopie nach <code>Programm\</code> erbt dagegen „Mittel“. Tritt dasselbe Bild erneut auf, genügt derselbe Doppelklick.</p>
+</blockquote>
+<h2 id="4-was-ausgeschlossen-wurde-jeweils-gemessen">4 · Was ausgeschlossen wurde (jeweils gemessen)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Vermutung</th><th>Messung</th><th>Ergebnis</th></tr></thead><tbody><tr><td>„Die Werkzeug-Sandbox blockiert nur den Agenten“</td><td>Start über <code>explorer.exe</code> (wie Doppelklick) und über den <strong>Aufgabenplaner</strong></td><td>scheiterte genauso</td></tr><tr><td>„Das WebView2-Profil ist gesperrt oder kaputt“</td><td>Rename-Probe (niemand hält den Ordner), Profil beiseitegelegt, frisches Profil</td><td>nicht die Ursache</td></tr><tr><td>„Schreibrechte fehlen“</td><td>DACL geprüft; Schreibprobe mit normalem Token legte <code>…\mappe-task\EBWebView</code> an</td><td><strong>OK</strong> – Rechte sind es nicht</td></tr><tr><td>„Die WebView2-Laufzeit ist defekt“</td><td>Windows-Suche und Teams nutzen sie seit 14:40 bzw. 15:06 ununterbrochen weiter</td><td>Laufzeit ist in Ordnung</td></tr><tr><td>„Die zwangsweise beendeten <code>msedgewebview2.exe</code> waren es“ (früherer Befund)</td><td>53 Abstürze, aber <strong>0</strong> zu <code>Netzwerk-Labor.exe</code></td><td><strong>widerlegt</strong> – ein Windows-Neustart war nie nötig</td></tr><tr><td>„Chromium-Argumente, GPU, Code-Integrität“</td><td>Matrix mit <code>--disable-gpu</code>, <code>--no-sandbox</code>, <code>--in-process-gpu</code>, älterer Runtime</td><td>alle wirkungslos</td></tr></tbody></table></div>
+<h2 id="5-prufung">5 · Prüfung</h2>
+<p><strong>Abnahmelauf im echten Programm</strong> (<code>python tools/q-echt.py</code>, Exit-Code <strong>0</strong>, 10 s, <strong>0</strong> WebView2-Abstürze):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Prüfung</th><th>Messwert</th></tr></thead><tbody><tr><td>Erster Auftrag</td><td><code>salon-01</code>, Switch <code>sw1</code>, 4 Kabel</td></tr><tr><td>Trifft die Maus jedes Gerät?</td><td><strong>6 Geräte geprüft, 0 verdeckt</strong></td></tr><tr><td>Kabel mit echter Maus ziehen</td><td>Kabel 4 → <strong>5</strong></td></tr><tr><td>Sprechblase verdeckt nichts?</td><td>links 272 px, 216 px breit, <strong>0 überdeckt</strong></td></tr><tr><td>Abnahme</td><td><strong>5 ★</strong></td></tr><tr><td>Fernwartungs-Schild</td><td>400 × 351 px, nur während der Fernwartung sichtbar</td></tr></tbody></table></div>
+<p><strong>Unabhängige Prüfung</strong> durch ein zweites Agentenmitglied: Labels mit <code>icacls</code> nachgemessen, Wirkungskette selbst reproduziert (Kopie von <code>cmd.exe</code> in den niedrigen Ordner → <code>whoami</code> zeigt <code>S-1-16-4096</code> → <code>mkdir %LOCALAPPDATA%\…</code> verweigert), Neustart über die Desktop-Verknüpfung, Regelprüfung (kein Prozess nach Namen beendet). Ergebnis: <strong>bestanden mit Beanstandungen, alle abgearbeitet.</strong></p>
+<p><strong>Stand:</strong> Commits <code>7c1523a</code> und <code>6057b05</code> auf <code>ausbau-1.2</code> (kein Push). Nachgezogen in <code>AGENTS.md</code>, <code>Architektur.md</code>, <code>Design – Spielspaß 2.0.md</code> § 27 und <code>Programm/SPIELEN.md</code> § 4.</p>
+<h2 id="6-was-man-daraus-fur-die-prufung-mitnimmt">6 · Was man daraus für die Prüfung mitnimmt</h2>
+<ul><li><strong>Zwei getrennte Türen:</strong> DACL (wer darf) und Integritätsstufe (bis wohin darf). „Vollzugriff“ heißt nicht „darf schreiben“.</li><li><code>icacls</code> zeigt Rechte, aber <strong>nicht</strong> das Integritätslabel; dafür gibt es <code>icacls /setintegritylevel</code> bzw. den Blick in die SACL (hier per <code>GetNamedSecurityInfoW</code>, siehe <code>Nachweise/1.2-Start/tools/integritaet-messen.ps1</code>).</li><li><strong>Fehlercodes lesen:</strong> 5 = Zugriff verweigert · <code>0x800700AA</code> = ERROR<em>BUSY · <code>0x8000FFFF</code> = E</em>UNEXPECTED. Der Code zeigt die Schicht, nicht die Ursache.</li><li><strong>Erst messen, dann glauben:</strong> Der Vorbefund „Windows-Neustart nötig“ stand in zwei Dokumenten und war falsch.</li></ul>
+<h2 id="7-nicht-gepruft-offen">7 · Nicht geprüft / offen</h2>
+<ul><li>ein <strong>echter menschlicher Doppelklick</strong> (der Start wurde über <code>explorer.exe</code> und den Aufgabenplaner nachgestellt),</li><li>Verhalten nach einem <strong>Windows-Neustart</strong>,</li><li>Spielbarkeit über die Abnahme hinaus.</li></ul>
+<h2 id="verwandt">Verwandt</h2>
+<ul><li><a href="../Liesmich.html">🖧 Netzwerk-Labor</a></li><li><a href="../entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html">Design – Spielspaß 2.0</a> – § 27 ist dieser Befund</li><li><a href="../Architektur.html">Architektur</a> · <span class="dk-tot" title="„10-Projekte/Lernprojekte/Netzwerk-Labor/Programm/SPIELEN“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">SPIELEN</span></li><li><span class="dk-tot" title="„90-Werkstatt/Logs/2026-10-05“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">Log vom 05.10.2026</span></li><li>Beweise (nicht im Git): <code>Nachweise/1.2-Start/BEFUND.md</code>, <code>forensik/BEFUND.md</code>, <code>pruefung/PRUEFUNG.md</code>, Bilder in <code>Nachweise/1.2-Q/</code></li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

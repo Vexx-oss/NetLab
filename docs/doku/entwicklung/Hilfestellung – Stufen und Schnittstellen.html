@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🪜 Hilfestellung – Stufen und Schnittstellen (verbindlicher Vertrag) · Netzwerk-Labor</title>
+<meta name="description" content="Der Vertrag der stufenweisen Hilfestellung: Bildungsstand, Vorrat, Schnittstellen.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">🪜 Hilfestellung – Stufen und Schnittstellen (verbindlicher Vertrag)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-begriff-bildungsstand-erklartiefe-niveau">§ 1 · Begriff: Bildungsstand ≠ Erklärtiefe ≠ Niveau</a></li>
+<li><a href="#2-die-vier-stufen-zahlen-sind-vertrag">§ 2 · Die vier Stufen (Zahlen sind Vertrag)</a></li>
+<li style="margin-left:16px"><a href="#2-2-wann-erscheint-eine-hilfe-zweite-abfrage-nicht-zweite-wahrheit">2.2 Wann erscheint eine Hilfe — zweite Abfrage, nicht zweite Wahrheit</a></li>
+<li style="margin-left:16px"><a href="#2-3-abfragewege-der-tabelle-befund-b3">2.3 Abfragewege der Tabelle (Befund B3)</a></li>
+<li style="margin-left:16px"><a href="#2-1-vorrat-kontingent-verbindlich">2.1 Vorrat (Kontingent) — verbindlich</a></li>
+<li><a href="#3-datenform-spiel-stufe-neu">§ 3 · Datenform: Spiel.stufe (neu)</a></li>
+<li><a href="#4-terminal-hilfe-datenform-daten-vorschlaege">§ 4 · Terminal-Hilfe: Datenform DATEN.vorschlaege</a></li>
+<li style="margin-left:16px"><a href="#4-1-der-vorschlagsstreifen-src-ui-hilfe-js-prafix-hl">4.1 Der Vorschlagsstreifen (src/ui/hilfe.js, Präfix hl-)</a></li>
+<li><a href="#5-leiste-mini-lernanker">§ 5 · Leiste/Mini: Lernanker</a></li>
+<li><a href="#6-trainingsbereich-spiel-training">§ 6 · Trainingsbereich: Spiel.training</a></li>
+<li><a href="#7-schreibrechte-damit-sich-niemand-uberschreibt">§ 7 · Schreibrechte (damit sich niemand überschreibt)</a></li>
+<li><a href="#8-was-als-fertig-gilt-abnahme-sechs-punkte">§ 8 · Was als „fertig" gilt (Abnahme, sechs Punkte)</a></li>
+<li><a href="#9-offene-punkte-ehrlich-stand-07-10-2026">§ 9 · Offene Punkte (ehrlich, Stand 07.10.2026)</a></li>
+</ul>
+</nav><h1 id="hilfestellung-stufen-und-schnittstellen-verbindlicher-vertrag">🪜 Hilfestellung – Stufen und Schnittstellen (verbindlicher Vertrag)</h1>
+<p>⬆️ <a href="../Liesmich.html">Netzwerk-Labor</a> · Vertrag: <a href="../Architektur.html">Architektur</a> · Spezifikation: <a href="../entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html">Konzept – Netzwerk-Labor</a></p>
+<blockquote>
+<p><strong>Zweck.</strong> Das Labor soll einen Menschen <em>ohne</em> Syntaxkenntnis spielbar machen, ohne ihn zu langweilen, sobald er die Syntax kennt. Dafür bekommt jede Ausbildungslage eine eigene <strong>Hilfe-Stufe</strong> mit einer messbaren Zahl von Hilfen. Dieser Text ist der Vertrag zwischen den Bausteinen — <strong>zuerst hier eintragen, dann bauen</strong> (AGENTS.md „Vertrag zuerst").</p>
+<p><strong>Grundsatz (aus dem Auftrag, 07.10.2026):</strong> Ein Azubi <em>kann</em> die ganzen Syntaxe nicht kennen, und im Spielflow hat er keinen Zugriff auf eine Lernnotiz. Also muss das Spiel die Hilfe dort anbieten, wo er steht: im Terminal, in der Leiste, im Trainingsbereich. Die Hilfe ist <strong>schrittweise</strong> — sie wächst mit dem Bildungsstand und mit dem Lernstand der einzelnen Fertigkeit.</p>
+</blockquote>
+<hr>
+<h2 id="1-begriff-bildungsstand-erklartiefe-niveau">§ 1 · Begriff: Bildungsstand ≠ Erklärtiefe ≠ Niveau</h2>
+<p>Drei Dinge hießen bisher „Niveau". Ab hier sind sie getrennt — daran hängt jeder weitere Baustein.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Begriff</th><th>Feld</th><th>Werte</th><th>Wer liest das?</th></tr></thead><tbody><tr><td><strong>Bildungsstand</strong> (neu)</td><td><code>Spiel.einst.stufe</code></td><td><code>"azubi"</code> · <code>"azubi-plus"</code> · <code>"geselle"</code> · <code>"meister"</code></td><td><code>Spiel.stufe.*</code>, Terminal, Leiste, Trainingsbereich, Konsole, Simulation</td></tr><tr><td><strong>Erklärtiefe</strong> (bestehend)</td><td><code>Spiel.einst.niveau</code></td><td><code>"E"</code> · <code>"AP1"</code> · <code>"AP2"</code></td><td><code>UI.konsole</code> (heute), <code>Spiel.grundText</code></td></tr><tr><td><strong>Prüfungsstrenge je Ticket</strong> (bestehend)</td><td><code>Spiel.einst.wahl</code>, <code>inst.niveau</code></td><td><code>"auto"</code> · <code>"E"</code> · <code>"AP1"</code> · <code>"AP2"</code></td><td><code>Spiel.niveauVon</code>, <code>Spiel.abnahme</code></td></tr></tbody></table></div>
+<p><strong>Regel:</strong> Der Bildungsstand ist eine <strong>Voreinstellung des Menschen</strong>, kein Spielzustand und keine Automatik. Er wird nie automatisch geändert. <code>Spiel.einst.niveau</code> (Erklärtiefe) wird beim Setzen des Bildungsstands <strong>mitgezogen</strong>, bleibt aber einzeln verstellbar — wer AP2-Texte bei Azubi-Hilfe will, darf das.</p>
+<h2 id="2-die-vier-stufen-zahlen-sind-vertrag">§ 2 · Die vier Stufen (Zahlen sind Vertrag)</h2>
+<p><code>stufe</code> ist der <strong>Rang</strong>: <code>azubi</code> 1 · <code>azubi-plus</code> 2 · <code>geselle</code> 3 · <code>meister</code> 4. Vergleiche immer über den Rang, nie über den Namen.</p>
+<div class="dk-tabelle"><table><thead><tr><th></th><th><code>azubi</code> (1)</th><th><code>azubi-plus</code> (2)</th><th><code>geselle</code> (3)</th><th><code>meister</code> (4)</th></tr></thead><tbody><tr><td><strong>Wer</strong></td><td>1. Lehrjahr, kennt keine Syntax</td><td>2.–3. Lehrjahr, kennt Grundbefehle</td><td>kann den Job, übt Prüfung</td><td>will keine Hilfe</td></tr><tr><td>Terminal: Vorschlagsstreifen</td><td><strong>1 Vorschlag</strong>, mit Syntax + Erklärung</td><td>bis <strong>2</strong> Vorschläge, knapp</td><td>nur nach Fehler</td><td>keiner</td></tr><tr><td>Terminal: „Was geht hier?"</td><td><strong>immer</strong> sichtbar</td><td>sichtbar</td><td>nach Fehler</td><td>nein</td></tr><tr><td>Terminal: Befehls-Gerüst (<code>zeige</code>)</td><td><strong>ja</strong> (Befehl ausgeschrieben)</td><td>ja, knapper Text</td><td>nein</td><td>nein</td></tr><tr><td>Terminal: Tipp zu falschem Befehl</td><td>ausführlich + Beispiel</td><td>knapp</td><td>knapp</td><td>nein</td></tr><tr><td>Terminal: Werkzeugleiter</td><td><strong>alle 6 Sprossen</strong> sichtbar</td><td>sichtbar</td><td>erst nach Fehler</td><td>nein</td></tr><tr><td>Leiste/Mini: Hilfe-Knopf</td><td>bei jeder Frage, <strong>stufenweise</strong> (2 Hilfen)</td><td>bei jeder Frage (1 Hilfe)</td><td>nur nach falscher Antwort</td><td>nein</td></tr><tr><td>Leiste/Mini: Anker („wo steht das?")</td><td><strong>immer</strong> nach der Antwort</td><td>nach der Antwort</td><td>nur bei Fehler</td><td>nein</td></tr><tr><td>Trainingsbereich: geführte Simulation</td><td><strong>angeboten, mit Gerüst</strong></td><td>angeboten, ohne Gerüst</td><td>Vorratsliste</td><td>nein</td></tr><tr><td>Simulation: Gründe in Klartext</td><td>ausführlich (E-Stufe)</td><td>ausführlich (E-Stufe)</td><td>knapp (AP1)</td><td>nur Codes</td></tr><tr><td>Konsole (CLI): <code>einstieg</code>, Tipps</td><td><code>einstieg:true</code>, <code>tipps:"alle"</code></td><td><code>einstieg:true</code>, <code>tipps:"fehler"</code></td><td><code>einstieg:false</code>, <code>tipps:"fehler"</code></td><td><code>einstieg:false</code>, <code>tipps:"keine"</code></td></tr></tbody></table></div>
+<p><strong>Hilfen sind schrittweise, nie alle auf einmal.</strong> Jede Stufe hat einen <em>Vorrat</em> (Kontingent), der mit jeder geöffneten Sprosse kleiner wird. Der Vorrat wird <strong>nur</strong> durch Hilfen verbraucht, nie durch Fehler.</p>
+<blockquote>
+<p><strong>Nachgetragen 07.10.2026 nach dem Gegenprüfungsbefund B1 von <code>prüfer-vertrag</code>:</strong> Die Erklärtiefe ist eine <strong>eigene Achse</strong> (§ 1) und wird <em>nicht</em> vom Bildungsstand gesteuert — sie wird bei <code>setzen()</code> nur <strong>mitgezogen</strong>. Deshalb sind für <code>azubi</code> und <code>azubi-plus</code> beide Male ausführliche Texte richtig: <code>azubi-plus</code> unterscheidet sich nicht durch <em>kürzere Texte</em>, sondern durch <strong>weniger und knappere Vorschläge</strong> (2 statt 1, knapper formuliert) und einen <strong>kleineren Vorrat</strong> (4 statt 6). Wer für <code>azubi-plus</code> kürzere Erklärtexte will, verstellt die Erklärtiefe — die steht bewusst getrennt.</p>
+</blockquote>
+<h3 id="2-2-wann-erscheint-eine-hilfe-zweite-abfrage-nicht-zweite-wahrheit">2.2 Wann erscheint eine Hilfe — zweite Abfrage, nicht zweite Wahrheit</h3>
+<blockquote>
+<p><strong>Nachgetragen 07.10.2026 nach dem Gegenprüfungsbefund B2 von <code>prüfer-vertrag</code>:</strong> Die Tabelle oben nennt für die Werkzeugleiste, den Mini-Hilfe-Knopf und den Lernanker <strong>„erst nach Fehler"</strong> (<code>geselle</code>). Das ist <strong>keine</strong> Aussage darüber, <em>ob</em> eine Stufe die Fläche hat — das ist <code>darf()</code> —, sondern darüber, <strong>wann</strong> sie erscheint. Beides muss abfragbar sein, sonst baut jede Fläche die Bedingung selbst nach und es entstehen zwei Wahrheiten.</p>
+</blockquote>
+<pre><code class="sprache-js">Spiel.stufe.darf("leiter" | "anker" | "miniHilfe" | "training")   // hat diese Stufe die Fläche überhaupt?
+Spiel.stufe.wann("leiter" | "anker" | "miniHilfe")                // "immer" | "nachfehler" | "nein"
+Spiel.stufe.wannPasst(flaeche, {fehler})                          // -&gt; {ja, grund}</code></pre>
+<ul><li><code>wann(...)</code> liefert die Bedingung als Wert, <code>wannPasst(...)</code> wertet sie mit dem mitgegebenen Zustand aus und gibt <strong><code>{ja, grund}</code></strong> zurück — nicht <code>true</code>/<code>false</code>. Die Begründung ist Teil der Antwort, damit eine Fläche sie anzeigen kann, ohne die Regel zu kennen. <strong>Achtung:</strong> <code>if (Spiel.stufe.wannPasst("miniHilfe"))</code> ist immer wahr (Objekt!). Richtig ist <code>if (Spiel.stufe.wannPasst("miniHilfe", {fehler}).ja)</code>.</li><li><strong><code>darf()</code> und <code>wann()</code> sind zwei verschiedene Fragen.</strong> <code>darf("leiter")</code> ist für <code>geselle</code> <strong><code>true</code></strong> — die Werkzeugleiste <em>gibt es</em>, sie erscheint nur erst nach einem Fehler (<code>wann("leiter") === "nachfehler"</code>). Wer beides verwechselt, zeigt einem Gesellen die Leiter sofort.</li><li><strong>Jede Fläche fragt <code>wannPasst</code> — keine baut die Fehler-Bedingung selbst nach.</strong> Das ist der Punkt, an dem <code>mini.js</code> und die Konsole sonst auseinanderlaufen würden.</li><li>Fehlt der Zustand (<code>fehler</code> nicht übergeben), gilt er als „noch kein Fehler" — eine Hilfe „nach Fehler" erscheint dann nicht. Im Zweifel wird <strong>nichts</strong> verraten.</li><li><code>wann("training")</code> ist nicht belegt und liefert deshalb <code>"nein"</code>; der Trainingsbereich ist kein Fehler-Hilfsmittel, sondern ein Ort (Regel: unbekannte Fläche → <code>"nein"</code>).</li></ul>
+<h3 id="2-3-abfragewege-der-tabelle-befund-b3">2.3 Abfragewege der Tabelle (Befund B3)</h3>
+<blockquote>
+<p><strong>Nachgetragen 07.10.2026 nach dem Gegenprüfungsbefund B3 von <code>prüfer-vertrag</code>:</strong> Zwei Zeilen der Tabelle hatten keinen Abfrageweg über <code>Spiel.stufe</code>; wer sie je Stufe steuern wollte, hätte die Tabelle ein zweites Mal ausgewertet. Sie sind jetzt Teil der <strong>einen</strong> Tabelle:</p>
+</blockquote>
+<div class="dk-tabelle"><table><thead><tr><th>Frage</th><th><code>kann(...)</code></th><th><code>darf(...)</code></th></tr></thead><tbody><tr><td>„Was geht hier?" (Gerüst-Text je Modus)</td><td><code>kann("wasGeht")</code> → <code>"immer"</code> \</td><td><code>"nachfehler"</code> \</td><td><code>"nein"</code></td><td><code>darf("wasGeht")</code> — <strong>abgeleitet</strong>: <code>kann("wasGeht") !== "nein"</code>. Es gibt dafür bewusst <em>keine</em> zweite Tabelle.</td></tr><tr><td>Befehls-Gerüst (<code>zeige</code>)</td><td><code>kann("geruest")</code> → <code>true</code> \</td><td><code>"knapp"</code> \</td><td><code>false</code></td><td><code>darf("geruest")</code> — eigener Schalter, weil <code>"knapp"</code> zwar vorhanden, aber nicht <code>true</code> ist.</td></tr><tr><td>Konsole: <code>einstieg</code>/<code>tipps</code> je Stufe</td><td><code>kann("einstieg")</code>, <code>kann("tipps")</code></td><td>– (Werte, keine Schalter)</td></tr></tbody></table></div>
+<h3 id="2-1-vorrat-kontingent-verbindlich">2.1 Vorrat (Kontingent) — verbindlich</h3>
+<pre><code>Spiel.HILFE_KONTO = {azubi: 6, "azubi-plus": 4, geselle: 2, meister: 0}</code></pre>
+<ul><li><code>Spiel.stufe.hilfenFrei()</code> → noch freie Hilfen dieser Instanz (nicht rückwirkend, <strong>je Ticket</strong>).</li><li>Gezählt wird in <code>inst.hilfen</code> (bestehende Liste: <code>{stufe, t}</code>) <strong>plus</strong> <code>inst.hilfenFrei</code>.</li><li><strong>Der Vorrat hängt an der Stufe des TICKETS, nicht an der des Menschen.</strong> Trägt <code>inst.stufe</code> eine Stufe, gilt sie; sonst gilt die Voreinstellung <code>azubi</code>. <code>Spiel.einst.stufe</code> (Bildungsstand des Menschen) bestimmt nur, <strong>welche Hilfe sichtbar ist</strong> — ein Mensch, der mitten im offenen Ticket auf „meister" umstellt, verliert den Vorrat dieses Tickets <strong>nicht</strong>. *(Nachgetragen 07.10.2026 nach einem Befund von <code>stufen-bauer</code>; der Code und <code>tests/spiel-stufensystem.test.js</code> halten es so.)*</li><li>Ist der Vorrat leer, ist die nächste Sprosse <strong>nicht gesperrt</strong>, sondern kostet Sterne wie bisher (Stufe 4/5 = −½, Stufe 6 = −1). Ein Azubi darf nie in eine Sackgasse laufen — das ist die härteste Regel dieses Vertrags. Ein leerer Vorrat ändert nur den Text („jetzt kostet es Sterne").</li></ul>
+<h2 id="3-datenform-spiel-stufe-neu">§ 3 · Datenform: <code>Spiel.stufe</code> (neu)</h2>
+<p>Datei <strong><code>src/spiel/stufensystem.js</code></strong> — neu, ein Besitzer. Öffentliche Fläche (nichts anderes aufrufen):</p>
+<pre><code class="sprache-js">Spiel.STUFE = [
+  /* Jede Zeile der Tabelle § 2 hat hier ihren Wert — auch die drei Spalten aus § 2.3. */
+  {id:"azubi",      rang:1, name:"Azubi (1. Lehrjahr)", kurz:"Azubi", niveau:"E", tipps:"alle", vorschlaege:1,
+   leiter:"immer", erklaerung:"ausfuehrlich", wasGeht:"immer", geruest:true, einstieg:true},
+  {id:"azubi-plus", rang:2, name:"Azubi (fortgeschritten)", kurz:"Azubi+", niveau:"E", tipps:"fehler", vorschlaege:2,
+   leiter:"immer", erklaerung:"ausfuehrlich", wasGeht:"immer", geruest:"knapp", einstieg:true},
+  {id:"geselle",    rang:3, name:"Geselle / Prüfungsvorbereitung", kurz:"Geselle", niveau:"AP1", tipps:"fehler", vorschlaege:1,
+   leiter:"nachfehler", erklaerung:"knapp", wasGeht:"nachfehler", geruest:false, einstieg:false},
+  {id:"meister",    rang:4, name:"Meister / Profi", kurz:"Meister", niveau:"AP2", tipps:"keine", vorschlaege:0,
+   leiter:"nein", erklaerung:"nurcodes", wasGeht:"nein", geruest:false, einstieg:false},
+];
+
+Spiel.stufe.alle()            // -&gt; Spiel.STUFE (Kopie, nie das Original)
+Spiel.stufe.id()              // -&gt; aktueller Bildungsstand, Standard "azubi"
+Spiel.stufe.def(id?)          // -&gt; Eintrag
+Spiel.stufe.rang(id?)         // -&gt; 1..4
+Spiel.stufe.setzen(id, {still}?)   // setzt einst.stufe + zieht einst.niveau nach; sendet "stufe" + "niveau"
+Spiel.stufe.kann(frage)       // -&gt; Wert aus der Tabelle: vorschlaege, tipps, niveau, einstieg, wasGeht,
+                              //    geruest, leiter, erklaerung; kann("konto") -&gt; Zahl
+Spiel.stufe.darf(frage)       // -&gt; true/false: HAT diese Stufe die Fläche? ("leiter", "anker", "miniHilfe",
+                              //    "training", "geruest" aus der Schaltertabelle; "wasGeht" ABGELEITET)
+Spiel.stufe.wann(flaeche)     // -&gt; "immer" | "nachfehler" | "nein"   WANN erscheint die Fläche? (§ 2.2)
+Spiel.stufe.wannPasst(flaeche, {fehler})  // -&gt; {ja, grund}  wertet die Bedingung aus – siehe § 2.2
+Spiel.stufe.erklaerung()      // -&gt; "ausfuehrlich" | "knapp" | "nurcodes"
+Spiel.stufe.konto()           // -&gt; {frei, gesamt} für die offene Instanz (null ohne Instanz)
+Spiel.stufe.hilfenFrei([inst])// -&gt; nur die Zahl (für eine Zeile „noch 3 von 6 Hilfen")
+Spiel.stufe.hilfeZiehen(inst) // -&gt; {frei:boolean, grund}  verbraucht EINE freie Hilfe, wenn vorhanden
+Spiel.stufe.text(ausfuehrlich, knapp, nurcodes)  // -&gt; den Text der Stufe (nie null)
+Spiel.stufe.erklaerungText(id?)  // -&gt; eine Zeile für die Oberfläche (kein DOM)
+Spiel.stufe.freigabeText(id?)    // -&gt; eine Zeile „was ist gerade frei" (kein DOM)</code></pre>
+<p><strong>Regeln:</strong></p>
+<ol><li>Kein Aufruf darf werfen, wenn <code>einst.stufe</code> fehlt oder unbekannt ist → Rückfall <code>"azubi"</code>.</li><li><code>Spiel.stufe</code> liest <strong>nie</strong> <code>L</code> (Lernmotor) — die Stufe ist eine Voreinstellung, der Lernstand kommt woanders her.</li><li><code>Spiel.stufe.setzen</code> schreibt über <code>Spiel.einstSetzen</code> (nicht direkt in <code>store</code>), damit die Oberfläche es merkt.</li><li>Deterministisch: kein <code>Math.random</code>, kein <code>Date.now</code> in dieser Datei.</li><li><strong>Wer eine Hilfe-Fläche baut, fragt <code>darf()</code> UND <code>wannPasst()</code> — nie nur eines von beiden</strong>, und baut die Fehler-Regel nicht selbst nach (§ 2.2).</li></ol>
+<h2 id="4-terminal-hilfe-datenform-daten-vorschlaege">§ 4 · Terminal-Hilfe: Datenform <code>DATEN.vorschlaege</code></h2>
+<p>Neue Datei <strong><code>src/daten/hilfen.js</code></strong> — Datenpaket, ein Besitzer. Der Kern ruft es über <code>Spiel.hilfe.passend(...)</code>, <strong>nie</strong> über direkte Tabellenzugriffe aus der Oberfläche.</p>
+<pre><code class="sprache-js">DATEN.hilfen.VORSCHLAEGE = [
+  { id: "link-pruefen",           // eindeutig, stabil, Präfix nach Bereich
+    bereich: "link",              // = Spiel.LEITER[].id, damit Leiter und Vorschlag dieselbe Sprache sprechen
+    skills: ["lab.link"],         // Fertigkeiten, bei denen das passt
+    befehl: "show ip interface brief",   // was im Terminal steht (leer = kein Befehl)
+    erklaerung: "Überblick: jede Schnittstelle mit Adresse und Status.",  // EIN Satz, warum
+    syntax: "show ip interface brief",   // Muster zum Lernen, ggf. mit &lt;Platzhalter&gt;
+    geraet: "ios",                // "ios" | "host-windows" | "host-linux" | "fw" | "alle"
+    modus: ["priv","config"],     // zulässige CLI-Modi, leer = alle
+    ebene: 1,                     // 1..3  (1 = harmlos ansehen, 3 = ändert etwas)
+    art: "pruefen"                // "pruefen" (ändert nichts) | "aendern" (ändert Konfiguration)
+  }, …
+];
+
+DATEN.hilfen.GERUEST = {          // „Was geht hier?“ je Modus — Text, kein Befehl
+  ios: {user: "…", priv: "…", config: "…", if: "…", vlan: "…", dhcp: "…", …},
+  "host-windows": {…}, "host-linux": {…}, fw: {…}
+};
+
+DATEN.hilfen.SYNTAX = {           // Syntax-Brücke: „ich will X" -&gt; „so schreibt man das"
+  "ip-adresse-setzen": {titel:"IP-Adresse setzen", ios:"ip address &lt;IP&gt; &lt;Maske&gt;", host:"netsh interface ip set address …", …}
+};</code></pre>
+<h3 id="4-1-der-vorschlagsstreifen-src-ui-hilfe-js-prafix-hl">4.1 Der Vorschlagsstreifen (<code>src/ui/hilfe.js</code>, Präfix <code>hl-</code>)</h3>
+<p><code>UI.hilfe.zeichnen(container, {netz, geraetId, modus, sitzung, letzterFehler})</code> — die Oberfläche kennt die Sitzung, weil <code>UI.konsole</code> sie hält. <strong>Entscheidung liegt in <code>Spiel.hilfe</code>, nicht in der Oberfläche:</strong></p>
+<pre><code class="sprache-js">Spiel.hilfe.passend({netz, id, modus, art, verlauf, letzterFehler, max})  // -&gt; [{…vorschlag, warum}]
+Spiel.hilfe.geruest({netz, id, modus, art})                               // -&gt; string | null
+Spiel.hilfe.leiter({netz, id, skill})                                     // -&gt; Spiel.LEITER + {vorschlag}
+Spiel.hilfe.syntaxBruecke({netz, id, modus, text, fehler})                // -&gt; {titel, muster, beispiel} | null</code></pre>
+<p><strong>Wo es hängt (verbindlich, sonst ist es wirkungslos — AGENTS.md „Wirkung vor Grün"):</strong> <code>UI.konsole.oeffnen</code> hängt den Streifen <strong>unter</strong> den Schirm, <code>UI.konsole.ausfuehren</code> ruft <code>UI.hilfe.aktualisieren(K, {letzterFehler: r})</code> nach jeder Zeile auf, und <code>UI.konsole.vorschlag</code> (der bestehende E-Vorschlag) wird <strong>durch</strong> <code>Spiel.hilfe</code> gespeist, damit es nur <em>eine</em> Vorschlagsquelle gibt.</p>
+<h2 id="5-leiste-mini-lernanker">§ 5 · Leiste/Mini: Lernanker</h2>
+<p><code>Spiel.mini</code> bekommt <strong>nichts Neues an Datenformen</strong>, nur zwei Flächen:</p>
+<pre><code class="sprache-js">Spiel.mini.hilfe(id)        // -&gt; {text, art:"denkhilfe"|"ausschnitt", frei:boolean}   stufenweise, je Frage
+Spiel.mini.anker(id)        // -&gt; {titel, text, quelle, wiki:skillId} | null           nach der Antwort</code></pre>
+<ul><li><code>hilfe</code> ist <strong>keine</strong> Lösung: es ist der Denkanstoß („Was passiert mit der running-config, wenn der Strom ausfällt?") oder ein Ausschnitt aus der Frage. Nie die richtige Option.</li><li><code>anker</code> erscheint <strong>nach</strong> dem Antworten, verknüpft die Frage mit einer Fertigkeit und einem Wiki-Eintrag (<code>UI.wiki.oeffnen(skill)</code>) und schreibt über <code>L.ueben(skill, …)</code> mit — der bestehende Weg, kein neuer.</li><li>Der Hilfe-Knopf steht in <code>UI.leiste</code> (<code>UI.leiste.miniHilfe</code> DOM-Bereich) <strong>und</strong> im Mini-Overlay aus <code>UI.karriere</code> — beide Wege müssen ihn zeigen, sonst ist es wieder nur halb (Lehre aus dem DHCP-Pool).</li></ul>
+<h2 id="6-trainingsbereich-spiel-training">§ 6 · Trainingsbereich: <code>Spiel.training</code></h2>
+<p>Neue Datei <strong><code>src/spiel/training.js</code></strong> — Simulationen <strong>abseits der Aufträge</strong>, eigenes Präfix <code>tr-</code>, eigene Ansicht <code>"training"</code> (<code>UI.app.registrieren("training", …)</code>).</p>
+<pre><code class="sprache-js">Spiel.TRAINING = [ {id, titel, beschreibung, skill, geraet, art:"basis"|"stoerung"|"pruefung", minuten, geruest:true} … ];
+Spiel.training.liste()          // -&gt; [{…def, stand:{versucht, bestanden, sterne}, offen:boolean, grund}]
+Spiel.training.starten(id)      // -&gt; {ok, iid} | {ok:false, grund}     legt eine Instanz mit quelle "training" an
+Spiel.training.stand()          // -&gt; Spiel.st.training = {je:{[id]:{versucht,bestanden,bestes}}}
+Spiel.training.abnehmen(iid, ergebnis)   // schreibt Stand + L.ueben, KEIN Euro/Ruf, KEIN Karrierefortschritt</code></pre>
+<p><strong>Regeln:</strong> Training zahlt <strong>kein</strong> Geld und <strong>keinen</strong> Ruf (sonst wird es zur Geldquelle statt zum Üben), aber es <strong>zählt für den Lernmotor</strong> (<code>L.ueben</code>) und für den Trainingsstand. Es erscheint nie im Postfach und nie in der Karriere-Wertung. Stufe <code>meister</code> sieht es nur als Liste ohne Gerüst.</p>
+<h2 id="7-schreibrechte-damit-sich-niemand-uberschreibt">§ 7 · Schreibrechte (damit sich niemand überschreibt)</h2>
+<p>Ein Besitzer je Datei. Wer eine fremde Datei braucht, ruft ihre öffentliche Fläche auf.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Baustein</th><th>Dateien (Eigentum)</th></tr></thead><tbody><tr><td>Kern-Stufensystem</td><td><code>src/spiel/stufensystem.js</code> · <code>src/ui/stufensystem.js</code></td></tr><tr><td>Terminal-Hilfe</td><td><code>src/daten/hilfen.js</code> · <code>src/spiel/hilfe.js</code> (<strong>nur anfügen</strong>, s. u.) · <code>src/ui/hilfe.js</code> · <code>src/stil/hilfe.css</code> · <code>src/ui/konsole.js</code></td></tr><tr><td>Leiste/Mini</td><td><code>src/spiel/mini.js</code> · <code>src/ui/leiste.js</code> · <code>src/ui/karriere.js</code> · <code>src/stil/leiste.css</code></td></tr><tr><td>Trainingsbereich</td><td><code>src/spiel/training.js</code> · <code>src/ui/training.js</code> · <code>src/stil/training.css</code></td></tr><tr><td>Doku + Bau + Abnahme</td><td><code>docs/Architektur.md</code> · <code>docs/entwicklung/Design – Spielspaß 2.0.md</code> · <code>src/ui/app.js</code> · <code>AGENTS.md</code></td></tr></tbody></table></div>
+<p><strong><code>src/spiel/hilfe.js</code> gehört der bestehenden Hilfeleiter.</strong> Der Terminal-Baustein darf dort <strong>nur</strong> am Dateiende neue Funktionen anfügen (<code>Spiel.hilfe.*</code>), keine bestehende Zeile ändern. Das ist die einzige geteilte Datei — sie wird an genau einer Stelle angefasst.</p>
+<p><code>bauen.py</code> nimmt neue Dateien in <code>src/daten</code>, <code>src/spiel</code>, <code>src/ui</code>, <code>src/stil</code> <strong>automatisch</strong> auf (alphabetisch, mit Kopf-/Schlusslisten). Kein Eintrag nötig, keine Reihenfolgeänderung.</p>
+<h2 id="8-was-als-fertig-gilt-abnahme-sechs-punkte">§ 8 · Was als „fertig" gilt (Abnahme, sechs Punkte)</h2>
+<ol><li><code>node tests/run.js</code> ist <strong>≥ 251/251 grün</strong>, <code>python tools/ethos.py</code> meldet GRÜN.</li><li><code>python bauen.py</code> läuft durch (Browser-Fassung), keine Ausnahme.</li><li>Zu jedem Baustein gibt es <strong>eine neue Testdatei</strong> <code>tests/spiel-&lt;baustein&gt;.test.js</code> bzw. <code>tests/cli-&lt;baustein&gt;.test.js</code> nach der Art von <code>tests/harness.js</code>.</li><li><strong>Wirkung vor Grün:</strong> Der Baustein wird aus dem echten Weg aufgerufen (Terminal-Zeile, Leisten-Knopf, Trainingsansicht). Ein Test, der nur seinen eigenen Aufruf prüft, gilt als <strong>nicht fertig</strong>.</li><li>Die Stufen <code>azubi</code> und <code>meister</code> sind <strong>beide</strong> durchgespielt: <code>azubi</code> kommt ohne Syntaxkenntnis voran, <code>meister</code> sieht keine ungefragte Hilfe.</li><li><code>docs/Architektur.md</code> (Stand-Tabelle) und <code>docs/entwicklung/Design – Spielspaß 2.0.md</code> (neuer Abschnitt) zeigen den echten Zustand.</li></ol>
+<h2 id="9-offene-punkte-ehrlich-stand-07-10-2026">§ 9 · Offene Punkte (ehrlich, Stand 07.10.2026)</h2>
+<ul><li>Die <strong>Android-Fassung ist nicht Teil dieses Auftrags</strong> (Nutzerentscheidung 07.10.2026). <code>android/bauen.py</code> wird nicht angefasst und nicht neu gebaut.</li><li>Die Zahlen der Tabelle in § 2 sind ein <strong>Startpunkt</strong>, kein Messergebnis. Sie werden nach dem ersten Durchspielen nachgezogen — dann aber hier, nicht nur im Code.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

@@ -67,12 +67,16 @@ Spiel.STUFEN_SCHALTER = Object.freeze({
 
 /* WANN erscheint eine Fläche? — die zweite Frage, getrennt von „hat sie überhaupt" (Befund B2).
    Wer nur darf() fragt, weiß nicht, ob die Fläche sofort oder erst nach einem Fehler kommt.
-   Jede Fläche soll wannPasst() benutzen statt die Fehler-Bedingung selbst nachzubauen. */
+   Jede Fläche soll wannPasst() benutzen statt die Fehler-Bedingung selbst nachzubauen.
+   `vorschlaege` und `syntaxBruecke` sind die beiden Flächen der Terminal-Hilfe (Vertrag § 4.1);
+   sie standen bis 09.10.2026 nur im Terminal nachgebaut da (Review „Testqualität", Rest von B2). */
 Spiel.STUFEN_WANN = Object.freeze({
-  leiter:    Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
-  anker:     Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
-  miniHilfe: Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
-  wasGeht:   Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  leiter:        Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  anker:         Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  miniHilfe:     Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  wasGeht:       Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  vorschlaege:   Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
+  syntaxBruecke: Object.freeze({azubi: "immer", "azubi-plus": "immer", geselle: "nachfehler", meister: "nein"}),
 });
 
 Spiel.stufe = (() => {

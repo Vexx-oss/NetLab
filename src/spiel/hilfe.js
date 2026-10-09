@@ -303,11 +303,26 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
       .sort(sortiere);
   }
 
+  /* WANN erscheint eine Fläche? Das beantwortet Baustein A (Spiel.stufe.wannPasst) – die Regel wird
+     hier NICHT nachgebaut (Befund B2, letzter Rest: vorher stand „nachfehler" an drei Stellen im
+     Terminal). Fehlt Spiel.stufe, gilt das bisherige Verhalten: azubi und azubi-plus sehen alles
+     sofort, geselle erst nach einem Fehler, meister nichts. */
+  function wannPasst(flaeche, fehler){
+    try {
+      const s = typeof Spiel !== "undefined" && Spiel.stufe;
+      if (s && typeof s.wannPasst === "function") {
+        const r = s.wannPasst(flaeche, {fehler: !!fehler});
+        if (r && typeof r.ja === "boolean") return r.ja;
+      }
+    } catch (e) { /* Baustein A fehlt oder würfelt – Rückfall unten */ }
+    return rang() < 3 || (rang() === 3 && !!fehler);
+  }
+
   /* ---------- § 4.1: der Vorschlagsstreifen ---------- */
   Spiel.hilfe.passend = function(o = {}){
     const anzahl = Math.max(0, Number(kann("vorschlaege")) || 0);
     if (!anzahl || !o.netz || !o.netz.geraete || !o.netz.geraete[o.id]) return [];
-    if (kann("leiter") === "nachfehler" && !hatFehler(o.letzterFehler)) return [];   /* geselle: nur nach Fehler */
+    if (!wannPasst("vorschlaege", hatFehler(o.letzterFehler))) return [];   /* geselle: nur nach Fehler */
     const grenze = o.max == null ? anzahl : Math.max(0, Math.min(anzahl, Number(o.max) || 0));
     if (!grenze) return [];
     const alle = kandidaten(o);
@@ -333,9 +348,7 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
 
   /* ---------- § 4.1: Werkzeugleiter (alle 6 Sprossen, je Sprosse der passende Befehl) ---------- */
   Spiel.hilfe.leiter = function(o = {}){
-    const sicht = kann("leiter");
-    if (sicht === "nein") return [];
-    if (sicht === "nachfehler" && !hatFehler(o.letzterFehler)) return [];
+    if (!wannPasst("leiter", hatFehler(o.letzterFehler))) return [];
     const alle = kandidaten({netz: o.netz, id: o.id, modus: o.modus, art: o.art});
     return (Spiel.LEITER || []).map(s => {
       const v = alle.find(x => x.bereich === s.id) || null;
@@ -348,9 +361,9 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
   Spiel.hilfe.syntaxBruecke = function(o = {}){
     const d = daten(); if (!d || !d.SYNTAX) return null;
     const r = rang();
-    if (r >= 4) return null;                                  /* meister: keine ungefragte Hilfe */
     const fehler = hatFehler(o.fehler);
-    if (!fehler && r >= 2) return null;                       /* azubi-plus und geselle: nur nach Fehler */
+    /* „wann erscheint die Brücke" steht in Spiel.STUFEN_WANN.syntaxBruecke – nicht hier. */
+    if (!wannPasst("syntaxBruecke", fehler)) return null;
     const zeile = String(o.text == null ? "" : o.text).trim();
     if (!zeile) return null;
     const art = geraeteArt(o.netz, o.id);
