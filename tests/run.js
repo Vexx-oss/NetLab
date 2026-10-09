@@ -50,7 +50,11 @@ const ctx = vm.createContext({console, setTimeout, clearTimeout, Date, Math, JSO
 const code = [`"use strict"; const LABOR_VERSION = "test";`];
 for (const f of module()) code.push(`/* ${path.relative(WURZEL, f)} */\n` + inhalt(f));
 code.push(fs.readFileSync(path.join(__dirname, "harness.js"), "utf8"));
-const filter = process.argv[2] || "";
+/* Filter: führende Striche werden abgeschnitten, damit `node tests/run.js --klassenraum` dasselbe
+   tut wie `node tests/run.js klassenraum`. Die Abnahme in docs/entwicklung/Klassenraum/D nennt die
+   Form mit Strichen — vorher lief sie ins Leere und meldete „0/0 grün (Exit 0)": ein grüner Lauf,
+   der nichts geprüft hat (Befund K2, Bilanz – Agententeam 2.0). */
+const filter = (process.argv[2] || "").replace(/^-+/, "");
 const testdateien = fs.readdirSync(__dirname).filter(n => n.endsWith(".test.js")).sort();
 for (const n of testdateien) code.push(`/* tests/${n} */\n` + fs.readFileSync(path.join(__dirname, n), "utf8"));
 code.push(`testsAusfuehren();`);
@@ -64,4 +68,10 @@ for (const e of gezeigt) {
   else { fehler++; console.log(`✗ ${e.name}\n    ${e.fehler.replace(/\n/g, "\n    ")}`); }
 }
 console.log(`\n${gezeigt.length - fehler}/${gezeigt.length} grün${fehler ? `, ${fehler} ROT` : ""}  (${testdateien.length} Testdateien, ${module().length} Module)`);
+/* Ein Filter, der nichts trifft, ist KEIN grüner Lauf: „0/0 grün" hat in dieser Sitzung einmal
+   einen kaputten Abnahmebefehl verdeckt. Deshalb hier ausdrücklich rot. */
+if (filter && gezeigt.length === 0) {
+  console.error(`KEIN Test passt zum Filter „${filter}" — 0 von ${ergebnisse.length} Fällen geprüft. Das ist kein grüner Lauf.`);
+  process.exit(1);
+}
 process.exit(fehler ? 1 : 0);

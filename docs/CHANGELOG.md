@@ -108,9 +108,8 @@ Zusammenschluss, nur zwei Selektoren verschwanden (beide aus dem gelöschten R8-
 - **Die 720-px-Frage im Einstellungsdialog ist nicht gemessen** — die Menüprobe erreicht den Dialog nicht.
 - **Die Erzeugnis-Hashes sind Momentaufnahmen**: die letzten CSS-Werte steckten beim Messen noch nicht im
   Artefakt, und ein Desktop-Release-Bau lief noch.
-- **`tests/stil-stand.json` deckt R2/R3/R4 noch nicht:** der Lauf meldet nach dem Einfrieren erneut
-  „BESSER als der Stand" (R2 121→113 · R3 204→195 · R4 530→514, selbst gemessen) — ein weiteres
-  `ethos.py --neu` gehört der Leitung.
+- **`tests/stil-stand.json` ist auf dem Stand dieser Runde eingefroren** — R1 22 · R2 113 · R3 195 ·
+  R4 514 · R5–R12 = 0 (selbst nachgeprüft: der Lauf meldet kein „BESSER als der Stand" mehr).
 ---
 
 ## 2.0.0 — Klassenraum Stufe A+B (09.10.2026)

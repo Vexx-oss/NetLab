@@ -1,15 +1,10 @@
 /* ---------- Inspektor (ui/inspektor.js) – nur Tokens aus basis.css ---------- */
-/* FALLE, gemessen 09.10.2026 (bewusst NICHT repariert, s. unten): Diese Datei ist CRLF und ihre
-   LETZTEN ZEHN ZEILEN (Byte-Zeilen 132-141, Lease-Tabelle) tragen je ein ZUSAETZLICHES einzelnes CR —
-   Muster `CR CR LF` statt `CR LF`, bei Byte 11401-11404 sogar vier CR in Folge. Zusammen 12 einzelne CR
-   an den Bytes 10778, 10887, 10995, 11186, 11265, 11322, 11357, 11401, 11402, 11403, 11435, 11487.
-   Zwei Folgen, beide nachgemessen:
-     - im Textmodus gelesen hat die Datei 153 Zeilen statt 141 (jedes CR gilt als Umbruch),
-     - git fuehrt sie deshalb als BINAER (`i/-text w/-text`, von der Leitung gemessen): `git diff` und
-       jeder Zeilenenden-Vergleich sind dort blind.
-   Wer hier arbeitet: byteweise schreiben und die vorhandenen Enden erhalten. Ein normalisierender
-   Editor entfernt die 12 CR und stellt die Datei in git von binaer auf Text um — das erzeugt
-   einen scheinbar riesigen Diff. Deshalb bleiben sie in dieser Runde stehen. */
+/* BEHOBEN (10.10.2026, task-51): Diese Datei trug 12 einzelne CR (Muster `CR CR LF`, in den letzten zehn
+   Byte-Zeilen, Lease-Tabelle). Folge: git hielt sie fuer BINAER (`git ls-files --eol` = `i/-text w/-text`),
+   `git diff` und jeder Zeilenenden-Vergleich waren dort blind. Die 12 CR sind byteweise entfernt, die
+   CRLF-Zeilenenden sind unangetastet (vorher 12 467 B, 164 CR-Bytes = 152 CRLF + 12 einzelne).
+   Wer hier arbeitet: byteweise schreiben und CRLF erhalten — ein normalisierender Editor stellt die
+   ganze Datei um und erzeugt einen Scheindiff ueber alle Zeilen. */
 .lb-inspektor.in{display:flex; flex-direction:column; overflow:hidden}
 .in-kopf{flex:0 0 auto; padding:14px 14px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
 .in-kopf-zeile{display:flex; align-items:center; gap:10px; min-width:0}
@@ -140,13 +135,13 @@
 @keyframes in-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
 .in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
 .in-ent-code{margin:0; padding:7px 9px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 12.5px/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
-
-/* Lease-Tabelle im DHCP-Abschnitt (Architektur 10.6): eine Zeile je Lease, Zustand farbig ueber Tokens */
-.in-lease-tabelle{width:100%; border-collapse:collapse; margin-top:6px; font:500 12.5px/1.35 var(--body)}
-.in-lease-tabelle th{text-align:left; padding:5px 7px; color:var(--faint); font:700 11px/1 var(--body); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--line)}
-.in-lease-tabelle td{padding:5px 7px; border-bottom:1px solid var(--line-2)}
-.in-lease-tabelle tr:last-child td{border-bottom:none}
-.in-lease-aktiv{color:var(--ok)}
-.in-lease-reserviert{color:var(--accent)}
-.in-lease-alt td{opacity:.62}
-.in-lease-konflikt td{background:var(--bad-soft)}
+
+/* Lease-Tabelle im DHCP-Abschnitt (Architektur 10.6): eine Zeile je Lease, Zustand farbig ueber Tokens */
+.in-lease-tabelle{width:100%; border-collapse:collapse; margin-top:6px; font:500 12.5px/1.35 var(--body)}
+.in-lease-tabelle th{text-align:left; padding:5px 7px; color:var(--faint); font:700 11px/1 var(--body); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--line)}
+.in-lease-tabelle td{padding:5px 7px; border-bottom:1px solid var(--line-2)}
+.in-lease-tabelle tr:last-child td{border-bottom:none}
+.in-lease-aktiv{color:var(--ok)}
+.in-lease-reserviert{color:var(--accent)}
+.in-lease-alt td{opacity:.62}
+.in-lease-konflikt td{background:var(--bad-soft)}

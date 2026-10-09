@@ -2061,8 +2061,9 @@ ist keine Nullmessung. Genau deshalb steht in diesem Abschnitt jeder Zahl ihre Q
 * **Die 720-px-Frage im Einstellungsdialog ist nicht gemessen** — die Menüprobe erreicht den Dialog nicht.
 * **Die Erzeugnis-Hashes sind Momentaufnahmen**: die letzten CSS-Werte steckten beim Messen noch nicht im
   Artefakt, und ein Desktop-Release-Bau lief noch.
-* **`tests/stil-stand.json` deckt R2/R3/R4 noch nicht** — der Lauf meldet erneut „BESSER als der Stand"
-  (R2 121→113 · R3 204→195 · R4 530→514); ein weiteres `--neu` gehört der Leitung.
+* **`tests/stil-stand.json` ist auf dem Stand dieser Runde eingefroren** (R1 22 · R2 113 · R3 195 · R4 514 ·
+  R5–R12 = 0) — selbst nachgeprüft: der Lauf meldet **kein** „BESSER als der Stand" mehr. Die vier
+  Altlasten darunter sind damit **eingefroren, nicht behoben** — Stoff für 3.0.
 * **R12 und der Rauchtest bleiben Lead-Messungen** — der Chronist hat sie nicht selbst gefahren. Die
   **Menüprobe** lief am Ende der Sitzung gegen **beide** Bauten und meldete 45 erfüllt/0 verletzt (Web) und
   49 erfüllt/0 verletzt (Android).

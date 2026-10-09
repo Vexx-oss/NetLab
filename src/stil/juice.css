@@ -49,23 +49,25 @@
 /* Knöpfe geben beim Drücken nach (ohne Klasse, gilt überall) */
 .knopf:active, .lb-wz:active, .lb-knopf:active, .pa-kat:active, .pa-teil:active, .dock-knopf:active, .am-zu:active{transform:scale(.96)}
 
-/* Bewegung aus: KEIN eigener Block mehr (task-38, R8). basis.css:91 (prefers-reduced-motion) und
-   basis.css:93 (html[data-bewegung="aus"]) schalten Animation und Übergang global ab — dieselbe
-   Begründung wie in naechster.css:7. Der Zustand bleibt an der FARBE erkennbar: die Rückmeldungen
-   dieses Bausteins tragen ohnehin eine Farbe (--ok/--warn/--ok-soft), nicht nur die Bewegung.
+/* Bewegung aus: kein eigener MEDIEN-Block (task-38, R8) — basis.css bleibt der EINE zentrale Block
+   (91: Dauer global 1 ms; 93: bei „Bewegung aus" alles ab, html[data-bewegung="aus"]). Der Zustand
+   bleibt an der FARBE erkennbar: die Rückmeldungen dieses Bausteins tragen ohnehin eine Farbe
+   (--ok/--warn/--ok-soft), nicht nur die Bewegung.
 
-   ZWEI SELEKTOREN SIND HIER BEWUSST REGEL-LOS (Befund der unabhängigen Prüfung § 4a, nachgemessen):
-     .ger[class*="jc-"] .gb     deckte die vier Geräte-Klassen ab, die es gibt — sie stehen oben einzeln:
-                                .ger.jc-plop .gb · .ger.jc-atmen .gb · .ger.jc-wackeln .gb · .ger.jc-sperre .gb
-     .kabel[class*="jc-"] *     deckte die drei animierten Kabel-Kinder ab — sie stehen oben einzeln:
-                                .kabel.jc-einrasten .kabel-linie · .kabel-trunk-aussen · .ps-oben path
-   Beide hatten im entfernten @media (prefers-reduced-motion)-Block `animation:none`. Wirkung heute:
-   bei „Bewegung reduzieren" laufen diese Animationen 1 ms statt gar nicht — sie erreichen ihren
-   Endzustand, weil basis.css:91 die Dauer global auf 1 ms setzt (dieselbe Bauart wie die fünf
-   Endzustände in szene.css). Bei „Bewegung aus" schaltet basis.css:93 weiterhin alles ab; im echten
-   Programm gemessen: animationName none, 0 laufende Animationen an allen vier Zielen. Das Verhalten
-   ist damit abgedeckt, nicht vergessen.
-   Dass die Selektoren leben, ist gemessen: `UI.juice(el, "einrasten", …)` läuft auf Kabel-Elementen
-   (src/ui/editor-werkzeuge.js:307 und :353; `Z.kEl` hält die <g class="kabel">, editor.js:352), und mit
-   „voll" tragen .kabel-linie/.kabel-trunk-aussen `jc-einrasten`, .ps-oben path `jc-led`,
-   .ger.jc-plop .gb `jc-plop` — je 0,32 s, je 1 laufende Animation. */
+   WIEDERHERGESTELLT (task-52, Befund der unabhängigen Prüfung § 4a): Diese zwei Selektoren hatten ihre
+   `animation:none`-Regel in einem eigenen Medienblock für `prefers-reduced-motion`. Beim Zusammenlegen auf
+   EINEN zentralen Block ist die Regel entfallen — ein Verlust, auch wenn basis.css:91 die Wirkung
+   zufällig abdeckte (dort liefen sie mit 1 ms statt gar nicht). Sie steht hier wieder, in R8-konformer
+   Form: nicht als zweiter Medienblock, sondern am Haus-Signal `html[data-bewegung="reduziert"]`.
+   Das ist genau die Menge des alten Medienblocks und mehr — app.js:48 setzt das Attribut aus
+   UI.bewegung(), und das liefert „reduziert" bei Einstellung „Reduziert" ODER bei
+   prefers-reduced-motion (app.js:16); die Einstellung schreibt das Attribut sofort (app.js:311).
+   Die Selektoren leben: `.kabel[class*="jc-"] *` deckt die Kinder eines einrastenden Kabels ab
+   (UI.juice(el,"einrasten"), editor-werkzeuge.js:307 und :353; Z.kEl hält die <g class="kabel">,
+   editor.js:352), `.ger[class*="jc-"] .gb` das innere Bild eines antwortenden Geräts (.gb trägt die
+   Geometrie, die Gruppe selbst ihre Position). Von den sieben Selektoren des alten Blocks brauchen die
+   fünf übrigen diese Regel nicht mehr: sie tragen ihren Endzustand in der Zustandsregel (szene.css).
+   Heute greift zusätzlich schon die JS-Seite: `UI.juice` setzt die Klasse nur bei UI.bewegung()==="voll"
+   (juice.js:10) — diese Regel ist das Netz darunter, falls das jemand ändert. */
+html[data-bewegung="reduziert"] .ger[class*="jc-"] .gb,
+html[data-bewegung="reduziert"] .kabel[class*="jc-"] *{animation:none}

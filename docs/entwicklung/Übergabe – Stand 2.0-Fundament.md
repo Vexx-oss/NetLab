@@ -138,8 +138,9 @@ Offen bleibt nur:
   die **720-px-Frage im Einstellungsdialog** ebenfalls nicht (die Menüprobe erreicht den Dialog nicht).
 * **Die Erzeugnis-Hashes sind Momentaufnahmen:** die letzten CSS-Werte steckten beim Messen noch nicht im
   Artefakt, und ein Desktop-Release-Bau lief noch.
-* **`tests/stil-stand.json` deckt R2/R3/R4 noch nicht** — der Lauf meldet erneut „BESSER als der Stand"
-  (R2 121→113 · R3 204→195 · R4 530→514); ein weiteres `ethos.py --neu` gehört der Leitung.
+* **`tests/stil-stand.json` ist eingefroren** auf R1 22 · R2 113 · R3 195 · R4 514 · R5–R12 = 0 — der
+  Lauf meldet **kein** „BESSER als der Stand" mehr (selbst geprüft). Diese vier Regeln sind damit
+  **eingefroren, nicht behoben**.
 * **Keine echte Unterrichtsstunde**, kein Test mit einem Menschen.
 * **Klassenraum Stufe C und D** (Live-Server, QR) sind **nicht gebaut** — nach E6 später.
 * Die **online** veröffentlichte Seite liefert weiterhin 1.2.4, weil nicht gepusht wurde.

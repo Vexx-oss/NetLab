@@ -126,4 +126,36 @@ gruppe("UI: Bewegung aus (Endzustände)", () => {
     erwarte.enthaelt(String(aus["animation"]), "none", "die Einstellung aus schaltet die Animation nicht ab");
     erwarte.enthaelt(String(aus["transition"]), "none", "die Einstellung aus schaltet den Übergang nicht ab");
   });
+
+  pruefe("Juice: die zwei wiederhergestellten Selektoren haben ihre Regel (task-52, R8-konform)", () => {
+    if (!hatRequire) return;
+    const juice = ohneKommentar(stil("juice.css"));
+    /* Der alte @media-Block deckte genau diese zwei Selektoren ab; beim Zusammenlegen auf EINEN
+       zentralen Block (R8) ging die Regel verloren. Sie steht wieder da — am Haus-Signal
+       html[data-bewegung="reduziert"] statt an einem zweiten Medienblock. */
+    const i = juice.indexOf("html[data-bewegung=\"reduziert\"]");
+    erwarte.wahr(i >= 0, "die Regel für reduzierte Bewegung fehlt in juice.css");
+    const regel = juice.slice(i, juice.indexOf("}", i) + 1);
+    erwarte.enthaelt(regel, ".ger[class*=\"jc-\"] .gb", "der Geräte-Selektor fehlt");
+    erwarte.enthaelt(regel, ".kabel[class*=\"jc-\"] *", "der Kabel-Selektor fehlt");
+    erwarte.enthaelt(regel, "animation:none", "die Regel schaltet die Animation nicht ab");
+    /* R8 bleibt: kein zweiter Bewegungsblock in dieser Datei. */
+    erwarte.falsch(/@media\s*\(prefers-reduced-motion/.test(juice), "juice.css hat wieder einen eigenen Bewegungsblock");
+  });
+
+  pruefe("Juice: das Signal ist echt — app.js setzt data-bewegung, juice.js setzt die Klasse nur bei voll", () => {
+    if (!hatRequire) return;
+    const lesen = p => {
+      const fs = require("fs"), path = require("path");
+      return fs.readFileSync(path.join(__dirname, "..", p), "utf8");
+    };
+    const app = lesen("src/ui/app.js");
+    /* Das Attribut, an dem die wiederhergestellte Regel hängt, kommt aus UI.bewegung() — und das
+       liefert „reduziert" bei Einstellung „Reduziert" ODER bei prefers-reduced-motion. */
+    erwarte.enthaelt(app, "dataset.bewegung = UI.bewegung()", "app.js setzt data-bewegung nicht aus UI.bewegung()");
+    erwarte.passt(app, /e\.bewegung === "reduziert" \|\| wenigBewegung\(\)/, "UI.bewegung() kennt die reduzierte Einstellung nicht");
+    /* Und die JS-Seite ist das erste Netz: ohne „voll" wird die Klasse gar nicht gesetzt. */
+    const js = lesen("src/ui/juice.js");
+    erwarte.enthaelt(js, "UI.bewegung() !== \"voll\"", "UI.juice setzt die Klasse nicht mehr nur bei voll");
+  });
 });

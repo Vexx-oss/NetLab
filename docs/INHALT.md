@@ -102,6 +102,13 @@ Messpunkte stehen im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 35.
 | [`entwicklung/Befund – Output-Runde.md`](<entwicklung/Befund – Output-Runde.md>) | Die **unabhängige Messung der Output-Runde**: Vorher-Stand der 14 CSS-Dateien (Bytes, Zeilen, CRLF, SHA256), Regeln vorher/nachher, **sieben Gegenproben** — und der **R8-Fund** samt dem einen benannten Verlust, dazu sieben widerlegte Annahmen. |
 | [`entwicklung/Befund – 27 von 27.md`](<entwicklung/Befund – 27 von 27.md>) | Die Frage, ob **jede** der 27 Fertigkeiten als Klassenraum-Auftrag lösbar ist — in vier Messungen belegt, mit der Tabelle aller 27 und fünf Befunden zum Drumherum. |
 
+## Ausblick: 3.0 und der Betrieb (09.10.2026)
+
+Was nach der ausgelieferten 2.0 kommt — als Plan, nicht als Wunschzettel.
+
+| Datei | Wofür |
+|---|---|
+| [`entwicklung/Konzept – 3.0.md`](<entwicklung/Konzept – 3.0.md>) | **Der Plan für die nächste Fassung.** Fünf Säulen — **Unterricht mit 20 Azubis**, **Inhalte, die nicht ausgehen**, **Stufe C/D ehrlich eingeordnet**, **technische Schulden**, **Diagnose ohne Bewertung** —, jede mit Aufwand, Risiko und einem **messbaren** Fertig-Kriterium; **Aufwandsspanne 11–20 Sitzungen** (davon 4,5–6,5 unverzichtbar) und ein Abschnitt „was ausdrücklich **nicht** in 3.0 gehört". |
 ## Wie dieses Verzeichnis aufgeräumt wurde
 
 Bis zum 06.10.2026 lagen zwölf Notizen im Wurzelverzeichnis; ein Besucher sah sie vor dem
