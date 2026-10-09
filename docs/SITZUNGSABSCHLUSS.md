@@ -206,6 +206,17 @@ Head`: das fragt in dieser Umgebung nach Eingaben und bricht ab. Erwartet wird
    dastehen — es ist ehrlicher als eine geglättete Zusammenfassung.
 5. **Der Nutzer entscheidet über Veröffentlichung.** Push, Tag und Release je einzeln freigeben
    lassen; im Zweifel nur lokal committen und fragen.
+6. **Zwei Zähler, zwei Bedeutungen — nicht verwechseln** (09.10.2026). Der Schalter in der
+   Oberfläche heißt **„Subagent parallelism limit"** und steuert `maxActiveSubagents` (gleichzeitige
+   Subagenten, Profilwert **16**). Die **Team-Größe** ist etwas anderes: `maxMembers` im Bundle
+   `@deepseek-ai/dsh-experimental-agent-team`. Das Profil-Bundle setzte ihn hart auf **8** (der
+   Standard des Plugins wäre 16), deshalb waren in der Sitzung vom 09.10.2026 nur acht
+   Teammitglieder möglich — und die waren schnell belegt, weil Plätze **dauerhaft** sind (inaktive
+   Mitglieder zählen weiter). Wer den einen Wert verdoppelt, ändert am anderen nichts.
+   Der Patch steht seit 09.10.2026 in `~/.dsh/profiles/desktop/cordis.patch.yml` (`maxMembers: 16`).
+   **`maxMembers` wird beim START gelesen und ist danach unveränderlich** („maximum immutable
+   roster entries per Team") — die Änderung wirkt erst nach einem Neustart, nicht durch einen
+   Profil-Neuladen. Der Menüpunkt dafür heißt **Application → „Restart App and Host"**.
 
 ## Was am Ende dastehen muss
 
