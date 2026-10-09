@@ -17,9 +17,11 @@ status: Übergabezettel — bewusst kurz. Jüngster Stand (Fassung 2.0.0 mit Fun
 
 **Drei Runden derselben Fassung sind gebaut und gemessen** — das Fundament, der Klassenraum-Öffnungsweg
 (Stufe A+B) und die Output-Runde (Trefferflächen, Altlasten, R12) —, alles zusammen ist als Fassung
-**2.0.0** verpackt, aber **noch nicht veröffentlicht**: Push und Tag `v2.0.0` fehlen (nur mit Freigabe des
-Nutzers). Online ausgeliefert ist weiterhin 1.2.4. Die Klassenraum-Stufen **C** (Live-Server) und **D** (QR)
-kommen nach **E6** später.
+**2.0.0 ist veröffentlicht**: Release `v2.0.0` mit drei Anhängen, und die **Live-Seite ist byte-gleich
+zum lokalen Bau** (selbst nachgemessen: 2.829.477 B, `C3C51EDA…828E`, `LABOR_VERSION = "2.0.0"`). Offen ist,
+ob der **heutige** Stand (Output-Runde und 20-Geräte-Test) ein eigenes Tag und Release bekommt — nur mit
+Freigabe des Nutzers, je Handlung einzeln. Die Klassenraum-Stufen **C** (Live-Server) und **D** (QR) kommen
+nach **E6** später.
 
 ## 2 · Was in dieser Sitzung entstanden ist
 
@@ -66,6 +68,12 @@ Berichte: [Review – 2.0-Fundament](<Review – 2.0-Fundament.md>) ·
 [Review – Klassenraum A+B](<Review – Klassenraum A+B.md>) ·
 [Befund – Output-Runde](<Befund – Output-Runde.md>) · [Befund – 27 von 27](<Befund – 27 von 27.md>).
 
+**Nachzügler derselben Runde:** `tests/klassen-20.test.js` (20 Geräte aus **einem** Code, Ampel **20/20**,
+349 ms) · [Markt – Monetarisierung](<Markt – Monetarisierung.md>) (Marktteil mit 20 Quellen, 9
+Wettbewerbern und dem Abschnitt „was NICHT funktionieren wird") ·
+[Bilanz – Agententeam 2.0](<Bilanz – Agententeam 2.0.md>) (Erfolgsquote streng **87,8 %** der Aufgaben,
+**66,7 %** der Zusagen; neun Ausfälle namentlich).
+
 ## 3 · Was gerade GILT (nicht neu herleiten, sondern benutzen)
 
 **Prüfstand 2.0.0.** „Vom Lead gemessen" heißt: nicht selbst erhoben, sondern übernommen. „Selbst gemessen"
@@ -73,10 +81,10 @@ heißt: in dieser Sitzung nachgerechnet.
 
 | Prüfung | Ergebnis |
 |---|---|
-| `sh tools/test.sh` (Endstand **mit** der Output-Runde) | **725/725 grün**, 81 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| `sh tools/test.sh` (Endstand mit Output-Runde und 20-Geräte-Test) | **733/733 grün**, 82 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
 | dieselbe Messung am Ende von Klassenraum A+B / des Fundaments | 661/661 (74/91) · 620/620 (70/90) (selbst gemessen) |
 | dieselbe Messung **vor** der Sitzung | 471/479 grün, **8 rot**, 55 Testdateien, 84 Module (Nullmessung des Leads) |
-| `node tests/run.js klassenraum` | **67/67** — der richtige Filter; `--klassenraum` liefert **0/0** (Befund K2) (Lead) |
+| `node tests/run.js --klassenraum` | **104/104 grün** (selbst gemessen) — der Filter schneidet führende Striche ab (Befund **K2 behoben**); ein Filter **ohne** Treffer endet mit **Exit 1** und der Meldung „KEIN Test passt zum Filter … Das ist kein grüner Lauf." |
 | `tools/ethos.py` | **GRUEN**, besser als der Stand: R1 23→22 · R2 122→113 · R3 206→195 · R4 539→514 · R5 70→0 · R6 11→0 · R8 5→0 · R10 87→0 (selbst gemessen) |
 | `tools/klassen.py` · `node tools/sim-stand.js` | **0** Klassen ohne CSS-Regel · Simulation **unverändert** (12/12) (selbst gemessen) |
 | Menüprobe Web · Android | **45 erfüllt, 0 verletzt** · **49 erfüllt, 0 verletzt** (je 5 von 5 Profilen) (selbst gemessen) |
@@ -84,8 +92,8 @@ heißt: in dieser Sitzung nachgerechnet.
 | R12 im Programm (`ethos.r12_js()`) | `klasse` **6/6**, `Auftrag` **3/3** (Lead) |
 | `python bauen.py` | **128 Module, 2225 KB** → `web/index.html`, Version **2.0.0** (Lead) |
 | Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.829.477 B**, SHA256 `C3C51EDA…828E`, byte-gleich, **0 Außenverweise** (Lead; Bytes und Hash selbst nachgerechnet) |
-| Android-APK 2.0.0 | **1.160.732 B**, SHA256 `A27751B2…F93733`, Signatur gültig (Lead; Bytes und Hash selbst nachgerechnet) |
-| `tools/seite.py --pruefen` | GRÜN: 39 Dokumente — nach dem Doku-Neubau **40** (Lead) |
+| Android-APK 2.0.0 (neu gebaut) | **1.164.828 B**, SHA256 `2208C08A…7BDD`, Signatur gültig (Lead; Bytes und Hash selbst nachgerechnet) |
+| `tools/seite.py --pruefen` | GRÜN: **45 Dokumente** (Lead, nach dem Neubau) |
 
 **Vier Regeln, die diese Sitzung gesetzt hat:**
 
@@ -105,11 +113,11 @@ heißt: in dieser Sitzung nachgerechnet.
 
 | | Schritt | Stand |
 |---|---|---|
-| **a** | **`python tools/seite.py` erneut laufen lassen** — `docs/doku/` ist älter als die Dokumente dieses Stand-Nachziehens; danach sind es **40** Dokumente | offen (Lead) |
+| **a** | **`python tools/seite.py` erneut laufen lassen** — nach diesem Nachzug ist `docs/doku/` wieder älter als die Quellen; es sind dann **45** Dokumente | offen (Lead) |
 | **b** | **Stand-Tabelle in [`Architektur.md`](../Architektur.md)** nachziehen — gehört dem **Lead** | offen (Lead) |
 | **c** | **Lokal committen** — vorher die Zeilenenden prüfen (Byte-Vergleich, Schritt 6 des Protokolls) | offen (Lead) |
-| **d** | **Push und Tag `v2.0.0`** — je Handlung **einzeln** freigeben lassen; danach Schritt 8: nachmessen, was online steht | offen, entscheidet der Nutzer |
-| **e** | **Desktop-Release-Bau** der Hülle — beim Schreiben lief er noch; die APK ist gebaut | offen (Lead) |
+| **d** | **Release auffrischen — nur mit Freigabe, je Handlung einzeln.** Zwei Wege: **neu taggen** (dann **2.0.1**, weil `v2.0.0` ohne `--force` nicht verschoben wird — Hausregel —, mit vollem Neubau) **oder** den Ablauf **„Release anlegen"** von Hand für `v2.0.0` anstoßen (laut Protokoll idempotent, ersetzt die Anhänge). Danach Schritt 8: nachmessen, was online steht | offen, entscheidet der Nutzer |
+| **e** | **Desktop-Hülle / `.exe`** — im Release `v2.0.0` liegt eine; ob für den heutigen Stand eine neue gebaut wird, ist offen | offen (Lead) |
 | **f** | **Klassenraum:** Stufe **C** (Live-Server) und **D** (QR) nach **E6**; **O1** ist entschieden (Platzzahl bleibt im Datei-Dialog, kein siebtes Bedienelement) | offen — [`Architektur.md`](../Architektur.md) § 12 |
 
 ## 5 · Was entschieden ist — und was nur der Nutzer entscheiden kann
@@ -122,9 +130,10 @@ steht in [`Architektur.md`](../Architektur.md) § 12.1, die Bau-Entscheidungen *
 
 Offen bleibt nur:
 
-1. **Ob veröffentlicht wird.** Push, Tag und Release gibt es nur auf ausdrückliche Freigabe, und zwar je
-   Handlung einzeln (siehe [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md), Schritt 7). Die
-   **Zielnummer 2.0.0** ist entschieden (Auftrag „bis zum Production Release").
+1. **Ob der heutige Stand ein eigenes Tag und Release bekommt.** `v2.0.0` ist seit 09.10.2026 online (Release
+   mit drei Anhängen, Seite byte-gleich zum lokalen Bau) — die Output-Runde und der 20-Geräte-Test sind aber
+   **jünger**. Push, Tag und Release gibt es nur auf ausdrückliche Freigabe, je Handlung einzeln
+   (siehe [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md), Schritt 7).
 
 ## 6 · Was ehrlich offen blieb
 
@@ -143,7 +152,20 @@ Offen bleibt nur:
   **eingefroren, nicht behoben**.
 * **Keine echte Unterrichtsstunde**, kein Test mit einem Menschen.
 * **Klassenraum Stufe C und D** (Live-Server, QR) sind **nicht gebaut** — nach E6 später.
-* Die **online** veröffentlichte Seite liefert weiterhin 1.2.4, weil nicht gepusht wurde.
+* **Online steht `v2.0.0`** — selbst nachgemessen: die Live-Seite ist **byte-gleich** zum lokalen Bau
+  (2.829.477 B, `C3C51EDA…828E`). Das **Release** `v2.0.0` (09.10.2026, 14:44 UTC) trägt drei Anhänge
+  (Browser-ZIP, `.exe`, `.html`) und ist **älter** als die Output-Runde; die **APK liegt nicht** im Release —
+  der Ablauf `.github/workflows/release.yml` wird gerade so erweitert, dass sie künftig **angehängt** wird
+  (sonst bleibt die Android-Fassung für Nutzer unsichtbar). **Auffrischen:** neu taggen (**2.0.1**, voller
+  Neubau) oder den Ablauf „Release anlegen" von Hand für `v2.0.0` anstoßen — **nur mit Freigabe des Nutzers**.
+* **Befund K2 ist behoben:** `node tests/run.js --klassenraum` läuft jetzt (führende Striche werden
+  abgeschnitten) und meldet **104/104 grün**; ein Filter **ohne** Treffer endet mit **Exit 1** und der
+  Meldung „KEIN Test passt zum Filter … Das ist kein grüner Lauf." — die Bilanzzeile allein zeigt weiterhin
+  „0/0 grün", der **Exit-Code** entscheidet.
+* **Grenzbefunde des 20-Geräte-Laufs** (Anforderungen für 3.0, im [Konzept](<Konzept – 3.0.md>) eingetragen):
+  `platz` > 31 wird **still auf 31 geklemmt**; ein **doppelter Platz** lässt den ersten Eintrag gewinnen;
+  **zwei Sitzungen gleichzeitig gehen nicht** (`sitzung` ist ein Einzelfeld — nur Export/Import holt die
+  alte zurück).
 * Der Prüfer hat den **Lernmotor-Befund** nicht selbst nachgemessen und die **FISI-Spielhalle** nicht
   geöffnet (gelesen, nicht gemessen) — was dort zu tun ist, steht als Vorlage im
   [Befund](<Befund – Lernmotor-Falle.md>), **nicht ausgeführt**.
@@ -153,7 +175,7 @@ Offen bleibt nur:
 ```powershell
 cd 10-Projekte\Lernprojekte\Netzwerk-Labor
 $node = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64\node.exe"
-& $node tests/run.js          # muss 725/725 grün melden, 0 rot, 0 übersprungen
+& $node tests/run.js          # muss 733/733 grün melden, 0 rot, 0 übersprungen
 python tools/ethos.py         # GRUEN gegen tests/stil-stand.json (R12 nur mit --dom)
 python tools/klassen.py       # 0 Klassen ohne CSS-Regel
 node tools/sim-stand.js       # Simulation unverändert gegenüber dem Referenzstand

@@ -185,6 +185,20 @@ UI.spiel = (() => {
     return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
   }
   /* Flow-Regler (§ 20 F6): Gerüst – die Frage des Seniors steht gleich da (frei), in Brief und Zielen */
+  /* Klassenraum am geöffneten Auftrag (B § 3.3: „B und C messen denselben Abdruck"): Der Azubi muss
+     SEHEN, welcher Platz er ist – er tippt ihn später in die Ampel der Lehrkraft ein – und welchen
+     Netz-Abdruck sein Auftrag trägt. Reiner TEXT: kein Bedienelement, keine neue Klasse; bei einem
+     normalen Auftrag bleibt die Zeile weg (Gegenprobe im Test). */
+  function klassenraumZeile(){
+    const inst = S.inst;
+    if (!inst || !(inst.quelle === "klassenraum" || inst.klassenraum)) return null;
+    const platz = Number(inst.klassenraum && inst.klassenraum.platz) || 0;
+    let abdruck = null;
+    try { abdruck = typeof Spiel.klassenraum?.netzkennwert === "function" && inst.netz ? Spiel.klassenraum.netzkennwert(inst.netz) : null; } catch (e) { abdruck = null; }
+    const teile = [h("b", {}, "🏫 Klassenraum-Auftrag"), " · ", platz >= 1 ? `Platz ${platz}` : "ohne Platz"];
+    if (abdruck) teile.push(" · Netz-Abdruck ", h("b", {}, abdruck));
+    return h("p", {class: "sp-leise"}, teile);
+  }
   function geruestTipp(def){
     const frage = S.inst && S.inst.flow === "geruest" ? (def.hilfen?.frage || [])[0] : null;
     return frage ? h("p", {class: "am-geruest"}, h("span", {"aria-hidden": "true"}, "🧭 "), h("b", {}, "Der Senior: "), `„${frage}“`,

@@ -109,6 +109,8 @@ Was nach der ausgelieferten 2.0 kommt — als Plan, nicht als Wunschzettel.
 | Datei | Wofür |
 |---|---|
 | [`entwicklung/Konzept – 3.0.md`](<entwicklung/Konzept – 3.0.md>) | **Der Plan für die nächste Fassung.** Fünf Säulen — **Unterricht mit 20 Azubis**, **Inhalte, die nicht ausgehen**, **Stufe C/D ehrlich eingeordnet**, **technische Schulden**, **Diagnose ohne Bewertung** —, jede mit Aufwand, Risiko und einem **messbaren** Fertig-Kriterium; **Aufwandsspanne 11–20 Sitzungen** (davon 4,5–6,5 unverzichtbar) und ein Abschnitt „was ausdrücklich **nicht** in 3.0 gehört". |
+| [`entwicklung/Markt – Monetarisierung.md`](<entwicklung/Markt – Monetarisierung.md>) | Der ehrliche Marktteil: **20 Quellen gelistet, 13 abgerufen, 7 mit belastbaren Zahlen** (BIBB, Westermann BiBox, MoodleCloud, § 5 DDG, § 19 UStG) und **9 Wettbewerber** mit URL und Preismodell; Preisvorschlag **Standortlizenz 390 €/Jahr** (ausdrücklich als **Setzung** markiert) — und der wichtigste Abschnitt: **„was NICHT funktionieren wird"**, darunter, dass ein Server-/Abo-Modell den Kern „kein Server, kein Konto" zerstört. |
+| [`entwicklung/Bilanz – Agententeam 2.0.md`](<entwicklung/Bilanz – Agententeam 2.0.md>) | Die **Erfolgsquote des Agententeams**, ehrlich gerechnet: streng **87,8 %** der Aufgaben und **66,7 %** der Zusagen halten der Nachmessung stand (mit Belegen 91,8 % und 88,9 %); **neun Ausfälle namentlich**. |
 ## Wie dieses Verzeichnis aufgeräumt wurde
 
 Bis zum 06.10.2026 lagen zwölf Notizen im Wurzelverzeichnis; ein Besucher sah sie vor dem

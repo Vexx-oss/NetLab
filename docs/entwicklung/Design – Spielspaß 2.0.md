@@ -1916,7 +1916,9 @@ Grundlage sind die Entscheidungen des Nutzers (§ 12.1, E1–E8) und fünf **Bau
    `--klassenraum` als **Namensfilter**, der in keinem Testnamen vorkommt; die Bilanzzeile zählt nur die
    gefilterte Liste (`tests/run.js:53,60,66`) und meldet deshalb **0/0 grün** bei **Exit 0** — ein grüner
    Lauf, der nichts geprüft hat. Genau die Bauart, gegen die `tests/harness.js` gebaut wurde. Richtig ist
-   der Filter `klassenraum` **ohne** Striche: **67 Fälle** (Prüfer, Review § 10 — Dokument D nennt 40).
+   der Filter `klassenraum` **ohne** Striche — und **seit 09.10.2026 läuft auch `--klassenraum`**: der Filter
+   schneidet führende Striche ab (**104/104 grün**, selbst gemessen), und ein Filter **ohne** Treffer endet
+   mit **Exit 1** und der Meldung „KEIN Test passt zum Filter … Das ist kein grüner Lauf."
 4. **Dokument D als Drehbuch wurde verworfen, B gilt** (Entscheidung **L4**): D verlangt ein `textarea`,
    zwei getrennte Knöpfe und ein eigenes Overlay — mit der Regel **R12** (höchstens sechs sichtbare
    Bedienelemente je Ansicht) ist das nicht darstellbar. B ist die baubare Fassung, D bleibt Protokoll.
@@ -1955,8 +1957,9 @@ bleiben:
 * **K1:** Zwei **lebende** Kommentare sagten noch „24 von 27" — gemessen sind **27** taugliche Fertigkeiten
   (seit den drei Injektoren aus task-5). Der Kommentar ist berichtigt, danach wurde **neu gebaut**: die
   Erzeugnisse dieser Runde sind deshalb jünger als die des Fundaments.
-* **K2:** Der Abnahmebefehl aus Dokument D prüft **0** Fälle (siehe „Verworfen" Punkt 3). Richtig ist
-  `node tests/run.js klassenraum` → **67** Fälle.
+* **K2 — behoben am 09.10.2026.** Der Abnahmebefehl aus Dokument D prüfte **0** Fälle („0/0 grün"). Jetzt
+  schneidet `node tests/run.js` führende Striche ab: `--klassenraum` meldet **104/104 grün**, und ein Filter
+  **ohne** Treffer endet mit **Exit 1** samt Meldung, statt als grüner Lauf durchzugehen.
 
 ### Was NICHT geprüft ist — ehrlich
 

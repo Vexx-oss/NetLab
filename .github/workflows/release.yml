@@ -8,7 +8,7 @@ name: Release anlegen
 # dort mit 401, gemessen 06.10.2026); ein Ablauf bekommt von GitHub dagegen ein
 # GITHUB_TOKEN, und mit `permissions: contents: write` darf er Releases anlegen.
 #
-# Was angehaengt wird (drei Anhaenge):
+# Was angehaengt wird (vier Anhaenge):
 #   * Netzwerk-Labor-<fassung>-Browser.zip   — Paket aus `tools/paket.py --ohne-exe` (Linux-Job)
 #                                              NUR die Browser-Fassung; `--ohne-exe` ist Pflicht,
 #                                              sonst nimmt das Werkzeug die lokale, veraltete
@@ -17,6 +17,10 @@ name: Release anlegen
 #                                              /releases/latest/download/Netzwerk-Labor.html
 #   * Netzwerk-Labor.exe                     — Windows-Programm, gebaut im Windows-Job aus DIESEM
 #                                              Commit (stabiler Name: .../latest/download/Netzwerk-Labor.exe)
+#   * Netzwerk-Labor-<fassung>-Android.apk   — Android-Fassung, gebaut im Android-Job aus DIESEM
+#                                              Commit, z. B. Netzwerk-Labor-2.0.0-Android.apk.
+#                                              Bis zum 09.10.2026 fehlte sie im Release: wer ueber
+#                                              die Release-Seite kam, sah die Android-Fassung nicht.
 #
 # Die .exe liegt weiterhin NICHT im Git (8 MB, jeder Bau eine neue Binaerdatei). Bis zum
 # 07.10.2026 fehlte sie deshalb ganz im Release; seit dem 07.10.2026 baut der zweite Job
@@ -206,3 +210,99 @@ jobs:
           }
           if (-not $ok) { throw "Die .exe konnte nicht angehaengt werden." }
           gh release view $tag --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
+
+  # Vierter Anhang: die Android-APK. Eigener Job wie der Windows-Job (`needs: release`, damit das
+  # Release schon existiert) — aber NICHT in dessen Kette: faellt der Android-Bau aus, sind die
+  # drei anderen Anhaenge trotzdem dran.
+  android:
+    name: Android-APK bauen und anhaengen
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Werkzeuge zeigen, damit im Protokoll steht, womit gebaut wurde (wie im Windows-Job).
+      # `android/bauen.py` braucht ein SDK mit build-tools >= 35 (deren d8 uebersetzt
+      # verschachtelte Klassen; 34.0.0 bricht ab, gemessen 06.10.2026) und ein JDK mit
+      # javac/keytool. Der Laeufer bringt beides mit — hier steht, welche Fassungen.
+      - name: Werkzeuge zeigen
+        run: |
+          java -version
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "SDK=$SDK"
+          ls "$SDK/build-tools" || true
+          ls "$SDK/platforms" || true
+
+      # Der Signaturschluessel liegt bewusst NICHT im Git (.gitignore: android/signatur/).
+      # Ohne ihn erzeugt `android/bauen.py` einen NEUEN Schluessel (bauen.py:388-393) — die APK
+      # waere dann bei jeder Auslieferung anders signiert und liesse sich nicht mehr ueber eine
+      # alte Fassung installieren („App nicht installiert“). Deshalb kommt er aus zwei Secrets:
+      #   ANDROID_KEYSTORE_B64       — android/signatur/netzwerk-labor.jks, base64-kodiert
+      #   ANDROID_KEYSTORE_PASSWORT  — das Passwort aus android/signatur/zugang.txt
+      # Fehlen sie, bricht dieser Job mit klarer Meldung ab, statt eine neu signierte APK
+      # zu veroeffentlichen — lieber keine APK als eine, die kein Update mehr zulaesst.
+      - name: Signaturschluessel aus den Secrets bereitstellen
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORT: ${{ secrets.ANDROID_KEYSTORE_PASSWORT }}
+        run: |
+          set -e
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORT" ]; then
+            echo "::error::Es fehlen die Repository-Secrets ANDROID_KEYSTORE_B64 und ANDROID_KEYSTORE_PASSWORT. Ohne sie erzeugt android/bauen.py einen neuen Signaturschluessel, und die APK liesse sich nicht ueber eine alte Fassung installieren. Anlegen: Settings > Secrets and variables > Actions; Inhalt: base64 von android/signatur/netzwerk-labor.jks bzw. das Passwort aus android/signatur/zugang.txt."
+            exit 1
+          fi
+          mkdir -p android/signatur
+          printf '%s' "$KEYSTORE_B64" | base64 -d > android/signatur/netzwerk-labor.jks
+          printf 'Passwort:   %s\n' "$KEYSTORE_PASSWORT" > android/signatur/zugang.txt
+          ls -l android/signatur
+
+      # Hausregel: bauen.py laeuft vor jedem Bau (auch wenn tools/einfach.py web/ selbst
+      # erzeugen wuerde, einfach.py:103-120). android/bauen.py baut daraus die Einzeldatei,
+      # uebersetzt Java, packt die APK und signiert sie.
+      - name: Web-Fassung bauen
+        run: python bauen.py
+
+      - name: Android-APK bauen und Fassung gegenpruefen
+        run: |
+          set -e
+          python android/bauen.py
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then TAG="${GITHUB_REF_NAME}"; fi
+          SOLL="${TAG#v}"
+          APK="Programm/Netzwerk-Labor-${SOLL}-Android.apk"
+          if [ ! -f "$APK" ]; then
+            echo "::error::Erwartet wurde $APK — der Bau hat eine andere Fassung erzeugt:"
+            ls -l Programm/*-Android.apk || true
+            exit 1
+          fi
+          ls -l "$APK"
+          sha256sum "$APK"
+
+      - name: Android-APK an das Release haengen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then TAG="${GITHUB_REF_NAME}"; fi
+          APK="Programm/Netzwerk-Labor-${TAG#v}-Android.apk"
+          NAME=$(basename "$APK")
+          # Wie im Linux-Job: erst einen gleichnamigen alten Anhang entfernen, dann hochladen —
+          # `--clobber` scheitert beim Ersetzen mit HTTP 404 (gemessen 07.10.2026).
+          gh release delete-asset "$TAG" "$NAME" -y >/dev/null 2>&1 && echo "Alter Anhang entfernt: $NAME"
+          sleep 5
+          ok=0
+          for versuch in 1 2 3; do
+            if gh release upload "$TAG" "$APK"; then ok=1; break; fi
+            echo "Versuch $versuch gescheitert — neuer Versuch in 10 s"
+            sleep 10
+          done
+          [ "$ok" = "1" ] || { echo "FEHLER: Die APK konnte nicht angehaengt werden."; exit 1; }
+          echo "Anhaenge im Release:"
+          gh release view "$TAG" --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'

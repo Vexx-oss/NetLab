@@ -110,6 +110,22 @@ Zusammenschluss, nur zwei Selektoren verschwanden (beide aus dem gelöschten R8-
   Artefakt, und ein Desktop-Release-Bau lief noch.
 - **`tests/stil-stand.json` ist auf dem Stand dieser Runde eingefroren** — R1 22 · R2 113 · R3 195 ·
   R4 514 · R5–R12 = 0 (selbst nachgeprüft: der Lauf meldet kein „BESSER als der Stand" mehr).
+
+### Nachtrag (09.10.2026, nach dem 20-Geräte-Lauf)
+
+- **Neu: `tests/klassen-20.test.js`** — 20 Geräte aus **einem** Auftragscode, Ampel **20/20**, 349 ms;
+  damit **733 Fälle** in **82 Testdateien** (91 Module), `davon 0 übersprungen`.
+- **Befund K2 ist behoben:** `node tests/run.js --klassenraum` läuft jetzt (der Filter schneidet führende
+  Striche ab) und meldet **104/104 grün**. Ein Filter, der **nichts** trifft, endet mit **Exit 1** und der
+  Meldung „KEIN Test passt zum Filter … Das ist kein grüner Lauf." — die Bilanzzeile allein zeigt weiterhin
+  „0/0 grün"; es entscheidet der **Exit-Code**.
+- **Grenzbefunde des 20-Geräte-Laufs** (als Anforderung ins [Konzept 3.0](<entwicklung/Konzept – 3.0.md>) übernommen):
+  `platz` > 31 wird **still auf 31 geklemmt** (harte Obergrenze je Sitzung), ein **doppelter Platz** lässt den
+  ersten Eintrag gewinnen, und **zwei Sitzungen gleichzeitig gehen nicht** (`sitzung` ist ein Einzelfeld —
+  nur Export/Import holt die alte zurück).
+- **Erzeugnisse:** APK neu gebaut **1.164.828 B**, SHA256
+  `2208C08A61E81E8039F197FC082CB653F211ACD89851A69E7884B7F375CC7BDD`; Einzeldatei unverändert
+  **2.829.477 B**, `C3C51EDA…828E` — und die **Live-Seite ist byte-gleich** dazu (selbst nachgemessen).
 ---
 
 ## 2.0.0 — Klassenraum Stufe A+B (09.10.2026)
@@ -197,9 +213,9 @@ wurde der Codec-Kommentar berichtigt und **neu gebaut**: die Erzeugnisse dieser 
 des Fundaments, und deren Werte (Einzeldatei 2.720.252 B / `3822D6B5…`, APK 1.127.964 B / `DB11BF88…`)
 sind damit **überholt**.
 
-**Erneut überholt** durch die **Output-Runde** (Abschnitt ganz oben): dort stehen die gültigen Erzeugnisse
-dieser Fassung (Einzeldatei **2.829.477 B**, SHA256 `C3C51EDA…828E`; APK **1.160.732 B**, SHA256
-`A27751B2…F93733`).
+**Erneut überholt** durch die **Output-Runde** und ihren Nachtrag (Abschnitt ganz oben): dort stehen die
+gültigen Erzeugnisse dieser Fassung (Einzeldatei **2.829.477 B**, SHA256 `C3C51EDA…828E`; APK
+**1.164.828 B**, SHA256 `2208C08A…7BDD`).
 
 **Neue Dateien dieser Stufe** — Bytes und SHA256 vom Chronisten über den Arbeitsbaum gerechnet, **alle
 LF, 0 CRLF**:
@@ -389,9 +405,9 @@ fertig wurden. Sein Fazit gilt weiter: *591 von 593 grün heißt nicht fertig.*
 - **Nicht gepusht, kein Tag.** `v2.0.0` und der Push stehen aus — beides nur mit ausdrücklicher Freigabe
   des Nutzers. Tag- und Zweigzeile im Kopf dieses Dokuments bleiben deshalb unverändert.
 - **Überholt** — zuerst durch die Klassenraum-Stufe A+B, dann durch die **Output-Runde** (jeweils
-  Abschnitte weiter oben). Gültig sind die Erzeugnisse der Output-Runde: Einzeldatei **2.829.477 B**,
-  SHA256 `C3C51EDA…828E`; APK **1.160.732 B**, SHA256 `A27751B2…F93733`. Die hier genannten Werte waren
-  der Stand **nach dem Fundament**.
+  Abschnitte weiter oben). Gültig sind die Erzeugnisse der Output-Runde samt Nachtrag: Einzeldatei
+  **2.829.477 B**, SHA256 `C3C51EDA…828E`; APK **1.164.828 B**, SHA256 `2208C08A…7BDD`. Die hier genannten
+  Werte waren der Stand **nach dem Fundament**.
 
 ### Neue Dateien dieser Fassung (Bytes und SHA256)
 

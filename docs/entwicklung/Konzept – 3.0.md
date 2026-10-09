@@ -21,7 +21,7 @@ jemanden zu bewerten), und Server und QR nur dort, wo sie den Ablauf wirklich tr
 
 | Größe | Stand | Quelle |
 |---|---|---|
-| Tests | **725/725 grün**, 81 Testdateien, 91 Module, 0 übersprungen | `sh tools/test.sh`, selbst gemessen |
+| Tests | **733/733 grün**, 82 Testdateien, 91 Module, 0 übersprungen | `sh tools/test.sh`, selbst gemessen |
 | Handgeschriebene Aufträge | **58** | `TABELLE_AUFTRAEGE_LAENGE` in `src/spiel/klassenraum-codec.js` |
 | Fertigkeiten | **27** (Tabelle für den Codec eingefroren) | `DATEN.skills` |
 | Fehlerinjektoren | **39** | `Spiel.INJEKTOREN` |
@@ -51,21 +51,32 @@ Netz. Die Hilfestellung richtet sich nach dem Bildungsstand **des Azubis** (E3),
 
 **Was fehlt.**
 1. **Mehrere Klassen / mehrere Sitzungen** nebeneinander: heute ersetzt die nächste Sitzung die vorige.
-2. **Ein Trockenlauf mit 20**: es gibt keinen Test, der 20 Geräte aus *einem* Code spielt und 20
-   Ergebnis-Codes zurückführt — die Zahl 20 ist heute eine Behauptung.
+2. **Der Trockenlauf mit 20 ist seit dem 09.10.2026 da** (`tests/klassen-20.test.js`: 20 Geräte aus *einem*
+   Code, Ampel **20/20**, 349 ms) — und er hat **drei Grenzen aufgedeckt**, die 3.0 schließen muss (Befund
+   unten).
 3. **Der Ablauf in der Stunde**: Wer hat welchen Platz? Wer hat noch nichts abgegeben? Das steht heute
    nirgends (die Ampel kennt nur „eingegangen").
 4. **Zeit**: `dauerMin` ist geplant, aber es gibt keinen Stunden-Bezug („noch 10 Minuten").
 
-**Aufwand: 2–3 Sitzungen.** (Sitzungsverwaltung + Trockenlauf-Test + Platz-/Abgabeübersicht.)
+**Aufwand: 2–3 Sitzungen.** (Sitzungsverwaltung + die drei Grenzfälle + Platz-/Abgabeübersicht.)
+
+**Befund aus dem 20-Geräte-Lauf (09.10.2026, `tests/klassen-20.test.js`).**
+* **`platz` > 31 wird still auf 31 geklemmt** — die Obergrenze je Sitzung ist hart, und niemand erfährt es.
+* **Ein doppelter Platz lässt den ersten Eintrag gewinnen** — der zweite Code verschwindet **ohne Meldung**.
+* **Zwei Sitzungen gleichzeitig gehen nicht:** `sitzung` ist ein **Einzelfeld** im Store; eine neue Sitzung
+  ersetzt die alte, und nur **Export/Import** holt sie zurück.
+Alle drei sind **Anforderungen für 3.0**, keine Kleinigkeiten: der erste Fall verfälscht still eine
+Ergebnistabelle, der zweite verschluckt eine Rückmeldung, der dritte verhindert zwei Klassen am selben
+Rechner.
 
 **Risiko.** Mittel. Der Codec ist eingefroren — Sitzungsverwaltung darf das **Format** nicht ändern, nur die
 Ablage. Das größere Risiko ist ein **falsches Gefühl von Sicherheit**: ein Trockenlauf mit 20 simulierten
 Geräten beweist die Software, **nicht** das Klassennetz.
 
 **Fertig, wenn (messbar):**
-* `tests/klassen-20.test.js` spielt **20** Instanzen aus **einem** Auftragscode durch: 20 verschiedene
-  Plätze, 20 Ergebnis-Codes, Ampel **20/20**, kein Verlust nach Neuladen — grün.
+* `tests/klassen-20.test.js` **ist da** (20 Geräte, ein Code, Ampel **20/20**, 349 ms) — **offen**: er deckt
+  auch die drei Grenzfälle ab, und der Code **klemmt nicht mehr still**, sondern **meldet** (`platz` > 31
+  wird abgewiesen, ein doppelter Platz gemeldet).
 * Zwei Sitzungen sind gleichzeitig ablegbar; ein Export enthält **beide**, und ein Import stellt **beide** her.
 * `python tools/menueprobe.py --datei web/index.html --lauf` bleibt **45/0**, R12 `klasse` **6/6**.
 
