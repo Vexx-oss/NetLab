@@ -54,8 +54,17 @@ UI.klassenraum = (() => {
   }
   /* Die Ampel (B § 9): fertig = belegte Plätze, offen = plaetze − fertig, Median = OBERER Median
      der gültigen Dauern > 0, auf ganze Sekunden. Ohne eingestellte Platzzahl bleibt sie gelb und
-     sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3). */
-  function ampel(sitzung){
+     sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3).
+
+     ZWEITE ZEILE: DIE DIAGNOSE OHNE BEWERTUNG (3.0, Säule 5, Weg A). Die Lehrkraft fragt im
+     Unterricht nicht „wie gut ist einer?", sondern „wo steht die Klasse?" — und die Antwort sind
+     AUSSCHLIESSLICH anonyme Zahlen: wie viele Plätze offen sind (mit der Klassengröße als Nenner),
+     wie viele Abgaben in den letzten fünf Minuten kamen und wie frisch die letzte ist.
+     KEIN Name, KEIN Rang, KEINE Sternesumme je Person, KEIN Vergleich zwischen Azubis; der Median
+     steht schon in der Ampel und wird hier NICHT wiederholt. Alles kommt aus der lokalen Sitzung
+     (`store "klassenraum"`) — kein Server, kein Netz. Die Uhr kommt als Zahl herein (`jetztMs`),
+     damit die Rechnung prüfbar bleibt: ohne Uhr wird keine Zeit behauptet. */
+  function ampel(sitzung, jetztMs){
     const s = sitzung || {};
     const werte = Object.keys(s.ergebnisse || {}).map(k => s.ergebnisse[k]).filter(x => x && typeof x === "object");
     const plaetze = Math.max(0, Number(s.plaetze) || 0);
@@ -78,7 +87,27 @@ UI.klassenraum = (() => {
       dauerS: typeof x.dauerS === "number" && x.dauerS > 0 ? x.dauerS : null,
       versuche: Math.max(0, Number(x.versuche) || 0),
     }));
-    return {farbe, summe: "Ampel: " + teile.join(" · "), fertig, plaetze, offen: plaetze > 0 ? Math.max(0, plaetze - fertig) : null, median, zeilen};
+    return Object.assign({farbe, summe: "Ampel: " + teile.join(" · "), fertig, plaetze,
+      offen: plaetze > 0 ? Math.max(0, plaetze - fertig) : null, median, zeilen},
+      fortschrittZahlen(werte, plaetze, fertig, jetztMs));
+  }
+
+  /* Die anonymen Diagnosezahlen — reine Rechnung, keine Namen weit und breit. */
+  function fortschrittZahlen(werte, plaetze, fertig, jetztMs){
+    const FENSTER_MS = 5 * 60 * 1000;
+    const offene = Math.max(0, plaetze - fertig);
+    const mitZeit = werte.map(x => x.zeit).filter(t => typeof t === "number" && isFinite(t));
+    const uhr = typeof jetztMs === "number" && isFinite(jetztMs);
+    const frische = uhr ? mitZeit.filter(t => jetztMs - t >= 0 && jetztMs - t <= FENSTER_MS).length : null;
+    const letzteSek = uhr && mitZeit.length ? Math.max(0, Math.round((jetztMs - Math.max(...mitZeit)) / 1000)) : null;
+    const zeitText = s => s < 60 ? "gerade eben" : s < 120 ? "vor 1 Minute" : `vor ${Math.round(s / 60)} Minuten`;
+    const teile = [];
+    if (plaetze > 0) teile.push(`${offene} von ${plaetze} offen`);
+    else teile.push(fertig ? `${fertig} ${fertig === 1 ? "Abgabe" : "Abgaben"}` : "noch keine Abgaben");
+    if (frische != null) teile.push(frische === 1 ? "1 Abgabe in den letzten 5 Minuten" : `${frische} Abgaben in den letzten 5 Minuten`);
+    if (letzteSek != null) teile.push(`letzte Abgabe ${zeitText(letzteSek)}`);
+    return {offenVon: plaetze > 0 ? {offen: offene, plaetze} : null, frische, letzteSek,
+      fortschritt: "Fortschritt: " + teile.join(" · ")};
   }
 
   /* ---------------- gemeinsame Bausteine ---------------- */
@@ -110,6 +139,7 @@ UI.klassenraum = (() => {
     L.hinweis = h("div", {class: "kl-block"}, hinweisZeile("kl-hinweis", ""));
     L.lampe = h("span", {class: "kl-lampe"});
     L.summe = hinweisZeile("kl-detail", "");
+    L.fortschritt = hinweisZeile("kl-detail", "");
     L.tafel = h("div", {class: "kl-tafel"});
     L.codes = h("textarea", {class: "kl-feld kl-breit", rows: "6", "aria-label": "Ergebnis-Codes",
       placeholder: "Einen Code je Zeile oder alles auf einmal einfügen.",
@@ -136,6 +166,10 @@ UI.klassenraum = (() => {
           L.hinweis),
         h("div", {class: "kl-ampel"},
           h("div", {class: "kl-summe"}, L.lampe, L.summe),
+          /* Die Diagnosezeile (3.0, Säule 5): NUR Text, kein Bedienelement — die Lehrkraft-Ansicht
+             bleibt bei sechs (R12). Sie ergänzt die Ampel um „wie viele offen / wie viele gerade
+             abgegeben / wie frisch die letzte ist" und wiederholt den Median nicht. */
+          L.fortschritt,
           L.tafel),
         h("div", {class: "kl-form"},
           hinweisZeile("kl-etikett", "Ergebnis-Codes"), L.codes,

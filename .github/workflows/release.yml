@@ -245,18 +245,38 @@ jobs:
       # alte Fassung installieren („App nicht installiert“). Deshalb kommt er aus zwei Secrets:
       #   ANDROID_KEYSTORE_B64       — android/signatur/netzwerk-labor.jks, base64-kodiert
       #   ANDROID_KEYSTORE_PASSWORT  — das Passwort aus android/signatur/zugang.txt
-      # Fehlen sie, bricht dieser Job mit klarer Meldung ab, statt eine neu signierte APK
-      # zu veroeffentlichen — lieber keine APK als eine, die kein Update mehr zulaesst.
-      - name: Signaturschluessel aus den Secrets bereitstellen
+      #
+      # DREI ZUSTAENDE statt zwei. Gemessen am 09.10.2026 am Lauf fuer v2.0.1: ohne die Secrets
+      # stand das ganze Release auf rot, obwohl die drei anderen Anhaenge da waren — ein rotes X,
+      # das dauerhaft leuchtet, wird ignoriert, und dann uebersieht man den Fall, in dem wirklich
+      # etwas kaputt ist.
+      #   1. Secrets fehlen          → dieser Job endet GRUEN, gibt eine ::warning:: aus, und die
+      #                                Android-Schritte werden uebersprungen (`if: … == 'ja'`).
+      #   2. Secrets da, Bau laeuft  → APK bauen, Fassung pruefen, anhaengen.
+      #   3. Secrets da, Bau scheitert → ::error:: und failure. Das ist der Fall, der rot sein MUSS.
+      # `secrets.*` ist in einem `if:` auf Job-Ebene nicht erlaubt — daher der Umweg ueber den
+      # Job-Output DIESES Schritts (die folgenden Schritte haengen an `steps.schluessel.outputs.da`).
+      - name: Secrets pruefen (Android-Schluessel vorhanden?)
+        id: schluessel
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORT: ${{ secrets.ANDROID_KEYSTORE_PASSWORT }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORT" ]; then
+            echo "da=nein" >> "$GITHUB_OUTPUT"
+            echo "::warning::Android-APK uebersprungen: ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASSWORT sind nicht gesetzt. Anleitung: Settings > Secrets and variables > Actions. Ohne den Originalschluessel waere die APK anders signiert und liesse sich nicht ueber eine alte Fassung installieren."
+            exit 0
+          fi
+          echo "da=ja" >> "$GITHUB_OUTPUT"
+          echo "Schluessel-Secrets sind gesetzt — die APK wird gebaut."
+
+      - name: Signaturschluessel bereitstellen
+        if: steps.schluessel.outputs.da == 'ja'
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           KEYSTORE_PASSWORT: ${{ secrets.ANDROID_KEYSTORE_PASSWORT }}
         run: |
           set -e
-          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORT" ]; then
-            echo "::error::Es fehlen die Repository-Secrets ANDROID_KEYSTORE_B64 und ANDROID_KEYSTORE_PASSWORT. Ohne sie erzeugt android/bauen.py einen neuen Signaturschluessel, und die APK liesse sich nicht ueber eine alte Fassung installieren. Anlegen: Settings > Secrets and variables > Actions; Inhalt: base64 von android/signatur/netzwerk-labor.jks bzw. das Passwort aus android/signatur/zugang.txt."
-            exit 1
-          fi
           mkdir -p android/signatur
           printf '%s' "$KEYSTORE_B64" | base64 -d > android/signatur/netzwerk-labor.jks
           printf 'Passwort:   %s\n' "$KEYSTORE_PASSWORT" > android/signatur/zugang.txt
@@ -266,9 +286,11 @@ jobs:
       # erzeugen wuerde, einfach.py:103-120). android/bauen.py baut daraus die Einzeldatei,
       # uebersetzt Java, packt die APK und signiert sie.
       - name: Web-Fassung bauen
+        if: steps.schluessel.outputs.da == 'ja'
         run: python bauen.py
 
       - name: Android-APK bauen und Fassung gegenpruefen
+        if: steps.schluessel.outputs.da == 'ja'
         run: |
           set -e
           python android/bauen.py
@@ -285,6 +307,7 @@ jobs:
           sha256sum "$APK"
 
       - name: Android-APK an das Release haengen
+        if: steps.schluessel.outputs.da == 'ja'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -305,4 +328,20 @@ jobs:
           done
           [ "$ok" = "1" ] || { echo "FEHLER: Die APK konnte nicht angehaengt werden."; exit 1; }
           echo "Anhaenge im Release:"
+          gh release view "$TAG" --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
+
+      # Zum Schluss immer die Anhangsliste — auch wenn oben uebersprungen (Zustand 1) oder
+      # gescheitert (Zustand 3) wurde. So steht in jedem Fall im Protokoll, was am Release haengt.
+      - name: Anhaenge im Release zeigen
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then TAG="${GITHUB_REF_NAME}"; fi
+          if [ "${{ steps.schluessel.outputs.da }}" = "ja" ]; then
+            echo "Android-APK: in diesem Lauf gebaut und angehaengt"
+          else
+            echo "Android-APK: uebersprungen (Secrets ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASSWORT fehlen)"
+          fi
           gh release view "$TAG" --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
