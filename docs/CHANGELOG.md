@@ -5,8 +5,73 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
 [`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, `v2.0.2` (über die GitHub-API gemessen am 09.10.2026); **`v2.0.3` folgt**.
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, `v2.0.2`, `v2.0.3`, **`v2.0.4`** (über die GitHub-API gemessen am 09.10.2026).
 
+---
+
+## 2.0.4 — Überlappung und verschiebbare Dialoge (09.10.2026)
+
+**Warum diese Fassung.** Zwei Befunde des **Nutzers**, beide mit Bild gemeldet: „Tools überlappen Text" und
+„Fenster wie der Auftragsdialog sollten verschiebbar sein". **`v2.0.0` bis `v2.0.3` bleiben unverändert
+stehen** (kein `--force`).
+
+### Behoben
+
+- **„Tools überlappen Text".** Die „1", die zwischen den Werkzeugen und dem Ebenen-Knopf hervorschien, war die
+  **„1" aus dem Mappen-Reiter „Ziele 0/1"**. Ursache (gemessen): `.lb-leiste-oben` y=121 h=48 **z-index 20**,
+  `.am-reiter` y=120 h=37 in `.am-mappe` mit **z-index 30** — die Mappe steckt aber **in** `.lb-auftrag`
+  (z-index 10) und erzeugt damit einen **eigenen Stapelkontext**, aus dem ihre 30 nicht herauskommen; sie malt
+  also **unter** der Leiste, und durch deren Lücken schien der Text durch. **Bei allen 25 geprüften Breiten
+  von 640 bis 1600 px** (40er-Schritte), nicht nur bei schmalem Fenster.
+  **Reparatur:** `src/ui/editor.js` misst die Leistenhöhe und stellt sie als `--leiste-h` bereit
+  (ResizeObserver, weil die Knöpfe bei grober Zeigereingabe 44 statt 48 px hoch sind; `:114-119`);
+  `src/stil/spiel.css` gibt der Mappe `--am-kopfraum = calc(var(--leiste-h, 48px) + 13px)` als `padding-top`
+  (`:31-41`). **Nachher gemessen:** Reiter **y=187**, Leiste y=121–169 — kein Schnitt; Durchlauf über alle
+  25 Breiten: **0 Auffälligkeiten** (vorher **25/25**). Bilder vorher/nachher und die Messkripte liegen in
+  `Nachweise/Ueberlappung/` (**nicht im Git** — Ablageort, kein Verweis).
+  Neu: `tests/ui-leiste-ueberlappung.test.js` (**4 Fälle**) — Verdrahtung, **Rechnung** (Kopfraum ≥
+  Leistenoberkante + 44 + 8 − 5), Messung statt Schätzung, Gegenprobe. **Ehrlich:** der geometrische Beweis
+  bleibt die **Messung**; ein Test kann kein Layout rechnen.
+
+### Neu
+
+- **Dialoge sind verschiebbar.** Ziehen am `.dialog-kopf` (Maus, Finger, Stift), geklemmt auf 12 px im
+  Fenster, jeder Dialog startet wieder **mittig**, der Schließknopf ist ausgenommen (`src/ui/app.js`,
+  `src/stil/rahmen.css`). **Der Drag-Test ist ein Entwurf außerhalb der Suite**
+  (`Nachweise/ui-dialog-ziehen.entwurf.js`, **nicht im Git**) — also **nicht** „getestet": die Geste ist im
+  Browser ausprobiert, aber **nicht** in den Prüflauf aufgenommen.
+
+### Prüfstand
+
+| Prüfung | Ergebnis |
+|---|---|
+| `sh tools/test.sh --rauch` | **Exit 0**; **768/768 grün**, 87 Testdateien, 92 Module, **0 übersprungen** (selbst gemessen) |
+| Rauchtest | **45/45** (Lead) |
+| `tools/ethos.py` · `tools/klassen.py` · `node tools/sim-stand.js` | **GRUEN**, **R4 wieder 514** · **0** · Simulation **unverändert** (ethos selbst nachgemessen) |
+| R12 im echten Browser | `Klasse` **6/6**, `Auftrag` **3/3** (Lead) |
+| `python bauen.py` | **129 Module, 2300 KB**, Version **2.0.4**; `VERSION_CODE` **20005** (Lead) |
+| Fassung | **2.0.4** in `web/index.html`, `docs/index.html`, `Netzwerk-Labor.html`, `android/bau/assets/index.html` (selbst geprüft) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.893.778 B**, SHA256 `C3D3835B4BA4C3ED47DF8B6EBB460F992E872A3E02F5A9CE7631C27CA23C4088`, byte-gleich, **0 Außenverweise** (selbst gemessen) |
+| Android-APK 2.0.4 | **1.185.308 B**, Signatur gültig — **ohne Prüfsumme**, sie ist **nicht reproduzierbar** (selbst gemessen) |
+| Online (GitHub-API und Abruf, selbst gemessen) | Tag **`v2.0.4`** gesetzt; Release `v2.0.4` (09.10.2026, 19:56 UTC) mit **zwei** Anhängen (Browser-ZIP, `.html`; die `.exe` kam bei 2.0.2 und 2.0.3 jeweils nach), **keine APK**; die **Live-Seite liefert 2.0.4** und ist **byte-gleich** zum lokalen Bau (2.893.778 B, `C3D3835B…4088`) |
+
+### Fehler auf dem Weg (ehrlich)
+
+- **Das Tor hat angeschlagen — und das war gut.** Die erste Fassung schrieb die Rechnung direkt ins
+  `padding`; `python tools/ethos.py` meldete **`R4 Abstand nur aus der Skala: 514 → 516 (+2)`**, weil `48px`
+  und `13px` außerhalb der Skala liegen. Die Rechnung steht jetzt als **Custom Property**; die **8 px**
+  sichtbarer Abstand liegen **auf** der Skala. Endstand: **R4 = 514**, GRÜN (selbst nachgemessen).
+- **Die drei Rechenfehler aus 2.0.3 bleiben unverändert gültig** (die zwei Vertragsfehler und die falsche
+  R12-Grenze) — **nichts daran ist überholt**.
+
+### Nicht geprüft (ehrlich)
+
+- **Der Drag-Test läuft nicht im Prüflauf** (Entwurf in `Nachweise/`), und **kein Bildschirmfoto** dieser
+  Fassung liegt im Git; die Überlappungsbilder liegen in `Nachweise/Ueberlappung/`.
+- **Kein echtes Gerät** (Finger, Stift) für das Ziehen: die pointer-Events sind über den Code und den
+  Browser belegt, nicht an einem Touchgerät gemessen.
+- **Der CI-Lauf für `v2.0.4` ist nicht abgewartet:** das Release hatte beim Messen **zwei** Anhänge, und die
+  **APK** fehlt weiterhin (die zwei Repository-Secrets).
 ---
 
 ## 2.0.3 — Der Hilfecode (09.10.2026)
