@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>✍️ Stilfaden – Auftragstexte · Netzwerk-Labor</title>
+<meta name="description" content="---.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">✍️ Stilfaden – Auftragstexte</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#0-was-gemessen-schlecht-ist-ist-stand-tools-texte-messen-js">0 · Was gemessen schlecht ist (Ist-Stand, tools/texte-messen.js)</a></li>
+<li><a href="#1-die-vier-bausteine-pflicht">1 · Die vier Bausteine (Pflicht)</a></li>
+<li><a href="#2-verboten">2 · Verboten</a></li>
+<li><a href="#3-erwunscht">3 · Erwünscht</a></li>
+<li><a href="#4-was-sich-nicht-andert">4 · Was sich NICHT ändert</a></li>
+<li><a href="#5-prufung-messbar-tools-texte-messen-js">5 · Prüfung (messbar, tools/texte-messen.js)</a></li>
+</ul>
+</nav><h1 id="stilfaden-auftragstexte">✍️ Stilfaden – Auftragstexte</h1>
+<blockquote>
+<p><strong>Stand:</strong> 09.10.2026 · <strong>Anlass:</strong> Rückmeldung des Nutzers: „die Aufgabentexte sind teilweise richtig schlecht geschrieben" · <strong>Gilt für:</strong> die 58 Aufträge in <code>src/daten/tickets-*.js</code> (Feld <code>symptom</code> und <code>titel</code>). <strong>Gilt nicht für:</strong> Mini-Tickets, Wiki, Trainingskarten, Fehlertexte — die sind gemessen in Ordnung.</p>
+</blockquote>
+<hr>
+<h2 id="0-was-gemessen-schlecht-ist-ist-stand-tools-texte-messen-js">0 · Was gemessen schlecht ist (Ist-Stand, <code>tools/texte-messen.js</code>)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Kennzahl</th><th>Ist</th></tr></thead><tbody><tr><td>Auftragstext gesamt (Titel + Symptom)</td><td><strong>Median 154 Zeichen</strong>, Minimum <strong>88</strong></td></tr><tr><td>Symptom allein</td><td><strong>Median 58 Zeichen</strong> — meist <strong>ein</strong> Satz</td></tr><tr><td>Aufträge unter 120 Zeichen</td><td><strong>12 von 58</strong></td></tr><tr><td>Wörtliche Doppelungen</td><td>0</td></tr><tr><td>Wiederkehrende Satzanfänge</td><td>„Der Drucker ist…" 3×, „Der Büro-PC…" mehrfach</td></tr></tbody></table></div>
+<p><strong>Die Texte sind nicht falsch — sie sind telegrafisch.</strong> Beispiel (Ist):</p>
+<blockquote>
+<p><strong>Titel:</strong> Drucker ja, Internet nein <strong>Symptom:</strong> Der Büro-PC druckt, kommt aber nicht ins Internet.</p>
+</blockquote>
+<p>Das ist eine <strong>Zustandsmeldung</strong>, kein Auftrag. Es fehlt alles, was einen echten Störungsbericht ausmacht: <strong>wer</strong> meldet, <strong>wann</strong> es aufgefallen ist, <strong>was</strong> der Kunde sieht, <strong>welche Folge</strong> das für den Betrieb hat und <strong>was schon versucht</strong> wurde. Genau daraus zieht der Azubi seine Fragen — und genau das ist der Unterschied zwischen „Aufgabe lösen" und „Störung aufnehmen".</p>
+<hr>
+<h2 id="1-die-vier-bausteine-pflicht">1 · Die vier Bausteine (Pflicht)</h2>
+<p>Jeder <code>symptom</code>-Text hat <strong>2 bis 4 Sätze</strong> und <strong>180 bis 420 Zeichen</strong> und enthält alle vier:</p>
+<ol><li><strong>Anlass mit Zeit</strong> — wann ist es aufgefallen, was war der Auslöser. <em>„Seit heute Morgen geht an der Kasse nichts mehr."</em> / <em>„Nach dem Umbau am Wochenende…"</em></li><li><strong>Beobachtung in Kundensprache</strong> — was geht, was geht nicht, <strong>ohne Deutung</strong>. Wörtliche Bildschirmmeldungen sind Gold: <em>„Auf dem Bildschirm steht: ‚Kein Internet'."</em></li><li><strong>Folge für den Betrieb</strong> — warum es eilt, was gerade nicht geht. <em>„Wir können keine Kartenzahlung mehr annehmen, die Kundschaft steht bis zur Tür."</em></li><li><strong>Was schon versucht wurde</strong> — Neustart, anderes Kabel, Kollege gefragt, Stecker gezogen. Das ist die wichtigste Zeile für die Diagnose: es zeigt, was <strong>nicht</strong> die Ursache ist.</li></ol>
+<p><strong>Beispiel (Soll):</strong></p>
+<blockquote>
+<p><strong>Titel:</strong> Drucker ja, Internet nein <strong>Symptom:</strong> Seit gestern Nachmittag kommen wir vom Büro-PC nicht mehr ins Internet – drucken geht weiterhin. Auf dem Bildschirm steht „Kein Internet". Ich habe den Rechner schon neu gestartet und das Netzwerkkabel an einen anderen Platz im Switch gesteckt, das hat nichts geändert. Ohne Internet können wir keine Bestellungen rausschicken.</p>
+</blockquote>
+<hr>
+<h2 id="2-verboten">2 · Verboten</h2>
+<ul><li><strong>Die Ursache nennen.</strong> Kein „das VLAN fehlt", kein „die Maske ist falsch", kein „der DNS-Eintrag zeigt auf den alten Server". Der Azubi muss <strong>suchen</strong>. Verbotene Wörter im Kundentext: *VLAN, Subnetzmaske, Präfix, Gateway, Route, Routing, DNS-Eintrag, Trunk, STP, Spanning Tree, DHCP-Pool, Lease, Portsicherheit, ACL, NAT, Firewall-Regel, Doppelvergab* — ein Kunde sagt das nicht, und es verrät die Antwort.</li><li><strong>Fachjargon statt Beobachtung.</strong> „Der Port ist down" → „am Switch leuchtet nichts".</li><li><strong>Füllwörter und Floskeln</strong>: *irgendwie, quasi, halt, eben, sozusagen, eventuell vielleicht, wie gesagt, leider leider*. Ein einziges „leider" ist erlaubt, wenn es echt klingt.</li><li><strong>Lösungsandeutungen</strong>: „wahrscheinlich ist der Switch kaputt" (falsche Fährte ist erlaubt, aber nie als <strong>richtige</strong> Deutung).</li><li><strong>Anglizismen und Werbesprache.</strong></li></ul>
+<h2 id="3-erwunscht">3 · Erwünscht</h2>
+<ul><li><strong>Der Kunde klingt wie ein Mensch</strong> und wie <strong>sein</strong> Betrieb: Bäckerei herzlich und direkt, Praxis höflich und sachlich, Büro nüchtern, Autohaus technisch, Mittelstand knapp. Der Ton darf <strong>je Kunde</strong> wechseln — innerhalb eines Auftrags bleibt er gleich.</li><li><strong>Geräte- und Ortsnamen aus dem Auftragsnetz</strong> dürfen fallen (Kasse, Drucker, Behandlungsraum, Lager) — sie gehören zur Beobachtung.</li><li><strong>Eigennamen der Ansprechpartner</strong> aus der Kundenakte (Vorname genügt), wenn es natürlich klingt.</li><li><strong>Präzise Beobachtungen statt Adjektive</strong>: „dreimal neu gestartet" schlägt „schon oft probiert".</li><li><strong>Der Titel</strong> bleibt kurz (15–46 Zeichen), konkret, ohne Fachwort, gern mit dem Charme der bestehenden Sammlung („Der Drucker ist beleidigt"). Kein Ausrufezeichen-Stakkato.</li></ul>
+<h2 id="4-was-sich-nicht-andert">4 · Was sich NICHT ändert</h2>
+<ul><li><strong>IDs, <code>netz</code>, <code>ziele</code>, <code>skills</code>, <code>stufe</code>, <code>art</code>, <code>quelle</code></strong> — die Technik hinter dem Auftrag bleibt <strong>unangetastet</strong>. Es wird <strong>nur Text</strong> geändert.</li><li><strong>Die Reihenfolge</strong> der Aufträge in der Datei.</li><li><strong>Der Charakter</strong> des Auftrags: wer ihn löst, muss weiterhin <strong>dieselbe</strong> Störung beheben.</li></ul>
+<h2 id="5-prufung-messbar-tools-texte-messen-js">5 · Prüfung (messbar, <code>tools/texte-messen.js</code>)</h2>
+<p>Nach dem Umschreiben muss die Messung zeigen:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Prüfung</th><th>Soll</th></tr></thead><tbody><tr><td>Symptomlänge</td><td><strong>180–420 Zeichen</strong> (kein Auftrag darunter)</td></tr><tr><td>Sätze je Symptom</td><td><strong>2–4</strong></td></tr><tr><td>Zeitmarke im Text</td><td>vorhanden (<code>seit</code>, <code>gestern</code>, <code>heute</code>, <code>nach dem</code>, <code>beim</code>, <code>letzte Woche</code> …)</td></tr><tr><td>Folge im Text</td><td>vorhanden („können nicht", „steht still", „müssen warten", „geht nicht raus" …)</td></tr><tr><td>Versuch im Text</td><td>vorhanden („neu gestartet", „probiert", „getauscht", „gefragt", „gezogen" …)</td></tr><tr><td>Ursachenwörter</td><td><strong>0</strong> (Liste in § 2)</td></tr><tr><td>Titel</td><td>15–46 Zeichen</td></tr><tr><td>Doppelungen</td><td>0 wörtliche Sätze über Aufträge hinweg</td></tr></tbody></table></div>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>
