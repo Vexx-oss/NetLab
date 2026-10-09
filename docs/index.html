@@ -1768,7 +1768,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .dialog{width:min(720px, 100%); max-height:calc(100vh - 48px); display:flex; flex-direction:column; border-radius:18px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
   transform:translateY(8px) scale(.99); transition:transform var(--dauer) ease}
 .dialog-huelle.da .dialog{transform:none}
-.dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line)}
+.dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line); cursor:grab; touch-action:none}
+.dialog-kopf.zieht{cursor:grabbing}
 .dialog-kopf h2{font-size:22px; font-weight:800}
 .dialog-zu{margin-left:auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
 .dialog-inhalt{overflow:auto; padding:8px 22px 22px}
@@ -1982,7 +1983,19 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .lb-auftrag{container-type:inline-size}
 @container (max-width:700px){ .am-kunde{display:none} .am-lesen{font-size:0; gap:0; padding:0 11px} .am-lesen .sym{margin:0} }
 @container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .sp-kunde-sym{display:none} }
-.am-mappe{position:absolute; top:100%; left:12px; z-index:30; width:min(560px, calc(100% - 24px)); max-height:min(70vh, 520px); display:flex; flex-direction:column;
+/* `--am-kopfraum` ist der Kopfraum unter der Werkzeugleiste der Fläche (`--leiste-h`, gemessen in
+   src/ui/editor.js). Ohne ihn liegt der Reiter „Brief/Ziele/Plan" exakt unter der schwebenden
+   Leiste (gemessen 09.10.2026: Mappen-Reiter y=120–164, Leiste y=121–169) – und durch deren
+   Lücken schien der Text durch („Tools überlappen Text", Rückmeldung des Nutzers). Die Mappe
+   bleibt dabei an der Auftragsleiste hängen; nur ihr Inhalt beginnt unter der Leiste.
+   Rechnung mit den gemessenen Zahlen: Leistenoberkante 10 px + Höhe `--leiste-h` + 8 px Luft
+   (der sichtbare Abstand – er steht auf der Abstandsskala) minus 5 px, die die Mappe schon unter
+   der Auftragsleiste sitzt = `--leiste-h` + 13 px. Die Rechnung steht als eigene Größe, weil
+   `padding` nach der Hausregel R4 nur Skalenwerte tragen darf; die 48 px sind der Rückfall für
+   den Augenblick vor dem ersten Messen. */
+.am-mappe{--am-kopfraum:calc(var(--leiste-h, 48px) + 13px);
+  position:absolute; top:100%; left:12px; z-index:30; width:min(560px, calc(100% - 24px)); max-height:min(70vh, 520px); display:flex; flex-direction:column;
+  padding-top:var(--am-kopfraum);
   margin-top:6px; border-radius:16px; background:var(--panel); border:1px solid var(--line-2); border-top:4px solid var(--k, var(--accent)); box-shadow:var(--schatten, 0 16px 40px rgba(0,0,0,.4))}
 .am-mappe.rein{animation:am-rein var(--dauer) ease-out}
 @keyframes am-rein{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}
@@ -2477,8 +2490,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 <div id="app" aria-live="off"></div>
 <script>
 "use strict";
-const LABOR_VERSION = "2.0.3";
-const LABOR_BAU = "413adf41";
+const LABOR_VERSION = "2.0.4";
+const LABOR_BAU = "cfdc5185";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -25437,6 +25450,22 @@ UI.labor = (() => {
     Z.root.append(leiste, mitte, Z.el.dock);
     container.replaceChildren(Z.root);
 
+    /* Die Auftragsmappe hängt als Overlay unter der Auftragsleiste und überdeckt damit den
+       oberen Rand der Fläche – genau dort schwebt die Werkzeugleiste (`top:10px`, z-index 20).
+       Die Mappe liegt in `.lb-auftrag` (z-index 10) und kommt aus diesem Stapelkontext nicht
+       heraus; ihre 30 helfen ihr nicht. Gemessen am 09.10.2026 (1200x760): Werkzeugleiste
+       y=121–169, Mappen-Reiter y=120–164 – der Text lag exakt darunter und die Lücken der
+       Leiste ließen ihn durchscheinen („Tools überlappen Text", Rückmeldung des Nutzers).
+       Deshalb misst ein Beobachter die Höhe der Leiste und stellt sie als `--leiste-h` bereit;
+       `spiel.css` gibt der Mappe damit genau so viel Kopfraum, dass ihr Inhalt darunter beginnt.
+       Gemessen statt geschätzt: die Leiste ist bei grober Zeigereingabe 44 px hoch, sonst 48. */
+    const setzeLeisteHoehe = () => {
+      const hh = oben.offsetHeight;
+      if (hh) Z.root.style.setProperty("--leiste-h", hh + "px");
+    };
+    setzeLeisteHoehe();
+    if (typeof ResizeObserver !== "undefined") new ResizeObserver(setzeLeisteHoehe).observe(oben);
+
     if (typeof ResizeObserver !== "undefined") {
       let alt = null;
       new ResizeObserver(() => {
@@ -25612,28 +25641,62 @@ UI.labor = (() => {
     Z.geplant = true;
     requestAnimationFrame(() => { Z.geplant = false; zeichnen(); });
   }
+  /* Ein Fehler beim Zeichnen darf NIE die Zeichnung des VORIGEN Auftrags stehen lassen. Deshalb:
+     erst leeren, dann in EINEM Schutz zeichnen. Scheitert es, ist die Fläche leer UND der Fehler steht
+     als Hinweis darauf (`.lb-hinweis`, aria-live) — statt stillschweigend der alten Topologie
+     (Befund des Nutzers: „nur die Auftragszeile oben wechselt, die Fläche nicht"). */
+  function zeichenFehler(e){
+    if (!Z.el.hinweis) return;
+    Z.zeichenFehlerAktiv = true;
+    Z.el.hinweis.textContent = "Die Fläche ließ sich nicht zeichnen: " + ((e && e.message) || e || "unbekannter Fehler") + " – bitte den Auftrag neu öffnen.";
+  }
   function zeichnen(){
     if (!Z.svg || !Z.netz || !Z.root?.isConnected) return;
     const netz = Z.netz, ebene = UI.ebenen.aktuell;
-    Z.root.dataset.ebene = ebene;
-    const eb = UI.ebenen.LISTE.find(l => l.id === ebene), et = Z.el.ansicht?.querySelector(".lb-ansicht-text");
-    if (et) et.textContent = eb ? eb.name : ebene;
-    Z.warn = new Map();
-    try { for (const w of Modell.pruefen(netz)) { if (!Z.warn.has(w.geraet)) Z.warn.set(w.geraet, []); const l = Z.warn.get(w.geraet); if (!l.includes(w.text)) l.push(w.text); } }
-    catch (e) { console.error("Modell.pruefen", e); }
-    Z.ohne = UI.ebenen.zonen(netz).ohne;
-    versatzBerechnen();
+    /* ZUERST leeren: ab hier steht keine alte Topologie mehr auf der Fläche. */
     for (const n of ["zonen", "kabel", "geraete", "karten"]) Z.s[n].replaceChildren();
     Z.gEl.clear(); Z.kEl.clear();
-    if (ebene === "ip") UI.ebenen.zeichneZonen(Z.s.zonen, netz, pos);
-    for (const k of netz.kabel) { const el = kabelGruppe(k); Z.kEl.set(k.id, el); Z.s.kabel.append(el); }
-    for (const g of Object.values(netz.geraete)) { const el = geraetGruppe(g); Z.gEl.set(g.id, el); Z.s.geraete.append(el); }
-    Z.karten = UI.ebenen.zeichneKarten(Z.s.karten, netz, pos, ebene);
-    Z.el.leer.hidden = Object.keys(netz.geraete).length > 0;
-    if (Z.hover && !netz.geraete[Z.hover]) Z.hover = null;
-    F.hoverZeichnen?.();
-    knoepfeAktualisieren();
+    try {
+      Z.root.dataset.ebene = ebene;
+      const eb = UI.ebenen.LISTE.find(l => l.id === ebene), et = Z.el.ansicht?.querySelector(".lb-ansicht-text");
+      if (et) et.textContent = eb ? eb.name : ebene;
+      Z.warn = new Map();
+      try { for (const w of Modell.pruefen(netz)) { if (!Z.warn.has(w.geraet)) Z.warn.set(w.geraet, []); const l = Z.warn.get(w.geraet); if (!l.includes(w.text)) l.push(w.text); } }
+      catch (e) { console.error("Modell.pruefen", e); }
+      Z.ohne = UI.ebenen.zonen(netz).ohne;
+      versatzBerechnen();
+      if (ebene === "ip") UI.ebenen.zeichneZonen(Z.s.zonen, netz, pos);
+      for (const k of netz.kabel) { const el = kabelGruppe(k); Z.kEl.set(k.id, el); Z.s.kabel.append(el); }
+      for (const g of Object.values(netz.geraete)) { const el = geraetGruppe(g); Z.gEl.set(g.id, el); Z.s.geraete.append(el); }
+      Z.karten = UI.ebenen.zeichneKarten(Z.s.karten, netz, pos, ebene);
+      Z.el.leer.hidden = Object.keys(netz.geraete).length > 0;
+      if (Z.hover && !netz.geraete[Z.hover]) Z.hover = null;
+      F.hoverZeichnen?.();
+      knoepfeAktualisieren();
+      if (Z.zeichenFehlerAktiv && Z.el.hinweis) { Z.el.hinweis.textContent = ""; Z.zeichenFehlerAktiv = false; }
+    } catch (e) {
+      console.error("Zeichnen", e);
+      zeichenFehler(e);
+    }
   }
+  /* Zeigt die Fläche wirklich das geladene Netz? Merkmal sind die `data-id` der gezeichneten Geräte
+     gegen `Z.netz.geraete` (Vorgabe der Leitung). */
+  function zeigtGeladenesNetz(){
+    if (!Z.svg || !Z.netz || !Z.root?.isConnected) return false;
+    const gezeichnet = new Set([...Z.s.geraete.querySelectorAll("g[data-id]")].map(g => g.getAttribute("data-id")));
+    const soll = Object.keys(Z.netz.geraete);
+    return soll.length > 0 && gezeichnet.size === soll.length && soll.every(id => gezeichnet.has(id));
+  }
+  /* Ein wieder sichtbar gewordenes Labor zieht nach: `laden()` zeichnet nicht, wenn die Ansicht gerade
+     nicht da ist (`Z.root?.isConnected`), und `zeigen()`/`wieder()` decken nur ihre eigenen Wege ab.
+     Der Haken hängt am Bus-Ereignis „ansicht" (app.js:102) — ohne Fremdeingriff in app.js. */
+  function nachziehen(){
+    if (!Z.netz || !Z.svg || !Z.root?.isConnected) return;
+    if (zeigtGeladenesNetz()) return;
+    zeichnen();
+    einpassen(false);
+  }
+  Bus.an("ansicht", name => { if (name === "labor") requestAnimationFrame(() => nachziehen()); });
   function knoepfeAktualisieren(){
     const v = Z.verlauf; if (!v || !Z.el.zurueck) return;
     const l = v.liste || [];
@@ -32619,6 +32682,40 @@ UI.app = (() => {
     const kasten = h("div", {class: "dialog " + klasse, role: "dialog", "aria-modal": "true", "aria-label": titel},
       h("div", {class: "dialog-kopf"}, h("h2", {}, titel), zu), h("div", {class: "dialog-inhalt"}, inhalt));
     const huelle = h("div", {class: "dialog-huelle", onpointerdown: e => { if (e.target === huelle) dialogZu(); }}, kasten);
+    /* Ziehen am KOPF (Nutzerbefund: der Auftragsdialog stand starr in der Mitte und verdeckte genau
+       die Fläche, die man beim Lesen sehen will). Pointer-Events — Maus, Finger und Stift gleich;
+       NICHT am Inhalt, sonst könnte man Text nicht mehr markieren. Geklemmt, damit kein Dialog aus
+       dem sichtbaren Bereich geschoben werden kann, und ohne gemerkte Lage: jeder Dialog startet
+       wieder mittig (deterministisch), weil hier jedes Mal ein frischer Kasten entsteht.
+       `transform` statt `left/top`: kein Layout-Sprung, die Hülle bleibt die Zentrierung. */
+    const kopf = kasten.querySelector(".dialog-kopf");
+    if (kopf) kopf.addEventListener("pointerdown", e => {
+      if (e.target.closest && e.target.closest("button")) return;      /* der Schließen-Knopf bleibt ein Knopf */
+      if (typeof e.clientX !== "number" || !kasten.getBoundingClientRect) return;
+      e.preventDefault();                                             /* keine Textauswahl beim Ziehen */
+      const start = {x: e.clientX, y: e.clientY};
+      const basis = kasten.getBoundingClientRect();                   /* die zentrierte Grundlage */
+      const rand = 12, vw = () => (typeof innerWidth === "number" ? innerWidth : 0), vh = () => (typeof innerHeight === "number" ? innerHeight : 0);
+      const grenzen = () => ({minX: rand - basis.left, maxX: vw() - rand - basis.right,
+                              minY: rand - basis.top, maxY: vh() - rand - basis.bottom});
+      const bewegen = ev => {
+        const b = grenzen();
+        const dx = Math.max(b.minX, Math.min(b.maxX, ev.clientX - start.x));
+        const dy = Math.max(b.minY, Math.min(b.maxY, ev.clientY - start.y));
+        kasten.style.transform = `translate(${Math.round(dx)}px, ${Math.round(dy)}px)`;
+      };
+      const loslassen = () => {
+        kopf.removeEventListener("pointermove", bewegen);
+        kopf.removeEventListener("pointerup", loslassen);
+        kopf.removeEventListener("pointercancel", loslassen);
+        kopf.classList.remove("zieht");
+      };
+      kopf.setPointerCapture?.(e.pointerId);
+      kopf.classList.add("zieht");
+      kopf.addEventListener("pointermove", bewegen);
+      kopf.addEventListener("pointerup", loslassen);
+      kopf.addEventListener("pointercancel", loslassen);
+    });
     huelle.addEventListener("keydown", e => {
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); dialogZu(); }
       if (e.key === "Tab") {         /* Fokus im Dialog halten */

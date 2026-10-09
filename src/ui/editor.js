@@ -105,6 +105,22 @@ UI.labor = (() => {
     Z.root.append(leiste, mitte, Z.el.dock);
     container.replaceChildren(Z.root);
 
+    /* Die Auftragsmappe hängt als Overlay unter der Auftragsleiste und überdeckt damit den
+       oberen Rand der Fläche – genau dort schwebt die Werkzeugleiste (`top:10px`, z-index 20).
+       Die Mappe liegt in `.lb-auftrag` (z-index 10) und kommt aus diesem Stapelkontext nicht
+       heraus; ihre 30 helfen ihr nicht. Gemessen am 09.10.2026 (1200x760): Werkzeugleiste
+       y=121–169, Mappen-Reiter y=120–164 – der Text lag exakt darunter und die Lücken der
+       Leiste ließen ihn durchscheinen („Tools überlappen Text", Rückmeldung des Nutzers).
+       Deshalb misst ein Beobachter die Höhe der Leiste und stellt sie als `--leiste-h` bereit;
+       `spiel.css` gibt der Mappe damit genau so viel Kopfraum, dass ihr Inhalt darunter beginnt.
+       Gemessen statt geschätzt: die Leiste ist bei grober Zeigereingabe 44 px hoch, sonst 48. */
+    const setzeLeisteHoehe = () => {
+      const hh = oben.offsetHeight;
+      if (hh) Z.root.style.setProperty("--leiste-h", hh + "px");
+    };
+    setzeLeisteHoehe();
+    if (typeof ResizeObserver !== "undefined") new ResizeObserver(setzeLeisteHoehe).observe(oben);
+
     if (typeof ResizeObserver !== "undefined") {
       let alt = null;
       new ResizeObserver(() => {

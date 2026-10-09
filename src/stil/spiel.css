@@ -28,7 +28,19 @@
 .lb-auftrag{container-type:inline-size}
 @container (max-width:700px){ .am-kunde{display:none} .am-lesen{font-size:0; gap:0; padding:0 11px} .am-lesen .sym{margin:0} }
 @container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .sp-kunde-sym{display:none} }
-.am-mappe{position:absolute; top:100%; left:12px; z-index:30; width:min(560px, calc(100% - 24px)); max-height:min(70vh, 520px); display:flex; flex-direction:column;
+/* `--am-kopfraum` ist der Kopfraum unter der Werkzeugleiste der Fläche (`--leiste-h`, gemessen in
+   src/ui/editor.js). Ohne ihn liegt der Reiter „Brief/Ziele/Plan" exakt unter der schwebenden
+   Leiste (gemessen 09.10.2026: Mappen-Reiter y=120–164, Leiste y=121–169) – und durch deren
+   Lücken schien der Text durch („Tools überlappen Text", Rückmeldung des Nutzers). Die Mappe
+   bleibt dabei an der Auftragsleiste hängen; nur ihr Inhalt beginnt unter der Leiste.
+   Rechnung mit den gemessenen Zahlen: Leistenoberkante 10 px + Höhe `--leiste-h` + 8 px Luft
+   (der sichtbare Abstand – er steht auf der Abstandsskala) minus 5 px, die die Mappe schon unter
+   der Auftragsleiste sitzt = `--leiste-h` + 13 px. Die Rechnung steht als eigene Größe, weil
+   `padding` nach der Hausregel R4 nur Skalenwerte tragen darf; die 48 px sind der Rückfall für
+   den Augenblick vor dem ersten Messen. */
+.am-mappe{--am-kopfraum:calc(var(--leiste-h, 48px) + 13px);
+  position:absolute; top:100%; left:12px; z-index:30; width:min(560px, calc(100% - 24px)); max-height:min(70vh, 520px); display:flex; flex-direction:column;
+  padding-top:var(--am-kopfraum);
   margin-top:6px; border-radius:16px; background:var(--panel); border:1px solid var(--line-2); border-top:4px solid var(--k, var(--accent)); box-shadow:var(--schatten, 0 16px 40px rgba(0,0,0,.4))}
 .am-mappe.rein{animation:am-rein var(--dauer) ease-out}
 @keyframes am-rein{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}

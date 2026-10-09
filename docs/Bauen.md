@@ -188,8 +188,8 @@ Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferung
 legt das Release mit den Anhängen an.
 
 ```bash
-git tag -a v2.0.3 -m "Netzwerk-Labor 2.0.3"
-git push origin v2.0.3
+git tag -a v2.0.4 -m "Netzwerk-Labor 2.0.4"
+git push origin v2.0.4
 ```
 
 Nach etwa einer Minute steht das Release unter
