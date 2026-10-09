@@ -15,9 +15,11 @@ status: Übergabezettel — bewusst kurz. Jüngster Stand (Fassung 2.0.0, noch n
 
 ## 1 · Wo wir stehen (in einem Satz)
 
-Das **2.0-Fundament ist gebaut, gemessen und als Fassung 2.0.0 verpackt** — aber **noch nicht
-veröffentlicht**: die Nummer steht in allen Erzeugnissen, Push und Tag `v2.0.0` fehlen (nur mit
-ausdrücklicher Freigabe des Nutzers). Online ausgeliefert ist weiterhin 1.2.4.
+Das **2.0-Fundament ist gebaut und gemessen**, und die **Klassenraum-Stufe A+B** (der Öffnungsweg) ist
+**gebaut und gemessen**; alles zusammen ist als Fassung **2.0.0** verpackt — aber **noch nicht veröffentlicht**:
+die Nummer steht in allen Erzeugnissen, Push und Tag `v2.0.0` fehlen (nur mit ausdrücklicher Freigabe des
+Nutzers). Online ausgeliefert ist weiterhin 1.2.4. Die Stufen **C** (Live-Server) und **D** (QR) kommen
+nach **E6** später.
 
 ## 2 · Was in dieser Sitzung entstanden ist
 
@@ -40,6 +42,20 @@ ausdrücklicher Freigabe des Nutzers). Online ausgeliefert ist weiterhin 1.2.4.
 Dazu die **unabhängige Gegenprüfung** ([Review – 2.0-Fundament](<Review – 2.0-Fundament.md>)) und eine
 Abnahmedatei, die das Fundament im echten Fluss durchspielt (`tests/2.0-abnahme.test.js`).
 
+**Zweite Hälfte derselben Fassung: der Öffnungsweg (Klassenraum Stufe A+B).**
+
+| Was | Stand | Wo es steht |
+|---|---|---|
+| **Codec** — Auftragscode `NL-XXXX-XX`, Ergebnis-Code `E-XXXX-XXX`, Prüfzeichen, Kanonisierung, Abdruck (6 Zeichen), eingefrorene Tabellen **58/27** | gebaut, gemessen | `src/spiel/klassenraum-codec.js` |
+| **Verwaltung** — `Spiel.klassenraum` (16 Namen), Store-Schlüssel `klassenraum` (`fassung: 1`), Öffnungsweg `quelle: "klassenraum"` | gebaut, gemessen | `src/spiel/klassenraum.js` · `src/spiel/zustand.js` |
+| **Zwei Ansichten** — `klassenraum` (Lehrkraft: Code groß und kopierbar, Ampel, Block-Eingabe, ein Hausdialog) und `mitarbeit` (Azubi: Code eingeben, Tippfehler markiert) | gebaut, gemessen | `src/ui/klassenraum.js` · `src/stil/klassenraum.css` |
+| **Einhängen** — Startseiten-Zeile über den Bus-Haken, Ergebnis-Code als Toast über den Kanal `klassenraum` | gebaut, gemessen | Bus-Ereignisse `ansicht`/`zustand-geaendert`/`spiel-geladen`; `src/ui/hub.js` bleibt unberührt |
+| **Keine Bewertung · kein Server · kein QR** | entschieden; Stufe C/D offen | [`Architektur.md`](../Architektur.md) § 12.1/§ 12.2 |
+
+Der Vertrag steht in [`Architektur.md`](../Architektur.md) § 12/§ 12.1/§ 12.2; die Bau-Entscheidungen
+**L1–L5** und der entschiedene Punkt **O1** (die Platzzahl bleibt im Datei-Dialog, **kein** siebtes
+Bedienelement) stehen dort bzw. im [CHANGELOG](../CHANGELOG.md) § 2.0.0 „Klassenraum Stufe A+B".
+
 ## 3 · Was gerade GILT (nicht neu herleiten, sondern benutzen)
 
 **Prüfstand 2.0.0.** „Vom Lead gemessen" heißt: ich habe die Zahl nicht selbst erhoben, sondern aus dem
@@ -47,14 +63,19 @@ Lauf des Leads übernommen. „Selbst gemessen" heißt: in dieser Sitzung nachge
 
 | Prüfung | Ergebnis |
 |---|---|
-| `node tests/run.js` | **620/620 grün**, 70 Testdateien, 90 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| `sh tools/test.sh` (Endstand **mit** Klassenraum A+B) | **661/661 grün**, 74 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (Lead) |
+| dieselbe Messung am Ende des Fundaments | 620/620 grün, 70 Testdateien, 90 Module (selbst gemessen) |
 | dieselbe Messung **vor** der Sitzung | 471/479 grün, **8 rot**, 55 Testdateien, 84 Module (Nullmessung des Leads) |
-| `tools/ethos.py` · `tools/klassen.py` · `tools/sim-stand.js` | GRÜN · **0** Klassen ohne CSS-Regel · Simulation **unverändert** (12/12) (selbst gemessen) |
-| `python bauen.py` | **126 Module, 2133 KB**, Version **2.0.0** (Lead) |
-| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.720.252 B**, SHA256 `3822D6B5…F6`, byte-gleich, 0 Außenverweise (Lead; Bytes und Hash selbst nachgerechnet) |
-| Android-APK 2.0.0 | **1.127.964 B**, SHA256 `DB11BF88…AC1`, `versionCode` 20001, keine Rechte (Lead; Bytes und Hash selbst nachgerechnet) |
-| `tools/seite.py --pruefen` | GRÜN: 39 Dokumente (Lead) |
-| `tools/seite-pruefen.py` | GRÜN; **online liegt noch 1.2.4** (nicht gepusht) (Lead) |
+| `node tests/run.js klassenraum` | **67/67 grün** — der richtige Filter; `--klassenraum` liefert **0/0** (Befund K2) (Lead) |
+| `tools/ethos.py` · `tools/klassen.py` · `tools/sim-stand.js` | GRÜN · **0** Klassen ohne CSS-Regel · Simulation **unverändert** (Lead) |
+| `python bauen.py` | **128 Module, 2202 KB**, Version **2.0.0** (Lead) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.791.782 B**, SHA256 `D7D45F13…A4A2`, byte-gleich, 0 Außenverweise (Lead; Bytes und Hash selbst nachgerechnet) |
+| Android-APK 2.0.0 | **1.148.444 B**, SHA256 `A9526120…D988` (Lead; Bytes und Hash selbst nachgerechnet) |
+| `tools/seite.py --pruefen` | GRÜN: 39 Dokumente — nach dem Doku-Neubau **40** (Lead) |
+| `tools/seite-pruefen.py` | in dieser Runde **nicht** gemessen |
+
+**Klassenraum Stufe A+B ist gemessen.** Die Tabelle zeigt den Endstand **nach** dieser Stufe; darunter
+stehen die Zeilen „am Ende des Fundaments" und „vor der Sitzung", damit der Weg sichtbar bleibt.
 
 **Vier Regeln, die diese Sitzung gesetzt hat:**
 
@@ -83,7 +104,7 @@ Lauf des Leads übernommen. „Selbst gemessen" heißt: in dieser Sitzung nachge
 | **c** | **Lokal committen** — vorher die Zeilenenden prüfen (Byte-Vergleich, Schritt 6 des Protokolls) | offen (Lead) |
 | **d** | **Push und Tag `v2.0.0`** — je Handlung **einzeln** freigeben lassen; danach Schritt 8: nachmessen, was wirklich online steht | offen, entscheidet der Nutzer |
 | **e** | **`.exe` neu bauen** (Rust) — in dieser Sitzung **nicht** geschehen; die APK ist gebaut | offen, wenn gewünscht |
-| **f** | **Klassenraum — Öffnungsweg:** **Stufe A+B (Code-Erzeugung, Lehrkräfte-Ansicht, „Code eingeben") ist NOCH NICHT gebaut**; der Rust-Server und der QR-Weg kommen nach **E6** später. Die **Annahmehälfte** (Umleitung nach E2) ist mit 2.0.0 fertig | offen — Entscheidungen in [`Architektur.md`](../Architektur.md) § 12.1 |
+| **f** | **Klassenraum:** Stufe **A+B** (Codec, Lehrkräfte-Ansicht, „Code eingeben") ist **gebaut**; **Stufe C** (Live-Server) und **D** (QR) kommen nach **E6** später; **O1** (Klassenstärke: sechstes oder siebtes Bedienelement) entscheidet die Leitung | A+B gebaut, C/D offen — [`Architektur.md`](../Architektur.md) § 12.1/§ 12.2 |
 
 ## 5 · Was entschieden ist — und was nur der Nutzer entscheiden kann
 
@@ -107,6 +128,11 @@ Offen bleibt nur:
   Bildschirmfoto und keine Pixelmessung dieser Fassung.
 * **Die `.exe` wurde nicht neu gebaut** und nicht gestartet — ihre Fassungsnummer ist **nicht gemessen**.
 * **Keine echte Unterrichtsstunde**, kein Test mit einem Menschen.
+* **Klassenraum Stufe C und D** (Live-Server, QR) sind **nicht gebaut** — nach E6 später.
+* **O1 ist entschieden:** die Platzzahl bleibt im Datei-Dialog, es gibt **kein** siebtes Bedienelement;
+  ohne Platzzahl sagt die Ampel ausdrücklich „Plätze nicht eingestellt".
+* Die **Klassenraum-Stufe A+B** ist gemessen (661/661; Filter `klassenraum` 67/67) — aber **kein
+  Browserlauf** hat die zwei neuen Ansichten gesehen (`tools/rauch.py` kennt sie nicht).
 * Die **online** veröffentlichte Seite liefert weiterhin 1.2.4, weil nicht gepusht wurde.
 * Die Testzahl **620** kommt aus dem Lauf; statisch gezählt sind es 613 `pruefe(`-Stellen in 70 Testdateien
   — die Differenz entsteht durch Tests in Schleifen und ist **nicht aufgeklärt**.

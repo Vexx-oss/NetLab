@@ -53,7 +53,7 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`entwicklung/Review – Testqualität.md`](<entwicklung/Review – Testqualität.md>) | Die **Mutationsprobe**: künstlich eingebaute Fehler, und wie viele Tests sie fangen. Fünf Mutanten gemessen, alle erkannt; dazu die Lücke in „Wirkung vor Grün". |
 | [`entwicklung/Review – Betrieb.md`](<entwicklung/Review – Betrieb.md>) | Spielstand-Migration v:2 → v:3 in elf Punkten, Byte-Gleichheit der Erzeugnisse, und warum die Fassung gezogen werden musste. |
 | [`entwicklung/Review – Betrieb-Werkzeuge.md`](<entwicklung/Review – Betrieb-Werkzeuge.md>) | Die Prüfwerkzeuge selbst: welches misst was, und der Befund, dass der Rauchtest eine feste Ansichtsliste führte — die neue Ansicht fehlte darin. |
-| [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31–§ 33 | Der Bau der Hilfestellung, die Auslieferung 1.2.4 und (in § 33) das **2.0-Fundament** — inklusive dem, was bewusst **nicht** gebaut und was **verworfen** wurde. |
+| [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31–§ 34 | Der Bau der Hilfestellung, die Auslieferung 1.2.4, (in § 33) das **2.0-Fundament** und (in § 34) der **Klassenraum-Öffnungsweg** — inklusive dem, was bewusst **nicht** gebaut und was **verworfen** wurde. |
 
 ## Fahrplan 1.3 / 2.0 — Entscheidungsvorlage (09.10.2026)
 
@@ -83,11 +83,17 @@ Fassung wurde auf **2.0.0** gezogen und gebaut; **veröffentlicht ist sie noch n
 Freigabe). Die gemessenen Zahlen stehen im [CHANGELOG](CHANGELOG.md) § 2.0.0, die Begründungen und die
 verworfenen Versuche im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 33.
 
+Die **zweite Hälfte derselben Fassung** ist der **Öffnungsweg (Klassenraum Stufe A+B)**: der Auftragscode,
+die zwei Ansichten für Lehrkraft und Azubi, die Startseiten-Zeile und der Ergebnis-Code als Toast — **ohne
+Bewertung, ohne Server, ohne QR**; die Stufen C und D kommen später. Bauweg und verworfene Versuche stehen
+im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 34.
+
 | Datei | Wofür |
 |---|---|
 | [`entwicklung/Übergabe – Stand 2.0-Fundament.md`](<entwicklung/Übergabe – Stand 2.0-Fundament.md>) | **Für den Neustart.** Der jüngste Übergabezettel, bewusst kurz: was diese Sitzung gebaut hat, welche vier Regeln jetzt gelten, was als Nächstes zu tun ist. Ein neuer Lauf liest zuerst diese Datei. |
 | [`entwicklung/Befund – Lernmotor-Falle.md`](<entwicklung/Befund – Lernmotor-Falle.md>) | Die Falle in `fremd/lernmotor.js` mit Datei:Zeile — was auf unserer Seite behoben ist, was nur in der FISI-Spielhalle behoben werden kann, samt Änderungsvorschlag. Vorlage für den Nutzer, nicht ausgeführt. |
 | [`entwicklung/Review – 2.0-Fundament.md`](<entwicklung/Review – 2.0-Fundament.md>) | Die **unabhängige Gegenprüfung** des Fundaments: jede Behauptung der Teammates mit eigenem Befehl oder Zitat nachgemessen, mit Restzweifeln und dem, was nicht geprüft werden konnte. |
+| [`entwicklung/Review – Klassenraum A+B.md`](<entwicklung/Review – Klassenraum A+B.md>) | Die **unabhängige Gegenprüfung** der Klassenraum-Stufen A und B (Codec, Öffnungsweg, die zwei Ansichten) mit eigenen Messungen — und ausdrücklich dem, was **nicht** geprüft werden konnte. |
 
 ## Wie dieses Verzeichnis aufgeräumt wurde
 

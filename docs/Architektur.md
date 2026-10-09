@@ -261,7 +261,7 @@ Bus-Ereignisse: `netz-geaendert`, `ticket-neu`, `ticket-geloest`, `zustand-geaen
 
 | Punkt | Vertrag |
 |---|---|
-| Schlüssel | `labor` (Spielstand), `einst` (Einstellungen), `sandbox` (freies Labor), `labor-sicherung` (rollierende Zweitsicherung). Geschrieben wird der **ganze** Speicher als ein JSON unter dem einen Schlüssel `netzwerk-labor` — im Browser und in der Android-Fassung in `localStorage`, im Desktop-Programm über Tauri in `spielstand.json` |
+| Schlüssel | `labor` (Spielstand), `einst` (Einstellungen), `sandbox` (freies Labor), `labor-sicherung` (rollierende Zweitsicherung), **`klassenraum`** (Klassenraum-Sitzung, `fassung: 1` — Nachtrag 09.10.2026, § 12.2). Geschrieben wird der **ganze** Speicher als ein JSON unter dem einen Schlüssel `netzwerk-labor` — im Browser und in der Android-Fassung in `localStorage`, im Desktop-Programm über Tauri in `spielstand.json`. Neue Schlüssel brauchen **keine** Änderung an `kern/basis.js` — die Speicher-Map ist frei |
 | Entprellung | **genau eine**: `SPEICHER.entprellung = 1500 ms` (`kern/basis.js`). `Spiel.speichern()` markiert nur „schmutzig"; geschrieben wird 1500 ms nach der **letzten** Änderung. `Spiel.AUTOSPEICHERN_MS = 0` — die frühere zweite Schicht (400 ms in `spiel/ticket.js`) ist entfallen |
 | Sofort schreiben | `store.sofort()`; im Spiel `Spiel.sofortSpeichern()` (Rückgabe immer erfüllt — ein Fehler ist bereits gemeldet). Aufrufer: Auftragsabschluss `spiel/abnahme.js` (bestanden **und** nicht bestanden), Ticket öffnen `spiel/ticket.js`, Käufe `spiel/wirtschaft.js` · `spiel/werkzeuge.js` · `spiel/playbooks.js`, Meilensteine `spiel/karriere.js` (Aufstieg, Fest gesehen), App in den Hintergrund `ui/start.js` (`pagehide`, `beforeunload`, `visibilitychange` → `hidden`) |
 | Kennzeichen | `store.stand()` → `{art:"schreibt"\|"gesichert"\|"fehler", fehler, zeit}`. Der Bus meldet jede echte Änderung als `speicher-stand`, ein Fehler zusätzlich als `speicher-fehler`. Die Kopfzeile zeigt daraus „… sichert / ✓ gesichert / ⚠ nicht gesichert" (`ui/app.js`, `role="status"`, kein Klickziel, keine Animation; unter 380 px Breite Kurzform) |
@@ -865,6 +865,67 @@ ausschließlich für den Lernstand des Einzelnen. Damit entfällt die „eigene 
 die der Fahrplan als Alternative genannt hatte — **die Umleitung nach E2 ist die ganze Lösung.** Das
 ausgelieferte Verhalten 2.0.0 erfüllt diese Entscheidung bereits; wer später doch bewerten will, ändert
 einen Vertrag und nicht eine Einstellung.
+
+### 12.2 Bau-Entscheidungen (09.10.2026)
+
+Für den Bau der Stufen A und B hat die Leitung fünf Punkte entschieden, an denen die Dokumente sich
+widersprechen oder älter sind als der Code. Sie gelten für die Umsetzung; die Dokumente A–D werden
+**nicht** nachgezogen (sie sind Protokolle), sondern hier zusammengeführt.
+
+| | Streitpunkt | Entscheidung | Begründung |
+|---|---|---|---|
+| **L1** | `A – Codec…` § 5 sagt „Auftrag ist trotzdem im Postfach sichtbar" | **E1 gilt: unsichtbar** | E1 ist jünger (Fahrplan § 7) und im Code umgesetzt (`postfach.js:137`, `hub.js:58`, Ereignistakt). `Spiel.instanz(iid)` und `Spiel.oeffnen(iid)` finden den Auftrag weiterhin |
+| **L2** | `plaetze` steht in Spez. § 2.5 + L6, aber **nicht** in `A § 7.1` („genau diese 14 Felder") | **`plaetze` kommt dazu** (`sitzung.plaetze`, `0`/`null` = nicht eingestellt, sonst 1..31) | Die Ampel der Lehrkraft braucht den Nenner „wie viele Plätze"; ohne ihn kann sie nie grün werden |
+| **L3** | `ohneFlow: true` (A, Spez. § 2.6, § 12) gegen `postfach.js:84`, das die Quelle selbst ausnimmt | **beides setzen** | Der Schalter schadet nicht und hält den geschriebenen Vertrag; die Quelle bleibt zusätzlich geschützt |
+| **L4** | Dokument **B** und **D** widersprechen sich beim Ablauf der Lehrkraft (Knopf „Code anzeigen" vs. „Sitzung anlegen"; ein `textarea` vs. Einzelfeld; ein Knopf „Datei…" vs. zwei) | **B gilt** | D's Drehbuch ist mit der Regel R12 (höchstens 6 sichtbare Bedienelemente je Ansicht) nicht darstellbar; B ist die baubare Fassung |
+| **L5** | Wo der Ergebnis-Code erscheint | **als Toast mit Kopierknopf**, geankert am Bus-Kanal `klassenraum` — **keine** Änderung an `sp-ergebnis` | `B § 7.2` verbietet die dauerhafte Zeile ausdrücklich; der Kanal ist gebaut (`klassenraum.js:51`) |
+
+Dazu die Dateiaufteilung für den Bau (ein Schreiber je Datei): **`src/spiel/klassenraum-codec.js`**
+(reine Rechnung: Formate, Prüfzeichen, Kanonisierung, Abdruck, eingefrorene Tabellen) ·
+**`src/spiel/klassenraum.js`** (die **elf** Funktionen der Vertragstabelle § 12 + `plaetze`/`plaetzeSetzen`
+nach L6 + das vorhandene `abnehmen` + die Prüffläche `tabellen()` — zusammen **16 Namen**, gemessen an der
+Rückgabe der Datei) · **`src/ui/klassenraum.js`** + `src/stil/klassenraum.css` (die zwei Ansichten
+`klassenraum` und `mitarbeit`, Startseiten-Zeile, Einstellungsabschnitt, Toast) ·
+`tests/klassenraum-codec.test.js`, `tests/klassenraum.test.js`, `tests/ui-klassenraum.test.js`,
+`tests/klassenraum-abnahme.test.js`.
+
+**O1 — die Klassenstärke und das sechste Bedienelement (entschieden am 09.10.2026).** Dokument B § 2.1
+gibt der Lehrkräfte-Ansicht **sechs** sichtbare Bedienelemente (Regel R12 prüft höchstens sechs), B § 9.4
+verlangt für die Ampel zusätzlich die **Klassenzahl** — das wäre ein siebtes und würde `ethos.py --dom`
+rot machen. Entscheidung: **die Platzzahl sitzt im Datei-Dialog**, nicht als eigenes Element in der
+Ansicht; ist sie nicht gesetzt, sagt die Ampel ausdrücklich „Plätze nicht eingestellt", statt eine Zahl zu
+erfinden. Die Regel R12 wird **nicht** für diese Ansicht aufgeweicht.
+
+**Kein Server (Stufe C), kein QR (Stufe D), keine Bewertung** — so bleibt 2.0 ohne Netz und ohne Konto
+benutzbar. Die Startseiten-Zeile hängt an einem **Bus-Haken** (`Bus.an("ansicht")`), nicht an einem
+Eingriff in `src/ui/hub.js`.
+
+### 12.3 Stand der Umsetzung (09.10.2026, gemessen)
+
+| Prüfung | Ergebnis |
+|---|---|
+| `sh tools/test.sh` | **Exit 0** — `661/661 grün (74 Testdateien, 91 Module)`, `davon 0 übersprungen` |
+| `node tests/run.js klassenraum` | **67/67 grün** · Achtung: `--klassenraum` prüft **0 Fälle** (Filter nimmt das Argument wörtlich) |
+| `python tools/ethos.py` · `klassen.py` | **GRÜN** · **0 Klassen ohne CSS-Regel** (auch für das Präfix `kl-`) |
+| `node tools/sim-stand.js` | Simulation unverändert gegenüber dem Referenzstand |
+| `python tools/seite.py --pruefen` | GRÜN — 40 Dokumente, kein toter Verweis |
+| `python bauen.py` | **128 Module**, 2202 KB → `web/index.html`, Fassung **2.0.0** |
+| `docs/index.html` = `Netzwerk-Labor.html` | **byte-gleich**, 2 791 782 B, SHA256 `D7D45F13…A4A2`, 0 Außenverweise |
+| Android | `Netzwerk-Labor-2.0.0-Android.apk`, 1 148 444 B, SHA256 `A9526120…D988`, Signatur gültig |
+
+**Der Codec ist erschöpfend belegt** (gemessen von der Umsetzung, nicht abgeleitet): Auftragscode
+**1 048 576/1 048 576** Nutzlasten (2²⁰) bauen-lesen-rund, 0 Abweichungen; Ergebnis-Code
+**33 554 432/33 554 432** (2²⁵), 0 Abweichungen; 9 672 Ein-Zeichen-Ersetzungen und 384 Vertauschungen
+werden **ausnahmslos** als Prüfziffer-Fehler markiert. Die drei dokumentierten Beispiele `NL-HC3L-CS`,
+`NL-WTQJ-EF` und `E-KFWS-HZM` stimmen zeichengleich; das Formbeispiel `NL-4F7K-2Q` wird abgewiesen
+(richtig wäre `NL-4F7K-E3`). Determinismus: 274 Codes in zwei getrennten Prozessen identisch.
+
+**Nicht geprüft — ehrlich:** kein Browserlauf (damit auch **nicht** die Regel „höchstens 6 sichtbare
+Bedienelemente" im laufenden Programm; sie ist nur im Test am DOM gezählt), keine Bildschirmfotos, keine
+zwei echten Edge-Profile, keine echte Unterrichtsstunde, `.exe` nicht neu gebaut, Stufe C (Server) und
+D (QR) offen, Kennwert-Kollisionen (30 Bit) nicht gemessen. Die zwei Befunde der Gegenprüfung
+(`docs/entwicklung/Review – Klassenraum A+B.md`) sind aufgenommen: der Kommentar „24 von 27" im Codec ist
+richtiggestellt, der Abnahmebefehl ist hier korrekt genannt.
 
 ## 13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag
 

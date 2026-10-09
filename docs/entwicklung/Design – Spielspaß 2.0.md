@@ -1874,3 +1874,98 @@ bleibt, steht schon im Review: **591 von 593 grün heißt nicht fertig.**
 Zwölf Schreiber mit getrennten Schreibbereichen, ein Prüfer, der jede Zahl selbst nachzählt, und ein Lead,
 der fremde Dateien zusammenführt: Das war der Gegenversuch zum gescheiterten Schwarm vom 05.10.2026 — und
 der Grund, warum am Ende **eine** Zahl steht, die niemand schätzen musste: **620/620, 0 übersprungen.**
+
+---
+
+## 34 · Klassenraum Stufe A+B — der Öffnungsweg (09.10.2026)
+
+§ 33 hat das Fundament gebaut; **offen war der Öffnungsweg**. Der Vertrag
+[`Architektur.md`](../Architektur.md) § 12 sagte seit dem 07.10.2026 wörtlich: „Nicht gebaut ist der
+Öffnungsweg: es gibt im Produkt noch keine Code-Erzeugung, keine Lehrkräfte-Ansicht und keinen Weg ‚Code
+eingeben'." Diese Runde baut **Stufe A** (Codec: Formate, Prüfzeichen, Kanonisierung, Abdruck) und
+**Stufe B** (die zwei Ansichten und der Weg vom Code zum Auftrag). **Stufe C** (Live-Server) und
+**Stufe D** (QR) bleiben nach **E6** liegen — 2.0 muss ohne Netz und ohne Konto funktionieren.
+
+Grundlage sind die Entscheidungen des Nutzers (§ 12.1, E1–E8) und fünf **Bau-Entscheidungen der Leitung**
+(§ 12.2, L1–L5), die genau die Stellen auflösen, an denen sich die Dokumente A–D widersprechen oder
+älter sind als der Code. Die Dokumente A–D werden **nicht** nachgezogen — sie sind Protokolle.
+
+### Der Bauweg
+
+| Schritt | Was entstand | Warum so |
+|---|---|---|
+| **Codec** | `src/spiel/klassenraum-codec.js` — **reine Rechnung**, kein Store, kein DOM: Formate `NL-XXXX-XX` und `E-XXXX-XXX`, Prüfzeichen (mod 31 / mod 32), Kanonisierung, Abdruck (FNV-1a), eingefrorene Tabellen | Trennung von Rechnung und Verwaltung: der Codec ist ohne Spielstand prüfbar und in vier Testdateien direkt angreifbar |
+| **Verwaltung** | `src/spiel/klassenraum.js` — die öffentliche Fläche (`erzeugen`, `ausCode`, `sitzung`, `ergebnisCode`, `ergebnisLesen`, `ergebnisEintragen`, `exportieren`, `importieren`, `netzkennwert`, `tauglicheFertigkeiten`, `platz`/`platzSetzen`, `plaetze`/`plaetzeSetzen`, `abnehmen`, `tabellen`), Store, Öffnungsweg | ein Schreiber je Datei; `abnehmen` (die Annahmehälfte aus § 33) blieb unverändert darin |
+| **Speicher** | neuer Store-Schlüssel **`klassenraum`** (`fassung: 1`), fünfter neben `lern`, `labor`, `einst`, `sandbox`; eigenes Exportformat | eine Klassensitzung darf den Spielstand **nicht** anfassen: getrennte Schlüssel heißt getrennte Lebensdauer |
+| **Kanonisierung** | je Variante höchstens **64 Seeds** durchsuchen, den ersten spielbaren nehmen | ein Code muss auf **jedem** Gerät denselben Auftrag ergeben — auch bei generierten Fällen, ohne Zufall und ohne Uhr |
+| **Einfrieren** | Tabellenlängen **58** (Aufträge) und **27** (Fertigkeiten) sind Teil des Formats — **alle 27 tauglich**; „24 von 27" ist seit den drei Injektoren aus task-5 überholt (Befund **K1**: zwei Produktivkommentare sagen es noch) | Indizes außerhalb werden als `fassung`-Fehler **abgelehnt** statt still etwas anderes zu bauen; neue Aufträge nur **anhängen** |
+| **Oberfläche** | `src/ui/klassenraum.js` + `src/stil/klassenraum.css`: Ansichten `klassenraum` (Lehrkraft) und `mitarbeit` (Azubi), Ampel, Block-Eingabe, ein Hausdialog für Sichern/Einlesen | zwei Ansichten statt einer: die Lehrkraft sieht die Klasse, der Azubi nur seinen Auftrag |
+| **Einhängen** | Startseiten-Zeile über den **Bus-Haken** `Bus.an(...)` — Ereignisse `ansicht`, `zustand-geaendert`, `spiel-geladen` —, Ergebnis-Code über den Kanal `klassenraum` als Toast | **kein** Eingriff in `src/ui/hub.js`; der Vertrag L5 verlangt ausdrücklich den Kanal statt einer Änderung an `sp-ergebnis` |
+| **Keine Bewertung** | kein Notenwert, keine Punkte, keine Rangfolge, kein Vergleich zwischen Azubis | Entscheidung des Nutzers am 09.10.2026; damit entfällt die „eigene Auswertung statt eines Filters" — die Umleitung nach E2 ist die ganze Lösung |
+
+### Verworfen — und warum das hier steht
+
+1. **Die Probe `A-api.js` wurde NICHT kopiert.** Sie weicht an **zehn Stellen** vom Vertrag ab (Messung der
+   Leitung). Ein fertig aussehender Entwurf, der den Vertrag an zehn Stellen anders liest, ist gefährlicher
+   als eine leere Datei: er sieht geprüft aus. Gebaut wurde nach § 12 und § 12.2, nicht nach der Probe.
+2. **Die erste Fassung des Ergebnis-Codes im Abschlussfenster wurde zurückgenommen.** Sie stand als
+   dauerhafte Zeile im Ergebnisbildschirm — `B § 7.2` verbietet das ausdrücklich. Jetzt kommt der Code als
+   **Toast** über den Bus-Kanal (Entscheidung **L5**). *Lehre:* Eine Anzeige, die an der falschen Stelle
+   steht, ist kein kleiner Schönheitsfehler, sondern ein Vertragsbruch.
+3. **Der Abnahmebefehl aus Dokument D ist untauglich.** `node tests/run.js --klassenraum` benutzt
+   `--klassenraum` als **Namensfilter**, der in keinem Testnamen vorkommt; die Bilanzzeile zählt nur die
+   gefilterte Liste (`tests/run.js:53,60,66`) und meldet deshalb **0/0 grün** bei **Exit 0** — ein grüner
+   Lauf, der nichts geprüft hat. Genau die Bauart, gegen die `tests/harness.js` gebaut wurde. Richtig ist
+   der Filter `klassenraum` **ohne** Striche: **67 Fälle** (Prüfer, Review § 10 — Dokument D nennt 40).
+4. **Dokument D als Drehbuch wurde verworfen, B gilt** (Entscheidung **L4**): D verlangt ein `textarea`,
+   zwei getrennte Knöpfe und ein eigenes Overlay — mit der Regel **R12** (höchstens sechs sichtbare
+   Bedienelemente je Ansicht) ist das nicht darstellbar. B ist die baubare Fassung, D bleibt Protokoll.
+5. **Die alte Vertragszeile „Auftrag ist trotzdem im Postfach sichtbar"** (`A § 5`) **gilt nicht**
+   (Entscheidung **L1**): E1 ist jünger und im Code umgesetzt — Klassenraum-Aufträge sind unsichtbar wie
+   Training, `Spiel.instanz(iid)` und `Spiel.oeffnen(iid)` finden sie weiterhin.
+
+### O1 — gemessen, dann entschieden
+
+`B § 2.1` legt **sechs** Bedienelemente für die Lehrkräfte-Ansicht fest; `B § 9.4` verlangt für die
+Klassenstärke („wie viele Plätze") ein **siebtes**. Die Leitung hat entschieden: **die Platzzahl bleibt im
+Datei-Dialog** (`src/ui/klassenraum.js:208-217`), es gibt **kein siebtes Bedienelement** — R12 wird nicht
+aufgeweicht, und ohne eingestellte Platzzahl sagt die Ampel ausdrücklich „Plätze nicht eingestellt", statt
+eine Zahl zu erfinden. Der Vertrag § 12.2 trägt die Entscheidung.
+
+### Messpunkte
+
+| Prüfung | Ergebnis |
+|---|---|
+| `sh tools/test.sh` (**nach** dem Einbau, Lead) | **661/661 grün**, 74 Testdateien, 91 Module, **0 übersprungen**, Exit 0 |
+| derselbe Lauf **davor** | 620/620 grün, 70 Testdateien, 90 Module, 0 übersprungen (selbst gemessen, § 33) |
+| die vier neuen Testdateien (`klassenraum-codec`, `klassenraum`, `ui-klassenraum`, `klassenraum-abnahme`), Filter `klassenraum` (Lead) | **67/67 grün**; `--klassenraum` liefert **0/0** (Befund K2) |
+| `python tools/ethos.py` · `tools/klassen.py` · `node tools/sim-stand.js` (Lead) | **GRUEN** · **0** Klassen ohne CSS-Regel · Simulation **unverändert** |
+| `python bauen.py` (Lead) | **128 Module, 2202 KB**, Version **2.0.0** |
+| Einzeldatei · APK (Lead; Bytes und SHA256 nachgerechnet) | **2.791.782 B** / `D7D45F13…A4A2` · **1.148.444 B** / `A9526120…D988` |
+| Browser (`tools/rauch.py`, `tools/menueprobe.py`) für die neuen Ansichten | **nicht gelaufen** |
+| Zeilenenden der acht neuen Dateien | **alle LF, 0 CRLF** (vom Prüfer gemessen, Review § 11); `src/spiel/zustand.js` ist **vorbestehend** CRLF (Index-Arithmetik) — **kein** Bruch in dieser Runde |
+
+### Der Prüfer hat nachgemessen — und einen Kommentar widerlegt
+
+Der unabhängige Prüfer ([Review – Klassenraum A+B](<Review – Klassenraum A+B.md>)) hat den Codec gegen
+Dokument A nachgerechnet (zeichengleich), den Determinismus über den echten Weg bestätigt, E1 und „keine
+Bewertung" nachgemessen und **alle 16 Namen** der Schnittstelle mit einem Aufrufer belegt. Zwei Befunde
+bleiben:
+
+* **K1:** Zwei **lebende** Kommentare sagten noch „24 von 27" — gemessen sind **27** taugliche Fertigkeiten
+  (seit den drei Injektoren aus task-5). Der Kommentar ist berichtigt, danach wurde **neu gebaut**: die
+  Erzeugnisse dieser Runde sind deshalb jünger als die des Fundaments.
+* **K2:** Der Abnahmebefehl aus Dokument D prüft **0** Fälle (siehe „Verworfen" Punkt 3). Richtig ist
+  `node tests/run.js klassenraum` → **67** Fälle.
+
+### Was NICHT geprüft ist — ehrlich
+
+* **Kein Browserlauf, kein Bild.** Die zwei neuen Ansichten sind über DOM-Attrappen und Quelltext belegt,
+  nicht im gezeichneten Bild; `tools/rauch.py` kennt die neuen Ansichten nicht.
+* **Keine echte Unterrichtsstunde** — kein Versuch mit einer Lehrkraft und einer Klasse, also auch keine
+  Aussage darüber, ob 90 Minuten damit tragen.
+* **Stufe C und D** (Server, QR) sind nicht gebaut, nicht gemessen und nicht geprüft.
+* **O1** ist entschieden (Platzzahl bleibt im Datei-Dialog) — die **Ampel** ist aber nur über
+  DOM-Attrappen und Quelltext belegt, **nicht** im Bild; ein Browserlauf fehlt weiterhin.
+* Die Zahlen dieser Stufe sind **Messungen des Leads** und in der Tabelle oben so gekennzeichnet;
+  Bytes und SHA256 der acht neuen Dateien hat der Chronist selbst über den Arbeitsbaum gerechnet.

@@ -15,6 +15,7 @@ const Spiel = {};
 
 Spiel.VERSION = 3;                 /* v:3 (Hilfestellung): train – Migration ergänzt Standardwerte */
 Spiel.EINSTIEG_TICKET = "salon-01";   /* erstes Ticket des Onboardings (Kabel fehlt) */
+Spiel.KLASSENRAUM = "klassenraum";   /* eigener Speicher-Schluessel der Klassenraum-Sitzung (Stufe A, Fassung 1; src/spiel/klassenraum.js) */
 Spiel.ergaenzer = {};
 Spiel._st = null;
 Spiel._einst = null;

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🔬 Review – Klassenraum A+B (task-35, unabhängige Gegenprüfung) · Netzwerk-Labor</title>
+<meta name="description" content="⬆️ Netzwerk-Labor · Vertrag: Architektur § 12 · Spezifikation:.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">🔬 Review – Klassenraum A+B (task-35, unabhängige Gegenprüfung)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-verfahren">1 · Verfahren</a></li>
+<li><a href="#2-der-codec-gegen-dokument-a-bestatigt-mit-eigener-arithmetik">2 · Der Codec gegen Dokument A — bestätigt, mit eigener Arithmetik</a></li>
+<li><a href="#3-die-eingefrorenen-tabellen-zeichengleich-und-die-umsetzung-fahrt-27">3 · Die eingefrorenen Tabellen — zeichengleich, und die Umsetzung fährt 27</a></li>
+<li style="margin-left:16px"><a href="#befund-k1-zwei-lebende-kommentare-sagen-weiter-24-von-27">Befund K1 — zwei lebende Kommentare sagen weiter „24 von 27"</a></li>
+<li><a href="#4-determinismus-uber-den-echten-weg-bestatigt">4 · Determinismus über den echten Weg — bestätigt</a></li>
+<li><a href="#5-wirkung-vor-grun-alle-16-namen-haben-einen-aufrufer">5 · „Wirkung vor Grün": alle 16 Namen haben einen Aufrufer</a></li>
+<li><a href="#6-e1-gilt-gemessen-nicht-zitiert">6 · E1 gilt — gemessen, nicht zitiert</a></li>
+<li><a href="#7-keine-bewertung-bestatigt">7 · Keine Bewertung — bestätigt</a></li>
+<li><a href="#8-die-sitzung-15-felder-die-14-plus-plaetze-kein-namensfeld">8 · Die Sitzung: 15 Felder — die 14 plus plaetze, kein Namensfeld</a></li>
+<li><a href="#9-oberflache-css-testrahmen">9 · Oberfläche, CSS, Testrahmen</a></li>
+<li><a href="#10-der-abnahmebefehl-dokument-d-irrt-die-zahl-ist-67">10 · Der Abnahmebefehl — Dokument D irrt, die Zahl ist 67</a></li>
+<li><a href="#11-zeilenenden">11 · Zeilenenden</a></li>
+<li><a href="#12-nicht-gemessen-pflichtabschnitt">12 · Nicht gemessen (Pflichtabschnitt)</a></li>
+<li><a href="#13-befunde-an-den-lead-kurz">13 · Befunde an den Lead (kurz)</a></li>
+</ul>
+</nav><h1 id="review-klassenraum-a-b-task-35-unabhangige-gegenprufung">🔬 Review – Klassenraum A+B (task-35, unabhängige Gegenprüfung)</h1>
+<p>⬆️ <a href="../Liesmich.html">Netzwerk-Labor</a> · Vertrag: <a href="../Architektur.html">Architektur</a> § 12 · Spezifikation: <a href="../entwicklung/Klassenraum/A%20%E2%80%93%20Codec%20und%20Determinismus.html">A – Codec und Determinismus</a> · <a href="../entwicklung/Klassenraum/B%20%E2%80%93%20Oberfl%C3%A4che%20und%20Ablauf.html">B – Oberfläche und Ablauf</a> · Vorherige Prüfung: <a href="../entwicklung/Review%20%E2%80%93%202.0-Fundament.html">Review – 2.0-Fundament</a></p>
+<blockquote>
+<p><strong>Auftrag.</strong> Wieder der WIDERSPRUCH: Codec, eingefrorene Tabellen, Determinismus, „Wirkung vor Grün", E1, Oberflächen-Regeln, Zeilenenden und der Abnahmebefehl — jede Aussage mit <strong>eigenem</strong> Befehl oder Experiment. Geändert wurde nichts außer dieser Datei.</p>
+<p><strong>Kernaussage in einem Satz.</strong> Der Codec hält <strong>jedes</strong> dokumentierte Beispiel ein, mit <strong>eigener</strong> Arithmetik nachgerechnet (auch das ungültige <code>NL-4F7K-2Q</code>) · die eingefrorenen Tabellen stimmen <strong>zeichengleich</strong> mit <code>Spiel.ticketReihe()</code> und dem Beleg, und die Umsetzung fährt <strong>27</strong> Fertigkeiten, nicht 24 · E1 gilt (nicht im Postfach, aber spielbar), die Abnahme zahlt <strong>0 €/0 Ruf/0 Einträge</strong> · alle <strong>16</strong> Schnittstellennamen haben einen Aufrufer — aber <strong>zwei Kommentare und Dokument D sind veraltet</strong>, und der dort genannte Abnahmebefehl liefert <strong>0 Fälle</strong> statt 40.</p>
+</blockquote>
+<p><strong>Stand der Messung:</strong> 09.10.2026, 16:31–16:5x · Arbeitsbaum nur gelesen · kein Produktivcode, keine fremden Tests, kein schreibender git-Befehl, kein Prozess beendet · <strong>Schreibrecht nur diese Datei</strong> (so der Lead: eigene Datei statt Nachtrag — die 2.0-Prüfung ist abgeschlossen und wird nicht mehr angerührt).</p>
+<hr>
+<h2 id="1-verfahren">1 · Verfahren</h2>
+<p>Alle Laufzeitmessungen laufen in einem eigenen <code>vm</code>-Bereich mit <strong>derselben Modulladung wie <code>tests/run.js</code></strong> (90 Module, Schicht- und Alphabetreihenfolge). Es wurde <strong>keine</strong> Prüfdatei angelegt; die Programme wurden per <code>node -e</code> übergeben. Für die Aufrufer- und Zeilenendenprüfung: <code>Select-String</code>, <code>git ls-files --eol</code>, Byte-Vergleich, Index-Arithmetik (Verfahren aus <a href="../SITZUNGSABSCHLUSS.html">SITZUNGSABSCHLUSS</a> Schritt 6, in <a href="../entwicklung/Review%20%E2%80%93%202.0-Fundament.html">Review – 2.0-Fundament</a> § 10.3 belegt).</p>
+<hr>
+<h2 id="2-der-codec-gegen-dokument-a-bestatigt-mit-eigener-arithmetik">2 · Der Codec gegen Dokument A — bestätigt, mit eigener Arithmetik</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Behauptung (Dokument A)</th><th>Wie geprüft</th><th>Ergebnis</th></tr></thead><tbody><tr><td>Alphabet: 32 Zeichen, kein <code>I</code>, <code>O</code>, <code>0</code>, <code>1</code></td><td><code>KlassenraumCodec.ALPHABET</code> gelesen</td><td><code>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"</code>, Länge <strong>32</strong>, <strong>eindeutig</strong>, <strong>keines</strong> der vier Zeichen enthalten · <code>BASIS = 32</code></td></tr><tr><td>Prüfsummen: <code>C1</code> Gewichte 1,2,3,… <strong>mod 31</strong>; <code>C2</code> Gewichte 1,3,5,… <strong>mod 32</strong></td><td>eigene Rechnung neben <code>pruefsummen()</code></td><td>s. u. — <strong>stimmt in allen Fällen</strong></td></tr><tr><td><code>NL-HC3L-CS</code> gültig</td><td><code>auftragLesen</code> + eigene Rechnung</td><td>Werte <code>[7,2,25,10]</code> → C1 = 126 mod 31 = <strong>2</strong> → <code>C</code>; C2 = 208 mod 32 = <strong>16</strong> → <code>S</code>. Codec liefert <code>CS</code>. <strong>gleich</strong> ✓</td></tr><tr><td><code>NL-WTQJ-EF</code> gültig</td><td>dito</td><td>Werte <code>[20,17,14,8]</code> → C1 = 128 mod 31 = <strong>4</strong> → <code>E</code>; C2 = 197 mod 32 = <strong>5</strong> → <code>F</code> ✓</td></tr><tr><td><code>E-KFWS-HZM</code> = Sitzung 9, Platz 5, 5 Sterne, 1 Fehlversuch, 70 s</td><td><code>ergebnisLesen</code> <strong>und</strong> <code>ergebnisBauen({sitzung:9, platz:5, sterne:5, versuche:1, dauerS:70})</code></td><td>gelesen: <code>{sitzung:9, platz:5, sterne:5, versuche:1, dauerS:70}</code>; gebaut: <strong><code>E-KFWS-HZM</code></strong> — <strong>Zeichen für Zeichen gleich</strong> ✓</td></tr><tr><td>Nutzzeichen des Ergebniscodes <code>KFWSH</code>, Prüfzeichen <code>ZM</code></td><td>eigene Rechnung</td><td>Werte <code>[9,5,20,16,7]</code> → C1 = 178 mod 31 = <strong>23</strong> → <code>Z</code>; C2 = 299 mod 32 = <strong>11</strong> → <code>M</code>. <strong>gleich</strong> ✓</td></tr><tr><td><strong><code>NL-4F7K-2Q</code> ist ungültig</strong></td><td><code>auftragLesen("NL-4F7K-2Q")</code></td><td><code>{ok:false, fehler:"prüfziffer", grund:"Die Prüfziffer passt nicht – hast du dich vertippt?"}</code> — <strong>abgewiesen</strong> ✓</td></tr><tr><td>richtig wäre <code>NL-4F7K-E3</code></td><td><code>auftragLesen("NL-4F7K-E3")</code></td><td><code>ok:true</code>, Sitzung 26, Index 23, Variante 169 ✓</td></tr><tr><td>Rundlauf Auftragscode</td><td><code>auftragLesen("NL-HC3L-CS")</code> → <code>{7, 11, 42, art:"hand"}</code>, damit <code>auftragBauen(...)</code></td><td>ergibt <strong><code>NL-HC3L-CS</code></strong> ✓</td></tr></tbody></table></div>
+<p><strong>Zwei Fehlversuche auf meiner Seite, ausdrücklich genannt</strong> (sie gehören zur Wahrheit dieser Prüfung):</p>
+<ol><li><code>auftragBauen({sitzung:7, index:11, variante:42})</code> lieferte <strong><code>null</code></strong> — ich hielt das kurz für eine Asymmetrie. Der Blick in den Quelltext zeigt: <code>art</code> ist ein <strong>Pflichtfeld</strong> (<code>klassenraum-codec.js:99-100</code>, <code>f.art === "hand" ? 0 : f.art === "generiert" ? 1 : ganz(f.art, 1)</code>). Mit <code>art</code> ist der Rundlauf grün.</li><li><code>ergebnisBauen({sitzung:9, platz:5, sterne:5, **fehlversuche**:1, **sekunden**:70})</code> lieferte <code>E-KFWA-AT6</code> — für einen Moment sah das nach „Dokument und Code widersprechen sich" aus. Die Feldnamen heißen aber <code>versuche</code> und <code>dauerS</code> (<code>:174-175</code>). Mit den richtigen Namen kommt <strong>genau das dokumentierte</strong> <code>E-KFWS-HZM</code> heraus. <strong>Kein Befund</strong> — mein Fehler, und ich hätte ihn fast als Befund gemeldet.</li></ol>
+<hr>
+<h2 id="3-die-eingefrorenen-tabellen-zeichengleich-und-die-umsetzung-fahrt-27">3 · Die eingefrorenen Tabellen — zeichengleich, und die Umsetzung fährt 27</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Behauptung</th><th>Wie geprüft</th><th>Ergebnis</th></tr></thead><tbody><tr><td>58 Auftrags-IDs in <code>Spiel.ticketReihe()</code>-Reihenfolge</td><td><code>JSON.stringify(Spiel.ticketReihe().map(id))</code> gegen <code>Nachweise/Klassenraum/A-tabelle.json</code> → <code>auftraege[].id</code></td><td><strong>zeichengleich</strong> ✓ (58 = 58)</td></tr><tr><td><code>TABELLE_AUFTRAEGE_LAENGE</code></td><td>Quelltext <code>klassenraum-codec.js:50</code></td><td><strong>58</strong> ✓</td></tr><tr><td>27 Fertigkeiten, Reihenfolge wie <code>DATEN.skills</code></td><td><code>tabellen({ticketIds, skillIds})</code> gegen den Beleg</td><td><strong>zeichengleich</strong> ✓ (27 = 27) · <code>TABELLE_SKILLS_LAENGE = 27</code> ✓</td></tr><tr><td>Beleg trägt 24 <code>tauglich: true</code>, 3 <code>false</code></td><td><code>A-tabelle.json</code> → <code>skills</code></td><td><strong>bestätigt</strong>: 27 Einträge, <strong>24 tauglich</strong> (Stand vor task-5)</td></tr><tr><td>Die Leitung hat <strong>27</strong> entschieden</td><td><code>tauglicheFertigkeiten()</code> mit den echten Listen</td><td><strong>27</strong>, <code>nichtTauglich: []</code> — die Umsetzung fährt die Entscheidung ✓</td></tr><tr><td>Die Abweichung ist dokumentiert</td><td><code>docs/Architektur.md:878</code></td><td><strong>belegt</strong>, wörtlich: „<strong>L2</strong></td><td><code>plaetze</code> … " bzw. die Zeile zur Tauglichkeit; und <code>tests/klassenraum-codec.test.js:257-260</code> sagt ausdrücklich: „A § 3.3 nennt ‚24 von 27' — das ist ÜBERHOLT: seit task-5 … gehören deshalb alle auf true", mit <code>erwarte.gleich(T.tauglicheFertigkeiten().length, 27, …)</code></td></tr></tbody></table></div>
+<h3 id="befund-k1-zwei-lebende-kommentare-sagen-weiter-24-von-27">Befund <strong>K1 — zwei lebende Kommentare sagen weiter „24 von 27"</strong></h3>
+<ul><li><code>src/spiel/klassenraum-codec.js:297</code>: „§ 3.3: nur die Fertigkeiten mit Injektor dürfen angeboten werden (<strong>24 von 27</strong>)."</li><li><code>src/spiel/klassenraum.js:32</code>: „… dort <strong>24 von 27</strong>)."</li></ul>
+<p>Beide Stellen stehen <strong>im Produktivcode</strong>, nicht in einer Protokollnotiz. Die Zahl ist seit task-5 falsch (gemessen: 27). Der Lead hatte genau danach gefragt („wenn irgendwo noch 24 steht, ist das ein Befund"). <strong>Restzweifel:</strong> In den <strong>Dokumenten</strong> (A § 3.3, § 8, § 9) steht 24 weiterhin — das sind Protokolle des damaligen Standes und laut Projektregel nicht nachzuziehen; ich werte sie <strong>nicht</strong> als Befund.</p>
+<hr>
+<h2 id="4-determinismus-uber-den-echten-weg-bestatigt">4 · Determinismus über den echten Weg — bestätigt</h2>
+<p>Nachgestellt wie die Oberfläche es tut (<code>src/ui/klassenraum.js:312-315</code>): <code>ausCode</code> → <code>instanzErstellen</code> mit <code>{ticketId|skill, seed, quelle:"klassenraum", ohneFlow:true}</code>.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Messung</th><th>Ergebnis</th></tr></thead><tbody><tr><td><code>ausCode("NL-HC3L-CS")</code></td><td><code>{sitzung:7, ticketId:"baeckerei-hotline", seed:43, code:"NL-HC3L-CS"}</code> — der Code kommt <strong>kanonisch</strong> zurück</td></tr><tr><td>zwei „Geräte": frischer Stand vs. Stand mit <code>st.flow["lab.vlan"].stand = "verwicklung"</code></td><td><code>def.id</code> <strong>beide Male <code>baeckerei-hotline</code></strong> → <strong>derselbe Auftrag</strong> ✓</td></tr><tr><td>Code auf beiden Geräten</td><td><strong>identisch</strong> ✓</td></tr></tbody></table></div>
+<p>Verglichen wurde <code>def.id</code> — nicht der Netzkennwert, wie von E8 verlangt. <strong>Restzweifel:</strong> zwei Zustände sind kein Beweis für alle; ich habe genau die zwei Stellen variiert, die laut Fahrplan § 2.4 den Unterschied machten (Flow-Stand), nicht die Sitzungs-/Platzwerte.</p>
+<hr>
+<h2 id="5-wirkung-vor-grun-alle-16-namen-haben-einen-aufrufer">5 · „Wirkung vor Grün": <strong>alle 16</strong> Namen haben einen Aufrufer</h2>
+<p>Die Schnittstelle hat <strong>16</strong> Namen, nicht elf — <code>docs/Architektur.md:885-886</code> erklärt das selbst („die <strong>elf</strong> Funktionen der Vertragstabelle § 12 + <code>plaetze</code>/<code>plaetzeSetzen</code> nach L6 + das vorhandene <code>abnehmen</code> + die Prüffläche <code>tabellen()</code> — zusammen <strong>16 Namen</strong>"). Meine Messung von <code>Object.keys(Spiel.klassenraum)</code> ergibt <strong>genau diese 16</strong>.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Name</th><th>Aufrufer in <code>src/</code> (ohne Definition)</th></tr></thead><tbody><tr><td><code>erzeugen</code>, <code>ausCode</code>, <code>ergebnisCode</code>, <code>ergebnisEintragen</code>, <code>netzkennwert</code>, <code>platzSetzen</code>, <code>plaetze</code>, <code>plaetzeSetzen</code></td><td><strong><code>src/ui/klassenraum.js</code></strong> (über <code>ruf("…")</code>, z. B. <code>:93</code>, <code>:164</code>, <code>:187</code>, <code>:217</code>, <code>:295</code>, <code>:302</code>, <code>:356</code>)</td></tr><tr><td><code>exportieren</code>, <code>importieren</code></td><td><code>src/ui/klassenraum.js</code> <strong>und</strong> <code>src/ui/karriere.js</code></td></tr><tr><td><code>tauglicheFertigkeiten</code>, <code>platz</code>, <code>tabellen</code>, <code>ausCode</code></td><td>zusätzlich <code>src/spiel/klassenraum.js</code></td></tr><tr><td><code>ergebnisLesen</code></td><td><code>src/spiel/klassenraum.js</code></td></tr><tr><td><code>abnehmen</code></td><td><code>src/spiel/abnahme.js</code>, <code>src/ui/klassenraum.js</code>, <code>src/ui/training.js</code></td></tr></tbody></table></div>
+<p><strong>Zwei Fallen, die ich selbst getreten bin — und die ein oberflächlicher Prüfer übersieht:</strong></p>
+<ol><li>Mein <strong>erster</strong> Aufruferscan suchte nur <code>\.name</code> und meldete für <code>erzeugen</code>, <code>ergebnisCode</code>, <code>ergebnisEintragen</code>, <code>netzkennwert</code>, <code>platzSetzen</code>, <code>plaetzeSetzen</code> <strong>„kein Aufrufer"</strong>. Das war <strong>falsch</strong>: die Oberfläche ruft die API über einen Namensverteiler (<code>ruf("…")</code>), die Namen stehen als <strong>Zeichenketten</strong>. Der zweite Scan (auch <code>"name"</code> und <code>'name'</code>) findet für <strong>jeden</strong> der 16 einen Aufrufer.</li><li>Ein Aufrufer <strong>in einer Testdatei</strong> zählt nicht. Ich habe <code>src/</code> und <code>tests/</code> getrennt gezählt; alle 16 haben mindestens einen <code>src/</code>-Aufrufer.</li></ol>
+<p><strong>Was ich damit <em>nicht</em> belegt habe:</strong> dass der Weg im Browser auch <strong>anklickbar</strong> ist (kein Browser, § 12).</p>
+<hr>
+<h2 id="6-e1-gilt-gemessen-nicht-zitiert">6 · E1 gilt — gemessen, nicht zitiert</h2>
+<p>Frischer Stand, Klassenraum-Auftrag über den echten Weg (<code>ausCode</code> → <code>instanzErstellen</code> → <code>inst.klassenraum</code>):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Frage (E1)</th><th>Messung</th></tr></thead><tbody><tr><td>im Postfach?</td><td><strong>nein</strong> — <code>postfach().some(x =&gt; x.iid === inst.iid) === false</code></td></tr><tr><td>im Offen-Zähler?</td><td><strong>nein</strong> — <code>Spiel.offen() === 0</code></td></tr><tr><td>trotzdem spielbar?</td><td><strong>ja</strong> — <code>Spiel.instanz(iid)</code> vorhanden, <code>Spiel.oeffnen(iid)</code> ohne Wurf, <code>Spiel.aktiveInstanz() === iid</code></td></tr></tbody></table></div>
+<p><strong>Restzweifel, ehrlich:</strong> mein frischer Stand hatte ein <strong>leeres</strong> Postfach (<code>postfachLaenge: 0</code>), weil <code>Spiel.leererStand()</code> es nicht füllt. Der Beweis „nicht im Postfach" ruht daher auf dem <strong>iid-Vergleich</strong>, nicht auf der Länge. Die Kachel „Heute" und der <strong>Ereignistakt</strong> habe ich <strong>nicht</strong> gemessen — die gehören in Phase 2 (die Taktprüfung braucht virtuelle Zeit über <code>Spiel.ereignisse</code>).</p>
+<hr>
+<h2 id="7-keine-bewertung-bestatigt">7 · Keine Bewertung — bestätigt</h2>
+<p>Klassenraum-Auftrag gelöst und abgeschlossen (<code>Spiel.loesung</code> → <code>Spiel.arbeitszieleErfuellen</code> → <code>Spiel.abnahme</code> → <code>Spiel.abschliessen</code>):</p>
+<pre><code>bestanden: true   ΔEuro: 0   ΔRuf: 0   Δst.erledigt: 0   note: null</code></pre>
+<p>Kein Geld, kein Ruf, kein Karriere-Eintrag, keine Note. <strong>Restzweifel:</strong> „kein Hilfe-Feld" im Ergebnis-Code habe ich nicht einzeln geprüft; der Feldkatalog des Codes ist nach Dokument A § 6.1 <code>{sitzung, platz, sterne, versuche, dauerS}</code> plus Prüfzeichen — gemessen über <code>ergebnisLesen</code> (Felder u. a. <code>nutzzeichen</code>, <code>prüfzeichen</code>, <code>C1</code>, <code>C2</code>), <strong>kein</strong> Namens- oder Hilfefeld.</p>
+<hr>
+<h2 id="8-die-sitzung-15-felder-die-14-plus-plaetze-kein-namensfeld">8 · Die Sitzung: 15 Felder — die 14 plus <code>plaetze</code>, kein Namensfeld</h2>
+<p><code>Spiel.klassenraum.erzeugen({ticketId:"salon-01"})</code> → Sitzung mit <strong>15</strong> Feldern, gemessen:</p>
+<pre><code>id · titel · art · ticketId · skill · index · variante · seed · eigene · schritte ·
+code · dauerMin · plaetze · erstellt · ergebnisse</code></pre>
+<ul><li><strong><code>plaetze</code> ist dabei</strong> (Wert <code>0</code> = „nicht eingestellt", § L6) — die 14 dokumentierten plus die Ergänzung.</li><li><strong>Kein Namensfeld</strong>: <code>Object.keys(...).filter(k =&gt; /name|schueler|azubi/i.test(k))</code> ergibt <strong><code>[]</code></strong> ✓ (DoD 11).</li><li>Die Ergänzung ist <strong>im Code</strong> begründet (<code>src/spiel/klassenraum.js:34-35</code>: „Leitungsentscheidung L6, bewusst gegen A § 7.1, das ‚genau diese 14 Felder' sagt") und <strong>im Vertrag</strong> (<code>docs/Architektur.md:878</code>: „**<code>plaetze</code> kommt dazu<strong> … Die Ampel der Lehrkraft braucht den Nenner"). </strong>Beides belegt.**</li></ul>
+<p><strong>Restzweifel:</strong> Die 14 Dokumentfelder habe ich <strong>nicht</strong> Namen für Namen gegen A § 7.1 aufgelistet (die Tabelle liegt um <code>:696-702</code>); ich habe gezählt (15 − <code>plaetze</code> = 14) und die Namensliste auf Vollständigkeit der naheliegenden Felder geprüft. Ein einzelnes fehlendes Dokumentfeld wäre mir dabei entgangen.</p>
+<hr>
+<h2 id="9-oberflache-css-testrahmen">9 · Oberfläche, CSS, Testrahmen</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Prüfung</th><th>Befehl</th><th>Ergebnis</th></tr></thead><tbody><tr><td>jede neue <code>kl-</code>Klasse hat eine CSS-Regel</td><td><code>python tools/klassen.py</code></td><td><strong>0 Klassen ohne CSS-Regel</strong> ✓</td></tr><tr><td>Zeitwerte nur 1/160/320 ms</td><td><code>python tools/ethos.py</code></td><td><strong>GRÜN</strong> (29 CSS-Dateien, keine Regel schlechter als der Stand) ✓</td></tr><tr><td>kein zweites <code>toUpperCase</code> im UI</td><td><code>Select-String src\ui\*.js</code></td><td><strong>genau ein</strong> Treffer: <code>src/ui/inspektor.js:393</code> — <strong>vorbestehend</strong>, <strong>nicht</strong> in <code>src/ui/klassenraum.js</code> ✓</td></tr><tr><td><code>erwarte.wirftNicht</code> existiert nicht</td><td>Suche in <code>tests/*.js</code></td><td><strong>0 Treffer</strong> ✓</td></tr><tr><td><strong>keine Zusicherung im Gruppenrumpf</strong> (Exit-2-Falle)</td><td><strong>alle</strong> Testdateien in einem Bereich geladen, <code>testsAusfuehren()</code> <strong>nicht</strong> gerufen</td><td><strong>kein LADEFEHLER</strong> — alle Gruppenrümpfe laufen durch ✓ · <strong>661</strong> Testfälle registriert</td></tr><tr><td>≤ 6 bzw. ≤ 3 sichtbare Bedienelemente (R12)</td><td><strong>nicht gemessen</strong></td><td>steht unter § 12</td></tr><tr><td>Escape schließt jeden Dialog</td><td><strong>nicht gemessen</strong></td><td>steht unter § 12</td></tr></tbody></table></div>
+<hr>
+<h2 id="10-der-abnahmebefehl-dokument-d-irrt-die-zahl-ist-67">10 · Der Abnahmebefehl — Dokument D irrt, die Zahl ist <strong>67</strong></h2>
+<div class="dk-tabelle"><table><thead><tr><th>Behauptung (Dokument D)</th><th>Wie geprüft</th><th>Ergebnis</th></tr></thead><tbody><tr><td><code>node tests/run.js --klassenraum</code> → 40/40</td><td>Testnamen im geladenen Bereich gezählt (Filter wirkt in <code>tests/run.js:60</code> auf <code>e.name.toLowerCase()</code>)</td><td><strong>0 Fälle</strong> — die führenden Striche treffen keinen Namen. <code>0/0 grün</code>. <strong>bestätigt: der Befehl ist unbrauchbar</strong></td></tr><tr><td>der richtige Befehl und die echte Fallzahl</td><td>dito</td><td><strong><code>node tests/run.js klassenraum</code></strong> → <strong>67 Fälle</strong> (Groß-/Kleinschreibung egal, <code>run.js</code> vergleicht klein)</td></tr><tr><td>Gesamtumfang</td><td>dito</td><td><strong>661</strong> registrierte Testfälle — deckt sich mit der Leitungsangabe „657/661"</td></tr></tbody></table></div>
+<p><strong>Befund K2:</strong> In Dokument D steht ein Befehl, der <strong>null</strong> Fälle prüft, und eine Zahl (40), die <strong>nicht</strong> die Fallzahl dieses Filters ist. Wer ihn benutzt, sieht <code>0/0 grün</code> und hält das für Erfolg — dieselbe Bauart wie der DHCP-Pool-Modus: grün, aber ohne Wirkung.</p>
+<hr>
+<h2 id="11-zeilenenden">11 · Zeilenenden</h2>
+<p><code>git ls-files --eol</code> führt nur die <strong>verfolgten</strong> Dateien; die fünf neuen sind noch <code>??</code> und erscheinen dort nicht. Gemessen:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th><code>git ls-files --eol</code></th><th>Urteil</th></tr></thead><tbody><tr><td><code>src/spiel/klassenraum.js</code></td><td><code>i/lf w/lf attr/text=auto eol=lf</code></td><td><strong>LF</strong> ✓</td></tr><tr><td><code>src/spiel/zustand.js</code> (geändert, +1 Zeile)</td><td><code>i/lf **w/crlf**</code></td><td>Verdacht — <strong>entlastet</strong>: <code>zustand.js</code> stand schon in der CRLF-Liste der ersten Messung um 15:20, <strong>vor</strong> der Änderung</td></tr><tr><td><code>src/spiel/klassenraum-codec.js</code>, <code>src/ui/klassenraum.js</code>, <code>src/stil/klassenraum.css</code> (+ die vier Testdateien)</td><td>untracked</td><td><strong>alle LF, 0 CRLF</strong> ✓ — Byte-Zählung unten</td></tr></tbody></table></div>
+<p><strong>Byte-Zählung der neuen Dateien (0 CRLF in jeder):</strong></p>
+<div class="dk-tabelle"><table><thead><tr><th>Datei</th><th>Zeilen</th><th>Bytes</th></tr></thead><tbody><tr><td><code>src/spiel/klassenraum.js</code></td><td>392</td><td>26 295</td></tr><tr><td><code>src/spiel/klassenraum-codec.js</code></td><td>311</td><td>18 692</td></tr><tr><td><code>src/ui/klassenraum.js</code></td><td>400</td><td>25 550</td></tr><tr><td><code>src/stil/klassenraum.css</code></td><td>59</td><td>4 401</td></tr><tr><td><code>tests/klassenraum-codec.test.js</code></td><td>352</td><td>26 792</td></tr><tr><td><code>tests/klassenraum.test.js</code></td><td>285</td><td>20 326</td></tr><tr><td><code>tests/ui-klassenraum.test.js</code></td><td>405</td><td>25 735</td></tr><tr><td><code>tests/klassenraum-abnahme.test.js</code></td><td>331</td><td>23 034</td></tr></tbody></table></div>
+<p><strong>Index-Arithmetik für <code>src/spiel/zustand.js</code>:</strong> HEAD <strong>12 032 B</strong> + <strong>215</strong> Zeilen = <strong>12 247</strong> = Index-Statistik <strong>12 247</strong> → die Datei war <strong>schon vor</strong> der Änderung CRLF (dieselbe Rechnung wie in <a href="../entwicklung/Review%20%E2%80%93%202.0-Fundament.html">Review – 2.0-Fundament</a> § 10.3). <strong>Ergebnis: kein Zeilenenden-Bruch in dieser Runde.</strong></p>
+<p><strong>Restzweifel:</strong> Der Byte-Vergleich belegt den <strong>jetzigen</strong> Zustand; für die fünf untracked Dateien gibt es keinen HEAD-Vergleich. Für <code>zustand.js</code> ist die Index-Statistik ein Indizienbeweis (Zustand beim letzten Git-Zugriff), kein lückenloser Verlauf.</p>
+<hr>
+<h2 id="12-nicht-gemessen-pflichtabschnitt">12 · Nicht gemessen (Pflichtabschnitt)</h2>
+<ul><li><strong>Kein Browser, kein Bildschirmfoto, kein echtes Edge-Profil.</strong> Kein <code>python bauen.py</code>, kein <code>tools/rauch.py</code>, kein <code>menueprobe.py</code>, kein <code>seite-pruefen.py</code>. Aussagen über die <strong>sichtbare</strong> Oberfläche (Knöpfe, Dialoge, Escape, ≤ 6/≤ 3 Bedienelemente) beruhen <strong>nicht</strong> auf meiner Messung.</li><li><strong>Die Kachel „Heute" und der Ereignistakt</strong> für einen Klassenraum-Auftrag (§ 6).</li><li><strong>Die 14 Dokumentfelder</strong> Name für Name gegen A § 7.1 (§ 8).</li><li><strong>Der volle Testlauf</strong> nach dieser Runde — die 661/657-Zahl der Leitung habe ich über die <strong>registrierten</strong> Namen bestätigt, nicht über einen eigenen Vollschnitt.</li><li><strong>Die vier Testdateien der beiden laufenden Bausteine</strong> — <code>determinismus</code> und <code>uebergabe-ui</code> waren zum Messzeitpunkt noch nicht fertig gemeldet; ihre Zahlen sind <strong>nicht</strong> nachgezählt.</li><li><strong>Byte-Vergleich/Index-Arithmetik</strong> der neuen Dateien (§ 11).</li></ul>
+<hr>
+<h2 id="13-befunde-an-den-lead-kurz">13 · Befunde an den Lead (kurz)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Nr.</th><th>Befund</th><th>Ort</th><th>Schwere</th></tr></thead><tbody><tr><td><strong>K1</strong></td><td>zwei <strong>lebende</strong> Kommentare sagen „24 von 27", gemessen sind es <strong>27</strong></td><td><code>src/spiel/klassenraum-codec.js:297</code>, <code>src/spiel/klassenraum.js:32</code></td><td>klein (Text), aber irreführend</td></tr><tr><td><strong>K2</strong></td><td>Abnahmebefehl in Dokument D prüft <strong>0</strong> Fälle; richtig ist <code>node tests/run.js klassenraum</code> → <strong>67</strong></td><td>Dokument D</td><td>mittel — „grün ohne Wirkung"</td></tr><tr><td>–</td><td>Codec, Tabellen, Determinismus, E1, keine Bewertung, 16 Aufrufer, <code>klassen.py</code>, <code>ethos.py</code>, Testrahmen</td><td>–</td><td><strong>bestätigt</strong></td></tr></tbody></table></div>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

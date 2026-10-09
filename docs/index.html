@@ -1184,6 +1184,67 @@ button.dx-karte:hover{border-color:var(--accent)}
 .kr-abz-stand .kr-bar{flex:1; height:6px}
 .kr-abz-stand .kr-bar i{background:var(--accent)}
 
+/* ---- klassenraum.css ---- */
+/* ---------- Klassenraum: Lehrkräfte-Ansicht und Mitarbeit (kl- · B § 2, § 4) ----------
+   Zwei Ansichten, ein Präfix. Jede Klasse hat GENAU EINE Regel (python tools/klassen.py → 0), keine
+   Regel ohne Klasse, kein Selektor zweimal (ethos R9), kein identischer Block (R10).
+   Farben/Größen nur aus den Tokens in basis.css (B § 2.4), Schriftgrößen aus {11,12,13,15,20,28},
+   Abstände aus {0,4,8,12,16,24,32}, Zeitwerte aus {1,160,320} ms bzw. var(--dauer) (R5).
+   Die EINE Ausnahme ist die Beamer-Zeile .kl-gross: font mit clamp(…) — sie beginnt mit der
+   Gewichtsangabe, danach steht clamp statt einer px-Zahl, deshalb überspringt die Schriftprüfung
+   (R3) sie. Das ist der in B § 2.4 offen benannte Kompromiss, kein Versehen. */
+
+/* --- Gerüst --- */
+.kl-lehrer{display:grid; gap:16px; padding:16px 24px 32px; height:100%; overflow:auto; background:var(--bg)}
+.kl-schueler{display:grid; gap:12px; padding:16px 24px 24px; height:100%; overflow:auto; background:var(--bg)}
+.kl-spalte{display:grid; gap:12px; align-content:start; width:min(660px,100%); margin:0 auto}
+.kl-kopf{display:grid; gap:4px}
+.kl-kopf h2{margin:0; font:800 20px/1.2 var(--display); color:var(--ink)}
+.kl-klein{margin:0; color:var(--muted); font-size:13px; line-height:1.4}
+
+/* --- Werkzeugzeilen --- */
+.kl-werkzeug{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel)}
+.kl-form{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
+.kl-feld{padding:8px 12px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel); color:var(--ink); font:500 15px/1.3 var(--mono); min-height:32px}
+.kl-feld:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+/* Tippfehler werden MARKIERT, nicht abgewiesen: das Feld trägt aria-invalid und wird so eingefärbt —
+   eine eigene Klasse dafür wäre die 35., und die Leitung hat 34 festgelegt. */
+.kl-feld[aria-invalid="true"]{border-color:var(--warn); background:var(--warn-soft)}
+
+/* --- Beschriftungen, Karte, Code --- */
+.kl-etikett{color:var(--faint); font-size:11px; text-transform:uppercase; letter-spacing:.04em}
+.kl-karte{display:grid; gap:8px; padding:16px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--radius); background:var(--panel); box-shadow:var(--schatten)}
+.kl-gross{display:grid; place-items:center; overflow:visible; font:800 clamp(28px,5vw,118px)/1.05 var(--mono)}
+.kl-code{font-family:var(--mono); color:var(--accent); letter-spacing:.08em; white-space:nowrap; user-select:all}
+.kl-block{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
+.kl-hinweis{color:var(--muted); font-size:13px; line-height:1.4}
+.kl-detail{color:var(--muted); font-size:12px; line-height:1.4}
+
+/* --- Ampel und Tafel (B § 9) --- */
+.kl-ampel{display:grid; gap:8px; padding:12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
+.kl-summe{display:flex; align-items:center; gap:8px}
+.kl-lampe{display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--faint)}
+.kl-lampe.kl-gruen{background:var(--ok)}
+.kl-lampe.kl-gelb{background:var(--warn)}
+.kl-lampe.kl-rot{background:var(--bad); box-shadow:0 0 0 2px var(--bad-soft)}
+.kl-tafel{display:grid; gap:4px; align-content:start}
+.kl-zeile{display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; padding:4px 0; border-top:1px solid var(--line)}
+.kl-platz{min-width:64px; color:var(--ink); font:700 13px/1.4 var(--mono)}
+.kl-sterne{color:var(--geld); font-size:13px; letter-spacing:.04em}
+.kl-dauer{margin-left:auto; color:var(--muted); font:500 13px/1.4 var(--mono)}
+.kl-fehl{color:var(--muted); font-size:11px}
+
+/* --- Knöpfe --- */
+.kl-knopf{font-family:var(--mono)}
+.kl-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
+.kl-breit{width:100%; max-width:none}
+
+/* --- Startseiten-Zeile (B § 4) --- */
+.kl-start{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px}
+.kl-start-etikett{color:var(--muted); font-size:12px}
+.kl-start-feld{padding:8px 12px; border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel-2); color:var(--ink); font:500 15px/1.3 var(--mono); width:200px}
+.kl-start-knopf{flex:0 0 auto}
+
 /* ---- kompetenz.css ---- */
 /* Kompetenzkarte im Lernstand (E2, Hebel 11a) – Präfix kk- */
 .kk-karte{padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
@@ -2328,7 +2389,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 <script>
 "use strict";
 const LABOR_VERSION = "2.0.0";
-const LABOR_BAU = "c3fff0b3";
+const LABOR_BAU = "f789fd1f";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -11751,7 +11812,9 @@ Object.assign(DATEN.lehrtexte, {
    `mini-denkhilfen-b.js`) lädt DAVOR und würde von der Grunddatei überschrieben.
 
    WARUM Object.assign UND NICHT EINE ZWEITE ZUWEISUNG. Die Grunddatei setzt
-   `DATEN.miniDenkhilfen = {…}` mit 25 Einträgen. Ein zweites `=` hier würde sie ersetzen.
+   `DATEN.miniDenkhilfen = {…}` — nach dem Nachzug der 35 Einträge aus task-6 sind es
+   60 Einträge (25 waren es vorher; die Zahl steht hier, damit der nächste Leser sie
+   nicht aus dem Kopf überschätzt). Ein zweites `=` hier würde sie ersetzen.
    Der Aufruf unten hängt deshalb IDEMPOTENT an: fehlt das Paket, entsteht es; ist es da,
    bleibt es und wird nur ergänzt. Reihenfolge-unabhängig, deterministisch, kein DOM.
 
@@ -14321,6 +14384,7 @@ const Spiel = {};
 
 Spiel.VERSION = 3;                 /* v:3 (Hilfestellung): train – Migration ergänzt Standardwerte */
 Spiel.EINSTIEG_TICKET = "salon-01";   /* erstes Ticket des Onboardings (Kabel fehlt) */
+Spiel.KLASSENRAUM = "klassenraum";   /* eigener Speicher-Schluessel der Klassenraum-Sitzung (Stufe A, Fassung 1; src/spiel/klassenraum.js) */
 Spiel.ergaenzer = {};
 Spiel._st = null;
 Spiel._einst = null;
@@ -18122,39 +18186,685 @@ Spiel.karriere.bezahlen = function(euro, grund){
   return true;
 };
 
+/* ---- spiel/klassenraum-codec.js ---- */
+"use strict";
+/* ---------- Klassenraum: der Codec (Stufe A1) ----------
+   Vertrag: docs/entwicklung/Klassenraum/A – Codec und Determinismus.md § 1 (Format, Prüfsumme,
+   Fehlerklassen), § 2 (Bit-Budget, eingefrorene Tabellen), § 3.1 (Seed-Kanonisierung),
+   § 4.2 (Netzkennwert), § 6 (Ergebnis-Code). Architektur § 12.
+   Diese Datei ist REIN: kein DOM, kein `Spiel`, kein Store, kein `Date`, keine Uhr, kein
+   `Math.random`, keine Ausnahme nach außen und KEINE Seiteneffekte beim Laden. Sie liest die
+   eingefrorenen Tabellen NICHT selbst — die ID-Listen übergibt der Aufrufer an `tabellen()`
+   (sie liegen als Literale in `src/spiel/klassenraum.js`, § 2.3 Regel 1). Nur die LÄNGEN der
+   Tabellen sind hier eingefroren, weil sie das Format bestimmen (Indizes 58..63 / 27..63 sind
+   „andere Fassung", § 2.3).
+
+   Auftragscode  NL-XXXX-XX   20 Bit Nutzlast + 10 Bit Prüfsumme = 30 Bit = 6 Zeichen, gedruckt 10
+     n = (sitzung << 15) | (art << 14) | (index << 8) | variante
+     sitzung 5 Bit (0..31) · art 1 Bit (0 hand / 1 generiert) · index 6 Bit (0..63) · variante 8 Bit
+   Ergebnis-Code E-XXXX-XXX   25 Bit Nutzlast + 10 Bit Prüfsumme = 35 Bit = 7 Zeichen, gedruckt 10
+     n = (sitzung << 20) | (platz << 15) | (sterne << 11) | (versuche << 9) | dauer
+     sitzung 5 · platz 5 · sterne 4 (HALBE Sterne 0..10) · versuche 2 (0..3) · dauer 9 (10-s-Einheiten)
+   Prüfsumme über die Nutzzeichen (Werte 0..31):
+     C1 = (1·v0 + 2·v1 + 3·v2 + …) mod 31     31 ist prim  → fängt Einzel-Ersetzungen
+     C2 = (1·v0 + 3·v1 + 5·v2 + …) mod 32     ungerade Gewichte → fängt Nachbarvertauschungen
+
+   ALPHABET: 32 Zeichen, kein I, kein O, keine 0, keine 1 (Verwechslungsgefahr). 5 Bit je Zeichen.
+   Normalisierung: Großschreibung → alles außer [0-9A-Z] weg → führendes NL (bzw. E) NUR abschneiden,
+   wenn danach genau 6 (bzw. 7) Zeichen übrig bleiben (§ 1.1). Das ist die Präfix-Falle: der gültige
+   Code NL-NLHW-K3 beginnt selbst mit NL und bleibt trotzdem lesbar.
+   Rückgabe bei Fehlern ist IMMER {ok:false, fehler:"klasse", grund:"Satz für die Oberfläche"} —
+   nie eine Ausnahme; bei leerer Eingabe null („nichts getippt = keine Fehlermeldung", § 1.5).
+
+   Sterne-Einheit: § 6.1 trägt im Code HALBE Sterne (4 Bit, 0..10). Diese Datei nimmt und gibt an
+   der Schnittstelle die ANZEIGE-Sterne (0..5 in 0,5-Schritten, also 4.5 = vier-einhalb), weil genau
+   so der Spielstand und der gemessene Beispiel-Round-Trip aussehen (§ 5.1: „sterne = 5 →
+   E-KFWS-HZM → gelesen {sitzung 9, platz 5, sterne 5, versuche 1, dauerS 70}"). Der Rohwert steht
+   als `sterneHalbe` daneben. */
+const KlassenraumCodec = (() => {
+
+  /* ---------- Alphabet und Zeichenrechnung (§ 1.1) ---------- */
+  const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const BASIS = 32;
+  const wert = c => ALPHABET.indexOf(c);
+  /* A:36: `zeichen(v) = ALPHABET[v % 32]` — MIT Modulo. (Die Probe `A-api.js` ließ den Modulo weg;
+     A gewinnt.) Nicht-Zahlen geben null statt eines stillen `undefined`. */
+  const zeichen = v => Number.isInteger(v) ? ALPHABET[((v % BASIS) + BASIS) % BASIS] : null;
+
+  /* ---------- Eingefrorene Formatgrenzen (§ 2.3, § 3.3) ----------
+     58 handgeschriebene Aufträge (gemessen § 2.2), 27 Fertigkeiten, davon 24 mit Injektor.
+     Die LÄNGE gehört zum Format: ein Code mit Auftragsindex 58..63 bzw. Fertigkeitsindex 27..63
+     stammt aus einer anderen Fassung. Wächst eine Tabelle, übergibt der Aufrufer seine Liste an
+     `tabellen()` — dann gilt SEINE Länge (Anhängeregel § 2.3). */
+  const TABELLE_AUFTRAEGE_LAENGE = 58;
+  const TABELLE_SKILLS_LAENGE = 27;
+  const KANON_FENSTER = 64;              /* § 3.1: höchstens 64 Seeds je Variante durchsuchen */
+
+  /* ---------- Prüfsumme (§ 1.2) ---------- */
+  function pruefsummen(werte){
+    let c1 = 0, c2 = 0;
+    for (let i = 0; i < werte.length; i++) { c1 += (i + 1) * werte[i]; c2 += (2 * i + 1) * werte[i]; }
+    c1 %= 31; c2 %= 32;
+    return {C1: c1, C2: c2, z1: ALPHABET[c1], z2: ALPHABET[c2]};
+  }
+
+  /* ---------- Meldungstexte (§ 1.5, Wortlaut der Oberfläche) ---------- */
+  const TEXT = {
+    laenge: n => `Der Code hat ${n} Zeichen – er braucht 6 (gedruckt z. B. NL-4F7K-2Q).`,
+    laengeErgebnis: n => `Der Ergebnis-Code hat ${n} Zeichen – er braucht 7 (gedruckt z. B. E-KFWS-HZM).`,
+    zeichen: "Im Code kommt kein I, kein O, keine 0 und keine 1 vor – hast du 0 statt O oder 1 statt I getippt?",
+    pruefziffer: "Die Prüfziffer passt nicht – hast du dich vertippt?",
+    bereich: n => `Der Sterne-Wert im Code liegt außerhalb des Bereichs (0..10 halbe Sterne): ${n}.`,
+    fassungAuftrag: (i, l) => `Auftragsindex ${i} liegt hinter dem Ende der Auftragstabelle (${l} Einträge).`,
+    fassungSkill: (i, l) => `Fertigkeitsindex ${i} liegt hinter dem Ende der Fertigkeitstabelle (${l} Einträge).`,
+    keinAuftrag: (i, id) => `Den Auftrag Nr. ${i}${typeof id === "string" && id ? " (" + id + ")" : ""} gibt es in dieser Fassung nicht.`,
+    keinSeed: id => `Für die Fertigkeit ${id} liefert kein Seed im Fenster (${KANON_FENSTER}) einen spielbaren Auftrag.`,
+    hinweisErgebnis: "Das sieht nach einem Ergebnis-Code aus (E-…). Hier gehört der Auftragscode hin (NL-…).",
+    hinweisAuftrag: "Das sieht nach einem Auftragscode aus (NL-…). Hier gehört der Ergebnis-Code hin (E-…).",
+  };
+
+  /* ---------- Normalisierung (§ 1.1) ----------
+     Gibt {rest, ohneTrenner, praefixWeg, roh} | null (leere Eingabe). Prüft NICHT die Länge:
+     die Fehlermeldung nennt die Länge NACH dem Abschneiden des Präfix, aber VOR der Präfix-Regel —
+     so sind die gemessenen Texte aus § 1.5 reproduzierbar („NL-ABC" → 5 Zeichen, „E-ABC" → 4). */
+  function entkernen(roh, praefix, nutzlaenge){
+    if (roh === null || roh === undefined) return null;
+    const s0 = String(roh);
+    if (s0.trim() === "") return null;
+    const ohneTrenner = s0.toUpperCase().replace(/[^0-9A-Z]/g, "");
+    let rest = ohneTrenner, praefixWeg = false;
+    if (rest.startsWith(praefix) && rest.length - praefix.length === nutzlaenge) { rest = rest.slice(praefix.length); praefixWeg = true; }
+    return {roh: s0, ohneTrenner, rest, praefixWeg};
+  }
+  /* Fremdzeichen (I, O, 0, 1) im Nutzteil — nach der Längenprüfung, sonst nennt die Meldung sie nicht. */
+  const fremdzeichen = rest => [...new Set([...rest].filter(c => wert(c) < 0))];
+
+  /* ---------- Auftragscode bauen (§ 2.1) ----------
+     Felder außerhalb ihrer Bitbreite ergeben null (nie ein falscher Code, nie eine Ausnahme). */
+  function auftragBauen(felder){
+    const f = felder || {};
+    const ganz = (v, max) => (Number.isInteger(v) && v >= 0 && v <= max) ? v : null;
+    const sitzung = ganz(f.sitzung, 31), index = ganz(f.index, 63), variante = ganz(f.variante, 255);
+    const art = f.art === "hand" ? 0 : f.art === "generiert" ? 1 : ganz(f.art, 1);
+    if (sitzung === null || index === null || variante === null || art === null) return null;
+    const n = ((sitzung << 15) | (art << 14) | (index << 8) | variante) >>> 0;
+    const werte = [(n >>> 15) & 31, (n >>> 10) & 31, (n >>> 5) & 31, n & 31];
+    const p = pruefsummen(werte);
+    return "NL-" + werte.map(zeichen).join("") + "-" + p.z1 + p.z2;
+  }
+
+  /* ---------- Auftragscode lesen (§ 1.1, § 1.2, § 2.3) ----------
+     `tabellen` ist optional und kommt aus `tabellen({ticketIds, skillIds})`. Ohne Tabellen gelten
+     die eingefrorenen Längen (58/27) für die Klasse „fassung"; mit Tabellen werden zusätzlich die ID
+     aufgelöst (Feld `ticketId` bzw. `skill`) und die Fehlerklassen „fassung"/„auftrag" vergeben.
+     Reihenfolge der Prüfungen: Länge → Fremdzeichen → Prüfsumme → freier Index → ID/Brauchbarkeit. */
+  function auftragLesen(roh, tabellenArg){
+    const k = entkernen(roh, "NL", 6);
+    if (k === null) return null;
+    if (k.rest.length !== 6) {
+      const r = {ok: false, fehler: "länge", grund: TEXT.laenge(k.rest.length), art: "auftrag", länge: k.rest.length, erwartet: 6};
+      if (k.rest.length === 8 && k.rest[0] === "E") r.hinweis = TEXT.hinweisErgebnis;
+      return r;
+    }
+    const fremd = fremdzeichen(k.rest);
+    if (fremd.length) return {ok: false, fehler: "zeichen", grund: TEXT.zeichen, art: "auftrag", zeichen: fremd.join(""), fremdzeichen: fremd.join(""), länge: 6};
+
+    const nz = k.rest.slice(0, 4), pz = k.rest.slice(4, 6);
+    const werte = [...nz].map(wert);
+    const p = pruefsummen(werte);
+    if (p.z1 !== pz[0] || p.z2 !== pz[1]) {
+      const falsch = [];
+      if (p.z1 !== pz[0]) falsch.push("C1");
+      if (p.z2 !== pz[1]) falsch.push("C2");
+      return {ok: false, fehler: "prüfziffer", grund: TEXT.pruefziffer, art: "auftrag", erwartet: p.z1 + p.z2, gefunden: pz, falsch, C1: p.C1, C2: p.C2};
+    }
+
+    const n = ((werte[0] << 15) | (werte[1] << 10) | (werte[2] << 5) | werte[3]) >>> 0;
+    const sitzung = (n >>> 15) & 31, artBit = (n >>> 14) & 1, index = (n >>> 8) & 63, variante = n & 255;
+    const art = artBit === 0 ? "hand" : "generiert";
+    const code = "NL-" + nz + "-" + pz;
+    const t = tabellenArg || null;
+    const laenge = t ? (art === "hand" ? t.auftraege.laenge : t.skills.laenge)
+                     : (art === "hand" ? TABELLE_AUFTRAEGE_LAENGE : TABELLE_SKILLS_LAENGE);
+    if (index >= laenge) {
+      return {ok: false, fehler: "fassung", art: "auftrag", code, sitzung, artName: art, artBit, index, variante,
+        freierIndex: index, tabellenlänge: laenge, tabelle: art === "hand" ? "TABELLE_AUFTRAEGE" : "TABELLE_SKILLS",
+        grund: art === "hand" ? TEXT.fassungAuftrag(index, laenge) : TEXT.fassungSkill(index, laenge)};
+    }
+
+    const treffer = {ok: true, sitzung, art, artBit, index, variante, seed: variante + 1, code,
+      nutzzeichen: nz, prüfzeichen: pz, C1: p.C1, C2: p.C2};
+    if (!t) return treffer;
+
+    const id = art === "hand" ? t.auftraege.id(index) : t.skills.id(index);
+    const vorhanden = art === "hand" ? t.auftraege.vorhanden(index) : t.skills.vorhanden(index);
+    if (typeof id !== "string" || !id || !vorhanden) {
+      return {ok: false, fehler: "auftrag", grund: TEXT.keinAuftrag(index, id), art: "auftrag", code, sitzung, artName: art, artBit, index, variante,
+        tabelle: art === "hand" ? "TABELLE_AUFTRAEGE" : "TABELLE_SKILLS", unbekannteId: id || null};
+    }
+    if (art === "hand") { treffer.ticketId = id; return treffer; }
+    treffer.skill = id;
+    treffer.tauglich = t.skills.tauglich(index);
+    if (!treffer.tauglich) {
+      return {ok: false, fehler: "auftrag", grund: TEXT.keinSeed(id), art: "auftrag", code, sitzung, artName: art, artBit, index, variante,
+        skill: id, tauglich: false, tabelle: "TABELLE_SKILLS"};
+    }
+    return treffer;
+  }
+
+  /* ---------- Ergebnis-Code bauen (§ 6.1) ----------
+     `sterne` sind ANZEIGE-Sterne (0..5, halbe Schritte) → im Code `round(sterne·2)` (0..10).
+     Geklemmt statt geworfen: die Werte kommen aus dem Spiel (§ 1.5, Encoder klemmt still). */
+  const klemme = (v, max) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.max(0, Math.min(max, n)) : 0; };
+  function ergebnisBauen(felder){
+    const f = felder || {};
+    const sitzung = klemme(f.sitzung, 31), platz = klemme(f.platz, 31);
+    const sterneHalbe = klemme(Number(f.sterne) * 2, 10);
+    const versuche = klemme(f.versuche, 3);
+    const dauer = klemme(Number(f.dauerS) / 10, 511);          /* 10-s-Einheiten (§ 6.1) */
+    const n = ((sitzung << 20) | (platz << 15) | (sterneHalbe << 11) | (versuche << 9) | dauer) >>> 0;
+    const werte = [(n >>> 20) & 31, (n >>> 15) & 31, (n >>> 10) & 31, (n >>> 5) & 31, n & 31];
+    const p = pruefsummen(werte);
+    const zk = werte.map(zeichen).concat([p.z1, p.z2]);
+    return "E-" + zk.slice(0, 4).join("") + "-" + zk.slice(4, 7).join("");
+  }
+
+  /* ---------- Ergebnis-Code lesen (§ 6.1, § 1.5 „bereich") ---------- */
+  function ergebnisLesen(roh){
+    const k = entkernen(roh, "E", 7);
+    if (k === null) return null;
+    if (k.rest.length !== 7) {
+      const r = {ok: false, fehler: "länge", grund: TEXT.laengeErgebnis(k.rest.length), art: "ergebnis", länge: k.rest.length, erwartet: 7};
+      if (k.rest.length === 8 && k.rest.startsWith("NL")) r.hinweis = TEXT.hinweisAuftrag;
+      return r;
+    }
+    const fremd = fremdzeichen(k.rest);
+    if (fremd.length) return {ok: false, fehler: "zeichen", grund: TEXT.zeichen, art: "ergebnis", zeichen: fremd.join(""), fremdzeichen: fremd.join(""), länge: 7};
+
+    const nz = k.rest.slice(0, 5), pz = k.rest.slice(5, 7);
+    const werte = [...nz].map(wert);
+    const p = pruefsummen(werte);
+    if (p.z1 !== pz[0] || p.z2 !== pz[1]) {
+      const falsch = [];
+      if (p.z1 !== pz[0]) falsch.push("C1");
+      if (p.z2 !== pz[1]) falsch.push("C2");
+      return {ok: false, fehler: "prüfziffer", grund: TEXT.pruefziffer, art: "ergebnis", erwartet: p.z1 + p.z2, gefunden: pz, falsch, C1: p.C1, C2: p.C2};
+    }
+
+    const n = ((werte[0] << 20) | (werte[1] << 15) | (werte[2] << 10) | (werte[3] << 5) | werte[4]) >>> 0;
+    const sterneHalbe = (n >>> 11) & 15;
+    const code = "E-" + nz.slice(0, 4) + "-" + nz.slice(4) + pz;
+    if (sterneHalbe > 10) {
+      return {ok: false, fehler: "bereich", grund: TEXT.bereich(sterneHalbe), art: "ergebnis", code,
+        sitzung: (n >>> 20) & 31, platz: (n >>> 15) & 31, sterneHalbe, versuche: (n >>> 9) & 3, dauerS: (n & 511) * 10};
+    }
+    return {ok: true, sitzung: (n >>> 20) & 31, platz: (n >>> 15) & 31,
+      sterne: sterneHalbe / 2, sterneHalbe, versuche: (n >>> 9) & 3, dauerS: (n & 511) * 10,
+      code, nutzzeichen: nz, prüfzeichen: pz, C1: p.C1, C2: p.C2};
+  }
+
+  /* ---------- Netzkennwert (§ 4.2, „Klassenraum-Abdruck") ----------
+     Kanonische JSON-Abbildung (Objektschlüssel rekursiv sortiert, UTF-16-Reihenfolge → locale-frei),
+     FNV-1a über UTF-16-Codeeinheiten (bewusst ohne Buffer/TextEncoder: Browser, Einzeldatei und
+     headless rechnen identisch), 30 Bit → 6 Zeichen. `netz.zustand` (Laufzeit) bleibt draußen.
+     Kabel werden mit `<`/`>` verglichen, NICHT mit localeCompare (sonst hinge die Reihenfolge an ICU). */
+  function kanonisch(x){
+    if (Array.isArray(x)) return "[" + x.map(kanonisch).join(",") + "]";
+    if (x && typeof x === "object")
+      return "{" + Object.keys(x).sort().map(k => JSON.stringify(k) + ":" + kanonisch(x[k])).join(",") + "}";
+    return JSON.stringify(x === undefined ? null : x);
+  }
+  function fnv1a(text){
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h >>> 0;
+  }
+  function netzAbbild(netz){
+    const n = netz && typeof netz === "object" ? netz : {};
+    const geraete = {};
+    for (const id of Object.keys(n.geraete || {}).sort()) geraete[id] = n.geraete[id];
+    const schluessel = k => [k.a.geraet, k.a.port, k.b.geraet, k.b.port, k.id].join("\u0000");
+    const kabel = (n.kabel || []).map(k => ({id: k.id, a: {geraet: k.a.geraet, port: k.a.port},
+                                             b: {geraet: k.b.geraet, port: k.b.port}}))
+      .sort((x, y) => { const a = schluessel(x), b = schluessel(y); return a < b ? -1 : a > b ? 1 : 0; });
+    return {v: n.v, geraete, kabel};
+  }
+  function abdruck(netz){
+    const h = fnv1a(kanonisch(netzAbbild(netz))) & 0x3fffffff;
+    let s = "";
+    for (let i = 5; i >= 0; i--) s += zeichen((h >>> (i * 5)) & 31);
+    return s;
+  }
+
+  /* ---------- Seed-Kanonisierung (§ 3.1) ----------
+     Reine Arithmetik: der k-te Kandidat des Fensters ist `variante + 1 + k`. Die SUCHE (welcher
+     Kandidat eine gültige Fassung ergibt) braucht `def.fuerSeed` und `Spiel.ticketGueltig`; sie
+     gehört in `src/spiel/klassenraum.js`, nicht hierher. */
+  const klemmeByte = v => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.max(0, Math.min(255, n)) : 0; };
+  function kanonSeed(variante, k){
+    const schritt = Math.round(Number(k));
+    const kk = Number.isFinite(schritt) ? Math.max(0, Math.min(KANON_FENSTER - 1, schritt)) : 0;
+    return klemmeByte(variante) + 1 + kk;
+  }
+
+  /* ---------- Eingefrorene Indextabellen (§ 2.3) ----------
+     Baut NUR Nachschlagewerke über die ÜBERGEBENEN Listen — in der gegebenen Reihenfolge, ohne
+     Sortierung, ohne Kopie der IDs zu verändern (Regel 1 und 2: einfrieren, nur anhängen).
+     Einträge dürfen Strings sein oder {id, tauglich?, ersterSeed?}. */
+  function eineTabelle(roh){
+    const eintraege = (Array.isArray(roh) ? roh : []).map((e, index) => {
+      const o = typeof e === "string" ? {id: e} : (e && typeof e === "object" ? e : {});
+      return {index, id: typeof o.id === "string" && o.id ? o.id : null,
+        /* `vorhanden:false` meldet der Aufrufer, wenn die eingefrorene ID es in DIESER Fassung nicht
+           mehr gibt (§ 2.3 Regel 3: beim Laden prüfen). Dann liefert der Codec `auftrag` statt eines
+           falschen Auftrags — mit der ID im Text, wie § 1.5 es gemessen zeigt. */
+        vorhanden: o.vorhanden !== false,
+        tauglich: o.tauglich !== false,
+        ersterSeed: Number.isInteger(o.ersterSeed) ? o.ersterSeed : null};
+    });
+    const nachId = new Map();
+    for (const e of eintraege) if (e.id !== null && !nachId.has(e.id)) nachId.set(e.id, e.index);
+    const gueltig = i => Number.isInteger(i) && i >= 0 && i < eintraege.length;
+    return {
+      laenge: eintraege.length,
+      ids: eintraege.map(e => e.id),
+      eintraege,
+      id: i => (gueltig(i) ? eintraege[i].id : null),
+      index: id => (nachId.has(id) ? nachId.get(id) : -1),
+      hat: id => nachId.has(id),
+      vorhanden: i => (gueltig(i) ? eintraege[i].vorhanden : false),
+      tauglich: i => (gueltig(i) ? eintraege[i].tauglich : false),
+      ersterSeed: i => (gueltig(i) ? eintraege[i].ersterSeed : null),
+    };
+  }
+  function tabellen(o){
+    const q = o || {};
+    const auftraege = eineTabelle(q.ticketIds);
+    const skills = eineTabelle(q.skillIds);
+    return {
+      auftraege, skills,
+      /* § 3.3: nur die Fertigkeiten mit Injektor dürfen angeboten werden. A hat dort „24 von 27"
+         gemessen — das war VOR den Injektoren aus task-5. Heute sind alle 27 adressierbar
+         (gemessen: 27/27 liefern bei Seed 1 einen gültigen Auftrag, 0 Kanonisierungsschritte);
+         die Tabelle trägt deshalb für alle 27 `tauglich: true`. Siehe Architektur § 12.2. */
+      tauglicheFertigkeiten: () => skills.eintraege.filter(e => e.tauglich && e.id)
+        .map(e => ({skill: e.id, index: e.index, ersterSeed: e.ersterSeed})),
+    };
+  }
+
+  return {
+    ALPHABET, BASIS, KANON_FENSTER, TABELLE_AUFTRAEGE_LAENGE, TABELLE_SKILLS_LAENGE,
+    wert, zeichen, pruefsummen, entkernen,
+    auftragBauen, auftragLesen, ergebnisBauen, ergebnisLesen,
+    abdruck, netzkennwert: abdruck,          /* § 5 nennt die API-Funktion `netzkennwert` */
+    kanonSeed, tabellen,
+    kanonisch, fnv1a,                        /* für Nachrechnungen (A:459: fnv1a("A") = 3289118412) */
+  };
+})();
+
 /* ---- spiel/klassenraum.js ---- */
 "use strict";
-/* ---------- Spiel: Klassenraum-Auftrag (Auftragscode der Lehrkraft; Architektur § 12, Entwurf § 4.5/E2) ----------
-   Ein Klassenraum-Auftrag entsteht aus einem angesagten Code: jedes Gerät baut denselben Fall
-   (`Spiel.instanzErstellen({ticketId|gen, seed, quelle:"klassenraum", ohneFlow:true})`, § 12 „Öffnungsweg"),
-   geöffnet wird er über `Spiel.oeffnen(iid)`. Er ist eine ÜBUNG im Unterricht – kein Auftrag der Karriere:
+/* ---------- Spiel: Klassenraum (Stufe A, 2.0-Fundament; Architektur § 12, A – Codec und Determinismus § 5-§ 7) ----------
+   Ein Auftrag entsteht aus einem ANGESAGTEN CODE: die Lehrkraft erzeugt ihn hier, jedes Gerät baut denselben
+   Fall aus demselben Code. Kein Konto, kein Server, kein Netz (Server = Stufe C, QR = Stufe D – beide später).
 
-   · KEIN Geld, KEIN Ruf: `Spiel.gutschreiben` wird nicht gerufen, `st.buch` bleibt leer.
-   · KEIN `st.erledigt`: damit zählen Wochenziel (`woche.js`), Abzeichen (`abzeichen.js`), Auftragsformen
-     (`formen.js`), Erste Stunde (`erstestunde.js`), Tagesbilanz (`tag.js`) und der Empfehlungs-Zähler
-     (`kundenakte.js`) nicht mit – und die Kundensterne (`st.kunden[id].sterne`) bleiben leer.
-   · KEIN Karriere-Ereignis: es wird kein „ticket-geloest" gemeldet; an diesem Bus-Ereignis hängt
-     `Spiel.karriere.ticketGeloest` (Wartung, Arbeitstag, Aufstieg, Statistik).
-   · Der Lernwert BLEIBT: `Spiel.lernenNachAbnahme(inst, def, abnahme)` läuft wie bei einem echten Auftrag
-     (`L.ueben` je Fertigkeit, Fehlerheft bei Fehlschlägen) – dieselbe Auflage wie beim Training
-     (`Spiel.training.abnehmen` ruft ihn selbst).
+   ÖFFNUNGSWEG (§ 5, wörtlich):
+     const c = Spiel.klassenraum.ausCode(eingabe);
+     if (!c) return;                                  // nichts eingetippt
+     if (c.fehler) return zeigeHinweis(c.grund);      // Tippfehler, fremde Fassung …
+     const inst = c.skill
+       ? Spiel.instanzErstellen({gen: {skill: c.skill, seed: c.seed}, quelle: "klassenraum", ohneFlow: true})
+       : Spiel.instanzErstellen({ticketId: c.ticketId, seed: c.seed, quelle: "klassenraum", ohneFlow: true});
+     inst.klassenraum = {sitzung: c.sitzung, platz: Spiel.klassenraum.platz() ?? 0, code: c.code};
+     Spiel.oeffnen(inst.iid);
+   `ohneFlow: true` schadet nie und hält den Vertrag; `postfach.js` schließt die Quelle inzwischen selbst aus.
+   `opts.stufe` wird NIE übergeben (das wäre eine lokale Einstellung und machte den Auftrag je Gerät anders).
 
-   Durchgesetzt wird das an EINER Stelle: `Spiel.abschliessen` schickt `quelle === "klassenraum"` als erste
-   Zeile hierher um – symmetrisch zum Trainingszweig (`abnahme.js`, Zusage in Architektur § 13.3 Punkt 1).
-   Weil die Umleitung VOR jedem Nebeneffekt steht (vor der Zeitbuchung, vor `st.erledigt.push`, vor
-   `Spiel.gutschreiben`, vor der Kundenakte), entsteht gar kein Klassenraum-Eintrag im Spielstand; die
-   Quellfilter der Karriere-Stellen bleiben dadurch toter Vorsorge-Code und müssen nicht nachgezogen werden.
+   ZWEI ENTSCHEIDUNGEN DES LEADS (sie gelten, auch wo ältere Texte anderes sagen):
+   1. E1: der Auftrag ist im Postfach UNSICHTBAR (Spiel.postfach(), Offen-Zähler, „Heute"-Kachel, Ereignistakt –
+      postfach.js, hub.js, ereignisse.js). Die ältere Messzeile in „A – Codec und Determinismus" § 5
+      („Auftrag ist trotzdem im Postfach sichtbar") ist damit ÜBERHOLT; der Widerspruch ist dem Lead gemeldet.
+      Spiel.instanz(iid)/Spiel.oeffnen(iid) finden den Auftrag weiterhin.
+   2. KEINE BEWERTUNG: der Ergebnis-Code trägt Sterne, Fehlversuche und Dauer – kein Hilfe-Feld, keine Note.
 
-   Öffentliche Fläche: `Spiel.klassenraum.abnehmen(inst|iid, abnahme?)` → Ergebnis in der Form von
-   `Spiel.abschliessen`. Ohne bestandene Abnahme bleibt der Auftrag offen (wie beim Training). */
+   Der Codec (`KlassenraumCodec`, src/spiel/klassenraum-codec.js) ist eine eigene Datei und wird hier NUR
+   aufgerufen (Code bauen/lesen, Abdruck, Kanonisierung, Tabellen). Diese Datei baut keinen zweiten Codec.
+
+   Die eingefrorenen Tabellen (§ 2.3 Regel 1) stehen als Literal HIER; sie wurden in dieser Sitzung gegen die
+   Wirklichkeit gemessen: 58 Auftrags-IDs in Spiel.ticketReihe()-Reihenfolge, 27 Fertigkeiten in
+   DATEN.skills-Reihenfolge, jede mit ersterSeed 1 (alle 27 liefern bei Seed 1 einen gültigen Auftrag –
+   lab.portsec/lab.stp/lab.storage sind seit den Injektoren aus task-5 adressierbar; ältere Belege nennen
+   dort 24 von 27). Ein Test wacht über Reihenfolge und Präfix (§ 2.3 Regel 4).
+
+   `sitzung.plaetze` (Leitungsentscheidung L6, bewusst gegen A § 7.1, das „genau diese 14 Felder" sagt):
+   0 = „nicht eingestellt", sonst 1..31 – die Ampel der Lehrkraft rechnet „offen" als plaetze − eingetragen.
+
+   Kein Eintrag in store "labor": der Spielstand bleibt unberührt. Eigener Schlüssel Spiel.KLASSENRAUM
+   (zustand.js) mit `fassung: 1`. */
 Spiel.klassenraum = (() => {
-  /* Die Abnahme in der Form von Spiel.abnahme(inst); fehlt sie, wird sie hier geholt. */
+  const SCHLUESSEL = () => Spiel.KLASSENRAUM || "klassenraum";
+  const FASSUNG = 1;
+  const KANON_FENSTER = 64;
+
+  /* ---------- Der Codec ---------- */
+  const C = () => (typeof KlassenraumCodec !== "undefined" && KlassenraumCodec) || null;
+  const OHNE_CODEC = {fehler: "fassung", grund: "Der Codec fehlt (src/spiel/klassenraum-codec.js) – ohne ihn lässt sich kein Klassenraum-Code bauen."};
+
+  /* ---------- Die eingefrorenen Tabellen (§ 2.3) ---------- */
+  const TABELLE_AUFTRAEGE = ["salon-01", "salon-02", "salon-03", "salon-04", "salon-05", "salon-06", "salon-hotline", "salon-projekt", "salon-terminal", "baeckerei-01", "baeckerei-02", "baeckerei-hotline", "baeckerei-03", "baeckerei-terminal", "buero-01", "buero-02", "buero-03", "buero-hotline", "buero-sicherheit-1", "buero-04", "buero-sicherheit-2", "buero-05", "buero-terminal", "buero-sicherheit-3", "buero-06", "buero-sicherheit-4", "buero-07", "buero-sicherheit-5", "salon-07", "praxis-01", "praxis-02", "praxis-03", "praxis-04", "praxis-hotline", "praxis-05", "praxis-06", "praxis-07", "praxis-projekt", "praxis-08", "praxis-09", "praxis-10", "autohaus-01", "autohaus-02", "autohaus-03", "autohaus-04", "autohaus-05", "autohaus-06", "autohaus-projekt", "autohaus-08", "autohaus-09", "autohaus-10", "mittel-01", "mittel-02", "mittel-03", "mittel-04", "storage-01", "storage-02", "storage-03"];
+  const TABELLE_SKILLS = [
+    {id: "lab.link", tauglich: true, ersterSeed: 1}, {id: "lab.ip", tauglich: true, ersterSeed: 1},
+    {id: "lab.netz", tauglich: true, ersterSeed: 1}, {id: "lab.gateway", tauglich: true, ersterSeed: 1},
+    {id: "lab.arp", tauglich: true, ersterSeed: 1}, {id: "lab.ping", tauglich: true, ersterSeed: 1},
+    {id: "lab.switch", tauglich: true, ersterSeed: 1}, {id: "lab.subnetz", tauglich: true, ersterSeed: 1},
+    {id: "lab.dhcp", tauglich: true, ersterSeed: 1}, {id: "lab.dns", tauglich: true, ersterSeed: 1},
+    {id: "lab.ports", tauglich: true, ersterSeed: 1}, {id: "lab.tcp", tauglich: true, ersterSeed: 1},
+    {id: "lab.cli", tauglich: true, ersterSeed: 1}, {id: "lab.speichern", tauglich: true, ersterSeed: 1},
+    {id: "lab.vlan", tauglich: true, ersterSeed: 1}, {id: "lab.trunk", tauglich: true, ersterSeed: 1},
+    {id: "lab.rostick", tauglich: true, ersterSeed: 1}, {id: "lab.acl", tauglich: true, ersterSeed: 1},
+    {id: "lab.route", tauglich: true, ersterSeed: 1}, {id: "lab.ttl", tauglich: true, ersterSeed: 1},
+    {id: "lab.nat", tauglich: true, ersterSeed: 1}, {id: "lab.portfwd", tauglich: true, ersterSeed: 1},
+    {id: "lab.fw", tauglich: true, ersterSeed: 1}, {id: "lab.dmz", tauglich: true, ersterSeed: 1},
+    {id: "lab.portsec", tauglich: true, ersterSeed: 1}, {id: "lab.stp", tauglich: true, ersterSeed: 1},
+    {id: "lab.storage", tauglich: true, ersterSeed: 1},
+  ];
+
+  /* Die Tabelle des Codec wird EINMAL aus diesen Listen gebaut (§ 2.3 Regel 1: die Reihenfolge ist bindend,
+     der Codec sortiert nie um). Sie ist die einzige Quelle für Index → ID und wird auch dem Leser übergeben. */
+  let tabellenMerker = null;
+  function tabellen(){
+    if (tabellenMerker) return tabellenMerker;
+    const c = C();
+    if (!c || typeof c.tabellen !== "function") return null;
+    try {
+      tabellenMerker = c.tabellen({ticketIds: TABELLE_AUFTRAEGE.slice(), skillIds: TABELLE_SKILLS.map(x => Object.assign({}, x))});
+    } catch (e) { tabellenMerker = null; }
+    return tabellenMerker;
+  }
+  const hatInjektor = skill => Object.values(Spiel.INJEKTOREN || {}).some(i => (i.skills || []).includes(skill));
+
+  /* ---------- Kanonisierung (§ 3.1): dieselbe Schleife auf jedem Gerät ----------
+     Der Rückfall wird über den OBJEKTVERGLEICH erkannt: `fuerSeed` gibt bei „Fassung taugt nicht"
+     dasselbe Objekt zurück (daten/basis.js), bei gelungener Seed-Fassung ein neues. */
+  function kanonHand(def, variante){
+    const c = C();
+    if (!def) return {fehler: "auftrag", grund: "Diesen Auftrag gibt es in dieser Fassung nicht."};
+    if (typeof def.fuerSeed !== "function") return {fehler: "fassung", grund: "Dieser Auftrag kennt keine Seed-Fassungen (fuerSeed fehlt)."};
+    for (let k = 0; k < KANON_FENSTER; k++) {
+      const s = c.kanonSeed(variante, k);
+      let d = null;
+      try { d = def.fuerSeed(s); } catch (e) { d = null; }
+      if (d && d !== def && Spiel.ticketGueltig(d)) return {seed: s, def: d, eigene: true, schritte: k};
+    }
+    const s0 = c.kanonSeed(variante, 0);
+    let d0 = null;
+    try { d0 = def.fuerSeed(s0); } catch (e) { d0 = null; }
+    if (d0 && Spiel.ticketGueltig(d0)) return {seed: s0, def: d0, eigene: false, schritte: KANON_FENSTER};
+    return {fehler: "auftrag", grund: "Aus diesem Code lässt sich hier kein spielbarer Auftrag bauen."};
+  }
+  function kanonGeneriert(skill, variante){
+    const c = C();
+    for (let k = 0; k < KANON_FENSTER; k++) {
+      const s = c.kanonSeed(variante, k);
+      let d = null;
+      /* KEIN opts.stufe: das kommt aus Spiel.einst.wahl (lokale Einstellung) und machte den Auftrag je Gerät anders. */
+      try { d = Spiel.generiere(skill, s); } catch (e) { d = null; }
+      if (d && Spiel.ticketGueltig(d)) return {seed: s, def: d, schritte: k};
+    }
+    return {fehler: "auftrag", grund: "Aus diesem Code lässt sich hier kein spielbarer Auftrag bauen."};
+  }
+
+  /* ---------- Speicher (store "klassenraum", § 7.1) ---------- */
+  const version = () => (typeof LABOR_VERSION === "string" ? LABOR_VERSION : "");
+  const leer = () => ({fassung: FASSUNG, programm: version(), sitzung: null, platz: null, letzte: null, zuletzt: jetzt(), zaehler: 0});
+  function lies(){
+    const k = store.get(SCHLUESSEL(), null);
+    return k && typeof k === "object" && !Array.isArray(k) ? k : null;
+  }
+  function schreib(k){
+    k.fassung = FASSUNG;
+    k.programm = version();
+    k.zuletzt = jetzt();
+    store.set(SCHLUESSEL(), k);
+    if (typeof Spiel.sofortSpeichern === "function") Spiel.sofortSpeichern();   /* eine Sitzung steht sofort auf der Platte */
+    return k;
+  }
+  const sitzungVon = k => (k && k.sitzung && typeof k.sitzung === "object" && !Array.isArray(k.sitzung)) ? k.sitzung : null;
+  const platzzahl = x => (Number.isInteger(x) && x >= 0 && x <= 31) ? x : null;
+
+  /* ---------- erzeugen (§ 5) ---------- */
+  function erzeugen(o){
+    if (o === null || o === undefined || typeof o !== "object" || Array.isArray(o))
+      return {fehler: "wahl", grund: "erzeugen erwartet ein Objekt mit genau einer Quelle: {ticketId} oder {skill}."};
+    const c = C(), tab = tabellen();
+    if (!c || !tab) return OHNE_CODEC;
+    const hatTicket = typeof o.ticketId === "string" && o.ticketId.length > 0;
+    const hatSkill = typeof o.skill === "string" && o.skill.length > 0;
+    if (hatTicket === hatSkill) return {fehler: "wahl", grund: "Bitte genau einen Auftrag oder eine Fertigkeit wählen."};
+    let art, index, ticketId = null, skill = null, basis = null;
+    if (hatTicket) {
+      art = "hand"; ticketId = o.ticketId;
+      index = tab.auftraege.index(ticketId);
+      if (index < 0) return {fehler: "auftrag", grund: `Diesen Auftrag gibt es in dieser Fassung nicht: ${ticketId}.`};
+      basis = (DATEN.tickets || []).find(t => t.id === ticketId) || null;
+      if (!basis) return {fehler: "auftrag", grund: `Diesen Auftrag gibt es in dieser Fassung nicht: ${ticketId}.`};
+    } else {
+      art = "generiert"; skill = o.skill;
+      index = tab.skills.index(skill);
+      if (index < 0) return {fehler: "auftrag", grund: `Diese Fertigkeit gibt es in dieser Fassung nicht: ${skill}.`};
+      if (!tab.skills.tauglich(index) || !hatInjektor(skill))
+        return {fehler: "auftrag", grund: `Für diese Fertigkeit lässt sich kein Auftrag bauen: ${skill}.`};
+    }
+    const dauerMin = Math.max(1, Math.min(120, typeof o.dauerMin === "number" && isFinite(o.dauerMin) ? Math.round(o.dauerMin) : 10));
+    /* Zähler lesen: er speist Sitzungskennung und Wunsch-Variante (kein Math.random, § 5).
+       Spiel.neuerSeed liest jetzt() und Spiel.st.naechsteIid – Spiel.st lädt den Stand bei Bedarf selbst. */
+    const alt = lies() || leer();
+    const zaehler = Number.isInteger(alt.zaehler) && alt.zaehler >= 0 ? alt.zaehler : 0;
+    const id = 1 + (Spiel.neuerSeed("klassenraum-id:" + zaehler) % 31);                        /* 1..31 */
+    const wunsch = typeof o.seed === "number" && isFinite(o.seed) ? (o.seed >>> 0) : Spiel.neuerSeed("klassenraum-variante:" + zaehler);
+    const variante = wunsch % 256;                                                            /* 0..255 */
+    const kanon = art === "hand" ? kanonHand(basis, variante) : kanonGeneriert(skill, variante);
+    if (kanon.fehler) return {fehler: kanon.fehler, grund: kanon.grund};
+    const code = c.auftragBauen({sitzung: id, art, index, variante});
+    if (typeof code !== "string" || !code) return {fehler: "fassung", grund: "Der Codec konnte keinen Auftragscode bauen."};
+    const titel = typeof o.titel === "string" && o.titel ? o.titel
+      : (kanon.def && kanon.def.titel) || (art === "generiert" ? ((DATEN.skills || []).find(s => s.id === skill) || {}).name : ticketId) || "Klassenraum-Auftrag";
+    const sitzung = {
+      id, titel, art, ticketId: art === "hand" ? ticketId : kanon.def.id, skill: art === "generiert" ? skill : null,
+      index, variante, seed: kanon.seed, eigene: art === "hand" ? !!kanon.eigene : false, schritte: kanon.schritte,
+      code, dauerMin, plaetze: platzzahl(o.plaetze) ?? 0, erstellt: jetzt(), ergebnisse: {},
+    };
+    schreib(Object.assign({}, alt, {
+      sitzung, zaehler: zaehler + 1,
+      platz: platzzahl(alt.platz),                                 /* eigener Platz dieses Geräts bleibt */
+      letzte: typeof alt.letzte === "string" ? alt.letzte : null,
+    }));
+    Spiel.melden("klassenraum", {art: "erzeugt", sitzung: sitzung.id, code});
+    return tief(sitzung);
+  }
+
+  /* ---------- ausCode (§ 5: reine Rechnung, keine Ausnahme, keine Speicheränderung) ---------- */
+  function ausCode(eingabe){
+    const c = C(), tab = tabellen();
+    if (!c || !tab) return OHNE_CODEC;
+    let r = null;
+    try { r = c.auftragLesen(eingabe, tab); } catch (e) { return {fehler: "prüfziffer", grund: "Der Code ließ sich nicht lesen."}; }
+    if (r === null || r === undefined) return null;                    /* nichts eingetippt = keine Fehlermeldung */
+    if (r.ok !== true) {
+      /* Der Codec liefert zu jeder Fehlerklasse einen Hinweis (z. B. „das sieht nach einem Ergebnis-Code aus") –
+         der gehört zur Oberfläche, § 1.5. */
+      const e = {fehler: r.fehler || "prüfziffer", grund: r.grund || "Dieser Code ist nicht gültig."};
+      if (typeof r.hinweis === "string" && r.hinweis) e.hinweis = r.hinweis;
+      return e;
+    }
+    const variante = r.variante, seedStart = c.kanonSeed(variante, 0);
+    let ticketId, skill = null, eigene = false, schritte = 0, def = null, seed = seedStart;
+    if (r.art === "generiert") {
+      skill = r.skill;
+      const kanon = kanonGeneriert(skill, variante);
+      if (kanon.fehler) return {fehler: "auftrag", grund: kanon.grund};
+      ticketId = kanon.def.id; def = kanon.def; seed = kanon.seed; schritte = kanon.schritte;
+    } else {
+      ticketId = r.ticketId;
+      const d = (DATEN.tickets || []).find(t => t.id === ticketId) || null;
+      if (!d) return {fehler: "auftrag", grund: `Diesen Auftrag gibt es in dieser Fassung nicht: ${ticketId}.`};
+      const kanon = kanonHand(d, variante);
+      if (kanon.fehler) return {fehler: "auftrag", grund: kanon.grund};
+      def = kanon.def; eigene = !!kanon.eigene; seed = kanon.seed; schritte = kanon.schritte;
+    }
+    return {ticketId, seed, art: r.art, sitzung: r.sitzung, index: r.index, variante, skill, eigene, schritte,
+      code: r.code, _def: def};
+  }
+
+  /* ---------- sitzung / ergebnisCode / ergebnisLesen / ergebnisEintragen (§ 5, § 6) ---------- */
+  function sitzung(){ const s = sitzungVon(lies()); return s ? tief(s) : null; }
+
+  function ergebnisCode(inst, abnahme){
+    if (!inst || typeof inst !== "object") return {fehler: "auftrag", grund: "Kein Auftrag übergeben."};
+    const kr = inst.klassenraum;
+    if (!kr || typeof kr !== "object" || Array.isArray(kr)) return {fehler: "auftrag", grund: "Dieser Auftrag kam nicht über einen Klassenraum-Code."};
+    if (!Number.isInteger(kr.sitzung) || kr.sitzung < 1 || kr.sitzung > 31)
+      return {fehler: "auftrag", grund: `inst.klassenraum.sitzung muss 1..31 sein (ist: ${JSON.stringify(kr.sitzung)}).`};
+    const platz = Number.isInteger(kr.platz) ? kr.platz : 0;
+    if (platz < 0 || platz > 31) return {fehler: "auftrag", grund: `inst.klassenraum.platz muss 0..31 sein (ist: ${JSON.stringify(kr.platz)}).`};
+    if (!abnahme || typeof abnahme !== "object") return {fehler: "abnahme", grund: "Ohne Abnahme gibt es keinen Ergebnis-Code."};
+    if (abnahme.bestanden !== true) return {fehler: "abnahme", grund: "Der Auftrag ist noch nicht bestanden."};
+    const sterne = typeof abnahme.sterne === "number" && isFinite(abnahme.sterne) ? Math.max(0, Math.min(5, abnahme.sterne)) : 0;
+    const versuche = Math.max(0, Math.min(3, (inst.abnahmen || 1) - 1));                     /* 2 Bit: Fehlversuche, „3+" */
+    const dauerS = Math.max(0, Math.min(5110, Math.round((inst.zeitMs || 0) / 1000)));        /* 9 Bit in 10-s-Einheiten */
+    const c = C();
+    if (!c || typeof c.ergebnisBauen !== "function") return OHNE_CODEC;
+    let code = null;
+    try { code = c.ergebnisBauen({sitzung: kr.sitzung, platz, sterne, versuche, dauerS}); } catch (e) { code = null; }
+    if (typeof code !== "string" || !code) return {fehler: "fassung", grund: "Der Codec konnte keinen Ergebnis-Code bauen."};
+    return code;
+  }
+
+  function ergebnisLesen(eingabe){
+    const c = C();
+    if (!c || typeof c.ergebnisLesen !== "function") return OHNE_CODEC;
+    let r = null;
+    try { r = c.ergebnisLesen(eingabe); } catch (e) { return {fehler: "prüfziffer", grund: "Der Ergebnis-Code ließ sich nicht lesen."}; }
+    if (r === null || r === undefined) return null;
+    if (r.ok !== true) return {fehler: r.fehler || "prüfziffer", grund: r.grund || "Dieser Ergebnis-Code ist nicht gültig."};
+    return {ok: true, sitzung: r.sitzung, platz: r.platz, sterne: r.sterne, dauerS: r.dauerS, versuche: r.versuche, code: r.code || null};
+  }
+
+  /* Idempotent: Schlüssel ist der PLATZ, der erste Eintrag gewinnt (§ 5.1, § 6.2). */
+  function ergebnisEintragen(eingabe){
+    const gelesen = ergebnisLesen(eingabe);
+    if (gelesen === null) return {fehler: "länge", grund: "Es wurde kein Ergebnis-Code eingegeben."};
+    if (gelesen.fehler) return {fehler: gelesen.fehler, grund: gelesen.grund};
+    const k = lies();
+    const s = sitzungVon(k);
+    if (!s) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – erst einen Auftrag erzeugen."};
+    if (gelesen.sitzung !== s.id)
+      return {fehler: "sitzung", grund: `Dieser Ergebnis-Code gehört zu Sitzung ${gelesen.sitzung} – hier läuft Sitzung ${s.id}.`};
+    if (!s.ergebnisse || typeof s.ergebnisse !== "object" || Array.isArray(s.ergebnisse)) s.ergebnisse = {};
+    const schluessel = String(gelesen.platz);
+    const alt = s.ergebnisse[schluessel];
+    if (alt) return alt.code === gelesen.code
+      ? {ok: true, neu: false, grund: "doppelt", platz: gelesen.platz, sterne: gelesen.sterne}
+      : {ok: true, neu: false, grund: "platz-schon-da", platz: gelesen.platz, sterne: alt.sterne};
+    s.ergebnisse[schluessel] = {platz: gelesen.platz, sterne: gelesen.sterne, dauerS: gelesen.dauerS, versuche: gelesen.versuche,
+      code: gelesen.code, zeit: jetzt(), quelle: "eingabe"};
+    k.letzte = gelesen.code;
+    schreib(k);
+    Spiel.melden("klassenraum", {art: "ergebnis", platz: gelesen.platz});
+    return {ok: true, neu: true, platz: gelesen.platz, sterne: gelesen.sterne};
+  }
+
+  /* ---------- Export / Import (§ 7.2: verlustfrei, mit Fassungsprüfung, wirft nie) ---------- */
+  function exportieren(){
+    const s = sitzungVon(lies());
+    if (!s) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – nichts zu exportieren."};
+    return JSON.stringify({format: "netzwerk-labor/klassenraum", fassung: FASSUNG, programm: version(), zeit: jetzt(), sitzung: tief(s)});
+  }
+
+  function importieren(text){
+    if (typeof text !== "string" || !text.trim()) return {fehler: "format", grund: "Die Datei ist leer."};
+    let roh = null;
+    try { roh = JSON.parse(text); } catch (e) { return {fehler: "format", grund: "Das ist keine JSON-Datei."}; }
+    if (!roh || typeof roh !== "object" || Array.isArray(roh)) return {fehler: "format", grund: "Das ist keine Klassenraum-Datei."};
+    if (roh.format !== "netzwerk-labor/klassenraum") return {fehler: "format", grund: "Das ist keine Klassenraum-Datei (format fehlt)."};
+    const f = Number.isInteger(roh.fassung) ? roh.fassung : FASSUNG;
+    if (f > FASSUNG) return {fehler: "fassung", grund: `Die Datei stammt aus einer neueren Fassung (Stand ${f}); dieses Programm kennt nur ${FASSUNG}.`};
+    if (!("sitzung" in roh)) return {fehler: "format", grund: "In der Datei fehlt die Sitzung."};
+    const s = roh.sitzung;
+    if (!s || typeof s !== "object" || Array.isArray(s)) return {fehler: "format", grund: "Die Sitzung in der Datei ist unbrauchbar."};
+    if (s.ergebnisse != null && (typeof s.ergebnisse !== "object" || Array.isArray(s.ergebnisse)))
+      return {fehler: "format", grund: "Die Ergebnisliste in der Datei ist unbrauchbar (Abbildung Platz → Ergebnis erwartet)."};
+    /* Pflichtfelder bekommen Standardwerte, unbekannte Felder bleiben erhalten (verlustfrei). */
+    const neu = Object.assign({}, s);
+    if (!Number.isInteger(neu.id)) neu.id = 1;
+    if (neu.art !== "hand" && neu.art !== "generiert") neu.art = "hand";
+    if (!Number.isInteger(neu.index)) neu.index = 0;
+    if (!Number.isInteger(neu.variante)) neu.variante = 0;
+    if (!Number.isInteger(neu.seed) || neu.seed < 1) neu.seed = 1;
+    if (typeof neu.eigene !== "boolean") neu.eigene = false;
+    if (!Number.isInteger(neu.schritte)) neu.schritte = 0;
+    if (typeof neu.code !== "string") neu.code = "";
+    if (typeof neu.titel !== "string") neu.titel = "";
+    if (neu.ticketId == null) neu.ticketId = null;
+    if (neu.skill == null) neu.skill = null;
+    if (!Number.isInteger(neu.dauerMin)) neu.dauerMin = 10;
+    if (!Number.isInteger(neu.plaetze)) neu.plaetze = 0;
+    if (!Number.isInteger(neu.erstellt)) neu.erstellt = jetzt();
+    if (!neu.ergebnisse || typeof neu.ergebnisse !== "object") neu.ergebnisse = {};
+    const alt = lies() || leer();
+    const k = Object.assign({}, alt, {
+      fassung: FASSUNG,
+      programm: typeof roh.programm === "string" ? roh.programm : version(),   /* abweichendes programm wird angenommen */
+      sitzung: neu, zaehler: Number.isInteger(alt.zaehler) ? alt.zaehler : 0,
+      platz: platzzahl(alt.platz),
+    });
+    schreib(k);
+    Spiel.melden("klassenraum", {art: "import", sitzung: neu.id});
+    return {ok: true, sitzung: tief(neu)};
+  }
+
+  /* ---------- Zusatzfläche (§ 5): Netzkennwert, taugliche Fertigkeiten, Platz, Plätze ---------- */
+  function netzkennwert(netz){
+    const c = C();
+    if (!c || typeof c.abdruck !== "function") return "";
+    try { return c.abdruck(netz); } catch (e) { return ""; }
+  }
+  function tauglicheFertigkeiten(){
+    const tab = tabellen();
+    const liste = tab ? tab.tauglicheFertigkeiten() : TABELLE_SKILLS.map((x, index) => ({skill: x.id, index, ersterSeed: x.ersterSeed}));
+    return liste.filter(x => hatInjektor(x.skill));    /* angeboten wird nur, was hier wirklich baubar ist */
+  }
+  function platz(){ const k = lies(); return k ? platzzahl(k.platz) : null; }
+  function platzSetzen(zahl){
+    if (!Number.isInteger(zahl) || zahl < 0 || zahl > 31) return {fehler: "wahl", grund: "Der Platz muss eine ganze Zahl von 0 bis 31 sein."};
+    const k = Object.assign(leer(), lies() || {});
+    k.platz = zahl;
+    schreib(k);
+    return {ok: true, platz: zahl};
+  }
+  /* Plätze der Sitzung (L6): Nenner der Ampel. 0 = „nicht eingestellt" (nicht 0 Plätze); gültig 1..31,
+     weil `platz` im Code 5 Bit hat. „Offen" wird gerechnet (plaetze − eingetragen), nirgends gespeichert. */
+  function plaetze(){ const s = sitzungVon(lies()); return s && Number.isInteger(s.plaetze) && s.plaetze >= 1 && s.plaetze <= 31 ? s.plaetze : 0; }
+  function plaetzeSetzen(zahl){
+    if (!Number.isInteger(zahl) || zahl < 0 || zahl > 31) return {fehler: "wahl", grund: "Die Platzzahl muss eine ganze Zahl von 0 bis 31 sein (0 = nicht eingestellt)."};
+    const k = lies();
+    const s = sitzungVon(k);
+    if (!s) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – erst einen Auftrag erzeugen."};
+    s.plaetze = zahl;
+    schreib(k);
+    Spiel.melden("klassenraum", {art: "plaetze", plaetze: zahl});
+    return {ok: true, plaetze: zahl};
+  }
+
+  /* ---------- abnehmen (task-2/task-21): die Annahmehälfte ----------
+     `Spiel.abschliessen` leitet `quelle === "klassenraum"` hierher um: kein Geld, kein Ruf, kein
+     `st.erledigt`, keine Wochenwertung, keine Abzeichen, kein Karriere-Ereignis – aber der Lernwert
+     bleibt (`Spiel.lernenNachAbnahme`), genau wie beim Training.
+     Die Bus-Meldung trägt den FERTIGEN Ergebnis-Code: er wird VOR dem Entfernen der Instanz gebildet
+     (danach findet Spiel.instanz(iid) nichts mehr) – die Oberfläche zeigt ihn als Toast mit Kopierknopf. */
   const abnahmeVon = (inst, ergebnis) => (ergebnis && typeof ergebnis === "object" && Array.isArray(ergebnis.ergebnisse))
     ? ergebnis : Spiel.abnahme(inst);
 
-  /* Spiel.klassenraum.abnehmen(inst, abnahme) → Ergebnis für den Ergebnisbildschirm.
-     Nimmt die Instanz (oder ihre Kennung). Schreibt NUR den Lernmotor – kein Euro, kein Ruf, kein
-     `st.erledigt`, keine Wochenwertung, keine Abzeichen, kein Karriere-Ereignis, kein Postfach-Nachschub. */
   function abnehmen(instanz, ergebnis){
     const inst = typeof instanz === "string" ? Spiel.instanz(instanz) : instanz;
     if (!inst) return {ok: false, grund: "Dieser Klassenraum-Auftrag ist nicht mehr da."};
@@ -18163,6 +18873,7 @@ Spiel.klassenraum = (() => {
     if (!def) return {ok: false, grund: "Zu diesem Auftrag fehlt die Aufgabe."};
     const ab = abnahmeVon(inst, ergebnis);
     const lernen = Spiel.lernenNachAbnahme(inst, def, ab);     /* der Lernwert – die eine Auflage */
+    const ergebnisText = ab.bestanden ? ergebnisCode(inst, ab) : null;
     if (ab.bestanden) Spiel.instanzEntfernen(inst.iid);        /* gelöst: der Auftrag ist durch (wie beim Training) */
     const daten = {
       ok: true, klassenraum: inst.klassenraum || null,
@@ -18173,13 +18884,16 @@ Spiel.klassenraum = (() => {
       naechstes: null, dex: [], raetsel: null, woche: null, verdacht: null, hotline: null, kundenakte: null, flow: null,
       hinweis: "Klassenraum-Auftrag: zahlt kein Geld und keinen Ruf und zählt nicht zur Karriere – er zählt für den Lernstand.",
     };
-    Spiel.melden("klassenraum", {iid: inst.iid, bestanden: daten.bestanden, sterne: daten.sterne});
+    Spiel.melden("klassenraum", {iid: inst.iid, bestanden: daten.bestanden, sterne: daten.sterne,
+      code: typeof ergebnisText === "string" ? ergebnisText : null});
     Spiel.geaendert("klassenraum");
     Spiel.sofortSpeichern();
     return daten;
   }
 
-  return {abnehmen};
+  return {erzeugen, ausCode, sitzung, ergebnisCode, ergebnisLesen, ergebnisEintragen,
+    exportieren, importieren, netzkennwert, tauglicheFertigkeiten, platz, platzSetzen, plaetze, plaetzeSetzen,
+    abnehmen, tabellen};
 })();
 
 /* ---- spiel/kompetenz.js ---- */
@@ -26845,6 +27559,408 @@ UI.klang = (() => {
   }
   const api = {spielen, pegel, zaehler, letzte: null, NAMEN: Object.keys(KLAENGE)};
   return api;
+})();
+
+/* ---- ui/klassenraum.js ---- */
+"use strict";
+/* ---------- UI: Klassenraum (Lehrkraft) und Mitarbeit (Azubi) · Bereich B ----------
+   Verbindlich: docs/entwicklung/Klassenraum/B – Oberfläche und Ablauf.md
+     § 1.2 Anmeldung in EINEM Start-Haken       § 2.1/2.2 DOM und Klassen (34, Präfix kl-)
+     § 3   Texte wörtlich                       § 4   Startseiten-Zeile (Haken auf Bus „ansicht“)
+     § 6.1 Öffnungsweg des Auftrags             § 6.5 Klassenraum-Abdruck (geladenes Netz!)
+     § 7   Ergebnis-Code als Toast              § 8   ein textarea, Block oder einzelne Codes
+     § 9   Ampel (oberer Median)                § 10  Export/Import über einen Knopf „Datei…“
+     § 11  Einstellungen: Schalter „Klassenraum-Server“ (nur Desktop)
+
+   DREI FESTLEGUNGEN DER LEITUNG, DIE HIER GELTEN (sie weichen von Entwurf D ab):
+     · Wo B und D sich widersprechen, gilt B (Knopf „Code anzeigen“, EIN textarea, „Datei…“).
+     · Die Startseiten-Zeile kommt aus DIESER Datei über den Bus-Haken „ansicht“ – `src/ui/hub.js`
+       wird NICHT angefasst (B § 4.1 nennt den Eingriff selbst „Fremdeingriff“; Entscheidung L5).
+     · Der Ergebnis-Code hängt am Bus-Kanal „klassenraum“ (src/spiel/klassenraum.js meldet ihn).
+       Das Ergebnis-Overlay in `src/ui/spiel.js` bleibt unberührt (B § 7.2).
+
+   KEINE BEWERTUNG (Nutzerentscheidung 09.10.2026): keine Punkte, keine Rangliste, kein Vergleich
+   zwischen Azubis. Die Ampel zählt Plätze und zeigt Dauern – sie benotet niemanden.
+   Der Bildungsstand bleibt unangetastet (E3): hier wird `Spiel.stufe` nie gesetzt.
+
+   GRÜN OHNE WIRKUNG ZÄHLT NICHT (AGENTS.md): beide Ansichten melden sich im echten Start-Haken an,
+   die Startseiten-Zeile hängt am echten Bus-Ereignis, der Ergebnis-Toast am echten Abnahmeweg. */
+UI.klassenraum = (() => {
+  const ABDRUCK_LEER = "— — — — —";
+  const START_FEHLER = "Kein Auftrag gefunden – frag deine Lehrkraft nach dem Code.";
+  const START_HINWEIS = "Auftragscode eintippen – der Auftrag öffnet sich wie aus dem Postfach.";
+
+  /* Die API defensiv lesen: fehlt der Codec (Bereich A) noch, bleibt die Fläche ruhig statt zu werfen. */
+  const api = () => { try { return (typeof Spiel !== "undefined" && Spiel.klassenraum) || null; } catch (e) { return null; } };
+  const kann = n => { const a = api(); return !!(a && typeof a[n] === "function"); };
+  const ruf = (n, ...args) => { try { const a = api(); return a && typeof a[n] === "function" ? a[n](...args) : null; } catch (e) { console.error("Klassenraum", n, e); return null; } };
+
+  /* ---------------- reine Helfer (kein DOM, headless prüfbar) ---------------- */
+
+  /* Dauer als M:SS – Haus-Vorlage src/spiel/tagebuch.js:52. Eingabe sind SEKUNDEN (A liefert dauerS). */
+  function dauerText(s){
+    const n = Math.max(0, Math.round(Number(s) || 0));
+    return `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
+  }
+  /* Halbe Sterne als Zeichen: 4,5 → ★★★★½ (A liefert halbe Sterne 0..10). */
+  function sterneText(halbe){
+    const n = Math.max(0, Math.min(10, Math.round(Number(halbe) || 0)));
+    return "★".repeat(Math.floor(n / 2)) + (n % 2 ? "½" : "") || "–";
+  }
+  /* Block in Stücke zerlegen (B § 8.2): Zeile und Stück – die Zeilennummer ist die Fehleradresse.
+     Bindestriche sind KEINE Trenner (sie gehören zum gedruckten Code); normalisiert wird in A. */
+  function zerlegen(block){
+    const aus = [];
+    String(block == null ? "" : block).replace(/\r/g, "").split("\n").forEach((z, i) => {
+      for (const stueck of z.split(/[\s,;]+/).filter(Boolean)) aus.push({zeile: i + 1, stueck});
+    });
+    return aus;
+  }
+  /* Die Ampel (B § 9): fertig = belegte Plätze, offen = plaetze − fertig, Median = OBERER Median
+     der gültigen Dauern > 0, auf ganze Sekunden. Ohne eingestellte Platzzahl bleibt sie gelb und
+     sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3). */
+  function ampel(sitzung){
+    const s = sitzung || {};
+    const werte = Object.keys(s.ergebnisse || {}).map(k => s.ergebnisse[k]).filter(x => x && typeof x === "object");
+    const plaetze = Math.max(0, Number(s.plaetze) || 0);
+    const fertig = werte.length;
+    const ohne = werte.filter(x => !(Number(x.platz) >= 1) || (plaetze > 0 && Number(x.platz) > plaetze)).length;
+    const dauern = werte.map(x => x.dauerS).filter(d => typeof d === "number" && isFinite(d) && d > 0).sort((a, b) => a - b);
+    const median = dauern.length ? Math.round(dauern[Math.floor(dauern.length / 2)]) : null;
+    const farbe = !fertig ? "" : (plaetze > 0 && fertig >= plaetze && !ohne) ? "kl-gruen" : "kl-gelb";
+    const teile = [];
+    if (!fertig) teile.push("noch keine Ergebnisse");
+    else {
+      teile.push(`fertig ${fertig}`);
+      teile.push(plaetze > 0 ? `offen ${Math.max(0, plaetze - fertig)}` : "Plätze nicht eingestellt");
+      teile.push(`Median ${median == null ? "–" : dauerText(median)}`);
+    }
+    if (ohne) teile.push(ohne === 1 ? "1 Ergebnis ohne gültigen Platz" : `${ohne} Ergebnisse ohne gültigen Platz`);
+    const zeilen = werte.slice().sort((a, b) => (Number(a.platz) || 0) - (Number(b.platz) || 0)).map(x => ({
+      platz: Number(x.platz) || 0,
+      sterne: Math.round((Number(x.sterne) || 0) * 2),
+      dauerS: typeof x.dauerS === "number" && x.dauerS > 0 ? x.dauerS : null,
+      versuche: Math.max(0, Number(x.versuche) || 0),
+    }));
+    return {farbe, summe: "Ampel: " + teile.join(" · "), fertig, plaetze, offen: plaetze > 0 ? Math.max(0, plaetze - fertig) : null, median, zeilen};
+  }
+
+  /* ---------------- gemeinsame Bausteine ---------------- */
+  const hinweisZeile = (klasse, text) => h("span", {class: klasse}, text);
+  /* Das Feld markieren, ohne es abzuweisen: aria-invalid + Farbe (klassenraum.css), Inhalt bleibt stehen. */
+  const markieren = (feld, an) => { if (feld) feld.setAttribute("aria-invalid", an ? "true" : "false"); };
+
+  /* Der Abdruck kommt aus dem TATSÄCHLICH geladenen Netz (B § 6.5), nie aus dem Code. */
+  function abdruck(){
+    const inst = UI.spiel?.inst;
+    if (!kann("netzkennwert") || !inst || !inst.netz) return null;
+    return ruf("netzkennwert", inst.netz) || null;
+  }
+  /* Die laufende Sitzung (tiefe Kopie) oder null. */
+  const sitzungJetzt = () => ruf("sitzung");
+
+  /* ================================================================ Lehrkraft */
+  const L = {};       /* die veränderlichen Behälter der Ansicht */
+
+  function lehrerZeigen(c){
+    const auftraege = (typeof Spiel.ticketReihe === "function" ? Spiel.ticketReihe() : [])
+      .map(t => h("option", {value: "id:" + t.id}, t.titel || t.id));
+    const fertigkeiten = (kann("tauglicheFertigkeiten") ? ruf("tauglicheFertigkeiten") : []) || [];
+    L.auftrag = h("select", {class: "kl-feld", "aria-label": "Auftrag"});
+    L.auftrag.append(...auftraege, ...(fertigkeiten.length
+      ? [h("optgroup", {label: "Übungen (erzeugt)"}, fertigkeiten.map(f => h("option", {value: "skill:" + f.skill}, f.skill)))] : []));
+    L.code = h("span", {class: "kl-code"}, ABDRUCK_LEER);
+    L.abdruck = h("span", {class: "kl-code"}, ABDRUCK_LEER);
+    L.hinweis = h("div", {class: "kl-block"}, hinweisZeile("kl-hinweis", ""));
+    L.lampe = h("span", {class: "kl-lampe"});
+    L.summe = hinweisZeile("kl-detail", "");
+    L.tafel = h("div", {class: "kl-tafel"});
+    L.codes = h("textarea", {class: "kl-feld kl-breit", rows: "6", "aria-label": "Ergebnis-Codes",
+      placeholder: "Einen Code je Zeile oder alles auf einmal einfügen.",
+      onkeydown: e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); ergebnisseEintragen(); } }});
+    c.replaceChildren(h("div", {class: "kl-lehrer"},
+      h("div", {class: "kl-spalte"},
+        h("header", {class: "kl-kopf"}, h("h2", {}, "Klassenraum"),
+          h("p", {class: "kl-klein"}, "Auftrag ansagen – jedes Gerät baut denselben Auftrag.")),
+        h("div", {class: "kl-werkzeug"},
+          hinweisZeile("kl-etikett", "Auftrag"), L.auftrag,
+          h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: codeAnzeigen}, "Code anzeigen")),
+        h("div", {class: "kl-karte"},
+          hinweisZeile("kl-etikett", "Auftragscode für die Klasse"),
+          h("div", {class: "kl-gross"}, L.code),
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Der Code ist die Ansage: jedes Gerät baut denselben Fall."),
+            h("button", {type: "button", class: "knopf kl-knopf", onclick: codeKopieren}, "Code kopieren")),
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), L.abdruck),
+          L.hinweis),
+        h("div", {class: "kl-ampel"},
+          h("div", {class: "kl-summe"}, L.lampe, L.summe),
+          L.tafel),
+        h("div", {class: "kl-form"},
+          hinweisZeile("kl-etikett", "Ergebnis-Codes"), L.codes,
+          h("span", {class: "kl-knoepfe"},
+            h("button", {type: "button", class: "knopf kl-knopf", onclick: ergebnisseEintragen}, "Eintragen"),
+            h("button", {type: "button", class: "knopf kl-knopf", onclick: dateiDialog}, "Datei…"))))));
+    lehrerFuellen();
+  }
+  /* `wieder` füllt NUR die Behälter – die Eingabefelder bleiben stehen, was darin steht, bleibt stehen. */
+  function lehrerWieder(){ if (L.summe) lehrerFuellen(); }
+
+  function lehrerHinweis(text){ if (L.hinweis) L.hinweis.replaceChildren(hinweisZeile("kl-hinweis", text || "")); }
+  function lehrerFuellen(){
+    if (!L.summe) return;
+    const s = sitzungJetzt();
+    L.code.textContent = (s && s.code) || ABDRUCK_LEER;
+    const ab = abdruck();
+    L.abdruck.textContent = ab || ABDRUCK_LEER;
+    const a = ampel(s);
+    L.lampe.className = "kl-lampe" + (a.farbe ? " " + a.farbe : "");
+    L.summe.textContent = a.summe;
+    L.tafel.replaceChildren(...a.zeilen.map(z => h("div", {class: "kl-zeile"},
+      hinweisZeile("kl-platz", z.platz >= 1 ? `Platz ${z.platz}` : "ohne Platz"),
+      hinweisZeile("kl-sterne", sterneText(z.sterne)),
+      hinweisZeile("kl-dauer", z.dauerS == null ? "–" : dauerText(z.dauerS)),
+      hinweisZeile("kl-fehl", z.versuche >= 3 ? "3+ Fehlversuche" : z.versuche === 1 ? "1 Fehlversuch" : `${z.versuche} Fehlversuche`))));
+  }
+
+  function codeAnzeigen(){
+    if (!kann("erzeugen")) return lehrerHinweis("Der Klassenraum ist in dieser Fassung nicht eingebaut.");
+    const wahl = String(L.auftrag.value || "");
+    const r = wahl.startsWith("skill:") ? ruf("erzeugen", {skill: wahl.slice(6)}) : ruf("erzeugen", {ticketId: wahl.slice(3)});
+    if (!r || r.fehler) return lehrerHinweis((r && r.grund) || "Der Auftrag ließ sich nicht anlegen.");
+    lehrerHinweis("");
+    lehrerFuellen();
+  }
+  function codeKopieren(){
+    const s = sitzungJetzt();
+    if (!s || !s.code) return lehrerHinweis("Noch keine Sitzung – wähle oben einen Auftrag und zeige den Code.");
+    const text = String(s.code);
+    if (UI.hub?.kopieren) return void UI.hub.kopieren(text, "Auftragscode kopiert – einfach an die Klasse weitergeben.");
+    UI.toast("Kopieren ging nicht – markier den Text und kopier ihn selbst.", "warn", {id: "kopieren", dauer: 3000});
+  }
+
+  /* B § 8: EIN Feld, Block oder einzeln; je Zeile eine Rückmeldung; Doppelte werden erkannt.
+     Der Schlüssel ist der PLATZ, der erste Eintrag gewinnt – das entscheidet A, nicht diese Datei. */
+  function ergebnisseEintragen(){
+    if (!kann("ergebnisEintragen")) return lehrerHinweis("Der Klassenraum ist in dieser Fassung nicht eingebaut.");
+    if (!sitzungJetzt()) return lehrerHinweis("Es läuft keine Sitzung – erst einen Auftrag erzeugen.");
+    const stuecke = zerlegen(L.codes.value);
+    if (!stuecke.length) return;
+    const zeilen = [], gesehen = new Map();
+    let neu = 0, doppelt = 0, fremd = 0, unlesbar = 0;
+    for (const {zeile, stueck} of stuecke){
+      const r = ruf("ergebnisEintragen", stueck);
+      if (!r || r.fehler){ if (r && r.fehler === "sitzung") fremd++; else unlesbar++; zeilen.push(`Zeile ${zeile} · ${(r && r.grund) || "unlesbar"}`); continue; }
+      if (r.neu === false){
+        doppelt++;
+        const wo = gesehen.get(stueck);
+        zeilen.push(`Zeile ${zeile} · ${stueck} · ` + (r.grund === "platz-schon-da"
+          ? `Platz ${r.platz} hat schon ein Ergebnis – das zuerst eingetragene gilt.`
+          : `doppelt${wo ? ` – steht schon in Zeile ${wo}` : ""}`));
+        continue;
+      }
+      gesehen.set(stueck, zeile);
+      neu++;
+      zeilen.push(`Zeile ${zeile} · Platz ${r.platz} · ${sterneText(Math.round((Number(r.sterne) || 0) * 2))} · eingetragen`);
+    }
+    const summe = [`${neu} eingetragen`, doppelt ? `${doppelt} doppelt` : null, fremd ? `${fremd} fremde Sitzung` : null,
+      unlesbar ? `${unlesbar} unlesbar` : null].filter(Boolean).join(" · ");
+    L.codes.value = "";
+    L.hinweis.replaceChildren(hinweisZeile("kl-hinweis", summe), ...zeilen.map(z => hinweisZeile("kl-hinweis", z)));
+    lehrerFuellen();
+  }
+
+  /* B § 10: Export UND Import auf EINEM Knopf (R12) – der Dialog bringt Escape und Fokusfalle mit.
+     Die Platzzahl der Klasse steht hier, nicht in der Ansicht: B § 2.1 legt SECHS Bedienelemente
+     fest, B § 9.4 verlangt für sie ein siebtes – Entscheidung der Leitung nötig (O1). */
+  function dateiDialog(){
+    const plaetze = h("select", {class: "kl-feld", "aria-label": "Plätze der Klasse"});
+    const jetzt = Number(ruf("plaetze")) || 0;
+    plaetze.append(h("option", {value: "0"}, "Plätze nicht eingestellt"),
+      ...Array.from({length: 31}, (_, i) => h("option", {value: String(i + 1)}, `${i + 1} Plätze`)));
+    plaetze.value = String(jetzt);
+    plaetze.onchange = () => { const r = ruf("plaetzeSetzen", Number(plaetze.value) || null); if (r && r.fehler) lehrerHinweis(r.grund); else lehrerFuellen(); };
+    const inhalt = h("div", {class: "kl-spalte"},
+      h("div", {class: "kl-form"}, hinweisZeile("kl-etikett", "Klassenstärke"), plaetze),
+      h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Die Sitzung liegt nur auf diesem Rechner. Die Datei ist die Sicherung – und der Weg auf einen anderen Rechner.")),
+      h("span", {class: "kl-knoepfe"},
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => { exportieren(); UI.app.dialogZu(); }}, "Exportieren"),
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => { importieren(); UI.app.dialogZu(); }}, "Importieren")));
+    UI.app.dialogOeffnen("Klassenraum-Datei", inhalt);
+  }
+  function exportieren(){
+    const text = ruf("exportieren");
+    if (!text || typeof text !== "string"){ UI.toast((text && text.grund) || "Es läuft keine Sitzung – nichts zu exportieren.", "warn", {id: "kl-datei", dauer: 6000}); return; }
+    try {
+      Promise.resolve(Plattform.datei.exportieren(`klassenraum-${heute()}.json`, text))
+        .then(ok => { if (ok !== false) UI.toast("Klassenraum-Datei gesichert.", "ok", {id: "kl-datei", dauer: 4000}); })
+        .catch(() => UI.toast("Die Datei ließ sich nicht sichern.", "warn", {id: "kl-datei", dauer: 6000}));
+    } catch (e) { console.error("Klassenraum-Export", e); UI.toast("Die Datei ließ sich nicht sichern.", "warn", {id: "kl-datei", dauer: 6000}); }
+  }
+  function importieren(){
+    let p;
+    try { p = Promise.resolve(Plattform.datei.importieren()); } catch (e) { console.error("Klassenraum-Import", e); return; }
+    p.then(text => {
+      if (!text) return;                                  /* abgebrochen: keine Meldung (B § 10.3) */
+      const vorher = ruf("exportieren");                  /* verlustfreie Sicherung für „Rückgängig“ */
+      const r = ruf("importieren", text);
+      if (!r || !r.ok){
+        const titel = r && r.fehler === "fassung" ? "Zu neues Format" : "Klassenraum-Datei";
+        UI.toast((r && r.grund) || "Das ist keine Klassenraum-Datei.", "warn", {id: "kl-datei", titel, dauer: r && r.fehler === "fassung" ? 14000 : 6000});
+        return;
+      }
+      const zurueck = typeof vorher === "string" ? {text: "Rückgängig", fn: () => { ruf("importieren", vorher); lehrerFuellen(); }} : null;
+      UI.toast("Datei eingelesen.", "ok", {id: "kl-datei", dauer: 8000, aktion: zurueck});
+      lehrerFuellen();
+    }).catch(() => UI.toast("Die Datei ließ sich nicht lesen.", "warn", {id: "kl-datei", dauer: 6000}));
+  }
+
+  /* ================================================================ Azubi */
+  const A = {};
+
+  function schuelerZeigen(c){
+    A.code = h("input", {type: "text", class: "kl-feld", placeholder: "NL-4F7K-2Q", spellcheck: "false",
+      autocomplete: "off", autocapitalize: "characters", "aria-label": "Auftragscode"});
+    A.platz = h("input", {type: "text", class: "kl-feld", inputmode: "numeric", maxlength: "2", "aria-label": "Platz",
+      placeholder: "0"});
+    A.hinweis = hinweisZeile("kl-hinweis", "Kein Auftrag offen – tippe den Code ein, den deine Lehrkraft ansagt.");
+    A.abdruck = h("span", {class: "kl-code"}, ABDRUCK_LEER);
+    const form = h("form", {class: "kl-form", onsubmit: e => { e.preventDefault(); schuelerOeffnen(); }},
+      hinweisZeile("kl-etikett", "Auftragscode"), A.code,
+      hinweisZeile("kl-etikett", "Platz"), A.platz,
+      h("button", {type: "submit", class: "knopf knopf-haupt kl-knopf"}, "Auftrag öffnen"));
+    c.replaceChildren(h("div", {class: "kl-schueler"},
+      h("div", {class: "kl-spalte"},
+        h("header", {class: "kl-kopf"}, h("h2", {}, "Mitarbeit"), h("p", {class: "kl-klein"}, START_HINWEIS)),
+        form,
+        h("div", {class: "kl-karte"},
+          hinweisZeile("kl-etikett", "Stand"), A.hinweis,
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), A.abdruck)))));
+    schuelerFuellen();
+  }
+  function schuelerWieder(){ if (A.hinweis) schuelerFuellen(); }
+
+  function schuelerHinweis(text, ok){
+    A.hinweis.textContent = text || "Kein Auftrag offen – tippe den Code ein, den deine Lehrkraft ansagt.";
+    markieren(A.code, !ok && !!text);
+  }
+  function schuelerFuellen(){
+    const inst = UI.spiel?.inst;
+    const offen = !!(inst && inst.klassenraum);
+    if (offen){
+      const platz = Number(inst.klassenraum.platz) || 0;
+      A.hinweis.textContent = `Auftrag angenommen: ${Spiel.defVon(inst)?.titel || "Auftrag"} · Platz ${platz}` +
+        (abdruck() ? ` · Klassenraum-Abdruck ${abdruck()} – vergleich ihn mit deinem Nachbarn.` : "");
+    }
+    A.abdruck.textContent = abdruck() || ABDRUCK_LEER;
+  }
+  function schuelerOeffnen(){
+    /* Platz zuerst merken – er gehört in den Ergebnis-Code (A § 2.2). Leer heißt: nicht ändern. */
+    const p = String(A.platz.value || "").trim();
+    if (p && kann("platzSetzen")){ const r = ruf("platzSetzen", Number(p)); if (r && r.fehler) return schuelerHinweis(r.grund, false); }
+    oeffnen(A.code.value, (text, ok) => schuelerHinweis(text, ok));
+  }
+
+  /* ---------------- der Öffnungsweg (B § 6.1 – so, und nur so) ---------------- */
+  function oeffnen(eingabe, melde){
+    if (!kann("ausCode")){ melde("Der Klassenraum ist in dieser Fassung nicht eingebaut.", false); return null; }
+    const c = ruf("ausCode", eingabe);
+    if (!c) return null;                                      /* nichts eingetippt: keine Meldung */
+    if (c.fehler){ melde(c.grund, false); return null; }       /* Tippfehler: markiert, nicht abgewiesen */
+    const offen = UI.spiel?.inst;
+    if (offen && offen.klassenraum && offen.klassenraum.code === c.code){
+      UI.spiel.oeffnen(offen.iid);                            /* derselbe Auftrag: weiterarbeiten */
+      melde("Dieser Auftrag ist schon offen. Weiterarbeiten?", true);
+      return offen;
+    }
+    if (!Spiel._st) Spiel.laden();                            /* frischer Schulrechner (B § 2.6) */
+    const inst = c.skill
+      ? Spiel.instanzErstellen({gen: {skill: c.skill, seed: c.seed}, quelle: "klassenraum", ohneFlow: true})
+      : Spiel.instanzErstellen({ticketId: c.ticketId, seed: c.seed, quelle: "klassenraum", ohneFlow: true});
+    inst.klassenraum = {sitzung: c.sitzung, platz: (Number(ruf("platz")) || 0), code: c.code};
+    UI.spiel.oeffnen(inst.iid);
+    melde(null, true);
+    return inst;
+  }
+
+  /* ---------------- Startseiten-Zeile (B § 4, Entscheidung L5: Haken auf Bus „ansicht“) ----------------
+     Kein Eingriff in hub.js: die Zeile hängt sich idempotent in die vorhandene `.hb-seite`. Sie
+     verschwindet mit jedem Neuaufbau des Hubs (hub.js:63 `replaceChildren`) von selbst und wird
+     danach frisch wieder eingehängt – auch nach `Spiel.neu()`. */
+  function startZeile(){
+    if (!kann("ausCode")) return null;                        /* ohne Bereich A kein DOM (B § 4.2) */
+    const feld = h("input", {type: "text", class: "kl-start-feld", id: "kl-start-feld", placeholder: "NL-4F7K-2Q",
+      spellcheck: "false", autocomplete: "off", autocapitalize: "characters", "aria-label": "Klassenraum-Code"});
+    const hinweis = hinweisZeile("kl-hinweis", "");
+    const los = () => oeffnen(feld.value, (text, ok) => { hinweis.textContent = text || (ok ? "" : START_FEHLER); markieren(feld, !ok && !!text); });
+    feld.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); los(); } });
+    return h("div", {class: "kl-start"},
+      h("label", {class: "kl-start-etikett", for: "kl-start-feld"}, "Klassenraum-Code"),
+      feld,
+      h("button", {type: "button", class: "hb-oder-zeile kl-start-knopf", onclick: los}, "Öffnen"),
+      hinweis);
+  }
+  function startEinhaengen(){
+    if (typeof document === "undefined" || !kann("ausCode")) return false;
+    const seite = document.querySelector(".hb-seite");
+    if (!seite || seite.querySelector(".kl-start")) return false;
+    const zeile = startZeile();
+    if (!zeile) return false;
+    const kacheln = seite.querySelector(".hb-kacheln");
+    if (kacheln && kacheln.parentNode === seite) seite.insertBefore(zeile, kacheln);   /* unter der Auftragskarte, über den Kacheln */
+    else seite.append(zeile);
+    return true;
+  }
+
+  /* ---------------- Ergebnis-Code für die Lehrkraft (B § 7) ----------------
+     Der Kanal „klassenraum“ kommt aus `Spiel.klassenraum.abnehmen` (src/spiel/klassenraum.js:51) –
+     das ist der EINE Abnahmeweg der vierten Quelle. Das Ergebnis-Overlay bleibt unberührt (§ 7.2). */
+  function ergebnisToast(d){
+    const inst = d && (typeof d.inst === "object" ? d.inst : null);
+    let code = d && typeof d.code === "string" ? d.code : null;
+    if (!code && inst && d.abnahme && kann("ergebnisCode")){ const r = ruf("ergebnisCode", inst, d.abnahme); if (typeof r === "string") code = r; }
+    if (!code) return null;                                   /* kein Code → kein Toast, kein Fehler */
+    UI.toast("Ergebnis-Code für deine Lehrkraft: " + code, "ok", {id: "klassenraum-code", titel: "Für die Lehrkraft",
+      dauer: 20000, aktion: {text: "Kopieren", fn: () => UI.hub.kopieren(code, "Ergebnis-Code kopiert – gib ihn deiner Lehrkraft.")}});
+    return code;
+  }
+
+  /* ---------------- Einstellungen (B § 11) ----------------
+     Baut seine Zeile mit denselben Klassen wie app.js (einst-zeile/einst-text/einst-steuer/schalter) –
+     die Haus-Helfer `zeile`/`schalter` sind nicht exportiert (app.js:401-403). */
+  function abschnitt(el){
+    if (!el) return;
+    const e = store.get("einst", {}) || {};
+    const nurDesktop = typeof Plattform !== "undefined" && Plattform.name === "tauri";
+    let an = !!e.klassenraumServer;
+    const knopf = h("button", {type: "button", role: "switch", class: "schalter" + (an ? " an" : ""), "aria-checked": String(an),
+      "aria-label": "Klassenraum-Server", onclick: () => {
+        an = !an;
+        knopf.setAttribute("aria-checked", String(an));
+        knopf.classList.toggle("an", an);
+        const frisch = store.get("einst", {}) || {};
+        frisch.klassenraumServer = an;
+        store.set("einst", frisch);
+      }}, h("span", {}));
+    el.append(h("div", {class: "einst-zeile" + (nurDesktop ? "" : " gesperrt")},
+      h("div", {class: "einst-text"},
+        h("strong", {}, "Klassenraum-Server (nur Desktop)"),
+        h("span", {}, "Nur das Desktop-Programm kann das. Beim ersten Einschalten fragt Windows, ob das Programm in Netzwerken erreichbar sein darf – das ist die Firewall-Abfrage. Erlaube sie nur für private Netzwerke, nicht für öffentliche. Lehnt die Firewall ab, geht nichts kaputt: die Klasse tippt die Ergebnis-Codes dann einfach ab, und alles andere bleibt gleich.")),
+      h("div", {class: "einst-steuer", inert: nurDesktop ? null : ""},
+        nurDesktop ? knopf : h("span", {class: "kl-detail"}, "Nur das Desktop-Programm kann das."))));
+  }
+
+  /* ---------------- Anmeldung: EIN Start-Haken (B § 1.2) ---------------- */
+  (UI.startHaken ||= []).push(() => {
+    UI.app.registrieren("klassenraum", {titel: "Klasse", symbol: "kunden", zeigen: lehrerZeigen, wieder: lehrerWieder});
+    UI.app.registrieren("mitarbeit", {titel: "Auftrag", symbol: "akte", zeigen: schuelerZeigen, wieder: schuelerWieder});
+    UI.app.einstellungAbschnitt("Klassenraum", abschnitt);
+    for (const e of ["ansicht", "zustand-geaendert", "spiel-geladen"]) Bus.an(e, () => { try { startEinhaengen(); } catch (err) { console.error("Klassenraum-Zeile", err); } });
+    Bus.an("klassenraum", d => { try { ergebnisToast(d); } catch (err) { console.error("Klassenraum-Code", err); } });
+    startEinhaengen();
+  });
+
+  return {ampel, zerlegen, dauerText, sterneText, oeffnen, startZeile, startEinhaengen, ergebnisToast,
+    lehrerZeigen, lehrerWieder, schuelerZeigen, schuelerWieder, abschnitt, abdruck, _L: L, _A: A};
 })();
 
 /* ---- ui/konsole.js ---- */

@@ -9,6 +9,123 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.0.0 — Klassenraum Stufe A+B (09.10.2026)
+
+**Der Öffnungsweg: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst** — ohne
+Konto, ohne Server, ohne Netz. Das ist die zweite Hälfte der Fassung 2.0.0; die erste (Übergabe, Ergebnis,
+Karriereumleitung, Denkhilfen, Wiki, Wiederholungssperre, nächster Schritt, Fragen-Generator) steht im
+Abschnitt „2.0.0 — Production Release: das 2.0-Fundament" weiter unten.
+
+Vertrag: [`Architektur.md`](Architektur.md) § 12 (Spezifikation) · § 12.1 (Entscheidungen E1–E8) ·
+§ 12.2 (Bau-Entscheidungen L1–L5).
+
+### Neu
+
+- **Auftragscode `NL-XXXX-XX`** — immer 10 Zeichen, 30 Bit Nutzlast (Sitzung 5 · Art 1 · Index 6 ·
+  Variante 8) plus 2 Prüfzeichen (mod 31 / mod 32). Das Alphabet hat 32 Zeichen und lässt `I`, `O`, `0`
+  und `1` weg — verwechselbare Zeichen kommen nicht vor.
+- **Ergebnis-Code `E-XXXX-XXX`** — 25 Bit Nutzlast (Sitzung 5 · Platz 5 · halbe Sterne 4 · Fehlversuche 2 ·
+  Dauer 9 in 10-s-Einheiten) plus 2 Prüfzeichen. Er trägt das Ergebnis, nicht die Person: kein Name, keine
+  Kennung, kein Gerät.
+- **Netzkennwert (Klassenraum-Abdruck)** — **6 Zeichen**, FNV-1a über die kanonisch sortierte Abbildung von
+  `{v, geraete, kabel}` **ohne** `netz.zustand`. Er zeigt, wie ähnlich zwei Netze sind; dass alle denselben
+  Auftrag haben, beweist **nicht** er, sondern der Vergleich über `def.id` (Entscheidung E8).
+- **Kanonisierung statt Zufall.** Zu einem Code sucht der Bau höchstens **64 Seeds** je Variante
+  (`KANON_FENSTER`) und nimmt den ersten, der wirklich einen spielbaren Auftrag ergibt — derselbe Code
+  ergibt deshalb auf jedem Gerät denselben Auftrag, auch bei generierten Fällen.
+- **Eingefrorene Tabellen: 58 Aufträge, 27 Fertigkeiten** — **alle 27 tauglich**; die frühere Angabe
+  „24 von 27" ist seit den drei neuen Injektoren überholt (der Prüfer hat **27** nachgemessen, Review § 3;
+  zwei Kommentare im Produktivcode sagen sie noch — Befund **K1**). Die **Länge gehört zum Format**: ein Code mit Auftragsindex 58…63 oder Fertigkeitsindex 27…63 wird als `fassung`-Fehler
+  **abgelehnt**, statt still etwas anderes zu bauen. Neue Aufträge dürfen nur **angehängt** werden, damit
+  alte Codes ihre Bedeutung behalten.
+- **`Spiel.klassenraum`** — die Rechen- und Verwaltungsfläche: `erzeugen`, `ausCode`, `sitzung`,
+  `ergebnisCode`, `ergebnisLesen`, `ergebnisEintragen`, `exportieren`, `importieren`, `netzkennwert`,
+  `tauglicheFertigkeiten`, `platz`/`platzSetzen`, `plaetze`/`plaetzeSetzen`, `abnehmen`, `tabellen`
+  (**16 Namen** = die elf der Vertragstabelle § 12 + `plaetze`/`plaetzeSetzen` nach L6 + das vorhandene
+  `abnehmen` + die Prüffläche `tabellen()`; seit 09.10.2026 steht diese Zählung so auch in § 12.2).
+- **Eigener Store-Schlüssel `klassenraum`** — der **fünfte** Schlüssel neben `lern`, `labor`, `einst` und
+  `sandbox`, mit `fassung: 1` und einem eigenen Exportformat
+  `{format: "netzwerk-labor/klassenraum", …}`. Der Spielstand (`labor`) bleibt **unberührt** — eine
+  Klassensitzung kann ihn nicht beschädigen.
+- **Öffnungsweg** — `Spiel.instanzErstellen({ticketId｜gen, seed, quelle: "klassenraum", ohneFlow: true})`
+  setzt `inst.klassenraum = {sitzung, platz, code}`, geöffnet wird über den vorhandenen Weg
+  `UI.spiel.oeffnen(iid)`. **E1 gilt**: der Auftrag bleibt im sichtbaren Postfach **unsichtbar** und hebt
+  keinen Zähler.
+- **Zwei neue Ansichten.** `klassenraum` (Lehrkraft) legt eine Sitzung an, zeigt den Code **groß und
+  kopierbar**, eine Ampel über die eingegangenen Ergebnisse (Median als oberer Wert), eine Block-Eingabe
+  für eingetippte Ergebnis-Codes und **einen** Hausdialog für Sichern und Einlesen. `mitarbeit` (Azubi)
+  hat ein Eingabefeld, **markiert** Tippfehler und öffnet einen gültigen Code. **Sechs** sichtbare
+  Bedienelemente bei der Lehrkraft, **drei** beim Azubi (Regel R12: höchstens sechs je Ansicht).
+- **Startseiten-Zeile über einen Bus-Haken** — `Bus.an("ansicht" | "zustand-geaendert" | "spiel-geladen")`;
+  `src/ui/hub.js` bleibt **unangetastet**.
+- **Ergebnis-Code als Toast** — gemeldet über den Bus-Kanal `klassenraum`, mit Kopierknopf, statt als
+  dauerhafte Zeile im Abschlussfenster (Entscheidung L5; `B § 7.2` verbietet die Zeile ausdrücklich).
+- **Keine Bewertung.** Entschieden vom Nutzer am 09.10.2026: *„Nein, Lehreraufträge sollen nicht bewertet
+  werden."* Keine Note, keine Punkte, keine Rangfolge, kein Vergleich zwischen Azubis; der Auftrag zählt
+  ausschließlich für den Lernstand des Einzelnen ([`Architektur.md`](Architektur.md) § 12.1).
+- **Kein Server, kein QR.** Stufe C (Live-Server) und Stufe D (QR) kommen nach **E6** später; 2.0 bleibt
+  ohne Netz und ohne Konto benutzbar.
+- **Kein siebtes Bedienelement (O1 entschieden).** Die Platzzahl der Klasse bleibt im **Datei-Dialog**; die
+  Lehrkräfte-Ansicht behält ihre **sechs** Bedienelemente (R12 wird nicht aufgeweicht). Ist keine Platzzahl
+  gesetzt, sagt die Ampel ausdrücklich **„Plätze nicht eingestellt"** — statt eine Zahl zu erfinden.
+
+### Offen und zurückgestellt
+
+- **E3** (überstimmt die Lehreransage den Bildungsstand? — nein), **E5** (Hilfe-Sicht der Lehrkraft — nein
+  für 1.3) und **E6** (Server/QR — später): entschieden bzw. offen, **nicht gebaut**.
+- Stufe **C** und **D** sind nicht gebaut; der Live-Server bleibt optional und in den Einstellungen
+  abschaltbar (Standard aus).
+
+### Prüfstand (Klassenraum Stufe A+B)
+
+| Prüfung | Ergebnis |
+|---|---|
+| `sh tools/test.sh` (Lead) | **Exit 0** — `661/661 grün  (74 Testdateien, 91 Module)`, `davon 0 übersprungen` |
+| die vier neuen Testdateien, Filter `klassenraum` (Lead) | **67/67 grün** — der richtige Filter; `--klassenraum` liefert **0/0** (Befund **K2**) |
+| `python tools/ethos.py` · `tools/klassen.py` · `node tools/sim-stand.js` (Lead) | **GRUEN** · **0** Klassen ohne CSS-Regel (auch `klassen.py kl-` → 0) · Simulation **unverändert** |
+| `python bauen.py` (Lead) | **128 Module, 2202 KB** → `web/index.html` (Version **2.0.0**) und `web/tests.html` |
+| `python tools/seite.py --pruefen` (Lead) | **GRUEN: 39 Dokumente** (nach dem Doku-Neubau **40**); die zwei roten Doku-Tests sind genau dieser Neubau |
+| `python tools/einfach.py` + `--ziel` (Lead; Bytes und SHA256 selbst nachgerechnet) | **2.791.782 B**, SHA256 `D7D45F1390C31F2CFE7EB578BC7BF21F6813A85A23951DD4323931D9D1E4A4A2`, **0 Außenverweise**, beide byte-gleich |
+| `python android/bauen.py` (Lead; Bytes und SHA256 selbst nachgerechnet) | APK **1.148.444 B**, SHA256 `A9526120C66930E4BC4093795E2D1DECA5C5AF18268CE4E753E064AF1AC2D988`, `GRUEN: Signatur gültig, Kennwerte stimmen, keine Rechte` |
+| Fassung in den Erzeugnissen (selbst geprüft) | **2.0.0** in `web/index.html`, `docs/index.html` und `android/bau/assets/index.html`; `Netzwerk-Labor.html` ist byte-gleich zu `docs/index.html` |
+
+**Hinweis zur Herkunft.** Nach dem Befund **K1** des Prüfers (zwei Kommentare sagten noch „24 von 27")
+wurde der Codec-Kommentar berichtigt und **neu gebaut**: die Erzeugnisse dieser Runde sind jünger als die
+des Fundaments, und deren Werte (Einzeldatei 2.720.252 B / `3822D6B5…`, APK 1.127.964 B / `DB11BF88…`)
+sind damit **überholt**.
+
+**Neue Dateien dieser Stufe** — Bytes und SHA256 vom Chronisten über den Arbeitsbaum gerechnet, **alle
+LF, 0 CRLF**:
+
+| Datei | Bytes | SHA256 |
+|---|---|---|
+| `src/spiel/klassenraum-codec.js` | 18.989 | `74A4A9A141510ED3581C659DE112D67334E3123D619A3FF34127844D5A1F80FF` |
+| `src/spiel/klassenraum.js` | 26.295 | `E1D4816CB2FB7A40DC7A1E5F8B733AA30F75A7CD5D48F734016F5631FF43B3C4` |
+| `src/ui/klassenraum.js` | 25.550 | `4744D18E02025F2A607313EF2E0F6BE26D1006E2CECB00F1BFCD648A606490C3` |
+| `src/stil/klassenraum.css` | 4.401 | `AC24A9A3DEDE3B515ED05922D0DB56656563B580669FBA87515CC0E67264ADFE` |
+| `tests/klassenraum-codec.test.js` | 26.792 | `24D89D2467E0232C6013501C25E53F76C7AF3723350463377DA71B53E589A094` |
+| `tests/klassenraum.test.js` | 20.326 | `01764065AE74F592872D983FC67D73C201BA0C770785747646C336561BC79BF8` |
+| `tests/ui-klassenraum.test.js` | 25.735 | `564A2E37A6C913956F20BC29CB5AAED699C2D37CD150551B4E3D412EB5F727AE` |
+| `tests/klassenraum-abnahme.test.js` | 23.034 | `54A2F154E14E8D559F8459110965DA595D8E7B64E8481343556CB1AE3CE00DF7` |
+
+**Additiv geändert:** `src/spiel/zustand.js` — 12.390 B, SHA256
+`EF6D1A8570D3B01EB4534E23250C0FF877DC4625C38C207B02362D3BC10FEC5D`, eine Zeile (`Spiel.KLASSENRAUM`).
+Die Datei ist **vorbestehend** CRLF (216 CRLF-Zeilen; Index-Arithmetik im Review § 11) — **kein**
+Zeilenenden-Bruch in dieser Runde.
+
+### Nicht geprüft (ehrlich)
+
+- **Kein Browserlauf und kein Pixelbild** dieser Stufe: `tools/rauch.py` und `tools/menueprobe.py` liefen
+  für die neuen Ansichten **nicht** — die Wirkung ist über DOM-Attrappen und Quelltext belegt.
+- **Keine echte Unterrichtsstunde**, kein Versuch mit einer Lehrkraft und einer Klasse.
+- **Stufe C und D** (Server, QR) sind nicht gebaut und damit auch nicht geprüft.
+- Der in Dokument D genannte Abnahmebefehl ist **untauglich**: `node tests/run.js --klassenraum` benutzt
+  `--klassenraum` als Namensfilter, der in **keinem** Testnamen vorkommt; die Bilanzzeile zählt nur die
+  gefilterte Liste (`tests/run.js:53,60,66`) und meldet deshalb **0/0 grün** bei **Exit 0** — ein grüner
+  Lauf, der nichts geprüft hat. Richtig ist der Filter **ohne** Striche: `node tests/run.js klassenraum`
+  → **67 Fälle** (Prüfer, Review § 10).
+---
+
 ## 2.0.0 — Production Release: das 2.0-Fundament (09.10.2026)
 
 **Dreizehn Bausteine, die kein neues Spiel sind, sondern seine Voraussetzungen.** Der
@@ -164,6 +281,9 @@ fertig wurden. Sein Fazit gilt weiter: *591 von 593 grün heißt nicht fertig.*
   deshalb weiterhin eine ältere Fassung. Ihre Fassungsnummer ist hier **nicht gemessen**.
 - **Nicht gepusht, kein Tag.** `v2.0.0` und der Push stehen aus — beides nur mit ausdrücklicher Freigabe
   des Nutzers. Tag- und Zweigzeile im Kopf dieses Dokuments bleiben deshalb unverändert.
+- **Überholt** durch die Klassenraum-Stufe A+B (Abschnitt **weiter oben**): dort stehen die gültigen
+  Erzeugnisse dieser Fassung (Einzeldatei **2.791.782 B**, SHA256 `D7D45F13…A4A2`; APK **1.148.444 B**,
+  SHA256 `A9526120…D988`). Die hier genannten Werte waren der Stand **nach dem Fundament**.
 
 ### Neue Dateien dieser Fassung (Bytes und SHA256)
 
