@@ -52,6 +52,9 @@ UI.klassenraum = (() => {
     });
     return aus;
   }
+  /* Der gedruckte HILFECODE (3.0, Säule 5, Weg A): `H-XXXX-XX`, zehn Zeichen, gleiche Form wie
+     `NL-XXXX-XX` und `E-XXXX-XXX`. Er ist KEIN Ergebnis — er sagt, WO jemand hängt. */
+  const istHilfecode = s => /^H-[0-9A-Z]{4}-[0-9A-Z]{2}$/i.test(String(s == null ? "" : s).trim());
   /* Die Ampel (B § 9): fertig = belegte Plätze, offen = plaetze − fertig, Median = OBERER Median
      der gültigen Dauern > 0, auf ganze Sekunden. Ohne eingestellte Platzzahl bleibt sie gelb und
      sagt das – sie erfindet keine Zahl. Rot ist im Normalbetrieb aus (§ 9.3).
@@ -223,8 +226,24 @@ UI.klassenraum = (() => {
     const stuecke = zerlegen(L.codes.value);
     if (!stuecke.length) return;
     const zeilen = [], gesehen = new Map();
-    let neu = 0, doppelt = 0, fremd = 0, unlesbar = 0;
+    let neu = 0, doppelt = 0, fremd = 0, unlesbar = 0, hilfen = 0;
     for (const {zeile, stueck} of stuecke){
+      /* Ein H-Code ist KEIN Ergebnis (3.0, Säule 5): er sagt, WO jemand hängt, und wird als
+         Klartext gelesen — NIE eingetragen. Diese Verzweigung steht deshalb VOR dem Eintragen;
+         so kann ein Hilfecode gar nicht erst im Ergebnissatz landen. Nur Platz und Zähler,
+         kein Name, keine Note, kein Rang. */
+      if (istHilfecode(stueck)){
+        const h = kann("hilfeLesen") ? ruf("hilfeLesen", stueck) : null;
+        if (!h || h.fehler || h.ok === false){
+          unlesbar++;
+          zeilen.push(`Zeile ${zeile} · ${(h && h.grund) || "Hilfecodes liest diese Fassung noch nicht."}`);
+          continue;
+        }
+        const ziele = (Number(h.schritt) || 0) + (Number(h.offen) || 0);
+        hilfen++;
+        zeilen.push(`Zeile ${zeile} · Platz ${h.platz} hängt: ${Number(h.schritt) || 0} von ${ziele} Zielen erfüllt`);
+        continue;
+      }
       const r = ruf("ergebnisEintragen", stueck);
       if (!r || r.fehler){ if (r && r.fehler === "sitzung") fremd++; else unlesbar++; zeilen.push(`Zeile ${zeile} · ${(r && r.grund) || "unlesbar"}`); continue; }
       if (r.neu === false){
@@ -240,6 +259,7 @@ UI.klassenraum = (() => {
       zeilen.push(`Zeile ${zeile} · Platz ${r.platz} · ${sterneText(Math.round((Number(r.sterne) || 0) * 2))} · eingetragen`);
     }
     const summe = [`${neu} eingetragen`, doppelt ? `${doppelt} doppelt` : null, fremd ? `${fremd} fremde Sitzung` : null,
+      hilfen ? `${hilfen} Hilferuf${hilfen === 1 ? "" : "e"} gelesen` : null,
       unlesbar ? `${unlesbar} unlesbar` : null].filter(Boolean).join(" · ");
     L.codes.value = "";
     L.hinweis.replaceChildren(hinweisZeile("kl-hinweis", summe), ...zeilen.map(z => hinweisZeile("kl-hinweis", z)));
@@ -301,6 +321,13 @@ UI.klassenraum = (() => {
       placeholder: "0"});
     A.hinweis = hinweisZeile("kl-hinweis", "Kein Auftrag offen – tippe den Code ein, den deine Lehrkraft ansagt.");
     A.abdruck = h("span", {class: "kl-code"}, ABDRUCK_LEER);
+    /* „Ich hänge" (3.0, Säule 5, Weg A): der Azubi sagt, WO er hängt — als Hilfecode `H-XXXX-XX`,
+       den er abliest und die Lehrkraft in ihr BESTEHENDES Feld „Ergebnis-Codes" tippt. Kein Server,
+       keine Bewertung: der Code trägt Platz und Zähler, keinen Namen. Die Anzeige ist Text
+       (`kl-code` in `kl-gross`, dieselbe große Zeile wie der Auftragscode der Lehrkraft). */
+    A.hilfeCode = h("span", {class: "kl-code"}, ABDRUCK_LEER);
+    A.hilfeKnopf = h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: hilfeZeigen}, "Ich hänge");
+    A.hilfeKopieren = h("button", {type: "button", class: "knopf kl-knopf", onclick: hilfeKopieren}, "Hilfecode kopieren");
     const form = h("form", {class: "kl-form", onsubmit: e => { e.preventDefault(); schuelerOeffnen(); }},
       hinweisZeile("kl-etikett", "Auftragscode"), A.code,
       hinweisZeile("kl-etikett", "Platz"), A.platz,
@@ -311,7 +338,11 @@ UI.klassenraum = (() => {
         form,
         h("div", {class: "kl-karte"},
           hinweisZeile("kl-etikett", "Stand"), A.hinweis,
-          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), A.abdruck)))));
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), A.abdruck),
+          h("div", {class: "kl-block"}, hinweisZeile("kl-etikett", "Wenn du nicht weiterkommst"),
+            A.hilfeKnopf, A.hilfeKopieren),
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Hilfecode für deine Lehrkraft"),
+            h("div", {class: "kl-gross"}, A.hilfeCode))))));
     schuelerFuellen();
   }
   function schuelerWieder(){ if (A.hinweis) schuelerFuellen(); }
@@ -357,6 +388,35 @@ UI.klassenraum = (() => {
     UI.spiel.oeffnen(inst.iid);
     melde(null, true);
     return inst;
+  }
+
+  /* „Ich hänge" (3.0, Säule 5, Weg A). Drei ehrliche Wege, keiner erfindet etwas:
+     kein offener Auftrag → sagen, dass es nichts zu melden gibt; API fehlt → sagen, dass diese
+     Fassung es noch nicht kann; sonst → den ECHTEN Code aus `hilfeCode(inst)` zeigen.
+     Der Code trägt Sitzung, Platz und Zähler — keinen Namen, keine Note, keinen Rang. */
+  function hilfeZeigen(){
+    const inst = UI.spiel?.inst;
+    if (!inst || !inst.klassenraum) {
+      A.hilfeCode.textContent = ABDRUCK_LEER;
+      return schuelerHinweis("Es ist kein Klassenraum-Auftrag offen – es gibt nichts zu melden.", false);
+    }
+    if (!kann("hilfeCode")) {
+      A.hilfeCode.textContent = ABDRUCK_LEER;
+      return schuelerHinweis("Hilfecodes kann diese Fassung noch nicht – sag es deiner Lehrkraft mündlich.", false);
+    }
+    const r = ruf("hilfeCode", inst);
+    if (typeof r !== "string" || !r) {
+      A.hilfeCode.textContent = ABDRUCK_LEER;
+      return schuelerHinweis((r && r.grund) || "Es gibt gerade nichts zu melden.", false);
+    }
+    A.hilfeCode.textContent = r;
+    schuelerHinweis(`Zeig den Hilfecode deiner Lehrkraft – sie tippt ihn in ihr Feld „Ergebnis-Codes".`, true);
+  }
+  function hilfeKopieren(){
+    const code = String(A.hilfeCode.textContent || "").trim();
+    if (!code || code === ABDRUCK_LEER) return schuelerHinweis(`Erst „Ich hänge" drücken – dann steht der Hilfecode da.`, false);
+    if (UI.hub?.kopieren) return void UI.hub.kopieren(code, "Hilfecode kopiert – zeig ihn deiner Lehrkraft.");
+    UI.toast("Kopieren ging nicht – schreib den Code von der Anzeige ab.", "warn", {id: "kopieren", dauer: 3000});
   }
 
   /* ---------------- Startseiten-Zeile (B § 4, Entscheidung L5: Haken auf Bus „ansicht“) ----------------

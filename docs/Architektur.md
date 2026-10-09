@@ -948,6 +948,27 @@ D (QR) offen, Kennwert-Kollisionen (30 Bit) nicht gemessen. Die zwei Befunde der
 (`docs/entwicklung/Review – Klassenraum A+B.md`) sind aufgenommen: der Kommentar „24 von 27" im Codec ist
 richtiggestellt, der Abnahmebefehl ist hier korrekt genannt.
 
+### 12.4 Hilfecode `H-XXXX-XX` (09.10.2026) — verbindlicher Vertrag
+
+**Wozu.** Die Lehrkraft sieht seit 2.0.2 **anonyme Fortschrittszahlen der Klasse** („Fortschritt: 7 von 20
+offen · 3 Abgaben in den letzten 5 Minuten"). Was fehlte: der Azubi konnte nicht sagen, **wo** er hängt.
+Der Hilfecode schließt genau diese Lücke — **ohne Server, ohne Konto, ohne Bewertung**. Der Azubi liest ihn
+ab, die Lehrkraft tippt ihn in ihr **bestehendes** Feld „Ergebnis-Codes"; dort passen mehrere Codes hinein,
+also entsteht **kein neues Bedienelement** und die Regel R12 bleibt bei 6.
+
+| Punkt | Festlegung |
+|---|---|
+| Form | **`H-XXXX-XX`** — immer 10 Zeichen, wie `NL-` und `E-` |
+| Alphabet | dasselbe 32-Zeichen-Alphabet (`ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, **kein I, O, 0, 1**) |
+| Prüfzeichen | **dieselben zwei** wie bei den anderen Codes: `C1 = Σ i·v(i) mod 31`, `C2 = Σ (2i+1)·v(i) mod 32` |
+| Nutzteil | **30 Bit = 6 Zeichen × 5 Bit**: `sitzung` 5 (1..31) · `platz` 5 (0..31) · `schritt` 5 (erfüllte Ziele, 0..31) · `offen` 5 (offene Ziele, 0..31) · **reserviert 10** (muss **0** sein) |
+| Reservierte Bits | beim Lesen ≠ 0 → `{fehler:"fassung"}` — so bleibt Raum für eine spätere Fassung, ohne die Form zu brechen |
+| Normalisierung | wie bei den anderen Codes: Großbuchstaben, alles außer `[0-9A-Z]` weg, führendes `H` nur abschneiden, wenn danach **genau 6** Zeichen bleiben |
+| Fehlerverhalten | **nie eine Ausnahme**; leer/`null` → `null`; ungültig → `{fehler, grund}` mit den wörtlichen Texten aus `A – Codec…md` § 1.5 |
+| API | `Spiel.klassenraum.hilfeCode(inst)` → `"H-XXXX-XX"` · `Spiel.klassenraum.hilfeLesen(code)` → `{ok, sitzung, platz, schritt, offen}` |
+| **Kein Personenbezug** | Der Code trägt **Sitzung, Platz und Zählerstände** — keinen Namen, keine Note, keinen Rang, keine Sterne. Das ist die Nutzerentscheidung („Lehreraufträge werden NICHT bewertet") in einer Datenform; ein Test wacht darüber |
+| Anzeige bei der Lehrkraft | Klartext in der bestehenden Ausgabe, z. B. „**Platz 7 hängt: 2 von 5 Zielen erfüllt**" — **kein** neues Feld. Ein `H`-Code ist **kein** Ergebnis und darf nicht als solches eingetragen werden |
+
 ## 13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag
 
 Der vollständige Vertrag steht in
