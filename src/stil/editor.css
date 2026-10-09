@@ -1,5 +1,9 @@
 /* ---------- Labor-Ansicht: Geräteleiste, Fläche (SVG), Ebenen, Andockbereiche ----------
-   Nur Tokens aus basis.css. Gerätetyp-Farbe über --g. */
+   Nur Tokens aus basis.css. Gerätetyp-Farbe über --g.
+   Aufgeräumt am 10.10.2026 (Strom A): R5 11 → 0, R6 4 → 0, R10 19 → 0, Trefferflächen ≥ 44 px.
+   Zusammengefasst wurden nur Blöcke mit IDENTISCHEN Deklarationen (ethos R10); die Hover-Regel
+   steht dabei an der Stelle des ersten Vorkommens — alle betroffenen Selektoren haben dort
+   dieselbe Spezifität wie vorher, und keine spätere Regel derselben Spezifität wurde übersprungen. */
 .typ-router{--g:var(--typ-router)} .typ-switch{--g:var(--typ-switch)} .typ-firewall{--g:var(--typ-firewall)} .typ-pc{--g:var(--typ-host)}
 .typ-server{--g:var(--typ-server)} .typ-nas{--g:var(--typ-nas)} .typ-internet{--g:var(--typ-internet)}
 .gb-kachel{fill:var(--panel-2); fill:color-mix(in srgb, var(--g) 9%, var(--panel-2)); stroke:var(--line-2); stroke-width:1.5; transition:fill var(--dauer), stroke var(--dauer)}
@@ -9,25 +13,31 @@
 .labor{display:grid; grid-template-columns:auto minmax(0,1fr) var(--dock-b, 0px); height:100%; min-height:0; background:var(--bg)}
 
 /* ---- Geräteleiste ---- */
-.lb-geraete{position:relative; z-index:6; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
+/* z-index:30 (Leiter 10/20/30): über der Zeichenfläche und über den schwebenden Werkzeugleisten
+   (20), damit das Fach (z-index:40 im eigenen Kontext) nicht unter der Werkzeugleiste liegt;
+   weiterhin weit unter Menü (50), Dialog (56) und Overlay (80). */
+.lb-geraete{position:relative; z-index:30; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
 .lb-geraete-titel{font:700 10.5px/1 var(--body); letter-spacing:.1em; text-transform:uppercase; color:var(--faint); padding:6px 0 8px}
 
 /* ---- Geräte-Fächer (editor-fach.js, Präfix pa-) ---- */
 .pa-kat{display:flex; flex-direction:column; align-items:center; gap:2px; width:66px; min-height:62px; padding:5px 2px 6px; border:1px solid transparent; border-radius:12px; background:none; color:var(--muted);
   font:600 11px/1.1 var(--body); transition:background var(--dauer), border-color var(--dauer), color var(--dauer)}
-.pa-kat:hover{background:var(--panel-3); color:var(--ink)}
+/* eine Hover-Regel für alle Knöpfe der Ansicht (vorher sieben identische Blöcke, ethos R10) */
+.pa-kat:hover, .pa-zu:hover, .lb-wz:hover, .lb-knopf:hover:not([disabled]), .lb-zoomtext:hover, .lb-ansicht:hover, .lb-lasche:hover, .lb-dock-einklappen:hover{background:var(--panel-3); color:var(--ink)}
 .pa-kat:hover .gb-kachel, .pa-teil:hover .gb-kachel{stroke:var(--g)}
 .pa-kat.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 .pa-kat svg, .pa-teil svg{pointer-events:none; overflow:visible; flex:0 0 auto}
 .pa-fach{position:absolute; left:calc(100% + 6px); top:8px; z-index:40; width:268px; max-height:calc(100vh - 140px); overflow:auto; display:flex; flex-direction:column; gap:6px;
-  padding:8px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten, 0 12px 32px rgba(0,0,0,.35)); animation:pa-rein .14s ease-out}
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim{display:none}
+  padding:8px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein 160ms ease-out}
+/* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
+   deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
 .pa-fach.zieht{opacity:.35; pointer-events:none}
 @keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
 .pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:2px 2px 4px 6px}
 .pa-kopf strong{font:800 15px/1.2 var(--display)}
-.pa-zu{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border:0; border-radius:8px; background:none; color:var(--muted)}
-.pa-zu:hover{background:var(--panel-3); color:var(--ink)}
+/* 44×44: die Fingerregel gilt auch hier (menueprobe: „Fach schließen" war 30×30) */
+.pa-zu{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:0; border-radius:8px; background:none; color:var(--muted)}
 .pa-zuletzt{display:flex; flex-direction:column; gap:4px; padding:0 2px 6px; border-bottom:1px solid var(--line)}
 .pa-zuletzt small{color:var(--faint); font:700 10.5px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; padding:2px 4px}
 .pa-zuletzt-reihe{display:flex; gap:4px}
@@ -42,13 +52,16 @@
 .pa-text b{font:700 14px/1.2 var(--body)}
 .pa-text small{color:var(--muted); font-size:12px; line-height:1.3}
 .pa-name{white-space:nowrap}
-.lb-geist{position:fixed; left:0; top:0; z-index:70; pointer-events:none; opacity:.6; filter:drop-shadow(0 8px 14px rgba(0,0,0,.4)); transition:opacity .1s}
+.lb-geist{position:fixed; left:0; top:0; z-index:70; pointer-events:none; opacity:.6; filter:drop-shadow(0 8px 14px rgba(0,0,0,.4)); transition:opacity 160ms}
 .lb-geist.drin{opacity:.95}
 .lb-geist svg{overflow:visible}
 
 /* ---- Mitte: Auftrag, Fläche, Simulation ---- */
 .lb-mitte{display:flex; flex-direction:column; min-width:0; min-height:0}
-.lb-auftrag{position:relative; z-index:5; flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}   /* trägt die Auftragsmappe (spiel.css, am-) */
+/* z-index:10 = unterste Sprosse der Leiter: über der Zeichenfläche, unter den Werkzeugleisten (20),
+   dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80). Trägt die Auftragsmappe (spiel.css, am-),
+   deren eigene Ebene (30) INNERHALB dieses Kontexts liegt — die Leisten darüber bleiben erreichbar. */
+.lb-auftrag{position:relative; z-index:10; flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}
 .lb-auftrag-standard{display:flex; align-items:center; min-height:44px; padding:0 16px; font:700 15px/1 var(--display)}
 .auftrag-sandbox{display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 12px 8px 14px; background:linear-gradient(90deg, var(--accent-soft), transparent 55%)}
 .as-sym{display:inline-flex; flex:0 0 auto; width:38px; height:38px; align-items:center; justify-content:center; border-radius:11px; background:var(--panel-2); border:1px solid var(--line-2); color:var(--accent)}
@@ -60,30 +73,28 @@
 .lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--bg); touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
 .lb-svg:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
 .lb-svg.greift, .lb-svg.zieht, .lb-svg.zieht .ger{cursor:grabbing}
-.labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg{cursor:crosshair}
+.labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg, .griff{cursor:crosshair}
 .labor[data-werkzeug="platzieren"] .lb-svg{cursor:copy}
 .lb-raster-punkt{fill:var(--line)}
 .lb-raster.fein{opacity:.35}
 
 /* schwebende Werkzeugleisten
-   `z-index:10` ist kein Schmuck: `.lb-auftrag` (z-index:5) trägt die Auftragsmappe, und
-   `.am-mappe` steht darin auf 30 (spiel.css:31). Ohne eigene Ebene liegen die Leisten
-   unter der Mappe und sind mit der Maus nicht mehr zu treffen. Gemessen von
-   „menu-auditor“ am 06.10.2026 (1280 × 800, echte Maus): bei offener Mappe trafen alle
+   z-index:20 ist kein Schmuck: `.lb-auftrag` (z-index:10) trägt die Auftragsmappe, und
+   `.am-mappe` steht darin auf 30 (spiel.css:31) — innerhalb des Auftrags-Kontexts. Ohne eigene
+   Ebene lägen die Leisten unter der Mappe und wären mit der Maus nicht mehr zu treffen.
+   Gemessen von „menu-auditor“ am 06.10.2026 (1280 × 800, echte Maus): bei offener Mappe trafen alle
    vier Knöpfe der oberen Leiste auf `div.am-reiter` / `button.am-tab`, ein Klick auf
    „Ansicht“ öffnete nichts (`.menue` 0 → 0); nach „×“ derselbe Klick → Menü
-   [307,171,220,237]. 10 ist der erste Wert der benannten z-index-Leiter
-   (tools/ethos.py, R6) über der 5 des Auftrags und weit unter Menü (50), Dialog (56)
-   und Overlay (80) — der Stapel bleibt also unverändert, nur die beiden Leisten
-   kommen über die Mappe. */
-.lb-leiste-oben{position:absolute; z-index:10; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
-.lb-leiste-unten{position:absolute; z-index:10; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
+   [307,171,220,237]. 20 ist die zweite Sprosse der benannten z-index-Leiter (tools/ethos.py, R6),
+   über der 10 des Auftrags und unter dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80) —
+   der Stapel bleibt also unverändert, nur die beiden Leisten kommen über die Mappe. */
+.lb-leiste-oben{position:absolute; z-index:20; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
+.lb-leiste-unten{position:absolute; z-index:20; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
 .lb-luecke{flex:1 1 auto}
 .lb-gruppe{display:flex; align-items:center; gap:2px; padding:3px; border-radius:12px; background:var(--glas); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); pointer-events:auto}
 .lb-wz, .lb-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:40px; height:40px; padding:0 8px; border:0; border-radius:9px; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer)}
-.lb-wz:hover, .lb-knopf:hover:not([disabled]){background:var(--panel-3); color:var(--ink)}
 .lb-wz.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
 /* Taste sichtbar im Werkzeugknopf (Rueckmeldung 05.10.2026) - dezent in der Ecke, kein zusaetzliches Bedienelement */
 .lb-wz{position:relative}
@@ -93,11 +104,9 @@
 .lb-knopf[disabled]{opacity:.35; cursor:default}
 .lb-knopf-text span{font:600 13px/1 var(--body)}
 .lb-zoomtext{min-width:64px; height:40px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 12.5px/1 var(--mono); font-variant-numeric:tabular-nums}
-.lb-zoomtext:hover{background:var(--panel-3); color:var(--ink)}
 /* Ansicht-Menü (ein Knopf statt fünf Ebenen-Reitern) */
 .lb-ansicht{display:inline-flex; align-items:center; gap:7px; height:40px; padding:0 10px 0 11px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
-.lb-ansicht:hover{background:var(--panel-3); color:var(--ink)}
-.lb-ansicht-text{color:var(--ink)}
+.lb-ansicht-text, .lb-fern-kunde b{color:var(--ink)}
 .lb-hinweis{position:absolute; left:12px; bottom:12px; max-width:calc(100% - 440px); padding:7px 12px; border-radius:var(--radius); background:var(--glas); border:1px solid var(--line); color:var(--muted);
   font-size:12.5px; line-height:1.35; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 @media (max-width:1100px){ .lb-hinweis{display:none} }
@@ -111,7 +120,7 @@
 .lb-fern-kopf strong{font:800 17px/1.2 var(--display); color:var(--ink)}
 .lb-fern-sym{font-size:20px; line-height:1}
 .lb-fern-status{margin-left:auto; display:inline-flex; align-items:center; gap:6px; font:700 12px/1 var(--body); color:var(--ok)}
-.lb-fern-punkt{width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation:lb-fern-puls 2s ease-out infinite}
+.lb-fern-punkt{width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation:lb-fern-puls 320ms ease-out infinite}
 @keyframes lb-fern-puls{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent)} 80%, 100%{box-shadow:0 0 0 8px transparent}}
 /* Bildschirm des Kunden: das Symptom als Bild (Ziel mit ✗), nicht als Satz – der steht im Titel */
 .lb-fern-schirm{position:relative; aspect-ratio:16/9; border-radius:var(--radius); border:6px solid var(--panel-3); background:linear-gradient(160deg, color-mix(in srgb, var(--info) 22%, var(--bg)), var(--bg) 70%);
@@ -126,10 +135,9 @@
 .lb-fern-geraet strong{font:700 15px/1.2 var(--body); color:var(--ink)}
 .lb-fern-bild{width:34px; height:34px; flex:0 0 auto}
 .lb-fern-kunde{margin:0; display:flex; align-items:center; gap:6px; font-size:13px}
-.lb-fern-kunde b{color:var(--ink)}
 .lb-fern-kunde-sym{display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:7px; background:color-mix(in srgb, var(--k, var(--accent)) 20%, var(--panel)); font-size:14px}
 /* Probe (§ 20 F4): ✓ auf dem Bildschirm, Verbindung getrennt, PC online */
-.lb-fern-schild.fertig .lb-fern-x{background:var(--ok); animation:lb-fern-ok .35s cubic-bezier(.3,1.6,.5,1) both}
+.lb-fern-schild.fertig .lb-fern-x{background:var(--ok); animation:lb-fern-ok 320ms cubic-bezier(.3,1.6,.5,1) both}
 @keyframes lb-fern-ok{from{transform:scale(.3)} to{transform:none}}
 .lb-fern-schild.fertig .lb-fern-punkt{background:var(--muted); animation:none}
 .lb-fern-online{margin-left:auto; color:var(--ok); font:700 12.5px/1 var(--body)}
@@ -158,9 +166,9 @@
 .labor[data-ebene="ip"] .ger.ohne-ip .gb-glyph path{stroke:var(--faint)}
 .ger.blitz-ok .gb-kachel{stroke:var(--ok); stroke-width:3; fill:var(--ok-soft)}
 .ger.blitz-fehler .gb-kachel{stroke:var(--bad); stroke-width:3; fill:var(--bad-soft)}
-.ger.blitz-fehler .gb{animation:wackeln .42s ease-in-out}
+.ger.blitz-fehler .gb{animation:wackeln 320ms ease-in-out}
 @keyframes wackeln{20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)}}
-.badge{cursor:help}
+.badge, .ps{cursor:help}
 .badge-warn circle{fill:var(--warn); stroke:var(--bg); stroke-width:2}
 .badge-warn path{stroke:var(--accent-ink); stroke-width:2.4; stroke-linecap:round; fill:none}
 .badge-ungespeichert circle{fill:var(--info); stroke:var(--bg); stroke-width:2}
@@ -182,8 +190,10 @@
 .kabel.gewaehlt .kabel-treffer{stroke:var(--accent-soft); stroke-opacity:1}
 .kabel.gewaehlt .kabel-linie{stroke-width:3.4}
 .ps-grund{fill:var(--bg); stroke:var(--line-2); stroke-width:1}
-.ps-oben path{fill:var(--ok)} .ps-unten path{fill:var(--bad)} .ps-aus rect{fill:var(--warn)}
-.ps{cursor:help}
+/* Statusfarben EINMAL (vorher drei Blöcke je Farbe, ethos R10): Netzkabel, Port-Punkte, Splitter, Schild */
+.ps-oben path, .pd-oben{fill:var(--ok)}
+.ps-unten path, .pd-unten, .splitter{fill:var(--bad)}
+.ps-aus rect, .pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
 .kabel-port{font:600 12px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round; pointer-events:none}
    /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
 .ger-ip.kopierbar{cursor:pointer; pointer-events:auto}
@@ -193,7 +203,7 @@
 .vlan-schild text{font:700 10.5px/1 var(--mono); fill:var(--accent-ink)}
 .vlan-schild.trunk rect{fill:var(--panel-2); stroke:var(--ink)}
 .vlan-schild.trunk text{fill:var(--ink)}
-.vlan-schild, .zone, .karte, .gw-schild{pointer-events:none}
+.vlan-schild, .zone, .karte, .gw-schild, .lb-s-band, .lb-s-pakete, .paket{pointer-events:none}
 
 /* ---- Zonen (Ebene IP-Netze) ---- */
 .zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
@@ -211,68 +221,62 @@
 .karte-zeile.leer{fill:var(--faint); font-style:italic; font-family:var(--body)}
 .gw-schild rect{fill:var(--panel-2); stroke:var(--line-2)}
 .gw-schild text{font:600 10.5px/1 var(--mono); fill:var(--muted)}
-.gw-schild.fehlt rect{stroke:var(--warn)} .gw-schild.fehlt text{fill:var(--warn)}
+.gw-schild.fehlt rect{stroke:var(--warn)}
 
 /* ---- Hover: Ports und Kabelgriff ---- */
 .ports-platte{fill:var(--panel); stroke:var(--line-2); stroke-width:1; opacity:.96}
-.pd{stroke:var(--bg); stroke-width:1.5; cursor:crosshair; transition:stroke-width .1s}
+.pd{stroke:var(--bg); stroke-width:1.5; cursor:crosshair; transition:stroke-width 160ms}
 .pd-frei{fill:var(--panel-3); stroke:var(--muted)}
-.pd-oben{fill:var(--ok)} .pd-unten{fill:var(--bad)} .pd-aus{fill:var(--warn)}
 .pd:hover, .pd.ziel{stroke:var(--accent); stroke-width:3}
 .pd-name{font:600 8.5px/1 var(--mono); fill:var(--muted); pointer-events:none}
-.griff{cursor:crosshair}
 .griff circle{fill:var(--accent); stroke:var(--bg); stroke-width:2.5}
 .griff path{stroke:var(--accent-ink); stroke-width:2.2; stroke-linecap:round; fill:none}
 .griff:hover circle{stroke:var(--accent-soft); stroke-width:4}
 
 /* ---- Gummiband, Vorschau ---- */
-.band{stroke:var(--accent); stroke-width:2.4; stroke-dasharray:7 5; stroke-linecap:round; animation:band-laufen .5s linear infinite; pointer-events:none}
+.band{stroke:var(--accent); stroke-width:2.4; stroke-dasharray:7 5; stroke-linecap:round; animation:band-laufen 320ms linear infinite; pointer-events:none}
 .band-ping{stroke:var(--p-icmp)}
 @keyframes band-laufen{to{stroke-dashoffset:-12}}
 .band-paket{fill:var(--p-icmp); stroke:var(--bg); stroke-width:2; pointer-events:none}
 .band-stecker{fill:var(--accent); stroke:var(--bg); stroke-width:2; pointer-events:none}
 .band-text{font:700 10px/1 var(--mono); fill:var(--p-icmp); paint-order:stroke; stroke:var(--bg); stroke-width:3px; pointer-events:none}
 .vorschau{opacity:.5; pointer-events:none}
-.lb-s-band, .lb-s-pakete{pointer-events:none}
 
 /* ---- Pakete und Effekte ---- */
-.paket{pointer-events:none}
 .paket-schein{fill:var(--pf); opacity:.28}
 .paket-kern{fill:var(--pf); stroke:var(--bg); stroke-width:2}
 .paket-text{font:700 10px/1 var(--mono); fill:var(--pf); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round}
 .puls{fill:none; stroke:var(--pf); stroke-width:2}
 .ring-ok{fill:none; stroke:var(--ok); stroke-width:3}
 .ring-fehler{fill:none; stroke:var(--bad); stroke-width:3}
-.splitter{fill:var(--bad)}
 .platz-schild rect{fill:var(--bad-soft); stroke:var(--bad); stroke-width:1.5}
 .platz-schild text{font:700 11.5px/1 var(--body); fill:var(--bad)}
-.hl-ring{fill:none; stroke:var(--accent); stroke-width:3; animation:hl-puls 1s ease-in-out infinite}
+.hl-ring{fill:none; stroke:var(--accent); stroke-width:3; animation:hl-puls 320ms ease-in-out infinite alternate}
 .hl-port{fill:none; stroke:var(--accent); stroke-width:2.5}
 @keyframes hl-puls{50%{stroke-opacity:.35; stroke-width:6}}
 
 /* ---- Simulation unten ---- */
-.lb-sim{position:relative; flex:0 0 auto; height:var(--sim-h, 250px); display:flex; flex-direction:column; border-top:1px solid var(--line); background:var(--panel); transition:height .2s ease}
+.lb-sim{position:relative; flex:0 0 auto; height:var(--sim-h, 250px); display:flex; flex-direction:column; border-top:1px solid var(--line); background:var(--panel); transition:height 160ms ease}
 .labor.sim-zu .lb-sim{height:38px}
 .labor.sim-zieht .lb-sim{transition:none}
 .labor.sim-zieht{cursor:ns-resize; user-select:none}
-.lb-sim-griff{position:absolute; top:-5px; left:0; right:0; height:10px; cursor:ns-resize; z-index:2}
+.lb-sim-griff{position:absolute; top:-5px; left:0; right:0; height:10px; cursor:ns-resize; z-index:10}
 .lb-sim-griff::after{content:""; position:absolute; left:50%; top:3px; width:44px; height:4px; margin-left:-22px; border-radius:2px; background:var(--line-2); opacity:0; transition:opacity var(--dauer)}
 .lb-sim-kopf{display:flex; align-items:center; gap:8px; width:100%; height:38px; flex:0 0 auto; padding:0 14px; border:0; background:none; color:var(--muted); font:700 13px/1 var(--body); text-align:left; min-width:0}
-.lb-sim-kopf:hover{color:var(--ink); background:var(--panel-2)}
+.lb-sim-kopf:hover, .lb-dock-tab:hover{color:var(--ink); background:var(--panel-2)}
 .lb-sim-titel-text{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.lb-sim-pfeil{margin-left:auto; display:inline-flex; transition:transform .2s}
+.lb-sim-pfeil{margin-left:auto; display:inline-flex; transition:transform 160ms}
 .labor:not(.sim-zu) .lb-sim-pfeil{transform:rotate(180deg)}
 .lb-sim-inhalt{flex:1 1 auto; min-height:0; overflow:auto}
 .lb-sim-platz{padding:12px 16px; color:var(--muted)}
 .lb-sim-platz strong{display:block; color:var(--ink); margin-bottom:4px}
 
 /* ---- Inspektor rechts ---- */
-.lb-insp-huelle{position:relative; width:360px; display:flex; flex-direction:column; min-height:0; background:var(--panel); border-left:1px solid var(--line); transition:width .2s ease}
+.lb-insp-huelle{position:relative; width:360px; display:flex; flex-direction:column; min-height:0; background:var(--panel); border-left:1px solid var(--line); transition:width 160ms ease}
 .labor.insp-zu .lb-insp-huelle{width:0; border-left:0}
 .lb-inspektor{flex:1 1 auto; min-height:0; min-width:0; overflow:auto}
-.lb-lasche{position:absolute; right:100%; top:50%; transform:translateY(-50%); z-index:4; display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 8px; border:1px solid var(--line); border-right:0; border-radius:10px 0 0 10px;
+.lb-lasche{position:absolute; right:100%; top:50%; transform:translateY(-50%); z-index:10; display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 8px; border:1px solid var(--line); border-right:0; border-radius:10px 0 0 10px;
   background:var(--glas); color:var(--muted); font:600 12.5px/1 var(--body); white-space:nowrap; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.lb-lasche:hover{color:var(--ink); background:var(--panel-3)}
 .labor.insp-zu .lb-lasche{color:var(--accent)}
 .lb-insp-leer{display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:48px 24px; color:var(--muted)}
 .lb-insp-leer strong{color:var(--ink); font:800 18px/1.2 var(--display)}
@@ -294,19 +298,24 @@
 /* Ruhe beim Start: Inspektor erst mit der ersten Auswahl, Simulation erst mit der ersten Aufzeichnung */
 
 /* ---- Dock rechts (K1, Phase B): Inspektor · Simulation · Plan · Akte als Reiter ----
-   Breite aus der Laborbreite: höchstens 40 % − Geräteleiste, so behält die Fläche ≥ 60 %. Eingeklappt: schmale Reiterleiste. */
-.labor.dock-da{--dock-b:clamp(250px, calc(40% - 88px), 440px)}
+   Breite aus der Laborbreite: höchstens 40 % − Geräteleiste, so behält die Fläche ≥ 60 %. Eingeklappt: schmale Reiterleiste.
+   Die UNTERGRENZE ist 180 statt 250 (Menüprobe 10.10.2026, rotes Profil klein-hoch 360×640): die
+   festen Teile der Labor-Spalte sind Leiste (78) + Dock. Mit 250 brauchte das Labor 328 px,
+   `ansicht` ist dort aber nur 284 px breit (360 minus 76 px Navigationsspalte) — das Dock-Blatt
+   ragte 44 px rechts heraus, und der Reiter „Inspektor“ lag mit ihm außerhalb. Mit 180 passen
+   78 + 180 = 258 px in 284 px (26 px Reserve). Ab ~845 px Fensterbreite greift weiter der
+   Prozentwert (40 % − 88 px); an den anderen Profilen ändert sich nur das Tablet (800: 250 → 202). */
+.labor.dock-da{--dock-b:clamp(180px, calc(40% - 88px), 440px)}
 .labor.dock-da.dock-zu{--dock-b:48px}
 .lb-dock{display:none; min-width:0; min-height:0; flex-direction:column; background:var(--panel); border-left:1px solid var(--line); container-type:inline-size}
 .labor.dock-da .lb-dock{display:flex}
 .lb-dock-reiter{display:flex; align-items:flex-end; gap:2px; padding:6px 6px 0; border-bottom:1px solid var(--line); flex:0 0 auto; overflow-x:auto; scrollbar-width:none}
-.lb-dock-tab{position:relative; display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 10px; border:1px solid transparent; border-bottom:0;
+/* 44 px hoch: die Fingerregel der Trefferflächen (menueprobe: der Reiter war 36 px hoch) */
+.lb-dock-tab{position:relative; display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 10px; border:1px solid transparent; border-bottom:0;
   border-radius:9px 9px 0 0; background:none; color:var(--muted); font:700 12.5px/1 var(--body); white-space:nowrap; cursor:pointer}
-.lb-dock-tab:hover{color:var(--ink); background:var(--panel-2)}
 .lb-dock-tab.an{color:var(--ink); background:var(--panel-2); border-color:var(--line); margin-bottom:-1px; padding-bottom:1px}
 .lb-dock-zahl{min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:var(--accent-ink); font:800 11px/18px var(--body); text-align:center}
-.lb-dock-einklappen{margin-left:auto; align-self:center; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--muted)}
-.lb-dock-einklappen:hover{background:var(--panel-3); color:var(--ink)}
+.lb-dock-einklappen{margin-left:auto; align-self:center; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--muted)}
 .lb-dock-inhalt{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .lb-dock-inhalt > *{flex:1 1 auto; min-height:0}
 .lb-plan, .lb-akte{overflow:auto}
@@ -325,13 +334,27 @@
    „superviser“ am 06.10.2026, Gate-Bericht Abschnitt 4. */
 @container (max-width:560px){ .lb-dock-tab .lb-dock-titel{display:none} .lb-dock-tab{padding:0 8px; min-width:44px} }
 .labor.dock-zu .lb-dock-reiter{flex-direction:column; align-items:center; border-bottom:0; padding:8px 0; gap:4px}
-.labor.dock-zu .lb-dock-tab{justify-content:center; width:38px; padding:0; border-radius:9px; border:1px solid transparent; margin:0}
-.labor.dock-zu .lb-dock-titel{display:none}
+/* 44×44 auch eingeklappt (war 38 px breit) – dieselbe Fingerzusage wie oben */
+.labor.dock-zu .lb-dock-tab{justify-content:center; width:44px; padding:0; border-radius:9px; border:1px solid transparent; margin:0}
 .labor.dock-zu .lb-dock-zahl{position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; font-size:10px; line-height:16px; padding:0 4px}
-.labor.dock-zu .lb-dock-inhalt{display:none}
 /* Simulation im Dock: Liste oben, PDU darunter (statt nebeneinander) */
 .lb-dock .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(0, 1.4fr) minmax(0, 1fr)}
 .lb-dock .si[data-breite="schmal"] .si-pdu{display:block; border-left:0; border-top:1px solid var(--line)}
 .lb-dock .si-kopf{flex-wrap:wrap; row-gap:6px}
 .lb-dock .si-zus{flex:1 1 190px}
 .lb-dock .si-zus strong{white-space:normal}
+
+/* ---- Fingerregeln der Web-Fassung (10.10.2026, Strom A) ----
+   `android/mobil/mobil.css` gilt nur im Android-Bau; die Web-Fassung hatte unter Berührung
+   deshalb 38-px-Menüpunkte und 40-px-Werkzeugknöpfe. Gemessen mit `tools/menueprobe.py`
+   (Profil „tablet-hoch“, `(pointer: coarse)`): Kontext-, Ansicht- und Zoom-Menü je 5 Knöpfe
+   206×38 — Soll ≥ 44. Die Regeln hier sind dieselben Werte wie mobil.css:39-40/365, nur für
+   die Web-Fassung. Spezifität `.menue .menue-punkt` (0,2,0) schlägt `.menue-punkt` (0,1,0)
+   in rahmen.css:106 unabhängig von der Dateireihenfolge (bauen.py lädt alphabetisch).
+   Auf dem Schreibtisch bleibt es bei 38/40 px: menueprobe.py:393-397 führt das dort als
+   Hinweis, nicht als Fehler — die 44 px sind eine Fingerregel. */
+@media (pointer: coarse){
+  .menue .menue-punkt, .pa-teil.klein{min-height:44px}
+  .lb-wz, .lb-knopf, .lb-ansicht{height:44px; min-width:44px}
+  .lb-zoomtext{height:44px; min-width:68px}
+}

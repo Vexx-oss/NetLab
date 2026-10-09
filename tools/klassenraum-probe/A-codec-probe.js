@@ -667,8 +667,17 @@ function messFertigkeitstauglichkeit(lab, tab, budget) {
 
 /* Je Fehlerklasse ein Beleg – inklusive der beiden Klassen, die nur über Tabellen entstehen
    (unbekannter Auftrag, andere Programmfassung). */
-function messFehlerklassen(lab, tab) {
+function messFehlerklassen(lab, tab, tauglichkeit) {
   const eCode = ergebnisCodeBauen({sitzung: 4, platz: 3, sterne: 4, versuche: 0, dauerS: 600});
+  /* Der Fall „Fertigkeit ohne Injektor" wird ABGELEITET, nicht auf einen Index festgenagelt:
+     er belegt die Fehlerklasse `auftrag` für eine Fertigkeit, die keinen spielbaren Auftrag liefert.
+     Gibt es heute keine solche Fertigkeit (alle 27 haben seit task-5 einen Injektor), entfällt der
+     Fall AUSDRÜCKLICH — ein gültiger Auftrag darf nicht als Beleg für `{fehler:"auftrag"}` gelten. */
+  const untauglichIndex = tauglichkeit ? tauglichkeit.je.findIndex(s => !s.tauglich) : -1;
+  const untauglichFall = untauglichIndex >= 0
+    ? {eingabe: auftragscode({sitzung: 5, art: 1, index: untauglichIndex, variante: 3}),
+       ausCode: ausCode(lab, tab, auftragscode({sitzung: 5, art: 1, index: untauglichIndex, variante: 3}))}
+    : {entfaellt: true, grund: `Keine untaugliche Fertigkeit in dieser Fassung (${tauglichkeit ? tauglichkeit.tauglich : "?"} von ${tauglichkeit ? tauglichkeit.skills : "?"} liefern im Suchraum einen gültigen Auftrag) — der Fall ist heute nicht darstellbar.`};
   const zeichenFall = "NL-" + "A".repeat(3) + "O" + "-AA";
   const tabelleMitLuecke = {...tab, auftraege: ["gibt-es-nicht", ...tab.auftraege.slice(1)]};
   const faelle = {
@@ -684,8 +693,7 @@ function messFehlerklassen(lab, tab) {
       ausCode: ausCode(lab, tab, auftragscode({sitzung: 5, art: 1, index: 40, variante: 3}))},
     auftragTabelleMitLuecke: {eingabe: auftragscode({sitzung: 5, art: 0, index: 0, variante: 3}),
       ausCode: ausCode(lab, tabelleMitLuecke, auftragscode({sitzung: 5, art: 0, index: 0, variante: 3}))},
-    auftragUntauglicheFertigkeit: {eingabe: auftragscode({sitzung: 5, art: 1, index: 26, variante: 3}),
-      ausCode: ausCode(lab, tab, auftragscode({sitzung: 5, art: 1, index: 26, variante: 3}))},
+    auftragUntauglicheFertigkeit: untauglichFall,
     ergebnisLeer: {eingabe: "", gelesen: ergebnisLesenRoh("")},
     ergebnisLaenge: {eingabe: "E-ABC", gelesen: ergebnisLesenRoh("E-ABC")},
     ergebnisZeichen: {eingabe: "E-AAAO-AAA", gelesen: ergebnisLesenRoh("E-AAAO-AAA")},
@@ -703,7 +711,7 @@ function messFehlerklassen(lab, tab) {
 /* Reservierte Indizes (heute frei): zählen und belegen, dass sie {fehler:"fassung"} ergeben.
    Wichtig für § 2.3: „frei" heißt „in dieser Fassung nicht vergeben"; beim Anhängen neuer Aufträge
    wird ein solcher Index belegt (er wurde nie ausgegeben). */
-function messReserviert(lab, tab) {
+function messReserviert(lab, tab, tauglichkeit) {
   const zaehl = {auftraegeFrei: 0, fertigkeitenFrei: 0, auftraegeFreiFassung: 0, fertigkeitenFreiFassung: 0, andereKlasse: []};
   for (let sitzung = 0; sitzung < 32; sitzung++) for (let variante = 0; variante < 256; variante++) {
     for (let index = tab.auftraege.length; index < 64; index++) {
@@ -719,10 +727,19 @@ function messReserviert(lab, tab) {
       else if (zaehl.andereKlasse.length < 5) zaehl.andereKlasse.push({art: 1, index, g});
     }
   }
-  /* taugliche vs. untaugliche Fertigkeitsindizes */
-  zaehl.tauglicheIndizes = tab.skills.length - 3;
-  zaehl.untauglicheIndizes = 3;
-  zaehl.unerreichbareCodesFertigkeit = 3 * 32 * 256;
+  /* Taugliche vs. untaugliche Fertigkeitsindizes — ABGELEITET aus der Messung
+     (`messFertigkeitstauglichkeit`), nicht gesetzt. Die frühere Annahme „3 untauglich, also 24 von 27"
+     war der Stand VOR den drei Injektoren aus task-5 (lab.portsec, lab.stp, lab.storage); eine feste
+     Zahl veraltet wieder. Ohne Messung wird NICHT geraten: dann bleibt das Feld null. */
+  const untauglich = tauglichkeit ? tauglichkeit.untauglich : null;
+  zaehl.tauglicheIndizes = tauglichkeit ? tauglichkeit.tauglich : null;
+  zaehl.untauglicheIndizes = untauglich;
+  zaehl.unerreichbareCodesFertigkeit = untauglich === null ? null : untauglich * 32 * 256;   /* 32 Sitzungen × 256 Varianten */
+  zaehl.tauglichkeitQuelle = "messFertigkeitstauglichkeit: Spiel.generiere + Spiel.ticketGueltig, Suchraum 128 Seeds je Fertigkeit";
+  zaehl.tauglichkeitAbgebrochen = tauglichkeit ? !!tauglichkeit.abgebrochen : null;
+  zaehl.tauglichkeitHinweis = !tauglichkeit ? "Ohne Tauglichkeitsmessung nicht ableitbar — absichtlich null statt geraten."
+    : tauglichkeit.abgebrochen ? "Die Tauglichkeitsmessung brach nach dem Budget ab — die Zahlen decken nur die geprüften Fertigkeiten ab."
+    : null;
   return zaehl;
 }
 
@@ -931,7 +948,11 @@ function main() {
   const lab = start();
   const tab = tabellen(lab);
   const K = klassenraumApi(lab, tab);
-  const budget = Math.max(60000, 9 * 60 * 1000);       /* obere Schranke für die Kanonisierungsteile */
+  /* Obere Schranke je Kanonisierungsteil. Am 09.10.2026 riss sie bei Maschinenlast: 56 von 58
+     Handaufträgen in 540 s (Laufzeit gesamt 647 s statt der in A § 0 dokumentierten 253 s).
+     Deshalb 30 min — der unbelastete Normalfall braucht ~250 s, die Schranke ist nur eine Notbremse.
+     Wird sie erreicht, steht das im Befundtext, in der Konsole UND im JSON (`abgebrochen`). */
+  const budget = Math.max(60000, 30 * 60 * 1000);
 
   const laenge = messLänge(lab);
   const normalisierung = messNormalisierung(lab, tab);
@@ -941,14 +962,29 @@ function main() {
   const netz = messNetzkennwert(lab, tab);
   const kanon = messKanonisierung(lab, tab, budget);
   const tauglichkeit = messFertigkeitstauglichkeit(lab, tab, 120000);
-  const fehlerklassen = messFehlerklassen(lab, tab);
-  const reserviert = messReserviert(lab, tab);
+  const fehlerklassen = messFehlerklassen(lab, tab, tauglichkeit);
+  const reserviert = messReserviert(lab, tab, tauglichkeit);
   const instanzweg = messInstanzweg(lab, tab);
   const speicher = messSpeicher(lab, tab, K);
   const determ = messDeterminismus();
 
+  /* Ein abgeschnittener Lauf darf nicht wie ein vollständiger aussehen (Lehre vom 09.10.2026:
+     der Abbruch stand nur im JSON-Feld `abgebrochen`, der Befundtext nannte eine glatte Zahl).
+     Deshalb hier EINMAL berechnet und an drei Stellen benutzt: Befundtext, Konsole, JSON. */
+  const handFehlend = tab.auftraege.filter(id => !kanon.hand.jeTicket.some(z => z.id === id));
+  const genFehlend = tab.skills.filter(id => !kanon.generiert.jeSkill.some(z => z.skill === id));
+  const budgetS = Math.round(budget / 1000);
+  const handKopf = `Kanonisierung Handaufträge: ${kanon.hand.tickets} von ${tab.auftraege.length} Aufträgen`
+    + (kanon.hand.abgebrochen ? `, ABGEBROCHEN nach Budget (${budgetS} s) — NICHT gemessen: ${handFehlend.join(", ")}` : ", vollständig");
+  const genKopf = `Generierte Formen: ${kanon.generiert.skills} von ${tab.skills.length} Fertigkeiten`
+    + (kanon.generiert.abgebrochen ? `, ABGEBROCHEN nach Budget (${budgetS} s) — NICHT gemessen: ${genFehlend.join(", ")}` : ", vollständig");
+
   const aus = {
     thema: "A-codec", stand: "2026-10-06",
+    /* `stand` bleibt das Datum des DOKUMENTS (Vergleichbarkeit mit A § 9), `laufzeit` ist der
+       Zeitpunkt DIESES Laufs (neu am 09.10.2026). Getrennt, damit der Beleg datiert ist, ohne die
+       Dokumentzuordnung zu verschieben. */
+    laufzeit: new Date().toISOString(),
     befehl: BEFEHL,
     umgebung: {node: process.version, module: lab.module.length, ticketsRoh: tab.roh.length, ticketReihe: tab.auftraege.length,
       skills: tab.skills.length, terminal: (lab.DATEN.tickets || []).filter(t => t.art === "terminal").length,
@@ -963,9 +999,9 @@ function main() {
     befunde: [
       `Auftragscode immer genau ${laenge.minLaenge} Zeichen (NL-XXXX-XX), Ergebniscode immer genau ${eCode.minLaenge} Zeichen (E-XXXX-XXX) – jeweils inkl. Trennstriche.`,
       `Erschöpfender Round-Trip über alle ${laenge.geprueft} Nutzlasten: ${laenge.fehlschlag} Fehlschläge.`,
-      `58 handgeschriebene Aufträge: Spiel.ticketReihe() und DATEN.tickets sind an ${tab.unterschiede.length} Stellen in anderer Reihenfolge – die Tabelle muss eingefroren werden.`,
-      `Kanonisierung Handaufträge: ${kanon.hand.k0} von ${kanon.hand.varianten} Varianten mit 0 Schritten; Rückfall auf die feste Fassung ${kanon.hand.rueckfall}× (${kanon.hand.ohneEigeneFassung.map(x => x.id).join(", ")}).`,
-      `Generierte Formen: ${tauglichkeit.tauglich} von ${tauglichkeit.skills} Fertigkeiten liefern überhaupt einen Auftrag; ${kanon.generiert.fehlschlaege} von ${kanon.generiert.varianten} Varianten scheitern (${kanon.generiert.jeSkill.filter(x => x.fehlschlaege > 0).map(x => x.skill).join(", ")}).`,
+      `${tab.auftraege.length} handgeschriebene Aufträge: Spiel.ticketReihe() und DATEN.tickets sind an ${tab.unterschiede.length} Stellen in anderer Reihenfolge – die Tabelle muss eingefroren werden.`,
+      `${handKopf}; ${kanon.hand.k0} von ${kanon.hand.varianten} Varianten mit 0 Schritten; Rückfall auf die feste Fassung ${kanon.hand.rueckfall}× (${kanon.hand.ohneEigeneFassung.map(x => x.id).join(", ")}).`,
+      `${genKopf}; ${kanon.generiert.fehlschlaege} von ${kanon.generiert.varianten} Varianten scheitern (${kanon.generiert.jeSkill.filter(x => x.fehlschlaege > 0).map(x => x.skill).join(", ") || "keine"}). Tauglichkeit (eigene Messung, ${tauglichkeit.abgebrochen ? "ABGEBROCHEN" : "vollständig"}): ${tauglichkeit.tauglich} von ${tauglichkeit.skills} Fertigkeiten liefern überhaupt einen Auftrag.`,
       `Determinismus: ${determ.identisch} von ${determ.codes} Codes in zwei getrennten Node-Prozessen (pids ${determ.pids.join(", ")}) identisch in Seed, Netzkennwert und Instanz-Kennwert.`,
       `Netzkennwert: 6 Zeichen, unabhängig von Schlüssel- und Kabelreihenfolge, ändert sich bei einer geänderten IP (${netz.kennwert} → ${netz.kGeaendert}), ignoriert die Laufzeit (netz.zustand).`,
       `Flow-Falle belegt: mit aktivem Flow-Stand liefert ohneFlow:false einen anderen generierten Auftrag (${instanzweg.flowFalle.generiertMitFlow.ticketId} statt ${instanzweg.flowFalle.generiertOhneFlow.ticketId}) – der Klassenraum-Weg braucht ohneFlow:true.`,
@@ -982,14 +1018,26 @@ function main() {
     skills: tauglichkeit.je.map((s, i) => ({index: i, id: s.skill, tauglich: s.tauglich, ersterSeed: s.ersterSeed})),
     unterschiede: tab.unterschiede,
   }, null, 1), "utf8");
-  console.log(JSON.stringify({ok: true, laufzeitMs: aus.laufzeitMs,
+  /* Der Abbruch gehört AUCH auf die Konsole — im JSON-Block wird er beim Blick auf die letzten
+     Zeilen leicht übersehen (Befund vom 09.10.2026: 56 von 58, aber eine glatte Zahl im Text). */
+  const warnungen = [];
+  if (kanon.hand.abgebrochen) warnungen.push(`${handKopf}.`);
+  if (kanon.generiert.abgebrochen) warnungen.push(`${genKopf}.`);
+  console.log(JSON.stringify({ok: true, laufzeit: aus.laufzeit, laufzeitMs: aus.laufzeitMs,
     laenge: [laenge.minLaenge, laenge.maxLaenge], roundtripFehler: laenge.fehlschlag,
     vertipper: `${vertipper.abgelehnt}/${vertipper.faelle}`,
     zufallRoh: zufall.rohGemischt.quote, zufallWohlgeformt: zufall.wohlgeformt.quote, mutationen: zufall.mutationen.quote,
-    kanonHandK0: kanon.hand.k0, kanonHandRueckfall: kanon.hand.rueckfall, kanonGenFehlschlaege: kanon.generiert.fehlschlaege,
+    kanonHand: `${kanon.hand.tickets}/${tab.auftraege.length}${kanon.hand.abgebrochen ? " ABGEBROCHEN" : ""}`,
+    kanonHandFehlend: handFehlend,
+    kanonHandK0: kanon.hand.k0, kanonHandVarianten: kanon.hand.varianten, kanonHandRueckfall: kanon.hand.rueckfall,
+    kanonGen: `${kanon.generiert.skills}/${tab.skills.length}${kanon.generiert.abgebrochen ? " ABGEBROCHEN" : ""}`,
+    kanonGenFehlschlaege: kanon.generiert.fehlschlaege,
     fertigkeitenTauglich: `${tauglichkeit.tauglich}/${tauglichkeit.skills}`,
     zweiProzesse: `${determ.identisch}/${determ.codes}`,
+    abgebrochen: warnungen.length > 0,
   }, null, 1));
+  for (const w of warnungen) console.log("WARNUNG: " + w);
+  if (!warnungen.length) console.log(`Vollständig: ${handKopf}; ${genKopf}.`);
 }
 
 if (process.argv[2] === "--teil1" || process.argv[2] === "--teil2") {

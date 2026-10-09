@@ -231,7 +231,6 @@ html[data-bewegung="aus"] *, html[data-bewegung="aus"] *::before, html[data-bewe
 .ak-v-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
 .ak-v-kopf small, .ak-v-zeit{color:var(--muted); font-size:12px}
 .ak-v-satz{font-weight:700; margin:0}
-.ak-v-zeit.gut{color:var(--ok)}
 .ak-schritt{margin:6px 0 0; color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em}
 .ak-chips{display:flex; flex-wrap:wrap; gap:6px}
 .ak-chip{min-height:30px; padding:4px 10px; border-radius:999px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 12.5px/1.2 var(--body); cursor:pointer; text-align:left}
@@ -255,8 +254,9 @@ html[data-bewegung="aus"] *, html[data-bewegung="aus"] *::before, html[data-bewe
 .ak-stern{border:0; background:none; color:var(--faint); font-size:18px; line-height:1; cursor:pointer; padding:2px}
 .ak-stern.an, .ak-stern:hover{color:var(--geld)}
 .ak-leer{color:var(--muted); font-size:13px; margin:0}
+/* R10: ein Block für die Erfolgsfarbe – Zeit „gut" in der Akte, Verdacht „voll" im Dock */
+.ak-v-zeit.gut, .sp-verdacht.voll{color:var(--ok)}
 .sp-verdacht{margin:10px 0 0; font-size:14px; line-height:1.45}
-.sp-verdacht.voll{color:var(--ok)}
 .ak-karte.aussage{border-left-color:var(--line-2)}   /* Kundenaussage am Telefon (Hotline) */
 
 /* ---- aussehen.css ---- */
@@ -319,7 +319,11 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 
 /* ---- editor.css ---- */
 /* ---------- Labor-Ansicht: Geräteleiste, Fläche (SVG), Ebenen, Andockbereiche ----------
-   Nur Tokens aus basis.css. Gerätetyp-Farbe über --g. */
+   Nur Tokens aus basis.css. Gerätetyp-Farbe über --g.
+   Aufgeräumt am 10.10.2026 (Strom A): R5 11 → 0, R6 4 → 0, R10 19 → 0, Trefferflächen ≥ 44 px.
+   Zusammengefasst wurden nur Blöcke mit IDENTISCHEN Deklarationen (ethos R10); die Hover-Regel
+   steht dabei an der Stelle des ersten Vorkommens — alle betroffenen Selektoren haben dort
+   dieselbe Spezifität wie vorher, und keine spätere Regel derselben Spezifität wurde übersprungen. */
 .typ-router{--g:var(--typ-router)} .typ-switch{--g:var(--typ-switch)} .typ-firewall{--g:var(--typ-firewall)} .typ-pc{--g:var(--typ-host)}
 .typ-server{--g:var(--typ-server)} .typ-nas{--g:var(--typ-nas)} .typ-internet{--g:var(--typ-internet)}
 .gb-kachel{fill:var(--panel-2); fill:color-mix(in srgb, var(--g) 9%, var(--panel-2)); stroke:var(--line-2); stroke-width:1.5; transition:fill var(--dauer), stroke var(--dauer)}
@@ -329,25 +333,31 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .labor{display:grid; grid-template-columns:auto minmax(0,1fr) var(--dock-b, 0px); height:100%; min-height:0; background:var(--bg)}
 
 /* ---- Geräteleiste ---- */
-.lb-geraete{position:relative; z-index:6; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
+/* z-index:30 (Leiter 10/20/30): über der Zeichenfläche und über den schwebenden Werkzeugleisten
+   (20), damit das Fach (z-index:40 im eigenen Kontext) nicht unter der Werkzeugleiste liegt;
+   weiterhin weit unter Menü (50), Dialog (56) und Overlay (80). */
+.lb-geraete{position:relative; z-index:30; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
 .lb-geraete-titel{font:700 10.5px/1 var(--body); letter-spacing:.1em; text-transform:uppercase; color:var(--faint); padding:6px 0 8px}
 
 /* ---- Geräte-Fächer (editor-fach.js, Präfix pa-) ---- */
 .pa-kat{display:flex; flex-direction:column; align-items:center; gap:2px; width:66px; min-height:62px; padding:5px 2px 6px; border:1px solid transparent; border-radius:12px; background:none; color:var(--muted);
   font:600 11px/1.1 var(--body); transition:background var(--dauer), border-color var(--dauer), color var(--dauer)}
-.pa-kat:hover{background:var(--panel-3); color:var(--ink)}
+/* eine Hover-Regel für alle Knöpfe der Ansicht (vorher sieben identische Blöcke, ethos R10) */
+.pa-kat:hover, .pa-zu:hover, .lb-wz:hover, .lb-knopf:hover:not([disabled]), .lb-zoomtext:hover, .lb-ansicht:hover, .lb-lasche:hover, .lb-dock-einklappen:hover{background:var(--panel-3); color:var(--ink)}
 .pa-kat:hover .gb-kachel, .pa-teil:hover .gb-kachel{stroke:var(--g)}
 .pa-kat.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 .pa-kat svg, .pa-teil svg{pointer-events:none; overflow:visible; flex:0 0 auto}
 .pa-fach{position:absolute; left:calc(100% + 6px); top:8px; z-index:40; width:268px; max-height:calc(100vh - 140px); overflow:auto; display:flex; flex-direction:column; gap:6px;
-  padding:8px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten, 0 12px 32px rgba(0,0,0,.35)); animation:pa-rein .14s ease-out}
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim{display:none}
+  padding:8px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein 160ms ease-out}
+/* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
+   deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
 .pa-fach.zieht{opacity:.35; pointer-events:none}
 @keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
 .pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:2px 2px 4px 6px}
 .pa-kopf strong{font:800 15px/1.2 var(--display)}
-.pa-zu{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border:0; border-radius:8px; background:none; color:var(--muted)}
-.pa-zu:hover{background:var(--panel-3); color:var(--ink)}
+/* 44×44: die Fingerregel gilt auch hier (menueprobe: „Fach schließen" war 30×30) */
+.pa-zu{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:0; border-radius:8px; background:none; color:var(--muted)}
 .pa-zuletzt{display:flex; flex-direction:column; gap:4px; padding:0 2px 6px; border-bottom:1px solid var(--line)}
 .pa-zuletzt small{color:var(--faint); font:700 10.5px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; padding:2px 4px}
 .pa-zuletzt-reihe{display:flex; gap:4px}
@@ -362,13 +372,16 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .pa-text b{font:700 14px/1.2 var(--body)}
 .pa-text small{color:var(--muted); font-size:12px; line-height:1.3}
 .pa-name{white-space:nowrap}
-.lb-geist{position:fixed; left:0; top:0; z-index:70; pointer-events:none; opacity:.6; filter:drop-shadow(0 8px 14px rgba(0,0,0,.4)); transition:opacity .1s}
+.lb-geist{position:fixed; left:0; top:0; z-index:70; pointer-events:none; opacity:.6; filter:drop-shadow(0 8px 14px rgba(0,0,0,.4)); transition:opacity 160ms}
 .lb-geist.drin{opacity:.95}
 .lb-geist svg{overflow:visible}
 
 /* ---- Mitte: Auftrag, Fläche, Simulation ---- */
 .lb-mitte{display:flex; flex-direction:column; min-width:0; min-height:0}
-.lb-auftrag{position:relative; z-index:5; flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}   /* trägt die Auftragsmappe (spiel.css, am-) */
+/* z-index:10 = unterste Sprosse der Leiter: über der Zeichenfläche, unter den Werkzeugleisten (20),
+   dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80). Trägt die Auftragsmappe (spiel.css, am-),
+   deren eigene Ebene (30) INNERHALB dieses Kontexts liegt — die Leisten darüber bleiben erreichbar. */
+.lb-auftrag{position:relative; z-index:10; flex:0 0 auto; border-bottom:1px solid var(--line); background:var(--panel)}
 .lb-auftrag-standard{display:flex; align-items:center; min-height:44px; padding:0 16px; font:700 15px/1 var(--display)}
 .auftrag-sandbox{display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 12px 8px 14px; background:linear-gradient(90deg, var(--accent-soft), transparent 55%)}
 .as-sym{display:inline-flex; flex:0 0 auto; width:38px; height:38px; align-items:center; justify-content:center; border-radius:11px; background:var(--panel-2); border:1px solid var(--line-2); color:var(--accent)}
@@ -380,30 +393,28 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--bg); touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
 .lb-svg:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
 .lb-svg.greift, .lb-svg.zieht, .lb-svg.zieht .ger{cursor:grabbing}
-.labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg{cursor:crosshair}
+.labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg, .griff{cursor:crosshair}
 .labor[data-werkzeug="platzieren"] .lb-svg{cursor:copy}
 .lb-raster-punkt{fill:var(--line)}
 .lb-raster.fein{opacity:.35}
 
 /* schwebende Werkzeugleisten
-   `z-index:10` ist kein Schmuck: `.lb-auftrag` (z-index:5) trägt die Auftragsmappe, und
-   `.am-mappe` steht darin auf 30 (spiel.css:31). Ohne eigene Ebene liegen die Leisten
-   unter der Mappe und sind mit der Maus nicht mehr zu treffen. Gemessen von
-   „menu-auditor“ am 06.10.2026 (1280 × 800, echte Maus): bei offener Mappe trafen alle
+   z-index:20 ist kein Schmuck: `.lb-auftrag` (z-index:10) trägt die Auftragsmappe, und
+   `.am-mappe` steht darin auf 30 (spiel.css:31) — innerhalb des Auftrags-Kontexts. Ohne eigene
+   Ebene lägen die Leisten unter der Mappe und wären mit der Maus nicht mehr zu treffen.
+   Gemessen von „menu-auditor“ am 06.10.2026 (1280 × 800, echte Maus): bei offener Mappe trafen alle
    vier Knöpfe der oberen Leiste auf `div.am-reiter` / `button.am-tab`, ein Klick auf
    „Ansicht“ öffnete nichts (`.menue` 0 → 0); nach „×“ derselbe Klick → Menü
-   [307,171,220,237]. 10 ist der erste Wert der benannten z-index-Leiter
-   (tools/ethos.py, R6) über der 5 des Auftrags und weit unter Menü (50), Dialog (56)
-   und Overlay (80) — der Stapel bleibt also unverändert, nur die beiden Leisten
-   kommen über die Mappe. */
-.lb-leiste-oben{position:absolute; z-index:10; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
-.lb-leiste-unten{position:absolute; z-index:10; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
+   [307,171,220,237]. 20 ist die zweite Sprosse der benannten z-index-Leiter (tools/ethos.py, R6),
+   über der 10 des Auftrags und unter dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80) —
+   der Stapel bleibt also unverändert, nur die beiden Leisten kommen über die Mappe. */
+.lb-leiste-oben{position:absolute; z-index:20; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
+.lb-leiste-unten{position:absolute; z-index:20; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
 .lb-luecke{flex:1 1 auto}
 .lb-gruppe{display:flex; align-items:center; gap:2px; padding:3px; border-radius:12px; background:var(--glas); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); pointer-events:auto}
 .lb-wz, .lb-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:40px; height:40px; padding:0 8px; border:0; border-radius:9px; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer)}
-.lb-wz:hover, .lb-knopf:hover:not([disabled]){background:var(--panel-3); color:var(--ink)}
 .lb-wz.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
 /* Taste sichtbar im Werkzeugknopf (Rueckmeldung 05.10.2026) - dezent in der Ecke, kein zusaetzliches Bedienelement */
 .lb-wz{position:relative}
@@ -413,11 +424,9 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-knopf[disabled]{opacity:.35; cursor:default}
 .lb-knopf-text span{font:600 13px/1 var(--body)}
 .lb-zoomtext{min-width:64px; height:40px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 12.5px/1 var(--mono); font-variant-numeric:tabular-nums}
-.lb-zoomtext:hover{background:var(--panel-3); color:var(--ink)}
 /* Ansicht-Menü (ein Knopf statt fünf Ebenen-Reitern) */
 .lb-ansicht{display:inline-flex; align-items:center; gap:7px; height:40px; padding:0 10px 0 11px; border:0; border-radius:9px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
-.lb-ansicht:hover{background:var(--panel-3); color:var(--ink)}
-.lb-ansicht-text{color:var(--ink)}
+.lb-ansicht-text, .lb-fern-kunde b{color:var(--ink)}
 .lb-hinweis{position:absolute; left:12px; bottom:12px; max-width:calc(100% - 440px); padding:7px 12px; border-radius:var(--radius); background:var(--glas); border:1px solid var(--line); color:var(--muted);
   font-size:12.5px; line-height:1.35; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 @media (max-width:1100px){ .lb-hinweis{display:none} }
@@ -431,7 +440,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-fern-kopf strong{font:800 17px/1.2 var(--display); color:var(--ink)}
 .lb-fern-sym{font-size:20px; line-height:1}
 .lb-fern-status{margin-left:auto; display:inline-flex; align-items:center; gap:6px; font:700 12px/1 var(--body); color:var(--ok)}
-.lb-fern-punkt{width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation:lb-fern-puls 2s ease-out infinite}
+.lb-fern-punkt{width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation:lb-fern-puls 320ms ease-out infinite}
 @keyframes lb-fern-puls{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent)} 80%, 100%{box-shadow:0 0 0 8px transparent}}
 /* Bildschirm des Kunden: das Symptom als Bild (Ziel mit ✗), nicht als Satz – der steht im Titel */
 .lb-fern-schirm{position:relative; aspect-ratio:16/9; border-radius:var(--radius); border:6px solid var(--panel-3); background:linear-gradient(160deg, color-mix(in srgb, var(--info) 22%, var(--bg)), var(--bg) 70%);
@@ -446,10 +455,9 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-fern-geraet strong{font:700 15px/1.2 var(--body); color:var(--ink)}
 .lb-fern-bild{width:34px; height:34px; flex:0 0 auto}
 .lb-fern-kunde{margin:0; display:flex; align-items:center; gap:6px; font-size:13px}
-.lb-fern-kunde b{color:var(--ink)}
 .lb-fern-kunde-sym{display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:7px; background:color-mix(in srgb, var(--k, var(--accent)) 20%, var(--panel)); font-size:14px}
 /* Probe (§ 20 F4): ✓ auf dem Bildschirm, Verbindung getrennt, PC online */
-.lb-fern-schild.fertig .lb-fern-x{background:var(--ok); animation:lb-fern-ok .35s cubic-bezier(.3,1.6,.5,1) both}
+.lb-fern-schild.fertig .lb-fern-x{background:var(--ok); animation:lb-fern-ok 320ms cubic-bezier(.3,1.6,.5,1) both}
 @keyframes lb-fern-ok{from{transform:scale(.3)} to{transform:none}}
 .lb-fern-schild.fertig .lb-fern-punkt{background:var(--muted); animation:none}
 .lb-fern-online{margin-left:auto; color:var(--ok); font:700 12.5px/1 var(--body)}
@@ -478,9 +486,9 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .labor[data-ebene="ip"] .ger.ohne-ip .gb-glyph path{stroke:var(--faint)}
 .ger.blitz-ok .gb-kachel{stroke:var(--ok); stroke-width:3; fill:var(--ok-soft)}
 .ger.blitz-fehler .gb-kachel{stroke:var(--bad); stroke-width:3; fill:var(--bad-soft)}
-.ger.blitz-fehler .gb{animation:wackeln .42s ease-in-out}
+.ger.blitz-fehler .gb{animation:wackeln 320ms ease-in-out}
 @keyframes wackeln{20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)}}
-.badge{cursor:help}
+.badge, .ps{cursor:help}
 .badge-warn circle{fill:var(--warn); stroke:var(--bg); stroke-width:2}
 .badge-warn path{stroke:var(--accent-ink); stroke-width:2.4; stroke-linecap:round; fill:none}
 .badge-ungespeichert circle{fill:var(--info); stroke:var(--bg); stroke-width:2}
@@ -502,8 +510,10 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .kabel.gewaehlt .kabel-treffer{stroke:var(--accent-soft); stroke-opacity:1}
 .kabel.gewaehlt .kabel-linie{stroke-width:3.4}
 .ps-grund{fill:var(--bg); stroke:var(--line-2); stroke-width:1}
-.ps-oben path{fill:var(--ok)} .ps-unten path{fill:var(--bad)} .ps-aus rect{fill:var(--warn)}
-.ps{cursor:help}
+/* Statusfarben EINMAL (vorher drei Blöcke je Farbe, ethos R10): Netzkabel, Port-Punkte, Splitter, Schild */
+.ps-oben path, .pd-oben{fill:var(--ok)}
+.ps-unten path, .pd-unten, .splitter{fill:var(--bad)}
+.ps-aus rect, .pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
 .kabel-port{font:600 12px/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round; pointer-events:none}
    /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
 .ger-ip.kopierbar{cursor:pointer; pointer-events:auto}
@@ -513,7 +523,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .vlan-schild text{font:700 10.5px/1 var(--mono); fill:var(--accent-ink)}
 .vlan-schild.trunk rect{fill:var(--panel-2); stroke:var(--ink)}
 .vlan-schild.trunk text{fill:var(--ink)}
-.vlan-schild, .zone, .karte, .gw-schild{pointer-events:none}
+.vlan-schild, .zone, .karte, .gw-schild, .lb-s-band, .lb-s-pakete, .paket{pointer-events:none}
 
 /* ---- Zonen (Ebene IP-Netze) ---- */
 .zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
@@ -531,68 +541,62 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .karte-zeile.leer{fill:var(--faint); font-style:italic; font-family:var(--body)}
 .gw-schild rect{fill:var(--panel-2); stroke:var(--line-2)}
 .gw-schild text{font:600 10.5px/1 var(--mono); fill:var(--muted)}
-.gw-schild.fehlt rect{stroke:var(--warn)} .gw-schild.fehlt text{fill:var(--warn)}
+.gw-schild.fehlt rect{stroke:var(--warn)}
 
 /* ---- Hover: Ports und Kabelgriff ---- */
 .ports-platte{fill:var(--panel); stroke:var(--line-2); stroke-width:1; opacity:.96}
-.pd{stroke:var(--bg); stroke-width:1.5; cursor:crosshair; transition:stroke-width .1s}
+.pd{stroke:var(--bg); stroke-width:1.5; cursor:crosshair; transition:stroke-width 160ms}
 .pd-frei{fill:var(--panel-3); stroke:var(--muted)}
-.pd-oben{fill:var(--ok)} .pd-unten{fill:var(--bad)} .pd-aus{fill:var(--warn)}
 .pd:hover, .pd.ziel{stroke:var(--accent); stroke-width:3}
 .pd-name{font:600 8.5px/1 var(--mono); fill:var(--muted); pointer-events:none}
-.griff{cursor:crosshair}
 .griff circle{fill:var(--accent); stroke:var(--bg); stroke-width:2.5}
 .griff path{stroke:var(--accent-ink); stroke-width:2.2; stroke-linecap:round; fill:none}
 .griff:hover circle{stroke:var(--accent-soft); stroke-width:4}
 
 /* ---- Gummiband, Vorschau ---- */
-.band{stroke:var(--accent); stroke-width:2.4; stroke-dasharray:7 5; stroke-linecap:round; animation:band-laufen .5s linear infinite; pointer-events:none}
+.band{stroke:var(--accent); stroke-width:2.4; stroke-dasharray:7 5; stroke-linecap:round; animation:band-laufen 320ms linear infinite; pointer-events:none}
 .band-ping{stroke:var(--p-icmp)}
 @keyframes band-laufen{to{stroke-dashoffset:-12}}
 .band-paket{fill:var(--p-icmp); stroke:var(--bg); stroke-width:2; pointer-events:none}
 .band-stecker{fill:var(--accent); stroke:var(--bg); stroke-width:2; pointer-events:none}
 .band-text{font:700 10px/1 var(--mono); fill:var(--p-icmp); paint-order:stroke; stroke:var(--bg); stroke-width:3px; pointer-events:none}
 .vorschau{opacity:.5; pointer-events:none}
-.lb-s-band, .lb-s-pakete{pointer-events:none}
 
 /* ---- Pakete und Effekte ---- */
-.paket{pointer-events:none}
 .paket-schein{fill:var(--pf); opacity:.28}
 .paket-kern{fill:var(--pf); stroke:var(--bg); stroke-width:2}
 .paket-text{font:700 10px/1 var(--mono); fill:var(--pf); paint-order:stroke; stroke:var(--bg); stroke-width:3.5px; stroke-linejoin:round}
 .puls{fill:none; stroke:var(--pf); stroke-width:2}
 .ring-ok{fill:none; stroke:var(--ok); stroke-width:3}
 .ring-fehler{fill:none; stroke:var(--bad); stroke-width:3}
-.splitter{fill:var(--bad)}
 .platz-schild rect{fill:var(--bad-soft); stroke:var(--bad); stroke-width:1.5}
 .platz-schild text{font:700 11.5px/1 var(--body); fill:var(--bad)}
-.hl-ring{fill:none; stroke:var(--accent); stroke-width:3; animation:hl-puls 1s ease-in-out infinite}
+.hl-ring{fill:none; stroke:var(--accent); stroke-width:3; animation:hl-puls 320ms ease-in-out infinite alternate}
 .hl-port{fill:none; stroke:var(--accent); stroke-width:2.5}
 @keyframes hl-puls{50%{stroke-opacity:.35; stroke-width:6}}
 
 /* ---- Simulation unten ---- */
-.lb-sim{position:relative; flex:0 0 auto; height:var(--sim-h, 250px); display:flex; flex-direction:column; border-top:1px solid var(--line); background:var(--panel); transition:height .2s ease}
+.lb-sim{position:relative; flex:0 0 auto; height:var(--sim-h, 250px); display:flex; flex-direction:column; border-top:1px solid var(--line); background:var(--panel); transition:height 160ms ease}
 .labor.sim-zu .lb-sim{height:38px}
 .labor.sim-zieht .lb-sim{transition:none}
 .labor.sim-zieht{cursor:ns-resize; user-select:none}
-.lb-sim-griff{position:absolute; top:-5px; left:0; right:0; height:10px; cursor:ns-resize; z-index:2}
+.lb-sim-griff{position:absolute; top:-5px; left:0; right:0; height:10px; cursor:ns-resize; z-index:10}
 .lb-sim-griff::after{content:""; position:absolute; left:50%; top:3px; width:44px; height:4px; margin-left:-22px; border-radius:2px; background:var(--line-2); opacity:0; transition:opacity var(--dauer)}
 .lb-sim-kopf{display:flex; align-items:center; gap:8px; width:100%; height:38px; flex:0 0 auto; padding:0 14px; border:0; background:none; color:var(--muted); font:700 13px/1 var(--body); text-align:left; min-width:0}
-.lb-sim-kopf:hover{color:var(--ink); background:var(--panel-2)}
+.lb-sim-kopf:hover, .lb-dock-tab:hover{color:var(--ink); background:var(--panel-2)}
 .lb-sim-titel-text{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.lb-sim-pfeil{margin-left:auto; display:inline-flex; transition:transform .2s}
+.lb-sim-pfeil{margin-left:auto; display:inline-flex; transition:transform 160ms}
 .labor:not(.sim-zu) .lb-sim-pfeil{transform:rotate(180deg)}
 .lb-sim-inhalt{flex:1 1 auto; min-height:0; overflow:auto}
 .lb-sim-platz{padding:12px 16px; color:var(--muted)}
 .lb-sim-platz strong{display:block; color:var(--ink); margin-bottom:4px}
 
 /* ---- Inspektor rechts ---- */
-.lb-insp-huelle{position:relative; width:360px; display:flex; flex-direction:column; min-height:0; background:var(--panel); border-left:1px solid var(--line); transition:width .2s ease}
+.lb-insp-huelle{position:relative; width:360px; display:flex; flex-direction:column; min-height:0; background:var(--panel); border-left:1px solid var(--line); transition:width 160ms ease}
 .labor.insp-zu .lb-insp-huelle{width:0; border-left:0}
 .lb-inspektor{flex:1 1 auto; min-height:0; min-width:0; overflow:auto}
-.lb-lasche{position:absolute; right:100%; top:50%; transform:translateY(-50%); z-index:4; display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 8px; border:1px solid var(--line); border-right:0; border-radius:10px 0 0 10px;
+.lb-lasche{position:absolute; right:100%; top:50%; transform:translateY(-50%); z-index:10; display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 8px; border:1px solid var(--line); border-right:0; border-radius:10px 0 0 10px;
   background:var(--glas); color:var(--muted); font:600 12.5px/1 var(--body); white-space:nowrap; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.lb-lasche:hover{color:var(--ink); background:var(--panel-3)}
 .labor.insp-zu .lb-lasche{color:var(--accent)}
 .lb-insp-leer{display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:48px 24px; color:var(--muted)}
 .lb-insp-leer strong{color:var(--ink); font:800 18px/1.2 var(--display)}
@@ -614,19 +618,24 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 /* Ruhe beim Start: Inspektor erst mit der ersten Auswahl, Simulation erst mit der ersten Aufzeichnung */
 
 /* ---- Dock rechts (K1, Phase B): Inspektor · Simulation · Plan · Akte als Reiter ----
-   Breite aus der Laborbreite: höchstens 40 % − Geräteleiste, so behält die Fläche ≥ 60 %. Eingeklappt: schmale Reiterleiste. */
-.labor.dock-da{--dock-b:clamp(250px, calc(40% - 88px), 440px)}
+   Breite aus der Laborbreite: höchstens 40 % − Geräteleiste, so behält die Fläche ≥ 60 %. Eingeklappt: schmale Reiterleiste.
+   Die UNTERGRENZE ist 180 statt 250 (Menüprobe 10.10.2026, rotes Profil klein-hoch 360×640): die
+   festen Teile der Labor-Spalte sind Leiste (78) + Dock. Mit 250 brauchte das Labor 328 px,
+   `ansicht` ist dort aber nur 284 px breit (360 minus 76 px Navigationsspalte) — das Dock-Blatt
+   ragte 44 px rechts heraus, und der Reiter „Inspektor“ lag mit ihm außerhalb. Mit 180 passen
+   78 + 180 = 258 px in 284 px (26 px Reserve). Ab ~845 px Fensterbreite greift weiter der
+   Prozentwert (40 % − 88 px); an den anderen Profilen ändert sich nur das Tablet (800: 250 → 202). */
+.labor.dock-da{--dock-b:clamp(180px, calc(40% - 88px), 440px)}
 .labor.dock-da.dock-zu{--dock-b:48px}
 .lb-dock{display:none; min-width:0; min-height:0; flex-direction:column; background:var(--panel); border-left:1px solid var(--line); container-type:inline-size}
 .labor.dock-da .lb-dock{display:flex}
 .lb-dock-reiter{display:flex; align-items:flex-end; gap:2px; padding:6px 6px 0; border-bottom:1px solid var(--line); flex:0 0 auto; overflow-x:auto; scrollbar-width:none}
-.lb-dock-tab{position:relative; display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 10px; border:1px solid transparent; border-bottom:0;
+/* 44 px hoch: die Fingerregel der Trefferflächen (menueprobe: der Reiter war 36 px hoch) */
+.lb-dock-tab{position:relative; display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 10px; border:1px solid transparent; border-bottom:0;
   border-radius:9px 9px 0 0; background:none; color:var(--muted); font:700 12.5px/1 var(--body); white-space:nowrap; cursor:pointer}
-.lb-dock-tab:hover{color:var(--ink); background:var(--panel-2)}
 .lb-dock-tab.an{color:var(--ink); background:var(--panel-2); border-color:var(--line); margin-bottom:-1px; padding-bottom:1px}
 .lb-dock-zahl{min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:var(--accent-ink); font:800 11px/18px var(--body); text-align:center}
-.lb-dock-einklappen{margin-left:auto; align-self:center; display:inline-flex; width:32px; height:32px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--muted)}
-.lb-dock-einklappen:hover{background:var(--panel-3); color:var(--ink)}
+.lb-dock-einklappen{margin-left:auto; align-self:center; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--muted)}
 .lb-dock-inhalt{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .lb-dock-inhalt > *{flex:1 1 auto; min-height:0}
 .lb-plan, .lb-akte{overflow:auto}
@@ -645,10 +654,9 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
    „superviser“ am 06.10.2026, Gate-Bericht Abschnitt 4. */
 @container (max-width:560px){ .lb-dock-tab .lb-dock-titel{display:none} .lb-dock-tab{padding:0 8px; min-width:44px} }
 .labor.dock-zu .lb-dock-reiter{flex-direction:column; align-items:center; border-bottom:0; padding:8px 0; gap:4px}
-.labor.dock-zu .lb-dock-tab{justify-content:center; width:38px; padding:0; border-radius:9px; border:1px solid transparent; margin:0}
-.labor.dock-zu .lb-dock-titel{display:none}
+/* 44×44 auch eingeklappt (war 38 px breit) – dieselbe Fingerzusage wie oben */
+.labor.dock-zu .lb-dock-tab{justify-content:center; width:44px; padding:0; border-radius:9px; border:1px solid transparent; margin:0}
 .labor.dock-zu .lb-dock-zahl{position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; font-size:10px; line-height:16px; padding:0 4px}
-.labor.dock-zu .lb-dock-inhalt{display:none}
 /* Simulation im Dock: Liste oben, PDU darunter (statt nebeneinander) */
 .lb-dock .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(0, 1.4fr) minmax(0, 1fr)}
 .lb-dock .si[data-breite="schmal"] .si-pdu{display:block; border-left:0; border-top:1px solid var(--line)}
@@ -656,10 +664,27 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-dock .si-zus{flex:1 1 190px}
 .lb-dock .si-zus strong{white-space:normal}
 
+/* ---- Fingerregeln der Web-Fassung (10.10.2026, Strom A) ----
+   `android/mobil/mobil.css` gilt nur im Android-Bau; die Web-Fassung hatte unter Berührung
+   deshalb 38-px-Menüpunkte und 40-px-Werkzeugknöpfe. Gemessen mit `tools/menueprobe.py`
+   (Profil „tablet-hoch“, `(pointer: coarse)`): Kontext-, Ansicht- und Zoom-Menü je 5 Knöpfe
+   206×38 — Soll ≥ 44. Die Regeln hier sind dieselben Werte wie mobil.css:39-40/365, nur für
+   die Web-Fassung. Spezifität `.menue .menue-punkt` (0,2,0) schlägt `.menue-punkt` (0,1,0)
+   in rahmen.css:106 unabhängig von der Dateireihenfolge (bauen.py lädt alphabetisch).
+   Auf dem Schreibtisch bleibt es bei 38/40 px: menueprobe.py:393-397 führt das dort als
+   Hinweis, nicht als Fehler — die 44 px sind eine Fingerregel. */
+@media (pointer: coarse){
+  .menue .menue-punkt, .pa-teil.klein{min-height:44px}
+  .lb-wz, .lb-knopf, .lb-ansicht{height:44px; min-width:44px}
+  .lb-zoomtext{height:44px; min-width:68px}
+}
+
 /* ---- ereignisse.css ---- */
-/* Ereignisse (E1): Karte oben über der Fläche – Toasts stehen unten, die Karte stört sie nicht. Präfix ev- */
-.ev-karte{position:fixed; left:50%; top:118px; transform:translateX(-50%); z-index:55; width:min(460px, calc(100vw - 32px)); padding:12px 14px 12px 14px;
-  background:var(--panel); border:1px solid var(--line-2); border-left:4px solid var(--warn); border-radius:12px; box-shadow:var(--schatten); animation:ev-rein .25s ease-out}
+/* Ereignisse (E1): Karte oben über der Fläche – Toasts stehen unten, die Karte stört sie nicht. Präfix ev-.
+   z-index 40 (Leiter): über den Labor-Ebenen (10–30), unter Menü (50), Palette (55), Dialogen (56) und
+   Toasts (60) – die Karte ist ein Hinweis, kein Dialog und darf nichts verdecken. */
+.ev-karte{position:fixed; left:50%; top:118px; transform:translateX(-50%); z-index:40; width:min(460px, calc(100vw - 32px)); padding:12px 14px 12px 14px;
+  background:var(--panel); border:1px solid var(--line-2); border-left:4px solid var(--warn); border-radius:12px; box-shadow:var(--schatten); animation:ev-rein var(--dauer-lang) ease-out}
 .ev-kopf{display:flex; align-items:center; gap:8px}
 .ev-kopf strong{flex:1; font:800 16px/1.2 var(--display); color:var(--ink)}
 .ev-sym{font-size:20px; line-height:1}
@@ -671,7 +696,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .ev-anruf{border-color:var(--ok)}
 .ev-rangehen{border-color:var(--ok); color:var(--ok); font-weight:700}   /* grün wie beim Telefon – kein zweiter Hauptknopf */
 .ev-rangehen:hover, .ev-rangehen:focus-visible{background:var(--ok); color:var(--bg)}
-.ev-anruf .ev-sym{display:inline-block; animation:ev-klingeln 1.2s ease-in-out infinite; transform-origin:50% 60%}
+.ev-anruf .ev-sym{display:inline-block; animation:ev-klingeln var(--dauer-lang) ease-in-out infinite; transform-origin:50% 60%}
 @keyframes ev-klingeln{0%, 40%, 100%{transform:none} 5%, 15%, 25%{transform:rotate(-14deg)} 10%, 20%, 30%{transform:rotate(14deg)}}
 @keyframes ev-rein{from{opacity:0; transform:translate(-50%, -8px)} to{opacity:1; transform:translate(-50%, 0)}}
 
@@ -763,8 +788,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .hb-kachel{display:flex; align-items:center; gap:10px; min-height:58px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--panel-2);
   color:var(--ink); text-align:left; cursor:pointer; font:inherit}
 .hb-kachel:hover{border-color:var(--accent); background:var(--panel-3)}
-.hb-kachel.fertig{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
-.hb-kachel.fertig small{color:var(--ok)}
+.hb-kachel.fertig, .dx-karte.verstanden{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
 .hb-kachel-sym{font-size:22px; line-height:1}
 .hb-kachel-text{display:flex; flex-direction:column; gap:2px; min-width:0}
 .hb-kachel-text small{color:var(--muted); font-size:12.5px}
@@ -775,7 +799,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .hb-feierabend p{font-size:14px; margin-top:4px}
 .hb-ausblick{color:var(--muted)}
 .hb-feier-knoepfe{display:flex; flex-direction:column; align-items:stretch; gap:6px; flex:none}
-.hb-aufwaermen h2, .hb-raetsel h2{font:800 22px/1.2 var(--display)}
+.hb-aufwaermen h2, .hb-raetsel h2, .hb-woche h2{font:800 22px/1.2 var(--display)}
 .hb-fortschritt{color:var(--muted); font-size:13px; margin:4px 0 10px}
 .hb-teilen{font:15px/1.6 var(--mono); padding:12px 14px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line); margin:12px 0 8px; white-space:pre-wrap; user-select:all}
 .sp-raetsel .knopf{margin-left:6px}
@@ -794,7 +818,6 @@ button.dx-karte{cursor:pointer}
 button.dx-karte:hover{border-color:var(--accent)}
 .dx-karte.unbekannt{border-style:dashed; color:var(--faint); background:none}
 .dx-karte.gesehen .dx-sym{color:var(--warn)}
-.dx-karte.verstanden{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
 .dx-sym{width:26px; height:26px; flex:none; display:grid; place-items:center; border-radius:50%; background:var(--panel-3); font-weight:800}
 .dx-karte.verstanden .dx-sym{background:var(--ok-soft); color:var(--ok)}
 .dx-text{display:flex; flex-direction:column; gap:1px; min-width:0}
@@ -805,7 +828,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .dx-symptom{font-style:italic; font-size:15px; margin-top:6px}
 /* Erste Stunde: der Anruf klingelt auf der Hauptkarte */
 .hb-auftrag.klingelt{border-color:var(--ok)}
-.hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln 1.2s ease-in-out infinite}
+.hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln var(--dauer-lang) ease-in-out infinite}
 /* § 20 F7: Wahl unter der Hauptkarte und Wochenziel */
 .hb-oder{grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin-top:-4px}
 .hb-oder small{color:var(--faint); font-size:12.5px}
@@ -813,9 +836,8 @@ button.dx-karte:hover{border-color:var(--accent)}
 .hb-oder-zeile:hover, .hb-oder-zeile:focus-visible{border-color:var(--accent); color:var(--ink); outline:none}
 .hb-woche-knopf{all:unset; cursor:pointer; color:var(--muted); border-bottom:1px dashed var(--line-2)}
 .hb-woche-knopf:hover, .hb-woche-knopf:focus-visible{color:var(--ink); border-bottom-color:var(--accent)}
-.hb-woche-knopf.fertig{color:var(--ok)}
+.hb-kachel.fertig small, .hb-woche-knopf.fertig{color:var(--ok)}
 .hb-woche{display:flex; flex-direction:column; gap:12px}
-.hb-woche h2{font:800 22px/1.2 var(--display)}
 .hb-woche-wahl{display:flex; flex-direction:column; gap:8px}
 .hb-woche-wahl .knopf{justify-content:flex-start; text-align:left}
 .hb-woche-wahl .knopf.an{border-color:var(--accent); background:var(--accent-soft)}
@@ -841,13 +863,24 @@ button.dx-karte:hover{border-color:var(--accent)}
 
 /* ---- inspektor.css ---- */
 /* ---------- Inspektor (ui/inspektor.js) – nur Tokens aus basis.css ---------- */
+/* FALLE, gemessen 09.10.2026 (bewusst NICHT repariert, s. unten): Diese Datei ist CRLF und ihre
+   LETZTEN ZEHN ZEILEN (Byte-Zeilen 132-141, Lease-Tabelle) tragen je ein ZUSAETZLICHES einzelnes CR —
+   Muster `CR CR LF` statt `CR LF`, bei Byte 11401-11404 sogar vier CR in Folge. Zusammen 12 einzelne CR
+   an den Bytes 10778, 10887, 10995, 11186, 11265, 11322, 11357, 11401, 11402, 11403, 11435, 11487.
+   Zwei Folgen, beide nachgemessen:
+     - im Textmodus gelesen hat die Datei 153 Zeilen statt 141 (jedes CR gilt als Umbruch),
+     - git fuehrt sie deshalb als BINAER (`i/-text w/-text`, von der Leitung gemessen): `git diff` und
+       jeder Zeilenenden-Vergleich sind dort blind.
+   Wer hier arbeitet: byteweise schreiben und die vorhandenen Enden erhalten. Ein normalisierender
+   Editor entfernt die 12 CR und stellt die Datei in git von binaer auf Text um — das erzeugt
+   einen scheinbar riesigen Diff. Deshalb bleiben sie in dieser Runde stehen. */
 .lb-inspektor.in{display:flex; flex-direction:column; overflow:hidden}
 .in-kopf{flex:0 0 auto; padding:14px 14px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
 .in-kopf-zeile{display:flex; align-items:center; gap:10px; min-width:0}
 .in-kopf-zeile > svg, .in-speichern .in-knopf{flex:0 0 auto}
 .in-kopf-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
 .in-kopf-text h3{font:800 19px/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.in-kopf-text span{color:var(--muted); font-size:12.5px}
+.in-kopf-text span, .in-gegen{color:var(--muted); font-size:12.5px}
 .in-chips{display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end}
 .in-chip{display:inline-flex; align-items:center; gap:3px; padding:1px 7px; border-radius:999px; font:600 11.5px/1.6 var(--body); background:var(--panel-3); color:var(--muted); white-space:nowrap}
 .in-chip.ok{background:var(--ok-soft); color:var(--ok)}
@@ -857,7 +890,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-chip.info{background:var(--info-soft); color:var(--info); font-family:var(--mono); font-size:11px}
 .in-chip.frei{background:transparent; border:1px dashed var(--line-2); color:var(--faint)}
 .in-speichern{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--radius-s); background:var(--warn-soft); color:var(--ink); font-size:12.5px; line-height:1.35}
-.in-speichern b{color:var(--warn)}
+.in-speichern b, .in-hinweis.warn, .in-meldung.warn, .in-werte dd.warn{color:var(--warn)}
 
 .in-reiter{flex:0 0 auto; display:flex; flex-wrap:wrap; gap:2px; padding:6px 10px 0; border-bottom:1px solid var(--line)}
 .in-tab{border:0; background:none; color:var(--muted); font:600 13px/1 var(--body); padding:9px 10px 10px; border-bottom:2px solid transparent; border-radius:6px 6px 0 0}
@@ -872,12 +905,10 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-abschnitt h5{font:700 13px/1.2 var(--body); color:var(--muted); margin:6px 0 0}
 .in-hinweis{color:var(--muted); font-size:13px; line-height:1.45}
 .in-hinweis.klein{font-size:12px}
-.in-hinweis.warn{color:var(--warn)}
-.in-hinweis.bad, .in-meldung.bad{color:var(--bad)}
 .in-hinweis code, .in-hinweis .mono{font-size:.95em}
 .in-leise, .in-feld-titel small{color:var(--faint); font-weight:400}
 .in-leer, .in-fehler{color:var(--muted); padding:16px}
-.in-fehler{color:var(--bad)}
+.in-hinweis.bad, .in-meldung.bad, .in-fehler, .in-lease-konflikt{color:var(--bad)}
 
 .in-raster{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px 10px}
 .in-zeile{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
@@ -891,13 +922,12 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-eingabe:focus, .in-auswahl:focus{border-color:var(--accent); outline:none; background:var(--panel)}
 .in-eingabe.bad{border-color:var(--bad); background:var(--bad-soft)}
 .in-eingabe.warn{border-color:var(--warn)}
-.in-eingabe::placeholder{color:var(--faint)}
+.in-eingabe::placeholder, .in-code-L{color:var(--faint)}
 .in-auswahl{padding-right:4px; cursor:pointer}
 .in-feld.klein .in-eingabe, .in-feld.klein .in-auswahl{height:30px}
 .in-meldung{font-size:12px; line-height:1.35; color:var(--muted)}
-.in-meldung.warn{color:var(--warn)}
 @keyframes in-wackeln{0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}}
-.in-eingabe.wackeln{animation:in-wackeln .25s 2}
+.in-eingabe.wackeln{animation:in-wackeln var(--dauer-lang) 2}
 
 .in-schalter{display:flex; align-items:flex-start; gap:10px; cursor:pointer; min-height:30px; padding:2px 0}
 .in-schalter input{position:absolute; opacity:0; width:1px; height:1px}
@@ -927,10 +957,8 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-karte{display:flex; flex-direction:column; gap:9px; padding:10px 11px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
 .in-karte[style*="--v"]{border-left:3px solid var(--v)}
 .in-werte{display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:0; font-size:13px}
-.in-werte dt{color:var(--muted)}
+.in-werte dt, .in-port, .in-lease-abgelaufen{color:var(--muted)}
 .in-werte dd{margin:0}
-.in-werte dd.warn{color:var(--warn)}
-.in-port{color:var(--muted)}
 .in-if-name{border:0; background:none; color:var(--ink); font:700 13.5px/1.2 var(--mono); padding:4px 0; text-align:left; cursor:pointer}
 .in-if-name small{color:var(--accent); font-weight:600}
 .in-if.sub{margin-left:14px; border-style:dashed}
@@ -942,8 +970,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-tabelle tr.klickbar:hover td, .in-port-kopf:hover, .in-port.auf .in-port-kopf{background:var(--panel-2)}
 .in-tabelle .rechts{text-align:right}
 .in-tabelle.mono{font-family:var(--mono); font-size:12.5px}
-.in-gegen{color:var(--muted); font-size:12.5px}
-.in-code-C{color:var(--ok); font-weight:700} .in-code-S{color:var(--accent); font-weight:700} .in-code-L{color:var(--faint)}
+.in-code-C{color:var(--ok); font-weight:700} .in-code-S{color:var(--accent); font-weight:700}
 
 .in-portliste{display:flex; flex-direction:column; gap:4px}
 .in-port-kopf{display:grid; grid-template-columns:78px auto 1fr 1fr; align-items:end; gap:6px; padding:5px 6px; border-radius:8px}
@@ -973,7 +1000,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-listenzeile{padding:4px 6px; border-radius:7px; background:var(--panel); font-size:13px}
 .in-warnliste{margin:0; padding-left:18px; color:var(--warn); font-size:13px; display:flex; flex-direction:column; gap:4px}
 
-.in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 10px; display:flex; flex-direction:column; gap:6px; animation:in-rein .2s ease-out}
+.in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 10px; display:flex; flex-direction:column; gap:6px; animation:in-rein var(--dauer) ease-out}
 @keyframes in-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
 .in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
 .in-ent-code{margin:0; padding:7px 9px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 12.5px/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
@@ -993,9 +1020,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 
 .in-lease-reserviert{color:var(--accent)}
 
-.in-lease-abgelaufen{color:var(--muted)}
 
-.in-lease-konflikt{color:var(--bad)}
 
 .in-lease-alt td{opacity:.62}
 
@@ -1003,58 +1028,82 @@ button.dx-karte:hover{border-color:var(--accent)}
 
 
 /* ---- juice.css ---- */
-/* ---------- Spielgefühl (ui/juice.js, Präfix jc-): jede Handlung antwortet in < 200 ms, sanft statt grell ----------
-   SVG-Geräte: animiert wird das innere Bild (.gb), weil die Gruppe selbst ihre Position als transform trägt. */
+/* ---------- Spielgefühl (ui/juice.js, Präfix jc-): jede Handlung antwortet in ≤ 320 ms (eine Stufe der Dauer-Leiter), sanft statt grell ----------
+   SVG-Geräte: animiert wird das innere Bild (.gb), weil die Gruppe selbst ihre Position als transform trägt.
+   DAUERN (task-38, tools/ethos.py R5): nur var(--dauer)=160ms und var(--dauer-lang)=320ms. Die vorher
+   gewachsenen Einzelwerte (.28s/.38s/.45s/.5s/.7s/.9s/1s) sind auf die nächstliegende Stufe abgebildet —
+   die kürzeste war .28s → 320 ms, die längste 1s → 320 ms. Keine Rückmeldung ist entfallen: alle
+   Animationen laufen weiter, nur die Sprünge/Wackler sind jetzt gleich lang. `UI.juice(el, art, ms)`
+   nimmt die Klasse nach ms wieder weg; alle Aufrufer liegen mit ≥ 400 ms über 320 ms, es wird also
+   keine Animation abgeschnitten. */
 .ger.jc-plop .gb, .ger.jc-atmen .gb, .ger.jc-wackeln .gb, .ger.jc-sperre .gb{transform-box:fill-box; transform-origin:center}
 
 /* Gerät gesetzt: springt kurz auf */
-.ger.jc-plop .gb{animation:jc-plop .38s cubic-bezier(.3,1.6,.5,1)}
+.ger.jc-plop .gb{animation:jc-plop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
 @keyframes jc-plop{0%{transform:scale(.45); opacity:.3} 65%{transform:scale(1.12); opacity:1} 100%{transform:scale(1)}}
 
 /* Kabel rastet ein: Linie leuchtet, Port-LEDs pulsieren grün */
-.kabel.jc-einrasten .kabel-linie, .kabel.jc-einrasten .kabel-trunk-aussen{animation:jc-einrasten .7s ease-out}
+.kabel.jc-einrasten .kabel-linie, .kabel.jc-einrasten .kabel-trunk-aussen{animation:jc-einrasten var(--dauer-lang) ease-out}
 @keyframes jc-einrasten{0%{stroke-width:7; stroke-opacity:1} 100%{stroke-width:2.6; stroke-opacity:.9}}
-.kabel.jc-einrasten .ps-oben path{transform-box:fill-box; transform-origin:center; animation:jc-led .45s ease-in-out 3}
+.kabel.jc-einrasten .ps-oben path{transform-box:fill-box; transform-origin:center; animation:jc-led var(--dauer-lang) ease-in-out 3}
 @keyframes jc-led{50%{transform:scale(1.7); opacity:.55}}
 
 /* Gerät antwortet: atmet zweimal */
-.ger.jc-atmen .gb{animation:jc-atmen .5s ease-in-out 2}
+.ger.jc-atmen .gb{animation:jc-atmen var(--dauer-lang) ease-in-out 2}
 .ger.jc-atmen .gb-kachel{stroke:var(--ok); stroke-width:2.6}
 @keyframes jc-atmen{50%{transform:scale(1.08)}}
 
 /* Fehler: sanftes Wackeln in Bernstein statt Rotflackern; Sperre greift: kurzes Kopfschütteln */
-.ger.jc-wackeln .gb, .ger.jc-sperre .gb{animation:jc-wackeln .45s ease-in-out}
+.ger.jc-wackeln .gb, .ger.jc-sperre .gb{animation:jc-wackeln var(--dauer-lang) ease-in-out}
 .ger.jc-wackeln .gb-kachel, .ger.jc-sperre .gb-kachel{stroke:var(--warn); stroke-width:2.6}
 @keyframes jc-wackeln{20%{transform:translateX(-3px)} 40%{transform:translateX(3px)} 60%{transform:translateX(-2px)} 80%{transform:translateX(1px)}}
 
 /* Ziel erfüllt: der Zähler „Ziele x/y“ ploppt */
-.am-ziele.jc-haken{animation:jc-haken .5s cubic-bezier(.3,1.6,.5,1); background:var(--ok-soft); color:var(--ok)}
+.am-ziele.jc-haken{animation:jc-haken var(--dauer-lang) cubic-bezier(.3,1.6,.5,1); background:var(--ok-soft); color:var(--ok)}
 @keyframes jc-haken{0%{transform:scale(.7)} 60%{transform:scale(1.18)} 100%{transform:scale(1)}}
 
 /* Werkzeug oder Fach gewählt: kurzes Nachfedern */
-.lb-wz.jc-wahl, .pa-kat.jc-wahl{animation:jc-wahl .28s cubic-bezier(.3,1.6,.5,1)}
+.lb-wz.jc-wahl, .pa-kat.jc-wahl{animation:jc-wahl var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
 @keyframes jc-wahl{0%{transform:scale(.88)} 70%{transform:scale(1.06)} 100%{transform:scale(1)}}
 
 /* Euro kommt an: Wert in der Kopfzeile glüht golden */
-.wert.jc-geld{animation:jc-geld .9s ease-out}
+.wert.jc-geld{animation:jc-geld var(--dauer-lang) ease-out}
 @keyframes jc-geld{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--geld) 70%, transparent)} 100%{box-shadow:0 0 0 12px transparent}}
 
-/* Sterne: nach dem Einfliegen ein Glanz */
-.sp-sterne.jc-sterne span.voll{animation:sp-stern .45s cubic-bezier(.3,1.7,.5,1) forwards, jc-glanz 1s ease-out forwards;
+/* Sterne: nach dem Einfliegen ein Glanz. Die Staffelung (animation-delay) bleibt: sie ist Choreografie
+   und wird von R5 nicht gemessen (ZEIT_PROPS in tools/ethos.py kennt animation-delay nicht). */
+.sp-sterne.jc-sterne span.voll{animation:sp-stern var(--dauer-lang) cubic-bezier(.3,1.7,.5,1) forwards, jc-glanz var(--dauer-lang) ease-out forwards;
   animation-delay:calc(var(--i) * 120ms + 150ms), calc(var(--i) * 120ms + 650ms)}
 @keyframes jc-glanz{0%{text-shadow:0 0 0 transparent} 40%{text-shadow:0 0 22px var(--geld)} 100%{text-shadow:0 0 18px color-mix(in srgb, var(--geld) 50%, transparent)}}
 
 /* Knöpfe geben beim Drücken nach (ohne Klasse, gilt überall) */
 .knopf:active, .lb-wz:active, .lb-knopf:active, .pa-kat:active, .pa-teil:active, .dock-knopf:active, .am-zu:active{transform:scale(.96)}
 
-@media (prefers-reduced-motion: reduce){
-  .ger[class*="jc-"] .gb, .kabel[class*="jc-"] *, .am-ziele.jc-haken, .lb-wz.jc-wahl, .pa-kat.jc-wahl, .wert.jc-geld, .sp-sterne.jc-sterne span.voll{animation:none}
-}
+/* Bewegung aus: KEIN eigener Block mehr (task-38, R8). basis.css:91 (prefers-reduced-motion) und
+   basis.css:93 (html[data-bewegung="aus"]) schalten Animation und Übergang global ab — dieselbe
+   Begründung wie in naechster.css:7. Der Zustand bleibt an der FARBE erkennbar: die Rückmeldungen
+   dieses Bausteins tragen ohnehin eine Farbe (--ok/--warn/--ok-soft), nicht nur die Bewegung.
+
+   ZWEI SELEKTOREN SIND HIER BEWUSST REGEL-LOS (Befund der unabhängigen Prüfung § 4a, nachgemessen):
+     .ger[class*="jc-"] .gb     deckte die vier Geräte-Klassen ab, die es gibt — sie stehen oben einzeln:
+                                .ger.jc-plop .gb · .ger.jc-atmen .gb · .ger.jc-wackeln .gb · .ger.jc-sperre .gb
+     .kabel[class*="jc-"] *     deckte die drei animierten Kabel-Kinder ab — sie stehen oben einzeln:
+                                .kabel.jc-einrasten .kabel-linie · .kabel-trunk-aussen · .ps-oben path
+   Beide hatten im entfernten @media (prefers-reduced-motion)-Block `animation:none`. Wirkung heute:
+   bei „Bewegung reduzieren" laufen diese Animationen 1 ms statt gar nicht — sie erreichen ihren
+   Endzustand, weil basis.css:91 die Dauer global auf 1 ms setzt (dieselbe Bauart wie die fünf
+   Endzustände in szene.css). Bei „Bewegung aus" schaltet basis.css:93 weiterhin alles ab; im echten
+   Programm gemessen: animationName none, 0 laufende Animationen an allen vier Zielen. Das Verhalten
+   ist damit abgedeckt, nicht vergessen.
+   Dass die Selektoren leben, ist gemessen: `UI.juice(el, "einrasten", …)` läuft auf Kabel-Elementen
+   (src/ui/editor-werkzeuge.js:307 und :353; `Z.kEl` hält die <g class="kabel">, editor.js:352), und mit
+   „voll" tragen .kabel-linie/.kabel-trunk-aussen `jc-einrasten`, .ps-oben path `jc-led`,
+   .ger.jc-plop .gb `jc-plop` — je 0,32 s, je 1 laufende Animation. */
 
 /* ---- karriere.css ---- */
 /* ---------- Karriere-Oberfläche (ui/karriere.js): Kunden, Shop, Lernstand, Wiki, Mini-Tickets ---------- */
 .kr-seite{height:100%; overflow:auto; padding:18px 22px 28px; display:flex; flex-direction:column; gap:18px; background:var(--bg); scrollbar-width:thin}
-.kr-kopf h2{font:800 28px/1 var(--display)}
+.kr-kopf h2, .kr-wiki-liste h2{font:800 28px/1 var(--display)}
 .kr-kopf p{margin-top:6px}
 .kr-raster{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:14px}
 .kr-raster.klein{grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:10px}
@@ -1067,15 +1116,14 @@ button.dx-karte:hover{border-color:var(--accent)}
 .kr-schloss{position:absolute; top:14px; right:14px; font-size:18px}
 .kr-ampel{padding:3px 9px; border-radius:999px; font:600 12px/1.4 var(--body)}
 .kr-ampel.ok{background:var(--ok-soft); color:var(--ok)}
-.kr-ampel.warn{background:var(--warn-soft); color:var(--warn); animation:kr-pochen 2s ease-in-out infinite}
-.kr-ampel.bad{background:var(--bad-soft); color:var(--bad); animation:kr-pochen 1.4s ease-in-out infinite}
+.kr-ampel.warn{background:var(--warn-soft); color:var(--warn); animation:kr-pochen var(--dauer-lang) ease-in-out infinite}
+.kr-ampel.bad{background:var(--bad-soft); color:var(--bad); animation:kr-pochen var(--dauer-lang) ease-in-out infinite}
 @keyframes kr-pochen{50%{filter:brightness(1.35)}}
 .kr-gruppe h3{font:700 12px/1 var(--body); letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin:0 0 10px}
 .kr-ware{display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:14px; background:var(--panel); border:1px solid var(--line)}
 .kr-ware b{font-size:14.5px}
 .kr-ware p{margin:0; color:var(--muted); font-size:12.5px; line-height:1.45}
 .kr-ware.gekauft{border-color:var(--ok)}
-.kr-ware.veraltet{border-color:var(--warn)}
 .kr-ware.gesperrt, .kr-ware.teuer{opacity:.7}
 .kr-ware-fuss{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
 .kr-preis{font:800 16px/1 var(--display); color:var(--geld); white-space:nowrap; flex:0 0 auto}
@@ -1084,10 +1132,9 @@ button.dx-karte:hover{border-color:var(--accent)}
 .kr-karriere, .kr-abzeichen, .kr-pruefung, .kr-stufe, .kr-zwei > div{padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px}
 .kr-karriere small{color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.09em; text-transform:uppercase}
 .kr-karriere h3, .kr-abzeichen h3, .kr-pruefung h3, .kr-stufe h3, .kr-zwei h3{font:800 18px/1.2 var(--display); margin:0}
-.kr-balken{display:grid; grid-template-columns:1fr 1fr; gap:14px}
 .kr-balken label{display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--muted)}
 .kr-bar{display:block; height:10px; border-radius:999px; background:var(--panel-3); overflow:hidden}
-.kr-bar i{display:block; height:100%; background:var(--ruf); border-radius:inherit; transition:width .6s ease}
+.kr-bar i{display:block; height:100%; background:var(--ruf); border-radius:inherit; transition:width var(--dauer-lang) ease}
 .kr-bar.koennen i{background:var(--ok)}
 .kr-fehlt{margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); display:flex; flex-direction:column; gap:4px}
 .kr-stufe.zu{opacity:.55}
@@ -1098,9 +1145,9 @@ button.dx-karte:hover{border-color:var(--accent)}
 .kr-skill .sp-ring{grid-row:1 / 3}
 .kr-skill-name{font-size:13px; font-weight:600; line-height:1.25}
 .kr-skill small{color:var(--faint); font-size:11.5px}
-.kr-skill.faellig{border-color:var(--warn)}
+.kr-ware.veraltet, .kr-skill.faellig{border-color:var(--warn)}
 .kr-skill.faellig small{color:var(--warn); font-weight:700}
-.kr-zwei{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.kr-balken, .kr-zwei{display:grid; grid-template-columns:1fr 1fr; gap:14px}
 .kr-fehlerheft{margin:0; padding-left:18px; font-size:13px; display:flex; flex-direction:column; gap:5px; color:var(--muted)}
 .kr-behalten{display:grid; grid-template-columns:auto auto; gap:4px 16px; margin:0; font-size:14px}
 .kr-behalten dd{margin:0; font:700 15px var(--mono)}
@@ -1123,7 +1170,6 @@ button.dx-karte:hover{border-color:var(--accent)}
 /* ---- Wiki ---- */
 .kr-wiki{display:grid; grid-template-columns:minmax(220px, 300px) minmax(0, 1fr); height:100%; min-height:0; background:var(--bg)}
 .kr-wiki-liste{display:flex; flex-direction:column; gap:10px; padding:18px 14px; border-right:1px solid var(--line); min-height:0; overflow:auto}
-.kr-wiki-liste h2{font:800 28px/1 var(--display)}
 .kr-wiki-liste nav{display:flex; flex-direction:column; gap:2px}
 .kr-wiki-punkt{display:flex; justify-content:space-between; gap:8px; text-align:left; padding:7px 10px; border:0; border-radius:9px; background:none; color:var(--ink); font-size:14px}
 .kr-wiki-punkt[disabled]{opacity:.6; cursor:default}
@@ -1195,8 +1241,12 @@ button.dx-karte:hover{border-color:var(--accent)}
    (R3) sie. Das ist der in B § 2.4 offen benannte Kompromiss, kein Versehen. */
 
 /* --- Gerüst --- */
-.kl-lehrer{display:grid; gap:16px; padding:16px 24px 32px; height:100%; overflow:auto; background:var(--bg)}
-.kl-schueler{display:grid; gap:12px; padding:16px 24px 24px; height:100%; overflow:auto; background:var(--bg)}
+/* overflow-y + overflow-x getrennt: mit `overflow:auto` bekommt .kl-spalte seine Breite VOR der
+   senkrechten Bildlaufleiste, ragt dann 1 px über die Fensterkante und der Kasten scrollt seitlich
+   (gemessen im Rauchtest: 720 px Breite → „div.kl-lehrer scrollt seitlich (+40 px)"). Seitlich wird
+   hier nie gescrollt — die Spalte ist auf min(660px,100%) begrenzt. */
+.kl-lehrer{display:grid; gap:16px; padding:16px 24px 32px; height:100%; overflow-y:auto; overflow-x:hidden; background:var(--bg)}
+.kl-schueler{display:grid; gap:12px; padding:16px 24px 24px; height:100%; overflow-y:auto; overflow-x:hidden; background:var(--bg)}
 .kl-spalte{display:grid; gap:12px; align-content:start; width:min(660px,100%); margin:0 auto}
 .kl-kopf{display:grid; gap:4px}
 .kl-kopf h2{margin:0; font:800 20px/1.2 var(--display); color:var(--ink)}
@@ -1356,7 +1406,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .ka-atlas .np-geraet.ka-hell{opacity:1; filter:none}
 .ka-atlas .np-geraet.ka-hell .np-ring{stroke:var(--accent); stroke-width:2.5; fill:var(--accent-soft)}
 .ka-kapitel{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px}
-.ka-kapitel li.zu{color:var(--faint)}
+.ka-kapitel li.zu, .ka-lohn li{color:var(--faint)}   /* R10: ein Block – gesperrtes Kapitel und noch nicht verdienter Lohn */
 .ka-kapitel-knopf{all:unset; cursor:pointer; padding:5px 8px; border-radius:8px; font-weight:600}
 .ka-kapitel-knopf:hover, .ka-kapitel-knopf:focus-visible{background:var(--accent-soft); outline:none}
 .ka-neu{color:var(--accent); font-size:12px; font-weight:800}
@@ -1374,7 +1424,6 @@ button.dx-karte:hover{border-color:var(--accent)}
 .ka-ergebnis p{margin:4px 0}
 /* Vertrauen zahlt aus (§ 20 F5): Empfehlung ab 3, Rabatt ab 4 */
 .ka-lohn{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 14px; font-size:13px}
-.ka-lohn li{color:var(--faint)}
 .ka-lohn li.da{color:var(--ok); font-weight:700}
 .ka-lohn li.bald{color:var(--ink)}
 .ka-lohn .ka-herzen{font-size:12px; letter-spacing:0}
@@ -1387,13 +1436,16 @@ html[data-modus="leiste"] body{overflow:hidden}
 .leiste-wurzel{position:fixed; inset:0; pointer-events:none}
 .leiste-karte{pointer-events:auto; position:absolute; left:0; top:0; width:300px; height:56px; display:flex; flex-direction:column; overflow:hidden;
   border-radius:14px; background:var(--leiste-bg); border:1px solid var(--line-2); color:var(--ink);
-  opacity:var(--leiste-deckkraft, .55); transition:opacity .25s ease, height .2s ease, width .2s ease, box-shadow .2s; user-select:none; -webkit-user-select:none}
+  opacity:var(--leiste-deckkraft, .55); transition:opacity var(--dauer), height var(--dauer), width var(--dauer), box-shadow var(--dauer); user-select:none; -webkit-user-select:none}
 .leiste-karte.hover{opacity:1}
 .leiste-karte.auf{width:320px; height:300px}
 /* Mit Mini-Ticket: Infozeile weg, damit Frage und Antworten ohne Scrollen passen.
    Ein WARTENDES Mini hat Vorrang vor dem €/h-Wert: „Mini" und „Hilfe" müssen in die 300 px passen –
    gemessen in Edge bei 300 × 56 px: Zeile 298 px, Hilfe-Knopf allein lässt den Ampeln 69 px,
    mit Mini-Zeichen bleiben ohne diese Regel nur 19 px. */
+/* Alles, was in dieser Karte verschwindet, steht in EINER Regel (R10): leere Felder und – sobald ein
+   Mini-Ticket übernimmt – Infozeile, Beschriftung und €/h-Wert. */
+.lk-text:empty, .lk-mini:empty, .lk-mini-hilfe:empty,
 .leiste-karte:has(.lk-mini .mk) .lk-text, .lk-oeffnen span,
 .leiste-karte:has(.lk-mini-wartet:not([hidden])) .lk-euro{display:none}
 .im-browser .leiste-karte{box-shadow:var(--schatten)}
@@ -1429,12 +1481,10 @@ html[data-modus="leiste"] body{overflow:hidden}
 /* Sichtbares Zeichen für ein wartendes Mini-Ticket (nur dann sichtbar; hidden wird per JS gesetzt). */
 .lk-mini-wartet{display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px; border-radius:var(--radius); border:1px solid var(--accent-soft); background:var(--accent-soft); color:var(--accent); font:700 11px/1 var(--display); flex:0 0 auto}
 .lk-mini-wartet .lk-punkt{background:var(--accent)}
-.lk-auf{display:flex; flex-direction:column; gap:6px; flex:1 1 auto; min-height:0; padding:0 10px 8px; opacity:0; transition:opacity .15s}
+.lk-auf{display:flex; flex-direction:column; gap:6px; flex:1 1 auto; min-height:0; padding:0 10px 8px; opacity:0; transition:opacity var(--dauer)}
 .leiste-karte.auf .lk-auf{opacity:1; transition-delay:.08s}
 .lk-text{font-size:13px; color:var(--muted); line-height:1.35}
-.lk-text:empty{display:none}
 .lk-mini{flex:1 1 auto; min-height:0; overflow:auto; border-radius:var(--radius)}
-.lk-mini:empty, .lk-mini-hilfe:empty{display:none}
 .lk-fuss{display:flex; align-items:center; margin-top:auto}
 .lk-marke{font:700 11px/1 var(--display); color:var(--faint); letter-spacing:.02em}
 .lk-klein{margin-left:auto; min-height:28px; padding:0 8px; border-radius:7px; border:1px solid var(--line); background:none; color:var(--muted); font:600 11.5px/1 var(--body)}
@@ -1566,12 +1616,25 @@ html[data-modus="leiste"] body{overflow:hidden}
 
 /* ---- rahmen.css ---- */
 /* ---------- App-Rahmen: Kopfzeile, Andock-Leiste, Ansichten, Toasts, Menüs, Palette, Dialoge ----------
-   Nur Tokens aus basis.css. */
+   Nur Tokens aus basis.css.
+
+   EBENEN (tools/ethos.py R6): Kopfzeile 10 · Menü/Palette 50 · Dialog 60 · Toast 70.
+   Das ist die alte Reihenfolge (3 < 50 < 55 < 56 < 60), nur aus der benannten Leiter
+   {10 … 80}; das Spiel-Overlay (`.sp-overlay`, spiel.css:133) bleibt mit 80 darüber.
+   Warum das Menü auf 50 steht (und nicht tiefer): die Android-Blätter `.lb-geraete` (40) und
+   `.lb-dock` (45, mobil.css:259/297) sind eigene Stapelkontexte in der Wurzel; unter 46
+   verschwindet das Kontextmenü hinter dem Dock-Blatt (gemessen mit tools/menueprobe.py,
+   Profil klein-hoch: „verdeckt von DIV.in-raster“). Menü und Palette teilen sich die 50:
+   die Palette hängt sich beim Öffnen an `body` (palette.js:100) und liegt damit über einem
+   schon offenen Menü; umgekehrt geht kein Menü auf, solange der Palettenschleier davor liegt.
+   DAUER (R5): nur 1/160/320 ms — dafür die Tokens `--dauer` (160) und `--dauer-lang` (320).
+   BLOCKDOPPLUNG (R10): gleiche Regelkörper stehen EINMAL mit Selektorliste; die Zeile bleibt an
+   der Stelle des ersten Vorkommens, damit die Kaskade unverändert bleibt. */
 #app{height:100%}
 .app{display:grid; grid-template-rows:var(--kopf-h) minmax(0,1fr); grid-template-columns:var(--dock-b) minmax(0,1fr); height:100vh; background:var(--bg)}
 
 /* ---- Kopfzeile ---- */
-.kopf{grid-column:1 / -1; display:flex; align-items:center; gap:18px; padding:0 12px 0 14px; background:var(--panel); border-bottom:1px solid var(--line); position:relative; z-index:3}
+.kopf{grid-column:1 / -1; display:flex; align-items:center; gap:16px; padding:0 12px; background:var(--panel); border-bottom:1px solid var(--line); position:relative; z-index:10}
 .kopf::after{content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:linear-gradient(90deg, transparent, var(--accent) 30%, transparent 70%); opacity:.35; pointer-events:none}
 .kopf-marke{display:flex; align-items:center; gap:10px; min-width:0; flex:0 0 auto}
 .marke-sym rect{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5}
@@ -1583,35 +1646,37 @@ html[data-modus="leiste"] body{overflow:hidden}
 .wert{display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 12px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
   font:600 14px/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap; transition:background var(--dauer), border-color var(--dauer)}
 button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
-.wert .sym{flex:0 0 auto}
-.wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym, .wert-offen.hat .sym{color:var(--accent)} .wert-offen .sym{color:var(--muted)}
-.wert-offen.hat{border-color:var(--accent); background:var(--accent-soft)} 
-.wert.leer .wert-zahl{color:var(--faint)}
+.wert .sym, .einst-steuer{flex:0 0 auto}
+.wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym, .wert-offen.hat .sym, .pal-punkt.an .pal-sym{color:var(--accent)} .wert-offen .sym, .einst-zeile.gesperrt strong{color:var(--muted)}
+.wert-offen.hat, .schalter.an{border-color:var(--accent); background:var(--accent-soft)} 
+.wert.leer .wert-zahl, .pal-eingabe::placeholder{color:var(--faint)}
 .wert.mit-fortschritt{position:relative; overflow:hidden}
-.wert.mit-fortschritt::after{content:""; position:absolute; left:0; bottom:0; height:3px; width:var(--fortschritt, 0%); background:var(--accent); border-radius:0 3px 3px 0; transition:width .6s ease}
-.wert-stufe.bereit{border-color:var(--ok)} .wert-stufe.bereit::after{background:var(--ok)}
-.wert.leuchtet{animation:wert-leuchten 1.1s ease-out}
+.wert.mit-fortschritt::after{content:""; position:absolute; left:0; bottom:0; height:3px; width:var(--fortschritt, 0%); background:var(--accent); border-radius:0 3px 3px 0; transition:width var(--dauer-lang) ease}
+.wert-stufe.bereit::after{background:var(--ok)}
+.wert.leuchtet{animation:wert-leuchten var(--dauer-lang) ease-out}
 .wert.leuchtet.runter{animation-name:wert-leuchten-runter}
 @keyframes wert-leuchten{0%{box-shadow:0 0 0 0 var(--ok); border-color:var(--ok)} 35%{box-shadow:0 0 0 5px transparent; background:var(--ok-soft)} 100%{box-shadow:0 0 0 0 transparent}}
 @keyframes wert-leuchten-runter{0%{box-shadow:0 0 0 0 var(--bad); border-color:var(--bad)} 35%{box-shadow:0 0 0 5px transparent; background:var(--bad-soft)} 100%{box-shadow:0 0 0 0 transparent}}
 .kopf-knoepfe{display:flex; align-items:center; gap:4px; flex:0 0 auto}
-.kopf-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:40px; height:40px; padding:0 10px; border-radius:var(--radius); border:1px solid transparent; background:none; color:var(--muted);
+.kopf-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; height:44px; padding:0 12px; border-radius:var(--radius); border:1px solid transparent; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer), border-color var(--dauer)}
-.kopf-knopf:hover{background:var(--panel-3); color:var(--ink)}
+.kopf-knopf:hover, .dock-knopf:hover, .toast-zu:hover, .dialog-zu:hover{background:var(--panel-3); color:var(--ink)}
 .kopf-knopf.mit-text span{font:600 13px/1 var(--body)}
 .kopf-knopf.mit-text:first-child span{font:500 11px/1 var(--mono); color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:3px 5px}
 @media (max-width:1180px){ .kopf-knopf.mit-text:first-child span, .marke-version{display:none}  }
 @media (max-width:980px){ .kopf-knopf.mit-text span, .wert-stufe{display:none}  }
+/* Platz für die 44-px-Knöpfe: bei 720 px Fensterbreite gab die Marke den letzten Platz her,
+   den die fünf Knöpfe der Kopfzeile brauchen (die Version verschwindet schon bei 1180 px). */
+@media (max-width:760px){ .marke-name{display:none}  }
 
 /* ---- Andock-Leiste ---- */
 .dock{grid-row:2; display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 0; background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; overflow-x:hidden}
 .dock-knopf{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; width:64px; min-height:58px; padding:6px 2px; border:0; border-radius:12px; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer)}
-.dock-knopf:hover{background:var(--panel-3); color:var(--ink)}
-.dock-knopf.an{background:var(--accent-soft); color:var(--accent)}
+.dock-knopf.an, .toast-info .toast-sym{background:var(--accent-soft); color:var(--accent)}
 .dock-knopf.an::before{content:""; position:absolute; left:-6px; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--accent)}
 .dock-knopf.spaeter{opacity:.72}
-.dock-knopf.spaeter.an{opacity:1}
+.dock-knopf.spaeter.an, .pal-huelle.da, .dialog-huelle.da{opacity:1}
 .dock-text{font:600 11px/1.1 var(--body); letter-spacing:.01em}
 .dock-zahl{position:absolute; top:4px; right:8px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:var(--accent-ink); font:700 11px/18px var(--body); text-align:center}
 
@@ -1634,9 +1699,9 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .knopf-haupt:hover{background:var(--accent); filter:brightness(1.08)}
 
 /* ---- Toasts ---- */
-.toast-stapel{position:fixed; left:50%; bottom:58px; transform:translateX(-50%); display:flex; flex-direction:column-reverse; align-items:center; gap:8px; z-index:60; pointer-events:none; width:min(640px, calc(100vw - 32px))}
+.toast-stapel{position:fixed; left:50%; bottom:58px; transform:translateX(-50%); display:flex; flex-direction:column-reverse; align-items:center; gap:8px; z-index:70; pointer-events:none; width:min(640px, calc(100vw - 32px))}
 .toast{pointer-events:auto; display:flex; align-items:center; gap:12px; max-width:100%; padding:10px 8px 10px 14px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
-  opacity:0; transform:translateY(10px) scale(.98); transition:opacity .2s ease, transform .2s ease}
+  opacity:0; transform:translateY(10px) scale(.98); transition:opacity var(--dauer) ease, transform var(--dauer) ease}
 .toast.da{opacity:1; transform:none}
 .toast.weg{opacity:0; transform:translateY(6px)}
 /* im Labor: oben rechts, neueste unten angehängt, kompakter */
@@ -1646,21 +1711,21 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .toast-stapel.im-labor .toast-text{font-size:13.5px}
 .toast-stapel.im-labor .toast-sym{width:26px; height:26px}
 .toast-sym{display:inline-flex; flex:0 0 auto; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--panel-3); color:var(--muted)}
-.toast-ok{border-color:var(--ok)} .toast-ok .toast-sym{background:var(--ok-soft); color:var(--ok)}
+/* Der Rahmen der Statusfarbe steht hier, nicht bei `.wert-stufe.bereit` (Kopfzeile): `.toast` setzt
+   oben das Kürzel `border`, das die Rahmenfarbe sonst wieder überschriebe (R10: ein Block statt zwei). */
+.toast-ok, .wert-stufe.bereit{border-color:var(--ok)} .toast-ok .toast-sym{background:var(--ok-soft); color:var(--ok)}
 .toast-warn{border-color:var(--warn)} .toast-warn .toast-sym{background:var(--warn-soft); color:var(--warn)}
 .toast-fehler{border-color:var(--bad)} .toast-fehler .toast-sym{background:var(--bad-soft); color:var(--bad)}
-.toast-info .toast-sym{background:var(--accent-soft); color:var(--accent)}
 .toast-inhalt{display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 auto}
 .toast-titel{font:700 12px/1.2 var(--body); color:var(--muted); text-transform:none}
 .toast-text{font:600 14.5px/1.35 var(--body)}
-.toast-knopf{flex:0 0 auto; min-height:34px; padding:0 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--panel-2); font:700 13px/1 var(--body); white-space:nowrap}
+.toast-knopf{flex:0 0 auto; min-height:44px; padding:0 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--panel-2); font:700 13px/1 var(--body); white-space:nowrap}
 .toast-knopf:hover{border-color:var(--accent); color:var(--accent)}
-.toast-zu{flex:0 0 auto; display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--faint)}
-.toast-zu:hover{background:var(--panel-3); color:var(--ink)}
+.toast-zu{flex:0 0 auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--faint)}
 
 /* ---- Menüs, Popover, Schnellauswahl ---- */
 .menue{position:fixed; z-index:50; min-width:220px; max-width:340px; max-height:min(70vh, 520px); overflow:auto; padding:6px; border-radius:12px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
-  animation:menue-auf .12s ease-out}
+  animation:menue-auf var(--dauer) ease-out}
 @keyframes menue-auf{from{opacity:0; transform:translateY(-4px) scale(.98)} to{opacity:1; transform:none}}
 /* Während der Messung (UI.menue hängt das Menü unsichtbar an, misst, klemmt, blendet ein)
    darf weder eine Animation laufen noch das Element versteckt sein: `display:none` liefert
@@ -1670,7 +1735,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
    Layout und liefert die echten Maße. */
 .menue.nl-messend { animation: none; visibility: hidden }
 .menue-titel{padding:6px 10px 8px; font:700 12px/1.2 var(--body); color:var(--muted); letter-spacing:.02em; border-bottom:1px solid var(--line); margin-bottom:4px}
-.menue-punkt{display:flex; align-items:center; gap:10px; width:100%; min-height:38px; padding:0 10px; border:0; border-radius:8px; background:none; color:var(--ink); text-align:left; font:500 14px/1.2 var(--body)}
+.menue-punkt{display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:0 12px; border:0; border-radius:8px; background:none; color:var(--ink); text-align:left; font:500 14px/1.2 var(--body)}
 .menue-punkt:hover:not([disabled]), .menue-punkt:focus-visible{background:var(--panel-3); outline:none}
 .menue-punkt[disabled]{color:var(--faint); cursor:default}
 .menue-punkt .sym{color:var(--muted); flex:0 0 auto}
@@ -1688,20 +1753,17 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sw-teil:hover, .sw-teil:focus-visible{background:var(--panel-3); border-color:var(--line-2); outline:none}
 
 /* ---- Befehlspalette ---- */
-.pal-huelle{position:fixed; inset:0; z-index:55; display:flex; justify-content:center; align-items:flex-start; padding-top:14vh; background:rgba(4,8,14,.45); opacity:0; transition:opacity .12s}
-.pal-huelle.da{opacity:1}
+.pal-huelle{position:fixed; inset:0; z-index:50; display:flex; justify-content:center; align-items:flex-start; padding-top:14vh; background:rgba(4,8,14,.45); opacity:0; transition:opacity var(--dauer)}
 .pal-kasten{width:min(620px, calc(100vw - 32px)); border-radius:16px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); overflow:hidden}
 .pal-kopf{display:flex; align-items:center; gap:10px; padding:0 14px; border-bottom:1px solid var(--line); color:var(--muted)}
 .pal-eingabe{flex:1 1 auto; height:54px; border:0; background:none; color:var(--ink); font:500 17px/1 var(--body); outline:none}
-.pal-eingabe::placeholder{color:var(--faint)}
 .pal-liste{max-height:min(52vh, 440px); overflow:auto; padding:6px}
-.pal-punkt{display:flex; align-items:center; gap:10px; min-height:42px; padding:0 10px; border-radius:9px; cursor:pointer}
+.pal-punkt{display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border-radius:9px; cursor:pointer}
 .pal-punkt.an{background:var(--accent-soft)}
-.pal-punkt.an .pal-text{color:var(--ink)}
+.pal-punkt.an .pal-text, .wahl-knopf:hover, .ex-knopf:hover{color:var(--ink)}
 .pal-punkt.aus{cursor:default; opacity:.6}
 .pal-punkt.tipp{opacity:.8; font-style:italic}
 .pal-sym{display:inline-flex; width:18px; color:var(--muted)}
-.pal-punkt.an .pal-sym{color:var(--accent)}
 .pal-text{font:600 14.5px/1.2 var(--body); white-space:nowrap}
 .pal-info{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:13px}
 .pal-gruppe{margin-left:auto; flex:0 0 auto; font:600 11px/1 var(--body); color:var(--faint); text-transform:uppercase; letter-spacing:.06em}
@@ -1710,15 +1772,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pal-fuss kbd{margin-right:2px}
 
 /* ---- Dialoge ---- */
-.dialog-huelle{position:fixed; inset:0; z-index:56; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(4,8,14,.5); opacity:0; transition:opacity .15s}
-.dialog-huelle.da{opacity:1}
+.dialog-huelle{position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(4,8,14,.5); opacity:0; transition:opacity var(--dauer)}
 .dialog{width:min(720px, 100%); max-height:calc(100vh - 48px); display:flex; flex-direction:column; border-radius:18px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
-  transform:translateY(8px) scale(.99); transition:transform .18s ease}
+  transform:translateY(8px) scale(.99); transition:transform var(--dauer) ease}
 .dialog-huelle.da .dialog{transform:none}
 .dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line)}
 .dialog-kopf h2{font-size:22px; font-weight:800}
-.dialog-zu{margin-left:auto; display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
-.dialog-zu:hover{background:var(--panel-3); color:var(--ink)}
+.dialog-zu{margin-left:auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
 .dialog-inhalt{overflow:auto; padding:8px 22px 22px}
 .einst-abschnitt{padding:14px 0 6px; border-bottom:1px solid var(--line)}
 .einst-abschnitt:last-of-type{border-bottom:0}
@@ -1727,18 +1787,21 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .einst-text{flex:1 1 auto; display:flex; flex-direction:column; gap:3px; min-width:0}
 .einst-text strong{font-weight:700}
 .einst-text span{color:var(--muted); font-size:13.5px}
-.einst-steuer{flex:0 0 auto}
 .einst-zeile.gesperrt .einst-steuer{opacity:.4; filter:grayscale(1)}
-.einst-zeile.gesperrt strong{color:var(--muted)}
 .einst-text .einst-grund{color:var(--warn)}
 .einst-fuss{padding-top:14px; color:var(--faint); font-size:12.5px}
-.wahl{display:inline-flex; padding:3px; gap:2px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line)}
-.wahl-knopf{min-height:34px; padding:0 12px; border:0; border-radius:8px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
-.wahl-knopf:hover{color:var(--ink)}
+.wahl{display:inline-flex; padding:4px; gap:2px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line)}
+/* Radius aus dem Token, wie `.st-knopf` in stufensystem.css:15 — dieselbe Optik in beiden
+   Segment-Schaltern, und der rohe `8px`-Wert (R2-Altlast) ist weg.
+   `min-width:44px` ist die zweite Hälfte der Fingerregel: die Höhe war mit 44 schon da, der
+   kurze Knopf „E" maß im Browser aber nur 40 px breit (`injektoren` gemessen, beide Profile). */
+.wahl-knopf{min-height:44px; min-width:44px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
 .wahl-knopf.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
-.schalter{position:relative; width:48px; height:28px; border-radius:14px; border:1px solid var(--line-2); background:var(--panel-3); padding:0; transition:background var(--dauer)}
-.schalter span{position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--muted); transition:transform var(--dauer), background var(--dauer)}
-.schalter.an{background:var(--accent-soft); border-color:var(--accent)}
+/* Der Schalter ist 64 × 44 (Trefferfläche) und bleibt eine Pille: `999px` ist ein erlaubter
+   Radius (R2). Der Knopf sitzt mittig — 4 px Rand links/rechts/oben/unten im Innenraum (62 × 42),
+   der Weg nach rechts ist damit genau 20 px wie vorher. */
+.schalter{position:relative; width:64px; height:44px; border-radius:999px; border:1px solid var(--line-2); background:var(--panel-3); padding:0; transition:background var(--dauer)}
+.schalter span{position:absolute; top:4px; left:4px; width:34px; height:34px; border-radius:50%; background:var(--muted); transition:transform var(--dauer), background var(--dauer)}
 .schalter.an span{transform:translateX(20px); background:var(--accent)}
 .regler{display:flex; align-items:center; gap:10px}
 .regler input{width:160px; accent-color:var(--accent)}
@@ -1754,7 +1817,6 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 /* ---- „Erklär mir das“ (ui/erklaeren.js, Präfix ex-): Lehrtext erst auf Klick ---- */
 .ex{display:inline-flex; flex-direction:column; align-items:flex-start; gap:4px; max-width:100%}
 .ex-knopf{border:0; padding:2px 0; background:none; color:var(--accent); font:600 12.5px/1.3 var(--body); text-decoration:underline; text-underline-offset:3px; cursor:pointer}
-.ex-knopf:hover{color:var(--ink)}
 .ex-text{display:flex; flex-direction:column; gap:4px; padding:6px 10px; border-left:3px solid var(--accent); background:var(--panel-2); border-radius:0 8px 8px 0; color:var(--ink); font-size:13px; line-height:1.45}
 .ex-text p{margin:0}
 .ex-quelle{color:var(--faint); font-size:11.5px}
@@ -1770,7 +1832,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .si-leer{padding:12px 16px; color:var(--muted)}
 .si-leer strong{display:block; color:var(--ink); margin-bottom:4px}
 .si-veraltet{display:flex; align-items:center; gap:8px; margin:0; padding:6px 14px; background:var(--warn-soft); color:var(--ink); font-size:12.5px; border-bottom:1px solid var(--line)}
-.si-veraltet[hidden]{display:none}
+/* R10: ein gemeinsamer Block statt vier – „hier ist nichts zu zeigen": Veraltet-Banner, Statistik, schmale PDU-Spalte, Standard-Dreieck */
+.si-veraltet[hidden], .si-zus:has(.si-zeile2) .si-statistik, .si[data-breite="schmal"] .si-pdu, .pdu-schicht > summary::-webkit-details-marker{display:none}
 .si-sym{display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; font:800 11px/1 var(--body); background:var(--warn); color:var(--accent-ink); flex:0 0 auto}
 .si-sym.bad{background:var(--bad); color:#fff}
 
@@ -1782,12 +1845,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 /* Ergebniswort links, Zusammenfassung rechts daneben (höchstens 2 Zeilen), darunter Kennung ODER Statistik */
 .si-zus{flex:1 1 auto; min-width:0; display:grid; grid-template-columns:auto minmax(0, 1fr); align-items:baseline; column-gap:10px; row-gap:1px}
 .si-zus strong{font:800 14px/1.3 var(--display); white-space:nowrap}
-.si-kopf.ok .si-zus strong{color:var(--ok)} .si-kopf.bad .si-zus strong{color:var(--bad)}
+/* R10: „gut" und „schlecht" je EIN Block – Ergebnis-Kopf, Problemfilter und Kennung teilen die Farbe */
+.si-kopf.ok .si-zus strong, .si-art[data-art="empfangen"], .si-art[data-art="antworten"]{color:var(--ok)}
+.si-kopf.bad .si-zus strong, .si-filter-knopf.probleme, .si-kennung.bad{color:var(--bad)}
 .si-zus p{margin:0; font-size:13px; line-height:1.4}
 .si-zus > p:first-of-type{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .si-zeile2, .si-statistik{grid-column:1 / -1}
-.si-zus .si-statistik{color:var(--faint); font-size:12px}
-.si-zus:has(.si-zeile2) .si-statistik{display:none}
+.si-zus .si-statistik, .si-skill, .si-quelle, .pdu-klein{color:var(--faint); font-size:12px}
 
 /* Umschalter (Ansicht, Tempo, MAC-Format): kleine Segmentknöpfe */
 .si-modus, .si-tempo, .pdu-format{display:inline-flex; flex:0 0 auto; padding:2px; gap:2px; border-radius:9px; background:var(--panel-2); border:1px solid var(--line)}
@@ -1799,20 +1863,18 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .si-leiste{display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; padding:5px 12px; border-bottom:1px solid var(--line); flex:0 0 auto}
 .si-steuer, .si-filter{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
 .si-steuer-knopf{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); cursor:pointer}
-.si-steuer-knopf:hover{border-color:var(--accent); color:var(--accent)}
+.si-steuer-knopf:hover, .si-knopf:hover{border-color:var(--accent); color:var(--accent)}
 .si-steuer-knopf svg path{fill:currentColor; stroke:currentColor; stroke-width:1.4; stroke-linejoin:round}
 .si-pos{min-width:5.5em; color:var(--muted); font:600 12px/1 var(--mono); font-variant-numeric:tabular-nums; padding:0 4px}
 .si-filter-titel{color:var(--muted); font-size:12px; font-weight:700}
 .si-filter-knopf{display:inline-flex; align-items:center; gap:5px; min-height:26px; padding:0 8px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:600 12px/1 var(--body); cursor:pointer; opacity:.5}
 .si-filter-knopf.an, .si-filter-knopf:hover{opacity:1}
-.si-filter-knopf.probleme{color:var(--bad)}
 .si-filter-knopf.probleme.an{border-color:var(--bad); background:var(--bad-soft)}
 .si-anzahl{color:var(--muted); font:600 11px/1 var(--mono)}
 
 /* ---- Liste + PDU nebeneinander ---- */
 .si-haupt{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(250px, 1fr)}
 .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr)}
-.si[data-breite="schmal"] .si-pdu{display:none}
 .si-liste{min-height:0; overflow:auto; padding:4px 6px 8px; outline:none; container-type:inline-size}
 .si-liste:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
 .si-pdu{min-height:0; overflow:auto; border-left:1px solid var(--line); background:var(--panel); container-type:inline-size}
@@ -1828,7 +1890,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 }
 .si-zeile:hover{background:var(--panel-2)}
 .si-zeile.aktuell{background:var(--accent-soft); border-left-color:var(--accent)}
-.si-zeile.leise{color:var(--muted)}
+.si-zeile.leise, .pdu-nach, .pdu-feld dt, .pdu-vorher s{color:var(--muted)}
 .si-zeile.drop{border-left-color:var(--bad); background:color-mix(in srgb, var(--bad) 7%, transparent)}
 .si-zeile.drop.aktuell{background:color-mix(in srgb, var(--bad) 14%, transparent)}
 .si-n{grid-area:n; color:var(--faint); font:600 11px/1 var(--mono); text-align:right}
@@ -1840,17 +1902,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .si-art{display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-size:12px; color:var(--muted)}
 .si-art svg path{fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
 .si-art[data-art="senden"]{color:var(--accent)}
-.si-art[data-art="empfangen"], .si-art[data-art="antworten"]{color:var(--ok)}
-.si-art[data-art="fluten"]{color:var(--warn)}
+.si-art[data-art="fluten"], .si-kennung.still{color:var(--warn)}
 .si-art[data-art="verwerfen"]{color:var(--bad); font-weight:700}
 .si-art[data-art="lernen"], .si-kennung.gemeldet{color:var(--info)}
 .si-grundzeile{grid-column:3 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; padding:2px 0 3px; font-size:12px; color:var(--ink)}
 .si-grund{font:700 12px/1.6 var(--mono); padding:0 6px; border-radius:5px; background:var(--bad-soft); color:var(--bad)}
 .si-erklaerung{color:var(--ink)}
 .si-kennung{font-size:12px; font-weight:700}
-.si-kennung.still{color:var(--warn)}
-.si-kennung.bad{color:var(--bad)}
-.si-skill, .si-quelle{color:var(--faint); font-size:12px}
 
 /* ---- Ansicht „Ergebnis“: wo es hängt ---- */
 .si-ergebnis{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:10px 14px 12px}
@@ -1860,7 +1918,6 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .si-problem-kopf{display:flex; align-items:center; flex-wrap:wrap; gap:8px}
 .si-problem .si-knopf{align-self:flex-start}
 .si-knopf{min-height:28px; padding:0 12px; border-radius:8px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:700 12.5px/1 var(--body); cursor:pointer}
-.si-knopf:hover{border-color:var(--accent); color:var(--accent)}
 .si-knopf.haupt{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
 .si-knopf.haupt:hover{filter:brightness(1.08); color:var(--accent-ink)}
 
@@ -1872,11 +1929,9 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pdu{padding:8px 12px 12px; font-size:12.5px}
 .pdu-leer{padding:10px 4px; color:var(--muted)}
 .pdu-leer p{margin:0 0 4px}
-.pdu-klein{font-size:12px; color:var(--faint)}
 .pdu-kopf{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:6px}
 .pdu-titel{min-width:0; line-height:1.4}
 .pdu-titel strong{font:800 13px/1.3 var(--display)}
-.pdu-nach{color:var(--muted)}
 .pdu-kopf-rechts{display:flex; align-items:center; gap:6px; flex:0 0 auto}
 .pdu-format button{font-family:var(--mono); font-size:12px}
 .pdu-text{margin:0 0 6px; color:var(--muted)}
@@ -1886,7 +1941,6 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pdu-sym{font-weight:800; color:var(--warn)}
 .pdu-schicht{border:1px solid var(--line); border-radius:8px; margin-top:6px; background:var(--panel)}
 .pdu-schicht > summary{display:flex; align-items:center; gap:8px; padding:5px 8px; cursor:pointer; list-style:none}
-.pdu-schicht > summary::-webkit-details-marker{display:none}
 .pdu-schicht > summary:hover{background:var(--panel-2); border-radius:8px}
 .pdu-nr{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:var(--radius-s); background:var(--panel-3); color:var(--muted); font:700 11px/1 var(--mono); flex:0 0 auto}
 .pdu-schicht-titel{font-weight:700; white-space:nowrap}
@@ -1896,13 +1950,11 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pdu-satz{margin:4px 0 6px; color:var(--muted); font-size:12px}
 .pdu-liste{margin:0; display:flex; flex-direction:column; gap:1px}
 .pdu-feld{display:grid; grid-template-columns:minmax(6em, 9.5em) minmax(0, 1fr); gap:8px; padding:2px 6px; border-radius:5px; border-left:2px solid transparent}
-.pdu-feld dt{color:var(--muted)}
 .pdu-feld dd{margin:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; min-width:0}
 .pdu-feld.geaendert{background:var(--warn-soft); border-left-color:var(--warn)}
 .pdu-wert{flex:0 1 auto; font:600 12px/1.45 var(--mono); overflow-wrap:anywhere}   /* MAC/IP bleiben ganz; der Zusatz rutscht darunter */
 .pdu-zusatz{color:var(--muted); font-size:12px}
 .pdu-vorher{color:var(--warn); font-size:12px}
-.pdu-vorher s{color:var(--muted)}
 /* schmale PDU-Spalte: Feldname über dem Wert, damit MAC und IP ungebrochen in eine Zeile passen */
 @container (max-width:400px){ .pdu-feld{grid-template-columns:minmax(0, 1fr); gap:0; padding:3px 6px} .pdu-feld dt{font-size:12px} }
 .pdu-warum{margin:6px 0 0; padding:5px 8px; border-radius:7px; background:var(--info-soft); font-size:12px; line-height:1.45}
@@ -1912,7 +1964,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
 .knopf.primaer:hover{background:var(--accent); filter:brightness(1.08)}
 .knopf.geist{background:none; border-color:transparent; color:var(--muted)}
-.knopf.geist:hover{color:var(--ink); background:var(--panel-3)}
+.knopf.geist:hover, .am-zu:hover{color:var(--ink); background:var(--panel-3)}
 .knopf.klein{min-height:30px; padding:0 10px; font-size:13px}
 .knopf.gross{min-height:48px; padding:0 22px; font-size:16px}
 .sp-leise{color:var(--muted); font-size:13px}
@@ -1930,9 +1982,9 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .am-titel strong{font:800 17px/1.2 var(--display); overflow:hidden; text-overflow:ellipsis; min-width:0}
 .am-kunde{color:var(--muted); font-size:13px; overflow:hidden; text-overflow:ellipsis; min-width:0}
 .am-ziele{flex:0 0 auto; padding:3px 9px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:700 12px/1.4 var(--mono); white-space:nowrap}
-.am-ziele.fertig{background:var(--ok-soft); color:var(--ok)}
-.am-ziele.frisch, .sp-ziele li.frisch .sp-haken{animation:sp-hop .5s cubic-bezier(.3,1.6,.5,1)}
-.am-knoepfe{display:flex; gap:6px; flex:0 0 auto; margin-left:auto}
+.am-ziele.fertig, .sp-chip.niv-E, .sp-chip.wdh, .sp-chip.klingelt{background:var(--ok-soft); color:var(--ok)}
+.am-ziele.frisch, .sp-ziele li.frisch .sp-haken{animation:sp-hop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}   /* Treffer-Rückmeldung: der Haken hüpft — 320 ms statt 0,5 s (R5) */
+.am-knoepfe, .sp-auftrag-knoepfe{display:flex; gap:6px; flex:0 0 auto; margin-left:auto}
 .am-lesen.an{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
 .am-mehr{min-width:40px; padding:0 10px; font-size:18px; letter-spacing:.05em}
 .lb-auftrag{container-type:inline-size}
@@ -1940,22 +1992,21 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 @container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .sp-kunde-sym{display:none} }
 .am-mappe{position:absolute; top:100%; left:12px; z-index:30; width:min(560px, calc(100% - 24px)); max-height:min(70vh, 520px); display:flex; flex-direction:column;
   margin-top:6px; border-radius:16px; background:var(--panel); border:1px solid var(--line-2); border-top:4px solid var(--k, var(--accent)); box-shadow:var(--schatten, 0 16px 40px rgba(0,0,0,.4))}
-.am-mappe.rein{animation:am-rein .2s ease-out}
+.am-mappe.rein{animation:am-rein var(--dauer) ease-out}
 @keyframes am-rein{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}
 .am-reiter{display:flex; align-items:center; gap:2px; padding:6px 8px 0 10px; border-bottom:1px solid var(--line)}
 .am-tab{border:0; background:none; color:var(--muted); font:700 13.5px/1 var(--body); padding:10px 12px 11px; border-bottom:2px solid transparent; border-radius:8px 8px 0 0}
 .am-tab:hover{color:var(--ink); background:var(--panel-2)}
 .am-tab.an{color:var(--accent); border-bottom-color:var(--accent)}
 .am-zu{margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:0; border-radius:8px; background:none; color:var(--muted)}
-.am-zu:hover{background:var(--panel-3); color:var(--ink)}
 .am-inhalt{flex:1 1 auto; min-height:0; overflow:auto; padding:14px 18px 6px}
 .am-brief{display:flex; flex-direction:column; gap:10px}
 .am-absender{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px}
-.am-absender b{color:var(--ink)}
+.am-absender b, .sp-demo li.jetzt, .sp-demo-kopf b{color:var(--ink)}
 .am-text{display:flex; flex-direction:column; gap:8px; font-size:15.5px; line-height:1.55; max-width:62ch}
-.am-text p{margin:0}
+.am-text p, .sp-brief-text p{margin:0}
 .am-symptom{margin:2px 0 0; padding:8px 10px; border-radius:var(--radius); background:var(--panel-2); font-size:13.5px}
-.am-symptom b{color:var(--muted); font-weight:600}
+.am-symptom b, .sp-symptom b{color:var(--muted); font-weight:600}
 .am-ziele-liste{display:flex; flex-direction:column; gap:10px; padding-bottom:6px}
 .am-ziele-liste .sp-ziele li{font-size:14.5px}
 .am-ziel-text{flex:1 1 auto; min-width:0}
@@ -1974,18 +2025,18 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-auftrag-titel{flex:1 1 auto; min-width:min(15em, 70%); display:flex; flex-direction:column}
 .sp-auftrag-titel strong{font:800 18px/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .sp-auftrag-titel span{color:var(--muted); font-size:12.5px}
-.sp-auftrag-knoepfe{display:flex; gap:6px; flex:0 0 auto; margin-left:auto}
 .sp-hilfe-knopf.an{border-color:var(--accent); background:var(--accent-soft)}
-.sp-abnahme.bereit{animation:sp-puls 1.6s ease-in-out infinite; box-shadow:0 0 0 0 var(--accent)}
+/* „Abnahme bereit“: das Signal bleibt STEHEN (weicher Ring), der Puls läuft nur noch dreimal
+   à 320 ms statt endlos mit 1,6 s — R5, Wirkung erhalten (der Blick wird weiter gelenkt). */
+.sp-abnahme.bereit{box-shadow:0 0 0 3px var(--accent-soft); animation:sp-puls var(--dauer-lang) ease-in-out 3}
 @keyframes sp-puls{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent)} 50%{box-shadow:0 0 0 8px transparent}}
 .sp-auftrag-mitte{display:flex; align-items:flex-start; gap:10px 18px; flex-wrap:wrap}
 .sp-symptom{flex:1 1 260px; font-size:13.5px; color:var(--ink); margin:0}
-.sp-symptom b{color:var(--muted); font-weight:600}
 .sp-ziele{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3px; flex:2 1 320px}
 .sp-ziele li{display:flex; align-items:baseline; gap:8px; font-size:13.5px; line-height:1.35}
 .sp-haken{display:inline-flex; width:20px; height:20px; flex:0 0 auto; align-items:center; justify-content:center; border-radius:var(--radius-s); font-weight:800; font-size:12px;
   border:1.5px solid var(--line-2); color:var(--faint); transform:translateY(3px)}
-.sp-ziele li.ok{color:var(--muted)}
+.sp-ziele li.ok, .sp-zeile.leise{color:var(--muted)}
 .sp-ziele li.ok .sp-haken{background:var(--ok); border-color:var(--ok); color:var(--bg)}
 @keyframes sp-hop{0%{transform:translateY(3px) scale(.4)} 100%{transform:translateY(3px) scale(1)}}
 .sp-ziele li.neutral .sp-haken{border-style:dotted}
@@ -2003,12 +2054,12 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-coach.neu .sp-blase{animation:sp-blase-rein var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
 @keyframes sp-blase-rein{from{opacity:0; transform:translateX(-8px) scale(.92)} to{opacity:1; transform:none}}
 .sp-coach .knopf{margin-left:auto; white-space:nowrap; flex:0 0 auto}
-.sp-chip.uebt{background:var(--accent-soft); color:var(--accent)}
+.sp-chip.uebt, .sp-chip.niv-AP1, .sp-chip.wahl{background:var(--accent-soft); color:var(--accent)}
 .sp-coach-sym{font-size:22px}
 @keyframes sp-rein{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
 
 /* ---- Hilfeleiter ---- */
-.sp-hilfe{display:flex; flex-direction:column; gap:10px; padding:10px 12px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line); max-height:min(32vh, 290px); overflow:auto; animation:sp-rein .2s ease-out}   /* Fläche bleibt nutzbar; Inhalt scrollt */
+.sp-hilfe{display:flex; flex-direction:column; gap:10px; padding:10px 12px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line); max-height:min(32vh, 290px); overflow:auto; animation:sp-rein var(--dauer) ease-out}   /* Fläche bleibt nutzbar; Inhalt scrollt */
 .sp-hilfe-kopf{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
 .sp-leiter{list-style:none; margin:0; padding:0; display:flex; gap:4px; flex-wrap:wrap}
 .sp-leiter li{display:flex; align-items:center; gap:4px; font-size:11.5px; color:var(--faint)}
@@ -2031,31 +2082,29 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-senior-sym.gross{font-size:56px}
 .sp-demo{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px}
 .sp-demo li{font-size:13.5px; color:var(--faint)}
-.sp-demo li.jetzt{color:var(--ink)}
-.sp-demo li.fertig, .sp-pruefliste li.ok > span{color:var(--ok)}
+.sp-demo li.fertig, .sp-pruefliste li.ok > span, .am-fertig .am-titel strong{color:var(--ok)}
 .sp-demo li.fertig::marker{content:"✓ "}
 .sp-demo-kopf{line-height:1.45}
-.sp-demo-kopf b{color:var(--ink)}
 .sp-demo-cli{margin:6px 0 0; padding:8px 10px; border-radius:8px; background:var(--bg); color:var(--ok); font:500 12.5px/1.5 var(--mono); white-space:pre-wrap}
 .sp-demo-felder{margin:6px 0 0; padding-left:16px; font-size:13px}
 
 /* ---- Overlays: Ergebnis, Willkommen, Vorhersage ---- */
-.sp-overlay{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(6,10,16,.55); backdrop-filter:blur(3px); opacity:0; transition:opacity .18s ease}
+.sp-overlay{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(6,10,16,.55); backdrop-filter:blur(3px); opacity:0; transition:opacity var(--dauer) ease}
 .sp-overlay.da{opacity:1}
 /* Vorhersage rechts über dem Inspektor: das ganze Netz bleibt sichtbar, während man rät */
 .sp-overlay.vorhersage{align-items:center; justify-content:flex-end; background:transparent; backdrop-filter:none; pointer-events:none; padding:24px 18px}
 .sp-overlay.vorhersage .sp-karte{width:min(340px, 32vw); pointer-events:auto}
 @media (max-width:900px){.sp-overlay.vorhersage{align-items:flex-end; justify-content:center; padding-bottom:88px} .sp-overlay.vorhersage .sp-karte{width:auto}}
 .sp-karte{width:min(620px, 100%); max-height:calc(100vh - 48px); overflow:auto; padding:24px 26px; border-radius:18px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
-  transform:translateY(12px) scale(.98); transition:transform .22s cubic-bezier(.2,.9,.3,1.2)}
+  transform:translateY(12px) scale(.98); transition:transform var(--dauer-lang) cubic-bezier(.2,.9,.3,1.2)}
 .sp-overlay.da .sp-karte, .sp-overlay.blatt.da .sp-karte{transform:none}
 .sp-ergebnis, .sp-willkommen{display:flex; flex-direction:column; gap:14px}
 .sp-ergebnis h2, .sp-willkommen h2{font:800 26px/1.1 var(--display)}
 .sp-ergebnis h3{font:700 13px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin:0 0 8px}
-.sp-erg-kopf{display:flex; gap:14px; align-items:center}
+.sp-erg-kopf, .sp-brief header{display:flex; gap:14px; align-items:center}
 .sp-erg-kopf .sp-leise{display:block; margin-bottom:2px}
 .sp-sterne{display:flex; gap:6px; font-size:40px; line-height:1}
-.sp-sterne span{color:var(--line-2); transform:scale(.3); opacity:0; animation:sp-stern .45s cubic-bezier(.3,1.7,.5,1) forwards; animation-delay:calc(var(--i) * 120ms + 150ms)}
+.sp-sterne span{color:var(--line-2); transform:scale(.3); opacity:0; animation:sp-stern var(--dauer-lang) cubic-bezier(.3,1.7,.5,1) forwards; animation-delay:calc(var(--i) * 120ms + 150ms)}   /* Treffer-Rückmeldung: Sterne poppen nacheinander (320 ms je Stern); die Staffelung (120 ms) bleibt */
 .sp-sterne span.voll{color:var(--geld); text-shadow:0 0 18px color-mix(in srgb, var(--geld) 50%, transparent)}
 .sp-sterne span.halb{background:linear-gradient(90deg, var(--geld) 50%, var(--line-2) 50%); -webkit-background-clip:text; background-clip:text; color:transparent}
 @keyframes sp-stern{to{transform:none; opacity:1}}
@@ -2071,24 +2120,21 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-block h3{margin:0; color:var(--muted); font:800 12px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
 .sp-lohn-reihe{display:flex; align-items:center; gap:10px 22px; flex-wrap:wrap}
 .sp-zeile{margin:0; font-size:13.5px; line-height:1.45}
-.sp-zeile.leise{color:var(--muted)}
 .sp-weg{gap:8px}
 .sp-weg-chips{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; align-items:center; gap:6px 4px}
 .sp-weg-chips li{display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:var(--panel); border:1px solid var(--line-2); font-size:13px}
 .sp-weg-chips li.sp-pfeil{padding:0; border:0; background:none; color:var(--faint)}
-.am-fertig .am-titel strong{color:var(--ok)}
 .sp-weg-chips li.ok{border-color:var(--ok); color:var(--ok); font-weight:700}
-.sp-weg-chips li.nicht{border-color:var(--warn)}
 .sp-merke p{margin:0; font-size:15px; line-height:1.55}
 .sp-merke-fuss{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
 .sp-ring{width:30px; height:30px; flex:0 0 auto; border-radius:50%; --p:var(--nach);
   background:conic-gradient(var(--ok) calc(var(--p) * 360deg), var(--line) 0); mask:radial-gradient(circle, transparent 58%, #000 60%); -webkit-mask:radial-gradient(circle, transparent 58%, #000 60%);
-  animation:sp-ring 1s ease-out}
+  animation:sp-ring var(--dauer-lang) ease-out}   /* Rückmeldung: der Ring füllt sich (320 ms statt 1 s) */
 @keyframes sp-ring{from{--p:var(--von)}}
 @property --p{syntax:"<number>"; inherits:false; initial-value:0}
 .sp-knoepfe{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px}
 /* Langes Ergebnis (Abzeichen, Feierabend): die Knöpfe bleiben unten im Fenster sichtbar */
-.sp-ergebnis > .sp-knoepfe{position:sticky; bottom:-24px; margin:4px -26px -24px; padding:12px 26px 16px; background:linear-gradient(transparent, var(--panel) 14px); z-index:1}
+.sp-ergebnis > .sp-knoepfe{position:sticky; bottom:-24px; margin:4px -26px -24px; padding:12px 26px 16px; background:linear-gradient(transparent, var(--panel) 14px); z-index:10}
 .sp-pruefliste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
 .sp-pruefliste li{display:flex; gap:10px; align-items:flex-start}
 .sp-pruefliste li > span{font-weight:800; width:18px}
@@ -2112,7 +2158,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-mail:hover{border-color:var(--line-2); transform:translateX(2px)}
 .sp-mail.an{border-color:var(--k, var(--accent)); background:color-mix(in srgb, var(--k, var(--accent)) 8%, var(--panel))}
 .sp-mail.neu::after{content:""; position:absolute; top:12px; right:12px; width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--panel)}
-.sp-mail.eilig{border-color:var(--warn)}
+.sp-mail.eilig, .sp-weg-chips li.nicht{border-color:var(--warn)}   /* an der LETZTEN Fundstelle zusammengeführt: `.sp-mail.an` + `.eilig` können am selben Element stehen */
 /* Kundenpost (Nachrichten ohne Auftrag): ruhiger als Aufträge, unter einem Trenner */
 .sp-pf-trenner{margin:10px 2px 0; color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
 .sp-post{background:var(--panel-2); border-style:dashed}
@@ -2124,19 +2170,12 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-mail-vorschau{color:var(--faint); font-size:12.5px; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .sp-chips{display:flex; gap:4px; flex-wrap:wrap; margin-top:4px}
 .sp-chip{padding:1px 7px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:600 11px/1.6 var(--body)}
-.sp-chip.niv-E{background:var(--ok-soft); color:var(--ok)}
-.sp-chip.niv-AP1{background:var(--accent-soft); color:var(--accent)}
-.sp-chip.niv-AP2{background:var(--info-soft); color:var(--info)}
+.sp-chip.niv-AP2, .sp-chip.wartung, .sp-chip.flow-geruest{background:var(--info-soft); color:var(--info)}
 .sp-chip.geld{color:var(--geld)}
-.sp-chip.frist{background:var(--warn-soft); color:var(--warn)}
-.sp-chip.wartung{background:var(--info-soft); color:var(--info)}
-.sp-chip.wdh{background:var(--ok-soft); color:var(--ok)}
-.sp-chip.klingelt{background:var(--ok-soft); color:var(--ok)}
-.sp-klingel{display:inline-block; font-style:normal; animation:ev-klingeln 1.2s ease-in-out infinite}
+.sp-chip.frist, .sp-chip.flow-verwicklung, .sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
+.sp-klingel{display:inline-block; font-style:normal; animation:ev-klingeln var(--dauer-lang) ease-in-out 3}   /* dreimal läuten statt endlos (R5) — der Chip „klingelt“ bleibt als Signal stehen */
 .sp-mail.klingelt{border-color:var(--ok)}
-/* Flow-Regler (§ 20 F6) */
-.sp-chip.flow-geruest{background:var(--info-soft); color:var(--info)}
-.sp-chip.flow-verwicklung{background:var(--warn-soft); color:var(--warn)}
+/* Flow-Regler (§ 20 F6): die beiden Flow-Chips stehen bei ihren Farbgruppen oben; .sp-chip.folge bei warn */
 .am-geruest{margin:0; padding:9px 11px; border-radius:var(--radius); background:var(--info-soft); color:var(--ink); font-size:14px; line-height:1.45}
 .am-geruest small{display:block; margin-top:3px; color:var(--muted); font-size:12.5px}
 .sp-chip.form{background:var(--panel-3); color:var(--text)}
@@ -2144,15 +2183,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-chip.form-projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
 .sp-leser{min-height:0; overflow:auto; scrollbar-width:thin}
 .sp-brief{display:flex; flex-direction:column; gap:16px; padding:22px 24px; border-radius:18px; background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--k, var(--accent))}
-.sp-brief header{display:flex; gap:14px; align-items:center}
 .sp-brief h3{font:800 24px/1.15 var(--display)}
 .sp-brief-text{display:flex; flex-direction:column; gap:10px; font-size:16px; line-height:1.6; max-width:62ch}
-.sp-brief-text p{margin:0}
 .sp-brief-info{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px}
 .sp-brief-info > div{padding:10px 12px; border-radius:12px; background:var(--panel-2)}
 .sp-brief-info small{color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
 .sp-brief-info p{margin:4px 0 0; font-size:14px}
-.sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{position:sticky; bottom:0; margin:0 -24px; padding:12px 24px; background:linear-gradient(transparent, var(--panel) 12px); z-index:1}   /* „Auftrag annehmen“ bleibt sichtbar, wenn der Brief länger ist als der Platz (Rauchtest § 22: 960 × 700 in der ersten Stunde) */
+.sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{position:sticky; bottom:0; margin:0 -24px; padding:12px 24px; background:linear-gradient(transparent, var(--panel) 12px); z-index:10}   /* „Auftrag annehmen“ bleibt sichtbar, wenn der Brief länger ist als der Platz (Rauchtest § 22: 960 × 700 in der ersten Stunde) */
 .sp-leer{display:flex; flex-direction:column; gap:12px; align-items:flex-start; padding:20px; border-radius:14px; border:1px dashed var(--line-2); color:var(--muted)}
 @media (max-width: 900px){ .sp-pf-teile{grid-template-columns:1fr} .sp-pf-teile > .sp-leser{display:none} }
 /* Schmal (F1): Leser als Blatt von unten */
@@ -2166,17 +2203,21 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sp-blatt-leser .sp-brief{padding:16px 16px 18px}
 .sp-blatt-leser .sp-brief h3{font-size:21px}
 .sp-blatt-leser .sp-knoepfe{position:sticky; bottom:-14px; padding:10px 0 4px; background:var(--panel)}
-@media (prefers-reduced-motion: reduce){ .sp-overlay.blatt .sp-karte{transform:none; transition:none} }
+/* (§ 8) Kein eigener Bewegungs-Block mehr: basis.css:91 schaltet JEDE Animation und jeden Übergang
+   zentral ab (1 ms, einmalig). Der sichtbare Zustand der Blatt-Karte hat ohnehin `transform:none`
+   (`.sp-overlay.blatt.da .sp-karte`), die Regel hier war also doppelt. */
 
 
 
 /* Aufstieg: kleine Feier (respektiert „Bewegung reduzieren“) */
 .sp-fest{background:radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--geld) 20%, transparent), transparent 62%)}
-.sp-fest .sp-senior-sym{animation:sp-fest-pop .8s cubic-bezier(.3,1.6,.5,1) both}
-.sp-fest h2{animation:sp-fest-rein .5s .15s ease-out both}
+.sp-fest .sp-senior-sym{animation:sp-fest-pop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
+.sp-fest h2{animation:sp-fest-rein var(--dauer-lang) var(--dauer) ease-out both}
 @keyframes sp-fest-pop{from{transform:scale(.2) rotate(-30deg); opacity:0} to{transform:none; opacity:1}}
 @keyframes sp-fest-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
-@media (prefers-reduced-motion: reduce){.sp-fest .sp-senior-sym, .sp-fest h2{animation:none}}
+/* (§ 8) Auch die Aufstiegs-Feier braucht keinen eigenen Block: basis.css:91 begrenzt jede Animation
+   auf 1 ms/einmalig, `both` lässt danach den Endzustand stehen — genau der Zustand ohne Animation.
+   Die Einstellung „Bewegung aus“ (basis.css:93) schaltet ohnehin global ab. */
 /* E1: Provisorium oder sauber? (Brief), Änderungsnotiz (Ziele), Marken, Ergebnis */
 .am-variante{margin-top:12px; padding-top:10px; border-top:1px solid var(--line)}
 .am-variante.gewaehlt{display:flex; gap:8px; align-items:baseline; justify-content:space-between; font-size:14px}
@@ -2186,8 +2227,6 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .am-variante-karte small{color:var(--muted); font-size:12.5px; line-height:1.35}
 .am-variante-karte:hover, .am-variante-karte:focus-visible, .am-variante-karte.an{border-color:var(--accent); background:var(--accent-soft); outline:none}
 .am-notiz{display:block; width:100%; margin-top:5px; padding:6px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:13.5px/1.4 var(--body); resize:vertical}
-.sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
-.sp-chip.wahl{background:var(--accent-soft); color:var(--accent)}
 .sp-schuld{margin:8px 0 0; font-size:14px; color:var(--warn)}
 .sp-akte-zeile{margin:8px 0 0; font-size:14px}
 
@@ -2215,96 +2254,155 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .st-erklaerung{color:var(--ink); font-size:13px}
 .st-freigabe{color:var(--muted); font-size:12px}
 
-/* Gleiche Maße und Farben wie .wahl-knopf in rahmen.css:168-171, damit beide Abschnitte gleich
-   aussehen. Der Radius kommt aus dem Token --radius-xs (basis.css:32) — ein roher px-Wert würde
-   `python tools/ethos.py` (R2 „Radius nur aus Tokens") rot machen. Gemessen 07.10.2026. */
-.st-knopf{min-height:34px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
+/* Gleiche Maße und Farben wie .wahl-knopf in rahmen.css (Regel in Zeile 171), damit beide
+   Abschnitte im selben Dialog gleich aussehen. min-height 44 px ist das Trefferflächen-Maß der
+   44-px-Runde: vorher standen hier 34 px neben den 44 px der Erklärtiefe — zwei Segment-Schalter
+   mit verschiedener Höhe nebeneinander. Der Radius kommt aus dem Token --radius-xs (basis.css:32) —
+   ein roher px-Wert würde `python tools/ethos.py` (R2 „Radius nur aus Tokens") rot machen. */
+.st-knopf{min-height:44px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
 .st-knopf:hover{color:var(--ink)}
 .st-knopf.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
 .st-knopf:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 
 /* ---- szene.css ---- */
-/* ---------- Funktionsprobe (ui/szene.js, Präfix sz-): 2–6 s nach bestandener Abnahme, auf der Zeichenfläche ---------- */
-.sz-buehne{position:absolute; inset:0; z-index:12; cursor:pointer; overflow:hidden; animation:sz-rein .2s ease-out}
-.sz-buehne.weg{opacity:0; transition:opacity .18s ease}
-.sz-weiter{position:absolute; left:50%; top:12px; transform:translateX(-50%); padding:6px 11px; border-radius:999px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
+/* ---------- Funktionsprobe (ui/szene.js, Präfix sz-): 2–6 s nach bestandener Abnahme, auf der Zeichenfläche ----------
+   DAUERN (task-38, tools/ethos.py R5): nur var(--dauer)=160ms und var(--dauer-lang)=320ms. Die Einzelwerte
+   (.18s/.2s/.28s/.35s/.7s/.9s) sind auf die nächstliegende Stufe abgebildet: .18s/.2s → 160 ms (Bühne
+   ein-/ausblenden, reine Dekoration), alles darüber → 320 ms. Die Rückmeldungen (Reaktionspille, Blase,
+   Wusstest-du-Karte) behalten ihre Animation — nur gleichmäßig lang, nichts ist entfallen.
+   VERZÖGERUNGEN (animation-delay) bleiben inhaltlich unverändert: sie sind Choreografie (Adressplan,
+   Hörer) und werden von R5 nicht gemessen (ZEIT_PROPS in tools/ethos.py kennt animation-delay nicht).
+   Die Staffelung des Adressplans (280 ms je Bereich, 250 ms Vorlauf) ist mit dem adressplan-Zweig in
+   ui/szene.js verzahnt (`pause(300 + n * 280 + 1100)`; die ruhige Fassung wartet die Staffel ab) —
+   wer sie ändert, muss dort mitziehen.
+   EBENE: z-index:20 — über den Leisten der Fläche (10, editor.css:79) und unter der Auftragsmappe (30).
+   Vorher 12; auf der Leiter liegt zwischen 10 und 30 nur die 20.
+
+   HAUS-SKALA (R2/R3/R4, Aufgabe des Leads nach task-38): Radien kommen aus `var(--radius)`/`var(--radius-s)`
+   oder sind `999px`/`50%`; Schriftgrößen aus {11,12,13,15,20,28}px; Abstände aus {0,4,8,12,16,24,32}px.
+   Die 7 Radien, 9 Schriftgrößen und 16 Abstände dieser Datei sind darauf abgebildet. Zwei Abbildungen
+   sind dabei besonders: `.sz-balken` bekommt `999px` statt `3px` (bei 6px Höhe ergibt die Pille genau
+   3px — optisch identisch), und der Pfeil der Sprechblase wird mit `left:50%` + `translateX(-50%)`
+   zentriert statt mit `margin-left:-7px` (dieselbe Lage, ohne Zahl außerhalb der Skala).
+   EINE begründete Ausnahme: `.sz-plan-leer` (Platzhalter der leeren Planfläche) behält seine Größe als
+   `clamp(28px, 5vw, 56px)` — Muster und Begründung stehen an der Regel selbst (siehe dort). */
+.sz-buehne{position:absolute; inset:0; z-index:20; cursor:pointer; overflow:hidden; animation:sz-rein var(--dauer) ease-out}
+.sz-buehne.weg{opacity:0; transition:opacity var(--dauer) ease}
+.sz-weiter{position:absolute; left:50%; top:12px; transform:translateX(-50%); padding:8px 12px; border-radius:999px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
   font:600 12px/1 var(--body); pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
-.sz-reaktion{position:absolute; transform:translate(-50%, -100%); display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border-radius:12px; background:var(--panel);
+/* R2/R4 (Haus-Skala): Radius aus var(--radius); Abstände auf {0,4,8,12,16,24,32}. Die Pille wächst um
+   2 px Höhe, der Radius geht 12 → var(--radius)=10 px — beides unterhalb der Wahrnehmungsschwelle. */
+.sz-reaktion{position:absolute; transform:translate(-50%, -100%); display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:var(--radius); background:var(--panel);
   border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); font:700 13px/1.2 var(--body); white-space:nowrap; pointer-events:none; animation:sz-pop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
 .sz-reaktion.sz-gesperrt{border-color:var(--warn)}
 .sz-reaktion.sz-druckt, .sz-reaktion.sz-seite, .sz-reaktion.sz-adresse, .sz-reaktion.sz-haken, .sz-reaktion.sz-sicherung{border-color:var(--ok)}
-.sz-sym{font-size:16px; line-height:1}
-.sz-druckt .sz-sym{animation:sz-beleg .7s .1s ease-out both}
+.sz-sym{font-size:15px; line-height:1}
+.sz-druckt .sz-sym{animation:sz-beleg var(--dauer-lang) ease-out both; animation-delay:.1s}
 .sz-sicherung .sz-sym, .sz-haken .sz-sym{color:var(--ok)}
-.sz-balken{display:inline-block; width:48px; height:6px; border-radius:3px; background:var(--panel-3); overflow:hidden}
-.sz-balken i{display:block; width:0; height:100%; background:var(--ok); animation:sz-laden .9s .1s ease-out forwards}
-.sz-blase{position:absolute; transform:translate(-50%, -100%); max-width:min(360px, 72%); display:flex; gap:9px; align-items:flex-start; padding:10px 14px; border-radius:16px;
-  background:var(--panel); border:2px solid var(--k, var(--accent)); box-shadow:var(--schatten); color:var(--ink); font-size:14px; line-height:1.4; pointer-events:none;
-  animation:sz-pop .35s cubic-bezier(.3,1.6,.5,1) both}
-.sz-blase::after{content:""; position:absolute; left:50%; bottom:-9px; width:14px; height:14px; margin-left:-7px; background:var(--panel);
-  border-right:2px solid var(--k, var(--accent)); border-bottom:2px solid var(--k, var(--accent)); transform:rotate(45deg)}
+/* Der Balken ist 6 px hoch: 999px (Pille) ergibt genau 3 px effektiven Radius — wie vorher `3px`. */
+.sz-balken{display:inline-block; width:48px; height:6px; border-radius:999px; background:var(--panel-3); overflow:hidden}
+/* ENDZUSTAND IM ZUSTAND, nicht in der Animation (Nachtrag zu task-38, Auftrag des Leads): Der Balken ist voll, die Animation holt
+   ihn nur aus dem leeren Zustand. So stimmt die Anzeige auch bei „Bewegung: aus" (basis.css:93 setzt
+   animation:none !important) und bei reduzierter Bewegung (dort 1 ms). `both` hält während der
+   Verzögerung den Startwert, damit die Bewegung mit „voll" unverändert aussieht. */
+.sz-balken i{display:block; width:100%; height:100%; background:var(--ok); animation:sz-laden var(--dauer-lang) ease-out both; animation-delay:.1s}
+.sz-blase{position:absolute; transform:translate(-50%, -100%); max-width:min(360px, 72%); display:flex; gap:8px; align-items:flex-start; padding:12px 16px; border-radius:var(--radius);
+  background:var(--panel); border:2px solid var(--k, var(--accent)); box-shadow:var(--schatten); color:var(--ink); font-size:15px; line-height:1.4; pointer-events:none;
+  animation:sz-pop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
+/* Der Pfeil bleibt mittig: `left:50%` + `translateX(-50%)` ist dasselbe wie vorher `margin-left:-7px`
+   bei 14 px Breite — ohne Zahl außerhalb der Abstands-Skala (R4). */
+.sz-blase::after{content:""; position:absolute; left:50%; bottom:-9px; width:14px; height:14px; transform:translateX(-50%) rotate(45deg); background:var(--panel);
+  border-right:2px solid var(--k, var(--accent)); border-bottom:2px solid var(--k, var(--accent))}
 .sz-kunde{font-size:20px; line-height:1.1}
 .sz-rest{display:block; margin-top:4px; color:var(--ok); font-size:12px; font-weight:700}
 /* reduzierte Bewegung: ruhige Haken-Liste statt fahrender Pakete */
 .sz-ruhig{background:color-mix(in srgb, var(--bg) 55%, transparent)}
-.sz-liste{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:min(440px, calc(100% - 32px)); padding:16px 18px; border-radius:16px; background:var(--panel);
+.sz-liste{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:min(440px, calc(100% - 32px)); padding:16px; border-radius:var(--radius); background:var(--panel);
   border:1px solid var(--line-2); box-shadow:var(--schatten)}
-.sz-liste ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; font-size:14.5px}
+.sz-liste ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; font-size:15px}
 .sz-liste li{display:flex; gap:8px; align-items:baseline}
 .sz-haken{color:var(--ok); font-weight:800}
-.sz-satz{margin:12px 0 0; color:var(--ink); font-size:14px; font-style:italic}
+.sz-satz{margin:12px 0 0; color:var(--ink); font-size:15px; font-style:italic}
 .sz-satz small{color:var(--muted); font-style:normal}
 @keyframes sz-rein{from{opacity:0} to{opacity:1}}
 @keyframes sz-pop{from{opacity:0; transform:translate(-50%, -70%) scale(.6)} to{opacity:1; transform:translate(-50%, -100%) scale(1)}}
 @keyframes sz-beleg{from{transform:translateY(9px); opacity:0} to{transform:none; opacity:1}}
-@keyframes sz-laden{to{width:100%}}
-@media (prefers-reduced-motion: reduce){ .sz-buehne, .sz-reaktion, .sz-blase, .sz-druckt .sz-sym, .sz-balken i{animation:none} .sz-balken i{width:100%} }
+@keyframes sz-laden{from{width:0} to{width:100%}}
+/* Bewegung aus: kein eigener Block mehr (task-38, R8) — Begründung am Dateiende. */
 /* Eigene Probe je Form (§ 20 F4): Karte mitten auf der Fläche, höchstens ~3 s */
-.sz-form{position:absolute; left:50%; top:46%; transform:translate(-50%, -50%); width:min(420px, calc(100% - 32px)); padding:14px 16px; border-radius:16px;
+.sz-form{position:absolute; left:50%; top:46%; transform:translate(-50%, -50%); width:min(420px, calc(100% - 32px)); padding:16px; border-radius:var(--radius);
   background:var(--panel); border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); pointer-events:none; animation:sz-pop-mitte var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
-.sz-form-kopf{font-size:14px; color:var(--muted); margin-bottom:8px}
+.sz-form-kopf{font-size:15px; color:var(--muted); margin-bottom:8px}
 .sz-form-kopf b{color:var(--ink)}
 .sz-form-fuss{margin:8px 0 0; font-size:13px; color:var(--ok); font-weight:700}
-/* Hotline: der Hörer wird aufgelegt */
+/* Hotline: der Hörer wird aufgelegt.
+   ENDZUSTAND IM ZUSTAND (Nachtrag zu task-38): Der Hörer LIEGT AUF — die Animation dreht ihn nur
+   dorthin. Vorher trug allein die Animation die Endlage (`0%` = Grundzustand, `both` hielt sie);
+   mit „Bewegung: aus" (basis.css:93) blieb der Hörer aufrecht stehen. `both` hält während der
+   Verzögerung (0,5 s) den Ausgangszustand aus den @keyframes — sonst spränge er erst in die
+   Endlage und fiele beim Start der Animation zurück. */
 .sz-auflegen{display:flex; gap:12px; align-items:flex-start; border-color:var(--k, var(--ok))}
-.sz-hoerer{font-size:30px; line-height:1; animation:sz-auflegen .7s .5s ease-in both}
-.sz-form-text{display:flex; flex-direction:column; gap:2px}
+.sz-hoerer{font-size:28px; line-height:1; transform:rotate(-135deg) translateY(4px); opacity:.55;
+  animation:sz-auflegen var(--dauer-lang) ease-in both; animation-delay:.5s}
+.sz-form-text{display:flex; flex-direction:column; gap:4px}
 .sz-form-text small{color:var(--muted)}
-.sz-form-text p{margin:6px 0 0; font-style:italic; line-height:1.4}
-@keyframes sz-auflegen{0%{transform:none} 60%{transform:rotate(-135deg) translateY(4px)} 100%{transform:rotate(-135deg) translateY(4px); opacity:.55}}
+.sz-form-text p{margin:8px 0 0; font-style:italic; line-height:1.4}
+@keyframes sz-auflegen{from{transform:none; opacity:1} 60%{transform:rotate(-135deg) translateY(4px)} to{transform:rotate(-135deg) translateY(4px); opacity:.55}}
 /* Plan-Audit: der Plan wird abgestempelt */
 .sz-audit{width:min(460px, calc(100% - 32px))}
 .sz-plan{position:relative; max-height:170px; overflow:hidden; border-radius:var(--radius); background:var(--bg); display:flex; justify-content:center}
 .sz-plan .np-svg{width:100%; max-height:170px}
-.sz-plan-leer{font-size:56px; padding:20px}
-.sz-stempel{position:absolute; right:26px; top:58px; display:flex; flex-direction:column; align-items:center; padding:6px 12px; border:3px solid var(--ok); border-radius:8px;
+/* BEGRÜNDETE AUSNAHME (R3, dem Lead gemeldet): Das Platzhalter-Zeichen füllt die leere Planfläche
+   (max-height:170px) und war 56px. 28px — der größte Haus-Wert — ließe die Fläche leer wirken.
+   Deshalb dieselbe Bauart wie die Beamer-Zeile im Klassenraum: `clamp(28px, 5vw, 56px)`. Der
+   Haus-Wert 28px ist die Untergrenze, 56px die Obergrenze; auf üblichen Fensterbreiten (≥1120px)
+   bleibt es bei 56px, also unverändert. R3 misst `font-size` nur, wenn der Wert mit einer Zahl
+   beginnt (`tools/ethos.py` r3_schrift) — die Ausnahme ist damit sichtbar und begründet, nicht heimlich. */
+.sz-plan-leer{font-size:clamp(28px, 5vw, 56px); padding:24px}
+.sz-stempel{position:absolute; right:26px; top:58px; display:flex; flex-direction:column; align-items:center; padding:8px 12px; border:3px solid var(--ok); border-radius:var(--radius-s);
   color:var(--ok); background:color-mix(in srgb, var(--panel) 70%, transparent); transform:rotate(-12deg) scale(2.4); opacity:0}
-.sz-stempel b{font:800 17px/1.1 var(--display); letter-spacing:.06em}
+.sz-stempel b{font:800 15px/1.1 var(--display); letter-spacing:.06em}
 .sz-stempel small{font:700 11px/1.2 var(--mono)}
-.sz-audit.gestempelt .sz-stempel{animation:sz-stempeln .28s cubic-bezier(.5,0,.8,.6) forwards}
-@keyframes sz-stempeln{to{transform:rotate(-12deg) scale(1); opacity:1}}
-/* Adressplan: die Bereiche leuchten nacheinander im Adressraum auf */
+/* ENDZUSTAND IM ZUSTAND (Nachtrag zu task-38): `.gestempelt` macht den Stempel sichtbar — auch ohne Animation
+   („Bewegung: aus", basis.css:93). Vorher trug allein die Animation den Endzustand (`forwards`),
+   mit abgeschalteter Bewegung blieb der Stempel unsichtbar. Die Animation beschreibt jetzt nur noch
+   den Weg dahin: groß und blass → klein und satt; ohne `forwards`, weil die Regel selbst das Ende ist. */
+.sz-audit.gestempelt .sz-stempel{transform:rotate(-12deg); opacity:1; animation:sz-stempeln var(--dauer-lang) cubic-bezier(.5,0,.8,.6)}
+@keyframes sz-stempeln{from{transform:rotate(-12deg) scale(2.4); opacity:0} to{transform:rotate(-12deg) scale(1); opacity:1}}
+/* Adressplan: die Bereiche leuchten nacheinander im Adressraum auf.
+   Auch hier (Nachtrag zu task-38) steht der ENDZUSTAND (hell) in der Zustandsregel — die Animation
+   beschreibt nur den Weg dorthin (`from` = gedimmt). Bei „Bewegung: aus" sind die Bereiche und die
+   Legende damit sofort lesbar, bei „voll" läuft die Staffel unverändert (die Verspätung bleibt). */
 .sz-adressplan{width:min(480px, calc(100% - 32px))}
-.sz-adressen{position:relative; height:26px; border-radius:7px; background:var(--panel-3); overflow:hidden}
-.sz-adressen i{position:absolute; top:0; bottom:0; border-right:2px solid var(--panel); background:var(--f, var(--accent)); opacity:.12;
-  animation:sz-leuchten .35s calc(var(--i) * 280ms + 250ms) ease-out forwards}
-.sz-legende{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 12px; font:500 12.5px/1.4 var(--mono); color:var(--muted)}
-.sz-legende li{opacity:.25; animation:sz-leuchten-text .35s calc(var(--i) * 280ms + 250ms) ease-out forwards}
+.sz-adressen{position:relative; height:26px; border-radius:var(--radius-s); background:var(--panel-3); overflow:hidden}
+.sz-adressen i{position:absolute; top:0; bottom:0; border-right:2px solid var(--panel); background:var(--f, var(--accent)); opacity:1;
+  animation:sz-leuchten var(--dauer-lang) ease-out both; animation-delay:calc(var(--i) * 280ms + 250ms)}
+.sz-legende{list-style:none; margin:8px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 12px; font:500 12px/1.4 var(--mono); color:var(--muted)}
+.sz-legende li{opacity:1; animation:sz-leuchten-text var(--dauer-lang) ease-out both; animation-delay:calc(var(--i) * 280ms + 250ms)}
 .sz-legende b{font-family:var(--body); color:var(--f, var(--ink))}
-@keyframes sz-leuchten{to{opacity:1}}
-@keyframes sz-leuchten-text{to{opacity:1; color:var(--ink)}}
+@keyframes sz-leuchten{from{opacity:.12} to{opacity:1}}
+@keyframes sz-leuchten-text{from{opacity:.25; color:var(--muted)} to{opacity:1; color:var(--ink)}}
 @keyframes sz-pop-mitte{from{opacity:0; transform:translate(-50%, -40%) scale(.85)} to{opacity:1; transform:translate(-50%, -50%) scale(1)}}
-@media (prefers-reduced-motion: reduce){
-  .sz-form, .sz-hoerer, .sz-adressen i, .sz-legende li{animation:none}
-  .sz-adressen i, .sz-legende li{opacity:1}
-  .sz-stempel{transform:rotate(-12deg); opacity:1}
-  .sz-audit.gestempelt .sz-stempel{animation:none}
-}
+/* Bewegung aus (task-38 und sein Nachtrag): KEIN eigener @media-Block — basis.css:91 (prefers-reduced-motion)
+   und basis.css:93 (html[data-bewegung="aus"]) schalten global ab. Damit die Anzeige trotzdem stimmt,
+   tragen die fünf Endzustände ihren Wert in der ZUSTANDSREGEL; die Animation beschreibt nur den Weg
+   dorthin:
+     .sz-balken i                     → width:100%                 (@keyframes sz-laden   from{width:0})
+     .sz-adressen i                   → opacity:1                  (@keyframes sz-leuchten from{opacity:.12})
+     .sz-legende li                   → opacity:1                  (@keyframes sz-leuchten-text from{opacity:.25})
+     .sz-audit.gestempelt .sz-stempel → opacity:1; rotate(-12deg)  (@keyframes sz-stempeln from{scale(2.4); opacity:0})
+     .sz-hoerer                       → opacity:.55; rotate(-135deg) translateY(4px)
+                                                                   (@keyframes sz-auflegen from{transform:none; opacity:1})
+   Mit „voll" läuft die Bewegung unverändert, mit „reduziert" in 1 ms, mit „aus" gar nicht — sichtbar
+   ist der Zustand in allen drei Fällen. Geprüft in tests/ui-bewegung-aus.test.js.
+   Die Verzögerungen der Bereiche bleiben (Choreografie, R5 misst sie nicht) — ui/szene.js wartet in
+   der ruhigen Fassung genau so lange, dass der letzte Bereich noch erscheint. */
 
 /* ---- terminal.css ---- */
 /* ---------- Terminal im Dock (tm-, Phase C) ---------- */
 .lb-terminal{display:flex; flex-direction:column; min-height:0}
-.tm{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+/* R10: `.tm` und `.tm-flaeche` sind dieselbe Flex-Spalte (Dock-Fläche und Sitzungsfläche) – ein Block. */
+.tm, .tm-flaeche{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
 /* `scrollbar-width:none` versteckte den einzigen Hinweis darauf, dass es weitere
    Sitzungen gibt. Gemessen von „menu-auditor“ am 06.10.2026 (720 × 640): `.tm-reiter`
    scrollWidth 388 gegen clientWidth 249 (+139 px), der dritte Reiter „PC-Kasse“ lag
@@ -2317,7 +2415,6 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .tm-os{font:600 10.5px/1 var(--mono); color:var(--faint)}
 .tm-tab-zu{width:24px; height:24px; margin-right:4px; border:0; border-radius:var(--radius-s); background:none; color:var(--faint); font-size:15px; line-height:1; cursor:pointer}
 .tm-tab-zu:hover{background:var(--panel-3); color:var(--ink)}
-.tm-flaeche{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .tm-leer{padding:16px; color:var(--muted)}
 .ko-pakete{margin:2px 0 6px}
 .ko-pakete-knopf{border:1px solid var(--line-2); border-radius:7px; background:var(--panel-2); color:var(--accent); font:700 11.5px/1 var(--body); padding:4px 8px; cursor:pointer}
@@ -2389,7 +2486,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 <script>
 "use strict";
 const LABOR_VERSION = "2.0.0";
-const LABOR_BAU = "f789fd1f";
+const LABOR_BAU = "e5d4a864";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -14364,7 +14461,103 @@ Object.assign(DATEN.wiki, {
     belege: "IANA Port Number Registry (445, 2049, 3260) · Brücke – FISI und Alltag zu Storage und Cloud · SNIA Dictionary (Snapshot, RAID) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept",
     siehe: ["lab.ports"],
   },
+
+  /* ---------- Zusatzseite OHNE eigene Fertigkeit: Klassenraum (Leitung, 09.10.2026) ----------
+     `DATEN.wiki` ist eine Seite je Fertigkeit (27, die Tabelle ist gesperrt: Klassenraum-Codec,
+     tools/klassenraum-probe/A-festlegung.md). Der Klassenraum ist keine Fertigkeit, braucht aber
+     eine Nachschlage-Seite – er ist ein Modus des Spiels, keine Übung. Deshalb steht er hier in
+     DERSELBEN Form: gleiche Pflichtfelder, gleiche Abschnittsstruktur, keine neue Fertigkeit.
+     `suche` ist optional und trägt zusätzliche Suchwörter; die Wiki-Ansicht findet die Seite schon
+     über `titel` und `kurz` (src/ui/karriere.js:295-296). Alle Zahlen sind am 09.10.2026 gegen
+     src/spiel/klassenraum.js, src/spiel/klassenraum-codec.js und src/ui/klassenraum.js gemessen. */
+  "klassenraum": {
+    titel: "Klassenraum",
+    kurz: "Ein Code von der Lehrkraft ergibt auf jedem Gerät denselben Auftrag – ohne Konto, ohne Netz und ohne Bewertung. Der Ergebnis-Code geht zurück an die Lehrkraft.",
+    abschnitte: [
+      {titel: "Was der Klassenraum ist", html:
+        "<p>Die Lehrkraft sagt einen <b>Code</b> an, jeder tippt ihn ein – und auf jedem Gerät entsteht <b>derselbe Auftrag</b>. Ohne Konto, ohne Server, ohne Netz: Jedes Gerät rechnet den Fall aus dem Code selbst aus.</p>" +
+        "<ul><li>Der Code ist die Ansage. Wer ihn kennt, kann mitspielen – er ist <b>kein Geheimnis</b>.</li><li>Der Auftrag ist im <b>Postfach unsichtbar</b>: kein Offen-Zähler, keine Heute-Kachel, kein Ereignis. Er läuft nur, solange du ihn offen hast.</li><li><b>Keine Bewertung</b>: kein Geld, kein Ruf, kein erledigter Auftrag, keine Note. Es zählt der Lernstand – wie beim Training.</li><li>Gleicher Code, gleicher Fall: Die Anzeige auf deinem Gerät zeigt denselben Auftrag wie beim Nachbarn.</li></ul>"},
+      {titel: "Ansagen: die Lehrkraft", html:
+        "<p>In der Ansicht <b>Klasse</b> (Titel „Klassenraum“) wählst du den Auftrag: einen festen Auftrag aus der Liste oder eine Übung aus der Gruppe „(erzeugt)“.</p>" +
+        "<table><tr><th>Schritt</th><th>Was passiert</th></tr>" +
+        "<tr><td>Auftrag wählen</td><td>fester Auftrag aus der Liste oder eine Übung, die aus einer Fertigkeit erzeugt wird</td></tr>" +
+        "<tr><td><b>Code anzeigen</b></td><td>der große Auftragscode <code>NL-XXXX-XX</code> für den Beamer</td></tr>" +
+        "<tr><td>Code kopieren</td><td>legt denselben Code in die Zwischenablage</td></tr>" +
+        "<tr><td>Klassenraum-Abdruck</td><td>ein Kennwert des <b>geladenen Netzes</b> – nicht des Codes</td></tr></table>" +
+        "<p>Der Abdruck ist zum Vergleichen gedacht: Zwei Geräte mit demselben Abdruck haben dasselbe Netz vor sich. Mehr sagt er nicht – siehe „Grenzen“.</p>"},
+      {titel: "Öffnen: der Azubi", html:
+        "<p>Zwei Wege führen zum selben Auftrag: die Zeile <b>Klassenraum-Code</b> auf der Startseite (Feld, Knopf „Öffnen“, Enter genügt) oder die Ansicht <b>Auftrag</b> (Titel „Mitarbeit“) mit den Feldern „Auftragscode“ und „Platz“ und dem Knopf „Auftrag öffnen“.</p>" +
+        "<ul><li><b>Groß oder klein, mit oder ohne Trennstriche</b>: Der Code wird eingelesen, nicht Zeichen für Zeichen verglichen.</li><li>Im Code kommen <b>kein I, kein O, keine 0 und keine 1</b> vor. Wer eines davon sieht, hat sich vertippt.</li><li>Ein Tippfehler wird <b>markiert, nicht abgewiesen</b>: Der Hinweis nennt Länge, Zeichen oder Prüfziffer.</li><li>Der <b>Platz</b> (1 bis 31; leer heißt unverändert) geht in den Ergebnis-Code. Ist derselbe Auftrag schon offen, fragt das Programm: „Weiterarbeiten?“</li></ul>" +
+        "<p>Zwei echte Beispiele: <code>NL-HC3L-CS</code> ist ein fester Auftrag, <code>NL-WTQJ-EF</code> eine erzeugte Übung. Beide ergeben auf jedem Gerät denselben Fall.</p>"},
+      {titel: "Der Ergebnis-Code", html:
+        "<p>Ist der Auftrag bestanden, zeigt ein Hinweis <b>„Für die Lehrkraft“</b> den Ergebnis-Code <code>E-XXXX-XXX</code> mit einem Kopierknopf. Vorher gibt es keinen: Der Code entsteht nur aus einer bestandenen Abnahme.</p>" +
+        "<ul><li>Er trägt die <b>Sitzung</b>, den <b>Platz</b>, die erreichten <b>Sterne</b> (0 bis 5), die <b>Fehlversuche</b> (0 bis 3; „3+“ heißt drei oder mehr) und die <b>Dauer</b>.</li><li>Er trägt <b>kein Hilfe-Feld und keine Note</b> – so ist es entschieden.</li></ul>" +
+        "<p>Beispiel: <code>E-KFWS-HZM</code> heißt Sitzung 9, Platz 5, 5 Sterne, 1 Fehlversuch, 70 Sekunden.</p>"},
+      {titel: "Die Ampel der Lehrkraft", html:
+        "<p>Die Ergebnis-Codes kommen blockweise zurück: alles in das Feld <b>Ergebnis-Codes</b> einfügen – eine Zeile je Code oder alle auf einmal – und <b>Eintragen</b> drücken. Jede Zeile bekommt eine Rückmeldung: eingetragen, doppelt, fremde Sitzung oder unlesbar.</p>" +
+        "<ul><li><b>Schlüssel ist der Platz</b>: Je Platz gilt der <b>erste</b> Eintrag. Ein zweiter Code für denselben Platz wird nicht übernommen.</li><li><b>fertig</b> = eingetragene Plätze, <b>offen</b> = Plätze − fertig. Die Platzzahl (1 bis 31) stellst du unter <b>Datei…</b> ein; „nicht eingestellt“ rechnet nichts aus.</li><li><b>Median</b> = <b>oberer Median</b> der gültigen Dauern (größer als 0), auf ganze Sekunden gerundet. Bei gerader Anzahl ist das die obere der beiden mittleren Zeiten.</li><li>Die Lampe ist <b>grün</b>, wenn alle Plätze eingetragen sind und kein Ergebnis ohne gültigen Platz dabei ist; sonst <b>gelb</b>. Rot ist im Normalbetrieb aus.</li></ul>" +
+        "<table><tr><th>Platz</th><th>Sterne</th><th>Dauer</th><th>Fehlversuche</th></tr>" +
+        "<tr><td>1 bis 31, sonst „ohne Platz“</td><td>halbe Sterne als ★</td><td>Zeit des Durchgangs</td><td>0, 1, 2 oder „3+“</td></tr></table>" +
+        "<p>Unter <b>Datei…</b> liegen Export und Import: Die Sitzung liegt nur auf dem Rechner der Lehrkraft, die Datei ist die Sicherung und der Weg auf ein anderes Gerät. Nach einem Import lässt er sich mit „Rückgängig“ zurücknehmen.</p>"},
+      {titel: "Grenzen und was nicht passiert", html:
+        "<ul><li><b>Der Code ist kein Geheimnis.</b> Er schützt nichts – er sagt nur, welcher Auftrag gemeint ist.</li><li><b>Der Klassenraum-Abdruck beweist nicht, dass alle denselben Auftrag haben.</b> Er wird aus dem geladenen Netz gebildet (Geräte, Kabel) – verschiedene Aufträge können dasselbe Netz zeigen. Verglichen wird der Auftrag über seine Kennung <code>def.id</code>, nicht über den Abdruck.</li><li><b>Kein Server, kein QR-Code.</b> Beides gehört zu späteren Stufen. Den Schalter „Klassenraum-Server“ gibt es in den Einstellungen schon – er merkt sich nur die Absicht und ändert heute nichts.</li><li><b>Grenzen des Codes:</b> Sitzung 1 bis 31, Platz 0 bis 31, dazu Auftrags- oder Fertigkeitsindex und Variante. Ein Code aus einer anderen Fassung wird abgewiesen, statt einen falschen Auftrag zu bauen.</li><li><b>Keine Bewertung:</b> kein Geld, kein Ruf, kein erledigter Auftrag, keine Note – auch nicht im Ergebnis-Code.</li></ul>"},
+    ],
+    merksatz: "Gleicher Code, gleicher Auftrag – auf jedem Gerät, ohne Konto und ohne Note.",
+    pruefungstipp: "Der Klassenraum ist kein Prüfungsstoff, sondern der Weg, wie eine Klasse denselben Auftrag bekommt. Zeigt dein Gerät etwas anderes als das deines Nachbarn, vergleicht den Auftrag (seine Kennung), nicht den Netzkennwert.",
+    quelle: "Klassenraum – B: Oberfläche und Ablauf",
+    belege: "Architektur.md § 12 (Klassenraum) · Klassenraum – A: Codec und Determinismus · src/spiel/klassenraum.js · src/spiel/klassenraum-codec.js · src/ui/klassenraum.js",
+    siehe: ["lab.cli", "lab.link"],
+    suche: ["Klassenraum", "Klassenzimmer", "Unterricht", "Schule", "Auftragscode", "Ergebnis-Code", "Code", "Ampel", "Median", "Beamer", "Lehrkraft", "Azubi", "Platz", "Sitzung", "ohne Konto", "ohne Server"],
+  },
+
+  /* ---------- Zusatzseite OHNE eigene Fertigkeit: Übergabe (Leitung, 09.10.2026) ----------
+     Ein Rechner, viele Azubis: die zweite große Neuerung der 2.0.0, ebenfalls kein Thema der
+     27 Fertigkeiten. Gleiche Form wie alle Seiten; alle Zahlen sind am 09.10.2026 an
+     src/spiel/uebergabe.js und src/ui/uebergabe.js gemessen (Ablauf selbst nachgestellt). */
+  "uebergabe": {
+    titel: "Übergabe",
+    kurz: "Ein Rechner wandert zum nächsten Azubi: der Spielstand ist danach leer, die Einstellungen bleiben – und der Lernstand nur, wenn die Lehrkraft ihn behält.",
+    abschnitte: [
+      {titel: "Was die Übergabe ist", html:
+        "<p>Ein Rechner, viele Azubis: Am Ende der Stunde wandert der Rechner zum nächsten Azubi. Ohne Übergabe steckt der zweite Azubi im <b>offenen Auftrag des ersten</b> – genau dafür gibt es dieses Werkzeug.</p>" +
+        "<ul><li>Die Übergabe setzt den <b>Spielstand</b> dieses Rechners zurück: Der nächste Azubi bekommt einen leeren Rechner und kann sofort anfangen.</li><li>Sie ist eine <b>Geräte-Operation</b>: kein Konto, kein Server, keine Anmeldung. Alles passiert auf diesem Rechner.</li><li>Danach lädt die Seite neu – erst dadurch ist sicher, dass wirklich kein Auftrag mehr offen ist.</li></ul>"},
+      {titel: "Wer sie benutzt", html:
+        "<p>Die Lehrkraft (oder der Azubi selbst) <b>am Ende einer Stunde im Computerraum</b>. Zu finden in den Einstellungen: Abschnitt <b>„Rechner übergeben“</b> mit dem Knopf <b>„Rechner übergeben …“</b>.</p>" +
+        "<p>Der Dialog <b>„Rechner übergeben?“</b> zeigt zuerst den Stand dieses Rechners (Stufe, Euro, Ruf, erledigte Tickets) und dann die Frage, die alles entscheidet: Was soll mit dem <b>Lernstand</b> passieren?</p>"},
+      {titel: "Was bleibt, was geht", html:
+        "<table><tr><th>Was</th><th>Nach der Übergabe</th></tr>" +
+        "<tr><td><b>Lernstand</b> (die Kästen des Lernmotors)</td><td>bleibt mit „Behalten“; mit „Löschen“ ist er weg</td></tr>" +
+        "<tr><td>Einstellungen (Bildungsstand, Klang, Leiste)</td><td>bleiben</td></tr>" +
+        "<tr><td>Die rollierende Sicherung des vorherigen Standes im Speicher</td><td>bleibt – sie liegt außerhalb des Spielstands und wird vom Programm selbst geführt</td></tr>" +
+        "<tr><td>Geld, Ruf, erledigte Tickets, Fehlerdex, Buch, offener Auftrag</td><td>weg – der Spielstand wird ersetzt</td></tr>" +
+        "<tr><td>Postfach</td><td>neu gefüllt; der nächste Azubi kann sofort anfangen</td></tr></table>" +
+        "<p>Selbst nachgestellt an einem benutzten Rechner: Geld 33 → 0 Euro, Ruf 4 → 0, erledigte Tickets 2 → 0, offener Auftrag → keiner. Der Lernstand war danach unverändert („Behalten“) beziehungsweise leer („Löschen“); die Einstellungen blieben in beiden Fällen gleich.</p>"},
+      {titel: "Der Dialog", html:
+        "<ul><li><b>„Behalten“</b> – für diesen Rechner weiterlernen; der Lernstand bleibt.</li><li><b>„Löschen“</b> – der nächste Azubi fängt frisch an; der Lernstand wird gelöscht.</li><li><b>„Erst sichern (Datei)“</b> – lädt den kompletten Speicher als Datei herunter, <b>bevor</b> der Rechner geräumt wird.</li><li><b>„Abbrechen“</b> – nichts passiert; <b>Escape</b> schließt den Dialog ebenfalls.</li></ul>" +
+        "<p>Im Dialog steht der Merksatz des Hauses: „Der Lernstand hängt am Rechner, nicht an der Person. Im Computerraum ist „Löschen“ meistens richtig – zu Hause „Behalten“.“ Beim nächsten Öffnen zeigt er unten, wann zuletzt übergeben wurde und ob der Lernstand behalten oder gelöscht wurde.</p>"},
+      {titel: "Behalten oder löschen?", html:
+        "<p>Der Lernstand gehört dem <b>Lernmotor</b>, nicht dem Spielstand – deshalb bleibt er standardmäßig erhalten. Die Entscheidung trifft die Lehrkraft, denn der Lernstand hängt am <b>Rechner</b>, nicht an der Person:</p>" +
+        "<ul><li><b>Computerraum</b> (jede Stunde ein anderer Azubi): „Löschen“, sonst lernt der Nächste mit den Lücken des Vorgängers weiter.</li><li><b>Eigener Rechner</b>: „Behalten“ – die Kästen gehören zu dieser Person.</li></ul>" +
+        "<p>Eine Reihenfolge zählt dabei: Bei „Löschen“ wird der Lernstand <b>geleert, bevor</b> der neue Spielstand geladen wird. Andersherum wäre das frische Postfach aus den <b>fälligen Fertigkeiten des Vorgängers</b> gefüllt.</p>"},
+      {titel: "Grenzen", html:
+        "<ul><li><b>Kein Konto, kein Server.</b> Es gibt keine Anmeldung und keine Nutzerliste; die Übergabe ist eine Datei- und Geräte-Operation.</li><li><b>Keinen Personen-Fortschritt:</b> Wer seinen Stand mitnehmen will, sichert ihn vorher über „Erst sichern (Datei)“ – oder in den Einstellungen im Abschnitt <b>„Spielstand“</b> – und liest die Datei am anderen Rechner wieder ein.</li><li><b>Ohne Lernmotor</b> wird „Löschen“ ehrlich abgelehnt: Es passiert nichts, statt den alten Lernstand still weiterzuführen.</li><li>Für die Übergabe gibt es <b>kein „Rückgängig“</b> – der Weg zurück ist die Sicherungsdatei.</li></ul>"},
+    ],
+    merksatz: "Der Spielstand gehört dem Azubi, der Lernstand hängt am Rechner.",
+    pruefungstipp: "Kein Prüfungsstoff, aber der Unterschied zählt: „Behalten“ lässt den Lernstand auf diesem Rechner stehen, „Löschen“ gibt ihn frei – Geld und offene Aufträge sind in beiden Fällen weg.",
+    quelle: "Fahrplan – 1.3 und 2.0 (Schritt 0: Übergabe)",
+    belege: "src/spiel/uebergabe.js · src/ui/uebergabe.js · tests/spiel-uebergabe.test.js · tests/ui-uebergabe.test.js",
+    siehe: ["lab.speichern"],
+    suche: ["Übergabe", "übergeben", "Rechner übergeben", "Computerraum", "nächster Azubi", "Lernstand", "behalten", "löschen", "Spielstand", "Sicherung", "Datei", "zurücksetzen", "ohne Konto", "ohne Server"],
+  },
 });
+
+/* ---------- Die Zusatzseiten: Seiten OHNE eigene Fertigkeit ----------
+   `DATEN.wiki` ist eine Seite je Fertigkeit (27, die Tabelle ist gesperrt: Klassenraum-Codec,
+   tools/klassenraum-probe/A-festlegung.md). Klassenraum und Übergabe sind keine Fertigkeiten,
+   brauchen aber ein Nachschlagewerk. Diese Liste ist die EINE Quelle der Wahrheit: Die Wiki-Ansicht
+   (src/ui/karriere.js `WIKI_ZUSATZ`) liest sie, ebenso die Tests – so muss beim nächsten Zusatz
+   nichts an drei Stellen nachgezogen werden. */
+DATEN.wikiZusatz = ["klassenraum", "uebergabe"];
 
 /* ---- spiel/zustand.js ---- */
 "use strict";
@@ -18679,7 +18872,11 @@ Spiel.klassenraum = (() => {
       platz: platzzahl(alt.platz),                                 /* eigener Platz dieses Geräts bleibt */
       letzte: typeof alt.letzte === "string" ? alt.letzte : null,
     }));
-    Spiel.melden("klassenraum", {art: "erzeugt", sitzung: sitzung.id, code});
+    /* NICHT `code` nennen: der Bus-Hörer der Ansicht deutet jedes `code` als ERGEBNIS-Code und zeigt
+       dafür 20 s lang einen Toast (src/ui/klassenraum.js:353-358) – beim Anlegen der Sitzung ist das
+       der Auftragscode und damit schlicht falsch. Gemessen im Vorführlauf: der Toast verdeckte danach
+       die Knöpfe „Eintragen"/„Datei…". */
+    Spiel.melden("klassenraum", {art: "erzeugt", sitzung: sitzung.id, auftragscode: code});
     return tief(sitzung);
   }
 
@@ -23789,18 +23986,41 @@ UI.laborFach = (() => {
       for (const b of fach.querySelectorAll(".pa-teil"))
         b.classList.toggle("an", Z.werkzeug === "platzieren" && !!Z.platz && gleich(Z.platz, b.dataset.typ, b.dataset.skin || null));
     }
+    /* Das Fach hängt absolut an der Leiste und öffnet nach rechts (editor.css: left:calc(100% + 6px),
+       Breite 268 px). Geklemmt wird gegen den nächsten BESCHNEIDENDEN Vorfahren — dieselbe Definition
+       wie tools/menueprobe.py (`eingesperrt`): der erste Vorfahre mit overflow auto/scroll/hidden/clip.
+       Gemessen (menueprobe, 06.10.2026): das Fach ragte rechts aus `ansicht` (67 px bei 720 px Breite)
+       und war dort teils nicht erreichbar. Reicht der Platz nicht, wird es SCHMALER statt herauszuragen. */
+    function behaelter(){
+      for (let k = leiste.parentElement; k && k.nodeType === 1; k = k.parentElement) {
+        const st = getComputedStyle(k);
+        if (/auto|scroll|hidden|clip/.test(st.overflowX + st.overflowY)) return k;
+      }
+      return null;
+    }
+    function einpassen(k){
+      fach.style.left = "";
+      fach.style.width = "";
+      fach.style.top = Math.max(6, k.offsetTop - 6) + "px";
+      const natur = fach.getBoundingClientRect().width || 268;          /* Breite aus editor.css */
+      const b = behaelter();
+      const rb = b ? b.getBoundingClientRect() : {right: innerWidth, bottom: innerHeight};
+      const rl = leiste.getBoundingClientRect();
+      const platz = Math.round(rb.right - rl.right - 6);               /* Platz rechts neben der Leiste */
+      if (platz > 0 && platz < natur) fach.style.width = platz + "px";
+      /* zweiter Durchgang wie in UI.menue: erst mit der endgültigen Breite passt die Höhenrechnung */
+      const r = fach.getBoundingClientRect(), unten = Math.min(innerHeight, rb.bottom) - 8;
+      if (r.bottom > unten) fach.style.top = Math.max(6, k.offsetTop - 6 - (r.bottom - unten)) + "px";
+    }
     function oeffnen(id, fokus){
       if (!UI.KATEGORIEN.some(k => k.id === id)) return;
       offen = id;
       zeichnen(id);
       fach.hidden = false;
       const k = knoepfe.find(b => b.dataset.kat === id);
-      fach.style.top = Math.max(6, k.offsetTop - 6) + "px";
+      einpassen(k);
       for (const b of knoepfe) { const an = b.dataset.kat === id; b.classList.toggle("an", an); b.setAttribute("aria-expanded", String(an)); }
       UI.juice?.(k, "wahl", 400); UI.klang?.spielen("klick");
-      /* Fach darf nicht unten aus dem Fenster ragen */
-      const r = fach.getBoundingClientRect(), unten = innerHeight - 8;
-      if (r.bottom > unten) fach.style.top = Math.max(6, k.offsetTop - 6 - (r.bottom - unten)) + "px";
       if (fokus) fach.querySelector(".pa-liste .pa-teil")?.focus({preventScroll: true});
       document.addEventListener("pointerdown", aussen, true);
     }
@@ -24114,6 +24334,17 @@ UI.laborPakete = (() => {
    UI.menueZu()                        offenes Menü/Popover schließen */
 UI.menue = (() => {
   let offen = null;
+  /* Geklemmt wird gegen die ANZEIGE, nicht gegen das Layout-Fenster: unter Geräte-Emulation ist
+     `innerWidth` größer als der sichtbar dargestellte Bereich (gemessen 569 bei 412 px Soll,
+     Faktor 1,38). Ein Menü, das nur gegen `innerWidth` klemmt, liegt dann sichtbar außerhalb des
+     Bildes — und ist nicht erscrollbar, weil es `position:fixed` am Dokument hängt
+     (Befund tools/menueprobe.py:67-73, 06.10.2026). `visualViewport` kennt den sichtbaren Teil;
+     ohne ihn (ältere WebView) gilt weiter das Fenster. */
+  function sichtbarerBereich(){
+    const v = typeof visualViewport !== "undefined" ? visualViewport : null;
+    return v ? {x: v.offsetLeft, y: v.offsetTop, w: v.width, h: v.height}
+             : {x: 0, y: 0, w: innerWidth, h: innerHeight};
+  }
   function zu(){ if (offen) { const o = offen; offen = null; o.el.remove(); document.removeEventListener("pointerdown", o.aussen, true); o.zurueck?.focus?.({preventScroll: true}); } }
   function menue(x, y, eintraege, o = {}){
     zu();
@@ -24151,9 +24382,9 @@ UI.menue = (() => {
        Die Klasse schaltet zugleich die Einblend-Animation ab, deren scale(.98) das
        Rechteck um 2 % verkleinert. */
     el.classList.add("nl-messend");
-    const r = el.getBoundingClientRect(), W = innerWidth, H = innerHeight;
-    el.style.left = Math.max(6, Math.min(x, W - r.width - 6)) + "px";
-    el.style.top = Math.max(6, Math.min(o.oben ? y - r.height : y, H - r.height - 6)) + "px";
+    const r = el.getBoundingClientRect(), W = sichtbarerBereich();
+    el.style.left = Math.max(W.x + 6, Math.min(x, W.x + W.w - r.width - 6)) + "px";
+    el.style.top = Math.max(W.y + 6, Math.min(o.oben ? y - r.height : y, W.y + W.h - r.height - 6)) + "px";
     el.classList.remove("nl-messend");
     const aussen = ev => { if (!el.contains(ev.target)) zu(); };
     offen = {el, aussen, zurueck: document.activeElement};
@@ -24173,9 +24404,9 @@ UI.menue = (() => {
     /* Zwei Durchgänge wie in `menue()` — mit `visibility:hidden` (siehe dort), nicht mit
        `display:none`: versteckt liefert jedes Rechteck 0. */
     el.classList.add("nl-messend");
-    const r = el.getBoundingClientRect();
-    el.style.left = Math.max(6, Math.min(x, innerWidth - r.width - 6)) + "px";
-    el.style.top = Math.max(6, Math.min(y, innerHeight - r.height - 6)) + "px";
+    const r = el.getBoundingClientRect(), W = sichtbarerBereich();
+    el.style.left = Math.max(W.x + 6, Math.min(x, W.x + W.w - r.width - 6)) + "px";
+    el.style.top = Math.max(W.y + 6, Math.min(y, W.y + W.h - r.height - 6)) + "px";
     el.classList.remove("nl-messend");
     const aussen = ev => { if (!el.contains(ev.target)) zu(); };
     offen = {el, aussen, zurueck: document.activeElement};
@@ -27244,8 +27475,22 @@ UI.karriere = (() => {
   }
 
   /* ---------- Wiki ---------- */
+  /* Zusatzseiten: Nachschlage-Seiten OHNE eigene Fertigkeit (Klassenraum, Übergabe – Leitung
+     09.10.2026). Sie stehen in DATEN.wiki wie jede andere Seite, gehören aber nicht zu DATEN.skills –
+     die 27er-Tabelle ist gesperrt (Klassenraum-Codec). Eine Zusatzseite hat keine Stufe und kein AP;
+     deshalb bekommt sie weder in der Liste noch im Artikel einen Stufenkopf (sie hätte sonst den
+     Rückfall „Stufe 1 · AP1“). Die Liste steht in den DATEN (`DATEN.wikiZusatz`) – EINE Quelle der
+     Wahrheit; der Literal-Rückfall hält die Ansicht auch mit einer älteren Datenschicht heil. */
+  const WIKI_ZUSATZ = (typeof DATEN !== "undefined" && Array.isArray(DATEN.wikiZusatz) && DATEN.wikiZusatz.length)
+    ? DATEN.wikiZusatz.slice() : ["klassenraum", "uebergabe"];
+  function wikiEintraege(){
+    const seiten = (DATEN.wiki || {});
+    const fertigkeiten = (DATEN.skills || []).map(s => ({s, w: seiten[s.id], zusatz: false})).filter(x => x.w);
+    const zusatz = WIKI_ZUSATZ.map(id => ({s: {id, name: (seiten[id] || {}).titel || id}, w: seiten[id], zusatz: true})).filter(x => x.w);
+    return [...fertigkeiten, ...zusatz];
+  }
   function wikiAnsicht(c){
-    const eintraege = (DATEN.skills || []).map(s => ({s, w: (DATEN.wiki || {})[s.id]})).filter(x => x.w);
+    const eintraege = wikiEintraege();
     const q = K.wikiSuche.trim().toLowerCase();
     const treffer = q ? eintraege.filter(x => (x.w.titel + " " + x.w.kurz + " " + x.s.name).toLowerCase().includes(q)) : eintraege;
     const wahl = K.wikiWahl && (DATEN.wiki || {})[K.wikiWahl] ? K.wikiWahl : (treffer[0] && treffer[0].s.id);
@@ -27253,8 +27498,11 @@ UI.karriere = (() => {
       oninput: e => { K.wikiSuche = e.target.value; wikiAnsicht(c); const el = c.querySelector("input[type=search]"); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }});
     const artikel = h("article", {class: "kr-artikel"});
     if (wahl) {
-      const w = DATEN.wiki[wahl], s = Spiel.skill(wahl);
-      artikel.append(h("small", {class: "sp-leise"}, `Stufe ${s.stufe} · ${s.ap}`), h("h2", {}, w.titel), h("p", {class: "kr-kurz"}, w.kurz),
+      const w = DATEN.wiki[wahl];
+      const e = eintraege.find(x => x.s.id === wahl) || null;
+      /* Fertigkeitsseiten tragen „Stufe x · APy“; eine Zusatzseite hat keine Stufe – also kein Kopf. */
+      const kopf = e && !e.zusatz ? h("small", {class: "sp-leise"}, `Stufe ${e.s.stufe} · ${e.s.ap}`) : null;
+      artikel.append(kopf, h("h2", {}, w.titel), h("p", {class: "kr-kurz"}, w.kurz),
         ...(w.abschnitte || []).map(a => h("section", {}, h("h3", {}, a.titel), h("div", {html: a.html}))),
         w.merksatz ? h("p", {class: "kr-merksatz"}, "💡 ", w.merksatz) : null,
         w.pruefungstipp ? h("p", {class: "kr-tipp"}, "🎯 Prüfungstipp: ", w.pruefungstipp) : null,
@@ -27264,7 +27512,7 @@ UI.karriere = (() => {
     c.replaceChildren(h("div", {class: "kr-wiki"},
       h("aside", {class: "kr-wiki-liste"}, h("h2", {}, "Wiki"), suche,
         h("nav", {}, treffer.map(x => h("button", {type: "button", class: "kr-wiki-punkt" + (x.s.id === wahl ? " an" : ""), onclick: () => { K.wikiWahl = x.s.id; wikiAnsicht(c); }},
-          h("span", {}, x.w.titel), h("small", {}, "Stufe " + x.s.stufe))))),
+          h("span", {}, x.w.titel), ...(x.zusatz ? [] : [h("small", {}, "Stufe " + x.s.stufe)]))))),
       artikel));
   }
   function wikiOeffnen(skill){ K.wikiWahl = skill; UI.app.ansicht("wiki"); }
@@ -27690,7 +27938,13 @@ UI.klassenraum = (() => {
           h("div", {class: "kl-gross"}, L.code),
           h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Der Code ist die Ansage: jedes Gerät baut denselben Fall."),
             h("button", {type: "button", class: "knopf kl-knopf", onclick: codeKopieren}, "Code kopieren")),
-          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), L.abdruck),
+          /* Der Abdruck ist der des EIGENEN Labors: D verlangt ausdrücklich das TATSÄCHLICH
+             GELADENE Netz, nicht den Code. Gemessen im Vorführlauf am 10.10.2026: die Lehrkraft
+             zeigte 2S8HS2, die zwei Azubi-Geräte desselben angesagten Auftrags 3U9JGE — dieselbe
+             Zeile, zwei verschiedene Netze. Deshalb sagt die Beschriftung, WESSEN Netz hier steht,
+             und der Hinweis daneben, wann beide gleich sind. KEIN neues Bedienelement (R12 = 6). */
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck (dein geladenes Netz)"), L.abdruck),
+          h("div", {class: "kl-block"}, hinweisZeile("kl-hinweis", "Er zeigt dein eigenes Labor. Mit den Geräten der Klasse stimmt er nur überein, wenn bei dir dasselbe Auftragsnetz geladen ist.")),
           L.hinweis),
         h("div", {class: "kl-ampel"},
           h("div", {class: "kl-summe"}, L.lampe, L.summe),
@@ -27912,13 +28166,22 @@ UI.klassenraum = (() => {
   }
 
   /* ---------------- Ergebnis-Code für die Lehrkraft (B § 7) ----------------
-     Der Kanal „klassenraum“ kommt aus `Spiel.klassenraum.abnehmen` (src/spiel/klassenraum.js:51) –
-     das ist der EINE Abnahmeweg der vierten Quelle. Das Ergebnis-Overlay bleibt unberührt (§ 7.2). */
+     Der Kanal „klassenraum“ kommt aus `Spiel.klassenraum` und trägt VIER verschiedene Meldungen:
+     `erzeugen` den AUFTRAGSCODE unter `auftragscode` (src/spiel/klassenraum.js:181),
+     `ergebnisEintragen` nur den Platz (:272), `importieren` eine Sitzungskennung (:321),
+     `plaetzeSetzen` die Platzzahl (:354) — und NUR `abnehmen` den fertigen ERGEBNIS-Code
+     unter `code` (:386-387). Gemessen im Vorführlauf am 10.10.2026: solange der Auftragscode im
+     Feld `code` stand, zeigte dieser Hörer ihn 20 s lang als „Ergebnis-Code“ an und verdeckte
+     die Knöpfe „Eintragen“/„Datei…“.
+     Deshalb liest er AUSSCHLIESSLICH `code` und lässt nur die GEDRUCKTE FORM des Ergebnis-Codes
+     durch: `E-XXXX-XXX` (Spezifikation § 2.2, immer genau 10 Zeichen). Ein Auftragscode (`NL-…`)
+     kann so nie als Ergebnis erscheinen — auch nicht, wenn ihn eine künftige Quelle wieder in
+     `code` schriebe. Geprüft wird bewusst die FORM, nicht die Prüfziffer: die Quelle setzt hier
+     den fertigen Code aus `ergebnisCode` ein, und die Prüfziffer prüft der Codec dort, wo es
+     zählt — beim Eintragen (`ergebnisEintragen`). */
   function ergebnisToast(d){
-    const inst = d && (typeof d.inst === "object" ? d.inst : null);
-    let code = d && typeof d.code === "string" ? d.code : null;
-    if (!code && inst && d.abnahme && kann("ergebnisCode")){ const r = ruf("ergebnisCode", inst, d.abnahme); if (typeof r === "string") code = r; }
-    if (!code) return null;                                   /* kein Code → kein Toast, kein Fehler */
+    const code = d && typeof d.code === "string" ? d.code : null;
+    if (!code || !/^E-[0-9A-Z]{4}-[0-9A-Z]{3}$/.test(code)) return null;   /* kein Ergebnis-Code → still */
     UI.toast("Ergebnis-Code für deine Lehrkraft: " + code, "ok", {id: "klassenraum-code", titel: "Für die Lehrkraft",
       dauer: 20000, aktion: {text: "Kopieren", fn: () => UI.hub.kopieren(code, "Ergebnis-Code kopiert – gib ihn deiner Lehrkraft.")}});
     return code;
@@ -30926,7 +31189,13 @@ UI.szene = (() => {
         h("div", {class: "sz-adressen", "aria-hidden": "true"}, f.bereiche.map((b, i) => h("i", {style: {left: b.links + "%", width: b.breite + "%", "--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}))),
         h("ul", {class: "sz-legende"}, f.bereiche.map((b, i) => h("li", {style: {"--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}, h("b", {}, b.name), ` ${b.netz}${b.praefix}`))));
       UI.klang?.spielen("haken");
-      await pause(ruhig ? 1200 : 300 + n * 280 + 1100, st);
+      /* Die Bereiche leuchten gestaffelt auf (szene.css: animation-delay calc(--i * 280ms + 250ms)).
+         Die Karte muss stehen, bis auch der LETZTE Bereich da ist — bei reduzierter Bewegung läuft die
+         Animation zwar mit 1 ms, die Verzögerungen bleiben aber (der zentrale Block in basis.css
+         ersetzt nur die Dauer). Seit task-38 gibt es hier keine eigene @media-Regel mehr, die die
+         Bereiche vorher sofort aufleuchten ließ — deshalb wartet die ruhige Fassung jetzt die Staffel ab. */
+      const staffel = 250 + (n - 1) * 280 + 320;
+      await pause(ruhig ? staffel : 300 + n * 280 + 1100, st);
     }
   }
 
@@ -31083,7 +31352,7 @@ UI.terminal = (() => {
 "use strict";
 /* ---------- Toasts: kurze Rückmeldungen unten mittig (im Labor: oben rechts auf der Zeichenfläche) ----------
    UI.toast(text, art = "info"|"ok"|"warn"|"fehler", {aktion:{text, fn}|[…], dauer, titel, id})
-     → {schliessen()}   Maus darüber hält den Toast an. Mit Aktion bleibt er länger stehen.  UI.toast.zu(id) schließt.
+     → {schliessen()}   Maus darüber ODER Tastaturfokus darin hält den Toast an. Mit Aktion bleibt er länger stehen.  UI.toast.zu(id) schließt.
    Gleiche id ersetzt einen noch sichtbaren Toast (z. B. wiederholte Pings).
    Ausbau 1.2 (A4): höchstens EIN Toast gleichzeitig – der neue ersetzt den alten. Ein verdrängter Toast mit Aktion
    (z. B. „Rückgängig“) kommt danach noch einmal kurz, damit die Aktion nicht verloren geht. */
@@ -31142,9 +31411,32 @@ UI.toast = (() => {
     const halten = () => { if (timer) { clearTimeout(timer); timer = null; rest = Math.max(1200, rest - (performance.now() - t0)); } };
     el.addEventListener("pointerenter", halten);
     el.addEventListener("pointerleave", starten);
+    /* Die TASTATUR wird wie die Maus behandelt (Befund tests/ui-klassenraum-tastatur.test.js:251):
+       `focusin`/`focusout` blubbern – anders als focus/blur – und halten den Zeitgeber an, solange der
+       Fokus im Toast steht. Ohne das hätte, wer per Tab zum Kopier-Knopf fährt, nur das nackte
+       Fenster; beim Ablauf verschwände der Knopf unter dem Finger. */
+    el.addEventListener("focusin", halten);
+    el.addEventListener("focusout", e => { if (!zu && !(e.relatedTarget && el.contains(e.relatedTarget))) starten(); });
+    /* Fokus, der im Toast steht, darf beim Schließen nicht ins Leere fallen (Befund :64-71).
+       Vorbild ist UI.menue (src/ui/editor-werkzeuge.js:21/63): das Element, das den Toast ausgelöst
+       hat, bekommt ihn zurück – erst dann der nächste sinnvolle Nachbar, zuletzt der Rumpf.
+       Steht der Fokus woanders, wird er NICHT angefasst (kein Fokusklau). */
+    const zurueck = document.activeElement || null;
+    function fokusRetten(){
+      const a = document.activeElement;
+      if (!a || (a !== el && !el.contains(a))) return;
+      const nachbar = el.nextElementSibling?.querySelector?.("button") || el.previousElementSibling?.querySelector?.("button") || null;
+      for (const z of [zurueck, nachbar, document.body]) {
+        if (!z || z === el || el.contains(z) || typeof z.focus !== "function" || z.isConnected === false) continue;
+        try { z.focus({preventScroll: true}); } catch (e) { try { z.focus(); } catch (e2) { continue; } }
+        return;
+      }
+      try { a.blur?.(); } catch (e) { /* ohne Ziel bleibt nur das Lösen des Fokus */ }
+    }
     let zu = false;
     function schliessen(sofort, verdraengt){
       if (zu) return; zu = true; halten();
+      fokusRetten();                                  /* VOR dem Entfernen – sonst zeigt der Fokus ins Nichts */
       if (!verdraengt && warten.length) { const w = warten.shift(); setTimeout(() => toast(w.text, w.art, Object.assign({}, w.o, {dauer: 5000})), 260); }
       if (sofort || wenigBewegung()) { el.remove(); hinweisStill(st); return; }
       el.classList.remove("da"); el.classList.add("weg");

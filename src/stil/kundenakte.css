@@ -18,7 +18,7 @@
 .ka-atlas .np-geraet.ka-hell{opacity:1; filter:none}
 .ka-atlas .np-geraet.ka-hell .np-ring{stroke:var(--accent); stroke-width:2.5; fill:var(--accent-soft)}
 .ka-kapitel{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px}
-.ka-kapitel li.zu{color:var(--faint)}
+.ka-kapitel li.zu, .ka-lohn li{color:var(--faint)}   /* R10: ein Block – gesperrtes Kapitel und noch nicht verdienter Lohn */
 .ka-kapitel-knopf{all:unset; cursor:pointer; padding:5px 8px; border-radius:8px; font-weight:600}
 .ka-kapitel-knopf:hover, .ka-kapitel-knopf:focus-visible{background:var(--accent-soft); outline:none}
 .ka-neu{color:var(--accent); font-size:12px; font-weight:800}
@@ -36,7 +36,6 @@
 .ka-ergebnis p{margin:4px 0}
 /* Vertrauen zahlt aus (§ 20 F5): Empfehlung ab 3, Rabatt ab 4 */
 .ka-lohn{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 14px; font-size:13px}
-.ka-lohn li{color:var(--faint)}
 .ka-lohn li.da{color:var(--ok); font-weight:700}
 .ka-lohn li.bald{color:var(--ink)}
 .ka-lohn .ka-herzen{font-size:12px; letter-spacing:0}

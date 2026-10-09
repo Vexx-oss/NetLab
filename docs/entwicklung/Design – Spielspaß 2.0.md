@@ -1969,3 +1969,100 @@ bleiben:
   DOM-Attrappen und Quelltext belegt, **nicht** im Bild; ein Browserlauf fehlt weiterhin.
 * Die Zahlen dieser Stufe sind **Messungen des Leads** und in der Tabelle oben so gekennzeichnet;
   Bytes und SHA256 der acht neuen Dateien hat der Chronist selbst über den Arbeitsbaum gerechnet.
+
+---
+
+## 35 · Output-Runde — Trefferflächen, Altlasten und R12 (09.10.2026)
+
+§ 33 und § 34 haben **Funktion** gebaut; diese Runde räumt die **Oberfläche** auf. Sie ist die dritte
+Runde derselben Fassung 2.0.0 und arbeitet an dem, was die Werkzeuge seit Fassung 1.2 nur **gemeldet**
+haben: das Regelwerk `tools/ethos.py` (R1–R12), die Menüprobe, der Rauchtest — und die eingefrorenen
+Altlasten in [`tests/stil-stand.json`](../../tests/stil-stand.json), die „GRÜN" bisher bedeuteten, ohne dass
+etwas besser wurde. Neu ist der Anspruch: **R12 soll messen**, statt „0 sichtbare Elemente — eingehalten"
+zu melden.
+
+### Was vorher gemessen war
+
+| Prüfung | Vorher (Angaben der Leitung) |
+|---|---|
+| `tools/menueprobe.py --datei web/index.html` | **rot: 36/43** — 44-px-Trefferflächen in den Editor-Menüs (vorbestehend, seit 07.10.2026 dokumentiert) |
+| `tools/ethos.py` | R5 **70** Zeitwerte · R6 **11** `z-index` · R8 **5** Bewegungsblöcke · R10 **87** Doppelblöcke |
+| R12 | **ohne Wirkung** — „0 sichtbare Elemente", also nie wirklich gemessen |
+| `tools/rauch.py` | ohne die zwei neuen Klassenraum-Ansichten |
+
+### Der Bauweg
+
+**Vierzehn CSS-Dateien in `src/stil/`** (Umfang `306 insertions(+), 260 deletions(-)`), sieben Ströme:
+
+| Strom | Was gebaut wurde | Beleg |
+|---|---|---|
+| Trefferflächen ≥ 44 px | `min-height`/`min-width` angehoben; nichts wurde kleiner; kein Selektor ohne `font-size` | `44px` **3 → 11**, neu `68px`; Menüprobe Web **36/43 → 45 erfüllt, 0 verletzt** |
+| R1–R4 | Farben, Radien, Schrift- und Abstandswerte auf Tokens und Skalen | ethos: R1 23→22 · R2 122→113 · R3 206→195 · R4 539→514 |
+| R5 | Zeitwerte aus der Skala 1/160/320 ms | **70 → 0** |
+| R6 | `z-index` nur aus der benannten Leiter; die Ursache der Android-Überdeckung (`z-index: 40` **unter** dem Dock-Blatt `45`) behoben | **11 → 0**; Menüprobe Android **49 erfüllt, 0 verletzt** |
+| R8 | die fünf Zusatzblöcke **gelöscht** statt verschoben; `basis.css` byte-identisch; „Bewegung reduzieren" = „1 ms statt aus" | **5 → 0**; `transition` 36 → 35, `animation` 54 → 54, `@keyframes` 41 → 41 |
+| R10 | Doppelblöcke durch **Zusammenschluss** (Komma-Selektorlisten) | **87 → 0**; Komma-Listen 119 → 158, Selektoren 1 819 → 1 818 |
+| R12 | die Regel **misst** jetzt: ohne `--dom` sagt das Werkzeug „NICHT GEMESSEN"; im Programm `klasse` **6/6**, `Auftrag` **3/3** | `ethos.r12_js()`, drei Breiten, zwei Zustände, **vier Gegenproben** |
+| Rauchtest | die zwei Klassenraum-Ansichten als **echte Wege** (Code anzeigen bzw. Code eintippen und öffnen) | **39/39 bei 12 → 45/45 bei 14 Fällen** |
+| Wiki | zwei neue Seiten „Klassenraum" und „Übergabe" | **29 Seiten / 107 Abschnitte** (selbst gezählt) |
+| Nachweise | 10 Bildschirmfotos + 1 Exportdatei der fünf Vorführschritte (Drei-Geräte-Lauf) | `Nachweise/Klassenraum/`; Code `NL-9ACQ-AM`, Abdruck `3U9JGE` auf B und C, Ampel 1/2 → 2/2 |
+
+**Sieben Gegenproben, alle bestanden** (Quelle: [Befund – Output-Runde](<Befund – Output-Runde.md>) § 13):
+Zeilenenden byteweise (28 von 29 Dateien LF, `inspektor.css` unverändert CRLF/binär) · Regeln gegen HEAD und
+`stil-stand.json` (Stand-Datei **nicht** gesenkt) · **Werkzeuge gegen Abschalten** (`ethos.py` nur im
+R12-Block geändert und dort **strenger**; `menueprobe.py` ohne abgeschwächte Kriterien) · Bewegung gegen
+„Rückmeldung entfernt" · Trefferfläche nicht durch kleineren Inhalt · Altlast nicht durch Löschen (+39
+Komma-Listen, 2 Selektoren weg) · Tokens. Der Prüfer hat außerdem **sieben eigene Annahmen widerlegt** —
+darunter „R8 wurde verschoben", „eine Regel wurde abgeschaltet" und „die Altlasten wurden gelöscht".
+
+### Verworfen — und warum das hier steht
+
+**R8 durch Verschieben lösen — so gemacht wurde es nicht.** Die Absicht war, die fünf Zusatzblöcke in den
+zentralen Reduced-Motion-Block einzulagern; gemessen ist `basis.css` **byte-identisch** geblieben, die
+Blöcke wurden **gelöscht**. *Lehre:* Wer Bewegung entfernt, muss nachsehen, ob sie eine **Rückmeldung**
+trug. Genau das ist passiert und benannt: `.ger[class*="jc-"] .gb` und `.kabel[class*="jc-"] *` haben im
+ganzen `src/stil/` **keine Regel mehr** — sie waren aber nicht tot, `UI.juice(el,"einrasten")` wird auf
+Kabelelementen gerufen (`src/ui/editor-werkzeuge.js:307,353`, `src/ui/juice.js:11`). Für „Bewegung
+reduzieren" liefen diese Animationen vorher **gar nicht**, jetzt laufen sie in **1 ms**; ob man das sieht,
+ist **nicht gemessen**. Der zweite, schärfere Schalter `html[data-bewegung="aus"]` ist unangetastet —
+„Bewegung aus" schaltet weiterhin wirklich ab.
+
+**„Eine Regel abschalten, um grün zu werden" — widerlegt.** Skalen und Zählfunktionen sind zeichengleich,
+die Stand-Datei ist nicht gesenkt, und R12 wurde **strenger** statt lockerer.
+
+**„Die Trefferflächen passend machen, indem der Inhalt schrumpft" — widerlegt.** Keine kleinere Schrift,
+kein Selektor ohne `font-size`, kein gesunkener `min-height`-Wert.
+
+**„Die Menüprobe 45/0 ist reiner CSS-Fortschritt" — relativiert.** `menueprobe.py` wurde in derselben
+Runde geändert (Neuladen bei „kein UI"); die Kriterien sind **nicht** abgeschwächt, aber der Vorher-Wert
+36/43 stammt aus einer **anderen Werkzeugfassung** — der Vergleich ist nicht allein der Stil-Arbeit
+zuzuschreiben.
+
+**„661/661 als Nullmessung" — nicht reproduzierbar.** Die Läufe während der Runde ergaben 678/689 →
+686/690 → 690/690 (vorher), 715/715 (nachher) und **725/725** (Chronist, Endstand) — ein bewegliches Ziel
+ist keine Nullmessung. Genau deshalb steht in diesem Abschnitt jeder Zahl ihre Quelle bei.
+
+### Messpunkte
+
+| Prüfung | Nachher |
+|---|---|
+| Menüprobe Web · Android | **45 erfüllt, 0 verletzt** (5 von 5 Profilen) · **49 erfüllt, 0 verletzt** (5 von 5 Profilen) — selbst gemessen |
+| `ethos.py` R1–R10 | **GRUEN**, besser als der Stand: R1 23→22 · R2 122→113 · R3 206→195 · R4 539→514 · R5 70→0 · R6 11→0 · R8 5→0 · R10 87→0 — selbst gemessen |
+| R12 im Programm | `klasse` **6/6**, `Auftrag` **3/3** — Zahl der Leitung |
+| `python tools/rauch.py` | **45/45** — Zahl der Leitung; der Aufbau (14 Fälle × 3 Breiten) ist im Quelltext nachgezählt |
+| `node tests/run.js` · `klassen.py` · `sim-stand.js` | **725/725** (81 Testdateien, 91 Module, 0 übersprungen, Exit 0) · **0** · **unverändert** — selbst gemessen |
+| `bauen.py` · Einzeldatei · APK | **128 Module, 2225 KB** · **2.829.477 B** / `C3C51EDA…828E` · **1.160.732 B** / `A27751B2…F93733` |
+
+### Was NICHT geprüft ist — ehrlich
+
+* **Kein `ethos.py --dom` gegen die Release-Hülle:** R12 lief gegen **Debug-Bau** und **Web-Bau**.
+* **Kein Aufnahmeprogramm:** die Bildschirmfotos sind über CDP entstanden.
+* **`prefers-reduced-motion` ist im Browser nicht gemessen** (dem Werkzeug fehlt `Emulation.setEmulatedMedia`).
+* **Die 720-px-Frage im Einstellungsdialog ist nicht gemessen** — die Menüprobe erreicht den Dialog nicht.
+* **Die Erzeugnis-Hashes sind Momentaufnahmen**: die letzten CSS-Werte steckten beim Messen noch nicht im
+  Artefakt, und ein Desktop-Release-Bau lief noch.
+* **`tests/stil-stand.json` deckt R2/R3/R4 noch nicht** — der Lauf meldet erneut „BESSER als der Stand"
+  (R2 121→113 · R3 204→195 · R4 530→514); ein weiteres `--neu` gehört der Leitung.
+* **R12 und der Rauchtest bleiben Lead-Messungen** — der Chronist hat sie nicht selbst gefahren. Die
+  **Menüprobe** lief am Ende der Sitzung gegen **beide** Bauten und meldete 45 erfüllt/0 verletzt (Web) und
+  49 erfüllt/0 verletzt (Android).

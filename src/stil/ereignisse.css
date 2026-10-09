@@ -1,6 +1,8 @@
-/* Ereignisse (E1): Karte oben über der Fläche – Toasts stehen unten, die Karte stört sie nicht. Präfix ev- */
-.ev-karte{position:fixed; left:50%; top:118px; transform:translateX(-50%); z-index:55; width:min(460px, calc(100vw - 32px)); padding:12px 14px 12px 14px;
-  background:var(--panel); border:1px solid var(--line-2); border-left:4px solid var(--warn); border-radius:12px; box-shadow:var(--schatten); animation:ev-rein .25s ease-out}
+/* Ereignisse (E1): Karte oben über der Fläche – Toasts stehen unten, die Karte stört sie nicht. Präfix ev-.
+   z-index 40 (Leiter): über den Labor-Ebenen (10–30), unter Menü (50), Palette (55), Dialogen (56) und
+   Toasts (60) – die Karte ist ein Hinweis, kein Dialog und darf nichts verdecken. */
+.ev-karte{position:fixed; left:50%; top:118px; transform:translateX(-50%); z-index:40; width:min(460px, calc(100vw - 32px)); padding:12px 14px 12px 14px;
+  background:var(--panel); border:1px solid var(--line-2); border-left:4px solid var(--warn); border-radius:12px; box-shadow:var(--schatten); animation:ev-rein var(--dauer-lang) ease-out}
 .ev-kopf{display:flex; align-items:center; gap:8px}
 .ev-kopf strong{flex:1; font:800 16px/1.2 var(--display); color:var(--ink)}
 .ev-sym{font-size:20px; line-height:1}
@@ -12,6 +14,6 @@
 .ev-anruf{border-color:var(--ok)}
 .ev-rangehen{border-color:var(--ok); color:var(--ok); font-weight:700}   /* grün wie beim Telefon – kein zweiter Hauptknopf */
 .ev-rangehen:hover, .ev-rangehen:focus-visible{background:var(--ok); color:var(--bg)}
-.ev-anruf .ev-sym{display:inline-block; animation:ev-klingeln 1.2s ease-in-out infinite; transform-origin:50% 60%}
+.ev-anruf .ev-sym{display:inline-block; animation:ev-klingeln var(--dauer-lang) ease-in-out infinite; transform-origin:50% 60%}
 @keyframes ev-klingeln{0%, 40%, 100%{transform:none} 5%, 15%, 25%{transform:rotate(-14deg)} 10%, 20%, 30%{transform:rotate(14deg)}}
 @keyframes ev-rein{from{opacity:0; transform:translate(-50%, -8px)} to{opacity:1; transform:translate(-50%, 0)}}

@@ -1,7 +1,7 @@
 "use strict";
 /* ---------- Toasts: kurze Rückmeldungen unten mittig (im Labor: oben rechts auf der Zeichenfläche) ----------
    UI.toast(text, art = "info"|"ok"|"warn"|"fehler", {aktion:{text, fn}|[…], dauer, titel, id})
-     → {schliessen()}   Maus darüber hält den Toast an. Mit Aktion bleibt er länger stehen.  UI.toast.zu(id) schließt.
+     → {schliessen()}   Maus darüber ODER Tastaturfokus darin hält den Toast an. Mit Aktion bleibt er länger stehen.  UI.toast.zu(id) schließt.
    Gleiche id ersetzt einen noch sichtbaren Toast (z. B. wiederholte Pings).
    Ausbau 1.2 (A4): höchstens EIN Toast gleichzeitig – der neue ersetzt den alten. Ein verdrängter Toast mit Aktion
    (z. B. „Rückgängig“) kommt danach noch einmal kurz, damit die Aktion nicht verloren geht. */
@@ -60,9 +60,32 @@ UI.toast = (() => {
     const halten = () => { if (timer) { clearTimeout(timer); timer = null; rest = Math.max(1200, rest - (performance.now() - t0)); } };
     el.addEventListener("pointerenter", halten);
     el.addEventListener("pointerleave", starten);
+    /* Die TASTATUR wird wie die Maus behandelt (Befund tests/ui-klassenraum-tastatur.test.js:251):
+       `focusin`/`focusout` blubbern – anders als focus/blur – und halten den Zeitgeber an, solange der
+       Fokus im Toast steht. Ohne das hätte, wer per Tab zum Kopier-Knopf fährt, nur das nackte
+       Fenster; beim Ablauf verschwände der Knopf unter dem Finger. */
+    el.addEventListener("focusin", halten);
+    el.addEventListener("focusout", e => { if (!zu && !(e.relatedTarget && el.contains(e.relatedTarget))) starten(); });
+    /* Fokus, der im Toast steht, darf beim Schließen nicht ins Leere fallen (Befund :64-71).
+       Vorbild ist UI.menue (src/ui/editor-werkzeuge.js:21/63): das Element, das den Toast ausgelöst
+       hat, bekommt ihn zurück – erst dann der nächste sinnvolle Nachbar, zuletzt der Rumpf.
+       Steht der Fokus woanders, wird er NICHT angefasst (kein Fokusklau). */
+    const zurueck = document.activeElement || null;
+    function fokusRetten(){
+      const a = document.activeElement;
+      if (!a || (a !== el && !el.contains(a))) return;
+      const nachbar = el.nextElementSibling?.querySelector?.("button") || el.previousElementSibling?.querySelector?.("button") || null;
+      for (const z of [zurueck, nachbar, document.body]) {
+        if (!z || z === el || el.contains(z) || typeof z.focus !== "function" || z.isConnected === false) continue;
+        try { z.focus({preventScroll: true}); } catch (e) { try { z.focus(); } catch (e2) { continue; } }
+        return;
+      }
+      try { a.blur?.(); } catch (e) { /* ohne Ziel bleibt nur das Lösen des Fokus */ }
+    }
     let zu = false;
     function schliessen(sofort, verdraengt){
       if (zu) return; zu = true; halten();
+      fokusRetten();                                  /* VOR dem Entfernen – sonst zeigt der Fokus ins Nichts */
       if (!verdraengt && warten.length) { const w = warten.shift(); setTimeout(() => toast(w.text, w.art, Object.assign({}, w.o, {dauer: 5000})), 260); }
       if (sofort || wenigBewegung()) { el.remove(); hinweisStill(st); return; }
       el.classList.remove("da"); el.classList.add("weg");

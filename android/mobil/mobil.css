@@ -128,7 +128,7 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
 /* Auf sehr schmalen Flächen (Telefon quer, ~700–1000 px) wird es eng.
    Zuerst schrumpfen, was nur Komfort ist — die Zeichenfläche bleibt. */
 @media (max-width: 1000px) and (pointer: coarse) {
-  .lb-zoomtext { min-width: 56px; font-size: 11.5px; }
+  .lb-zoomtext { min-width: 56px; font-size: 12px; }
   .pa-kat { width: 64px; min-height: 60px; }
 }
 
@@ -207,13 +207,27 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
     height: calc(var(--nl-nav-h) - 4px); min-height: 44px;
     padding: 2px 0; gap: 2px; border-radius: 10px;
   }
+  /* BESCHRIFTUNG DER UNTEREN LEISTE — die EINZIGE Schriftgröße dieser Datei außerhalb der
+     Haus-Skala {11,12,13,15,20,28}, und zwar mit Absicht (aus den Werten gerechnet):
+     Acht Andock-Knöpfe (app.js REIHE) teilen sich auf 360 px Telefonbreite 356 px → 44,5 px je
+     Knopf (`flex:1 1 0; min-width:0; padding:2px 0`, die volle Breite gehört dem Text).
+     `white-space:nowrap` heißt: der Text bricht NICHT um, er läuft seitlich aus dem Knopf —
+     `.dock` hat `overflow:visible`, und direkt daneben steht die nächste Beschriftung.
+     Bei 9,5px füllt „Lernstand“ (9 Zeichen) die 44,5 px gerade aus; bei 11px braucht dasselbe
+     Wort rund 51 px und schiebt sich über den Nachbarn. Alle acht Knöpfe tragen dieselbe Größe,
+     die drei längsten (Lernstand, Postfach, Training) bestimmen das Ergebnis.
+     Deshalb bleibt hier 9,5px stehen. Wer die Zahl ändern will, kürzt vorher die Beschriftung
+     („Lernstand“ → „Lernen“ wären 7 Zeichen) oder erlaubt den Wert im Vertrag.
+     Die Zeichenbreiten sind aus der Schriftfamilie geschätzt (≈0,5 em je Zeichen im 600er Schnitt);
+     im Browser nachgemessen hat sie niemand — der genaue Umbruchpunkt ist damit der Restzweifel
+     dieser Datei, nicht die Richtung: 11px sind hier breiter als der Knopf. */
   .dock-text { font: 600 9.5px/1.05 var(--body); white-space: nowrap; letter-spacing: 0; }
   /* Der aktive Strich lag links außen — unten gehört er an die Oberkante des Knopfes */
   .dock-knopf.an::before {
     left: 30%; right: 30%; top: 0; bottom: auto; width: auto; height: 3px;
     border-radius: 0 0 3px 3px;
   }
-  .dock-zahl { top: 0; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; font: 700 10px/16px var(--body); }
+  .dock-zahl { top: 0; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; font: 700 11px/16px var(--body); }
 
   /* ---------- Werkzeuge: EINE Zeile im Daumenbereich ----------
      Die Leiste ist so breit wie ihr Inhalt (nicht bildschirmbreit): der leere Rest
@@ -235,7 +249,7 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
   /* Hochformat: der Ebenen-Name und der Pfeil sprengen die Zeile bei 360 px.
      Der Knopf bleibt, das Menü dahinter nennt die Ebene weiterhin. */
   .lb-ansicht-text, .lb-ansicht svg:last-of-type { display: none; }
-  .lb-zoomtext { min-width: 48px; height: 44px; padding: 0 4px; font-size: 11.5px; }
+  .lb-zoomtext { min-width: 48px; height: 44px; padding: 0 4px; font-size: 12px; }
 
   /* ---------- Geräteleiste → Blatt von unten, geöffnet mit dem + Knopf ---------- */
   .lb-geraete {
@@ -312,7 +326,7 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
     -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   }
   .nl-fab:active, .nl-fab.an { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
-  .nl-fab-text { font: 600 9.5px/1 var(--body); margin-top: 2px; letter-spacing: 0; }
+  .nl-fab-text { font: 600 11px/1 var(--body); margin-top: 2px; letter-spacing: 0; }
   .nl-fab-geraete { left: 6px; }
   .nl-fab-dock { right: 6px; }
 
@@ -347,12 +361,12 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
   .nl-menue .menue-punkt { min-height: 44px; }
 
   /* ---------- Auftrag: verdichtet, damit die Zeichenfläche hoch bleibt ---------- */
-  .lb-auftrag-standard { min-height: 40px; padding: 0 10px; font-size: 14px; }
+  .lb-auftrag-standard { min-height: 40px; padding: 0 10px; font-size: 15px; }
   .auftrag-sandbox { min-height: 44px; gap: 8px; padding: 4px 8px 4px 10px; }
   .as-sym { width: 32px; height: 32px; border-radius: 10px; }
-  .as-text strong { font-size: 14.5px; }
+  .as-text strong { font-size: 15px; }
   .as-text span {
-    font-size: 11.5px; line-height: 1.25; white-space: normal;
+    font-size: 12px; line-height: 1.25; white-space: normal;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
   /* Der Zurücksetzen-Knopf trägt nur noch sein Symbol (Text bleibt im title) */
@@ -398,7 +412,7 @@ body { touch-action: manipulation; }                    /* kein Doppeltipp-Zoom 
 
   /* Querformat hat Breite genug: die Kopfzeile zeigt wieder alles in EINER Zeile —
      Name, alle vier Werte und die vier Knöpfe. Das ⋯-Menü braucht es hier nicht. */
-  .marke-name { display: inline; font-size: 12.5px; }
+  .marke-name { display: inline; font-size: 13px; }
   .wert-stufe { display: inline-flex; }
   .kopf-knoepfe .kopf-knopf { display: inline-flex; }
   .kopf-knoepfe .kopf-knopf.nl-mehr { display: none; }   /* mehr Knöpfe als nötig wären nur Ballast */

@@ -9,10 +9,12 @@
 .st-erklaerung{color:var(--ink); font-size:13px}
 .st-freigabe{color:var(--muted); font-size:12px}
 
-/* Gleiche Maße und Farben wie .wahl-knopf in rahmen.css:168-171, damit beide Abschnitte gleich
-   aussehen. Der Radius kommt aus dem Token --radius-xs (basis.css:32) — ein roher px-Wert würde
-   `python tools/ethos.py` (R2 „Radius nur aus Tokens") rot machen. Gemessen 07.10.2026. */
-.st-knopf{min-height:34px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
+/* Gleiche Maße und Farben wie .wahl-knopf in rahmen.css (Regel in Zeile 171), damit beide
+   Abschnitte im selben Dialog gleich aussehen. min-height 44 px ist das Trefferflächen-Maß der
+   44-px-Runde: vorher standen hier 34 px neben den 44 px der Erklärtiefe — zwei Segment-Schalter
+   mit verschiedener Höhe nebeneinander. Der Radius kommt aus dem Token --radius-xs (basis.css:32) —
+   ein roher px-Wert würde `python tools/ethos.py` (R2 „Radius nur aus Tokens") rot machen. */
+.st-knopf{min-height:44px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
 .st-knopf:hover{color:var(--ink)}
 .st-knopf.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
 .st-knopf:focus-visible{outline:2px solid var(--accent); outline-offset:2px}

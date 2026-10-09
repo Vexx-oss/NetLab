@@ -28,13 +28,13 @@ veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unt
 
 | Zweck | Befehl | Erwartung |
 |---|---|---|
-| Tests | `sh tools/test.sh` | meldet `N/N grün` + `davon N übersprungen` (Stand: **461**, 53 Testdateien, 83 Module – 09.10.2026). Ein Test mit **0 Zusicherungen** gilt als übersprungen und wird gezählt, nicht als grün verschwiegen |
-| + Rauchtest der Oberfläche | `sh tools/test.sh --rauch` | zusätzlich **39/39** (12 Ansichten × 3 Breiten, seit 07.10.2026 mit „Training") |
+| Tests | `sh tools/test.sh` | meldet `N/N grün` + `davon N übersprungen` (Stand: **725**, 81 Testdateien, 91 Module, 0 übersprungen – 09.10.2026, selbst nachgemessen). Ein Test mit **0 Zusicherungen** gilt als übersprungen und wird gezählt, nicht als grün verschwiegen |
+| + Rauchtest der Oberfläche | `sh tools/test.sh --rauch` | zusätzlich **45/45** (14 Ansichten **plus** die Erstabnahme mit echter Maus, je 3 Breiten = 45 Prüfungen; seit 09.10.2026 mit den zwei Klassenraum-Ansichten — Zahl von der Leitung gemessen) |
 | Gegen die Falle in Testnamen | `node tools/pruefe-namen-flicken.js [--setzen]` | findet `pruefe("…„…"…")`, das den Lauf mit `LADEFEHLER` (Exit 2) anhält — trockener Lauf zuerst |
-| Tiefe Menüebenen (Android und Web) | `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | **5 Profile, 49 Kriterien erfüllt, 0 verletzt** — Achtung: das prüft die **Android-Fassung** (Stand 1.2.3, ohne die Module der Hilfestellung vom 07.10.2026). Die Zahl ist grün, sagt über den aktuellen Quellstand aber **nichts**. Für den Web-Bau: `--datei web/index.html` (am 07.10.2026 **rot**: 36/43, 44-px-Trefferflächen in den Editor-Menüs — gemessen **identisch** zu `HEAD~1`, also vorbestehend) |
+| Tiefe Menüebenen (Android und Web) | `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | **5 Profile, 49 Kriterien erfüllt, 0 verletzt** (selbst nachgemessen am 09.10.2026 gegen die Android-Fassung **2.0.0**; die Zahl gilt für den gebauten Stand, nicht für jeden künftigen Quellstand). Für den Web-Bau: `--datei web/index.html` (am 09.10.2026 nach der Output-Runde **45 Kriterien erfüllt, 0 verletzt**, 5 von 5 Profilen — selbst gemessen; vorher **rot** 36 von 43 erfüllt, 44-px-Trefferflächen in den Editor-Menüs, gemessen **identisch** zu `HEAD~1`, also vorbestehend) |
 | Simulation gegen Referenzstand | `node tools/sim-stand.js` | „Simulation unverändert gegenüber dem Referenzstand“ |
 | Klassen ↔ CSS | `python tools/klassen.py` | `0 Klassen ohne CSS-Regel` |
-| Regelwerk (Minimalismus) | `python tools/ethos.py` | `GRUEN: keine Regel schlechter als tests/stil-stand.json` |
+| Regelwerk (Minimalismus) | `python tools/ethos.py` | `GRUEN: keine Regel schlechter als tests/stil-stand.json` — am 09.10.2026 **BESSER als der Stand**: R1 23→22 · R2 122→113 · R3 206→195 · R4 539→514 · R5 70→0 · R6 11→0 · R8 5→0 · R10 87→0 (selbst gemessen; die Stand-Datei ist neu eingefroren, deckt R2/R3/R4 aber noch nicht). **Achtung:** R12 misst nur mit `--dom`; ohne es meldet der Lauf ausdrücklich „NICHT GEMESSEN" |
 | Bauen (Browser-Fassung) | `python bauen.py` | immer **vor** `cargo tauri build` |
 | Einzeldatei (auch die Wurzel-Datei) | `python tools/einfach.py` · `--ziel Netzwerk-Labor.html` | beide byte-gleich, `0 Außenverweise` |
 | Android-APK | `python android/bauen.py` | 7 Schritte, ~5 s, endet mit `GRUEN` |

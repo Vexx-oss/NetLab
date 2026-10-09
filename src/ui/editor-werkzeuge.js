@@ -7,6 +7,17 @@
    UI.menueZu()                        offenes Menü/Popover schließen */
 UI.menue = (() => {
   let offen = null;
+  /* Geklemmt wird gegen die ANZEIGE, nicht gegen das Layout-Fenster: unter Geräte-Emulation ist
+     `innerWidth` größer als der sichtbar dargestellte Bereich (gemessen 569 bei 412 px Soll,
+     Faktor 1,38). Ein Menü, das nur gegen `innerWidth` klemmt, liegt dann sichtbar außerhalb des
+     Bildes — und ist nicht erscrollbar, weil es `position:fixed` am Dokument hängt
+     (Befund tools/menueprobe.py:67-73, 06.10.2026). `visualViewport` kennt den sichtbaren Teil;
+     ohne ihn (ältere WebView) gilt weiter das Fenster. */
+  function sichtbarerBereich(){
+    const v = typeof visualViewport !== "undefined" ? visualViewport : null;
+    return v ? {x: v.offsetLeft, y: v.offsetTop, w: v.width, h: v.height}
+             : {x: 0, y: 0, w: innerWidth, h: innerHeight};
+  }
   function zu(){ if (offen) { const o = offen; offen = null; o.el.remove(); document.removeEventListener("pointerdown", o.aussen, true); o.zurueck?.focus?.({preventScroll: true}); } }
   function menue(x, y, eintraege, o = {}){
     zu();
@@ -44,9 +55,9 @@ UI.menue = (() => {
        Die Klasse schaltet zugleich die Einblend-Animation ab, deren scale(.98) das
        Rechteck um 2 % verkleinert. */
     el.classList.add("nl-messend");
-    const r = el.getBoundingClientRect(), W = innerWidth, H = innerHeight;
-    el.style.left = Math.max(6, Math.min(x, W - r.width - 6)) + "px";
-    el.style.top = Math.max(6, Math.min(o.oben ? y - r.height : y, H - r.height - 6)) + "px";
+    const r = el.getBoundingClientRect(), W = sichtbarerBereich();
+    el.style.left = Math.max(W.x + 6, Math.min(x, W.x + W.w - r.width - 6)) + "px";
+    el.style.top = Math.max(W.y + 6, Math.min(o.oben ? y - r.height : y, W.y + W.h - r.height - 6)) + "px";
     el.classList.remove("nl-messend");
     const aussen = ev => { if (!el.contains(ev.target)) zu(); };
     offen = {el, aussen, zurueck: document.activeElement};
@@ -66,9 +77,9 @@ UI.menue = (() => {
     /* Zwei Durchgänge wie in `menue()` — mit `visibility:hidden` (siehe dort), nicht mit
        `display:none`: versteckt liefert jedes Rechteck 0. */
     el.classList.add("nl-messend");
-    const r = el.getBoundingClientRect();
-    el.style.left = Math.max(6, Math.min(x, innerWidth - r.width - 6)) + "px";
-    el.style.top = Math.max(6, Math.min(y, innerHeight - r.height - 6)) + "px";
+    const r = el.getBoundingClientRect(), W = sichtbarerBereich();
+    el.style.left = Math.max(W.x + 6, Math.min(x, W.x + W.w - r.width - 6)) + "px";
+    el.style.top = Math.max(W.y + 6, Math.min(y, W.y + W.h - r.height - 6)) + "px";
     el.classList.remove("nl-messend");
     const aussen = ev => { if (!el.contains(ev.target)) zu(); };
     offen = {el, aussen, zurueck: document.activeElement};

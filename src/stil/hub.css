@@ -14,8 +14,7 @@
 .hb-kachel{display:flex; align-items:center; gap:10px; min-height:58px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--panel-2);
   color:var(--ink); text-align:left; cursor:pointer; font:inherit}
 .hb-kachel:hover{border-color:var(--accent); background:var(--panel-3)}
-.hb-kachel.fertig{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
-.hb-kachel.fertig small{color:var(--ok)}
+.hb-kachel.fertig, .dx-karte.verstanden{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
 .hb-kachel-sym{font-size:22px; line-height:1}
 .hb-kachel-text{display:flex; flex-direction:column; gap:2px; min-width:0}
 .hb-kachel-text small{color:var(--muted); font-size:12.5px}
@@ -26,7 +25,7 @@
 .hb-feierabend p{font-size:14px; margin-top:4px}
 .hb-ausblick{color:var(--muted)}
 .hb-feier-knoepfe{display:flex; flex-direction:column; align-items:stretch; gap:6px; flex:none}
-.hb-aufwaermen h2, .hb-raetsel h2{font:800 22px/1.2 var(--display)}
+.hb-aufwaermen h2, .hb-raetsel h2, .hb-woche h2{font:800 22px/1.2 var(--display)}
 .hb-fortschritt{color:var(--muted); font-size:13px; margin:4px 0 10px}
 .hb-teilen{font:15px/1.6 var(--mono); padding:12px 14px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line); margin:12px 0 8px; white-space:pre-wrap; user-select:all}
 .sp-raetsel .knopf{margin-left:6px}
@@ -45,7 +44,6 @@ button.dx-karte{cursor:pointer}
 button.dx-karte:hover{border-color:var(--accent)}
 .dx-karte.unbekannt{border-style:dashed; color:var(--faint); background:none}
 .dx-karte.gesehen .dx-sym{color:var(--warn)}
-.dx-karte.verstanden{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
 .dx-sym{width:26px; height:26px; flex:none; display:grid; place-items:center; border-radius:50%; background:var(--panel-3); font-weight:800}
 .dx-karte.verstanden .dx-sym{background:var(--ok-soft); color:var(--ok)}
 .dx-text{display:flex; flex-direction:column; gap:1px; min-width:0}
@@ -56,7 +54,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .dx-symptom{font-style:italic; font-size:15px; margin-top:6px}
 /* Erste Stunde: der Anruf klingelt auf der Hauptkarte */
 .hb-auftrag.klingelt{border-color:var(--ok)}
-.hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln 1.2s ease-in-out infinite}
+.hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln var(--dauer-lang) ease-in-out infinite}
 /* § 20 F7: Wahl unter der Hauptkarte und Wochenziel */
 .hb-oder{grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin-top:-4px}
 .hb-oder small{color:var(--faint); font-size:12.5px}
@@ -64,9 +62,8 @@ button.dx-karte:hover{border-color:var(--accent)}
 .hb-oder-zeile:hover, .hb-oder-zeile:focus-visible{border-color:var(--accent); color:var(--ink); outline:none}
 .hb-woche-knopf{all:unset; cursor:pointer; color:var(--muted); border-bottom:1px dashed var(--line-2)}
 .hb-woche-knopf:hover, .hb-woche-knopf:focus-visible{color:var(--ink); border-bottom-color:var(--accent)}
-.hb-woche-knopf.fertig{color:var(--ok)}
+.hb-kachel.fertig small, .hb-woche-knopf.fertig{color:var(--ok)}
 .hb-woche{display:flex; flex-direction:column; gap:12px}
-.hb-woche h2{font:800 22px/1.2 var(--display)}
 .hb-woche-wahl{display:flex; flex-direction:column; gap:8px}
 .hb-woche-wahl .knopf{justify-content:flex-start; text-align:left}
 .hb-woche-wahl .knopf.an{border-color:var(--accent); background:var(--accent-soft)}

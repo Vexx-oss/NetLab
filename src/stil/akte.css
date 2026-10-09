@@ -8,7 +8,6 @@
 .ak-v-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
 .ak-v-kopf small, .ak-v-zeit{color:var(--muted); font-size:12px}
 .ak-v-satz{font-weight:700; margin:0}
-.ak-v-zeit.gut{color:var(--ok)}
 .ak-schritt{margin:6px 0 0; color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em}
 .ak-chips{display:flex; flex-wrap:wrap; gap:6px}
 .ak-chip{min-height:30px; padding:4px 10px; border-radius:999px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 12.5px/1.2 var(--body); cursor:pointer; text-align:left}
@@ -32,6 +31,7 @@
 .ak-stern{border:0; background:none; color:var(--faint); font-size:18px; line-height:1; cursor:pointer; padding:2px}
 .ak-stern.an, .ak-stern:hover{color:var(--geld)}
 .ak-leer{color:var(--muted); font-size:13px; margin:0}
+/* R10: ein Block für die Erfolgsfarbe – Zeit „gut" in der Akte, Verdacht „voll" im Dock */
+.ak-v-zeit.gut, .sp-verdacht.voll{color:var(--ok)}
 .sp-verdacht{margin:10px 0 0; font-size:14px; line-height:1.45}
-.sp-verdacht.voll{color:var(--ok)}
 .ak-karte.aussage{border-left-color:var(--line-2)}   /* Kundenaussage am Telefon (Hotline) */

@@ -1,11 +1,22 @@
 /* ---------- Inspektor (ui/inspektor.js) – nur Tokens aus basis.css ---------- */
+/* FALLE, gemessen 09.10.2026 (bewusst NICHT repariert, s. unten): Diese Datei ist CRLF und ihre
+   LETZTEN ZEHN ZEILEN (Byte-Zeilen 132-141, Lease-Tabelle) tragen je ein ZUSAETZLICHES einzelnes CR —
+   Muster `CR CR LF` statt `CR LF`, bei Byte 11401-11404 sogar vier CR in Folge. Zusammen 12 einzelne CR
+   an den Bytes 10778, 10887, 10995, 11186, 11265, 11322, 11357, 11401, 11402, 11403, 11435, 11487.
+   Zwei Folgen, beide nachgemessen:
+     - im Textmodus gelesen hat die Datei 153 Zeilen statt 141 (jedes CR gilt als Umbruch),
+     - git fuehrt sie deshalb als BINAER (`i/-text w/-text`, von der Leitung gemessen): `git diff` und
+       jeder Zeilenenden-Vergleich sind dort blind.
+   Wer hier arbeitet: byteweise schreiben und die vorhandenen Enden erhalten. Ein normalisierender
+   Editor entfernt die 12 CR und stellt die Datei in git von binaer auf Text um — das erzeugt
+   einen scheinbar riesigen Diff. Deshalb bleiben sie in dieser Runde stehen. */
 .lb-inspektor.in{display:flex; flex-direction:column; overflow:hidden}
 .in-kopf{flex:0 0 auto; padding:14px 14px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
 .in-kopf-zeile{display:flex; align-items:center; gap:10px; min-width:0}
 .in-kopf-zeile > svg, .in-speichern .in-knopf{flex:0 0 auto}
 .in-kopf-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
 .in-kopf-text h3{font:800 19px/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.in-kopf-text span{color:var(--muted); font-size:12.5px}
+.in-kopf-text span, .in-gegen{color:var(--muted); font-size:12.5px}
 .in-chips{display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end}
 .in-chip{display:inline-flex; align-items:center; gap:3px; padding:1px 7px; border-radius:999px; font:600 11.5px/1.6 var(--body); background:var(--panel-3); color:var(--muted); white-space:nowrap}
 .in-chip.ok{background:var(--ok-soft); color:var(--ok)}
@@ -15,7 +26,7 @@
 .in-chip.info{background:var(--info-soft); color:var(--info); font-family:var(--mono); font-size:11px}
 .in-chip.frei{background:transparent; border:1px dashed var(--line-2); color:var(--faint)}
 .in-speichern{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--radius-s); background:var(--warn-soft); color:var(--ink); font-size:12.5px; line-height:1.35}
-.in-speichern b{color:var(--warn)}
+.in-speichern b, .in-hinweis.warn, .in-meldung.warn, .in-werte dd.warn{color:var(--warn)}
 
 .in-reiter{flex:0 0 auto; display:flex; flex-wrap:wrap; gap:2px; padding:6px 10px 0; border-bottom:1px solid var(--line)}
 .in-tab{border:0; background:none; color:var(--muted); font:600 13px/1 var(--body); padding:9px 10px 10px; border-bottom:2px solid transparent; border-radius:6px 6px 0 0}
@@ -30,12 +41,10 @@
 .in-abschnitt h5{font:700 13px/1.2 var(--body); color:var(--muted); margin:6px 0 0}
 .in-hinweis{color:var(--muted); font-size:13px; line-height:1.45}
 .in-hinweis.klein{font-size:12px}
-.in-hinweis.warn{color:var(--warn)}
-.in-hinweis.bad, .in-meldung.bad{color:var(--bad)}
 .in-hinweis code, .in-hinweis .mono{font-size:.95em}
 .in-leise, .in-feld-titel small{color:var(--faint); font-weight:400}
 .in-leer, .in-fehler{color:var(--muted); padding:16px}
-.in-fehler{color:var(--bad)}
+.in-hinweis.bad, .in-meldung.bad, .in-fehler, .in-lease-konflikt{color:var(--bad)}
 
 .in-raster{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px 10px}
 .in-zeile{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
@@ -49,13 +58,12 @@
 .in-eingabe:focus, .in-auswahl:focus{border-color:var(--accent); outline:none; background:var(--panel)}
 .in-eingabe.bad{border-color:var(--bad); background:var(--bad-soft)}
 .in-eingabe.warn{border-color:var(--warn)}
-.in-eingabe::placeholder{color:var(--faint)}
+.in-eingabe::placeholder, .in-code-L{color:var(--faint)}
 .in-auswahl{padding-right:4px; cursor:pointer}
 .in-feld.klein .in-eingabe, .in-feld.klein .in-auswahl{height:30px}
 .in-meldung{font-size:12px; line-height:1.35; color:var(--muted)}
-.in-meldung.warn{color:var(--warn)}
 @keyframes in-wackeln{0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}}
-.in-eingabe.wackeln{animation:in-wackeln .25s 2}
+.in-eingabe.wackeln{animation:in-wackeln var(--dauer-lang) 2}
 
 .in-schalter{display:flex; align-items:flex-start; gap:10px; cursor:pointer; min-height:30px; padding:2px 0}
 .in-schalter input{position:absolute; opacity:0; width:1px; height:1px}
@@ -85,10 +93,8 @@
 .in-karte{display:flex; flex-direction:column; gap:9px; padding:10px 11px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
 .in-karte[style*="--v"]{border-left:3px solid var(--v)}
 .in-werte{display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:0; font-size:13px}
-.in-werte dt{color:var(--muted)}
+.in-werte dt, .in-port, .in-lease-abgelaufen{color:var(--muted)}
 .in-werte dd{margin:0}
-.in-werte dd.warn{color:var(--warn)}
-.in-port{color:var(--muted)}
 .in-if-name{border:0; background:none; color:var(--ink); font:700 13.5px/1.2 var(--mono); padding:4px 0; text-align:left; cursor:pointer}
 .in-if-name small{color:var(--accent); font-weight:600}
 .in-if.sub{margin-left:14px; border-style:dashed}
@@ -100,8 +106,7 @@
 .in-tabelle tr.klickbar:hover td, .in-port-kopf:hover, .in-port.auf .in-port-kopf{background:var(--panel-2)}
 .in-tabelle .rechts{text-align:right}
 .in-tabelle.mono{font-family:var(--mono); font-size:12.5px}
-.in-gegen{color:var(--muted); font-size:12.5px}
-.in-code-C{color:var(--ok); font-weight:700} .in-code-S{color:var(--accent); font-weight:700} .in-code-L{color:var(--faint)}
+.in-code-C{color:var(--ok); font-weight:700} .in-code-S{color:var(--accent); font-weight:700}
 
 .in-portliste{display:flex; flex-direction:column; gap:4px}
 .in-port-kopf{display:grid; grid-template-columns:78px auto 1fr 1fr; align-items:end; gap:6px; padding:5px 6px; border-radius:8px}
@@ -131,7 +136,7 @@
 .in-listenzeile{padding:4px 6px; border-radius:7px; background:var(--panel); font-size:13px}
 .in-warnliste{margin:0; padding-left:18px; color:var(--warn); font-size:13px; display:flex; flex-direction:column; gap:4px}
 
-.in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 10px; display:flex; flex-direction:column; gap:6px; animation:in-rein .2s ease-out}
+.in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 10px; display:flex; flex-direction:column; gap:6px; animation:in-rein var(--dauer) ease-out}
 @keyframes in-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
 .in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
 .in-ent-code{margin:0; padding:7px 9px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 12.5px/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
@@ -142,8 +147,6 @@
 .in-lease-tabelle td{padding:5px 7px; border-bottom:1px solid var(--line-2)}
 .in-lease-tabelle tr:last-child td{border-bottom:none}
 .in-lease-aktiv{color:var(--ok)}
-.in-lease-reserviert{color:var(--accent)}
-.in-lease-abgelaufen{color:var(--muted)}
-.in-lease-konflikt{color:var(--bad)}
+.in-lease-reserviert{color:var(--accent)}
 .in-lease-alt td{opacity:.62}
 .in-lease-konflikt td{background:var(--bad-soft)}

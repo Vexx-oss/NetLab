@@ -290,8 +290,22 @@ UI.karriere = (() => {
   }
 
   /* ---------- Wiki ---------- */
+  /* Zusatzseiten: Nachschlage-Seiten OHNE eigene Fertigkeit (Klassenraum, Übergabe – Leitung
+     09.10.2026). Sie stehen in DATEN.wiki wie jede andere Seite, gehören aber nicht zu DATEN.skills –
+     die 27er-Tabelle ist gesperrt (Klassenraum-Codec). Eine Zusatzseite hat keine Stufe und kein AP;
+     deshalb bekommt sie weder in der Liste noch im Artikel einen Stufenkopf (sie hätte sonst den
+     Rückfall „Stufe 1 · AP1“). Die Liste steht in den DATEN (`DATEN.wikiZusatz`) – EINE Quelle der
+     Wahrheit; der Literal-Rückfall hält die Ansicht auch mit einer älteren Datenschicht heil. */
+  const WIKI_ZUSATZ = (typeof DATEN !== "undefined" && Array.isArray(DATEN.wikiZusatz) && DATEN.wikiZusatz.length)
+    ? DATEN.wikiZusatz.slice() : ["klassenraum", "uebergabe"];
+  function wikiEintraege(){
+    const seiten = (DATEN.wiki || {});
+    const fertigkeiten = (DATEN.skills || []).map(s => ({s, w: seiten[s.id], zusatz: false})).filter(x => x.w);
+    const zusatz = WIKI_ZUSATZ.map(id => ({s: {id, name: (seiten[id] || {}).titel || id}, w: seiten[id], zusatz: true})).filter(x => x.w);
+    return [...fertigkeiten, ...zusatz];
+  }
   function wikiAnsicht(c){
-    const eintraege = (DATEN.skills || []).map(s => ({s, w: (DATEN.wiki || {})[s.id]})).filter(x => x.w);
+    const eintraege = wikiEintraege();
     const q = K.wikiSuche.trim().toLowerCase();
     const treffer = q ? eintraege.filter(x => (x.w.titel + " " + x.w.kurz + " " + x.s.name).toLowerCase().includes(q)) : eintraege;
     const wahl = K.wikiWahl && (DATEN.wiki || {})[K.wikiWahl] ? K.wikiWahl : (treffer[0] && treffer[0].s.id);
@@ -299,8 +313,11 @@ UI.karriere = (() => {
       oninput: e => { K.wikiSuche = e.target.value; wikiAnsicht(c); const el = c.querySelector("input[type=search]"); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }});
     const artikel = h("article", {class: "kr-artikel"});
     if (wahl) {
-      const w = DATEN.wiki[wahl], s = Spiel.skill(wahl);
-      artikel.append(h("small", {class: "sp-leise"}, `Stufe ${s.stufe} · ${s.ap}`), h("h2", {}, w.titel), h("p", {class: "kr-kurz"}, w.kurz),
+      const w = DATEN.wiki[wahl];
+      const e = eintraege.find(x => x.s.id === wahl) || null;
+      /* Fertigkeitsseiten tragen „Stufe x · APy“; eine Zusatzseite hat keine Stufe – also kein Kopf. */
+      const kopf = e && !e.zusatz ? h("small", {class: "sp-leise"}, `Stufe ${e.s.stufe} · ${e.s.ap}`) : null;
+      artikel.append(kopf, h("h2", {}, w.titel), h("p", {class: "kr-kurz"}, w.kurz),
         ...(w.abschnitte || []).map(a => h("section", {}, h("h3", {}, a.titel), h("div", {html: a.html}))),
         w.merksatz ? h("p", {class: "kr-merksatz"}, "💡 ", w.merksatz) : null,
         w.pruefungstipp ? h("p", {class: "kr-tipp"}, "🎯 Prüfungstipp: ", w.pruefungstipp) : null,
@@ -310,7 +327,7 @@ UI.karriere = (() => {
     c.replaceChildren(h("div", {class: "kr-wiki"},
       h("aside", {class: "kr-wiki-liste"}, h("h2", {}, "Wiki"), suche,
         h("nav", {}, treffer.map(x => h("button", {type: "button", class: "kr-wiki-punkt" + (x.s.id === wahl ? " an" : ""), onclick: () => { K.wikiWahl = x.s.id; wikiAnsicht(c); }},
-          h("span", {}, x.w.titel), h("small", {}, "Stufe " + x.s.stufe))))),
+          h("span", {}, x.w.titel), ...(x.zusatz ? [] : [h("small", {}, "Stufe " + x.s.stufe)]))))),
       artikel));
   }
   function wikiOeffnen(skill){ K.wikiWahl = skill; UI.app.ansicht("wiki"); }

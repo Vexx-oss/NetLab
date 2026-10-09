@@ -189,6 +189,41 @@ FAELLE = [
     # Szenario; der Kopf trägt die Summenzeile.
     ("Training", "__rauch.ansicht('training')", [".tr-karte .tr-knoepfe .knopf.primaer", ".tr-kopf .tr-summe"], None),
     ("Shop", "__rauch.ansicht('shop')", [".kr-ware .knopf.primaer", ".kr-ware", ".kr-kopf h2"], None),
+    # Klassenraum (2.0-Fundament, Stufe A/B): ZWEI neue Ansichten. Sie fehlten in dieser Liste, obwohl der
+    # Rauchtest grün meldete – dieselbe Lücke wie bei „Training" (07.10.2026). „Klasse" ist die
+    # Lehrkraft-Ansicht (Auftrag ansagen, Code groß zeigen), „Auftrag" die Azubi-Ansicht (Code eintippen).
+    # Beide Fälle gehen über das Öffnen hinaus und prüfen den ECHTEN Weg: die Lehrkraft klickt „Code anzeigen",
+    # danach steht der Code wirklich groß da; der Azubi holt einen Code über Spiel.klassenraum.erzeugen,
+    # tippt ihn ein, klickt „Auftrag öffnen" und der Auftrag ist danach offen – und nach E1 NICHT im
+    # sichtbaren Postfach. Danach steht wieder die Ansicht, deren Hauptaktion wie bei allen Fällen mit
+    # elementFromPoint geprüft wird. Kein Eintrag in ABSICHT: das Werkzeug wird nicht angepasst.
+    ("Klasse",
+     "__rauch.ansicht('klassenraum');"
+     " document.querySelector('.kl-lehrer .knopf-haupt').click();"
+     " for (let i = 0; i < 20 && !/^NL-[A-Z0-9]{4}-[A-Z0-9]{2}$/.test((document.querySelector('.kl-gross .kl-code') || {}).textContent || ''); i++) await __rauch.warte(50);"
+     " if (!/^NL-[A-Z0-9]{4}-[A-Z0-9]{2}$/.test((document.querySelector('.kl-gross .kl-code') || {}).textContent || ''))"
+     "   throw new Error('„Code anzeigen\" zeigt keinen Code: ' + ((document.querySelector('.kl-gross .kl-code') || {}).textContent || '—'));",
+     [".kl-lehrer .kl-knopf.knopf-haupt", ".kl-lehrer .kl-kopf h2"], None),
+    ("Auftrag",
+     "__rauch.ansicht('mitarbeit');"
+     " const klCode = (Spiel.klassenraum.erzeugen({ticketId: 'salon-02', seed: 11}) || {}).code;"
+     " if (!klCode) throw new Error('Spiel.klassenraum.erzeugen lieferte keinen Code');"
+     " const klFeld = document.querySelector('.kl-schueler input[aria-label=Auftragscode]');"
+     " if (!klFeld) throw new Error('Feld „Auftragscode\" fehlt');"
+     " klFeld.value = klCode;"
+     " const klKnopf = document.querySelector('.kl-schueler form.kl-form button[type=submit]');"
+     " if (!klKnopf) throw new Error('Knopf „Auftrag öffnen\" fehlt');"
+     " klKnopf.click();"
+     " for (let i = 0; i < 40 && !(UI.spiel && UI.spiel.inst && UI.spiel.inst.klassenraum); i++) await __rauch.warte(100);"
+     " const klInst = UI.spiel && UI.spiel.inst;"
+     " if (!klInst || !klInst.klassenraum || klInst.klassenraum.code !== klCode)"
+     "   throw new Error('Der Auftrag ist nicht offen: ' + JSON.stringify((klInst || {}).klassenraum || null));"
+     " if (Spiel.postfach().some(i => i.iid === klInst.iid)) throw new Error('E1 verletzt: der Klassenraum-Auftrag steht im sichtbaren Postfach');"
+     " UI.app.ansicht('mitarbeit');"
+     " for (let i = 0; i < 20 && !/Auftrag angenommen/.test((document.querySelector('.kl-schueler .kl-hinweis') || {}).textContent || ''); i++) await __rauch.warte(50);"
+     " if (!/Auftrag angenommen/.test((document.querySelector('.kl-schueler .kl-hinweis') || {}).textContent || ''))"
+     "   throw new Error('Die Mitarbeit-Ansicht zeigt den angenommenen Auftrag nicht');",
+     [".kl-schueler form.kl-form .knopf-haupt", ".kl-schueler .kl-kopf h2"], None),
 ]
 
 

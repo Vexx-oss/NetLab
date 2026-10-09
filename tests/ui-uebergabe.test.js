@@ -15,6 +15,18 @@ const UEB_KANN_LADEN = (() => {
 })();
 const UEB_ZUSATZ = UEB_KANN_LADEN ? "" : " (kein require im Testbereich – nur unter node tests/run.js)";
 
+/* Die ECHTEN Spiel-Funktionen, wie sie beim LADEN dieser Datei aussehen — also bevor irgendein Fall
+   gelaufen ist. Der Prüfstand setzt für `Spiel.uebergabe`, `Spiel.uebergabeLetzte` und
+   `Spiel.gutschreiben` Attrappen INS GETEILTE Spiel-Objekt (Bauart von tests/spiel-leiste-hilfe.test.js).
+   Ohne Aufräumen sieht jede danach laufende Testdatei diese Attrappen statt der echten Funktionen —
+   genau das hat `wiki-2` am 10.10.2026 Stunden gekostet: gemessen wurden `{ok, lernstandBehalten}`
+   (zwei Felder der Attrappe) statt der vier echten Rückgabefelder. Der Beleg wird beim LADEN gemerkt,
+   nicht im Fall — sonst könnte der Beweis grün werden, weil ein früherer Fall schon geleakt hat. */
+const UEB_ECHT = (() => {
+  try { return {uebergabe: Spiel.uebergabe, letzte: Spiel.uebergabeLetzte, gutschreiben: Spiel.gutschreiben}; }
+  catch (e) { return {}; }
+})();
+
 /* ================= DOM-Ersatz ================= */
 function uebKnoten(tag){
   const el = {
@@ -123,7 +135,11 @@ function uebStand(){
 function uebKapsel(fn){
   return () => {
     const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken,
-                 labor: store.get("labor", null), einstStore: store.get("einst", null)};
+                 labor: store.get("labor", null), einstStore: store.get("einst", null),
+                 /* Die drei Attrappen des Prüfstands sitzen im GETEILTEN Spiel-Objekt und MÜSSEN hier
+                    zurück: tests/run.js lädt alle Testdateien in EINEN Kontext — jede spätere Datei
+                    sähe sonst die Attrappe statt der echten Funktion (Befund `wiki-2`, 10.10.2026). */
+                 uebergabe: Spiel.uebergabe, uebergabeLetzte: Spiel.uebergabeLetzte, gutschreiben: Spiel.gutschreiben};
     try {
       Spiel._trocken = true; Spiel._lz = {};
       Spiel._st = Spiel.leererStand();
@@ -131,6 +147,7 @@ function uebKapsel(fn){
       return fn();
     } finally {
       Spiel._st = alt.st; Spiel._einst = alt.einst; Spiel._lz = alt.lz; Spiel._trocken = alt.trocken;
+      Spiel.uebergabe = alt.uebergabe; Spiel.uebergabeLetzte = alt.uebergabeLetzte; Spiel.gutschreiben = alt.gutschreiben;
       store.set("labor", alt.labor); store.set("einst", alt.einstStore);
       jetzt.frei();
     }
@@ -232,4 +249,43 @@ gruppe("UI: Übergabe" + UEB_ZUSATZ, () => {
     erwarte.wahr(s.toasts.some(t => String(t[0]).includes("Kein Lernmotor")), "der Grund wird gemeldet");
     erwarte.wahr(s.toasts.some(t => t[1] === "fehler"), "als Fehler, nicht als Erfolg");
   }));
+
+  /* Der Beweis, dass dieser Prüfstand die Welt für die folgenden Dateien NICHT verändert (Befund
+     `wiki-2`, 10.10.2026). Er läuft absichtlich als LETZTER Fall der Gruppe: danach hat jeder
+     andere Fall den geteilten Zustand schon angefasst. */
+  pruefe("Der Prüfstand räumt hinter sich auf — die echten Spiel-Funktionen stehen wieder da", () => {
+    /* 1 · ein voller Durchlauf mit den Attrappen — und der Beleg, dass sie WIRKLICH aktiv waren */
+    let attrappeAktiv = null;
+    uebKapsel(() => {
+      const s = uebStand();
+      attrappeAktiv = {uebergabe: Spiel.uebergabe !== UEB_ECHT.uebergabe,
+                       letzte: Spiel.uebergabeLetzte !== UEB_ECHT.letzte,
+                       gutschreiben: Spiel.gutschreiben !== UEB_ECHT.gutschreiben};
+      uebFinde(s.abschnitte.find(a => a[0] === "Rechner übergeben")[1], "button")[0].click();
+    })();
+    erwarte.gleich(attrappeAktiv, {uebergabe: true, letzte: true, gutschreiben: true},
+      "im Durchlauf waren die drei Attrappen aktiv — sonst prüft der Fall nichts");
+    /* 2 · danach: wieder genau die Funktionen aus der Ladezeit (Identität, nicht Gleichheit) */
+    erwarte.gleich(Spiel.uebergabe === UEB_ECHT.uebergabe, true, "Spiel.uebergabe ist wieder das Original");
+    erwarte.gleich(Spiel.uebergabeLetzte === UEB_ECHT.letzte, true, "Spiel.uebergabeLetzte auch");
+    erwarte.gleich(Spiel.gutschreiben === UEB_ECHT.gutschreiben, true, "Spiel.gutschreiben auch");
+    /* 3 · die echte Funktion liefert die VIER Felder — die Attrappe lieferte nur zwei */
+    uebKapsel(() => {
+      const r = Spiel.uebergabe({lernstandBehalten: true});
+      erwarte.gleich(r.ok, true, "die echte Übergabe gelingt");
+      erwarte.gleich(Object.keys(r).sort(), ["lernstandBehalten", "nachher", "ok", "vorher"],
+        "vier Felder wie in src/spiel/uebergabe.js:54-56");
+      erwarte.gleich(typeof r.nachher, "object", "mit dem Zustand nachher (die Attrappe kannte ihn nicht)");
+    })();
+    /* 4 · flächig: die Identität JEDER Funktion im geteilten Spiel-Objekt vor und nach einem Durchlauf.
+       So fällt auch auf, was hier niemand namentlich kennt — der Befund war ja genau eine unbemerkte
+       Änderung an einem fremden Objekt. */
+    const karte = () => Object.fromEntries(Object.keys(Spiel).filter(k => typeof Spiel[k] === "function").map(k => [k, Spiel[k]]));
+    const vorher = karte();
+    uebKapsel(() => { uebStand(); })();
+    const nachher = karte();
+    erwarte.gleich(Object.keys(vorher).filter(k => nachher[k] !== vorher[k]), [],
+      "keine einzige Funktion des Spiel-Objekts bleibt verändert zurück");
+    erwarte.gleich(Object.keys(nachher).filter(k => !(k in vorher)), [], "und keine kommt dazu");
+  });
 });

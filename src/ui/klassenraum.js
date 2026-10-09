@@ -126,7 +126,13 @@ UI.klassenraum = (() => {
           h("div", {class: "kl-gross"}, L.code),
           h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Der Code ist die Ansage: jedes Gerät baut denselben Fall."),
             h("button", {type: "button", class: "knopf kl-knopf", onclick: codeKopieren}, "Code kopieren")),
-          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck"), L.abdruck),
+          /* Der Abdruck ist der des EIGENEN Labors: D verlangt ausdrücklich das TATSÄCHLICH
+             GELADENE Netz, nicht den Code. Gemessen im Vorführlauf am 10.10.2026: die Lehrkraft
+             zeigte 2S8HS2, die zwei Azubi-Geräte desselben angesagten Auftrags 3U9JGE — dieselbe
+             Zeile, zwei verschiedene Netze. Deshalb sagt die Beschriftung, WESSEN Netz hier steht,
+             und der Hinweis daneben, wann beide gleich sind. KEIN neues Bedienelement (R12 = 6). */
+          h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Klassenraum-Abdruck (dein geladenes Netz)"), L.abdruck),
+          h("div", {class: "kl-block"}, hinweisZeile("kl-hinweis", "Er zeigt dein eigenes Labor. Mit den Geräten der Klasse stimmt er nur überein, wenn bei dir dasselbe Auftragsnetz geladen ist.")),
           L.hinweis),
         h("div", {class: "kl-ampel"},
           h("div", {class: "kl-summe"}, L.lampe, L.summe),
@@ -348,13 +354,22 @@ UI.klassenraum = (() => {
   }
 
   /* ---------------- Ergebnis-Code für die Lehrkraft (B § 7) ----------------
-     Der Kanal „klassenraum“ kommt aus `Spiel.klassenraum.abnehmen` (src/spiel/klassenraum.js:51) –
-     das ist der EINE Abnahmeweg der vierten Quelle. Das Ergebnis-Overlay bleibt unberührt (§ 7.2). */
+     Der Kanal „klassenraum“ kommt aus `Spiel.klassenraum` und trägt VIER verschiedene Meldungen:
+     `erzeugen` den AUFTRAGSCODE unter `auftragscode` (src/spiel/klassenraum.js:181),
+     `ergebnisEintragen` nur den Platz (:272), `importieren` eine Sitzungskennung (:321),
+     `plaetzeSetzen` die Platzzahl (:354) — und NUR `abnehmen` den fertigen ERGEBNIS-Code
+     unter `code` (:386-387). Gemessen im Vorführlauf am 10.10.2026: solange der Auftragscode im
+     Feld `code` stand, zeigte dieser Hörer ihn 20 s lang als „Ergebnis-Code“ an und verdeckte
+     die Knöpfe „Eintragen“/„Datei…“.
+     Deshalb liest er AUSSCHLIESSLICH `code` und lässt nur die GEDRUCKTE FORM des Ergebnis-Codes
+     durch: `E-XXXX-XXX` (Spezifikation § 2.2, immer genau 10 Zeichen). Ein Auftragscode (`NL-…`)
+     kann so nie als Ergebnis erscheinen — auch nicht, wenn ihn eine künftige Quelle wieder in
+     `code` schriebe. Geprüft wird bewusst die FORM, nicht die Prüfziffer: die Quelle setzt hier
+     den fertigen Code aus `ergebnisCode` ein, und die Prüfziffer prüft der Codec dort, wo es
+     zählt — beim Eintragen (`ergebnisEintragen`). */
   function ergebnisToast(d){
-    const inst = d && (typeof d.inst === "object" ? d.inst : null);
-    let code = d && typeof d.code === "string" ? d.code : null;
-    if (!code && inst && d.abnahme && kann("ergebnisCode")){ const r = ruf("ergebnisCode", inst, d.abnahme); if (typeof r === "string") code = r; }
-    if (!code) return null;                                   /* kein Code → kein Toast, kein Fehler */
+    const code = d && typeof d.code === "string" ? d.code : null;
+    if (!code || !/^E-[0-9A-Z]{4}-[0-9A-Z]{3}$/.test(code)) return null;   /* kein Ergebnis-Code → still */
     UI.toast("Ergebnis-Code für deine Lehrkraft: " + code, "ok", {id: "klassenraum-code", titel: "Für die Lehrkraft",
       dauer: 20000, aktion: {text: "Kopieren", fn: () => UI.hub.kopieren(code, "Ergebnis-Code kopiert – gib ihn deiner Lehrkraft.")}});
     return code;

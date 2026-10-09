@@ -1,6 +1,6 @@
 /* ---------- Karriere-Oberfläche (ui/karriere.js): Kunden, Shop, Lernstand, Wiki, Mini-Tickets ---------- */
 .kr-seite{height:100%; overflow:auto; padding:18px 22px 28px; display:flex; flex-direction:column; gap:18px; background:var(--bg); scrollbar-width:thin}
-.kr-kopf h2{font:800 28px/1 var(--display)}
+.kr-kopf h2, .kr-wiki-liste h2{font:800 28px/1 var(--display)}
 .kr-kopf p{margin-top:6px}
 .kr-raster{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:14px}
 .kr-raster.klein{grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:10px}
@@ -13,15 +13,14 @@
 .kr-schloss{position:absolute; top:14px; right:14px; font-size:18px}
 .kr-ampel{padding:3px 9px; border-radius:999px; font:600 12px/1.4 var(--body)}
 .kr-ampel.ok{background:var(--ok-soft); color:var(--ok)}
-.kr-ampel.warn{background:var(--warn-soft); color:var(--warn); animation:kr-pochen 2s ease-in-out infinite}
-.kr-ampel.bad{background:var(--bad-soft); color:var(--bad); animation:kr-pochen 1.4s ease-in-out infinite}
+.kr-ampel.warn{background:var(--warn-soft); color:var(--warn); animation:kr-pochen var(--dauer-lang) ease-in-out infinite}
+.kr-ampel.bad{background:var(--bad-soft); color:var(--bad); animation:kr-pochen var(--dauer-lang) ease-in-out infinite}
 @keyframes kr-pochen{50%{filter:brightness(1.35)}}
 .kr-gruppe h3{font:700 12px/1 var(--body); letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin:0 0 10px}
 .kr-ware{display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:14px; background:var(--panel); border:1px solid var(--line)}
 .kr-ware b{font-size:14.5px}
 .kr-ware p{margin:0; color:var(--muted); font-size:12.5px; line-height:1.45}
 .kr-ware.gekauft{border-color:var(--ok)}
-.kr-ware.veraltet{border-color:var(--warn)}
 .kr-ware.gesperrt, .kr-ware.teuer{opacity:.7}
 .kr-ware-fuss{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
 .kr-preis{font:800 16px/1 var(--display); color:var(--geld); white-space:nowrap; flex:0 0 auto}
@@ -30,10 +29,9 @@
 .kr-karriere, .kr-abzeichen, .kr-pruefung, .kr-stufe, .kr-zwei > div{padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px}
 .kr-karriere small{color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.09em; text-transform:uppercase}
 .kr-karriere h3, .kr-abzeichen h3, .kr-pruefung h3, .kr-stufe h3, .kr-zwei h3{font:800 18px/1.2 var(--display); margin:0}
-.kr-balken{display:grid; grid-template-columns:1fr 1fr; gap:14px}
 .kr-balken label{display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--muted)}
 .kr-bar{display:block; height:10px; border-radius:999px; background:var(--panel-3); overflow:hidden}
-.kr-bar i{display:block; height:100%; background:var(--ruf); border-radius:inherit; transition:width .6s ease}
+.kr-bar i{display:block; height:100%; background:var(--ruf); border-radius:inherit; transition:width var(--dauer-lang) ease}
 .kr-bar.koennen i{background:var(--ok)}
 .kr-fehlt{margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); display:flex; flex-direction:column; gap:4px}
 .kr-stufe.zu{opacity:.55}
@@ -44,9 +42,9 @@
 .kr-skill .sp-ring{grid-row:1 / 3}
 .kr-skill-name{font-size:13px; font-weight:600; line-height:1.25}
 .kr-skill small{color:var(--faint); font-size:11.5px}
-.kr-skill.faellig{border-color:var(--warn)}
+.kr-ware.veraltet, .kr-skill.faellig{border-color:var(--warn)}
 .kr-skill.faellig small{color:var(--warn); font-weight:700}
-.kr-zwei{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.kr-balken, .kr-zwei{display:grid; grid-template-columns:1fr 1fr; gap:14px}
 .kr-fehlerheft{margin:0; padding-left:18px; font-size:13px; display:flex; flex-direction:column; gap:5px; color:var(--muted)}
 .kr-behalten{display:grid; grid-template-columns:auto auto; gap:4px 16px; margin:0; font-size:14px}
 .kr-behalten dd{margin:0; font:700 15px var(--mono)}
@@ -69,7 +67,6 @@
 /* ---- Wiki ---- */
 .kr-wiki{display:grid; grid-template-columns:minmax(220px, 300px) minmax(0, 1fr); height:100%; min-height:0; background:var(--bg)}
 .kr-wiki-liste{display:flex; flex-direction:column; gap:10px; padding:18px 14px; border-right:1px solid var(--line); min-height:0; overflow:auto}
-.kr-wiki-liste h2{font:800 28px/1 var(--display)}
 .kr-wiki-liste nav{display:flex; flex-direction:column; gap:2px}
 .kr-wiki-punkt{display:flex; justify-content:space-between; gap:8px; text-align:left; padding:7px 10px; border:0; border-radius:9px; background:none; color:var(--ink); font-size:14px}
 .kr-wiki-punkt[disabled]{opacity:.6; cursor:default}

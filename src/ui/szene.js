@@ -110,7 +110,13 @@ UI.szene = (() => {
         h("div", {class: "sz-adressen", "aria-hidden": "true"}, f.bereiche.map((b, i) => h("i", {style: {left: b.links + "%", width: b.breite + "%", "--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}))),
         h("ul", {class: "sz-legende"}, f.bereiche.map((b, i) => h("li", {style: {"--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}, h("b", {}, b.name), ` ${b.netz}${b.praefix}`))));
       UI.klang?.spielen("haken");
-      await pause(ruhig ? 1200 : 300 + n * 280 + 1100, st);
+      /* Die Bereiche leuchten gestaffelt auf (szene.css: animation-delay calc(--i * 280ms + 250ms)).
+         Die Karte muss stehen, bis auch der LETZTE Bereich da ist — bei reduzierter Bewegung läuft die
+         Animation zwar mit 1 ms, die Verzögerungen bleiben aber (der zentrale Block in basis.css
+         ersetzt nur die Dauer). Seit task-38 gibt es hier keine eigene @media-Regel mehr, die die
+         Bereiche vorher sofort aufleuchten ließ — deshalb wartet die ruhige Fassung jetzt die Staffel ab. */
+      const staffel = 250 + (n - 1) * 280 + 320;
+      await pause(ruhig ? staffel : 300 + n * 280 + 1100, st);
     }
   }
 

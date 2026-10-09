@@ -174,7 +174,11 @@ Spiel.klassenraum = (() => {
       platz: platzzahl(alt.platz),                                 /* eigener Platz dieses Geräts bleibt */
       letzte: typeof alt.letzte === "string" ? alt.letzte : null,
     }));
-    Spiel.melden("klassenraum", {art: "erzeugt", sitzung: sitzung.id, code});
+    /* NICHT `code` nennen: der Bus-Hörer der Ansicht deutet jedes `code` als ERGEBNIS-Code und zeigt
+       dafür 20 s lang einen Toast (src/ui/klassenraum.js:353-358) – beim Anlegen der Sitzung ist das
+       der Auftragscode und damit schlicht falsch. Gemessen im Vorführlauf: der Toast verdeckte danach
+       die Knöpfe „Eintragen"/„Datei…". */
+    Spiel.melden("klassenraum", {art: "erzeugt", sitzung: sitzung.id, auftragscode: code});
     return tief(sitzung);
   }
 

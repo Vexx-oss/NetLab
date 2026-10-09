@@ -61,7 +61,7 @@ Zahlen.
 ### 3. Prüfen und bauen, in dieser Reihenfolge
 
 ```powershell
-sh tools/test.sh                       # erwartet: 434/434 grün, 0 übersprungen (Stand 07.10.2026)
+sh tools/test.sh                       # erwartet: 707/707 grün, 0 übersprungen (Stand 09.10.2026)
 python tools/ethos.py                  # GRUEN gegen tests/stil-stand.json
 python tools/klassen.py                # 0 Klassen ohne CSS-Regel
 node tools/sim-stand.js                # Simulation unverändert

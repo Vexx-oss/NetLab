@@ -402,4 +402,55 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(store.get("einst", {}).klassenraumServer, true, "eingeschaltet wird gespeichert");
     erwarte.gleich(schalter.getAttribute("aria-checked"), "true", "und der Schalter zeigt es");
   }));
+
+  pruefe("Der Abdruck der Lehrkraft sagt, WESSEN Netz er zeigt (Vorführlauf-Befund 10.10.2026)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const detail = klFinde(c, ".kl-detail").map(x => klText(x));
+    erwarte.enthaelt(detail.join(" | "), "Klassenraum-Abdruck (dein geladenes Netz)", "die Beschriftung nennt das eigene Netz");
+    const hinweis = klFinde(c, ".kl-hinweis").map(x => klText(x)).join(" | ");
+    erwarte.enthaelt(hinweis, "eigenes Labor", "und der Hinweis sagt, wessen Abdruck das ist");
+    erwarte.enthaelt(hinweis, "dasselbe Auftragsnetz geladen", "mit der Bedingung, wann beide gleich sind");
+    /* die Zahl der Bedienelemente bleibt bei sechs — die Ehrlichkeit kostet keinen Knopf (R12) */
+    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
+    erwarte.gleich(steuer, 6, "weiterhin sechs sichtbare Bedienelemente");
+  }));
+
+  pruefe("Auftrag erzeugen meldet KEINEN Ergebnis-Code — auch kein NL-… in `code` (B § 7, Kanal kontrakt)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const s = klSitzung("salon-terminal");
+    const kanal = d => p.busHaken.find(b => b.art === "klassenraum").fn(d);
+    const toasts = () => p.rufe.filter(r => r[0] === "toast").length;
+    kanal({art: "erzeugt", sitzung: s.id, auftragscode: s.code});        /* so meldet die Quelle den Auftragscode */
+    erwarte.gleich(toasts(), 0, "Auftrag erzeugen ist kein Ergebnis");
+    kanal({art: "ergebnis", platz: 5});                                  /* Ergebnis eingetragen, aber ohne Code */
+    erwarte.gleich(toasts(), 0, "das Eintragen meldet keinen Code");
+    kanal({art: "import", sitzung: s.id});
+    kanal({art: "plaetze", plaetze: 9});
+    erwarte.gleich(toasts(), 0, "Import und Platzzahl erst recht nicht");
+    /* die alte, irreführende Form: Auftragscode im Feld `code` — genau der Vorführlauf-Befund */
+    kanal({art: "erzeugt", sitzung: s.id, code: s.code});
+    erwarte.gleich(toasts(), 0, "ein NL-…-Code wird vom Codec als Ergebnis abgewiesen");
+    kanal({bestanden: false, sterne: 0, code: null});                    /* nicht bestanden: kein Code */
+    erwarte.gleich(toasts(), 0, "ohne Bestehen gibt es keinen Ergebnis-Code");
+  }));
+
+  pruefe("Abnahme bestanden: GENAU EIN Toast, und zwar mit dem E-…-Code aus `code` (B § 7)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const s = klSitzung("salon-terminal");
+    const code = klErgebnis(s.id, 5, 4.5, 110000, 2);
+    erwarte.passt(code, /^E-[0-9A-Z]{4}-[0-9A-Z]{3}$/, "der Codec baut einen Ergebnis-Code der gedruckten Form");
+    /* Die Abnahme-Meldung trägt BEIDES: den Auftragscode (neues Feld) und den Ergebnis-Code (`code`) */
+    p.busHaken.find(b => b.art === "klassenraum").fn({iid: "i1", bestanden: true, sterne: 4.5, auftragscode: s.code, code});
+    const toasts = p.rufe.filter(r => r[0] === "toast");
+    erwarte.gleich(toasts.length, 1, "genau ein Toast");
+    erwarte.enthaelt(toasts[0][1], code, "mit dem Ergebnis-Code");
+    erwarte.falsch(String(toasts[0][1]).includes(s.code), "nicht mit dem Auftragscode");
+    erwarte.gleich(toasts[0][2], "ok", "als Erfolg");
+    erwarte.gleich(toasts[0][3].id, "klassenraum-code", "mit fester id");
+    erwarte.gleich(toasts[0][3].titel, "Für die Lehrkraft", "und Titel");
+  }));
 });

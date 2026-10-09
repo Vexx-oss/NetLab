@@ -394,7 +394,14 @@ def pruefe(aus: dict) -> tuple[list, list, list]:
     mobil.css). Ein Profil ohne Berührung („schreibtisch“) wird mit Maus gemessen: dort
     ist ein 38 px hoher Menüpunkt kein Fehler, sondern wird als Hinweis geführt. Ehrlich
     bleibt es trotzdem: unter Geräte-Emulation meldet `matchMedia('(pointer: coarse)')`
-    wahr, die mobilen Regeln greifen also wirklich."""
+    wahr, die mobilen Regeln greifen also wirklich.
+
+    (c) Ein Profil OHNE Messung (kein UI) zählt WEDER als erfüllt NOCH als verletzt — dieselbe
+    Haltung wie R12 in `tools/ethos.py` („gilt weder als eingehalten noch als verletzt“). Sonst
+    liest sich „40 erfüllt, 7 verletzt“ wie sieben Befunde, obwohl ein Profil gar nicht gemessen
+    wurde (Befund 09.10.2026, von der Leitung freigegeben)."""
+    if aus.get("nichtGemessen"):
+        return [], [], [(f"Profil {aus.get('profil')}: NICHT GEMESSEN", aus.get("fehler") or ["-"])]
     grob = bool(aus.get("beruehrung"))
     gruen, rot, hinweise = [], [], []
 
@@ -514,6 +521,27 @@ def fenster_setzen(ws, breite: int, hoehe: int):
     return False
 
 
+def warten_auf_seite(ws) -> bool:
+    """Warten, bis die App wirklich bereit ist — `document.readyState === "complete"` UND `UI.app`
+    vorhanden —, mit Zeitgrenze und ohne Wurf. Rückgabe: True = bereit, False = Zeitgrenze erreicht.
+
+    Eigene, benannte Wartestelle seit 09.10.2026 (Befund `menueprobe`): im `--lauf` blieb je Lauf
+    EIN Profil ohne UI („Fehler im Messskript [kein UI]“) — das zählte als 1 Verstoß, und 9
+    Kriterien wurden gar nicht gemessen. Dasselbe Profil allein aufgerufen war grün (9/9): Die
+    Seite war nach dem Navigieren noch nicht bereit, kein Befund der Oberfläche.
+    Gewartet wurde zuerst nur auf `#app` mit Kindern — ein Stellvertreter, kein Beweis: Nach einem
+    `Page.navigate` kann noch das ALTE Dokument die Kinder tragen, während `UI.app` fehlt. Jetzt
+    wird auf genau das gewartet, was das Messskript braucht."""
+    time.sleep(1.2)
+    for _ in range(40):
+        v, _ = js(ws, "(document.readyState === 'complete' && typeof UI !== 'undefined' && !!UI.app) ? 1 : 0",
+                  warten=False)
+        if (v or 0) == 1:
+            return True
+        time.sleep(0.5)
+    return False
+
+
 def messe_profil(ws, datei: Path, name: str, breite: int, hoehe: int, dpr: float, ausrichtung: str,
                  beruehrung: bool = True) -> dict:
     # Das echte Fenster auf die Sollmaße ziehen, BEVOR die Emulation greift. Gemessen
@@ -531,18 +559,30 @@ def messe_profil(ws, datei: Path, name: str, breite: int, hoehe: int, dpr: float
               "screenWidth": breite, "screenHeight": hoehe,
               "screenOrientation": {"type": ausrichtung, "angle": 0 if ausrichtung == "portraitPrimary" else 90}})
     ws.rufen("Page.navigate", {"url": datei.as_uri()})
-    time.sleep(2.6)
-    for _ in range(40):
-        v, _ = js(ws, "document.getElementById('app')?.children.length || 0", warten=False)
-        if (v or 0) > 0:
-            break
-        time.sleep(0.5)
+    bereit = warten_auf_seite(ws)
     wert, fehler = js(ws, MESSUNG, warten=True)
     if wert is None:
-        return {"profil": name, "fehler": ["Messskript abgebrochen: " + str(fehler)]}
+        return {"profil": name, "nichtGemessen": True,
+                "fehler": ["Messskript abgebrochen: " + str(fehler)] + ([] if bereit else ["Seite nicht bereit"])}
+    # (b) Zwei Versuche: meldet der erste „kein UI“, EINMAL neu laden und erneut messen. Bleibt es
+    # auch beim zweiten Mal dabei, gilt das Profil als NICHT GEMESSEN (kein Verstoß, s. pruefe()) —
+    # und der Hinweis sagt offen, dass neu geladen wurde (Befund 09.10.2026, s. o.).
+    if "kein UI" in (wert.get("fehler") or []):
+        ws.rufen("Page.reload", {"ignoreCache": True})
+        warten_auf_seite(ws)
+        zweiter, fehler2 = js(ws, MESSUNG, warten=True)
+        if zweiter is not None:
+            zweiter.setdefault("notizen", []).append(
+                "Seite war beim ersten Versuch nicht bereit (kein UI) – einmal neu geladen; "
+                "das ist ein Werkzeug-Neuladen, kein Befund der Oberfläche")
+            wert = zweiter
     wert["profil"] = name
     wert["soll"] = {"breite": breite, "hoehe": hoehe, "dpr": dpr}
     wert["beruehrung"] = beruehrung
+    # (c) Ohne UI wurde NICHTS gemessen: kein Verstoß, sondern keine Messung. Die Kennzeichnung
+    # reist mit dem Ergebnis und wird in pruefe()/drucke()/main() respektiert.
+    if "kein UI" in (wert.get("fehler") or []):
+        wert["nichtGemessen"] = True
     return wert
 
 
@@ -554,6 +594,13 @@ def schuss(ws, ziel: Path):
 
 def drucke(aus: dict, breite_konsole: int = 100) -> tuple[int, int]:
     gruen, rot, hinweise = pruefe(aus)
+    # (c) Ein nicht gemessenes Profil bekommt eine eigene Zeile: nicht „ROT 0 erfüllt, 1 verletzt“
+    # (das sah wie ein Befund aus), sondern ausdrücklich NICHT GEMESSEN mit Grund.
+    if aus.get("nichtGemessen"):
+        grund = "; ".join(str(x) for x in (aus.get("fehler") or ["-"])[:2])
+        print(f"\n  Profil {aus.get('profil')} — NICHT GEMESSEN ({grund})")
+        print("  NICHT GEMESSEN: 0 Kriterien erfüllt, 0 verletzt, 0 Hinweis(e) — kein Ergebnis")
+        return 0, 0
     print(f"\n  Profil {aus.get('profil')}  Anzeige {aus.get('breite')}×{aus.get('hoehe')} px "
           f"(Layout {aus.get('layoutBreite')}, innerWidth {aus.get('innerBreite')}), "
           f"{'grob (Finger)' if aus.get('grob') else 'fein (Maus)'}"
@@ -661,7 +708,17 @@ def main() -> int:
         Path(a.json).parent.mkdir(parents=True, exist_ok=True)
         Path(a.json).write_text(json.dumps(ergebnisse, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"\n  JSON {a.json}")
-    print(f"\n  {'GRÜN' if not rot else 'ROT'}: {len(profile)} Profil(e), {gruen} Kriterien erfüllt, {rot} verletzt")
+    # (c) Die Zusammenfassung trennt „gemessen“ von „nicht gemessen“: Ein abgebrochenes Profil ist
+    # kein Verstoß, aber es darf auch nicht als grün durchgehen — es wird ausdrücklich benannt.
+    nicht_gemessen = [a.get("profil") for a in ergebnisse if a.get("nichtGemessen")]
+    gemessen = len(profile) - len(nicht_gemessen)
+    if not gemessen:
+        print(f"\n  NICHTS GEMESSEN: 0 von {len(profile)} Profilen gemessen — das ist kein Ergebnis "
+              f"({', '.join(str(n) for n in nicht_gemessen)})")
+        return 1
+    kopf = "ROT" if rot else ("GRÜN (mit Einschränkung)" if nicht_gemessen else "GRÜN")
+    print(f"\n  {kopf}: {gemessen} von {len(profile)} Profilen gemessen, {gruen} Kriterien erfüllt, {rot} verletzt"
+          + (f" · {', '.join(str(n) for n in nicht_gemessen)} NICHT GEMESSEN" if nicht_gemessen else ""))
     return 1 if rot else 0
 
 

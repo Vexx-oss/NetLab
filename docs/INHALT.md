@@ -53,7 +53,7 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`entwicklung/Review – Testqualität.md`](<entwicklung/Review – Testqualität.md>) | Die **Mutationsprobe**: künstlich eingebaute Fehler, und wie viele Tests sie fangen. Fünf Mutanten gemessen, alle erkannt; dazu die Lücke in „Wirkung vor Grün". |
 | [`entwicklung/Review – Betrieb.md`](<entwicklung/Review – Betrieb.md>) | Spielstand-Migration v:2 → v:3 in elf Punkten, Byte-Gleichheit der Erzeugnisse, und warum die Fassung gezogen werden musste. |
 | [`entwicklung/Review – Betrieb-Werkzeuge.md`](<entwicklung/Review – Betrieb-Werkzeuge.md>) | Die Prüfwerkzeuge selbst: welches misst was, und der Befund, dass der Rauchtest eine feste Ansichtsliste führte — die neue Ansicht fehlte darin. |
-| [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31–§ 34 | Der Bau der Hilfestellung, die Auslieferung 1.2.4, (in § 33) das **2.0-Fundament** und (in § 34) der **Klassenraum-Öffnungsweg** — inklusive dem, was bewusst **nicht** gebaut und was **verworfen** wurde. |
+| [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) § 31–§ 35 | Der Bau der Hilfestellung, die Auslieferung 1.2.4, (in § 33) das **2.0-Fundament**, (in § 34) der **Klassenraum-Öffnungsweg** und (in § 35) die **Output-Runde** — inklusive dem, was bewusst **nicht** gebaut und was **verworfen** wurde. |
 
 ## Fahrplan 1.3 / 2.0 — Entscheidungsvorlage (09.10.2026)
 
@@ -88,12 +88,19 @@ die zwei Ansichten für Lehrkraft und Azubi, die Startseiten-Zeile und der Ergeb
 Bewertung, ohne Server, ohne QR**; die Stufen C und D kommen später. Bauweg und verworfene Versuche stehen
 im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 34.
 
+Die **dritte Runde** derselben Fassung ist die **Output-Runde**: Trefferflächen ≥ 44 px, die Altlasten der
+Regeln R1–R10 und die Regel **R12**, die bisher **nichts** gemessen hat — sieben Ströme, sieben
+Gegenproben, ein belegter R8-Fund („gelöscht statt verschoben"). Bauweg, verworfene Versuche und die
+Messpunkte stehen im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 35.
+
 | Datei | Wofür |
 |---|---|
 | [`entwicklung/Übergabe – Stand 2.0-Fundament.md`](<entwicklung/Übergabe – Stand 2.0-Fundament.md>) | **Für den Neustart.** Der jüngste Übergabezettel, bewusst kurz: was diese Sitzung gebaut hat, welche vier Regeln jetzt gelten, was als Nächstes zu tun ist. Ein neuer Lauf liest zuerst diese Datei. |
 | [`entwicklung/Befund – Lernmotor-Falle.md`](<entwicklung/Befund – Lernmotor-Falle.md>) | Die Falle in `fremd/lernmotor.js` mit Datei:Zeile — was auf unserer Seite behoben ist, was nur in der FISI-Spielhalle behoben werden kann, samt Änderungsvorschlag. Vorlage für den Nutzer, nicht ausgeführt. |
 | [`entwicklung/Review – 2.0-Fundament.md`](<entwicklung/Review – 2.0-Fundament.md>) | Die **unabhängige Gegenprüfung** des Fundaments: jede Behauptung der Teammates mit eigenem Befehl oder Zitat nachgemessen, mit Restzweifeln und dem, was nicht geprüft werden konnte. |
 | [`entwicklung/Review – Klassenraum A+B.md`](<entwicklung/Review – Klassenraum A+B.md>) | Die **unabhängige Gegenprüfung** der Klassenraum-Stufen A und B (Codec, Öffnungsweg, die zwei Ansichten) mit eigenen Messungen — und ausdrücklich dem, was **nicht** geprüft werden konnte. |
+| [`entwicklung/Befund – Output-Runde.md`](<entwicklung/Befund – Output-Runde.md>) | Die **unabhängige Messung der Output-Runde**: Vorher-Stand der 14 CSS-Dateien (Bytes, Zeilen, CRLF, SHA256), Regeln vorher/nachher, **sieben Gegenproben** — und der **R8-Fund** samt dem einen benannten Verlust, dazu sieben widerlegte Annahmen. |
+| [`entwicklung/Befund – 27 von 27.md`](<entwicklung/Befund – 27 von 27.md>) | Die Frage, ob **jede** der 27 Fertigkeiten als Klassenraum-Auftrag lösbar ist — in vier Messungen belegt, mit der Tabelle aller 27 und fünf Befunden zum Drumherum. |
 
 ## Wie dieses Verzeichnis aufgeräumt wurde
 

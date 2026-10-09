@@ -879,6 +879,8 @@ widersprechen oder älter sind als der Code. Sie gelten für die Umsetzung; die 
 | **L3** | `ohneFlow: true` (A, Spez. § 2.6, § 12) gegen `postfach.js:84`, das die Quelle selbst ausnimmt | **beides setzen** | Der Schalter schadet nicht und hält den geschriebenen Vertrag; die Quelle bleibt zusätzlich geschützt |
 | **L4** | Dokument **B** und **D** widersprechen sich beim Ablauf der Lehrkraft (Knopf „Code anzeigen" vs. „Sitzung anlegen"; ein `textarea` vs. Einzelfeld; ein Knopf „Datei…" vs. zwei) | **B gilt** | D's Drehbuch ist mit der Regel R12 (höchstens 6 sichtbare Bedienelemente je Ansicht) nicht darstellbar; B ist die baubare Fassung |
 | **L5** | Wo der Ergebnis-Code erscheint | **als Toast mit Kopierknopf**, geankert am Bus-Kanal `klassenraum` — **keine** Änderung an `sp-ergebnis` | `B § 7.2` verbietet die dauerhafte Zeile ausdrücklich; der Kanal ist gebaut (`klassenraum.js:51`) |
+| **L6** | Wie viele Fertigkeiten sind tauglich — A misst **24 von 27** | **alle 27** (`tauglich: true`), Indizes 0..26 gültig, **27..63** → `{fehler:"fassung"}` | A maß **vor** den Injektoren aus task-5. Nachgemessen (`tests/klassenraum-loesbarkeit.test.js`, `docs/entwicklung/Befund – 27 von 27.md`): 27 Skills × Seeds 1..16 = **432/432**, volles Fenster Seeds 1..64 = **1728/1728**, echter Lehrkraft-Weg = **54/54**, jedes Mal mit Injektor, gebrochenem Ziel und Lösungsweg. Kein Index rückt (Anhängeregel unverletzt); die drei neuen (`lab.portsec`, `lab.stp`, `lab.storage`) liefern echte Aufträge statt `{fehler:"auftrag"}` — **gewollt** |
+| **L7** | Was die Regel **R12** („höchstens 6 Bedienelemente je Ansicht") bedeutet | Sie **misst je Ansicht** — und die Grenze **6** bindet die **Zusatzansichten** (Lehrkraft `klasse` = 6, Azubi `Auftrag` = 3). Die Hauptansichten werden **gemessen und als Stand festgehalten**, nicht auf 6 gebogen | R12 meldete bis 09.10. „0 sichtbare Elemente — eingehalten", weil der Messweg `null` lieferte (`cdp.py` verpackte den Ausdruck als Rumpf) — ein **grünes Nichts**. Repariert: `ethos.py` zählt je Ansicht im eigenen Kasten und sagt „nicht gemessen", wenn etwas nicht messbar ist. Ergebnis am alten Bau: `Heute 6 · Postfach 6 · Labor 15 · Kunden 4 · Wiki 31 · Lernstand 31 · Shop 4`. Eine Wiki-Seite mit 31 Verweisen auf 6 zu kürzen wäre kein Minimalismus, sondern ein Rückschritt — deshalb die Trennung |
 
 Dazu die Dateiaufteilung für den Bau (ein Schreiber je Datei): **`src/spiel/klassenraum-codec.js`**
 (reine Rechnung: Formate, Prüfzeichen, Kanonisierung, Abdruck, eingefrorene Tabellen) ·
@@ -904,14 +906,18 @@ Eingriff in `src/ui/hub.js`.
 
 | Prüfung | Ergebnis |
 |---|---|
-| `sh tools/test.sh` | **Exit 0** — `661/661 grün (74 Testdateien, 91 Module)`, `davon 0 übersprungen` |
-| `node tests/run.js klassenraum` | **67/67 grün** · Achtung: `--klassenraum` prüft **0 Fälle** (Filter nimmt das Argument wörtlich) |
-| `python tools/ethos.py` · `klassen.py` | **GRÜN** · **0 Klassen ohne CSS-Regel** (auch für das Präfix `kl-`) |
+| `sh tools/test.sh` | **Exit 0** — `726/726 grün (81 Testdateien, 91 Module)`, `davon 0 übersprungen` |
+| `sh tools/test.sh --rauch` | **45/45** — 14 Ansichten (die zwei Klassenraum-Ansichten sind neu) × 3 Breiten, echte Maus |
+| `node tests/run.js klassenraum` | grün · Achtung: `--klassenraum` prüft **0 Fälle** (Filter nimmt das Argument wörtlich) |
+| `python tools/ethos.py` · `klassen.py` | **GRÜN** (neuer Stand eingefroren) · **0 Klassen ohne CSS-Regel** (auch für `kl-`) |
 | `node tools/sim-stand.js` | Simulation unverändert gegenüber dem Referenzstand |
-| `python tools/seite.py --pruefen` | GRÜN — 40 Dokumente, kein toter Verweis |
-| `python bauen.py` | **128 Module**, 2202 KB → `web/index.html`, Fassung **2.0.0** |
-| `docs/index.html` = `Netzwerk-Labor.html` | **byte-gleich**, 2 791 782 B, SHA256 `D7D45F13…A4A2`, 0 Außenverweise |
-| Android | `Netzwerk-Labor-2.0.0-Android.apk`, 1 148 444 B, SHA256 `A9526120…D988`, Signatur gültig |
+| `python tools/seite.py --pruefen` | GRÜN — 42 Dokumente, kein toter Verweis |
+| `python tools/menueprobe.py` | **Web 45 erfüllt / 0 verletzt**, **Android 49 erfüllt / 0 verletzt** — jeweils **5 von 5 Profilen gemessen** |
+| **R12 im laufenden Programm** | **`klasse` 6/6 ✓ · `Auftrag` 3/3 ✓** — Vorschrift unverändert aus `ethos.py`, drei Breiten, zwei Zustände, vier Gegenproben |
+| `python bauen.py` | **128 Module**, 2238 KB → `web/index.html`, Fassung **2.0.0** |
+| `docs/index.html` = `Netzwerk-Labor.html` | **byte-gleich**, 2 829 477 B, SHA256 `C3C51EDA…828E`, 0 Außenverweise |
+| Android | `Netzwerk-Labor-2.0.0-Android.apk`, 1 160 732 B, SHA256 `A27751B2…F93733`, Signatur gültig |
+| Desktop (Auslieferung) | **Release**-Bau `Programm/Netzwerk-Labor.exe`, 8 630 272 B, 2.0.0; Sonden: 10 Ansichten, `klassenraum`+`mitarbeit` da, `.st-knopf` 44 px, `.menue` z-index 50 |
 
 **Der Codec ist erschöpfend belegt** (gemessen von der Umsetzung, nicht abgeleitet): Auftragscode
 **1 048 576/1 048 576** Nutzlasten (2²⁰) bauen-lesen-rund, 0 Abweichungen; Ergebnis-Code
@@ -919,6 +925,21 @@ Eingriff in `src/ui/hub.js`.
 werden **ausnahmslos** als Prüfziffer-Fehler markiert. Die drei dokumentierten Beispiele `NL-HC3L-CS`,
 `NL-WTQJ-EF` und `E-KFWS-HZM` stimmen zeichengleich; das Formbeispiel `NL-4F7K-2Q` wird abgewiesen
 (richtig wäre `NL-4F7K-E3`). Determinismus: 274 Codes in zwei getrennten Prozessen identisch.
+Der Beweislauf der Kanonisierung ist **vollständig**: 58 von 58 Handaufträgen, `kanonHandK0` **3520**,
+**3712** Varianten, Rückfall 192 (die drei Terminal-Aufträge), `abgebrochen: false` — und ein Abbruch
+wäre an drei Stellen sichtbar (Befundtext, Konsole, JSON), nachgewiesen mit einem absichtlich auf 60 s
+gesetzten Budget.
+
+**Die Output-Runde (09.10.2026) hat den gemessenen Stil-Stand verbessert** — alles in
+`tests/stil-stand.json` eingefroren: **R1 23→22 · R2 122→113 · R3 206→195 · R4 539→514 · R5 70→0 ·
+R6 11→0 · R8 5→0 · R10 87→0**. Trefferflächen: **44 px drei → elf** Flächen; die zwei Menü-Überdeckungen
+hatten eine Ursache (`.menue` mit `z-index:40` unter dem Android-Dock-Blatt mit 45) und sind behoben.
+Unabhängig gegengeprüft in `docs/entwicklung/Befund – Output-Runde.md` mit **sieben Gegenproben**
+(Zeilenenden, Regeln gegen HEAD, Werkzeug-Hashes gegen „Regel abgeschaltet", Bewegung 36/54/41,
+Trefferfläche gegen „Inhalt verkleinert", Löschen gegen Ändern, Tokens) — dabei wurden drei Annahmen
+**widerlegt**, u. a. dass R8 „verschoben" statt gelöscht wurde (`basis.css` ist byte-identisch).
+Ein Verlust ist benannt und dokumentiert: `.ger[class*="jc-"] .gb` und `.kabel[class*="jc-"] *` haben
+keine eigene Regel mehr (Wirkung gedeckt durch `basis.css:91/93`, in `juice.css` kommentiert).
 
 **Nicht geprüft — ehrlich:** kein Browserlauf (damit auch **nicht** die Regel „höchstens 6 sichtbare
 Bedienelemente" im laufenden Programm; sie ist nur im Test am DOM gezählt), keine Bildschirmfotos, keine

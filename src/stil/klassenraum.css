@@ -8,8 +8,12 @@
    (R3) sie. Das ist der in B § 2.4 offen benannte Kompromiss, kein Versehen. */
 
 /* --- Gerüst --- */
-.kl-lehrer{display:grid; gap:16px; padding:16px 24px 32px; height:100%; overflow:auto; background:var(--bg)}
-.kl-schueler{display:grid; gap:12px; padding:16px 24px 24px; height:100%; overflow:auto; background:var(--bg)}
+/* overflow-y + overflow-x getrennt: mit `overflow:auto` bekommt .kl-spalte seine Breite VOR der
+   senkrechten Bildlaufleiste, ragt dann 1 px über die Fensterkante und der Kasten scrollt seitlich
+   (gemessen im Rauchtest: 720 px Breite → „div.kl-lehrer scrollt seitlich (+40 px)"). Seitlich wird
+   hier nie gescrollt — die Spalte ist auf min(660px,100%) begrenzt. */
+.kl-lehrer{display:grid; gap:16px; padding:16px 24px 32px; height:100%; overflow-y:auto; overflow-x:hidden; background:var(--bg)}
+.kl-schueler{display:grid; gap:12px; padding:16px 24px 24px; height:100%; overflow-y:auto; overflow-x:hidden; background:var(--bg)}
 .kl-spalte{display:grid; gap:12px; align-content:start; width:min(660px,100%); margin:0 auto}
 .kl-kopf{display:grid; gap:4px}
 .kl-kopf h2{margin:0; font:800 20px/1.2 var(--display); color:var(--ink)}

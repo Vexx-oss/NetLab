@@ -1,10 +1,23 @@
 /* ---------- App-Rahmen: Kopfzeile, Andock-Leiste, Ansichten, Toasts, Menüs, Palette, Dialoge ----------
-   Nur Tokens aus basis.css. */
+   Nur Tokens aus basis.css.
+
+   EBENEN (tools/ethos.py R6): Kopfzeile 10 · Menü/Palette 50 · Dialog 60 · Toast 70.
+   Das ist die alte Reihenfolge (3 < 50 < 55 < 56 < 60), nur aus der benannten Leiter
+   {10 … 80}; das Spiel-Overlay (`.sp-overlay`, spiel.css:133) bleibt mit 80 darüber.
+   Warum das Menü auf 50 steht (und nicht tiefer): die Android-Blätter `.lb-geraete` (40) und
+   `.lb-dock` (45, mobil.css:259/297) sind eigene Stapelkontexte in der Wurzel; unter 46
+   verschwindet das Kontextmenü hinter dem Dock-Blatt (gemessen mit tools/menueprobe.py,
+   Profil klein-hoch: „verdeckt von DIV.in-raster“). Menü und Palette teilen sich die 50:
+   die Palette hängt sich beim Öffnen an `body` (palette.js:100) und liegt damit über einem
+   schon offenen Menü; umgekehrt geht kein Menü auf, solange der Palettenschleier davor liegt.
+   DAUER (R5): nur 1/160/320 ms — dafür die Tokens `--dauer` (160) und `--dauer-lang` (320).
+   BLOCKDOPPLUNG (R10): gleiche Regelkörper stehen EINMAL mit Selektorliste; die Zeile bleibt an
+   der Stelle des ersten Vorkommens, damit die Kaskade unverändert bleibt. */
 #app{height:100%}
 .app{display:grid; grid-template-rows:var(--kopf-h) minmax(0,1fr); grid-template-columns:var(--dock-b) minmax(0,1fr); height:100vh; background:var(--bg)}
 
 /* ---- Kopfzeile ---- */
-.kopf{grid-column:1 / -1; display:flex; align-items:center; gap:18px; padding:0 12px 0 14px; background:var(--panel); border-bottom:1px solid var(--line); position:relative; z-index:3}
+.kopf{grid-column:1 / -1; display:flex; align-items:center; gap:16px; padding:0 12px; background:var(--panel); border-bottom:1px solid var(--line); position:relative; z-index:10}
 .kopf::after{content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:linear-gradient(90deg, transparent, var(--accent) 30%, transparent 70%); opacity:.35; pointer-events:none}
 .kopf-marke{display:flex; align-items:center; gap:10px; min-width:0; flex:0 0 auto}
 .marke-sym rect{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5}
@@ -16,35 +29,37 @@
 .wert{display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 12px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
   font:600 14px/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap; transition:background var(--dauer), border-color var(--dauer)}
 button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
-.wert .sym{flex:0 0 auto}
-.wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym, .wert-offen.hat .sym{color:var(--accent)} .wert-offen .sym{color:var(--muted)}
-.wert-offen.hat{border-color:var(--accent); background:var(--accent-soft)} 
-.wert.leer .wert-zahl{color:var(--faint)}
+.wert .sym, .einst-steuer{flex:0 0 auto}
+.wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym, .wert-offen.hat .sym, .pal-punkt.an .pal-sym{color:var(--accent)} .wert-offen .sym, .einst-zeile.gesperrt strong{color:var(--muted)}
+.wert-offen.hat, .schalter.an{border-color:var(--accent); background:var(--accent-soft)} 
+.wert.leer .wert-zahl, .pal-eingabe::placeholder{color:var(--faint)}
 .wert.mit-fortschritt{position:relative; overflow:hidden}
-.wert.mit-fortschritt::after{content:""; position:absolute; left:0; bottom:0; height:3px; width:var(--fortschritt, 0%); background:var(--accent); border-radius:0 3px 3px 0; transition:width .6s ease}
-.wert-stufe.bereit{border-color:var(--ok)} .wert-stufe.bereit::after{background:var(--ok)}
-.wert.leuchtet{animation:wert-leuchten 1.1s ease-out}
+.wert.mit-fortschritt::after{content:""; position:absolute; left:0; bottom:0; height:3px; width:var(--fortschritt, 0%); background:var(--accent); border-radius:0 3px 3px 0; transition:width var(--dauer-lang) ease}
+.wert-stufe.bereit::after{background:var(--ok)}
+.wert.leuchtet{animation:wert-leuchten var(--dauer-lang) ease-out}
 .wert.leuchtet.runter{animation-name:wert-leuchten-runter}
 @keyframes wert-leuchten{0%{box-shadow:0 0 0 0 var(--ok); border-color:var(--ok)} 35%{box-shadow:0 0 0 5px transparent; background:var(--ok-soft)} 100%{box-shadow:0 0 0 0 transparent}}
 @keyframes wert-leuchten-runter{0%{box-shadow:0 0 0 0 var(--bad); border-color:var(--bad)} 35%{box-shadow:0 0 0 5px transparent; background:var(--bad-soft)} 100%{box-shadow:0 0 0 0 transparent}}
 .kopf-knoepfe{display:flex; align-items:center; gap:4px; flex:0 0 auto}
-.kopf-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:40px; height:40px; padding:0 10px; border-radius:var(--radius); border:1px solid transparent; background:none; color:var(--muted);
+.kopf-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; height:44px; padding:0 12px; border-radius:var(--radius); border:1px solid transparent; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer), border-color var(--dauer)}
-.kopf-knopf:hover{background:var(--panel-3); color:var(--ink)}
+.kopf-knopf:hover, .dock-knopf:hover, .toast-zu:hover, .dialog-zu:hover{background:var(--panel-3); color:var(--ink)}
 .kopf-knopf.mit-text span{font:600 13px/1 var(--body)}
 .kopf-knopf.mit-text:first-child span{font:500 11px/1 var(--mono); color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:3px 5px}
 @media (max-width:1180px){ .kopf-knopf.mit-text:first-child span, .marke-version{display:none}  }
 @media (max-width:980px){ .kopf-knopf.mit-text span, .wert-stufe{display:none}  }
+/* Platz für die 44-px-Knöpfe: bei 720 px Fensterbreite gab die Marke den letzten Platz her,
+   den die fünf Knöpfe der Kopfzeile brauchen (die Version verschwindet schon bei 1180 px). */
+@media (max-width:760px){ .marke-name{display:none}  }
 
 /* ---- Andock-Leiste ---- */
 .dock{grid-row:2; display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 0; background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; overflow-x:hidden}
 .dock-knopf{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; width:64px; min-height:58px; padding:6px 2px; border:0; border-radius:12px; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer)}
-.dock-knopf:hover{background:var(--panel-3); color:var(--ink)}
-.dock-knopf.an{background:var(--accent-soft); color:var(--accent)}
+.dock-knopf.an, .toast-info .toast-sym{background:var(--accent-soft); color:var(--accent)}
 .dock-knopf.an::before{content:""; position:absolute; left:-6px; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--accent)}
 .dock-knopf.spaeter{opacity:.72}
-.dock-knopf.spaeter.an{opacity:1}
+.dock-knopf.spaeter.an, .pal-huelle.da, .dialog-huelle.da{opacity:1}
 .dock-text{font:600 11px/1.1 var(--body); letter-spacing:.01em}
 .dock-zahl{position:absolute; top:4px; right:8px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:var(--accent-ink); font:700 11px/18px var(--body); text-align:center}
 
@@ -67,9 +82,9 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .knopf-haupt:hover{background:var(--accent); filter:brightness(1.08)}
 
 /* ---- Toasts ---- */
-.toast-stapel{position:fixed; left:50%; bottom:58px; transform:translateX(-50%); display:flex; flex-direction:column-reverse; align-items:center; gap:8px; z-index:60; pointer-events:none; width:min(640px, calc(100vw - 32px))}
+.toast-stapel{position:fixed; left:50%; bottom:58px; transform:translateX(-50%); display:flex; flex-direction:column-reverse; align-items:center; gap:8px; z-index:70; pointer-events:none; width:min(640px, calc(100vw - 32px))}
 .toast{pointer-events:auto; display:flex; align-items:center; gap:12px; max-width:100%; padding:10px 8px 10px 14px; border-radius:14px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
-  opacity:0; transform:translateY(10px) scale(.98); transition:opacity .2s ease, transform .2s ease}
+  opacity:0; transform:translateY(10px) scale(.98); transition:opacity var(--dauer) ease, transform var(--dauer) ease}
 .toast.da{opacity:1; transform:none}
 .toast.weg{opacity:0; transform:translateY(6px)}
 /* im Labor: oben rechts, neueste unten angehängt, kompakter */
@@ -79,21 +94,21 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .toast-stapel.im-labor .toast-text{font-size:13.5px}
 .toast-stapel.im-labor .toast-sym{width:26px; height:26px}
 .toast-sym{display:inline-flex; flex:0 0 auto; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--panel-3); color:var(--muted)}
-.toast-ok{border-color:var(--ok)} .toast-ok .toast-sym{background:var(--ok-soft); color:var(--ok)}
+/* Der Rahmen der Statusfarbe steht hier, nicht bei `.wert-stufe.bereit` (Kopfzeile): `.toast` setzt
+   oben das Kürzel `border`, das die Rahmenfarbe sonst wieder überschriebe (R10: ein Block statt zwei). */
+.toast-ok, .wert-stufe.bereit{border-color:var(--ok)} .toast-ok .toast-sym{background:var(--ok-soft); color:var(--ok)}
 .toast-warn{border-color:var(--warn)} .toast-warn .toast-sym{background:var(--warn-soft); color:var(--warn)}
 .toast-fehler{border-color:var(--bad)} .toast-fehler .toast-sym{background:var(--bad-soft); color:var(--bad)}
-.toast-info .toast-sym{background:var(--accent-soft); color:var(--accent)}
 .toast-inhalt{display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 auto}
 .toast-titel{font:700 12px/1.2 var(--body); color:var(--muted); text-transform:none}
 .toast-text{font:600 14.5px/1.35 var(--body)}
-.toast-knopf{flex:0 0 auto; min-height:34px; padding:0 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--panel-2); font:700 13px/1 var(--body); white-space:nowrap}
+.toast-knopf{flex:0 0 auto; min-height:44px; padding:0 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--panel-2); font:700 13px/1 var(--body); white-space:nowrap}
 .toast-knopf:hover{border-color:var(--accent); color:var(--accent)}
-.toast-zu{flex:0 0 auto; display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--faint)}
-.toast-zu:hover{background:var(--panel-3); color:var(--ink)}
+.toast-zu{flex:0 0 auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--faint)}
 
 /* ---- Menüs, Popover, Schnellauswahl ---- */
 .menue{position:fixed; z-index:50; min-width:220px; max-width:340px; max-height:min(70vh, 520px); overflow:auto; padding:6px; border-radius:12px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
-  animation:menue-auf .12s ease-out}
+  animation:menue-auf var(--dauer) ease-out}
 @keyframes menue-auf{from{opacity:0; transform:translateY(-4px) scale(.98)} to{opacity:1; transform:none}}
 /* Während der Messung (UI.menue hängt das Menü unsichtbar an, misst, klemmt, blendet ein)
    darf weder eine Animation laufen noch das Element versteckt sein: `display:none` liefert
@@ -103,7 +118,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
    Layout und liefert die echten Maße. */
 .menue.nl-messend { animation: none; visibility: hidden }
 .menue-titel{padding:6px 10px 8px; font:700 12px/1.2 var(--body); color:var(--muted); letter-spacing:.02em; border-bottom:1px solid var(--line); margin-bottom:4px}
-.menue-punkt{display:flex; align-items:center; gap:10px; width:100%; min-height:38px; padding:0 10px; border:0; border-radius:8px; background:none; color:var(--ink); text-align:left; font:500 14px/1.2 var(--body)}
+.menue-punkt{display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:0 12px; border:0; border-radius:8px; background:none; color:var(--ink); text-align:left; font:500 14px/1.2 var(--body)}
 .menue-punkt:hover:not([disabled]), .menue-punkt:focus-visible{background:var(--panel-3); outline:none}
 .menue-punkt[disabled]{color:var(--faint); cursor:default}
 .menue-punkt .sym{color:var(--muted); flex:0 0 auto}
@@ -121,20 +136,17 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .sw-teil:hover, .sw-teil:focus-visible{background:var(--panel-3); border-color:var(--line-2); outline:none}
 
 /* ---- Befehlspalette ---- */
-.pal-huelle{position:fixed; inset:0; z-index:55; display:flex; justify-content:center; align-items:flex-start; padding-top:14vh; background:rgba(4,8,14,.45); opacity:0; transition:opacity .12s}
-.pal-huelle.da{opacity:1}
+.pal-huelle{position:fixed; inset:0; z-index:50; display:flex; justify-content:center; align-items:flex-start; padding-top:14vh; background:rgba(4,8,14,.45); opacity:0; transition:opacity var(--dauer)}
 .pal-kasten{width:min(620px, calc(100vw - 32px)); border-radius:16px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); overflow:hidden}
 .pal-kopf{display:flex; align-items:center; gap:10px; padding:0 14px; border-bottom:1px solid var(--line); color:var(--muted)}
 .pal-eingabe{flex:1 1 auto; height:54px; border:0; background:none; color:var(--ink); font:500 17px/1 var(--body); outline:none}
-.pal-eingabe::placeholder{color:var(--faint)}
 .pal-liste{max-height:min(52vh, 440px); overflow:auto; padding:6px}
-.pal-punkt{display:flex; align-items:center; gap:10px; min-height:42px; padding:0 10px; border-radius:9px; cursor:pointer}
+.pal-punkt{display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border-radius:9px; cursor:pointer}
 .pal-punkt.an{background:var(--accent-soft)}
-.pal-punkt.an .pal-text{color:var(--ink)}
+.pal-punkt.an .pal-text, .wahl-knopf:hover, .ex-knopf:hover{color:var(--ink)}
 .pal-punkt.aus{cursor:default; opacity:.6}
 .pal-punkt.tipp{opacity:.8; font-style:italic}
 .pal-sym{display:inline-flex; width:18px; color:var(--muted)}
-.pal-punkt.an .pal-sym{color:var(--accent)}
 .pal-text{font:600 14.5px/1.2 var(--body); white-space:nowrap}
 .pal-info{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:13px}
 .pal-gruppe{margin-left:auto; flex:0 0 auto; font:600 11px/1 var(--body); color:var(--faint); text-transform:uppercase; letter-spacing:.06em}
@@ -143,15 +155,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pal-fuss kbd{margin-right:2px}
 
 /* ---- Dialoge ---- */
-.dialog-huelle{position:fixed; inset:0; z-index:56; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(4,8,14,.5); opacity:0; transition:opacity .15s}
-.dialog-huelle.da{opacity:1}
+.dialog-huelle{position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(4,8,14,.5); opacity:0; transition:opacity var(--dauer)}
 .dialog{width:min(720px, 100%); max-height:calc(100vh - 48px); display:flex; flex-direction:column; border-radius:18px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
-  transform:translateY(8px) scale(.99); transition:transform .18s ease}
+  transform:translateY(8px) scale(.99); transition:transform var(--dauer) ease}
 .dialog-huelle.da .dialog{transform:none}
 .dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line)}
 .dialog-kopf h2{font-size:22px; font-weight:800}
-.dialog-zu{margin-left:auto; display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
-.dialog-zu:hover{background:var(--panel-3); color:var(--ink)}
+.dialog-zu{margin-left:auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
 .dialog-inhalt{overflow:auto; padding:8px 22px 22px}
 .einst-abschnitt{padding:14px 0 6px; border-bottom:1px solid var(--line)}
 .einst-abschnitt:last-of-type{border-bottom:0}
@@ -160,18 +170,21 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .einst-text{flex:1 1 auto; display:flex; flex-direction:column; gap:3px; min-width:0}
 .einst-text strong{font-weight:700}
 .einst-text span{color:var(--muted); font-size:13.5px}
-.einst-steuer{flex:0 0 auto}
 .einst-zeile.gesperrt .einst-steuer{opacity:.4; filter:grayscale(1)}
-.einst-zeile.gesperrt strong{color:var(--muted)}
 .einst-text .einst-grund{color:var(--warn)}
 .einst-fuss{padding-top:14px; color:var(--faint); font-size:12.5px}
-.wahl{display:inline-flex; padding:3px; gap:2px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line)}
-.wahl-knopf{min-height:34px; padding:0 12px; border:0; border-radius:8px; background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
-.wahl-knopf:hover{color:var(--ink)}
+.wahl{display:inline-flex; padding:4px; gap:2px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line)}
+/* Radius aus dem Token, wie `.st-knopf` in stufensystem.css:15 — dieselbe Optik in beiden
+   Segment-Schaltern, und der rohe `8px`-Wert (R2-Altlast) ist weg.
+   `min-width:44px` ist die zweite Hälfte der Fingerregel: die Höhe war mit 44 schon da, der
+   kurze Knopf „E" maß im Browser aber nur 40 px breit (`injektoren` gemessen, beide Profile). */
+.wahl-knopf{min-height:44px; min-width:44px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
 .wahl-knopf.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
-.schalter{position:relative; width:48px; height:28px; border-radius:14px; border:1px solid var(--line-2); background:var(--panel-3); padding:0; transition:background var(--dauer)}
-.schalter span{position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--muted); transition:transform var(--dauer), background var(--dauer)}
-.schalter.an{background:var(--accent-soft); border-color:var(--accent)}
+/* Der Schalter ist 64 × 44 (Trefferfläche) und bleibt eine Pille: `999px` ist ein erlaubter
+   Radius (R2). Der Knopf sitzt mittig — 4 px Rand links/rechts/oben/unten im Innenraum (62 × 42),
+   der Weg nach rechts ist damit genau 20 px wie vorher. */
+.schalter{position:relative; width:64px; height:44px; border-radius:999px; border:1px solid var(--line-2); background:var(--panel-3); padding:0; transition:background var(--dauer)}
+.schalter span{position:absolute; top:4px; left:4px; width:34px; height:34px; border-radius:50%; background:var(--muted); transition:transform var(--dauer), background var(--dauer)}
 .schalter.an span{transform:translateX(20px); background:var(--accent)}
 .regler{display:flex; align-items:center; gap:10px}
 .regler input{width:160px; accent-color:var(--accent)}
@@ -187,7 +200,6 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 /* ---- „Erklär mir das“ (ui/erklaeren.js, Präfix ex-): Lehrtext erst auf Klick ---- */
 .ex{display:inline-flex; flex-direction:column; align-items:flex-start; gap:4px; max-width:100%}
 .ex-knopf{border:0; padding:2px 0; background:none; color:var(--accent); font:600 12.5px/1.3 var(--body); text-decoration:underline; text-underline-offset:3px; cursor:pointer}
-.ex-knopf:hover{color:var(--ink)}
 .ex-text{display:flex; flex-direction:column; gap:4px; padding:6px 10px; border-left:3px solid var(--accent); background:var(--panel-2); border-radius:0 8px 8px 0; color:var(--ink); font-size:13px; line-height:1.45}
 .ex-text p{margin:0}
 .ex-quelle{color:var(--faint); font-size:11.5px}

@@ -297,23 +297,142 @@ def r11_einheit(bloecke):
     return treffer
 
 
-def r12_bedienelemente(bloecke, texte, messen):
-    """Höchstens 6 sichtbare Bedienelemente je Ansicht (DOM-Messung im laufenden Programm)."""
-    if not messen:
-        return None
-    js = ("(()=>{const s=[...document.querySelectorAll('button,[role=button],input,select,textarea,a[href]')]"
-          ".filter(e=>{const r=e.getBoundingClientRect();const st=getComputedStyle(e);"
-          "return r.width>0&&r.height>0&&st.visibility!=='hidden'&&st.display!=='none'});"
-          "return JSON.stringify({sichtbar:s.length})})()")
+# ------------------------------------------------- Regel 12: Bedienelemente JE ANSICHT
+#
+# BEFUND UND REPARATUR (09.10.2026, Strom G).
+# Die alte Fassung maß den GERADE OFFENEN Zustand und machte aus einer fehlgeschlagenen Messung
+# eine 0: `aus.stdout or "{}"` lieferte bei leerer Ausgabe ein leeres Objekt, `daten.get("sichtbar", 0)`
+# daraus die Zahl 0, und `0 > 6` ist falsch → kein Treffer → „0 sichtbare Elemente — eingehalten".
+# Gemessen: `python tools/ethos.py --dom` ohne laufendes Programm meldete genau das. Ein Fehlerpfad,
+# der GRÜN ergibt, ist genau die Bauart, vor der AGENTS.md („Wirkung vor Grün") warnt.
+# Jetzt gilt: je angemeldeter Ansicht EINE Zahl; was nicht messbar ist, steht als Befund da und
+# zählt NICHT als eingehalten.
+
+R12_GRENZE = 6                    # Standard: höchstens 6 sichtbare Bedienelemente je Ansicht
+R12_GRENZEN = {"mitarbeit": 3}    # Spez. B § 2.1/§ 2.2: die Azubi-Ansicht „Auftrag" hat 3
+R12_WAEHLER = "button,[role=button],input,select,textarea,a[href]"
+# Der letzte Messbericht — für die Zeile in `zeige()` und die Zusammenfassung in `main()`.
+R12_BERICHT = {"gemessen": False, "grund": None, "zahlen": []}
+
+
+def r12_js():
+    """Das Messprogramm für den laufenden DOM — EINE Auswertung, je Ansicht eine Zahl.
+
+    Jede angemeldete Ansicht wird einzeln geöffnet, gezählt und am Ende wird die vorher offene
+    Ansicht wiederhergestellt (die Messung stellt das Programm nicht um). Eine Ansicht, die sich
+    nicht öffnen lässt, liefert `fehler` statt einer Zahl — sie wird nie zu einer 0."""
+    return ("(()=>{"
+            "if(typeof UI==='undefined'||!UI.app||typeof UI.app.liste!=='function'"
+            "||typeof UI.app.ansicht!=='function')"
+            "return {fehler:'UI.app fehlt - Programm nicht erreichbar'};"
+            "if(UI.app.modus!=='voll')return {fehler:'Programm laeuft im Modus '"
+            "+UI.app.modus+' - keine Ansicht ist aufgebaut'};"
+            "const sichtbar=e=>{const r=e.getBoundingClientRect();const st=getComputedStyle(e);"
+            "return r.width>0&&r.height>0&&st.visibility!=='hidden'&&st.display!=='none'};"
+            "const kasten=k=>[...document.querySelectorAll('.ansicht')]"
+            ".find(e=>e.dataset.ansicht===k)||null;"
+            "const zaehlen=k=>{document.body.offsetHeight;const b=kasten(k);"
+            "return b?[...b.querySelectorAll('" + R12_WAEHLER + "')].filter(sichtbar).length:null};"
+            "const vorher=UI.app.aktuell||null;const aus=[];"
+            "for(const a of (UI.app.liste()||[])){let fehler=null;"
+            "try{UI.app.ansicht(a.name)}catch(e){fehler=String((e&&e.message)||e)}"
+            "const offen=UI.app.aktuell===a.name;"
+            "aus.push({name:a.name,titel:a.titel,zahl:offen?zaehlen(a.name):null,"
+            "fehler:fehler||(offen?null:'Ansicht nicht aufgebaut')})}"
+            "if(vorher)try{UI.app.ansicht(vorher)}catch(e){}"
+            "return {ansichten:aus,grenze:" + str(R12_GRENZE)
+            + ",grenzen:" + json.dumps(R12_GRENZEN) + "}"
+            "})()")
+
+
+def r12_auswerten(ausgabe):
+    """Aus der Ausgabe von cdp.py Befunde und Zahlen machen. NICHTS wird stillschweigend zu 0.
+
+    Liefert (befunde, zahlen); `zahlen` ist [(titel, name, zahl|None, soll)] für die Anzeige."""
+    roh = (ausgabe or "").strip()
+    if not roh:
+        return ["nicht gemessen: das Programm hat nichts geantwortet"], []
     try:
-        aus = subprocess.run([sys.executable, "tools/cdp.py", "eval", js], cwd=HIER,
-                             capture_output=True, text=True, timeout=90, encoding="utf-8")
-        daten = json.loads(re.search(r"\{.*\}", aus.stdout or "{}").group(0))
+        daten = json.loads(roh)
+        if isinstance(daten, str):        # zweimal kodiert (Zeichenkette statt Objekt)
+            daten = json.loads(daten)
     except Exception as fehler:                                        # noqa: BLE001
-        print(f"       Regel 12 übersprungen: {fehler}")
+        return [f"nicht gemessen: Auswertung nicht lesbar ({fehler}) - Rohausgabe: {roh[:120]}"], []
+    if not isinstance(daten, dict):
+        return [f"nicht gemessen: unerwartete Auswertung ({roh[:120]})"], []
+    if daten.get("fehler"):
+        return [f"nicht gemessen: {daten['fehler']}"], []
+    ansichten = daten.get("ansichten")
+    if not isinstance(ansichten, list) or not ansichten:
+        return ["nicht gemessen: das Programm meldet keine einzige Ansicht"], []
+    grenze = daten.get("grenze") or R12_GRENZE
+    grenzen = daten.get("grenzen") or R12_GRENZEN
+    befunde, zahlen = [], []
+    for a in ansichten:
+        name = a.get("name") or "?"
+        titel = a.get("titel") or name
+        soll = grenzen.get(name, grenze)
+        zahl = a.get("zahl")
+        if a.get("fehler") or zahl is None:
+            befunde.append(f"nicht gemessen: Ansicht {titel} ({name}) - {a.get('fehler') or 'keine Zahl'}")
+            zahlen.append((titel, name, None, soll))
+            continue
+        zahlen.append((titel, name, zahl, soll))
+        if zahl > soll:
+            befunde.append(f"{titel} ({name}): {zahl} sichtbare Bedienelemente - erlaubt {soll}")
+    if not any(z[2] is not None for z in zahlen):
+        befunde.append("nicht gemessen: keine einzige Ansicht war messbar")
+    return befunde, zahlen
+
+
+def r12_bedienelemente(bloecke, texte, messen):
+    """Höchstens 6 sichtbare Bedienelemente je Ansicht (DOM-Messung im laufenden Programm).
+
+    DREI AUSGÄNGE, und keiner davon ist still:
+      · gemessen, alles im Rahmen   → [] (eingehalten)
+      · gemessen, eine Ansicht zu groß → Liste der Verstöße (zählt als Verschlechterung)
+      · NICHT gemessen (kein Programm, Ansicht nicht aufgebaut) → None: laut gemeldet in der
+        Zeile UND in der Zusammenfassung, aber NICHT als Verschlechterung gezählt und NICHT
+        als eingehalten. Ein Rückschritt, der nur aus einer nicht zustande gekommenen Messung
+        entsteht, ist keiner — der eingefrorene Stand kannte R12 nur als stumme 0.
+
+    Warum `return ` vor dem Messprogramm steht: `tools/cdp.py:147` verpackt den Ausdruck je nach
+    Inhalt als AUSDRUCK (`... return {js} ...`) oder als RUMPF (`... {js} ...`). Ein Programm mit
+    `return`/`;` gilt als Rumpf — ohne eigenes `return` kommt dann `null` zurück (gemessen 09.10.2026:
+    genau das war der Grund, warum R12 „0 sichtbare Elemente" meldete; die Messung kam nie an)."""
+    if not messen:
+        R12_BERICHT["gemessen"] = False
+        R12_BERICHT["grund"] = "ohne --dom wird im DOM nicht gemessen"
         return None
-    if daten.get("sichtbar", 0) > 6:
-        return [f"laufendes Programm: {daten['sichtbar']} sichtbare Bedienelemente"]
+    try:
+        aus = subprocess.run([sys.executable, "tools/cdp.py", "eval", "return " + r12_js()], cwd=HIER,
+                             capture_output=True, text=True, timeout=120, encoding="utf-8")
+    except Exception as fehler:                                        # noqa: BLE001
+        R12_BERICHT.update(gemessen=False, grund=str(fehler))
+        print(f"       R12 nicht gemessen: {fehler}")
+        return None
+    befunde, zahlen = r12_auswerten(aus.stdout)
+    verstoesse = [b for b in befunde if not b.startswith("nicht gemessen")]
+    offen = [b for b in befunde if b.startswith("nicht gemessen")]
+    if not zahlen and aus.returncode != 0:
+        zeilen = [z for z in (aus.stderr or "").strip().splitlines() if z.strip()]
+        zusatz = f" ({zeilen[-1].strip()[:110]})" if zeilen else ""
+        offen = [f"nicht gemessen: cdp.py endete mit {aus.returncode}{zusatz}"]
+    for titel, name, zahl, soll in zahlen:
+        stand = "nicht gemessen" if zahl is None else f"{zahl} sichtbar, erlaubt {soll}"
+        print(f"       R12 {titel} ({name}): {stand}")
+    for b in offen:
+        print(f"       R12 {b}")
+    for b in verstoesse:
+        print(f"       R12 VERSTOSS {b}")
+    gemessen = any(z[2] is not None for z in zahlen)
+    R12_BERICHT["gemessen"] = gemessen and not offen
+    R12_BERICHT["grund"] = None if (gemessen and not offen) else "; ".join(offen) or "keine Ansicht messbar"
+    R12_BERICHT["zahlen"] = zahlen
+    if verstoesse:
+        return verstoesse
+    if offen or not gemessen:
+        return None
     return []
 
 
@@ -333,7 +452,7 @@ def messen(texte=None, dom=False):
         ("R9", "Ein Selektor einmal definiert", r9_selektor_einmal(bloecke), "Wiederholungen"),
         ("R10", "Keine identische Blockdopplung", r10_blockdopplung(bloecke), "doppelte Blöcke"),
         ("R11", "Längenzahl nur mit Einheit", r11_einheit(bloecke), "Zahlen ohne Einheit"),
-        ("R12", "Höchstens 6 Bedienelemente je Ansicht", r12_bedienelemente(bloecke, roh, dom), "sichtbare Elemente"),
+        ("R12", "Höchstens 6 Bedienelemente je Ansicht", r12_bedienelemente(bloecke, roh, dom), "Befunde je Ansicht"),
     ]
     return regeln, kenn
 
@@ -345,7 +464,8 @@ def zeige(regeln, kenn, lang=False):
     print()
     for nr, name, treffer, einheit in regeln:
         if treffer is None:
-            print(f"  {nr:3} {name:38} übersprungen (--dom nicht gesetzt oder Programm nicht erreichbar)")
+            grund = f" — {R12_BERICHT['grund']}" if nr == "R12" and R12_BERICHT.get("grund") else ""
+            print(f"  {nr:3} {name:38} nicht gemessen{grund}")
             continue
         kopf = f"  {nr:3} {name:38} {len(treffer):4} {einheit}"
         if treffer:
@@ -442,6 +562,15 @@ def main():
     regeln, kenn = messen(dom=args.dom)
     zeige(regeln, kenn, args.lang)
 
+    nicht_gemessen = [nr for nr, _, t, _ in regeln if t is None]
+    if not R12_BERICHT.get("gemessen") and "R12" not in nicht_gemessen:
+        nicht_gemessen.append("R12")          # teilweise/nicht gemessen: laut sagen, nicht zählen
+    if nicht_gemessen:
+        print(f"  NICHT GEMESSEN: {', '.join(nicht_gemessen)} — diese Regel(n) gelten weder als eingehalten "
+              "noch als verletzt und zählen NICHT als Verschlechterung. "
+              + (f"R12: {R12_BERICHT['grund']}. " if R12_BERICHT.get("grund") else "")
+              + "R12 misst nur mit `--dom` bei laufendem Programm (python tools/cdp.py start).")
+
     ziel = Path(args.stand)
     if not ziel.is_absolute():
         ziel = HIER / ziel
@@ -462,7 +591,8 @@ def main():
                 print("  - " + z)
             return 1
         print(f"\nGRUEN: keine Regel schlechter als {kurz(ziel)}. "
-              "Eingehalten ist damit nicht jede Regel — der Stand friert die Altlasten ein.")
+              "Eingehalten ist damit nicht jede Regel — der Stand friert die Altlasten ein."
+              + (f" NICHT GEMESSEN: {', '.join(nicht_gemessen)}." if nicht_gemessen else ""))
         return 0
 
     offen = [f"{nr} {name}: {len(t)}" for nr, name, t, _ in regeln if t]

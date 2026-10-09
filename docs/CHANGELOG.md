@@ -9,6 +9,110 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.0.0 — Output-Runde: Trefferflächen, Altlasten und R12 (09.10.2026)
+
+**Die dritte Runde derselben Fassung: die Oberfläche selbst.** Nach dem Fundament (Abschnitt weiter unten)
+und dem Öffnungsweg (Abschnitt darunter) räumt diese Runde auf, was seit Fassung 1.2 als Altlast im
+Regelwerk steht und was die Werkzeuge bisher nur **gemeldet**, aber nicht durchgesetzt haben:
+Trefferflächen unter 44 px, Zeitwerte außerhalb der Skala, `z-index`-Deklarationen außerhalb der Leiter,
+zusätzliche Bewegungsblöcke, doppelte CSS-Blöcke — und die Regel **R12**, die bisher **nichts gemessen**
+hat. Sieben Ströme haben parallel gearbeitet.
+
+Bezug: `AGENTS.md` (Befehlstabelle) · [`tests/stil-stand.json`](../tests/stil-stand.json) · `tools/ethos.py` ·
+`tools/menueprobe.py` · `tools/rauch.py`.
+
+### Was vorher gemessen war
+
+| Prüfung | Vorher |
+|---|---|
+| `python tools/menueprobe.py --datei web/index.html` | **rot: 36 von 43 Kriterien erfüllt** — 44-px-Trefferflächen in den Editor-Menüs (seit 07.10.2026 in `AGENTS.md` dokumentiert, vorbestehend) |
+| `python tools/menueprobe.py --datei android/bau/assets/index.html` | **rot** — im Lauf der Runde 38/4 mit drei Überdeckungen, später 49/8; Ursache: ein Menü mit `z-index: 40` lag **unter** dem Dock-Blatt (`45`) |
+| `python tools/ethos.py` — R1 · R2 · R3 · R4 | **23** Farb-Literale · **122** Radien ohne Token · **206** Schriftwerte außerhalb der Skala · **539** Abstandswerte außerhalb der Skala |
+| Regel R5 (Dauer nur 1/160/320 ms) | **70** Zeitwerte außerhalb der Skala |
+| Regel R6 (`z-index` nur aus der Leiter) | **11** Deklarationen außerhalb der Leiter |
+| Regel R8 (Bewegung aus: ein zentraler Block) | **5** weitere Bewegungsblöcke |
+| Regel R10 (keine identische Blockdopplung) | **87** doppelte Blöcke |
+| Regel R12 (höchstens 6 Bedienelemente je Ansicht) | **ohne Wirkung**: „0 sichtbare Elemente — eingehalten", also nie wirklich gemessen |
+| `python tools/rauch.py` | **39/39** bei **12 Ansichten** — die zwei neuen Klassenraum-Ansichten fehlten |
+| `src/stil/` | **14 Dateien** im Umfang der Runde (Aufnahme 17:06:43, jede Datei `== HEAD`); Quelle: [Befund – Output-Runde](<entwicklung/Befund – Output-Runde.md>) § 1 |
+
+### Was geändert wurde
+
+**Vierzehn CSS-Dateien in `src/stil/`** wurden angefasst — `editor.css`, `spiel.css`, `szene.css`, `juice.css`,
+`rahmen.css`, `leiste.css`, `inspektor.css`, `ereignisse.css`, `karriere.css`, `hub.css`, `simulation.css`,
+`terminal.css`, `akte.css`, `kundenakte.css`; Umfang **306 insertions(+), 260 deletions(-)**.
+
+- **Trefferflächen ≥ 44 px.** `min-height`/`min-width` wurden **nicht kleiner**, `44px` kommt jetzt **11×**
+  vor (vorher 3×), neu dazu `68px`; keine kleinere Schrift, **kein** Selektor ohne `font-size`.
+- **R1–R4.** Farb-Literale, Radien, Schrift- und Abstandswerte wandern auf die Tokens und Skalen des
+  Regelwerks.
+- **R5 und R6.** Zeitwerte und `z-index`-Deklarationen kommen aus der Skala bzw. der benannten Leiter.
+- **R8 — gelöscht, nicht verschoben.** Die fünf Zusatzblöcke in `juice.css`, `spiel.css` und `szene.css`
+  sind **weg**; `basis.css` ist **byte-identisch** geblieben. „Bewegung reduzieren" heißt im Haus
+  „**1 ms statt aus**" (`basis.css:91`), und der schärfere Schalter `html[data-bewegung="aus"]`
+  (`basis.css:93`) ist unangetastet — „Bewegung aus" schaltet weiterhin wirklich ab.
+- **R10.** Doppelte Blöcke sind durch **Zusammenschluss** verschwunden: Komma-Selektorlisten **119 → 158**
+  (+39), Selektoren 1 819 → 1 818.
+- **R12 wird messbar.** `tools/ethos.py` sagt ohne `--dom` jetzt ausdrücklich „**NICHT GEMESSEN**" statt
+  still „0 sichtbare Elemente — eingehalten"; im Programm wertet **`ethos.r12_js()`** unverändert aus:
+  `klasse` **6/6**, `Auftrag` **3/3** (drei Breiten, zwei Zustände, vier Gegenproben).
+- **Menüprobe.** Die Ursache der Android-Überdeckung — ein Menü mit `z-index: 40` **unter** dem Dock-Blatt
+  (`45`) — ist behoben; der Web-Bau kommt von 36/43 auf **45 erfüllt, 0 verletzt**.
+- **Rauchtest erweitert.** Die zwei Klassenraum-Ansichten „Klasse" (Lehrkraft: Code anzeigen) und
+  „Auftrag" (Azubi: Code eintippen und öffnen) sind als **echte Wege** dabei — **14 Fälle × 3 Breiten = 45**.
+- **Dazu in dieser Runde:** das Wiki hat **zwei neue Seiten** — **„Klassenraum"** und **„Übergabe"**
+  (jetzt **29 Seiten / 107 Abschnitte**, beide in der Ansicht und über die Suche erreichbar) —, und in
+  `Nachweise/Klassenraum/` liegen **10 Bildschirmfotos und 1 Exportdatei** der fünf Vorführschritte
+  (Drei-Geräte-Lauf: Code `NL-9ACQ-AM`, B und C messen denselben Abdruck `3U9JGE`, Ampel 1/2 → 2/2,
+  Import überlebt den Neustart).
+
+### Was danach gemessen ist
+
+| Prüfung | Nachher |
+|---|---|
+| `python tools/menueprobe.py --datei web/index.html` | **GRÜN: 5 von 5 Profilen, 45 Kriterien erfüllt, 0 verletzt** (selbst gemessen) |
+| `python tools/menueprobe.py --datei android/bau/assets/index.html` | **GRÜN: 5 von 5 Profilen, 49 Kriterien erfüllt, 0 verletzt** (selbst gemessen) |
+| `python tools/ethos.py` | **GRUEN** — besser als der Stand: R1 23→22 · R2 122→113 · R3 206→195 · R4 539→514 · R5 70→0 · R6 11→0 · R8 5→0 · R10 87→0 |
+| R12 im Programm (`ethos.r12_js()`) | `klasse` **6/6 ✓**, `Auftrag` **3/3 ✓** — drei Breiten, zwei Zustände, **vier Gegenproben** (Zahl der Leitung) |
+| `python tools/rauch.py` | **45/45** (14 Ansichten × 3 Breiten; Zahl der Leitung, der Aufbau ist im Quelltext nachgezählt) |
+| `sh tools/test.sh` | **725/725 grün**, 81 Testdateien, 91 Module, **0 übersprungen**, Exit 0 (selbst gemessen) |
+| `python tools/klassen.py` · `node tools/sim-stand.js` | **0** Klassen ohne CSS-Regel · Simulation **unverändert** (selbst gemessen) |
+| `python bauen.py` | **128 Module, 2225 KB** → `web/index.html` (Version **2.0.0**) (Zahl der Leitung) |
+| Einzeldatei `docs/index.html` = `Netzwerk-Labor.html` | **2.829.477 B**, SHA256 `C3C51EDA6FBD8DD49F8EC390DEC92BD6C9B2A59A7BEC116FE493CF439056828E`, **0 Außenverweise**, byte-gleich (selbst nachgerechnet) |
+| Android-APK 2.0.0 | **1.160.732 B**, SHA256 `A27751B2924705DDFD7E5CF4FA1A027DC552182D8B8010AEEC56493E49F93733`, Signatur gültig (selbst nachgerechnet) |
+
+### Verworfen — und warum das hier steht
+
+**R8 durch Verschieben lösen — so gemacht wurde es nicht.** Die Absicht war, die fünf Zusatzblöcke in den
+zentralen Reduced-Motion-Block einzulagern; gemessen ist `basis.css` **byte-identisch** geblieben, die
+Blöcke wurden **gelöscht**. *Lehre:* Wer Bewegung entfernt, muss nachsehen, ob sie eine **Rückmeldung**
+trug. Genau das ist hier passiert und benannt: `.ger[class*="jc-"] .gb` und `.kabel[class*="jc-"] *` haben
+im ganzen `src/stil/` **keine Regel mehr** — sie waren aber nicht tot: `UI.juice(el,"einrasten")` wird auf
+Kabelelementen gerufen (`src/ui/editor-werkzeuge.js:307,353`, `src/ui/juice.js:11`). Für „Bewegung
+reduzieren" liefen diese Animationen vorher **gar nicht**, jetzt laufen sie in **1 ms**. Ob man das sieht,
+ist **nicht gemessen** (kein Browserlauf freigegeben).
+
+**„Eine Regel abschalten, um grün zu werden" — widerlegt.** Skalen und Zählfunktionen sind zeichengleich,
+`tests/stil-stand.json` ist nicht gesenkt, und R12 wurde **strenger** statt lockerer („nicht gemessen"
+statt stiller 0). **„Die Trefferflächen passend machen, indem der Inhalt schrumpft" — widerlegt:** keine
+kleinere Schrift, kein Selektor ohne `font-size`, kein gesunkener `min-height`-Wert. **„Die Altlasten
+wurden gelöscht statt geändert" — weitgehend widerlegt:** +39 Komma-Selektorlisten zeigen den
+Zusammenschluss, nur zwei Selektoren verschwanden (beide aus dem gelöschten R8-Block).
+
+### Nicht geprüft (ehrlich)
+
+- **Kein `ethos.py --dom` gegen die Release-Hülle.** R12 lief gegen den **Debug-Bau** und den **Web-Bau**,
+  nicht gegen die Auslieferungs-Hülle.
+- **Kein Snipping-Werkzeug:** die Bildschirmfotos in `Nachweise/Klassenraum/` sind über CDP aufgenommen.
+- **`prefers-reduced-motion` ist im Browser nicht gemessen** — dem Werkzeug fehlt `Emulation.setEmulatedMedia`.
+- **Die 720-px-Frage im Einstellungsdialog ist nicht gemessen** — die Menüprobe erreicht den Dialog nicht.
+- **Die Erzeugnis-Hashes sind Momentaufnahmen**: die letzten CSS-Werte steckten beim Messen noch nicht im
+  Artefakt, und ein Desktop-Release-Bau lief noch.
+- **`tests/stil-stand.json` deckt R2/R3/R4 noch nicht:** der Lauf meldet nach dem Einfrieren erneut
+  „BESSER als der Stand" (R2 121→113 · R3 204→195 · R4 530→514, selbst gemessen) — ein weiteres
+  `ethos.py --neu` gehört der Leitung.
+---
+
 ## 2.0.0 — Klassenraum Stufe A+B (09.10.2026)
 
 **Der Öffnungsweg: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst** — ohne
@@ -93,6 +197,10 @@ Vertrag: [`Architektur.md`](Architektur.md) § 12 (Spezifikation) · § 12.1 (En
 wurde der Codec-Kommentar berichtigt und **neu gebaut**: die Erzeugnisse dieser Runde sind jünger als die
 des Fundaments, und deren Werte (Einzeldatei 2.720.252 B / `3822D6B5…`, APK 1.127.964 B / `DB11BF88…`)
 sind damit **überholt**.
+
+**Erneut überholt** durch die **Output-Runde** (Abschnitt ganz oben): dort stehen die gültigen Erzeugnisse
+dieser Fassung (Einzeldatei **2.829.477 B**, SHA256 `C3C51EDA…828E`; APK **1.160.732 B**, SHA256
+`A27751B2…F93733`).
 
 **Neue Dateien dieser Stufe** — Bytes und SHA256 vom Chronisten über den Arbeitsbaum gerechnet, **alle
 LF, 0 CRLF**:
@@ -281,9 +389,10 @@ fertig wurden. Sein Fazit gilt weiter: *591 von 593 grün heißt nicht fertig.*
   deshalb weiterhin eine ältere Fassung. Ihre Fassungsnummer ist hier **nicht gemessen**.
 - **Nicht gepusht, kein Tag.** `v2.0.0` und der Push stehen aus — beides nur mit ausdrücklicher Freigabe
   des Nutzers. Tag- und Zweigzeile im Kopf dieses Dokuments bleiben deshalb unverändert.
-- **Überholt** durch die Klassenraum-Stufe A+B (Abschnitt **weiter oben**): dort stehen die gültigen
-  Erzeugnisse dieser Fassung (Einzeldatei **2.791.782 B**, SHA256 `D7D45F13…A4A2`; APK **1.148.444 B**,
-  SHA256 `A9526120…D988`). Die hier genannten Werte waren der Stand **nach dem Fundament**.
+- **Überholt** — zuerst durch die Klassenraum-Stufe A+B, dann durch die **Output-Runde** (jeweils
+  Abschnitte weiter oben). Gültig sind die Erzeugnisse der Output-Runde: Einzeldatei **2.829.477 B**,
+  SHA256 `C3C51EDA…828E`; APK **1.160.732 B**, SHA256 `A27751B2…F93733`. Die hier genannten Werte waren
+  der Stand **nach dem Fundament**.
 
 ### Neue Dateien dieser Fassung (Bytes und SHA256)
 

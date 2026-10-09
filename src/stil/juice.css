@@ -1,47 +1,71 @@
-/* ---------- Spielgefühl (ui/juice.js, Präfix jc-): jede Handlung antwortet in < 200 ms, sanft statt grell ----------
-   SVG-Geräte: animiert wird das innere Bild (.gb), weil die Gruppe selbst ihre Position als transform trägt. */
+/* ---------- Spielgefühl (ui/juice.js, Präfix jc-): jede Handlung antwortet in ≤ 320 ms (eine Stufe der Dauer-Leiter), sanft statt grell ----------
+   SVG-Geräte: animiert wird das innere Bild (.gb), weil die Gruppe selbst ihre Position als transform trägt.
+   DAUERN (task-38, tools/ethos.py R5): nur var(--dauer)=160ms und var(--dauer-lang)=320ms. Die vorher
+   gewachsenen Einzelwerte (.28s/.38s/.45s/.5s/.7s/.9s/1s) sind auf die nächstliegende Stufe abgebildet —
+   die kürzeste war .28s → 320 ms, die längste 1s → 320 ms. Keine Rückmeldung ist entfallen: alle
+   Animationen laufen weiter, nur die Sprünge/Wackler sind jetzt gleich lang. `UI.juice(el, art, ms)`
+   nimmt die Klasse nach ms wieder weg; alle Aufrufer liegen mit ≥ 400 ms über 320 ms, es wird also
+   keine Animation abgeschnitten. */
 .ger.jc-plop .gb, .ger.jc-atmen .gb, .ger.jc-wackeln .gb, .ger.jc-sperre .gb{transform-box:fill-box; transform-origin:center}
 
 /* Gerät gesetzt: springt kurz auf */
-.ger.jc-plop .gb{animation:jc-plop .38s cubic-bezier(.3,1.6,.5,1)}
+.ger.jc-plop .gb{animation:jc-plop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
 @keyframes jc-plop{0%{transform:scale(.45); opacity:.3} 65%{transform:scale(1.12); opacity:1} 100%{transform:scale(1)}}
 
 /* Kabel rastet ein: Linie leuchtet, Port-LEDs pulsieren grün */
-.kabel.jc-einrasten .kabel-linie, .kabel.jc-einrasten .kabel-trunk-aussen{animation:jc-einrasten .7s ease-out}
+.kabel.jc-einrasten .kabel-linie, .kabel.jc-einrasten .kabel-trunk-aussen{animation:jc-einrasten var(--dauer-lang) ease-out}
 @keyframes jc-einrasten{0%{stroke-width:7; stroke-opacity:1} 100%{stroke-width:2.6; stroke-opacity:.9}}
-.kabel.jc-einrasten .ps-oben path{transform-box:fill-box; transform-origin:center; animation:jc-led .45s ease-in-out 3}
+.kabel.jc-einrasten .ps-oben path{transform-box:fill-box; transform-origin:center; animation:jc-led var(--dauer-lang) ease-in-out 3}
 @keyframes jc-led{50%{transform:scale(1.7); opacity:.55}}
 
 /* Gerät antwortet: atmet zweimal */
-.ger.jc-atmen .gb{animation:jc-atmen .5s ease-in-out 2}
+.ger.jc-atmen .gb{animation:jc-atmen var(--dauer-lang) ease-in-out 2}
 .ger.jc-atmen .gb-kachel{stroke:var(--ok); stroke-width:2.6}
 @keyframes jc-atmen{50%{transform:scale(1.08)}}
 
 /* Fehler: sanftes Wackeln in Bernstein statt Rotflackern; Sperre greift: kurzes Kopfschütteln */
-.ger.jc-wackeln .gb, .ger.jc-sperre .gb{animation:jc-wackeln .45s ease-in-out}
+.ger.jc-wackeln .gb, .ger.jc-sperre .gb{animation:jc-wackeln var(--dauer-lang) ease-in-out}
 .ger.jc-wackeln .gb-kachel, .ger.jc-sperre .gb-kachel{stroke:var(--warn); stroke-width:2.6}
 @keyframes jc-wackeln{20%{transform:translateX(-3px)} 40%{transform:translateX(3px)} 60%{transform:translateX(-2px)} 80%{transform:translateX(1px)}}
 
 /* Ziel erfüllt: der Zähler „Ziele x/y“ ploppt */
-.am-ziele.jc-haken{animation:jc-haken .5s cubic-bezier(.3,1.6,.5,1); background:var(--ok-soft); color:var(--ok)}
+.am-ziele.jc-haken{animation:jc-haken var(--dauer-lang) cubic-bezier(.3,1.6,.5,1); background:var(--ok-soft); color:var(--ok)}
 @keyframes jc-haken{0%{transform:scale(.7)} 60%{transform:scale(1.18)} 100%{transform:scale(1)}}
 
 /* Werkzeug oder Fach gewählt: kurzes Nachfedern */
-.lb-wz.jc-wahl, .pa-kat.jc-wahl{animation:jc-wahl .28s cubic-bezier(.3,1.6,.5,1)}
+.lb-wz.jc-wahl, .pa-kat.jc-wahl{animation:jc-wahl var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
 @keyframes jc-wahl{0%{transform:scale(.88)} 70%{transform:scale(1.06)} 100%{transform:scale(1)}}
 
 /* Euro kommt an: Wert in der Kopfzeile glüht golden */
-.wert.jc-geld{animation:jc-geld .9s ease-out}
+.wert.jc-geld{animation:jc-geld var(--dauer-lang) ease-out}
 @keyframes jc-geld{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--geld) 70%, transparent)} 100%{box-shadow:0 0 0 12px transparent}}
 
-/* Sterne: nach dem Einfliegen ein Glanz */
-.sp-sterne.jc-sterne span.voll{animation:sp-stern .45s cubic-bezier(.3,1.7,.5,1) forwards, jc-glanz 1s ease-out forwards;
+/* Sterne: nach dem Einfliegen ein Glanz. Die Staffelung (animation-delay) bleibt: sie ist Choreografie
+   und wird von R5 nicht gemessen (ZEIT_PROPS in tools/ethos.py kennt animation-delay nicht). */
+.sp-sterne.jc-sterne span.voll{animation:sp-stern var(--dauer-lang) cubic-bezier(.3,1.7,.5,1) forwards, jc-glanz var(--dauer-lang) ease-out forwards;
   animation-delay:calc(var(--i) * 120ms + 150ms), calc(var(--i) * 120ms + 650ms)}
 @keyframes jc-glanz{0%{text-shadow:0 0 0 transparent} 40%{text-shadow:0 0 22px var(--geld)} 100%{text-shadow:0 0 18px color-mix(in srgb, var(--geld) 50%, transparent)}}
 
 /* Knöpfe geben beim Drücken nach (ohne Klasse, gilt überall) */
 .knopf:active, .lb-wz:active, .lb-knopf:active, .pa-kat:active, .pa-teil:active, .dock-knopf:active, .am-zu:active{transform:scale(.96)}
 
-@media (prefers-reduced-motion: reduce){
-  .ger[class*="jc-"] .gb, .kabel[class*="jc-"] *, .am-ziele.jc-haken, .lb-wz.jc-wahl, .pa-kat.jc-wahl, .wert.jc-geld, .sp-sterne.jc-sterne span.voll{animation:none}
-}
+/* Bewegung aus: KEIN eigener Block mehr (task-38, R8). basis.css:91 (prefers-reduced-motion) und
+   basis.css:93 (html[data-bewegung="aus"]) schalten Animation und Übergang global ab — dieselbe
+   Begründung wie in naechster.css:7. Der Zustand bleibt an der FARBE erkennbar: die Rückmeldungen
+   dieses Bausteins tragen ohnehin eine Farbe (--ok/--warn/--ok-soft), nicht nur die Bewegung.
+
+   ZWEI SELEKTOREN SIND HIER BEWUSST REGEL-LOS (Befund der unabhängigen Prüfung § 4a, nachgemessen):
+     .ger[class*="jc-"] .gb     deckte die vier Geräte-Klassen ab, die es gibt — sie stehen oben einzeln:
+                                .ger.jc-plop .gb · .ger.jc-atmen .gb · .ger.jc-wackeln .gb · .ger.jc-sperre .gb
+     .kabel[class*="jc-"] *     deckte die drei animierten Kabel-Kinder ab — sie stehen oben einzeln:
+                                .kabel.jc-einrasten .kabel-linie · .kabel-trunk-aussen · .ps-oben path
+   Beide hatten im entfernten @media (prefers-reduced-motion)-Block `animation:none`. Wirkung heute:
+   bei „Bewegung reduzieren" laufen diese Animationen 1 ms statt gar nicht — sie erreichen ihren
+   Endzustand, weil basis.css:91 die Dauer global auf 1 ms setzt (dieselbe Bauart wie die fünf
+   Endzustände in szene.css). Bei „Bewegung aus" schaltet basis.css:93 weiterhin alles ab; im echten
+   Programm gemessen: animationName none, 0 laufende Animationen an allen vier Zielen. Das Verhalten
+   ist damit abgedeckt, nicht vergessen.
+   Dass die Selektoren leben, ist gemessen: `UI.juice(el, "einrasten", …)` läuft auf Kabel-Elementen
+   (src/ui/editor-werkzeuge.js:307 und :353; `Z.kEl` hält die <g class="kabel">, editor.js:352), und mit
+   „voll" tragen .kabel-linie/.kabel-trunk-aussen `jc-einrasten`, .ps-oben path `jc-led`,
+   .ger.jc-plop .gb `jc-plop` — je 0,32 s, je 1 laufende Animation. */

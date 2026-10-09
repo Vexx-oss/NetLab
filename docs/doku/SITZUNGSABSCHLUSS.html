@@ -99,7 +99,7 @@ python tools/fassung-ziehen.py --setzen</code></pre>
 <p>Betroffene Stellen: <code>bauen.py</code> (<code>VERSION</code>), <code>shell/src-tauri/Cargo.toml</code>, <code>shell/src-tauri/tauri.conf.json</code>, <code>shell/src-tauri/Cargo.lock</code> (<strong>nur</strong> der eigene Block — im <code>Cargo.lock</code> tragen fremde Pakete dieselbe Nummer; ein blindes Ersetzen beschädigt die Sperrdatei), dazu die Doku: README (ZIP-Name, Fassungsangaben), <code>docs/Bauen.md</code> (Tag-Beispiel), <code>android/LIESMICH.md</code> und <code>docs/Liesmich.md</code> (APK-Dateiname), <code>android/huelle/AndroidManifest.xml</code> (Kommentar), <code>.github/workflows/release.yml</code> (Beispielbefehl).</p>
 <p>Nicht anfassen: der <code>CHANGELOG</code>-Verlauf alter Fassungen, <code>Design</code>/<code>Plan</code>-Notizen (das sind Protokolle), und <code>versionCode</code> in <code>android/bauen.py</code> — Bauzählung und Spielversion sind zwei Zahlen.</p>
 <h3 id="3-prufen-und-bauen-in-dieser-reihenfolge">3. Prüfen und bauen, in dieser Reihenfolge</h3>
-<pre><code class="sprache-powershell">sh tools/test.sh                       # erwartet: 434/434 grün, 0 übersprungen (Stand 07.10.2026)
+<pre><code class="sprache-powershell">sh tools/test.sh                       # erwartet: 707/707 grün, 0 übersprungen (Stand 09.10.2026)
 python tools/ethos.py                  # GRUEN gegen tests/stil-stand.json
 python tools/klassen.py                # 0 Klassen ohne CSS-Regel
 node tools/sim-stand.js                # Simulation unverändert

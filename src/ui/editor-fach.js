@@ -51,18 +51,41 @@ UI.laborFach = (() => {
       for (const b of fach.querySelectorAll(".pa-teil"))
         b.classList.toggle("an", Z.werkzeug === "platzieren" && !!Z.platz && gleich(Z.platz, b.dataset.typ, b.dataset.skin || null));
     }
+    /* Das Fach hängt absolut an der Leiste und öffnet nach rechts (editor.css: left:calc(100% + 6px),
+       Breite 268 px). Geklemmt wird gegen den nächsten BESCHNEIDENDEN Vorfahren — dieselbe Definition
+       wie tools/menueprobe.py (`eingesperrt`): der erste Vorfahre mit overflow auto/scroll/hidden/clip.
+       Gemessen (menueprobe, 06.10.2026): das Fach ragte rechts aus `ansicht` (67 px bei 720 px Breite)
+       und war dort teils nicht erreichbar. Reicht der Platz nicht, wird es SCHMALER statt herauszuragen. */
+    function behaelter(){
+      for (let k = leiste.parentElement; k && k.nodeType === 1; k = k.parentElement) {
+        const st = getComputedStyle(k);
+        if (/auto|scroll|hidden|clip/.test(st.overflowX + st.overflowY)) return k;
+      }
+      return null;
+    }
+    function einpassen(k){
+      fach.style.left = "";
+      fach.style.width = "";
+      fach.style.top = Math.max(6, k.offsetTop - 6) + "px";
+      const natur = fach.getBoundingClientRect().width || 268;          /* Breite aus editor.css */
+      const b = behaelter();
+      const rb = b ? b.getBoundingClientRect() : {right: innerWidth, bottom: innerHeight};
+      const rl = leiste.getBoundingClientRect();
+      const platz = Math.round(rb.right - rl.right - 6);               /* Platz rechts neben der Leiste */
+      if (platz > 0 && platz < natur) fach.style.width = platz + "px";
+      /* zweiter Durchgang wie in UI.menue: erst mit der endgültigen Breite passt die Höhenrechnung */
+      const r = fach.getBoundingClientRect(), unten = Math.min(innerHeight, rb.bottom) - 8;
+      if (r.bottom > unten) fach.style.top = Math.max(6, k.offsetTop - 6 - (r.bottom - unten)) + "px";
+    }
     function oeffnen(id, fokus){
       if (!UI.KATEGORIEN.some(k => k.id === id)) return;
       offen = id;
       zeichnen(id);
       fach.hidden = false;
       const k = knoepfe.find(b => b.dataset.kat === id);
-      fach.style.top = Math.max(6, k.offsetTop - 6) + "px";
+      einpassen(k);
       for (const b of knoepfe) { const an = b.dataset.kat === id; b.classList.toggle("an", an); b.setAttribute("aria-expanded", String(an)); }
       UI.juice?.(k, "wahl", 400); UI.klang?.spielen("klick");
-      /* Fach darf nicht unten aus dem Fenster ragen */
-      const r = fach.getBoundingClientRect(), unten = innerHeight - 8;
-      if (r.bottom > unten) fach.style.top = Math.max(6, k.offsetTop - 6 - (r.bottom - unten)) + "px";
       if (fokus) fach.querySelector(".pa-liste .pa-teil")?.focus({preventScroll: true});
       document.addEventListener("pointerdown", aussen, true);
     }

@@ -722,4 +722,100 @@ Object.assign(DATEN.wiki, {
     belege: "IANA Port Number Registry (445, 2049, 3260) · Brücke – FISI und Alltag zu Storage und Cloud · SNIA Dictionary (Snapshot, RAID) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept",
     siehe: ["lab.ports"],
   },
+
+  /* ---------- Zusatzseite OHNE eigene Fertigkeit: Klassenraum (Leitung, 09.10.2026) ----------
+     `DATEN.wiki` ist eine Seite je Fertigkeit (27, die Tabelle ist gesperrt: Klassenraum-Codec,
+     tools/klassenraum-probe/A-festlegung.md). Der Klassenraum ist keine Fertigkeit, braucht aber
+     eine Nachschlage-Seite – er ist ein Modus des Spiels, keine Übung. Deshalb steht er hier in
+     DERSELBEN Form: gleiche Pflichtfelder, gleiche Abschnittsstruktur, keine neue Fertigkeit.
+     `suche` ist optional und trägt zusätzliche Suchwörter; die Wiki-Ansicht findet die Seite schon
+     über `titel` und `kurz` (src/ui/karriere.js:295-296). Alle Zahlen sind am 09.10.2026 gegen
+     src/spiel/klassenraum.js, src/spiel/klassenraum-codec.js und src/ui/klassenraum.js gemessen. */
+  "klassenraum": {
+    titel: "Klassenraum",
+    kurz: "Ein Code von der Lehrkraft ergibt auf jedem Gerät denselben Auftrag – ohne Konto, ohne Netz und ohne Bewertung. Der Ergebnis-Code geht zurück an die Lehrkraft.",
+    abschnitte: [
+      {titel: "Was der Klassenraum ist", html:
+        "<p>Die Lehrkraft sagt einen <b>Code</b> an, jeder tippt ihn ein – und auf jedem Gerät entsteht <b>derselbe Auftrag</b>. Ohne Konto, ohne Server, ohne Netz: Jedes Gerät rechnet den Fall aus dem Code selbst aus.</p>" +
+        "<ul><li>Der Code ist die Ansage. Wer ihn kennt, kann mitspielen – er ist <b>kein Geheimnis</b>.</li><li>Der Auftrag ist im <b>Postfach unsichtbar</b>: kein Offen-Zähler, keine Heute-Kachel, kein Ereignis. Er läuft nur, solange du ihn offen hast.</li><li><b>Keine Bewertung</b>: kein Geld, kein Ruf, kein erledigter Auftrag, keine Note. Es zählt der Lernstand – wie beim Training.</li><li>Gleicher Code, gleicher Fall: Die Anzeige auf deinem Gerät zeigt denselben Auftrag wie beim Nachbarn.</li></ul>"},
+      {titel: "Ansagen: die Lehrkraft", html:
+        "<p>In der Ansicht <b>Klasse</b> (Titel „Klassenraum“) wählst du den Auftrag: einen festen Auftrag aus der Liste oder eine Übung aus der Gruppe „(erzeugt)“.</p>" +
+        "<table><tr><th>Schritt</th><th>Was passiert</th></tr>" +
+        "<tr><td>Auftrag wählen</td><td>fester Auftrag aus der Liste oder eine Übung, die aus einer Fertigkeit erzeugt wird</td></tr>" +
+        "<tr><td><b>Code anzeigen</b></td><td>der große Auftragscode <code>NL-XXXX-XX</code> für den Beamer</td></tr>" +
+        "<tr><td>Code kopieren</td><td>legt denselben Code in die Zwischenablage</td></tr>" +
+        "<tr><td>Klassenraum-Abdruck</td><td>ein Kennwert des <b>geladenen Netzes</b> – nicht des Codes</td></tr></table>" +
+        "<p>Der Abdruck ist zum Vergleichen gedacht: Zwei Geräte mit demselben Abdruck haben dasselbe Netz vor sich. Mehr sagt er nicht – siehe „Grenzen“.</p>"},
+      {titel: "Öffnen: der Azubi", html:
+        "<p>Zwei Wege führen zum selben Auftrag: die Zeile <b>Klassenraum-Code</b> auf der Startseite (Feld, Knopf „Öffnen“, Enter genügt) oder die Ansicht <b>Auftrag</b> (Titel „Mitarbeit“) mit den Feldern „Auftragscode“ und „Platz“ und dem Knopf „Auftrag öffnen“.</p>" +
+        "<ul><li><b>Groß oder klein, mit oder ohne Trennstriche</b>: Der Code wird eingelesen, nicht Zeichen für Zeichen verglichen.</li><li>Im Code kommen <b>kein I, kein O, keine 0 und keine 1</b> vor. Wer eines davon sieht, hat sich vertippt.</li><li>Ein Tippfehler wird <b>markiert, nicht abgewiesen</b>: Der Hinweis nennt Länge, Zeichen oder Prüfziffer.</li><li>Der <b>Platz</b> (1 bis 31; leer heißt unverändert) geht in den Ergebnis-Code. Ist derselbe Auftrag schon offen, fragt das Programm: „Weiterarbeiten?“</li></ul>" +
+        "<p>Zwei echte Beispiele: <code>NL-HC3L-CS</code> ist ein fester Auftrag, <code>NL-WTQJ-EF</code> eine erzeugte Übung. Beide ergeben auf jedem Gerät denselben Fall.</p>"},
+      {titel: "Der Ergebnis-Code", html:
+        "<p>Ist der Auftrag bestanden, zeigt ein Hinweis <b>„Für die Lehrkraft“</b> den Ergebnis-Code <code>E-XXXX-XXX</code> mit einem Kopierknopf. Vorher gibt es keinen: Der Code entsteht nur aus einer bestandenen Abnahme.</p>" +
+        "<ul><li>Er trägt die <b>Sitzung</b>, den <b>Platz</b>, die erreichten <b>Sterne</b> (0 bis 5), die <b>Fehlversuche</b> (0 bis 3; „3+“ heißt drei oder mehr) und die <b>Dauer</b>.</li><li>Er trägt <b>kein Hilfe-Feld und keine Note</b> – so ist es entschieden.</li></ul>" +
+        "<p>Beispiel: <code>E-KFWS-HZM</code> heißt Sitzung 9, Platz 5, 5 Sterne, 1 Fehlversuch, 70 Sekunden.</p>"},
+      {titel: "Die Ampel der Lehrkraft", html:
+        "<p>Die Ergebnis-Codes kommen blockweise zurück: alles in das Feld <b>Ergebnis-Codes</b> einfügen – eine Zeile je Code oder alle auf einmal – und <b>Eintragen</b> drücken. Jede Zeile bekommt eine Rückmeldung: eingetragen, doppelt, fremde Sitzung oder unlesbar.</p>" +
+        "<ul><li><b>Schlüssel ist der Platz</b>: Je Platz gilt der <b>erste</b> Eintrag. Ein zweiter Code für denselben Platz wird nicht übernommen.</li><li><b>fertig</b> = eingetragene Plätze, <b>offen</b> = Plätze − fertig. Die Platzzahl (1 bis 31) stellst du unter <b>Datei…</b> ein; „nicht eingestellt“ rechnet nichts aus.</li><li><b>Median</b> = <b>oberer Median</b> der gültigen Dauern (größer als 0), auf ganze Sekunden gerundet. Bei gerader Anzahl ist das die obere der beiden mittleren Zeiten.</li><li>Die Lampe ist <b>grün</b>, wenn alle Plätze eingetragen sind und kein Ergebnis ohne gültigen Platz dabei ist; sonst <b>gelb</b>. Rot ist im Normalbetrieb aus.</li></ul>" +
+        "<table><tr><th>Platz</th><th>Sterne</th><th>Dauer</th><th>Fehlversuche</th></tr>" +
+        "<tr><td>1 bis 31, sonst „ohne Platz“</td><td>halbe Sterne als ★</td><td>Zeit des Durchgangs</td><td>0, 1, 2 oder „3+“</td></tr></table>" +
+        "<p>Unter <b>Datei…</b> liegen Export und Import: Die Sitzung liegt nur auf dem Rechner der Lehrkraft, die Datei ist die Sicherung und der Weg auf ein anderes Gerät. Nach einem Import lässt er sich mit „Rückgängig“ zurücknehmen.</p>"},
+      {titel: "Grenzen und was nicht passiert", html:
+        "<ul><li><b>Der Code ist kein Geheimnis.</b> Er schützt nichts – er sagt nur, welcher Auftrag gemeint ist.</li><li><b>Der Klassenraum-Abdruck beweist nicht, dass alle denselben Auftrag haben.</b> Er wird aus dem geladenen Netz gebildet (Geräte, Kabel) – verschiedene Aufträge können dasselbe Netz zeigen. Verglichen wird der Auftrag über seine Kennung <code>def.id</code>, nicht über den Abdruck.</li><li><b>Kein Server, kein QR-Code.</b> Beides gehört zu späteren Stufen. Den Schalter „Klassenraum-Server“ gibt es in den Einstellungen schon – er merkt sich nur die Absicht und ändert heute nichts.</li><li><b>Grenzen des Codes:</b> Sitzung 1 bis 31, Platz 0 bis 31, dazu Auftrags- oder Fertigkeitsindex und Variante. Ein Code aus einer anderen Fassung wird abgewiesen, statt einen falschen Auftrag zu bauen.</li><li><b>Keine Bewertung:</b> kein Geld, kein Ruf, kein erledigter Auftrag, keine Note – auch nicht im Ergebnis-Code.</li></ul>"},
+    ],
+    merksatz: "Gleicher Code, gleicher Auftrag – auf jedem Gerät, ohne Konto und ohne Note.",
+    pruefungstipp: "Der Klassenraum ist kein Prüfungsstoff, sondern der Weg, wie eine Klasse denselben Auftrag bekommt. Zeigt dein Gerät etwas anderes als das deines Nachbarn, vergleicht den Auftrag (seine Kennung), nicht den Netzkennwert.",
+    quelle: "Klassenraum – B: Oberfläche und Ablauf",
+    belege: "Architektur.md § 12 (Klassenraum) · Klassenraum – A: Codec und Determinismus · src/spiel/klassenraum.js · src/spiel/klassenraum-codec.js · src/ui/klassenraum.js",
+    siehe: ["lab.cli", "lab.link"],
+    suche: ["Klassenraum", "Klassenzimmer", "Unterricht", "Schule", "Auftragscode", "Ergebnis-Code", "Code", "Ampel", "Median", "Beamer", "Lehrkraft", "Azubi", "Platz", "Sitzung", "ohne Konto", "ohne Server"],
+  },
+
+  /* ---------- Zusatzseite OHNE eigene Fertigkeit: Übergabe (Leitung, 09.10.2026) ----------
+     Ein Rechner, viele Azubis: die zweite große Neuerung der 2.0.0, ebenfalls kein Thema der
+     27 Fertigkeiten. Gleiche Form wie alle Seiten; alle Zahlen sind am 09.10.2026 an
+     src/spiel/uebergabe.js und src/ui/uebergabe.js gemessen (Ablauf selbst nachgestellt). */
+  "uebergabe": {
+    titel: "Übergabe",
+    kurz: "Ein Rechner wandert zum nächsten Azubi: der Spielstand ist danach leer, die Einstellungen bleiben – und der Lernstand nur, wenn die Lehrkraft ihn behält.",
+    abschnitte: [
+      {titel: "Was die Übergabe ist", html:
+        "<p>Ein Rechner, viele Azubis: Am Ende der Stunde wandert der Rechner zum nächsten Azubi. Ohne Übergabe steckt der zweite Azubi im <b>offenen Auftrag des ersten</b> – genau dafür gibt es dieses Werkzeug.</p>" +
+        "<ul><li>Die Übergabe setzt den <b>Spielstand</b> dieses Rechners zurück: Der nächste Azubi bekommt einen leeren Rechner und kann sofort anfangen.</li><li>Sie ist eine <b>Geräte-Operation</b>: kein Konto, kein Server, keine Anmeldung. Alles passiert auf diesem Rechner.</li><li>Danach lädt die Seite neu – erst dadurch ist sicher, dass wirklich kein Auftrag mehr offen ist.</li></ul>"},
+      {titel: "Wer sie benutzt", html:
+        "<p>Die Lehrkraft (oder der Azubi selbst) <b>am Ende einer Stunde im Computerraum</b>. Zu finden in den Einstellungen: Abschnitt <b>„Rechner übergeben“</b> mit dem Knopf <b>„Rechner übergeben …“</b>.</p>" +
+        "<p>Der Dialog <b>„Rechner übergeben?“</b> zeigt zuerst den Stand dieses Rechners (Stufe, Euro, Ruf, erledigte Tickets) und dann die Frage, die alles entscheidet: Was soll mit dem <b>Lernstand</b> passieren?</p>"},
+      {titel: "Was bleibt, was geht", html:
+        "<table><tr><th>Was</th><th>Nach der Übergabe</th></tr>" +
+        "<tr><td><b>Lernstand</b> (die Kästen des Lernmotors)</td><td>bleibt mit „Behalten“; mit „Löschen“ ist er weg</td></tr>" +
+        "<tr><td>Einstellungen (Bildungsstand, Klang, Leiste)</td><td>bleiben</td></tr>" +
+        "<tr><td>Die rollierende Sicherung des vorherigen Standes im Speicher</td><td>bleibt – sie liegt außerhalb des Spielstands und wird vom Programm selbst geführt</td></tr>" +
+        "<tr><td>Geld, Ruf, erledigte Tickets, Fehlerdex, Buch, offener Auftrag</td><td>weg – der Spielstand wird ersetzt</td></tr>" +
+        "<tr><td>Postfach</td><td>neu gefüllt; der nächste Azubi kann sofort anfangen</td></tr></table>" +
+        "<p>Selbst nachgestellt an einem benutzten Rechner: Geld 33 → 0 Euro, Ruf 4 → 0, erledigte Tickets 2 → 0, offener Auftrag → keiner. Der Lernstand war danach unverändert („Behalten“) beziehungsweise leer („Löschen“); die Einstellungen blieben in beiden Fällen gleich.</p>"},
+      {titel: "Der Dialog", html:
+        "<ul><li><b>„Behalten“</b> – für diesen Rechner weiterlernen; der Lernstand bleibt.</li><li><b>„Löschen“</b> – der nächste Azubi fängt frisch an; der Lernstand wird gelöscht.</li><li><b>„Erst sichern (Datei)“</b> – lädt den kompletten Speicher als Datei herunter, <b>bevor</b> der Rechner geräumt wird.</li><li><b>„Abbrechen“</b> – nichts passiert; <b>Escape</b> schließt den Dialog ebenfalls.</li></ul>" +
+        "<p>Im Dialog steht der Merksatz des Hauses: „Der Lernstand hängt am Rechner, nicht an der Person. Im Computerraum ist „Löschen“ meistens richtig – zu Hause „Behalten“.“ Beim nächsten Öffnen zeigt er unten, wann zuletzt übergeben wurde und ob der Lernstand behalten oder gelöscht wurde.</p>"},
+      {titel: "Behalten oder löschen?", html:
+        "<p>Der Lernstand gehört dem <b>Lernmotor</b>, nicht dem Spielstand – deshalb bleibt er standardmäßig erhalten. Die Entscheidung trifft die Lehrkraft, denn der Lernstand hängt am <b>Rechner</b>, nicht an der Person:</p>" +
+        "<ul><li><b>Computerraum</b> (jede Stunde ein anderer Azubi): „Löschen“, sonst lernt der Nächste mit den Lücken des Vorgängers weiter.</li><li><b>Eigener Rechner</b>: „Behalten“ – die Kästen gehören zu dieser Person.</li></ul>" +
+        "<p>Eine Reihenfolge zählt dabei: Bei „Löschen“ wird der Lernstand <b>geleert, bevor</b> der neue Spielstand geladen wird. Andersherum wäre das frische Postfach aus den <b>fälligen Fertigkeiten des Vorgängers</b> gefüllt.</p>"},
+      {titel: "Grenzen", html:
+        "<ul><li><b>Kein Konto, kein Server.</b> Es gibt keine Anmeldung und keine Nutzerliste; die Übergabe ist eine Datei- und Geräte-Operation.</li><li><b>Keinen Personen-Fortschritt:</b> Wer seinen Stand mitnehmen will, sichert ihn vorher über „Erst sichern (Datei)“ – oder in den Einstellungen im Abschnitt <b>„Spielstand“</b> – und liest die Datei am anderen Rechner wieder ein.</li><li><b>Ohne Lernmotor</b> wird „Löschen“ ehrlich abgelehnt: Es passiert nichts, statt den alten Lernstand still weiterzuführen.</li><li>Für die Übergabe gibt es <b>kein „Rückgängig“</b> – der Weg zurück ist die Sicherungsdatei.</li></ul>"},
+    ],
+    merksatz: "Der Spielstand gehört dem Azubi, der Lernstand hängt am Rechner.",
+    pruefungstipp: "Kein Prüfungsstoff, aber der Unterschied zählt: „Behalten“ lässt den Lernstand auf diesem Rechner stehen, „Löschen“ gibt ihn frei – Geld und offene Aufträge sind in beiden Fällen weg.",
+    quelle: "Fahrplan – 1.3 und 2.0 (Schritt 0: Übergabe)",
+    belege: "src/spiel/uebergabe.js · src/ui/uebergabe.js · tests/spiel-uebergabe.test.js · tests/ui-uebergabe.test.js",
+    siehe: ["lab.speichern"],
+    suche: ["Übergabe", "übergeben", "Rechner übergeben", "Computerraum", "nächster Azubi", "Lernstand", "behalten", "löschen", "Spielstand", "Sicherung", "Datei", "zurücksetzen", "ohne Konto", "ohne Server"],
+  },
 });
+
+/* ---------- Die Zusatzseiten: Seiten OHNE eigene Fertigkeit ----------
+   `DATEN.wiki` ist eine Seite je Fertigkeit (27, die Tabelle ist gesperrt: Klassenraum-Codec,
+   tools/klassenraum-probe/A-festlegung.md). Klassenraum und Übergabe sind keine Fertigkeiten,
+   brauchen aber ein Nachschlagewerk. Diese Liste ist die EINE Quelle der Wahrheit: Die Wiki-Ansicht
+   (src/ui/karriere.js `WIKI_ZUSATZ`) liest sie, ebenso die Tests – so muss beim nächsten Zusatz
+   nichts an drei Stellen nachgezogen werden. */
+DATEN.wikiZusatz = ["klassenraum", "uebergabe"];

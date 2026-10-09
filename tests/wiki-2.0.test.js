@@ -24,6 +24,11 @@ gruppe("Wiki 2.0: Pflichtfelder, Verweise, IPv6 und WLAN", () => {
   const TAGS = new Set(["p", "ul", "ol", "li", "code", "b", "strong", "i", "em", "table", "tr", "th", "td", "pre", "sup", "sub", "br"]);
   const seiten = () => Object.entries(DATEN.wiki || {});
   const skillIds = () => (DATEN.skills || []).map(s => s.id);
+  /* Zusatzseiten ohne eigene Fertigkeit (Leitung, 09.10.2026: „Klassenraum“, „Übergabe“). Die Liste
+     steht in den DATEN (`DATEN.wikiZusatz`) – EINE Quelle der Wahrheit, die auch die Ansicht liest.
+     Ausdrücklich gelistet (kein „irgendwas, was keine Fertigkeit ist“): so bleibt ein Tippfehler in
+     einer skill-id laut und wird nicht still zur Zusatzseite. */
+  const ZUSATZ = (typeof DATEN !== "undefined" && Array.isArray(DATEN.wikiZusatz)) ? DATEN.wikiZusatz.slice() : ["klassenraum", "uebergabe"];
   /* Sichtbarer Text = alles, was UI.karriere.wikiAnsicht zeigt (ohne `belege`, `siehe`). */
   const sichtbar = w => [w.titel, w.kurz, w.merksatz, w.pruefungstipp, w.quelle,
     ...(w.abschnitte || []).map(a => (a.titel || "") + " " + (a.html || ""))].filter(Boolean).join(" ");
@@ -43,13 +48,17 @@ gruppe("Wiki 2.0: Pflichtfelder, Verweise, IPv6 und WLAN", () => {
       }
     }
     erwarte.gleich(fehler, []);
-    erwarte.gleich(seiten().length, skillIds().length, "eine Wiki-Seite je Fertigkeit");
+    /* Eine Seite je Fertigkeit (27) PLUS die ausdrücklich gelisteten Zusatzseiten – der Klassenraum
+       ist keine Fertigkeit, braucht aber eine Nachschlage-Seite. */
+    erwarte.gleich(skillIds().filter(id => !(DATEN.wiki || {})[id]), [], "Fertigkeiten ohne Wiki-Seite");
+    erwarte.gleich(seiten().map(([id]) => id).filter(id => !skillIds().includes(id)), ZUSATZ, "Zusatzseiten ohne eigene Fertigkeit");
+    erwarte.gleich(seiten().length, skillIds().length + ZUSATZ.length, "Seitenzahl (Fertigkeiten + Zusatzseiten)");
   });
 
-  pruefe('Keine Seite zeigt ins Leere: jede Seiten-ID ist eine Fertigkeit', () => {
+  pruefe('Keine Seite zeigt ins Leere: jede Seiten-ID ist eine Fertigkeit oder eine Zusatzseite', () => {
     const bekannt = new Set(skillIds()), fremd = [];
-    for (const [id] of seiten()) if (!bekannt.has(id)) fremd.push(id);
-    erwarte.gleich(fremd, [], "Wiki-Seiten ohne Fertigkeit in DATEN.skills");
+    for (const [id] of seiten()) if (!bekannt.has(id) && !ZUSATZ.includes(id)) fremd.push(id);
+    erwarte.gleich(fremd, [], "Wiki-Seiten ohne Fertigkeit und ohne Eintrag in ZUSATZ");
     const fehlend = skillIds().filter(id => !(DATEN.wiki || {})[id]);
     erwarte.gleich(fehlend, [], "Fertigkeiten ohne Wiki-Seite");
   });
