@@ -42,3 +42,7 @@ Programm/**/*.idsig
 *secret*.txt
 *passwoerter*.txt
 *zugang*.txt
+
+# Testpaket fuer Case-Tests (HTML + .exe, nicht ins Git)
+Testpaket/
+
