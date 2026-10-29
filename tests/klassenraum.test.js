@@ -52,19 +52,51 @@ gruppe("Spiel: Klassenraum", () => {
     return {c, inst};
   }
 
-  /* ---------- Die eingefrorene Tabelle (§ 2.3) ---------- */
-  pruefe("Die eingefrorene Tabelle ist die lebende Reihenfolge: 58 Aufträge, 27 Fertigkeiten, Codec da", () => wegwerf(() => {
+  /* ---------- Die eingefrorene Tabelle (§ 2.3, § 17.9) ----------
+     Leitungsentscheidung 29.10.2026: Die 58er-Auftragstabelle bleibt UNVERÄNDERT eingefroren. Die
+     15 neuen 2.1-Tickets (ticketReihe 73, wachsend bis 76 in S7) sind bewusst NICHT
+     klassenraum-adressierbar – der Codec-Index ist 6 Bit breit (höchstens 64); KEIN Formatwechsel
+     in 2.1, 3.1 hebt das Format mit Migrationsweg an. Die Codec-Tabelle wird deshalb NICHT mehr mit
+     Spiel.ticketReihe() gleichgesetzt: maßgeblich ist die eingefrorene Liste, und alte Codes müssen
+     weiter dieselben Aufträge liefern. */
+  pruefe("Eingefrorene 58er-Tabelle (§ 2.3/§ 17.9): IDs lebendig, alte Codes stabil, Fertigkeiten 30, ticketReihe entkoppelt", () => wegwerf(() => {
     const t = K().tabellen();
     erwarte.wahr(!!t, "der Codec liefert die Tabellen");
+    /* (b) 58 lang, keine Duplikate, erster/letzter Eintrag unverändert */
     erwarte.gleich(t.auftraege.laenge, 58, "58 eingefrorene Aufträge");
-    erwarte.gleich(t.skills.laenge, 27, "27 Fertigkeiten");
-    const reihe = Spiel.ticketReihe().map(x => x.id);
-    erwarte.gleich(t.auftraege.ids.join("|"), reihe.slice(0, 58).join("|"), "Präfix der lebenden Spielreihenfolge (§ 2.3 Regel 4)");
+    erwarte.gleich(new Set(t.auftraege.ids).size, 58, "keine doppelte Auftrags-ID");
+    erwarte.gleich(t.auftraege.ids[0], "salon-01", "erster Eintrag unverändert");
+    erwarte.gleich(t.auftraege.ids[57], "storage-03", "letzter Eintrag unverändert");
+    /* (a) alle 58 IDs existieren genau einmal in DATEN.tickets */
+    const zaehler = new Map();
+    for (const x of DATEN.tickets || []) zaehler.set(x.id, (zaehler.get(x.id) || 0) + 1);
+    erwarte.gleich(t.auftraege.ids.filter(id => !zaehler.has(id)), [], "keine tote ID in der Tabelle");
+    erwarte.gleich(t.auftraege.ids.filter(id => (zaehler.get(id) || 0) > 1), [], "keine eingefrorene ID mehrfach in DATEN.tickets");
+    /* (c) REGRESSION: alte Codes für die letzten drei Indizes liefern weiter storage-01..03 */
+    const regression = [];
+    for (const paar of [[55, "storage-01"], [56, "storage-02"], [57, "storage-03"]]) {
+      const index = paar[0], id = paar[1];
+      const sz = K().erzeugen({ticketId: id, seed: 0});
+      if (!sz || sz.fehler) { regression.push(id + ": erzeugen fehlgeschlagen"); continue; }
+      if (sz.index !== index) regression.push(id + ": Index " + sz.index + " statt " + index);
+      const gelesen = K().ausCode(sz.code);
+      if (!gelesen || gelesen.fehler) regression.push(id + ": ausCode fehlgeschlagen");
+      else if (gelesen.ticketId !== id) regression.push(id + ": Code liefert " + gelesen.ticketId);
+    }
+    erwarte.gleich(regression, [], "alte Codes (Index 55–57) liefern weiter storage-01/02/03");
+    /* (d) Fertigkeitentabelle = 30 in DATEN.skills-Reihenfolge */
+    erwarte.gleich(t.skills.laenge, 30, "30 Fertigkeiten (0–26 alt, 27–29 ans Ende angehängt)");
     erwarte.gleich(t.skills.ids.join("|"), (DATEN.skills || []).map(s => s.id).join("|"), "Fertigkeitsreihenfolge = DATEN.skills");
-    /* jede eingefrorene ID existiert noch */
-    const fehlt = t.auftraege.ids.filter(id => !(DATEN.tickets || []).some(x => x.id === id));
-    erwarte.gleich(fehlt, [], "keine tote ID in der Tabelle");
-    console.log(`MESSUNG Tabelle: Auftraege=${t.auftraege.laenge} · Skills=${t.skills.laenge} · taugliche=${K().tauglicheFertigkeiten().length}`);
+    /* (e) ticketReihe() ist länger und wird NICHT mit der Codec-Tabelle gleichgesetzt */
+    const reihe = Spiel.ticketReihe().map(x => x.id);
+    erwarte.wahr(reihe.length >= 58, "die lebende Ticketreihe hat mindestens 58 Einträge, ist " + reihe.length);
+    erwarte.wahr(reihe.length > t.auftraege.laenge, "die lebende Reihe ist länger als die Codec-Tabelle (" + reihe.length + " > 58)");
+    /* (f) offener 3.1-Punkt ist im Codec dokumentiert */
+    const fs2 = require("fs"), path2 = require("path");
+    const codec = fs2.readFileSync(path2.join(__dirname, "..", "src", "spiel", "klassenraum-codec.js"), "utf8");
+    erwarte.enthaelt(codec, "NICHT klassenraum-adressierbar", "Codec dokumentiert die bewusste Grenze (§ 17.9)");
+    erwarte.enthaelt(codec, "3.1 hebt das Format", "Codec nennt den offenen 3.1-Punkt");
+    console.log("MESSUNG Tabelle: Auftraege=" + t.auftraege.laenge + " · Skills=" + t.skills.laenge + " · ticketReihe=" + reihe.length + " · taugliche=" + K().tauglicheFertigkeiten().length);
   }));
 
   /* ---------- erzeugen → ausCode: derselbe Auftrag, auf jedem Gerät dasselbe Netz ---------- */

@@ -21,7 +21,7 @@ UI.ereignisse = (() => {
     const inst = UI.spiel && UI.spiel.inst;
     const aktion = e.aktion === "provider" ? h("button", {type: "button", class: "knopf klein", onclick: () => {
         if (Spiel.ereignisse.providerAnrufen(inst)) UI.toast("Störung gemeldet – das Internet ist wieder da. +1 Ruf fürs Erkennen.", "ok", {dauer: 3800});
-        zu(); UI.labor.auftragNeu?.(); }}, "📞 Provider anrufen")
+        zu(); UI.labor.auftragNeu?.(); }}, UI.symbol("telefon", 16), " Provider anrufen")
       : e.aktion === "notfall" && e.iid ? h("button", {type: "button", class: "knopf klein", onclick: () => { zu(); UI.spiel.oeffnen(e.iid); }}, "Jetzt hin ▸")
       : e.aktion === "abheben" && e.iid ? h("button", {type: "button", class: "knopf klein ev-rangehen", onclick: () => { zu(); UI.spiel.oeffnen(e.iid); }}, "Rangehen ▸")
       : e.aktion === "neu" && e.iid ? h("button", {type: "button", class: "knopf klein", onclick: () => { zu(); UI.spiel.imPostfach(e.iid); }}, "Ansehen ▸") : null;

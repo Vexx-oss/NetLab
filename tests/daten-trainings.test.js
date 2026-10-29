@@ -41,13 +41,29 @@ gruppe("Daten: Trainings", () => {
     erwarte.gleich(f, []);
   });
 
-  pruefe("jede Fertigkeit aus DATEN.skills kommt mindestens einmal vor – keine erfundene", () => {
+  /* Namentliche Ausnahmen (Architektur § 17.1): Wo die Simulation das Thema nicht ausführen kann,
+     gibt es KEIN Training – ein Training erzeugt eine Sim-Instanz über einen Injektor. IPv6 und WLAN
+     werden inhaltlich geübt (Adressierung, Planung, Bewertung), nicht paketweise simuliert. Die
+     Begründung ist zugleich im Dichte-Test (tests/inhaltsdichte.test.js, AUSNAHME_TRAINING) geführt. */
+  const AUSNAHME_TRAINING = {
+    "lab.ipv6": "§17.1: IPv6 wird inhaltlich geübt, nicht paketweise simuliert – ein Training bräuchte eine Sim-Instanz.",
+    "lab.wlan": "§17.1: WLAN wird inhaltlich geübt, nicht paketweise simuliert – Funk hat kein Sim-Modell.",
+  };
+  pruefe("jede Fertigkeit aus DATEN.skills kommt mindestens einmal vor – keine erfundene, Ausnahmen namentlich", () => {
     const f = [];
     for (const t of alle) if (!skillIds.has(t.skill)) f.push(`${t.id}: unbekannte Fertigkeit ${t.skill}`);
     const genutzt = new Set(alle.map(t => t.skill));
     erwarte.gleich(f, []);
-    erwarte.gleich(DATEN.skills.filter(s => !genutzt.has(s.id)).map(s => s.id), [], "Fertigkeit ohne Szenario");
-    erwarte.wahr(DATEN.skills.length >= 27, `DATEN.skills hat nur ${DATEN.skills.length} Einträge`);
+    erwarte.gleich(DATEN.skills.filter(s => !genutzt.has(s.id) && !AUSNAHME_TRAINING[s.id]).map(s => s.id), [], "Fertigkeit ohne Szenario (außer den namentlichen Ausnahmen)");
+    /* Gegenprobe: Die Ausnahmen sind echt – kein Training, gültige Begründung, echte Fertigkeit. */
+    const ausnahmenFalsch = [];
+    for (const id of Object.keys(AUSNAHME_TRAINING)) {
+      if (!skillIds.has(id)) ausnahmenFalsch.push(id + ": keine Fertigkeit");
+      if (String(AUSNAHME_TRAINING[id]).trim().length < 20) ausnahmenFalsch.push(id + ": Begründung zu knapp");
+      if (genutzt.has(id)) ausnahmenFalsch.push(id + ": hat inzwischen ein Training – Ausnahme entfernen");
+    }
+    erwarte.gleich(ausnahmenFalsch, [], "Trainings-Ausnahmen sind echt und begründet");
+    erwarte.wahr(DATEN.skills.length >= 30, `DATEN.skills hat nur ${DATEN.skills.length} Einträge`);
   });
 
   pruefe("art, minuten, niveau und geruest stehen im erlaubten Bereich", () => {

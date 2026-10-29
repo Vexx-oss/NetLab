@@ -14,7 +14,7 @@
 UI.szene = (() => {
   let aktiv = null;
   const pause = (ms, st) => new Promise(res => { const t = setTimeout(res, ms); st.weiter.push(() => { clearTimeout(t); res(); }); });
-  const SYMBOL = {druckt: "🧾", seite: "🌐", adresse: "🏷", gesperrt: "⛔", haken: "✓", sicherung: "💾"};
+  const SYMBOL = {druckt: "beleg", seite: "welt", adresse: "etikett", gesperrt: "schloss", haken: "ok", sicherung: "sicherung"};   /* U01: SVG-Glyphen statt Emoji */
 
   /* Setzt ein Element an eine Bildschirmstelle (transform: -50 % / -100 % → left = Mitte, top = Unterkante) und hält
      es dabei innerhalb der Bühne. px/py sind bereits die endgültige Position. */
@@ -57,7 +57,7 @@ UI.szene = (() => {
 
   function reaktion(buehne, z){
     const el = h("div", {class: `sz-reaktion sz-${z.art}`},
-      h("span", {class: "sz-sym", "aria-hidden": "true"}, SYMBOL[z.art] || "✓"), h("span", {}, z.text),
+      h("span", {class: "sz-sym", "aria-hidden": "true"}, UI.symbol(SYMBOL[z.art] || "ok", 15)), h("span", {}, z.text),
       z.art === "seite" ? h("span", {class: "sz-balken"}, h("i")) : null);
     if (!anGeraet(buehne, z.ende, el)) return;
     const g = UI.labor.geraetEl?.(z.ende);
@@ -95,8 +95,8 @@ UI.szene = (() => {
     if (f.art === "audit") {
       let bild = null;
       try { const netz = UI.labor.netz; if (netz) bild = UI.netzplan.zeichnung(Spiel.plan.aus(netz, {art: "skizze"}), "skizze"); } catch (e) { bild = null; }
-      const el = formKarte(buehne, "sz-audit", h("div", {class: "sz-form-kopf"}, "📐 ", h("b", {}, "Netzplan"), ` · ${f.kunde}`),
-        h("div", {class: "sz-plan"}, bild || h("span", {class: "sz-plan-leer", "aria-hidden": "true"}, "🗺")),
+      const el = formKarte(buehne, "sz-audit", h("div", {class: "sz-form-kopf"}, UI.symbol("plan", 16), " ", h("b", {}, "Netzplan"), ` · ${f.kunde}`),
+        h("div", {class: "sz-plan"}, bild || h("span", {class: "sz-plan-leer", "aria-hidden": "true"}, UI.symbol("plan", 24))),
         h("div", {class: "sz-stempel", "aria-label": "Geprüft"}, h("b", {}, "GEPRÜFT ✓"), h("small", {}, datumDe(f.tag))),
         h("p", {class: "sz-form-fuss"}, `${f.korrigiert} ${f.korrigiert === 1 ? "Wert" : "Werte"} korrigiert – der Plan stimmt wieder`));
       await pause(ruhig ? 0 : 420, st);
@@ -106,7 +106,7 @@ UI.szene = (() => {
     }
     if (f.art === "adressplan") {
       const n = f.bereiche.length;
-      formKarte(buehne, "sz-adressplan", h("div", {class: "sz-form-kopf"}, "🧮 ", h("b", {}, "Adressplan"), ` · ${f.basis}`),
+      formKarte(buehne, "sz-adressplan", h("div", {class: "sz-form-kopf"}, UI.symbol("rechner", 16), " ", h("b", {}, "Adressplan"), ` · ${f.basis}`),
         h("div", {class: "sz-adressen", "aria-hidden": "true"}, f.bereiche.map((b, i) => h("i", {style: {left: b.links + "%", width: b.breite + "%", "--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}))),
         h("ul", {class: "sz-legende"}, f.bereiche.map((b, i) => h("li", {style: {"--i": i, "--f": `var(--vlan-${(i % 7) + 2})`}}, h("b", {}, b.name), ` ${b.netz}${b.praefix}`))));
       UI.klang?.spielen("haken");
@@ -187,7 +187,7 @@ UI.szene = (() => {
       if (f && f.art === "fernwartung") o.aufdecken?.();        /* auch beim Überspringen: das Netz zeigt sich */
       document.removeEventListener("keydown", taste, true);
       buehne.classList.add("weg");
-      setTimeout(() => buehne.remove(), wenigBewegung() ? 0 : 180);
+      setTimeout(() => buehne.remove(), wenigBewegung() ? 0 : UI.zeit("dauer"));
       if (aktiv === st) aktiv = null;
     }
     const erg = {dauer: Math.round(performance.now() - t0), uebersprungen: st.uebersprungen, gezeigt: ruhig ? zeilen.length : gezeigt.length, ruhig};

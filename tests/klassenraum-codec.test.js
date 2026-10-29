@@ -92,8 +92,8 @@ gruppe("Klassenraum: Codec (A1)", () => {
       }
     erwarte.gleich(faelle, 1048576, "alle 2^20 Nutzlasten");
     erwarte.gleich([laengeFalsch, falsch], [0, 0], "keine Abweichung" + (erster ? " (erste: " + erster + ")" : ""));
-    erwarte.gleich(gueltig, 32 * (58 + 27) * 256, "einlösbare Nutzlasten (58 Aufträge, 27 Fertigkeiten)");
-    erwarte.gleich(fassung, 1048576 - 32 * (58 + 27) * 256, "der Rest ist `fassung` — kein anderer Fehler");
+    erwarte.gleich(gueltig, 32 * (K.TABELLE_AUFTRAEGE_LAENGE + K.TABELLE_SKILLS_LAENGE) * 256, "einlösbare Nutzlasten (" + K.TABELLE_AUFTRAEGE_LAENGE + " Aufträge, " + K.TABELLE_SKILLS_LAENGE + " Fertigkeiten)");
+    erwarte.gleich(fassung, 1048576 - 32 * (K.TABELLE_AUFTRAEGE_LAENGE + K.TABELLE_SKILLS_LAENGE) * 256, "der Rest ist `fassung` — kein anderer Fehler");
   });
 
   pruefe('Erschöpfender Round-Trip Ergebnis-Code: jedes Sterne-/Versuchs-/Dauer-Bit und beide Ränder', () => {
@@ -220,13 +220,13 @@ gruppe("Klassenraum: Codec (A1)", () => {
     const r15 = K.ergebnisLesen(packErgebnis({sitzung: 3, platz: 7, sterneHalbe: 15, versuche: 1, dauer: 5}));
     erwarte.gleich([r15.ok, r15.fehler, r15.sterneHalbe], [false, "bereich", 15]);
     erwarte.gleich(r15.grund, "Der Sterne-Wert im Code liegt außerhalb des Bereichs (0..10 halbe Sterne): 15.");
-    /* fassung — reservierte Indizes, ohne Tabellen gelten die eingefrorenen Längen 58/27 (§ 2.3) */
+    /* fassung — reservierte Indizes, ohne Tabellen gelten die eingefrorenen Längen 58/30 (§ 2.3) */
     const f1 = K.auftragLesen("NL-FRJD-KR");
     erwarte.gleich([f1.ok, f1.fehler, f1.index, f1.tabellenlänge], [false, "fassung", 61, 58]);
     erwarte.gleich(f1.grund, "Auftragsindex 61 liegt hinter dem Ende der Auftragstabelle (58 Einträge).");
     const f2 = K.auftragLesen("NL-F4AD-HJ");
-    erwarte.gleich([f2.ok, f2.fehler, f2.index, f2.tabellenlänge], [false, "fassung", 40, 27]);
-    erwarte.gleich(f2.grund, "Fertigkeitsindex 40 liegt hinter dem Ende der Fertigkeitstabelle (27 Einträge).");
+    erwarte.gleich([f2.ok, f2.fehler, f2.index, f2.tabellenlänge], [false, "fassung", 40, 30]);
+    erwarte.gleich(f2.grund, "Fertigkeitsindex 40 liegt hinter dem Ende der Fertigkeitstabelle (30 Einträge).");
     /* auftrag — die gemessenen Fälle aus § 1.5: Tabelleneintrag entfernt (ID gibt es nicht mehr),
        Eintrag fehlt ganz, und eine Fertigkeit ohne Injektor (§ 3.3). */
     const weg = K.tabellen({ticketIds: [{id: "gibt-es-nicht", vorhanden: false}], skillIds: []});
@@ -246,18 +246,27 @@ gruppe("Klassenraum: Codec (A1)", () => {
 
   pruefe('Eingefrorene Tabellen (§ 2.3): Reihenfolge bindend, Auflösung Index ↔ ID, taugliche Fertigkeiten', () => {
     erwarte.wahr(K, "KlassenraumCodec ist geladen");
-    const ticketIds = Spiel.ticketReihe().map(t => t.id);
+    /* Leitungsentscheidung 29.10.2026 (§ 12.2/§ 17.9): Die Auftragstabelle bleibt das eingefrorene
+       58er-Literal; die 15 neuen 2.1-Tickets sind bewusst NICHT klassenraum-adressierbar (6-Bit-Index).
+       Geprüft wird deshalb die EINGEFRORENE Tabelle, nicht Spiel.ticketReihe(). */
+    const ticketIds = Spiel.klassenraum.tabellen().auftraege.ids.slice();
     const mitInjektor = new Set(Object.values(Spiel.INJEKTOREN).flatMap(i => i.skills || []));
     const skillIds = DATEN.skills.map(s => ({id: s.id, tauglich: mitInjektor.has(s.id)}));
     const T = K.tabellen({ticketIds, skillIds});
+    erwarte.gleich(K.TABELLE_AUFTRAEGE_LAENGE, 58, "Format bleibt bei 58 Handtickets (Leitungsentscheidung § 17.9)");
+    erwarte.gleich(ticketIds.length, 58, "die eingefrorene Tabelle hat 58 Einträge");
+    erwarte.wahr(Spiel.ticketReihe().length > 58, "die lebende Ticketreihe ist länger (" + Spiel.ticketReihe().length + ") und wird NICHT gleichgesetzt");
     /* Die eingefrorenen Längen des Codec stimmen mit der Wirklichkeit dieser Fassung überein (§ 2.2/§ 3.3) */
-    erwarte.gleich([T.auftraege.laenge, T.skills.laenge], [K.TABELLE_AUFTRAEGE_LAENGE, K.TABELLE_SKILLS_LAENGE], "58 Aufträge, 27 Fertigkeiten");
-    erwarte.gleich([ticketIds.length, DATEN.skills.length], [58, 27]);
+    erwarte.gleich([T.auftraege.laenge, T.skills.laenge], [K.TABELLE_AUFTRAEGE_LAENGE, K.TABELLE_SKILLS_LAENGE], "58 Aufträge, 30 Fertigkeiten");
+    erwarte.gleich([ticketIds.length, DATEN.skills.length], [58, 30]);
     erwarte.gleich(T.auftraege.ids[0], "salon-01", "Anfang der Tabelle (§ 2.3)");
     /* A § 3.3 nennt „24 von 27" — das ist ÜBERHOLT: seit task-5 (Injektoren für lab.portsec, lab.stp,
-       lab.storage) hat jede der 27 Fertigkeiten einen Injektor. Hier gemessen; die eingefrorenen
-       `tauglich`-Merker der Tabelle gehören deshalb alle auf true. */
-    erwarte.gleich(T.tauglicheFertigkeiten().length, 27, "heute ist jede der 27 Fertigkeiten adressierbar");
+       lab.storage) hat jede der alten 27 Fertigkeiten einen Injektor. Seit S6a/S6b (Architektur § 17.1)
+       kommen drei Fertigkeiten ANS ENDE dazu; tauglich sind die mit Injektor, gezählt über die Merker
+       der übergebenen Liste — keine feste Zahl. */
+    const erwartetTauglich = skillIds.filter(s => s.tauglich).length;
+    erwarte.gleich(T.tauglicheFertigkeiten().length, erwartetTauglich, "tauglich = Fertigkeiten mit Injektor (" + erwartetTauglich + " von " + skillIds.length + ")");
+    erwarte.wahr(erwartetTauglich >= 27, "mindestens die alten 27 Fertigkeiten sind adressierbar, ist " + erwartetTauglich);
     erwarte.gleich(T.tauglicheFertigkeiten().length, skillIds.filter(s => s.tauglich).length, "gezählt wird über die Merker der übergebenen Liste");
     erwarte.gleich(T.tauglicheFertigkeiten().filter(f => f.tauglich !== undefined).length, 0, "die Liste trägt nur skill/index/ersterSeed");
     /* Auflösung: derselbe Code, einmal roh und einmal mit Tabellen */

@@ -103,11 +103,11 @@ Spiel.ticketBauen = function(spec, seed){
   const karriere = spec.karriere || V.stufe;
   const stufe = spec.stufe || "E";
   const kunde = spec.kunde || V.kunde;
-  const symptom = spec.symptom || Spiel.symptomText(gebrochen[0], gesund.netz);
+  const symptom = spec.symptom || Spiel.symptomText(gebrochen[0], gesund.netz, Zufall("symptom:" + saat));
   return {
     id: spec.id, art: spec.art || "stoerung", stufe, karriere, kunde, reihe: spec.reihe,
-    titel: spec.titel || Spiel.titelAusZiel(gebrochen[0]) || (erster ? erster.titel : "Störung"),   /* Kundensicht – der Injektor-Titel verriete die Ursache */
-    briefing: spec.briefing || Spiel.briefingText(kunde, symptom, Zufall(saat + 3)),
+    titel: spec.titel || Spiel.titelKunde(gebrochen[0], Zufall("titel:" + saat)),   /* Kundensicht – der Injektor-Titel verriete die Ursache */
+    briefing: spec.briefing || Spiel.briefingText(kunde, symptom, Zufall("briefing:" + saat)),
     symptom, skills, netz: fabrik, ziele: endZiele, hilfen, loesung,
     erklaerung: spec.erklaerung || gewaehlt.map(g => g.inj.erklaerung).filter(Boolean).join(" "),
     quelle: spec.quelle || (erster ? erster.quelle : "Network – Lernfassung"),
@@ -169,20 +169,89 @@ Spiel.titelAusZiel = function(ziel){
   return null;
 };
 
-/* Laien-Symptom aus einem gebrochenen Ziel */
-Spiel.symptomText = function(ziel, netz){
-  if (!ziel) return "Irgendetwas stimmt im Netz nicht.";
-  const t = ziel.text || "";
-  if (ziel.typ === "blockiert") return `Das darf nicht sein: ${t.replace(/ NICHT| nicht/, "")} – das geht gerade.`;
-  if (ziel.typ === "dhcp") return `${t.replace(/ bekommt.*/, "")} bekommt keine Adresse mehr.`;
-  if (ziel.typ === "gespeichert") return "Nach jedem Stromausfall ist etwas weg.";
-  return `„${t}“ klappt nicht mehr.`;
+/* ---------- Stilfaden (docs/entwicklung/Stilfaden – Auftragstexte.md § 1/§ 2/§ 5): EINE Quelle der Textregeln ----------
+   Gilt für GENERIERTE Tickets (Prüfung, Tagesrätsel, Postfach-Nachschub). Handtickets liefern ihre Texte selbst und
+   bleiben unverändert. tools/texte-messen.js --pruefen liest die Muster von hier (Spiel.STIL), damit Tor und
+   Generator dieselbe Regel kennen; die Zahlen sind die Sollwerte des Stilfadens. */
+Spiel.STIL = {
+  TITEL_MIN: 15, TITEL_MAX: 46, SYMPTOM_MIN: 180, SYMPTOM_MAX: 420, SAETZE_MIN: 2, SAETZE_MAX: 4,
+  /* Ursachenwörter (§ 2): Der Kunde deutet nicht – er beschreibt, was er sieht. */
+  URSACHE: /\b(VLAN|Subnetzmaske|Subnet|Präfix|Gateway|Standardgateway|Route|Routing|DNS-Eintrag|DNS-Server|Trunk|Spanning Tree|STP|DHCP-Pool|DHCP-Server|Lease|Reservierung|Portsicherheit|Port-Security|ACL|NAT|Firewall-Regel|Doppelvergabe|Adresskonflikt|falsche Maske|Port ist down|VLAN-Fehler|Konfigurationsfehler)\b/i,
+  FUELLWORT: /\b(irgendwie|quasi|halt|eben mal|sozusagen|gewissermaßen|eventuell vielleicht|wie gesagt)\b/i,
+  /* Bausteine 1–4 (§ 1). Die festen Sätze sind bewusst kurz und im Kundenton gehalten. */
+  ZEIT: /\b(seit|gestern|heute|heute morgen|heute früh|heute nachmittag|heute vormittag|vorgestern|nach dem|nach der|beim|letzte woche|letzten|am wochenende|über nacht|seitdem|vorhin|eben|gerade eben|nacht|zum ersten|am montag|am dienstag|am mittwoch|am donnerstag|am freitag)\b/i,
+  FOLGE: /\b(können|kann|können wir|kann ich|können keine|können so keine|steht still|warten|müssen warten|geht nicht raus|kommt nicht raus|geht nichts|keine (?:karten)?zahlung|fällt aus|geht nur noch|müssen (?:wir )?(?:per hand|von hand|händisch)|keine bestellungen|kommt nicht (?:mehr )?(?:durch|raus|rein)|bleibt (?:die )?arbeit liegen|arbeit liegen|bleibt liegen|verdienen kein geld|läuft nicht mehr|keine termine|keine besprechungen|schlange|die hälfte|geht die hälfte|ohne (?:die|das|den) \w+ geht|sonst steht|steht die \w+ still|liegen bleibt|nicht rausschicken|nicht raus|kommt nicht an|nicht mehr an die|kostet|kostet uns|verlieren|fällt die \w+ aus|hält [^.]{0,30}auf|brauchen das)\b/i,
+  VERSUCH: /\b(neu(?:ge)?startet|neu gestartet|neu starten|neustart|neu eingerichtet|neu aufgesetzt|probiert|versucht|getauscht|umgesteckt|gezogen|abgezogen|gesteckt|eingesteckt|angeschlossen|gefragt|nachgesehen|nachgeschaut|ausprobiert|resettet|zurückgesetzt|an- und ausgeschaltet|ab- und wieder angeschaltet|aus- und wieder eingeschaltet|eingeschaltet|ausgeschaltet|nachgetragen|zweimal|dreimal|mehrmals|extra)\b/i,
+  ZEIT_BAUSTEIN: [
+    "Seit heute Morgen", "Seit gestern Nachmittag", "Seit gestern früh", "Nach dem Umbau am Wochenende",
+    "Beim Öffnen heute früh", "Seit letzter Woche", "Seit heute Vormittag", "Nach dem Stromausfall in der Nacht",
+  ],
+  MELDUNG_BAUSTEIN: [
+    "Auf dem Bildschirm steht: „Kein Internet“.",
+    "Auf dem Bildschirm steht: „Netzwerk nicht verfügbar“.",
+    "Die Anzeige sagt nur: „Keine Verbindung“.",
+    "Auf dem Bildschirm steht: „Server nicht gefunden“.",
+    "Es erscheint nur die Meldung: „Zeitüberschreitung“.",
+  ],
+  FOLGE_BAUSTEIN: [
+    "Ohne das geht bei uns die Arbeit liegen, und die Zeit läuft uns davon.",
+    "Das hält den ganzen Betrieb auf; wir brauchen das heute wieder.",
+    "Wir können so keine Kartenzahlung annehmen, die Kundschaft wird ungeduldig.",
+    "Wir müssen die Leute wegschicken, das kostet uns den ganzen Tag.",
+    "Der Betrieb steht still, bitte schauen Sie heute noch danach.",
+  ],
+  VERSUCH_BAUSTEIN: [
+    "Ich habe den Rechner schon neu gestartet und das Kabel an einen anderen Platz gesteckt – ohne Erfolg.",
+    "Wir haben das Gerät aus- und wieder eingeschaltet und einen Kollegen gefragt, das hat nichts geändert.",
+    "Ich habe schon dreimal neu gestartet und ein anderes Kabel probiert; es bleibt dabei.",
+    "Der Kollege hat nachgesehen und alles einmal aus- und eingeschaltet, geholfen hat es nicht.",
+  ],
+  TITEL_FALLBACK: ["Störung im Betrieb", "Problem im Betrieb", "Etwas funktioniert nicht", "Wir brauchen Unterstützung", "Bei uns hakt es gerade"],
 };
-/* Briefing in Kundenstimme: Einstieg aus den Kundensätzen + Symptom */
+/* Titelregel für generierte Tickets: 15–46 Zeichen, ohne Ursachenwort und ohne Füllwort (§ 2/§ 3). */
+Spiel.stilTitelOk = function(t){
+  const s = String(t == null ? "" : t).trim();
+  if (s.length < Spiel.STIL.TITEL_MIN || s.length > Spiel.STIL.TITEL_MAX) return false;
+  return !Spiel.STIL.URSACHE.test(s) && !Spiel.STIL.FUELLWORT.test(s);
+};
+/* Kundensicht-Titel: aus dem gebrochenen Ziel, sonst ein neutraler Fallback. Nie der Injektor-Titel (der verrät die Ursache). */
+Spiel.titelKunde = function(ziel, z){
+  z = z || Zufall("titel");
+  const kandidaten = [];
+  const ausZiel = Spiel.titelAusZiel(ziel);
+  if (ausZiel) kandidaten.push(ausZiel);
+  if (ziel && ziel.typ === "dhcp") kandidaten.push("Es kommt keine Adresse an");
+  if (ziel && ziel.typ === "gespeichert") kandidaten.push("Nach dem Stromausfall fehlt etwas");
+  if (ziel && ziel.typ === "blockiert") kandidaten.push("Da kommt jemand zu weit");
+  for (const t of kandidaten) if (Spiel.stilTitelOk(t)) return t;
+  return z.wahl(Spiel.STIL.TITEL_FALLBACK);
+};
+/* Vier Bausteine in Kundensprache: Anlass mit Zeit · Beobachtung · Folge für den Betrieb · was schon versucht wurde.
+   Deterministisch über den übergebenen Zufall; 2–4 Sätze, 180–420 Zeichen, 0 Ursachenwörter (Stilfaden § 1/§ 2). */
+Spiel.symptomText = function(ziel, netz, z){
+  z = z || Zufall("symptom");
+  const zeit = z.wahl(Spiel.STIL.ZEIT_BAUSTEIN);
+  /* Beobachtung: aus dem Kundensicht-Titel, wenn er die Stilregel erfüllt – sonst neutral, ohne Deutung. */
+  const titel = ziel ? Spiel.titelAusZiel(ziel) : null;
+  let beobachtung;
+  if (ziel && ziel.typ === "gespeichert") beobachtung = "Nach dem Stromausfall von gestern Abend ist bei uns etwas weg, das vorher da war.";
+  else if (ziel && ziel.typ === "blockiert") beobachtung = `${zeit} erreichen bei uns Leute Dinge, die sie nicht erreichen dürfen.`;
+  else if (titel && Spiel.stilTitelOk(titel)) beobachtung = `${zeit} klappt es nicht mehr: ${titel}.`;
+  else beobachtung = `${zeit} geht bei uns etwas nicht mehr, was sonst immer funktioniert hat.`;
+  const folge = z.wahl(Spiel.STIL.FOLGE_BAUSTEIN);
+  const versuch = z.wahl(Spiel.STIL.VERSUCH_BAUSTEIN);
+  const mitMeldung = z.zahl(2) === 0;
+  const saetze = mitMeldung ? [beobachtung, z.wahl(Spiel.STIL.MELDUNG_BAUSTEIN), folge, versuch] : [beobachtung, folge, versuch];
+  return saetze.join(" ");
+};
+/* Briefing in Kundenstimme: Anrede + Symptom (enthält alle vier Bausteine) + ein echter Dringend-Satz + Gruß.
+   Ein Dringend-Satz mit Ursachenwort wird verworfen – der Kunde deutet nicht (Stilfaden § 2). */
 Spiel.briefingText = function(kundeId, symptom, z){
+  z = z || Zufall("briefing");
   const k = (DATEN.kunden || {})[kundeId];
   const anrede = k ? z.wahl(["Hallo!", "Hi,", "Guten Morgen,", "Hallo du,"]) : "Hallo,";
-  const dringend = k && k.saetze && k.saetze.dringend && k.saetze.dringend.length ? z.wahl(k.saetze.dringend) : "";
+  const pool = k && k.saetze && k.saetze.dringend ? k.saetze.dringend.filter(s => !Spiel.STIL.URSACHE.test(s)) : [];
+  const dringend = pool.length ? z.wahl(pool) : "";
   const gruss = k ? `\n\n${k.ansprechpartner.name}, ${k.name}` : "";
   return `${anrede} ${symptom} ${dringend}`.trim() + gruss;
 };

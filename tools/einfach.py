@@ -32,6 +32,21 @@ STANDARD_QUELLE = WEB / "index.html"
 STANDARD_STIL = WEB / "schriften.css"
 STANDARD_ZIEL = HIER / "docs" / "index.html"
 
+# Lizenzhinweise, die in JEDE gebaute Einzeldatei gehoeren (2.1.0, Architektur § 17.6).
+# WARUM: Die Einzeldatei wird weitergegeben. PolyForm Noncommercial verlangt die Beigabe des
+# Lizenztextes; die SIL Open Font License 1.1 verlangt Lizenztext UND Copyright-Hinweis der
+# eingebetteten Schriften. Bis 2.1.0 enthielt die Datei davon nichts (0 Treffer, Befund
+# C-doku § 6.2). Der Block wird beim Bau aus den echten Dateien GELESEN und eingebettet —
+# keine getippte Kopie, die von den Dateien abweichen kann.
+LIZENZ_TEXTE = [
+    ("LICENSE", "PolyForm Noncommercial License 1.0.0 - verbindlicher Text (Spiel und Quelltext)"),
+    ("LIZENZ.md", "Dieselbe Lizenz auf Deutsch, mit den Ausnahmen (Schriften, Inhalte, Marken)"),
+    ("schriften/OFL-atkinsonhyperlegible.txt", "Atkinson Hyperlegible - SIL Open Font License 1.1"),
+    ("schriften/OFL-bricolagegrotesque.txt", "Bricolage Grotesque - SIL Open Font License 1.1"),
+    ("schriften/OFL-jetbrainsmono.txt", "JetBrains Mono - SIL Open Font License 1.1"),
+]
+LIZENZ_MARKE = 'id="lizenzhinweise"'
+
 # Verweise, die eine eigenstaendige Datei nicht haben darf.
 VERBOTEN = [
     (re.compile(r"""<link[^>]+rel=["']?stylesheet""", re.I), "<link rel=stylesheet>"),
@@ -99,6 +114,34 @@ def aussenverweise(html: str) -> list[str]:
     return fund
 
 
+def lizenzblock() -> str:
+    """Die vollstaendigen Lizenztexte als inerten Datenblock fuer die Einzeldatei.
+
+    `<script type="text/plain">` fuehrt kein Browser aus (kein JavaScript, keine Anfrage).
+    Ein HTML-Kommentar waere unsicherer: Lizenztexte sind nicht garantiert frei von `--`.
+    Fehlt eine Lizenzdatei, bricht der Bau ab — lieber keine Datei als eine ohne Lizenz.
+    """
+    fehlend = [rel for rel, _ in LIZENZ_TEXTE if not (HIER / rel).is_file()]
+    if fehlend:
+        raise SystemExit("FEHLER: Lizenzdatei(en) fehlen: " + ", ".join(fehlend)
+                         + " — ohne sie darf keine Einzeldatei entstehen.")
+    teile = ["<script type=\"text/plain\" " + LIZENZ_MARKE + ">",
+             "LIZENZHINWEISE DER EINZELDATEI",
+             "Eingefuegt beim Bau von tools/einfach.py; die vollstaendigen Texte stehen darunter.",
+             ""]
+    for rel, titel in LIZENZ_TEXTE:
+        teile.append("=" * 78)
+        teile.append(titel + "   [" + rel + "]")
+        teile.append("=" * 78)
+        teile.append((HIER / rel).read_text(encoding="utf-8").replace("\r\n", "\n").strip())
+        teile.append("")
+    teile.append("Kurzfassung: Spielen, Ueben und Unterricht sind frei (auch in Schulen und")
+    teile.append("Bildungseinrichtungen). Verkaufen und kommerzielles Nutzen sind ohne gesonderte")
+    teile.append("Erlaubnis nicht gestattet; die eingebetteten Schriften stehen unter der OFL 1.1.")
+    teile.append("</script>")
+    return "\n".join(teile)
+
+
 def baue_web_falls_noetig() -> None:
     """Sorgt dafuer, dass web/index.html existiert.
 
@@ -150,6 +193,16 @@ def bauen(quelle: Path, stil: Path, ziel: Path) -> int:
             "FEHLER: kein <link ... schriften.css> gefunden. Wurde die Seite anders gebaut?"
         )
 
+    # Lizenzblock einbetten (2.1.0): PolyForm + OFL samt Copyright der Schriften.
+    block = lizenzblock()
+    if LIZENZ_MARKE not in neu:
+        if "</body>" in neu:
+            neu = neu.replace("</body>", block + "\n</body>", 1)
+        elif "</html>" in neu:
+            neu = neu.replace("</html>", block + "\n</html>", 1)
+        else:
+            raise SystemExit("FEHLER: kein </body> oder </html> gefunden — der Lizenzblock kann nicht eingefuegt werden.")
+
     rest = aussenverweise(neu)
     if rest:
         raise SystemExit("FEHLER: Aussenverweise uebrig geblieben:\n  " + "\n  ".join(rest))
@@ -162,6 +215,7 @@ def bauen(quelle: Path, stil: Path, ziel: Path) -> int:
     print(f"Einzeldatei -> {ziel}")
     print(f"  Groesse    {len(roh):,} Bytes ({len(roh)/1024/1024:.2f} MB)")
     print(f"  Schriften  {schriften} als Daten-URI eingebettet")
+    print(f"  Lizenz     {len(LIZENZ_TEXTE)} Texte eingebettet ({len(block):,} Bytes, inert)")
     print(f"  SHA256     {sha}")
     print(f"  Aussenverweise  0  (geprueft: link/script/img/url)")
     return 0
@@ -176,6 +230,13 @@ def pruefen(ziel: Path) -> int:
     for name in ("fetch(", "XMLHttpRequest", "WebSocket"):
         if name in html:
             print(f"  HINWEIS: '{name}' kommt im Text vor — im Kontext pruefen (Konsole/Lehrtext?).")
+    # Nicht rot: docs/index.html stammt bis zum Fassungszug vom Bau VOR 2.1.0 und enthaelt den
+    # Lizenzblock deshalb noch nicht. Ein Rot waere hier eine falsche Aussage ueber den Bauweg.
+    if LIZENZ_MARKE not in html:
+        print("  HINWEIS: Lizenzblock fehlt in dieser Datei (Bau von vor 2.1.0) — nach "
+              "`python tools/einfach.py` ist er enthalten.")
+    else:
+        print("  Lizenzblock enthalten: PolyForm Noncommercial 1.0.0 + OFL-Texte.")
     if rest:
         print("  ROT: Aussenverweise uebrig:")
         for r in rest:

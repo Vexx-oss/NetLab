@@ -33,7 +33,7 @@ function uesAlleinLaden(){
   const fs = require("fs"), path = require("path"), vm = require("vm");
   const W = path.resolve(__dirname, ".."), SRC = path.join(W, "src");
   const SCH = [["kern", ["basis.js", "netz.js"]], ["@lernmotor", []], ["modell", ["geraete.js"]], ["sim", ["engine.js"]],
-               ["cli", ["parser.js"]], ["daten", ["basis.js"]], ["spiel", ["zustand.js"]]];
+               ["cli", ["parser.js"]], ["daten", ["basis.js", "lehrtexte.js"]], ["spiel", ["zustand.js"]]];
   const LM = [path.resolve(W, "..", "FISI-Spielhalle", "src", "lernmotor.js"), path.join(W, "fremd", "lernmotor.js")].find(f => fs.existsSync(f));
   const KOPF = /^\/\*\s*=+[\s\S]*?=+\s*\*\/\s*/;
   const code = ['"use strict"; const LABOR_VERSION = "test";'];
@@ -192,7 +192,10 @@ function uesWelt(opt = {}){
   UI.symbol = () => uesKnoten("span");
   UI.ebenen = {fuerSkills: () => null}; UI.blatt = {zeichnen(){}}; UI.wiki = {oeffnen(){}};
   UI.bewegung = () => "aus";                                   /* ohne Zähl-Animation: keine Uhr im Test */
-  UI.klang = {spielen(){}}; UI.erklaeren = () => uesKnoten("div"); UI.ereignisse = {vormerken(){}};
+  UI.klang = {spielen(){}}; UI.ereignisse = {vormerken(){}};
+  /* Echter Erklärdialog (nicht Attrappe): der Lehrtext-Consumer im Ergebnis ruft UI.erklaeren mit der
+     Fertigkeits-id; nur so prüft der Fall den echten Weg statt eines Stubs. */
+  vm.runInContext(lies("src/ui/erklaeren.js"), bereich, {filename: "src/ui/erklaeren.js"});
   UI.sandbox = null;
   UI.szene = {abspielen: () => { throw new Error("Funktionsprobe im Prüfstand nicht ausgeführt"); }};
   /* Die Zusage muss im BEREICH entstehen: `await` hängt seine Fortsetzung an die Warteschlange der
@@ -245,14 +248,14 @@ gruppe("UI: Ergebnis kopieren" + UES_ZUSATZ, () => {
 
   /* Kapsel wie in tests/spiel-*.test.js: eigener Wegwerf-Stand, danach alles zurück (auch der
      geliehene Bus – die geladenen Dateien melden Hörer an, die sonst in fremde Tests feuerten). */
-  function uesFenster(fn){
+  function uesFenster(fn, ticketId = "salon-05"){
     const welt = uesWelt();
     const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken};
     try {
       Spiel._trocken = true; Spiel._lz = {};
       Spiel._st = Spiel.leererStand();
       Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD);
-      const inst = Spiel.instanzErstellen({ticketId: "salon-05"});
+      const inst = Spiel.instanzErstellen({ticketId});
       Spiel._einst.wahl = Spiel.defVon(inst).stufe || "E";          /* wie Spiel.testlauf: das Niveau des Tickets */
       Spiel.oeffnen(inst.iid);
       const def = Spiel.defVon(inst);
@@ -305,6 +308,22 @@ gruppe("UI: Ergebnis kopieren" + UES_ZUSATZ, () => {
     erwarte.enthaelt(kurz, k.name, "und der Kundenname");
     /* Und das Fenster bleibt danach benutzbar: der Kopierknopf hängt an `ergebnisText`, nicht an der Zeile. */
     erwarte.wahr(uesFinde(fenster, "button").some(b => uesText(b).trim() === "Ergebnis kopieren"), "der Kopierknopf ist unberührt");
+  }));
+
+
+  /* Lehrtext-Consumer (Architektur § 17.4, Lead-Integration): DATEN.lehrtexte traegt Skill-Texte unter
+     der Fertigkeits-id (lab.switch …). Geprueft wird der ECHTE Weg: salon-05 hat lab.switch, das
+     Ergebnis-Fenster muss den Knopf zeigen, ein Klick den E-Text sichtbar machen. */
+  pruefe("Lehrtext-Consumer: Skill-Lehrtexte erscheinen im Ergebnis und lassen sich oeffnen", () => uesFenster(({welt, fenster, def}) => {
+    const skill = (def.skills || []).find(id => (DATEN.lehrtexte || {})[id]);
+    const lt = skill ? DATEN.lehrtexte[skill] : null;
+    erwarte.wahr(!!lt && !!lt.E, "das Ticket traegt einen Skill-Lehrtext (" + def.skills.join(", ") + ")");
+    const knoepfe = uesFinde(fenster, "button").map(b => uesText(b).trim()).filter(t => t.startsWith("Lehrtext: "));
+    erwarte.gleich(knoepfe.length, 1, "genau ein Lehrtext-Knopf fuer die Fertigkeit mit Text");
+    erwarte.enthaelt(knoepfe[0], (DATEN.skills.find(s => s.id === skill) || {}).name || skill, "der Knopf nennt die Fertigkeit");
+    welt.knopfKlick(knoepfe[0]);
+    const texte = uesFinde(fenster, ".ex-text");
+    erwarte.wahr(texte.some(t => uesText(t).includes(lt.E)), "der Lehrtext ist nach dem Klick sichtbar (E-Text)");
   }));
 
   pruefe("Ein Klick kopiert den Klartext aus Spiel.ergebnisText(inst, erg) und meldet Erfolg", () => uesFenster(({welt, inst, def, erg}) => {

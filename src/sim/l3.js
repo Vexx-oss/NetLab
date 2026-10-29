@@ -3,8 +3,12 @@
    Schnittstellen (einheitliche Sicht auf Host-, Router-, SVI-, Firewall- und Internet-Konfiguration),
    ARP-Cache und -Auflösung, ICMP-Fehlermeldungen, Routingtabelle, Sockets für die Aufrufe. */
 Sim.l3 = (() => {
-  const TTL = {pc: 128, server: 128, nas: 64, router: 255, switch: 255, firewall: 64, internet: 64};
-  const ttlStart = g => TTL[g.typ] || 64;
+  /* TTL-Start je Betriebssystem (Architektur § 16.3): Windows-Ziele 128, Linux-Ziele (Server/NAS mit
+     Linux-Betriebssystem, im Inspektor umstellbar) 64. Endgeräte fragen ihr Betriebssystem, IOS-Geräte,
+     Firewall und Internet haben je Gerätetyp genau einen festen Wert – kein TTL-Literal außerhalb dieser
+     Tabelle. */
+  const TTL = {windows: 128, linux: 64, router: 255, switch: 255, firewall: 64, internet: 64};
+  const ttlStart = g => { const os = Modell.osVon(g); return TTL[os === "windows" || os === "linux" ? os : g.typ] || 64; };
   const sviMac = g => IP.macAus(Sim._hash(g.id + "/svi"));
   const gueltig = (ip, m) => IP.gueltig(ip) && IP.maskeGueltig(m) && IP.hostAdresse(ip, m);
 

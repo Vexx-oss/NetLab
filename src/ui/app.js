@@ -181,7 +181,7 @@ UI.app = (() => {
     }
   }
   function zaehlen(w, k, alt, neu){
-    const t0 = performance.now(), ms = 700, marke = (w.marke = (w.marke || 0) + 1);
+    const t0 = performance.now(), ms = UI.zeit("zaehler"), marke = (w.marke = (w.marke || 0) + 1);
     const s = t => {
       if (w.marke !== marke) return;
       const p = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - p, 3);

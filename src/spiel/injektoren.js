@@ -46,7 +46,7 @@ Spiel.INJEKTOREN = (() => {
     erklaerung: "Router-Schnittstellen sind ab Werk abgeschaltet. Ist das Gateway-Interface aus, kommt im LAN niemand mehr hinaus: Das Gateway antwortet nicht einmal auf ARP."});
 
   /* ---------- Schicht 3 am Host ---------- */
-  neu({name: "ip-tippfehler", titel: "Zahlendreher in der IP-Adresse", skills: ["lab.ip", "lab.netz"], gruende: ["GW_WRONG_SUBNET", "ARP_NO_REPLY", "WRONG_MASK", "NO_GATEWAY"], vorlagen: alleVorlagen,
+  neu({name: "ip-tippfehler", titel: "Zahlendreher in der IP-Adresse", skills: ["lab.ip", "lab.netz", "lab.arp"], gruende: ["GW_WRONG_SUBNET", "ARP_NO_REPLY", "WRONG_MASK", "NO_GATEWAY"], vorlagen: alleVorlagen,
     passt: (n, r) => statisch(n, r.clients).map(id => ({key: id, geraet: id, ip: hIf(n, id).ip})),
     param: (n, k, r, z) => { const o = k.ip.split(".").map(Number); o[2] = (o[2] + z.wahl([1, 10, 100])) % 256; return {ip: o.join(".")}; },
     anwenden(n, k, p){ Modell.setzen(n, k.geraet || k.key, "if.eth0.ip", p.ip); },
@@ -123,7 +123,7 @@ Spiel.INJEKTOREN = (() => {
       bereich: [{geraet: k.geraet}], konkret: [`Auf dem Server fehlt der Eintrag ${k.eintraege[0].name} → ${k.eintraege[0].ip} (Reiter Dienste).`]}),
     erklaerung: "Ein DNS-Server kennt nur die Namen, die in seiner Zone stehen. Fehlt der A-Record, meldet er „Name nicht gefunden“ – das Netz ist in Ordnung, nur die Übersetzung fehlt."});
 
-  neu({name: "dienst-aus", titel: "Dienst gestoppt", skills: ["lab.ports", "lab.tcp"], gruende: ["SERVICE_OFF", "PORT_CLOSED"], vorlagen: ["lan", "buero", "praxis", "standorte", "dmz"],
+  neu({name: "dienst-aus", titel: "Dienst gestoppt", skills: ["lab.ports", "lab.tcp", "lab.storage"], gruende: ["SERVICE_OFF", "PORT_CLOSED"], vorlagen: ["lan", "buero", "praxis", "standorte", "dmz"],
     passt(n, r){
       const c = [];
       for (const id of Object.keys(n.geraete)) { const d = n.geraete[id].running.dienste || {}; for (const s of ["datei", "druck", "http", "https"]) if (d[s] && d[s].an) c.push({key: `${id}:${s}`, geraet: id, dienst: s}); }
@@ -245,7 +245,7 @@ Spiel.INJEKTOREN = (() => {
       bereich: [{geraet: k.geraet}], konkret: [`Der Filial-Router hat keine Route zurück: „ip route 0.0.0.0 0.0.0.0 ${k.route.nh}“.`]}),
     erklaerung: "Routing ist keine Einbahnstraße: Jedes Paket braucht einen Hinweg UND die Antwort einen Rückweg. Fehlt die Rückroute, kommt die Anfrage an, die Antwort aber nie – der Absender sieht nur „Zeitüberschreitung“, keine Fehlermeldung."});
 
-  neu({name: "schleife", titel: "Routing-Schleife", skills: ["lab.ttl", "lab.route"], gruende: ["TTL_EXPIRED", "PORT_SHUTDOWN", "GW_UNREACHABLE", "ARP_NO_REPLY"], vorlagen: ["standorte"],
+  neu({name: "schleife", titel: "Routing-Schleife", skills: ["lab.ttl", "lab.route", "lab.stp"], gruende: ["TTL_EXPIRED", "PORT_SHUTDOWN", "GW_UNREACHABLE", "ARP_NO_REPLY"], vorlagen: ["standorte"],
     passt: (n, r) => r.router2 ? [{key: r.router2, geraet: r.router2, port: "Gi0/0"}] : [],
     anwenden(n, k){ Modell.setzen(n, k.geraet || k.key, "if.Gi0/0.shutdown", true); },
     loesung: (n, k) => [{geraet: k.geraet, cli: cli("interface GigabitEthernet0/0", "no shutdown"), text: "Filial-Router: LAN-Schnittstelle Gi0/0 wieder einschalten."}],
@@ -262,7 +262,7 @@ Spiel.INJEKTOREN = (() => {
       bereich: [{geraet: k.geraet}], konkret: [`inside und outside sind vertauscht: ${k.innen} muss „ip nat inside“ sein, ${k.aussen} „ip nat outside“.`]}),
     erklaerung: "NAT übersetzt nur Pakete, die von inside nach outside laufen. Sind die Rollen vertauscht, gehen die Pakete mit privater Absenderadresse unübersetzt ins Internet – und der Provider verwirft sie, denn private Adressen (RFC 1918) werden dort nicht geroutet."});
 
-  neu({name: "nat-fehlt", titel: "NAT-Regel fehlt", skills: ["lab.nat", "lab.cli"], gruende: ["NAT_MISSING"], vorlagen: ["lan", "buero", "praxis", "standorte"],
+  neu({name: "nat-fehlt", titel: "NAT-Regel fehlt", skills: ["lab.nat", "lab.cli", "lab.speichern"], gruende: ["NAT_MISSING"], vorlagen: ["lan", "buero", "praxis", "standorte"],
     passt: (n, r) => (n.geraete[r.router]?.running.nat?.dynamisch || []).map(d => ({key: r.router, geraet: r.router, regel: d})),
     anwenden(n, k){ const id = k.geraet || k.key; Modell.setzen(n, id, "nat.dynamisch", []); },
     loesung: (n, k) => [{geraet: k.geraet, cli: cli(`ip nat inside source list ${k.regel.acl} interface ${lang(k.regel.aus)} overload`), text: `Router: PAT einschalten (list ${k.regel.acl}, overload auf ${k.regel.aus}).`}],
@@ -279,7 +279,7 @@ Spiel.INJEKTOREN = (() => {
       bereich: [{geraet: k.geraet}], konkret: [`ACL 1 erlaubt nur ${k.netzA}/24. Die Filiale fehlt.`]}),
     erklaerung: "Die ACL einer NAT-Regel legt fest, WELCHE inneren Adressen übersetzt werden. Fehlt ein Netz darin, gehen dessen Pakete unübersetzt hinaus und werden beim Provider verworfen – nur dieser Standort hat dann kein Internet."});
 
-  neu({name: "gespeichert-kaputt", titel: "Nach Stromausfall fehlt eine Änderung", skills: ["lab.speichern", "lab.cli"], gruende: ["PORT_SHUTDOWN", "NO_ROUTE", "NAT_MISSING", "GW_UNREACHABLE", "ARP_NO_REPLY"], vorlagen: ["lan", "buero", "praxis"],
+  neu({name: "gespeichert-kaputt", titel: "Nach Stromausfall fehlt eine Änderung", skills: ["lab.speichern", "lab.cli", "lab.betrieb"], gruende: ["PORT_SHUTDOWN", "NO_ROUTE", "NAT_MISSING", "GW_UNREACHABLE", "ARP_NO_REPLY"], vorlagen: ["lan", "buero", "praxis"],
     passt: (n, r) => r.wanIf ? [{key: r.router, geraet: r.router, port: r.wanIf}] : [],
     anwenden(n, k){ const id = k.geraet || k.key; Modell.setzen(n, id, `if.${k.port || "Gi0/1"}.shutdown`, true); Modell.speichern(n.geraete[id]); },
     zusatzZiele: (n, k) => [{typ: "gespeichert", geraet: k.geraet, text: "Die Konfiguration ist gespeichert (übersteht den nächsten Stromausfall)"}],
@@ -291,7 +291,7 @@ Spiel.INJEKTOREN = (() => {
 
   /* ---------- Firewall, DMZ, Port-Weiterleitung ---------- */
   const fwRegeln = n => n.geraete.fw?.running.regeln || [];
-  neu({name: "fw-regel-fehlt", titel: "Firewall-Regel fehlt", skills: ["lab.fw"], gruende: ["FW_DENY"], vorlagen: ["dmz"],
+  neu({name: "fw-regel-fehlt", titel: "Firewall-Regel fehlt", skills: ["lab.fw", "lab.dmz", "lab.portfwd"], gruende: ["FW_DENY"], vorlagen: ["dmz"],
     passt: n => fwRegeln(n).filter(r => r.id === "r1" || r.id === "r2").map(r => ({key: r.id, geraet: "fw", regel: r, regeln: fwRegeln(n)})),
     anwenden(n, k){ Modell.setzen(n, "fw", "regeln", fwRegeln(n).filter(r => r.id !== (k.regel ? k.regel.id : k.key))); },
     loesung: (n, k) => [{geraet: "fw", setzen: {regeln: k.regeln}, text: `Firewall: Regel „${k.regel.text}“ (${k.regel.von} → ${k.regel.nach}, ${k.regel.proto}${k.regel.port ? "/" + k.regel.port : ""}) wieder anlegen.`}],
@@ -307,7 +307,7 @@ Spiel.INJEKTOREN = (() => {
       bereich: [{geraet: "fw"}], konkret: ["Ganz oben steht „innen → dmz: ip verwerfen“ – sie trifft zuerst."]}),
     erklaerung: "Auch Firewall-Regeln gelten „first match“. Eine allgemeine Sperre über einer speziellen Erlaubnis macht die Erlaubnis wirkungslos."});
 
-  neu({name: "portfwd-falsch", titel: "Port-Weiterleitung auf falschen Port", skills: ["lab.portfwd", "lab.ports"], gruende: ["PORT_CLOSED", "SERVICE_OFF", "FW_DENY"], vorlagen: ["dmz"],
+  neu({name: "portfwd-falsch", titel: "Port-Weiterleitung auf falschen Port", skills: ["lab.portfwd", "lab.ports", "lab.tcp"], gruende: ["PORT_CLOSED", "SERVICE_OFF", "FW_DENY"], vorlagen: ["dmz"],
     passt: n => (n.geraete.fw?.running.nat?.weiterleitung || []).map(w => ({key: "fw", geraet: "fw", nat: n.geraete.fw.running.nat, w})),
     anwenden(n){ const nat = tief(n.geraete.fw.running.nat); nat.weiterleitung = nat.weiterleitung.map(w => Object.assign({}, w, {zielPort: 80})); Modell.setzen(n, "fw", "nat", nat); },
     loesung: (n, k) => [{geraet: "fw", setzen: {nat: k.nat}, text: `Firewall: Weiterleitung von Port ${k.w.aussenPort} auf ${k.w.ziel}:${k.w.zielPort} (nicht Port 80).`}],
@@ -396,7 +396,7 @@ Spiel.INJEKTOREN = (() => {
     erklaerung: "Ein Rechner nimmt das erste DHCP-Angebot, das ankommt – vom richtigen Server oder von einem fremden. Ein fremder („Rogue“) Server verteilt dann oft sich selbst als Gateway und einen fremden DNS-Server: Der Rechner hat eine gültige Adresse, kommt aber nicht ins Internet. Erkennbar an „ipconfig /all“: Dort steht ein DHCP-Server, den es im Netz nicht geben sollte. Abhilfe: den fremden Server abschalten oder DHCP-Snooping am Switch einschalten.",
     quelle: "RFC 2131 · IOS-ähnlich (Snooping ist eine Switch-Funktion, kein RFC-Verfahren)"});
 
-  neu({name: "snooping-ohne-trust", titel: "DHCP-Snooping ohne vertrauten Port", skills: ["lab.dhcp", "lab.switch"], gruende: ["DHCP_NO_OFFER", "NO_IP"],
+  neu({name: "snooping-ohne-trust", titel: "DHCP-Snooping ohne vertrauten Port", skills: ["lab.dhcp", "lab.switch", "lab.portsec"], gruende: ["DHCP_NO_OFFER", "NO_IP"],
     vorlagen: ["buero"],
     passt: (n, r) => {
       const l = dhcpLage(n), cs = clientSwitch(n);
@@ -551,7 +551,7 @@ Spiel.INJEKTOREN = (() => {
      (src/sim/aufrufe.js:52-55), und am Switch erlischt der Link. Gewählt werden nur Endgeräte der
      Vorlage (r.clients) – so ist der erste gebrochene Zielgrund DEVICE_OFF und nicht der eines
      unbeteiligten Servers. */
-  neu({name: "geraet-stromlos", titel: "Gerät ohne Strom", skills: ["lab.link"], gruende: ["DEVICE_OFF", "ARP_NO_REPLY", "LINK_DOWN", "TIMEOUT", "DHCP_NO_OFFER"],
+  neu({name: "geraet-stromlos", titel: "Gerät ohne Strom", skills: ["lab.link", "lab.betrieb", "lab.speichern"], gruende: ["DEVICE_OFF", "ARP_NO_REPLY", "LINK_DOWN", "TIMEOUT", "DHCP_NO_OFFER"],
     vorlagen: ["lan", "buero", "standorte"],
     passt: (n, r) => (r.clients || []).filter(id => n.geraete[id] && n.geraete[id].an !== false).map(id => ({key: id, geraet: id})),
     anwenden(n, k){ Modell.geraetSetzen(n, k.key, "an", false); },
@@ -565,7 +565,7 @@ Spiel.INJEKTOREN = (() => {
 
   /* DHCP-Pool ohne freie Adresse: Start = Gateway, eine Adresse. Der einzige Kandidat ist damit das
      Gateway selbst – der Server vergibt nichts und meldet DHCP_POOL_EMPTY (src/sim/host.js:247-256, 318). */
-  neu({name: "dhcp-pool-zu-klein", titel: "DHCP-Pool ohne freie Adresse", skills: ["lab.dhcp"], gruende: ["DHCP_POOL_EMPTY", "DHCP_NO_OFFER"],
+  neu({name: "dhcp-pool-zu-klein", titel: "DHCP-Pool ohne freie Adresse", skills: ["lab.dhcp", "lab.subnetz", "lab.betrieb"], gruende: ["DHCP_POOL_EMPTY", "DHCP_NO_OFFER"],
     vorlagen: ["buero"],
     passt: (n, r) => { const p = poolVon(n, r.server); return p && p.gw ? [{key: "pool", geraet: r.server, pool: Object.assign({}, p)}] : []; },
     anwenden(n, k){ Modell.setzen(n, k.geraet, "dienste.dhcp.pools", [Object.assign({}, k.pool, {start: k.pool.gw, anzahl: 1})]); },
@@ -628,7 +628,7 @@ Spiel.INJEKTOREN = (() => {
   /* Route mit falscher Maske: Die Route in die Filiale ist da, deckt aber nur ein Viertel des Netzes ab
      (255.255.255.240 = /28). Die Adressen .21 und .22 liegen außerhalb, das Paket fällt auf die
      Default-Route und verschwindet im Internet (Grundcode NO_ROUTE, wie beim fehlenden Eintrag). */
-  neu({name: "route-maske-falsch", titel: "Route mit falscher Maske", skills: ["lab.route", "lab.cli"], gruende: ["NO_ROUTE", "NO_RETURN_ROUTE", "HOST_UNREACHABLE", "TIMEOUT"],
+  neu({name: "route-maske-falsch", titel: "Route mit falscher Maske", skills: ["lab.route", "lab.cli", "lab.subnetz", "lab.netz", "lab.ttl"], gruende: ["NO_ROUTE", "NO_RETURN_ROUTE", "HOST_UNREACHABLE", "TIMEOUT"],
     vorlagen: ["standorte"],
     passt: (n, r) => {
       const id = r.router, liste = (n.geraete[id] && n.geraete[id].running.routen) || [];
@@ -673,5 +673,163 @@ Spiel.INJEKTOREN = (() => {
     erklaerung: "Ein DNS-Eintrag verbindet einen Namen mit einer Adresse. Zeigt er auf das falsche Gerät, klappt die Namensauflösung trotzdem – der Client verbindet sich nur mit dem falschen Rechner. Ist dort der Dienst nicht eingerichtet, antwortet er mit einem Verbindungsabbruch (TCP-RST). Deshalb prüft man bei „Name geht nicht“ zuerst, auf welche Adresse er auflöst (nslookup) und ob dort der erwartete Dienst läuft.",
     quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035"});
 
+  /* ---------- S7 Volumen (Architektur § 17.5): zehn neue Fehlerbilder ----------
+     Jeder Fall nutzt NUR vorhandene Mechaniken (kein neuer Sim-Grund, keine Änderung an src/sim/):
+     bricht das Startnetz und wird von seiner Lösung wieder geheilt (tests/tickets-generator.test.js
+     prüft alle Injektor×Vorlage×Seeds; tests/inhaltsdichte.test.js zählt die Zuordnungen). */
+  neu({name: "subif-aus", titel: "Router-Subinterface abgeschaltet", skills: ["lab.rostick", "lab.vlan", "lab.trunk"],
+    gruende: ["PORT_SHUTDOWN", "ARP_NO_REPLY", "GW_UNREACHABLE", "DROP_VLAN"], vorlagen: ["praxis"],
+    passt: (n, r) => r.vlans ? [{key: String(r.vlans.behandlung), geraet: r.router, sub: `Gi0/0.${r.vlans.behandlung}`, vlan: r.vlans.behandlung}] : [],
+    anwenden(n, k){ Modell.setzen(n, k.geraet, `if.${k.sub}.shutdown`, true); },
+    loesung: (n, k) => [{geraet: k.geraet, cli: cli(`interface ${lang(k.sub)}`, "no shutdown"), text: `Router: ${k.sub} wieder einschalten (no shutdown) – dann hat VLAN ${k.vlan} sein Gateway zurück.`}],
+    hilfen: (n, k) => ({frage: [`Das VLAN ${k.vlan} erreicht sein Gateway nicht, die anderen VLANs laufen. Ist die Router-Schnittstelle dazu überhaupt eingeschaltet?`],
+      bereich: [{geraet: k.geraet, port: "Gi0/0"}], konkret: [`${k.sub} ist per shutdown abgeschaltet. „show ip interface brief“ zeigt den Zustand.`]}),
+    erklaerung: "Router-on-a-Stick bündelt je VLAN ein Subinterface. Ist eines abgeschaltet, hat genau dieses VLAN kein Gateway: Die ARP-Anfrage an das Gateway bleibt unbeantwortet, die Clients melden „Zielhost nicht erreichbar“ – die anderen VLANs laufen ungestört weiter.",
+    quelle: "VLAN – Lernfassung · Cisco IOS: Configuring Routing Between VLANs with IEEE 802.1Q Encapsulation"});
+
+  neu({name: "datei-dienst-aus", titel: "Dateifreigabe gestoppt", skills: ["lab.storage", "lab.ports", "lab.tcp"],
+    gruende: ["SERVICE_OFF", "PORT_CLOSED", "TIMEOUT"], vorlagen: ["buero", "praxis"],
+    passt(n){
+      const c = [];
+      for (const id of Object.keys(n.geraete)) {
+        const d = n.geraete[id].running.dienste || {};
+        if (d.datei && d.datei.an) c.push({key: id + ":datei", geraet: id, dienst: "datei"});
+      }
+      return c;
+    },
+    anwenden(n, k){ const [id, s] = k.key.split(":"); Modell.setzen(n, id, `dienste.${s}`, Object.assign({}, n.geraete[id].running.dienste[s], {an: false})); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {["dienste." + k.dienst]: Object.assign({}, n.geraete[k.geraet].running.dienste[k.dienst], {an: true})},
+      text: `${name(n, k.geraet)}: die Dateifreigabe (SMB, TCP 445) wieder starten.`}],
+    hilfen: (n, k) => ({frage: ["Ping geht, die Freigabe nicht. Was antwortet ein Server auf ein SYN zu einem Port, an dem kein Dienst lauscht?"],
+      bereich: [{geraet: k.geraet}], konkret: [`Auf ${name(n, k.geraet)} ist der Dienst „Dateifreigabe“ gestoppt – SMB lauscht auf TCP 445.`]}),
+    erklaerung: "Ein NAS oder Dateiserver erreicht man über SMB auf TCP 445. Ist der Dienst aus, bleibt der Host erreichbar, aber die Verbindung wird sofort abgelehnt (TCP-RST). Das ist der Unterschied zwischen „Schicht 3 steht“ und „Dienst läuft“.",
+    quelle: "TCP – Lernfassung · IANA Port Number Registry (445)"});
+
+  neu({name: "dhcp-gateway-falsch", titel: "DHCP verteilt ein falsches Gateway", skills: ["lab.dhcp", "lab.gateway", "lab.ip"],
+    gruende: ["GW_WRONG_SUBNET", "NO_GATEWAY", "DHCP_NO_OFFER", "TIMEOUT"], vorlagen: ["buero"],
+    passt: (n, r) => (poolVon(n, r.server) ? [{key: r.server, geraet: r.server, pools: JSON.parse(JSON.stringify(n.geraete[r.server].running.dienste.dhcp.pools))}] : []),
+    anwenden(n, k){ const pools = JSON.parse(JSON.stringify(k.pools)); pools[0].gw = "10.255.255.1";
+      Modell.setzen(n, k.geraet, "dienste.dhcp.pools", pools); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"dienste.dhcp.pools": k.pools},
+      text: `${name(n, k.geraet)}: im DHCP-Pool das richtige Gateway ${k.pools[0].gw} eintragen (Option 3).`}],
+    hilfen: (n, k) => ({frage: ["Die Clients haben eine Adresse, auch ihren Server finden sie – nur nach draußen geht nichts. Was steht in ihrer Gateway-Option?"],
+      bereich: [{geraet: k.geraet}], konkret: [`Der DHCP-Pool liefert das Gateway 10.255.255.1 – ein Gerät, das es hier nicht gibt. Richtig ist ${k.pools[0].gw}.`]}),
+    erklaerung: "DHCP verteilt nicht nur Adressen, sondern Optionen: Gateway (Option 3), DNS (Option 6) und mehr. Ein falsches Gateway im Pool trifft alle Clients des Pools gleichzeitig – sie kommen ins eigene Netz, aber nicht hinaus, weil das Gateway nicht erreichbar ist.",
+    quelle: "RFC 2131 · RFC 2132 (Option 3 Router)"});
+
+  neu({name: "fw-zone-falsch", titel: "Schnittstelle in der falschen Zone", skills: ["lab.fw", "lab.dmz", "lab.portfwd"],
+    gruende: ["FW_DENY", "TIMEOUT"], vorlagen: ["dmz"],
+    passt: n => { const f = n.geraete.fw && n.geraete.fw.running.if && n.geraete.fw.running.if["Gi0/1"]; return (f && f.zone) ? [{key: "fw", geraet: "fw", port: "Gi0/1", zone: f.zone}] : []; },
+    anwenden(n, k){ Modell.setzen(n, "fw", `if.${k.port}.zone`, "innen"); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {["if." + k.port + ".zone"]: k.zone},
+      text: `Firewall: ${k.port} wieder der Zone „${k.zone}“ zuordnen – die Regeln (aussen → dmz) greifen sonst nicht.`}],
+    hilfen: (n, k) => ({frage: ["Die Regel „außen → dmz“ steht im Regelwerk. Warum trifft sie den Webshop trotzdem nicht?"],
+      bereich: [{geraet: k.geraet, port: k.port}], konkret: [`${k.port} steckt in der Zone „innen“ statt „${k.zone}“. Keine Regel von aussen nach innen erlaubt den Shop.`]}),
+    erklaerung: "Firewall-Regeln gelten für Zonen, nicht für Kabel. Steckt eine Schnittstelle in der falschen Zone, wird jeder Verkehr aus Sicht einer anderen Zone bewertet – der Webshop ist dann weder von außen noch aus dem LAN erlaubt, obwohl die Regeln für „dmz“ richtig aussehen.",
+    quelle: "05-AP2-Infrastruktur-Sicherheit (Firewall/Zonen) · BSI IT-Grundschutz-Kompendium, NET.3.2 Firewall"});
+
+  neu({name: "nat-acl-zu-klein", titel: "NAT-ACL erfasst das Clientnetz nicht", skills: ["lab.nat", "lab.ports", "lab.route"],
+    gruende: ["NAT_MISSING", "TIMEOUT"], vorlagen: ["lan", "buero", "praxis"],
+    passt: (n, r) => n.geraete[r.router] && n.geraete[r.router].running.acls && n.geraete[r.router].running.acls["1"]
+      ? [{key: r.router, geraet: r.router, regeln: JSON.parse(JSON.stringify(n.geraete[r.router].running.acls["1"].regeln))}] : [],
+    anwenden(n, k){ Modell.setzen(n, k.geraet || k.key, "acls.1.regeln", [{aktion: "permit", proto: "ip",
+      quelle: {ip: "10.255.255.0", wc: "0.0.0.255"}, ziel: null, zielPort: null, quellPort: null, icmpTyp: null}]); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {"acls.1.regeln": k.regeln},
+      text: `${name(n, k.geraet)}: die NAT-ACL wieder auf das/die echten Clientnetze setzen (Liste 1).`}],
+    hilfen: (n, k) => ({frage: ["PAT übersetzt nur, was die NAT-ACL erlaubt. Steht das Clientnetz überhaupt in dieser Liste?"],
+      bereich: [{geraet: k.geraet}], konkret: ["In ACL 1 steht ein fremdes Netz (10.255.255.0/24). Die echten Clientadressen werden deshalb nicht übersetzt und im Internet verworfen."]}),
+    erklaerung: "Die ACL einer NAT-Regel bestimmt, WELCHE inneren Adressen übersetzt werden. Fehlt das Clientnetz, verlassen private Adressen das Netz – der Provider verwirft sie. Symptom: Internet tot, intern läuft alles.",
+    quelle: "Cisco IOS NAT Configuration Guide · RFC 3022"});
+
+  neu({name: "portsec-max-falsch", titel: "Port-Security mit leerer MAC-Liste", skills: ["lab.portsec", "lab.switch", "lab.cli"],
+    gruende: ["PORTSEC_VIOLATION", "LINK_DOWN", "ARP_NO_REPLY", "TIMEOUT"], vorlagen: ["lan", "praxis", "standorte"],
+    passt: (n, r) => (r.hosts || []).filter(id => n.geraete[id] && amSwitch(n, id)).map(id => {
+      const s = amSwitch(n, id);
+      return {key: id, geraet: s.geraet, port: s.port, host: id, mac: n.geraete[id].hw.macs.eth0};
+    }),
+    anwenden(n, k){
+      const mac = k.mac || n.geraete[k.host]?.hw?.macs?.eth0 || "";
+      Modell.setzen(n, k.geraet, "ports." + k.port + ".portSecurity", {max: 1, macs: [fremdMac(mac)], verstoss: "shutdown"});
+    },
+    loesung: (n, k) => [
+      {aktion: "errdisable", geraet: k.geraet, port: k.port,
+       text: name(n, k.geraet) + " " + k.port + ": err-disabled aufheben – im Inspektor „Port zurücksetzen“, auf der Konsole „interface " + lang(k.port) + "“ → „shutdown“ → „no shutdown“."},
+      {geraet: k.geraet, setzen: {["ports." + k.port + ".portSecurity"]: {max: 1, macs: [k.mac], verstoss: "shutdown"}},
+       text: name(n, k.geraet) + ": Port-Security auf die MAC von " + name(n, k.host) + " (" + k.mac + ") umtragen – erst danach bleibt der Port oben."}],
+    hilfen: (n, k) => ({frage: ["Das Kabel steckt, die Adresse stimmt – und trotzdem geht kein einziges Paket durch. Was kann einen Switchport außer „shutdown“ noch dichtmachen?"],
+      bereich: [{geraet: k.geraet, port: k.port}],
+      konkret: ["Auf " + name(n, k.geraet) + " steht am Port " + k.port + " „Port-Security“ mit einer festen MAC-Adresse. " + name(n, k.host) + " hat eine andere – der Switch hat den Port deshalb abgeschaltet (err-disabled)."]}),
+    erklaerung: "Port-Security merkt sich, welche MAC-Adressen an einem Switchport erlaubt sind. Eine fremde MAC ist ein Verstoß; bei „violation shutdown“ schaltet der Switch den Port ab (err-disabled). Aus diesem Zustand kommt er nur mit „shutdown“ und „no shutdown“ zurück – und nur, wenn die Ursache behoben ist: entweder die erlaubte Adresse berichtigen oder das fremde Gerät entfernen. Sonst sperrt der nächste Rahmen den Port sofort wieder.",
+    quelle: "Cisco Catalyst Software Configuration Guide: Configuring Port Security · Network – Lernfassung (§ 9 MAC Flooding, Abwehr Port Security)"});
+  neu({name: "route-kreis-ttl", titel: "Zwei Router schicken sich Pakete im Kreis", skills: ["lab.ttl", "lab.route", "lab.gateway", "lab.stp"],
+    gruende: ["TTL_EXPIRED", "ARP_NO_REPLY", "TIMEOUT"], vorlagen: ["standorte"],
+    passt: (n, r) => (r.router && r.router2 && n.geraete[r.router].running.routen) ? [{key: r.router, geraet: r.router, routen: JSON.parse(JSON.stringify(n.geraete[r.router].running.routen)), peer: r.router2, transfer: r.transfer}] : [],
+    anwenden(n, k){ Modell.setzen(n, k.geraet, "routen",
+      n.geraete[k.geraet].running.routen.map(x => /^0.0.0.0$/.test(x.netz) ? Object.assign({}, x, {nh: k.transfer + "2"}) : x)); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {routen: k.routen},
+      text: `${name(n, k.geraet)}: die Default-Route wieder auf das Internet zeigen lassen (statt auf ${name(n, k.peer)}).`}],
+    hilfen: (n, k) => ({frage: ["Mach ein traceroute zu einer Adresse im Internet. Welche zwei Adressen wechseln sich ab?"],
+      bereich: [{geraet: k.geraet}], konkret: [`Die Default-Route der Zentrale zeigt auf ${name(n, k.peer)}; dessen Default zeigt zurück – ein Kreis. TTL 0 beendet ihn.`]}),
+    erklaerung: "Routing gilt immer nur bis zum nächsten Router. Zeigen zwei Router mit ihrer Default-Route aufeinander, kreist das Paket zwischen ihnen; erst die TTL beendet den Kreis und der Absender bekommt „Time exceeded“. Traceroute zeigt dann abwechselnd dieselben zwei Adressen.",
+    quelle: "Network – Lernfassung · RFC 792 (Time Exceeded)"});
+
+  neu({name: "helper-falsch", titel: "DHCP-Relay zeigt auf einen fremden Server", skills: ["lab.dhcp", "lab.cli", "lab.route"],
+    gruende: ["DHCP_NO_OFFER"], vorlagen: ["buero"],
+    passt: (n, r) => r.relayIf && (n.geraete[r.router].running.if[r.relayIf].helper || []).length
+      ? [{key: r.router + ":" + r.relayIf, geraet: r.router, port: r.relayIf, helper: n.geraete[r.router].running.if[r.relayIf].helper.slice()}] : [],
+    anwenden(n, k){ const [id, p] = k.key.split(":"); Modell.setzen(n, id, `if.${p}.helper`, ["10.255.255.254"]); },
+    loesung: (n, k) => [{geraet: k.geraet, cli: cli(`interface ${lang(k.port)}`, `ip helper-address ${k.helper[0]}`),
+      text: `Router: auf ${k.port} wieder „ip helper-address ${k.helper[0]}“ setzen.`}],
+    hilfen: (n, k) => ({frage: ["Der DHCP-Server läuft. Kommen die Relay-Anfragen überhaupt bei ihm an – oder schickt der Router sie woandershin?"],
+      bereich: [{geraet: k.geraet, port: k.port}], konkret: [`Der Helper zeigt auf 10.255.255.254 statt auf ${k.helper[0]}. Dort antwortet kein DHCP-Server.`]}),
+    erklaerung: "Das DHCP-Relay schickt die Client-Anfrage als Unicast an genau die Adresse im „ip helper-address“. Steht dort ein falscher Server, gehen die Anfragen ins Leere – der Client fällt nach dem Timeout auf APIPA zurück, obwohl der richtige DHCP-Server läuft.",
+    quelle: "RFC 2131 · Cisco IOS DHCP Server Configuration Guide"});
+
+  /* S7: zwei weitere gemessene Fälle (C-Plan, an die Sim angepasst). */
+  neu({name: "nas-rechte-falsch", titel: "Dateifreigabe nach NAS-Umzug ohne Dienst", skills: ["lab.storage", "lab.ports"],
+    gruende: ["SERVICE_OFF", "PORT_CLOSED", "TIMEOUT"], vorlagen: ["standorte"],
+    passt(n, r){
+      const id = r.server, d = id && n.geraete[id] && n.geraete[id].running.dienste;
+      return (d && d.datei && d.datei.an) ? [{key: id + ":datei", geraet: id, dienst: "datei"}] : [];
+    },
+    anwenden(n, k){ const t = k.key.split(":"); Modell.setzen(n, t[0], "dienste." + t[1], Object.assign({}, n.geraete[t[0]].running.dienste[t[1]], {an: false})); },
+    loesung: (n, k) => [{geraet: k.geraet, setzen: {["dienste." + k.dienst]: Object.assign({}, n.geraete[k.geraet].running.dienste[k.dienst], {an: true})},
+      text: name(n, k.geraet) + ": die Dateifreigabe (SMB, TCP 445) wieder starten."}],
+    hilfen: (n, k) => ({frage: ["Der Server antwortet auf Ping, die Freigabe öffnet sich aber nicht. Lauscht auf TCP 445 überhaupt ein Dienst?"],
+      bereich: [{geraet: k.geraet}], konkret: ["Auf " + name(n, k.geraet) + " ist der Dienst „Dateifreigabe“ gestoppt."]}),
+    erklaerung: "Eine Freigabe auf einem NAS oder Dateiserver läuft über SMB auf TCP 445. Ist der Dienst aus, bleibt der Host erreichbar, aber jede Verbindung wird sofort abgelehnt (TCP-RST). Rechte und Freigaben spielen erst danach eine Rolle.",
+    quelle: "TCP – Lernfassung · IANA Port Number Registry (445) · Storage-Konzeptatlas"});
+
+  neu({name: "stp-rootfalsch", titel: "STP-Wurzel falsch gedacht – zwei Wege", skills: ["lab.stp", "lab.switch"],
+    gruende: ["STORM", "TIMEOUT"], vorlagen: ["standorte"],
+    passt: (n, r) => {
+      const von = (r.clients || [])[0], nach = (r.clients || [])[1];
+      if (!von || !nach || von === nach || !n.geraete[von] || !n.geraete[nach]) return [];
+      const sws = Object.values(n.geraete).filter(g => g.typ === "switch");
+      for (let i = 0; i < sws.length; i++) for (let j = i + 1; j < sws.length; j++) {
+        const a = freieSwitchPorts(n, sws[i].id, 2), b = freieSwitchPorts(n, sws[j].id, 2);
+        if (a.length === 2 && b.length === 2) return [{key: sws[i].id + "|" + sws[j].id, geraet: sws[i].id, gegen: sws[j].id,
+          a1: a[0], a2: a[1], b1: b[0], b2: b[1], von: von, nach: nach}];
+      }
+      return [];
+    },
+    anwenden(n, k){
+      for (const paare of [[k.a1, k.b1], [k.a2, k.b2]]) {
+        const v = Modell.verbinden(n, {geraet: k.geraet, port: paare[0]}, {geraet: k.gegen, port: paare[1]});
+        if (v && v.fehler) throw new Error("stp-rootfalsch: " + v.fehler);
+      }
+    },
+    ziele: (n, k) => (k.von && n.geraete[k.von] && n.geraete[k.nach])
+      ? [{typ: "erreichbar", von: k.von, nach: k.nach, proto: "icmp", text: name(n, k.von) + " und " + name(n, k.nach) + " erreichen sich"}] : [],
+    loesung: (n, k) => [
+      {aktion: "trennen", geraet: k.gegen, a: {geraet: k.gegen, port: k.b2},
+       text: "Die zusätzliche Leitung zwischen " + name(n, k.geraet) + " und " + name(n, k.gegen) + " entfernen – sie bildet den Kreis."},
+      {aktion: "trennen", geraet: k.geraet, a: {geraet: k.geraet, port: k.a1},
+       text: "Auch die zweite Zusatzleitung (" + name(n, k.geraet) + " " + k.a1 + ") abziehen: Der Plan kennt keine direkte Leitung zwischen den Switches."}],
+    hilfen: (n, k) => ({frage: ["Zwei Wege zwischen zwei Switches – welches Protokoll wählt normalerweise eine Wurzel und blockiert den zweiten Weg?"],
+      bereich: [{geraet: k.geraet}, {geraet: k.gegen}],
+      konkret: [name(n, k.geraet) + " und " + name(n, k.gegen) + " sind doppelt verbunden (zwei Leitungen). Ohne STP kreisen Broadcasts; der Lauf bricht mit „Broadcast-Sturm“ ab."]}),
+    erklaerung: "Spanning Tree (IEEE 802.1D) wählt genau eine Wurzel und blockiert redundante Ports. Ist die Wurzel falsch gedacht oder fehlt die Blockierung, entsteht aus zwei Leitungen ein Kreis: Broadcasts laufen im Kreis, bis das Netz steht. In diesem Modell ist STP nicht nachgebildet – der Fehler endet erst, wenn die zweite Leitung gezogen wird. Erkennbar am Abbruch „Broadcast-Sturm“.",
+    quelle: "Fragen – Netzwerke planen (Wozu STP?) · IEEE 802.1D"});
   return I;
 })();

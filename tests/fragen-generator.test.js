@@ -45,6 +45,14 @@ gruppe("Fragen-Generator", () => {
   const PORT_TABELLE = {"HTTP": 80, "HTTPS": 443, "SSH": 22, "SMB (Dateifreigabe)": 445,
     "DNS": 53, "DHCP-Server": 67, "RDP": 3389, "SMTP": 25};
 
+  /* Welle 2 · S5: Konstanten der neun neuen Vorlagen – unabhängig von den Template-Daten. */
+  const TYPEN_DNS = ["A", "AAAA", "MX", "PTR"];
+  const CLI_FAELLE = [["user", "enable", "priv"], ["priv", "configure terminal", "config"],
+    ["config", "interface Gi0/1", "if"], ["if", "exit", "config"], ["config", "exit", "priv"], ["priv", "disable", "user"]];
+  const cliPromptTest = (name, stufe) => stufe === "user" ? name + ">" : stufe === "priv" ? name + "#" :
+    stufe === "config" ? name + "(config)#" : name + "(config-if)#";
+  const weiterTest = (ip, k) => zt(zz(ip) + k);
+
   /* ---------- Die Gegenrechnung je Vorlage ----------
      p(params)   prüft die Zahlen der Frage auf Konsistenz (Rückgabe: Liste von Fehlern)
      richtig     der erwartete Text, aus den Parametern gerechnet
@@ -134,7 +142,7 @@ gruppe("Fragen-Generator", () => {
         return f;
       },
       richtig: p => String(p.port),
-      falsch: p => Object.values(PORT_TABELLE).filter(x => x !== p.port).map(String),
+      falsch: p => Object.values(PORT_TABELLE).filter(x => x !== p.port).map(String).concat([String(p.port + 1)]),
     },
     "ttl-unterwegs": {
       p: p => {
@@ -159,6 +167,115 @@ gruppe("Fragen-Generator", () => {
       },
       richtig: p => maskeAus(24 + Math.round(Math.log(p.n) / Math.log(2))),
       falsch: p => { const q = 24 + Math.round(Math.log(p.n) / Math.log(2)); return [maskeAus(24), maskeAus(q - 1), maskeAus(q + 1), maskeAus(q + 2)]; },
+    },
+
+    /* ---------- Welle 2 · S5: neun neue Vorlagen (Architektur § 17.4) ---------- */
+    "gateway-adresse": {
+      p: p => {
+        const f = [];
+        if (p.maske !== maskeAus(p.p)) f.push(`maske ${p.maske} ≠ ${maskeAus(p.p)}`);
+        if ((zz(p.ip) & zz(p.maske)) >>> 0 !== zz(p.netz)) f.push(`ip ${p.ip} liegt nicht im Netz ${p.netz}`);
+        if (zz(p.netz) % gross(p.p) !== 0) f.push(`netz ${p.netz} ist kein Blockanfang für /${p.p}`);
+        if (zz(p.gw) !== zz(p.netz) + 1) f.push(`gw ${p.gw} ist nicht Netzadresse + 1`);
+        if (zz(p.bc) !== zz(p.netz) + gross(p.p) - 1) f.push(`broadcast ${p.bc} falsch`);
+        if (zz(p.zwei) !== zz(p.netz) + 2) f.push(`zweite Adresse ${p.zwei} falsch`);
+        return f;
+      },
+      richtig: p => p.gw,
+      falsch: p => [p.netz, p.bc, p.zwei],
+    },
+    "dhcp-pool-groesse": {
+      p: p => {
+        const f = [];
+        if (zz(p.start) === null || zz(p.ende) === null) return [`start/ende ist keine Adresse`];
+        if (p.len !== zz(p.ende) - zz(p.start) + 1) f.push(`len ${p.len} ≠ ${zz(p.ende) - zz(p.start) + 1}`);
+        if (Math.floor(zz(p.start) / 256) !== Math.floor(zz(p.ende) / 256)) f.push("start und ende liegen nicht im selben /24");
+        if (p.len < 2) f.push(`len ${p.len} unbrauchbar`);
+        return f;
+      },
+      richtig: p => String(p.len),
+      falsch: p => [String(p.len - 1), String(p.len + 1), String(255 - p.len)],
+    },
+    "dns-eintragstyp": {
+      p: p => {
+        const f = [];
+        if (!Number.isInteger(p.variant) || p.variant < 0 || p.variant > 3) f.push(`variant ${p.variant}`);
+        if (TYPEN_DNS[p.variant] !== p.typ) f.push(`typ ${p.typ} passt nicht zu variant ${p.variant}`);
+        if (!/\.[a-z]/.test(String(p.name))) f.push(`name ${p.name} unbrauchbar`);
+        return f;
+      },
+      richtig: p => p.typ,
+      falsch: p => TYPEN_DNS.filter(t => t !== p.typ),
+    },
+    "tcp-ack-nummer": {
+      p: p => {
+        const f = [];
+        if (!Number.isInteger(p.isn) || p.isn < 1) f.push(`isn ${p.isn}`);
+        if (!Number.isInteger(p.nbytes) || p.nbytes < 1) f.push(`nbytes ${p.nbytes}`);
+        return f;
+      },
+      richtig: p => String(p.isn + p.nbytes + 1),
+      falsch: p => [String(p.isn + p.nbytes), String(p.isn + p.nbytes + 2), String(p.isn + 1)],
+    },
+    "stp-bridge-id": {
+      p: p => {
+        const f = [], prios = [4096, 8192, 16384, 24576, 32768];
+        if (!prios.includes(p.prio)) f.push(`prio ${p.prio} ist kein Prioritätsschritt`);
+        if (!Number.isInteger(p.vid) || p.vid < 1 || p.vid > 4094) f.push(`vid ${p.vid}`);
+        return f;
+      },
+      richtig: p => String(p.prio + p.vid),
+      falsch: p => [String(p.prio), String(p.prio + p.vid + 1), String(p.prio + 4096)],
+    },
+    "storage-raid-nutz": {
+      p: p => {
+        const f = [];
+        if (p.level !== 5 && p.level !== 6) f.push(`level ${p.level}`);
+        if (!Number.isInteger(p.n) || p.n < 4 || p.n > 8) f.push(`n ${p.n}`);
+        if (!(p.groesse > 0)) f.push(`groesse ${p.groesse}`);
+        if (p.nutz !== (p.level === 5 ? p.n - 1 : p.n - 2) * p.groesse) f.push(`nutz ${p.nutz} falsch`);
+        return f;
+      },
+      richtig: p => `${p.nutz} TB`,
+      falsch: p => [`${p.n * p.groesse} TB`, `${p.nutz + (p.level === 5 ? -p.groesse : p.groesse)} TB`, `${p.groesse} TB`],
+    },
+    "nat-pat-portbereich": {
+      p: p => {
+        const f = [];
+        if (!Number.isInteger(p.von) || p.von < 1024) f.push(`von ${p.von}`);
+        if (!Number.isInteger(p.bis) || p.bis > 65535 || p.bis <= p.von) f.push(`bis ${p.bis}`);
+        if (p.len !== p.bis - p.von + 1) f.push(`len ${p.len} ≠ ${p.bis - p.von + 1}`);
+        return f;
+      },
+      richtig: p => String(p.len),
+      falsch: p => [String(p.len - 1), String(p.bis), String(p.len + 1)],
+    },
+    "fw-erste-regel": {
+      p: p => {
+        const f = [], regeln = [p.r1, p.r2, p.r3];
+        if (![1, 2, 3].includes(p.treffer)) f.push(`treffer ${p.treffer}`);
+        if (p.richtig !== "Regel " + p.treffer) f.push(`richtig ${p.richtig}`);
+        const passend = regeln.filter(r => new RegExp(`tcp ${p.port}$`).test(String(r)));
+        if (passend.length !== 1) f.push(`${passend.length} Regeln passen zu Port ${p.port}`);
+        if (regeln[p.treffer - 1] !== "permit tcp " + p.port) f.push("die Treffer-Regel erlaubt den Port nicht");
+        if (regeln.some(r => !/^(permit|deny) tcp \d+$/.test(String(r)))) f.push("Regel hat unerwartete Form");
+        return f;
+      },
+      richtig: p => p.richtig,
+      falsch: p => ["Regel 1", "Regel 2", "Regel 3", "Keine – Standard deny"].filter(t => t !== p.richtig),
+    },
+    "cli-prompt": {
+      p: p => {
+        const f = [];
+        if (!/^[A-Za-z]+-\d+$/.test(String(p.name))) f.push(`name ${p.name}`);
+        const feld = CLI_FAELLE.find(x => x[0] === p.von && x[1] === p.cmd);
+        if (!feld) f.push(`Übergang ${p.von} + „${p.cmd}“ unbekannt`);
+        else if (feld[2] !== p.nach) f.push(`nach ${p.nach} ≠ ${feld[2]}`);
+        if (!/modus$/i.test(String(p.modus || ""))) f.push(`modus ${p.modus}`);
+        return f;
+      },
+      richtig: p => cliPromptTest(p.name, p.nach),
+      falsch: p => ["user", "priv", "config", "if"].filter(k => k !== p.nach).map(k => cliPromptTest(p.name, k)),
     },
   };
 
@@ -195,7 +312,7 @@ gruppe("Fragen-Generator", () => {
     }
     erwarte.gleich(fehler.slice(0, 8), []);
     erwarte.gleich(gebaut, ids().length * SEEDS, `${gebaut} Fragen aus ${ids().length} Vorlagen`);
-    erwarte.wahr(ids().length >= 10, `nur ${ids().length} Vorlagen`);
+    erwarte.wahr(ids().length >= 20, `nur ${ids().length} Vorlagen (Ziel §17.4: 20)`);
   });
 
   pruefe("Fragen-Generator: die als richtig markierte Option ist nachgerechnet richtig – 200 Seeds je Vorlage", () => {
@@ -323,7 +440,7 @@ gruppe("Fragen-Generator", () => {
 
   pruefe("Fragen-Generator: die Anbindung ist bereit – fuerSkill, merken, von – ohne src/spiel/mini.js anzufassen", () => {
     const mitVorlage = [...new Set(ids().map(id => DATEN.fragenVorlagen[id].skill))].sort();
-    erwarte.wahr(mitVorlage.length >= 8, `nur ${mitVorlage.length} Fertigkeiten mit Vorlage`);
+    erwarte.wahr(mitVorlage.length >= 15, `nur ${mitVorlage.length} Fertigkeiten mit Vorlage (Ziel §17.4: >=15)`);
     for (const skill of mitVorlage) {
       const a = Spiel.fragen.fuerSkill(skill, {seed: 3});
       erwarte.wahr(!!a, `${skill}: keine generierte Frage`);
@@ -347,5 +464,24 @@ gruppe("Fragen-Generator", () => {
     erwarte.wahr(typeof Spiel.mini.passtNiveau(g) === "boolean", "passtNiveau() verträgt die generierte Frage");
     erwarte.gleich(Spiel.fragen.von("gf-gibtsnicht-1"), null, "unbekannte ID → null");
     erwarte.gleich(Spiel.fragen.alle().length, ids().length, "alle() listet jede Vorlage");
+  });
+
+  pruefe("Fragen-Generator: Zielzahlen §17.4 – 20 Vorlagen, >=15 Fertigkeiten, je >=2 Denkfehler-Familien", () => {
+    const vorlagen = Object.values(DATEN.fragenVorlagen);
+    erwarte.gleich(vorlagen.length, 20, "20 Vorlagen");
+    const skills = new Set(vorlagen.map(v => v.skill));
+    erwarte.wahr(skills.size >= 15, `nur ${skills.size} Fertigkeiten mit Vorlage`);
+    const arten = new Set((DATEN.fragenDenkfehler || []).map(String));
+    const zuWenig = [];
+    for (const id of ids()) {
+      const benutzt = new Set();
+      for (let seed = 1; seed <= 20; seed++) {
+        const x = Spiel.fragen.erzeugeVoll(id, seed);
+        if (!x) continue;
+        for (const d of (DATEN.fragenVorlagen[id].ablenker(x.parameter) || [])) if (d && arten.has(String(d.art))) benutzt.add(String(d.art));
+      }
+      if (benutzt.size < 2) zuWenig.push(`${id}: ${[...benutzt].join(", ") || "keine"}`);
+    }
+    erwarte.gleich(zuWenig, [], "Vorlagen mit weniger als zwei Denkfehler-Familien");
   });
 });

@@ -5,19 +5,19 @@
    Regeln: höchstens ein Fach offen; zweiter Klick, Esc oder Klick daneben schließt. Geräte per Ziehen (Zeigerereignisse,
    kein HTML5-DnD) oder Klick → Werkzeug „platzieren“. Platzieren schließt das Fach, außer Umschalt ist gedrückt.
    Tastatur: 1–4 öffnet ein Fach, im offenen Fach wählt 1…n das Gerät, Enter setzt es in die Mitte der Fläche.
-   Oben im Fach „Zuletzt benutzt“ (höchstens 3, einst.labor.zuletzt). Klassenpräfix pa- (Palette). */
+   Oben im Fach „Zuletzt benutzt“ (höchstens 5, einst.labor.zuletzt; U12: mehr als drei, damit der wiederkehrende Griff sitzt). Klassenpräfix pa- (Palette). */
 UI.laborFach = (() => {
   function einrichten(Z, F){
     const leiste = Z.el.geraete;
     let offen = null;
     const einst = () => store.get("einst", {}) || {};
     const gleich = (a, typ, skin) => a.typ === typ && (a.skin || null) === (skin || null);
-    const zuletzt = () => (einst().labor?.zuletzt || []).filter(z => z && UI.GERAETE.some(a => gleich(a, z.typ, z.skin))).slice(0, 3);
+    const zuletzt = () => (einst().labor?.zuletzt || []).filter(z => z && UI.GERAETE.some(a => gleich(a, z.typ, z.skin))).slice(0, 5);
     function zuletztMerken(typ, skin){
       const e = einst();
       const l = (e.labor?.zuletzt || []).filter(z => z && !gleich(z, typ, skin));
       l.unshift({typ, skin: skin || null});
-      e.labor = Object.assign({}, e.labor, {zuletzt: l.slice(0, 3)});
+      e.labor = Object.assign({}, e.labor, {zuletzt: l.slice(0, 5)});
       store.set("einst", e);
     }
     const bild = (typ, skin, b, hoehe) => sv("svg", {viewBox: "-34 -30 68 60", width: b, height: hoehe, "aria-hidden": "true"}, UI.geraetebild(typ, skin));

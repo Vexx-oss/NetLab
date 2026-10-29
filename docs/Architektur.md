@@ -1197,6 +1197,212 @@ ersten sortierten Vorschlag; die zur Fertigkeit passende Sprosse wird über `lei
 `ticketId`-Blockade beim Nachfüllen gilt symmetrisch für alle unsichtbaren Quellen; die `.exe` ist nicht
 neu gebaut.
 
+## 16 · Welle 1 (2.1 + 3.0-Gerüst) — verbindlicher Vertrag (26.10.2026)
+
+**Anlass.** Diese Session baut das Maximal-Programm 3.0 in Wellen. Welle 1 umfasst 2.1 S1/S2 (Wahrheit,
+Korrektheit) sowie parallel UX-P1 und das Werkstatt-Gerüst. Damit Code und Doku nicht auseinanderlaufen,
+steht hier zuerst die Datenform.
+
+### 16.1 Eine Zahlenquelle: `docs/STAND.md` (generiert)
+
+| Gegenstand | Festlegung |
+|---|---|
+| Erzeuger | `tools/stand.py` erzeugt `docs/STAND.md` und einen markierten Block in `README.md`. Quelle sind **Messungen** (Testlauf, Modulliste des Baus, Dateisystem), keine getippten Zahlen. |
+| Blockmarker | `<!-- STAND:ANFANG -->` … `<!-- STAND:ENDE -->`. Handarbeit in diesem Bereich wird überschrieben. |
+| Prüfmodus | `python tools/stand.py --pruefen` vergleicht den erzeugten Text mit den Dateien; Abweichung → Exit 1 mit betroffener Zeile. |
+| Pflichtfelder | Fassung, Baukennung, Tests (grün/gesamt/übersprungen), Testdateien, headless Module, Bau-Module, `src/`-Dateien und -Zeilen (Methode benannt), Einzeldatei Bytes + SHA256, Inhalte (Tickets, Minis, Injektoren, Trainings, Wiki-Seiten, Fertigkeiten), `docs/doku`-Seiten. |
+| Geltung | README, Liesmich, AGENTS, Bauen, SITZUNGSABSCHLUSS und CHANGELOG nennen diese Zahlen nur noch über `STAND.md`; historische Abschnitte bleiben unangetastet (nicht rückdatieren). |
+
+### 16.2 Skip-Gate (2.1 S1; Code in Track B, weil `tests/*` dort liegt)
+
+`tests/run.js` endet mit Exit 1, wenn `uebersprungen(ergebnisse) > 0`. Ein Test ohne Zusicherung gilt damit
+als **rot**, nicht als grün. `tools/test.sh` reicht den Exit-Code unverändert durch; die Bilanzzeile bleibt
+im Text. Die Definition „übersprungen = 0 Zusicherungen" (`tests/harness.js`) bleibt unverändert.
+
+### 16.3 TTL und Probe-Art je Betriebssystem (2.1 S2)
+
+| Gegenstand | Festlegung |
+|---|---|
+| TTL-Startwerte | `src/sim/l3.js`: Windows-Ziele 128, Linux-Ziele (Server/NAS mit Linux-Betriebssystem) **64**. Genau ein Startwert je **Endgerätetyp** (PC/Server/NAS), zentral in `l3.js`; Router, Switch und Internet führen ihre eigenen TTL-Konstanten in ihren Modulen (`router.js`, `switch.js`, `internet.js`) — das sind Gerätewerte, keine Endgerät-Startwerte. |
+| Traceroute | Windows-Endgeräte senden ICMP-Echo; Linux-Endgeräte senden UDP-Proben auf hohe Ports, wie im Wiki gelehrt. Die sichtbare Ausgabe bleibt gleich; nur Sim-Gründe dürfen abweichen. |
+| Referenzstand | `tests/sim-stand.json` wird nach der Änderung bewusst neu erzeugt; die Abweichung wird im CHANGELOG begründet. Danach ist `node tools/sim-stand.js` grün. |
+
+### 16.4 Design-Tokens und Bewegung (UX-P1)
+
+| Gegenstand | Festlegung |
+|---|---|
+| Dauer-Tokens | `--dauer-kurz:80ms` · `--dauer:160ms` · `--dauer-mittel:240ms` · `--dauer-lang:320ms`; Zähler `--dauer-zaehler:700ms` (Audit §4.1); Easings `--ease-standard`, `--ease-out`, `--ease-pop`. |
+| JS-Zugriff | genau eine Funktion `UI.zeit()` liest Tokens per `getComputedStyle`; Animations-/Wartepfade in `src/ui/` enthalten keine ms-Literale mehr. Die Schrittweite der Simulation (`SCHRITT_MS`) bleibt Datenkonstante, wird aber an das Tempo gekoppelt. |
+| Lesbarkeit | alle Text-Tokens ≥ 4,5:1 auf `--bg`/`--panel`/`--panel-2` in beiden Schemata; `--faint` wird angehoben, nicht nur dokumentiert. |
+| Press | genau **eine** `.knopf:active`-Transform-Regel; Druck 80 ms. |
+| Icons | UI-Chrome (Knöpfe, Überschriften, Chips) nutzt `UI.symbol`; Emoji nur in Klartext-Copy außerhalb der Chrome. |
+
+### 16.5 Werkstatt-Gerüst (3.0, Welle 1; Track D)
+
+**Wichtig:** Ein freies Labor existiert bereits (`UI.sandbox` in `src/ui/start.js`, Store `"sandbox"`,
+`v:1`, Autosave bei `netz-geaendert`, erreichbar über „Freies Labor"). Die Werkstatt **erweitert** diesen Weg,
+sie erfindet keinen zweiten.
+
+| Gegenstand | Festlegung |
+|---|---|
+| Datenform | Speicher `"sandbox"` bleibt: `{v:1, netz}`. Neue **optionale** Felder (`name`, `vorlage`) dürfen ergänzt werden und müssen von alten Ständen toleriert werden (unbekannte Felder ignorieren, nie werfen). Die Karriere (`"labor"`) wird nie berührt. |
+| Netzform | unverändert `{geraete:{id:{…}}, kabel:[…]}` wie `UI.labor.laden(netz, …)`; keine neuen Gerätetypen in Welle 1. |
+| Module | neu `src/spiel/werkstatt.js` → `Spiel.werkstatt` (reine Logik: Vorlagen aus vorhandenen Netzen, `netzGueltig`, Namensvergabe, Duplizier-Helfer ohne UI). Neu `src/ui/werkstatt.js` → `UI.werkstatt` (Gerüst: Werkstatt-Leiste, Palette-Suche, Vorlagenliste). Neu `src/stil/werkstatt.css`. `bauen.py` lädt `src/spiel/*.js` und `src/ui/*.js` automatisch alphabetisch. |
+| Editor-Mengen | Auswahl-Erweiterung ausschließlich UI-Zustand: `Z.auswahl` bleibt für Einzelgerät (Kompatibilität); neu `Z.auswahlSet` (Set von Geräte-ids) + `UI.labor.auswahlMehr()`. Duplizieren erzeugt **einen** Verlaufsschritt; Namen erhalten Suffix `-2`, `-3`; Kabel werden nicht mitdupliziert. |
+| Minimap | reine Ansicht (SVG-Vorschau), keine Datenform, kein Speicher. |
+| Wirkung vor Grün | Das Gerüst zählt erst als gebaut, wenn es aus dem echten Weg erreichbar ist: `UI.sandbox.laden()` → Werkstatt-Leiste, Beleg über `tests/ui-werkstatt.test.js`. Die Verdrahtung in `app.js`/`spiel.js` macht der Lead/Integrator (ein Schreiber). |
+| Nicht in Welle 1 | Vorlagen-Inhalte (Track E), Challenge-Karten, PDU/PCAP, Export, neue Gerätetypen, Zonen. |
+
+### 16.6 Schreibrechte Welle 1 (Auszug aus dem Task-Board)
+
+Ein Schreiber je Datei. Geteilte Dateien (`src/daten/*`, Verdrahtung in `app.js`/`spiel.js`,
+`docs/Architektur.md`) gehören dem Integrator (Lead). Kollision → nicht schreiben, Lead melden.
+
+## 17 · Welle 2+3 (2.1 S3–S8) — verbindlicher Vertrag (29.10.2026)
+
+**Anlass.** Nach Welle 1 (S1 Wahrheit, S2 Korrektheit) wird 2.1 zu Ende gebaut: S3 Prüfungsnähe/Generator,
+S4 Hilfeleiter/Doku-Ziele, S5 Lehrtexte/Fragen/Dichte, S6a/S6b IPv6/Betrieb/WLAN, S7 Volumen/Terminologie,
+S8 Fassung 2.1.0. Es gilt weiter: ein Schreiber je Datei, keine halbfertigen Beiträge, Wirkung vor Grün.
+
+### 17.1 Drei neue Fertigkeiten (S6a/S6b) — **append-only**
+
+| Index | id | Name | ap | stufe | Pflichtinhalte |
+|---:|---|---|---|---:|---|
+| 27 | `lab.ipv6` | IPv6: Adressen, Präfixe, NDP | AP1 | 5 | Wiki-Seite (≥4 Abschnitte, Quellen), Lehrtext E/AP1/AP2, 6 Minis, 1 Training, 1 Ticket, 1 Hilfe, Senior-Frage, Prüfungsfrage, ≥1 Injektor |
+| 28 | `lab.betrieb` | Betrieb und Überwachung (Syslog, Schwellwert, Backup, Uptime) | AP2 | 5 | wie oben, 6 Minis, 1 Training, 1 Ticket, 1 Hilfe, ≥1 Injektor |
+| 29 | `lab.wlan` | WLAN: SSID, VLAN, Sicherheit, Gastnetz | AP1 | 5 | wie oben, 8 Minis, 2 Trainings, 2 Tickets, 1 Hilfe, ≥2 Injektoren |
+
+- **Anhängeregel:** ausschließlich ans **Ende** von `DATEN.skills`; bestehende Indizes 0–26 bleiben unverändert.
+  `src/spiel/klassenraum-codec.js`: `TABELLE_SKILLS_LAENGE = 30`. Alte Codes bleiben gültig (Index < 27).
+  Codec-Tests und Klassenraum-Tests müssen danach grün sein — **Go/No-Go nach 1 h Arbeit**; bricht der Codec,
+  wird nicht weitergebaut, sondern der Lead informiert (Fallback: Inhalte unter bestehenden Fertigkeiten).
+- **Ehrliche Grenze:** IPv6/Betrieb/WLAN werden **inhaltlich** geübt (Adressierung, Planung, Konfiguration,
+  Bewertung), nicht paketweise simuliert. Jeder Lehrtext/Wiki-Abschnitt sagt das ausdrücklich.
+- **Übungsformen ohne Simulation (verbindlich):** Wo die Simulation das Thema nicht ausführen kann, gibt es
+  **kein** Training (Trainings erzeugen eine Sim-Instanz über einen Injektor) und **keinen** generierten
+  Prüfungsfall. Stattdessen: Handticket mit Arbeitsziel (`notiz`/`tabelle`/`audit`/`befehl`/`antwort`) auf einem
+  vorhandenen Netz, Minis, Wiki, Lehrtext, Hilfe, Senior-Frage. Prüfungs-Erreichbarkeit wird über den
+  Handticket-Pool hergestellt (S3-Blueprint mischt generierte und handgeschriebene Tickets). Fehlende Trainings
+  sind **namentliche Ausnahmen in `docs/STAND.md`** (2.1-Plan D4 erlaubt Ausnahmen mit Begründung) — keine
+  Scheinbegründung, keine Umdeutung bestehender Injektoren. `lab.betrieb` darf vorhandene Störungs-Injektoren
+  nutzen (Baustein „Störung erkennen und dokumentieren"), wenn das Ticket den Betriebsbezug ehrlich trägt.
+- **Neue Sim-Gründe** sind nur zulässig, wenn sie in §5.3 dokumentiert werden und `tests/sim-stand.json`
+  bewusst aktualisiert wird (mit Begründung im CHANGELOG); Standard ist: keine neuen Gründe.
+
+### 17.2 Generator, Prüfung, Abnahme (S3)
+
+| Gegenstand | Festlegung |
+|---|---|
+| Generierte Tickets | `symptomText`/`briefingText` liefern vier Bausteine (Anlass mit Zeit · Beobachtung in Kundensprache · Folge · was schon versucht wurde), **180–420 Zeichen**, 2–4 Sätze, **0 Ursachenwörter** (`docs/entwicklung/Stilfaden – Auftragstexte.md`), Titel 15–46 Zeichen, deterministisch über `Zufall` (kein `Math.random`, kein Datum). |
+| Stil-Gate | `tools/texte-messen.js --pruefen` prüft 100 Seeds je Form (Prüfung, Tagesrätsel, Postfach) und die Handtickets; Exit 1 bei Verstoß. Wird als Test/CI-Schritt aufgerufen. |
+| Prüfung | Alle **30** Fertigkeiten erreichbar (auch Stufe 6 und `lab.portsec`); keine Ausschlüsse `Math.min(5, …)`/Portsec mehr. Blueprint je AP1/AP2 (Fertigkeitssets), 3 Aufgaben/25 min und IHK-Notenschlüssel bleiben unverändert. |
+| Abnahme-Regression | Basis-Paare zusätzlich zu ICMP: **Dienste** (HTTP, DNS, DHCP, Druckfreigabe/Port 445) und **Drucker-Endgeräte**; mindestens **5** Dienst-/Drucker-Fälle in den Tests; `REGRESSION_MAX` darf dafür angehoben werden. Keine neue Datenform. |
+
+### 17.3 Hilfeleiter und Doku-Ziele (S4)
+
+| Gegenstand | Festlegung |
+|---|---|
+| SENIOR_FRAGEN | Schlüssel = `DATEN.skills`-id; **30/30** vorhanden (heute 13/27). |
+| Stufe 5 | Ohne eigenes `hilfen`-Feld **kein Lösungstext-Fallback**: nur Handlungshinweise (z. B. „Prüfe zuerst, ob …"); Stufe 6 bleibt „Lösung vorführen". |
+| Doku-Ziel | Vorhandene Formen `notiz` (≥ 20 Zeichen) / `tabelle` / `audit` wiederverwenden; die 17 Briefings, die Protokoll/Wartungsbuch fordern, bekommen ein Ziel; Abnahme/Tests prüfen es. **Kein neuer Zieltyp**, keine neue Datenform. |
+| Stufen 5/6 | Ausbau auf **≥10 / ≥8** Handtickets mit echten Themen (Firewall/Log, NAS-Rechte/Backup, Port-Security in der Halle, …); alle Texte im Stilfaden, Symptom ohne Ursachenwörter. |
+
+### 17.4 Lehrtexte, Fragen, Dichte (S5)
+
+- `lehrtexte.js`: **12** neue Texte — 9 fehlende Fertigkeiten (`lab.switch, lab.subnetz, lab.tcp, lab.cli,
+  lab.speichern, lab.rostick, lab.portfwd, lab.dmz, lab.storage`) + 3 neue (`lab.ipv6, lab.betrieb, lab.wlan`)
+  → **46** Texte auf 30/30 Fertigkeiten; Quellen nur Whitelist. **Datenform (append-only):** `DATEN.lehrtexte`
+  bleibt für die 34 Sim-Codes unverändert; die 12 Skill-Texte kommen als zusätzliche Schlüssel mit der
+  Skill-id dazu (`DATEN.lehrtexte["lab.switch"] = {titel, skill, E, AP1, AP2, quelle}`). `DATEN.lehrtextFuer(skill,
+  niveau)` liefert den Text (Skill-Text hat Vorrang, sonst `null`). Der echte Consumer wird vom Lead verdrahtet
+  (Ergebnis-/Erklärdialog: „Erklär mir das" zeigt den Skill-Text; kein toter Text). Der Dichte-Test zählt beide
+  Quellen (Code-Text, der auf die Fertigkeit zeigt, **oder** Skill-Text).
+- `fragen-vorlagen.js`: **20** Vorlagen auf **≥15** Fertigkeiten, je ≥2 Denkfehler-Familien; Lösung und Prüfung
+  rechnen unabhängig (kein Vergleich mit dem Lösungstext), deterministisch.
+**Zulässige Quellen (Content):** RFC, IEEE, ISO/IEC, BSI, ETSI, ITIL, SNIA, DSGVO/EU-Recht, Cisco-Dokumentation,
+IHK-Rahmen (FIAusbV, KMK) — und ausdrücklich die **Wi-Fi Alliance** (WPA3-Spezifikation, Standardisierungsallianz).
+Der Wächter-Test `tests/wiki-2.0.test.js` akzeptiert „Wi-Fi" bereits; die frühere Whitelist-Liste im
+Staging-Dokument (`analysis/NetLab/drafts/INDEX.md`) ist damit überholt und keine Vertragsquelle.
+- `tests/inhaltsdichte.test.js` (neu): Matrix **30 Fertigkeiten × 8 Zeilen** — Wiki (≥3 Abschnitte, Ziel ≥4),
+  Lehrtext, ≥3 Minis, ≥1 Training, ≥1 Ticket, ≥1 Hilfe, ≥1 Senior-Frage, ≥1 Prüfungsfrage. Ausnahmen nur
+  namentlich mit Begründung im Test (Vorbild: toter-Lehrtext-Test); Ziel 30/30.
+
+### 17.5 Volumen, Welle 3 (S7)
+
+Zielzahlen (Summenprobe aus 2.1-Plan §4): Tickets **76** · Minis **150** · Trainings **52** · Injektoren **55**
++ jede Fertigkeit ≥3 Injektor-Zuordnungen (23 fehlende Links) · Hilfe-Vorschläge **47** · Wiki **37** ·
+Fragen **20/15** · Lehrtexte **46** · Doku-Ziele **17/17**. Dazu: Terminologie (Karriere-Stufe vs. Erklär­tiefe vs.
+Niveau; „Broadcast-Domäne" einheitlich) dokumentiert; 5 Wiki-Vertiefungsseiten (VPN/IPsec, TLS/Zertifikate,
+802.1X, Backup, Virtualisierung) mit ≥4 Abschnitten und Quellen; unabhängiger Faktencheck 100 Aussagen = 0 Fehler
+oder benannte Ausnahmen. Jede Einheit mit Lernziel, Quelle, Test.
+
+### 17.6 Fassung 2.1.0 und Auslieferung (S8; **nur nach Freigabe**)
+
+- Fassung **2.1.0** erst, wenn alle Gates grün sind: `python tools/fassung-ziehen.py --neu 2.1.0` **Trockenlauf**,
+  dann `--setzen`; `VERSION_CODE` in `android/bauen.py` von Hand **über** dem abgeleiteten Wert (Doku: 20006 → neu).
+- Einzeldatei: Lizenzblock (PolyForm Noncommercial 1.0.0 + OFL-Hinweis mit Quellen) in den Bau aufnehmen
+  (`tools/einfach.py`), `docs/index.html` und `Netzwerk-Labor.html` neu bauen, **byte-gleich**, 0 Außenverweise;
+  `tools/stand.py` erneut erzeugen; `tools/seite.py` neu bauen.
+- README als Produktseite (5-Minuten-Einstieg, FAQ/Troubleshooting, ehrliche Grenzen, Doku-Link), CHANGELOG 2.1.0,
+  GitHub-Metadaten/Issue-/PR-Vorlagen/SECURITY/CONTRIBUTING als Dateien (kein Netz-Abruf, keine Release-API).
+- Screenshots nur mit Browser; sonst 1.1.0 kennzeichnen und „nicht geprüft" schreiben.
+- **Kein Commit, kein Push, keine Veröffentlichung** ohne ausdrückliche Nutzerfreigabe.
+
+### 17.7 Zahlenkopplung und Tests
+
+Tests, die Zählungen hart codieren (27 Fertigkeiten, 29 Wiki-Seiten, 45 Injektoren, 771/823 Tests, 5 Vorlagen …),
+werden auf die Vertragswerte gezogen — **ohne** Abschwächung. Neue Tests je Owner in eigenen Dateien; nichts
+gelöscht; 0 übersprungen (Skip-Gate). `docs/STAND.md` wird am Ende der Welle neu erzeugt.
+
+### 17.8 Schreibrechte Welle 2 (ein Schreiber je Datei)
+
+| Owner | Dateien (nur diese) | Nicht anfassen |
+|---|---|---|
+| **O1 · S3** | `src/spiel/generator.js`, `pruefung.js`, `abnahme.js`, `ticket.js`, `tools/texte-messen.js`, `tests/tickets-generator.test.js`, `tests/pruefung.test.js`, `tests/abnahme*.test.js`, neue `tests/texte-stil.test.js` | `src/daten/`, `src/ui/`, `src/sim/` |
+| **O2 · S4** | `src/daten/hilfen.js`, `src/spiel/hilfe.js`, `src/daten/tickets-1-2.js`, `tickets-3-5.js`, `tickets-hotline.js`, `tickets-sicherheit.js`, `tickets-terminal.js`, neu `src/daten/tickets-3-0.js`, `tests/tickets-hand.test.js`, neue `tests/tickets-doku.test.js`, `tests/hilfe*.test.js` | `abnahme.js`, `src/ui/`, `src/sim/` |
+| **O3 · S5** | `src/daten/lehrtexte.js`, `src/daten/fragen-vorlagen.js`, neu `tests/inhaltsdichte.test.js`, `tests/lehrtexte*.test.js`, `tests/fragen-vorlagen*.test.js` | `wiki.js`, `mini.js`, `basis.js` |
+| **O4 · S6** | `src/daten/basis.js`, `wiki.js`, `mini.js`, `mini-denkhilfen*.js`, `trainings.js`, `src/spiel/klassenraum-codec.js`, `src/spiel/injektoren.js`, `tests/wiki-*.test.js`, `tests/daten-mini.test.js`, `tests/daten-trainings.test.js`, `tests/injektoren-*.test.js`, `tests/klassenraum-codec*.test.js`, `tests/mini-ausbau*.test.js` | `lehrtexte.js` (O3), `tickets-*.js` (O2), `generator/pruefung/abnahme` (O1) |
+| **O5 · S8-Vorbereitung** | `README.md`, `docs/CHANGELOG.md`, neu `docs/FAQ.md`, `docs/Mitmachen.md`, `docs/Liesmich.md`, `docs/Bauen.md`, `docs/SITZUNGSABSCHLUSS.md`, `docs/bilder/HERKUNFT.md`, `tools/einfach.py`, `tools/fassung-ziehen.py` (Prüfmodus), `.github/**` (nur Doku/Templates) | `src/`, `tests/`, `docs/Architektur.md`, `docs/STAND.md` |
+| **Lead** | `docs/Architektur.md`, Integration, S7-Dateien (Welle 3), Fassungszug/Bau nach Freigabe | – |
+
+Kollision → nicht schreiben, Lead melden. Welle 3 (S7/S8-Endlauf) wird nach den Welle-2-Gates neu vergeben.
+
+**Nachtrag 29.10.2026 (Integrationsänderungen, in § 17.8 noch nicht gelistet):** `src/daten/tickets-3-0.js`,
+`src/spiel/szene.js`, `tests/spiel-szene.test.js`, `tests/spiel-ereignisse.test.js`, `tests/spiel-varianten.test.js`
+(O2); `src/spiel/klassenraum.js`, `src/spiel/kompetenz.js`, `tests/klassenraum*.test.js`,
+`tests/spiel-kundenakte.test.js` (O4); `src/ui/erklaeren.js`, `src/ui/spiel.js` (Lehrtext-Consumer, § 17.4),
+`src/stil/spiel.css` (Klasse `sp-lehrtexte`), `tests/ui-spiel-ergebnis.test.js` (Lead-Integration);
+`docs/entwicklung/Terminologie.md` (O5). Alle übrigen Dateien des Arbeitsbaums liegen in den Scopes der
+Tabelle. Die QA führt diese Liste als „Integrationsänderungen" und prüft sie in der Stichprobe.
+
+### 17.9 Klassenraum-Tabellen und Ticketwachstum (Entscheidung 29.10.2026)
+
+**Befund.** Das Auftrags-Codec hat 6 Bit Auftragsindex (0..63, Format § 1.2). 2.1 waechst von 58 auf 76
+Handtickets. Die Tabelle TABELLE_AUFTRAEGE in src/spiel/klassenraum.js ist ein **Literal** (eingefrorene
+Bindung, § 2.3 Regel 1) - alte Codes bleiben dadurch gueltig, auch wenn neue Tickets an anderer Stelle der
+lebenden Reihenfolge stehen. Die lebende Reihenfolge (Spiel.ticketReihe()) ist **nicht** die Codec-Tabelle;
+ein Neu-Einfrieren aus der lebenden Reihenfolge waere ein Bruch.
+
+**Entscheidung.**
+1. **Kein Formatwechsel** in 2.1 (keine 7-Bit-Indizes). Die 6-Bit-Grenze bleibt; das Format wird erst in 3.1
+   angehoben (dann mit Fassungs-/Migrationsweg, vgl. § 12.4).
+2. TABELLE_AUFTRAEGE bleibt **unveraendert die 58 IDs in historischer Reihenfolge**;
+   TABELLE_AUFTRAEGE_LAENGE = 58 bleibt. Die 15 neuen 2.1-Handtickets (S4/S6) sind **nicht
+   klassenraum-adressierbar**; das wird im Codec-Kopf und in § 12.2/3.1 dokumentiert. Fuer 3.1 werden sie
+   beim Formatwechsel hinten angehaengt.
+3. **Keine Umsortierung** bestehender oder neuer Tickets, um eine "lebende Reihenfolge" zu erzwingen
+   (neue Stufe-5-Tickets koennen nicht hinter alten Stufe-6-Tickets sortieren, ohne die Karriere-Reihenfolge
+   zu verbiegen).
+4. **Test-Invariante statt Gleichheit:** die Tests pruefen (a) alle 58 IDs der Tabelle existieren genau
+   einmal in DATEN.tickets, (b) die Tabelle ist unveraendert 58 lang und hat keine Duplikate, (c) **alte
+   Codes bleiben stabil**: Beispielcodes fuer Index 55/56/57 dekodieren weiterhin zu storage-01/02/03
+   (Regressionsfall), (d) Fertigkeitentabelle = 30, (e) die lebende ticketReihe() darf wachsen (73 -> 76)
+   und wird nicht mit der Codec-Tabelle gleichgesetzt.
+5. Ehrliche Grenze: 3.1 muss vor dem Klassenraum-Feldtest das Format anheben und die neuen Tickets
+   anhaengen - sonst sind nur 58 von 76 Auftraegen per Code aufrufbar.
+
+
+
 
 
 

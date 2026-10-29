@@ -1,3 +1,7 @@
+---
+beschreibung: Der verbindliche Stil für Auftragstexte — gemessener Ist-Stand, Regeln und das messbare Tor.
+---
+
 # ✍️ Stilfaden – Auftragstexte
 
 > **Stand:** 09.10.2026 · **Anlass:** Rückmeldung des Nutzers: „die Aufgabentexte sind teilweise

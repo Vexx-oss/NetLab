@@ -14,7 +14,9 @@
   const t = spec => DATEN.tickets.push(T(spec));
 
   /* ===== 1 · Fremder Router im Netz (Rogue-DHCP) ===== */
-  t({id: "buero-sicherheit-1", reihe: 3.7, kunde: "schreibbuero", karriere: 2, stufe: "AP1",
+  t({id: "buero-sicherheit-1",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Wartungsbucheintrag geschrieben (Ursache, Änderung, Rückweg)"}], reihe: 3.7, kunde: "schreibbuero", karriere: 2, stufe: "AP1",
     form: "sicherheitsvorfall", vorlage: "buero", vSeed: 41, minuten: 8,
     injektoren: [{name: "fremder-dhcp", ziel: "fremd"}],
     titel: "Fremder Router im Netz",
@@ -36,7 +38,9 @@
     lohn: {euro: 70, ruf: 2}});
 
   /* ===== 3 · Reservierung zeigt auf eine belegte Adresse (DHCP_RESERVED_BUSY) ===== */
-  t({id: "buero-sicherheit-3", reihe: 5.7, kunde: "schreibbuero", karriere: 2, stufe: "AP1",
+  t({id: "buero-sicherheit-3",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Zeilen fürs Wartungsbuch geschrieben"}], reihe: 5.7, kunde: "schreibbuero", karriere: 2, stufe: "AP1",
     form: "sicherheitsvorfall", vorlage: "buero", vSeed: 43, minuten: 6,
     injektoren: [],
     umbau(n){

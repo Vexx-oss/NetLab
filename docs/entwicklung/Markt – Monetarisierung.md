@@ -1,3 +1,7 @@
+---
+beschreibung: Marktrecherche mit Quellen: Zielgruppe, Wettbewerber, Preismodell — und was ausdrücklich nicht funktionieren wird.
+---
+
 # 💰 Markt und Monetarisierung – kann das Netzwerk-Labor Geld verdienen?
 
 > **Stand:** 09.10.2026 · **Auftrag:** task-48 (Marktrecherche, vom Nutzer ausdrücklich verlangt) ·

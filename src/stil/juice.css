@@ -1,6 +1,6 @@
 /* ---------- Spielgefühl (ui/juice.js, Präfix jc-): jede Handlung antwortet in ≤ 320 ms (eine Stufe der Dauer-Leiter), sanft statt grell ----------
    SVG-Geräte: animiert wird das innere Bild (.gb), weil die Gruppe selbst ihre Position als transform trägt.
-   DAUERN (task-38, tools/ethos.py R5): nur var(--dauer)=160ms und var(--dauer-lang)=320ms. Die vorher
+   DAUERN (task-38, tools/ethos.py R5): nur var(--dauer)=var(--dauer) und var(--dauer-lang)=var(--dauer-lang). Die vorher
    gewachsenen Einzelwerte (.28s/.38s/.45s/.5s/.7s/.9s/1s) sind auf die nächstliegende Stufe abgebildet —
    die kürzeste war .28s → 320 ms, die längste 1s → 320 ms. Keine Rückmeldung ist entfallen: alle
    Animationen laufen weiter, nur die Sprünge/Wackler sind jetzt gleich lang. `UI.juice(el, art, ms)`
@@ -9,7 +9,7 @@
 .ger.jc-plop .gb, .ger.jc-atmen .gb, .ger.jc-wackeln .gb, .ger.jc-sperre .gb{transform-box:fill-box; transform-origin:center}
 
 /* Gerät gesetzt: springt kurz auf */
-.ger.jc-plop .gb{animation:jc-plop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
+.ger.jc-plop .gb{animation:jc-plop var(--dauer-lang) var(--ease-pop)}
 @keyframes jc-plop{0%{transform:scale(.45); opacity:.3} 65%{transform:scale(1.12); opacity:1} 100%{transform:scale(1)}}
 
 /* Kabel rastet ein: Linie leuchtet, Port-LEDs pulsieren grün */
@@ -29,11 +29,11 @@
 @keyframes jc-wackeln{20%{transform:translateX(-3px)} 40%{transform:translateX(3px)} 60%{transform:translateX(-2px)} 80%{transform:translateX(1px)}}
 
 /* Ziel erfüllt: der Zähler „Ziele x/y“ ploppt */
-.am-ziele.jc-haken{animation:jc-haken var(--dauer-lang) cubic-bezier(.3,1.6,.5,1); background:var(--ok-soft); color:var(--ok)}
+.am-ziele.jc-haken{animation:jc-haken var(--dauer-lang) var(--ease-pop); background:var(--ok-soft); color:var(--ok)}
 @keyframes jc-haken{0%{transform:scale(.7)} 60%{transform:scale(1.18)} 100%{transform:scale(1)}}
 
 /* Werkzeug oder Fach gewählt: kurzes Nachfedern */
-.lb-wz.jc-wahl, .pa-kat.jc-wahl{animation:jc-wahl var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
+.lb-wz.jc-wahl, .pa-kat.jc-wahl{animation:jc-wahl var(--dauer-lang) var(--ease-pop)}
 @keyframes jc-wahl{0%{transform:scale(.88)} 70%{transform:scale(1.06)} 100%{transform:scale(1)}}
 
 /* Euro kommt an: Wert in der Kopfzeile glüht golden */
@@ -42,12 +42,14 @@
 
 /* Sterne: nach dem Einfliegen ein Glanz. Die Staffelung (animation-delay) bleibt: sie ist Choreografie
    und wird von R5 nicht gemessen (ZEIT_PROPS in tools/ethos.py kennt animation-delay nicht). */
-.sp-sterne.jc-sterne span.voll{animation:sp-stern var(--dauer-lang) cubic-bezier(.3,1.7,.5,1) forwards, jc-glanz var(--dauer-lang) ease-out forwards;
+.sp-sterne.jc-sterne span.voll{animation:sp-stern var(--dauer-lang) var(--ease-pop) forwards, jc-glanz var(--dauer-lang) ease-out forwards;
   animation-delay:calc(var(--i) * 120ms + 150ms), calc(var(--i) * 120ms + 650ms)}
 @keyframes jc-glanz{0%{text-shadow:0 0 0 transparent} 40%{text-shadow:0 0 22px var(--geld)} 100%{text-shadow:0 0 18px color-mix(in srgb, var(--geld) 50%, transparent)}}
 
 /* Knöpfe geben beim Drücken nach (ohne Klasse, gilt überall) */
-.knopf:active, .lb-wz:active, .lb-knopf:active, .pa-kat:active, .pa-teil:active, .dock-knopf:active, .am-zu:active{transform:scale(.96)}
+/* U06: .knopf:active hat GENAU EINE Regel in rahmen.css (translateY, 80 ms). Hier bleiben nur die
+   Werkzeug-/Fachknöpfe, deren Grundregeln in editor.css (Track D) liegen. */
+.lb-wz:active, .lb-knopf:active, .pa-kat:active, .pa-teil:active, .dock-knopf:active, .am-zu:active{transform:scale(.96)}
 
 /* Bewegung aus: kein eigener MEDIEN-Block (task-38, R8) — basis.css bleibt der EINE zentrale Block
    (91: Dauer global 1 ms; 93: bei „Bewegung aus" alles ab, html[data-bewegung="aus"]). Der Zustand

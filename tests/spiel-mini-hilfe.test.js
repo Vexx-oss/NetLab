@@ -75,7 +75,7 @@ function miniTestOberflaeche(){
      UI.buehneFrei (hier gestubbt) fragt zusammengesetzte Selektoren ab, die von selbst null ergeben. */
   const gerufen = {ansichten: [], timers: []}, hoerer = {}, fehler = [];
   const UI = {app: {registrieren(){}, einstellungAbschnitt(){}, ansicht: n => gerufen.ansichten.push(n)},
-    toast(){}, symbol: () => miniTestKnoten("span"), spiel: {status(){}}, klang: {spielen(){}},
+    toast(){}, symbol: () => miniTestKnoten("span"), zeit: () => 160, spiel: {status(){}}, klang: {spielen(){}},
     buehneFrei: () => true, modus(){}, netzplan: {}};
   const Bus = {an: (name, fn) => { (hoerer[name] ||= []).push(fn); return () => {}; }, aus(){}, senden(){}};
   const bereich = {

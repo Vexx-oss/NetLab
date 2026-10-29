@@ -5,7 +5,151 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
 [`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, `v2.0.2`, `v2.0.3`, **`v2.0.4`** (über die GitHub-API gemessen am 09.10.2026).
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, `v2.0.2`, `v2.0.3`, `v2.0.4`, **`v2.0.5`** — **13 Tags**, am 26.10.2026 mit `git tag --list` nachgezählt.
+
+---
+
+## 2.1.0 — Wahrheit, Korrektheit, Inhalte (S1–S8) (26.–29.10.2026)
+
+**Warum.** 2.1 ist die Runde vor 3.0: Wahrheit, Korrektheit, Prüfungsnähe, Inhaltsdichte.
+Diese Sitzung lief als ausdrücklich freigegebener Agenten-Schwarm (ein Schreiber je Datei);
+hier steht nur, was **gemessen** ist. **Fassung 2.1.0 ist gezogen** (`tools/fassung-ziehen.py --neu 2.1.0`,
+Trockenlauf 0 Fehler, dann `--setzen`; `VERSION_CODE` in `android/bauen.py` von Hand auf **20101**).
+Alle Zahlen unten stammen aus [`STAND.md`](STAND.md), gemessen am 29.10.2026 — nichts geschätzt.
+
+### S3–S8 — Inhalte, Hilfen, Fertigkeiten, Volumen (Endstand, gemessen)
+
+**Endstand vom 29.10.2026.** Jede Zahl stammt aus [`STAND.md`](STAND.md), erzeugt von
+`tools/stand.py` aus einem echten Testlauf — **nicht geschätzt, nicht aus alten Fassungen
+abgeschrieben**. Die Runden S3–S8 sind abgeschlossen; ihre Verträge stehen in
+[`Architektur.md`](Architektur.md) § 17.
+
+| Feld | Wert | Quelle (gemessen) |
+|---|---|---|
+| Tests | **873/873 grün, 0 übersprungen, Exit 0** | `python tools/stand.py` (echter Lauf) |
+| Testdateien / headless Module | **103 / 95** | `docs/STAND.md` |
+| Bau-Module | **133** (davon 95 headless) | `python bauen.py --liste` |
+| `src/` | **132 Dateien / 32.571 Zeilen** | `docs/STAND.md` |
+| Inhalte | **76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten** | `docs/STAND.md` |
+| Einzeldatei | **3.159.586 Bytes**, SHA256 `53C71182…F33D98D`, byte-gleich, Lizenzblock enthalten | `docs/STAND.md` |
+| Doku-Seiten | **50** (49 Dokumente + Übersicht) | `docs/STAND.md` |
+| Fassung / Baukennung | **2.1.0 / `32f07b3d`** | `docs/index.html` |
+
+Die Inhalte dieser Runden (Verträge: [`Architektur.md`](Architektur.md) § 17):
+**S3** Generator/Prüfung/Abnahme · **S4** Hilfeleiter und Doku-Ziele · **S5** Lehrtexte,
+Fragen, Dichte · **S6** die drei neuen Fertigkeiten IPv6, WLAN, Betrieb (append-only) ·
+**S7** Volumen · **S8** dieser Fassungszug. Jede Runde trägt ihre gemessenen Zahlen hier
+nach; **historische Abschnitte** älterer Fassungen bleiben unverändert.
+
+> **Warum die Zahlen stimmen:** Sie stehen in einer Datei, die ein Werkzeug bei jedem Lauf
+> neu erzeugt (`docs/STAND.md`), und `python tools/stand.py --pruefen` meldet jede Abweichung
+> mit Exit 1. Eine getippte Testzahl wäre genau der Fehler, den 2.1 S1 abgeschafft hat.
+
+### S1 — eine Zahlenquelle statt fünf Zahlenständen
+
+- **Neu `tools/stand.py`** (Vertrag: [`Architektur.md`](Architektur.md) § 16.1): misst bei
+  jedem Lauf den **echten** Testlauf (`node tests/run.js`, inklusive „davon N übersprungen"
+  und Exit-Code), die Modulliste des Baus (`python bauen.py --liste`), Dateien und Zeilen
+  unter `src/`, beide Einzeldateien (Bytes, SHA256, Byte-Gleichheit), den geladenen
+  Datenbestand (Tickets, Minis, Injektoren, Trainings, Wiki-Seiten, Fertigkeiten), die
+  Doku-Seiten und alle relativen Verweise. Es erzeugt [`STAND.md`](STAND.md) und den
+  markierten Block in [`../README.md`](../README.md); `--pruefen` endet mit Exit 1 und der
+  betroffenen Zeile, sobald Dokument und Messung auseinanderlaufen.
+- **Alte Zahlen abgelöst:** 251/251, 434, 707, 768 und 213, „107 Module", „20.706 Zeilen",
+  „2.269.597 Bytes" und „35 Testdateien" standen **gleichzeitig** im Repo. README, Liesmich,
+  AGENTS, Bauen, Mitmachen, SITZUNGSABSCHLUSS und INHALT nennen Zahlen nur noch über
+  `STAND.md`; der Prüfmodus verbietet die alten Angaben in `README.md` ausdrücklich.
+- **Falsche Systemaussagen belegt korrigiert:** Die Doku **wird** seit 07.10.2026 als HTML
+  unter `/doku/` ausgeliefert (README und SITZUNGSABSCHLUSS behaupteten das Gegenteil);
+  `seite.yml` liefert `docs/index.html`, `docs/bilder/` **und** `docs/doku/`;
+  `tools/seite-pruefen.py` verglich die beiden Einzeldateien **nie** — das tut jetzt
+  `stand.py` über den SHA256; die `.exe` baut der Release-Ablauf, und in keinem Release
+  liegt eine APK.
+- **CHANGELOG 2.0.5 nachgetragen** — Tag und Release existierten, der Abschnitt fehlte;
+  historische Abschnitte blieben unverändert und wurden nicht rückdatiert.
+- **Tote relative Verweise: 0.** 16 echte tote Verweise behoben (12 in
+  `docs/entwicklung/Übergabe – Stand 09.10.2026.md`, 4 auf `Nachweise/` → jetzt Text mit
+  „liegt nicht im Repo"). Die 17. Fundstelle des C-Berichts ist ein Falschtreffer im
+  Fließtext (`Spiel.vorlagen[name](z, {kunde})`), kein Verweis. **Damals gemessen (S1): 210
+  relative Verweise in 78 Markdown-Dateien, 0 tot** — Endstand nach S3–S8: 258 in 85 Dateien,
+  0 tot (Tabelle oben). Nebenbei belegt: das alte
+  `tools/repo-verweise-flicken.py` sah wegen git-quotierter Umlaut-Pfade nur **42 von 78**
+  Dateien.
+- **Doku-Index kuratiert:** `tools/seite.py` schneidet den Obsidian-YAML-Kopf ab (er wurde
+  vorher als Text ausgeliefert) und liest `beschreibung:` aus dem Front-Matter; **keine
+  Karte** des Index ist noch leer (vorher 15 mit „---."). `--pruefen` verlangt nur
+  `docs/doku/` (versioniert); `_site/` ist Auslieferung (gitignoriert) und darf fehlen.
+- **CI:** `pruefen.yml` prüft zusätzlich `python tools/stand.py --pruefen` und die
+  Doku-Frische (`python tools/seite.py` + `git diff --exit-code docs/doku`).
+- **Bilder:** README und `docs/bilder/HERKUNFT.md` kennzeichnen alle Aufnahmen als Fassung
+  **1.1.0**; ohne Browser wurden **keine** neuen Bilder erzeugt (ausdrücklich: nicht geprüft).
+
+### S2 — Korrektheit (Track B)
+
+- **Skip-Gate** (`tests/run.js`, Architektur § 16.2): Ein Test ohne eine einzige Zusicherung
+  gilt als **übersprungen**; der Lauf endet dann mit **Exit 1** und nennt die Namen. Die
+  Bilanzzeile bleibt im Text.
+- **TTL und Probe-Art je Betriebssystem** (`src/sim/l3.js`, `src/sim/aufrufe.js`):
+  Windows-Ziele 128, Linux-Ziele (Server/NAS) 64; Linux-Traceroute als UDP-Probe. Die
+  Begründung des Owners **wörtlich**: „TTL-Startwerte je OS (Server/NAS Linux 64 statt 128)
+  und Linux-Traceroute als UDP-Probe ändern das eingedampfte Ereignisbild des Referenzstands
+  nicht (TTL-Werte/Probe-Art werden dort nicht erfasst); Referenz bewusst neu erzeugt,
+  byte-identisch. Verhalten durch neue Tests belegt (Ping-TTL 64/128, UDP- vs. ICMP-Proben)."
+- **Inhalte und Befundtexte:** `src/daten/wiki.js` und `src/daten/lehrtexte.js` korrigiert
+  (Befunde F1–F7), neue Inhaltsprüfung in `tests/inhalt-korrektheit.test.js`.
+- **Referenzstand:** `tests/sim-stand.json` ist **unverändert** (gemessen: `git status`
+  meldet die Datei nicht) — die bewusste Neuerzeugung war byte-identisch.
+
+### Gates (29.10.2026, Endstand)
+
+| Gate | Befehl | Ergebnis |
+|---|---|---|
+| G1 Tests | `node tests/run.js` | **873/873 grün, 0 übersprungen, Exit 0** (103 Testdateien, 95 Module) |
+| G2 Zahlen | `python tools/stand.py --pruefen` | **Exit 0**: `STAND.md` und README-Block stimmen mit der Messung |
+| G7 Doku | `python tools/seite.py --pruefen` | **Exit 0**: 49 Dokumente, 50 HTML-Seiten, 0 tote Verweise |
+| Frische | `python tools/seite.py` + `git diff --exit-code docs/doku` | leer nach dem Bau |
+| Fassung | `python tools/fassung-ziehen.py --pruefen` | **Exit 0**: alle Fassungsstellen konsistent mit 2.1.0 |
+| Bau | `python bauen.py` | 133 Module, Version 2.1.0 |
+| Einzeldatei | `docs/index.html` = `Netzwerk-Labor.html` | **3.159.586 B**, SHA256 `53C71182…F33D98D`, byte-gleich, **Lizenzblock enthalten**, 0 Außenverweise |
+
+**Nicht geprüft:** Browser, Android-Gerät und Windows-`.exe` — die Gates G5/G6
+(Abnahme, Start im echten Browser) brauchen einen Browser und liefen in dieser Sitzung nicht.
+
+---
+
+## 2.0.5 — Auftragstexte als Störungsberichte (09.10.2026)
+
+> **Dieser Abschnitt wurde am 26.10.2026 nachgetragen** (2.1 S1, „Wahrheit und Messbasis"):
+> Tag und Release `v2.0.5` gab es, der CHANGELOG-Abschnitt fehlte. Die Zahlen hier sind
+> nachgemessen, soweit die Fassung im Repo noch messbar ist. **Historische Abschnitte wurden
+> nicht verändert und nicht rückdatiert.**
+
+**Warum diese Fassung.** Die Auftragstexte meldeten einen *Zustand* („Kasse ohne Netz") statt
+einer *Störung aus Kundensicht*. Diese Fassung schreibt die Ticket-, Mail- und Rückmeldungstexte
+neu und macht den Stil **messbar**, damit er nicht wieder zerfällt.
+
+**Geändert** (gezählt aus `git diff --stat v2.0.4..v2.0.5`, am 26.10.2026):
+
+- **33 Dateien, +1.065/−399 Zeilen** in drei Commits (`376ab83`, `0a37dbc`, `a92b95f`).
+- **Auftragstexte neu geschrieben:** `src/daten/tickets-1-2.js`, `src/daten/tickets-3-5.js`,
+  `src/daten/tickets-hotline.js`, `src/daten/tickets-sicherheit.js`, `src/daten/tickets-terminal.js`
+  — aus Zustandsmeldungen werden Störungsberichte.
+- **Stilfaden als Vertrag:** `docs/entwicklung/Stilfaden – Auftragstexte.md` (neu, 101 Zeilen).
+- **Messbares Tor:** `tools/texte-messen.js` (neu, 201 Zeilen) prüft die Textregeln; der Test
+  `tests/ui-spiel-ergebnis.test.js` wächst um 112 Zeilen.
+- **Fassung gezogen:** `bauen.py`, `android/bauen.py`, `shell/src-tauri/Cargo.toml`,
+  `shell/src-tauri/Cargo.lock`, `shell/src-tauri/tauri.conf.json`,
+  `android/huelle/AndroidManifest.xml`, `.github/workflows/release.yml`; `docs/doku/` neu erzeugt.
+
+**Nachgemessene Kennwerte dieser Fassung** (26.10.2026, im Repo messbar):
+
+- Tag `v2.0.5`: **09.10.2026, 22:59:52 +0200** (`git for-each-ref`).
+- Einzeldatei dieser Fassung: **2.909.678 Bytes**, SHA256 `BD3EA26E…72EE82D`;
+  `docs/index.html` und `Netzwerk-Labor.html` sind **byte-gleich** (beide unverändert im Baum).
+- **Nicht gemessen:** die Testzahl des Laufs vom 09.10.2026 — sie ist nach den Änderungen dieser
+  Sitzung nicht mehr reproduzierbar — und der Release-Text (laut älterer API-Abfrage nur ein
+  Compare-Link; in dieser Sitzung nicht erneut abgerufen). Der heutige Stand steht in
+  [`STAND.md`](STAND.md).
 
 ---
 

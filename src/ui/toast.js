@@ -95,11 +95,11 @@ UI.toast = (() => {
     function schliessen(sofort, verdraengt){
       if (zu) return; zu = true; halten();
       fokusRetten();                                  /* VOR dem Entfernen – sonst zeigt der Fokus ins Nichts */
-      if (!verdraengt && warten.length) { const w = warten.shift(); setTimeout(() => toast(w.text, w.art, Object.assign({}, w.o, {dauer: 5000})), 260); }
+      if (!verdraengt && warten.length) { const w = warten.shift(); setTimeout(() => toast(w.text, w.art, Object.assign({}, w.o, {dauer: 5000})), UI.zeit("mittel")); }
       if (sofort || wenigBewegung()) { el.remove(); hinweisStill(st); return; }
       el.classList.remove("da"); el.classList.add("weg");
       hinweisStill(st);
-      setTimeout(() => { el.remove(); hinweisStill(st); }, 220);
+      setTimeout(() => { el.remove(); hinweisStill(st); }, UI.zeit("dauer"));
     }
     el._schliessen = schliessen;
     if (aktionen.length && !o.nachgeholt) el._nachholen = {text, art, o: Object.assign({}, o, {nachgeholt: true})};

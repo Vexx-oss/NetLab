@@ -116,16 +116,18 @@ gruppe("Wiki: Klassenraum", () => {
       erwarte.wahr(sicht.includes(wort), `„${wort}“ fehlt auf der Seite`);
   });
 
-  pruefe('Die Wiki-Ansicht listet 29 Einträge – beide Zusatzseiten dabei, ohne Stufenkopf' + wkZusatz(), () => {
+  pruefe('Die Wiki-Ansicht listet alle Seiten – Zusatzseiten dabei, ohne Stufenkopf' + wkZusatz(), () => {
     if (!wkHatRequire()) return;
     const st = wkPruefstand();
     const c = st.doc.createElement("div");
     st.UI.karriere.wikiAnsicht(c);
     const punkte = c.querySelectorAll(".kr-wiki-punkt");
-    erwarte.gleich(punkte.length, 29, "Einträge der Liste (27 Fertigkeiten + 2 Zusatzseiten)");
+    const soll = (DATEN.skills || []).length + (DATEN.wikiZusatz || []).length;
+    erwarte.gleich(punkte.length, soll, "Einträge der Liste (Fertigkeiten + Zusatzseiten)");
     /* Die Listeneinträge hängen Titel und Stufe ohne Trenner aneinander („…prüfenStufe 1“); eine
        Zusatzseite hat keine Stufe und besteht deshalb genau aus ihrem Titel. */
-    for (const titel of ["Klassenraum", "Übergabe"]) {
+    for (const id of (DATEN.wikiZusatz || [])) {
+      const titel = DATEN.wiki[id].titel;
       const e = punkte.find(p => p.textContent === titel);
       erwarte.wahr(!!e, `„${titel}“ fehlt in der Liste`);
       if (e) erwarte.falsch(/Stufe/.test(e.textContent), `die Zusatzseite „${titel}“ trägt einen Stufenkopf`);

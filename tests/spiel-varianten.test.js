@@ -21,7 +21,8 @@ gruppe("Spiel: Provisorium oder sauber", () => {
       erwarte.wahr(def && Spiel.varianten.fuer(def) && Spiel.varianten.geraete(def).length >= 1, id);
       const n = def.netz(Zufall(1));
       Spiel.loesung(n, def.loesung.filter(s => s.aktion !== "speichern"));
-      erwarte.wahr(def.ziele.every(z => Sim.pruefeZiel(n, z).ok), id + ": Lösung ohne Sicherung wirkt");
+      /* Arbeitsziele (notiz/tabelle/audit, Welle 2 · S4) prüft die Abnahme, nicht Sim.pruefeZiel. */
+      erwarte.wahr(def.ziele.filter(z => !Spiel.istArbeitsziel(z)).every(z => Sim.pruefeZiel(n, z).ok), id + ": Lösung ohne Sicherung wirkt");
       for (const g of Object.values(n.geraete)) if (Modell.IOS[g.typ]) Modell.neustart(n, g.id);
       erwarte.wahr(def.ziele.some(z => !Sim.pruefeZiel(n, z).ok), id + ": nach dem Neustart ist der Fehler zurück");
     }

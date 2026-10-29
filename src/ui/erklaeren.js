@@ -4,7 +4,7 @@
    Lehrtexte (DATEN.lehrtexte[code] = {E, AP1, AP2, quelle}) erscheinen erst auf Klick, Stufe für Stufe: zuerst in der
    Tiefe des eigenen Niveaus, dann auf Wunsch ausführlicher (AP1 → Einstieg); am Ende die Quelle. Ohne Lehrtext: null.
    Genutzt im Simulations-Panel und im Ergebnis „Noch nicht ganz“. Klassenpräfix ex-. */
-UI.erklaeren = function(code, niveau = "E"){
+UI.erklaeren = function(code, niveau = "E", titel = "Erklär mir das"){
   const lt = (typeof DATEN !== "undefined" && DATEN.lehrtexte && DATEN.lehrtexte[code]) || null;
   if (!lt) return null;
   const STUFEN = ["AP2", "AP1", "E"];
@@ -18,6 +18,6 @@ UI.erklaeren = function(code, niveau = "E"){
     text.append(h("p", {}, lt[reihe[i++]]));
     if (i < reihe.length) knopf.textContent = "Ausführlicher";
     else { knopf.remove(); if (lt.quelle) text.append(h("small", {class: "ex-quelle"}, "Quelle: " + lt.quelle)); }
-  }}, "Erklär mir das");
+  }}, titel);
   return h("span", {class: "ex"}, knopf, text);
 };

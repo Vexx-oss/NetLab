@@ -1,53 +1,51 @@
 /* ---------- Karriere-Oberfläche (ui/karriere.js): Kunden, Shop, Lernstand, Wiki, Mini-Tickets ---------- */
 .kr-seite{height:100%; overflow:auto; padding:18px 22px 28px; display:flex; flex-direction:column; gap:18px; background:var(--bg); scrollbar-width:thin}
-.kr-kopf h2, .kr-wiki-liste h2{font:800 28px/1 var(--display)}
+.kr-kopf h2, .kr-wiki-liste h2{font:800 var(--fs-6)/1 var(--display)}
 .kr-kopf p{margin-top:6px}
 .kr-raster{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:14px}
 .kr-raster.klein{grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:10px}
 .kr-kunde{display:flex; flex-direction:column; gap:10px; padding:16px; border-radius:16px; background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--k, var(--accent)); position:relative}
 .kr-kunde.zu{opacity:.55; border-top-color:var(--line-2)}
 .kr-kunde header{display:flex; gap:12px; align-items:center}
-.kr-kunde h3{font:800 18px/1.15 var(--display)}
-.kr-text{margin:0; font-size:13.5px; line-height:1.5; color:var(--muted)}
+.kr-kunde h3{font:800 var(--fs-5)/1.15 var(--display)}
+.kr-text{margin:0; font-size:var(--fs-3); line-height:1.5; color:var(--muted)}
 .kr-kunde-fuss{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:auto}
-.kr-schloss{position:absolute; top:14px; right:14px; font-size:18px}
-.kr-ampel{padding:3px 9px; border-radius:999px; font:600 12px/1.4 var(--body)}
+.kr-schloss{position:absolute; top:14px; right:14px; font-size:var(--fs-5)}
+.kr-ampel{padding:3px 9px; border-radius:999px; font:600 var(--fs-2)/1.4 var(--body)}
 .kr-ampel.ok{background:var(--ok-soft); color:var(--ok)}
 .kr-ampel.warn{background:var(--warn-soft); color:var(--warn); animation:kr-pochen var(--dauer-lang) ease-in-out infinite}
 .kr-ampel.bad{background:var(--bad-soft); color:var(--bad); animation:kr-pochen var(--dauer-lang) ease-in-out infinite}
 @keyframes kr-pochen{50%{filter:brightness(1.35)}}
-.kr-gruppe h3{font:700 12px/1 var(--body); letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin:0 0 10px}
+.kr-gruppe h3{font:700 var(--fs-2)/1 var(--body); letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin:0 0 10px}
 .kr-ware{display:flex; flex-direction:column; gap:6px; padding:12px 14px; border-radius:14px; background:var(--panel); border:1px solid var(--line)}
-.kr-ware b{font-size:14.5px}
-.kr-ware p{margin:0; color:var(--muted); font-size:12.5px; line-height:1.45}
+.kr-ware b, .kr-ware p{margin:0; color:var(--muted); font-size:var(--fs-2); line-height:1.45}
 .kr-ware.gekauft{border-color:var(--ok)}
 .kr-ware.gesperrt, .kr-ware.teuer{opacity:.7}
 .kr-ware-fuss{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
-.kr-preis{font:800 16px/1 var(--display); color:var(--geld); white-space:nowrap; flex:0 0 auto}
-.kr-status{color:var(--muted); font-size:12px; text-align:right}
+.kr-preis{font:800 var(--fs-4)/1 var(--display); color:var(--geld); white-space:nowrap; flex:0 0 auto}
+.kr-status{color:var(--muted); font-size:var(--fs-2); text-align:right}
 .kr-fuss{max-width:70ch}
 .kr-karriere, .kr-abzeichen, .kr-pruefung, .kr-stufe, .kr-zwei > div{padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px}
-.kr-karriere small{color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.09em; text-transform:uppercase}
-.kr-karriere h3, .kr-abzeichen h3, .kr-pruefung h3, .kr-stufe h3, .kr-zwei h3{font:800 18px/1.2 var(--display); margin:0}
-.kr-balken label{display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--muted)}
+.kr-karriere small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.09em; text-transform:uppercase}
+.kr-karriere h3, .kr-abzeichen h3, .kr-pruefung h3, .kr-stufe h3, .kr-zwei h3{font:800 var(--fs-5)/1.2 var(--display); margin:0}
+.kr-balken label{display:flex; flex-direction:column; gap:6px; font-size:var(--fs-2); color:var(--muted)}
 .kr-bar{display:block; height:10px; border-radius:999px; background:var(--panel-3); overflow:hidden}
 .kr-bar i{display:block; height:100%; background:var(--ruf); border-radius:inherit; transition:width var(--dauer-lang) ease}
 .kr-bar.koennen i{background:var(--ok)}
-.kr-fehlt{margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); display:flex; flex-direction:column; gap:4px}
+.kr-fehlt{margin:0; padding-left:18px; font-size:var(--fs-3); color:var(--muted); display:flex; flex-direction:column; gap:4px}
 .kr-stufe.zu{opacity:.55}
 .kr-stufe.jetzt, .kr-skill:hover{border-color:var(--accent)}
-.kr-stufe h3 small{font:600 12px var(--body); color:var(--faint)}
+.kr-stufe h3 small{font:600 var(--fs-2) var(--body); color:var(--faint)}
 .kr-ringe{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:6px}
 .kr-skill{display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; column-gap:10px; align-items:center; text-align:left; padding:8px 10px; border-radius:12px; border:1px solid transparent; background:var(--panel-2); color:var(--ink)}
 .kr-skill .sp-ring{grid-row:1 / 3}
-.kr-skill-name{font-size:13px; font-weight:600; line-height:1.25}
-.kr-skill small{color:var(--faint); font-size:11.5px}
-.kr-ware.veraltet, .kr-skill.faellig{border-color:var(--warn)}
+.kr-skill-name{font-size:var(--fs-2); font-weight:600; line-height:1.25}
+.kr-skill small, .kr-ware.veraltet, .kr-skill.faellig{border-color:var(--warn)}
 .kr-skill.faellig small{color:var(--warn); font-weight:700}
 .kr-balken, .kr-zwei{display:grid; grid-template-columns:1fr 1fr; gap:14px}
-.kr-fehlerheft{margin:0; padding-left:18px; font-size:13px; display:flex; flex-direction:column; gap:5px; color:var(--muted)}
-.kr-behalten{display:grid; grid-template-columns:auto auto; gap:4px 16px; margin:0; font-size:14px}
-.kr-behalten dd{margin:0; font:700 15px var(--mono)}
+.kr-fehlerheft{margin:0; padding-left:18px; font-size:var(--fs-2); display:flex; flex-direction:column; gap:5px; color:var(--muted)}
+.kr-behalten{display:grid; grid-template-columns:auto auto; gap:4px 16px; margin:0; font-size:var(--fs-3)}
+.kr-behalten dd{margin:0; font:700 var(--fs-4) var(--mono)}
 .kr-zert{display:flex; gap:8px; flex-wrap:wrap}
 .kr-zertifikat{padding:6px 12px; border-radius:12px; background:color-mix(in srgb, var(--geld) 16%, var(--panel)); border:1px solid color-mix(in srgb, var(--geld) 50%, transparent); font-weight:700}
 .kr-aufgaben{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:10px}
@@ -55,11 +53,11 @@
 .kr-aufgaben li{display:list-item}
 .kr-aufgaben li > div{display:block}
 .kr-punkte{display:flex; align-items:baseline; gap:8px}
-.kr-punkte b{font:800 44px/1 var(--display); color:var(--accent)}
-.kr-tag{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--muted)}
-.kr-einst{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 0; font-size:14px}
+.kr-punkte b{font:800 calc(var(--fs-6) * 1.57)/1 var(--display); color:var(--accent)}
+.kr-tag{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:var(--fs-2); color:var(--muted)}
+.kr-einst{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 0; font-size:var(--fs-3)}
 .kr-einst span{display:flex; flex-direction:column}
-.kr-einst small{color:var(--faint); font-size:12px}
+.kr-einst small{color:var(--faint); font-size:var(--fs-2)}
 .kr-einst.aus, .mk-knopf.gewaehlt{opacity:.6}
 .kr-einst select{max-width:260px}
 @media (max-width: 900px){ .kr-balken, .kr-zwei{grid-template-columns:1fr} }
@@ -68,59 +66,59 @@
 .kr-wiki{display:grid; grid-template-columns:minmax(220px, 300px) minmax(0, 1fr); height:100%; min-height:0; background:var(--bg)}
 .kr-wiki-liste{display:flex; flex-direction:column; gap:10px; padding:18px 14px; border-right:1px solid var(--line); min-height:0; overflow:auto}
 .kr-wiki-liste nav{display:flex; flex-direction:column; gap:2px}
-.kr-wiki-punkt{display:flex; justify-content:space-between; gap:8px; text-align:left; padding:7px 10px; border:0; border-radius:9px; background:none; color:var(--ink); font-size:14px}
+.kr-wiki-punkt{display:flex; justify-content:space-between; gap:8px; text-align:left; padding:7px 10px; border:0; border-radius:9px; background:none; color:var(--ink); font-size:var(--fs-3)}
 .kr-wiki-punkt[disabled]{opacity:.6; cursor:default}
-.kr-wiki-punkt small{color:var(--faint); white-space:nowrap; flex:0 0 auto; font-size:12px}
-.kr-wiki-liste input[type=search]{min-height:36px; padding:0 12px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel); color:var(--ink); font:500 14px/1 var(--body)}
+.kr-wiki-punkt small{color:var(--faint); white-space:nowrap; flex:0 0 auto; font-size:var(--fs-2)}
+.kr-wiki-liste input[type=search]{min-height:36px; padding:0 12px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel); color:var(--ink); font:500 var(--fs-3)/1 var(--body)}
 .kr-wiki-liste input[type=search]:focus{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--accent-soft)}
 .kr-wiki-punkt:hover{background:var(--panel-2)}
 .kr-wiki-punkt.an{background:var(--accent-soft); color:var(--accent)}
-.kr-artikel{overflow:auto; padding:22px 30px 40px; display:flex; flex-direction:column; gap:14px; max-width:860px; font-size:15.5px; line-height:1.6}
-.kr-artikel h2{font:800 30px/1.1 var(--display)}
-.kr-artikel h3{font:700 18px/1.2 var(--display); margin:0 0 6px}
-.kr-artikel table{border-collapse:collapse; font-size:14px; margin:6px 0}
+.kr-artikel{overflow:auto; padding:22px 30px 40px; display:flex; flex-direction:column; gap:14px; max-width:860px; font-size:var(--fs-4); line-height:1.6}
+.kr-artikel h2{font:800 var(--fs-6)/1.1 var(--display)}
+.kr-artikel h3{font:700 var(--fs-5)/1.2 var(--display); margin:0 0 6px}
+.kr-artikel table{border-collapse:collapse; font-size:var(--fs-3); margin:6px 0}
 .kr-artikel th, .kr-artikel td{border:1px solid var(--line); padding:5px 9px; text-align:left}
 .kr-artikel code{font-size:.9em}
-.kr-kurz{font-size:17px; color:var(--muted)}
+.kr-kurz{font-size:var(--fs-4); color:var(--muted)}
 .kr-merksatz{padding:10px 14px; border-radius:12px; background:var(--accent-soft); border-left:3px solid var(--accent)}
 .kr-tipp{padding:10px 14px; border-radius:12px; background:var(--info-soft); border-left:3px solid var(--info)}
 
 /* ---- Mini-Tickets (Leiste 320×220 und Dialog) ---- */
-.mk{display:flex; flex-direction:column; gap:5px; font-size:12.5px; line-height:1.35}
+.mk{display:flex; flex-direction:column; gap:5px; font-size:var(--fs-2); line-height:1.35}
 .mk-kopf{display:flex; gap:6px; align-items:center; justify-content:space-between}
-.mk-skill{color:var(--faint); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.mk-frage{margin:0; font-weight:700; font-size:12.5px}
-.mk-schnapp{margin:0; padding:5px 7px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 10.5px/1.35 var(--mono); white-space:pre; overflow:hidden}
-.mk-hinweis{margin:0; color:var(--faint); font-size:11px}
+.mk-skill{color:var(--faint); font-size:var(--fs-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.mk-frage{margin:0; font-weight:700; font-size:var(--fs-2)}
+.mk-schnapp{margin:0; padding:5px 7px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 var(--fs-1)/1.35 var(--mono); white-space:pre; overflow:hidden}
+.mk-hinweis{margin:0; color:var(--faint); font-size:var(--fs-1)}
 .mk-optionen, .mk-zuordnen > div{display:flex; flex-direction:column; gap:3px}
-.mk-knopf{min-height:28px; padding:3px 8px; border-radius:7px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); text-align:left; font:600 12px/1.25 var(--body)}
+.mk-knopf{min-height:28px; padding:3px 8px; border-radius:7px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); text-align:left; font:600 var(--fs-2)/1.25 var(--body)}
 .mk-knopf:hover:not(:disabled){border-color:var(--accent); background:var(--panel-3)}
 .mk-knopf.an{border-color:var(--accent); background:var(--accent-soft)}
 .mk-knopf:disabled{cursor:default}
 .mk-zuordnen{display:grid; grid-template-columns:1fr 1fr; gap:6px}
-.mk-klein{align-self:flex-start; border:0; background:none; color:var(--muted); font-size:11px; padding:2px 0}
+.mk-klein{align-self:flex-start; border:0; background:none; color:var(--muted); font-size:var(--fs-1); padding:2px 0}
 .mk-ergebnis{padding:6px 8px; border-radius:8px}
 .mk-ergebnis.ok{background:var(--ok-soft)}
 .mk-ergebnis.bad{background:var(--bad-soft)}
-.mk-ergebnis p{margin:3px 0 0; font-size:11.5px}
-.mk-leer{margin:0; color:var(--muted); font-size:12px}
-.mk.gross{font-size:15px; gap:10px}
-.mk.gross .mk-frage{font-size:17px}
-.mk.gross .mk-schnapp{font-size:13px; white-space:pre-wrap}
-.mk.gross .mk-knopf{min-height:40px; font-size:14px; padding:8px 12px}
-.mk.gross .mk-ergebnis p{font-size:14px}
+.mk-ergebnis p{margin:3px 0 0; font-size:var(--fs-2)}
+.mk-leer{margin:0; color:var(--muted); font-size:var(--fs-2)}
+.mk.gross{font-size:var(--fs-4); gap:10px}
+.mk.gross .mk-frage{font-size:var(--fs-4)}
+.mk.gross .mk-schnapp{font-size:var(--fs-2); white-space:pre-wrap}
+.mk.gross .mk-knopf{min-height:40px; font-size:var(--fs-3); padding:8px 12px}
+.mk.gross .mk-ergebnis p{font-size:var(--fs-3)}
 .mk-dialog{min-height:120px}
 .sp-auftrag.pruefung{border-left-color:var(--geld); background:linear-gradient(90deg, color-mix(in srgb, var(--geld) 10%, var(--panel)), var(--panel) 60%)}
 
 /* Abzeichen im Lernstand */
-.kr-abzeichen h3 small{font:600 13px/1 var(--body); color:var(--muted); margin-left:6px}
+.kr-abzeichen h3 small{font:600 var(--fs-2)/1 var(--body); color:var(--muted); margin-left:6px}
 .kr-abz-raster{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:10px}
 .kr-abz{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border-radius:12px; border:1px dashed var(--line-2); background:var(--panel-2)}
-.kr-abz .kr-abz-sym{font-size:26px; line-height:1; filter:grayscale(1); opacity:.45}
+.kr-abz .kr-abz-sym{font-size:var(--fs-6); line-height:1; filter:grayscale(1); opacity:.45}
 .kr-abz.hat{border-style:solid; border-color:color-mix(in srgb, var(--geld) 50%, var(--line)); background:color-mix(in srgb, var(--geld) 7%, var(--panel))}
 .kr-abz.hat .kr-abz-sym{filter:none; opacity:1}
 .kr-abz-text{display:flex; flex-direction:column; gap:3px; min-width:0; flex:1}
-.kr-abz-text small{color:var(--muted); font-size:12.5px; line-height:1.35}
+.kr-abz-text small{color:var(--muted); font-size:var(--fs-2); line-height:1.35}
 .kr-abz-text .kr-abz-datum{color:var(--ok); font-weight:700}
 .kr-abz-offen{font-style:italic}
 .kr-abz-stand{display:flex; align-items:center; gap:8px; margin-top:2px}

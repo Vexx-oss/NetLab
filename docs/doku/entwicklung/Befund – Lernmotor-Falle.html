@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>🧠 Befund – die Lernmotor-Falle · Netzwerk-Labor</title>
-<meta name="description" content="---.">
+<meta name="description" content="Der Motor liest seinen Stand einmal beim Laden seines Skripts und hält ihn danach im Verschluss:.">
 <style>
 :root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
 @media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
@@ -74,10 +74,7 @@ img{max-width:100%;height:auto}
 <li><a href="#8-nicht-gepruft">8 · Nicht geprüft</a></li>
 <li><a href="#9-belege-in-dieser-sitzung-ausgefuhrt">9 · Belege (in dieser Sitzung ausgeführt)</a></li>
 </ul>
-</nav><hr>
-<p>typ: befund erstellt: 2026-10-09 aktualisiert: 2026-10-09 status: fertig — unsere Seite ist gesichert und gemessen; die Motor-Änderung ist eine Vorlage für die FISI-Spielhalle und NICHT ausgeführt tags: [FISI, Lernspiel, Netzwerk, Lernmotor, Befund, Falle]</p>
-<hr>
-<h1 id="befund-die-lernmotor-falle">🧠 Befund – die Lernmotor-Falle</h1>
+</nav><h1 id="befund-die-lernmotor-falle">🧠 Befund – die Lernmotor-Falle</h1>
 <blockquote>
 <p>[!danger] Kurzfassung Der Lernmotor (Fahrplan 1.3/2.0 § 2.1 und § 2.2) hat <strong>zwei</strong> Fallen: er wirft einen Lernstand mit <code>v !== 1</code> <strong>still</strong> weg, und er hält seinen Stand <strong>im Verschluss</strong> — ein Import nach dem Start ist beim nächsten <code>save()</code> verloren. <strong>Beide sind von unserer Seite nicht heilbar</strong>, denn der Motor gehört der FISI-Spielhalle. Auf unserer Seite ist deshalb getan, was hier möglich ist: die Übergabe setzt den Lernstand <strong>über den Motor</strong> zurück (<code>L.reset()</code> VOR <code>Spiel.laden()</code>), die Speicherfüllung läuft <strong>vor dem ersten Lesen</strong> des Motors, und eine <strong>Wache</strong> in <span class="dk-tot" title="„../../tests/lernmotor-wache.test.js“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">tests/lernmotor-wache.test.js</span> wird rot, sobald jemand im <code>src/</code> an der <code>L.*</code>-API vorbei direkt in <code>store["lern"]</code> schreibt. Der Änderungsvorschlag für die Spielhalle steht in <strong>§ 6</strong> — als Vorlage, <strong>nicht ausgeführt</strong>.</p>
 </blockquote>

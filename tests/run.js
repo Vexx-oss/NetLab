@@ -74,4 +74,15 @@ if (filter && gezeigt.length === 0) {
   console.error(`KEIN Test passt zum Filter „${filter}" — 0 von ${ergebnisse.length} Fällen geprüft. Das ist kein grüner Lauf.`);
   process.exit(1);
 }
-process.exit(fehler ? 1 : 0);
+/* Skip-Gate (Architektur § 16.2): Ein Test ohne eine einzige Zusicherung hat nichts geprüft und
+   gilt als übersprungen. Bisher stand die Zahl nur als Text unter der Bilanz — ein Lauf, in dem
+   sich 40 Tests still ausstiegen, endete mit Exit 0 und „N/N grün". Jetzt ist der Lauf rot.
+   Die Definition „übersprungen = 0 Zusicherungen" bleibt in tests/harness.js; hier wird der dort
+   gesetzte Merker (`uebersprungen`) nur ausgezählt. Gilt für den GANZEN Lauf, nicht nur für den
+   gefilterten Ausschnitt: ein stiller Aussteiger ist auch dann ein Fehler. */
+const uebersprungene = ergebnisse.filter(e => e.ok && e.uebersprungen);
+if (uebersprungene.length) {
+  console.error(`\n${uebersprungene.length} Test(s) ohne eine einzige Zusicherung – als übersprungen gewertet. Das ist kein grüner Lauf (Architektur § 16.2):`);
+  for (const e of uebersprungene) console.error(`  - ${e.name}`);
+}
+process.exit(fehler || uebersprungene.length ? 1 : 0);

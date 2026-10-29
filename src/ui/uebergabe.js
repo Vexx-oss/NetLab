@@ -17,7 +17,7 @@ UI.uebergabe = (() => {
     const o = h("div", {class: "sp-overlay", role: "dialog", "aria-modal": "true"}, h("div", {class: "sp-karte"}, inhalt));
     document.body.append(o);
     requestAnimationFrame(() => o.classList.add("da"));
-    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), 180); document.removeEventListener("keydown", esc); };
+    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), UI.zeit("dauer")); document.removeEventListener("keydown", esc); };
     const esc = e => { if (e.key === "Escape") zu(); };
     document.addEventListener("keydown", esc);
     return zu;

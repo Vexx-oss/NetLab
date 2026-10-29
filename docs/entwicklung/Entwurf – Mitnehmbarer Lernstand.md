@@ -1,3 +1,7 @@
+---
+beschreibung: Ein Code, der den Lernstand mitnimmt — Nutzlast, Grenzen und warum es zwei Codes braucht.
+---
+
 # Entwurf – Mitnehmbarer Lernstand
 
 > **Auftrag (E3).** Im Klassenzimmer ist der Spielstand eine Browser-Ablage: Rechner gewechselt = Fortschritt weg.

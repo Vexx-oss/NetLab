@@ -2,15 +2,15 @@
 /* KUNDENAKTE (Design – Spielspaß 2.0, Hebel 10; Architektur § 9.7): Atlas leuchtet, wo man gearbeitet hat; Vertrauen wächst durch
    saubere Arbeit (Provisorium bringt nichts, nichts sinkt); Kapitel öffnen sich mit dem Vertrauen; Baustellen = offene Provisorien. */
 gruppe("Spiel: Kompetenzkarte", () => {
-  pruefe("27 Felder in 6 Regionen = genau DATEN.skills; Nebel lichtet sich durch Stufe und geübte Nachbarn; Stufen aus dem Lernmotor", () => {
+  pruefe("30 Felder in 6 Regionen = genau DATEN.skills; Nebel lichtet sich durch Stufe und geübte Nachbarn; Stufen aus dem Lernmotor", () => {
     const ids = Spiel.KOMPETENZ_REGIONEN.flatMap(r => r.skills);
-    erwarte.gleich(ids.length, 27);
+    erwarte.gleich(ids.length, 30);
     erwarte.gleich(ids.slice().sort(), DATEN.skills.map(s => s.id).sort(), "jede Fertigkeit genau einmal");
     erwarte.gleich(Spiel.KOMPETENZ_REGIONEN.length, 6);
     for (const [a, b] of Spiel.KOMPETENZ_BRUECKEN) erwarte.wahr(ids.includes(a) && ids.includes(b), a + "–" + b);
     const leer = Spiel.kompetenz.karte({versucht: () => false, box: () => 0}, 1);
     const stufe1 = DATEN.skills.filter(s => s.stufe === 1).length;
-    erwarte.gleich([leer.gesamt, leer.sichtbar], [27, stufe1], "Start: nur Stufe 1 sichtbar, Rest Nebel");
+    erwarte.gleich([leer.gesamt, leer.sichtbar], [30, stufe1], "Start: nur Stufe 1 sichtbar, Rest Nebel");
     const geuebt = new Set(["lab.gateway"]);
     const k = Spiel.kompetenz.karte({versucht: id => geuebt.has(id), box: () => 3}, 1);
     const feld = id => k.regionen.flatMap(r => r.felder).find(f => f.id === id);

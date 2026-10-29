@@ -371,11 +371,41 @@ def quellen() -> list[Path]:
     return aus
 
 
+def ohne_frontmatter(text: str) -> str:
+    """Den YAML-Kopf (--- bis ---) abschneiden.
+
+    WARUM (26.10.2026): 23 Notizen beginnen mit einem Obsidian-Kopf. Der gehoert nicht zum
+    Text: ungeschnitten wurde er als Textzeile ausgeliefert („tags: [FISI, …]“) und der
+    Index zeigte fuer diese Dokumente als Beschreibung nur „---.“ — 15 von 46 Karten.
+    """
+    zeilen = text.split("\n")
+    if zeilen and zeilen[0].strip() == "---":
+        for n in range(1, len(zeilen)):
+            if zeilen[n].strip() == "---":
+                return "\n".join(zeilen[n + 1:])
+    return text
+
+
+def frontmatter_wert(text: str, schluessel: str) -> str:
+    """Einen einfachen Wert ("schluessel: wert") aus dem YAML-Kopf lesen, sonst ""."""
+    zeilen = text.split("\n")
+    if not zeilen or zeilen[0].strip() != "---":
+        return ""
+    for zeile in zeilen[1:]:
+        if zeile.strip() == "---":
+            break
+        m = md.re.match(r"^\s*" + schluessel + r":\s*(.+?)\s*$", zeile)
+        if m:
+            return m.group(1).strip("'\"")
+    return ""
+
+
 def beschreibung_von(text: str) -> str:
     """Erster Satz des Dokuments als Beschreibung (ohne Ueberschrift und Leerzeilen)."""
     for zeile in text.split("\n"):
         z = zeile.strip()
-        if not z or z.startswith("#") or z.startswith("|") or z.startswith(">") or z.startswith("```"):
+        if (not z or z.startswith("#") or z.startswith("|") or z.startswith(">")
+                or z.startswith("```") or md.re.match(r"^(?:-{3,}|\*{3,}|_{3,})$", z)):
             continue
         z = md.text_von(md.Konverter().inline(z))
         z = z.replace("**", "").replace("`", "")
@@ -401,21 +431,23 @@ def sammeln() -> tuple[list[Dokument], Verweise]:
         d = Dokument(pfad, rel)
         d.gruppe = gruppe_von(rel)
         text = pfad.read_text(encoding="utf-8")
+        koerper = ohne_frontmatter(text)
         k = md.Konverter(links=None)                    # nur fuer Titel/Beschreibung
-        for zeile in text.split("\n"):
+        for zeile in koerper.split("\n"):
             m = md.re.match(r"^#\s+(.*)$", zeile)
             if m:
                 d.titel = md.text_von(k.inline(m.group(1).strip()))
                 break
         if not d.titel:
             d.titel = pfad.stem
-        d.beschreibung = BESCHREIBUNG.get(rel) or beschreibung_von(text)
+        d.beschreibung = (BESCHREIBUNG.get(rel) or frontmatter_wert(text, "beschreibung")
+                         or beschreibung_von(koerper))
         dokumente.append(d)
     return dokumente, Verweise(dokumente)
 
 
 def baue_dokument(d: Dokument, verweise: Verweise) -> str:
-    text = d.pfad.read_text(encoding="utf-8")
+    text = ohne_frontmatter(d.pfad.read_text(encoding="utf-8"))
     verweise.aktuell = d.aus_rel
     verweise.quellordner = d.pfad.parent.relative_to(HIER).as_posix()      # z. B. "docs/entwicklung"
     k = md.Konverter(links=verweise)
@@ -530,9 +562,17 @@ def pruefen() -> int:
         print("ROT: keine Dokumente gefunden")
         return 1
 
+    # docs/doku/ ist das versionierte Erzeugnis und damit Pflicht. _site/ ist NUR Auslieferung
+    # (gitignoriert) und entsteht erst beim Bauen; wer den Pruefweg sauber fahren will, baut vorher
+    # (python tools/seite.py) — die Frische von docs/doku beweist die CI mit `git diff --exit-code`.
+    # Ohne diese Unterscheidung war --pruefen in einem frischen Klon rot, obwohl nichts fehlte
+    # (QA-Befund G7, 26.10.2026).
     for ziel in ziele():
         basis = ziel / DOKU_ORDNER
         if not basis.is_dir():
+            if ziel.name == "_site":
+                print("  Hinweis: _site/doku/ fehlt (gitignoriert, nur Auslieferung) — nicht geprueft")
+                continue
             fehler.append(f"{basis.relative_to(HIER).as_posix()}/ fehlt (nicht gebaut?)")
             continue
         gefunden = sorted(p.relative_to(basis).as_posix() for p in basis.rglob("*.html"))

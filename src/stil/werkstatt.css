@@ -1,0 +1,43 @@
+/* ---------- Werkstatt: Leiste, Palette-Suche, Minimap (Architektur § 16.5) ----------
+   Nur Tokens aus basis.css, Zahlen aus den Skalen von tools/ethos.py (Schrift 11/12/13/15,
+   Abstand 4/8/12/16/32, Radius- und Dauer-Token, z-Leiter 10/20/50). Reine Ansicht: die
+   Werkstatt hängt oben in der Mitte und unten rechts auf der Fläche, sie ändert kein Layout. */
+
+/* ---- Werkstatt-Leiste (sichtbar nur im Sandbox-Kontext, editor.js schaltet sie über laden(…, {sandbox:true})) ---- */
+.wk-leiste{position:relative; z-index:10; display:flex; align-items:center; gap:8px; min-height:48px; padding:0 12px; border-bottom:1px solid var(--line); background:var(--panel)}
+.wk-leiste[hidden], .wk-treffer[hidden]{display:none}
+.wk-titel, .wk-mini-titel{color:var(--faint); font:700 var(--fs-1)/1 var(--body); text-transform:uppercase}
+.wk-suche{display:flex; align-items:center; gap:8px; min-width:0; padding:0 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--muted)}
+.wk-suche:focus-within{border-color:var(--accent); color:var(--accent)}
+.wk-suche-feld{width:200px; max-width:30vw; height:32px; padding:0; border:0; background:none; color:var(--ink); font:600 var(--fs-2)/1 var(--body); outline:none}
+.wk-suche-feld::placeholder{color:var(--faint)}
+.wk-knopf{display:inline-flex; align-items:center; gap:4px; min-height:36px; padding:0 12px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--muted); font:600 var(--fs-2)/1 var(--body); transition:background var(--dauer), color var(--dauer)}
+.wk-knopf:hover, .wk-mini-knopf:hover{background:var(--panel-3); color:var(--ink)}
+.wk-luecke{flex:1 1 auto}
+.wk-kennwerte{color:var(--faint); font:600 var(--fs-1)/1 var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+/* ---- Trefferliste der Gerätepalette-Suche (unscharf, wie die Befehlspalette) ---- */
+.wk-treffer{position:absolute; left:112px; top:calc(100% + 4px); z-index:50; width:280px; max-height:320px; overflow:auto; display:flex; flex-direction:column; gap:4px; padding:4px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten)}
+.wk-punkt{display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:4px 8px; border:0; border-radius:var(--radius-s); background:none; color:var(--ink); text-align:left; font:600 var(--fs-2)/1.2 var(--body)}
+.wk-punkt:hover, .wk-punkt.an{background:var(--accent-soft); color:var(--ink)}
+.wk-punkt svg{flex:0 0 auto; overflow:visible}
+.wk-punkt-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.wk-punkt-text small{color:var(--muted); font-size:var(--fs-1); line-height:1.2}
+.wk-nichts{padding:8px; color:var(--faint); font:600 var(--fs-2)/1.3 var(--body)}
+
+/* ---- Minimap: reine Ansicht, unten rechts auf der Fläche (keine Datenform, kein Speicher) ---- */
+.wk-mini{position:absolute; right:10px; bottom:10px; z-index:20; display:flex; flex-direction:column; gap:4px; padding:8px; border-radius:var(--radius); background:var(--glas); border:1px solid var(--line); box-shadow:var(--schatten)}
+.wk-mini-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.wk-mini-knopf{display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--muted); transition:background var(--dauer), color var(--dauer)}
+.wk-mini-svg{display:block; width:184px; height:112px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--bg); cursor:pointer; touch-action:none}
+.wk-mini-kabel, .wk-mini-geraete{pointer-events:none}
+.wk-mini-kabel-linie{stroke:var(--line-2); stroke-width:2; vector-effect:non-scaling-stroke}
+.wk-mini-punkt{fill:var(--g, var(--muted)); stroke:var(--bg); stroke-width:1; vector-effect:non-scaling-stroke}
+.wk-mini-punkt.an{fill:var(--accent)}
+.wk-mini-rahmen{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:6 4; vector-effect:non-scaling-stroke; opacity:.9}
+.wk-mini-fuss{display:flex; align-items:center; gap:8px}
+.wk-mini-zoom{display:flex; align-items:center; gap:4px; min-width:0; color:var(--faint); font:600 var(--fs-1)/1 var(--body)}
+.wk-mini-zoomtext{white-space:nowrap}
+.wk-zoomfeld{width:56px; height:28px; padding:0 4px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:600 var(--fs-1)/1 var(--mono); text-align:center}
+.wk-stufe{height:28px; padding:0 4px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:600 var(--fs-1)/1 var(--body)}
+@media (max-width: 900px){ .wk-mini{display:none} }

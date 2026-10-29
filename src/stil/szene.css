@@ -1,5 +1,5 @@
 /* ---------- Funktionsprobe (ui/szene.js, Präfix sz-): 2–6 s nach bestandener Abnahme, auf der Zeichenfläche ----------
-   DAUERN (task-38, tools/ethos.py R5): nur var(--dauer)=160ms und var(--dauer-lang)=320ms. Die Einzelwerte
+   DAUERN (task-38, tools/ethos.py R5): nur var(--dauer)=var(--dauer) und var(--dauer-lang)=var(--dauer-lang). Die Einzelwerte
    (.18s/.2s/.28s/.35s/.7s/.9s) sind auf die nächstliegende Stufe abgebildet: .18s/.2s → 160 ms (Bühne
    ein-/ausblenden, reine Dekoration), alles darüber → 320 ms. Die Rückmeldungen (Reaktionspille, Blase,
    Wusstest-du-Karte) behalten ihre Animation — nur gleichmäßig lang, nichts ist entfallen.
@@ -22,14 +22,14 @@
 .sz-buehne{position:absolute; inset:0; z-index:20; cursor:pointer; overflow:hidden; animation:sz-rein var(--dauer) ease-out}
 .sz-buehne.weg{opacity:0; transition:opacity var(--dauer) ease}
 .sz-weiter{position:absolute; left:50%; top:12px; transform:translateX(-50%); padding:8px 12px; border-radius:999px; background:var(--glas); border:1px solid var(--line); color:var(--muted);
-  font:600 12px/1 var(--body); pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+  font:600 var(--fs-2)/1 var(--body); pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 /* R2/R4 (Haus-Skala): Radius aus var(--radius); Abstände auf {0,4,8,12,16,24,32}. Die Pille wächst um
    2 px Höhe, der Radius geht 12 → var(--radius)=10 px — beides unterhalb der Wahrnehmungsschwelle. */
 .sz-reaktion{position:absolute; transform:translate(-50%, -100%); display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:var(--radius); background:var(--panel);
-  border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); font:700 13px/1.2 var(--body); white-space:nowrap; pointer-events:none; animation:sz-pop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
+  border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); font:700 var(--fs-2)/1.2 var(--body); white-space:nowrap; pointer-events:none; animation:sz-pop var(--dauer-lang) var(--ease-pop) both}
 .sz-reaktion.sz-gesperrt{border-color:var(--warn)}
 .sz-reaktion.sz-druckt, .sz-reaktion.sz-seite, .sz-reaktion.sz-adresse, .sz-reaktion.sz-haken, .sz-reaktion.sz-sicherung{border-color:var(--ok)}
-.sz-sym{font-size:15px; line-height:1}
+.sz-sym{font-size:var(--fs-4); line-height:1}
 .sz-druckt .sz-sym{animation:sz-beleg var(--dauer-lang) ease-out both; animation-delay:.1s}
 .sz-sicherung .sz-sym, .sz-haken .sz-sym{color:var(--ok)}
 /* Der Balken ist 6 px hoch: 999px (Pille) ergibt genau 3 px effektiven Radius — wie vorher `3px`. */
@@ -40,22 +40,22 @@
    Verzögerung den Startwert, damit die Bewegung mit „voll" unverändert aussieht. */
 .sz-balken i{display:block; width:100%; height:100%; background:var(--ok); animation:sz-laden var(--dauer-lang) ease-out both; animation-delay:.1s}
 .sz-blase{position:absolute; transform:translate(-50%, -100%); max-width:min(360px, 72%); display:flex; gap:8px; align-items:flex-start; padding:12px 16px; border-radius:var(--radius);
-  background:var(--panel); border:2px solid var(--k, var(--accent)); box-shadow:var(--schatten); color:var(--ink); font-size:15px; line-height:1.4; pointer-events:none;
-  animation:sz-pop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
+  background:var(--panel); border:2px solid var(--k, var(--accent)); box-shadow:var(--schatten); color:var(--ink); font-size:var(--fs-4); line-height:1.4; pointer-events:none;
+  animation:sz-pop var(--dauer-lang) var(--ease-pop) both}
 /* Der Pfeil bleibt mittig: `left:50%` + `translateX(-50%)` ist dasselbe wie vorher `margin-left:-7px`
    bei 14 px Breite — ohne Zahl außerhalb der Abstands-Skala (R4). */
 .sz-blase::after{content:""; position:absolute; left:50%; bottom:-9px; width:14px; height:14px; transform:translateX(-50%) rotate(45deg); background:var(--panel);
   border-right:2px solid var(--k, var(--accent)); border-bottom:2px solid var(--k, var(--accent))}
-.sz-kunde{font-size:20px; line-height:1.1}
-.sz-rest{display:block; margin-top:4px; color:var(--ok); font-size:12px; font-weight:700}
+.sz-kunde{font-size:var(--fs-5); line-height:1.1}
+.sz-rest{display:block; margin-top:4px; color:var(--ok); font-size:var(--fs-2); font-weight:700}
 /* reduzierte Bewegung: ruhige Haken-Liste statt fahrender Pakete */
 .sz-ruhig{background:color-mix(in srgb, var(--bg) 55%, transparent)}
 .sz-liste{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:min(440px, calc(100% - 32px)); padding:16px; border-radius:var(--radius); background:var(--panel);
   border:1px solid var(--line-2); box-shadow:var(--schatten)}
-.sz-liste ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; font-size:15px}
+.sz-liste ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; font-size:var(--fs-4)}
 .sz-liste li{display:flex; gap:8px; align-items:baseline}
 .sz-haken{color:var(--ok); font-weight:800}
-.sz-satz{margin:12px 0 0; color:var(--ink); font-size:15px; font-style:italic}
+.sz-satz{margin:12px 0 0; color:var(--ink); font-size:var(--fs-4); font-style:italic}
 .sz-satz small{color:var(--muted); font-style:normal}
 @keyframes sz-rein{from{opacity:0} to{opacity:1}}
 @keyframes sz-pop{from{opacity:0; transform:translate(-50%, -70%) scale(.6)} to{opacity:1; transform:translate(-50%, -100%) scale(1)}}
@@ -64,10 +64,10 @@
 /* Bewegung aus: kein eigener Block mehr (task-38, R8) — Begründung am Dateiende. */
 /* Eigene Probe je Form (§ 20 F4): Karte mitten auf der Fläche, höchstens ~3 s */
 .sz-form{position:absolute; left:50%; top:46%; transform:translate(-50%, -50%); width:min(420px, calc(100% - 32px)); padding:16px; border-radius:var(--radius);
-  background:var(--panel); border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); pointer-events:none; animation:sz-pop-mitte var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
-.sz-form-kopf{font-size:15px; color:var(--muted); margin-bottom:8px}
+  background:var(--panel); border:1.5px solid var(--ok); box-shadow:var(--schatten); color:var(--ink); pointer-events:none; animation:sz-pop-mitte var(--dauer-lang) var(--ease-pop) both}
+.sz-form-kopf{font-size:var(--fs-4); color:var(--muted); margin-bottom:8px}
 .sz-form-kopf b{color:var(--ink)}
-.sz-form-fuss{margin:8px 0 0; font-size:13px; color:var(--ok); font-weight:700}
+.sz-form-fuss{margin:8px 0 0; font-size:var(--fs-2); color:var(--ok); font-weight:700}
 /* Hotline: der Hörer wird aufgelegt.
    ENDZUSTAND IM ZUSTAND (Nachtrag zu task-38): Der Hörer LIEGT AUF — die Animation dreht ihn nur
    dorthin. Vorher trug allein die Animation die Endlage (`0%` = Grundzustand, `both` hielt sie);
@@ -75,7 +75,7 @@
    Verzögerung (0,5 s) den Ausgangszustand aus den @keyframes — sonst spränge er erst in die
    Endlage und fiele beim Start der Animation zurück. */
 .sz-auflegen{display:flex; gap:12px; align-items:flex-start; border-color:var(--k, var(--ok))}
-.sz-hoerer{font-size:28px; line-height:1; transform:rotate(-135deg) translateY(4px); opacity:.55;
+.sz-hoerer{font-size:var(--fs-6); line-height:1; transform:rotate(-135deg) translateY(4px); opacity:.55;
   animation:sz-auflegen var(--dauer-lang) ease-in both; animation-delay:.5s}
 .sz-form-text{display:flex; flex-direction:column; gap:4px}
 .sz-form-text small{color:var(--muted)}
@@ -91,11 +91,11 @@
    Haus-Wert 28px ist die Untergrenze, 56px die Obergrenze; auf üblichen Fensterbreiten (≥1120px)
    bleibt es bei 56px, also unverändert. R3 misst `font-size` nur, wenn der Wert mit einer Zahl
    beginnt (`tools/ethos.py` r3_schrift) — die Ausnahme ist damit sichtbar und begründet, nicht heimlich. */
-.sz-plan-leer{font-size:clamp(28px, 5vw, 56px); padding:24px}
+.sz-plan-leer{font-size:clamp(var(--fs-6), 5vw, calc(var(--fs-6) * 2)); padding:24px}
 .sz-stempel{position:absolute; right:26px; top:58px; display:flex; flex-direction:column; align-items:center; padding:8px 12px; border:3px solid var(--ok); border-radius:var(--radius-s);
   color:var(--ok); background:color-mix(in srgb, var(--panel) 70%, transparent); transform:rotate(-12deg) scale(2.4); opacity:0}
-.sz-stempel b{font:800 15px/1.1 var(--display); letter-spacing:.06em}
-.sz-stempel small{font:700 11px/1.2 var(--mono)}
+.sz-stempel b{font:800 var(--fs-4)/1.1 var(--display); letter-spacing:.06em}
+.sz-stempel small{font:700 var(--fs-1)/1.2 var(--mono)}
 /* ENDZUSTAND IM ZUSTAND (Nachtrag zu task-38): `.gestempelt` macht den Stempel sichtbar — auch ohne Animation
    („Bewegung: aus", basis.css:93). Vorher trug allein die Animation den Endzustand (`forwards`),
    mit abgeschalteter Bewegung blieb der Stempel unsichtbar. Die Animation beschreibt jetzt nur noch
@@ -110,7 +110,7 @@
 .sz-adressen{position:relative; height:26px; border-radius:var(--radius-s); background:var(--panel-3); overflow:hidden}
 .sz-adressen i{position:absolute; top:0; bottom:0; border-right:2px solid var(--panel); background:var(--f, var(--accent)); opacity:1;
   animation:sz-leuchten var(--dauer-lang) ease-out both; animation-delay:calc(var(--i) * 280ms + 250ms)}
-.sz-legende{list-style:none; margin:8px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 12px; font:500 12px/1.4 var(--mono); color:var(--muted)}
+.sz-legende{list-style:none; margin:8px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 12px; font:500 var(--fs-2)/1.4 var(--mono); color:var(--muted)}
 .sz-legende li{opacity:1; animation:sz-leuchten-text var(--dauer-lang) ease-out both; animation-delay:calc(var(--i) * 280ms + 250ms)}
 .sz-legende b{font-family:var(--body); color:var(--f, var(--ink))}
 @keyframes sz-leuchten{from{opacity:.12} to{opacity:1}}

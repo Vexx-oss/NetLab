@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>C · Rust: Live-Server (C1/C2) und QR-Code (D) · Netzwerk-Labor</title>
-<meta name="description" content="---.">
+<meta name="description" content="Bereich C des Auftrags tools/auftraege/KLASSENRAUM.md.">
 <style>
 :root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
 @media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
@@ -101,10 +101,7 @@ img{max-width:100%;height:auto}
 <li><a href="#10-vorschlage-fur-die-anderen-dateien-nicht-selbst-geandert">10 · Vorschläge für die anderen Dateien (nicht selbst geändert)</a></li>
 <li><a href="#11-dateien-dieses-bereichs">11 · Dateien dieses Bereichs</a></li>
 </ul>
-</nav><hr>
-<p>tags: [FISI, Lernspiel, Netzwerk, Klassenraum, Rust] erstellt: 2026-10-06 aktualisiert: 2026-10-06 status: Entwurf geprüft und nachgemessen (Bereich C)</p>
-<hr>
-<h1 id="c-rust-live-server-c1-c2-und-qr-code-d">C · Rust: Live-Server (C1/C2) und QR-Code (D)</h1>
+</nav><h1 id="c-rust-live-server-c1-c2-und-qr-code-d">C · Rust: Live-Server (C1/C2) und QR-Code (D)</h1>
 <p>Bereich C des Auftrags <span class="dk-tot" title="„../../../tools/auftraege/KLASSENRAUM.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>tools/auftraege/KLASSENRAUM.md</code></span> (Stufen C1, C2, D). Dieser Text ist die <strong>umsetzungsreife Festlegung</strong>: Er beschreibt die Änderungen Datei:Zeile-genau, nennt jede Zahl mit Befehl und Ergebnis und benennt offen, was <strong>nicht</strong> geprüft ist. Umgesetzt wurde in dieser Runde nur, was außerhalb von <code>shell/</code> und <code>src/</code> liegt (Auftrag: der Spielkern bleibt unverändert) – der Einbau in die <code>.exe</code> ist deshalb eine Anleitung, der Server selbst und der QR-Encoder sind gebaut und gemessen.</p>
 <h2 id="0-kurzfassung">0 · Kurzfassung</h2>
 <div class="dk-tabelle"><table><thead><tr><th>Frage</th><th>Festlegung</th><th>Beleg</th></tr></thead><tbody><tr><td>Server in der <code>.exe</code> (C1)</td><td>neue Datei <code>shell/src-tauri/src/klassenraum.rs</code>, <strong>drei</strong> Änderungen in <code>main.rs</code> (Zeile 8, 147–148, 114), <strong>keine</strong> Änderung an <code>capabilities/</code></td><td>§ 4, <code>capabilities/main.json:4</code></td></tr><tr><td>Eigenständiges Binary (C2)</td><td><code>tools/klassenraum/</code> – <strong>gebaut</strong>, 330.240 Bytes, ohne jede Abhängigkeit</td><td>§ 2</td></tr><tr><td>Zwei Endpunkte</td><td><code>GET /liste</code>, <code>POST /ergebnis</code> – gleiche Datenform in C1 und C2</td><td>§ 3</td></tr><tr><td>Port</td><td>Vorgabe <strong>47112</strong>, Bereich 47112–47121</td><td>§ 3.6</td></tr><tr><td>Bind-Adresse</td><td><strong>0.0.0.0</strong> (Klassennetz), Standard des Servers ist trotzdem <strong>aus</strong></td><td>§ 3.5</td></tr><tr><td>CORS</td><td><code>Access-Control-Allow-Origin: *</code> + Preflight 204 + <code>Allow-Private-Network</code></td><td>§ 3.4</td></tr><tr><td>QR-Code (D)</td><td>eigener Encoder in Rust, <strong>ohne Kiste</strong>, Version 1–4, Stufe H für den Auftragscode, Rückgabe als SVG-Data-URI</td><td>§ 5</td></tr><tr><td>Nur Desktop</td><td>Browser- und Android-Fassung können weder Server noch QR</td><td>§ 4.6, § 5.6</td></tr></tbody></table></div>

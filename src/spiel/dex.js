@@ -66,7 +66,18 @@ Spiel.DEX_SYMPTOM = {
   "dhcp-adresse-reserviert": "„Nur der eine Rechner am Fenster bekommt keine Adresse – alle anderen schon.“",
   "dhcp-adresskonflikt":    "„Ein Rechner bekommt keine Adresse, und im Haus heißt es, eine Adresse sei doppelt vergeben.“",
   "route-maske-falsch":     "„Die Filiale ist nicht mehr erreichbar, obwohl in der Zentrale alles läuft.“",
-  "dns-eintrag-falsch":     "„Unsere Intranet-Seite geht über den Namen nicht mehr auf – über die Adresse schon.“"
+  "dns-eintrag-falsch":     "„Unsere Intranet-Seite geht über den Namen nicht mehr auf – über die Adresse schon.“",
+  /* S7 (task-23): zehn neue Fehlerarten */
+  "subif-aus":          "„Eine Abteilung kommt seit dem Umbau weder zu uns noch ins Internet.“",
+  "datei-dienst-aus":   "„Der Server ist an, aber die Freigabe öffnet sich nicht mehr.“",
+  "dhcp-gateway-falsch":"„Neue Rechner bekommen eine Adresse, kommen aber nicht nach draußen.“",
+  "fw-zone-falsch":     "„Der Webshop ist von außen nicht erreichbar – die Regel steht doch da.“",
+  "nat-acl-zu-klein":   "„Alles intern geht, nur ins Internet kommt keiner mehr.“",
+  "portsec-max-falsch": "„Der Port ist nach dem Umstecken tot – kein Lämpchen, nichts.“",
+  "route-kreis-ttl":    "„Der Weg ins Internet läuft, aber die Seite lädt nie fertig.“",
+  "helper-falsch":      "„In der Abteilung bekommt seit heute keiner mehr eine Adresse.“",
+  "nas-rechte-falsch":  "„Die Ablage ist erreichbar, aber die Freigabe will nicht aufgehen.“",
+  "stp-rootfalsch":     "„Seit das zweite Kabel liegt, stottert das ganze Netz.“",
 };
 
 Spiel.dex.daten = function(){

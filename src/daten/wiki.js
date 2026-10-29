@@ -26,7 +26,7 @@ Object.assign(DATEN.wiki, {
         "<p>Ein <b>Access Point</b> (AP) ist die Brücke zwischen Funk und Kabel: auf der einen Seite die Antenne, auf der anderen ein Switchport. Die Funkzelle heißt BSS, ihr Name ist die <b>SSID</b>, die MAC des Funkmoduls die BSSID.</p>" +
         "<ul><li>Funk ist ein <b>geteiltes Medium</b>: Alle Geräte einer Zelle senden abwechselnd, die beworbene Bruttorate erreicht deshalb kein einzelnes Gerät.</li><li>Den Zugriff regelt <b>CSMA/CA</b> mit Bestätigung je Rahmen – gesendet wird, wenn die Luft frei ist; Kollisionen werden vermieden, nicht erkannt.</li><li>Funk arbeitet <b>halbduplex</b>: senden und empfangen nacheinander, anders als Ethernet am Kabel.</li><li>Die Verbindung entsteht per <b>Assoziation</b>: Das Gerät meldet sich am AP an. Ohne Assoziation gibt es keinen Link – dieselbe Rolle wie ein gestecktes Kabel.</li></ul>" +
         "<table><tr><th>Band</th><th>Kanäle</th><th>Eigenschaft</th></tr>" +
-        "<tr><td>2,4 GHz</td><td>1 bis 13 (je nach Land); überlappungsfrei sind 1, 6 und 11</td><td>weit, aber langsamer und oft belegt</td></tr>" +
+        "<tr><td>2,4 GHz</td><td>1 bis 13 – je nach Land und Regulierung (in den USA nur 1–11); überlappungsfrei sind 1, 6 und 11</td><td>weit, aber langsamer und oft belegt</td></tr>" +
         "<tr><td>5 GHz</td><td>viele Kanäle</td><td>schneller, kürzere Reichweite</td></tr>" +
         "<tr><td>6 GHz</td><td>nur mit neueren Geräten</td><td>viel Platz, wenige Störer</td></tr></table>" +
         "<p>Störer sind Nachbarzellen auf demselben Kanal, Mikrowellen und dicke Wände. Prüfen lässt sich die Verbindung über Feldstärke und Rate; ein Ping durchs Funknetz schwankt stärker als über Kabel.</p>"},
@@ -126,7 +126,7 @@ Object.assign(DATEN.wiki, {
       {titel: "Ansehen", html:
         "<table><tr><th>Gerät</th><th>Befehl</th><th>Hinweis</th></tr>" +
         "<tr><td>Windows</td><td><code>arp -a</code></td><td>Cache anzeigen; <code>arp -d</code> leert ihn</td></tr>" +
-        "<tr><td>Router</td><td><code>show ip arp</code></td><td><b>Echtes IOS</b> – das Labor kennt diesen Befehl nicht: „Incomplete“ heißt, es wurde gefragt und niemand hat geantwortet.</td></tr></table>"},
+        "<tr><td>Router</td><td><code>show ip arp</code></td><td>Die ARP-Tabelle des Geräts mit Protocol, Address, Age (min), Hardware Addr, Type und Interface; das Labor listet nur aufgelöste Einträge. Den Zustand „Incomplete“ für eine noch offene Anfrage zeigt erst echte IOS-Hardware.</td></tr></table>"},
       {titel: "Sicherheit", html:
         "<p>ARP kennt keine Anmeldung, jeder darf antworten. Beim <b>ARP-Spoofing</b> gibt sich ein Angreifer als Gateway aus und liest mit. Abwehr: Dynamic ARP Inspection am Switch, VLANs, Verschlüsselung. Eine Firewall zwischen Netzen sieht diesen Verkehr im LAN gar nicht.</p>"},
       {titel: "IPv6: Nachbarschaft statt ARP (NDP)", html:
@@ -288,7 +288,8 @@ Object.assign(DATEN.wiki, {
         "<p>Derselbe Name darf mehrere A- und AAAA-Einträge haben – der Client nimmt einen erreichbaren. Die Rückwärtssuche läuft über eigene Zonen: <code>in-addr.arpa</code> für IPv4, <code>ip6.arpa</code> für IPv6; dort stehen PTR-Einträge.</p>"},
       {titel: "Cache, TTL und Zonenrand", html:
         "<p>Jeder Eintrag trägt eine <b>TTL</b> in Sekunden: So lange darf ein Resolver die Antwort behalten. Kurze Werte (300 s) helfen vor einem Umzug, lange Werte (86400 s) sparen Anfragen.</p>" +
-        "<p>Ein Server ist nur für seine Zone <b>autoritativ</b>; für alles andere fragt er weiter. Deshalb dauert es nach einer Änderung, bis sie überall ankommt – der alte Eintrag liegt noch im Cache. Nachsehen mit <code>nslookup name</code> oder <code>dig</code>; auf echten Systemen fragt <code>nslookup -type=AAAA name</code> gezielt nach IPv6-Adressen – das Labor kennt nur die einfache Form.</p>"},
+        "<p>Ein Server ist nur für seine Zone <b>autoritativ</b>; für alles andere fragt er weiter. Deshalb dauert es nach einer Änderung, bis sie überall ankommt – der alte Eintrag liegt noch im Cache. Nachsehen mit <code>nslookup name</code> oder <code>dig</code>; auf echten Systemen fragt <code>nslookup -type=AAAA name</code> gezielt nach IPv6-Adressen – das Labor kennt nur die einfache Form.</p>" +
+        "<p><b>Echtes DNS, nicht das Labor:</b> Eintragstypen, Zonen und die TTL-Regeln gelten auf echten DNS-Servern. Die Simulation fragt nur A-Einträge ab (ein Name, eine Adresse) und merkt sich die Antwort für die nächste Auflösung nicht – jede Frage geht wieder über das Netz. Die Konsole zeigt dagegen einen Cache: <code>ipconfig /displaydns</code> listet Einträge mit „Gültigkeitsdauer“ 300 s, <code>ipconfig /flushdns</code> leert ihn; <code>dig</code> zeigt die feste Anzeige-TTL <code>300 IN A</code>.</p>"},
     ],
     merksatz: "Per IP geht, per Name nicht: Es ist DNS.",
     pruefungstipp: "DNS ist der erste Diagnosepunkt, wenn „der Server nicht erreichbar“ ist. Erst IP testen, dann Namen.",
@@ -519,7 +520,7 @@ Object.assign(DATEN.wiki, {
         "<tr><td><code>tracert</code> (Windows)</td><td>ICMP-Echo</td><td>ohne Zusatzprogramm nutzbar</td></tr>" +
         "<tr><td><code>traceroute</code> (Linux)</td><td>UDP auf hohe Ports</td><td>die Antwort kommt als ICMP-Fehler zurück</td></tr>" +
         "<tr><td><code>traceroute</code> (IOS)</td><td>UDP oder ICMP</td><td>am Router auch im Konfigurationsmodus mit <code>do</code></td></tr></table>" +
-        "<p>Filtert ein Netz ICMP, bleiben Zeilen leer: Die Station ist da, sie meldet sich nur nicht. Wiederholen sich zwei Adressen mehrfach, läuft der Verkehr im Kreis – dieselbe Vermutung wie bei einem Ping, der nie ankommt. Auf echtem Windows sendet <code>pathping</code> mehr Pakete und rechnet den Verlust je Station aus – das Labor kennt nur <code>tracert</code>.</p>"},
+        "<p>Filtert ein Netz ICMP, bleiben Zeilen leer: Die Station ist da, sie meldet sich nur nicht. Wiederholen sich zwei Adressen mehrfach, läuft der Verkehr im Kreis – dieselbe Vermutung wie bei einem Ping, der nie ankommt. Auf echtem Windows sendet <code>pathping</code> mehr Pakete und rechnet den Verlust je Station aus; im Labor zeigt <code>pathping</code> sofort dieselben Stationen wie <code>tracert</code> und rechnet 0 % Verlust, solange Antworten kommen.</p>"},
       {titel: "IPv6: Hop Limit statt TTL", html:
         "<p>IPv6 führt kein Feld „TTL“, sondern das <b>Hop Limit</b> – ebenfalls 8 Bit und mit derselben Aufgabe: Jeder Router zieht eins ab, bei 0 wird das Paket verworfen, und der Absender bekommt ICMPv6 „Time Exceeded“ (Typ 3).</p>" +
         "<ul><li>Der IPv6-Kopf ist fest 40 Byte lang, Erweiterungen hängen dahinter.</li><li>Der Absender setzt meist 64 (Linux) oder 128 (Windows) – wie bei IPv4.</li><li>Traceroute arbeitet gleich: Pakete mit Hop Limit 1, 2, 3 …</li><li>Ein Router, der kein ICMPv6 sendet, erscheint als leere Zeile.</li></ul>" +
@@ -626,7 +627,7 @@ Object.assign(DATEN.wiki, {
     abschnitte: [
       {titel: "Einrichten", html:
         "<pre>SW1(config)# interface fa0/5\nSW1(config-if)# switchport mode access\nSW1(config-if)# switchport port-security\nSW1(config-if)# switchport port-security maximum 1\nSW1(config-if)# switchport port-security mac-address sticky\nSW1(config-if)# switchport port-security violation shutdown</pre>" +
-        "<p>Standard ist höchstens eine MAC und die Aktion shutdown. Mit <code>sticky</code> merkt sich der Switch die erste gelernte MAC. Port-Security geht nur auf Access-Ports (oder fest eingestellten Trunks), nicht auf aushandelnden Ports.</p>"},
+        "<p>Standard ist höchstens eine MAC und die Aktion shutdown. Mit <code>sticky</code> merkt sich der Switch die erste gelernte MAC. Port-Security geht nur auf Access-Ports – das Labor weist sie auf einem Trunk-Port ausdrücklich ab. Auf echten Geräten ist sie auch auf fest eingestellten Trunks möglich, nicht auf aushandelnden Ports.</p>"},
       {titel: "Was bei einem Verstoß passiert", html:
         "<table><tr><th>Modus</th><th>fremde Frames</th><th>Meldung</th><th>Port</th></tr>" +
         "<tr><td>protect</td><td>verworfen</td><td>keine</td><td>bleibt an</td></tr>" +
@@ -723,8 +724,141 @@ Object.assign(DATEN.wiki, {
     siehe: ["lab.ports"],
   },
 
+
+  /* ---------- S6a/S6b (Architektur § 17.1): IPv6, Betrieb/Überwachung, WLAN ----------
+     Drei Seiten für die am 29.10.2026 ans ENDE von DATEN.skills angehängten Fertigkeiten.
+     Ehrliche Grenze (verbindlich, § 17.1): IPv6, Betrieb und WLAN werden INHALTLICH geübt
+     (Adressierung, Planung, Konfiguration, Bewertung), nicht paketweise simuliert. Jede Seite
+     sagt das ausdrücklich; es gibt hier keine abtippbaren Konsolen-Rezepte, die das Labor nicht
+     ausführen kann (Wächter: tests/wiki-2.0.test.js, Rezeptzeilen). */
+  "lab.ipv6": {
+    titel: "IPv6: Adressen, Präfixe, NDP",
+    kurz: "IPv6-Adressen sind 128 Bit lang; statt einer Maske trägt die Adresse ihre Präfixlänge, und statt ARP klärt NDP die Nachbarschaft.",
+    abschnitte: [
+      {titel: "128 Bit in acht Blöcken: die Schreibweise", html:
+        "<p>Eine IPv6-Adresse besteht aus 128 Bit, geschrieben als acht Blöcke zu je 16 Bit in Hexadezimal: <code>2001:0db8:aa00:0001:0000:0000:0000:0042</code>. Zwei Kürzungsregeln machen sie lesbar: <b>führende Nullen</b> eines Blocks fallen weg, und <b>ein einziges Mal</b> darf eine Folge von Nullblöcken durch <code>::</code> ersetzt werden. Aus dem Beispiel wird <code>2001:db8:aa00:1::42</code>.</p>" +
+        "<table><tr><th>Bereich</th><th>Bedeutung</th></tr>" +
+        "<tr><td>2000::/3</td><td>Global Unicast – im Internet routingfähig, öffentlich</td></tr>" +
+        "<tr><td>fc00::/7</td><td>Unique Local – privat, nicht im Internet geroutet (Gegenstück zu RFC 1918)</td></tr>" +
+        "<tr><td>fe80::/10</td><td>Link-Local – nur auf diesem Link, wird automatisch gebildet</td></tr>" +
+        "<tr><td>ff00::/8</td><td>Multicast – erreicht Gruppen und ersetzt den Broadcast</td></tr>" +
+        "<tr><td>::1</td><td>Loopback (Gegenstück zu 127.0.0.1)</td></tr>" +
+        "<tr><td>::</td><td>noch keine Adresse</td></tr></table>" +
+        "<p>Einen Broadcast gibt es bei IPv6 nicht; seine Rolle übernimmt Multicast. Für Dokumentation und Beispiele ist <code>2001:db8::/32</code> reserviert – solche Adressen gehören niemandem und gehören in kein echtes Netz.</p>"},
+      {titel: "Präfix statt Maske: Netze planen", html:
+        "<p>IPv6 kennt keine Subnetzmaske. Die <b>Präfixlänge</b> steht direkt an der Adresse: <code>2001:db8:aa00:1::1/64</code> heißt, die ersten 64 Bit bezeichnen das Netz, die restlichen 64 Bit den Rechner. Geplant wird von links nach rechts:</p>" +
+        "<ul><li><b>/48</b> je Standort oder Kunde – das ist der übliche Block aus einem Provider-Präfix.</li><li><b>/56</b> je Standort, wenn nur 256 Netze gebraucht werden.</li><li><b>/64</b> je LAN – die Standardgröße: nur bei /64 funktioniert das automatische Adressieren (SLAAC) sauber.</li><li><b>/127</b> für Punkt-zu-Punkt-Strecken (RFC 6164) oder /64 nach Herstellergewohnheit.</li></ul>" +
+        "<p>Ein /64 hat 2<sup>64</sup> Adressen, praktisch unbegrenzt viele. Die Hostbits werden deshalb nicht „verbraucht“ wie bei IPv4. Die Adresse mit lauter Nullen im Hostteil ist kein normaler Host: Sie ist als <b>Subnet-Router-Anycast</b> reserviert (RFC 4291); eine Broadcastadresse wie bei IPv4 gibt es bei IPv6 nicht. Wer aus einem /48 zehn /64 schneidet, zählt in Hexadezimal: die Subnetz-ID steht in den Blöcken 3 und 4.</p>"},
+      {titel: "Link-Local und NDP: der Link ohne DHCP", html:
+        "<p>Jede IPv6-Schnittstelle bildet sich selbst eine <b>Link-Local-Adresse</b> aus <code>fe80::/10</code>. Sie wird nie geroutet und dient der Kommunikation auf demselben Link – etwa um den Router zu finden. Ein Rechner hat dadurch fast immer mehrere Adressen gleichzeitig: eine Link-Local und mindestens eine globale.</p>" +
+        "<p>Die Schnittstellen-Kennung (Interface-ID, die hinteren 64 Bit) entsteht auf zwei Wegen: klassisch aus der MAC-Adresse (EUI-64, mit eingeschobenem FFFE), oder – bei modernen Systemen der Normalfall – als zufällige, zeitlich wechselnde Kennung (<b>Privacy Extensions</b>, RFC 4941). Die zufällige Variante verhindert, dass man ein Gerät über seine Adresse dauerhaft verfolgen kann; für Server und Router ist eine feste, planbare Adresse üblich.</p>" +
+        "<p><b>NDP</b> (Neighbor Discovery Protocol, RFC 4861) ersetzt ARP und ICMP-Router-Redirect:</p>" +
+        "<table><tr><th>Nachricht</th><th>Typ</th><th>Aufgabe</th></tr>" +
+        "<tr><td>Router Solicitation</td><td>133</td><td>Rechner fragt: Gibt es hier einen Router?</td></tr>" +
+        "<tr><td>Router Advertisement</td><td>134</td><td>Router meldet Präfix, Standardroute und Flags</td></tr>" +
+        "<tr><td>Neighbor Solicitation</td><td>135</td><td>Wer hat diese Adresse? (Gegenstück zur ARP-Anfrage)</td></tr>" +
+        "<tr><td>Neighbor Advertisement</td><td>136</td><td>Antwort mit der MAC-Adresse</td></tr></table>" +
+        "<p>Die <b>Duplicate Address Detection</b> läuft über Neighbor Solicitation: Bevor eine Adresse gilt, fragt der Rechner, ob sie schon jemand benutzt. Multicast-Adressen wie <code>ff02::1</code> (alle Knoten) und <code>ff02::2</code> (alle Router) ersetzen den Broadcast.</p>"},
+      {titel: "Adressvergabe und statisches Routing", html:
+        "<p>Adressen kommen auf drei Wegen: <b>statisch</b> eingetragen, per <b>SLAAC</b> aus dem Router Advertisement (der Rechner bildet die Adresse selbst aus Präfix und Interface-ID) oder per <b>DHCPv6</b> (Server UDP 547, Client UDP 546). Ein Router Advertisement setzt dafür Flags: <code>A</code> erlaubt SLAAC, <code>M</code> verlangt DHCPv6, <code>O</code> holt weitere Angaben per DHCPv6.</p>" +
+        "<p>Geroutet wird mit Präfixen statt mit Klassen: eine Route ist ein Zielpräfix plus Next Hop. Die Standardroute ist <code>::/0</code>. In der Praxis zeigt sie auf die Link-Local-Adresse des Routers, dazu wird die Ausgangsschnittstelle genannt – der Router muss also nicht im selben globalen Präfix liegen.</p>" +
+        "<table><tr><th>Weg</th><th>Beispiel</th><th>Bedeutung</th></tr>" +
+        "<tr><td>Standardroute</td><td>::/0 → fe80::1</td><td>alles, was nicht lokal ist</td></tr>" +
+        "<tr><td>Präfixroute</td><td>2001:db8:aa01::/48 → fe80::2</td><td>Standort oder Kunde</td></tr>" +
+        "<tr><td>Direkt verbunden</td><td>2001:db8:aa00:1::/64</td><td>am eigenen Link, ohne Next Hop</td></tr></table>"},
+      {titel: "Im Labor: Adressierung üben, nicht Pakete", html:
+        "<p><b>Ehrliche Grenze:</b> Dieses Labor rechnet und simuliert mit IPv4. Es verschickt keine IPv6-Pakete, zeigt keine NDP-Nachrichten und vergibt keine IPv6-Adressen per Router Advertisement. IPv6 wird hier <b>inhaltlich</b> geübt: Adressen lesen und kürzen, Präfixe planen, Adresstypen unterscheiden, Fehlkonfigurationen beurteilen – nicht paketweise ausführen.</p>" +
+        "<p>Für die Praxis heißt das: Rechne ein /48 in /64-Netze, prüfe die Kürzung einer Adresse und entscheide, welche Adresse auf einen Link gehört. Wer ein IPv6-Paket im Detail sehen will, braucht ein echtes Gerät oder einen Paketmitschnitt.</p>"},
+    ],
+    merksatz: "128 Bit, Präfix statt Maske, kein Broadcast – und Link-Local bleibt auf dem Link.",
+    pruefungstipp: "Adressen kürzen und wieder ausschreiben üben; /48 → /64 rechnen; die Typen global, link-local, multicast und loopback auseinanderhalten. In Prüfungsaufgaben wird häufig nach der Anzahl der Subnetze aus einem /48 gefragt.",
+    quelle: "04-AP1-Netzwerk",
+    belege: "RFC 8200 (IPv6) · RFC 4291 (Adressarchitektur) · RFC 5952 (kanonische Schreibweise) · RFC 4861 (Neighbor Discovery) · RFC 4862 (SLAAC) · RFC 4941 (Privacy Extensions) · RFC 8415 (DHCPv6) · RFC 3849 (2001:db8::/32) · RFC 4193 (Unique Local) · RFC 6164 (/127) · 04-AP1-Netzwerk",
+    siehe: ["lab.ip", "lab.subnetz", "lab.route", "lab.dhcp", "lab.ping"],
+  },
+  "lab.betrieb": {
+    titel: "Betrieb und Überwachung (Syslog, Schwellwert, Backup, Uptime)",
+    kurz: "Ein Netz läuft nicht, weil es gebaut ist, sondern weil es überwacht, gesichert und im Störungsfall nachvollziehbar repariert wird.",
+    abschnitte: [
+      {titel: "Syslog: Ereignisse sammeln und gewichten", html:
+        "<p>Geräte schreiben Ereignisse als <b>Syslog</b>-Meldungen (RFC 5424): Zeitstempel, Hostname, Anwendung, <b>Severity</b> und Text. Die Severity reicht von 0 (emerg, System steht) bis 7 (debug); geübte Stufen sind 0–3 (emerg/alert/crit/err), 4 (warning), 5 (notice), 6 (info) und 7 (debug).</p>" +
+        "<table><tr><th>Wert</th><th>Stufe</th><th>Beispiel</th></tr>" +
+        "<tr><td>0</td><td>emerg</td><td>System nicht benutzbar</td></tr>" +
+        "<tr><td>2</td><td>crit</td><td>kritischer Zustand, sofort handeln</td></tr>" +
+        "<tr><td>3</td><td>err</td><td>Fehler, Funktion gestört</td></tr>" +
+        "<tr><td>4</td><td>warning</td><td>Warnung, Schwelle erreicht</td></tr>" +
+        "<tr><td>6</td><td>info</td><td>normaler Betriebszustand</td></tr></table>" +
+        "<p>In kleinen Netzen sammelt ein zentraler Syslog-Server die Meldungen (klassisch UDP 514, sicher per TCP/TLS nach RFC 5425); sonst steht die Spur nur lokal im Puffer und ist nach einem Neustart weg. Wichtig ist die <b>einheitliche Uhrzeit</b> über NTP, sonst lassen sich Ereignisse auf mehreren Geräten nicht ordnen.</p>"},
+      {titel: "Schwellwerte: wann aus einem Messwert ein Alarm wird", html:
+        "<p>Ein Monitoring misst laufend Werte (Auslastung, freier Platz, Temperatur, Antwortzeit) und vergleicht sie mit Schwellen. Zwei Stufen sind üblich: <b>Warnung</b> bei 80 Prozent, <b>Alarm</b> bei 90 Prozent. Dazu gehören eine <b>Hysterese</b> (Warnung fällt erst bei 75 Prozent zurück, sonst flattert der Alarm) und ein <b>Zeitfenster</b> (erst drei Minuten über der Schwelle zählt).</p>" +
+        "<ul><li>Zu viele Alarme werden ignoriert – lieber wenige, dafür handlungsfähige.</li><li>Der Schwellwert gehört zur Kennzahl: 80 Prozent Speicher ist bei Protokollen normal, bei Benutzerdaten kritisch.</li><li>Ein Alarm braucht eine benannte Reaktion: wer prüft, bis wann, mit welchem ersten Schritt.</li></ul>"},
+      {titel: "Backup: Kopien, die man wieder zurückspielen kann", html:
+        "<p>Die einfache Regel lautet <b>3-2-1</b>: drei Kopien, auf zwei verschiedenen Medien, eine davon außerhalb des Standorts. Das ist gängige Praxis und kein wörtlicher BSI-Text – BSI IT-Grundschutz CON.3 fordert ein durchdachtes Datensicherungskonzept, nennt die 3-2-1-Regel aber nicht wörtlich. Dazu kommen die Begriffe <b>RPO</b> (wie viel Datenverlust ist erlaubt – also wie oft sichern) und <b>RTO</b> (wie lange darf die Wiederherstellung dauern).</p>" +
+        "<table><tr><th>Art</th><th>Sichert</th><th>Restore</th></tr>" +
+        "<tr><td>Voll</td><td>alle Daten</td><td>einfach, aber langsam und groß</td></tr>" +
+        "<tr><td>Inkrementell</td><td>Änderungen seit der letzten Sicherung</td><td>Vollsicherung plus alle Zwischenstände</td></tr>" +
+        "<tr><td>Differenziell</td><td>Änderungen seit der letzten Vollsicherung</td><td>Vollsicherung plus letzter Stand</td></tr></table>" +
+        "<p>Die wichtigste Prüfung ist die <b>Wiederherstellung</b>: Ein Backup, das nie zurückgespielt wurde, ist eine Annahme, kein Beleg. Im Labor heißt die verwandte Handlung <code>copy running-config startup-config</code>: Die laufende Konfiguration wird zur startenden – nach einem Neustart ohne diesen Schritt ist die Änderung weg.</p>"},
+      {titel: "Uptime und Verfügbarkeit: Zahlen lesen", html:
+        "<p><b>Verfügbarkeit</b> ist die Zeit im Betrieb geteilt durch die Gesamtzeit. Sie wird oft als Neun angeboten; dahinter steckt erlaubte Ausfallzeit:</p>" +
+        "<table><tr><th>Verfügbarkeit</th><th>Ausfall pro Jahr</th><th>pro Monat</th></tr>" +
+        "<tr><td>99 %</td><td>etwa 87,6 Stunden</td><td>etwa 7,2 Stunden</td></tr>" +
+        "<tr><td>99,9 %</td><td>etwa 8,8 Stunden</td><td>etwa 43,8 Minuten</td></tr>" +
+        "<tr><td>99,99 %</td><td>etwa 52,6 Minuten</td><td>etwa 4,4 Minuten</td></tr>" +
+        "<tr><td>99,999 %</td><td>etwa 5,3 Minuten</td><td>etwa 26 Sekunden</td></tr></table>" +
+        "<p>Hinter den Neunen stehen <b>MTBF</b> (mittlere Zeit zwischen Ausfällen) und <b>MTTR</b> (mittlere Reparaturzeit); die Verfügbarkeit steigt vor allem durch kürzere MTTR. Wartungsfenster, Redundanz (zwei Netzteile, zwei Wege) und eine klare Störungsannahme zählen mit – „Uptime“ eines einzelnen Geräts sagt noch nichts über die Verfügbarkeit des Dienstes.</p>"},
+      {titel: "Störung erkennen und dokumentieren – die ehrliche Grenze", html:
+        "<p><b>Betriebsbezug im Labor:</b> Das Labor simuliert Netzstörungen (Kabel weg, Gerät aus, Port abgeschaltet, fehlende Startkonfiguration nach einem Neustart). Genau das ist die Alltagsseite des Betriebs: Die Störung tritt auf, du misst, grenzt ein und dokumentierst nachvollziehbar – statt sofort zu raten.</p>" +
+        "<ul><li><b>Symptom</b> in der Sprache des Nutzers notieren („kein Internet“, „Drucker antwortet nicht“).</li><li><b>Messung</b>: Link, Adresse, Gateway, Dienst – von unten nach oben.</li><li><b>Ursache</b> belegen, nicht vermuten: ein Befehl, ein Status, eine Zeile Syslog.</li><li><b>Maßnahme</b> und <b>Wirkung</b> festhalten; eine kurze Notiz im Wartungsbuch ist Teil der Arbeit.</li></ul>" +
+        "<p><b>Ehrliche Grenze:</b> Geübt werden Störungserkennung, Messung und Dokumentation im simulierten Netz; Syslog-Server, Schwellwert-Alarme und das Rückspielen einer Sicherung gehören auf echte Systeme und werden hier bewertet, nicht ausgeführt.</p>"},
+    ],
+    merksatz: "Erst messen, dann reparieren, danach dokumentieren – und Sicherungen prüft man durch Zurückspielen.",
+    pruefungstipp: "Verfügbarkeits-Neunen in Ausfallzeit umrechnen, Backup-Arten unterscheiden und Syslog-Severity zuordnen können. Der Unterschied zwischen running-config und startup-config ist Prüfungsstoff und im Labor direkt sichtbar.",
+    quelle: "Network – Lernfassung",
+    belege: "RFC 5424 (Syslog) · RFC 5425 (Syslog über TLS) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept · BSI, DER.1 Detektion von sicherheitsrelevanten Ereignissen · ISO/IEC 25010 (Zuverlässigkeit, Verfügbarkeit) · Network – Lernfassung",
+    siehe: ["lab.speichern", "lab.link", "lab.ping", "lab.storage", "lab.fw"],
+  },
+  "lab.wlan": {
+    titel: "WLAN: SSID, VLAN, Sicherheit, Gastnetz",
+    kurz: "Funk ist ein geteiltes Medium: Ein Access Point verbindet Funkzellen mit dem Kabel, jede SSID liegt in einem VLAN – und das Gastnetz bleibt getrennt.",
+    abschnitte: [
+      {titel: "Funkzelle: BSS, SSID und BSSID", html:
+        "<p>Ein <b>Access Point</b> (AP) ist die Brücke zwischen Funk und Kabel: eine Antenne für die Funkzelle, ein Switchport für das Kabel. Die Funkzelle heißt <b>BSS</b> (Basic Service Set), ihr Name ist die <b>SSID</b> – der Name, den ein Gerät in der Liste sieht. Die MAC-Adresse des Funkmoduls ist die <b>BSSID</b>.</p>" +
+        "<ul><li><b>CSMA/CA</b>: Gesendet wird, wenn die Luft frei ist; Kollisionen werden vermieden (Bestätigung je Rahmen), nicht erkannt. Deshalb sinkt der Durchsatz mit jedem aktiven Gerät.</li><li><b>Halbduplex</b>: Senden und Empfangen nacheinander – anders als am Kabel.</li><li><b>Assoziation</b>: Erst nach dem Anmelden am AP gibt es einen Link, vergleichbar mit dem gesteckten Kabel.</li><li>2,4 GHz (Kanäle 1–13, überlappungsfrei 1, 6, 11) reicht weiter, 5 und 6 GHz sind schneller und weniger belegt.</li></ul>" +
+        "<p>Störer sind Nachbarzellen auf demselben Kanal, Mikrowellen und dicke Wände. Ein Ping durchs Funknetz schwankt stärker als über Kabel – das ist Physik, kein Fehler.</p>"},
+      {titel: "SSID zu VLAN: der Trunk zum Access Point", html:
+        "<p>In einem einfachen Aufbau gehört jede SSID zu genau <b>einem VLAN</b>. Der AP nimmt die Frames seiner Funknetze, versieht sie mit einem <b>802.1Q-Tag</b> und schickt sie über <b>einen Trunk</b> zum Switch. Dort landet jede SSID im passenden VLAN – genau wie ein Kabelport im Access-VLAN. Bei <b>dynamischer VLAN-Zuweisung</b> (802.1X/RADIUS) kann eine SSID mehrere VLANs bedienen: Der AP taggt dann je Benutzer nach der Anmeldung.</p>" +
+        "<table><tr><th>Baustein</th><th>Aufgabe</th></tr>" +
+        "<tr><td>SSID „Firma“ → VLAN 10</td><td>Mitarbeitergeräte im Verwaltungsnetz</td></tr>" +
+        "<tr><td>SSID „Gast“ → VLAN 30</td><td>Gäste getrennt, eigener IP-Bereich</td></tr>" +
+        "<tr><td>Management-VLAN</td><td>Verwaltung des AP selbst, von den Nutznetzen getrennt</td></tr>" +
+        "<tr><td>Native VLAN am Trunk</td><td>muss auf beiden Seiten gleich sein, sonst landen ungetaggte Frames im falschen Netz</td></tr></table>" +
+        "<p>Ohne Router oder Layer-3-Switch kommt kein Frame von einem VLAN ins andere – auch nicht von „Firma“ nach „Gast“. Größere Anlagen steuert ein WLAN-Controller, der SSIDs und Kanäle an alle APs verteilt.</p>"},
+      {titel: "WPA2, WPA3 und was sie schützen", html:
+        "<p>Ohne Verschlüsselung liest jedes Gerät im Funkbereich mit. <b>WEP</b> ist gebrochen und wird nicht mehr benutzt. <b>WPA2</b> verschlüsselt mit AES-CCMP; bei <b>WPA2-Personal</b> teilen sich alle Geräte ein Passwort, bei <b>WPA2-Enterprise</b> meldet sich jedes Gerät über 802.1X an einem RADIUS-Server an – zentral widerrufbar.</p>" +
+        "<table><tr><th>Verfahren</th><th>Anmeldung</th><th>Eigenschaft</th></tr>" +
+        "<tr><td>WPA2-Personal (PSK)</td><td>gemeinsames Passwort</td><td>einfach, ein Passwort für alle; bei Abgang Passwort wechseln</td></tr>" +
+        "<tr><td>WPA2-Enterprise</td><td>802.1X + RADIUS</td><td>je Person ein Konto, zentral sperrbar</td></tr>" +
+        "<tr><td>WPA3-Personal (SAE)</td><td>Passwort mit SAE</td><td>schützt besser gegen Wörterbuchangriffe auf Mitschnitte</td></tr>" +
+        "<tr><td>WPA3-Enterprise</td><td>802.1X, strengere Vorgaben</td><td>höchste Anforderung; PMF verpflichtend</td></tr></table>" +
+        "<p><b>PMF</b> (802.11w) schützt Verwaltungsframes – bei WPA3 ist PMF verpflichtend, bei WPA2 optional. <b>WPS</b> sollte aus bleiben (PIN ist angreifbar). Ein sichtbares WLAN ist kein Sicherheitsproblem – die Verschlüsselung entscheidet, nicht das Verstecken der SSID.</p>"},
+      {titel: "Gastnetz und Isolation", html:
+        "<p>Ein Gastnetz ist eine eigene SSID in einem eigenen VLAN mit eigenem IP-Bereich. Der Übergang ins Internet läuft über einen Router oder eine Firewall, die nur diesen einen Weg erlaubt; Zugriffe in die Firmennetze sind gesperrt.</p>" +
+        "<ul><li><b>Client-Isolation</b>: Gäste erreichen sich auch untereinander nicht – nützlich gegen Angriffe im selben Funknetz.</li><li><b>Kein Zugriff auf intern</b>: per Firewall/ACL verbieten, nicht nur „nicht bekannt geben“.</li><li><b>Bandbreite begrenzen</b>: Gäste sollen das Firmennetz nicht ausbremsen.</li><li><b>Rechtlicher Hinweis</b>: Wer offenes WLAN anbietet, braucht einen Verantwortlichen für den Anschluss; ein vorgeschaltetes Portal ändert daran nichts.</li></ul>" +
+        "<p>Wer das Gastnetz einrichtet, prüft danach genau drei Dinge: Internet geht, intern geht nicht, Gäste erreichen sich nicht. Das ist die Abnahme – nicht das Funk-Signal.</p>"},
+      {titel: "Im Labor: planen und bewerten, nicht funken", html:
+        "<p><b>Ehrliche Grenze:</b> Dieses Labor simuliert kein WLAN. Es gibt keine Funkzelle, keine Assoziation, keine 802.11-Rahmen und keine Verschlüsselungsaushandlung; Geräte sind hier über Kabel verbunden. WLAN wird <b>inhaltlich</b> geübt: SSID-VLAN-Zuordnung planen, Sicherheitsverfahren bewerten, Gastnetz-Isolation beurteilen und dokumentieren.</p>" +
+        "<p>Für die Praxis: einen Trunk zum AP planen, eine Tabelle SSID–VLAN–IP-Bereich anlegen und die drei Prüfungen des Gastnetzes beschreiben. Wer Funk messen will, braucht echte Hardware und ein Analysewerkzeug.</p>"},
+    ],
+    merksatz: "Eine SSID, ein VLAN, ein Trunk zum AP – und das Gastnetz sieht nur das Internet.",
+    pruefungstipp: "SSID und BSSID unterscheiden; 802.1Q-Trunk zum AP erklären; WPA2-Personal von WPA2-Enterprise trennen und die drei Prüfungen des Gastnetzes nennen können.",
+    quelle: "VLAN – Lernfassung",
+    belege: "IEEE 802.11 (WLAN, CSMA/CA) · IEEE 802.11i (WPA2) · IEEE 802.11w (PMF) · Wi-Fi Alliance: WPA3 Specification · IEEE 802.1Q (VLAN-Tagging) · BSI IT-Grundschutz-Kompendium, NET.2.1 WLAN-Betrieb · VLAN – Visuelle Lernnotiz",
+    siehe: ["lab.link", "lab.vlan", "lab.trunk", "lab.acl", "lab.dmz"],
+  },
+
   /* ---------- Zusatzseite OHNE eigene Fertigkeit: Klassenraum (Leitung, 09.10.2026) ----------
-     `DATEN.wiki` ist eine Seite je Fertigkeit (27, die Tabelle ist gesperrt: Klassenraum-Codec,
+     `DATEN.wiki` ist eine Seite je Fertigkeit (30 seit S6a/S6b; die Indizes 0–26 sind gesperrt: Klassenraum-Codec,
      tools/klassenraum-probe/A-festlegung.md). Der Klassenraum ist keine Fertigkeit, braucht aber
      eine Nachschlage-Seite – er ist ein Modus des Spiels, keine Übung. Deshalb steht er hier in
      DERSELBEN Form: gleiche Pflichtfelder, gleiche Abschnittsstruktur, keine neue Fertigkeit.
@@ -810,12 +944,145 @@ Object.assign(DATEN.wiki, {
     siehe: ["lab.speichern"],
     suche: ["Übergabe", "übergeben", "Rechner übergeben", "Computerraum", "nächster Azubi", "Lernstand", "behalten", "löschen", "Spielstand", "Sicherung", "Datei", "zurücksetzen", "ohne Konto", "ohne Server"],
   },
+
+  /* ---------- S7-Vertiefung (Architektur § 17.5): fünf Nachschlage-Seiten OHNE eigene Fertigkeit ----------
+     Themen, die im Lernweg vorkommen, aber (noch) keine eigene Fertigkeit haben. Gleiche Form wie alle
+     Seiten; Inhalt inhaltlich geprüft, Quellen aus der Whitelist (RFC/IEEE/BSI/Hersteller). Sie stehen
+     alle in DATEN.wikiZusatz, damit die Wiki-Ansicht sie ohne Stufenkopf listet. */
+  "vpn-ipsec": {
+    titel: "VPN und IPsec",
+    kurz: "Ein VPN verbindet zwei Netze über ein unsicheres Netz so, als wären sie direkt verkabelt: IPsec verschlüsselt und authentisiert die Pakete auf dem Weg durch das Internet.",
+    abschnitte: [
+      {titel: "Warum ein Tunnel?", html:
+        "<p>Zwei Standorte sollen ihr internes Netz teilen, ohne dass der Verkehr durchs Internet lesbar ist. Eine Standleitung ist teuer, ein <b>Tunnel</b> über das vorhandene Internet ist die übliche Lösung: Die Router verschlüsseln jedes Paket, bevor es das Internet sieht, und entschlüsseln es am anderen Ende. Für die Geräte dahinter sieht es aus wie ein direktes Kabel.</p>" +
+        "<ul><li><b>Vertraulichkeit</b>: Mitlesen auf dem Weg ist nutzlos.</li><li><b>Integrität</b>: Veränderte Pakete werden erkannt und verworfen.</li><li><b>Authentizität</b>: Beide Enden wissen, mit wem sie sprechen.</li></ul>"},
+      {titel: "IPsec: AH und ESP", html:
+        "<p>IPsec besteht aus zwei Protokollen: <b>AH</b> (Authentication Header) sichert Integrität und Echtheit, verschlüsselt aber nicht; <b>ESP</b> (Encapsulating Security Payload) verschlüsselt zusätzlich und wird in der Praxis fast immer allein verwendet. Im <b>Tunnelmodus</b> wird das ganze Paket eingepackt und mit neuen IP-Adressen (den öffentlichen der Router) versehen; im Transportmodus bleibt das ursprüngliche IP-Header sichtbar.</p>" +
+        "<p>Daraus folgt: Ein Tunnel verbindet <b>Netze</b>, nicht einzelne Programme. Welche Pakete in den Tunnel dürfen, entscheidet eine eigene Regel („interessanter Verkehr“) – typischerweise genau die Netze beider Standorte.</p>"},
+      {titel: "IKE: Schlüssel aushandeln", html:
+        "<p>Bevor Daten fließen, handeln beide Seiten mit <b>IKE</b> (IKEv2) die Verschlüsselung aus: Welche Verfahren, welche Schlüssel, wie lange gültig. Dafür braucht jede Seite eine Identität – ein gemeinsames Geheimnis (PSK) oder besser ein Zertifikat. Danach gelten zwei Sicherheitsverbindungen (je Richtung eine), die nach Ablauf automatisch erneuert werden.</p>" +
+        "<p>Ein schwacher PSK macht den ganzen Tunnel angreifbar: Wer ihn kennt, kann sich als Standort ausgeben. Zertifikate mit eigener CA sind der sauberere Weg, weil sie sich zentral widerrufen lassen.</p>"},
+      {titel: "Was ein VPN nicht löst", html:
+        "<ul><li><b>Kein Ersatz für Autorisierung</b>: Wer im Tunnel ist, darf nicht automatisch alles. Rechte und Firewall-Regeln gelten weiter.</li><li><b>Kein Schutz vor Malware</b>: Ein verschlüsselter Tunnel transportiert Schadsoftware genauso zuverlässig wie gute Daten.</li><li><b>Kein Ersatz für ein sicheres Endgerät</b>: Ein gekaperter Laptop im Homeoffice ist ein offenes Tor – auch mit VPN.</li><li><b>Kein WLAN</b>: Ein Funknetz ist etwas anderes; WLAN-Sicherheit (WPA2/WPA3) schützt nur die Funkstrecke, nicht den Weg durchs Internet.</li></ul>"},
+      {titel: "Im Labor: planen, nicht tunneln", html:
+        "<p><b>Ehrliche Grenze:</b> IPsec-Tunnel, IKE-Aushandlung und verschlüsselte Pakete kommen im Labor nicht vor. Es gibt keine IKE-Aushandlung, keine Security Associations und keine verschlüsselten Pakete. Geübt wird die <b>Planung und Bewertung</b>: Welche Netze müssen verbunden sein, welcher Verkehr darf in den Tunnel, wie authentisieren sich die Enden, und was passiert, wenn der Tunnel ausfällt?</p>" +
+        "<p>Ein sauberes Konzept nennt beide Endpunkte, die zu verbindenden Netze, das Verfahren (ESP, IKEv2), die Identität (PSK oder Zertifikat) und einen Rückfallweg, wenn der Tunnel nicht steht.</p>"},
+    ],
+    merksatz: "Ein VPN macht aus dem Internet eine private Leitung – nicht aus jedem Gerät ein sicheres.",
+    pruefungstipp: "ESP verschlüsselt, AH nicht; Tunnelmodus verbindet Netze, Transportmodus einzelne Hosts; IKEv2 handelt die Schlüssel aus. Ein VPN ersetzt weder Firewall noch Berechtigungen.",
+    quelle: "05-AP2-Infrastruktur-Sicherheit",
+    belege: "RFC 4301 (IPsec-Architektur) · RFC 4303 (ESP) · RFC 7296 (IKEv2) · BSI IT-Grundschutz-Kompendium, NET.3.3 VPN · Infrastruktur & Sicherheit – Visuelle Lernnotiz",
+    siehe: ["lab.fw", "lab.dmz", "lab.route"],
+    suche: ["VPN", "IPsec", "Tunnel", "Site-to-Site", "ESP", "AH", "IKE", "IKEv2", "PSK", "Zertifikat", "Standort", "Fernzugriff"],
+  },
+  "tls": {
+    titel: "TLS und Zertifikate",
+    kurz: "TLS schützt eine Verbindung zwischen zwei Programmen: verschlüsselt, unverändert und mit geprüfter Identität. HTTPS ist HTTP über TLS.",
+    abschnitte: [
+      {titel: "Was TLS leistet", html:
+        "<p><b>TLS</b> (Transport Layer Security) sitzt zwischen Anwendung und TCP. Es sorgt für <b>Vertraulichkeit</b> (Verschlüsselung), <b>Integrität</b> (Veränderungen fallen auf) und <b>Authentizität</b> (der Server weist sich mit einem Zertifikat aus). <b>HTTPS</b> ist nichts anderes als HTTP, das über TLS läuft – standardmäßig Port 443.</p>" +
+        "<p>TLS schützt nur die Strecke zwischen den beiden Programmen. Was am Server mit den Daten passiert, sagt es nicht – und ein gefälschter Shop mit gültigem Zertifikat bleibt ein gefälschter Shop.</p>"},
+      {titel: "Der Handshake in Kurzform", html:
+        "<p>Am Anfang steht der <b>Handshake</b>: Beide Seiten einigen sich auf Version und Verfahren (Cipher Suite). Der Server schickt sein Zertifikat; der Client prüft, ob es von einer vertrauten CA stammt, zum Namen passt und gültig ist. Danach wird ein gemeinsamer Sitzungsschlüssel vereinbart – und der gesamte weitere Verkehr läuft mit <b>symmetrischer</b> Verschlüsselung, weil die viel schneller ist als asymmetrische.</p>" +
+        "<table><tr><th>Schritt</th><th>Aufgabe</th></tr><tr><td>ClientHello / ServerHello</td><td>Version, Verfahren, Zufallszahlen</td></tr><tr><td>Zertifikat</td><td>Identität des Servers beweisen</td></tr><tr><td>Schlüsselaustausch</td><td>gemeinsamen Sitzungsschlüssel bilden</td></tr><tr><td>Finished</td><td>Handshake gegen Veränderung absichern</td></tr></table>"},
+      {titel: "Zertifikate und Vertrauenskette", html:
+        "<p>Ein Zertifikat verbindet einen Namen mit einem öffentlichen Schlüssel und ist von einer <b>CA</b> signiert. Der Client vertraut einigen Wurzel-CAs (im Betriebssystem hinterlegt); die Kette führt vom Serverzertifikat über Zwischen-CAs zur Wurzel. Geprüft werden Name (heute über <b>SAN</b>-Einträge, nicht mehr nur Common Name), Gültigkeitszeitraum und der Status (Widerruf über CRL oder OCSP).</p>" +
+        "<p>Ein Zertifikat ist ein Ausweis, kein Passwort: Der private Schlüssel bleibt auf dem Server und verlässt ihn nie. Wer ihn kopiert, kann sich als der Server ausgeben – deshalb ist Diebstahl des Schlüssels der schlimmste Fall, nicht das Ablaufdatum.</p>"},
+      {titel: "Typische Fehler", html:
+        "<ul><li><b>Abgelaufen</b>: Browser warnt, Verbindungen werden abgelehnt.</li><li><b>Falscher Name</b>: Das Zertifikat gilt für einen anderen Host (SAN prüfen).</li><li><b>Unbekannte CA</b>: Selbstsigniert oder eigene CA, die der Client nicht kennt.</li><li><b>Alte TLS-Version</b>: TLS 1.0/1.1 gelten als unsicher; 1.2 ist Minimum, 1.3 Standard.</li><li><b>Gemischte Inhalte</b>: Eine HTTPS-Seite lädt Bilder über HTTP – der Browser blockt sie.</li></ul>"},
+      {titel: "Im Labor: Grenze und Worauf es ankommt", html:
+        "<p><b>Ehrliche Grenze:</b> TLS-Handshake und Zertifikatsprüfung kommen im Labor nicht vor. Der HTTP-Dienst antwortet immer mit Erfolg, Port 443 ist ein normaler Port. Geübt wird das <b>Verstehen und Bewerten</b>: Welche Ports sind offen, welche Verbindung ist verschlüsselt, was sagt ein Zertifikatsfehler aus?</p>" +
+        "<p>Für die Praxis zählt: richtige Version (TLS 1.2/1.3), gültiges Zertifikat mit passendem Namen, privater Schlüssel geschützt, Widerruf möglich. Ein Zertifikat ohne passenden Namen ist so gut wie keins.</p>"},
+    ],
+    merksatz: "TLS prüft den Ausweis des Servers und verschlüsselt die Strecke – nicht den Server dahinter.",
+    pruefungstipp: "Handshake-Schritte nennen, SAN statt CN, Vertrauenskette CA → Zwischen-CA → Server, TLS 1.2/1.3, HTTPS = HTTP über TLS auf 443.",
+    quelle: "05-AP2-Infrastruktur-Sicherheit",
+    belege: "RFC 8446 (TLS 1.3) · RFC 5280 (X.509-Zertifikate) · IANA Port Number Registry (443) · BSI IT-Grundschutz-Kompendium, APP.3.1 Webanwendungen",
+    siehe: ["lab.ports", "lab.tcp", "lab.dmz"],
+    suche: ["TLS", "SSL", "HTTPS", "Zertifikat", "CA", "SAN", "Handshake", "Verschlüsselung", "443", "Widerruf", "OCSP"],
+  },
+  "8021x": {
+    titel: "802.1X und Port-Authentifizierung",
+    kurz: "802.1X lässt ein Gerät erst ans Netz, wenn es sich an einem Prüfserver ausgewiesen hat – je Port und je Nutzer statt „Kabel rein, Netz auf“.",
+    abschnitte: [
+      {titel: "Drei Rollen", html:
+        "<p><b>802.1X</b> (Port-Based Network Access Control) regelt den Zugang am Switch- oder WLAN-Port. Drei Rollen wirken zusammen: Der <b>Supplicant</b> ist das Gerät des Nutzers, der <b>Authenticator</b> ist der Switch (oder Access Point), und der <b>Authentisierungsserver</b> ist meist ein <b>RADIUS</b>-Server. Der Switch fragt nur; entschieden wird zentral.</p>" +
+        "<table><tr><th>Rolle</th><th>Gerät</th><th>Aufgabe</th></tr><tr><td>Supplicant</td><td>PC, Laptop</td><td>meldet sich mit Zertifikat oder Zugangsdaten an</td></tr><tr><td>Authenticator</td><td>Switch/AP</td><td>sperrt den Port und reicht die Anmeldung weiter</td></tr><tr><td>Server</td><td>RADIUS</td><td>prüft die Anmeldung, erteilt oder verweigert</td></tr></table>"},
+      {titel: "Der Ablauf", html:
+        "<p>Der Port startet <b>gesperrt</b>: Nur EAPOL-Rahmen (die Anmeldung) kommen durch, aller normale Verkehr nicht. Der Client beginnt die EAP-Aushandlung, der Switch verpackt sie in RADIUS-Anfragen und schickt sie an den Server. Ist die Prüfung erfolgreich, öffnet der Switch den Port – oder weist sogar ein VLAN zu (dynamische VLAN-Zuweisung). Bei WLAN heißt das WPA2-/WPA3-Enterprise.</p>" +
+        "<p>Wichtig: 802.1X authentisiert <b>wer</b> am Port hängt, nicht <b>was</b> er danach tut. Berechtigungen im Netz bleiben eine eigene Aufgabe.</p>"},
+      {titel: "Warum das besser ist als „Port auf Dauer“", html:
+        "<ul><li><b>Zentral sperrbar</b>: Ein Mitarbeiter geht – sein Konto wird gesperrt, nicht der Port.</li><li><b>Kein Generalschlüssel</b>: Jeder meldet sich einzeln an; ein geklautes Kabel bringt nichts.</li><li><b>Nachvollziehbar</b>: Der RADIUS-Server protokolliert, wer wann an welchem Port war.</li><li><b>Gastnetz sauber</b>: Unbekannte Geräte landen in einem isolierten VLAN oder gar nicht im Netz.</li></ul>"},
+      {titel: "Grenzen und Fehler", html:
+        "<p>Ohne erreichbaren RADIUS-Server bleibt der Port zu – ein Ausfall des Servers sperrt also alle Ports, die ihn brauchen. Deshalb plant man Notfall-Zugänge und überwacht den Server. Geräte ohne 802.1X-Client (Kameras, Drucker) brauchen eine technische Ausnahme (MAC-Authentifizierung oder eigenes Geräte-VLAN) – ein schwacher Ersatz, aber besser als „alle Ports offen“.</p>" +
+        "<p>Häufige Fehler: falsche RADIUS-Adresse, fehlendes Zertifikat, Zeitversatz (Zertifikate sind zeitgebunden), vertauschter Shared Secret.</p>"},
+      {titel: "Im Labor: Port-Security als Nachbar", html:
+        "<p><b>Ehrliche Grenze:</b> 802.1X, RADIUS-Server und EAP-Aushandlung kommen im Labor nicht vor. Was es gibt, ist <b>Port-Security</b>: Sie erlaubt nur bestimmte MAC-Adressen an einem Port und schaltet bei einem fremden Gerät den Port ab (err-disabled). Das ist eine benachbarte Idee – Ausweis der Hardware statt Ausweis des Nutzers – und wird hier geübt.</p>" +
+        "<p>Für die Praxis zählt: Rollen kennen, EAP und RADIUS unterscheiden, wissen, was bei Serverausfall passiert, und Ausnahmen für gerätelose Ports begründen.</p>"},
+    ],
+    merksatz: "802.1X fragt zuerst den Ausweis, dann schaltet der Port durch – entschieden wird zentral im RADIUS.",
+    pruefungstipp: "Drei Rollen (Supplicant, Authenticator, Server), EAP im Switch zum RADIUS, Port startet gesperrt, dynamisches VLAN, Ausfall des Servers sperrt Ports.",
+    quelle: "05-AP2-Infrastruktur-Sicherheit",
+    belege: "IEEE 802.1X (Port-Based Network Access Control) · RFC 3748 (EAP) · RFC 2865 (RADIUS) · BSI IT-Grundschutz-Kompendium, NET.2.1 WLAN-Betrieb · Infrastruktur & Sicherheit – Visuelle Lernnotiz",
+    siehe: ["lab.portsec", "lab.switch", "lab.vlan"],
+    suche: ["802.1X", "Port-Authentifizierung", "RADIUS", "EAP", "Supplicant", "Authenticator", "dot1x", "Enterprise", "Port-Security"],
+  },
+  "backup": {
+    titel: "Backup und Wiederherstellung",
+    kurz: "Eine Sicherung ist erst eine Sicherung, wenn die Wiederherstellung geprüft ist. RAID und Snapshots sind keine Sicherung.",
+    abschnitte: [
+      {titel: "Schutzziele: RPO und RTO", html:
+        "<p>Zwei Zahlen entscheiden jedes Sicherungskonzept: <b>RPO</b> (Recovery Point Objective) sagt, wie viel Datenverlust hinnehmbar ist – daraus folgt der Sicherungsrhythmus. <b>RTO</b> (Recovery Time Objective) sagt, wie schnell der Betrieb wieder laufen muss – daraus folgen Art und Ort der Sicherung. Wer beides nicht kennt, sichert entweder zu wenig oder zu teuer.</p>" +
+        "<p>Beispiel: Ein Kassensystem kann 15 Minuten Verlust verkraften und muss in einer Stunde wieder laufen – also häufige Sicherungen und ein getesteter Wiederanlaufplan. Eine Architekturablage mit RPO 24 Stunden braucht das nicht.</p>"},
+      {titel: "Arten und Rhythmus", html:
+        "<table><tr><th>Art</th><th>Was gesichert wird</th><th>Eigenschaft</th></tr><tr><td>Voll</td><td>alles</td><td>einfach zurückzuspielen, braucht viel Platz und Zeit</td></tr><tr><td>Inkrementell</td><td>Änderungen seit der letzten Sicherung</td><td>klein und schnell, Restore braucht die Kette</td></tr><tr><td>Differenziell</td><td>Änderungen seit der letzten Vollsicherung</td><td>Mittelweg: weniger Stände als inkrementell</td></tr></table>" +
+        "<p>Dazu kommen Aufbewahrung (wie lange, wie viele Stände) und der Ort. Ein Plan ohne Aufbewahrungsregel wächst entweder unbegrenzt oder löscht zu früh.</p>"},
+      {titel: "3-2-1 und die Offline-Kopie", html:
+        "<p><b>3-2-1</b> heißt: drei Kopien der Daten, auf zwei unterschiedlichen Medien, davon eine räumlich getrennt. Gegen Ransomware und versehentliches Löschen hilft zusätzlich eine <b>Offline- oder unveränderbare Kopie</b> (Band, externes Medium, unveränderbarer Speicher): Ein Angreifer im Netz kann sie nicht verschlüsseln, wenn er sie nicht erreicht.</p>" +
+        "<ul><li><b>RAID ist keine Sicherung</b>: Ein gelöschter oder verschlüsselter Ordner liegt auf allen Platten gleich.</li><li><b>Snapshot ist keine Sicherung</b>: Er liegt auf demselben System und fällt mit ihm aus.</li><li><b>Ein Medium ist keine Sicherung</b>: Brand, Diebstahl oder Blitzschlag trifft beide Kopien, wenn sie am selben Ort lagern.</li></ul>"},
+      {titel: "Wiederherstellung üben", html:
+        "<p>Eine ungetestete Sicherung ist eine Hoffnung. Zum Konzept gehört die regelmäßige <b>Restore-Probe</b>: Daten auf einem getrennten System zurückspielen, Zeit messen, Ergebnis dokumentieren. Nur so weiß man, dass RTO und RPO wirklich halten – und dass der Schlüssel für verschlüsselte Sicherungen vorhanden ist.</p>" +
+        "<p>Dokumentiert gehören: Quelle, Ziel, Rhythmus, Aufbewahrung, Verantwortliche, Restore-Schritte, letzter Test. Der Notfallplan regelt, in welcher Reihenfolge Systeme wieder anlaufen.</p>"},
+      {titel: "Im Labor: bewerten, nicht sichern", html:
+        "<p><b>Ehrliche Grenze:</b> Sicherungssoftware und Restore kommen im Labor nicht vor. Es gibt NAS-Freigaben und Dienste, aber keine Backup-Jobs. Geübt wird die <b>Bewertung</b>: RPO/RTO aus dem Betrieb ableiten, Sicherungsart und Ort begründen, 3-2-1 prüfen und die Wiederherstellung beschreiben.</p>"},
+    ],
+    merksatz: "Erst die geprüfte Wiederherstellung macht aus einer Kopie eine Sicherung.",
+    pruefungstipp: "RPO (Datenverlust) und RTO (Ausfallzeit) unterscheiden, voll/inkrementell/differenziell erklären, 3-2-1 nennen, RAID/Snapshot abgrenzen, Restore-Test fordern.",
+    quelle: "Storage-Konzeptatlas",
+    belege: "BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept · BSI-Standard 200-4 (Business Continuity Management) · SNIA Dictionary (Snapshot, Backup)",
+    siehe: ["lab.storage", "lab.betrieb"],
+    suche: ["Backup", "Sicherung", "Restore", "Wiederherstellung", "3-2-1", "RPO", "RTO", "Snapshot", "RAID", "Notfallplan"],
+  },
+  "virtualisierung": {
+    titel: "Virtualisierung und Container",
+    kurz: "Ein Hypervisor teilt einen Server in mehrere virtuelle Maschinen; Container teilen sich einen Kernel. Beides spart Hardware – und schafft neue Abhängigkeiten.",
+    abschnitte: [
+      {titel: "Hypervisor: Typ 1 und Typ 2", html:
+        "<p>Ein <b>Hypervisor</b> teilt die Hardware eines Servers in mehrere <b>virtuelle Maschinen</b> (VM). Jede VM hat eigene virtuelle Platten, eigenen Arbeitsspeicher und eine eigene Netzwerkkarte – sie verhält sich wie ein eigener Rechner mit eigenem Betriebssystem. <b>Typ 1</b> läuft direkt auf der Hardware (vom Betriebssystem unabhängig), <b>Typ 2</b> als Programm auf einem normalen Betriebssystem.</p>" +
+        "<table><tr><th>Bauart</th><th>Beispiel</th><th>Eigenschaft</th></tr><tr><td>Typ 1</td><td>Rechenzentrum</td><td>nah an der Hardware, wenig Overhead</td></tr><tr><td>Typ 2</td><td>Arbeitsplatz</td><td>einfach ausprobieren, mehr Overhead</td></tr><tr><td>Container</td><td>Serverdienste</td><td>teilen einen Kernel, starten schnell</td></tr></table>"},
+      {titel: "Was alles virtualisiert wird", html:
+        "<p>Virtualisiert werden nicht nur CPU und RAM: Der <b>virtuelle Switch</b> verbindet die VMs untereinander und nach außen, virtuelle Platten liegen als Datei oder als LUN im Speichernetz, und virtuelle Netzwerkkarten bekommen eigene MAC-Adressen. Für das Netzwerk ist eine VM ein normaler Host – mit Adresse, Gateway und Ports.</p>" +
+        "<p>Wichtig für den Betrieb: Ein physischer Serverausfall trifft jetzt alle VMs auf ihm; ein überlasteter Speicher bremst alle gleichzeitig. Virtualisierung bündelt Risiken, sie verteilt sie nicht.</p>"},
+      {titel: "Container statt VM", html:
+        "<p><b>Container</b> teilen sich den Kernel des Hosts: Sie starten schneller und brauchen weniger Speicher, sind aber weniger stark voneinander getrennt als VMs. Für viele kleine Dienste sind sie praktisch, für fremde oder stark unterschiedliche Betriebssysteme bleibt die VM die saubere Grenze. Beides ist kein Ersatz für Sicherheit: Ein Fehler im Container oder in der VM kann nach außen wirken, wenn die Konfiguration es zulässt.</p>"},
+      {titel: "Betrieb: Planung, Backup, Ausfall", html:
+        "<ul><li><b>Ressourcen planen</b>: CPU, RAM und die Zugriffe je Sekunde (IOPS) des Speichers begrenzen die Zahl der VMs.</li><li><b>Backup</b>: VM-Snapshots sind kein Ersatz für eine Sicherung – sie liegen auf derselben Infrastruktur.</li><li><b>Ausfall</b>: Ein Host-Ausfall nimmt alle seine VMs mit; Redundanz kostet Geld und muss begründet sein.</li><li><b>Netz</b>: Jede VM braucht ihren Platz im Adressplan und in der Doku.</li></ul>"},
+      {titel: "Im Labor: Modell, keine VMs", html:
+        "<p><b>Ehrliche Grenze:</b> Eine Hypervisor-Umgebung kommt im Labor nicht vor. Es gibt keine VMs, keine Snapshots und keinen Speicher-LUN, der sich anlegen ließe. Geübt wird das <b>Verständnis</b>: Typ 1/2 unterscheiden, VM und Container vergleichen, Ressourcen- und Ausfallrisiken benennen und in ein Speicherkonzept einordnen.</p>"},
+    ],
+    merksatz: "Virtualisierung spart Hardware, nicht Verantwortung: Backup und Netzplanung gelten je VM.",
+    pruefungstipp: "Hypervisor Typ 1/2, VM vs. Container (eigener Kernel oder geteilt), vSwitch und virtuelle Platten, Ausfall- und Backup-Risiken, Snapshots sind keine Sicherung.",
+    quelle: "Brücke – FISI und Alltag zu Storage und Cloud",
+    belege: "SNIA Dictionary (Virtualisierung, Snapshot) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept · Brücke – FISI und Alltag zu Storage und Cloud",
+    siehe: ["lab.storage", "lab.betrieb"],
+    suche: ["Virtualisierung", "Hypervisor", "VM", "Container", "vSwitch", "virtuelle Maschine", "Snapshot", "Cloud", "Ressourcen"],
+  },
 });
 
 /* ---------- Die Zusatzseiten: Seiten OHNE eigene Fertigkeit ----------
-   `DATEN.wiki` ist eine Seite je Fertigkeit (27, die Tabelle ist gesperrt: Klassenraum-Codec,
-   tools/klassenraum-probe/A-festlegung.md). Klassenraum und Übergabe sind keine Fertigkeiten,
+   `DATEN.wiki` ist eine Seite je Fertigkeit (30 seit S6a/S6b; die Indizes 0–26 sind gesperrt:
+   Klassenraum-Codec, tools/klassenraum-probe/A-festlegung.md). Klassenraum und Übergabe sind keine Fertigkeiten,
    brauchen aber ein Nachschlagewerk. Diese Liste ist die EINE Quelle der Wahrheit: Die Wiki-Ansicht
    (src/ui/karriere.js `WIKI_ZUSATZ`) liest sie, ebenso die Tests – so muss beim nächsten Zusatz
    nichts an drei Stellen nachgezogen werden. */
-DATEN.wikiZusatz = ["klassenraum", "uebergabe"];
+DATEN.wikiZusatz = ["klassenraum", "uebergabe", "vpn-ipsec", "tls", "8021x", "backup", "virtualisierung"];

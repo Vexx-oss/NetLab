@@ -42,7 +42,7 @@ verschieben — die Fundstellen sind überall genannt und **nicht stillschweigen
 | Edge-Ursache | eigener Kurzlauf, eigenes Profil, danach gelöscht | `FATAL:mojo…platform_channel.cc:187 Check failed: Zugriff verweigert (0x5)`, Exit `0x80000003` |
 | Klassenraum-Code | `grep klassenraum src/` · `typeof Spiel.klassenraum` | **0 Treffer** / `"undefined"` — noch nichts gebaut (Auftrag ist Spezifikation) |
 
-**Vollständiges Protokoll mit Rohausgaben:** [`Nachweise/Klassenraum/D-messung.md`](../../../Nachweise/Klassenraum/D-messung.md)
+**Vollständiges Protokoll mit Rohausgaben:** `Nachweise/Klassenraum/D-messung.md` (**liegt nicht im Repo**)
 und die Dateien `D-messung-tests.txt`, `-ruhig.txt`, `-bau.txt`, `-rauch.txt`, `-menueprobe.txt`, `-android.txt`.
 
 **Warum Edge nicht läuft (gemessen, nicht vermutet):** Edge bricht in seiner **eigenen**

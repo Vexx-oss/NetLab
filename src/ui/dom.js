@@ -42,3 +42,25 @@ UI.kopieren = async function(text){
   } catch (e) { return false; }
 };
 const wenigBewegung = () => typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Zeit-Tokens: die EINE Quelle für Dauern in JS (Architektur §16.4, UX-Audit U07) ----------
+   Die vier Stufen und der Zähler stehen in basis.css (--dauer-kurz/-dauer/-mittel/-lang/--dauer-zaehler).
+   UI.zeit(name) liest sie über getComputedStyle und gibt Millisekunden zurück; ohne DOM (headless-Test,
+   Browser ohne geladenes CSS) gelten die Fallbacks — sie sind mit basis.css identisch und werden vom Test
+   tests/ui-zeit.test.js gegengeprüft. Aufruf: UI.zeit("kurz"|"dauer"|"mittel"|"lang"|"zaehler"). */
+UI.zeit = (() => {
+  const FALLBACK = {kurz: 80, dauer: 160, mittel: 240, lang: 320, zaehler: 700};
+  const TOKEN = {kurz: "--dauer-kurz", dauer: "--dauer", mittel: "--dauer-mittel", lang: "--dauer-lang", zaehler: "--dauer-zaehler"};
+  return function zeit(name){
+    const roh = String(name == null ? "dauer" : name).trim().replace(/^--/, "");
+    const schluessel = roh === "dauer" ? "dauer" : roh.replace(/^dauer-/, "");
+    const fallback = FALLBACK[schluessel];
+    if (fallback == null) throw new Error("UI.zeit: unbekannte Dauer „" + name + "“ (erlaubt: kurz, dauer, mittel, lang, zaehler)");
+    try {
+      if (typeof document === "undefined" || typeof getComputedStyle !== "function") return fallback;
+      const wert = getComputedStyle(document.documentElement).getPropertyValue(TOKEN[schluessel]).trim();
+      const ms = parseFloat(wert);
+      return Number.isFinite(ms) && ms > 0 ? ms : fallback;
+    } catch (e) { return fallback; }
+  };
+})();

@@ -12,6 +12,11 @@ auf 1.2.0 aufgenommen. Die Oberflaeche ist dieselbe; die kleinen Ziffern in der 
 der Bilder sind der einzige Unterschied. Neue Nachweise werden mit der jeweils aktuellen
 Fassung erzeugt.
 
+**In der 2.1-Runde (26.–29.10.2026) wurde kein Bild neu erzeugt.** Ohne Browser ist
+`python tools/bilder.py` hier **nicht geprüft**; der Bildstand bleibt bewusst der von 1.1.0
+und ist in `README.md` so gekennzeichnet. Für 2.1.0 gilt dasselbe: Bilder nur mit Browser —
+sonst bleibt es bei diesem ehrlichen Hinweis.
+
 Neu bauen: `python tools/bilder.py` · Pruefen: `python tools/bilder.py --pruefen`
 
 

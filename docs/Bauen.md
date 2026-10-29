@@ -25,7 +25,7 @@ src/ ──python bauen.py──▶ web/index.html ──python tools/einfach.py
 
 | Befehl | Ergebnis | Dauer |
 |---|---|---|
-| `python bauen.py` | `web/index.html` + `web/tests.html` (107 Module) | Sekunden |
+| `python bauen.py` | `web/index.html` + `web/tests.html` (Modulzahl: [STAND.md](STAND.md)) | Sekunden |
 | `python tools/einfach.py` | `docs/index.html` — das Spiel als **eine** Datei | Sekunden |
 | `python tools/paket.py` | `dist/` — Ordner + ZIP für eine Release, geprüft (mit `.exe`, wenn `Programm/` sie hat → `-Windows.zip`, sonst `-Browser.zip`) | Sekunden |
 | `cargo tauri build --no-bundle` | `netzwerk-labor.exe` (Rust-Hülle) | Minuten |
@@ -45,10 +45,17 @@ python tools/einfach.py --pruefen              # nur prüfen
 python tools/einfach.py --ziel /tmp/spiel.html # woandershin
 ```
 
-Gemessener Stand (06.10.2026): **2.263.054 Bytes (2,16 MB)**, 14 Schriften eingebettet,
-**0 Außenverweise**. Zum Vergleich: ohne eingebettete Schriften wären es 1,6 MB plus ein
+Gemessener Stand: **Größe und SHA256 stehen in [STAND.md](STAND.md)** — dort bei jedem Lauf neu
+erhoben (historisch am 06.10.2026: 2.263.054 Bytes). 14 Schriften eingebettet, **0 Außenverweise**. Zum Vergleich: ohne eingebettete Schriften wären es 1,6 MB plus ein
 Ordner daneben — und genau dieser Ordner ist die Fehlerquelle, wenn jemand nur die
 `index.html` weiterreicht.
+
+**Lizenzblock (seit 2.1.0).** Jede gebaute Einzeldatei enthält die vollständigen
+Lizenztexte als inerten Datenblock <script type="text/plain" id="lizenzhinweise">:
+PolyForm Noncommercial 1.0.0 (`LICENSE`), die deutsche Erklärung (`LIZENZ.md`) und die drei
+OFL-1.1-Texte der eingebetteten Schriften samt Copyright-Zeilen. Gelesen wird direkt aus
+den Dateien — fehlt eine, bricht der Bau ab. Prüfen: `python tools/einfach.py --pruefen docs/index.html`
+(meldet „Lizenzblock enthalten“ oder einen Hinweis bei einem älteren Bau).
 
 > **Bekannter Schönheitsfehler bei den Schriften** (gemessen, nicht behoben):
 > `mimetypes.guess_type(".woff2")` liefert unter Windows `application/octet-stream`, weil
@@ -181,6 +188,20 @@ SIZES.txt                      Inhalt, Größen, Prüfsummen
 
 Die Anleitungen kommen aus `Vorlagen/` — **eine** Quelle, kein zweiter Ort zum Pflegen.
 
+### Fassung ziehen und prüfen
+
+Vor dem Zug prüfen, ob alle Fassungsstellen konsistent sind (Quelle, Konfiguration,
+Dokumente, Android-Bauzählung, Screenshot-Hinweis):
+
+```bash
+python tools/fassung-ziehen.py --pruefen      # muss GRUEN sein, schreibt nichts
+python tools/fassung-ziehen.py --neu 2.1.0    # Trockenlauf: zeigt jede Stelle
+```
+
+Danach (nur mit Freigabe) `--setzen`, `VERSION_CODE` in `android/bauen.py` von Hand über den
+abgeleiteten Wert ziehen, bauen und die Zahlen mit `python tools/stand.py` neu erheben. Der
+Ablauf steht in [SITZUNGSABSCHLUSS.md](SITZUNGSABSCHLUSS.md), Abschnitt „Release 2.1.0 — Checkliste“.
+
 ### Eine Release anlegen
 
 **Das macht ein Ablauf** ([`.github/workflows/release.yml`](../.github/workflows/release.yml)):
@@ -188,8 +209,8 @@ Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferung
 legt das Release mit den Anhängen an.
 
 ```bash
-git tag -a v2.0.5 -m "Netzwerk-Labor 2.0.5"
-git push origin v2.0.5
+git tag -a v2.1.0 -m "Netzwerk-Labor 2.1.0"
+git push origin v2.1.0
 ```
 
 Nach etwa einer Minute steht das Release unter
@@ -256,14 +277,15 @@ python android/bauen.py --ohne-spiel    # schneller, nimmt android/bau/spiel.htm
 python android/bauen.py --nur-pruefen   # Signatur, Kennwerte, Assets prüfen
 ```
 
-Ergebnis: `Programm/Netzwerk-Labor-<Version>-Android.apk` (0,94 MB, signiert).
+Ergebnis: `Programm/Netzwerk-Labor-<Version>-Android.apk` (am 06.10.2026: 0,94 MB, signiert;
+Größe der aktuellen APK **nicht geprüft**, weil keine gebaut wurde).
 Nötig sind ein Android-SDK mit **build-tools ≥ 35** und ein JDK 17+.
 
-**Zwei Versionszahlen, zwei Bedeutungen** (06.10.2026): `versionName` ist die
-Spielversion aus `bauen.py` (`VERSION`) und bleibt **1.2.1**. `versionCode` ist die
-Bauzählung und steht als eigene Zahl in `android/bauen.py` (`VERSION_CODE`, jetzt
-**10202**) — aus 1.2.1 abgeleitet ergäbe sie 10201, also genau den Code der schon
-gebauten APK. Android verweigert die Installation über eine alte Fassung, wenn der Code
+**Zwei Versionszahlen, zwei Bedeutungen:** `versionName` ist die Spielversion aus
+`bauen.py` (`VERSION`, derzeit **2.1.0**). `versionCode` ist die Bauzählung und steht als
+eigene Zahl in `android/bauen.py` (`VERSION_CODE = 20006`, gemessen 26.10.2026). Aus 2.0.5
+abgeleitet ergäbe sie 20005, also genau einen Code unter der schon gebauten APK. Android
+verweigert die Installation über eine alte Fassung, wenn der Code
 nicht größer ist („App nicht installiert“). Deshalb ist er vom Namen entkoppelt und
 steigt mit jeder APK, die das Haus verlässt; `version_lesen()` bricht ab, wenn
 `VERSION_CODE` unter dem aus `versionName` ableitbaren Wert liegt.
@@ -297,8 +319,10 @@ ist:
    Fehler-Rückfall). Das ist der Ersatz für den Gerätetest, der hier nicht möglich ist —
    siehe „Ehrliche Grenzen“.
 
-Gemessen an der eingefrorenen APK vom 06.10.2026 (980.508 Bytes, SHA256 `46c90213…`,
-Seite darin `a2bba5cf…`):
+**Historische Momentaufnahme:** gemessen an der eingefrorenen APK vom 06.10.2026 (980.508 Bytes,
+SHA256 `46c90213…`, Seite darin `a2bba5cf…`). Die Zeilen unten sind der damals abgelesene
+`aapt`-Ausschnitt und **nicht** der heutige Stand — heute gilt `VERSION` = 2.1.0 und
+`VERSION_CODE = 20006` (siehe [STAND.md](STAND.md), gemessen 29.10.2026):
 
 ```
 package: name='oss.vexx.netlab' versionCode='10202' versionName='1.2.1' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
@@ -393,7 +417,8 @@ Lauf ab, wenn er rot wird (gemessen an `tools/test.sh`, Zeilen 29–37):
 > dagegen **vor** den Tests. Wer „ethos läuft nach klassen.py" schreibt, meint den
 > Rauchtest-Pfad.
 
-Stand 07.10.2026: **434/434 grün, 50 Testdateien, 83 Module, davon 0 übersprungen**. Neu in dieser
+Stand 07.10.2026 (historisch, für die damalige Fassung gemessen): **434 von 434 grün, 50 Testdateien,
+83 Module, davon 0 übersprungen**. Der heutige Stand steht in [STAND.md](STAND.md). Neu in dieser
 Runde sind die Hilfestellung (`spiel-stufensystem`, `spiel-hilfe-lernverbuchung`, `spiel-mini-denktexte`,
 `spiel-hilfe-streifen`, `spiel-leiste-hilfe`, `spiel-training`, `ui-training`, `spiel-einstieg-stufe`,
 `spiel-fehlertexte`, `daten-trainings`, `spiel-lernstand-hilfe`) sowie die beiden Gegenprüfungen
@@ -481,6 +506,6 @@ Spiel als die Quelle.
 |---|---|
 | `kein Node gefunden` | Node 24 installieren oder `NODE=/pfad/zu/node sh tools/test.sh` |
 | `sh tools/test.sh` bricht mit `dirname`-Fehler ab | Git-`/usr/bin` fehlt im `PATH`: `& "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:$PATH; sh tools/test.sh'` |
-| `.exe` zeigt kein Fenster | `Programm/Integritaet-reparieren.cmd` (Details in [`Nachweise/1.2-Start/BEFUND.md`](../Nachweise/1.2-Start/BEFUND.md)) |
+| `.exe` zeigt kein Fenster | `Programm/Integritaet-reparieren.cmd` (Details im Befund `Nachweise/1.2-Start/BEFUND.md` — **liegt nicht im Repo**) |
 | `einfach.py`: „Aussenverweise uebrig geblieben" | Eine neue Datei wird von außen geladen. Entweder einbetten oder bewusst im Spiel belassen und die Prüfliste in `tools/einfach.py` anpassen — **nicht** die Prüfung abschalten. |
 | `lernmotor.py` meldet ABWEICHUNG | Die Spielhalle ist weiter. `--neu-einlesen`, dann Tests und `node tools/sim-stand.js`. |

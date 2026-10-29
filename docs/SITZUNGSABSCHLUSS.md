@@ -61,7 +61,13 @@ Zahlen.
 ### 3. Prüfen und bauen, in dieser Reihenfolge
 
 ```powershell
-sh tools/test.sh                       # erwartet: 707/707 grün, 0 übersprungen (Stand 09.10.2026)
+sh tools/test.sh                       # erwartet: N/N grün, 0 übersprungen (Zahl: docs/STAND.md)
+python tools/stand.py --pruefen         # Zahlen in docs/STAND.md und README.md gegen die Messung
+python tools/seite.py --pruefen         # Doku-Seite: jede Quelle erzeugt, 0 tote Verweise
+                                       # Pflicht ist docs/doku/ (versioniert); _site/ ist nur
+                                       # Auslieferung (gitignoriert) und darf fehlen
+python tools/seite.py                  # Doku-Seite neu bauen, DANN Frische prüfen:
+git diff --exit-code docs/doku         # leer = das versionierte Erzeugnis ist aktuell
 python tools/ethos.py                  # GRUEN gegen tests/stil-stand.json
 python tools/klassen.py                # 0 Klassen ohne CSS-Regel
 node tools/sim-stand.js                # Simulation unverändert
@@ -92,8 +98,9 @@ python android/werkzeuge/mobilprobe.py --geraet pixel7 --ausrichtung hoch,quer -
 
 ### 4. Die `.exe` — nur wenn du die Minuten hast, dann aber **messen**
 
-Die `.exe` liegt nicht im Git und wird vom Release-Ablauf **nicht** gebaut; sie muss auf dem
-Entwicklungsrechner entstehen (06.10.2026: 4 m 25 s).
+Die `.exe` liegt nicht im Git. Sie wird bei jedem **Tag** vom Release-Ablauf auf
+`windows-latest` gebaut und an das Release gehängt (`.github/workflows/release.yml`, zweiter
+Job); für einen lokalen Bau auf dem Entwicklungsrechner (06.10.2026: 4 m 25 s) gilt:
 
 ```powershell
 cd shell/src-tauri
@@ -151,8 +158,8 @@ git -c i18n.commitEncoding=UTF-8 commit -F <Nachrichtendatei>
 
 ```powershell
 git push origin ausbau-1.2
-git tag -a v1.2.2 -m "Netzwerk-Labor 1.2.2"      # Nummer aus bauen.py — hier steht sie als Beispiel
-git push origin v1.2.2
+git tag -a v2.0.6 -m "Netzwerk-Labor 2.0.6"      # Nummer aus bauen.py — hier steht sie als Beispiel
+git push origin v2.0.6
 ```
 
 Drei Abläufe laufen dann von selbst — und man sollte wissen, was sie tun:
@@ -160,7 +167,7 @@ Drei Abläufe laufen dann von selbst — und man sollte wissen, was sie tun:
 | Ablauf | Auslöser | Wirkung |
 |---|---|---|
 | `pruefen.yml` | Push auf `ausbau-1.2` | Tests auf GitHub |
-| `seite.yml` | Push auf `ausbau-1.2` | **veröffentlicht die Seite** (nur `docs/index.html` + `docs/bilder/`) |
+| `seite.yml` | Push auf `ausbau-1.2` | **veröffentlicht die Seite**: `docs/index.html`, `docs/bilder/` **und `docs/doku/`** (die ganze Doku als HTML) |
 | `release.yml` | **Tag** | prüft, baut das Paket, legt das Release mit den Anhängen an; ein zweiter Job auf `windows-latest` baut die `.exe` und hängt sie ebenfalls an |
 
 **Ein Release erneut auslösen** — z. B. um die Anhänge zu erneuern, ohne ein neues Tag zu setzen:
@@ -189,6 +196,44 @@ Invoke-WebRequest "https://vexx-oss.github.io/NetLab/index.html" -OutFile "$env:
 Zum Prüfen der Ladelinks `System.Net.Http.HttpClient` benutzen, nicht `Invoke-WebRequest -Method
 Head`: das fragt in dieser Umgebung nach Eingaben und bricht ab. Erwartet wird
 `Content-Disposition: attachment` — sonst ist der „Ein-Klick-Download" keiner.
+
+## Release 2.1.0 — Checkliste (S8, nur mit Freigabe)
+
+Diese Liste ist der Ablauf für den Fassungszug auf 2.1.0. **Nichts davon passiert
+automatisch**, und Punkt 8 ist eine harte Sperre: ohne ausdrückliche Freigabe des Nutzers
+kein Commit, kein Tag, kein Push, kein Release.
+
+1. **Gates grün, vollständig.** `sh tools/test.sh` („N/N grün", **0 übersprungen**,
+   Exit 0) · `python tools/klassen.py` · `node tools/sim-stand.js` · `python tools/ethos.py` ·
+   `python tools/stand.py --pruefen` (Exit 0) · `python tools/seite.py --pruefen` (Exit 0) ·
+   `git diff --exit-code docs/doku` nach `python tools/seite.py` (**leer**).
+2. **Fassung prüfen, dann ziehen** (Trockenlauf zuerst):
+   `python tools/fassung-ziehen.py --pruefen` → muss **GRÜN** sein · `python tools/fassung-ziehen.py --neu 2.1.0`
+   → Trockenlauf, **0 Fehler** · dann `--setzen`.
+3. **Android-Bauzählung von Hand:** `VERSION_CODE` in `android/bauen.py` muss **über** dem
+   aus 2.1.0 abgeleiteten Wert liegen — abgeleitet ist **20100**, also z. B. **20101**
+   (der Fassungszug ändert sie nicht).
+4. **Bauen:** `python bauen.py` · `python tools/einfach.py` (schreibt `docs/index.html` **und**
+   `Netzwerk-Labor.html`) · beide **byte-gleich**, **0 Außenverweise**, **Lizenzblock
+   enthalten** (PolyForm Noncommercial 1.0.0 + die drei OFL-Texte, eingebettet von
+   `tools/einfach.py`).
+5. **Zahlen und Doku nachziehen:** `python tools/stand.py` (schreibt `docs/STAND.md` + den
+   Block in `README.md`) · `python tools/stand.py --pruefen` (Exit 0) · `python tools/seite.py` ·
+   `python tools/seite.py --pruefen` (Exit 0) · `git diff --exit-code docs/doku` (leer).
+6. **Abnahme:** `python tools/abnahme.py` — vollständige Kette. Der Browseranteil
+   (`starttest.py`, Rauchtest) läuft **nur mit Browser**; ohne Browser ist er ausdrücklich
+   „nicht geprüft". Screenshots **nur mit Browser** neu erzeugen; sonst bleibt der
+   1.1.0-Hinweis in README und `docs/bilder/HERKUNFT.md` stehen.
+7. **2.1.0-Abschnitt im CHANGELOG füllen:** Die Platzhalter der Tabelle (S3–S8) durch die
+   gemessenen Endzahlen ersetzen; Quelle ist ausschließlich `docs/STAND.md`. Keine
+   geschätzten Zahlen, keine alten Fassungszahlen.
+8. **Freigabe abwarten** (harte Sperre): Commit, Tag `v2.1.0`, `git push` und Release
+   **nur** nach ausdrücklicher Zustimmung des Nutzers. Der Owner schreibt nicht selbst.
+9. **Release-Inhalt:** CHANGELOG-Abschnitt als Release-Text, drei Anhänge
+   (`…-Browser.zip`, `Netzwerk-Labor.html`, `…exe`), dazu eine `SHA256SUMS`-Datei mit den
+   Prüfsummen der Anhänge. Android-APK nur anhängen, wenn sie wirklich gebaut und geprüft ist.
+10. **Nachmessen** wie in Schritt 8 oben: Live-Seite hashen, Anhänge und
+    `Content-Disposition` prüfen, `SHA256SUMS` gegen die heruntergeladenen Dateien rechnen.
 
 ## Harte Regeln, die aus Fehlern stammen
 

@@ -36,7 +36,7 @@ Object.assign(DATEN.lehrtexte, {
     skill: "lab.arp",
     E: "Der Absender hat im eigenen Netz gerufen „Wer hat diese IP-Adresse?“, aber niemand hat geantwortet. Ohne MAC-Adresse kann er den Frame nicht adressieren, das Paket bleibt liegen. Meist ist die Ziel-IP falsch, das Ziel aus, in einem anderen VLAN, oder die Maske täuscht ein gemeinsames Netz nur vor. Prüf, ob es ein Gerät mit genau dieser IP im selben VLAN gibt.",
     AP1: "Der ARP-Request (Broadcast) bleibt unbeantwortet, die Ziel-IP lässt sich nicht in eine MAC auflösen. Ursachen: Ziel fehlt oder ist aus, falsche IP oder Maske, anderes VLAN.",
-    AP2: "Windows: Antwort von der eigenen Adresse: „Zielhost nicht erreichbar.“ · IOS show ip arp: „Incomplete“",
+    AP2: "Windows: Antwort von der eigenen Adresse: „Zielhost nicht erreichbar.“ · IOS show ip arp: kein Eintrag für das Ziel („Incomplete“ zeigt erst echte Hardware)",
     quelle: "Network – Lernfassung (§ 9 ARP Schritt für Schritt) · RFC 826",
   },
   DROP_VLAN: {
@@ -116,7 +116,7 @@ Object.assign(DATEN.lehrtexte, {
     skill: "lab.ttl",
     E: "Jeder Router zieht von der TTL (Time To Live) eines Pakets 1 ab. Erreicht sie 0, wird das Paket verworfen, und der Absender bekommt die Meldung „TTL abgelaufen“. Passiert das bei einem normalen Ping, kreist das Paket meist zwischen zwei Routern, die sich gegenseitig als Weg eingetragen haben. Mit Traceroute siehst du, wo es im Kreis geht.",
     AP1: "Die TTL erreicht 0, das Paket wird verworfen und ICMP Time Exceeded geht an den Absender. Häufige Ursache ist eine Routingschleife.",
-    AP2: "Windows: „Die Gültigkeitsdauer wurde bei der Übertragung überschritten.“ · IOS ping: &",
+    AP2: "Labor-Windows: „Antwort von …: TTL beim Transport abgelaufen.“ · IOS ping: & · echtes Windows meldet: „Die Gültigkeitsdauer wurde bei der Übertragung überschritten.“",
     quelle: "Network – Lernfassung (§ 5, § 10 tracert) · RFC 791 · RFC 792 (Time Exceeded)",
   },
   ACL_DENY: {
@@ -242,9 +242,9 @@ Object.assign(DATEN.lehrtexte, {
   STORM: {
     titel: "Broadcast-Sturm",
     skill: "lab.stp",
-    E: "Im Netz gibt es eine Schleife zwischen Switches, und Spanning Tree ist nicht aktiv. Ein einziger Broadcast kreist dann endlos und vervielfacht sich an jedem Switch, denn Ethernet-Frames haben keine TTL. Die Simulation hat deshalb abgebrochen. Entferne die doppelte Verbindung oder lass Spanning Tree einen der Wege blockieren.",
+    E: "Im Netz gibt es eine Schleife zwischen Switches, und Spanning Tree ist nicht aktiv. Ein einziger Broadcast kreist dann endlos und vervielfacht sich an jedem Switch, denn Ethernet-Frames haben keine TTL. Die Simulation hat deshalb abgebrochen. Entferne die doppelte Verbindung – dieses Labor kennt kein STP, deshalb ist das hier der einzige Weg aus dem Sturm. Auf echten Geräten blockiert zusätzlich Spanning Tree einen der beiden Wege.",
     AP1: "Layer-2-Schleife ohne STP: Broadcasts zirkulieren unbegrenzt, weil Schicht 2 keine TTL kennt, und das Netz ist überlastet. Redundante Wege nur mit STP.",
-    AP2: "%SW_MATM-4-MACFLAP_NOTIF: Host … is flapping between port … and port …",
+    AP2: "Labor: „Abbruch nach 5000 Ereignissen: … Das ist ein Broadcast-Sturm – eine Layer-2-Schleife ohne Spanning Tree.“ · echtes IOS mit Storm-Control: %STORM_CONTROL-3-SHUTDOWN: A packet storm was detected on …",
     quelle: "Fragen – Netzwerke planen (Wozu STP?) · IEEE 802.1D",
   },
   PORTSEC_VIOLATION: {
@@ -279,4 +279,115 @@ Object.assign(DATEN.lehrtexte, {
     AP2: "Windows: „Zeitüberschreitung der Anforderung.“ · IOS ping: .....",
     quelle: "Cisco: Understanding the Ping and Traceroute Commands · Microsoft Learn: ping · Network – Lernfassung (§ 10 Werkzeugkasten)",
   },
+
+  /* ---------- Lehrtexte je Fertigkeit (2.1 S5, Architektur § 17.4) ----------
+     Append-only: Die 34 Schlüssel oben sind Sim-Grundcodes (engine.js:34-70) und bleiben unverändert.
+     Für Fertigkeiten ohne eigenen Grundcode hängen die Texte hier unter der Skill-id; Feldformat wie oben.
+     Consumer: DATEN.lehrtextFuer(skill, niveau) (unten) – die Anzeige verdrahtet der Lead. */
+  "lab.switch": {
+    titel: "Switch: Lernen, Fluten, Altern",
+    skill: "lab.switch",
+    E: "Ein Switch merkt sich am Quell-Port, welche MAC-Adresse dort sendet (MAC-Tabelle). Kennt er das Ziel, leitet er gezielt weiter; kennt er es nicht, flutet er den Frame an alle Ports außer dem Quell-Port. Nach 300 Sekunden ohne Verkehr verfällt ein Eintrag. Prüf die Tabelle mit „show mac address-table“ und ob der Port im richtigen VLAN liegt.",
+    AP1: "Der Switch lernt Quell-MACs je Port und VLAN; unbekannte Ziele werden geflutet. Broadcasts und unbekannte Unicasts bleiben in derselben Broadcast-Domäne – begrenzt wird sie durch VLANs.",
+    AP2: "show mac address-table: VLAN 10 · 0050.56aa.bb01 · DYNAMIC Fa0/3 · show interfaces Fa0/3: … 300 seconds",
+    quelle: "Network – Lernfassung (Switching) · Fragen – Netzwerk-Grundlagen (net-04 bis net-07) · Cisco Catalyst Command Reference (show mac address-table)",
+  },
+  "lab.subnetz": {
+    titel: "Adressplan: Blockgröße und Netz-ID",
+    skill: "lab.subnetz",
+    E: "Subnetting rechnet mit der Blockgröße: 2 hoch (32 minus Präfixlänge). Die Netz-ID ist die erste Adresse eines Blocks, der Broadcast die letzte, Hosts liegen dazwischen. Plane vom größten Netz zum kleinsten (VLSM), sonst passen die kleinen nicht mehr. Prüf jede Zuordnung mit Netz-ID, Maske und Gateway.",
+    AP1: "Ein /p-Netz hat 2^(32−p) Adressen, davon 2^(32−p)−2 nutzbare Hosts. VLSM vergibt die größten Blöcke zuerst; jedes Netz braucht Netz-ID, Maske und Gateway.",
+    AP2: "ipconfig: IPv4-Adresse 192.168.1.10 · Subnetzmaske 255.255.255.192 · show ip interface brief: 192.168.1.1 255.255.255.192",
+    quelle: "04-AP1-Netzwerk (Subnetting-Verfahren) · Fragen – Subnetting · Network – Lernfassung (§ 8)",
+  },
+  "lab.tcp": {
+    titel: "TCP: Handshake und Nummern",
+    skill: "lab.tcp",
+    E: "TCP baut vor dem ersten Datenbyte eine Verbindung auf: SYN, SYN/ACK, ACK. Jede Seite startet mit einer zufälligen Sequenznummer, und jedes gesendete Byte zählt mit – das SYN verbraucht eine Nummer. Bestätigt wird immer die Nummer des nächsten erwarteten Bytes. Deshalb lässt sich aus den Nummern ablesen, ob Daten fehlen oder doppelt ankommen.",
+    AP1: "Der Drei-Wege-Handshake (SYN, SYN/ACK, ACK) synchronisiert die Sequenznummern; das SYN zählt als ein Byte. Die ACK-Nummer nennt das nächste erwartete Byte; fehlende Bytes werden erneut angefordert.",
+    AP2: "netstat -n: TCP 192.168.1.10:52344 198.51.100.53:443 ESTABLISHED · Mitschnitt: Seq=… Ack=… Flags [SYN, ACK]",
+    quelle: "TCP – Lernfassung (§ 2 Aufbau mit Nummern) · RFC 9293 · Fragen – Netzwerk-Grundlagen (net-42 bis net-49)",
+  },
+  "lab.cli": {
+    titel: "IOS-Konsole: der Prompt zeigt den Modus",
+    skill: "lab.cli",
+    E: "Die IOS-Konsole hat Modi: Anwender- (>) und Privileg-Modus (#), Konfigurationsmodus (config)# und darunter Schnittstelle, VLAN oder Line (config-if)#, (config-vlan)#. Jeder Befehl gilt nur in seinem Modus; der Prompt zeigt, wo du bist. Mit enable kommst du in den Privileg-Modus, mit configure terminal in die Konfiguration, mit exit eine Ebene zurück.",
+    AP1: "Der Prompt kennzeichnet den Modus (>, #, (config)#, (config-if)#). Befehle wirken nur im passenden Modus; enable und configure terminal führen nach oben, exit und end zurück.",
+    AP2: "Router> enable · Router# configure terminal · Router(config)# interface Gi0/1 · Router(config-if)# % Invalid input detected at '^' marker.",
+    quelle: "Cisco IOS Configuration Fundamentals Configuration Guide: Using the Command-Line Interface · VLAN – Lernfassung",
+  },
+  "lab.speichern": {
+    titel: "running-config und startup-config",
+    skill: "lab.speichern",
+    E: "Jede Änderung landet zuerst in der running-config im RAM – sie gilt sofort, ist aber nach einem Neustart weg. Erst „copy running-config startup-config“ (oder „write memory“) schreibt sie in die startup-config im NVRAM. Auf Switches kommt die VLAN-Datenbank in vlan.dat dazu; sie wird separat gespeichert. Prüf nach dem Speichern mit „show startup-config“, dass deine Zeilen wirklich drinstehen.",
+    AP1: "running-config = aktive Konfiguration im RAM, startup-config = gespeicherte Konfiguration im NVRAM. Ohne copy running-config startup-config ist die Änderung nach dem Neustart verloren; die VLAN-Datenbank liegt zusätzlich in vlan.dat.",
+    AP2: "copy running-config startup-config · Destination filename [startup-config]? · [OK] · show startup-config",
+    quelle: "Cisco IOS Configuration Fundamentals Configuration Guide (Managing Configuration Files) · Cisco Catalyst Software Configuration Guide: Configuring VLANs (vlan.dat)",
+  },
+  "lab.rostick": {
+    titel: "Router-on-a-Stick: eine Leitung, viele VLANs",
+    skill: "lab.rostick",
+    E: "Beim Router-on-a-Stick hängt der Router mit genau einer Leitung am Trunk des Switches. Für jedes VLAN gibt es eine Sub-Schnittstelle (z. B. Gi0/0.10) mit encapsulation dot1Q und einer eigenen IP als Gateway. Der Switch-Port muss Trunk sein, und das VLAN muss auf dem Trunk erlaubt sein. Fehlt eines davon, bleibt das Netz stumm, obwohl die Konfiguration richtig aussieht.",
+    AP1: "Router-on-a-Stick bündelt mehrere VLANs über einen Trunk: je VLAN eine Sub-Schnittstelle mit 802.1Q-Tag und Gateway-IP. Der Switch-Uplink muss Trunk sein, die VLANs müssen in der Allowed-Liste stehen; sonst fehlen die Frames.",
+    AP2: "show ip interface brief: Gi0/0.10 192.168.10.1 … up/up · show interfaces Gi0/0.10: Encapsulation 802.1Q Virtual LAN, Vlan ID 10",
+    quelle: "VLAN – Lernfassung (§ 1 Korrektur 6) · VLAN – Visuelle Lernnotiz · Cisco IOS: Configuring Routing Between VLANs with IEEE 802.1Q Encapsulation",
+  },
+  "lab.portfwd": {
+    titel: "Port-Weiterleitung: ein Dienst von außen",
+    skill: "lab.portfwd",
+    E: "NAT übersetzt nur Adressen; ohne Weiterleitung weiß der Router nicht, welcher Rechner im LAN einen Port von außen bekommen soll. Eine Port-Weiterleitung (statisches NAT mit Port) ordnet zum Beispiel öffentlich 443 dem Server auf 443 im LAN zu. Nur dieser eine Port wird geöffnet – alles andere bleibt zu. Prüf von außen mit dem echten Dienst, nicht mit Ping allein.",
+    AP1: "Statisches NAT mit Port (Port Forwarding) leitet ein öffentliches Port-Paar auf genau einen internen Host und Port um. Nur dieser Port ist erreichbar; die Firewall muss ihn zusätzlich erlauben, und der Zielhost braucht ein Gateway zum Router.",
+    AP2: "show ip nat translations: tcp 203.0.113.2:443 192.168.1.10:443 · von außen: Zeitüberschreitung oder „Verbindung abgelehnt“",
+    quelle: "Cisco IOS NAT Configuration Guide (Static NAT with port) · RFC 3022 · 05-AP2-Infrastruktur-Sicherheit",
+  },
+  "lab.dmz": {
+    titel: "DMZ: der Puffer zwischen Internet und LAN",
+    skill: "lab.dmz",
+    E: "Dienste, die aus dem Internet erreichbar sein müssen (Web, Mail), gehören in eine eigene Zone – die DMZ. Sie liegt zwischen außen und innen, hat ein eigenes Netz und eigene Regeln: von außen nur der eine Dienst, aus der DMZ nichts ins interne Netz, aus dem LAN nur das Nötige in die DMZ. So ist ein gekaperter Webserver nicht sofort im LAN.",
+    AP1: "Die DMZ ist eine eigene Firewall-Zone für öffentlich erreichbare Dienste. Regelwerk: außen → DMZ nur die veröffentlichten Ports, DMZ → innen kein Verkehr (Ausnahmen ausdrücklich), innen → DMZ nur was der Betrieb braucht.",
+    AP2: "Firewall-Protokoll: deny tcp 203.0.113.200 → 172.16.0.10:445 (von aussen nach dmz) · Windows: „Zeitüberschreitung der Anforderung.“",
+    quelle: "05-AP2-Infrastruktur-Sicherheit (DMZ-Regelwerk) · Infrastruktur & Sicherheit – Visuelle Lernnotiz (Firmennetz mit DMZ und VLANs) · BSI IT-Grundschutz-Kompendium, NET.3.2 Firewall",
+  },
+  "lab.storage": {
+    titel: "NAS, SAN und Sicherung: wo die Daten liegen",
+    skill: "lab.storage",
+    E: "Ein NAS liefert Dateien über SMB (TCP 445) oder NFS (2049), ein SAN liefert Blöcke über iSCSI (TCP 3260) oder Fibre Channel. RAID schützt nur vor dem Ausfall einer Platte – gegen Löschen und Verschlüsselung hilft nur eine Sicherung, getrennt vom Gerät (3-2-1). Snapshots zeigen einen alten Stand auf demselben System und sind keine Sicherung. Prüf bei einer Freigabe immer Pfad, Dienst und Berechtigung.",
+    AP1: "NAS = Dateien über SMB/NFS; SAN = Blockspeicher über iSCSI/FC in eigenem Netz. RAID 1/5/6 übersteht Plattenausfälle, ist aber keine Sicherung; Snapshots liegen auf demselben System. Sicherung nach 3-2-1, mindestens eine Kopie außer Haus.",
+    AP2: "net use \\nas-1\plaene: Systemfehler 53 (Netzwerkpfad nicht gefunden) · \\nas-1\plaene: Zugriff verweigert (Fehler 5)",
+    quelle: "IANA Port Number Registry (445, 2049, 3260) · SNIA Dictionary (Snapshot, RAID) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept",
+  },
+  "lab.ipv6": {
+    titel: "IPv6: Adressen, Präfixe und NDP",
+    skill: "lab.ipv6",
+    E: "IPv6-Adressen sind 128 Bit lang, hexadezimal in acht Blöcken geschrieben; führende Nullen fallen weg, und eine Folge von Nullblöcken darf einmal durch :: ersetzt werden. Statt einer Maske gibt es die Präfixlänge (üblich /64), einen Broadcast kennt IPv6 nicht, und die Nachbarschaft löst NDP mit ICMPv6 statt ARP. Die Interface-ID entsteht aus der MAC (EUI-64) oder zufällig als Privacy-Adresse (RFC 4941). Dieses Labor übt Adressierung, Präfixplanung und NDP-Grundlagen – keine IPv6-Konfiguration und kein paketweises Verhalten; Konfiguration und Paketprüfung gehören auf echte Geräte.",
+    AP1: "IPv6: 128-Bit-Adressen, Präfix statt Maske (/64 je LAN), Link-Local fe80::/10, Unique Local fc00::/7, Multicast ff00::/8; NDP (ICMPv6 133–136) übernimmt ARP und Router-Erkennung, die Interface-ID kommt aus EUI-64 oder als Privacy-Adresse (RFC 4941). Im Labor werden Adressierung, Planung und NDP-Grundlagen geübt – nicht Konfiguration, nicht paketweise simuliert.",
+    AP2: "Echtes IOS: show ipv6 interface brief → GigabitEthernet0/0 [up/up], fe80::1, 2001:db8:aa:10::1/64 · echtes IOS führt NDP und SLAAC aus; dieses Labor kennt den Befehl nicht und zeigt keine IPv6-Pakete.",
+    quelle: "RFC 4291 (IPv6-Adressarchitektur) · RFC 4861 (Neighbor Discovery) · RFC 4862 (SLAAC) · RFC 4941 (Privacy-Adressen) · RFC 8415 (DHCPv6) · RFC 3849 (Dokumentationspräfix)",
+  },
+  "lab.betrieb": {
+    titel: "Betrieb: protokollieren, messen, sichern",
+    skill: "lab.betrieb",
+    E: "Betrieb heißt: den Zustand kennen, bevor etwas ausfällt. Syslog sammelt Meldungen zentral, Schwellwerte lösen Warnungen aus, bevor der Speicher voll oder die Leitung dicht ist. Backups brauchen einen Rhythmus und eine getestete Wiederherstellung, keine ungeprüfte Kopie. Uptime und Antwortzeiten zeigen, ob die Verfügbarkeit hält. Dieses Labor übt Bewertung und Planung; Monitoring-Server laufen auf echten Systemen.",
+    AP1: "Betrieb/Überwachung: zentrale Protokollierung (Syslog, NTP für gleiche Zeit), Schwellwerte und Alarmierung, Backup mit dokumentierter Wiederherstellung, Uptime/Verfügbarkeit messen. Kein neues Simulationsverhalten, sondern Bewertung und Planung.",
+    AP2: "Echtes IOS: logging host 192.168.1.50, logging trap informational, show logging · echte Systeme: /var/log/syslog · dieses Labor kennt keinen Logging-Dienst; bewertet werden Schwellwert, Backup und Uptime.",
+    quelle: "BSI IT-Grundschutz-Kompendium, OPS.1.1.5 Protokollierung · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept · RFC 5424 (Syslog) · Cisco IOS Configuration Fundamentals Configuration Guide (logging)",
+  },
+  "lab.wlan": {
+    titel: "WLAN: SSID, VLAN und Sicherheit",
+    skill: "lab.wlan",
+    E: "Ein Access Point brückt Funk und Kabel: die SSID ist der Netzname, und jedes Funkgerät muss sich per Assoziation anmelden. Im Betrieb bekommt jede SSID ein eigenes VLAN, damit Gäste nicht im Firmennetz landen. Verschlüsselung ist Pflicht: WPA2 (CCMP/AES) oder WPA3 (SAE), im Betrieb oft 802.1X mit RADIUS; WEP und WPA mit TKIP gelten als gebrochen. Funk ist ein geteiltes Medium – die beworbene Bruttorate erreicht kein Gerät allein. Dieses Labor plant und bewertet WLAN; die Funkübertragung wird auf echten Geräten geprüft, nicht simuliert.",
+    AP1: "WLAN: SSID = Netzname, Assoziation verbindet Client und AP; SSID↔VLAN trennt Firmen- und Gastnetz. WPA2 (802.11i/RSN, CCMP/AES) und WPA3 (SAE, 802.11-2016/2020) verschlüsseln; ein offenes Gastnetz nur mit Portal und Isolation. Halbduplex, geteiltes Medium, CSMA/CA. Im Labor inhaltlich, nicht paketweise geübt.",
+    AP2: "Windows: Netzwerk „Firma“ nicht verfügbar · AP/WLC: SSID Firma, VLAN 20, WPA2-PSK · Funktechnik auf echten Geräten, nicht das Labor.",
+    quelle: "IEEE 802.11 · IEEE 802.11i (WPA2, CCMP/AES) · WPA3 Specification (Wi-Fi Alliance) · BSI IT-Grundschutz-Kompendium, NET.2.1 WLAN-Betrieb",
+  },
 });
+
+/* Der Skill-Text in der Tiefe des Niveaus (Architektur § 17.4). Nur die 12 Skill-Schlüssel oben;
+   Sim-Code-Texte werden weiter über DATEN.lehrtexte[code][niveau] gelesen. Unbekannte oder fehlende
+   Niveau-Werte fallen auf „E“ zurück, unbekannte Skills liefern null. */
+DATEN.lehrtextFuer = function(skill, niveau){
+  const t = DATEN.lehrtexte && DATEN.lehrtexte[skill];
+  if (!t || !t.skill || !t.E) return null;
+  const n = niveau === "AP1" || niveau === "AP2" ? niveau : "E";
+  return t[n] || t.E;
+};

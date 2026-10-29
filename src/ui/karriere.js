@@ -23,11 +23,11 @@ UI.karriere = (() => {
         offen ? akteZeile(id, c) : null,
         offen ? h("div", {class: "kr-kunde-fuss"},
           h("span", {class: "sp-chip"}, "Stufe " + k.stufe),
-          Spiel.kundenakte.empfohlen(id) ? h("span", {class: "sp-chip uebt", title: "Durch eine Empfehlung eine Stufe früher"}, `💬 empfohlen von ${Spiel.kundenDaten(Spiel.kundenakte.empfehlungen()[id].von).name}`) : null,
+          Spiel.kundenakte.empfohlen(id) ? h("span", {class: "sp-chip uebt", title: "Durch eine Empfehlung eine Stufe früher"}, UI.symbol("sprechblase", 13), ` empfohlen von ${Spiel.kundenDaten(Spiel.kundenakte.empfehlungen()[id].von).name}`) : null,
           sterne && sterne.anzahl ? h("span", {class: "sp-chip geld", title: `${sterne.anzahl} Tickets`}, `★ ${String(sterne.schnitt ?? sterne.mittel ?? "").replace(".", ",")}`) : null,
           vertrag ? h("span", {class: "kr-ampel " + a[0]}, a[1] + " Vertrag: " + a[2] + ` · ${eur(k.euroProStunde)} €/h`) :
             shopEintrag ? h("button", {type: "button", class: "knopf klein" + (shopEintrag.zustand === "kaufbar" ? " primaer" : ""), disabled: shopEintrag.zustand !== "kaufbar", title: shopEintrag.grund || "",
-              onclick: () => kaufen(shopEintrag.id, () => kundenAnsicht(c))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null) : h("span", {class: "kr-schloss"}, "🔒"));
+              onclick: () => kaufen(shopEintrag.id, () => kundenAnsicht(c))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null) : h("span", {class: "kr-schloss", "aria-hidden": "true"}, UI.symbol("schloss", 18)));
     });
     c.replaceChildren(h("div", {class: "kr-seite"}, h("header", {class: "kr-kopf"}, h("h2", {}, "Kunden"),
       h("p", {class: "sp-leise"}, `Stufe ${st.stufe} · ${st.ruf} Ruf · ${Spiel.karriere.vertragskunden().length} Wartungsverträge · ${eur(Spiel.euroProStunde())} €/h passiv`)),
@@ -40,9 +40,9 @@ UI.karriere = (() => {
     const neu = Spiel.kundenakte.kapitel(id).filter(x => x.frei && !x.gelesen).length;
     return h("div", {class: "ka-zeile"},
       h("span", {class: "ka-herzen", title: `Vertrauen ${v} von 5`}, herzen(v)),
-      a ? h("span", {class: "sp-chip", title: "Geräte im Netz-Atlas, an denen du gearbeitet hast"}, `🗺 ${a.hell.length}/${a.gesamt.length}`) : null,
-      bau ? h("span", {class: "sp-chip folge", title: "Offene Provisorien"}, `🩹 ${bau}`) : null,
-      neu ? h("span", {class: "sp-chip uebt"}, `📖 ${neu} neu`) : null,
+      a ? h("span", {class: "sp-chip", title: "Geräte im Netz-Atlas, an denen du gearbeitet hast"}, UI.symbol("plan", 13), ` ${a.hell.length}/${a.gesamt.length}`) : null,
+      bau ? h("span", {class: "sp-chip folge", title: "Offene Provisorien"}, UI.symbol("provisorium", 13), ` ${bau}`) : null,
+      neu ? h("span", {class: "sp-chip uebt"}, UI.symbol("wiki", 13), ` ${neu} neu`) : null,
       h("button", {type: "button", class: "knopf klein", onclick: () => akteAnsicht(c, id)}, "Akte ▸"));
   }
   function akteAnsicht(c, id){
@@ -69,9 +69,9 @@ UI.karriere = (() => {
       h("section", {class: "ka-block"}, h("h3", {}, "Geschichten"),
         h("ol", {class: "ka-kapitel"}, kap.map(x => h("li", {class: x.frei ? (x.gelesen ? "gelesen" : "frei") : "zu"},
           x.frei ? h("button", {type: "button", class: "ka-kapitel-knopf", onclick: () => kapitelLesen(id, x.nr, () => akteAnsicht(c, id))}, `${x.nr}. ${x.titel}`, x.gelesen ? (x.beantwortet ? " ✓" : "") : h("span", {class: "ka-neu"}, " neu"))
-            : h("span", {}, `${x.nr}. 🔒 ab Vertrauen ${x.ab}`))))),
+            : h("span", {}, `${x.nr}. `, UI.symbol("schloss", 13), ` ab Vertrauen ${x.ab}`))))),
       bau.length ? h("section", {class: "ka-block"}, h("h3", {}, "Offene Baustellen"),
-        h("ul", {class: "ka-baustellen"}, bau.map(b => h("li", {}, `🩹 Provisorium bei „${b.titel}“ – `, b.imPostfach ? "der Folgeauftrag liegt im Postfach." : b.offen ? `meldet sich in etwa ${b.offen} ${b.offen === 1 ? "Auftrag" : "Aufträgen"} wieder.` : "meldet sich bald wieder.")))) : null,
+        h("ul", {class: "ka-baustellen"}, bau.map(b => h("li", {}, UI.symbol("provisorium", 13), ` Provisorium bei „${b.titel}“ – `, b.imPostfach ? "der Folgeauftrag liegt im Postfach." : b.offen ? `meldet sich in etwa ${b.offen} ${b.offen === 1 ? "Auftrag" : "Aufträgen"} wieder.` : "meldet sich bald wieder.")))) : null,
       h("section", {class: "ka-block"}, h("h3", {}, "Zuletzt"),
         verlauf.length ? h("ul", {class: "ka-verlauf"}, verlauf.map(e => h("li", {}, `${(Spiel.ticketDef(e.id) || {}).titel || e.id} · ${"★".repeat(Math.floor(e.sterne || 0))}${(e.sterne || 0) % 1 ? "½" : ""} · ${datumDe(e.tag)}`)))
           : h("p", {class: "sp-leise"}, "Noch kein Auftrag für diesen Kunden."))));
@@ -89,7 +89,7 @@ UI.karriere = (() => {
     }}, o)));
     UI.app.dialogOeffnen(`${kd(kunde).name} · ${g.titel}`, h("div", {class: "ka-geschichte"},
       h("p", {class: "ka-text"}, g.text),
-      h("p", {class: "ka-senior"}, h("span", {class: "sp-senior-sym", "aria-hidden": "true"}, "🧑‍🔧"), h("span", {}, g.senior, h("small", {}, " — der Senior"))),
+      h("p", {class: "ka-senior"}, h("span", {class: "sp-senior-sym", "aria-hidden": "true"}, UI.symbol("senior", 28)), h("span", {}, g.senior, h("small", {}, " — der Senior"))),
       h("p", {class: "ka-frage"}, h("b", {}, g.frage.text)), fragen, ergebnis), "ka-dialog");
     if (danach) danach();                                           /* Akte dahinter frisch: Kapitel ist jetzt gelesen */
   }
@@ -156,7 +156,7 @@ UI.karriere = (() => {
         klappe("playbooks", "Playbooks und Slots", `${kaufbar} kaufbar · ${st.playbooks.aktiv.length}/${st.playbooks.slots} belegt`),
         auf.playbooks ? h("div", {}, slot ? zeile(slot, "Playbook-Slot", slot.zustand === "kaufbar" ? `${eur(slot.preis)} €` : slot.zustand === "gekauft" ? "✓ alle Slots gekauft" : `Dir fehlen ${eur(slot.preis - st.euro)} €`) : null,
           offen.map(spielZeile)) : null,
-        gesperrt ? h("p", {class: "sp-leise kr-fuss"}, `🔒 ${gesperrt} weitere ${gesperrt === 1 ? "Fertigkeit wird" : "Fertigkeiten werden"} ab „sicher“ kaufbar – üben kannst du sie in der Kompetenzkarte.`) : null,
+        gesperrt ? h("p", {class: "sp-leise kr-fuss"}, UI.symbol("schloss", 13), ` ${gesperrt} weitere ${gesperrt === 1 ? "Fertigkeit wird" : "Fertigkeiten werden"} ab „sicher“ kaufbar – üben kannst du sie in der Kompetenzkarte.`) : null,
         h("p", {class: "sp-leise kr-fuss"}, "Playbooks lösen Wartungs-Tickets ihrer Fertigkeit automatisch (60 % Ertrag, ohne Lernwirkung). Ist die Fertigkeit fällig, pausiert das Playbook, bis du die Wiederholung gemacht hast.")),
       klappe("aussehen", "Aussehen", `${aussehen.length} Artikel`),
       auf.aussehen ? h("div", {class: "kr-raster klein"}, aussehen.map(karte)) : null,
@@ -218,7 +218,7 @@ UI.karriere = (() => {
             : h("span", {class: "kr-abz-stand"}, h("span", {class: "kr-bar"}, h("i", {style: {width: Math.round(100 * a.ist / a.soll) + "%"}})), h("small", {}, `${zahlDe(a.ist)} / ${zahlDe(a.soll)}`)))))));
     c.replaceChildren(h("div", {class: "kr-seite"},
       h("header", {class: "kr-kopf"}, h("h2", {}, "Lernstand"), h("p", {class: "sp-leise"}, (n => `Serie: ${n} ${n === 1 ? "Tag" : "Tage"}`)(typeof L !== "undefined" ? L.serie() : 0) + (n => ` · heute ${n} ${n === 1 ? "Übung" : "Übungen"}`)(typeof L !== "undefined" ? L.heuteZahl() : 0),
-        " ", h("button", {type: "button", class: "knopf klein geist", title: "Spieltagebuch: kurze Auswertung zum Einfügen in einen Chat", onclick: () => UI.hub.tagebuchKopieren()}, "📋 Auswertung kopieren"))),
+        " ", h("button", {type: "button", class: "knopf klein geist", title: "Spieltagebuch: kurze Auswertung zum Einfügen in einen Chat", onclick: () => UI.hub.tagebuchKopieren()}, UI.symbol("auswertung", 16), " Auswertung kopieren"))),
       h("section", {class: "kr-karriere"},
         h("div", {}, h("small", {}, "Karriere"), h("h3", {}, `Stufe ${info.stufe} · ${info.name}`)),
         info.naechste ? h("div", {class: "kr-balken"},
@@ -233,7 +233,7 @@ UI.karriere = (() => {
         h("p", {class: "sp-leise"}, `3 Aufgaben, ${Spiel.PRUEFUNG.MINUTEN} Minuten, keine Hilfe – Note nach IHK-Punkteschlüssel. Die erste Prüfung ist gebührenfrei.`),
         p ? h("button", {type: "button", class: "knopf primaer", onclick: () => pruefungUebersicht()}, `Laufende Prüfung ${p.art} öffnen`) :
           h("div", {class: "sp-knoepfe"}, ["AP1", "AP2"].map(art => h("button", {type: "button", class: "knopf", onclick: () => pruefungStarten(art)}, `Prüfung ${art} starten (${Spiel.PRUEFUNG.GEBUEHR[art]} €)`))),
-        (st.zertifikate || []).length ? h("div", {class: "kr-zert"}, st.zertifikate.map(z => h("span", {class: "kr-zertifikat"}, `🎓 ${z.art} · Note ${z.note} · ${datumDe(z.tag)}`))) : null,
+        (st.zertifikate || []).length ? h("div", {class: "kr-zert"}, st.zertifikate.map(z => h("span", {class: "kr-zertifikat"}, UI.symbol("urkunde", 14), ` ${z.art} · Note ${z.note} · ${datumDe(z.tag)}`))) : null,
         (st.pruefungen || []).length ? h("p", {class: "sp-leise"}, "Bisher: " + st.pruefungen.slice(-5).map(x => `${x.art} ${x.punkte} P. (Note ${x.note})`).join(" · ")) : null),
       h("section", {class: "kr-zwei"},
         h("div", {}, h("h3", {}, "Fehlerheft"), fehler.length ? h("ul", {class: "kr-fehlerheft"}, fehler.map(f => h("li", {}, h("b", {}, Spiel.karriere.skillName(f.unit) + ": "), f.text))) : h("p", {class: "sp-leise"}, "Noch leer.")),
@@ -279,7 +279,7 @@ UI.karriere = (() => {
   function overlay(inhalt){
     const o = h("div", {class: "sp-overlay", role: "dialog", "aria-modal": "true"}, h("div", {class: "sp-karte"}, inhalt));
     document.body.append(o); requestAnimationFrame(() => o.classList.add("da"));
-    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), 180); document.removeEventListener("keydown", esc); };
+    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), UI.zeit("dauer")); document.removeEventListener("keydown", esc); };
     /* Escape muss auch hier schließen. Gemessen von „menu-auditor“ am 06.10.2026:
        „Prüfung AP1“ und „Mini-Ticket“ blieben nach Escape offen (Geometrie unverändert),
        während die Overlays aus spiel.js und hub.js korrekt schlossen — die hatten den
@@ -319,8 +319,8 @@ UI.karriere = (() => {
       const kopf = e && !e.zusatz ? h("small", {class: "sp-leise"}, `Stufe ${e.s.stufe} · ${e.s.ap}`) : null;
       artikel.append(kopf, h("h2", {}, w.titel), h("p", {class: "kr-kurz"}, w.kurz),
         ...(w.abschnitte || []).map(a => h("section", {}, h("h3", {}, a.titel), h("div", {html: a.html}))),
-        w.merksatz ? h("p", {class: "kr-merksatz"}, "💡 ", w.merksatz) : null,
-        w.pruefungstipp ? h("p", {class: "kr-tipp"}, "🎯 Prüfungstipp: ", w.pruefungstipp) : null,
+        w.merksatz ? h("p", {class: "kr-merksatz"}, UI.symbol("idee", 16), " ", w.merksatz) : null,
+        w.pruefungstipp ? h("p", {class: "kr-tipp"}, UI.symbol("ziel", 16), " Prüfungstipp: ", w.pruefungstipp) : null,
         (w.siehe || []).length ? h("p", {}, "Siehe auch: ", ...w.siehe.filter(x => DATEN.wiki[x]).flatMap((x, i) => [i ? " · " : "", h("a", {href: "#", onclick: e => { e.preventDefault(); K.wikiWahl = x; wikiAnsicht(c); }}, DATEN.wiki[x].titel)])) : null,
         h("p", {class: "sp-leise"}, "Quelle im Vault: " + (w.quelle || "–")));
     }
@@ -354,7 +354,7 @@ UI.karriere = (() => {
       if (!offen && !naechste) return null;
       const kinder = [];
       if (offen) kinder.push(h("div", {class: "mk-hilfe" + (offen.frei ? "" : " knapp")},
-        h("b", {class: "mk-hilfe-art"}, offen.art === "ausschnitt" ? "🔎 Ausschnitt aus der Aufgabe" : "💡 Denkhilfe"),
+        h("b", {class: "mk-hilfe-art"}, offen.art === "ausschnitt" ? [UI.symbol("suche", 14), " Ausschnitt aus der Aufgabe"] : [UI.symbol("idee", 14), " Denkhilfe"]),
         h("p", {class: "mk-hilfe-text"}, offen.text),
         offen.frei ? null : h("small", {class: "mk-hilfe-vorrat"}, "Der Vorrat an freien Hilfen ist aufgebraucht – die Hilfe bleibt.")));
       if (naechste) kinder.push(h("button", {type: "button", class: "mk-klein mk-hilfe-knopf", tabindex: "-1",
@@ -371,7 +371,7 @@ UI.karriere = (() => {
       /* Lernanker: nach der Antwort, mit belegter Quelle und Verweis auf UI.wiki.oeffnen (§ 5). */
       const a = Spiel.mini.anker(m.id);
       const anker = a ? h("div", {class: "mk-anker"},
-        h("b", {class: "mk-anker-titel"}, "📌 Lernanker: " + a.titel),
+        h("b", {class: "mk-anker-titel"}, UI.symbol("anker", 14), " Lernanker: " + a.titel),
         h("p", {class: "mk-anker-text"}, a.text),
         a.quelle ? h("p", {class: "mk-anker-quelle"}, "Quelle: " + a.quelle) : null,
         a.wiki ? h("button", {type: "button", class: "mk-klein mk-wiki-knopf", tabindex: "-1", onmousedown: e2 => e2.preventDefault(),
@@ -491,7 +491,7 @@ UI.karriere = (() => {
     if (!f || f.gesehen) return;
     UI.klang?.spielen("fanfare");
     const kunden = (f.kunden || []).map(kd);
-    const zu = overlay(h("div", {class: "sp-willkommen sp-fest"}, h("span", {class: "sp-senior-sym gross"}, "🎉"),
+    const zu = overlay(h("div", {class: "sp-willkommen sp-fest"}, h("span", {class: "sp-senior-sym gross"}, UI.symbol("feier", 56)),
       h("small", {class: "sp-leise"}, "Aufstieg"),
       h("h2", {}, `Stufe ${f.stufe}: ${f.name}`), h("p", {}, "„" + f.satz + "“"),
       kunden.length ? h("p", {}, "Neue Kunden: ", kunden.map(k => `${k.symbol} ${k.name}`).join(", ")) : null,
@@ -521,10 +521,10 @@ UI.karriere = (() => {
     if (!Spiel._st) return null;
     const t = Spiel.tag.heute();
     return h("div", {class: "kr-tag", title: "Heute dran"},
-      h("span", {}, `🔥 ${t.serie} Tag${t.serie === 1 ? "" : "e"} Serie · ${t.erledigtHeute}/${t.ziel} Tickets heute`),
+      h("span", {}, UI.symbol("serie", 13), ` ${t.serie} Tag${t.serie === 1 ? "" : "e"} Serie · ${t.erledigtHeute}/${t.ziel} Tickets heute`),
       t.faellig.length ? h("button", {type: "button", class: "knopf klein", onclick: () => { const n = Spiel.tag.bereitschaftStarten(); UI.toast(n.length ? `${n.length} Wiederholung${n.length === 1 ? "" : "en"} als Bereitschaftsdienst im Postfach.` : "Gerade nichts Fälliges mit Ticket.", "info"); UI.spiel.status(); if (UI.app.aktuell === "postfach") UI.app.ansicht("postfach"); }},
-        `🛠 Bereitschaftsdienst (${t.faellig.length} fällig)`) : null,
-      h("button", {type: "button", class: "knopf klein geist", onclick: () => miniDialog()}, "⚡ Mini-Ticket"));
+        UI.symbol("werkzeug", 14), ` Bereitschaftsdienst (${t.faellig.length} fällig)`) : null,
+      h("button", {type: "button", class: "knopf klein geist", onclick: () => miniDialog()}, UI.symbol("blitz", 16), " Mini-Ticket"));
   }
 
   /* ---------- Anmeldung ---------- */

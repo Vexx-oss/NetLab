@@ -26,10 +26,14 @@
    aufgerufen (Code bauen/lesen, Abdruck, Kanonisierung, Tabellen). Diese Datei baut keinen zweiten Codec.
 
    Die eingefrorenen Tabellen (§ 2.3 Regel 1) stehen als Literal HIER; sie wurden in dieser Sitzung gegen die
-   Wirklichkeit gemessen: 58 Auftrags-IDs in Spiel.ticketReihe()-Reihenfolge, 27 Fertigkeiten in
-   DATEN.skills-Reihenfolge, jede mit ersterSeed 1 (alle 27 liefern bei Seed 1 einen gültigen Auftrag –
-   lab.portsec/lab.stp/lab.storage sind seit den Injektoren aus task-5 adressierbar; ältere Belege nennen
-   dort 24 von 27). Ein Test wacht über Reihenfolge und Präfix (§ 2.3 Regel 4).
+   Wirklichkeit gemessen: 58 Auftrags-IDs in Spiel.ticketReihe()-Reihenfolge, 30 Fertigkeiten in
+   DATEN.skills-Reihenfolge (0–26 alt, 27–29 seit S6a/S6b ans ENDE angehängt, Architektur § 17.1),
+   jede mit ersterSeed 1. Adressierbar sind die Fertigkeiten mit Injektor (28); lab.ipv6/lab.wlan
+   stehen ehrlich auf tauglich: false (inhaltlich geübt, nicht paketweise simuliert).
+   WICHTIG (§ 17.9, Leitungsentscheidung 29.10.2026): Die Auftragstabelle bleibt das 58er-Literal und
+   wird NICHT mit Spiel.ticketReihe() gleichgesetzt. Der Codec-Index ist 6 Bit breit – die 15 neuen
+   2.1-Tickets (Reihe 73, S7 → 76) sind bewusst nicht klassenraum-adressierbar; 3.1 hebt das Format
+   mit Migrationsweg an. Ein Test wacht über IDs, Stabilität der alten Codes und die Entkopplung.
 
    `sitzung.plaetze` (Leitungsentscheidung L6, bewusst gegen A § 7.1, das „genau diese 14 Felder" sagt):
    0 = „nicht eingestellt", sonst 1..31 – die Ampel der Lehrkraft rechnet „offen" als plaetze − eingetragen.
@@ -62,6 +66,13 @@ Spiel.klassenraum = (() => {
     {id: "lab.fw", tauglich: true, ersterSeed: 1}, {id: "lab.dmz", tauglich: true, ersterSeed: 1},
     {id: "lab.portsec", tauglich: true, ersterSeed: 1}, {id: "lab.stp", tauglich: true, ersterSeed: 1},
     {id: "lab.storage", tauglich: true, ersterSeed: 1},
+    /* S6a/S6b (Architektur § 17.1, append-only): ausschließlich ANS ENDE, Indizes 27–29.
+       tauglich nur, wo ein Injektor wirklich einen Auftrag bauen kann: lab.betrieb ja (Störungsbezug
+       über gespeichert-kaputt/geraet-stromlos), lab.ipv6 und lab.wlan nein – sie werden inhaltlich
+       geübt, nicht paketweise simuliert (kein Schein-Auftrag). */
+    {id: "lab.ipv6", tauglich: false, ersterSeed: 1},
+    {id: "lab.betrieb", tauglich: true, ersterSeed: 1},
+    {id: "lab.wlan", tauglich: false, ersterSeed: 1},
   ];
 
   /* Die Tabelle des Codec wird EINMAL aus diesen Listen gebaut (§ 2.3 Regel 1: die Reihenfolge ist bindend,

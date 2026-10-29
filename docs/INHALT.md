@@ -38,7 +38,7 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`entwicklung/Konzept – Netzwerk-Labor.md`](<entwicklung/Konzept – Netzwerk-Labor.md>) | Die Spezifikation des Spiels. |
 | [`entwicklung/Konzept – Lernplattform für Betriebe und Schulen.md`](<entwicklung/Konzept – Lernplattform für Betriebe und Schulen.md>) | Konzept für den Einsatz im Unterricht und in der Ausbildung. |
 | [`entwicklung/Befund – Programm startet wieder.md`](<entwicklung/Befund – Programm startet wieder.md>) | Der Befund zum Integritätslabel, das die `.exe` blockierte — samt Reparaturweg. |
-| [`entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md`](<entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>) | Vertrag für die nächste Stufe: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag — **noch nicht umgesetzt** (Fassung 1.2.3). |
+| [`entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md`](<entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>) | Vertrag für die Lehrkraft-Funktion: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag — **Stufen A+B seit 2.0.0 gebaut, C/D offen** (Fassung 2.0.5). |
 | [`entwicklung/Klassenraum/`](entwicklung/Klassenraum/Liesmich.md) | Die vier Teil-Dokumente zu diesem Vertrag (A Codec/Determinismus · B Oberfläche/Ablauf · C Rust/Live/QR · D Prüfung/Abnahme) mit allen Messprotokollen. |
 | [`entwicklung/Opus-Auftrag – Netzwerk-Labor.md`](<entwicklung/Opus-Auftrag – Netzwerk-Labor.md>) | Der ursprüngliche Auftrag, aus dem das Projekt entstand. |
 
@@ -80,7 +80,7 @@ Hilfevorrat, die geöffneten Trainingskarten, die Denkhilfen, Hilfe-Vorschläge 
 mit IPv6 und WLAN, die Wache gegen die Lernmotor-Falle — dazu drei Nachträge aus dem laufenden Auftrag:
 **keine schnelle Wiederholung**, der **sichtbare nächste Schritt** und der **Fragen-Generator**. Die
 Fassung wurde auf **2.0.0** gezogen und gebaut — inzwischen steht sie auf **2.0.1** (Veröffentlichung des
-heutigen Standes, CHANGELOG-Abschnitt 2.0.1): **`v2.0.0` ist veröffentlicht**, `v2.0.1` folgt mit Freigabe. Die gemessenen Zahlen stehen im [CHANGELOG](CHANGELOG.md) § 2.0.0, die Begründungen und die
+heutigen Standes, CHANGELOG-Abschnitt 2.0.1): Die Tags `v2.0.0`–`v2.0.5` existieren (gemessen: 13 Tags, `git tag --list`); ob der Release `v2.0.5` online steht, ist in dieser Sitzung **nicht geprüft**. Die gemessenen Zahlen stehen im [CHANGELOG](CHANGELOG.md) § 2.0.0, die Begründungen und die
 verworfenen Versuche im [Design](<entwicklung/Design – Spielspaß 2.0.md>) § 33.
 
 Die **zweite Hälfte derselben Fassung** ist der **Öffnungsweg (Klassenraum Stufe A+B)**: der Auftragscode,
@@ -116,11 +116,14 @@ Was nach der ausgelieferten 2.0 kommt — als Plan, nicht als Wunschzettel.
 Bis zum 06.10.2026 lagen zwölf Notizen im Wurzelverzeichnis; ein Besucher sah sie vor dem
 Quelltext. Auf Wunsch wurden sie hierher gezogen — **mit** `git mv`, damit die
 Versionsgeschichte jeder Datei erhalten bleibt, und mit angepassten Verweisen
-(`tools/repo-aufraeumen.py`, `tools/repo-verweise-flicken.py`; der zweite Lauf prüft
-**jeden** relativen Verweis in **jeder** Markdown-Datei gegen die Wirklichkeit).
+(`tools/repo-aufraeumen.py`, `tools/repo-verweise-flicken.py`). **Grenze des alten Werkzeugs
+(26.10.2026 gemessen):** `repo-verweise-flicken.py` liest `git ls-files "*.md"`, git gibt Pfade
+mit Umlauten aber quotiert aus — dadurch sah es nur **42 statt 78** Dateien. Seit 26.10.2026 prüft
+`python tools/stand.py --pruefen` alle Markdown-Dateien (auch die mit Umlauten) und meldet
+**199 relative Verweise, 0 tot**.
 
-Im Wurzelverzeichnis bleiben nur, was man dort erwartet: `README.md`, `CHANGELOG.md`
-(Konvention auf GitHub), `LICENSE`, `LIZENZ.md`, `AGENTS.md`, `.gitignore`,
+Im Wurzelverzeichnis bleiben nur, was man dort erwartet: `README.md`, `LICENSE`, `LIZENZ.md`,
+`AGENTS.md` (der `CHANGELOG.md` liegt bewusst in `docs/`), `.gitignore`,
 `.gitattributes`, `index.html` (Weiterleitung für Pages), die Baueingänge `bauen.py` und
 `schriften.css` sowie die Ordner `src/`, `tests/`, `tools/`, `android/`, `shell/`,
 `schriften/`, `Vorlagen/`, `Programm/`, `fremd/` und `docs/`.

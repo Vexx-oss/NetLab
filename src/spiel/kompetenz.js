@@ -1,22 +1,25 @@
 "use strict";
 /* ---------- Kompetenzkarte (Design – Spielspaß 2.0, Hebel 11a; Architektur § 9.7) ----------
-   Die 27 Fertigkeiten als Landkarte in sechs Regionen. Zustand je Feld:
+   Die 30 Fertigkeiten als Landkarte in sechs Regionen (S6a/S6b: lab.ipv6, lab.betrieb, lab.wlan
+   ans Ende von DATEN.skills angehängt und hier einsortiert). Zustand je Feld:
      nebel   weder geübt noch freigeschaltet (Karriere-Stufe) noch neben einem schon geübten Feld – man sieht nur „?“
      offen   sichtbar, noch nie geübt
      danach  die Stufe des Lernmotors: angefangen · gesehen · geübt · sicher · gemeistert · gemeistert ★ (Box 0–5)
    Nachbarn: innerhalb einer Region die Reihe, dazu fachliche Brücken zwischen Regionen (KOMPETENZ_BRUECKEN). */
 Spiel.KOMPETENZ_REGIONEN = [
-  {id: "adressierung", titel: "Adressierung", sym: "🔢", skills: ["lab.ip", "lab.netz", "lab.subnetz", "lab.gateway", "lab.arp"]},
-  {id: "switching", titel: "Switching & VLAN", sym: "🔀", skills: ["lab.link", "lab.switch", "lab.vlan", "lab.trunk", "lab.stp"]},
+  {id: "adressierung", titel: "Adressierung", sym: "🔢", skills: ["lab.ip", "lab.netz", "lab.subnetz", "lab.gateway", "lab.arp", "lab.ipv6"]},
+  {id: "switching", titel: "Switching & VLAN", sym: "🔀", skills: ["lab.link", "lab.switch", "lab.vlan", "lab.trunk", "lab.stp", "lab.wlan"]},
   {id: "routing", titel: "Routing", sym: "🧭", skills: ["lab.route", "lab.ttl", "lab.rostick", "lab.nat", "lab.portfwd"]},
   {id: "dienste", titel: "Dienste", sym: "🛎", skills: ["lab.ping", "lab.dhcp", "lab.dns", "lab.ports", "lab.tcp"]},
   {id: "sicherheit", titel: "Sicherheit", sym: "🛡", skills: ["lab.acl", "lab.fw", "lab.dmz", "lab.portsec"]},
-  {id: "betrieb", titel: "Betrieb & Storage", sym: "🗄", skills: ["lab.cli", "lab.speichern", "lab.storage"]},
+  {id: "betrieb", titel: "Betrieb & Storage", sym: "🗄", skills: ["lab.cli", "lab.speichern", "lab.storage", "lab.betrieb"]},
 ];
 Spiel.KOMPETENZ_BRUECKEN = [
   ["lab.ip", "lab.dhcp"], ["lab.gateway", "lab.route"], ["lab.arp", "lab.switch"], ["lab.link", "lab.ping"], ["lab.netz", "lab.vlan"],
   ["lab.trunk", "lab.rostick"], ["lab.nat", "lab.fw"], ["lab.portfwd", "lab.dmz"], ["lab.ports", "lab.acl"], ["lab.switch", "lab.portsec"],
   ["lab.switch", "lab.cli"], ["lab.ports", "lab.storage"], ["lab.ttl", "lab.ping"],
+  /* S6a/S6b: fachliche Brücken der drei neuen Fertigkeiten. */
+  ["lab.ipv6", "lab.ip"], ["lab.wlan", "lab.vlan"], ["lab.betrieb", "lab.storage"],
 ];
 Spiel.KOMPETENZ_STUFEN = ["angefangen", "gesehen", "geübt", "sicher", "gemeistert", "gemeistert ★"];
 Spiel.kompetenz = {};

@@ -241,6 +241,23 @@ DATEN.hilfen = {
      befehl: "ip link", syntax: "ip link",
      erklaerung: "Ist eth0 des Servers oder NAS oben? NO-CARRIER heißt: kein Link – dann kommt kein Frame an.",
      geraet: "host-linux", modus: [], ebene: 2, art: "pruefen"},
+
+    /* ---- Welle 2 · S6 (Architektur § 17.1): IPv6, Betrieb und WLAN sind Lehrthemen – im Simulator
+       werden sie gelesen, geplant und bewertet, nicht paketweise ausgeführt. Die drei Vorschläge zeigen
+       deshalb nur Befehle, die auf den vorhandenen Geräten wirklich laufen (geprüft in
+       tests/spiel-hilfe-vorschlaege.test.js gegen die echte CLI). ---- */
+    {id: "ipv6-win-adressen", bereich: "ip", skills: ["lab.ipv6", "lab.ip"],
+     befehl: "ipconfig /all", syntax: "ipconfig /all",
+     erklaerung: "Zeigt alle Adressen dieses Rechners – auch die IPv6-Adressen. Im Labor wird IPv6 gelesen, geplant und bewertet, nicht paketweise simuliert.",
+     geraet: "host-windows", modus: [], ebene: 1, art: "pruefen"},
+    {id: "betrieb-win-verbindungen", bereich: "dienst", skills: ["lab.betrieb", "lab.ports"],
+     befehl: "netstat", syntax: "netstat",
+     erklaerung: "Welche Verbindungen stehen offen? Der erste Blick bei „läuft, aber niemand kommt an“ – und die Grundlage für ein Betriebsprotokoll.",
+     geraet: "host-windows", modus: [], ebene: 1, art: "pruefen"},
+    {id: "wlan-switch-vlan", bereich: "vlan", skills: ["lab.wlan", "lab.vlan"], nurTyp: ["switch"],
+     befehl: "show vlan brief", syntax: "show vlan brief",
+     erklaerung: "Im Labor gibt es keine Funkzelle: SSID, Gäste- und Firmennetz werden als VLAN geplant – diese Liste zeigt, ob die Zuordnung steht.",
+     geraet: "ios", modus: ["user", "priv"], ebene: 1, art: "pruefen"},
   ],
 
   /* „Was geht hier?" je CLI-Modus. Erste Zeile = Kurzfassung, ab der zweiten Zeile ausführlich. */

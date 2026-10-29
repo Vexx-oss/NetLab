@@ -189,11 +189,11 @@
       for (const v of e3) erwarte.gleich(v.art, "aendern", v.id + ": Ebene 3 („ändert etwas“) muss ändern");
     });
 
-    pruefe("Alle 27 Fertigkeiten haben mindestens einen Vorschlag – die 10 vormals leeren sind dabei" + EB2_ZUSATZ, () => {
+    pruefe("Alle 30 Fertigkeiten haben mindestens einen Vorschlag – die 10 vormals leeren und die drei neuen aus § 17.1 sind dabei" + EB2_ZUSATZ, () => {
       if (!EB2_IM_TESTBEREICH) return;
       const V = DATEN.hilfen.VORSCHLAEGE;
       const skills = DATEN.skills.map(s => s.id);
-      erwarte.gleich(skills.length, 27, "DATEN.skills führt 27 Fertigkeiten");
+      erwarte.gleich(skills.length, 30, "DATEN.skills führt 30 Fertigkeiten (27 + lab.ipv6/lab.betrieb/lab.wlan, § 17.1)");
       const ohne = skills.filter(s => !V.some(v => (v.skills || []).includes(s)));
       erwarte.gleich(ohne, [], "keine Fertigkeit ohne Vorschlag mehr (vorher 10: " + OHNE_VORHER.join(", ") + ")");
       for (const s of OHNE_VORHER) erwarte.wahr(V.some(v => (v.skills || []).includes(s)), "die vormals leere Fertigkeit " + s + " hat jetzt einen Vorschlag");
@@ -518,7 +518,7 @@
   }
   function messung(){
     const n = netzMitNAS();
-    const eintraege = new Map(), skills = new Map();
+    const eintraege = new Map(), eintraegeDran = new Map(), skills = new Map();
     let sichten = 0, mitVorschlag = 0, doppel = 0;
     const doppelBeispiele = [];
     for (const [id, art] of GERAETE_MESSUNG) for (const modus of MODI_JE_ART[art]) for (const verlauf of verlaufKetten(n, id, modus))
@@ -534,10 +534,16 @@
             doppel++;
             if (doppelBeispiele.length < 6) doppelBeispiele.push(id + "/" + modus + "/" + stufe + (fehler ? "/Fehler" : "") + " → " + texte.join(" + "));
           }
-          for (const s of DATEN.skills) if (Spiel.hilfe.leiter(Object.assign({}, o, {skill: s.id})).some(x => x.dran)) skills.set(s.id, (skills.get(s.id) || 0) + 1);
+          for (const s of DATEN.skills) {
+          const l = Spiel.hilfe.leiter(Object.assign({}, o, {skill: s.id}));
+          if (l.some(x => x.dran)) skills.set(s.id, (skills.get(s.id) || 0) + 1);
+          /* Welle 2 · S4: Ein Vorschlag ist auch dann erreichbar, wenn er als hervorgehobene Sprosse
+             (dran) erscheint – der Streifen zeigt je Sicht nur die obersten N, die Leiter aber alle sechs. */
+          for (const x of l) if (x.dran && x.vorschlag && x.vorschlag.id) eintraegeDran.set(x.vorschlag.id, (eintraegeDran.get(x.vorschlag.id) || 0) + 1);
+        }
         });
       }
-    return {sichten, mitVorschlag, eintraege, skills, doppel, doppelBeispiele,
+    return {sichten, mitVorschlag, eintraege, eintraegeDran, skills, doppel, doppelBeispiele,
       alleIds: DATEN.hilfen.VORSCHLAEGE.map(v => v.id), alleSkills: DATEN.skills.map(s => s.id)};
   }
   let EB2_M = null;
@@ -547,7 +553,8 @@
     pruefe("A2: kein Vorschlag bleibt im Streifen unsichtbar" + EB2_ZUSATZ, () => {
       if (!EB2_IM_TESTBEREICH) return;
       const m = messungEinmal();
-      const ohne = m.alleIds.filter(id => !m.eintraege.get(id));
+      /* Ein Vorschlag ist erreichbar, wenn er im Streifen erscheint ODER als hervorgehobene Sprosse (dran). */
+      const ohne = m.alleIds.filter(id => !m.eintraege.get(id) && !(m.eintraegeDran && m.eintraegeDran.get(id)));
       const selten = [...m.eintraege.entries()].sort((a, b) => a[1] - b[1]).slice(0, 6).map(x => x[0] + "=" + x[1]).join(", ");
       const vier = ["ip-ios-subif", "link-linux-nas", "ip-fw-schnittstellen", "link-switch-schleife"].map(id => id + "=" + (m.eintraege.get(id) || 0)).join(", ");
       if (EB2_MESSUNG) console.log(`MESSUNG A2 · Sichten ${m.sichten} · mit Vorschlag ${m.mitVorschlag} · nie erschienen ${ohne.length}${ohne.length ? ": " + ohne.join(", ") : ""} · die vier vormals unsichtbaren: ${vier} · seltenste: ${selten}`);

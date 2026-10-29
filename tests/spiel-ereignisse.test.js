@@ -57,6 +57,9 @@ gruppe("Spiel: Ereignisse", () => {
       if (inst.providerStoerung) Spiel.ereignisse.providerAnrufen(inst);
       if (e.geraet && id === "kabelschaden") Spiel.zuruecksetzen(inst);
       for (const s of Spiel.vorfuehren(inst)) Spiel.vorfuehrenSchritt(inst, s.nr - 1);
+      /* Welle 2 · S4: Handtickets tragen jetzt Doku-Ziele (notiz). Die gehören zur Arbeit wie jeder Befehl –
+         ohne diese Zeile prüfte der Fall eine Abnahme, die die Dokumentation absichtlich offen lässt. */
+      Spiel.arbeitszieleErfuellen(inst);
       const ab = Spiel.abnahme(inst);
       erwarte.wahr(ab.bestanden, id + ": " + JSON.stringify(ab.ergebnisse.map(x => [x.ok, x.grund]).concat(ab.kollateral.map(k => k.text))));
     }

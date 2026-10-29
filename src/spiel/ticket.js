@@ -123,18 +123,57 @@ Spiel.zieleLive = function(inst){
   return {status, erfuellt: n, gesamt: status.length, neuOk, alle: status.length > 0 && n === status.length};
 };
 
-/* ---- Regression: was im Start-Netz ging, muss nachher noch gehen ---- */
+/* ---- Regression: was im Start-Netz ging, muss nachher noch gehen ----
+   B-Bericht § 3.4: Die Regression war eng (nur ICMP zwischen Endgeräten) – Dienste (HTTP, DNS, DHCP,
+   Druckfreigabe/Port 445) und der Drucker als Endgerät waren NIE Regression, obwohl viele Tickets genau
+   Dienst- und Druckerziele haben. Seit 2.1 S3 prüft sie zusätzlich DIENSTE und Drucker – aus vorhandenen
+   Feldern (running.dienste, if.eth0), KEINE neue Datenform (Architektur § 17.2). */
 Spiel.HOSTTYPEN = {pc: true, server: true, nas: true};
+Spiel.REGRESSION_MAX = 90;                    /* Dienstziele + ICMP-Paare (vorher 45 reine ICMP-Paare) */
 
-/* Paare, die für den Regressionstest in Frage kommen: Endgeräte untereinander (ICMP), ohne Geräte,
-   die laut Ticket absichtlich ausgesperrt werden (von-Seite eines „blockiert“-Ziels). def.regression:false schaltet ab. */
+/* ICMP-Paare (Alt-Form, für gespeicherte Instanzen und Rückwärtskompatibilität). */
 Spiel.regressionsPaare = function(def, netz){
-  if (def.regression === false) return [];
-  const ohne = new Set([...(def.ziele || []).filter(z => z.typ === "blockiert").map(z => z.von), ...(def.regressionOhne || [])]);
+  if (def && def.regression === false) return [];
+  const ohne = new Set([...((def && def.ziele) || []).filter(z => z.typ === "blockiert").map(z => z.von), ...((def && def.regressionOhne) || [])]);
   const hosts = Object.values(netz.geraete).filter(g => Spiel.HOSTTYPEN[g.typ] && !ohne.has(g.id)).map(g => g.id).sort();
   const paare = [];
   for (let i = 0; i < hosts.length; i++) for (let j = i + 1; j < hosts.length; j++) paare.push({von: hosts[i], nach: hosts[j]});
   return paare.slice(0, Spiel.REGRESSION_MAX);
+};
+
+/* Alle Regressions-Basen eines Tickets im Startnetz: [{text, ziel}] mit ziel = vollständiges Sim.pruefeZiel-Objekt.
+   Reihenfolge: Dienste und DHCP zuerst (gezielt), dann ICMP-Paare; begrenzt durch REGRESSION_MAX. */
+Spiel.regressionsBasen = function(def, netz){
+  if (!def || def.regression === false) return [];
+  const ohne = new Set([...(def.ziele || []).filter(z => z.typ === "blockiert").map(z => z.von), ...(def.regressionOhne || [])]);
+  const ids = Object.values(netz.geraete).filter(g => Spiel.HOSTTYPEN[g.typ] && !ohne.has(g.id)).map(g => g.id).sort();
+  const basen = [];
+  const ziel = (text, z) => basen.push({text, ziel: Object.assign({typ: "erreichbar"}, z)});
+  const eth0 = id => ((((netz.geraete[id] || {}).running || {}).if) || {}).eth0 || {};
+  for (const id of ids) {
+    const g = netz.geraete[id], d = (g.running || {}).dienste || {};
+    const andere = ids.filter(v => v !== id);
+    const dienst = (schluessel, port, proto, name) => {
+      if (!(d[schluessel] && d[schluessel].an)) return;
+      for (const von of andere) ziel(name + " auf " + g.name, {von, nach: id, proto, port});
+    };
+    dienst("datei", 445, "tcp", "Dateifreigabe (Port 445)");
+    dienst("druck", 9100, "tcp", "Druckfreigabe (Port 9100)");
+    dienst("ssh", 22, "tcp", "SSH");
+    dienst("http", 80, "http", "Webdienst (HTTP)");
+    dienst("https", 443, "http", "Webdienst (HTTPS)");
+    if (d.dns && d.dns.an) {
+      /* Nur DASS der Name aufgelöst wird ist Regression – nicht, auf WELCHE IP: der Eintrag zu ändern ist
+         bei DNS-Tickets genau die Lösung (tr-dns-falsches-geraet). Die inhaltliche Richtigkeit prüft das
+         Ticketziel, nicht die Regression. */
+      const e = (d.dns.eintraege || [])[0], von = andere.find(v => eth0(v).dns === eth0(id).ip);
+      if (e && von) ziel("Namensauflösung auf " + g.name, {von, nach: id, proto: "dns", name: e.name});
+    }
+    if (d.dhcp && d.dhcp.an) for (const von of andere) if (eth0(von).dhcp) ziel("DHCP-Adresse über " + g.name, {typ: "dhcp", von, nach: id, port: "eth0"});
+  }
+  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++)
+    ziel("Erreichbarkeit " + netz.geraete[ids[i]].name + " ↔ " + netz.geraete[ids[j]].name, {von: ids[i], nach: ids[j], proto: "icmp"});
+  return basen.slice(0, Spiel.REGRESSION_MAX);
 };
 
 Spiel.basisMessen = function(inst){
@@ -142,22 +181,25 @@ Spiel.basisMessen = function(inst){
   const def = Spiel.defVon(inst);
   const start = Spiel.startNetzVon(inst);
   const basis = [];
-  for (const p of Spiel.regressionsPaare(def, start)) {
-    const r = Spiel.zielPruefen(start, {typ: "erreichbar", von: p.von, nach: p.nach, proto: "icmp"});
-    if (r && r.ok) basis.push(p);
+  for (const b of Spiel.regressionsBasen(def, start)) {
+    const r = Spiel.zielPruefen(start, b.ziel);
+    if (r && r.ok) basis.push(b);
   }
   inst.basis = basis;
   return basis;
 };
 
-/* Regressionstest auf einem Netz: [{von, nach, ok, grund, text, trace}] für alle Basis-Paare */
+/* Regressionstest auf einem Netz: [{von, nach, ok, grund, text, trace}] für alle Regressions-Basen.
+   Unterstützt gespeicherte Alt-Instanzen, deren inst.basis noch reine ICMP-Paare ({von,nach}) sind. */
 Spiel.regressionPruefen = function(inst, netz){
   if (!inst.basis) Spiel.basisMessen(inst);
   const liste = [];
-  for (const p of inst.basis || []) {
-    if (!netz.geraete[p.von] || !netz.geraete[p.nach]) { liste.push({von: p.von, nach: p.nach, ok: false, grund: "DEVICE_OFF", text: "Gerät entfernt", trace: null}); continue; }
-    const r = Spiel.zielPruefen(netz, {typ: "erreichbar", von: p.von, nach: p.nach, proto: "icmp"}) || {};
-    liste.push({von: p.von, nach: p.nach, ok: r.ok !== false, grund: r.grund || null, text: r.text || "", trace: r.trace || null});
+  for (const b of inst.basis || []) {
+    const z = b.ziel || {typ: "erreichbar", von: b.von, nach: b.nach, proto: "icmp"};
+    const von = z.von, nach = z.nach || null;
+    if ((von && !netz.geraete[von]) || (nach && !netz.geraete[nach])) { liste.push({von, nach, ok: false, grund: "DEVICE_OFF", text: "Gerät entfernt", trace: null}); continue; }
+    const r = Spiel.zielPruefen(netz, z) || {};
+    liste.push({von, nach, ok: r.ok !== false, grund: r.grund || null, text: r.ok !== false ? (b.text || r.text || "") : ((b.text || "Regression") + ": " + (r.text || r.grund || "geht nicht mehr")), trace: r.trace || null});
   }
   return liste;
 };

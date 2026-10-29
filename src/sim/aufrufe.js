@@ -78,7 +78,7 @@
       return {ok: false, grund: lg.grund, lease: null, text: lg.text, stelle: e};
     }
     const xid = Sim._hash(`${g.id}|${port}|${L.t}|${L.ev.length}`) % 1000000;
-    const dhcpFrame = (felder, info) => Sim._frame({ip: {src: "0.0.0.0", dst: "255.255.255.255", ttl: 128, proto: "UDP", id: Sim._neueIpId(L, g.id)},
+    const dhcpFrame = (felder, info) => Sim._frame({ip: {src: "0.0.0.0", dst: "255.255.255.255", ttl: L3().ttlStart(g), proto: "UDP", id: Sim._neueIpId(L, g.id)},
       udp: {src: 68, dst: 67}, app: {proto: "DHCP", info, felder: Object.assign({xid, clientMac: ifc.mac, clientIp: "0.0.0.0", angeboten: "0.0.0.0", relay: "0.0.0.0", server: null}, felder)}});
     const passt = typen => fr => !!(fr.app && fr.app.proto === "DHCP" && fr.app.felder && fr.app.felder.xid === xid && typen.includes(fr.app.felder.typ));
     let angebot = null;
@@ -328,7 +328,10 @@
     vorbereiten(L, g);
     const z = zielAufloesen(L, g, zielIp);
     if (!z.ok) { stelleSetzen(L, z.stelle); return {ok: false, grund: z.grund, hops: [], trace: Sim._trace(L, false, z.text || "Ziel unbekannt"), text: z.text}; }
-    const win = istWin(g), max = opt.maxHops || 30, timeout = win ? Sim.T.PING_WIN : Sim.T.PING_IOS;
+    /* Probe-Art je Betriebssystem (Architektur § 16.3): Windows-Endgeräte senden ICMP-Echo, Linux-Endgeräte
+       UDP-Proben auf hohe Ports – so wie im Wiki gelehrt. Die Wartezeit bleibt wie bisher: Endgeräte 4 s, IOS 2 s. */
+    const win = Sim._istHost(g) && Modell.osVon(g) === "windows";
+    const max = opt.maxHops || 30, timeout = Sim._istHost(g) ? Sim.T.PING_WIN : Sim.T.PING_IOS;
     const zst = Sim._z(L, g.id); zst.pingId = ((zst.pingId || 0) % 65000) + 1;
     const ident = zst.pingId, hops = [];
     let fertig = false, ok = false, grund = null, seq = 0, udpPort = 33434;

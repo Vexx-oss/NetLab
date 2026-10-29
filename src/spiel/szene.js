@@ -103,7 +103,7 @@ Spiel.szeneText = function(netz, ziel, art, ende, ereignis){
       return `${ziel.name || ziel.nach} gefunden`;
     case "gesperrt": return "Gesperrt – wie gewünscht";
     case "sicherung": return "Konfiguration gesichert";
-    default: return ziel.typ === "konfig" ? "Einstellung passt" : ziel.typ === "befehl" ? "Befehl ausgeführt" : ziel.typ === "antwort" ? "Antwort stimmt" : `${name(ende)} antwortet`;
+    default: return ziel.typ === "konfig" ? "Einstellung passt" : ziel.typ === "befehl" ? "Befehl ausgeführt" : ziel.typ === "antwort" ? "Antwort stimmt" : ziel.typ === "notiz" ? "Eintrag geschrieben" : ziel.typ === "tabelle" ? "Tabelle stimmt" : ziel.typ === "audit" ? "Plan geprüft" : `${name(ende)} antwortet`;
   }
 };
 
@@ -116,7 +116,12 @@ Spiel.szene = function(instOderNetz, abnahme){
     const z = e.ziel;
     let pfad, ende, ereignis = null;
     if (z.typ === "konfig" || z.typ === "gespeichert") { pfad = netz.geraete[z.geraet] ? [z.geraet] : []; ende = z.geraet; }
-    else if (Spiel.istArbeitsziel(z)) { ende = z.geraet || (z.pruefen || {}).geraet; pfad = netz.geraete[ende] ? [ende] : []; }
+    else if (Spiel.istArbeitsziel(z)) {
+      /* Arbeitsziele ohne Gerät (notiz/tabelle/audit, Welle 2 · S4): Die Zeile braucht einen Anker, sonst
+         fiele sie aus der Funktionsprobe. Server als sinnvoller Ort der Dokumentation, sonst das erste Gerät. */
+      ende = z.geraet || (z.pruefen || {}).geraet || Object.keys(netz.geraete).find(id => netz.geraete[id].typ === "server") || Object.keys(netz.geraete)[0];
+      pfad = netz.geraete[ende] ? [ende] : [];
+    }
     else ({pfad, ende, ereignis} = Spiel.szenePfad(netz, z, e.trace));
     if (!pfad.length || !netz.geraete[ende]) continue;
     const art = Spiel.szeneArt(netz, z, ende);

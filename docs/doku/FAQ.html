@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Häufige Fragen und Troubleshooting · Netzwerk-Labor</title>
+<meta name="description" content="Häufige Fragen und Troubleshooting — ehrlich beantwortet, mit Verweis auf die Stelle, an der es belegt ist.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Häufige Fragen und Troubleshooting</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#spielen-und-starten">Spielen und Starten</a></li>
+<li style="margin-left:16px"><a href="#1-muss-ich-fur-das-spiel-ins-internet">1. Muss ich für das Spiel ins Internet?</a></li>
+<li style="margin-left:16px"><a href="#2-wo-liegt-mein-spielstand-und-warum-ist-er-im-windows-programm-nicht-da">2. Wo liegt mein Spielstand — und warum ist er im Windows-Programm nicht da?</a></li>
+<li style="margin-left:16px"><a href="#3-das-windows-programm-offnet-kein-fenster-was-ist-los">3. Das Windows-Programm öffnet kein Fenster. Was ist los?</a></li>
+<li style="margin-left:16px"><a href="#4-smartscreen-warnt-beim-start-ist-das-ein-problem">4. SmartScreen warnt beim Start. Ist das ein Problem?</a></li>
+<li style="margin-left:16px"><a href="#5-warum-liegt-im-release-keine-apk-fur-android">5. Warum liegt im Release keine APK für Android?</a></li>
+<li style="margin-left:16px"><a href="#6-lauft-es-auf-linux-und-macos">6. Läuft es auf Linux und macOS?</a></li>
+<li style="margin-left:16px"><a href="#7-die-bilder-im-readme-zeigen-eine-altere-version-warum">7. Die Bilder im README zeigen eine ältere Version. Warum?</a></li>
+<li><a href="#unterricht-lizenz-weitergabe">Unterricht, Lizenz, Weitergabe</a></li>
+<li style="margin-left:16px"><a href="#8-darf-ich-das-im-unterricht-oder-in-der-ausbildung-einsetzen">8. Darf ich das im Unterricht oder in der Ausbildung einsetzen?</a></li>
+<li style="margin-left:16px"><a href="#9-darf-ich-es-verkaufen-oder-kommerziell-nutzen">9. Darf ich es verkaufen oder kommerziell nutzen?</a></li>
+<li style="margin-left:16px"><a href="#10-ist-die-doku-offentlich">10. Ist die Doku öffentlich?</a></li>
+<li><a href="#beitragen-und-bauen">Beitragen und Bauen</a></li>
+<li style="margin-left:16px"><a href="#11-wie-baue-ich-das-spiel-selbst">11. Wie baue ich das Spiel selbst?</a></li>
+<li style="margin-left:16px"><a href="#12-warum-stehen-im-readme-keine-testzahlen">12. Warum stehen im README keine Testzahlen?</a></li>
+<li style="margin-left:16px"><a href="#13-ein-test-schlagt-fehl-wie-melde-ich-das">13. Ein Test schlägt fehl. Wie melde ich das?</a></li>
+<li style="margin-left:16px"><a href="#14-ich-will-etwas-beitragen-was-gilt">14. Ich will etwas beitragen — was gilt?</a></li>
+<li style="margin-left:16px"><a href="#15-was-fehlt-noch-ipv6-ospf-wlan-stp">15. Was fehlt noch (IPv6, OSPF, WLAN, STP)?</a></li>
+</ul>
+</nav><h1 id="haufige-fragen-und-troubleshooting">Häufige Fragen und Troubleshooting</h1>
+<p>Hier stehen die Fragen, die beim Ausprobieren, im Unterricht und beim Beitragen erfahrungsgemäß zuerst kommen — jeweils mit der <strong>Stelle, an der es belegt ist</strong>. Wo etwas nicht gemessen wurde, steht das ausdrücklich so. Zahlen (Tests, Module, Größen) stehen grundsätzlich nicht hier, sondern in <a href="STAND.html">STAND.md</a> — sie werden bei jedem Lauf gemessen, nicht abgeschrieben.</p>
+<h2 id="spielen-und-starten">Spielen und Starten</h2>
+<h3 id="1-muss-ich-fur-das-spiel-ins-internet">1. Muss ich für das Spiel ins Internet?</h3>
+<p><strong>Nein.</strong> Die ausgelieferte Einzeldatei (<code>Netzwerk-Labor.html</code>) lädt nichts nach: Schriften sind eingebettet, es gibt <strong>0 Außenverweise</strong>. Das prüft <code>python tools/einfach.py --pruefen</code> über <code>&lt;link&gt;</code>, <code>&lt;script src&gt;</code>, <code>&lt;img src&gt;</code> und <code>url()</code>. Die Browser-Fassung im Netz braucht natürlich einmal eine Verbindung, um geladen zu werden.</p>
+<h3 id="2-wo-liegt-mein-spielstand-und-warum-ist-er-im-windows-programm-nicht-da">2. Wo liegt mein Spielstand — und warum ist er im Windows-Programm nicht da?</h3>
+<p>Browser und Windows-Programm speichern <strong>getrennt</strong>:</p>
+<ul><li>Browser: <code>localStorage</code> der jeweiligen Adresse</li><li>Windows: <code>%APPDATA%\de.fisi.netzwerklabor\spielstand.json</code></li></ul>
+<p>Sie tauschen sich nicht aus. Ob ein Browser <code>localStorage</code> für eine per Doppelklick geöffnete Datei (<code>file://</code>) dauerhaft behält, ist <strong>nicht gemessen</strong> — für den Unterricht ist der Weg über den Browser oder das Windows-Programm verlässlicher.</p>
+<h3 id="3-das-windows-programm-offnet-kein-fenster-was-ist-los">3. Das Windows-Programm öffnet kein Fenster. Was ist los?</h3>
+<p>Gemessener Grund: ein <strong>Integritätslabel „Niedrig"</strong> auf dem Programmordner (Überrest einer Werkzeug-Sandbox). Die <code>.exe</code> erbt es, läuft als Low-Prozess und darf <code>%LOCALAPPDATA%</code> nicht beschreiben; die WebView2-Laufzeit kann ihr Profil nicht anlegen und bricht ab (<code>failed to create webview</code>, <code>0x800700AA</code>).</p>
+<p><strong>Abhilfe (ohne Administratorrechte, wiederholbar):</strong> <code>Programm/Integritaet-reparieren.cmd</code> doppelklicken. Der ausführliche Befund liegt in <code>Nachweise/1.2-Start/BEFUND.md</code> — <strong>nicht im Repo</strong> (<code>Nachweise/</code> ist nicht versioniert); im Repo zusammengefasst in <a href="Architektur.html">Architektur.md</a> und <a href="Bauen.html">Bauen.md</a>.</p>
+<h3 id="4-smartscreen-warnt-beim-start-ist-das-ein-problem">4. SmartScreen warnt beim Start. Ist das ein Problem?</h3>
+<p>Die <code>.exe</code> ist <strong>nicht signiert</strong> — Windows zeigt deshalb beim ersten Start den SmartScreen-Hinweis („Weitere Informationen" → „Trotzdem ausführen"). Das ist erwartbar und kein Fehler des Programms. Eine Signatur kostet Geld und ist nicht Teil des Projekts.</p>
+<h3 id="5-warum-liegt-im-release-keine-apk-fur-android">5. Warum liegt im Release keine APK für Android?</h3>
+<p>In den Releases liegt <strong>keine</strong> APK (geprüft am 26.10.2026), und im Klon ist keine. Die APK baut man selbst: <code>python android/bauen.py</code> (Android-SDK mit build-tools ≥ 35 und JDK 17+ nötig). <strong>Nicht geprüft</strong> ist ein Lauf auf einem echten Telefon oder Emulator — ein Gerät stand nicht zur Verfügung. Details: <a href="Bauen.html">Bauen.md</a>, Abschnitt Android, und <span class="dk-tot" title="„../android/LIESMICH.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">android/LIESMICH.md</span> (nicht Teil der Doku-Seite).</p>
+<h3 id="6-lauft-es-auf-linux-und-macos">6. Läuft es auf Linux und macOS?</h3>
+<p>Im <strong>Browser</strong> ja — die Einzeldatei ist plattformunabhängig. Die Linux-Pakete unter <code>Programm/linux/</code> sind <strong>Stand 1.0</strong> und enthalten die Neuerungen seit 1.1 nicht. Getestet wurde Linux nur in <strong>WSLg</strong>, nicht auf einem echten GNOME/KDE — dort gibt es keinen Tray-Dienst. macOS ist <strong>nicht geprüft</strong>.</p>
+<h3 id="7-die-bilder-im-readme-zeigen-eine-altere-version-warum">7. Die Bilder im README zeigen eine ältere Version. Warum?</h3>
+<p>Die Screenshots stammen aus den Abnahme-Nachweisen der Fassung <strong>1.1.0</strong>; Oberfläche und Aufbau sind gleich geblieben, nur die kleinen Ziffern in der Kopfzeile der Bilder sind älter. Herkunft, Quellpfad und SHA256 jeder Aufnahme stehen in <a href="bilder/HERKUNFT.html">bilder/HERKUNFT.md</a>. Ohne Browser wurden in der 2.1-Runde <strong>keine</strong> neuen Bilder erzeugt — das ist ausdrücklich „nicht geprüft".</p>
+<h2 id="unterricht-lizenz-weitergabe">Unterricht, Lizenz, Weitergabe</h2>
+<h3 id="8-darf-ich-das-im-unterricht-oder-in-der-ausbildung-einsetzen">8. Darf ich das im Unterricht oder in der Ausbildung einsetzen?</h3>
+<p><strong>Ja.</strong> PolyForm Noncommercial 1.0.0 erlaubt Spielen, Üben und Unterricht — auch in Schulen und Bildungseinrichtungen. Kein Konto, kein Server, keine Bewertung, kein Netz nötig. Der Klassenraum (Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag) ist in <strong>Stufen A+B</strong> gebaut; Bewertung, Server und QR stehen aus — Stand in <a href="Architektur.html">Architektur.md</a> § 12 und <a href="CHANGELOG.html">CHANGELOG.md</a>.</p>
+<h3 id="9-darf-ich-es-verkaufen-oder-kommerziell-nutzen">9. Darf ich es verkaufen oder kommerziell nutzen?</h3>
+<p><strong>Nein</strong>, nicht ohne gesonderte Erlaubnis. Verkaufen, kommerzielles Nutzen und Weitergeben unter eigener Flagge sind untersagt; der verbindliche Text ist <code>LICENSE</code>, die deutsche Erklärung mit Ausnahmen (Schriften, Inhalte, Marken) steht in <code>LIZENZ.md</code>. Beide Texte liegen dem Auslieferungspaket bei und sind seit 2.1.0 <strong>auch in der Einzeldatei</strong> als Lizenzblock enthalten (PolyForm + die drei OFL-Texte der eingebetteten Schriften).</p>
+<h3 id="10-ist-die-doku-offentlich">10. Ist die Doku öffentlich?</h3>
+<p><strong>Ja</strong> — seit 07.10.2026 wird die gesamte Doku als HTML unter <a href="https://vexx-oss.github.io/NetLab/doku/">vexx-oss.github.io/NetLab/doku/</a> ausgeliefert (erzeugt von <code>python tools/seite.py</code> aus den Markdown-Dateien, versioniert in <code>docs/doku/</code>). Das umfasst auch die langen Entwicklungsnotizen. Wer etwas Internes nicht öffentlich haben will, legt es nicht in <code>docs/</code> ab.</p>
+<h2 id="beitragen-und-bauen">Beitragen und Bauen</h2>
+<h3 id="11-wie-baue-ich-das-spiel-selbst">11. Wie baue ich das Spiel selbst?</h3>
+<p>Voraussetzung: Node (für Tests) und Python 3 (für die Werkzeuge).</p>
+<pre><code class="sprache-bash">git clone https://github.com/Vexx-oss/NetLab.git
+cd NetLab
+python bauen.py            # src/ -&gt; web/index.html
+python tools/einfach.py    # web/ -&gt; docs/index.html und Netzwerk-Labor.html (byte-gleich)
+sh tools/test.sh           # Tests headless in Node
+python tools/stand.py --pruefen   # die Zahlen in STAND.md/README gegen die Messung</code></pre>
+<p>Die Reihenfolge ist wichtig (<code>bauen.py</code> zuerst). Für die Windows-Hülle kommt Rust dazu (<code>cargo tauri build</code>), für Android das Android-SDK. Details: <a href="Bauen.html">Bauen.md</a>.</p>
+<h3 id="12-warum-stehen-im-readme-keine-testzahlen">12. Warum stehen im README keine Testzahlen?</h3>
+<p>Weil sie zu oft falsch abgeschrieben wurden: Bis 2.1 standen <strong>fünf</strong> verschiedene Testzahlen im selben Repo (aus fünf Fassungen). Seit 2.1 gibt es genau <strong>eine</strong> Quelle: <a href="STAND.html">STAND.md</a>, erzeugt von <code>python tools/stand.py</code> aus einem echten Testlauf; <code>--pruefen</code> meldet jede Abweichung. Zahlen in README und Doku werden nicht mehr getippt.</p>
+<h3 id="13-ein-test-schlagt-fehl-wie-melde-ich-das">13. Ein Test schlägt fehl. Wie melde ich das?</h3>
+<p>Ein <strong>Issue</strong> im Repo (Vorlage: <code>.github/ISSUE_TEMPLATE/bug_report.md</code>) mit: Befehl, vollständiger Ausgabe, Betriebssystem, Node-Fassung und ob die FISi-Spielhalle daneben liegt (<code>../FISI-Spielhalle</code>). Keine Zugangsdaten, keine Spielstände mit Klarnamen anhängen. <strong>Sicherheitslücken</strong> bitte nicht als öffentliches Issue: siehe <code>SECURITY.md</code>.</p>
+<h3 id="14-ich-will-etwas-beitragen-was-gilt">14. Ich will etwas beitragen — was gilt?</h3>
+<p>Arbeite auf dem Zweig <code>ausbau-1.2</code>, halte dich an <a href="AGENTS.html">../AGENTS.md</a> (kurz: keine Prozesse nach Namen beenden, kein Push ohne Absprache, nichts behaupten, was nicht gemessen ist) und an <a href="Mitmachen.html">Mitmachen.md</a>. Ein Beitrag zählt erst, wenn er <strong>im Programm wirkt</strong> („Wirkung vor Grün") und die Tests grün bleiben. Fehlt eine Zahl, gehört sie in <code>STAND.md</code> — nicht in Prosa wiederholt.</p>
+<h3 id="15-was-fehlt-noch-ipv6-ospf-wlan-stp">15. Was fehlt noch (IPv6, OSPF, WLAN, STP)?</h3>
+<p>Die Simulation deckt IPv4 mit VLAN, Routing, ACL, NAT, DHCP, DNS, TCP/HTTP und Firewall ab. <strong>Nicht enthalten</strong> sind derzeit STP, OSPF, IPv6, WLAN und 802.1X — sie stehen im 3.0-Programm. Ein Wiki-Befehl, den das Labor nicht kann, ist dort ausdrücklich als „echtes Gerät" gekennzeichnet (Architektur § 15.2, Punkt 5).</p>
+<hr>
+<p><strong>Wenn etwas hier fehlt:</strong> Issue mit der Frage stellen. Was oft gefragt wird, wandert in diese Datei — und was dabei als „nicht geprüft" herauskommt, bleibt genau so stehen.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

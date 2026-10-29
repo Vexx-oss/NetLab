@@ -1,6 +1,6 @@
 "use strict";
 /* ---------- Netz-Editor: die Labor-Ansicht (Konzept § 7 „Fläche“, Architektur § 9) ----------
-   UI.labor = { netz, verlauf, auswahl:{geraet, port}|null,
+   UI.labor = { netz, verlauf, auswahl:{geraet, port}|null, auswahlMehr() → [ids],
                 laden(netz, {titel, verlauf?, auftrag?(el)}), auswaehlen(id, port?), hervorheben(liste, ms?),
                 animiere(ereignis, {ms}?), zeigeTrace(trace), neuZeichnen(),
                 einpassen(), aufraeumen(), werkzeug(name), zentrieren(id), ping(vonId, nachId), konsole(id),
@@ -19,7 +19,7 @@ UI.labor = (() => {
     netz: null, verlauf: null, opt: {}, titel: "Labor",
     root: null, svg: null, welt: null, s: {}, el: {},
     view: {tx: 0, ty: 0, k: 1},
-    auswahl: null, kabelWahl: null,
+    auswahl: null, auswahlSet: new Set(), kabelWahl: null,
     werkzeug: "auswahl", platz: null, pingVon: null,
     gEl: new Map(), kEl: new Map(), karten: new Map(), versatz: new Map(),
     warn: new Map(), ohne: new Set(),
@@ -84,7 +84,7 @@ UI.labor = (() => {
       Z.el.ansichtGruppe,
       h("div", {class: "lb-luecke"}),
       Z.el.verlaufGruppe);
-    const unten = h("div", {class: "lb-leiste-unten"}, h("div", {class: "lb-gruppe"}, Z.el.zoomText));
+    const unten = h("div", {class: "lb-leiste-unten"}, Z.el.zoomGruppe = h("div", {class: "lb-gruppe"}, Z.el.zoomText));
     Z.el.hinweis = h("div", {class: "lb-hinweis", "aria-live": "polite"});
     Z.el.leer = h("div", {class: "lb-leer", hidden: true},
       h("strong", {}, "Die Fläche ist leer."),
@@ -142,6 +142,8 @@ UI.labor = (() => {
     werkzeugAnzeigen();
     if (Z.netz) { zeichnen(); inspektorZeigen(); }
     simLeer();
+    /* Werkstatt (Architektur § 16.5): Leiste nur im Sandbox-Kontext, Minimap immer – reine Ansicht. */
+    if (UI.werkstatt?.einrichten?.(Z.root, {sandbox: !!Z.opt.sandbox}) && Z.el.zoomGruppe) Z.el.zoomGruppe.hidden = true;
     requestAnimationFrame(() => { if (Z.einpassenAusstehend || !Z.gesehen) { einpassen(false); Z.einpassenAusstehend = false; Z.gesehen = true; } else ansichtSetzen(); });
   }
   /* Wiederanzeige nach Ansichtswechsel (DOM blieb erhalten) */
@@ -221,6 +223,7 @@ UI.labor = (() => {
        So bleibt bei jedem Zoom etwas Lesbares stehen, statt zu schrumpfen oder zu verschwinden. */
     Z.svg?.classList.toggle("wenig-text", k < 0.95);
     Z.svg?.classList.toggle("klein", k < 0.6);
+    UI.werkstatt?.ansichtGeaendert?.();
   }
   function weltPunkt(clientX, clientY){
     const r = Z.svg.getBoundingClientRect();
@@ -243,7 +246,7 @@ UI.labor = (() => {
     return {k, tx: mx - (mx - Z.view.tx) * (k / Z.view.k), ty: my - (my - Z.view.ty) * (k / Z.view.k)};
   }
   let ansichtAnim = 0;
-  function ansichtAnimieren(ziel, ms = 260){
+  function ansichtAnimieren(ziel, ms = UI.zeit("mittel")){      /* Zeit-Token statt 260-ms-Literal (U07) */
     const start = {...Z.view}, id = ++ansichtAnim;
     if (UI.bewegung?.() !== "voll" || ms <= 0) { Object.assign(Z.view, ziel); ansichtSetzen(); return; }
     const t0 = performance.now();
@@ -264,9 +267,9 @@ UI.labor = (() => {
     const extra = UI.ebenen.aktuell === "mac" || UI.ebenen.aktuell === "routen" ? 190 : 0;
     return {x1: x1 - 80, y1: y1 - 80, x2: x2 + 80 + extra, y2: y2 + 90};
   }
-  function einpassen(animiert = true){
+  function einpassen(animiert = true, ids = null){
     if (!Z.svg) return;
-    const r = Z.svg.getBoundingClientRect(), b = grenzen();
+    const r = Z.svg.getBoundingClientRect(), b = grenzen(ids && ids.length ? ids : undefined);
     if (!r.width || !r.height) { Z.einpassenAusstehend = true; return; }
     let ziel;
     if (!b) ziel = {k: 1, tx: r.width / 2 - 400, ty: r.height / 2 - 260};
@@ -333,6 +336,7 @@ UI.labor = (() => {
       console.error("Zeichnen", e);
       zeichenFehler(e);
     }
+    UI.werkstatt?.netzGeaendert?.();
   }
   /* Zeigt die Fläche wirklich das geladene Netz? Merkmal sind die `data-id` der gezeichneten Geräte
      gegen `Z.netz.geraete` (Vorgabe der Leitung). */
@@ -554,23 +558,130 @@ UI.labor = (() => {
     requestAnimationFrame(() => { zonenGeplant = false; Z.s.zonen.replaceChildren(); UI.ebenen.zeichneZonen(Z.s.zonen, Z.netz, pos); });
   }
 
-  /* ---------- Auswahl, Inspektor ---------- */
+  /* ---------- Auswahl, Inspektor ----------
+     Auswahl ist seit 3.0 eine MENGE (Z.auswahlSet, Architektur § 16.5). Z.auswahl bleibt als
+     Einzelgerät-Kompatibilität bestehen: Inspektor, Konsole, Befehlspalette und andere Bausteine
+     lesen weiterhin {geraet, port}; gezeigt wird dort das ZULETZT gewählte Gerät („primär"). */
   function auswaehlen(id, port){
     if (id && !Z.netz?.geraete[id]) id = null;
-    const alt = Z.auswahl?.geraet || null;
-    Z.auswahl = id ? {geraet: id, port: port || null} : null;
-    if (id) Z.kabelWahl = null;
-    for (const el of Z.gEl.values()) el.classList.toggle("gewaehlt", el.dataset.id === id);
+    auswahlSetzen(id ? [id] : [], {primaer: id, port});
+  }
+  /* Kern aller Auswahlwege: setzt die Menge, zeichnet die Ringe, meldet den Bus, öffnet den Inspektor. */
+  function auswahlSetzen(ids, o = {}){
+    const vorher = [...Z.auswahlSet].sort().join("|");
+    const gueltig = [];
+    for (const id of ids || []) if (Z.netz?.geraete[id] && !gueltig.includes(id)) gueltig.push(id);
+    Z.auswahlSet = new Set(gueltig);
+    const primaer = o.primaer && Z.auswahlSet.has(o.primaer) ? o.primaer : gueltig[gueltig.length - 1] || null;
+    Z.auswahl = primaer ? {geraet: primaer, port: o.port || null} : null;
+    if (gueltig.length) Z.kabelWahl = null;
+    for (const el of Z.gEl.values()) {
+      const an = Z.auswahlSet.has(el.dataset.id);
+      el.classList.toggle("gewaehlt", an);
+      el.classList.toggle("primaer", an && el.dataset.id === primaer);
+    }
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
-    Bus.senden("auswahl", {geraet: id || null, port: port || null});
-    if (alt !== id) inspektorZeigen();
+    const geaendert = vorher !== [...Z.auswahlSet].sort().join("|");
+    if (!geaendert) return gueltig;
+    Bus.senden("auswahl", {geraet: primaer || null, port: Z.auswahl?.port || null, geraete: gueltig.slice(), mehr: gueltig.length});
     /* Auswahl zeigt den Inspektor – außer Plan oder Akte sind gerade offen (dort gehört die Auswahl zum Vergleich) */
-    if (id && alt !== id && !(dockOffen("plan") || dockOffen("akte"))) dockZeigen("inspektor");
-    else if (id && Z.inspWartet) { Z.inspWartet = false; layoutAnwenden(); }
+    if (Z.auswahlSet.size && !(dockOffen("plan") || dockOffen("akte"))) dockZeigen("inspektor");
+    else if (Z.auswahlSet.size && Z.inspWartet) { Z.inspWartet = false; layoutAnwenden(); }
+    inspektorZeigen();
+    return gueltig;
+  }
+  /* Shift-/Strg-Klick: Gerät zur Menge hinzufügen oder herausnehmen. */
+  function auswahlUmschalten(id){
+    if (!Z.netz?.geraete[id]) return [...Z.auswahlSet];
+    const jetzt = [...Z.auswahlSet];
+    const i = jetzt.indexOf(id);
+    if (i >= 0) jetzt.splice(i, 1); else jetzt.push(id);
+    return auswahlSetzen(jetzt, {primaer: i >= 0 ? jetzt[jetzt.length - 1] : id});
+  }
+  function auswahlAlle(){ return Z.netz ? auswahlSetzen(Object.keys(Z.netz.geraete)) : []; }
+  /* Geräte, deren Mittelpunkt im Welt-Rechteck liegt (Marquee). */
+  function geraeteImRechteck(b){
+    const ids = [];
+    if (!b || !Z.netz) return ids;
+    for (const g of Object.values(Z.netz.geraete)) {
+      const p = pos(g.id);
+      if (p && p.x >= b.x1 && p.x <= b.x2 && p.y >= b.y1 && p.y <= b.y2) ids.push(g.id);
+    }
+    return ids;
+  }
+  function auswahlImRechteck(b, additiv){
+    const drin = geraeteImRechteck(b);
+    return auswahlSetzen(additiv ? [...Z.auswahlSet, ...drin] : drin, {primaer: drin[drin.length - 1]});
+  }
+  /* Beim Aufziehen: schon zeigen, was dazukäme – ohne die Auswahl (und damit den Inspektor) bei jeder Mausbewegung zu ändern. */
+  function auswahlVorschau(ids){
+    const set = new Set(ids || []);
+    for (const el of Z.gEl.values()) el.classList.toggle("vorschau", set.has(el.dataset.id) && !Z.auswahlSet.has(el.dataset.id));
+  }
+  /* Gruppe verschieben (Pfeiltasten, Ziehen): EIN Verlaufsschritt. */
+  function verschiebenMehr(ids, dx, dy){
+    const ziele = (ids && ids.length ? ids : [...Z.auswahlSet]).filter(id => Z.netz?.geraete[id]);
+    if (!ziele.length) return 0;
+    const text = ziele.length === 1 ? Z.netz.geraete[ziele[0]].name + " verschoben" : ziele.length + " Geräte verschoben";
+    aendern(text, n => { for (const id of ziele) { const g = n.geraete[id]; if (g) { g.x = raster(g.x + dx); g.y = raster(g.y + dy); } } });
+    return ziele.length;
+  }
+  /* Sammellöschung: EIN Verlaufsschritt, Rückgängig holt alle zurück. */
+  function loeschenMehr(ids){
+    const ziele = (ids && ids.length ? ids : [...Z.auswahlSet]).filter(id => Z.netz?.geraete[id]);
+    if (!ziele.length) return 0;
+    const namen = ziele.map(id => Z.netz.geraete[id].name);
+    const text = ziele.length === 1 ? namen[0] + " gelöscht" : ziele.length + " Geräte gelöscht";
+    auswahlSetzen([]);
+    aendern(text, n => { for (const id of ziele) Modell.entfernen(n, id); });
+    UI.toast(text + ".", "info", {id: "loeschen", aktion: {text: "Rückgängig", fn: rueckgaengig}});
+    return ziele.length;
+  }
+  /* Duplizieren (Strg+D, Kontextmenü): Spiel.werkstatt.dupliziere liefert neue Geräte ohne Kabel;
+     eingesetzt werden sie in EINEM Verlaufsschritt. Namen mit Suffix -2/-3, Ports frei. */
+  function duplizieren(ids){
+    if (!Z.netz) return [];
+    const ziele = (ids && ids.length ? ids : [...Z.auswahlSet]).filter(id => Z.netz.geraete[id] && Z.netz.geraete[id].typ !== "internet");
+    if (!ziele.length) return [];
+    let delta;
+    try { delta = Spiel.werkstatt.dupliziere(Z.netz, ziele); }
+    catch (e) { UI.toast("Duplizieren ging nicht: " + ((e && e.message) || e), "fehler", {id: "duplizieren"}); return []; }
+    const text = delta.geraete.length === 1 ? delta.geraete[0].name + " dupliziert" : delta.geraete.length + " Geräte dupliziert";
+    aendern(text, n => { for (const g of delta.geraete) n.geraete[g.id] = g; });
+    auswahlSetzen(delta.ids);
+    UI.toast(text + " – Rückgängig (Strg+Z) nimmt es zurück.", "ok", {id: "duplizieren", dauer: 2600});
+    return delta.ids;
+  }
+  /* Auf die Auswahl einpassen (⇧F); ohne Auswahl wie „alles einpassen". */
+  function einpassenAuswahl(){
+    const ids = [...Z.auswahlSet];
+    einpassen(true, ids.length ? ids : null);
+  }
+  /* Klick auf die Minimap: diesen Weltpunkt in die Mitte holen. */
+  function mitteAufWelt(x, y){
+    if (!Z.svg) return;
+    const r = Z.svg.getBoundingClientRect();
+    Z.eingepasst = false;
+    ansichtAnimieren({k: Z.view.k, tx: r.width / 2 - x * Z.view.k, ty: r.height / 2 - y * Z.view.k});
+  }
+  function zoomAufProzent(p){
+    if (!Z.svg) return;
+    const r = Z.svg.getBoundingClientRect();
+    const k = klemme((Number(p) || 100) / 100, 0.25, 3);
+    Z.eingepasst = false;
+    ansichtAnimieren(zielZoom(k, r.left + r.width / 2, r.top + r.height / 2));
+  }
+  function zoomProzent(){ return Math.round(Z.view.k * 100); }
+  /* Sichtbarer Weltausschnitt der Fläche (für den Rahmen in der Minimap). */
+  function sichtbereich(){
+    if (!Z.svg) return null;
+    const r = Z.svg.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    return {x1: (0 - Z.view.tx) / Z.view.k, y1: (0 - Z.view.ty) / Z.view.k, x2: (r.width - Z.view.tx) / Z.view.k, y2: (r.height - Z.view.ty) / Z.view.k};
   }
   function kabelWaehlen(kid){
     Z.kabelWahl = kid || null;
-    if (kid && Z.auswahl) auswaehlen(null);
+    if (kid && Z.auswahlSet.size) auswahlSetzen([]);
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
   }
   function inspektorZeigen(){
@@ -626,6 +737,8 @@ UI.labor = (() => {
   Bus.an("netz-geaendert", d => {
     if (!d || d.netz !== Z.netz) return;
     if (Z.auswahl && !Z.netz.geraete[Z.auswahl.geraet]) auswaehlen(null);
+    for (const id of [...Z.auswahlSet]) if (!Z.netz.geraete[id]) Z.auswahlSet.delete(id);
+    if (!Z.auswahlSet.size) Z.auswahl = null;
     if (Z.kabelWahl && !Z.netz.kabel.some(k => k.id === Z.kabelWahl)) Z.kabelWahl = null;
     for (const id of [...Z.pos.keys()]) if (!Z.netz.geraete[id]) Z.pos.delete(id);
     neuZeichnen();
@@ -797,7 +910,7 @@ UI.labor = (() => {
     };
     if (UI.bewegung?.() !== "voll") return fertig();
     const start = {}; for (const id of ids) start[id] = {x: netz.geraete[id].x, y: netz.geraete[id].y};
-    const t0 = performance.now(), MS = 520;
+    const t0 = performance.now(), MS = UI.zeit("lang");        /* Zeit-Token statt 520-ms-Literal (U07) */
     const schritt = t => {
       if (!Z.root?.isConnected) return fertig();
       const p = Math.min(1, (t - t0) / MS), e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
@@ -823,6 +936,8 @@ UI.labor = (() => {
       {text: "Vergrößern", sym: "plus", taste: "+", fn: () => zoomSchritt(1.25)},
       {text: "Verkleinern", sym: "minus", taste: "−", fn: () => zoomSchritt(1 / 1.25)},
       {text: "Zoom 100 %", sym: "suche", taste: "0", fn: () => zoomAuf(1)},
+      {text: "50 %", fn: () => zoomAufProzent(50)}, {text: "75 %", fn: () => zoomAufProzent(75)},
+      {text: "150 %", fn: () => zoomAufProzent(150)}, {text: "200 %", fn: () => zoomAufProzent(200)},
       "-",
       {text: "Alles einpassen", sym: "einpassen", taste: "F", fn: () => einpassen(true)},
       {text: "Aufräumen", sym: "aufraeumen", taste: "A", fn: () => aufraeumen()},
@@ -835,7 +950,7 @@ UI.labor = (() => {
     Z.verlauf = opt.verlauf || Modell.verlauf(netz);
     Z.titel = opt.titel || "Labor";
     Z.opt = opt;
-    Z.auswahl = null; Z.kabelWahl = null; Z.pos.clear(); Z.hover = null; Z.pingVon = null;
+    Z.auswahl = null; Z.auswahlSet = new Set(); Z.kabelWahl = null; Z.pos.clear(); Z.hover = null; Z.pingVon = null;
     if (Z.werkzeug !== "auswahl") Z.werkzeug = "auswahl";
     Z.einpassenAusstehend = true;
     Z.inspWartet = true; Z.simWartet = true; Z.simZu = true;
@@ -849,6 +964,7 @@ UI.labor = (() => {
       layoutAnwenden(); auftragZeichnen(); werkzeugAnzeigen(); zeichnen(); inspektorZeigen(); simLeer();
       requestAnimationFrame(() => { einpassen(false); Z.einpassenAusstehend = false; });
     }
+    UI.werkstatt?.sandboxModus?.(!!opt.sandbox);
     Bus.senden("labor-geladen", {netz, titel: Z.titel});
     if (Z.fern) setTimeout(() => { if (Z.fern && Z.netz === netz) UI.terminal?.oeffnen(Z.fern); }, 0);
   }
@@ -918,12 +1034,28 @@ UI.labor = (() => {
   Object.assign(F, {pos, raster, weltPunkt, zoomUm, ansichtSetzen, ansichtAnimieren, einpassen, sichtbarMachen, zeichnen, neuZeichnen,
     geraetBewegt, zonenNeu, kabelGeo, kabelGruppe, auswaehlen, kabelWaehlen, inspektorZeigen, inspektorUmschalten, simUmschalten, simHoeheSetzen,
     aendern, rueckgaengig, wiederholen, werkzeug, werkzeugAnzeigen, platzEnde, geraetAnlegen, einsetzen, loeschen, kabelTrennen, verbinden, aufraeumen, konsole,
-    grundText, layoutAnwenden, STATUS_TEXT, zoomSchritt, dockZeigen, dockZu, dockOffen, dockReiter});
+    grundText, layoutAnwenden, STATUS_TEXT, zoomSchritt, dockZeigen, dockZu, dockOffen, dockReiter,
+    auswahlSetzen, auswahlUmschalten, auswahlAlle, auswahlImRechteck, geraeteImRechteck, auswahlVorschau,
+    verschiebenMehr, loeschenMehr, duplizieren, einpassenAuswahl, mitteAufWelt, zoomAufProzent, zoomProzent, sichtbereich});
 
   const api = {
     get netz(){ return Z.netz; },
     get verlauf(){ return Z.verlauf; },
     get auswahl(){ return Z.auswahl ? {...Z.auswahl} : null; },
+    /* Mehrfachauswahl (Architektur § 16.5): Lese- und Schreib-API für andere Bausteine/Tests.
+       auswahlMehr() liefert die ids in Auswahlreihenfolge (letztes = primär), auswahlMehrSetzen(ids)
+       setzt sie ohne Verlaufsschritt – Auswahl ist UI-Zustand, kein Netzzustand. */
+    auswahlMehr: () => [...Z.auswahlSet],
+    auswahlMehrSetzen: ids => auswahlSetzen(ids),
+    duplizieren: ids => duplizieren(ids),
+    loeschenMehr: ids => loeschenMehr(ids),
+    verschiebenMehr: (ids, dx, dy) => verschiebenMehr(ids, dx, dy),
+    auswahlAlle: () => auswahlAlle(),
+    einpassenAuswahl: () => einpassenAuswahl(),
+    zoomAufProzent: p => zoomAufProzent(p),
+    zoomProzent: () => zoomProzent(),
+    mitteAufWelt: (x, y) => mitteAufWelt(x, y),
+    sichtbereich: () => sichtbereich(),
     get titel(){ return Z.titel; },
     get el(){ return {auftrag: Z.el.auftrag || null, inspektor: Z.el.inspektor || null, sim: Z.el.sim || null, plan: Z.el.plan || null, akte: Z.el.akte || null, terminal: Z.el.terminal || null}; },
     get werkzeugName(){ return Z.werkzeug; },

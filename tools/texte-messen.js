@@ -17,10 +17,11 @@ for (const [ordner, kopf] of SCH) {
   const d = path.join(SRC, ordner), alle = fs.readdirSync(d).filter(n => n.endsWith(".js")).sort();
   for (const n of [...kopf.filter(x => alle.includes(x)), ...alle.filter(x => !kopf.includes(x))]) code.push(fs.readFileSync(path.join(d, n), "utf8"));
 }
-code.push("globalThis.DATEN = DATEN; globalThis.Spiel = typeof Spiel !== 'undefined' ? Spiel : null;");
+code.push("globalThis.DATEN = DATEN; globalThis.Spiel = typeof Spiel !== 'undefined' ? Spiel : null;" +
+          "globalThis.Zufall = typeof Zufall !== 'undefined' ? Zufall : null;");
 const ctx = vm.createContext({ console, setTimeout, clearTimeout, Date, Math, JSON, Intl, require, __dirname, __filename });
 vm.runInContext(code.join("\n"), ctx, { filename: "labor-daten.js" });
-const DATEN = ctx.DATEN;
+const DATEN = ctx.DATEN, Spiel = ctx.Spiel, Zufall = ctx.Zufall;
 
 /* ---------- Textfelder einsammeln ---------- */
 const FELDER = ["titel", "symptom", "brief", "text", "anruf", "hinweis", "kundenhinweis", "auftrag"];
@@ -147,6 +148,171 @@ if (process.argv.includes("--tor")) {
   console.log(`\nHinweise (kein Verstoß, zum Nachlesen): ${hinweise.length} Aufträge`);
   for (const h of hinweise) console.log(`  · ${h.id.padEnd(18)} ${(h.titel || "").padEnd(30)} ${h.g.join(" · ")}`);
   process.exitCode = verstoesse.length ? 1 : 0;
+}
+
+/* ---------- --pruefen: Stil-Gate für generierte Tickets und Handtickets (Architektur § 17.2) ----------
+   Prüft 100 Seeds je Form (Prüfung, Tagesrätsel, Postfach) und alle Handtickets. Die Muster kommen aus
+   Spiel.STIL (src/spiel/generator.js) – EINE Quelle mit dem Generator; nur wenn sie fehlt, gilt die Kopie oben.
+   Exit 1 bei einem harten Verstoß. Der Lauf enthält die GEGENPROBE: ein künstlich schlechter Text MUSS rot
+   werden, sonst wäre das Tor blind. Aufruf in tests/texte-stil.test.js (läuft bei jedem Testlauf/CI mit). */
+if (process.argv.includes("--pruefen")) {
+  const ST = (Spiel && Spiel.STIL) || {};
+  const ST_URSACHE = ST.URSACHE || URSACHE, ST_FUELL = ST.FUELLWORT || FUELLWORT;
+  const ST_ZEIT = ST.ZEIT || ZEIT, ST_FOLGE = ST.FOLGE || FOLGE, ST_VERSUCH = ST.VERSUCH || VERSUCH;
+  const TITEL_MIN = ST.TITEL_MIN || 15, TITEL_MAX = ST.TITEL_MAX || 46;
+  const SYM_MIN = ST.SYMPTOM_MIN || 180, SYM_MAX = ST.SYMPTOM_MAX || 420;
+  const SATZ_MIN = ST.SAETZE_MIN || 2, SATZ_MAX = ST.SAETZE_MAX || 4;
+
+  function stilPruefen(id, titel, symptom, briefing, generiert){
+    const hart = [], weich = [];
+    const s = kurz(symptom), t = kurz(titel);
+    if (s.length < SYM_MIN) hart.push("Symptom " + s.length + " Zeichen (Soll " + SYM_MIN + "–" + SYM_MAX + ")");
+    if (s.length > SYM_MAX) hart.push("Symptom " + s.length + " Zeichen (Soll " + SYM_MIN + "–" + SYM_MAX + ")");
+    const ss = saetze(s);
+    if (ss.length < SATZ_MIN) hart.push("nur " + ss.length + " Satz (Soll " + SATZ_MIN + "–" + SATZ_MAX + ")");
+    if (ss.length > SATZ_MAX) hart.push(ss.length + " Sätze (Soll " + SATZ_MIN + "–" + SATZ_MAX + ")");
+    if (t.length < TITEL_MIN) hart.push("Titel nur " + t.length + " Zeichen (Soll " + TITEL_MIN + "–" + TITEL_MAX + ")");
+    if (t.length > TITEL_MAX) hart.push("Titel " + t.length + " Zeichen (Soll " + TITEL_MIN + "–" + TITEL_MAX + ")");
+    if (!/[.!?]$/.test(s)) hart.push("Symptom endet ohne Satzzeichen");
+    if (ST_FUELL.test(s)) { const f = s.match(ST_FUELL); hart.push("Füllwort: „" + f[0] + "“"); }
+    /* Ursachenwort: erlaubt ist, was der Kunde ABLIEST (zitierte Bildschirmmeldung) – wie im --tor-Lauf. */
+    for (const m of s.matchAll(new RegExp(ST_URSACHE.source, "gi"))) {
+      const davor = s.slice(Math.max(0, m.index - 40), m.index).toLowerCase();
+      if (!/(meldung|meldet|steht|zeigt|sagt|von wegen|an, dass|angesagt|bildschirm|display|fehlertext)/.test(davor)) { hart.push("Ursache genannt: „" + m[0] + "“"); break; }
+    }
+    if (ST_URSACHE.test(t)) { const m = t.match(ST_URSACHE); hart.push("Ursache im Titel: „" + m[0] + "“"); }
+    const bausteine = (text, ziel) => {
+      if (!ziel.test(text)) hart.push("Baustein fehlt");
+    };
+    if (generiert) {
+      bausteine(s, ST_ZEIT);
+      bausteine(s, ST_FOLGE);
+      bausteine(s, ST_VERSUCH);
+      if (briefing && !kurz(briefing).includes(s)) hart.push("Briefing enthält das Symptom nicht");
+      if (briefing && ST_URSACHE.test(briefing)) { const m = briefing.match(ST_URSACHE); hart.push("Ursache im Briefing: „" + m[0] + "“"); }
+    } else {
+      if (!ST_ZEIT.test(s)) weich.push("kein Anlass/Zeitmarke (Hinweis)");
+      if (!ST_FOLGE.test(s)) weich.push("keine Folge für den Betrieb (Hinweis)");
+      if (!ST_VERSUCH.test(s)) weich.push("kein ‚schon versucht‘ (Hinweis)");
+    }
+    return {id, titel: t, hart, weich};
+  }
+
+  /* Texte je Form und Nummer (1..100) – genau der Weg, den die Form im Spiel nimmt.
+     Prüfung: 3 Aufgaben; fehlt der Injektor (S6-Vorbereitung), mischt Spiel.pruefung.bauen ein Handticket bei. */
+  function tagPlus(i){ return new Date(Date.UTC(2026, 9, 1) + (i - 1) * 86400000).toISOString().slice(0, 10); }
+  function eintrag(id, def, generiert, ersatz){
+    return {id, titel: def.titel, symptom: def.symptom, briefing: def.briefing, generiert: !!generiert, ersatz: ersatz || null};
+  }
+  /* Generierbare Fertigkeiten einmal messen: Für Inhalte ohne Injektor (S6-Vorbereitung) gibt es im
+     Postfach-Nachschub KEINEN generierten Auftrag – die Form wird nur dort gemessen, wo der Generator liefert. */
+  let GENERIERBAR = null;
+  function generierbareSkills(){
+    if (GENERIERBAR) return GENERIERBAR;
+    const ok = [], ohne = [];
+    for (const s of DATEN.skills || []) {
+      try { Spiel.generiere(s.id, 1, {stufe: s.ap === "AP2" ? "AP1" : "E"}); ok.push(s); }
+      catch (e) { ohne.push(s.id); }
+    }
+    return (GENERIERBAR = {ok, ohne});
+  }
+  function texteFuer(form, i){
+    if (form === "Pruefung") {
+      /* Den ECHTEN Bogen der Prüfung messen: Spiel.pruefung.bogen plant nur baubare Aufgaben und
+         füllt notfalls mit Handtickets auf (§ 17.1) – genau diese Texte sieht der Prüfling. */
+      const art = i % 2 ? "AP1" : "AP2";
+      const z = Zufall("mess:pruefung:" + i);
+      const bogen = Spiel.pruefung && Spiel.pruefung.bogen ? Spiel.pruefung.bogen(art, z)
+        : (Spiel.pruefung && Spiel.pruefung.plan ? Spiel.pruefung.plan(art, z).map(s => ({art: "gen", skill: s})) : []);
+      const liste = [];
+      for (const d of bogen) {
+        if (d.art === "gen") {
+          const def = Spiel.generiere(d.skill, i, {stufe: art});
+          if (!def) throw new Error("kein generierter Auftrag für " + d.skill);
+          liste.push(eintrag(def.id, def, true));
+        } else {
+          const t = (DATEN.tickets || []).find(x => x.id === d.ticketId);
+          if (!t) throw new Error("Handticket fehlt: " + d.ticketId);
+          liste.push(eintrag("Ticket " + t.id, t, false, d.skill || null));
+        }
+      }
+      if (liste.length !== Spiel.PRUEFUNG.AUFGABEN) throw new Error("Bogen hat " + liste.length + " statt 3 Aufgaben");
+      return liste;
+    }
+    if (form === "Tagesraetsel") {
+      const tag = tagPlus(i), niveau = ["E", "AP1", "AP2"][(i - 1) % 3];
+      const w = Spiel.raetsel.wahl(tag, niveau);
+      if (!w || !w.def) throw new Error("kein Rätsel für " + tag);
+      return [eintrag("raetsel:" + tag, w.def, true)];
+    }
+    const {ok} = generierbareSkills();
+    for (let v = 0; v < ok.length; v++) {
+      const skill = ok[(i - 1 + v) % ok.length], stufe = skill.ap === "AP2" ? "AP1" : "E";
+      try { const def = Spiel.generiere(skill.id, i, {stufe}); if (def) return [eintrag(def.id, def, true)]; } catch (e) { /* nächste Fertigkeit */ }
+    }
+    throw new Error("kein Nachschub-Ticket");
+  }
+
+  console.log("\n===== STIL-GATE (--pruefen, Architektur § 17.2) =====");
+  const OHNE_INJEKTOR = generierbareSkills().ohne;
+  if (OHNE_INJEKTOR.length) console.log("Ohne Injektor (Postfach-Nachschub misst sie nicht, Prüfung mischt Handtickets bei): " + OHNE_INJEKTOR.join(", "));
+  let fehler = 0;
+  for (const form of ["Pruefung", "Tagesraetsel", "Postfach"]) {
+    Spiel.generierte = {};                                   /* je Form frisch bauen: 100 Seeds */
+    let imStil = 0, ersatz = 0; const verstoesse = [];
+    for (let i = 1; i <= 100; i++) {
+      let liste;
+      try { liste = texteFuer(form, i); } catch (e) { verstoesse.push(form + "/" + i + ": " + String(e && e.message || e)); continue; }
+      let ok = true;
+      for (const x of liste) {
+        if (!x.generiert) ersatz++;
+        const r = stilPruefen(x.id, x.titel, x.symptom, x.briefing, x.generiert);
+        if (r.hart.length) { ok = false; verstoesse.push(x.id + (x.ersatz ? " (Handticket für " + x.ersatz + ")" : "") + ": " + r.hart.join(" · ")); }
+      }
+      if (ok) imStil++;
+    }
+    console.log("Form " + form.padEnd(12) + ": " + imStil + "/100 Seeds im Stilfaden" + (ersatz ? " · " + ersatz + " Handticket-Aufgaben (S6-Vorbereitung)" : "") + (verstoesse.length ? " · " + verstoesse.length + " Verstoß(e)" : ""));
+    for (const v of verstoesse.slice(0, 8)) console.log("  ✗ " + v);
+    fehler += verstoesse.length;
+  }
+
+  /* Handtickets: unverändert im Stil (harte Regeln); fehlende Bausteine sind Hinweise, kein Verstoß. */
+  let hImStil = 0, hHinweise = 0; const hVer = [];
+  /* --gegentest hängt EINEN absichtlich schlechten Text an die gemessene Liste: Der Lauf MUSS rot werden.
+     Das ist die Gegenprobe zum Gate (tests/texte-stil.test.js misst den Exit-Code). */
+  const hListe = (DATEN.tickets || []).slice();
+  if (process.argv.includes("--gegentest")) hListe.push({id: "GEGENTEST", titel: "VLAN", symptom: "Der Router hat ein Problem.", briefing: ""});
+  for (const t of hListe) {
+    const r = stilPruefen("Ticket " + t.id, t.titel, t.symptom, t.briefing, false);
+    if (r.hart.length) hVer.push(t.id + ": " + r.hart.join(" · ")); else hImStil++;
+    if (r.weich.length) hHinweise++;
+  }
+  console.log("Handtickets  : " + hImStil + "/" + (DATEN.tickets || []).length + " im Stilfaden" + (hVer.length ? " · " + hVer.length + " Verstoß(e)" : "") + " · " + hHinweise + " Hinweise (nicht hart)");
+  for (const v of hVer.slice(0, 8)) console.log("  ✗ " + v);
+  fehler += hVer.length;
+
+  /* Determinismus: derselbe Seed ergibt denselben Text (kein Math.random, kein Datum im Text). */
+  const text = liste => JSON.stringify(liste.map(x => [x.id, x.titel, x.symptom, x.briefing]));
+  let detProben = 0, detVer = 0;
+  for (const form of ["Pruefung", "Tagesraetsel", "Postfach"]) for (let i = 1; i <= 3; i++) {
+    try {
+      Spiel.generierte = {};
+      const a = text(texteFuer(form, i));
+      Spiel.generierte = {};
+      const b = text(texteFuer(form, i));
+      detProben++;
+      if (a !== b) { detVer++; console.log("  ✗ nicht deterministisch: " + form + "/" + i); }
+    } catch (e) { detVer++; console.log("  ✗ Determinismus-Probe " + form + "/" + i + ": " + String(e && e.message || e)); }
+  }
+  console.log("Determinismus: " + (detProben - detVer) + "/" + detProben + " Proben identisch");
+  fehler += detVer;
+
+  /* Gegenprobe: dieser Text verletzt fast jede Regel – das Tor MUSS ihn rot sehen. */
+  const gegen = stilPruefen("GEGENTEST", "VLAN", "Der Router hat ein Problem.", "", true);
+  if (!gegen.hart.length) { console.log("✗ Gegenprobe: künstlicher Stilverstoß wurde NICHT erkannt – das Tor ist blind."); fehler++; }
+  else console.log("Gegenprobe   : künstlicher Stilverstoß rot erkannt (" + gegen.hart.length + " harte Verstöße)");
+  console.log("Ergebnis: " + (fehler ? "ROT – " + fehler + " Verstoß(e)" : "GRUEN – 300/300 Seed-Texte und " + hImStil + "/" + (DATEN.tickets || []).length + " Handtickets im Stilfaden"));
+  process.exitCode = fehler ? 1 : 0;
 }
 
 if (process.argv.includes("--alle")) {

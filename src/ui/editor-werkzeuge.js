@@ -180,6 +180,16 @@ UI.laborWerkzeuge = (() => {
       Z.s.band.append(g);
     }
 
+    /* Klick auf ein Gerät: Shift/Strg schaltet zur Menge hinzu/ab (ohne Ziehen), sonst wird das Gerät
+       gezogen – liegt es schon in einer Mehrfachauswahl, wird die ganze Menge gezogen. */
+    function geraetGeste(basis, id, e){
+      if (e.shiftKey || e.ctrlKey || e.metaKey) { F.auswahlUmschalten(id); return {...basis, art: "auswahlTipp", id}; }
+      if (!Z.auswahlSet.has(id)) F.auswaehlen(id);
+      const ids = [...Z.auswahlSet].filter(x => Z.netz.geraete[x]);
+      const starts = new Map(ids.map(x => { const q = Z.netz.geraete[x]; return [x, {x: q.x, y: q.y}]; }));
+      return {...basis, art: "geraet", id, ids, starts, start: starts.get(id)};
+    }
+
     /* ---------- Zeiger auf der Fläche ---------- */
     svg.addEventListener("pointerdown", e => {
       if (e.button === 2) return;
@@ -199,8 +209,11 @@ UI.laborWerkzeuge = (() => {
       else if (Z.werkzeug === "kabel" && t.id) G = {...basis, art: "kabel", von: {geraet: t.id, port: t.art === "port" ? t.port : null}};
       else if (t.art === "port") G = {...basis, art: "kabel", von: {geraet: t.id, port: t.port}, vonPort: true};
       else if (t.art === "griff") G = {...basis, art: "kabel", von: {geraet: t.id, port: null}};
-      else if (t.art === "geraet") { const g = Z.netz.geraete[t.id]; G = {...basis, art: "geraet", id: t.id, start: {x: g.x, y: g.y}}; }
+      else if (t.art === "geraet") G = geraetGeste(basis, t.id, e);
       else if (t.art === "kabel") { F.kabelWaehlen(t.kabel); G = {...basis, art: "pan", view: {...Z.view}, kabelKlick: true}; }
+      /* Leere Fläche: mit dem Zeiger-Werkzeug zieht man einen Auswahlrahmen (Marquee) auf;
+         die Ansicht verschiebt weiterhin die mittlere Maustaste (und außerhalb des Zeiger-Werkzeugs). */
+      else if (Z.werkzeug === "auswahl") G = {...basis, art: "marquee", additiv: e.shiftKey || e.ctrlKey || e.metaKey};
       else G = {...basis, art: "pan", view: {...Z.view}};
       try { svg.setPointerCapture(e.pointerId); } catch {}
       if (G.art === "pan") svg.classList.add("greift");
@@ -216,7 +229,13 @@ UI.laborWerkzeuge = (() => {
       const dx = e.clientX - G.x0, dy = e.clientY - G.y0;
       if (!G.bewegt && Math.hypot(dx, dy) > 4) {
         G.bewegt = true;
-        if (G.art === "geraet") { hoverSetzen(null); svg.classList.add("zieht"); F.auswaehlen(G.id); }
+        if (G.art === "auswahlTipp") {
+          /* Ziehen mit Shift/Strg: aus dem Umschalt-Klick wird eine Gruppen-Geste. */
+          G.art = "geraet"; G.ids = [...Z.auswahlSet].filter(x => Z.netz.geraete[x]);
+          G.starts = new Map(G.ids.map(x => { const q = Z.netz.geraete[x]; return [x, {x: q.x, y: q.y}]; }));
+          G.start = G.starts.get(G.id);
+        }
+        if (G.art === "geraet") { hoverSetzen(null); svg.classList.add("zieht"); }
         if (G.art === "kabel" || G.art === "ping") { hoverSetzen(null); hoverZeichnen(); }
       }
       if (!G.bewegt) return;
@@ -228,12 +247,24 @@ UI.laborWerkzeuge = (() => {
     function bewegen(e){
       const dx = e.clientX - G.x0, dy = e.clientY - G.y0;
       if (G.art === "pan") { Z.eingepasst = false; Z.view.tx = G.view.tx + dx; Z.view.ty = G.view.ty + dy; F.ansichtSetzen(); return; }
+      if (G.art === "marquee") {
+        const a = F.weltPunkt(G.x0, G.y0), b = F.weltPunkt(e.clientX, e.clientY);
+        const r = {x1: Math.min(a.x, b.x), y1: Math.min(a.y, b.y), x2: Math.max(a.x, b.x), y2: Math.max(a.y, b.y)};
+        G.rechteck = r;
+        Z.s.band.replaceChildren(sv("rect", {class: "marquee", x: r.x1, y: r.y1, width: r.x2 - r.x1, height: r.y2 - r.y1}));
+        F.auswahlVorschau(F.geraeteImRechteck(r));
+        return;
+      }
       if (G.art === "geraet") {
-        const p = {x: F.raster(G.start.x + dx / Z.view.k), y: F.raster(G.start.y + dy / Z.view.k)};
-        const alt = Z.pos.get(G.id);
-        if (alt && alt.x === p.x && alt.y === p.y) return;
-        Z.pos.set(G.id, p);
-        F.geraetBewegt(G.id); F.zonenNeu();
+        /* Gruppe: alle gewählten Geräte bewegen sich mit demselben Versatz (EIN Verlaufsschritt am Ende). */
+        for (const id of (G.ids || [G.id])) {
+          const s = (G.starts && G.starts.get(id)) || {x: Z.netz.geraete[id].x, y: Z.netz.geraete[id].y};
+          const p = {x: F.raster(s.x + dx / Z.view.k), y: F.raster(s.y + dy / Z.view.k)};
+          const alt = Z.pos.get(id);
+          if (alt && alt.x === p.x && alt.y === p.y) continue;
+          Z.pos.set(id, p);
+          F.geraetBewegt(id); F.zonenNeu();
+        }
         return;
       }
       if (G.art === "kabel" || G.art === "ping") {
@@ -256,18 +287,41 @@ UI.laborWerkzeuge = (() => {
       try { svg.releasePointerCapture(g.pid); } catch {}
       for (const el of Z.gEl.values()) el.classList.remove("zielt");
       bandLeeren();
-      if (abbruch) { Z.pos.delete(g.id); F.zeichnen(); return; }
+      if (g.art === "marquee") { F.auswahlVorschau([]); }
+      if (abbruch) {
+        for (const id of (g.ids || [g.id])) Z.pos.delete(id);
+        F.zeichnen(); return;
+      }
+      if (g.art === "marquee") {
+        if (!g.bewegt) {
+          F.auswaehlen(null); F.kabelWaehlen(null);
+          if (Z.werkzeug === "ping" && Z.pingVon) { Z.pingVon = null; F.werkzeugAnzeigen(); }
+          return;
+        }
+        F.auswahlImRechteck(g.rechteck, g.additiv);
+        return;
+      }
+      if (g.art === "auswahlTipp") return;                    /* Umschalt-Klick: Auswahl steht schon */
       if (g.art === "pan") {
         if (!g.bewegt && !g.kabelKlick) { F.auswaehlen(null); F.kabelWaehlen(null); if (Z.werkzeug === "ping" && Z.pingVon) { Z.pingVon = null; F.werkzeugAnzeigen(); } }
         return;
       }
       if (g.art === "geraet") {
-        if (!g.bewegt) { F.auswaehlen(g.id); return; }
-        const p = Z.pos.get(g.id);
-        Z.pos.delete(g.id);
-        const geraet = Z.netz.geraete[g.id];
-        if (p && geraet && (p.x !== geraet.x || p.y !== geraet.y)) F.aendern(`${geraet.name} verschoben`, n => { n.geraete[g.id].x = p.x; n.geraete[g.id].y = p.y; });
-        else F.zeichnen();
+        if (!g.bewegt) {
+          /* Klick auf eines von mehreren: die Menge bleibt; erst ein zweiter Klick auf dasselbe Gerät wählt es allein. */
+          if (Z.auswahlSet.size > 1 && Z.auswahlSet.has(g.id)) return;
+          F.auswaehlen(g.id);
+          return;
+        }
+        const ziele = [];
+        for (const id of (g.ids || [g.id])) {
+          const p = Z.pos.get(id), geraet = Z.netz.geraete[id];
+          Z.pos.delete(id);
+          if (p && geraet && (p.x !== geraet.x || p.y !== geraet.y)) ziele.push({id, p});
+        }
+        if (!ziele.length) { F.zeichnen(); return; }
+        const text = ziele.length === 1 ? `${Z.netz.geraete[ziele[0].id].name} verschoben` : `${ziele.length} Geräte verschoben`;
+        F.aendern(text, n => { for (const z of ziele) if (n.geraete[z.id]) { n.geraete[z.id].x = z.p.x; n.geraete[z.id].y = z.p.y; } });
         return;
       }
       if (g.art === "kabel") {
@@ -362,17 +416,21 @@ UI.laborWerkzeuge = (() => {
       e.preventDefault();
       const t = ziel(e.target), netz = Z.netz;
       if (t.id) {
-        const g = netz.geraete[t.id]; F.auswaehlen(t.id);
+        /* Rechtsklick in einer Mehrfachauswahl lässt die Auswahl stehen – das Menü gilt dann für alle. */
+        const g = netz.geraete[t.id]; if (!Z.auswahlSet.has(t.id)) F.auswaehlen(t.id);
+        const mehr = Z.auswahlSet.size;
         const unges = Modell.ungespeichert(g);
         UI.menue(e.clientX, e.clientY, [
-          {text: "Konsole öffnen", sym: "konsole", taste: "C", fn: () => F.konsole(t.id), aus: g.typ === "internet"},
+          {text: "Konsole öffnen", sym: "konsole", taste: "C", fn: () => F.konsole(t.id), aus: g.typ === "internet" || mehr > 1},
           {text: "Ping von hier …", sym: "ping", fn: () => { F.werkzeug("ping", {von: t.id}); }},
           "-",
-          {text: g.an ? "Ausschalten" : "Einschalten", sym: "strom", fn: () => strom(t.id)},
-          {text: "Neustart", sym: "neustart", fn: () => neustart(t.id), info: unges ? "ungespeichert!" : null},
+          {text: mehr > 1 ? mehr + " Geräte duplizieren" : "Duplizieren", sym: "plus", taste: "Strg+D", fn: () => F.duplizieren()},
           "-",
-          {text: "Löschen", sym: "loeschen", taste: "Entf", gefahr: true, fn: () => F.loeschen(t.id)},
-        ], {titel: g.name});
+          {text: g.an ? "Ausschalten" : "Einschalten", sym: "strom", fn: () => strom(t.id), aus: mehr > 1},
+          {text: "Neustart", sym: "neustart", fn: () => neustart(t.id), info: unges ? "ungespeichert!" : null, aus: mehr > 1},
+          "-",
+          {text: mehr > 1 ? mehr + " Geräte löschen" : "Löschen", sym: "loeschen", taste: "Entf", gefahr: true, fn: () => mehr > 1 ? F.loeschenMehr() : F.loeschen(t.id)},
+        ], {titel: mehr > 1 ? mehr + " Geräte" : g.name});
       } else if (t.art === "kabel") {
         F.kabelWaehlen(t.kabel);
         const tester = typeof Spiel !== "undefined" && Spiel.werkzeug && Spiel.werkzeug.hat("kabeltester");
@@ -382,10 +440,15 @@ UI.laborWerkzeuge = (() => {
           {text: "Kabel trennen", sym: "trennen", taste: "Entf", gefahr: true, fn: () => F.kabelTrennen(t.kabel)}], {titel: "Kabel"});
       } else {
         const w = F.weltPunkt(e.clientX, e.clientY);
+        const hatAuswahl = Z.auswahlSet.size > 0;
         UI.menue(e.clientX, e.clientY, [
           {text: "Gerät hier einsetzen …", sym: "plus", fn: () => schnellwahl(e.clientX, e.clientY, w)},
           {text: "Aufräumen", sym: "aufraeumen", taste: "A", fn: () => F.aufraeumen()},
           {text: "Alles einpassen", sym: "einpassen", taste: "F", fn: () => F.einpassen(true)},
+          {text: "Auf Auswahl einpassen", sym: "einpassen", taste: "⇧F", aus: !hatAuswahl, fn: () => F.einpassenAuswahl()},
+          "-",
+          {text: hatAuswahl ? (Z.auswahlSet.size > 1 ? Z.auswahlSet.size + " Geräte duplizieren" : "Duplizieren") : "Duplizieren", sym: "plus", taste: "Strg+D", aus: !hatAuswahl, fn: () => F.duplizieren()},
+          {text: "Auswahl aufheben", sym: "schliessen", taste: "Esc", aus: !hatAuswahl, fn: () => F.auswaehlen(null)},
           "-",
           {text: "Rückgängig", sym: "zurueck", taste: "Strg+Z", aus: !Z.verlauf?.kannZurueck, fn: () => F.rueckgaengig()},
           {text: "Wiederholen", sym: "vor", taste: "Strg+Y", aus: !Z.verlauf?.kannVor, fn: () => F.wiederholen()},
@@ -419,10 +482,13 @@ UI.laborWerkzeuge = (() => {
       if (strg && !e.altKey) {
         if (k === "z" || k === "Z") { e.shiftKey ? F.wiederholen() : F.rueckgaengig(); return true; }
         if (k === "y" || k === "Y") { F.wiederholen(); return true; }
+        if (k === "a" || k === "A") { F.auswahlAlle(); return true; }              /* Strg+A: alle Geräte wählen */
+        if (k === "d" || k === "D") { F.duplizieren(); return true; }              /* Strg+D: Auswahl duplizieren */
         return false;
       }
       if (e.altKey) return false;
       const sel = Z.auswahl?.geraet;
+      if (e.shiftKey && (k === "f" || k === "F")) { F.einpassenAuswahl(); return true; }   /* ⇧F: auf die Auswahl einpassen */
       /* Umschalt+1…5: Ebene (Ansicht-Menü); 1–4: Geräte-Fach, im offenen Fach 1…n: Gerät */
       if (e.shiftKey && /^Digit[1-5]$/.test(e.code || "")) { UI.ebenen.setzen(UI.ebenen.LISTE[+e.code.slice(5) - 1].id); return true; }
       if (!e.shiftKey && /^[1-9]$/.test(k)) return !!F.fachTaste?.(+k);
@@ -433,7 +499,7 @@ UI.laborWerkzeuge = (() => {
           if (G) { ende(e, true); return true; }
           if (Z.werkzeug === "platzieren") { F.platzEnde(); return true; }
           if (Z.werkzeug !== "auswahl") { F.werkzeug("auswahl"); return true; }
-          if (Z.auswahl || Z.kabelWahl) { F.auswaehlen(null); F.kabelWaehlen(null); return true; }
+          if (Z.auswahlSet.size || Z.kabelWahl) { F.auswaehlen(null); F.kabelWaehlen(null); return true; }
           return false;
         case "v": case "V": F.werkzeug("auswahl"); return true;
         case "k": case "K": F.werkzeug(Z.werkzeug === "kabel" ? "auswahl" : "kabel"); return true;
@@ -447,6 +513,7 @@ UI.laborWerkzeuge = (() => {
         case "-": F.zoomSchritt(1 / 1.25); return true;
         case "0": F.ansichtAnimieren({...Z.view, k: 1}); return true;
         case "Delete": case "Backspace":
+          if (Z.auswahlSet.size > 1) { F.loeschenMehr(); return true; }              /* Sammellöschung: ein Schritt */
           if (sel) { F.loeschen(sel); return true; }
           if (Z.kabelWahl) { F.kabelTrennen(Z.kabelWahl); Z.kabelWahl = null; return true; }
           return false;
@@ -454,8 +521,7 @@ UI.laborWerkzeuge = (() => {
         case "ArrowLeft": case "ArrowRight": case "ArrowUp": case "ArrowDown": {
           const dx = k === "ArrowLeft" ? -1 : k === "ArrowRight" ? 1 : 0, dy = k === "ArrowUp" ? -1 : k === "ArrowDown" ? 1 : 0;
           if (sel) {
-            const g = Z.netz.geraete[sel], s = e.shiftKey ? 100 : 20;
-            F.aendern(`${g.name} verschoben`, n => { n.geraete[sel].x = F.raster(g.x + dx * s); n.geraete[sel].y = F.raster(g.y + dy * s); });
+            F.verschiebenMehr([...Z.auswahlSet], dx * (e.shiftKey ? 100 : 20), dy * (e.shiftKey ? 100 : 20));
           } else { Z.eingepasst = false; Z.view.tx -= dx * 80; Z.view.ty -= dy * 80; F.ansichtSetzen(); }
           return true;
         }

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminologie — vier Stufen und eine Sprosse · Netzwerk-Labor</title>
+<meta name="description" content="Die vier Stufen im Programm — Karriere-Stufe, Bildungsstand, Erklärtiefe, Prüfungsstufe — plus Hilfe-Sprosse: je Datenfeld, Wertebereich, Quelle und Beispiel.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Terminologie — vier Stufen und eine Sprosse</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-die-vier-achsen-auf-einen-blick">1 · Die vier Achsen auf einen Blick</a></li>
+<li><a href="#2-die-achsen-einzeln-mit-beispielen">2 · Die Achsen einzeln — mit Beispielen</a></li>
+<li style="margin-left:16px"><a href="#2-1-karriere-stufe-1-6">2.1 Karriere-Stufe (1–6)</a></li>
+<li style="margin-left:16px"><a href="#2-2-bildungsstand-4-werte-rang-1-4">2.2 Bildungsstand (4 Werte, Rang 1–4)</a></li>
+<li style="margin-left:16px"><a href="#2-3-erklartiefe-e-ap1-ap2">2.3 Erklärtiefe (E · AP1 · AP2)</a></li>
+<li style="margin-left:16px"><a href="#2-4-prufungsstufe-prufungsstrenge-e-ap1-ap2">2.4 Prüfungsstufe / Prüfungsstrenge (E · AP1 · AP2)</a></li>
+<li style="margin-left:16px"><a href="#2-5-hilfe-sprosse-0-6">2.5 Hilfe-Sprosse (0–6)</a></li>
+<li><a href="#3-weitere-stufen-die-nicht-zu-den-vier-achsen-gehoren">3 · Weitere „Stufen", die nicht zu den vier Achsen gehören</a></li>
+<li><a href="#4-schreibregeln-fur-neue-texte-und-screens">4 · Schreibregeln für neue Texte und Screens</a></li>
+<li><a href="#5-ist-stand-und-vorschlage-nur-genannt-nicht-umgesetzt">5 · Ist-Stand und Vorschläge (nur genannt, nicht umgesetzt)</a></li>
+<li><a href="#6-verwandte-dokumente">6 · Verwandte Dokumente</a></li>
+</ul>
+</nav><h1 id="terminologie-vier-stufen-und-eine-sprosse">Terminologie — vier Stufen und eine Sprosse</h1>
+<p><strong>Warum diese Datei.</strong> Das Wort „Stufe" steht im Programm für <strong>vier verschiedene Dinge</strong>, und im Code heißt das Feld mehrfach <code>stufe</code>. Das ist keine Kleinigkeit: Ein Text „Stufe 4" kann je nach Bildschirm die Karriere, den Bildungsstand, die Erklärtiefe oder die Hilfeleiter meinen. Diese Datei hält die Achsen <strong>einmal verbindlich</strong> fest — mit Datenfeld, Wertebereich, Quelle und Beispiel —, damit neue Texte und Screens nicht wieder raten müssen. Der Ist-Zustand der Oberfläche (welche sichtbaren Texte heute noch unqualifiziert „Stufe" sagen) steht mit Datei:Zeile im Audit: <code>analysis/NetLab/qa/S7b-Terminologie-Audit.md</code>.</p>
+<blockquote>
+<p><strong>Nichts hiervon ist umbenannt.</strong> Diese Datei <strong>dokumentiert</strong> die Achsen; Umbenennungen im Code wären ein eigener Eingriff (Vorschläge am Ende, Entscheidung beim Lead). Kein <code>src/</code>-Code wurde für diese Datei geändert.</p>
+</blockquote>
+<h2 id="1-die-vier-achsen-auf-einen-blick">1 · Die vier Achsen auf einen Blick</h2>
+<div class="dk-tabelle"><table><thead><tr><th>#</th><th>Achse</th><th>Feld im Code</th><th>Werte</th><th>Bedeutung</th><th>Sichtbar als</th></tr></thead><tbody><tr><td>1</td><td><strong>Karriere-Stufe</strong></td><td><code>Spiel.st.stufe</code> (1–6)</td><td>1 Azubi · 2 Geselle · 3 Fachkraft · 4 Spezialist · 5 Senior · 6 Storage &amp; Cloud</td><td>Fortschritt im Spielstand; steigt über Ruf und Können. <strong>Nie</strong> automatisch durch Hilfe.</td><td>„Karriere-Stufe", „Stufe 3 · Fachkraft", Fortschrittsbalken in der Kopfzeile</td></tr><tr><td>2</td><td><strong>Bildungsstand</strong></td><td><code>Spiel.einst.stufe</code> (Rang 1–4)</td><td><code>azubi</code> · <code>azubi-plus</code> · <code>geselle</code> · <code>meister</code></td><td>Voreinstellung des <strong>Menschen</strong>: wie viel Hilfe und Erklärung er bekommt. Wird nie automatisch geändert.</td><td>„Bildungsstand" (Einstellungen), Freigabe-Hinweis im Lernstand</td></tr><tr><td>3</td><td><strong>Erklärtiefe</strong></td><td><code>Spiel.einst.niveau</code></td><td><code>E</code> · <code>AP1</code> · <code>AP2</code></td><td>Wie ausführlich Konsole, Simulation und Lehrtexte erklären. Folgt dem Bildungsstand, bleibt einzeln verstellbar.</td><td>„Erklärtiefe" (Einstellungen), Lehrtext-Stufen, Konsole</td></tr><tr><td>4</td><td><strong>Prüfungsstufe / -strenge</strong></td><td><code>Spiel.einst.wahl</code> (<code>auto</code>\</td><td><code>E</code>\</td><td><code>AP1</code>\</td><td><code>AP2</code>) und <code>inst.niveau</code> (aus dem Ticket)</td><td><code>E</code> · <code>AP1</code> · <code>AP2</code></td><td>Wie streng <strong>ein einzelnes Ticket</strong> bewertet wird (Prüfungstag, Abnahme, Tagesrätsel).</td><td>Prüfungsansicht, Ergebnis, Ticketkopf</td></tr><tr><td>5</td><td><strong>Hilfe-Sprosse</strong></td><td><code>inst.hilfeStufe</code> (0–6)</td><td>0 Symptom · 1 Checkliste · 2 Werkzeug · 3 Senior · 4 Bereich · 5 Hinweis · 6 Lösung</td><td>Wie weit die Hilfeleiter in <strong>diesem Auftrag</strong> geklettert ist; 4/5 kosten ½ Stern, 6 einen ganzen.</td><td>„Hilfe 3/6" neben der Leiter (bewusst <strong>nicht</strong> „Stufe 3/6")</td></tr></tbody></table></div>
+<p><strong>Quellen:</strong> Achsen 2–4: <a href="../Architektur.html"><code>Architektur.md</code></a> § 13.1 („Die drei Achsen, nicht verwechseln") und der Vertrag <a href="../entwicklung/Hilfestellung%20%E2%80%93%20Stufen%20und%20Schnittstellen.html"><code>Hilfestellung – Stufen und Schnittstellen.md</code></a>. Achse 1: <code>src/spiel/karriere.js</code> (<code>KARRIERE_STUFEN</code>, Nr. 22–30). Achse 5: <code>src/spiel/hilfe.js</code> (<code>Spiel.HILFE</code>, Nr. 8–16).</p>
+<h2 id="2-die-achsen-einzeln-mit-beispielen">2 · Die Achsen einzeln — mit Beispielen</h2>
+<h3 id="2-1-karriere-stufe-1-6">2.1 Karriere-Stufe (1–6)</h3>
+<ul><li><strong>Feld:</strong> <code>Spiel.st.stufe</code> im Spielstand; Anzeige über <code>Spiel.stufeInfo()</code>.</li><li><strong>Definition:</strong> <code>Spiel.KARRIERE_STUFEN</code> in <code>src/spiel/karriere.js</code> — je Stufe Name, Ruf-Schwelle und freigeschaltete Geräte. <code>Spiel.KARRIERE_MAX = 6</code>.</li><li><strong>Beispiel:</strong> „Stufe 3 · Fachkraft → Spezialist: Ruf 30/55 · Können 8/12".</li><li><strong>Abgrenzung:</strong> Hat <strong>nichts</strong> mit Hilfe zu tun. Ein Meister (Achse 2) kann Karriere-Stufe 1 haben — und umgekehrt.</li></ul>
+<h3 id="2-2-bildungsstand-4-werte-rang-1-4">2.2 Bildungsstand (4 Werte, Rang 1–4)</h3>
+<ul><li><strong>Feld:</strong> <code>Spiel.einst.stufe</code>; Vergleich <strong>immer</strong> über <code>Spiel.stufe.rang(id)</code> (1–4), nie über den Namen (Architektur § 13.2).</li><li><strong>Wirkung:</strong> Hilfe-Vorrat <strong>je Ticket</strong> <code>Spiel.HILFE_KONTO = {azubi: 6, "azubi-plus": 4, geselle: 2, meister: 0}</code>; Freischaltungen in Leiste, Postfach und Lernstand (<code>src/ui/lernstand-hilfe.js</code>).</li><li><strong>Beispiel:</strong> „Stufe 2 von 4 · Azubi+ — Lernanker nach der Antwort" (Freigabe-Hinweis).</li><li><strong>Abgrenzung:</strong> Eine <strong>Voreinstellung</strong>, kein Fortschritt. Der Mensch stellt sie ein; das Programm ändert sie nie selbst.</li></ul>
+<h3 id="2-3-erklartiefe-e-ap1-ap2">2.3 Erklärtiefe (E · AP1 · AP2)</h3>
+<ul><li><strong>Feld:</strong> <code>Spiel.einst.niveau</code>. <code>Spiel.stufe.setzen(id)</code> zieht sie nach, lässt sie aber einzeln verstellbar (Architektur § 13.1).</li><li><strong>Wirkung:</strong> Lehrtexte (<code>DATEN.lehrtexte[code][niveau]</code>), Erklärungen in Konsole und Simulation (<code>src/ui/simpanel.js</code>, <code>src/ui/erklaeren.js</code>).</li><li><strong>Beispiel:</strong> „E erklärt, AP1 knapp, AP2 nur Gerätemeldung" (Kopf von <code>src/ui/simpanel.js</code>).</li><li><strong>Abgrenzung:</strong> Steuert nur <strong>wie viel Text</strong> erscheint — nicht, wie bewertet wird (Achse 4).</li></ul>
+<h3 id="2-4-prufungsstufe-prufungsstrenge-e-ap1-ap2">2.4 Prüfungsstufe / Prüfungsstrenge (E · AP1 · AP2)</h3>
+<ul><li><strong>Feld:</strong> <code>Spiel.einst.wahl</code> (<code>auto</code> = folgt dem Ticket) und <code>inst.niveau</code> (aus <code>DATEN.tickets[].stufe</code>); Logik in <code>src/spiel/pruefung.js</code>.</li><li><strong>Wirkung:</strong> Bewertungsmaßstab eines Tickets, Prüfungstag nach IHK-Notenschlüssel, Abnahme.</li><li><strong>Beispiel:</strong> Ein Ticket mit <code>stufe: "AP1"</code> wird im Prüfungstag als AP1-Aufgabe gewertet.</li><li><strong>Abgrenzung:</strong> Gleiche <strong>Werte</strong> wie die Erklärtiefe, aber andere Achse. Ein AP1-Ticket kann mit Erklärtiefe <code>E</code> gespielt werden.</li></ul>
+<h3 id="2-5-hilfe-sprosse-0-6">2.5 Hilfe-Sprosse (0–6)</h3>
+<ul><li><strong>Feld:</strong> <code>inst.hilfeStufe</code> (0–6) plus <code>inst.hilfen[]</code> (was gezogen wurde).</li><li><strong>Leiter:</strong> <code>Spiel.HILFE</code> (<code>src/spiel/hilfe.js</code>): 0 Symptom und Ziel (frei) · 1 Fehlersuche-Leiter (frei) · 2 Werkzeughinweis (frei) · 3 Frage des Seniors (frei) · 4 Bereich markieren (−½ ★) · 5 Konkreter Hinweis (−½ ★) · 6 Lösung vorführen (−1 ★, kein Scheitern danach).</li><li><strong>Beispiel:</strong> „Hilfe 3/6" im Hilfe-Streifen; „Vorrat leer – ab jetzt kostet es Sterne (Stufe 4/5: −½, Stufe 6: −1)" neben dem Hilfekonto (siehe Audit, P2).</li><li><strong>Abgrenzung:</strong> Misst die Hilfe <strong>in einem Auftrag</strong>, nicht den Bildungsstand des Menschen. Die Sprossen sind fest, der Vorrat hängt am Bildungsstand (Achse 2).</li></ul>
+<h2 id="3-weitere-stufen-die-nicht-zu-den-vier-achsen-gehoren">3 · Weitere „Stufen", die nicht zu den vier Achsen gehören</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Begriff</th><th>Wo</th><th>Werte</th><th>Nicht verwechseln mit</th></tr></thead><tbody><tr><td><strong>Fertigkeitsstufe</strong></td><td><code>DATEN.skills[].stufe</code> (<code>src/daten/basis.js</code>)</td><td>1–6 (Anforderung einer Fertigkeit)</td><td>Karriere-Stufe: gleiche Zahlen, andere Bedeutung. Sichtbar z. B. als „Aufträge ab Stufe X" bei einer Fertigkeit.</td></tr><tr><td><strong>Leitner-Fach</strong></td><td>Lernmotor (<code>fach</code> 1–5)</td><td>1–5</td><td>Hilfe-Sprosse: „Leitner-Stufe 2 von 5" ist eine Wiederholungsbox.</td></tr><tr><td><strong>Erreichbarkeits-Stufe</strong></td><td><code>Spiel.pruefung</code> / Erklärtiefe-Tabellen</td><td>s. o.</td><td>—</td></tr></tbody></table></div>
+<h2 id="4-schreibregeln-fur-neue-texte-und-screens">4 · Schreibregeln für neue Texte und Screens</h2>
+<ol><li><strong>Nie nackt „Stufe"</strong>, wenn auf demselben Bildschirm zwei Achsen vorkommen können. Qualifizieren: „Karriere-Stufe", „Bildungsstand", „Erklärtiefe", „Prüfungsstufe", „Hilfe X/6".</li><li><strong>Zahl ohne Bezug ist verboten:</strong> „Stufe 4" allein sagt nichts. Immer Achse + Zahl + ggf. Name: „Karriere-Stufe 4 · Spezialist", „Stufe 2 von 4 (Azubi+)", „Hilfe 4/6".</li><li><strong>Bildungsstand immer über den Rang</strong> vergleichen (1–4), nie über den Namen (Architektur § 13.2).</li><li><strong>Prüfungsstufe nur an Tickets</strong> (<code>inst.niveau</code>), nicht an Personen.</li><li><strong>Bestehende Sonderfälle sind Vorbilder:</strong> Die Leiste zeigt bewusst „<strong>Hilfe 3/6</strong>" statt „Stufe 3/6" (<code>src/ui/spiel.js</code>, Kommentar bei <code>ticketLeiste</code>), und der Trainingsbereich schreibt „<strong>Bildungsstand</strong>" statt „Stufe" (<code>src/ui/training.js</code>, Kommentar). Diese beiden Entscheidungen sind der Maßstab für neue Stellen.</li></ol>
+<h2 id="5-ist-stand-und-vorschlage-nur-genannt-nicht-umgesetzt">5 · Ist-Stand und Vorschläge (nur genannt, nicht umgesetzt)</h2>
+<p>Der grep-Audit (Datei:Zeile, Klassifikation, Risiko) steht vollständig in <span class="dk-tot" title="„../../../analysis/NetLab/qa/S7b-Terminologie-Audit.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>analysis/NetLab/qa/S7b-Terminologie-Audit.md</code></span>. Kurz: von 37 sichtbaren „Stufe"-Strings in <code>src/ui/**</code> sind 11 eindeutig Karriere und 4 Hilfe; <strong>21 sind ohne Qualifier</strong> und damit Kandidaten für Klarstellung. Die zwei heikelsten:</p>
+<ul><li><code>src/ui/lernstand-hilfe.js</code> „Stufe X von 4 · …" — sichtbarer <strong>Bildungsstand</strong> ohne das Wort.</li><li><code>src/ui/karriere.js</code> „Aufträge ab Stufe X" und „Stufe X: &lt;Fertigkeit&gt;" — dort ist es die <strong>Fertigkeitsstufe</strong>, im selben Fenster wie die Karriere.</li></ul>
+<p><strong>Umbenennungs-Vorschläge (Entscheidung: Lead; kein Code geändert):</strong> <code>st.stufe</code> → <code>karriere</code> · <code>einst.stufe</code> → <code>bildungsstand</code> · <code>einst.niveau</code> → <code>erklaertiefe</code> · <code>DATEN.tickets[].stufe</code> → <code>pruefungsniveau</code> · <code>inst.hilfeStufe</code> → <code>hilfeSprosse</code>. Alle Umbenennungen berühren Spielstände, Codec und Tests — deshalb bewusst nur Vorschlag.</p>
+<h2 id="6-verwandte-dokumente">6 · Verwandte Dokumente</h2>
+<ul><li><a href="../Architektur.html"><code>Architektur.md</code></a> § 13 (Hilfestellung, drei Achsen) und § 3–4 (Datenformen)</li><li><a href="../entwicklung/Hilfestellung%20%E2%80%93%20Stufen%20und%20Schnittstellen.html"><code>Hilfestellung – Stufen und Schnittstellen.md</code></a> (Vertrag)</li><li><a href="../CHANGELOG.html"><code>CHANGELOG.md</code></a> 2.0.5/2.1.0 (wo die Achsen entstanden sind)</li><li>Audit: <span class="dk-tot" title="„../../../analysis/NetLab/qa/S7b-Terminologie-Audit.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text."><code>S7b-Terminologie-Audit.md</code></span></li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

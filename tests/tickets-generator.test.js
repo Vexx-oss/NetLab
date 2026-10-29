@@ -53,14 +53,22 @@ gruppe("Generator", () => {
     if (fehler.length) console.log(fehler.join(String.fromCharCode(10))); erwarte.gleich(fehler.length, 0, `${gebaut} gebaut, ${leer} ohne Wirkung`);
     erwarte.wahr(gebaut > 150, `nur ${gebaut} Tickets gebaut`);
   });
-  pruefe("Jede Fertigkeit der Stufen 1–5 ist generierbar – Port-Security eingeschlossen", () => {
-    /* Bis 1.3 stand hier „außer Port-Security“: Die Fertigkeit hatte keinen Injektor. Seit dem Injektor
-       portsec-fremde-mac (Ausbau 1.3) gilt die Ausnahme nicht mehr. */
-    const fehlt = [];
-    for (const s of DATEN.skills.filter(x => x.stufe <= 5)) {
-      try { const d = Spiel.generiere(s.id, 42); if (!d.ziele.length) fehlt.push(s.id); } catch (e) { fehlt.push(s.id + ": " + e.message); }
+  pruefe("Jede vorhandene Fertigkeit ist generierbar ODER über den Prüfungs-Handticket-Pool spielbar (dynamisch)", () => {
+    /* 2.1 S3: Die Zahl der Fertigkeiten ist nicht mehr hart codiert (nach S6 30, vorher 27). Inhalte ohne
+       Injektor (Architektur § 17.1) bekommen in der Prüfung ein Handticket beigemischt – dieser Weg wird hier
+       mitgemessen, statt eine Liste „erlaubter Ausnahmen“ zu pflegen. Fehlt beides, ist der Test rot. */
+    const fehlt = [], ersatz = [];
+    for (const s of DATEN.skills) {
+      try { const d = Spiel.generiere(s.id, 42); if (!d || !d.ziele.length) fehlt.push(s.id + ": kein Ziel"); }
+      catch (e) {
+        const art = s.ap === "AP2" ? "AP2" : "AP1";
+        const t = Spiel.pruefung.handticketFuer(art, s.id, Zufall("fallback:" + s.id), new Set());
+        if (!t) fehlt.push(s.id + ": " + e.message); else ersatz.push(s.id);
+      }
     }
     erwarte.gleich(fehlt, []);
+    erwarte.gleich(ersatz.filter((id, i) => ersatz.indexOf(id) !== i), [], "jede Fertigkeit nur einmal gezählt");
+    erwarte.wahr(DATEN.skills.length >= 27, "Fertigkeiten gemessen: " + DATEN.skills.length);
   });
   pruefe("generiere ist deterministisch und liefert gültige Tickets für 60 Seeds", () => {
     const fehler = [];

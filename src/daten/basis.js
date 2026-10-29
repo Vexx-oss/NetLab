@@ -38,6 +38,12 @@ DATEN.skills = [
   {id: "lab.portsec",  name: "Port-Security",                      ap: "AP2", stufe: 5},
   {id: "lab.stp",      name: "Schleifen und Spanning Tree",        ap: "AP2", stufe: 6},
   {id: "lab.storage",  name: "NAS, SAN und Speichernetze",         ap: "AP2", stufe: 6},
+  /* Welle 2 · S6a/S6b (Architektur § 17.1, append-only): ausschließlich ANS ENDE anhängen —
+     die Indizes 0–26 sind eingefroren (Klassenraum-Codec). IPv6, Betrieb und WLAN werden
+     inhaltlich geübt (Adressierung, Planung, Konfiguration, Bewertung), nicht paketweise simuliert. */
+  {id: "lab.ipv6",     name: "IPv6: Adressen, Präfixe, NDP",       ap: "AP1", stufe: 5},
+  {id: "lab.betrieb",  name: "Betrieb und Überwachung (Syslog, Schwellwert, Backup, Uptime)", ap: "AP2", stufe: 5},
+  {id: "lab.wlan",     name: "WLAN: SSID, VLAN, Sicherheit, Gastnetz", ap: "AP1", stufe: 5},
 ];
 
 /* Salon: ein LAN, ein Router mit NAT ins Internet. Alles funktioniert. */

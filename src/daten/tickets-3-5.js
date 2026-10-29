@@ -1,5 +1,5 @@
 "use strict";
-/* ---------- Handgeschriebene Tickets, Karriere-Stufen 3 bis 5 ----------
+/* ---------- Handgeschriebene Tickets, Karriere-Stufen 3 bis 6 ----------
    Vorlagen-IDs: praxis = srv, empfang, behandlung, gast, sw1, r1, inet · standorte = srv, verkauf, werkstatt, annahme,
    sw1, sw2, r1 (Zentrale), r2 (Standort Süd), inet · dmz = pc1, pc2, web, kunde, sw1, sw2, fw, inet. */
 (() => {
@@ -8,28 +8,36 @@
   const lang = p => String(p).replace(/^Fa(?=\d)/, "FastEthernet").replace(/^Gi(?=\d)/, "GigabitEthernet");
 
   /* ===== Stufe 3 · Praxis Dr. Krämer (Sabine Krämer) ===== */
-  t({id: "praxis-01", reihe: 1, kunde: "praxis", karriere: 3, stufe: "E", vorlage: "praxis", vSeed: 41, minuten: 5, vorhersage: true,
+  t({id: "praxis-01",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 1, kunde: "praxis", karriere: 3, stufe: "E", vorlage: "praxis", vSeed: 41, minuten: 5, vorhersage: true,
     injektoren: [{name: "vlan-falsch", ziel: "behandlung"}],
     titel: "Behandlungsraum ohne Akten",
     briefing: "Hallo,\nim Raum 2 geht heute nichts – bitte schauen Sie zeitnah nach. Für das Protokoll bräuchte ich danach zwei Sätze.\n\nSabine Krämer",
     symptom: "Guten Morgen, im Behandlungsraum 2 kommt der PC seit heute Morgen nicht mehr an die Patientenakten, die anderen Räume haben sie. Wir hatten gestern einen Kabelkanal verlegen lassen, seitdem steht die Behandlung im Raum 2 still. Der Kollege hat das Kabel umgesteckt, den Rechner neu gestartet und eine andere Dose probiert, ohne Erfolg.",
     lohn: {euro: 90, ruf: 2}});
 
-  t({id: "praxis-02", reihe: 2, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 42, minuten: 6,
+  t({id: "praxis-02",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 2, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 42, minuten: 6,
     injektoren: [{name: "vlan-fehlt"}],
     titel: "Nach dem Switch-Reset",
     briefing: "Hallo,\nseit dem Eingriff von gestern ist ein Raum abgeschnitten. Vor allem: Kommen die Gäste jetzt an unsere Daten? Für das Protokoll bräuchte ich zwei Sätze.\n\nSabine Krämer",
     symptom: "Guten Morgen, unser Hausmeister hat den Switch im Serverraum zurückgesetzt, weil er so warm war. Seitdem steht der Behandlungsraum still, Empfang und Server laufen normal weiter. Wir haben die Kabel am Switch schon umgesteckt und den Rechner neu gestartet, ohne Erfolg. Bitte sagen Sie uns auch, ob die Gäste jetzt an unsere Daten kommen können.",
     lohn: {euro: 100, ruf: 2}});
 
-  t({id: "praxis-03", reihe: 3, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 43, minuten: 6,
+  t({id: "praxis-03",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Protokolleintrag geschrieben (Ursache, Änderung, Rückweg)"}], reihe: 3, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 43, minuten: 6,
     injektoren: [{name: "trunk-vlan-fehlt"}],
     titel: "Behandlungsraum abgeschnitten",
     briefing: "Hallo,\nein Dienstleister hat „die Sicherheit am Switch verbessert“. Seitdem kommt der Behandlungsraum weder an den Server noch ins Internet. Im Protokoll steht nur „allowed vlan angepasst“. Können Sie damit etwas anfangen?\n\nSabine Krämer",
     symptom: "Guten Tag, ein Dienstleister hat am Switch die Sicherheit verbessert und versichert, dass alles wie vorher sei. Im Behandlungsraum geht seitdem nichts mehr, kein Server und kein Internet, die übrigen Räume laufen. Ich habe den PC neu gestartet, ein anderes Kabel probiert und die Kollegen gefragt, es bleibt dabei. Die Befunde können nicht eingetragen werden, das blockiert den ganzen Tag.",
     lohn: {euro: 100, ruf: 2}});
 
-  t({id: "praxis-04", reihe: 4, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 44, minuten: 6,
+  t({id: "praxis-04",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 4, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 44, minuten: 6,
     injektoren: [{name: "acl-reihenfolge"}],
     titel: "Gäste im Patientennetz!",
     briefing: "Hallo,\ndas ist dringend: Ein Gast hat mehr gesehen, als er darf. Bitte heute noch kommen – und zwei Sätze fürs Protokoll.\n\nSabine Krämer",
@@ -51,7 +59,9 @@
     symptom: "Guten Tag, seit gestern kommen unsere Gäste gar nicht mehr ins Internet, nicht einmal auf harmlose Seiten. Die Patienten können nicht einmal ihre Termine abrufen, sie beschweren sich am Empfang. Ich habe den Laptop neu gestartet und mich mit einem anderen Gerät ins Gästenetz gewählt, probiert habe ich das mehrfach. An die Akten sollen die Gäste weiterhin nicht, das ist unverändert wichtig.",
     lohn: {euro: 100, ruf: 2}});
 
-  t({id: "praxis-07", reihe: 7, kunde: "praxis", karriere: 3, stufe: "AP2", vorlage: "praxis", vSeed: 47, minuten: 7,
+  t({id: "praxis-07",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 7, kunde: "praxis", karriere: 3, stufe: "AP2", vorlage: "praxis", vSeed: 47, minuten: 7,
     injektoren: [{name: "subif-vlan-falsch"}],
     titel: "Behandlung hinter dem Router verschwunden",
     briefing: "Hallo,\nnach der Korrektur von gestern kommt ein Raum nicht mehr hinaus. Ich fürchte, da ist etwas schiefgegangen – bitte heute nachsehen. Zwei Sätze fürs Protokoll genügen.\n\nSabine Krämer",
@@ -101,7 +111,9 @@
      Drei Störungen, die vorher kein Auftrag auslöste: Port-Security am Gästeport, erschöpfter DHCP-Pool,
      Adresskonflikt im Pool. Jeder Fall hat einen echten Startbruch mit eigenem Grundcode. */
 
-  t({id: "praxis-08", reihe: 8, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 81, minuten: 7,
+  t({id: "praxis-08",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 8, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 81, minuten: 7,
     injektoren: [],
     skills: ["lab.portsec", "lab.switch"],
     umbau(n){
@@ -126,7 +138,9 @@
     erklaerung: "Port-Security merkt sich, welche MAC-Adressen an einem Switchport erlaubt sind. Eine fremde MAC führt je nach Einstellung zum Verwerfen oder – wie hier – zum Abschalten des Ports (err-disabled). Der Port bleibt aus, bis er wieder freigegeben und der Eintrag berichtigt wird. Fachlich richtig ist die Funktion trotzdem: Sie verhindert, dass jemand ein fremdes Gerät an einen festen Platz hängt.",
     quelle: "VLAN – Lernfassung (§ 3: Port-Security) · IEEE 802.1X (Zugangskontrolle am Port)", lohn: {euro: 90, ruf: 3}});
 
-  t({id: "praxis-09", reihe: 9, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 82, minuten: 7,
+  t({id: "praxis-09",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 9, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 82, minuten: 7,
     injektoren: [],
     umbau(n){
       /* Der Dienstleister hat den Gästepool auf die Gateway-Adresse gelegt – dort ist nichts zu vergeben. */
@@ -154,7 +168,9 @@
     erklaerung: "Ein DHCP-Server vergibt nur Adressen, die in seinem Pool liegen und frei sind. Ist der Pool zu klein – oder liegt er auf Adressen, die fest vergeben sind – findet er nichts und schweigt. Der Client wartet, bekommt kein Angebot und gibt sich selbst eine APIPA-Adresse (169.254.x.x); damit erreicht er nur andere APIPA-Geräte, kein Gateway, kein Internet.",
     quelle: "RFC 2131 (DHCP) · RFC 3927 (APIPA)", lohn: {euro: 95, ruf: 3}});
 
-  t({id: "praxis-10", reihe: 10, kunde: "praxis", karriere: 3, stufe: "AP2", vorlage: "praxis", vSeed: 83, minuten: 8,
+  t({id: "praxis-10",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 10, kunde: "praxis", karriere: 3, stufe: "AP2", vorlage: "praxis", vSeed: 83, minuten: 8,
     injektoren: [],
     umbau(n){
       /* Ein Kollege hat dem Empfangs-PC die Adresse des Gästepools gegeben; der Pool liegt auf dieser Adresse. */
@@ -350,14 +366,18 @@
     quelle: "RFC 2131 (DHCP) · RFC 3927 (APIPA)", lohn: {euro: 150, ruf: 4}});
 
   /* ===== Stufe 5 · Kessler Präzisionsteile (Dr. Ines Kessler) ===== */
-  t({id: "mittel-01", reihe: 1, kunde: "mittelstand", karriere: 5, stufe: "AP1", vorlage: "dmz", vSeed: 61, minuten: 6,
+  t({id: "mittel-01",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Eine Zeile fürs Betriebshandbuch geschrieben"}], reihe: 1, kunde: "mittelstand", karriere: 5, stufe: "AP1", vorlage: "dmz", vSeed: 61, minuten: 6,
     injektoren: [{name: "fw-reihenfolge"}],
     titel: "Webshop intern nicht erreichbar",
     briefing: "Guten Abend.\nBitte korrigieren Sie den gestrigen Eingriff; eine Zeile für das Betriebshandbuch genügt mir.\n\nDr. Ines Kessler",
     symptom: "Guten Abend, der Vertrieb erreicht seit heute den eigenen Webshop nicht mehr, Kunden von außen kommen aber weiterhin darauf. Laut Änderungsprotokoll wurde gestern eine Schutzregel für die DMZ ergänzt; ich habe die Einträge mit dem Kollegen nachgesehen und verglichen. Unsere Leute im Vertrieb können keine Bestellungen mehr prüfen, das bleibt liegen.",
     lohn: {euro: 170, ruf: 3}});
 
-  t({id: "mittel-02", reihe: 2, kunde: "mittelstand", karriere: 5, stufe: "AP1", vorlage: "dmz", vSeed: 62, minuten: 5,
+  t({id: "mittel-02",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Eine Zeile fürs Betriebshandbuch geschrieben"}], reihe: 2, kunde: "mittelstand", karriere: 5, stufe: "AP1", vorlage: "dmz", vSeed: 62, minuten: 5,
     injektoren: [{name: "fw-regel-fehlt", ziel: "r1"}],
     titel: "Kein Internet im Büro",
     briefing: "Guten Abend.\nBitte stellen Sie den Stand von gestern wieder her; eine Zeile für das Betriebshandbuch genügt mir.\n\nDr. Ines Kessler",
@@ -372,7 +392,9 @@
     symptom: "Guten Abend, unsere Kunden erreichen den Webshop seit heute Vormittag nicht mehr, intern ist er da. Die Weiterleitung auf Port 443 steht laut Konfiguration, daran hat niemand gerüttelt. Ich habe den Shop selbst aus dem Internet geprüft und unseren Dienstleister gefragt, beide sehen nur eine Zeitüberschreitung. Ohne den Shop verdienen wir kein Geld.",
     lohn: {euro: 190, ruf: 3}});
 
-  t({id: "mittel-04", reihe: 4, kunde: "mittelstand", karriere: 5, stufe: "AP2", vorlage: "dmz", vSeed: 64, minuten: 7,
+  t({id: "mittel-04",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Eine Zeile fürs Betriebshandbuch geschrieben"}], reihe: 4, kunde: "mittelstand", karriere: 5, stufe: "AP2", vorlage: "dmz", vSeed: 64, minuten: 7,
     injektoren: [{name: "portfwd-falsch"}],
     titel: "Kunden kommen nicht in den Shop",
     briefing: "Guten Abend.\nBitte prüfen Sie die Weiterleitung; eine Zeile für das Betriebshandbuch genügt mir. Kunden stehen vor verschlossener Tür.\n\nDr. Ines Kessler",
@@ -466,5 +488,120 @@
     symptom: "Guten Tag, wir haben das neue NAS im Serverraum aufgestellt und ans Netz gesteckt, es leuchtet auch. Seit gestern findet es trotzdem kein Rechner, weder über den Namen noch über die Nummer aus dem Handbuch. Beim alten NAS musste man nichts einstellen, sagt der Kollege; ich habe das Kabel umgesteckt und den Rechner neu gestartet. Ohne die Ablage steht die Arbeit im Büro.",
     erklaerung: "Ein Gerät im LAN braucht drei Einträge, damit es mitspielt: eine freie Adresse aus dem eigenen Netz, dieselbe Maske wie die anderen und – für fremde Netze – das Gateway; dazu den DNS-Server, wenn Namen aufgelöst werden sollen. Ein Server oder NAS bekommt eine feste Adresse, damit alle es immer unter derselben Nummer finden; Arbeitsplätze holen ihre Adresse per DHCP. Ohne Adresse hat ein Gerät im Netz kein Ziel.",
     quelle: "04-AP1-Netzwerk (Adressierung im LAN) · RFC 1918 (private Adressen)", lohn: {euro: 220, ruf: 5}});
+
+  /* ===== Welle 2 · S4 (Architektur § 17.3): Ausbau Karriere-Stufe 5 auf 10 Tickets ===== */
+  t({id: "mittel-05", reihe: 5, kunde: "mittelstand", karriere: 5, stufe: "AP1", vorlage: "dmz", vSeed: 65, minuten: 6,
+    injektoren: [{name: "fw-reihenfolge"}],
+    titel: "Firewall-Log voller Verwerfungen",
+    briefing: "Guten Abend.\nSeit dem Wartungsfenster gestern kommt der Vertrieb nicht mehr an den eigenen Shop; ein kurzer Anruf genügt mir.\n\nDr. Ines Kessler",
+    symptom: "Guten Abend, seit dem Wartungsfenster gestern Abend steht im Protokoll unserer Firewall fast nur noch „verworfen“. Der Vertrieb erreicht den eigenen Webshop seither nicht mehr, Kunden von außen kommen weiterhin durch. Ich habe das Protokoll zweimal ausgedruckt und die Einträge verglichen, sie wiederholen sich. Ohne den Shop steht die Auftragsannahme im Büro, bitte sehen Sie es sich heute an.",
+    lohn: {euro: 170, ruf: 3}});
+
+  t({id: "mittel-06", reihe: 6, kunde: "mittelstand", karriere: 5, stufe: "AP2", vorlage: "dmz", vSeed: 66, minuten: 6,
+    injektoren: [{name: "fw-regel-fehlt"}],
+    titel: "Neue Kollegin kommt nicht an den Shop",
+    briefing: "Guten Abend.\nDie neue Vertriebsmitarbeiterin sitzt seit heute im Haus und kommt an keinen Shop; ein kurzer Anruf genügt.\n\nDr. Ines Kessler",
+    symptom: "Guten Abend, seit heute Morgen kommt unsere neue Kollegin im Vertrieb nicht an den eigenen Webshop. Alle anderen Arbeitsplätze erreichen ihn, und von außen ist er ebenfalls da. Ich habe ihren Rechner neu gestartet und ihr Konto mit dem eines Kollegen verglichen, ohne Erfolg. Ohne den Shop kann sie keine Angebote stellen, das ist heute wichtig.",
+    lohn: {euro: 180, ruf: 3}});
+
+  t({id: "mittel-07", reihe: 7, kunde: "mittelstand", karriere: 5, stufe: "AP1", vorlage: "standorte", vSeed: 67, minuten: 6,
+    injektoren: [{name: "portsec-fremde-mac"}],
+    titel: "Fremder Laptop im Werk",
+    briefing: "Guten Abend.\nIm Werk steht seit heute ein fremdes Notebook am Hallenanschluss; ein kurzer Anruf genügt.\n\nDr. Ines Kessler",
+    symptom: "Guten Abend, im Werk hat heute Vormittag jemand ein fremdes Notebook an den Hallenanschluss gesteckt. Seitdem ist die Werkstatt offline, die Anlage steht still und die Schicht wartet. Unser Mitarbeiter hat das Kabel wieder abgezogen, der Anschluss bleibt aber dunkel. Bitte prüfen Sie das heute noch, sonst fällt die Schicht aus.",
+    lohn: {euro: 175, ruf: 3}});
+
+  t({id: "mittel-08", reihe: 8, kunde: "mittelstand", karriere: 5, stufe: "AP2", vorlage: "dmz", vSeed: 68, minuten: 6,
+    injektoren: [{name: "portfwd-falsch"}],
+    titel: "Kamera im Lager von außen nicht erreichbar",
+    briefing: "Guten Abend.\nDer Wachdienst erreicht die Lagerkamera seit heute nicht mehr; ein kurzer Anruf genügt.\n\nDr. Ines Kessler",
+    symptom: "Guten Abend, unser Wachdienst erreicht die Kamera im Lager seit heute nicht mehr von außen. Intern ist sie im Bild, die Aufzeichnung läuft weiter. Ich habe die Kamera neu gestartet und das Kabel geprüft, der Fehler bleibt. Die Kamera gehört zu unserer Bewachungsauflage, bitte heute noch prüfen.",
+    lohn: {euro: 185, ruf: 3}});
+
+  t({id: "mittel-09", reihe: 9, kunde: "mittelstand", karriere: 5, stufe: "AP2", vorlage: "dmz", vSeed: 69, minuten: 6,
+    injektoren: [{name: "dmz-regel-fehlt"}],
+    titel: "Lieferant kommt nicht in die DMZ",
+    briefing: "Guten Abend.\nDer Lieferant kommt beim täglichen Abgleich nicht durch; ein kurzer Anruf genügt.\n\nDr. Ines Kessler",
+    symptom: "Guten Abend, unser Lieferant kommt beim täglichen Abgleich nicht mehr auf den Webshop in der DMZ. Das Programm meldet, der Server sei nicht erreichbar; der Dienstleister sagt, von außen sei alles offen. Ich habe den Abgleich zweimal neu gestartet und die Uhrzeit geprüft. Ohne den Abgleich läuft die Bestellung von Teilen nicht an.",
+    lohn: {euro: 190, ruf: 3}});
+
+  t({id: "mittel-10", reihe: 10, kunde: "mittelstand", karriere: 5, stufe: "AP2", vorlage: "standorte", vSeed: 70, minuten: 7,
+    injektoren: [{name: "portsec-fremde-mac"}],
+    titel: "Schichtwechsel: Anschluss bleibt dunkel",
+    briefing: "Guten Abend.\nNach dem Schichtwechsel kommt die Annahme nicht mehr durch; ein kurzer Anruf genügt.\n\nDr. Ines Kessler",
+    symptom: "Guten Abend, nach dem Schichtwechsel heute früh kommt die Annahme nicht mehr an unseren Warenwirtschaftsrechner. Der Kollege hat am Anschluss ein neues Kabel gesteckt, das Lämpchen bleibt aber aus. Ich habe den Rechner zweimal neu gestartet und ein anderes Kabel versucht. Ohne die Annahme können wir keine Ware buchen, bitte heute kommen.",
+    lohn: {euro: 190, ruf: 4}});
+
+  /* ===== Welle 2 · S4 (Architektur § 17.3): Ausbau Karriere-Stufe 6 auf 8 Tickets ===== */
+  t({id: "storage-04", reihe: 4, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "standorte", vSeed: 74, minuten: 8,
+    injektoren: [{name: "stp-doppelkabel"}],
+    skills: ["lab.stp", "lab.switch"],
+    titel: "Zwei Kabel, ein Ausfall",
+    briefing: "Hallo,\nseit dem Verkabeln im Archiv erreichen sich unsere Rechner kaum noch; eine kurze Rückmeldung genügt.\n\nJana Wolff",
+    symptom: "Guten Tag, seit dem Verkabeln im Archiv erreichen sich unsere Rechner kaum noch, das Netz ist zeitweise ganz weg. Der Kollege hat zwei Kabel gezogen, weil noch Anschlüsse frei waren. Ich habe einen Rechner neu gestartet und ein Kabel abgezogen, danach ging es kurz. Ohne die Ablage können die Architekten nicht zeichnen, bitte heute kommen.",
+    lohn: {euro: 220, ruf: 5}});
+
+  t({id: "storage-05", reihe: 5, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "standorte", vSeed: 75, minuten: 8,
+    injektoren: [{name: "route-fehlt"}],
+    skills: ["lab.storage", "lab.route"],
+    titel: "Nächtliche Sicherung bleibt leer",
+    briefing: "Hallo,\nseit dem Standortwechsel kommt die Sicherung nicht mehr durch; eine kurze Rückmeldung genügt.\n\nJana Wolff",
+    symptom: "Guten Tag, seit dem Umzug des Sicherungsservers in die Filiale bleibt unsere nächtliche Sicherung leer. Das Programm meldet am Morgen „keine Verbindung“, der Server selbst läuft und ist im Archiv zu hören. Ich habe den Auftrag zweimal von Hand gestartet und das Kabel am Server geprüft. Ohne Sicherung dürfen wir die Pläne nicht freigeben.",
+    lohn: {euro: 240, ruf: 5}});
+
+  t({id: "storage-06", reihe: 6, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "standorte", vSeed: 76, minuten: 7,
+    injektoren: [{name: "schleife"}],
+    skills: ["lab.ttl", "lab.route"],
+    titel: "Filiale nur auf Umwegen erreichbar",
+    briefing: "Hallo,\nseit der Umstellung in der Zentrale ist die Filiale nur sporadisch da; eine kurze Rückmeldung genügt.\n\nJana Wolff",
+    symptom: "Guten Tag, seit der Umstellung in der Zentrale erreicht die Filiale niemand mehr zuverlässig, mal geht es, mal bleibt es weg. Der Kollege hat den Router zweimal neu gestartet und alle Kabel geprüft. Den Dateiaustausch zwischen beiden Häusern haben wir von Hand versucht, er bricht immer wieder ab. Ohne den Austausch stehen die Pläne in der Filiale still.",
+    lohn: {euro: 230, ruf: 4}});
+
+  t({id: "storage-07", reihe: 7, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "standorte", vSeed: 77, minuten: 7,
+    injektoren: [{name: "dienst-aus"}],
+    skills: ["lab.storage", "lab.ports"],
+    titel: "Freigabe der Pläne ist weg",
+    briefing: "Hallo,\nseit heute Morgen findet die Zentrale die Pläne auf dem Server nicht mehr; eine kurze Rückmeldung genügt.\n\nJana Wolff",
+    symptom: "Guten Tag, seit heute Morgen findet die Zentrale die Projektpläne auf dem Server nicht mehr. Der Server antwortet auf Ping, eine Verbindung zu den Dateien kommt aber nicht zustande. Ich habe den Rechner neu gestartet und die Freigabe mit dem Kollegen verglichen, sie steht noch aus. Ohne die Pläne kann morgen auf der Baustelle nicht gearbeitet werden.",
+    lohn: {euro: 235, ruf: 5}});
+
+  t({id: "storage-08", reihe: 8, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "standorte", vSeed: 78, minuten: 8,
+    injektoren: [{name: "portsec-fremde-mac"}],
+    skills: ["lab.portsec", "lab.storage"],
+    titel: "Fremder Laptop am Archiv-Switch",
+    briefing: "Hallo,\nam Archiv-Switch hängt seit heute ein fremdes Gerät; eine kurze Rückmeldung genügt.\n\nJana Wolff",
+    symptom: "Guten Tag, am Archiv-Switch hängt seit heute Vormittag ein fremdes Gerät, das dort niemand kennt. Seitdem kommen unsere Rechner nicht mehr an die Ablage im Archiv. Der Kollege hat das Gerät entfernt, der Anschluss bleibt aber dunkel. Bitte prüfen Sie das heute, morgen muss die Planausgabe laufen.",
+    lohn: {euro: 245, ruf: 5}});
+
+  /* ===== Welle 3 · S7 (Architektur § 17.5): Bestand auf 76 Handtickets – drei Fälle mit echtem Lernziel ===== */
+  t({id: "storage-09", reihe: 10, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "standorte", vSeed: 91, minuten: 7,
+    injektoren: [{name: "schleife"}],
+    skills: ["lab.ttl", "lab.route"],
+    titel: "Die Pläne fahren im Kreis",
+    briefing: "Hallo,\nseit der Umstellung in der Zentrale kommt der Dateiaustausch mit der Filiale nicht mehr durch; eine kurze Rückmeldung genügt mir.\n\nJana Wolff",
+    symptom: "Guten Tag, seit der Umstellung in der Zentrale kommt der Dateiaustausch mit der Filiale nicht mehr an. Der Kollege hat den Router zweimal neu gestartet und die Kabel geprüft, der Austausch bricht trotzdem ab. Auf dem Bildschirm steht, die Gegenstelle antworte nicht; die Uhrzeit im Protokoll stimmt. Ohne den Austausch können die Pläne in der Filiale nicht gedruckt werden.",
+    erklaerung: "Bei einer Routing-Schleife schicken sich zwei Router ein Paket immer hin und her. Die TTL sinkt an jedem Router um 1; bei 0 wird das Paket verworfen und der Router meldet „Time exceeded“. traceroute macht die Schleife sichtbar: Derselbe Router erscheint mehrfach. Die Lösung ist eine Route, die den Kreis schließt, nicht eine neue Adresse.",
+    quelle: "RFC 792 (ICMP Time Exceeded) · Cisco: Traceroute und TTL – im Labor paketweise sichtbar",
+    lohn: {euro: 250, ruf: 5}});
+
+  t({id: "storage-10", reihe: 11, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "buero", vSeed: 92, minuten: 6,
+    injektoren: [{name: "dhcp-adresskonflikt"}],
+    skills: ["lab.dhcp", "lab.ip"],
+    titel: "Zwei Geräte, eine Adresse",
+    briefing: "Hallo,\nseit dem Anschluss des Messgeräts zickt der Rechner am Empfang; eine kurze Rückmeldung genügt mir.\n\nJana Wolff",
+    symptom: "Guten Tag, seit dem Anschluss des Messgeräts zickt der Rechner am Empfang: Mal hat er eine Adresse, mal fällt er aus. Der Kollege hat den Rechner neu gestartet und ein anderes Kabel genommen, ohne Erfolg. Laut Bildschirmmeldung ist die Adresse „bereits in Verwendung“. Der Empfang kann so keine Termine mehr annehmen.",
+    erklaerung: "Ein DHCP-Server merkt sich, welche Adresse er welchem Gerät gegeben hat. Meldet sich ein zweites Gerät mit derselben festen Adresse, kommt es zum Adresskonflikt: Beide Verbindungen brechen zeitweise ab. Richtig ist, den freien Bereich und die Reservierungen zu prüfen und dem neuen Gerät eine eigene Adresse zuzuweisen – oder es in den DHCP-Bereich zu hängen.",
+    quelle: "RFC 2131 (DHCP) · Microsoft Learn: DHCP-Adresskonflikt – im Labor sichtbar (DHCP_CONFLICT)",
+    lohn: {euro: 250, ruf: 5}});
+
+  t({id: "storage-11", reihe: 12, kunde: "storage", karriere: 6, stufe: "AP2", vorlage: "standorte", vSeed: 93, minuten: 6,
+    injektoren: [{name: "geraet-stromlos", ziel: "annahme"}],
+    skills: ["lab.link", "lab.betrieb"],
+    titel: "Nach dem Gewitter ist die Annahme weg",
+    briefing: "Hallo,\nnach dem Gewitter gestern Abend ist die Annahme im Südflügel nicht mehr da; eine kurze Rückmeldung genügt mir.\n\nJana Wolff",
+    symptom: "Guten Tag, nach dem Gewitter gestern Abend kommt die Annahme im Südflügel nicht mehr ins Netz. Der Rechner ist beim Vorbeigehen dunkel geblieben, die Kollegin sagt, er sei wohl aus. Ich habe das Kabel geprüft und die Sicherung im Verteiler nachgesehen, die ist drin. Ohne den Rechner können die Anlieferungen nicht erfasst werden, bitte heute noch prüfen.",
+    erklaerung: "Ein Gerät kann auf Schicht 1 fehlen, obwohl Kabel und Switch in Ordnung sind: Es ist schlicht aus. Erst einschalten, dann Link und Adresse prüfen. Für den Betrieb gehört in den Bericht, wann der Ausfall begann und ob nach dem Wiedereinschalten alles läuft.",
+    quelle: "Network – Lernfassung (Schicht 1) · Betriebsdokumentation: BSI IT-Grundschutz – im Labor sichtbar (DEVICE_OFF)",
+    lohn: {euro: 245, ruf: 5}});
 
 })();

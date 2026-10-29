@@ -4,6 +4,9 @@ Kurz und verbindlich. Die vollständigen Betriebsregeln stehen in [`AGENTS.md`](
 sie gelten für Menschen genauso wie für Modelle. Hier steht, was für einen Beitrag
 praktisch wichtig ist.
 
+Kurzfassung für GitHub: [CONTRIBUTING.md](../CONTRIBUTING.md) · Sicherheitslücken:
+[SECURITY.md](../SECURITY.md) · häufige Fragen: [FAQ.md](FAQ.md).
+
 ## Die fünf Regeln, die alles andere erklären
 
 1. **Senkrechter Schnitt vor Breite.** Lieber eine Funktion vollständig — Modell,
@@ -59,9 +62,10 @@ Git wiederherstellen und mit einem Skript bearbeiten, das **die vorhandenen Ende
 Jeder Beitrag muss diese Befehle grün hinterlassen:
 
 ```bash
-sh tools/test.sh            # 213/213 grün
+sh tools/test.sh            # N/N grün, 0 übersprungen — die Zahl misst docs/STAND.md
 python tools/klassen.py     # 0 Klassen ohne CSS-Regel
 node tools/sim-stand.js     # Simulation unverändert gegenüber dem Referenzstand
+python tools/stand.py --pruefen   # Zahlen in docs/STAND.md + README gegen die Messung
 ```
 
 Nach jeder Änderung an `src/sim/` oder `src/modell/` **zusätzlich**

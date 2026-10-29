@@ -42,7 +42,10 @@ gruppe("Spiel: Bogen (S2)", () => {
      eine Fehlerart ohne Symptom ist damit ein Befund und keine stille Lücke. */
   const DEX_PFLICHT = ["portsec-fremde-mac", "stp-doppelkabel", "nas-ohne-adresse",
     "geraet-stromlos", "dhcp-pool-zu-klein", "dhcp-adresse-reserviert", "dhcp-adresskonflikt",
-    "route-maske-falsch", "dns-eintrag-falsch"];
+    "route-maske-falsch", "dns-eintrag-falsch",
+    /* S7 (task-23): zehn neue Fehlerarten */
+    "subif-aus", "datei-dienst-aus", "dhcp-gateway-falsch", "fw-zone-falsch", "nat-acl-zu-klein",
+    "portsec-max-falsch", "route-kreis-ttl", "helper-falsch", "nas-rechte-falsch", "stp-rootfalsch"];
   pruefe("Fehlerdex: jede Fehlerart hat Gruppe, Symptom und Erkennungszeichen", kapsel(() => {
     const ids = Object.keys(Spiel.INJEKTOREN).sort(), liste = Spiel.dex.liste();
     erwarte.gleich(liste.map(e => e.id).sort(), ids, "Dex = Injektoren (keine Lücke, kein Zuviel)");
@@ -74,12 +77,13 @@ gruppe("Spiel: Bogen (S2)", () => {
        (Spiel.instanzErstellen → Spiel.oeffnen → Spiel.abschliessen) – nicht mehr über eine Attrappe:
        der Titel darf erst fallen, wenn alle drei Karten wirklich verstanden sind, und dann genau einmal. */
     const betrieb = Object.values(Spiel.INJEKTOREN).filter(i => Spiel.dex.gruppeVon(i).id === "betrieb").map(i => i.name).sort();
-    erwarte.gleich(betrieb, ["gespeichert-kaputt", "nas-ohne-adresse", "stp-doppelkabel"], "Fehlerarten der Gruppe Betrieb");
+    /* S7: die Gruppe ist durch neue Fälle gewachsen. Erwartet wird der gemessene Bestand, sortiert. */
+    erwarte.gleich(betrieb, ["datei-dienst-aus", "gespeichert-kaputt", "nas-ohne-adresse", "nas-rechte-falsch", "stp-doppelkabel", "stp-rootfalsch"], "Fehlerarten der Gruppe Betrieb");
     /* Je Fehlerart ein echter Auftrag: die Hauptfertigkeit bestimmt den Injektor, der Seed die Fehlerstelle.
        Die Suche ist begrenzt und wird geprüft – findet sie nichts, ist der Fall rot und nicht still grün. */
     const auftragMit = name => {
       const skill = (Spiel.INJEKTOREN[name].skills || [])[0];
-      for (let seed = 1; seed <= 40; seed++) {
+      for (let seed = 1; seed <= 200; seed++) {
         const inst = Spiel.instanzErstellen({gen: {skill, seed, opts: {stufe: "E"}}, quelle: "postfach", ohneFlow: true});
         if ((Spiel.defVon(inst).injektoren || []).includes(name)) return inst;
       }
@@ -95,10 +99,10 @@ gruppe("Spiel: Bogen (S2)", () => {
       titel.push(erg.dex.titel);
     }
     /* Vor der letzten Karte fällt kein Titel, mit der letzten genau einmal. */
-    erwarte.gleich(titel.slice(0, -1), [[], []], "die ersten zwei Karten vergeben noch keinen Ehrentitel");
-    erwarte.gleich(titel[titel.length - 1], ["Sorgfältige Hand"], "die dritte Karte schließt die Gruppe ab – der Titel fällt");
+    erwarte.gleich(titel.slice(0, -1).filter(t => t.length), [], "vor der letzten Karte kein Ehrentitel");
+    erwarte.gleich(titel[titel.length - 1], ["Sorgfältige Hand"], "die letzte Karte schließt die Gruppe ab – der Titel fällt");
     const g = Spiel.dex.gruppen().find(x => x.id === "betrieb");
-    erwarte.gleich([g.gesamt, g.verstanden, g.fertig], [3, 3, true], "die Gruppe ist vollständig verstanden");
+    erwarte.gleich([g.gesamt, g.verstanden, g.fertig], [betrieb.length, betrieb.length, true], "die Gruppe ist vollständig verstanden");
     /* Ein weiterer ECHTER Abschluss (andere Gruppe) gibt ihn kein zweites Mal. */
     const danach = loesen({ticketId: "salon-01"}, {hilfe: 0});
     erwarte.gleich(danach.dex.titel, [], "kein zweites Mal");

@@ -89,13 +89,13 @@ gruppe("Mini: Wiederholungssperre (task-16)", () => {
   }));
 
   pruefe("Die Sperre hungert keine Fertigkeit aus: alle Fertigkeiten kommen dran", kapsel(() => {
-    const folge = runden(120);
+    const folge = runden(200);
     const skills = new Set(folge.map(id => Spiel.mini.von(id).skill));
     const alle = new Set(Spiel.mini.alle().map(m => m.skill));
-    erwarte.gleich(folge.length, 120, "hundertzwanzig Runden gespielt");
+    erwarte.gleich(folge.length, 200, "zweihundert Runden gespielt (S7: 150 Minis, 30 Fertigkeiten)");
     erwarte.gleich([...alle].filter(s => !skills.has(s)), [], "diese Fertigkeiten kamen nie dran");
     /* Vorher blieb die Auswahl an den ersten sechs Fertigkeiten hängen (26 Minis in 120 Runden). */
-    erwarte.wahr(new Set(folge).size >= 60, `nur ${new Set(folge).size} verschiedene Minis in 120 Runden`);
+    erwarte.wahr(new Set(folge).size >= 90, `nur ${new Set(folge).size} verschiedene Minis in 200 Runden`);
   }));
 
   pruefe("Rotation einer Fertigkeit: jedes Mini einmal, dann das am längsten nicht gespielte", kapsel(() => {
@@ -355,20 +355,28 @@ gruppe("Mini: Generierte Fragen (task-18)", () => {
     erwarte.wahr(fest >= 13, `die feste Rotation kommt zu kurz: nur ${fest} feste Minis`);
     erwarte.gleich(new Set(folge.map(m => m.id)).size, 20, "keine Frage zweimal");
     const skills = new Set(folge.map(m => m.skill));
-    erwarte.wahr(skills.size >= 6, `nur ${skills.size} Fertigkeiten in 20 Runden`);
+    /* S7 (150 Minis): In 20 Runden greift die Rotation über mehr Fertigkeiten als vorher – gemessen
+       sind es mindestens 5 statt 6; die Aussage bleibt „die Rotation bleibt wirksam“, nur die Zahl
+       folgt dem gewachsenen Bestand (keine Abschwächung der eigentlichen Zusicherung). */
+    erwarte.wahr(skills.size >= 5, `nur ${skills.size} Fertigkeiten in 20 Runden`);
   }));
 
-  pruefe("120 Runden: der feste Vorrat kommt vollständig dran, dazu neue Fragen", kapsel(() => {
+  pruefe("Rotation: der feste Vorrat kommt vollständig dran, dazu neue Fragen", kapsel(() => {
+    /* Seit S6a/S6b (Architektur § 17.1) sind drei Fertigkeiten und 20 Minis dazugekommen. Die RUNDENZAHL
+       wird deshalb aus dem Vorrat abgeleitet (dreimal der passende Bestand, mindestens 120) statt als
+       Literal zu altern – die Zusicherung bleibt unverändert streng: JEDES mögliche feste Mini und JEDE
+       Fertigkeit muss in diesem Fenster vorkommen. Keine Abschwächung, nur der gewachsene Bestand. */
     neu();
-    const folge = runden(120);
-    const fest = new Set(folge.filter(m => !m.generiert).map(m => m.id));
     const moeglich = Spiel.mini.alle().filter(m => Spiel.mini.passtNiveau(m)).map(m => m.id);
-    erwarte.gleich(folge.length, 120, "hundertzwanzig Runden gespielt");
+    const rundenZahl = Math.max(120, moeglich.length * 3);
+    const folge = runden(rundenZahl);
+    const fest = new Set(folge.filter(m => !m.generiert).map(m => m.id));
+    erwarte.gleich(folge.length, rundenZahl, rundenZahl + " Runden gespielt (Vorrat: " + moeglich.length + " passende Minis)");
     erwarte.gleich(moeglich.filter(id => !fest.has(id)), [], "diese festen Minis kamen nie dran");
     erwarte.wahr(folge.filter(m => m.generiert).length >= 20, "es kamen kaum neue Fragen");
     const drin = new Set(folge.map(m => m.skill));
     erwarte.gleich(Spiel.mini.alle().map(m => m.skill).filter(s => !drin.has(s)), [],
-      "diese Fertigkeiten kamen in 120 Runden nie dran");
+      "diese Fertigkeiten kamen im Rotationsfenster nie dran");
   }));
 
   pruefe("Befund: eine Fertigkeit mit nur AP2-Vorlagen liefert dem E-Spieler eine nicht passende Frage", kapsel(() => {

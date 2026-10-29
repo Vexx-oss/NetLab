@@ -58,6 +58,19 @@ DATEN.fragenVorlagen = (() => {
     "ungeteiltes-netz",     /* die Maske vor der Aufteilung */
     "dienst-vertauscht",    /* der Port eines anderen Dienstes */
     "falsche-seite",        /* Ziel und Gateway vertauscht (ARP) */
+    /* Welle 2 · S5 (Architektur § 17.4): Familien der neun neuen Vorlagen. */
+    "falsche-adressfamilie",/* A statt AAAA oder umgekehrt (v4/v6 verwechselt) */
+    "falsche-richtung",     /* Hin- und Rückauflösung verwechselt (PTR statt A) */
+    "syn-nicht-gezaehlt",   /* das SYN als Byte vergessen */
+    "ohne-vlan",            /* System-ID-Anteil (VLAN) der Bridge-ID vergessen */
+    "falsche-prioritaet",   /* Priorität mit 4096 verrechnet statt VLAN addiert */
+    "ohne-paritaet",        /* RAID ohne Paritätsplatte gerechnet */
+    "eine-platte",          /* nur eine Platte als Nutzkapazität */
+    "nur-obergrenze",       /* nur die obere Portgrenze als Anzahl */
+    "falsche-regel",        /* eine andere Regel der Liste gewählt */
+    "implizites-deny",      /* Standard-deny übersehen, obwohl eine Regel passt */
+    "falscher-modus",       /* falscher IOS-Modus nach dem Befehl */
+    "falsche-ebene",        /* eine Ebene zu hoch oder zu tief */
   ];
 
   const neu = o => { V[o.id] = Object.assign({art: "wahl", platzhalter: []}, o); };
@@ -219,7 +232,7 @@ DATEN.fragenVorlagen = (() => {
     frage: p => `Auf ${p.host} läuft der Dienst ${p.dienst}. Auf welchem Port ist er standardmäßig erreichbar?`,
     loesung: p => String(p.port),
     pruefe: (p, t) => { const n = Number(String(t).trim()); return Number.isInteger(n) && n === p.port; },
-    ablenker: p => p.andere.map(port => ({text: String(port), art: "dienst-vertauscht"})),
+    ablenker: p => p.andere.map(port => ({text: String(port), art: "dienst-vertauscht"})).concat([{text: String(p.port + 1), art: "off-by-one"}]),
     erklaerung: p => `${p.dienst} ist standardmäßig über Port ${p.port} erreichbar. Die anderen Zahlen gehören zu anderen Diensten – wer Ports verwechselt, öffnet an der Firewall die falsche Tür.`});
 
   /* Dienst-Tabelle und Hostnamen: eigene Funktionen, damit sie nicht bei jedem Aufruf neu entstehen. */
@@ -255,5 +268,132 @@ DATEN.fragenVorlagen = (() => {
     ],
     erklaerung: p => `256 Adressen im /24 geteilt durch ${p.n} VLANs sind ${p.block} Adressen je VLAN. ${p.block} Adressen entsprechen ${p.p} Präfixbits, also ${IP.maske(p.p)}.`});
 
+
+  /* ---------- Welle 2 · S5: neun Vorlagen (Architektur § 17.4, 20 Vorlagen / 17 Fertigkeiten) ----------
+     Gleiche Bauform wie oben: zahlen() zieht die Parameter aus dem Seed, loesung() und pruefe() rechnen
+     unabhängig, jeder Ablenker trägt eine Denkfehler-Familie aus DATEN.fragenDenkfehler. */
+  const TYPEN_DNS = ["A", "AAAA", "MX", "PTR"];
+  const ARTEN_DNS = {
+    A:    {AAAA: "falsche-adressfamilie", MX: "dienst-vertauscht", PTR: "falsche-richtung"},
+    AAAA: {A: "falsche-adressfamilie", MX: "dienst-vertauscht", PTR: "falsche-richtung"},
+    MX:   {A: "dienst-vertauscht", AAAA: "dienst-vertauscht", PTR: "falsche-richtung"},
+    PTR:  {A: "falsche-richtung", AAAA: "falsche-adressfamilie", MX: "dienst-vertauscht"},
+  };
+  const NAMEN_DNS = ["server-01.buero.local", "mail-2.firma.local", "nas-3.lager.local", "drucker-4.etage.local",
+    "web-5.kunde.de", "vpn-6.standort.local", "db-7.rechenzentrum.local", "proxy-8.filiale.local",
+    "kamera-9.halle.local", "router-10.zentrale.local", "fileserver-11.schule.local", "portal-12.praxis.local"];
+  const PORTS_FW = ["80", "443", "22", "3389", "25"];
+  const CLI_FAELLE = [
+    {modus: "Anwender-Modus", von: "user", cmd: "enable", nach: "priv"},
+    {modus: "Privileg-Modus", von: "priv", cmd: "configure terminal", nach: "config"},
+    {modus: "Konfigurationsmodus", von: "config", cmd: "interface Gi0/1", nach: "if"},
+    {modus: "Schnittstellenmodus", von: "if", cmd: "exit", nach: "config"},
+    {modus: "Konfigurationsmodus", von: "config", cmd: "exit", nach: "priv"},
+    {modus: "Privileg-Modus", von: "priv", cmd: "disable", nach: "user"},
+  ];
+  const CLI_NAMEN = ["Router-1", "Switch-2", "Router-3", "Switch-4", "Router-7", "Switch-8", "Router-9", "Switch-10", "Router-11", "Switch-12"];
+  const cliPrompt = (name, stufe) => stufe === "user" ? name + ">" : stufe === "priv" ? name + "#" :
+    stufe === "config" ? name + "(config)#" : name + "(config-if)#";
+
+  /* Standardgateway: die erste Hostadresse im Netz. */
+  neu({id: "gateway-adresse", titel: "Standardgateway im Netz", skill: "lab.gateway", stufe: "E", quelle: "Network – Lernfassung (§ 9 Gateway)",
+    platzhalter: ["netz", "p", "ip"],
+    zahlen: z => { const a = adresseImBlock(z, z.wahl([24, 25, 26, 27, 28, 29])); return {netz: a.netz, p: a.p, maske: a.maske, ip: a.ip, gw: weiter(a.netz, 1), bc: broadcastVon(a.ip, a.maske), zwei: weiter(a.netz, 2)}; },
+    frage: p => `Der Rechner ${p.ip}/${p.p} im Netz ${p.netz} braucht ein Standardgateway. Welche Adresse ist im Netz üblich?`,
+    loesung: p => p.gw,
+    pruefe: (p, t) => { const n = zz(String(t).trim()); return n !== null && n === zz(p.gw); },
+    ablenker: p => [{text: p.netz, art: "netzadresse"}, {text: p.bc, art: "broadcast"}, {text: p.zwei, art: "off-by-one"}],
+    erklaerung: p => `Das Gateway ist ein Host im selben Netz; die Konvention ist die erste Hostadresse: Netzadresse + 1 = ${p.gw}. ${p.netz} ist die Netzadresse und nicht vergebbar, ${p.bc} ist der Broadcast. ${p.zwei} wäre eine andere Hostadresse – möglich, aber nicht die übliche.`});
+
+  /* DHCP: ein Bereich von Start bis Ende; jede Adresse darin ist vergebbar. */
+  neu({id: "dhcp-pool-groesse", titel: "Größe eines DHCP-Bereichs", skill: "lab.dhcp", stufe: "AP1", quelle: "Network – Lernfassung (§ 9 DORA) · RFC 2131",
+    platzhalter: ["start", "ende"],
+    zahlen: z => { const a = adresseImBlock(z, 24); const s = z.zwischen(20, 150), len = z.zwischen(20, 80); return {netz: a.netz, start: weiter(a.netz, s), ende: weiter(a.netz, s + len - 1), len}; },
+    frage: p => `Der DHCP-Bereich reicht von ${p.start} bis ${p.ende}. Wie viele Adressen kann der Server aus diesem Bereich vergeben?`,
+    loesung: p => String(p.len),
+    pruefe: (p, t) => { const n = Number(String(t).trim()); return Number.isInteger(n) && n === p.len; },
+    ablenker: p => [{text: String(p.len - 1), art: "off-by-one"}, {text: String(p.len + 1), art: "off-by-one"}, {text: String(255 - p.len), art: "zaehlfehler"}],
+    erklaerung: p => `Von ${p.start} bis ${p.ende} sind es ${p.len} Adressen (Ende − Start + 1). Alle liegen im DHCP-Bereich und sind vergebbar; die Netz- und Broadcastadresse des /24 liegen außerhalb. ${p.len - 1} vergisst den ersten Tag, ${p.len + 1} zählt einen Tag zu viel.`});
+
+  /* DNS: welcher Eintragstyp beantwortet welche Frage? */
+  neu({id: "dns-eintragstyp", titel: "DNS-Eintragstyp wählen", skill: "lab.dns", stufe: "AP1", quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035",
+    platzhalter: ["name"],
+    zahlen: z => { const typen = TYPEN_DNS, variant = z.zahl(typen.length); return {variant, name: z.wahl(NAMEN_DNS), typ: typen[variant]}; },
+    frage: p => ["Welcher Eintragstyp liefert zu einem Namen die IPv4-Adresse?",
+      "Welcher Eintragstyp liefert zu einem Namen die IPv6-Adresse?",
+      "Welcher Eintragstyp nennt den Mailserver eines Namens?",
+      "Welcher Eintragstyp löst eine IP-Adresse zurück zu einem Namen auf?"][p.variant] + ` (Beispiel: ${p.name})`,
+    loesung: p => p.typ,
+    pruefe: (p, t) => String(t).trim() === p.typ,
+    ablenker: p => Object.entries(ARTEN_DNS[p.typ]).map(([text, art]) => ({text, art})),
+    erklaerung: p => `Für diese Frage ist ${p.typ} der passende Typ. A liefert IPv4-Adressen, AAAA IPv6-Adressen, MX den Mailserver, PTR die Rückauflösung von Adresse zu Name – wer die Typen verwechselt, fragt am Ziel vorbei.`});
+
+  /* TCP: das SYN verbraucht eine Sequenznummer, die ACK-Nummer zeigt auf das nächste Byte. */
+  neu({id: "tcp-ack-nummer", titel: "ACK-Nummer nach dem Handshake", skill: "lab.tcp", stufe: "AP2", quelle: "TCP – Lernfassung (§ 2 Aufbau mit Nummern) · RFC 9293",
+    platzhalter: ["isn", "nbytes"],
+    zahlen: z => ({isn: z.zwischen(1000, 90000), nbytes: z.zwischen(500, 5000)}),
+    frage: p => `Das SYN trug die Sequenznummer ${p.isn}. Im ersten Segment kommen ${p.nbytes} Datenbytes. Welche ACK-Nummer bestätigt der Server?`,
+    loesung: p => String(p.isn + p.nbytes + 1),
+    pruefe: (p, t) => { const n = Number(String(t).trim()); return Number.isInteger(n) && n === p.isn + p.nbytes + 1; },
+    ablenker: p => [{text: String(p.isn + p.nbytes), art: "syn-nicht-gezaehlt"}, {text: String(p.isn + p.nbytes + 2), art: "off-by-one"}, {text: String(p.isn + 1), art: "zaehlfehler"}],
+    erklaerung: p => `Das SYN zählt als ein Byte: erwartet wird ab ${p.isn + 1}, plus ${p.nbytes} Datenbytes, also ${p.isn + p.nbytes + 1}. ${p.isn + p.nbytes} vergisst das SYN, ${p.isn + 1} ignoriert die Daten.`});
+
+  /* STP: die Bridge-ID enthält Priorität plus System-ID (VLAN). */
+  neu({id: "stp-bridge-id", titel: "Bridge-ID aus Priorität und VLAN", skill: "lab.stp", stufe: "AP2", quelle: "IEEE 802.1D · Fragen – Netzwerke planen (Wozu STP?)",
+    platzhalter: ["prio", "vid"],
+    zahlen: z => ({prio: z.wahl([4096, 8192, 16384, 24576, 32768]), vid: z.zwischen(1, 100)}),
+    frage: p => `Ein Switch hat die Priorität ${p.prio}, das VLAN ist ${p.vid}. Welchen Prioritätswert zeigt „show spanning-tree“ in der Bridge-ID?`,
+    loesung: p => String(p.prio + p.vid),
+    pruefe: (p, t) => { const n = Number(String(t).trim()); return Number.isInteger(n) && n === p.prio + p.vid; },
+    ablenker: p => [{text: String(p.prio), art: "ohne-vlan"}, {text: String(p.prio + p.vid + 1), art: "zaehlfehler"}, {text: String(p.prio + 4096), art: "falsche-prioritaet"}],
+    erklaerung: p => `Die Bridge-ID setzt sich aus Priorität und System-ID zusammen; die System-ID enthält die VLAN-Nummer. ${p.prio} + ${p.vid} = ${p.prio + p.vid}. ${p.prio} vergisst das VLAN, ${p.prio + 4096} verwechselt die VLAN-Nummer mit einem Prioritätsschritt.`});
+
+  /* Storage: RAID 5 verliert eine Platte an Parität, RAID 6 zwei. */
+  neu({id: "storage-raid-nutz", titel: "Nutzbare Kapazität eines RAID", skill: "lab.storage", stufe: "AP2", quelle: "SNIA Dictionary (RAID) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept",
+    platzhalter: ["level", "n", "groesse"],
+    zahlen: z => { const level = z.wahl([5, 6]), n = z.zwischen(4, 8), groesse = z.wahl([1, 2, 3, 4, 6, 8, 10, 12]); return {level, n, groesse, nutz: (level === 5 ? n - 1 : n - 2) * groesse}; },
+    frage: p => `Ein RAID ${p.level} aus ${p.n} Platten zu je ${p.groesse} TB. Wie viel Nutzkapazität steht zur Verfügung?`,
+    loesung: p => `${p.nutz} TB`,
+    pruefe: (p, t) => { const m = String(t).trim().match(/^(\d+)\s*TB$/i); return !!m && Number(m[1]) === p.nutz; },
+    ablenker: p => [{text: `${p.n * p.groesse} TB`, art: "ohne-paritaet"}, {text: `${p.nutz + (p.level === 5 ? -p.groesse : p.groesse)} TB`, art: "zaehlfehler"}, {text: `${p.groesse} TB`, art: "eine-platte"}],
+    erklaerung: p => `Bei RAID ${p.level} gehen ${p.level === 5 ? "eine Platte" : "zwei Platten"} für die Parität verloren: (${p.n} − ${p.level === 5 ? 1 : 2}) × ${p.groesse} TB = ${p.nutz} TB. ${p.n * p.groesse} TB sind die Rohkapazität, ${p.groesse} TB wäre nur eine Platte.`});
+
+  /* NAT/PAT: der Portbereich einer öffentlichen Adresse begrenzt die gleichzeitigen Verbindungen. */
+  neu({id: "nat-pat-portbereich", titel: "Wie viele PAT-Verbindungen passen?", skill: "lab.nat", stufe: "AP2", quelle: "Cisco IOS NAT Configuration Guide · RFC 3022 · Network – Lernfassung (§ 7)",
+    platzhalter: ["von", "bis"],
+    zahlen: z => { const von = z.wahl([1024, 2048, 4096, 8192, 10240, 16384]); const bis = z.zwischen(50000, 65535); return {von, bis, len: bis - von + 1}; },
+    frage: p => `PAT vergibt Ports von ${p.von} bis ${p.bis}. Wie viele gleichzeitige Verbindungen kann eine öffentliche Adresse damit unterscheiden?`,
+    loesung: p => String(p.len),
+    pruefe: (p, t) => { const n = Number(String(t).trim()); return Number.isInteger(n) && n === p.len; },
+    ablenker: p => [{text: String(p.len - 1), art: "off-by-one"}, {text: String(p.bis), art: "nur-obergrenze"}, {text: String(p.len + 1), art: "zaehlfehler"}],
+    erklaerung: p => `Von ${p.von} bis ${p.bis} sind es ${p.bis} − ${p.von} + 1 = ${p.len} Ports und damit höchstens ${p.len} gleichzeitige Verbindungen je öffentlicher Adresse. ${p.bis} wäre nur die obere Grenze.`});
+
+  /* Firewall: first match – die erste passende Regel entscheidet. */
+  neu({id: "fw-erste-regel", titel: "Welche Firewall-Regel entscheidet?", skill: "lab.fw", stufe: "AP2", quelle: "05-AP2-Infrastruktur-Sicherheit (Firewall-Grundregeln) · BSI IT-Grundschutz-Kompendium, NET.3.2 Firewall",
+    platzhalter: ["port", "r1", "r2", "r3"],
+    zahlen: z => {
+      const port = z.wahl(PORTS_FW), treffer = z.zwischen(1, 3), andere = z.mischen(PORTS_FW.filter(x => x !== port));
+      let k = 0; const regeln = [];
+      for (let i = 1; i <= 3; i++) {
+        if (i === treffer) regeln.push("permit tcp " + port);
+        else regeln.push((z.kommazahl() < 0.5 ? "deny" : "permit") + " tcp " + andere[k++]);
+      }
+      return {port, treffer, r1: regeln[0], r2: regeln[1], r3: regeln[2], richtig: "Regel " + treffer};
+    },
+    frage: p => `Regel 1: ${p.r1} · Regel 2: ${p.r2} · Regel 3: ${p.r3} · Welche Regel entscheidet für Port ${p.port}?`,
+    loesung: p => p.richtig,
+    pruefe: (p, t) => String(t).trim() === p.richtig,
+    ablenker: p => { const andere = [1, 2, 3].filter(i => i !== p.treffer).map(i => ({text: "Regel " + i, art: "falsche-regel"})); return andere.concat([{text: "Keine – Standard deny", art: "implizites-deny"}]); },
+    erklaerung: p => `Nur Regel ${p.treffer} passt zu Port ${p.port}; die Regeln davor passen nicht, also entscheidet die erste passende. Der Standard-deny greift erst, wenn keine Regel passt – hier passt eine.`});
+
+  /* IOS-Modi: der Prompt zeigt die Ebene nach dem Befehl. */
+  neu({id: "cli-prompt", titel: "IOS-Prompt nach einem Befehl", skill: "lab.cli", stufe: "AP2", quelle: "Cisco IOS Configuration Fundamentals Configuration Guide: Using the Command-Line Interface · VLAN – Lernfassung",
+    platzhalter: ["name", "modus", "cmd"],
+    zahlen: z => { const f = CLI_FAELLE[z.zahl(CLI_FAELLE.length)]; return {name: z.wahl(CLI_NAMEN), modus: f.modus, von: f.von, cmd: f.cmd, nach: f.nach}; },
+    frage: p => `Du bist an „${p.name}“ im ${p.modus} und gibst „${p.cmd}“ ein. Welcher Prompt steht danach da?`,
+    loesung: p => cliPrompt(p.name, p.nach),
+    pruefe: (p, t) => String(t).trim() === cliPrompt(p.name, p.nach),
+    ablenker: p => { const andere = ["user", "priv", "config", "if"].filter(k => k !== p.nach); return [{text: cliPrompt(p.name, andere[0]), art: "falscher-modus"}, {text: cliPrompt(p.name, andere[1]), art: "falscher-modus"}, {text: cliPrompt(p.name, andere[2]), art: "falsche-ebene"}]; },
+    erklaerung: p => `„${p.cmd}“ wechselt vom ${p.modus} eine Ebene weiter; der Prompt zeigt den neuen Modus. ${cliPrompt(p.name, p.nach)} ist richtig – die anderen Prompts gehören zu Modi, die dieser Befehl nicht erreicht.`});
   return V;
 })();

@@ -119,16 +119,16 @@
       erwarte.passt(t, /blockweise/, "die Seite sagt, wie die Codes zurückkommen");
     });
 
-    pruefe("4 · Die Wiki-Ansicht führt die Zusatzseiten in der Liste (29 Einträge)" + ZUSATZ, () => {
+    pruefe("4 · Die Wiki-Ansicht führt die Zusatzseiten in der Liste (je Fertigkeit eine Seite + 2)" + ZUSATZ, () => {
       if (!KANN_LADEN) return;
       const seiten = Object.keys(DATEN.wiki || {});
-      erwarte.gleich(seiten.length, 29, "27 Fertigkeiten + 2 Zusatzseiten, sind " + seiten.length);
+      erwarte.gleich(seiten.length, DATEN.skills.length + DATEN.wikiZusatz.length, "je Fertigkeit (30) eine Seite + Zusatzseiten, sind " + seiten.length);
       const zusatz = seiten.filter(id => !DATEN.skills.some(s => s.id === id));
-      erwarte.gleich(zusatz, ["klassenraum", "uebergabe"], "genau zwei Seiten ohne Fertigkeit (gemessen, nicht übernommen)");
+      erwarte.gleich(zusatz, DATEN.wikiZusatz, "Seiten ohne Fertigkeit = DATEN.wikiZusatz (S7: + 5 Vertiefungsseiten)");
       /* EINE Quelle der Wahrheit: die Liste steht in den DATEN (wiki.js:820); karriere.js liest sie
          von dort und hängt jede Zusatzseite ohne Stufenkopf an. Das RENDERN prüft der Wiki-Strom
          (tests/wiki-klassenraum.test.js) – hier wird es bewusst nicht doppelt zugesichert. */
-      erwarte.gleich(DATEN.wikiZusatz, ["klassenraum", "uebergabe"], "DATEN.wikiZusatz nennt beide (src/daten/wiki.js:820)");
+      erwarte.wahr(Array.isArray(DATEN.wikiZusatz) && DATEN.wikiZusatz.length >= 2 && DATEN.wikiZusatz.includes("klassenraum") && DATEN.wikiZusatz.includes("uebergabe"), "DATEN.wikiZusatz nennt die Zusatzseiten (S7: 7 inkl. Vertiefung)");
       erwarte.enthaelt(karriereQuelle, "DATEN.wikiZusatz", "karriere.js:299 liest die Liste aus den DATEN");
       erwarte.enthaelt(karriereQuelle, "zusatz: true", "und markiert sie als Zusatz (kein Stufenkopf)");
       for (const id of zusatz) {
@@ -142,12 +142,12 @@
         erwarte.enthaelt(suche, w, "Suchwort „" + w + "“ ist hinterlegt");
     });
 
-    pruefe("5 · Die 44 Hilfe-Vorschläge bleiben unberührt – und tragen keinen Klassenraum-Eintrag" + ZUSATZ, () => {
+    pruefe("5 · Die 47 Hilfe-Vorschläge bleiben unberührt – und tragen keinen Klassenraum-Eintrag" + ZUSATZ, () => {
       if (!KANN_LADEN) return;
       const V = DATEN.hilfen.VORSCHLAEGE;
-      erwarte.gleich(V.length, 44, "weiterhin 44 Vorschläge (nichts ergänzt, nichts entfernt)");
+      erwarte.gleich(V.length, 47, "47 Vorschläge: die 44 bestehenden plus je einer für lab.ipv6/lab.betrieb/lab.wlan (§ 17.1)");
       erwarte.gleich(V.filter(v => v.ebene === 2).length, 15, "weiterhin 15 auf Ebene 2");
-      erwarte.gleich(DATEN.skills.filter(s => !V.some(v => (v.skills || []).includes(s.id))).length, 0, "jede der 27 Fertigkeiten bleibt versorgt");
+      erwarte.gleich(DATEN.skills.filter(s => !V.some(v => (v.skills || []).includes(s.id))).length, 0, "jede der 30 Fertigkeiten ist versorgt");
       /* Der Klassenraum hat keinen Konsolenbefehl – ein Vorschlag dort wäre ein Vertragsbruch.
          Deshalb: gemessen KEIN Eintrag, und das bleibt so. */
       const treffer = V.filter(v => /klassenraum|klasse\b|auftrag öffnen|auftragscode/i.test(v.id + " " + v.befehl + " " + v.erklaerung));
@@ -203,10 +203,10 @@
       if (!KANN_LADEN) return;
       /* Vier Häuser geprüft: Wiki, Flächen, Führung, Vorschläge. Keine Lücke → nichts ergänzt. */
       erwarte.gleich([DATEN.wiki.klassenraum ? 1 : 0, quelle.length > 0 ? 1 : 0, typeof Spiel.naechster === "function" ? 1 : 0, DATEN.hilfen.VORSCHLAEGE.length].join("/"),
-        "1/1/1/44", "Wiki da · Flächen lesbar · Führung da · 44 Vorschläge unverändert");
-      erwarte.gleich(Object.keys(DATEN.wiki).length, 29, "29 Wiki-Seiten (27 Fertigkeiten + Klassenraum, Übergabe)");
-      erwarte.gleich(DATEN.wikiZusatz.length, 2, "zwei Zusatzseiten (klassenraum, uebergabe)");
-      erwarte.gleich(DATEN.skills.length, 27, "27 Fertigkeiten – die Tabelle ist gesperrt");
+        "1/1/1/47", "Wiki da · Flächen lesbar · Führung da · 47 Vorschläge (44 + 3 für § 17.1)");
+      erwarte.gleich(Object.keys(DATEN.wiki).length, DATEN.skills.length + DATEN.wikiZusatz.length, "je Fertigkeit eine Wiki-Seite plus Zusatzseiten (§ 17.5: 30 + 7)");
+      erwarte.wahr(DATEN.wikiZusatz.length >= 2, "mindestens die beiden Zusatzseiten klassenraum und uebergabe");
+      erwarte.gleich(DATEN.skills.length, 30, "30 Fertigkeiten (append-only nach § 17.1)");
     });
   });
 })();

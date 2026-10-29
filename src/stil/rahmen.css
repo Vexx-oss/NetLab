@@ -23,11 +23,11 @@
 .marke-sym rect{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5}
 .marke-sym path{fill:none; stroke:var(--accent); stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 .marke-sym circle{fill:var(--accent)}
-.marke-name{font:800 17px/1 var(--display); letter-spacing:-.01em; white-space:nowrap}
-.marke-version{font:500 11px/1 var(--mono); color:var(--faint); padding:3px 6px; border:1px solid var(--line); border-radius:999px}
+.marke-name{font:800 var(--fs-4)/1 var(--display); letter-spacing:-.01em; white-space:nowrap}
+.marke-version{font:500 var(--fs-1)/1 var(--mono); color:var(--faint); padding:3px 6px; border:1px solid var(--line); border-radius:999px}
 .kopf-werte{display:flex; align-items:center; gap:8px; margin-left:auto; min-width:0}
 .wert{display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 12px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
-  font:600 14px/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap; transition:background var(--dauer), border-color var(--dauer)}
+  font:600 var(--fs-3)/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap; transition:background var(--dauer), border-color var(--dauer)}
 button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .wert .sym, .einst-steuer{flex:0 0 auto}
 .wert-euro .sym{color:var(--geld)} .wert-ruf .sym{color:var(--ruf)} .wert-stufe .sym, .wert-offen.hat .sym, .pal-punkt.an .pal-sym{color:var(--accent)} .wert-offen .sym, .einst-zeile.gesperrt strong{color:var(--muted)}
@@ -44,8 +44,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .kopf-knopf{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; height:44px; padding:0 12px; border-radius:var(--radius); border:1px solid transparent; background:none; color:var(--muted);
   transition:background var(--dauer), color var(--dauer), border-color var(--dauer)}
 .kopf-knopf:hover, .dock-knopf:hover, .toast-zu:hover, .dialog-zu:hover{background:var(--panel-3); color:var(--ink)}
-.kopf-knopf.mit-text span{font:600 13px/1 var(--body)}
-.kopf-knopf.mit-text:first-child span{font:500 11px/1 var(--mono); color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:3px 5px}
+.kopf-knopf.mit-text span{font:600 var(--fs-2)/1 var(--body)}
+.kopf-knopf.mit-text:first-child span{font:500 var(--fs-1)/1 var(--mono); color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:3px 5px}
 @media (max-width:1180px){ .kopf-knopf.mit-text:first-child span, .marke-version{display:none}  }
 @media (max-width:980px){ .kopf-knopf.mit-text span, .wert-stufe{display:none}  }
 /* Platz für die 44-px-Knöpfe: bei 720 px Fensterbreite gab die Marke den letzten Platz her,
@@ -60,8 +60,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .dock-knopf.an::before{content:""; position:absolute; left:-6px; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--accent)}
 .dock-knopf.spaeter{opacity:.72}
 .dock-knopf.spaeter.an, .pal-huelle.da, .dialog-huelle.da{opacity:1}
-.dock-text{font:600 11px/1.1 var(--body); letter-spacing:.01em}
-.dock-zahl{position:absolute; top:4px; right:8px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:var(--accent-ink); font:700 11px/18px var(--body); text-align:center}
+.dock-text{font:600 var(--fs-1)/1.1 var(--body); letter-spacing:.01em}
+.dock-zahl{position:absolute; top:4px; right:8px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:var(--accent-ink); font:700 var(--fs-1)/18px var(--body); text-align:center}
 
 /* ---- Fläche und Ansichten ---- */
 .flaeche{grid-row:2; grid-column:2; position:relative; min-width:0; min-height:0; overflow:hidden}
@@ -69,15 +69,17 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .ansicht[hidden], .ex-text[hidden]{display:none}
 .platzhalter{max-width:520px; margin:12vh auto 0; padding:36px 32px; text-align:center; background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:var(--schatten)}
 .ph-sym{display:inline-flex; width:84px; height:84px; align-items:center; justify-content:center; border-radius:24px; background:var(--accent-soft); color:var(--accent); margin-bottom:16px}
-.platzhalter h2{font-size:28px; font-weight:800; margin-bottom:8px}
-.ph-text{font-size:16px; color:var(--ink); margin-bottom:10px}
+.platzhalter h2{font-size:var(--fs-6); font-weight:800; margin-bottom:8px}
+.ph-text{font-size:var(--fs-4); color:var(--ink); margin-bottom:10px}
 .ph-mehr{color:var(--muted); margin-bottom:22px}
 
 /* ---- Knöpfe (allgemein) ---- */
 .knopf{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 16px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink);
-  font:600 14px/1 var(--body); transition:background var(--dauer), border-color var(--dauer), transform var(--dauer)}
+  font:600 var(--fs-3)/1 var(--body); transition:background var(--dauer), border-color var(--dauer), transform var(--dauer)}
 .knopf:hover{background:var(--panel-3); border-color:var(--accent)}
-.knopf:active{transform:translateY(1px)}
+/* U06 (Audit): genau EINE Press-Regel. Druck 80 ms (--dauer-kurz), Lösen 160 ms (--dauer aus der
+   Grundregel oben). Vorher überschrieben sich zwei Regeln gleicher Spezifität (.96 aus juice.css). */
+.knopf:active{transform:translateY(1px); transition-duration:var(--dauer-kurz)}
 .knopf-haupt{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
 .knopf-haupt:hover{background:var(--accent); filter:brightness(1.08)}
 
@@ -91,7 +93,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .toast-stapel.im-labor{transform:none; flex-direction:column; align-items:flex-start}
 .toast-stapel.im-labor .toast{max-width:100%; padding:8px 6px 8px 10px; gap:10px}
 .lb-leinwand.unter-toast .lb-hinweis{visibility:hidden}
-.toast-stapel.im-labor .toast-text{font-size:13.5px}
+.toast-stapel.im-labor .toast-text{font-size:var(--fs-3)}
 .toast-stapel.im-labor .toast-sym{width:26px; height:26px}
 .toast-sym{display:inline-flex; flex:0 0 auto; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--panel-3); color:var(--muted)}
 /* Der Rahmen der Statusfarbe steht hier, nicht bei `.wert-stufe.bereit` (Kopfzeile): `.toast` setzt
@@ -100,9 +102,9 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .toast-warn{border-color:var(--warn)} .toast-warn .toast-sym{background:var(--warn-soft); color:var(--warn)}
 .toast-fehler{border-color:var(--bad)} .toast-fehler .toast-sym{background:var(--bad-soft); color:var(--bad)}
 .toast-inhalt{display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 auto}
-.toast-titel{font:700 12px/1.2 var(--body); color:var(--muted); text-transform:none}
-.toast-text{font:600 14.5px/1.35 var(--body)}
-.toast-knopf{flex:0 0 auto; min-height:44px; padding:0 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--panel-2); font:700 13px/1 var(--body); white-space:nowrap}
+.toast-titel{font:700 var(--fs-2)/1.2 var(--body); color:var(--muted); text-transform:none}
+.toast-text{font:600 var(--fs-3)/1.35 var(--body)}
+.toast-knopf{flex:0 0 auto; min-height:44px; padding:0 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--panel-2); font:700 var(--fs-2)/1 var(--body); white-space:nowrap}
 .toast-knopf:hover{border-color:var(--accent); color:var(--accent)}
 .toast-zu{flex:0 0 auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:8px; background:none; color:var(--faint)}
 
@@ -117,8 +119,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
    verkleinert das Rechteck (scale .98 → 2 % zu klein). `visibility:hidden` behält das
    Layout und liefert die echten Maße. */
 .menue.nl-messend { animation: none; visibility: hidden }
-.menue-titel{padding:6px 10px 8px; font:700 12px/1.2 var(--body); color:var(--muted); letter-spacing:.02em; border-bottom:1px solid var(--line); margin-bottom:4px}
-.menue-punkt{display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:0 12px; border:0; border-radius:8px; background:none; color:var(--ink); text-align:left; font:500 14px/1.2 var(--body)}
+.menue-titel{padding:6px 10px 8px; font:700 var(--fs-2)/1.2 var(--body); color:var(--muted); letter-spacing:.02em; border-bottom:1px solid var(--line); margin-bottom:4px}
+.menue-punkt{display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:0 12px; border:0; border-radius:8px; background:none; color:var(--ink); text-align:left; font:500 var(--fs-3)/1.2 var(--body)}
 .menue-punkt:hover:not([disabled]), .menue-punkt:focus-visible{background:var(--panel-3); outline:none}
 .menue-punkt[disabled]{color:var(--faint); cursor:default}
 .menue-punkt .sym{color:var(--muted); flex:0 0 auto}
@@ -126,20 +128,20 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .menue-leer-sym{width:16px; flex:0 0 auto}
 .menue-text{flex:1 1 auto}
 .menue-punkt kbd{margin-left:auto; color:var(--faint)}
-.menue-info{margin-left:auto; font:500 12px/1 var(--mono); color:var(--faint); white-space:nowrap}
+.menue-info{margin-left:auto; font:500 var(--fs-2)/1 var(--mono); color:var(--faint); white-space:nowrap}
 .menue-punkt:not([disabled]) .menue-info{color:var(--ok)}
 .menue-trenner{height:1px; margin:5px 6px; background:var(--line)}
 .menue-ports{min-width:260px}
 .popover{max-width:none}
 .schnellwahl{display:grid; grid-template-columns:repeat(4, 76px); gap:4px; padding:2px}
-.sw-teil{display:flex; flex-direction:column; align-items:center; gap:2px; min-height:70px; padding:6px 2px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--ink); font:600 11.5px/1.1 var(--body)}
+.sw-teil{display:flex; flex-direction:column; align-items:center; gap:2px; min-height:70px; padding:6px 2px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--ink); font:600 var(--fs-2)/1.1 var(--body)}
 .sw-teil:hover, .sw-teil:focus-visible{background:var(--panel-3); border-color:var(--line-2); outline:none}
 
 /* ---- Befehlspalette ---- */
 .pal-huelle{position:fixed; inset:0; z-index:50; display:flex; justify-content:center; align-items:flex-start; padding-top:14vh; background:rgba(4,8,14,.45); opacity:0; transition:opacity var(--dauer)}
 .pal-kasten{width:min(620px, calc(100vw - 32px)); border-radius:16px; background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); overflow:hidden}
 .pal-kopf{display:flex; align-items:center; gap:10px; padding:0 14px; border-bottom:1px solid var(--line); color:var(--muted)}
-.pal-eingabe{flex:1 1 auto; height:54px; border:0; background:none; color:var(--ink); font:500 17px/1 var(--body); outline:none}
+.pal-eingabe{flex:1 1 auto; height:54px; border:0; background:none; color:var(--ink); font:500 var(--fs-4)/1 var(--body); outline:none}
 .pal-liste{max-height:min(52vh, 440px); overflow:auto; padding:6px}
 .pal-punkt{display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border-radius:9px; cursor:pointer}
 .pal-punkt.an{background:var(--accent-soft)}
@@ -147,11 +149,11 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pal-punkt.aus{cursor:default; opacity:.6}
 .pal-punkt.tipp{opacity:.8; font-style:italic}
 .pal-sym{display:inline-flex; width:18px; color:var(--muted)}
-.pal-text{font:600 14.5px/1.2 var(--body); white-space:nowrap}
-.pal-info{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:13px}
-.pal-gruppe{margin-left:auto; flex:0 0 auto; font:600 11px/1 var(--body); color:var(--faint); text-transform:uppercase; letter-spacing:.06em}
+.pal-text{font:600 var(--fs-3)/1.2 var(--body); white-space:nowrap}
+.pal-info{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:var(--fs-2)}
+.pal-gruppe{margin-left:auto; flex:0 0 auto; font:600 var(--fs-1)/1 var(--body); color:var(--faint); text-transform:uppercase; letter-spacing:.06em}
 .pal-nichts{padding:18px; color:var(--muted); text-align:center}
-.pal-fuss{display:flex; gap:16px; padding:8px 14px; border-top:1px solid var(--line); color:var(--faint); font-size:12px}
+.pal-fuss{display:flex; gap:16px; padding:8px 14px; border-top:1px solid var(--line); color:var(--faint); font-size:var(--fs-2)}
 .pal-fuss kbd{margin-right:2px}
 
 /* ---- Dialoge ---- */
@@ -161,25 +163,25 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .dialog-huelle.da .dialog{transform:none}
 .dialog-kopf{display:flex; align-items:center; gap:12px; padding:16px 16px 12px 22px; border-bottom:1px solid var(--line); cursor:grab; touch-action:none}
 .dialog-kopf.zieht{cursor:grabbing}
-.dialog-kopf h2{font-size:22px; font-weight:800}
+.dialog-kopf h2{font-size:var(--fs-5); font-weight:800}
 .dialog-zu{margin-left:auto; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:var(--radius); background:none; color:var(--muted)}
 .dialog-inhalt{overflow:auto; padding:8px 22px 22px}
 .einst-abschnitt{padding:14px 0 6px; border-bottom:1px solid var(--line)}
 .einst-abschnitt:last-of-type{border-bottom:0}
-.einst-abschnitt h3{font-size:13px; font-family:var(--body); font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:6px}
+.einst-abschnitt h3{font-size:var(--fs-2); font-family:var(--body); font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:6px}
 .einst-zeile{display:flex; align-items:center; gap:18px; padding:10px 0}
 .einst-text{flex:1 1 auto; display:flex; flex-direction:column; gap:3px; min-width:0}
 .einst-text strong{font-weight:700}
-.einst-text span{color:var(--muted); font-size:13.5px}
+.einst-text span{color:var(--muted); font-size:var(--fs-3)}
 .einst-zeile.gesperrt .einst-steuer{opacity:.4; filter:grayscale(1)}
 .einst-text .einst-grund{color:var(--warn)}
-.einst-fuss{padding-top:14px; color:var(--faint); font-size:12.5px}
+.einst-fuss{padding-top:14px; color:var(--faint); font-size:var(--fs-2)}
 .wahl{display:inline-flex; padding:4px; gap:2px; border-radius:11px; background:var(--panel-2); border:1px solid var(--line)}
 /* Radius aus dem Token, wie `.st-knopf` in stufensystem.css:15 — dieselbe Optik in beiden
    Segment-Schaltern, und der rohe `8px`-Wert (R2-Altlast) ist weg.
    `min-width:44px` ist die zweite Hälfte der Fingerregel: die Höhe war mit 44 schon da, der
    kurze Knopf „E" maß im Browser aber nur 40 px breit (`injektoren` gemessen, beide Profile). */
-.wahl-knopf{min-height:44px; min-width:44px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 13px/1 var(--body); white-space:nowrap}
+.wahl-knopf{min-height:44px; min-width:44px; padding:0 12px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); white-space:nowrap}
 .wahl-knopf.an{background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
 /* Der Schalter ist 64 × 44 (Trefferfläche) und bleibt eine Pille: `999px` ist ein erlaubter
    Radius (R2). Der Knopf sitzt mittig — 4 px Rand links/rechts/oben/unten im Innenraum (62 × 42),
@@ -189,18 +191,18 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .schalter.an span{transform:translateX(20px); background:var(--accent)}
 .regler{display:flex; align-items:center; gap:10px}
 .regler input{width:160px; accent-color:var(--accent)}
-.einst-wert{min-width:46px; font:600 13px/1 var(--mono); color:var(--ink); text-align:right}
+.einst-wert{min-width:46px; font:600 var(--fs-2)/1 var(--mono); color:var(--ink); text-align:right}
 .kuerzel{display:grid; grid-template-columns:1fr 1fr; gap:6px 28px}
 .kuerzel section{padding:12px 0}
-.kuerzel h3{font-size:13px; font-family:var(--body); font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:8px}
+.kuerzel h3{font-size:var(--fs-2); font-family:var(--body); font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:8px}
 .kuerzel dl{display:grid; grid-template-columns:auto 1fr; gap:7px 12px; margin:0}
 .kuerzel dt{white-space:nowrap}
-.kuerzel dd{margin:0; color:var(--muted); font-size:13.5px}
+.kuerzel dd{margin:0; color:var(--muted); font-size:var(--fs-3)}
 @media (max-width:760px){ .kuerzel{grid-template-columns:1fr} .einst-zeile{flex-direction:column; align-items:flex-start} }
 
 /* ---- „Erklär mir das“ (ui/erklaeren.js, Präfix ex-): Lehrtext erst auf Klick ---- */
 .ex{display:inline-flex; flex-direction:column; align-items:flex-start; gap:4px; max-width:100%}
-.ex-knopf{border:0; padding:2px 0; background:none; color:var(--accent); font:600 12.5px/1.3 var(--body); text-decoration:underline; text-underline-offset:3px; cursor:pointer}
-.ex-text{display:flex; flex-direction:column; gap:4px; padding:6px 10px; border-left:3px solid var(--accent); background:var(--panel-2); border-radius:0 8px 8px 0; color:var(--ink); font-size:13px; line-height:1.45}
+.ex-knopf{border:0; padding:2px 0; background:none; color:var(--accent); font:600 var(--fs-2)/1.3 var(--body); text-decoration:underline; text-underline-offset:3px; cursor:pointer}
+.ex-text{display:flex; flex-direction:column; gap:4px; padding:6px 10px; border-left:3px solid var(--accent); background:var(--panel-2); border-radius:0 8px 8px 0; color:var(--ink); font-size:var(--fs-2); line-height:1.45}
 .ex-text p{margin:0}
-.ex-quelle{color:var(--faint); font-size:11.5px}
+.ex-quelle{color:var(--faint); font-size:var(--fs-2)}

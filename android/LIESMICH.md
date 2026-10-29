@@ -9,23 +9,29 @@ Die Android-Fassung des Netzwerk-Labors: eine WebView-Hülle um **dieselbe**
 Browser-Fassung, die auch die `.exe` und die Seite im Netz benutzen. Eine Quelle,
 kein zweiter Stand — es wird nichts nachgebaut und nichts gepflegt, was es doppelt gibt.
 
-**Fertige App:** `Programm/Netzwerk-Labor-2.0.5-Android.apk`, versionCode **10202**,
-versionName 2.0.5, signiert (v2 + v3), keine Berechtigungen, freie Drehung. Darin liegt
-genau die gemessene Seite: `assets/index.html`, 2.231.733 Bytes, SHA256
-`d58254c7875a8646cd8543c1ab6e652a0204eb408322289edac23961f25cc659` — selbst
-nachgemessen: das `assets/index.html` **in** der APK ist byte-gleich zu
-`android/bau/assets/index.html` (geprüft in `android/bauen.py`, Schritt 7, und am
-06.10.2026 zusätzlich von Hand aus der APK entpackt).
+**Fertige App — in dieser Sitzung NICHT gebaut.** In dieser Sitzung wurde **keine APK**
+erzeugt (kein Android-SDK, kein Build nachgewiesen), und im Ordner `Programm/` liegt
+keine. Wer sie baut, erhält `Programm/Netzwerk-Labor-2.1.0-Android.apk`: versionName 2.1.0,
+versionCode **20101** (aus `android/bauen.py`, gemessen 29.10.2026). Die Hülle fordert
+**keine Berechtigung** an (Manifest) und dreht frei (`screenOrientation="unspecified"`,
+`configChanges`); ob eine gebaute APK signiert ist und auf einem Gerät läuft, ist für
+2.1.0 **nicht geprüft**.
 
-**End-APK (06.10.2026, 16:19:40):** 960.028 Bytes, SHA256
+**Altnachweis 2.0.x (06.10.2026) — ausdrücklich historisch, keine Aussage über 2.1.0.**
+Damals wurde eine APK mit der Bauzählung **10202** gebaut: die Seite darin
+(`assets/index.html`) war 2.231.733 Bytes groß, SHA256
+`d58254c7875a8646cd8543c1ab6e652a0204eb408322289edac23961f25cc659`; die End-APK
+(06.10.2026, 16:19:40) hatte 960.028 Bytes, SHA256
 `88c16df1ea1f8bc9cb5e91d834d48cd7027408c45f1923d07f01205e41c016f7`.
+Diese Zahlen gelten **nur** für jenen Bau: die Einzeldatei von 2.1.0 ist
+**3.159.586 Bytes** groß (SHA256 `53c71182…f33d98d`, siehe [STAND](../docs/STAND.md)).
 
 **Die APK-Größe ist als Kennung wertlos.** `apksigner` hängt einen Signaturblock von
 genau 4.096 Bytes an und füllt davor auf eine 4.096er-Grenze auf (Hinweis von
-„huelle-drehung“): vier verschiedene Seiten in dieser Sitzung, jedes Mal exakt
+„huelle-drehung“): vier verschiedene Seiten in jener Sitzung, jedes Mal exakt
 960.028 Bytes. Als Kennung deshalb immer die SHA256 nennen — oder versionCode plus
 Seiten-SHA. Der APK-Hash ändert sich mit jedem Bau (die ZIP-Zeitstempel stecken mit
-drin), die Seiten-Kennung `d58254c7875a8646…` ist der Inhalt und bleibt.
+drin); der Seiten-Hash ist der Inhalt des jeweiligen Baus und ändert sich mit der Fassung.
 
 ## Installieren
 

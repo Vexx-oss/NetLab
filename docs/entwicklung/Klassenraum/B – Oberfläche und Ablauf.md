@@ -17,7 +17,7 @@ Grundlage: [`tools/auftraege/KLASSENRAUM.md`](../../../tools/auftraege/KLASSENRA
 Beamer-Lesbarkeit, Ablauf des Klassenraum-Auftrags, Ergebnis-Code, Lehrer-Eingabe, Ampel, Export/Import und
 den Server-Schalter – jede Festlegung mit `Datei:Zeile`-Beleg.
 
-**Belege:** [`Nachweise/Klassenraum/B-ui.md`](../../../Nachweise/Klassenraum/B-ui.md) (Klassenliste, Tokens,
+**Belege:** `Nachweise/Klassenraum/B-ui.md` (**liegt nicht im Repo**) (Klassenliste, Tokens,
 Rauchtest-Analyse, Lesbarkeitsrechnung, Textliste, Belegverzeichnis).
 **Entwürfe und Gegenprüfungen:** `Nachweise/Klassenraum/B-ansichten.md`, `B-texte-ablauf.md`,
 `B-ampel-eingabe.md`, `B-gegenpruefung.md`, `B-gegenpruefung-dom-css-tokens.md`,

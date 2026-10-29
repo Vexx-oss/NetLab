@@ -3,8 +3,9 @@
    DATEN.trainings = [{id, titel, beschreibung, skill, geraet, art, minuten, geruest, niveau, tipp, quelle, schritte?}]
 
    Regeln (gemessen in tests/daten-trainings.test.js, nicht behauptet):
-   · skill     = id aus DATEN.skills (src/daten/basis.js). Jede dieser 27 ids kommt mindestens einmal vor,
-                 keine erfundene. Damit deckt der Trainingsbereich jede Fertigkeit des Labors ab.
+   · skill     = id aus DATEN.skills (src/daten/basis.js). Jede dieser 30 ids kommt mindestens einmal vor,
+                 AUSNAHME namentlich: lab.ipv6 und lab.wlan (S6a/S6b, Architektur § 17.1: inhaltlich geübt,
+                 nicht paketweise simuliert – deshalb kein Training, keine Scheinbegründung).
    · art       = "basis" (geführt heranführen) | "stoerung" (Fehler suchen) | "pruefung" (ohne Hilfe bestehen).
    · minuten   = 3..15, geschätzte Dauer eines Durchgangs.
    · geruest   = true bei basis/stoerung (geführte Übung mit Schritten und Denkanstoß), false bei pruefung.
@@ -72,7 +73,7 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung (§ 9 ARP) · RFC 5227 (IPv4 Address Conflict Detection)"},
 
   /* ---------- lab.netz: Gleiches Netz? (Maske anwenden) ---------- */
-  {id: "tr-netz-maske", titel: "Gleiches Netz oder nicht?", skill: "lab.netz", geraet: "host",
+  {id: "tr-netz-maske", titel: "Gleiches Netz oder nicht?", skill: "lab.netz", geraet: "alle",
    art: "basis", minuten: 5, geruest: true, niveau: "E",
    beschreibung: "Zwei Rechner sollen sich ohne Router erreichen: 10.1.1.10/16 und 10.1.200.5/16. Du rechnest mit der Maske nach, ob beide in derselben Netz-ID liegen – nicht nach Augenmaß über das dritte Oktett.",
    tipp: "Nicht schätzen: mit der Maske für beide Adressen die Netz-ID ausrechnen und vergleichen.",
@@ -129,7 +130,7 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung · Cisco Catalyst Command Reference (show mac address-table)"},
 
   /* ---------- lab.subnetz: Adressplan und Subnetting ---------- */
-  {id: "tr-subnetz-plan", titel: "Adressplan für vier Abteilungen", skill: "lab.subnetz", geraet: "host",
+  {id: "tr-subnetz-plan", titel: "Adressplan für vier Abteilungen", skill: "lab.subnetz", geraet: "alle",
    art: "basis", minuten: 10, geruest: true, niveau: "E",
    beschreibung: "Aus 192.168.10.0/24 soll jede der vier Abteilungen ein eigenes Netz mit Platz für rund 50 Geräte bekommen. /26 liefert 62 Hostadressen je Netz und passt damit auf vier Netze; Netz-ID, erster und letzter Host sowie Broadcast rechnest du selbst aus.",
    tipp: "Blockgröße = 2 hoch (32 minus Präfix). Zähl die Blöcke ab und trag zu jedem Block Netz-, Host- und Broadcastadresse ein.",
@@ -140,7 +141,7 @@ DATEN.trainings = [
      "Gegenprobe: 4 × 62 = 248 Hostadressen reichen für die vier Abteilungen."],
    quelle: "04-AP1-Netzwerk · 07-Uebungen-Subnetting-Szenarien · Fragen – Subnetting"},
 
-  {id: "tr-subnetz-pruefung", titel: "Prüfung: Subnetting ohne Hilfe", skill: "lab.subnetz", geraet: "host",
+  {id: "tr-subnetz-pruefung", titel: "Prüfung: Subnetting ohne Hilfe", skill: "lab.subnetz", geraet: "alle",
    art: "pruefung", minuten: 12, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Gerüst: Zu 172.16.5.130/25, 10.0.0.50/27 und 192.168.1.70/26 nennst du Netz-ID, Broadcast und Hostanzahl und trägst die Werte in die Simulation ein. Ein falsches Oktett fällt sofort auf – nachrechnen statt raten.",
    tipp: "",
@@ -176,7 +177,7 @@ DATEN.trainings = [
    quelle: "04-AP1-Netzwerk (Ports) · TCP – Lernfassung (§ 5: RST bei geschlossenem Port) · RFC 9293"},
 
   /* ---------- lab.tcp: TCP-Handshake ---------- */
-  {id: "tr-tcp-handshake", titel: "TCP-Handshake beobachten", skill: "lab.tcp", geraet: "host",
+  {id: "tr-tcp-handshake", titel: "TCP-Handshake beobachten", skill: "lab.tcp", geraet: "alle",
    art: "basis", minuten: 5, geruest: true, niveau: "E",
    beschreibung: "Bevor Daten fließen, stimmen Client und Server im Drei-Wege-Handshake die Sequenznummern ab: SYN, SYN/ACK, ACK. Du öffnest eine Verbindung, liest die drei Schritte mit und prüfst den Unterschied zu einem geschlossenen Port, der mit RST antwortet.",
    tipp: "Drei Nachrichten vor den Daten: Wer fragt, wer bestätigt – und was passiert, wenn niemand zuhört?",
@@ -199,7 +200,7 @@ DATEN.trainings = [
    quelle: "VLAN – Lernfassung · Cisco IOS Configuration Fundamentals Configuration Guide: Using the Command-Line Interface"},
 
   /* ---------- lab.speichern: running- und startup-config ---------- */
-  {id: "tr-config-speichern", titel: "Konfiguration dauerhaft sichern", skill: "lab.speichern", geraet: "router",
+  {id: "tr-config-speichern", titel: "Konfiguration dauerhaft sichern", skill: "lab.speichern", geraet: "alle",
    art: "basis", minuten: 4, geruest: true, niveau: "E",
    beschreibung: "Die running-config liegt im RAM und ist nach einem Neustart weg. Du änderst am Router eine Schnittstellen-Adresse, sicherst mit `copy running-config startup-config` ins NVRAM und prüfst nach einem reload, dass die Änderung noch da ist. Auf Switches liegen VLAN-Daten zusätzlich in flash:vlan.dat und überleben dort ein erase startup-config.",
    tipp: "Zwei Konfigurationen, zwei Speicher: die laufende und die gespeicherte. Welche überlebt den Neustart?",
@@ -211,7 +212,7 @@ DATEN.trainings = [
    quelle: "Netzwerk 29.09 · Cisco IOS Configuration Fundamentals Configuration Guide (Managing Configuration Files)"},
 
   /* ---------- lab.vlan: VLANs und Access-Ports ---------- */
-  {id: "tr-vlan-anlegen", titel: "VLANs anlegen und Ports zuordnen", skill: "lab.vlan", geraet: "switch",
+  {id: "tr-vlan-anlegen", titel: "VLANs anlegen und Ports zuordnen", skill: "lab.vlan", geraet: "alle",
    art: "basis", minuten: 7, geruest: true, niveau: "E",
    beschreibung: "Am Switch SW1 sollen Verwaltung und Gäste getrennt werden: VLAN 10 „Verwaltung“ für Fa0/1 und Fa0/2, VLAN 20 „Gaeste“ für Fa0/11. Du legst beide VLANs in der VLAN-Datenbank an, setzt die Access-Ports und prüfst mit `show vlan brief`, dass die Ports wirklich zugeordnet sind.",
    tipp: "Erst das VLAN anlegen, dann den Port hineinsetzen – ein Port in einem nicht existierenden VLAN wird inaktiv.",
@@ -221,7 +222,7 @@ DATEN.trainings = [
      "`show vlan brief` prüfen: Stehen beide Ports im richtigen VLAN und sind sie aktiv?"],
    quelle: "VLAN – Lernfassung · VLAN – Visuelle Lernnotiz (§ 7 Zwischen VLANs routen) · IEEE 802.1Q"},
 
-  {id: "tr-vlan-trennung", titel: "Zwei PCs am selben Switch erreichen sich nicht", skill: "lab.vlan", geraet: "switch",
+  {id: "tr-vlan-trennung", titel: "Zwei PCs am selben Switch erreichen sich nicht", skill: "lab.vlan", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Zwei PCs hängen am selben Switch, haben Adressen aus demselben Netz und erreichen sich trotzdem nicht. Meist ist die VLAN-Zuordnung der Grund: Ports in verschiedenen VLANs sind verschiedene Broadcast-Domänen, auch im selben Gehäuse. Ohne Router gibt es keinen Weg dazwischen.",
    tipp: "Schau nach, in welchem VLAN jeder Port steht. Zwischen zwei VLANs vermittelt niemand von selbst.",
@@ -232,7 +233,7 @@ DATEN.trainings = [
    quelle: "VLAN – Lernfassung · VLAN – Visuelle Lernnotiz (§ 7 Zwischen VLANs routen) · IEEE 802.1Q"},
 
   /* ---------- lab.trunk: Trunk und 802.1Q ---------- */
-  {id: "tr-trunk-erlauben", titel: "VLAN 20 fehlt auf dem Trunk", skill: "lab.trunk", geraet: "switch",
+  {id: "tr-trunk-erlauben", titel: "VLAN 20 fehlt auf dem Trunk", skill: "lab.trunk", geraet: "alle",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Die PCs in VLAN 20 kommen nicht über den Router, VLAN 10 läuft. `show interfaces trunk` zeigt unter „Vlans allowed on trunk“ nur 1 und 10 – das VLAN 20 fehlt in der Erlaubnisliste. Typische Falle: `switchport trunk allowed vlan 20` ersetzt die Liste, statt sie zu ergänzen.",
    tipp: "„allowed vlan“ ist eine Liste. Ersetzen oder ergänzen – das ist der ganze Unterschied.",
@@ -359,7 +360,7 @@ DATEN.trainings = [
    quelle: "Cisco Catalyst Software Configuration Guide: Configuring Port Security · Network – Lernfassung (§ 9 MAC Flooding, Abwehr Port Security)"},
 
   /* ---------- lab.stp: Schleifen und Spanning Tree ---------- */
-  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", geraet: "switch",
+  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", geraet: "alle",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Zwei Switches sind versehentlich doppelt verbunden, und das Netz wird plötzlich sehr langsam: Broadcasts kreisen zwischen beiden Geräten und vervielfachen sich, bis die Simulation mit „Broadcast-Sturm“ abbricht. Du erkennst das an hoher Last ohne Nutzverkehr und behebst es, indem du die zusätzlichen Leitungen zurückbaust – Spanning Tree würde genau das automatisch tun, ist in dieser Simulation aber nicht nachgebildet.",
    tipp: "Zwei Wege zwischen zwei Switches sind einer zu viel, solange niemand Frames blockiert. Welches Protokoll macht das – und arbeitet es hier?",
@@ -450,5 +451,115 @@ DATEN.trainings = [
      "Die Adresse aus der Auflösung im Netz suchen: Welches Gerät trägt sie?",
      "Am DNS-Server den Eintrag auf die richtige Adresse des Servers ändern.",
      "Erneut messen: Der Name löst auf den Server auf, die Seite lädt."],
-   quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035"}
+   quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035"},
+
+  /* ---------- S6a (Architektur § 17.1): lab.betrieb – Betrieb/Überwachung, nur wo simulierbar ----------
+     Ehrlich: Betrieb wird inhaltlich geübt. Dieses Szenario nutzt die VORHANDENEN Störungs-Injektoren
+     „gespeichert-kaputt“ (Startkonfiguration/Backup) und „geraet-stromlos“ (Verfügbarkeit/Uptime) –
+     kein neuer Injektor, kein neuer Sim-Grund. Für lab.ipv6 und lab.wlan gibt es bewusst KEIN Training
+     (Funk und IPv6 werden nicht paketweise simuliert); die Ausnahmen stehen namentlich in
+     tests/inhalte-s6.test.js und tests/daten-trainings.test.js. */
+  {id: "tr-betrieb-startconfig", titel: "Nach dem Stromausfall fehlt eine Änderung", skill: "lab.betrieb", geraet: "alle",
+   art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
+   beschreibung: "Ein Router wurde nach einem Stromausfall neu gestartet. Eine vorher eingerichtete Schnittstelle ist danach wieder abgeschaltet, obwohl niemand sie angefasst hat. Der Grund liegt im Unterschied zwischen laufender und gespeicherter Konfiguration: Was nur in der running-config stand, ist beim Neustart verloren. Du erkennst die Störung, misst sie und dokumentierst Maßnahme und Wirkung.",
+   tipp: "Nach einem Neustart gilt die gespeicherte Startkonfiguration. Vergleiche, was im laufenden Betrieb anders war – und was davon vorher gesichert wurde.",
+   schritte: ["Am Router beobachten: Die Schnittstelle ist nach dem Neustart wieder administratively down.",
+     "„show ip interface brief“ zeigt den Zustand; ein Ping vom LAN auf das Gateway scheitert.",
+     "Die Schnittstelle einschalten (no shutdown) und messen, ob das LAN wieder ins Internet kommt.",
+     "„copy running-config startup-config“ ausführen, damit die Änderung den nächsten Neustart übersteht.",
+     "Ins Wartungsbuch schreiben: Symptom, Ursache (nicht gespeichert), Maßnahme und Prüfung nach dem Neustart."],
+   quelle: "Network – Lernfassung · RFC 5424 (Syslog) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept"},
+
+  /* ---------- S7 Volumen (Architektur § 17.5): 11 Szenarien für simulierbare Fertigkeiten ---------- */
+  {id: "tr-netz-nachbar", titel: "Gleiches Netz oder nicht?", skill: "lab.netz", geraet: "alle",
+   art: "basis", minuten: 6, geruest: true, niveau: "E",
+   beschreibung: "Zwei Rechner streiten: Der eine sagt, der andere sei „im gleichen Netz“, der Ping geht trotzdem nicht. Du rechnest mit Adresse und Maske nach, wer wirklich zusammengehört, und prüfst danach die Verbindung.",
+   tipp: "Wende auf beide Adressen dieselbe Maske an. Kommt dieselbe Netz-ID heraus, gehören sie zusammen – sonst braucht es ein Gateway.",
+   schritte: ["Adresse und Maske beider Rechner im Inspektor ablesen.",
+     "Mit der Maske die Netz-ID beider Adressen ausrechnen (Bit für Bit).",
+     "Vergleichen: gleiche Netz-ID = direkt erreichbar, sonst über das Gateway.",
+     "Ergebnis mit einem Ping prüfen und die Entscheidung notieren."],
+   quelle: "Network – Lernfassung · 04-AP1-Netzwerk (Subnetting-Verfahren)"},
+  {id: "tr-arp-gateway", titel: "ARP für das Gateway", skill: "lab.arp", geraet: "host",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Ein Rechner erreicht das Internet nicht, Nachbarn im eigenen Netz aber schon. Du untersuchst, nach welcher MAC-Adresse er für ein fremdes Ziel fragt, und findest den Unterschied zwischen Ziel-Adresse und Gateway-Adresse.",
+   tipp: "Für ein Ziel außerhalb des eigenen Netzes fragt ARP nicht das Ziel, sondern den nächsten Router. Steht das Gateway im ARP-Eintrag?",
+   schritte: ["Mit dem Ping ein Ziel außerhalb des Netzes anstoßen und das Ergebnis lesen.",
+     "In der ARP-Anzeige nachsehen, ob eine MAC für das Gateway aufgelöst ist.",
+     "Nachrechnen, ob das Gateway wirklich im eigenen Netz liegt.",
+     "Das Gateway anpingen und den Eintrag danach erneut prüfen."],
+   quelle: "Network – Lernfassung · RFC 826"},
+  {id: "tr-ports-ping-dienst", titel: "Ping geht, Dienst nicht", skill: "lab.ports", geraet: "alle",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Der Server antwortet auf Ping, aber die Anwendung erreicht ihn nicht. Du unterscheidest Host-Erreichbarkeit von Dienst-Erreichbarkeit und prüfst Port, Dienst und Protokoll.",
+   tipp: "Ping prüft nur Schicht 3. Für den Dienst zählt der Port: Lauscht dort jemand – und auf TCP oder UDP?",
+   schritte: ["Den Server pingen: Antwortet er überhaupt?",
+     "Den Port des Dienstes prüfen (Port-Zahl im Auftrag).",
+     "Im Inspektor den Dienst auf dem Server ansehen: eingeschaltet?",
+     "Dienst einschalten, Port erneut prüfen und die Verbindung testen."],
+   quelle: "TCP – Lernfassung · RFC 9293"},
+  {id: "tr-tcp-abbruch", titel: "Der Handshake bricht ab", skill: "lab.tcp", geraet: "alle",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Eine Verbindung kommt nicht zustande. Du verfolgst den Handshake in der Simulation: Welches Paket fehlt, und was bedeutet ein RST im Vergleich zu einer Zeitüberschreitung?",
+   tipp: "Drei Pakete gehören zum Aufbau: SYN, SYN/ACK, ACK. Schau, welches davon ausbleibt – und wer stattdessen antwortet.",
+   schritte: ["Die Verbindung in der Simulation anstoßen und die Ereignisse filtern.",
+     "Prüfen: Kommt ein Antwortpaket auf das SYN?",
+     "Ein RST bedeutet geschlossener Port; keine Antwort bedeutet Filter oder falsche Adresse.",
+     "Ziel und Port korrigieren, erneut verbinden und den Aufbau im Ereignisfenster sehen."],
+   quelle: "TCP – Lernfassung (§ 2 Aufbau mit Nummern) · RFC 9293"},
+  {id: "tr-speichern-neustart", titel: "Nach dem Neustart fehlt die Änderung", skill: "lab.speichern", geraet: "alle",
+   art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
+   beschreibung: "Ein Router hat eine Änderung verloren, obwohl sie im laufenden Betrieb sichtbar war. Du unterscheidest running-config und startup-config, führst den Neustart im Kopf durch und sicherst die Konfiguration.",
+   tipp: "Änderungen gelten sofort, stehen aber nur im RAM. Was passiert mit einer Schnittstelle, die nur in der running-config eingeschaltet wurde?",
+   schritte: ["Den Router-Zustand ansehen: Ist die Schnittstelle im Betrieb an, nach dem Neustart aus?",
+     "Erneut einschalten und die Änderung mit dem Speicherbefehl sichern.",
+     "Mit der Startup-Anzeige vergleichen: Stehen die Zeilen jetzt drin?",
+     "Im Wartungsbuch notieren, was gespeichert wurde und warum."],
+   quelle: "Cisco IOS Configuration Fundamentals Configuration Guide (Managing Configuration Files)"},
+  {id: "tr-trunk-allowed", titel: "VLAN auf dem Trunk nicht erlaubt", skill: "lab.trunk", geraet: "alle",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Zwei Switches sind per Trunk verbunden, doch ein VLAN kommt auf der anderen Seite nicht an. Du prüfst die Allowed-Liste des Trunks und korrigierst sie, ohne die anderen VLANs zu verlieren.",
+   tipp: "Der Trunk trägt nur VLANs, die in seiner Liste stehen. Achte auf „add“ – ohne add ersetzt der Befehl die ganze Liste.",
+   schritte: ["Den Trunk-Zustand anzeigen: Welche VLANs sind erlaubt?",
+     "Mit dem benötigten VLAN vergleichen.",
+     "Das fehlende VLAN ergänzen (add), nicht die Liste ersetzen.",
+     "Erneut prüfen: Tabelle zeigt das VLAN, die Geräte erreichen sich."],
+   quelle: "VLAN – Lernfassung · IEEE 802.1Q"},
+  {id: "tr-rostick-gateway", titel: "Subinterface ohne Verbindung", skill: "lab.rostick", geraet: "alle",
+   art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
+   beschreibung: "Ein VLAN erreicht das Gateway nicht, obwohl der Trunk steht. Du prüfst Subinterface, 802.1Q-Nummer und IP und findest die fehlende Zuordnung zwischen VLAN und Router-Schnittstelle.",
+   tipp: "Jedes Subinterface gehört über encapsulation dot1Q zu genau einem VLAN. Stimmt die Nummer mit dem VLAN der Rechner überein?",
+   schritte: ["Vom betroffenen Rechner das Gateway anpingen.",
+     "Am Router die Subinterfaces anzeigen: VLAN-Nummer und IP prüfen.",
+     "Die 802.1Q-Nummer mit dem VLAN am Switch vergleichen und korrigieren.",
+     "Erneut messen: Gateway antwortet, Ziel im anderen VLAN erreichbar."],
+   quelle: "VLAN – Visuelle Lernnotiz · Cisco IOS: Configuring Routing Between VLANs with IEEE 802.1Q Encapsulation"},
+  {id: "tr-ttl-weglesen", titel: "Prüfung: Weg mit Traceroute lesen", skill: "lab.ttl", geraet: "router",
+   art: "pruefung", minuten: 10, geruest: false, niveau: "AP2",
+   beschreibung: "Ohne Gerüst: Ein Traceroute-Ergebnis und eine Fehlermeldung liegen vor. Du entscheidest, wo der Weg bricht, ob es eine Schleife ist und welche Adresse der meldende Router hat.",
+   tipp: "",
+   quelle: "Network – Lernfassung · RFC 792 (Time Exceeded)"},
+  {id: "tr-portfwd-dienst", titel: "Weiterleitung zeigt ins Leere", skill: "lab.portfwd", geraet: "firewall",
+   art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
+   beschreibung: "Der Webshop ist von außen nicht erreichbar. Du prüfst die Port-Weiterleitung, den Ziel-Port im LAN und ob der Dienst dort überhaupt lauscht – und unterscheidest das von einem Firewall-Deny.",
+   tipp: "Die Weiterleitung öffnet nur den Weg. Zielhost und Zielport müssen stimmen, und der Dienst muss dort wirklich laufen.",
+   schritte: ["Von außen auf den veröffentlichten Port zugreifen und die Meldung notieren.",
+     "Die Weiterleitung im Firewall-Inspektor ansehen: Zielhost und Ziel-Port.",
+     "Prüfen, ob der Dienst auf diesem Port im LAN lauscht.",
+     "Ziel korrigieren, erneut testen und den Unterschied zu einem Deny erklären."],
+   quelle: "Cisco IOS NAT Configuration Guide (Static NAT with port) · RFC 3022"},
+  {id: "tr-fw-regel", titel: "Die Firewall lässt zu wenig durch", skill: "lab.fw", geraet: "firewall",
+   art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
+   beschreibung: "Ein erlaubter Weg ist trotzdem gesperrt. Du liest das Regelwerk von oben, prüfst Richtung, Protokoll und Port und findest die fehlende oder falsch sortierte Regel.",
+   tipp: "Die erste passende Regel gewinnt. Steht eine allgemeine Sperre über der Erlaubnis?",
+   schritte: ["Die Meldung von außen/innen reproduzieren und notieren.",
+     "Das Regelwerk von oben nach unten lesen: Welche Regel trifft den Verkehr zuerst?",
+     "Richtung (Zone zu Zone), Protokoll und Port mit dem Ziel vergleichen.",
+     "Regel ergänzen oder umsortieren, erneut messen und begründen."],
+   quelle: "05-AP2-Infrastruktur-Sicherheit (Firewall-Grundregeln)"},
+  {id: "tr-dmz-weg", titel: "Prüfung: DMZ richtig begrenzen", skill: "lab.dmz", geraet: "firewall",
+   art: "pruefung", minuten: 10, geruest: false, niveau: "AP2",
+   beschreibung: "Ohne Gerüst: Du bekommst Zonen und ein Regelwerk. Du entscheidest, welche Wege erlaubt sein müssen und welcher Weg aus der DMZ ins LAN auf keinen Fall offenstehen darf.",
+   tipp: "",
+   quelle: "05-AP2-Infrastruktur-Sicherheit (DMZ-Regelwerk)"},
 ];

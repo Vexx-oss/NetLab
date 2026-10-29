@@ -79,6 +79,50 @@ Spiel.SENIOR_FRAGEN = {
   "lab.acl": "Welche Regel der Liste trifft das Paket zuerst?",
   "lab.nat": "Mit welcher Absenderadresse kommt das Paket im Internet an?",
   "lab.speichern": "Was passiert mit der running-config, wenn der Strom ausfällt?",
+  /* Welle 2 · S4 (Architektur § 17.3): Für JEDE Fertigkeit eine Gegenfrage – keine Lösung, keine Ursache.
+     Ergänzt 2026-10-29 die 14 fehlenden und die 3 neuen Fertigkeiten aus § 17.1 (lab.ipv6/lab.betrieb/lab.wlan). */
+  "lab.ping": "Antwortet das Ziel überhaupt – und was meldet ping genau: Zeitüberschreitung, Ziel nicht erreichbar oder unbekannter Name?",
+  "lab.switch": "An welchem Port hat der Switch welche MAC-Adresse gelernt – und kommt das Frame dort überhaupt an?",
+  "lab.subnetz": "Rechne Netz und Broadcast zu beiden Adressen aus: Liegen sie wirklich im selben Netz?",
+  "lab.ports": "Auf welchem Port lauscht der Dienst – und ist genau dieser Port im Ziel erlaubt?",
+  "lab.tcp": "Wo im Handshake bricht es ab: fehlt das SYN/ACK oder die Bestätigung danach?",
+  "lab.cli": "In welchem Modus stehst du gerade – und was erlaubt dir dieser Modus?",
+  "lab.rostick": "Welches Subinterface gehört zu welchem VLAN – und trägt der Trunk dieses VLAN?",
+  "lab.ttl": "Wie viele Router antworten auf dem Weg – und wo bleibt die nächste Antwort aus?",
+  "lab.portfwd": "Auf welchen inneren Port soll die Weiterleitung zeigen – und lauscht der Dienst dort?",
+  "lab.fw": "Welche Regel trifft zuerst – und in welcher Richtung läuft das Paket durch die Firewall?",
+  "lab.dmz": "Von welcher Zone in welche soll der Verkehr erlaubt sein – und welche Regel deckt genau das ab?",
+  "lab.portsec": "Was steht am Switchport: welche MAC ist erlaubt, und wie ist der Port konfiguriert?",
+  "lab.stp": "Wie viele Wege gibt es zwischen den Switches – und blockiert einer davon?",
+  "lab.storage": "Hat der Speicher überhaupt eine Adresse – und erreicht ihn der Server per Ping?",
+  "lab.ipv6": "Wie lang ist das Präfix deiner Adresse – und liegt das Ziel damit im selben Netz?",
+  "lab.betrieb": "Was steht im Syslog – und welche Schwelle wurde wann überschritten?",
+  "lab.wlan": "In welchem VLAN landet der Funk-Client – und was erlaubt die Freigabe für das Gastnetz?",
+};
+
+/* Stufe-5-Fallback (Architektur § 17.3): Ohne eigenes `hilfen.konkret`-Feld gibt es KEINE Lösungstexte,
+   sondern nur Handlungshinweise. Quelle ist die Fehlersuche-Leiter (Spiel.LEITER), gewählt über die
+   Fertigkeiten des Tickets. Gemessen 26.10.2026: 39 von 58 Handtickets ohne eigenes hilfen-Feld bekamen
+   zuvor `def.loesung.map(s => s.text)` vorgelesen – das war die Lösung zum halben Sternpreis. */
+Spiel.SKILL_LEITER = {
+  "lab.link": "link", "lab.ip": "ip", "lab.netz": "ip", "lab.subnetz": "ip", "lab.arp": "ip", "lab.dhcp": "ip",
+  "lab.gateway": "gateway", "lab.ping": "gateway", "lab.nat": "gateway", "lab.portfwd": "gateway",
+  "lab.route": "route", "lab.ttl": "route",
+  "lab.vlan": "vlan", "lab.trunk": "vlan", "lab.rostick": "vlan", "lab.wlan": "vlan",
+  "lab.switch": "dienst", "lab.ports": "dienst", "lab.tcp": "dienst", "lab.dns": "dienst", "lab.cli": "dienst",
+  "lab.acl": "dienst", "lab.fw": "dienst", "lab.dmz": "dienst", "lab.portsec": "dienst", "lab.storage": "dienst",
+  "lab.speichern": "dienst", "lab.stp": "link", "lab.ipv6": "ip", "lab.betrieb": "dienst",
+};
+Spiel.handlungsHinweise = function(inst){
+  const def = (typeof Spiel.defVon === "function" && Spiel.defVon(inst)) || {};
+  const ids = [...new Set((def.skills || []).map(s => Spiel.SKILL_LEITER[s]).filter(Boolean))];
+  const reihe = ids.length ? ids : ["link", "ip", "dienst"];
+  const haken = (inst && inst.leiter) || {};
+  const offen = reihe.filter(id => !haken[id]);
+  return (offen.length ? offen : reihe).slice(0, 2).map(id => {
+    const s = Spiel.LEITER.find(x => x.id === id);
+    return s ? `Prüfe zuerst ${s.titel}: ${s.frage}` : "Prüfe zuerst Link, Adresse und den Weg zum Ziel.";
+  });
 };
 
 Spiel.hilfeInfo = stufe => Spiel.HILFE[Math.max(0, Math.min(6, stufe))];
@@ -102,7 +146,13 @@ Spiel.hilfeInhalt = function(inst, stufe){
     case 3: r.fragen = (h.frage && h.frage.length ? h.frage : [Spiel.SENIOR_FRAGEN[erster] || "Wo auf dem Weg vom Absender zum Ziel bleibt das Paket hängen?"]).slice(); break;
     case 4: r.bereich = (h.bereich && h.bereich.length ? h.bereich : (def.fehler || []).filter(f => f.auf).map(f => ({geraet: f.auf}))).slice();
             r.namen = r.bereich.map(b => Spiel.geraetName(inst.netz, b.geraet) + (b.port ? " " + b.port : "")); break;
-    case 5: r.konkret = [...(h.konkret && h.konkret.length ? h.konkret : (def.loesung || []).map(s => s.text).filter(Boolean)), ...(inst.ereignisLoesung || []).map(s => s.text)]; break;
+    case 5: {                                                  /* Architektur § 17.3: Handlungshinweise statt Lösung */
+      const eigene = h.konkret && h.konkret.length ? h.konkret.slice() : Spiel.handlungsHinweise(inst);
+      /* Ein dazugekommener Vorfall (Notfall) wird benannt – aber nicht vorgelesen: Wo nachsehen, nicht was tun. */
+      const ereignis = (inst.ereignisLoesung || []).map(s => `Neuer Vorfall: Prüfe zuerst ${Spiel.geraetName(inst.netz, s.geraet)} – was zeigen Link, Adresse und die letzten Änderungen dort?`);
+      r.konkret = [...new Set([...eigene, ...ereignis])];
+      break;
+    }
     case 6: r.schritte = Spiel.vorfuehren(inst); break;
   }
   return r;

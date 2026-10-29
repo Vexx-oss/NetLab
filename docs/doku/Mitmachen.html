@@ -74,6 +74,7 @@ img{max-width:100%;height:auto}
 </ul>
 </nav><h1 id="mitmachen">Mitmachen</h1>
 <p>Kurz und verbindlich. Die vollständigen Betriebsregeln stehen in <a href="AGENTS.html"><code>AGENTS.md</code></a> — sie gelten für Menschen genauso wie für Modelle. Hier steht, was für einen Beitrag praktisch wichtig ist.</p>
+<p>Kurzfassung für GitHub: <span class="dk-tot" title="„../CONTRIBUTING.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">CONTRIBUTING.md</span> · Sicherheitslücken: <span class="dk-tot" title="„../SECURITY.md“ gehört nicht zu den veröffentlichten Dokumenten — kein Verweis, nur Text.">SECURITY.md</span> · häufige Fragen: <a href="FAQ.html">FAQ.md</a>.</p>
 <h2 id="die-funf-regeln-die-alles-andere-erklaren">Die fünf Regeln, die alles andere erklären</h2>
 <ol><li><strong>Senkrechter Schnitt vor Breite.</strong> Lieber eine Funktion vollständig — Modell, Simulation, Konsole, Oberfläche, Lehrtext, Fehlerinjektor, Ticket, Test — als fünf halbe. Nach jedem Schritt muss etwas <strong>spielbar</strong> sein.</li></ol>
 <ol><li><strong>Wirkung vor Grün.</strong> Ein Baustein zählt erst, wenn er im Programm vorkommt. Grüne Tests ohne Aufruf aus einem Ticket oder der Oberfläche gelten als <strong>nicht fertig</strong>. <em>Belegtes Gegenbeispiel:</em> Der gesamte DHCP-Pool-Modus der Konsole war seit 1.0 wirkungslos, weil der Test nur den Prompt prüfte.</li></ol>
@@ -90,9 +91,10 @@ git diff --stat --ignore-cr-at-eol &lt;Datei&gt;    # ohne Zeilenenden</code></p
 <p>Weichen die Zahlen stark voneinander ab (Beispiel aus der Design-Notiz: <code>engine.js</code> mit 265 Zeilen gegen 6 echte), hast du die Enden der ganzen Datei umgestellt. Dann: Datei aus Git wiederherstellen und mit einem Skript bearbeiten, das <strong>die vorhandenen Enden erhält</strong>.</p>
 <h2 id="was-gepruft-wird">Was geprüft wird</h2>
 <p>Jeder Beitrag muss diese Befehle grün hinterlassen:</p>
-<pre><code class="sprache-bash">sh tools/test.sh            # 213/213 grün
+<pre><code class="sprache-bash">sh tools/test.sh            # N/N grün, 0 übersprungen — die Zahl misst docs/STAND.md
 python tools/klassen.py     # 0 Klassen ohne CSS-Regel
-node tools/sim-stand.js     # Simulation unverändert gegenüber dem Referenzstand</code></pre>
+node tools/sim-stand.js     # Simulation unverändert gegenüber dem Referenzstand
+python tools/stand.py --pruefen   # Zahlen in docs/STAND.md + README gegen die Messung</code></pre>
 <p>Nach jeder Änderung an <code>src/sim/</code> oder <code>src/modell/</code> <strong>zusätzlich</strong> <code>node tools/sim-stand.js</code> — und jede Abweichung benennen: gewollt oder ungewollt.</p>
 <p>Berührt dein Beitrag die Auslieferung, kommen dazu:</p>
 <pre><code class="sprache-bash">python tools/einfach.py --pruefen docs/index.html   # Einzeldatei ohne Außenverweise

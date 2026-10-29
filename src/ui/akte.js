@@ -6,7 +6,7 @@
 UI.akte = (() => {
   const S = {schicht: null, ursache: null, geraet: null, aendern: false, hinweis: new Set()};
   const inst = () => { const i = UI.spiel?.inst; return i && UI.labor.netz === i.netz ? i : null; };
-  const SYM = {ping: "📡", kabel: "🔌", trace: "🧭", befehl: "⌨", plan: "🗺"};
+  const SYM = {ping: "ping", kabel: "kabel", trace: "trace", befehl: "tastatur", plan: "plan"};   /* U01: SVG-Glyphen statt Emoji */
 
   function zeichnen(){
     const c = UI.labor.el?.akte, i = inst();
@@ -19,7 +19,7 @@ UI.akte = (() => {
   }
   function karte(i, k, niveau){
     return h("li", {class: "ak-karte" + (k.ok == null ? " aussage" : k.ok ? " ok" : " nicht") + (k.wichtig ? " wichtig" : "")},
-      h("span", {class: "ak-sym", "aria-hidden": "true"}, SYM[k.art] || "•"),
+      h("span", {class: "ak-sym", "aria-hidden": "true"}, UI.symbol(SYM[k.art] || "info", 17)),
       h("div", {class: "ak-text"},
         h("b", {}, k.titel || k.art, k.anzahl > 1 ? h("small", {}, ` ${k.anzahl}×`) : null),
         h("span", {class: "ak-befund"}, (k.ok == null ? "„" : k.ok ? "✓ " : "✗ ") + k.befund + (k.ok == null ? "“" : "")),   /* Kundenaussage (Hotline): weder ✓ noch ✗ */
@@ -38,14 +38,14 @@ UI.akte = (() => {
     if (v && !S.aendern) {
       const u = o.ursachen.find(x => x.id === v.ursache), g = o.geraete.find(x => x.id === v.geraet);
       return h("section", {class: "ak-verdacht gesetzt"},
-        h("div", {class: "ak-v-kopf"}, h("h3", {}, "🔎 Dein Verdacht"), h("button", {type: "button", class: "knopf klein geist", onclick: () => { S.aendern = true; Object.assign(S, {schicht: v.schicht, ursache: v.ursache, geraet: v.geraet}); zeichnen(); }}, "ändern")),
+        h("div", {class: "ak-v-kopf"}, h("h3", {}, UI.symbol("suche", 18), " Dein Verdacht"), h("button", {type: "button", class: "knopf klein geist", onclick: () => { S.aendern = true; Object.assign(S, {schicht: v.schicht, ursache: v.ursache, geraet: v.geraet}); zeichnen(); }}, "ändern")),
         h("p", {class: "ak-v-satz"}, `Schicht ${v.schicht} · ${u ? u.titel : "–"} · ${g ? g.name : "–"}`),
         h("small", {class: "ak-v-zeit" + (v.vorEingriff ? " gut" : "")}, v.vorEingriff ? "✓ vor dem ersten Eingriff festgehalten" : "nach dem ersten Eingriff festgehalten – zählt, bringt aber keinen Bonus"));
     }
     const bereit = S.schicht && S.ursache && S.geraet;
     const chip = (an, text, fn, titel) => h("button", {type: "button", class: "ak-chip" + (an ? " an" : ""), "aria-pressed": String(!!an), title: titel || null, onclick: fn}, text);
     return h("section", {class: "ak-verdacht"},
-      h("div", {class: "ak-v-kopf"}, h("h3", {}, "🔎 Dein Verdacht"), h("small", {}, pflicht)),
+      h("div", {class: "ak-v-kopf"}, h("h3", {}, UI.symbol("suche", 18), " Dein Verdacht"), h("small", {}, pflicht)),
       h("p", {class: "ak-schritt"}, "1 · Welche Schicht?"),
       h("div", {class: "ak-chips"}, o.schichten.map(s => chip(S.schicht === s.n, `${s.n} ${s.name}`, () => { S.schicht = s.n; zeichnen(); }, s.text))),
       h("p", {class: "ak-schritt"}, "2 · Welche Ursache?"),

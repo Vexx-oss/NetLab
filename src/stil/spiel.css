@@ -3,28 +3,27 @@
 .knopf.primaer:hover{background:var(--accent); filter:brightness(1.08)}
 .knopf.geist{background:none; border-color:transparent; color:var(--muted)}
 .knopf.geist:hover, .am-zu:hover{color:var(--ink); background:var(--panel-3)}
-.knopf.klein{min-height:30px; padding:0 10px; font-size:13px}
-.knopf.gross{min-height:48px; padding:0 22px; font-size:16px}
-.sp-leise{color:var(--muted); font-size:13px}
-.sp-ok{color:var(--ok); font-weight:600}
+.knopf.klein{min-height:30px; padding:0 10px; font-size:var(--fs-2)}
+.knopf.gross{min-height:48px; padding:0 22px; font-size:var(--fs-4)}
+.sp-leise, .sp-ok{color:var(--ok); font-weight:600}
 
 /* ---- Kundensymbol ---- */
-.sp-kunde-sym{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; width:36px; height:36px; border-radius:11px; font-size:19px;
+.sp-kunde-sym{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; width:36px; height:36px; border-radius:11px; font-size:var(--fs-5);
   background:color-mix(in srgb, var(--k, var(--accent)) 18%, var(--panel-2)); border:1px solid color-mix(in srgb, var(--k, var(--accent)) 45%, transparent)}
-.sp-kunde-sym.gross{width:52px; height:52px; font-size:27px; border-radius:15px}
+.sp-kunde-sym.gross{width:52px; height:52px; font-size:var(--fs-6); border-radius:15px}
 
 /* ---- Auftragszeile (eine Zeile) und Auftragsmappe (Präfix am-) ---- */
 .am-zeile{display:flex; align-items:center; gap:10px; min-width:0; flex-wrap:nowrap}
-.am-zeile .sp-kunde-sym{width:32px; height:32px; font-size:17px; border-radius:var(--radius)}
+.am-zeile .sp-kunde-sym{width:32px; height:32px; font-size:var(--fs-4); border-radius:var(--radius)}
 .am-titel{flex:1 1 auto; min-width:0; display:flex; align-items:baseline; gap:10px; white-space:nowrap; overflow:hidden}
-.am-titel strong{font:800 17px/1.2 var(--display); overflow:hidden; text-overflow:ellipsis; min-width:0}
-.am-kunde{color:var(--muted); font-size:13px; overflow:hidden; text-overflow:ellipsis; min-width:0}
-.am-ziele{flex:0 0 auto; padding:3px 9px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:700 12px/1.4 var(--mono); white-space:nowrap}
+.am-titel strong{font:800 var(--fs-4)/1.2 var(--display); overflow:hidden; text-overflow:ellipsis; min-width:0}
+.am-kunde{color:var(--muted); font-size:var(--fs-2); overflow:hidden; text-overflow:ellipsis; min-width:0}
+.am-ziele{flex:0 0 auto; padding:3px 9px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:700 var(--fs-2)/1.4 var(--mono); white-space:nowrap}
 .am-ziele.fertig, .sp-chip.niv-E, .sp-chip.wdh, .sp-chip.klingelt{background:var(--ok-soft); color:var(--ok)}
-.am-ziele.frisch, .sp-ziele li.frisch .sp-haken{animation:sp-hop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}   /* Treffer-Rückmeldung: der Haken hüpft — 320 ms statt 0,5 s (R5) */
+.am-ziele.frisch, .sp-ziele li.frisch .sp-haken{animation:sp-hop var(--dauer-lang) var(--ease-pop)}   /* Treffer-Rückmeldung: der Haken hüpft — 320 ms statt 0,5 s (R5) */
 .am-knoepfe, .sp-auftrag-knoepfe{display:flex; gap:6px; flex:0 0 auto; margin-left:auto}
 .am-lesen.an{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
-.am-mehr{min-width:40px; padding:0 10px; font-size:18px; letter-spacing:.05em}
+.am-mehr{min-width:40px; padding:0 10px; font-size:var(--fs-5); letter-spacing:.05em}
 .lb-auftrag{container-type:inline-size}
 @container (max-width:700px){ .am-kunde{display:none} .am-lesen{font-size:0; gap:0; padding:0 11px} .am-lesen .sym{margin:0} }
 @container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .sp-kunde-sym{display:none} }
@@ -45,27 +44,27 @@
 .am-mappe.rein{animation:am-rein var(--dauer) ease-out}
 @keyframes am-rein{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}
 .am-reiter{display:flex; align-items:center; gap:2px; padding:6px 8px 0 10px; border-bottom:1px solid var(--line)}
-.am-tab{border:0; background:none; color:var(--muted); font:700 13.5px/1 var(--body); padding:10px 12px 11px; border-bottom:2px solid transparent; border-radius:8px 8px 0 0}
+.am-tab{border:0; background:none; color:var(--muted); font:700 var(--fs-3)/1 var(--body); padding:10px 12px 11px; border-bottom:2px solid transparent; border-radius:8px 8px 0 0}
 .am-tab:hover{color:var(--ink); background:var(--panel-2)}
 .am-tab.an{color:var(--accent); border-bottom-color:var(--accent)}
 .am-zu{margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:0; border-radius:8px; background:none; color:var(--muted)}
 .am-inhalt{flex:1 1 auto; min-height:0; overflow:auto; padding:14px 18px 6px}
 .am-brief{display:flex; flex-direction:column; gap:10px}
-.am-absender{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px}
+.am-absender{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:var(--fs-2)}
 .am-absender b, .sp-demo li.jetzt, .sp-demo-kopf b{color:var(--ink)}
-.am-text{display:flex; flex-direction:column; gap:8px; font-size:15.5px; line-height:1.55; max-width:62ch}
+.am-text{display:flex; flex-direction:column; gap:8px; font-size:var(--fs-4); line-height:1.55; max-width:62ch}
 .am-text p, .sp-brief-text p{margin:0}
-.am-symptom{margin:2px 0 0; padding:8px 10px; border-radius:var(--radius); background:var(--panel-2); font-size:13.5px}
+.am-symptom{margin:2px 0 0; padding:8px 10px; border-radius:var(--radius); background:var(--panel-2); font-size:var(--fs-3)}
 .am-symptom b, .sp-symptom b{color:var(--muted); font-weight:600}
 .am-ziele-liste{display:flex; flex-direction:column; gap:10px; padding-bottom:6px}
-.am-ziele-liste .sp-ziele li{font-size:14.5px}
+.am-ziele-liste .sp-ziele li{font-size:var(--fs-3)}
 .am-ziel-text{flex:1 1 auto; min-width:0}
 .sp-naechste{padding:6px 10px; border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 6px 6px 0}
 .am-antwort-zeile{display:flex; gap:6px; margin-top:5px; align-items:center}
-.am-antwort{flex:1 1 140px; max-width:220px; min-width:0; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:14px var(--mono)}
+.am-antwort{flex:1 1 140px; max-width:220px; min-width:0; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3) var(--mono)}
 .am-antwort:focus{outline:2px solid var(--accent); outline-offset:1px}
 .am-terminal{flex:none; align-self:center; font-family:var(--mono)}
-.am-grund{display:block; margin-top:1px; color:var(--warn); font-size:12.5px; font-weight:600}   /* Einstieg: warum das Ziel noch offen ist */
+.am-grund{display:block; margin-top:1px; color:var(--warn); font-size:var(--fs-2); font-weight:600}   /* Einstieg: warum das Ziel noch offen ist */
 .am-fuss{display:flex; justify-content:flex-end; gap:8px; padding:10px 14px 12px; border-top:1px solid var(--line)}
 
 /* ---- Auftragsleiste (Prüfungstag) ---- */
@@ -73,70 +72,71 @@
   background:linear-gradient(90deg, color-mix(in srgb, var(--k, var(--accent)) 9%, var(--panel)), var(--panel) 60%)}
 .sp-auftrag-kopf{display:flex; align-items:center; gap:8px 12px; min-width:0; flex-wrap:wrap}   /* schmale Fläche: Knöpfe rutschen unter den Titel */
 .sp-auftrag-titel{flex:1 1 auto; min-width:min(15em, 70%); display:flex; flex-direction:column}
-.sp-auftrag-titel strong{font:800 18px/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.sp-auftrag-titel span{color:var(--muted); font-size:12.5px}
+.sp-auftrag-titel strong{font:800 var(--fs-5)/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.sp-auftrag-titel span{color:var(--muted); font-size:var(--fs-2)}
 .sp-hilfe-knopf.an{border-color:var(--accent); background:var(--accent-soft)}
 /* „Abnahme bereit“: das Signal bleibt STEHEN (weicher Ring), der Puls läuft nur noch dreimal
    à 320 ms statt endlos mit 1,6 s — R5, Wirkung erhalten (der Blick wird weiter gelenkt). */
 .sp-abnahme.bereit{box-shadow:0 0 0 3px var(--accent-soft); animation:sp-puls var(--dauer-lang) ease-in-out 3}
 @keyframes sp-puls{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent)} 50%{box-shadow:0 0 0 8px transparent}}
 .sp-auftrag-mitte{display:flex; align-items:flex-start; gap:10px 18px; flex-wrap:wrap}
-.sp-symptom{flex:1 1 260px; font-size:13.5px; color:var(--ink); margin:0}
+.sp-symptom{flex:1 1 260px; font-size:var(--fs-3); color:var(--ink); margin:0}
 .sp-ziele{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3px; flex:2 1 320px}
-.sp-ziele li{display:flex; align-items:baseline; gap:8px; font-size:13.5px; line-height:1.35}
-.sp-haken{display:inline-flex; width:20px; height:20px; flex:0 0 auto; align-items:center; justify-content:center; border-radius:var(--radius-s); font-weight:800; font-size:12px;
+.sp-ziele li{display:flex; align-items:baseline; gap:8px; font-size:var(--fs-3); line-height:1.35}
+.sp-haken{display:inline-flex; width:20px; height:20px; flex:0 0 auto; align-items:center; justify-content:center; border-radius:var(--radius-s); font-weight:800; font-size:var(--fs-2);
   border:1.5px solid var(--line-2); color:var(--faint); transform:translateY(3px)}
 .sp-ziele li.ok, .sp-zeile.leise{color:var(--muted)}
 .sp-ziele li.ok .sp-haken{background:var(--ok); border-color:var(--ok); color:var(--bg)}
 @keyframes sp-hop{0%{transform:translateY(3px) scale(.4)} 100%{transform:translateY(3px) scale(1)}}
 .sp-ziele li.neutral .sp-haken{border-style:dotted}
 .sp-blockiert{color:var(--warn); font-weight:600}
-.sp-fortschritt{font:600 12px/1.3 var(--mono); color:var(--faint); align-self:center}
-.sp-ungespeichert{margin:0; padding:6px 10px; border-radius:8px; background:var(--warn-soft); color:var(--warn); font-size:13px}
+.sp-fortschritt{font:600 var(--fs-2)/1.3 var(--mono); color:var(--faint); align-self:center}
+.sp-ungespeichert{margin:0; padding:6px 10px; border-radius:8px; background:var(--warn-soft); color:var(--warn); font-size:var(--fs-2)}
 
 /* ---- Coach (Onboarding) ---- */
 .sp-coach{display:flex; align-items:center; gap:12px; padding:2px 2px 2px 4px}
 .sp-coach.weiter{cursor:pointer}
-.sp-coach p{margin:0; font-size:14px; font-weight:600}
+.sp-coach p{margin:0; font-size:var(--fs-3); font-weight:600}
 /* Der Senior spricht in einer Sprechblase (Einstieg in 90 s): Spitze zeigt auf ihn */
 .sp-blase{position:relative; flex:0 1 auto; padding:9px 14px; border-radius:14px; background:var(--accent-soft); border:1.5px solid var(--accent); line-height:1.4}
 .sp-blase::before{content:""; position:absolute; left:-8px; top:50%; width:12px; height:12px; margin-top:-6px; background:var(--accent-soft); border-left:1.5px solid var(--accent); border-bottom:1.5px solid var(--accent); transform:rotate(45deg)}
-.sp-coach.neu .sp-blase{animation:sp-blase-rein var(--dauer-lang) cubic-bezier(.3,1.6,.5,1)}
+.sp-coach.neu .sp-blase{animation:sp-blase-rein var(--dauer-lang) var(--ease-pop)}
 @keyframes sp-blase-rein{from{opacity:0; transform:translateX(-8px) scale(.92)} to{opacity:1; transform:none}}
 .sp-coach .knopf{margin-left:auto; white-space:nowrap; flex:0 0 auto}
 .sp-chip.uebt, .sp-chip.niv-AP1, .sp-chip.wahl{background:var(--accent-soft); color:var(--accent)}
-.sp-coach-sym{font-size:22px}
+.sp-coach-sym{font-size:var(--fs-5)}
 @keyframes sp-rein{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
+
 
 /* ---- Hilfeleiter ---- */
 .sp-hilfe{display:flex; flex-direction:column; gap:10px; padding:10px 12px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line); max-height:min(32vh, 290px); overflow:auto; animation:sp-rein var(--dauer) ease-out}   /* Fläche bleibt nutzbar; Inhalt scrollt */
 .sp-hilfe-kopf{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
 .sp-leiter{list-style:none; margin:0; padding:0; display:flex; gap:4px; flex-wrap:wrap}
-.sp-leiter li{display:flex; align-items:center; gap:4px; font-size:11.5px; color:var(--faint)}
+.sp-leiter li{display:flex; align-items:center; gap:4px; font-size:var(--fs-2); color:var(--faint)}
 .sp-leiter li span{display:none}
 .sp-leiter li.an span{display:inline; color:var(--ink); font-weight:600}
-.sp-leiter button{width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line-2); background:var(--panel); color:var(--faint); font:700 12px var(--mono)}
+.sp-leiter button{width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line-2); background:var(--panel); color:var(--faint); font:700 var(--fs-2) var(--mono)}
 .sp-leiter li.frei button{border-color:var(--accent); color:var(--accent)}
 .sp-leiter li.an button{background:var(--accent); color:var(--accent-ink)}
 .sp-leiter button:disabled{cursor:default; opacity:.6}
-.sp-hilfe-inhalt p{margin:0 0 6px; font-size:14px; line-height:1.5}
+.sp-hilfe-inhalt p{margin:0 0 6px; font-size:var(--fs-3); line-height:1.5}
 .sp-hilfe-fuss{display:flex; gap:8px; align-items:center; position:sticky; bottom:-10px; margin:0 -12px -10px; padding:8px 12px 10px; background:linear-gradient(transparent, var(--panel-2) 10px)}   /* nächste Stufe immer erreichbar */
 .sp-hilfe-fuss small{opacity:.8}
 .sp-check{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px}
-.sp-check label{display:flex; gap:8px; align-items:flex-start; font-size:13.5px; cursor:pointer}
+.sp-check label{display:flex; gap:8px; align-items:flex-start; font-size:var(--fs-3); cursor:pointer}
 .sp-check input{margin-top:3px; accent-color:var(--accent)}
-.sp-check small{display:block; color:var(--faint); font-size:12px}
+.sp-check small{display:block; color:var(--faint); font-size:var(--fs-2)}
 .sp-senior{display:flex; gap:12px; align-items:flex-start}
-.sp-senior p{font-style:italic; font-size:15px}
-.sp-senior-sym{font-size:28px; line-height:1}
-.sp-senior-sym.gross{font-size:56px}
+.sp-senior p{font-style:italic; font-size:var(--fs-4)}
+.sp-senior-sym{font-size:var(--fs-6); line-height:1}
+.sp-senior-sym.gross{font-size:calc(var(--fs-6) * 2)}
 .sp-demo{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px}
-.sp-demo li{font-size:13.5px; color:var(--faint)}
+.sp-demo li{font-size:var(--fs-3); color:var(--faint)}
 .sp-demo li.fertig, .sp-pruefliste li.ok > span, .am-fertig .am-titel strong{color:var(--ok)}
 .sp-demo li.fertig::marker{content:"✓ "}
 .sp-demo-kopf{line-height:1.45}
-.sp-demo-cli{margin:6px 0 0; padding:8px 10px; border-radius:8px; background:var(--bg); color:var(--ok); font:500 12.5px/1.5 var(--mono); white-space:pre-wrap}
-.sp-demo-felder{margin:6px 0 0; padding-left:16px; font-size:13px}
+.sp-demo-cli{margin:6px 0 0; padding:8px 10px; border-radius:8px; background:var(--bg); color:var(--ok); font:500 var(--fs-2)/1.5 var(--mono); white-space:pre-wrap}
+.sp-demo-felder{margin:6px 0 0; padding-left:16px; font-size:var(--fs-2)}
 
 /* ---- Overlays: Ergebnis, Willkommen, Vorhersage ---- */
 .sp-overlay{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(6,10,16,.55); backdrop-filter:blur(3px); opacity:0; transition:opacity var(--dauer) ease}
@@ -149,33 +149,34 @@
   transform:translateY(12px) scale(.98); transition:transform var(--dauer-lang) cubic-bezier(.2,.9,.3,1.2)}
 .sp-overlay.da .sp-karte, .sp-overlay.blatt.da .sp-karte{transform:none}
 .sp-ergebnis, .sp-willkommen{display:flex; flex-direction:column; gap:14px}
-.sp-ergebnis h2, .sp-willkommen h2{font:800 26px/1.1 var(--display)}
-.sp-ergebnis h3{font:700 13px/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin:0 0 8px}
+.sp-ergebnis h2, .sp-willkommen h2{font:800 var(--fs-6)/1.1 var(--display)}
+.sp-ergebnis h3{font:700 var(--fs-2)/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin:0 0 8px}
 .sp-erg-kopf, .sp-brief header{display:flex; gap:14px; align-items:center}
 .sp-erg-kopf .sp-leise{display:block; margin-bottom:2px}
-.sp-sterne{display:flex; gap:6px; font-size:40px; line-height:1}
-.sp-sterne span{color:var(--line-2); transform:scale(.3); opacity:0; animation:sp-stern var(--dauer-lang) cubic-bezier(.3,1.7,.5,1) forwards; animation-delay:calc(var(--i) * 120ms + 150ms)}   /* Treffer-Rückmeldung: Sterne poppen nacheinander (320 ms je Stern); die Staffelung (120 ms) bleibt */
+.sp-sterne{display:flex; gap:6px; font-size:calc(var(--fs-6) * 1.43); line-height:1}
+.sp-sterne span{color:var(--line-2); transform:scale(.3); opacity:0; animation:sp-stern var(--dauer-lang) var(--ease-pop) forwards; animation-delay:calc(var(--i) * 120ms + 150ms)}   /* Treffer-Rückmeldung: Sterne poppen nacheinander (320 ms je Stern); die Staffelung (120 ms) bleibt */
 .sp-sterne span.voll{color:var(--geld); text-shadow:0 0 18px color-mix(in srgb, var(--geld) 50%, transparent)}
 .sp-sterne span.halb{background:linear-gradient(90deg, var(--geld) 50%, var(--line-2) 50%); -webkit-background-clip:text; background-clip:text; color:transparent}
 @keyframes sp-stern{to{transform:none; opacity:1}}
-.sp-dank{margin:0; padding:12px 16px; border-radius:14px; background:var(--panel-2); border-left:3px solid var(--accent); font-size:15.5px; line-height:1.5}
-.sp-dank cite{display:block; margin-top:6px; color:var(--muted); font-size:13px; font-style:normal}
+.sp-dank{margin:0; padding:12px 16px; border-radius:14px; background:var(--panel-2); border-left:3px solid var(--accent); font-size:var(--fs-4); line-height:1.5}
+.sp-dank cite{display:block; margin-top:6px; color:var(--muted); font-size:var(--fs-2); font-style:normal}
 .sp-lohn{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
-.sp-geld{font:800 28px/1 var(--display); color:var(--geld)}
-.sp-ruf{font:800 20px/1 var(--display); color:var(--ruf)}
-.sp-abzuege{margin:0; padding-left:18px; color:var(--muted); font-size:13px}
+.sp-geld{font:800 var(--fs-6)/1 var(--display); color:var(--geld)}
+.sp-ruf{font:800 var(--fs-5)/1 var(--display); color:var(--ruf)}
+.sp-abzuege{margin:0; padding-left:18px; color:var(--muted); font-size:var(--fs-2)}
 /* Nachbesprechung in höchstens drei Blöcken: ① Sterne + Lohn · ② Dein Weg · ③ Merke */
 .sp-block{display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:14px; background:var(--panel-2); border:1px solid var(--line)}
 .sp-block-lohn{padding:0; background:none; border:0}
-.sp-block h3{margin:0; color:var(--muted); font:800 12px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
+.sp-block h3{margin:0; color:var(--muted); font:800 var(--fs-2)/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
 .sp-lohn-reihe{display:flex; align-items:center; gap:10px 22px; flex-wrap:wrap}
-.sp-zeile{margin:0; font-size:13.5px; line-height:1.45}
+.sp-zeile{margin:0; font-size:var(--fs-3); line-height:1.45}
 .sp-weg{gap:8px}
 .sp-weg-chips{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; align-items:center; gap:6px 4px}
-.sp-weg-chips li{display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:var(--panel); border:1px solid var(--line-2); font-size:13px}
+.sp-weg-chips li{display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:var(--panel); border:1px solid var(--line-2); font-size:var(--fs-2)}
 .sp-weg-chips li.sp-pfeil{padding:0; border:0; background:none; color:var(--faint)}
 .sp-weg-chips li.ok{border-color:var(--ok); color:var(--ok); font-weight:700}
-.sp-merke p{margin:0; font-size:15px; line-height:1.55}
+.sp-merke p{margin:0; font-size:var(--fs-4); line-height:1.55}
+.sp-lehrtexte{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
 .sp-merke-fuss{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
 .sp-ring{width:30px; height:30px; flex:0 0 auto; border-radius:50%; --p:var(--nach);
   background:conic-gradient(var(--ok) calc(var(--p) * 360deg), var(--line) 0); mask:radial-gradient(circle, transparent 58%, #000 60%); -webkit-mask:radial-gradient(circle, transparent 58%, #000 60%);
@@ -189,17 +190,17 @@
 .sp-pruefliste li{display:flex; gap:10px; align-items:flex-start}
 .sp-pruefliste li > span{font-weight:800; width:18px}
 .sp-pruefliste li.offen > span{color:var(--bad)}
-.sp-pruefliste p{margin:2px 0 0; color:var(--muted); font-size:13.5px; line-height:1.45}
+.sp-pruefliste p{margin:2px 0 0; color:var(--muted); font-size:var(--fs-3); line-height:1.45}
 .sp-willkommen{align-items:center; text-align:center}
-.sp-willkommen p{max-width:46ch; font-size:15.5px}
+.sp-willkommen p{max-width:46ch; font-size:var(--fs-4)}
 .sp-vorhersage{display:flex; flex-direction:column; gap:10px; text-align:center}
-.sp-vorhersage h3{font:800 20px/1.2 var(--display)}
+.sp-vorhersage h3{font:800 var(--fs-5)/1.2 var(--display)}
 .sp-vorhersage .sp-knoepfe{justify-content:center}
 
 /* ---- Postfach ---- */
 .sp-postfach{display:flex; flex-direction:column; height:100%; min-height:0; padding:18px 22px 0; gap:14px; background:var(--bg)}
 .sp-pf-kopf{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap}
-.sp-pf-kopf h2{font:800 28px/1 var(--display)}
+.sp-pf-kopf h2{font:800 var(--fs-6)/1 var(--display)}
 .sp-pf-aktionen{display:flex; gap:8px; align-items:center}
 .sp-pf-teile{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(280px, 400px) minmax(0, 1fr); gap:16px; padding-bottom:18px}
 .sp-pf-liste{display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; padding:2px 4px 8px 2px; scrollbar-width:thin}
@@ -210,35 +211,35 @@
 .sp-mail.neu::after{content:""; position:absolute; top:12px; right:12px; width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--panel)}
 .sp-mail.eilig, .sp-weg-chips li.nicht{border-color:var(--warn)}   /* an der LETZTEN Fundstelle zusammengeführt: `.sp-mail.an` + `.eilig` können am selben Element stehen */
 /* Kundenpost (Nachrichten ohne Auftrag): ruhiger als Aufträge, unter einem Trenner */
-.sp-pf-trenner{margin:10px 2px 0; color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
+.sp-pf-trenner{margin:10px 2px 0; color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
 .sp-post{background:var(--panel-2); border-style:dashed}
 .sp-post.an{border-style:solid}
 .sp-mail-text{display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 auto}
-.sp-mail-von{color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:14px}
-.sp-mail b{font:700 15px/1.25 var(--body)}
+.sp-mail-von{color:var(--muted); font-size:var(--fs-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:14px}
+.sp-mail b{font:700 var(--fs-4)/1.25 var(--body)}
 .sp-mail.neu b{font-weight:800}
-.sp-mail-vorschau{color:var(--faint); font-size:12.5px; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.sp-mail-vorschau{color:var(--faint); font-size:var(--fs-2); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .sp-chips{display:flex; gap:4px; flex-wrap:wrap; margin-top:4px}
-.sp-chip{padding:1px 7px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:600 11px/1.6 var(--body)}
+.sp-chip{padding:1px 7px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:600 var(--fs-1)/1.6 var(--body)}
 .sp-chip.niv-AP2, .sp-chip.wartung, .sp-chip.flow-geruest{background:var(--info-soft); color:var(--info)}
 .sp-chip.geld{color:var(--geld)}
 .sp-chip.frist, .sp-chip.flow-verwicklung, .sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
 .sp-klingel{display:inline-block; font-style:normal; animation:ev-klingeln var(--dauer-lang) ease-in-out 3}   /* dreimal läuten statt endlos (R5) — der Chip „klingelt“ bleibt als Signal stehen */
 .sp-mail.klingelt{border-color:var(--ok)}
 /* Flow-Regler (§ 20 F6): die beiden Flow-Chips stehen bei ihren Farbgruppen oben; .sp-chip.folge bei warn */
-.am-geruest{margin:0; padding:9px 11px; border-radius:var(--radius); background:var(--info-soft); color:var(--ink); font-size:14px; line-height:1.45}
-.am-geruest small{display:block; margin-top:3px; color:var(--muted); font-size:12.5px}
+.am-geruest{margin:0; padding:9px 11px; border-radius:var(--radius); background:var(--info-soft); color:var(--ink); font-size:var(--fs-3); line-height:1.45}
+.am-geruest small{display:block; margin-top:3px; color:var(--muted); font-size:var(--fs-2)}
 .sp-chip.form{background:var(--panel-3); color:var(--text)}
 .sp-chip.form-terminal, .sp-chip.form-forensik{font-family:var(--mono)}
 .sp-chip.form-projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
 .sp-leser{min-height:0; overflow:auto; scrollbar-width:thin}
 .sp-brief{display:flex; flex-direction:column; gap:16px; padding:22px 24px; border-radius:18px; background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--k, var(--accent))}
-.sp-brief h3{font:800 24px/1.15 var(--display)}
-.sp-brief-text{display:flex; flex-direction:column; gap:10px; font-size:16px; line-height:1.6; max-width:62ch}
+.sp-brief h3{font:800 var(--fs-6)/1.15 var(--display)}
+.sp-brief-text{display:flex; flex-direction:column; gap:10px; font-size:var(--fs-4); line-height:1.6; max-width:62ch}
 .sp-brief-info{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px}
 .sp-brief-info > div{padding:10px 12px; border-radius:12px; background:var(--panel-2)}
-.sp-brief-info small{color:var(--faint); font:700 11px/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
-.sp-brief-info p{margin:4px 0 0; font-size:14px}
+.sp-brief-info small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
+.sp-brief-info p{margin:4px 0 0; font-size:var(--fs-3)}
 .sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{position:sticky; bottom:0; margin:0 -24px; padding:12px 24px; background:linear-gradient(transparent, var(--panel) 12px); z-index:10}   /* „Auftrag annehmen“ bleibt sichtbar, wenn der Brief länger ist als der Platz (Rauchtest § 22: 960 × 700 in der ersten Stunde) */
 .sp-leer{display:flex; flex-direction:column; gap:12px; align-items:flex-start; padding:20px; border-radius:14px; border:1px dashed var(--line-2); color:var(--muted)}
 @media (max-width: 900px){ .sp-pf-teile{grid-template-columns:1fr} .sp-pf-teile > .sp-leser{display:none} }
@@ -251,7 +252,6 @@
 .sp-blatt-griff:hover::before, .sp-blatt-griff:focus-visible::before{background:var(--muted)}
 .sp-blatt-leser{overflow:visible}
 .sp-blatt-leser .sp-brief{padding:16px 16px 18px}
-.sp-blatt-leser .sp-brief h3{font-size:21px}
 .sp-blatt-leser .sp-knoepfe{position:sticky; bottom:-14px; padding:10px 0 4px; background:var(--panel)}
 /* (§ 8) Kein eigener Bewegungs-Block mehr: basis.css:91 schaltet JEDE Animation und jeden Übergang
    zentral ab (1 ms, einmalig). Der sichtbare Zustand der Blatt-Karte hat ohnehin `transform:none`
@@ -261,7 +261,7 @@
 
 /* Aufstieg: kleine Feier (respektiert „Bewegung reduzieren“) */
 .sp-fest{background:radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--geld) 20%, transparent), transparent 62%)}
-.sp-fest .sp-senior-sym{animation:sp-fest-pop var(--dauer-lang) cubic-bezier(.3,1.6,.5,1) both}
+.sp-fest .sp-senior-sym{animation:sp-fest-pop var(--dauer-lang) var(--ease-pop) both}
 .sp-fest h2{animation:sp-fest-rein var(--dauer-lang) var(--dauer) ease-out both}
 @keyframes sp-fest-pop{from{transform:scale(.2) rotate(-30deg); opacity:0} to{transform:none; opacity:1}}
 @keyframes sp-fest-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
@@ -270,12 +270,12 @@
    Die Einstellung „Bewegung aus“ (basis.css:93) schaltet ohnehin global ab. */
 /* E1: Provisorium oder sauber? (Brief), Änderungsnotiz (Ziele), Marken, Ergebnis */
 .am-variante{margin-top:12px; padding-top:10px; border-top:1px solid var(--line)}
-.am-variante.gewaehlt{display:flex; gap:8px; align-items:baseline; justify-content:space-between; font-size:14px}
+.am-variante.gewaehlt{display:flex; gap:8px; align-items:baseline; justify-content:space-between; font-size:var(--fs-3)}
 .am-variante-frage{margin:0 0 6px}
 .am-variante-karten{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-.am-variante-karte{all:unset; cursor:pointer; display:flex; flex-direction:column; gap:3px; padding:9px 11px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); font-size:14px}
-.am-variante-karte small{color:var(--muted); font-size:12.5px; line-height:1.35}
+.am-variante-karte{all:unset; cursor:pointer; display:flex; flex-direction:column; gap:3px; padding:9px 11px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); font-size:var(--fs-3)}
+.am-variante-karte small{color:var(--muted); font-size:var(--fs-2); line-height:1.35}
 .am-variante-karte:hover, .am-variante-karte:focus-visible, .am-variante-karte.an{border-color:var(--accent); background:var(--accent-soft); outline:none}
-.am-notiz{display:block; width:100%; margin-top:5px; padding:6px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:13.5px/1.4 var(--body); resize:vertical}
-.sp-schuld{margin:8px 0 0; font-size:14px; color:var(--warn)}
-.sp-akte-zeile{margin:8px 0 0; font-size:14px}
+.am-notiz{display:block; width:100%; margin-top:5px; padding:6px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3)/1.4 var(--body); resize:vertical}
+.sp-schuld{margin:8px 0 0; font-size:var(--fs-3); color:var(--warn)}
+.sp-akte-zeile{margin:8px 0 0; font-size:var(--fs-3)}

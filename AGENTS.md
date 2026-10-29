@@ -28,7 +28,7 @@ veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unt
 
 | Zweck | Befehl | Erwartung |
 |---|---|---|
-| Tests | `sh tools/test.sh` | meldet `N/N grün` + `davon N übersprungen` (Stand: **768**, 87 Testdateien, 92 Module, 0 übersprungen – 09.10.2026, selbst nachgemessen). Ein Test mit **0 Zusicherungen** gilt als übersprungen und wird gezählt, nicht als grün verschwiegen. **Filter:** `node tests/run.js <name>` filtert nur die Ausgabe; seit 09.10.2026 schneidet er führende Striche ab (`--klassenraum` → **104/104 grün**, selbst gemessen), und ein Filter **ohne** Treffer endet mit **Exit 1** samt „KEIN Test passt zum Filter … Das ist kein grüner Lauf." — die Bilanzzeile zeigt dabei weiterhin „0/0 grün", es entscheidet der **Exit-Code** |
+| Tests | `sh tools/test.sh` | meldet `N/N grün` + `davon N übersprungen` (Zahl, Testdateien und Module: **[`docs/STAND.md`](docs/STAND.md)**, bei jedem Lauf gemessen — nicht hier von Hand gepflegt). Ein Test mit **0 Zusicherungen** gilt als übersprungen und wird gezählt, nicht als grün verschwiegen. **Filter:** `node tests/run.js <name>` filtert nur die Ausgabe; seit 09.10.2026 schneidet er führende Striche ab (`--klassenraum` → **104/104 grün**, selbst gemessen), und ein Filter **ohne** Treffer endet mit **Exit 1** samt „KEIN Test passt zum Filter … Das ist kein grüner Lauf." — die Bilanzzeile zeigt dabei weiterhin „0/0 grün", es entscheidet der **Exit-Code** |
 | + Rauchtest der Oberfläche | `sh tools/test.sh --rauch` | zusätzlich **45/45** (14 Ansichten **plus** die Erstabnahme mit echter Maus, je 3 Breiten = 45 Prüfungen; seit 09.10.2026 mit den zwei Klassenraum-Ansichten — Zahl von der Leitung gemessen) |
 | Gegen die Falle in Testnamen | `node tools/pruefe-namen-flicken.js [--setzen]` | findet `pruefe("…„…"…")`, das den Lauf mit `LADEFEHLER` (Exit 2) anhält — trockener Lauf zuerst |
 | Tiefe Menüebenen (Android und Web) | `python tools/menueprobe.py --datei android/bau/assets/index.html --lauf` | **5 Profile, 49 Kriterien erfüllt, 0 verletzt** (selbst nachgemessen am 09.10.2026 gegen die Android-Fassung **2.0.2**; beim Stand **2.0.1** waren es **47** — die Zahl hängt am gebauten Stand, nicht am Quellstand). Für den Web-Bau: `--datei web/index.html` (am 09.10.2026 **45 Kriterien erfüllt, 0 verletzt**, 5 von 5 Profilen, auch gegen den **2.0.2**-Bau — selbst gemessen; vorher **rot** 36 von 43 erfüllt, 44-px-Trefferflächen in den Editor-Menüs, gemessen **identisch** zu `HEAD~1`, also vorbestehend) |
@@ -36,18 +36,22 @@ veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unt
 | Klassen ↔ CSS | `python tools/klassen.py` | `0 Klassen ohne CSS-Regel` |
 | Regelwerk (Minimalismus) | `python tools/ethos.py` | `GRUEN: keine Regel schlechter als tests/stil-stand.json` — am 09.10.2026 **BESSER als der Stand**: R1 23→22 · R2 122→113 · R3 206→195 · R4 539→514 · R5 70→0 · R6 11→0 · R8 5→0 · R10 87→0 (selbst gemessen; die Stand-Datei ist auf genau diesen Stand eingefroren: R1 22 · R2 113 · R3 195 · R4 514 · R5–R12 = 0). **Achtung:** R12 misst nur mit `--dom`; ohne es meldet der Lauf ausdrücklich „NICHT GEMESSEN" |
 | Bauen (Browser-Fassung) | `python bauen.py` | immer **vor** `cargo tauri build` |
-| Einzeldatei (auch die Wurzel-Datei) | `python tools/einfach.py` · `--ziel Netzwerk-Labor.html` | beide byte-gleich, `0 Außenverweise` |
+| Doku-Seite erzeugen und prüfen | `python tools/seite.py` · `--pruefen` | **Pflicht ist `docs/doku/`** (versioniert, 46 Dokumente). `_site/` ist nur Auslieferung und gitignoriert; existiert es nicht, meldet `--pruefen` einen Hinweis und bleibt grün. Frische beweist die CI: `python tools/seite.py` + `git diff --exit-code docs/doku` |
+| Einzeldatei (auch die Wurzel-Datei) | `python tools/einfach.py` · `--ziel Netzwerk-Labor.html` | beide byte-gleich (**beweist `python tools/stand.py`** über den SHA256), `0 Außenverweise` |
 | Android-APK | `python android/bauen.py` | 7 Schritte, ~5 s, endet mit `GRUEN` |
 | PC-Hülle für die Entwicklungsrunde | `pwsh -File shell/entwickeln.ps1 -NurBauen` | Debug-Profil, ~4 s je Runde (Auslieferung bleibt `cargo tauri build`) |
 | Fassung ziehen (2.0.3 → 2.0.4) | `python tools/fassung-ziehen.py --neu 2.0.4` · `--setzen` | Trockenlauf zuerst; im `Cargo.lock` bleibt nur der eigene Block; **`VERSION_CODE` in `android/bauen.py` von Hand nachziehen** (muss über dem aus `versionName` abgeleiteten Wert liegen) |
-| Tote Verweise finden | `python tools/repo-verweise-flicken.py` | prüft **jeden** relativen Verweis in jeder Markdown-Datei — **schreibt aber**: es setzt tote Verweise zuerst gerade |
+| Tote Verweise finden | `python tools/stand.py --pruefen` | prüft alle relativen Verweise in allen `*.md` (0 tot) — das alte `tools/repo-verweise-flicken.py` **übersieht** Dateien mit Umlauten im Pfad (git quotet sie) und **schreibt**; trockener Lauf zuerst |
+| Zahlen prüfen (eine Quelle) | `python tools/stand.py --pruefen` | 0 Abweichung: `docs/STAND.md` und der Stand-Block in `README.md` stimmen mit der Messung; Exit 1 mit betroffener Zeile |
 | Die drei Randbefunde nachmessen | `python tools/nachprobe-menuefix.py` | `GRÜN: alle drei Befunde behoben` |
 | Echtes Programm | `python tools/q-echt.py` | startet die `.exe`; siehe Befund unten |
 | Klassenraum-Codec messen | `& "<node>" tools\klassenraum-probe\A-codec-probe.js` | erschöpfender Code-Round-Trip über 2²⁰ Nutzlasten (~250 s), schreibt `Nachweise/Klassenraum/A-codec.json` |
 | Klassenraum-Server bauen | `cargo build --release` in `tools/klassenraum` | eine `.exe` **ohne jede Kiste** (322.560 B), `cargo test` 10/10 |
 | Klassenraum-Server prüfen | `pwsh -File tools\klassenraum-probe\C-http-probe.ps1` | 20 echte HTTP-Messungen, endet mit `20/20`, Port danach frei |
 
-Node liegt portabel unter `%LOCALAPPDATA%\node-portable\node-v24.21.0-win-x64\node.exe` (v24.21.0).
+Node liegt auf diesem Rechner unter `C:\Program Files\nodejs\node.exe` (v24.20.0, gemessen 26.10.2026);
+das portable Node unter `%LOCALAPPDATA%\node-portable\node-v24.21.0-win-x64\node.exe` ist hier
+**nicht vorhanden**. `tools/test.sh` sucht beide Wege, `tools/stand.py` ebenso.
 
 **In eingeschränkten Umgebungen** (z. B. einer Werkzeug-Sandbox) startet `sh tools/test.sh` nicht, wenn `sh.exe`
 direkt aufgerufen wird: dann fehlt `dirname`, weil Git-`/usr/bin` nicht im PATH liegt, und das Skript sucht
@@ -95,10 +99,17 @@ Anhängen das überwiegende Ende der Datei übernimmt. Ein Editor, der beim Spei
   Trace-Format). Danach der Code.
 - **Selbst und nacheinander.** Keine Agentenschwärme: Ein Schwarm riss zweimal das Limit, und drei von vier
   Teammitgliedern brachen am 05.10.2026 mitten in der Arbeit ab, ohne etwas zu hinterlassen.
+  *Ausnahme 3.0-Session (26.10.2026, ausdrückliche Nutzerfreigabe):* Agenten-Schwarm erlaubt —
+  max. 5 Schreib-Owner, ein Schreiber je Datei, Staging + Integrator, keine halbfertigen Beiträge;
+  alle übrigen Verbote bleiben.
 - **Nach jedem Commit den Stand nachziehen.** `docs/entwicklung/Design – Spielspaß 2.0.md` (neuer Abschnitt) und
   `docs/Architektur.md` (Stand-Tabelle) müssen den echten Zustand zeigen. Kein Commit ohne Stand.
 - **Tests statt Augenschein, wo es geht.** Nach jeder Änderung an `src/sim/` oder `src/modell/` zusätzlich
   `node tools/sim-stand.js` laufen lassen und jede Abweichung benennen: gewollt oder ungewollt.
+- **Eine Zahlenquelle.** Zahlen in README und Doku werden **nicht** von Hand gepflegt:
+`python tools/stand.py` misst (echter Testlauf, Modulliste, Dateisystem) und schreibt
+`docs/STAND.md` + den markierten Block in `README.md`; `python tools/stand.py --pruefen` hält
+beides gegen die Messung. Historische CHANGELOG-Abschnitte bleiben unangetastet.
 - **Determinismus.** Kein `Math.random` ohne Seed, kein Datum, keine Uhr in `src/sim/` und `src/cli/`.
 - **Ehrlich berichten.** Stand nachzählen statt schätzen, offen sagen, was **nicht** geprüft wurde. Antworten auf
   Deutsch.

@@ -106,14 +106,18 @@
     lohn: {euro: 55, ruf: 1}});
 
   /* ===== Stufe 2 · Schreibbüro Albers (Konrad Albers) ===== */
-  t({id: "buero-01", reihe: 1, kunde: "schreibbuero", karriere: 2, stufe: "E", vorlage: "buero", vSeed: 31, minuten: 4, vorhersage: true,
+  t({id: "buero-01",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Wartungsbucheintrag geschrieben (Ursache, Änderung, Rückweg)"}], reihe: 1, kunde: "schreibbuero", karriere: 2, stufe: "E", vorlage: "buero", vSeed: 31, minuten: 4, vorhersage: true,
     injektoren: [{name: "dhcp-aus"}],
     titel: "169.254 – was heißt das?",
     briefing: "Guten Tag,\nich bitte um zügige Durchsicht; im Büro steht die Arbeit. Ein Anruf genügt, ich bin den ganzen Vormittag erreichbar.\nP.S. Der Vorgang kommt ins Wartungsbuch.\n\nKonrad Albers",
     symptom: "Guten Tag, seit heute Morgen zeigen beide Arbeitsplätze eine Adresse, die mit 169.254 beginnt; weder Intranet noch Internet sind erreichbar. Der Drucker druckt weiterhin. Ich habe beide Rechner neu gestartet, ohne Erfolg. Der Server wurde gestern neu gestartet – ich bitte um zügige Durchsicht.",
     lohn: {euro: 60, ruf: 1}});
 
-  t({id: "buero-02", reihe: 2, kunde: "schreibbuero", karriere: 2, stufe: "E", vorlage: "buero", vSeed: 32, minuten: 4,
+  t({id: "buero-02",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Zeilen fürs Wartungsbuch geschrieben"}], reihe: 2, kunde: "schreibbuero", karriere: 2, stufe: "E", vorlage: "buero", vSeed: 32, minuten: 4,
     injektoren: [{name: "dns-eintrag-fehlt"}],
     titel: "Das Intranet ist verschwunden",
     briefing: "Guten Tag,\nbitte sehen Sie sich das heute an; ohne den Zugriff steht die Arbeit.\nP.S. Für das Wartungsbuch hätte ich gern zwei Zeilen.\n\nKonrad Albers",
@@ -127,7 +131,9 @@
     symptom: "Guten Tag, das Netzlaufwerk mit den Mandantenakten (S:) ist seit heute früh nicht erreichbar. Der Server ist aber ansprechbar – das habe ich selbst probiert –, und das Intranet geht. Neu gestartet habe ich den Rechner schon, und das Laufwerk habe ich einmal getrennt und wieder verbunden. Ohne die Akten können wir keine Fristen bearbeiten.",
     lohn: {euro: 65, ruf: 1}});
 
-  t({id: "buero-04", reihe: 4, kunde: "schreibbuero", karriere: 2, stufe: "AP1", vorlage: "buero", vSeed: 34, minuten: 6,
+  t({id: "buero-04",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Zeilen fürs Wartungsbuch geschrieben"}], reihe: 4, kunde: "schreibbuero", karriere: 2, stufe: "AP1", vorlage: "buero", vSeed: 34, minuten: 6,
     injektoren: [{name: "helper-fehlt"}],
     skills: ["lab.dhcp", "lab.cli"],
     titel: "Nach dem Routertausch keine Adressen",
@@ -135,7 +141,9 @@
     symptom: "Guten Tag, der Provider hat heute den Router getauscht und die alte Konfiguration „übernommen“. Seitdem erhalten die Arbeitsplätze keine Adressen mehr; sie zeigen Werte, die mit 169.254 beginnen. Der Server selbst hat seine feste Adresse und läuft. Ich habe zwei Arbeitsplätze neu gestartet und den Vorgang ins Wartungsbuch eingetragen – bitte prüfen Sie, woran es liegt.",
     lohn: {euro: 75, ruf: 2}});
 
-  t({id: "buero-05", reihe: 5, kunde: "schreibbuero", karriere: 2, stufe: "AP1", vorlage: "buero", vSeed: 35, minuten: 5,
+  t({id: "buero-05",
+    /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
+    zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Zeilen fürs Wartungsbuch geschrieben"}], reihe: 5, kunde: "schreibbuero", karriere: 2, stufe: "AP1", vorlage: "buero", vSeed: 35, minuten: 5,
     injektoren: [{name: "dienst-aus", ziel: "drucker:druck"}],
     skills: ["lab.tcp", "lab.ports"],
     titel: "Der Drucker ist beleidigt",

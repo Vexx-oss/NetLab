@@ -15,7 +15,7 @@ UI.hub = (() => {
     document.body.append(o);
     requestAnimationFrame(() => o.classList.add("da"));
     const esc = e => { if (e.key === "Escape") zu(); };
-    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), 180); document.removeEventListener("keydown", esc); };
+    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), UI.zeit("dauer")); document.removeEventListener("keydown", esc); };
     document.addEventListener("keydown", esc);
     return zu;
   }
@@ -26,13 +26,13 @@ UI.hub = (() => {
     if (!Spiel._st) { c.replaceChildren(); return; }
     const s = Spiel.hub.stand(), n = s.naechster, fa = s.feierabend;
     const serie = s.serie.zurueck ? "Willkommen zurück!"
-      : s.serie.tage ? `🔥 ${s.serie.tage} ${s.serie.tage === 1 ? "Tag" : "Tage"} Serie` + (s.serie.urlaub && s.serie.frei ? ` · noch ${s.serie.frei} freier Tag diese Woche` : s.serie.urlaub ? " · freie Tage dieser Woche genutzt" : "")
+      : s.serie.tage ? `${s.serie.tage} ${s.serie.tage === 1 ? "Tag" : "Tage"} Serie` + (s.serie.urlaub && s.serie.frei ? ` · noch ${s.serie.frei} freier Tag diese Woche` : s.serie.urlaub ? " · freie Tage dieser Woche genutzt" : "")
       : "Schön, dass du da bist.";
     /* Nach dem Tagesziel ersetzt der Feierabend die Auftragskarte (Platzbudget): Bilanz, ein Ausblick, Hauptknopf „Zur Leiste“ –
        wer weiterspielen will, findet „Noch einen Auftrag“ daneben */
     const weiterFn = () => { if (n.art === "leer") { const i = Spiel.nachschub(); UI.spiel.status(); if (i) UI.spiel.oeffnen(i.iid); } else UI.spiel.oeffnen(n.iid); };
     const feier = fa ? h("section", {class: "hb-feierabend"},
-      h("div", {}, h("h3", {}, "🌙 Feierabend"),
+      h("div", {}, h("h3", {}, UI.symbol("feierabend", 18), " Feierabend"),
         h("p", {}, `${fa.bilanz.tickets} Aufträge · Ø ${zahl(fa.bilanz.sterne)} ★ · +${eur(fa.bilanz.euro)} €`),
         h("p", {class: "hb-ausblick"}, fa.ausblick)),
       h("div", {class: "hb-feier-knoepfe"},
@@ -56,12 +56,12 @@ UI.hub = (() => {
     const kachel = (sym, titel, info, fn, fertig) => h("button", {type: "button", class: "hb-kachel" + (fertig ? " fertig" : ""), onclick: fn},
       h("span", {class: "hb-kachel-sym", "aria-hidden": "true"}, sym), h("span", {class: "hb-kachel-text"}, h("b", {}, titel), h("small", {}, info)));
     const kacheln = h("div", {class: "hb-kacheln"},
-      kachel("☕", "Aufwärmen", aw.erledigt >= aw.ziel ? "✓ erledigt" : aw.erledigt ? `${aw.erledigt}/${aw.ziel} Karten` : `${aw.ziel} Karten`, aufwaermen, aw.erledigt >= aw.ziel),
-      kachel("🧩", `Tagesrätsel #${ra.nr}`, ra.geloest ? `✓ ${zahl(ra.sterne)} ★` : ra.laeuft ? "angefangen" : Spiel.NIVEAU_NAME[ra.niveau] || ra.niveau, raetsel, ra.geloest),
-      s.post.ungelesen ? kachel("✉", "Post", `${s.post.ungelesen} neu`, () => UI.app.ansicht("postfach"))
-        : kachel("📕", "Fehlerdex", `${s.dex.verstanden}/${s.dex.gesamt}`, () => dexOeffnen()));
+      kachel(UI.symbol("kaffee", 22), "Aufwärmen", aw.erledigt >= aw.ziel ? "✓ erledigt" : aw.erledigt ? `${aw.erledigt}/${aw.ziel} Karten` : `${aw.ziel} Karten`, aufwaermen, aw.erledigt >= aw.ziel),
+      kachel(UI.symbol("raetsel", 22), `Tagesrätsel #${ra.nr}`, ra.geloest ? `✓ ${zahl(ra.sterne)} ★` : ra.laeuft ? "angefangen" : Spiel.NIVEAU_NAME[ra.niveau] || ra.niveau, raetsel, ra.geloest),
+      s.post.ungelesen ? kachel(UI.symbol("postfach", 22), "Post", `${s.post.ungelesen} neu`, () => UI.app.ansicht("postfach"))
+        : kachel(UI.symbol("dex", 22), "Fehlerdex", `${s.dex.verstanden}/${s.dex.gesamt}`, () => dexOeffnen()));
     c.replaceChildren(h("div", {class: "hb-seite"},
-      h("header", {class: "hb-kopf"}, h("h2", {}, datumText()), h("p", {class: "hb-serie"}, serie)),
+      h("header", {class: "hb-kopf"}, h("h2", {}, datumText()), h("p", {class: "hb-serie"}, s.serie.tage && !s.serie.zurueck ? [UI.symbol("serie", 13), " "] : null, serie)),
       feier, karte, kacheln,
       h("p", {class: "hb-ziel"}, fa ? null : `Heute ${s.tagesziel.erledigt}/${s.tagesziel.ziel} · `, wocheZeile(s.woche))));   /* Wochenziel auch im Feierabend */
   }
@@ -77,7 +77,7 @@ UI.hub = (() => {
       h("h2", {}, "Dein Ziel für diese Woche"),
       h("p", {class: "sp-leise"}, "Eins von dreien – oder keins. Geschafft gibt +1 Ruf; verpasst kostet nichts."),
       h("div", {class: "hb-woche-wahl"}, Spiel.woche.vorschlaege().map(v => h("button", {type: "button", class: "knopf" + (jetzt && jetzt.id === v.id ? " an" : ""),
-        onclick: () => { Spiel.woche.waehlen(v.id); zu(); neu(); }}, "🎯 " + v.text))),
+        onclick: () => { Spiel.woche.waehlen(v.id); zu(); neu(); }}, UI.symbol("ziel", 16), " " + v.text))),
       h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Später"))));
   }
   function neu(){ if (wurzel && wurzel.isConnected && !wurzel.hidden) zeigen(wurzel); }
@@ -94,7 +94,7 @@ UI.hub = (() => {
     };
     const hoerer = d => { if (!d || !bereich.isConnected) return; gezaehlt++; Spiel.hub.aufgewaermt(); zeichnen(); };
     Bus.an("mini", hoerer);
-    const zuOverlay = overlay(h("div", {class: "hb-aufwaermen"}, h("h2", {}, "☕ Aufwärmen"), stand, bereich, fuss));
+    const zuOverlay = overlay(h("div", {class: "hb-aufwaermen"}, h("h2", {}, UI.symbol("kaffee", 20), " Aufwärmen"), stand, bereich, fuss));
     const zu = () => { Bus.aus("mini", hoerer); zuOverlay(); neu(); if (gezaehlt) UI.spiel.status(); };
     UI.karriere.miniZeichnen(bereich, {gross: true});
     zeichnen();
@@ -112,7 +112,7 @@ UI.hub = (() => {
     const text = Spiel.raetsel.teilen(tag);
     if (!text) return;
     const zu = overlay(h("div", {class: "hb-raetsel"},
-      h("h2", {}, "🧩 Tagesrätsel"),
+      h("h2", {}, UI.symbol("raetsel", 20), " Tagesrätsel"),
       h("pre", {class: "hb-teilen"}, text),
       h("p", {class: "sp-leise"}, "Alle mit demselben Niveau haben heute dasselbe Netz. Der Text verrät die Ursache nicht."),
       h("div", {class: "sp-knoepfe"},
@@ -133,10 +133,10 @@ UI.hub = (() => {
   function dexAbschnitt(){
     const z = Spiel.dex.zaehlen();
     return h("section", {class: "dx-dex", id: "dex"},
-      h("h3", {}, "📕 Fehlerdex ", h("small", {}, `${z.gesehen} gesehen · ${z.verstanden} verstanden · ${z.gesamt} Fehlerarten`)),
+      h("h3", {}, UI.symbol("dex", 18), " Fehlerdex ", h("small", {}, `${z.gesehen} gesehen · ${z.verstanden} verstanden · ${z.gesamt} Fehlerarten`)),
       h("p", {class: "sp-leise"}, "Jede Fehlerart, die du behebst, landet hier – ohne bezahlte Hilfe gelöst gilt sie als verstanden. Eine ganze Gruppe verstanden: Ehrentitel."),
       ...Spiel.dex.gruppen().map(g => h("div", {class: "dx-gruppe" + (g.fertig ? " fertig" : "")},
-        h("h4", {}, g.titel, h("small", {}, ` ${g.verstanden}/${g.gesamt}`), g.fertig ? h("span", {class: "dx-titel"}, "🏆 " + g.ehrentitel) : null),
+        h("h4", {}, g.titel, h("small", {}, ` ${g.verstanden}/${g.gesamt}`), g.fertig ? h("span", {class: "dx-titel"}, UI.symbol("trophae", 14), " " + g.ehrentitel) : null),
         h("div", {class: "dx-raster"}, g.eintraege.map(e => e.zustand === "unbekannt"
           ? h("div", {class: "dx-karte unbekannt", title: "Noch nicht begegnet"}, h("span", {class: "dx-sym", "aria-hidden": "true"}, "?"),
               h("span", {class: "dx-text"}, h("b", {}, "Unbekannt"), h("small", {}, `taucht ab Stufe ${e.ab} auf`)))

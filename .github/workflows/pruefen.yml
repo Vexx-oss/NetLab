@@ -68,3 +68,19 @@ jobs:
 
       - name: GitHub-Abläufe selbst prüfen
         run: python tools/ablaeufe.py
+
+      # Ab hier: die eine Zahlenquelle und die Doku-Frische (2.1 S1, Architektur § 16.1).
+      # stand.py misst selbst (echter Testlauf, Modulliste, Dateisystem) und vergleicht
+      # docs/STAND.md und den Stand-Block in README.md mit der Messung.
+      - name: Stand prüfen — eine Zahlenquelle
+        run: python tools/stand.py --pruefen
+
+      # docs/doku/ ist versioniert und wird ausgeliefert. Der Neu-Bau muss ihn exakt
+      # reproduzieren, sonst wäre die veröffentlichte Doku veraltet (Befund G7).
+      - name: Doku-Seite bauen und strukturell prüfen
+        run: |
+          python tools/seite.py
+          python tools/seite.py --pruefen
+
+      - name: Doku-Seite ist frisch (kein veraltetes Erzeugnis)
+        run: git diff --exit-code docs/doku

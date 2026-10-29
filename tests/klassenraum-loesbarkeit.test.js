@@ -44,10 +44,17 @@ gruppe("Klassenraum: Lösbarkeit", () => {
 
   const hatInjektor = skill => Object.values(Spiel.INJEKTOREN || {}).some(i => (i.skills || []).includes(skill));
   const SEEDS = [1, 2];
+  /* Namentliche Ausnahmen (Architektur § 17.1): lab.ipv6 und lab.wlan werden INHALTLICH geübt, nicht
+     paketweise simuliert – sie haben keinen Injektor und können deshalb keinen generierbaren
+     Klassenraum-Auftrag tragen. KEINE Abschwächung: die geprüfte Zahl wird dynamisch aus
+     DATEN.skills minus Ausnahmen gezählt, und die Ausnahmen selbst werden auf Ehrlichkeit geprüft
+     (kein Injektor, in der Tabelle gesperrt). lab.betrieb ist simulierbar und wird voll geprüft. */
+  const AUSNAHME = ["lab.ipv6", "lab.wlan"];
+  const SIMULIERBAR = () => DATEN.skills.filter(s => !AUSNAHME.includes(s.id));
 
-  pruefe("alle 27 Fertigkeiten: Injektor + Ziel, im Startnetz wirklich gebrochen, gültig und lösbar", kapsel(() => {
+  pruefe("alle simulierbaren Fertigkeiten: Injektor + Ziel, im Startnetz wirklich gebrochen, gültig und lösbar", kapsel(() => {
     const fehler = [];
-    for (const s of DATEN.skills) for (const seed of SEEDS) {
+    for (const s of SIMULIERBAR()) for (const seed of SEEDS) {
       const wo = `${s.id}/Seed ${seed}`;
       let inst = null, def = null;
       try {
@@ -71,14 +78,14 @@ gruppe("Klassenraum: Lösbarkeit", () => {
       if (offen.length) fehler.push(`${wo}: Lösung heilt nicht – ${offen.join(" | ")}`);
     }
     if (fehler.length) console.log(fehler.join(String.fromCharCode(10)));
-    erwarte.gleich(fehler.length, 0, `${DATEN.skills.length * SEEDS.length} Fälle (${DATEN.skills.length} Fertigkeiten × Seeds ${SEEDS.join(",")})`);
+    erwarte.gleich(fehler.length, 0, `${SIMULIERBAR().length * SEEDS.length} Fälle (${SIMULIERBAR().length} simulierbare Fertigkeiten × Seeds ${SEEDS.join(",")}; Ausnahmen: ${AUSNAHME.join(", ")})`);
   }));
 
   pruefe("die eingefrorene Tabelle sagt die Wahrheit: tauglich genau dort, wo wirklich ein Auftrag entsteht", () => {
     const T = Spiel.klassenraum.tabellen();
     erwarte.wahr(!!T, "die Tabelle des Codec fehlt");
     const ids = DATEN.skills.map(s => s.id);
-    erwarte.gleich(T.skills.laenge, ids.length, "27 Fertigkeiten in der Tabelle");
+    erwarte.gleich(T.skills.laenge, ids.length, "30 Fertigkeiten in der Tabelle");
     erwarte.gleich(T.skills.ids, ids, "Reihenfolge wie DATEN.skills (Regel 2: nur anhängen)");
     /* Keine Zusage ohne Deckung: jedes `tauglich: true` braucht einen Injektor, und keine Fertigkeit mit
        Injektor darf gesperrt sein (das war der Stand vor dem Ausbau 1.3: 24 von 27). */
@@ -92,18 +99,22 @@ gruppe("Klassenraum: Lösbarkeit", () => {
     erwarte.gleich(unnoetigGesperrt, [], "mit Injektor, aber gesperrt");
     /* Dieselbe Zahl über die öffentliche Fläche der Verwaltung (filtert zusätzlich über hatInjektor). */
     const taug = Spiel.klassenraum.tauglicheFertigkeiten();
-    erwarte.gleich(taug.length, DATEN.skills.length, "27 taugliche Fertigkeiten");
-    erwarte.gleich(taug.map(x => x.skill), ids, "und zwar alle, in Reihenfolge");
-    erwarte.gleich(DATEN.skills.filter(s => !hatInjektor(s.id)).map(s => s.id), [], "keine Fertigkeit ohne Injektor");
+    const mitInjektor = DATEN.skills.filter(s => hatInjektor(s.id));
+    erwarte.gleich(taug.length, mitInjektor.length, mitInjektor.length + " taugliche Fertigkeiten (die mit Injektor)");
+    erwarte.gleich(taug.map(x => x.skill), mitInjektor.map(s => s.id), "und zwar alle mit Injektor, in DATEN.skills-Reihenfolge");
+    erwarte.gleich(SIMULIERBAR().filter(s => !hatInjektor(s.id)).map(s => s.id), [], "keine simulierbare Fertigkeit ohne Injektor");
+    /* Die Ausnahmen sind ehrlich: kein Injektor, in der Tabelle gesperrt. */
+    erwarte.gleich(AUSNAHME.filter(id => hatInjektor(id)), [], "Ausnahmen tragen keinen Schein-Injektor");
+    erwarte.gleich(AUSNAHME.filter(id => T.skills.tauglich(T.skills.index(id))), [], "Ausnahmen sind in der Tabelle gesperrt");
     /* Die Tabelle behauptet für jede Fertigkeit `ersterSeed 1`. Der Codec rechnet den k-ten Kandidaten als
        `variante + 1 + k` (klassenraum-codec.js: kanonSeed) – Variante 0 beginnt also bei Seed 1. Genau das
        prüft der Fall unten mit `seed: 0` nach: 0 Kanonisierungsschritte. */
-    erwarte.gleich(DATEN.skills.map(s => T.skills.ersterSeed(T.skills.index(s.id))), DATEN.skills.map(() => 1), "ersterSeed 1 für alle 27");
+    erwarte.gleich(DATEN.skills.map(s => T.skills.ersterSeed(T.skills.index(s.id))), DATEN.skills.map(() => 1), "ersterSeed 1 für alle 30 (auch für die gesperrten Ausnahmen)");
   });
 
-  pruefe("der echte Weg der Lehrkraft: erzeugen → Code → ausCode → lösen → Abnahme besteht (alle 27)", kapsel(() => {
+  pruefe("der echte Weg der Lehrkraft: erzeugen → Code → ausCode → lösen → Abnahme besteht (alle simulierbaren)", kapsel(() => {
     const fehler = [];
-    for (const s of DATEN.skills) {
+    for (const s of SIMULIERBAR()) {
       /* `seed: 0` = Variante 0 = das Kanonisierungsfenster beginnt bei Seed 1 (die Tabelle sagt ersterSeed 1). */
       const sz = Spiel.klassenraum.erzeugen({skill: s.id, seed: 0});
       if (!sz || sz.fehler) { fehler.push(`${s.id}: erzeugen – ${(sz && sz.grund) || "kein Ergebnis"}`); continue; }
@@ -127,6 +138,6 @@ gruppe("Klassenraum: Lösbarkeit", () => {
       if (typeof ec !== "string" || !ec) fehler.push(`${s.id}: Ergebnis-Code – ${JSON.stringify(ec)}`);
     }
     if (fehler.length) console.log(fehler.join(String.fromCharCode(10)));
-    erwarte.gleich(fehler.length, 0, "27 Aufträge über den Codec-Weg");
+    erwarte.gleich(fehler.length, 0, SIMULIERBAR().length + " Aufträge über den Codec-Weg");
   }));
 });

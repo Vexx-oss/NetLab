@@ -75,7 +75,7 @@ UI.spiel = (() => {
     const z = ziele.find(x => x.erwartet) || ziele.find(x => x.typ === "erreichbar") || null;
     const zg = z && inst.netz.geraete[z.nach];
     const ziel = zg ? {typ: zg.typ, skin: zg.skin, text: zg.name}                     /* Gerät: dasselbe Bild wie auf der Fläche */
-      : {sym: !z ? "⚠" : z.proto === "dns" ? "🔎" : "🌐", text: z ? z.name || z.nach || "" : ""};
+      : {sym: !z ? "⚠" : UI.symbol(z.proto === "dns" ? "suche" : "welt", 20), text: z ? z.name || z.nach || "" : ""};
     return {person: k.ansprechpartner?.name || k.name, symbol: k.symbol, farbe: k.farbe, symptom: def.symptom, ziel};
   }
   function aktiveLaden(){
@@ -110,7 +110,7 @@ UI.spiel = (() => {
     const abnahme = h("button", {type: "button", class: "knopf primaer sp-abnahme" + (alle ? " bereit" : ""), title: "Abnahme anfordern: Der Kunde prüft selbst nach.", onclick: abnahmeAnfordern}, "✓ Abnahme");
     const zeile = h("div", {class: "am-zeile"},
       h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}, title: k.name}, k.symbol || "✉"),
-      h("div", {class: "am-titel"}, h("strong", {}, def.titel), h("span", {class: "am-kunde"}, inst.raetsel ? `🧩 Tagesrätsel #${inst.raetsel.nr} · ${Spiel.NIVEAU_NAME[inst.raetsel.niveau] || inst.raetsel.niveau}` : k.name)),
+      h("div", {class: "am-titel"}, h("strong", {}, def.titel), h("span", {class: "am-kunde"}, inst.raetsel ? [UI.symbol("raetsel", 14), ` Tagesrätsel #${inst.raetsel.nr} · ${Spiel.NIVEAU_NAME[inst.raetsel.niveau] || inst.raetsel.niveau}`] : k.name)),
       h("span", {class: "am-ziele" + (alle ? " fertig" : ""), title: live ? "Erfüllte Ziele – Liste in der Mappe" : "AP2: Ziele prüfst du selbst"},
         live ? `Ziele ${erfuellt}/${n}` : `${n} ${n === 1 ? "Ziel" : "Ziele"}`),
       h("div", {class: "am-knoepfe"},
@@ -121,7 +121,7 @@ UI.spiel = (() => {
     const ungespeichert = Spiel.speichernErwartet(def, niveau) ? Spiel.ungespeicherteGeraete(inst) : [];
     el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, zeile,
       S.einstiegStart ? einstiegKarte() : null,
-      ungespeichert.length ? h("p", {class: "sp-ungespeichert"}, "💾 Nicht gespeichert: ", ungespeichert.map(g => g.name).join(", "),
+      ungespeichert.length ? h("p", {class: "sp-ungespeichert"}, UI.symbol("sicherung", 15), " Nicht gespeichert: ", ungespeichert.map(g => g.name).join(", "),
         niveau === "AP2" ? " – die Abnahme startet die Geräte neu!" : " – nach einem Neustart wäre die Änderung weg.") : null,
       S.coach ? coachLeiste() : null,
       S.hilfeOffen ? hilfePanel(inst, def, naechste) : null));
@@ -196,7 +196,7 @@ UI.spiel = (() => {
     const platz = Number(inst.klassenraum && inst.klassenraum.platz) || 0;
     let abdruck = null;
     try { abdruck = typeof Spiel.klassenraum?.netzkennwert === "function" && inst.netz ? Spiel.klassenraum.netzkennwert(inst.netz) : null; } catch (e) { abdruck = null; }
-    const teile = [h("b", {}, "🏫 Klassenraum-Auftrag"), " · ", platz >= 1 ? `Platz ${platz}` : "ohne Platz"];
+    const teile = [h("b", {}, UI.symbol("welt", 15), " Klassenraum-Auftrag"), " · ", platz >= 1 ? `Platz ${platz}` : "ohne Platz"];
     if (abdruck) teile.push(" · Netz-Abdruck ", h("b", {}, abdruck));
     /* „Ich hänge" (3.0, Säule 5, Weg A): HIER hängt der Azubi — der Knopf holt den Hilfecode,
        zeigt ihn im Knopf und kopiert ihn beim Klick. Die Kette samt ehrlicher Absage liegt in
@@ -207,7 +207,7 @@ UI.spiel = (() => {
   }
   function geruestTipp(def){
     const frage = S.inst && S.inst.flow === "geruest" ? (def.hilfen?.frage || [])[0] : null;
-    return frage ? h("p", {class: "am-geruest"}, h("span", {"aria-hidden": "true"}, "🧭 "), h("b", {}, "Der Senior: "), `„${frage}“`,
+    return frage ? h("p", {class: "am-geruest"}, h("span", {"aria-hidden": "true"}, UI.symbol("trace", 15)), " ", h("b", {}, "Der Senior: "), `„${frage}“`,
       h("small", {}, "Diesmal mit Gerüst: Haken und Warnungen sind an, ein zweiter Versuch kostet nichts.")) : null;
   }
   /* E2 Kundenakte im Ergebnis: Atlas erschlossen, Vertrauen gestiegen, neues Kapitel – eine Zeile im Block „Dein Weg“ */
@@ -216,10 +216,10 @@ UI.spiel = (() => {
     const teile = [];
     if (a.neuHell.length) teile.push(`🗺 ${a.neuHell.length} ${a.neuHell.length === 1 ? "Gerät" : "Geräte"} im Netz-Atlas (${a.hell}/${a.gesamt}${a.komplett ? ", komplett betreut" : ""})`);
     if (a.vertrauen.nachher > a.vertrauen.vorher) teile.push(`♥ Vertrauen ${a.vertrauen.nachher}/5`);
-    if (a.kapitel) teile.push(`📖 Neue Geschichte: „${a.kapitel.titel}“ (Kunden → Akte)`);
-    if (a.empfehlung) teile.push(`💬 ${a.empfehlung.neu ? `Empfehlung: ${Spiel.kundenDaten(a.empfehlung.kunde).name} kommt eine Stufe früher` : "Empfehlung an einen anderen Kunden"}`);
+    if (a.kapitel) teile.push(`Neue Geschichte: „${a.kapitel.titel}“ (Kunden → Akte)`);
+    if (a.empfehlung) teile.push(`${a.empfehlung.neu ? `Empfehlung: ${Spiel.kundenDaten(a.empfehlung.kunde).name} kommt eine Stufe früher` : "Empfehlung an einen anderen Kunden"}`);
     const f = erg.flow;
-    if (f && f.stand !== f.vorher && f.stand !== "normal" && Spiel.flow.an()) teile.push(f.stand === "geruest" ? `🧭 Nächstes Mal „${Spiel.skill(f.skill).name}“ mit Gerüst` : `🔥 „${Spiel.skill(f.skill).name}“ sitzt – der nächste wird kniffliger`);
+    if (f && f.stand !== f.vorher && f.stand !== "normal" && Spiel.flow.an()) teile.push(f.stand === "geruest" ? `Nächstes Mal „${Spiel.skill(f.skill).name}“ mit Gerüst` : `„${Spiel.skill(f.skill).name}“ sitzt – der nächste wird kniffliger`);
     if (a.rabatt) teile.push(`🏷 Wartungsvertrag −${Math.round(Spiel.VERTRAUEN_LOHN.rabattAnteil * 100)} %`);
     return teile.length ? h("p", {class: "sp-akte-zeile"}, teile.join(" · ")) : null;
   }
@@ -270,7 +270,7 @@ UI.spiel = (() => {
     const rest = p ? Spiel.pruefung.restMs(p) : 0, mm = Math.floor(rest / 60000), ss = String(Math.floor(rest / 1000) % 60).padStart(2, "0");
     const nr = p ? p.aufgaben.indexOf(inst.iid) + 1 : 0;
     el.append(h("div", {class: "sp-auftrag pruefung"},
-      h("div", {class: "sp-auftrag-kopf"}, h("span", {class: "sp-kunde-sym"}, "🎓"),
+      h("div", {class: "sp-auftrag-kopf"}, h("span", {class: "sp-kunde-sym"}, UI.symbol("urkunde", 24)),
         h("div", {class: "sp-auftrag-titel"}, h("strong", {}, def.titel), h("span", {}, `Prüfung ${p ? p.art : ""} · Aufgabe ${nr}/${p ? p.aufgaben.length : "?"} · Restzeit ${mm}:${ss}`)),
         h("div", {class: "sp-auftrag-knoepfe"}, h("button", {type: "button", class: "knopf primaer", onclick: () => UI.karriere?.pruefungUebersicht?.()}, "Zur Prüfungsübersicht"))),
       h("div", {class: "sp-auftrag-mitte"}, h("p", {class: "sp-symptom"}, h("b", {}, "Aufgabe: "), def.symptom || ""),
@@ -352,11 +352,11 @@ UI.spiel = (() => {
           h("input", {type: "checkbox", checked: s.erledigt, onchange: e => Spiel.leiterHaken(inst, s.id, e.target.checked)}),
           h("span", {}, h("b", {}, s.titel + ": "), s.frage, h("small", {}, " Werkzeug: " + s.werkzeug)))))));
       case 2: return h("div", {}, r.naechste ? h("p", {class: "sp-naechste"}, h("b", {}, "Nächste Diagnose: "), r.naechste) : null,
-        ...r.werkzeuge.map(w => h("p", {}, "🔧 ", w)), h("p", {class: "sp-leise"}, r.simulation));
-      case 3: return h("div", {class: "sp-senior"}, h("span", {class: "sp-senior-sym"}, "🧑‍🔧"), h("div", {}, ...r.fragen.map(f => h("p", {}, "„" + f + "“")), h("small", {}, "— der Senior")));
+        ...r.werkzeuge.map(w => h("p", {}, UI.symbol("werkzeug", 15), " ", w)), h("p", {class: "sp-leise"}, r.simulation));
+      case 3: return h("div", {class: "sp-senior"}, h("span", {class: "sp-senior-sym"}, UI.symbol("senior", 28)), h("div", {}, ...r.fragen.map(f => h("p", {}, "„" + f + "“")), h("small", {}, "— der Senior")));
       case 4: return h("div", {}, h("p", {}, "Schau dir diese Stelle genauer an: ", h("b", {}, r.namen.join(", ") || "—")),
         h("button", {type: "button", class: "knopf klein", onclick: () => UI.labor.hervorheben(r.bereich, 5000)}, "Noch einmal zeigen"));
-      case 5: return h("div", {}, ...r.konkret.map(k => h("p", {}, "💡 ", k)));
+      case 5: return h("div", {}, ...r.konkret.map(k => h("p", {}, UI.symbol("idee", 15), " ", k)));
       case 6: return demoAnsicht(inst, r);
     }
     return h("p", {}, r.name);
@@ -458,7 +458,7 @@ UI.spiel = (() => {
     const o = h("div", {class: "sp-overlay " + klasse, role: "dialog", "aria-modal": "true"}, h("div", {class: "sp-karte"}, inhalt));
     document.body.append(o);
     requestAnimationFrame(() => o.classList.add("da"));
-    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), 180); document.removeEventListener("keydown", esc); };
+    const zu = () => { o.classList.remove("da"); setTimeout(() => o.remove(), UI.zeit("dauer")); document.removeEventListener("keydown", esc); };
     const esc = e => { if (e.key === "Escape") zu(); };
     document.addEventListener("keydown", esc);
     if (aussenZu) o.addEventListener("click", e => { if (e.target === o) zu(); });
@@ -489,11 +489,12 @@ UI.spiel = (() => {
             !e.ok && e.grund && niveau !== "AP2" ? UI.erklaeren(e.grund, niveau) : null))),
           ab.kollateral.map(r => h("li", {class: "offen"}, h("span", {}, "⚠"), h("div", {}, h("b", {}, `Kollateralschaden: ${r.vonName} erreicht ${r.nachName} nicht mehr`),
             h("p", {}, "Das ging vorher. Change-Management heißt: Nichts, was lief, darf kaputtgehen. " + Spiel.grundTitel(r.grund))))),
-          ab.neustart.verlust && niveau === "AP2" ? h("li", {class: "offen"}, h("span", {}, "💾"), h("div", {}, h("b", {}, "Nach dem Neustart war deine Änderung weg"),
+          ab.neustart.verlust && niveau === "AP2" ? h("li", {class: "offen"}, h("span", {}, UI.symbol("sicherung", 16)), h("div", {}, h("b", {}, "Nach dem Neustart war deine Änderung weg"),
             h("p", {}, "Die Abnahme hat " + ab.neustart.geraete.map(g => g.name).join(", ") + " neu gestartet. Ungespeichertes steht nur im RAM – „copy running-config startup-config“ schreibt es ins NVRAM."))) : null),
         h("div", {class: "sp-knoepfe"},
           h("button", {type: "button", class: "knopf primaer", onclick: () => zu()}, "Zurück ins Labor"),
-          h("button", {type: "button", class: "knopf", onclick: () => { zu(); S.hilfeOffen = true; UI.labor.auftragNeu(); }}, "🛟 Hilfe"))));
+          h("button", {type: "button", class: "knopf", onclick: () => { zu(); S.hilfeOffen = true; UI.labor.auftragNeu(); }}, UI.symbol("hilfe", 16), " Hilfe")),
+        lehrtextKnoepfe(def, niveau).length ? h("p", {class: "sp-leise sp-lehrtexte"}, "Zum Nachlesen: ", lehrtextKnoepfe(def, niveau)) : null));
       return;
     }
     /* Nachbesprechung in höchstens drei Blöcken (Design – Spielspaß 2.0, Hebel 1):
@@ -513,12 +514,12 @@ UI.spiel = (() => {
     const besser = (erg.lernen || []).find(l => l.nachher > l.vorher);
     const zeilen = [
       erg.abnahme.abzuege.length ? h("p", {class: "sp-zeile leise"}, erg.abnahme.abzuege.map(a => `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`).join(" · ")) : null,
-      abz.length ? h("p", {class: "sp-zeile"}, "🏅 ", h("b", {}, abz.length === 1 ? "Neues Abzeichen: " : "Neue Abzeichen: "), abz.map(a => `${a.sym} ${a.titel}`).join(" · ")) : null,
-      besser ? h("p", {class: "sp-zeile"}, "📈 ", h("b", {}, besser.name + ": "), `Stufe ${besser.vorher} → ${besser.nachher}`) : null,
+      abz.length ? h("p", {class: "sp-zeile"}, UI.symbol("medaille", 16), " ", h("b", {}, abz.length === 1 ? "Neues Abzeichen: " : "Neue Abzeichen: "), abz.map(a => `${a.sym} ${a.titel}`).join(" · ")) : null,
+      besser ? h("p", {class: "sp-zeile"}, UI.symbol("tendenz", 16), " ", h("b", {}, besser.name + ": "), `Stufe ${besser.vorher} → ${besser.nachher}`) : null,
       feierabend ? feierabendZeile() : null,
-      erg.woche ? h("p", {class: "sp-zeile"}, "🎯 ", h("b", {}, "Wochenziel geschafft: "), `${erg.woche.text} · +${erg.woche.ruf} Ruf`) : null,
+      erg.woche ? h("p", {class: "sp-zeile"}, UI.symbol("ziel", 16), " ", h("b", {}, "Wochenziel geschafft: "), `${erg.woche.text} · +${erg.woche.ruf} Ruf`) : null,
       ...dexZeilen(erg.dex),
-      erg.raetsel ? h("p", {class: "sp-zeile sp-raetsel"}, "🧩 ", h("b", {}, `Tagesrätsel #${erg.raetsel.nr}: `), h("span", {class: "sp-raetsel-zeile"}, erg.raetsel.zeile), " ",
+      erg.raetsel ? h("p", {class: "sp-zeile sp-raetsel"}, UI.symbol("raetsel", 16), " ", h("b", {}, `Tagesrätsel #${erg.raetsel.nr}: `), h("span", {class: "sp-raetsel-zeile"}, erg.raetsel.zeile), " ",
         h("button", {type: "button", class: "knopf klein", onclick: () => UI.hub.kopieren(Spiel.raetsel.teilen(), "Ergebnis kopiert – einfach einfügen.")}, "Ergebnis kopieren")) : null,
     ].filter(Boolean);
     const merke = merkeText(def, erg.abnahme.niveau);
@@ -546,14 +547,16 @@ UI.spiel = (() => {
         h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
           h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])),
         erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
-          {voll: "🎯 ", ursache: "🔎 ", schicht: "🔎 "}[erg.verdacht.treffer] || "💭 ", erg.verdacht.text) : null,
-        erg.hotline ? h("p", {class: "sp-hotline"}, "☎ " + erg.hotline.text) : null,
+          UI.symbol({voll: "ziel", ursache: "suche", schicht: "suche"}[erg.verdacht.treffer] || "idee", 15), " ", erg.verdacht.text) : null,
+        erg.hotline ? h("p", {class: "sp-hotline"}, UI.symbol("telefon", 15), " " + erg.hotline.text) : null,
         akteZeile(erg),
-        erg.schuld ? h("p", {class: "sp-schuld"}, `🩹 Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null) : null,
+        erg.schuld ? h("p", {class: "sp-schuld"}, UI.symbol("provisorium", 15), ` Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null) : null,
       merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
         h("div", {class: "sp-merke-fuss"},
           def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
-          typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, "📖 Nachlesen") : null)) : null,
+          typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, UI.symbol("dex", 16), " Nachlesen") : null)) : null,
+      lehrtextKnoepfe(def, niveau).length ? h("section", {class: "sp-block sp-lehrtexte"},
+        h("h3", {}, "Zum Nachlesen"), h("div", {class: "sp-merke-fuss"}, lehrtextKnoepfe(def, niveau))) : null,
       einstiegSchluss ? h("section", {class: "sp-block sp-einstieg sp-einstieg-schluss"},
         h("h3", {}, "Willkommen angekommen"),
         h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_LERNEN),
@@ -562,7 +565,7 @@ UI.spiel = (() => {
         weiterKnopf,
         h("button", {type: "button", class: "knopf geist", onclick: () => ergebnisKopieren(erg.inst, erg)}, "Ergebnis kopieren"),
         h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("heute"); }}, "Übersicht"),
-        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, "🌙 Feierabend: zur Leiste") : null)), "erfolg");
+        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, UI.symbol("feierabend", 16), " Feierabend: zur Leiste") : null)), "erfolg");
     zaehlen(euroEl, erg.euro);
     UI.klang?.spielen("sterne");
   }
@@ -570,15 +573,26 @@ UI.spiel = (() => {
   function dexZeilen(dex){
     if (!dex) return [];
     const neu = dex.neu || [], z = [];
-    if (neu.length) z.push(h("p", {class: "sp-zeile"}, "📕 ", h("b", {}, "Fehlerdex: "),
+    if (neu.length) z.push(h("p", {class: "sp-zeile"}, UI.symbol("dex", 16), " ", h("b", {}, "Fehlerdex: "),
       neu.map(d => `${d.titel} – ${d.zustand === "verstanden" ? "verstanden" : "gesehen"}`).join(" · ")));
-    if ((dex.titel || []).length) z.push(h("p", {class: "sp-zeile"}, "🏆 ", h("b", {}, "Ehrentitel: "), dex.titel.join(" · ")));
+    if ((dex.titel || []).length) z.push(h("p", {class: "sp-zeile"}, UI.symbol("trophae", 16), " ", h("b", {}, "Ehrentitel: "), dex.titel.join(" · ")));
     return z;
   }
   /* Tagesziel: eine Zeile mit offenem Faden für morgen (Folgeauftrag, Notfall, Kapitel … – Spiel.hub.ausblick; die Bilanz steht im Hub) */
   function feierabendZeile(){
     const b = Spiel.tag.bilanz();
-    return h("p", {class: "sp-zeile"}, "🎉 ", h("b", {}, "Tagesziel geschafft"), ` – ${b.tickets} Aufträge heute · ${Spiel.hub.ausblick()}`);
+    return h("p", {class: "sp-zeile"}, UI.symbol("feier", 16), " ", h("b", {}, "Tagesziel geschafft"), ` – ${b.tickets} Aufträge heute · ${Spiel.hub.ausblick()}`);
+  }
+  /* Lehrtext-Consumer (Architektur § 17.4): DATEN.lehrtexte traegt neben den 34 Sim-Code-Texten auch
+     12 Skill-Texte unter der Fertigkeits-id (z. B. "lab.switch"). Diese Texte werden sonst nirgends
+     gelesen — hier im Ergebnis erscheinen sie als "Zum Nachlesen" (Wirkung vor Gruen, Lead-Integration). */
+  function lehrtextKnoepfe(def, niveau){
+    if (niveau === "AP2") return [];                 /* Pruefungsstrenge: keine Erklaerung im AP2-Ergebnis */
+    const skills = [...new Set(def.skills || [])];
+    return skills.map(id => {
+      const name = (DATEN.skills || []).find(s => s.id === id)?.name || id;
+      return UI.erklaeren(id, niveau, "Lehrtext: " + name);
+    }).filter(Boolean);
   }
   /* Merke: Einstieg erklärt (bis drei Sätze), AP1/AP2 bekommen nur die Regel – den letzten Satz der Erklärung */
   function merkeText(def, niveau){
@@ -594,7 +608,7 @@ UI.spiel = (() => {
   }
   function zaehlen(el, ziel){
     if (UI.bewegung() !== "voll") { el.textContent = `+${fmtEuro(ziel)}`; return; }
-    const t0 = performance.now(), dauer = 900;
+    const t0 = performance.now(), dauer = UI.zeit("zaehler");
     const f = t => { const p = Math.min(1, (t - t0) / dauer); el.textContent = `+${fmtEuro(ziel * (1 - Math.pow(1 - p, 3)))}`; if (p < 1) requestAnimationFrame(f); };
     requestAnimationFrame(f);
   }
@@ -617,7 +631,7 @@ UI.spiel = (() => {
         : liste.length ? `${liste.length} ${liste.length === 1 ? "Auftrag wartet" : "Aufträge warten"} · Stufe ${st.stufe} · ${st.erledigt.length} erledigt` : "Alles erledigt.")),
       h("div", {class: "sp-pf-aktionen"},
         UI.tag?.karte ? UI.tag.karte() : null,
-        h("button", {type: "button", class: "knopf", onclick: () => { UI.sandbox.laden(); UI.app.ansicht("labor"); }, title: "Ohne Auftrag frei ausprobieren"}, "🧪 Freies Labor")));
+        h("button", {type: "button", class: "knopf", onclick: () => { UI.sandbox.laden(); UI.app.ansicht("labor"); }, title: "Ohne Auftrag frei ausprobieren"}, UI.symbol("test", 16), " Freies Labor")));
     const links = h("div", {class: "sp-pf-liste", role: "list"}, karten.length ? karten : h("div", {class: "sp-leer"},
       h("p", {}, "Keine offenen Aufträge. Gönn dir eine Pause – oder hol dir neue Arbeit."),
       h("button", {type: "button", class: "knopf primaer", onclick: () => { Spiel.nachschub(); status(); postfachAnsicht(c); }}, "Neuen Auftrag holen")));
@@ -640,7 +654,7 @@ UI.spiel = (() => {
   /* Kundenpost: Nachricht ohne Auftrag (Lob vom Kunden oder Notiz vom Senior) */
   function postAbsender(n){
     const k = kunde(n.kunde);
-    return n.art === "senior" ? {sym: "🧑‍🔧", name: "Der Senior", zusatz: "Notiz", farbe: "--accent"}
+    return n.art === "senior" ? {sym: UI.symbol("senior", 20), name: "Der Senior", zusatz: "Notiz", farbe: "--accent"}
       : {sym: k.symbol || "✉", name: k.ansprechpartner?.name || k.name, zusatz: k.name, farbe: k.farbe || "--accent"};
   }
   function postKarte(n, an, wahl){
@@ -687,9 +701,9 @@ UI.spiel = (() => {
           inst.quelle === "wartung" ? h("span", {class: "sp-chip wartung"}, "Wartung") : null,
           inst.quelle === "wiederholung" ? h("span", {class: "sp-chip wdh"}, "Wiederholung") : null,
           inst.quelle === "folge" ? h("span", {class: "sp-chip folge", title: "Ein Provisorium von neulich hat nicht gehalten"}, "↩ Folgeauftrag") : null,
-          inst.flow === "geruest" ? h("span", {class: "sp-chip flow-geruest", title: "Die letzten zwei Aufträge dieser Fertigkeit waren zäh: diesmal mit Tipp, Haken und Warnungen"}, "🧭 mit Gerüst") : null,
-          inst.flow === "verwicklung" ? h("span", {class: "sp-chip flow-verwicklung", title: "Drei Glanzergebnisse in Folge: diesmal kniffliger, ohne Warnungen"}, "🔥 kniffliger") : null,
-          Spiel.varianten.fuer(def) ? h("span", {class: "sp-chip wahl", title: "Du entscheidest: Provisorium (schnell, 60 % Lohn, kommt wieder) oder sauber (gesichert und dokumentiert, 120 %)"}, "🩹/🧰 Wahl") : null,
+          inst.flow === "geruest" ? h("span", {class: "sp-chip flow-geruest", title: "Die letzten zwei Aufträge dieser Fertigkeit waren zäh: diesmal mit Tipp, Haken und Warnungen"}, UI.symbol("trace", 14), " mit Gerüst") : null,
+          inst.flow === "verwicklung" ? h("span", {class: "sp-chip flow-verwicklung", title: "Drei Glanzergebnisse in Folge: diesmal kniffliger, ohne Warnungen"}, UI.symbol("serie", 14), " kniffliger") : null,
+          Spiel.varianten.fuer(def) ? h("span", {class: "sp-chip wahl", title: "Du entscheidest: Provisorium (schnell, 60 % Lohn, kommt wieder) oder sauber (gesichert und dokumentiert, 120 %)"}, UI.symbol("provisorium", 14), "/", UI.symbol("werkzeug", 14), " Wahl") : null,
 
           frist != null ? h("span", {class: "sp-chip frist"}, frist > 0 ? `⏱ ${frist} min` : "⏱ überfällig") : null)));
   }
@@ -778,7 +792,7 @@ UI.spiel = (() => {
     const mehr = !!c.blasen && (S.coach.blase || 0) < c.blasen.length - 1;
     const el = h("div", {class: "sp-coach" + (!c.blasen ? " hinweis" : "") + (S.coach.neu ? " neu" : "") + (mehr ? " weiter" : ""), "data-hinweisquelle": "coach",
       title: mehr ? "Klick: weiter" : null, onclick: mehr ? () => coachBlase((S.coach.blase || 0) + 1) : null},
-      h("span", {class: "sp-coach-sym", "aria-hidden": "true"}, "🧑‍🔧"), h("p", {class: "sp-blase"}, text),
+      h("span", {class: "sp-coach-sym", "aria-hidden": "true"}, UI.symbol("senior", 22)), h("p", {class: "sp-blase"}, text),
       h("button", {type: "button", class: "knopf geist klein", onclick: e => { e.stopPropagation(); clearTimeout(S.coach?.timer); S.coach = null; Spiel.einstSetzen("coach", false); UI.labor.auftragNeu(); }}, "Hinweise aus"));
     S.coach.neu = false;
     return el;

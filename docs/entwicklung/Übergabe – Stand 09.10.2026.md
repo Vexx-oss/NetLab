@@ -20,11 +20,11 @@ geplant und wartet auf eine Entscheidung (siehe § 4).
 
 | Was | Stand | Wo es steht |
 |---|---|---|
-| **Hilfestellung** (Bildungsstufen, Hilfekonto, Terminal-Streifen, Lernanker, Trainingsbereich) | gebaut, 1.2.4 | [CHANGELOG 1.2.4](CHANGELOG.md) · [Hilfestellung – Stufen und Schnittstellen](<entwicklung/Hilfestellung – Stufen und Schnittstellen.md>) |
-| **Doku als Build** — 29 Markdown-Dateien als lesbare Seiten unter `/doku/` | gebaut, live | `tools/md.py` · `tools/seite.py` · [INHALT.md](INHALT.md) |
-| **Auslieferung korrigiert** — veraltete `.exe` wäre als neue Fassung verpackt worden; Doku jetzt im Browser-ZIP | gebaut | [CHANGELOG, Nachtrag](CHANGELOG.md) · `.github/workflows/release.yml` |
-| **Fahrplan 1.3 / 2.0** — fünf unabhängige Expertenentwürfe, 1 454 Zeilen | **geplant, nichts gebaut** | [Fahrplan – 1.3 und 2.0](<entwicklung/Fahrplan – 1.3 und 2.0.md>) |
-| **Team-Größe** — `maxMembers` von 8 auf 16 | eingetragen, wirkt nach Neustart | `~/.dsh/profiles/desktop/cordis.patch.yml` · [SITZUNGSABSCHLUSS](SITZUNGSABSCHLUSS.md) Regel 6 |
+| **Hilfestellung** (Bildungsstufen, Hilfekonto, Terminal-Streifen, Lernanker, Trainingsbereich) | gebaut, 1.2.4 | [CHANGELOG 1.2.4](../CHANGELOG.md) · [Hilfestellung – Stufen und Schnittstellen](<Hilfestellung – Stufen und Schnittstellen.md>) |
+| **Doku als Build** — 29 Markdown-Dateien als lesbare Seiten unter `/doku/` | gebaut, live | `tools/md.py` · `tools/seite.py` · [INHALT.md](../INHALT.md) |
+| **Auslieferung korrigiert** — veraltete `.exe` wäre als neue Fassung verpackt worden; Doku jetzt im Browser-ZIP | gebaut | [CHANGELOG, Nachtrag](../CHANGELOG.md) · `.github/workflows/release.yml` |
+| **Fahrplan 1.3 / 2.0** — fünf unabhängige Expertenentwürfe, 1 454 Zeilen | **geplant, nichts gebaut** | [Fahrplan – 1.3 und 2.0](<Fahrplan – 1.3 und 2.0.md>) |
+| **Team-Größe** — `maxMembers` von 8 auf 16 | eingetragen, wirkt nach Neustart | `~/.dsh/profiles/desktop/cordis.patch.yml` · [SITZUNGSABSCHLUSS](../SITZUNGSABSCHLUSS.md) Regel 6 |
 
 ## 3 · Was gerade GILT (nicht neu herleiten, sondern benutzen)
 
@@ -43,14 +43,14 @@ python bauen.py              118 Module, Version 1.2.4
 **Achtung:** die lebende Adresse ist `…/NetLab/`. `…/Side-Project/` gibt **HTTP 404** — ein alter
 Kommentar behauptete eine Umleitung; das war falsch.
 
-**Drei Fallen, die Zeit gekostet haben** (stehen ausführlich in [AGENTS.md](../AGENTS.md)):
+**Drei Fallen, die Zeit gekostet haben** (stehen ausführlich in [AGENTS.md](../../AGENTS.md)):
 * `bash.exe` scheitert in dieser Umgebung (Signal-Pipe, Win32-Fehler 5) → Tests direkt mit `node tests/run.js`.
 * Ein Test ohne Zusicherungen galt früher als grün → `tests/harness.js` meldet jetzt „davon N übersprungen".
 * In Doku-Tests keine feste Dokumentzahl verdrahten — sie wächst (genau daran wurde ein Test rot).
 
 ## 4 · Was als Nächstes zu tun ist
 
-**Empfehlung, in dieser Reihenfolge** (Begründung im [Fahrplan](<entwicklung/Fahrplan – 1.3 und 2.0.md>)):
+**Empfehlung, in dieser Reihenfolge** (Begründung im [Fahrplan](<Fahrplan – 1.3 und 2.0.md>)):
 
 | | Schritt | Aufwand | Status |
 |---|---|---|---|
@@ -63,7 +63,7 @@ Kommentar behauptete eine Umleitung; das war falsch.
 
 ## 5 · Was nur der Nutzer entscheiden kann
 
-Die **acht Entscheidungen E1–E8** aus [§ 8 des Klassenraum-Entwurfs](<entwicklung/Entwurf – Klassenraum-Umsetzung.md>);
+Die **acht Entscheidungen E1–E8** aus [§ 8 des Klassenraum-Entwurfs](<Entwurf – Klassenraum-Umsetzung.md>);
 die vier wichtigsten stehen als Tabelle im Fahrplan § 7. Die schwerste ist keine technische Frage:
 **Soll ein Klassenraum-Auftrag bewertet werden?** Wenn ja, braucht es eine eigene Auswertung statt eines
 Filters — und dann stellt sich die Frage nach **Noten**, die dieses Spiel bisher bewusst nicht stellt.
@@ -86,6 +86,6 @@ $node = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64\node.exe"
 git status -sb                # muss "## ausbau-1.2...origin/ausbau-1.2" ohne Änderungen melden
 ```
 
-Danach **eine** Datei lesen, je nach Auftrag: den [Fahrplan](<entwicklung/Fahrplan – 1.3 und 2.0.md>)
-für die Richtung, [ARCHITEKTUR § 13](Architektur.md) für die Hilfestellung, [SITZUNGSABSCHLUSS](SITZUNGSABSCHLUSS.md)
+Danach **eine** Datei lesen, je nach Auftrag: den [Fahrplan](<Fahrplan – 1.3 und 2.0.md>)
+für die Richtung, [ARCHITEKTUR § 13](../Architektur.md) für die Hilfestellung, [SITZUNGSABSCHLUSS](../SITZUNGSABSCHLUSS.md)
 für das Ende einer Sitzung.

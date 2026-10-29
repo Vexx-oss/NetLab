@@ -43,12 +43,20 @@ const KlassenraumCodec = (() => {
   const zeichen = v => Number.isInteger(v) ? ALPHABET[((v % BASIS) + BASIS) % BASIS] : null;
 
   /* ---------- Eingefrorene Formatgrenzen (§ 2.3, § 3.3) ----------
-     58 handgeschriebene Aufträge (gemessen § 2.2), 27 Fertigkeiten, davon 24 mit Injektor.
-     Die LÄNGE gehört zum Format: ein Code mit Auftragsindex 58..63 bzw. Fertigkeitsindex 27..63
+     58 handgeschriebene Aufträge (gemessen § 2.2), 30 Fertigkeiten: 27 alte, seit S6a/S6b
+     (Architektur § 17.1) kommen lab.ipv6, lab.betrieb, lab.wlan ANS ENDE dazu (Anhängeregel).
+     Die LÄNGE gehört zum Format: ein Code mit Auftragsindex 58..63 bzw. Fertigkeitsindex 30..63
      stammt aus einer anderen Fassung. Wächst eine Tabelle, übergibt der Aufrufer seine Liste an
-     `tabellen()` — dann gilt SEINE Länge (Anhängeregel § 2.3). */
+     `tabellen()` — dann gilt SEINE Länge (Anhängeregel § 2.3).
+
+     GRENZE DER AUFTRAGSTABELLE (Leitungsentscheidung 29.10.2026, § 12.2/§ 17.9): Der Index ist
+     6 Bit breit — höchstens 64 Handtickets sind in EINEM Code adressierbar. Die 2.1-Tickets
+     (ticketReihe 73, wachsend bis 76 in S7) sind deshalb bewusst NICHT klassenraum-adressierbar:
+     die eingefrorene 58er-Tabelle bleibt, und alte Codes liefern weiter dieselben Aufträge
+     (Index 55–57 = storage-01..03). KEIN Formatwechsel in 2.1; 3.1 hebt das Format mit
+     Migrationsweg an und hängt die neuen Tickets hinten an. Geprüft: tests/klassenraum.test.js. */
   const TABELLE_AUFTRAEGE_LAENGE = 58;
-  const TABELLE_SKILLS_LAENGE = 27;
+  const TABELLE_SKILLS_LAENGE = 30;      /* § 17.1: 27 alte + lab.ipv6/lab.betrieb/lab.wlan */
   const KANON_FENSTER = 64;              /* § 3.1: höchstens 64 Seeds je Variante durchsuchen */
 
   /* ---------- Prüfsumme (§ 1.2) ---------- */
