@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übergabe — Stand nach der Sitzung vom 29.10.2026 (Frontend-Redesign) · Netzwerk-Labor</title>
+<meta name="description" content="Das lokale Repo steht auf v2.1.0 (fb7e0bc, Zweig ausbau-1.2, Arbeitsbaum sauber), die.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Übergabe — Stand nach der Sitzung vom 29.10.2026 (Frontend-Redesign)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-auftrag-und-entscheidungen-des-nutzers">1 · Auftrag und Entscheidungen des Nutzers</a></li>
+<li><a href="#2-wo-wir-stehen-in-einem-satz">2 · Wo wir stehen (in einem Satz)</a></li>
+<li><a href="#3-was-in-dieser-sitzung-entstanden-ist-alles-gemessen">3 · Was in dieser Sitzung entstanden ist (alles gemessen)</a></li>
+<li style="margin-left:16px"><a href="#3-1-repo-und-zugang">3.1 Repo und Zugang</a></li>
+<li style="margin-left:16px"><a href="#3-2-werkzeugkette">3.2 Werkzeugkette</a></li>
+<li style="margin-left:16px"><a href="#3-3-nachgemessene-pruflaufe">3.3 Nachgemessene Prüfläufe</a></li>
+<li style="margin-left:16px"><a href="#3-4-vault-nicht-teil-des-repos">3.4 Vault (nicht Teil des Repos)</a></li>
+<li><a href="#4-die-drei-bild-vorlagen">4 · Die drei Bild-Vorlagen</a></li>
+<li style="margin-left:16px"><a href="#4-1-favorit-a-die-tokens-fur-den-vertrag">4.1 Favorit A — die Tokens für den Vertrag</a></li>
+<li><a href="#5-was-als-nachstes-zu-tun-ist-reihenfolge-ist-verbindlich">5 · Was als Nächstes zu tun ist (Reihenfolge ist verbindlich)</a></li>
+<li><a href="#6-prufstand-und-befehle-auf-diesem-rechner-verifiziert">6 · Prüfstand und Befehle (auf diesem Rechner verifiziert)</a></li>
+<li><a href="#7-fallen-grenzen-und-offene-punkte">7 · Fallen, Grenzen und offene Punkte</a></li>
+<li><a href="#8-was-nur-der-nutzer-entscheiden-kann">8 · Was nur der Nutzer entscheiden kann</a></li>
+<li><a href="#9-womit-man-neu-anfangt">9 · Womit man neu anfängt</a></li>
+</ul>
+</nav><h1 id="ubergabe-stand-nach-der-sitzung-vom-29-10-2026-frontend-redesign">Übergabe — Stand nach der Sitzung vom 29.10.2026 (Frontend-Redesign)</h1>
+<blockquote>
+<p><strong>Warum diese Datei existiert.</strong> Diese Sitzung hat den Auftrag „komplettes Redesign des Frontends" vorbereitet, aber absichtlich <strong>noch keine Zeile Produktcode</strong> angefasst. Ein neuer Lauf soll in einer Minute wissen, was entschieden ist, was gemessen wurde, wo die Bild-Vorlagen liegen und was als Nächstes zu tun ist — mit Verweisen statt Wiederholungen.</p>
+</blockquote>
+<h2 id="1-auftrag-und-entscheidungen-des-nutzers">1 · Auftrag und Entscheidungen des Nutzers</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Frage</th><th>Entscheidung</th></tr></thead><tbody><tr><td>Auftrag</td><td>„Ich will ein komplettes Redesign des Frontends." Zuerst <strong>visuelle Prototypen als Bilder</strong>, nicht als Code.</td></tr><tr><td>Stilwunsch (wörtlich)</td><td>„Dunkel, modern, sleek, Cyberpunkig aber nicht kitschig, Matrix, elegant, professionell"</td></tr><tr><td>Umfang</td><td><strong>Optik + Shell</strong> — neues Design-System plus Kopfzeile/Navigation/Karten/Dock; Bedienlogik und Ansichten bleiben erhalten</td></tr><tr><td>Qualitätsgates</td><td>Kontrast, Trefferflächen, keine Überläufe, 0 tote Links <strong>bleiben Pflicht</strong>; Stil-Tests, die die alte Optik festschreiben, werden <strong>bewusst neu geschrieben, nicht abgeschwächt</strong></td></tr><tr><td>Git</td><td><strong>Committen ja, Push nur auf Zuruf</strong> (entspricht <code>AGENTS.md</code> § 17.6)</td></tr><tr><td>Richtung</td><td><strong>A „Matrix-Elegant" gefällt dem Nutzer „am besten bisher"</strong> — noch keine endgültige Freigabe, B und C bleiben Alternativen</td></tr><tr><td>Agenten</td><td>Ausdrücklich erlaubt („verwende agents"); drei Design-Agenten arbeiteten parallel, je ein Ordner, keine Kollision</td></tr></tbody></table></div>
+<h2 id="2-wo-wir-stehen-in-einem-satz">2 · Wo wir stehen (in einem Satz)</h2>
+<p>Das lokale Repo steht auf <strong>v2.1.0</strong> (<code>fb7e0bc</code>, Zweig <code>ausbau-1.2</code>, Arbeitsbaum sauber), die Werkzeugkette ist geprüft, drei <strong>Bild-Vorlagen</strong> liegen unter <code>Nachweise/Prototypen-Redesign/</code> — <strong>am Frontend-Code ist nichts geändert</strong>, kein Vertrag geschrieben, kein Test angepasst.</p>
+<h2 id="3-was-in-dieser-sitzung-entstanden-ist-alles-gemessen">3 · Was in dieser Sitzung entstanden ist (alles gemessen)</h2>
+<h3 id="3-1-repo-und-zugang">3.1 Repo und Zugang</h3>
+<ul><li><code>Vexx-oss/NetLab</code> ist <strong>öffentlich</strong>; Schreibzugriff über die gespeicherten Windows-Anmeldedaten (<code>Vexx-oss</code>) — mit <code>git push --dry-run</code> gegen einen Wegwerf-Zweig belegt, es wurde nichts angelegt.</li><li>Lokaler Checkout war 2 Commits hinter origin (<code>1a24a66</code>) und ist per <code>git pull --ff-only</code> auf <strong><code>fb7e0bc</code> = Tag <code>v2.1.0</code></strong> gezogen worden.</li><li>Release <code>v2.1.0</code> („Netzwerk-Labor 2.1.0") trägt drei Anhänge: <code>Netzwerk-Labor.html</code>, <code>Netzwerk-Labor.exe</code>, <code>Netzwerk-Labor-2.1.0-Browser.zip</code>.</li></ul>
+<h3 id="3-2-werkzeugkette">3.2 Werkzeugkette</h3>
+<ul><li>git 2.55.0 · rustc/cargo 1.97.1 · MSVC 14.44 (VS 2022 Community, Linkerprobe ok) · cargo-tauri 2.12.0 · Python 3.14.6 (+ Pillow 12.3.0) · WebView2 156.0.4314.50 · JDK 21 · Git-Bash.</li><li><strong>Node lag nur portabel vor</strong>: <code>%LOCALAPPDATA%\node-portable\node-v24.21.0-win-x64</code> (v24.21.0); der Ordner steht jetzt im <strong>Benutzer-PATH</strong>. <strong>Falle:</strong> Die Aussage in <code>AGENTS.md</code>, Node liege unter <code>C:\Program Files\nodejs</code>, stimmt auf diesem Rechner <strong>nicht</strong> (dort ist keine <code>node.exe</code>; gemessen 29.10.2026).</li><li><strong>Nicht installiert:</strong> Android-SDK (fehlt; APK-Bau braucht build-tools ≥ 35 und den Signaturschlüssel, der nicht im Git liegt). Für Code/Tests/Web/Windows-Programm nicht nötig.</li></ul>
+<h3 id="3-3-nachgemessene-pruflaufe">3.3 Nachgemessene Prüfläufe</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Prüfung</th><th>Ergebnis</th></tr></thead><tbody><tr><td><code>sh tools/test.sh</code> (Git-Bash)</td><td><strong>873/873 grün</strong>, 103 Testdateien, 95 Module, <strong>0 übersprungen</strong>, Exit 0, 112,2 s</td></tr><tr><td><code>python bauen.py</code></td><td>Exit 0, 133 Module, 2534 KB → <code>web/index.html</code> (Version 2.1.0); <code>git status</code> danach sauber</td></tr><tr><td><code>cargo build --release --features custom-protocol</code></td><td>Exit 0 in 5 min 58 s → <code>shell/src-tauri/target/release/netzwerk-labor.exe</code>, <strong>8 821 248 B</strong>, ProductVersion <strong>2.1.0</strong></td></tr><tr><td><code>python tools/stand.py --pruefen</code> (nach dieser Übergabe)</td><td>grün; die aktuellen Zahlen stehen in <a href="../STAND.html">STAND.md</a></td></tr></tbody></table></div>
+<p><strong>Nicht geprüft:</strong> die gebaute <code>.exe</code> wurde <strong>nicht gestartet</strong>; die Lesbarkeit im echten Programm ist offen. Die <code>.exe</code> wurde <strong>nicht</strong> nach <code>Programm/</code> kopiert (Auslieferung nur mit Freigabe).</p>
+<h3 id="3-4-vault-nicht-teil-des-repos">3.4 Vault (nicht Teil des Repos)</h3>
+<ul><li><code>Agents/Memories/User.md</code>: Abschnitt „Projekt Netzwerk-Labor — verbindlicher Arbeitsstand" (v2.1.0 ist der Arbeitsstand, Installations-Ausnahme vom 29.10.2026).</li><li><code>90-Werkstatt/Logs/2026-10-29.md</code>: Sitzungsprotokoll.</li><li><code>.vaultignore</code>: <code>…/shell/src-tauri/target</code> ergänzt — sonst meldet der Vault-Prüfindex hunderte Rust-Fingerprint-Dateien als „neu".</li></ul>
+<h2 id="4-die-drei-bild-vorlagen">4 · Die drei Bild-Vorlagen</h2>
+<p>Ablage (nicht versioniert, weil <code>Nachweise/</code> in der <code>.gitignore</code> steht):</p>
+<pre><code>Nachweise/Prototypen-Redesign/
+├── BRIEF.md                  ← verbindliches Briefing (Inhalte, Maße, Renderbefehle)
+├── matrix/                   ← A · MATRIX-ELEGANT   (vom Nutzer favorisiert)
+├── holo/                     ← B · HOLO-SUITE
+└── blueprint/                ← C · NEON-BLUEPRINT</code></pre>
+<p>Jeder Ordner enthält: <code>mockup.html</code> (Renderhilfe), <code>&lt;slug&gt;-board.png</code> (1366 × 2048), <code>&lt;slug&gt;-hub.png</code> (1366 × 768), <code>&lt;slug&gt;-labor.png</code> (1366 × 768), <code>&lt;slug&gt;-stil.png</code> (1366 × 420), <code>NOTIZ.md</code>. Alle Boards sind am Pixel geprüft (Maße stimmen, Schriften geladen, keine Überläufe, keine Netzabrufe). Rendern/Zuschneiden: siehe <code>BRIEF.md</code> § 6 — <strong>Schriftenpfad korrigiert auf <code>../../../schriften/</code></strong> (die ursprüngliche Angabe <code>../../schriften/</code> zeigte auf <code>Nachweise/schriften</code>).</p>
+<div class="dk-tabelle"><table><thead><tr><th></th><th>A · Matrix-Elegant</th><th>B · Holo-Suite</th><th>C · Neon-Blueprint</th></tr></thead><tbody><tr><td>Charakter</td><td>Kontrollraum: Punktraster, Hairlines, Mono-Mikrolabels</td><td>Glas, Gradient-Kanten, viel Luft, sleek</td><td>Schaltplan: Raster, Eckmarken, Maßketten, Annotationen</td></tr><tr><td>Grund / Fläche</td><td><code>#04070A</code> / <code>#08100C</code></td><td><code>#05070F</code> / <code>#101829</code></td><td><code>#060A12</code> / <code>#0A1422</code></td></tr><tr><td>Akzent</td><td>Emerald <code>#30E58B</code>, Cyan <code>#22D3EE</code> sparsam</td><td>Cyan <code>#5EEBFF</code>, Violett <code>#8B7CFF</code></td><td>Cyan <code>#46D9FF</code>, Amber <code>#FFB454</code></td></tr><tr><td>Stärke</td><td>trifft „Matrix + elegant + professionell" am direktesten</td><td>hochwertigste, modernste Anmutung</td><td>fachlich glaubwürdigstes Laborbild</td></tr><tr><td>Schwäche</td><td>bewusst leise</td><td>„Matrix" kaum erkennbar, eher Premium-SaaS</td><td>dichteste Vorlage, kleinste Labels 7 px</td></tr></tbody></table></div>
+<h3 id="4-1-favorit-a-die-tokens-fur-den-vertrag">4.1 Favorit A — die Tokens für den Vertrag</h3>
+<ul><li><strong>Farben:</strong> Grund <code>#04070A</code> · Fläche <code>#08100C</code> · Linie <code>rgba(163,255,214,.10)</code> (Swatch <code>#1A2B23</code>) · Text <code>#E8F4ED</code> · Nebentext <code>#97AC9F</code> · gedämpft <code>#7C9386</code> · Akzent <code>#30E58B</code> · Sekundär <code>#22D3EE</code> · OK <code>#54E6A8</code> · Warnung <code>#F2C14E</code> · Fehler <code>#FF6B8A</code>.</li><li><strong>Typografie:</strong> Bricolage Grotesque 600/800 (Wortmarke, H1 44/46, Kartentitel, Knöpfe); Atkinson Hyperlegible 400/700 (Fließtext); JetBrains Mono 400/600 (Labels, IPs, Status).</li><li><strong>Shell:</strong> Kopfzeile 56 px (Marke + <code>v2.1</code>, vier Werte-Chips, Suche mit <code>Strg+K</code>, Theme/Zahnrad/Hilfe) · linke Leiste 88 px mit allen sieben Wegen · Statusfuß 28 px · Radien 4/8/12, Schatten nur am Hauptknopf.</li><li><strong>Gemessene Kontraste (am Prototyp):</strong> Text/Grund 17,9:1 · Nebentext 8,4:1 · gedämpft 6,1:1 (Grund) bzw. 5,9:1 (Fläche) · Akzent 12,2:1 · Warnung 11,5:1 — alle ≥ 4,5:1.</li></ul>
+<h2 id="5-was-als-nachstes-zu-tun-ist-reihenfolge-ist-verbindlich">5 · Was als Nächstes zu tun ist (Reihenfolge ist verbindlich)</h2>
+<p><strong>0 · Lesen, bevor gebaut wird.</strong> Diese Datei · <code>Nachweise/Prototypen-Redesign/matrix/matrix-board.png</code> und <code>-hub/-labor/-stil.png</code> · <code>matrix/NOTIZ.md</code> · <code>BRIEF.md</code> · <a href="../Architektur.html">Architektur § 16.4</a> (Design-Tokens und Bewegung) · <code>AGENTS.md</code> und <a href="../SITZUNGSABSCHLUSS.html">SITZUNGSABSCHLUSS</a>.</p>
+<p><strong>1 · Gestaltungsvertrag zuerst</strong> (Projektregel „Vertrag zuerst"): neuer Abschnitt in <a href="../Architektur.html">Architektur.md</a> (z. B. § 18 „Frontend-Redesign — Gestaltungsvertrag") mit Farbtokens dunkel <strong>und</strong> die Ableitung für hell, Typo-Skala, Shell-Maßen, Komponenten-Inventar, Zuordnung zu den bestehenden Dateien (<code>src/stil/basis.css</code> Tokens, <code>aussehen.css</code> Shop-Farben, <code>rahmen.css</code>/<code>leiste.css</code> Shell, <code>hub.css</code>, <code>spiel.css</code>, <code>editor.css</code>, <code>inspektor.css</code>, <code>konsole.css</code> …), Nicht-Ziele (z. B. keine neuen Ansichten) und Test-Strategie.</p>
+<p><strong>2 · Gates bewusst anpassen</strong> (nur nach dem Vertrag, nie „nebenbei"):</p>
+<ul><li><code>tools/ethos.py</code>: Skalen (Schrift, Abstände, Radien, Schatten, Zeiten) auf das neue System ziehen. <strong>Achtung:</strong> der Prototyp nutzt H1 44 px und Radien 4/8/12 px — beides liegt außerhalb der heutigen Skalen (Schrift max. 28, Radien 6/10/999/50 %).</li><li><code>tests/stil-stand.json</code> mit <code>python tools/ethos.py --neu --stand tests/stil-stand.json</code> neu einfrieren — <strong>nur nach</strong> bewusster Entscheidung, nicht um Rot zu verstecken.</li><li>Stil-/UI-Tests, die die alte Optik festschreiben (<code>ui-typografie</code>, <code>ui-kontrast</code>, <code>ui-trefferflaechen</code>, <code>ui-symbole</code>, <code>ui-leiste-ueberlappung</code>, <code>klassen-20</code>, <code>texte-stil</code>, …) neu schreiben bzw. auf das neue System ziehen; <strong>Verhaltenstests unangetastet</strong>.</li></ul>
+<p><strong>3 · Welle 1 bauen</strong>: Tokens + Shell + Hub + Labor-Chrome + Leiste im Stil von A. Nach <strong>jedem</strong> Schritt: <code>python bauen.py</code>, <code>sh tools/test.sh</code>, Sichtkontrolle per Screenshot (<code>python tools/starttest.py docs/index.html --bild …</code> bzw. <code>python tools/rauch.py</code>), erst dann weiter. Die App muss nach jedem Schritt lauffähig sein. Commits lokal auf <code>ausbau-1.2</code>; <strong>kein Push</strong>.</p>
+<p><strong>4 · Welle 2</strong>: restliche Ansichten (Postfach, Kunden, Wiki, Lernstand, Shop, Einstellungen, Klassenraum, Editor-Dock, Inspektor, Terminal/Konsole) auf das neue System ziehen — eine Ansicht vollständig, dann die nächste („senkrechter Schnitt vor Breite").</p>
+<p><strong>5 · Welle 3</strong>: Doku und Stand nachziehen (<code>python tools/stand.py</code> → <code>python tools/seite.py</code> → nochmal beide), CHANGELOG, Screenshots, <code>sh tools/test.sh --rauch</code>, <code>tools/ethos.py --dom</code>, <code>node tools/sim-stand.js</code>; danach erst Freigabe für Auslieferung/Fassung.</p>
+<h2 id="6-prufstand-und-befehle-auf-diesem-rechner-verifiziert">6 · Prüfstand und Befehle (auf diesem Rechner verifiziert)</h2>
+<pre><code class="sprache-powershell">cd 10-Projekte\Lernprojekte\Netzwerk-Labor
+git status -sb                    # ausbau-1.2, nach dieser Übergabe 1 Commit vor origin (kein Push)
+$env:PATH = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64;" + $env:PATH
+&amp; "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:/c/Users/Student/AppData/Local/node-portable/node-v24.21.0-win-x64:$PATH; sh tools/test.sh'
+python bauen.py                   # 133 Module, Version 2.1.0
+python tools/stand.py --pruefen   # Exit 0
+python tools/seite.py --pruefen   # Exit 0
+python tools/ethos.py             # GRÜN gegen tests/stil-stand.json
+sh tools/test.sh --rauch          # zusätzlich 45/45 mit echtem Edge</code></pre>
+<h2 id="7-fallen-grenzen-und-offene-punkte">7 · Fallen, Grenzen und offene Punkte</h2>
+<ul><li><strong>Mikrolabels:</strong> Die Prototypen nutzen 7–9-px-Beschriftungen. Das Projekt-Gate verlangt für funktionale Beschriftung <strong>≥ 11 px</strong> (<code>ui-typografie.test.js</code>) — in der Umsetzung anheben; die Dichte sinkt dadurch leicht. Die Bilder sind Stimmungsvorlage, <strong>keine 1:1-Implementierung</strong>.</li><li><strong>Hellmodus fehlt</strong> in allen Vorlagen (bewusst nur dunkel entworfen); muss aus den Tokens abgeleitet und in beiden Schemata geprüft werden.</li><li><strong>Nicht gemockt:</strong> Leistenmodus 300 × 56, Breiten 960/720 (die prüft <code>tools/rauch.py</code>), Hover-/ Fokus-/Ladezustände, Shop-Akzentfarben (<code>data-akzent</code>) und Leistenstile (<code>data-leiste</code>) — alle müssen erhalten bleiben.</li><li><strong>Icon-Regel:</strong> UI-Chrome nutzt <code>UI.symbol</code> (SVG), Emoji nur in Fließtext-Copy; C hat das vorbildlich als Inline-SVG umgesetzt.</li><li><strong>Prototypen sind nicht versioniert</strong> (<code>Nachweise/</code> steht in der <code>.gitignore</code>). Sie liegen nur auf diesem Rechner; wer sie behalten will, kopiert den Ordner oder regeneriert ihn aus <code>mockup.html</code> + <code>BRIEF.md</code>.</li><li><strong>Android-SDK fehlt</strong> (siehe § 3.2) — für das Redesign nicht nötig.</li></ul>
+<h2 id="8-was-nur-der-nutzer-entscheiden-kann">8 · Was nur der Nutzer entscheiden kann</h2>
+<ol><li><strong>A als Basis bestätigen</strong> („bisher" am besten) oder Mischung: z. B. A als Grundlage, B für mehr Luft, C für Netz-Annotationen im Labor?</li><li><strong>Akzentfarbe:</strong> Emerald <code>#30E58B</code> neu einführen, oder beim bestehenden Cyan bleiben (<code>--accent:#4FC3F7</code>)? Die Shop-Akzentfarben (bernstein/minze/koralle/violett) müssen dazu passen.</li><li><strong>Dichte:</strong> Kontrollraum-dicht (wie A) oder luftiger (wie B)?</li><li><strong>Hellmodus:</strong> gleichwertig mitdenken oder erst nach der dunklen Fassung?</li><li><strong>Reihenfolge Welle 1:</strong> Hub + Labor + Leiste zuerst — oder eine andere Ansicht als Aushängeschild?</li></ol>
+<h2 id="9-womit-man-neu-anfangt">9 · Womit man neu anfängt</h2>
+<pre><code class="sprache-powershell">cd 10-Projekte\Lernprojekte\Netzwerk-Labor
+git log --oneline -3              # letzter Commit muss die Übergabe vom 29.10.2026 sein
+$env:PATH = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64;" + $env:PATH
+&amp; "C:\Program Files\Git\bin\bash.exe" -c 'export PATH=/usr/bin:/bin:/c/Users/Student/AppData/Local/node-portable/node-v24.21.0-win-x64:$PATH; sh tools/test.sh'</code></pre>
+<p>Dann <strong>eine</strong> Datei lesen, je nach Auftrag: diese Übergabe (Redesign), <code>matrix/NOTIZ.md</code> (Tokens und Begründungen), <a href="../Architektur.html">Architektur § 16</a> (was heute schon als Design-Vertrag gilt), <a href="../SITZUNGSABSCHLUSS.html">SITZUNGSABSCHLUSS</a> (wie eine Sitzung endet).</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>
