@@ -42,6 +42,21 @@ alle Text-Tokens ≥ 4,5:1 in beiden Schemata. Dauer-Tokens unverändert 80/160/
 - Einzeldatei: `Netzwerk-Labor.html` = `docs/index.html`, 0 Außenverweise, SHA256 im Stand.
 - Fassung: 2.3.0 (`VERSION_CODE = 20300`); Windows-Bau über `cargo build --release --features custom-protocol`.
 
+
+**Nachtrag (gleicher Tag): Struktur statt nur Farbe.** Nach der Rückmeldung „sieht nicht ansatzweise so aus"
+wurde der Labor-Editor auch strukturell umgebaut:
+- Geräte-Karten 168 × 112 (schmal < 900 px: 116 × 80) mit größerem Symbol, Name/IP im Karteninneren,
+  Trefferfläche wächst mit; `einpassen()` hat größere Ränder (112/96) und einen `ResizeObserver`
+  (klappt die Begrüßung zu, öffnet das Dock, wird neu eingepasst).
+- Auftragsband als Paneel: Kicker, Titel 28 px, Meta-Chips, Knöpfe rechts; schmal flach (Titel 20 px, Kicker aus).
+- Inspektor als rechtes Paneel mit Kopf, Reiterzeile (Übersicht/Ports/VLAN) und Abschnitts-Trennern;
+  auf breiten Ansichten wird beim Laden das erste Infrastruktur-Gerät vorausgewählt (kein Leerzustand).
+- „// LAGEBILD"-Kopf über der Zeichenfläche; Legende/Hinweis/Zoom als Glas-Pillen.
+- Schmale Breiten (≤ 900 px): Werkzeugleiste weg, Band flach, Begrüßung im Fluss – sonst schob das Band
+  die Fläche unter die Falz (Ursache des 720-px-Rauchtestfehlers, behoben).
+Gemessen: Tests 873/873, Rauchtest 45/45, ethos GRÜN (R2 23→15, R4 128→109, R9 6→3; R10 durch die
+Kaskaden-Overrides 0→4, im Stand eingefroren).
+
 ## 2.2.0 — Frontend-Redesign „Matrix-Elegant" (A) (29.10.2026)
 
 **Warum.** Der Nutzer hat ein komplettes Redesign des Frontends beauftragt: **Optik + Shell neu,

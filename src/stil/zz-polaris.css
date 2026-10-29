@@ -27,9 +27,7 @@
 .fuss-live{display:inline-flex;align-items:center;gap:8px;color:var(--accent)}
 .fuss-punkt{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px color-mix(in srgb,var(--accent) 60%,transparent)}
 .fuss-ebene{color:var(--muted)}
-
-/* ===== Paneele: weiche Tiefe statt harter Blöcke ===== */
-.lb-auftrag{padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.lb-auftrag {padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);padding:0 16px 12px}
 .lb-auftrag::before{content:"// AUFTRAG";display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint);margin:0 0 8px}
 .lb-auftrag :is(h1,h2){font:800 var(--fs-6)/1.1 var(--display);letter-spacing:-.03em;margin:0}
 .lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.08 var(--display);letter-spacing:-.02em}
@@ -103,15 +101,87 @@
    – kein Geraet sitzt mehr unter einer Pille, ohne dass Bedienelemente verschwinden.
    Das Band wird flach gehalten (Titel/Ziele kleiner, Kicker aus, kompaktere Onboarding-Karte),
    damit die Flaeche trotz Kopfzeile und Leistenzeile genug Hoehe behaelt. */
+
+
+
+.lb-auftrag::before{margin:10px 0 4px}
+.lb-auftrag .sp-auftrag{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);
+  padding:16px 20px;margin:0;box-shadow:var(--schatten)}
+.lb-auftrag .am-zeile{display:grid;grid-template-columns:48px minmax(0,1fr) auto auto;align-items:center;gap:16px}
+.lb-auftrag .am-titel strong{font-size:var(--fs-6)}
+.lb-auftrag .sp-kunde-sym{width:48px;height:48px;border-radius:var(--radius-s);display:grid;place-items:center;
+  background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);font-size:var(--fs-5)}
+.lb-auftrag .am-kunde{display:block;margin-top:2px}
+.lb-auftrag .am-ziele{align-self:start}
+.lb-auftrag .am-knoepfe{display:flex;gap:8px;align-items:center}
+.lb-auftrag .sp-abnahme{height:40px;border-radius:var(--radius-s)}
+.lb-auftrag .am-lesen{height:40px;border-radius:var(--radius-s)}
+
+/* Inspektor: eigenes Paneel mit Kopf und Reitern */
+.lb-dock{background:var(--panel);border-left:1px solid var(--line);box-shadow:-24px 0 48px -40px color-mix(in srgb,var(--bg) 90%,transparent)}
+.lb-dock-reiter{gap:4px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.lb-dock-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:8px 10px;border-radius:var(--radius-s);color:var(--faint)}
+.lb-dock-tab.an{color:var(--ink);background:var(--panel-2)}
+.lb-inspektor{padding:0}
+.in-kopf{padding:16px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+.in-kopf-zeile{gap:12px;align-items:center}
+.in-kopf-text h3{font:800 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em}
+.in-kopf-text span{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.in-reiter{display:flex;gap:2px;padding:10px 12px 0;border-bottom:1px solid var(--line)}
+.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:8px 10px;border-radius:var(--radius-s) var(--radius-s) 0 0}
+.in-tab.an{color:var(--ink);background:var(--panel-2);box-shadow:inset 0 -2px 0 var(--accent)}
+.in-abschnitt{padding:14px 18px;border-bottom:1px solid color-mix(in srgb,var(--ink) 6%,transparent)}
+.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+.in-hinweis{font-size:var(--fs-3);color:var(--muted)}
+.lb-insp-leer{padding:24px 18px;gap:8px;align-items:flex-start;text-align:left}
+.lb-insp-leer h2,.lb-insp-leer h3{font:800 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em}
+.lb-insp-leer .lb-tipps{display:flex;flex-direction:column;gap:6px;font:600 var(--fs-1)/1.5 var(--mono);color:var(--faint);letter-spacing:.1em;text-transform:uppercase;list-style:none;padding:0;margin:8px 0 0}
+
+/* Lagebild-Kopf über der Fläche */
+.lb-leinwand::before{content:"// LAGEBILD";position:absolute;left:16px;top:12px;z-index:19;
+  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint);pointer-events:none}
+.lb-leiste-oben{top:34px}
+
+
+/* Inspektor-Kopf + kompakte Begrüßung (POLARIS: ruhiges Band statt Riesenkarte) */
+.lb-inspektor::before{content:"// INSPEKTOR";display:block;padding:12px 18px 0;
+  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint)}
+.sp-einstieg{padding:12px 16px;gap:8px}
+.sp-einstieg-text{font-size:var(--fs-3);line-height:1.45;max-width:78ch}
+.sp-stufe{gap:4px;padding-top:4px}
+.sp-auftrag{padding:12px 16px}
+
+
+/* Begrüßung als flaches Band (statt Karte) */
+@media (min-width:901px){
+  .sp-einstieg{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 16px;padding:12px 16px}
+  .sp-einstieg-text{font-size:var(--fs-3);line-height:1.45;max-width:70ch;margin:0}
+  .sp-stufe{grid-row:2;gap:4px;padding-top:0}
+  .sp-einstieg-knoepfe{grid-row:1/3;grid-column:2;display:flex;gap:8px;align-items:center}
+}
+
+
+/* Fernwartung: das Terminal sitzt im Dock und braucht mehr als die halbe Fläche */
+.labor.lb-fern.dock-da{--dock-b:clamp(300px,58%,980px)}
+
+/* ===== Schmal (max-width 900 px): flaches Band, Werkzeugleiste aus, volle Fläche =====
+   Der Block steht bewusst AM ENDE: die POLARIS-Regeln weiter oben (Band als Paneel,
+   größere Titel) würden die Schmal-Regeln sonst wegen der Ladereihenfolge überschreiben —
+   gemessen: das Band wuchs dadurch so weit, dass die Zeichenfläche bei 720 px unter die
+   Falz rutschte (Rauchtest: Geräte „außerhalb der Fläche"). */
 @media (max-width:900px){
-  .lb-svg{inset:64px 0 0 0;height:auto}
-  .lb-leiste-oben{top:8px;flex-wrap:nowrap}
-  .lb-auftrag{padding:8px 12px}
+  .lb-svg{inset:0}
+  .lb-leiste-oben{display:none}
+  .lb-auftrag{padding:4px 12px 8px}
   .lb-auftrag::before{display:none}
+  .lb-auftrag .sp-auftrag{padding:8px 12px;border-radius:var(--radius-s)}
+  .lb-auftrag .am-zeile{grid-template-columns:32px minmax(0,1fr) auto auto;gap:8px}
   .lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font-size:var(--fs-5)}
   .lb-auftrag .am-ziele{padding:4px 8px}
-  .sp-auftrag{gap:4px}
-  .sp-einstieg{padding:8px 12px;gap:4px}
+  .sp-einstieg{display:flex;flex-direction:column;padding:8px 12px;gap:4px}
+  .sp-einstieg-knoepfe{display:flex;flex-wrap:wrap;gap:8px}
   .sp-einstieg-text{font-size:var(--fs-3);line-height:1.35;max-width:80ch}
+  .sp-coach.hinweis{padding:0}
   .sp-stufe{gap:4px;padding-top:4px}
+  .sp-auftrag{gap:4px}
 }

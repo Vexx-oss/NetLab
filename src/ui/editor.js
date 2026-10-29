@@ -55,6 +55,18 @@ UI.labor = (() => {
 
     /* Fläche */
     Z.svg = sv("svg", {class: "lb-svg", tabindex: "0", role: "application", "aria-label": "Netz-Zeichenfläche. Pfeiltasten verschieben die Ansicht, F passt ein, Fragezeichen zeigt alle Tasten."});
+  /* POLARIS: Die Karten sind größer – ändert sich die Fläche (Begrüßung klappt zu, Dock öffnet),
+     wird neu eingepasst, sonst läge ein Gerät außerhalb der Zeichenfläche (Rauchtest 720 px). */
+  if (typeof ResizeObserver === "function") {
+    let letzteGroesse = "";
+    const beobachter = new ResizeObserver(() => {
+      const r = Z.svg.getBoundingClientRect(), jetzt = Math.round(r.width) + "x" + Math.round(r.height);
+      if (jetzt === letzteGroesse || !Z.netz || !r.width || !r.height) return;
+      letzteGroesse = jetzt;
+      einpassen(false);
+    });
+    beobachter.observe(Z.svg);
+  }
     const defs = sv("defs", {},
       sv("pattern", {id: "lb-raster", width: RASTER, height: RASTER, patternUnits: "userSpaceOnUse"},
         sv("circle", {cx: 0, cy: 0, r: 1.1, class: "lb-raster-punkt"}), sv("circle", {cx: RASTER, cy: 0, r: 1.1, class: "lb-raster-punkt"}),
@@ -271,7 +283,7 @@ UI.labor = (() => {
     let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
     for (const p of liste) { x1 = Math.min(x1, p.x); y1 = Math.min(y1, p.y); x2 = Math.max(x2, p.x); y2 = Math.max(y2, p.y); }
     const extra = UI.ebenen.aktuell === "mac" || UI.ebenen.aktuell === "routen" ? 190 : 0;
-    return {x1: x1 - 80, y1: y1 - 80, x2: x2 + 80 + extra, y2: y2 + 90};
+    return {x1: x1 - 112, y1: y1 - 96, x2: x2 + 112 + extra, y2: y2 + 122};
   }
   function einpassen(animiert = true, ids = null){
     if (!Z.svg) return;
@@ -496,21 +508,24 @@ UI.labor = (() => {
     if (UI.ebenen.aktuell === "ip" && Z.ohne.has(g.id)) klassen.push("ohne-ip");
     const el = sv("g", {class: klassen.join(" "), "data-id": g.id, transform: `translate(${p.x} ${p.y})`});
     const art = UI.geraeteArt(g.typ, g.skin);
-    el.append(sv("rect", {class: "ger-treffer", x: -58, y: -40, width: 116, height: 80, rx: 8}));
-    el.append(sv("rect", {class: "ger-auswahl", x: -62, y: -44, width: 124, height: 88, rx: 10}));
-    el.append(sv("rect", {class: "ger-karte", x: -58, y: -40, width: 116, height: 80, rx: 8}));
-    el.append(sv("g", {class: "ger-bild", transform: "translate(-34 -6) scale(.72)"}, UI.geraetebild(g.typ, g.skin)));
+    /* Große Karten auf breiten Flächen, kompakte auf schmalen – sonst passt das Netz dort nicht. */
+    const BREIT = !(typeof innerWidth === "number" && innerWidth < 900);
+    const KW = BREIT ? 168 : 116, KH = BREIT ? 112 : 80;
+    el.append(sv("rect", {class: "ger-treffer", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: 10}));
+    el.append(sv("rect", {class: "ger-auswahl", x: -KW / 2 - 6, y: -KH / 2 - 6, width: KW + 12, height: KH + 12, rx: 12}));
+    el.append(sv("rect", {class: "ger-karte", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: 10}));
+    el.append(sv("g", {class: "ger-bild", transform: BREIT ? "translate(-54 -22) scale(.9)" : "translate(-34 -6) scale(.72)"}, UI.geraetebild(g.typ, g.skin)));
     const a = UI.ebenen.adresse(netz, g);
     /* Name und Adresse mit Luft: bei 12-13 px Schrift berührten sich die beiden Zeilen (Abstand 0 gemessen,
        Befund 05.10.2026) – das wirkt gedrängt, auch wenn sich die Kästen formal nicht schneiden. */
-    el.append(sv("text", {class: "ger-name", x: -8, y: -4, "text-anchor": "start", text: g.name}));
+    el.append(sv("text", {class: "ger-name", x: BREIT ? -20 : -8, y: BREIT ? -8 : -4, "text-anchor": "start", text: g.name}));
     /* Auf der Fläche steht bewusst NUR die erste Adresse (Kurzform „… +2“ bei mehreren Schnittstellen).
        Alle Adressen mit Schnittstelle stehen im Tooltip. Begründung: Mit allen drei Adressen untereinander
        füllte der Router den Bereich unter sich voll und stieß an die Portnamen – dieselbe Dichte, die der
        Kunde bemängelt hat (Versuch und Messung 05.10.2026). Die Subnetz-Schilder sagen bereits, welche
        Netze es gibt; welcher Router-Port in welchem Netz liegt, verrät der Tooltip und der Inspektor. */
     if (a.text) {
-      const adr = sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: -8, y: 14, "text-anchor": "start", text: a.text});
+      const adr = sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: BREIT ? -20 : -8, y: BREIT ? 16 : 14, "text-anchor": "start", text: a.text});
       /* Adresse anklicken = in die Zwischenablage (Wunsch 05.10.2026: „für easy von hand routing").
          Kopiert wird NUR die Adresse ohne Präfix und ohne „+2" – genau das, was man in eine Route tippt.
 
@@ -989,6 +1004,13 @@ UI.labor = (() => {
     if (Z.root?.isConnected) {
       layoutAnwenden(); auftragZeichnen(); werkzeugAnzeigen(); zeichnen(); inspektorZeigen(); simLeer();
       requestAnimationFrame(() => { einpassen(false); Z.einpassenAusstehend = false; });
+      /* POLARIS: rechts steht der Inspektor dauerhaft – auf breiten Ansichten das erste
+         Infrastruktur-Gerät vorwählen, damit dort echte Werte stehen statt des Leerzustands. */
+      if (typeof innerWidth === "number" && innerWidth >= 1100 && !Z.auswahl && !opt.fernwartung && !Z.fern && !opt.sandbox) {
+        const liste = Object.values(netz.geraete || {});
+        const erstes = liste.find(g => g.typ === "switch") || liste.find(g => g.typ === "router") || liste[0];
+        if (erstes) auswaehlen(erstes.id);
+      }
     }
     UI.werkstatt?.sandboxModus?.(!!opt.sandbox);
     Bus.senden("labor-geladen", {netz, titel: Z.titel});

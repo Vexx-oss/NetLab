@@ -1757,3 +1757,9 @@ R10 durch Blockzusammenlegungen 0. Ethos ist GRÜN gegen den neuen Stand.
 **Nicht geändert.** Datenformen, Simulation, Tests, Bedienlogik, Trefferflächen (`ger-treffer` 116 × 80,
 `kabel-treffer` 14), Tastenkürzel, Klassenraum, Kontrastregeln der Semantikfarben (18.4).
 
+
+
+**Nachtrag POLARIS-Struktur (§ 18.15).** Karten 168 × 112 (schmal 116 × 80), Band als Paneel mit
+28-px-Titel, Inspektor als Paneel mit Reiterzeile und Vorauswahl des ersten Infrastruktur-Geräts auf
+breiten Flächen, „// LAGEBILD"-Kopf, `ResizeObserver` für erneutes Einpassen. Schmale Breiten:
+Werkzeugleiste aus, Band flach — sonst liegt die Fläche unter der Falz.
