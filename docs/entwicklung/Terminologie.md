@@ -107,7 +107,7 @@ Achse 1: `src/spiel/karriere.js` (`KARRIERE_STUFEN`, Nr. 22–30). Achse 5: `src
 ## 5 · Ist-Stand und Vorschläge (nur genannt, nicht umgesetzt)
 
 Der grep-Audit (Datei:Zeile, Klassifikation, Risiko) steht vollständig in
-[`analysis/NetLab/qa/S7b-Terminologie-Audit.md`](../../../analysis/NetLab/qa/S7b-Terminologie-Audit.md).
+`analysis/NetLab/qa/S7b-Terminologie-Audit.md` (Arbeitsdatei außerhalb des Repositoriums).
 Kurz: von 37 sichtbaren „Stufe"-Strings in `src/ui/**` sind 11 eindeutig Karriere und 4 Hilfe;
 **21 sind ohne Qualifier** und damit Kandidaten für Klarstellung. Die zwei heikelsten:
 
@@ -125,4 +125,4 @@ Alle Umbenennungen berühren Spielstände, Codec und Tests — deshalb bewusst n
 - [`Architektur.md`](../Architektur.md) § 13 (Hilfestellung, drei Achsen) und § 3–4 (Datenformen)
 - [`Hilfestellung – Stufen und Schnittstellen.md`](<Hilfestellung – Stufen und Schnittstellen.md>) (Vertrag)
 - [`CHANGELOG.md`](../CHANGELOG.md) 2.0.5/2.1.0 (wo die Achsen entstanden sind)
-- Audit: [`S7b-Terminologie-Audit.md`](../../../analysis/NetLab/qa/S7b-Terminologie-Audit.md)
+- Audit: `analysis/NetLab/qa/S7b-Terminologie-Audit.md` (Arbeitsdatei außerhalb des Repositoriums)
