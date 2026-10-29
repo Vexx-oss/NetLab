@@ -1,15 +1,15 @@
 /* Kundenakte (E2, Hebel 10): Zeile in der Kundenkarte, Akte mit Atlas, Geschichten, Baustellen – Präfix ka- */
-.ka-zeile{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px}
+.ka-zeile{display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:2px}
 .ka-zeile .knopf{margin-left:auto}
 .ka-herzen{color:var(--ruf); letter-spacing:1px; font-size:var(--fs-4)}
 .ka-herzen.gross{font-size:var(--fs-5)}
 .ka-seite{gap:14px}
 .ka-zurueck{align-self:flex-start}
-.ka-kopf{display:flex; gap:14px; align-items:flex-start}
+.ka-kopf{display:flex; gap:12px; align-items:flex-start}
 .ka-kopf h2{margin:0; font:800 var(--fs-6)/1.2 var(--display)}
 .ka-kopf p{margin:2px 0}
 .ka-vertrauen{font-weight:700}
-.ka-block{padding:14px 16px; border-radius:14px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
+.ka-block{padding:12px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
 .ka-block h3{margin:0; font:800 var(--fs-4)/1.2 var(--display)}
 .ka-block h3 small{font:600 var(--fs-2) var(--body); color:var(--muted)}
 .ka-atlas-rahmen{overflow-x:auto; max-width:100%}
@@ -19,10 +19,10 @@
 .ka-atlas .np-geraet.ka-hell .np-ring{stroke:var(--accent); stroke-width:2.5; fill:var(--accent-soft)}
 .ka-kapitel{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px}
 .ka-kapitel li.zu, .ka-lohn li{color:var(--faint)}   /* R10: ein Block – gesperrtes Kapitel und noch nicht verdienter Lohn */
-.ka-kapitel-knopf{all:unset; cursor:pointer; padding:5px 8px; border-radius:8px; font-weight:600}
+.ka-kapitel-knopf{all:unset; cursor:pointer; padding:4px 8px; border-radius:var(--radius-s); font-weight:600}
 .ka-kapitel-knopf:hover, .ka-kapitel-knopf:focus-visible{background:var(--accent-soft); outline:none}
 .ka-neu{color:var(--accent); font-size:var(--fs-2); font-weight:800}
-.ka-baustellen, .ka-verlauf{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:3px}
+.ka-baustellen, .ka-verlauf{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:3px}
 .ka-dialog{max-width:620px}
 .ka-geschichte{display:flex; flex-direction:column; gap:10px}
 .ka-text{margin:0; font-size:var(--fs-4); line-height:1.55}
@@ -35,7 +35,7 @@
 .ka-optionen .knopf.falsch{border-color:var(--warn); background:var(--warn-soft); color:var(--ink); opacity:1}
 .ka-ergebnis p{margin:4px 0}
 /* Vertrauen zahlt aus (§ 20 F5): Empfehlung ab 3, Rabatt ab 4 */
-.ka-lohn{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 14px; font-size:var(--fs-2)}
+.ka-lohn{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px 12px; font-size:var(--fs-2)}
 .ka-lohn li.da{color:var(--ok); font-weight:700}
 .ka-lohn li.bald{color:var(--ink)}
 .ka-lohn .ka-herzen{font-size:var(--fs-2); letter-spacing:0}

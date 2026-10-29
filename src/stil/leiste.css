@@ -4,7 +4,7 @@ html[data-modus="leiste"], html[data-modus="leiste"] body, html[data-modus="tray
 html[data-modus="leiste"] body{overflow:hidden}
 .leiste-wurzel{position:fixed; inset:0; pointer-events:none}
 .leiste-karte{pointer-events:auto; position:absolute; left:0; top:0; width:300px; height:56px; display:flex; flex-direction:column; overflow:hidden;
-  border-radius:14px; background:var(--leiste-bg); border:1px solid var(--line-2); color:var(--ink);
+  border-radius:var(--radius); background:var(--leiste-bg); border:1px solid var(--line-2); color:var(--ink);
   opacity:var(--leiste-deckkraft, .55); transition:opacity var(--dauer), height var(--dauer), width var(--dauer), box-shadow var(--dauer); user-select:none; -webkit-user-select:none}
 .leiste-karte.hover{opacity:1}
 .leiste-karte.auf{width:320px; height:300px}
@@ -25,15 +25,15 @@ html[data-modus="leiste"] body{overflow:hidden}
 .lk-zeile{display:flex; align-items:center; gap:8px; height:54px; flex:0 0 auto; padding:0 6px 0 2px}
 .lk-griff{display:flex; align-items:center; justify-content:center; width:18px; align-self:stretch; color:var(--faint); cursor:grab}
 .lk-griff .sym, .lk-werte > *, .lk-werte .sym{pointer-events:none}
-.lk-ampeln{display:flex; align-items:center; gap:5px; min-width:0; flex:0 1 auto}
+.lk-ampeln{display:flex; align-items:center; gap:4px; min-width:0; flex:0 1 auto}
 .lk-ampel{display:inline-flex}
 .lk-ampel-sym.f-ok{fill:var(--ok)} .lk-ampel-sym.f-warn{fill:var(--warn)} .lk-ampel-sym.f-bad{fill:var(--bad)}
 .lk-keine{font:700 var(--fs-2)/1 var(--display); color:var(--muted); white-space:nowrap}
 .lk-mehr{font:600 var(--fs-1)/1 var(--body); color:var(--muted)}
-.lk-werte{display:flex; align-items:center; gap:9px; margin-left:auto; font:700 var(--fs-2)/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap}
+.lk-werte{display:flex; align-items:center; gap:8px; margin-left:auto; font:700 var(--fs-2)/1 var(--body); font-variant-numeric:tabular-nums; white-space:nowrap}
 .lk-wert{display:inline-flex; align-items:center; gap:3px}   /* Euro je Stunde und Ruf */
 .lk-euro{color:var(--geld)}
-.lk-ruf{display:inline-flex; align-items:center; gap:3px; color:var(--ink)}
+.lk-ruf{display:inline-flex; align-items:center; gap:4px; color:var(--ink)}
 .lk-ruf .sym{color:var(--ruf)}
 .lk-offen{display:inline-flex; align-items:center; gap:4px; color:var(--muted)}
 .lk-punkt{width:8px; height:8px; border-radius:50%; background:var(--faint)}
@@ -50,7 +50,7 @@ html[data-modus="leiste"] body{overflow:hidden}
 /* Sichtbares Zeichen für ein wartendes Mini-Ticket (nur dann sichtbar; hidden wird per JS gesetzt). */
 .lk-mini-wartet{display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px; border-radius:var(--radius); border:1px solid var(--accent-soft); background:var(--accent-soft); color:var(--accent); font:700 var(--fs-1)/1 var(--display); flex:0 0 auto}
 .lk-mini-wartet .lk-punkt{background:var(--accent)}
-.lk-auf{display:flex; flex-direction:column; gap:6px; flex:1 1 auto; min-height:0; padding:0 10px 8px; opacity:0; transition:opacity var(--dauer)}
+.lk-auf{display:flex; flex-direction:column; gap:4px; flex:1 1 auto; min-height:0; padding:0 8px 8px; opacity:0; transition:opacity var(--dauer)}
 .leiste-karte.auf .lk-auf{opacity:1; transition-delay:var(--dauer-kurz)}
 .lk-text{font-size:var(--fs-2); color:var(--muted); line-height:1.35}
 .lk-mini{flex:1 1 auto; min-height:0; overflow:auto; border-radius:var(--radius)}

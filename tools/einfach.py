@@ -194,14 +194,26 @@ def bauen(quelle: Path, stil: Path, ziel: Path) -> int:
         )
 
     # Lizenzblock einbetten (2.1.0): PolyForm + OFL samt Copyright der Schriften.
+    # BEFUND 29.10.2026 (behoben): Der App-Code enthält in `H.seite` ein vollständiges simuliertes
+    # HTML-Dokument als String (`<!DOCTYPE html> … </body>`). Deshalb wird der Block vor dem
+    # LETZTEN `</body>` eingefügt — der frühere Einbau am ERSTEN `</body>` landete mitten im
+    # JavaScript und machte die Einzeldatei unbrauchbar (`SyntaxError: Unexpected end of input`,
+    # #app blieb leer; betraf bereits den Bau von v2.1.0). `pruefen()` prüft die Lage jetzt mit.
     block = lizenzblock()
     if LIZENZ_MARKE not in neu:
-        if "</body>" in neu:
-            neu = neu.replace("</body>", block + "\n</body>", 1)
-        elif "</html>" in neu:
-            neu = neu.replace("</html>", block + "\n</html>", 1)
-        else:
-            raise SystemExit("FEHLER: kein </body> oder </html> gefunden — der Lizenzblock kann nicht eingefuegt werden.")
+        # Sichere Stelle: NACH dem letzten </script> (sonst landet der Block im JS) und so früh
+        # wie möglich — also vor dem letzten </body>, sonst vor dem letzten </html>.
+        letztes_skript = neu.rfind("</script>")
+        stellen = [p for p in (neu.rfind("</body>"), neu.rfind("</html>")) if p > letztes_skript]
+        if not stellen:
+            raise SystemExit("FEHLER: keine sichere Einbaustelle (</body>/</html> nach dem letzten "
+                             "</script>) gefunden — der Lizenzblock kann nicht eingefuegt werden.")
+        stelle = min(stellen)
+        neu = neu[:stelle] + block + "\n" + neu[stelle:]
+    elif neu.find(LIZENZ_MARKE) < neu.rfind("</script>"):
+        # Der Marker steht vor dem letzten </script> — dann liegt er in einem Skriptblock (Altbau).
+        raise SystemExit("FEHLER: Lizenzblock steht innerhalb eines Skripts (Bau von vor dem 29.10.2026). "
+                         "Bitte die Datei mit `python tools/einfach.py --ziel …` neu bauen.")
 
     rest = aussenverweise(neu)
     if rest:
@@ -237,6 +249,17 @@ def pruefen(ziel: Path) -> int:
               "`python tools/einfach.py` ist er enthalten.")
     else:
         print("  Lizenzblock enthalten: PolyForm Noncommercial 1.0.0 + OFL-Texte.")
+        # Lage pruefen (Befund 29.10.2026): der Block muss AUSSERHALB jedes Skriptblocks stehen.
+        # Vor dem oeffnenden <script> des Blocks muss jedes Skript geschlossen sein.
+        pos = html.find(LIZENZ_MARKE)
+        blockstart = html.rfind("<script", 0, pos)
+        if blockstart < 0:
+            blockstart = pos
+        vor = html[:blockstart]
+        if vor.count("<script") != vor.count("</script>"):
+            print("  ROT: Lizenzblock steht innerhalb eines Skriptblocks \u2014 die Seite rendert nicht.")
+            print("    Abhilfe: `python tools/einfach.py --ziel <datei>` neu bauen.")
+            return 1
     if rest:
         print("  ROT: Aussenverweise uebrig:")
         for r in rest:

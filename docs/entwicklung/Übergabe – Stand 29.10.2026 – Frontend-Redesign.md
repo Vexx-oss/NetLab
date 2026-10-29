@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Redesign, Übergabe, Kontext]
 erstellt: 2026-10-29
-status: Übergabezettel für die nächste Sitzung — Stand v2.1.0, Redesign-Vorlage A favorisiert, Frontend noch nicht umgebaut; Plugin-Ausbau und 工艺-Prozess dokumentiert, Workflow-Prompt 2.0 in § 12.
+status: Redesign gebaut und abgenommen — Fassung 2.2.0, Welle 1+2 fertig, Doku/Stand/CHANGELOG nachgezogen; offen nur R12-Entscheidung und die Veröffentlichungs-Freigaben (§ 13).
 ---
 
 # Übergabe — Stand nach der Sitzung vom 29.10.2026 (Frontend-Redesign)
@@ -426,3 +426,51 @@ Kurz und konkret: Ist-Check (Zweig sauber, v2.1.0, Tests 873/873), Prozess-Outli
 Dichte, Hellmodus, Fassung (2.2.0 oder 3.0.0) — und dann sofort mit Link 1 (Vertrag) beginnen,
 sobald er bestätigt oder „entscheide du" sagt.
 ````
+
+
+## 13 · Ergebnis der Redesign-Sitzung (29.10.2026, 19:00–20:45)
+
+**Kurz:** Der Gestaltungsvertrag steht (§ 18), Welle 1 und 2 sind gebaut und abgenommen,
+die Doku ist nachgezogen, die Fassung **2.2.0** ist gezogen und gebaut. **Nicht** gepusht,
+**nicht** veröffentlicht, die `.exe` **nicht** nach `Programm/` kopiert (nur mit Freigabe).
+
+### 13.1 Was fertig ist
+
+| Link (工艺) | Ergebnis |
+|---|---|
+| 1 · Vertrag | `docs/Architektur.md` **§ 18** (Tokens dunkel/hell, Typo, Shell, Komponenten, Dateizuordnung, Teststrategie, offene Nutzerentscheidungen) |
+| 2 · Gates | `ethos.py`-Skala auf § 18.5; `tests/stil-stand.json` neu eingefroren (R2 113→**23**, R4 514→**128**, R10 **0**) |
+| 3–5 · Welle 1 | Tokens, Shell (Kopf **56**, Leiste **88**, Statusfuß **28**), Komponenten (§ 18.8), Hub „Heute", Labor-Chrome; Schatten nur als neutraler Overlay-Schatten, Glow nur am Hauptknopf |
+| 6 · Welle-1-Abnahme | `Nachweise/redesign/welle1-abnahme.md` |
+| 7–10 · Welle 2 | alle Ansichten/Werkzeuge über Tokens, Altlast-Literale ersetzt; `Nachweise/redesign/welle2-abnahme.md` |
+| 11 · Doku/Stand | `stand.py`/`seite.py` gelaufen, `--pruefen` beides **GRÜN**, CHANGELOG-Abschnitt 2.2.0 geschrieben |
+| 12 · Fassung | **2.2.0** gesetzt (`fassung-ziehen.py --setzen`, `VERSION_CODE = 20201`), Einzeldatei byte-gleich, `.exe` ProductVersion **2.2.0** |
+
+**Gemessen am 29.10.2026** ([`STAND.md`](../STAND.md) ist die Quelle): 873/873 Tests grün,
+0 übersprungen · Rauchtest **45/45** · `ethos.py` grün (R1 22 · R2 23 · R3 4 · R4 128 · R5–R11 0) ·
+`klassen.py` 0 · Simulation **unverändert** · Einzeldatei 3.163.368 B, SHA256 `3BFE278C…3A4C94`,
+0 Außenverweise · Baukennung `02885212` · 50 Doku-Dokumente.
+
+### 13.2 Nebenfund, behoben (war blockierend)
+
+`tools/einfach.py` setzte den Lizenzblock am ersten `</body>` ein; der App-Code enthält in
+`H.seite` selbst ein simuliertes HTML-Dokument als String. Der Block landete dadurch **im
+JavaScript** — die Einzeldatei war **seit v2.1.0 nicht lauffähig** (`#app` blieb leer). Neu:
+Einbau nach dem letzten `</script>`, Lage-Prüfung in `--pruefen`.
+
+### 13.3 Offen — Entscheidung des Nutzers
+
+1. **R12** („max. 6 Bedienelemente je Ansicht"): Altbefund, nie durchgesetzt; mit `ethos.py --dom`
+   gemessen überschritten (Heute 8 · Labor 22 · Training 40 · Wiki 34 · Lernstand 31).
+   **Einfrieren** (dann zählt sie künftig mit) oder Oberfläche reduzieren (eigenes Vorhaben)?
+2. **Freigaben:** `.exe` nach `Programm/` kopieren, Commit (lokal bereits erlaubt), `git push`,
+   Tag `v2.2.0`, Release — alles **nur auf ausdrückliche Freigabe**.
+3. **Android-APK:** nicht gebaut (Android-SDK fehlt auf diesem Rechner, siehe § 3.2).
+4. **`ethos.py --dom`** braucht ein laufendes Programm am CDP-Port; der Startversuch der neuen
+   `.exe` über `tools/cdp.py start` meldete sich nicht am Port (Ursache **nicht geprüft**).
+
+### 13.4 Nächster Schritt
+
+R12 entscheiden; danach – auf Zuruf – veröffentlichen (Schritte 7/8 aus
+[`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md)): Push, Tag `v2.2.0`, Release mit den drei
+Anhängen, Live-Seite hashen.

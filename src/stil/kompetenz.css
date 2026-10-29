@@ -1,12 +1,12 @@
 /* Kompetenzkarte im Lernstand (E2, Hebel 11a) – Präfix kk- */
-.kk-karte{padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
+.kk-karte{padding:16px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
 .kk-kopf{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
 .kk-kopf h3{font:800 var(--fs-5)/1.2 var(--display); margin:0}
 .kk-regionen{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px}
-.kk-region{padding:10px 12px; border-radius:12px; background:var(--panel-2); border:1px solid var(--line)}
+.kk-region{padding:8px 12px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line)}
 .kk-region h4{margin:0 0 8px; font:700 var(--fs-3)/1.2 var(--display); color:var(--ink)}
 .kk-felder{display:flex; flex-wrap:wrap; gap:6px}
-.kk-feld{all:unset; cursor:pointer; box-sizing:border-box; display:flex; flex-direction:column; gap:1px; min-width:120px; max-width:100%; flex:1 1 120px; padding:7px 9px;
+.kk-feld{all:unset; cursor:pointer; box-sizing:border-box; display:flex; flex-direction:column; gap:0px; min-width:120px; max-width:100%; flex:1 1 120px; padding:8px 8px;
   border-radius:var(--radius); border:1px solid var(--line); background:var(--panel); font-size:var(--fs-2); line-height:1.25}
 .kk-feld:hover, .kk-feld:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 .kk-name{font-weight:700; color:var(--ink)}

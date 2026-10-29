@@ -24,4 +24,4 @@ html[data-leiste="schiene"] .leiste-karte{border-left:3px solid var(--accent)}
 html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-mix(in srgb, var(--line-2) 60%, transparent) 1px, transparent 1.3px); background-size:10px 10px}
 
 /* Shop: Farbtupfer vor dem Namen einer Akzentfarbe */
-.kr-tupfer{display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:-1px; background:var(--tupfer); border:1px solid var(--line-2)}
+.kr-tupfer{display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:4px; vertical-align:-1px; background:var(--tupfer); border:1px solid var(--line-2)}

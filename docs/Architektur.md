@@ -1406,3 +1406,315 @@ ein Neu-Einfrieren aus der lebenden Reihenfolge waere ein Bruch.
 
 
 
+
+## 18 · Frontend-Redesign — Gestaltungsvertrag (29.10.2026) — verbindlicher Vertrag
+
+**Anlass.** Der Nutzer hat ein „komplettes Redesign des Frontends" beauftragt: **Optik + Shell neu,
+Bedienlogik und Ansichten bleiben** (Übergabe 29.10.2026 § 1). Drei Bild-Vorlagen liegen unter
+`Nachweise/Prototypen-Redesign/` (nicht versioniert, weil `Nachweise/` in der `.gitignore` steht);
+Basis ist **A · „Matrix-Elegant"**. Dieser Abschnitt ist die **eine Quelle** für Farbtokens, Typo-Skala,
+Shell-Maße, Komponenten und die Zuordnung zu den Dateien — nach der Projektregel „Vertrag zuerst"
+(`AGENTS.md`): erst diese Datenform, dann Code.
+
+**Belege.** Alle hier genannten Werte stammen entweder aus `matrix/NOTIZ.md` (Prototyp, dort am Pixel
+geprüft) oder aus `BRIEF.md`; abgeleitete Werte sind ausdrücklich als **abgeleitet** gekennzeichnet und
+werden im Umbau gemessen. Nichts hier ist eine Behauptung über den heutigen Code, ohne dass es an
+`src/stil/basis.css` dieser Sitzung geprüft wurde.
+
+### 18.1 Geltung und Nicht-Ziele
+
+| Gegenstand | Festlegung |
+|---|---|
+| Gilt für | alle sichtbaren Flächen des Web-/Windows-/Einzeldatei-Baus: Tokens, Typo, Shell (Kopfzeile, linke Leiste, Statusfuß), Karten, Knöpfe, Dialoge, Toasts, Netzfläche, Werkzeuge, alle Ansichten |
+| Gilt **nicht** für | Bedienlogik, DOM-Verträge, Datenformen, Simulation, Tests mit Verhaltenszusicherung, Inhaltstexte. Diese bleiben **unangetastet** (§ 18.11) |
+| Basis-Vorlage | **A · Matrix-Elegant** (`Nachweise/Prototypen-Redesign/matrix/`, `matrix-board.png`, `-hub`, `-labor`, `-stil`) |
+| Alternativen | B · Holo-Suite und C · Neon-Blueprint bleiben als Stimmungshilfen liegen; einzelne Ideen (z. B. C für Netz-Annotationen) sind **kein** Vertragsbestandteil |
+| Nicht-Ziele | keine neuen Ansichten, keine neuen Gerätetypen, keine neuen Inhalte/Tickets, kein Umbau der Android-Eigenheiten (`android/mobil/mobil.css`) über die gemeinsamen Tokens hinaus, keine Änderung an `tests/sim-stand.json` |
+| Grundsatz | Die Vorlage ist **Stimmungsvorlage**, keine 1:1-Implementierung: Mikrolabels 8–9 px werden auf ≥ 11 px gehoben (§ 18.5), die Dichte sinkt dadurch leicht — gewollt |
+| Veraltet | § 16.4 bleibt in Kraft (Bewegung, Icon-Regel, Press-Regel), wird aber durch § 18.5–18.9 ergänzt. Bei Widerspruch gilt § 18 |
+
+### 18.2 Farbtokens — dunkel (Standard)
+
+Der Grund ist **schwarzgrün, nicht blau**: A ersetzt die alte Blau-Leitstand-Palette. Spalten:
+Token · heutiger Wert (v2.1.0, gemessen in `basis.css`) · neuer Wert (A) · Bedeutung.
+
+| Token | v2.1.0 | A (neu) | Bedeutung / Verwendung |
+|---|---|---|---|
+| `--bg` | `#0E131B` | **`#04070A`** | Fläche hinter allem; Grund der App |
+| `--bg-raster` | `#16202D` | **`rgba(163,255,214,.06)`** | 24-px-**Punktraster** als Textur (Punkte 1 px, Abstand 24 px) — ersetzt die Linienraster-Optik |
+| `--panel` | `#141B26` | **`#08100C`** | Paneele: Inspektor, Dock, Kopfzeile, Leiste, Kartenflächen |
+| `--panel-2` | `#1B2433` | **`#0B160F`** *(abgeleitet)* | abgesetzte Felder (Chips, Eingaben, Listenzeilen) |
+| `--panel-3` | `#233047` | **`#101D16`** *(abgeleitet)* | Hover, aktive Reiter, gedrückte Flächen |
+| `--line` | `#2A3649` | **`rgba(163,255,214,.10)`** (Swatch `#1A2B23`) | **Haarlinien**: 1 px, Rahmen, Trenner |
+| `--line-2` | `#3A4A62` | **`rgba(163,255,214,.18)`** *(abgeleitet)* | betonte Linien: Fokusrahmen, aktive Kante, Tabellenkopf |
+| `--ink` | `#E6ECF5` | **`#E8F4ED`** | Text |
+| `--muted` | `#93A1B8` | **`#97AC9F`** | Nebentext |
+| `--faint` | `#8A98AD` | **`#7C9386`** | gedämpft (bleibt ≥ 4,5:1, § 18.12) |
+| `--accent` | `#4FC3F7` | **`#30E58B`** | **Handlungsfarbe**: genau ein Hauptknopf, aktiver Weg, Fokus — sonst nichts |
+| `--accent-ink` | `#06121C` | **`#04120A`** | Text auf Akzentfläche |
+| `--accent-soft` | `#12324A` | **`#0E2A1C`** *(abgeleitet)* | Akzent-Hauch: aktive Fläche, Auswahl |
+| `--ok` | `#4ADE80` | **`#54E6A8`** | Erfolg/Ziel erreicht (Semantik) |
+| `--ok-soft` | `#0F3322` | **`#0B2A1B`** *(abgeleitet)* | Erfolgsfläche, sparsam |
+| `--warn` | `#FBBF24` | **`#F2C14E`** | Warnung (Semantik, nie Fläche) |
+| `--warn-soft` | `#3A2D0B` | **`#2E2410`** *(abgeleitet)* | Warnzeile, 2-px-Kante (§ 18.8) |
+| `--bad` | `#F87171` | **`#FF6B8A`** | Fehler (Semantik, nie Fläche) |
+| `--bad-soft` | `#3B1515` | **`#33121C`** *(abgeleitet)* | Fehlerfläche, sparsam |
+| `--info` | `#A78BFA` | **`#22D3EE`** | Zusatzinfo / seltener **Daten**-Akzent (Sekundärfarbe A) |
+| `--info-soft` | `#271D45` | **`#0A2630`** *(abgeleitet)* | Info-Fläche |
+| `--glas` | `rgba(20,27,38,.82)` | **`rgba(4,7,10,.82)`** | halbdurchsichtige Werkzeugleisten über der Netzfläche |
+| `--leiste-bg` | `rgba(20,27,38,.94)` | **`rgba(4,7,10,.94)`** | linke Leiste |
+| `--schatten` | `0 10px 30px rgba(0,0,0,.45)` | **`0 12px 32px rgba(0,0,0,.55)`** — nur Overlays (Dialog, Menü, Toast); **`--glow: 0 0 0 1px rgba(48,229,139,.35), 0 0 24px rgba(48,229,139,.18)`** — nur Hauptknopf `.knopf.primaer` | A: keine Karten-Schatten, Tiefe kommt aus Haarlinien; Glow ist Handlungsfarbe |
+
+**Akzent-Disziplin (verbindlich, aus A):** Emerald `#30E58B` ist **eine** Handlungsfarbe je Bildschirm
+(ein Hauptknopf, aktiver Weg, Fokus). Cyan `#22D3EE` erscheint nur als seltener Daten-Akzent.
+Warnung/Fehler bleiben **Semantik** (Text, Kante, Punkt) und werden **nie** flächig.
+Keine Scanlines, keine Glitches, kein Matrix-Zeichenregen — die Anmutung kommt aus Raster, Haarlinien
+und Disziplin.
+
+### 18.3 Farbtokens — hell (Ableitung)
+
+Hell war in **keiner** Vorlage entworfen (nur dunkel). Es wird aus den A-Tokens abgeleitet, damit die
+Bedeutung wandert und nicht die Optik: gleiche Hue-Familie (grünlich-neutral), Emerald wird zum
+**dunklen** Handlungsgrün, damit der Kontrast auf hellem Grund trägt.
+
+| Token | hell (abgeleitet) | Begründung |
+|---|---|---|
+| `--bg` | `#F2F6F3` | helles Grün-Grau, kein reines Weiß |
+| `--bg-raster` | `rgba(11,90,58,.10)` | Punktraster bleibt sichtbar, aber leise |
+| `--panel` | `#FFFFFF` | Paneele heben sich vom Grund |
+| `--panel-2` | `#F7FAF8` | abgesetzte Felder |
+| `--panel-3` | `#E8EFEA` | Hover/aktiv |
+| `--line` | `#D2DED7` | Haarlinien |
+| `--line-2` | `#B4C6BB` | betonte Linien |
+| `--ink` | `#0B1512` | Text |
+| `--muted` | `#4C5F56` | Nebentext |
+| `--faint` | `#5C7066` | gedämpft (≥ 4,5:1 auf `--bg`/`--panel`) |
+| `--accent` | `#0B7A4B` | Handlungsgrün dunkel; auf Weiß ≥ 4,5:1 (im Umbau gemessen) |
+| `--accent-ink` | `#FFFFFF` | Text auf Akzentfläche |
+| `--accent-soft` | `#DDF3E7` | Akzent-Hauch |
+| `--ok` | `#0F7A3E` · `--ok-soft` `#DDF3E7` | Erfolg |
+| `--warn` | `#8A5A00` · `--warn-soft` `#FBF0D6` | Warnung |
+| `--bad` | `#A81E42` · `--bad-soft` `#FBE4EA` | Fehler |
+| `--info` | `#0E7490` · `--info-soft` `#DDF1F5` | Info |
+| `--glas` / `--leiste-bg` | `rgba(255,255,255,.86)` / `rgba(255,255,255,.95)` | Werkzeugleisten |
+| `--schatten` | `0 12px 32px rgba(20,32,51,.18)` (nur Overlays) | Tiefenschatten bleibt neutral |
+| `--glow` | `0 0 0 1px rgba(11,122,75,.25), 0 0 24px rgba(11,122,75,.12)` (nur Hauptknopf) | Glow bleibt Handlungssache |
+
+**Pflicht:** Hell wird **gleichwertig** geprüft (beide Schemata, `ui-kontrast.test.js`, Screenshots).
+Kein Token darf nur im dunklen Schema existieren.
+
+### 18.4 Semantik- und Datenfarben, die **nicht** wandern
+
+Diese Farben tragen **Bedeutung** und werden aus A **nicht** umgefärbt; sie werden nur an die neuen
+Flächen geprüft (Kontrast/Haarlinien):
+
+- Protokollfarben `--p-arp … --p-http`, VLAN-Farben `--vlan-1 … --vlan-8`, Zonen `--zone-a … --zone-e`
+  (samt `-linie`): unverändert (jede Farbe erscheint immer **mit** Beschriftung).
+- Gerätetyp-Farben `--typ-router … --typ-internet`: unverändert.
+- Shop-Akzentfarben (`data-akzent`: bernstein/minze/koralle/violett) in `aussehen.css`: **unverändert**,
+  inklusive der Regel, dass sie nur Shop-Flächen färben; sie müssen auf `--panel`/`--panel-2` lesbar bleiben.
+- Leistenstile (`data-leiste`) in `leiste.css`: **unverändert** erhalten (Auswahl bleibt sichtbar).
+- `--geld` (Gold) und `--ruf` (Ruf): bleiben Datenfarben und werden nicht zu Akzentfarben.
+
+### 18.5 Typografie
+
+**Schriften** (unverändert, bereits in `basis.css` und im Projektstamm `schriften/`):
+`--display: Bricolage Grotesque` (600/800 — Wortmarke, H1, Kartentitel, Knöpfe),
+`--body: Atkinson Hyperlegible` (400/700 — Fließtext, Zeilen),
+`--mono: JetBrains Mono` (400/600 — Mikrolabels, IPs, Messwerte, Statuszeile).
+**Keine neuen Schriftdateien, keine Netzschriften.**
+
+**Skala (verbindlich, ersetzt die sechs Stufen aus § 16.4):**
+
+| Token | px | Verwendung in A |
+|---|---|---|
+| `--fs-1` | **11** | Mikrolabels (Mono, Versalien, Sperrung `.08em`, `//`-Präfix), SVG-Beschriftung, Chips, Statuszeile — **Untergrenze für funktionale Beschriftung** |
+| `--fs-2` | **12.5** | dichte Zeilen, Tabellen, Hinweise |
+| `--fs-3` | **14** | Standard-Fließtext in Karten und Formularen |
+| `--fs-4` | **16** | Grundtext (`body`) |
+| `--fs-5` | **20** | Kartentitel, Abschnittsüberschriften |
+| `--fs-6` | **28** | H2/Ansichtstitel |
+| `--fs-7` | **34** | *(neu)* H1 klein / große Zahlen |
+| `--fs-8` | **44** | *(neu)* H1 der Vorlage A (44/46) |
+
+**Regeln:**
+- Funktionale Beschriftung **nie unter 11 px** (Projekt-Gate `ui-typografie.test.js`); die 7–10-px-Labels
+  der Vorlage werden auf `--fs-1` gehoben. Die Bilder sind Stimmungsvorlage, keine 1:1-Implementierung.
+- Mono nur für **Daten** (IPs, Ports, Messwerte, Status, Mikrolabels) — nicht für Fließtext.
+- **13 px und 15 px** sind Altlasten aus v2.1.0 (`--fs-`-Nachbarwerte); sie werden beim Umbau ersetzt.
+  Bis eine Datei umgestellt ist, bleiben sie in `ethos.py` erlaubt, dürfen aber **nicht** neu entstehen.
+- H1/H2 mit `line-height: 1.1–1.15`, `text-wrap: balance` (bestehende Regel bleibt).
+- Satzbreite: Fließtext max. **72 Zeichen** (`ch`) je Spalte; Karten mit Fließtext ≥ 320 px.
+
+### 18.6 Raster, Abstände, Radien, Schatten
+
+| Gegenstand | Festlegung |
+|---|---|
+| Abstands-Skala | **4 · 8 · 12 · 16 · 24 · 32 px** (unverändert aus § 16.4; die Vorlage nutzt genau dieses Raster) |
+| Grundraster | 8-px-Grundraster, 4-px-Halbschritte; Shell-Breiten in § 18.7 |
+| Radien | **4 / 8 / 12 px** — `--radius-xs:4px` · `--radius-s:8px` · `--radius:12px`; Kreise `999px`/`50%`. Die alten Werte **6 px und 10 px entfallen** |
+| Schatten | **nur** am Hauptknopf (`--glow`); Karten und Paneele **ohne** Schlagschatten (Trennung über Haarlinien/Flächen); nur Overlays (Dialog, Menü, Toast, Leistenkarte im Browser) dürfen den neutralen `--schatten` tragen |
+| Rahmen | 1 px Haarlinie (`--line`); betonte Kante 2 px (`--accent` aktiv, `--warn` Warnzeile, `--bad` Fehler) |
+| Textur | 24-px-Punktraster im Hintergrund der Arbeitsfläche (`--bg-raster`), **max. eine** Textur je Bildschirm; keine Scanlines |
+| Kontrast | alle Text-Tokens ≥ **4,5:1** auf `--bg`/`--panel`/`--panel-2` in **beiden** Schemata; Nicht-Text (Linien, Icons) ≥ 3:1 |
+
+### 18.7 Shell — Kopfzeile, linke Leiste, Statusfuß
+
+A ersetzt die v2.1.0-Shell (Kopf 54 px, `--kopf-h`; Dock 76 px, `--dock-b`) durch:
+
+| Bauteil | Maß | Inhalt und Verhalten (Optik neu, Bedienung gleich) |
+|---|---|---|
+| Kopfzeile | **56 px** (`--kopf-h`) | links Wortmarke **Netzwerk-Labor** + Fassungs-Chip `v2.1`→`v2.2` (aus `STAND.md`, nicht getippt); Mitte **vier Werte-Chips** (bestehende Werte, keine neuen Daten); rechts Suche mit `Strg+K`, Theme/Umschalter, Zahnrad (Einstellungen), Hilfe. Rechte Seite ist eine **ruhige Werkzeugleiste** (Symbolknöpfe 40×40) |
+| Linke Leiste | **88 px** (`--leiste-w`) | **alle sieben Wege** (unverändert in Anzahl, Reihenfolge und Ziel): Symbol + Text untereinander; aktiver Weg mit **2-px-Emerald-Kante links** und leichtem Flächenhauch (`--accent-soft`); Weg-Höhe 80 px, Trefferfläche volle Breite |
+| Statusfuß | **28 px** (`--fuss-h`, neu) | reine **Anzeige** (Serie, SIM-Werte, Verbindung): Mono `--fs-1`, `--muted`; keine Knöpfe, keine Trefferflächen |
+| Arbeitsfläche | Rest | Layout-Raster unverändert (Leiste + Inhalt + Dock); Dock bleibt **76 px** (`--dock-b`), Reiter 44 px hoch |
+| Kopfzeilen-Hintergrund | — | `--panel` mit unterer Haarlinie; **kein** Verlauf, keine Unschärfe außer `--glas` über der Netzfläche |
+| Mobile/Leistenmodus | 300 × 56 | Leistenmodus bleibt erhalten und wird in `tools/rauch.py` bei 1366/960/720 geprüft |
+
+**Wichtig:** Die Shell ist **Optik + Anordnung**, keine neue Navigation. Jeder heutige Weg bleibt
+erreichbar, jede heutige Taste (`Strg+K`, `Esc`, Reiterwechsel) behält ihre Wirkung.
+
+### 18.8 Komponenten-Inventar (verbindlich)
+
+Jede Komponente existiert **einmal** als Klasse in `basis.css` (Grundform) bzw. in der Datei ihres
+Bereichs; Bereichsdateien dürfen sie nur über Tokens einfärben, nicht neu erfinden.
+
+| Komponente | Klasse/Vertrag | Maße und Regeln |
+|---|---|---|
+| Mikrolabel | `.mikro` | Mono `--fs-1`, Versalien, Sperrung `.08em`, `--muted`/`--faint`, optional `//`-Präfix; **keine** 8-px-Labels |
+| Karte | `.karte` | `--panel`, 1-px-`--line`, Radius `--radius`, Innenabstand 12/16 px, **kein** Schatten |
+| Chip | `.chip` | `--panel-2`, Radius `--radius-xs`, Höhe 24 px, Mono `--fs-1`, Zahl + Bezug als Text |
+| Knopf (Standard) | `.knopf` | Höhe 40 px, Radius `--radius-s`, `--panel-2` + Haarlinie, Text `--fs-3`; Hover `--panel-3` |
+| Hauptknopf | `.knopf-haupt` | Höhe 44 px, `--accent`-Fläche, `--accent-ink`-Text, **einziger** Glow (`--schatten`); **genau einer** je Bildschirm |
+| Symbolknopf | `.knopf-symbol` | 40 × 40 px, Symbol aus `UI.symbol` (SVG), `aria-label` Pflicht |
+| Reiter | `.reiter` | Höhe 44 px, aktiver Reiter: `--accent`-Unterkante 2 px + `--panel-3`; Trefferfläche volle Reiterbreite |
+| Leistenweg | `.weg` | Höhe 80 px, Symbol + Text, aktiver Weg: 2-px-Kante `--accent` links, Fläche `--accent-soft` |
+| Warnzeile | `.warnzeile` | `--warn-soft`-Fläche, **2-px-`--warn`-Kante links**, Text `--warn`/`--ink`, max. zwei Zeilen |
+| Statuspunkt | `.punkt` | 8 px, `--ok`/`--warn`/`--bad`, **immer mit Text** daneben (nie nur Farbe) |
+| Wertanzeige | `.wert` | Mono `--fs-1`, Label + Wert, in Chips/Statusfuß |
+| Dialog/Toast | bestehende Klassen in `spiel.css`/`toast.js` | Fläche `--panel`, Haarlinien, Radius `--radius`, ohne Schatten; Toast oben rechts, 160 ms (§ 18.9) |
+| Feld/Eingabe | bestehende Klassen | `--panel-2`, Haarlinie, Fokus 2 px `--accent`, Höhe 36 px |
+| Rastertextur | `.raster` (Arbeitsfläche) | 24-px-Punktraster, `--bg-raster`, nur Hintergrund |
+
+**Trefferflächen (Gates):** Knöpfe 40–44 px, Symbolknöpfe 40 × 40, Reiter 44 px, Leistenwege 80 px;
+auf Fingergeräten (Android) ≥ 44 px (`ui-trefferflaechen.test.js`, § 11.5 bleibt in Kraft).
+Die Statuszeile (28 px) ist **reine Anzeige** und hat bewusst keine Trefferfläche.
+
+### 18.9 Bewegung
+
+Unverändert aus § 16.4 (vier Stufen `--dauer-kurz:80ms`, `--dauer:160ms`, `--dauer-mittel:240ms`,
+`--dauer-lang:320ms`, Zähler `--dauer-zaehler:700ms`; Easings `--ease-standard`, `--ease-out`,
+`--ease-pop`; genau **eine** `.knopf:active`-Regel; `UI.zeit()` bleibt der einzige JS-Zugriff).
+Neu ist nur die **Zuordnung**: Hover/Fokus 80–160 ms, Reiter/Leiste 160 ms, Dialog/Toast 160–240 ms,
+Glow am Hauptknopf 240 ms. `prefers-reduced-motion` und `html[data-bewegung="aus"]` gelten unverändert.
+
+### 18.10 Zuordnung — Datei, Aufgabe, Reihenfolge
+
+| Datei | Aufgabe in A | Welle |
+|---|---|---|
+| `src/stil/basis.css` | **Tokens** (§ 18.2/18.3), Typo-Skala (§ 18.5), Raster/Radien/Schatten, Grundformen `.mikro .karte .chip .knopf .knopf-haupt .knopf-symbol .reiter .warnzeile .punkt` | 1 |
+| `src/stil/rahmen.css` | Shell: Kopfzeile 56, Statusfuß 28, Layout, Dock-Rahmen | 1 |
+| `src/stil/leiste.css` | linke Leiste 88 px, sieben Wege, aktive Kante | 1 |
+| `src/stil/hub.css` | Hub: Hauptaktion, „Dein nächster Auftrag", drei Kacheln | 1 |
+| `src/stil/szene.css` | Netzfläche: Punktraster, Geräte-Karten, Kabel, gestrichelte Amber-Linie als einziger „Defekt" | 1 |
+| `src/stil/spiel.css` | Dialoge, Auftragszeile, Toasts, Ergebnisflächen | 1/2 |
+| `src/stil/inspektor.css` | Inspektor-Karten, Reiter, Listenzeilen | 1/2 |
+| `src/ui/app.js` | Kopfzeilen-Markup (Werte-Chips, Suche, Symbolknöpfe) — **nur Optik/Markup**, keine Bedienlogik | 1 |
+| `src/ui/leiste.js` | Weg-Anordnung (sieben Wege, Symbole) — Ziele unverändert | 1 |
+| `src/ui/hub.js` | Hub-Struktur (Hauptaktion, Kacheln) — Funktionen unverändert | 1 |
+| `src/stil/aussehen.css` | Shop-Akzentfarben **unverändert**, an neue Flächen prüfen | 2 |
+| `src/stil/akte.css` · `karriere.css` · `hilfe.css` | Postfach, Kunden, Wiki | 2 |
+| `src/stil/start.css` · `lernstand-hilfe.css` · `klassenraum.css` | Shop, Lernstand, Klassenraum | 2 |
+| `src/stil/editor.css` · `terminal.css` · `konsole.css` · `simulation.css` | Dock, Terminal, Konsole, PDU | 2 |
+| `android/mobil/mobil.css` | nur gemeinsame Tokens; **kein** Layout-Umbau | 2 |
+| `tools/ethos.py`, `tests/stil-stand.json` | Gates auf das neue System ziehen (§ 18.12) | 1, **nach** diesem Vertrag |
+
+**Ein Schreiber je Datei** (§ 16.6/§ 17.8 bleibt in Kraft). `docs/Architektur.md`, `basis.css` und die
+Verdrahtung in `app.js` gehören dem Integrator; Kollision → nicht schreiben, melden.
+
+### 18.11 Verhalten und Verträge, die **unverändert** bleiben
+
+1. **Datenformen** aus § 10–§ 17 (Speicherstände, Codecs, Ticket-IDs, Klassenraum, Lernstand) — keine Änderung.
+2. **DOM-/Klassen-Verträge**, die Tests und Bedienung nutzen (IDs, `data-*`, Rollen, Tastaturwege,
+   `Strg+K`, `Esc`, Reiter-Reihenfolge, Dock-Reihenfolge). Neue Klassen sind erlaubt, bestehende dürfen
+   **nicht umbenannt** oder entfernt werden, solange Tests sie prüfen.
+3. **Ansichten und Wege**: 14 Ansichten, sieben Leistenwege, Dock-Reiter unverändert in Anzahl, Reihenfolge
+   und Ziel (kein toter Weg, `tools/stand.py --pruefen` 0 tote Verweise).
+4. **Shop-Akzente** (`data-akzent`) und **Leistenstile** (`data-leiste`) unverändert sichtbar.
+5. **Emoji-Regel** (§ 16.4): UI-Chrome nutzt `UI.symbol` (SVG); Emoji nur in Klartext-Copy.
+6. **Determinismus** und Simulation unberührt: `node tools/sim-stand.js` unverändert.
+7. **Bewegung aus** (`data-bewegung="aus"`, `prefers-reduced-motion`) wirkt weiterhin auf **alle** neuen
+   Übergänge.
+8. **Android** bleibt lauffähig; gemeinsame Tokens dürfen mobil nur über `basis.css` wirken.
+
+### 18.12 Teststrategie und Gestaltungs-Gates
+
+Die Gates werden **bewusst auf das neue System gezogen, nicht abgeschwächt** (Nutzerentscheidung § 1).
+Reihenfolge: erst Vertrag (dieser Abschnitt), dann Gates, dann Code — nie „nebenbei".
+
+**A · Gates anpassen (nur nach diesem Vertrag):**
+
+| Gate | Änderung | Bedingung |
+|---|---|---|
+| `tools/ethos.py` `SCHRIFT_SKALA` | `{11,12,13,15,20,28}` → **`{11,12.5,13,14,15,16,20,28,34,44}`** (13/15 als sinkende Altlast) | Skala deckt § 18.5; keine neuen Ausreißer |
+| `tools/ethos.py` `RADIUS_ERLAUBT` | **unverändert** (`999px`, `50%`, `0`): die neuen Radien laufen **ausschließlich** über die Tokens `--radius-xs` 4 / `--radius-s` 8 / `--radius` 12; Radius-Literale (heute u. a. 6/10 px) werden beim Umbau zu Tokens | Radien-Skala § 18.6, Token-Disziplin |
+| `tools/ethos.py` `ABSTAND_SKALA`, `DAUER_SKALA` | **unverändert** (4·8·12·16·24·32; 1/160/320 ms) | A passt in die bestehende Skala |
+| `tests/stil-stand.json` | mit **`python tools/ethos.py --neu --stand tests/stil-stand.json`** neu einfrieren — **erst wenn** der Umbau steht und die Zahlen **nicht steigen** | Einfrieren ist Dokumentation, kein Verstecken |
+| `tests/ui-typografie.test.js` | auf acht Stufen und `--fs-1` = 11 px ziehen; SVG-Beschriftung ≥ `--fs-1` bleibt Pflicht | funktionale Labels ≥ 11 px |
+| `tests/ui-kontrast.test.js` | auf die neuen Tokens paaren; `--faint` ≥ 4,5:1 auf `--bg`/`--panel`/`--panel-2` in beiden Schemata | § 18.6 |
+| `tests/ui-trefferflaechen.test.js` | neue Komponentenmaße (§ 18.8) als Soll; Leistenweg 80, Reiter 44, Symbolknopf 40 | § 18.8 |
+| `tests/ui-symbole.test.js` | unverändert (SVG-Chrome, Emoji-Regel) | § 16.4 |
+| `tests/ui-leiste-ueberlappung.test.js` | auf Leiste 88 px / sieben Wege ziehen; **keine** Überlappung | Shell |
+| `tests/klassen-20.test.js` | unverändert (Klasse ↔ CSS); neue Klassen brauchen Regeln | `python tools/klassen.py` = 0 |
+| `tests/texte-stil.test.js` | unverändert (Textstil, keine Optik) | — |
+
+**B · Verhaltenstests unangetastet:** alle übrigen Tests (Simulation, Tickets, Klassenraum, Lernmotor,
+Hilfe, Inhalte) werden **nicht** angepasst, um Rot zu verdecken. Ändert sich ein Verhaltenstest, ist das
+ein **Befund** und wird im Bericht benannt.
+
+**C · Messpflicht nach jedem Schritt** (App bleibt lauffähig):
+`python bauen.py` → `sh tools/test.sh` (**873/873 grün, 0 übersprungen** als Ausgangsstand; die aktuelle
+Zahl steht in `docs/STAND.md`) → `python tools/ethos.py` → Sichtkontrolle per Screenshot
+`python tools/starttest.py docs/index.html --bild …` bei **1366 / 960 / 720 px**:
+keine abgeschnittenen Texte, keine Überläufe, Raster und Kontraste passen.
+
+**D · Abnahme Gates (Welle-Abschluss):** `sh tools/test.sh --rauch` (45/45), `python tools/ethos.py --dom`,
+`node tools/sim-stand.js` (unverändert), `python tools/stand.py --pruefen`,
+`python tools/seite.py --pruefen`, `python tools/klassen.py`, `python tools/stand.py --pruefen`
+(0 tote Verweise). Belege in `Nachweise/redesign/welle1-abnahme.md` bzw. `welle2-abnahme.md`.
+
+**E · Screenshot-Belege** (nicht versioniert): `Nachweise/redesign/1366/…`, `960/…`, `720/…` je Ansicht;
+je Bild geprüft und im Beleg mit Pfad und Datum genannt.
+
+### 18.13 Umsetzung und Definition of Done
+
+| Welle | Inhalt | Done-Kriterium |
+|---|---|---|
+| 1 | Tokens, Typo, Shell (Kopf 56, Leiste 88, Statusfuß 28), Hub, Labor-Chrome | Hub, Labor und Leiste sichtbar in A; Tests 873/873; Screenshots 1366/960/720; `welle1-abnahme.md` |
+| 2 | restliche Ansichten und Werkzeuge (Postfach, Kunden, Wiki, Lernstand, Shop, Einstellungen, Klassenraum, Dock, Inspektor, Terminal, Konsole, PDU) | alle Ansichten in A; Rauchtest 45/45; `ethos.py --dom` grün; `welle2-abnahme.md` |
+| 3 | Doku, Stand, Screenshots, Fassung, Abschluss | Doku/STAND/CHANGELOG aktuell; Fassung (Vorschlag **2.2.0**, vom Nutzer zu bestätigen); Einzeldatei byte-gleich; `.exe` mit passender ProductVersion; **kein Push, kein Release** |
+
+**Definition of Done (Redesign):**
+1. `docs/Architektur.md` enthält diesen Vertrag; `ethos.py` und `stil-stand.json` passen dazu.
+2. Alle Flächen sichtbar in A; Bedienlogik und Ansichten unverändert; Hell gleichwertig.
+3. `sh tools/test.sh` 873/873 (0 übersprungen), `--rauch` 45/45, `ethos.py --dom` grün,
+   `stand.py --pruefen` und `seite.py --pruefen` grün, `sim-stand.js` unverändert, `klassen.py` 0.
+4. Screenshots 1366/960/720 je Ansicht liegen vor und sind am Bild geprüft (keine Überläufe,
+   keine abgeschnittenen Texte, Trefferflächen ≥ 40/44 px, Kontraste ≥ 4,5:1).
+5. Kein Push, kein Release ohne ausdrückliche Freigabe; ehrlicher Abschlussbericht mit gemessenen Zahlen.
+
+### 18.14 Offene Entscheidungen (nur der Nutzer)
+
+Diese Sitzung arbeitet mit den **Vorgaben dieses Vertrags** (Basis A, Emerald `#30E58B`,
+kontrollraum-dichte, Hell abgeleitet, Fassung 2.2.0). Sie kann der Nutzer jederzeit ändern; dann wird
+**zuerst** dieser Abschnitt geändert, dann der Code.
+
+| Frage | Vorgabe in diesem Vertrag | Wirkung bei Änderung |
+|---|---|---|
+| Basis-Vorlage | **A · Matrix-Elegant** | B/C: § 18.2–18.8 neu |
+| Akzentfarbe | **Emerald `#30E58B`** (Cyan nur Daten-Akzent) | anderes `--accent` + Kontrastnachweis |
+| Dichte | **kontrollraum-dicht** (A) | luftiger (B): Abstände 4/8/12/16/24/32 nur nach oben |
+| Hellmodus | **gleichwertig mitgeführt** (§ 18.3) | „erst später": § 18.3 bleibt, Abnahme reduziert |
+| Reihenfolge Welle 1 | **Hub + Labor + Leiste zuerst** | andere Ansicht zuerst: § 18.13 tauschen |
+| Fassungsnummer | **2.2.0** (Vorschlag) | 3.0.0: `tools/fassung-ziehen.py --neu …` |
+

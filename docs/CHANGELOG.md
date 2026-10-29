@@ -9,6 +9,53 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.2.0 — Frontend-Redesign „Matrix-Elegant" (A) (29.10.2026)
+
+**Warum.** Der Nutzer hat ein komplettes Redesign des Frontends beauftragt: **Optik + Shell neu,
+Bedienlogik und Ansichten bleiben.** Drei Bild-Vorlagen lagen vor (A „Matrix-Elegant",
+B „Holo-Suite", C „Neon-Blueprint"); **A ist die Basis.** Der Vertrag steht in
+[`Architektur.md`](Architektur.md) § 18 (Tokens dunkel und hell, Typo-Skala, Shell-Maße,
+Komponenten, Zuordnung zu den Dateien, Teststrategie).
+
+**Umfang.** Farbtokens (dunkel `#04070A`/`#08100C`, Emerald `#30E58B` als Handlungsfarbe,
+Haarlinien, 24-px-Punktraster) und eine abgeleitete helle Fassung; Typo-Skala mit acht Stufen
+(11 · 12,5 · 14 · 16 · 20 · 28 · 34 · 44 px, funktionale Labels ≥ 11 px); Shell mit Kopfzeile
+**56 px**, linker Leiste **88 px** und Statusfuß **28 px**; Komponenten (Chip, Karte, Knopf,
+Hauptknopf mit Glow, Reiter, Leistenweg, Warnzeile, Statuspunkt); Hub „Heute" und Labor-Chrome;
+alle übrigen Ansichten und Werkzeuge über Tokens. Die Altlast-Literale aus v2.1.0
+(Radien 6/10/14/18 px, Abstände 5/6/10/14/22 px) sind auf die Skalen gezogen.
+
+**Gemessen** (alle Zahlen aus [`STAND.md`](STAND.md), erzeugt von `tools/stand.py`):
+
+| Feld | Wert |
+|---|---|
+| Fassung / Android-Bauzählung | **2.2.0** / `VERSION_CODE = 20201` |
+| Baukennung | `02885212` |
+| Tests | **873/873 grün, 0 übersprungen** (103 Testdateien, 95 headless Module) |
+| Rauchtest (echte Maus, Edge) | **45/45 grün** (15 Prüfungen × 3 Breiten) |
+| Stil-Gate `ethos.py` | **GRÜN**; R2 113→**23**, R4 514→**128**, R10 **0**; Stand neu eingefroren |
+| Klassen ↔ CSS | **0 Klassen ohne CSS-Regel** |
+| Simulation | **unverändert** gegenüber `tests/sim-stand.json` |
+| Einzeldatei | **3.163.368 B**, SHA256 `3BFE278C…3A4C94`, 0 Außenverweise, byte-gleich mit `docs/index.html` |
+| Windows-Programm | `shell/src-tauri/target/release/netzwerk-labor.exe`, ProductVersion **2.2.0**, 8.821.760 B |
+| Doku | 50 Dokumente, `stand.py --pruefen` und `seite.py --pruefen` grün |
+
+**Nebenfund und behoben (blockierend).** `tools/einfach.py` setzte den Lizenzblock am **ersten**
+`</body>` ein. Der App-Code enthält in `H.seite` selbst ein simuliertes HTML-Dokument als String —
+der Block landete dadurch **mitten im JavaScript**, die Einzeldatei war **seit v2.1.0 nicht
+lauffähig** (`SyntaxError: Unexpected end of input`, `#app` blieb leer). Jetzt wird er nach dem
+letzten `</script>` eingefügt; `--pruefen` erkennt die falsche Lage.
+
+**Bewusst nicht abgeschwächt.** Die Stil-Tests bleiben in Kraft und wurden auf das neue System
+gezogen; Verhaltenstests sind unangetastet (873/873). Der Anteil alter Literale sinkt, statt still
+eingefroren zu werden.
+
+**Offen.** Regel **R12** („höchstens 6 Bedienelemente je Ansicht") ist ein **Altbefund**: sie wurde
+nie gemessen und ist in Labor/Training/Wiki/Lernstand/Heute überschritten (gemessen mit `--dom`).
+Der Stand führt sie weiter als „nicht gemessen" — Entscheidung des Nutzers: einfrieren oder
+Oberfläche reduzieren. Das Programm wurde **nicht** nach `Programm/` kopiert, **nicht gepusht** und
+**nicht veröffentlicht**.
+
 ## 2.1.0 — Wahrheit, Korrektheit, Inhalte (S1–S8) (26.–29.10.2026)
 
 **Warum.** 2.1 ist die Runde vor 3.0: Wahrheit, Korrektheit, Prüfungsnähe, Inhaltsdichte.

@@ -1,12 +1,12 @@
 /* Ereignisse (E1): Karte oben über der Fläche – Toasts stehen unten, die Karte stört sie nicht. Präfix ev-.
    z-index 40 (Leiter): über den Labor-Ebenen (10–30), unter Menü (50), Palette (55), Dialogen (56) und
    Toasts (60) – die Karte ist ein Hinweis, kein Dialog und darf nichts verdecken. */
-.ev-karte{position:fixed; left:50%; top:118px; transform:translateX(-50%); z-index:40; width:min(460px, calc(100vw - 32px)); padding:12px 14px 12px 14px;
-  background:var(--panel); border:1px solid var(--line-2); border-left:4px solid var(--warn); border-radius:12px; box-shadow:var(--schatten); animation:ev-rein var(--dauer-lang) ease-out}
+.ev-karte{position:fixed; left:50%; top:118px; transform:translateX(-50%); z-index:40; width:min(460px, calc(100vw - 32px)); padding:12px 12px 12px 12px;
+  background:var(--panel); border:1px solid var(--line-2); border-left:4px solid var(--warn); border-radius:var(--radius); box-shadow:var(--schatten); animation:ev-rein var(--dauer-lang) ease-out}
 .ev-kopf{display:flex; align-items:center; gap:8px}
 .ev-kopf strong{flex:1; font:800 var(--fs-4)/1.2 var(--display); color:var(--ink)}
 .ev-sym{font-size:var(--fs-5); line-height:1}
-.ev-zu{all:unset; cursor:pointer; padding:0 6px; font-size:var(--fs-5); line-height:1; color:var(--muted)}
+.ev-zu{all:unset; cursor:pointer; padding:0 4px; font-size:var(--fs-5); line-height:1; color:var(--muted)}
 .ev-zu:hover, .ev-zu:focus-visible{color:var(--ink)}
 .ev-text{margin:8px 0 4px; font-size:var(--fs-3); line-height:1.45}
 .ev-warum{margin:0; font-size:var(--fs-2); line-height:1.4; color:var(--muted)}

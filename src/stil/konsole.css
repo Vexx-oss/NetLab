@@ -6,13 +6,13 @@
 .ko-huelle{
   --ko-bg:#0A0F16; --ko-ink:#D6E1EE; --ko-dim:#8A9BB2; --ko-prompt:#4FC3F7; --ko-bad:#FF8A8A; --ko-log:#D9B26A; --ko-echo:#FFFFFF; --ko-sel:rgba(79,195,247,.30);
   display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
-.ko-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px 8px 12px; border-bottom:1px solid var(--line)}
+.ko-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 8px 8px 12px; border-bottom:1px solid var(--line)}
 .ko-titel{display:flex; align-items:center; gap:8px; min-width:0; font:700 var(--fs-3)/1.2 var(--body); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.ko-art{flex:0 0 auto; font:600 var(--fs-1)/1 var(--body); color:var(--muted); padding:3px 7px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line)}
-.ko-knopf{flex:0 0 auto; min-height:28px; padding:0 10px; border-radius:8px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body); cursor:pointer}
+.ko-art{flex:0 0 auto; font:600 var(--fs-1)/1 var(--body); color:var(--muted); padding:4px 8px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line)}
+.ko-knopf{flex:0 0 auto; min-height:28px; padding:0 8px; border-radius:var(--radius-s); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body); cursor:pointer}
 .ko-knopf:hover{border-color:var(--accent); color:var(--accent)}
 
-.ko-schirm{flex:1 1 auto; min-height:140px; overflow:auto; padding:10px 12px 14px; background:var(--ko-bg); color:var(--ko-ink);
+.ko-schirm{flex:1 1 auto; min-height:140px; overflow:auto; padding:8px 12px 12px; background:var(--ko-bg); color:var(--ko-ink);
   font:var(--fs-2)/1.5 var(--mono); cursor:text; overscroll-behavior:contain; scrollbar-color:#2A3649 transparent}
 .ko-schirm ::selection{background:var(--ko-sel)}
 .ko-schirm:focus{outline:none}
@@ -26,9 +26,9 @@
 .ko-echo{white-space:pre-wrap; word-break:break-all; color:var(--ko-echo); margin-top:4px}
 .ko-echo-prompt, .ko-prompt{color:var(--ko-prompt)}
 
-.ko-notiz{margin:6px 0 2px; padding:6px 8px; border-left:2px solid var(--ko-prompt); color:var(--ko-dim); font:var(--fs-2)/1.45 var(--body); white-space:normal}
+.ko-notiz{margin:4px 0 0px; padding:4px 8px; border-left:2px solid var(--ko-prompt); color:var(--ko-dim); font:var(--fs-2)/1.45 var(--body); white-space:normal}
 .ko-notiz kbd{background:transparent; color:var(--ko-ink); border-color:#3A4A62}
-.ko-sym{margin-right:6px; color:var(--ko-prompt)}
+.ko-sym{margin-right:4px; color:var(--ko-prompt)}
 .ko-zeile{display:flex; align-items:flex-start; margin-top:4px}
 .ko-prompt{flex:0 0 auto; white-space:pre}
 .ko-eingabe{flex:1 1 auto; min-width:6ch; margin:0; padding:0; border:0; outline:0; background:transparent; color:var(--ko-echo);
@@ -39,13 +39,13 @@
 
 .ko-vorschlag, .ko-notiz{transition:none}
 .ko-vorschlag[hidden], .ko-notiz[hidden], .ko-mit-vorschlag .ko-hilfe-bsp{display:none}
-.ko-vorschlag{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:8px 12px; border-top:1px solid var(--line); background:var(--accent-soft); font-size:var(--fs-2)}
+.ko-vorschlag{display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding:8px 12px; border-top:1px solid var(--line); background:var(--accent-soft); font-size:var(--fs-2)}
 .ko-vorschlag-titel{font-weight:700; color:var(--accent)}
-.ko-vorschlag-knopf{border:1px solid var(--accent); background:var(--panel); color:var(--ink); border-radius:7px; padding:3px 8px; cursor:pointer}
+.ko-vorschlag-knopf{border:1px solid var(--accent); background:var(--panel); color:var(--ink); border-radius:7px; padding:4px 8px; cursor:pointer}
 .ko-vorschlag-knopf code{font:600 var(--fs-2)/1.3 var(--mono)}
 .ko-vorschlag-knopf:hover{background:var(--accent); color:var(--accent-ink)}
 .ko-vorschlag-text{color:var(--muted); flex-basis:100%; line-height:1.4}
-.ko-hilfe{padding:7px 12px 9px; border-top:1px solid var(--line); color:var(--muted); font-size:var(--fs-2); line-height:1.7}
+.ko-hilfe{padding:8px 12px 8px; border-top:1px solid var(--line); color:var(--muted); font-size:var(--fs-2); line-height:1.7}
 .ko-hilfe code{font:var(--fs-2) var(--mono); color:var(--ink)}
 /* Punktlinien (ipconfig): eine Zeile je Eintrag. Die Punkte beginnen mit 2 Zeichen und wachsen bis zur Originallänge,
    solange Platz ist – der Wert schrumpft nie (sonst bräche er an Bruchteilen eines Pixels um) und rutscht nur, wenn gar nichts

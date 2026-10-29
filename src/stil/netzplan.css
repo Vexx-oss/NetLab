@@ -1,14 +1,14 @@
 /* ---------- Netzplan zum Auftrag (np-, Phase B) – im Dock und in der Auftragsmappe ---------- */
-.np{display:flex; flex-direction:column; gap:10px; padding:12px 14px 14px}
+.np{display:flex; flex-direction:column; gap:8px; padding:12px 14px 14px}
 .np-kopf{display:flex; align-items:flex-start; justify-content:space-between; gap:8px 12px; flex-wrap:wrap}
-.np-titel{display:flex; flex-direction:column; gap:2px; min-width:0}
+.np-titel{display:flex; flex-direction:column; gap:0px; min-width:0}
 .np-titel strong{font:800 var(--fs-4)/1.2 var(--display)}
 .np-titel small{color:var(--muted); font-size:var(--fs-2); line-height:1.35}
-.np-wahl{display:inline-flex; flex:0 0 auto; padding:2px; gap:2px; border-radius:9px; background:var(--panel-2); border:1px solid var(--line)}
-.np-wahl button{min-height:26px; padding:0 10px; border:0; border-radius:7px; background:none; color:var(--muted); font:700 var(--fs-2)/1 var(--body); cursor:pointer}
+.np-wahl{display:inline-flex; flex:0 0 auto; padding:0px; gap:0px; border-radius:var(--radius-s); background:var(--panel-2); border:1px solid var(--line)}
+.np-wahl button{min-height:26px; padding:0 8px; border:0; border-radius:7px; background:none; color:var(--muted); font:700 var(--fs-2)/1 var(--body); cursor:pointer}
 .np-wahl button:hover{color:var(--ink); background:var(--panel-3)}
 .np-wahl button.an{background:var(--accent); color:var(--accent-ink)}
-.np-flaeche{overflow:auto; border:1px solid var(--line); border-radius:12px; background:var(--bg); scrollbar-width:thin}
+.np-flaeche{overflow:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--bg); scrollbar-width:thin}
 /* höchstens 15 % verkleinern, sonst scrollen – die Schrift bleibt ≥ 14 px lesbar */
 .np-svg{display:block; width:100%; min-width:calc(var(--np-b) * .85); height:auto}
 .np-linie{stroke:var(--line-2); stroke-width:3; stroke-linecap:round}
@@ -22,17 +22,16 @@
 .np-adresse{font:500 var(--fs-3) var(--mono); fill:var(--muted); text-anchor:middle}
 .np-skizze .np-flaeche{background:color-mix(in srgb, var(--geld) 4%, var(--bg))}
 .np-skizze .np-name{font-style:italic}
-.np-tabelle, .np-tabelle th, .np-tabelle td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap}
+.np-tabelle, .np-tabelle th, .np-tabelle td, .np-vgl-tabelle th, .np-vgl-tabelle td{padding:4px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap}
 .np-tabelle thead th{color:var(--muted); font-size:var(--fs-2); text-transform:uppercase; letter-spacing:.04em; position:sticky; top:0; background:var(--bg)}
 .np-tabelle tbody tr{cursor:pointer}
 .np-tabelle tbody tr:hover{background:var(--panel-2)}
 .np-tabelle tbody tr.gewaehlt{background:var(--accent-soft)}
 .np-luecke{color:var(--warn); font-weight:800}
-.np-vergleich{border:1px solid var(--line); border-radius:12px; overflow:hidden; container-type:inline-size}
-.np-vgl-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:7px 10px; background:var(--panel-2); border-bottom:1px solid var(--line)}
+.np-vergleich{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; container-type:inline-size}
+.np-vgl-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:8px 8px; background:var(--panel-2); border-bottom:1px solid var(--line)}
 .np-vgl-kopf strong{font-size:var(--fs-3)} .np-vgl-kopf small{color:var(--muted); font-size:var(--fs-2)}
 .np-vgl-tabelle{width:100%; border-collapse:collapse; font-size:var(--fs-3)}
-.np-vgl-tabelle th, .np-vgl-tabelle td{padding:5px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap}
 .np-vgl-tabelle thead th{font-size:var(--fs-2); color:var(--muted); text-transform:uppercase; letter-spacing:.04em}
 @container (max-width:320px){ .np-vgl-tabelle{font-size:var(--fs-2)} .np-vgl-tabelle th, .np-vgl-tabelle td{padding:4px 5px} }
 .np-vgl-tabelle tbody th{color:var(--muted); font-weight:600; font-size:var(--fs-2); white-space:nowrap}
@@ -55,6 +54,6 @@
 /* Plan-Audit (E1): Werte als Knöpfe, markiert = „stimmt nicht“ */
 .np-audit-hinweis{margin:0 0 8px; font-size:var(--fs-2); color:var(--muted)}
 .np-tabelle.np-audit td{cursor:default}
-.np-wert{all:unset; cursor:pointer; padding:1px 4px; border-radius:var(--radius-xs); font:inherit}
+.np-wert{all:unset; cursor:pointer; padding:0px 4px; border-radius:var(--radius-xs); font:inherit}
 .np-wert:hover, .np-wert:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 .np-pruef.markiert .np-wert{background:var(--warn-soft); color:var(--warn); font-weight:700; text-decoration:line-through}

@@ -11,7 +11,7 @@ kein zweiter Stand — es wird nichts nachgebaut und nichts gepflegt, was es dop
 
 **Fertige App — in dieser Sitzung NICHT gebaut.** In dieser Sitzung wurde **keine APK**
 erzeugt (kein Android-SDK, kein Build nachgewiesen), und im Ordner `Programm/` liegt
-keine. Wer sie baut, erhält `Programm/Netzwerk-Labor-2.1.0-Android.apk`: versionName 2.1.0,
+keine. Wer sie baut, erhält `Programm/Netzwerk-Labor-2.2.0-Android.apk`: versionName 2.2.0,
 versionCode **20101** (aus `android/bauen.py`, gemessen 29.10.2026). Die Hülle fordert
 **keine Berechtigung** an (Manifest) und dreht frei (`screenOrientation="unspecified"`,
 `configChanges`); ob eine gebaute APK signiert ist und auf einem Gerät läuft, ist für

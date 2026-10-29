@@ -99,6 +99,7 @@ UI.app = (() => {
       try { def.zeigen(c); } catch (e) { console.error("Ansicht " + name, e); c.append(h("p", {class: "platzhalter"}, `Diese Ansicht konnte nicht aufgebaut werden: ${e.message || e}`)); }
     } else { c.hidden = false; try { def.wieder?.(c); } catch (e) { console.error(e); } }
     for (const b of $$(".dock-knopf", root)) { const an = b.dataset.ansicht === name; b.classList.toggle("an", an); if (an) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); }
+    if (el.fussWeg) el.fussWeg.textContent = "Ansicht: " + (def.titel || name);
     Bus.senden("ansicht", name);
   }
   function dockZeichnen(){
@@ -222,7 +223,13 @@ UI.app = (() => {
         knopf("hilfe", "Tastenkürzel (?)", () => hilfe())));
     el.dock = h("nav", {class: "dock", "aria-label": "Ansichten"});
     el.flaeche = h("main", {class: "flaeche"});
-    root.append(kopf, el.dock, el.flaeche);
+    /* § 18.7: Statusfuß 28 px — reine Anzeige (Ansicht links, Zustand rechts), keine Bedienelemente. */
+    el.fussWeg = h("span", {class: "fuss-text"}, "Bereit");
+    el.fuss = h("footer", {class: "fuss", "aria-label": "Statuszeile"},
+      h("span", {class: "fuss-teil", role: "status", "aria-live": "polite"}, el.fussWeg),
+      h("span", {class: "fuss-teil"}, "lokal", h("span", {class: "fuss-trenner", "aria-hidden": "true"}, "·"), "kein Netz",
+        h("span", {class: "fuss-trenner", "aria-hidden": "true"}, "·"), "v" + (typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : "dev")));
+    root.append(kopf, el.dock, el.flaeche, el.fuss);
     container.replaceChildren(root);
     gebaut = new Map();
     const alt = {...wert}; for (const k of Object.keys(wert)) wert[k] = undefined;

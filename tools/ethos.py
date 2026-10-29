@@ -39,8 +39,13 @@ HIER = Path(__file__).resolve().parent.parent
 STIL = HIER / "src" / "stil"
 STAND_VORGABE = HIER / "tests" / "stil-stand.json"
 
-SCHRIFT_SKALA = {11, 12, 13, 15, 20, 28}
+# Schrift-Skala nach Architektur § 18.5 (Frontend-Redesign A): 11 / 12,5 / 14 / 16 / 20 / 28 / 34 / 44 px.
+# 13 und 15 px sind Altlasten aus v2.1.0 — sie bleiben erlaubt, dürfen aber NICHT neu entstehen;
+# die Zahl in tests/stil-stand.json darf nur sinken.
+SCHRIFT_SKALA = {11, 12.5, 13, 14, 15, 16, 20, 28, 34, 44}
 ABSTAND_SKALA = {0, 4, 8, 12, 16, 24, 32}
+# Radien laufen ausschließlich über Tokens (--radius-xs 4 / --radius-s 8 / --radius 12, § 18.6);
+# Literale bleiben nur Pille und Kreis. var(--radius…) ist in r2_radius ohnehin erlaubt.
 RADIUS_ERLAUBT = {"999px", "50%"}
 DAUER_SKALA = {1, 160, 320}                     # Millisekunden
 Z_LEITER = {10, 20, 30, 40, 50, 60, 70, 80}
@@ -160,7 +165,7 @@ def r1_farbe(bloecke):
 
 
 def r2_radius(bloecke):
-    """Radius nur aus Tokens: var(--radius…), 999px (Pille), 50% (Kreis)."""
+    """Radius nur aus Tokens: var(--radius-xs/-s/--radius, § 18.6), 999px (Pille), 50% (Kreis)."""
     treffer = []
     for b, d in deklarationen(bloecke):
         if "radius" not in d["prop"] or "root" in b["sel"] or d["prop"].startswith("--"):
@@ -175,7 +180,7 @@ def r2_radius(bloecke):
 
 
 def r3_schrift(bloecke):
-    """Schrift nur aus sechs Werten: {11,12,13,15,20,28}px — keine halben Pixel, kein em/%."""
+    """Schrift nur aus der Skala § 18.5: {11, 12.5, 14, 16, 20, 28, 34, 44}px (+ Altlast 13/15)."""
     treffer = []
     kurz = re.compile(r"^(?:(?:normal|italic|oblique|small-caps|bold|bolder|lighter|[1-9]00)\s+)*([\d.]+)px")
     for b, d in deklarationen(bloecke):
@@ -443,7 +448,7 @@ def messen(texte=None, dom=False):
     regeln = [
         ("R1", "Farbe nur per Token", r1_farbe(bloecke), "Deklarationen mit Farb-Literal"),
         ("R2", "Radius nur aus Tokens", r2_radius(bloecke), "Deklarationen ohne Token"),
-        ("R3", "Schrift nur aus 6 Werten", r3_schrift(bloecke), "Deklarationen außerhalb der Skala"),
+        ("R3", "Schrift nur aus der Skala § 18.5", r3_schrift(bloecke), "Deklarationen außerhalb der Skala"),
         ("R4", "Abstand nur aus der Skala", r4_abstand(bloecke), "Werte außerhalb der Skala"),
         ("R5", "Dauer nur 1/160/320 ms", r5_dauer(bloecke), "Zeitwerte außerhalb der Skala"),
         ("R6", "z-index nur aus der Leiter", r6_zindex(bloecke), "Deklarationen außerhalb der Leiter"),
