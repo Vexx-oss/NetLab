@@ -76,7 +76,7 @@ PAKET = "oss.vexx.netlab"
 # Wert DARÜBER → 20101.
 # Angehoben am 29.10.2026 mit dem Fassungszug 2.1.0 → 2.2.0 (Frontend-Redesign): abgeleitet
 # wird 2*10000 + 2*100 + 0 = 20200; die Hausregel verlangt einen Wert DARÜBER → 20201.
-VERSION_CODE = 20201
+VERSION_CODE = 20300
 
 SDK_ORTE = [
     Path(r"C:\Users\Student\android-sdk"),

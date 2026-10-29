@@ -5,85 +5,65 @@
    § 18.2 dunkle Tokens · § 18.3 helle Ableitung · § 18.5 Typo · § 18.6 Raster/Radien · § 18.7 Shell. */
 :root{
   color-scheme:dark;
-  --bg:#04070A;            /* § 18.2: schwarzgrüner Grund (A) */
-  --bg-raster:rgba(163,255,214,.06); /* 24-px-Punktraster als Textur (§ 18.6) */
-  --raster:24px;           /* Punktabstand des Rasters */
-  --panel:#08100C;         /* Paneele, Inspektor, Dock, Kopfzeile, Leiste */
-  --panel-2:#0B160F;       /* abgesetzte Felder, Karten (abgeleitet) */
-  --panel-3:#101D16;       /* Hover, aktive Reiter (abgeleitet) */
-  --line:rgba(163,255,214,.10); /* Haarlinien (§ 18.2, Swatch #1A2B23) */
-  --line-2:rgba(163,255,214,.18); /* betonte Linien (abgeleitet) */
-  --ink:#E8F4ED;           /* Text */
-  --muted:#97AC9F;         /* Nebentext */
-  --faint:#7C9386;         /* U03: ≥ 6,1:1 auf --bg, 5,9:1 auf --panel (§ 18.2) */
-  --accent:#30E58B;        /* Handlungsfarbe A (Emerald) */
-  --accent-ink:#04120A;
-  --accent-soft:#0E2A1C;
-  --ok:#54E6A8;  --ok-soft:#0B2A1B;
-  --warn:#F2C14E; --warn-soft:#2E2410;
-  --bad:#FF6B8A; --bad-soft:#33121C;
-  --info:#22D3EE; --info-soft:#0A2630;
-  --geld:#FCD34D;          /* Euro */
-  --ruf:#F472B6;           /* Ruf */
-  /* Paketfarben je Protokoll (immer mit Beschriftung verwenden, § 18.4: unverändert) */
-  --p-arp:#FBBF24; --p-icmp:#4FC3F7; --p-tcp:#A78BFA; --p-udp:#34D399; --p-dhcp:#F472B6; --p-dns:#FB923C; --p-http:#60A5FA;
+  /* POLARIS (§ 18.2 neu): geschichtete Neutraltoene, vier semantische Signalfarben.
+     Minze = Handlung/Erfolg/Live, Iris = Wissen/Reputation, Amber = Geld/Zeit, Koralle = Stoerung. */
+  --bg:#0B0C0F; --bg-raster:rgba(255,255,255,.022); --raster:24px;
+  --panel:#14161B; --panel-2:#191C22; --panel-3:#1F232B;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.16);
+  --ink:#F3F4F1; --muted:#B0B4AD; --faint:#848981;
+  --accent:#7DF3C0; --accent-ink:#08130F; --accent-soft:#12251E;
+  --mint:#7DF3C0; --iris:#9C8CFF; --amber:#FFC46B; --koralle:#FF8A7A;
+  --ok:#7DF3C0; --ok-soft:#10241C;
+  --warn:#FFC46B; --warn-soft:#2A2113;
+  --bad:#FF8A7A; --bad-soft:#2C1719;
+  --info:#9C8CFF; --info-soft:#1B1930;
+  --geld:#FFC46B; --ruf:#9C8CFF;
+  /* Paketfarben je Protokoll (immer mit Beschriftung verwenden, § 18.4) */
+  --p-arp:#F3C46A; --p-icmp:#7FD4F5; --p-tcp:#B0A0FF; --p-udp:#63E6A6; --p-dhcp:#F5A0D0; --p-dns:#FFA06A; --p-http:#7FB6F5;
   /* VLAN-Farben 1..8 (zyklisch), immer zusammen mit der Nummer zeigen */
-  --vlan-1:#94A3B8; --vlan-2:#4FC3F7; --vlan-3:#4ADE80; --vlan-4:#FBBF24; --vlan-5:#F472B6; --vlan-6:#A78BFA; --vlan-7:#FB923C; --vlan-8:#2DD4BF;
-  /* Subnetz-Zonen (Ebene IP-Netze), halbtransparent */
-  --zone-a:rgba(79,195,247,.10); --zone-b:rgba(74,222,128,.10); --zone-c:rgba(251,191,36,.10); --zone-d:rgba(244,114,182,.10); --zone-e:rgba(167,139,250,.10);
-  --schatten:0 12px 32px rgba(0,0,0,.55);  /* § 18.6: neutraler Tiefenschatten NUR fuer Overlays (Dialog, Menue, Toast) */
-  --glow:0 0 0 1px rgba(48,229,139,.35), 0 0 24px rgba(48,229,139,.18); /* § 18.6: Glow NUR am Hauptknopf */
-  --radius:12px; --radius-s:8px; --radius-xs:4px;   /* § 18.6: 4/8/12, alte 6/10 entfallen */
+  --vlan-1:#9AA3B2; --vlan-2:#7FD4F5; --vlan-3:#68E0A0; --vlan-4:#F3C46A; --vlan-5:#F5A0D0; --vlan-6:#B0A0FF; --vlan-7:#FFA06A; --vlan-8:#6FE0D4;
+  /* Subnetz-Zonen (Ebene IP), halbtransparent */
+  --zone-a:rgba(127,212,245,.09); --zone-b:rgba(104,224,160,.09); --zone-c:rgba(243,196,106,.09); --zone-d:rgba(245,160,208,.09); --zone-e:rgba(176,160,255,.09);
+  --schatten:0 30px 70px -50px rgba(0,0,0,.9);
+  --glow:0 0 0 1px rgba(125,243,192,.28), 0 16px 36px -20px rgba(125,243,192,.42);
+  --radius:14px; --radius-s:10px; --radius-xs:6px;
   --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --mono:"JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
-  /* Bewegung (Architektur §16.4/§18.9): vier Stufen + benannter Zähler (700 ms) */
   --dauer-kurz:80ms; --dauer:160ms; --dauer-mittel:240ms; --dauer-lang:320ms; --dauer-zaehler:700ms;
   --ease-standard:cubic-bezier(.2,.7,.3,1); --ease-out:cubic-bezier(.16,.84,.44,1); --ease-pop:cubic-bezier(.3,1.6,.5,1);
-  /* Typo-Skala § 18.5: acht Stufen; funktionale Beschriftung und SVG-Text nie unter --fs-1 */
   --fs-1:11px; --fs-2:12.5px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:28px; --fs-7:34px; --fs-8:44px;
-  /* ---- Ergänzt (UI-Rahmen/Editor): Gerätetyp-Farben, Zonen-Ränder, Ebenen ---- */
-  --typ-router:#4FC3F7; --typ-switch:#2DD4BF; --typ-firewall:#F59E8B; --typ-host:#C7D2E4; --typ-server:#A78BFA; --typ-nas:#60A5FA; --typ-internet:#7DD3FC;
-  --zone-a-linie:rgba(79,195,247,.55); --zone-b-linie:rgba(74,222,128,.55); --zone-c-linie:rgba(251,191,36,.55); --zone-d-linie:rgba(244,114,182,.55); --zone-e-linie:rgba(167,139,250,.55);
-  --glas:rgba(4,7,10,.82);     /* halbdurchsichtige Werkzeugleisten über der Fläche */
-  --leiste-bg:rgba(4,7,10,.94);
-  /* Shell § 18.7: Kopf zeile 56, linke Leiste 88, Statusfuß 28, Dock 76 */
-  --kopf-h:56px; --leiste-w:88px; --fuss-h:28px; --dock-b:76px;
+  --typ-router:#7FD4F5; --typ-switch:#6FE0D4; --typ-firewall:#FFA08A; --typ-host:#C9D2E0; --typ-server:#B0A0FF; --typ-nas:#7FB6F5; --typ-internet:#8FD8F0;
+  --zone-a-linie:rgba(127,212,245,.5); --zone-b-linie:rgba(104,224,160,.5); --zone-c-linie:rgba(243,196,106,.5); --zone-d-linie:rgba(245,160,208,.5); --zone-e-linie:rgba(176,160,255,.5);
+  --glas:rgba(11,12,15,.78); --leiste-bg:rgba(11,12,15,.92);
+  --kopf-h:60px; --leiste-w:76px; --fuss-h:34px; --dock-b:76px;
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
-    color-scheme:light;
-    --bg:#F2F6F3; --bg-raster:rgba(11,90,58,.10); --panel:#FFFFFF; --panel-2:#F7FAF8; --panel-3:#E8EFEA; --line:#D2DED7; --line-2:#B4C6BB;
-    --ink:#0B1512; --muted:#4C5F56; --faint:#5C7066; --accent:#0B7A4B; --accent-ink:#FFFFFF; --accent-soft:#DDF3E7;
-    --ok:#0F7A3E; --ok-soft:#DDF3E7; --warn:#8A5A00; --warn-soft:#FBF0D6; --bad:#A81E42; --bad-soft:#FBE4EA; --info:#0E7490; --info-soft:#DDF1F5;
-    --geld:#9A5D06; --ruf:#BE185D;
-    --p-arp:#B45309; --p-icmp:#0B7FB5; --p-tcp:#6D28D9; --p-udp:#047857; --p-dhcp:#BE185D; --p-dns:#C2410C; --p-http:#1D4ED8;
-    --vlan-1:#64748B; --vlan-2:#0B7FB5; --vlan-3:#15803D; --vlan-4:#B45309; --vlan-5:#BE185D; --vlan-6:#6D28D9; --vlan-7:#C2410C; --vlan-8:#0F766E;
-    --zone-a:rgba(11,127,181,.09); --zone-b:rgba(21,128,61,.09); --zone-c:rgba(180,83,9,.09); --zone-d:rgba(190,24,93,.09); --zone-e:rgba(109,40,217,.09);
-
-    --typ-router:#0B7FB5; --typ-switch:#0F766E; --typ-firewall:#C2410C; --typ-host:#475569; --typ-server:#6D28D9; --typ-nas:#1D4ED8; --typ-internet:#0369A1;
-    --zone-a-linie:rgba(11,127,181,.5); --zone-b-linie:rgba(21,128,61,.5); --zone-c-linie:rgba(180,83,9,.5); --zone-d-linie:rgba(190,24,93,.5); --zone-e-linie:rgba(109,40,217,.5);
-    --glas:rgba(255,255,255,.86); --leiste-bg:rgba(255,255,255,.95);
-    --schatten:0 12px 32px rgba(20,32,51,.18);
-    --glow:0 0 0 1px rgba(11,122,75,.25), 0 0 24px rgba(11,122,75,.12);
+    --bg:#F4F4F1; --bg-raster:rgba(20,21,15,.05); --panel:#FFFFFF; --panel-2:#F7F7F4; --panel-3:#ECECE6;
+  --line:rgba(20,21,15,.12); --line-2:rgba(20,21,15,.22);
+  --ink:#14150F; --muted:#55584F; --faint:#6B6E64;
+  --accent:#0B7A52; --accent-ink:#FFFFFF; --accent-soft:#DCF2E7;
+  --mint:#0B7A52; --iris:#4B3FBF; --amber:#8A5A00; --koralle:#A83A28;
+  --ok:#0B7A52; --ok-soft:#DCF2E7; --warn:#8A5A00; --warn-soft:#FBF0D6; --bad:#A83A28; --bad-soft:#FBE4DE; --info:#4B3FBF; --info-soft:#E7E3FB;
+  --geld:#8A5A00; --ruf:#4B3FBF;
+  --schatten:0 24px 50px -34px rgba(20,21,15,.35);
+  --glow:0 0 0 1px rgba(11,122,82,.22), 0 12px 28px -16px rgba(11,122,82,.28);
+  --glas:rgba(255,255,255,.86); --leiste-bg:rgba(255,255,255,.95);
   }
 }
 :root[data-theme="light"]{
-  color-scheme:light;
-  --bg:#F2F6F3; --bg-raster:rgba(11,90,58,.10); --panel:#FFFFFF; --panel-2:#F7FAF8; --panel-3:#E8EFEA; --line:#D2DED7; --line-2:#B4C6BB;
-  --ink:#0B1512; --muted:#4C5F56; --faint:#5C7066; --accent:#0B7A4B; --accent-ink:#FFFFFF; --accent-soft:#DDF3E7;
-  --ok:#0F7A3E; --ok-soft:#DDF3E7; --warn:#8A5A00; --warn-soft:#FBF0D6; --bad:#A81E42; --bad-soft:#FBE4EA; --info:#0E7490; --info-soft:#DDF1F5;
-  --geld:#9A5D06; --ruf:#BE185D;
-  --p-arp:#B45309; --p-icmp:#0B7FB5; --p-tcp:#6D28D9; --p-udp:#047857; --p-dhcp:#BE185D; --p-dns:#C2410C; --p-http:#1D4ED8;
-  --vlan-1:#64748B; --vlan-2:#0B7FB5; --vlan-3:#15803D; --vlan-4:#B45309; --vlan-5:#BE185D; --vlan-6:#6D28D9; --vlan-7:#C2410C; --vlan-8:#0F766E;
-  --zone-a:rgba(11,127,181,.09); --zone-b:rgba(21,128,61,.09); --zone-c:rgba(180,83,9,.09); --zone-d:rgba(190,24,93,.09); --zone-e:rgba(109,40,217,.09);
-
-  --typ-router:#0B7FB5; --typ-switch:#0F766E; --typ-firewall:#C2410C; --typ-host:#475569; --typ-server:#6D28D9; --typ-nas:#1D4ED8; --typ-internet:#0369A1;
-  --zone-a-linie:rgba(11,127,181,.5); --zone-b-linie:rgba(21,128,61,.5); --zone-c-linie:rgba(180,83,9,.5); --zone-d-linie:rgba(190,24,93,.5); --zone-e-linie:rgba(109,40,217,.5);
+    --bg:#F4F4F1; --bg-raster:rgba(20,21,15,.05); --panel:#FFFFFF; --panel-2:#F7F7F4; --panel-3:#ECECE6;
+  --line:rgba(20,21,15,.12); --line-2:rgba(20,21,15,.22);
+  --ink:#14150F; --muted:#55584F; --faint:#6B6E64;
+  --accent:#0B7A52; --accent-ink:#FFFFFF; --accent-soft:#DCF2E7;
+  --mint:#0B7A52; --iris:#4B3FBF; --amber:#8A5A00; --koralle:#A83A28;
+  --ok:#0B7A52; --ok-soft:#DCF2E7; --warn:#8A5A00; --warn-soft:#FBF0D6; --bad:#A83A28; --bad-soft:#FBE4DE; --info:#4B3FBF; --info-soft:#E7E3FB;
+  --geld:#8A5A00; --ruf:#4B3FBF;
+  --schatten:0 24px 50px -34px rgba(20,21,15,.35);
+  --glow:0 0 0 1px rgba(11,122,82,.22), 0 12px 28px -16px rgba(11,122,82,.28);
   --glas:rgba(255,255,255,.86); --leiste-bg:rgba(255,255,255,.95);
-  --schatten:0 12px 32px rgba(20,32,51,.18);
-  --glow:0 0 0 1px rgba(11,122,75,.25), 0 0 24px rgba(11,122,75,.12);
-}
+  }
 *{box-sizing:border-box}
 /* hidden heißt versteckt – auch wenn eine Klassenregel display setzt (Design § 22, G1: .lb-fern-schild hatte display:flex
    und lag als leere Pille über dem Switch; die Maus traf das Schild statt das Gerät). !important wie im üblichen Reset. */

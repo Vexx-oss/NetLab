@@ -7,14 +7,14 @@
   border:1px solid var(--line); border-left:2px solid var(--k, var(--accent))}
 .hb-auftrag-text small, .hb-auftrag > small{color:var(--muted); font-size:var(--fs-2); text-transform:uppercase; letter-spacing:.06em}
 .hb-auftrag h3{font:700 var(--fs-5)/1.2 var(--display); margin:3px 0 4px}
-.hb-auftrag p{color:var(--muted); font-size:var(--fs-3)}
+.hb-auftrag p, .ansicht .hb-feierabend p{color:var(--muted); font-size:var(--fs-3)}
 .hb-annehmen{grid-column:1 / -1; justify-self:start}
 .hb-auftrag.leer{grid-template-columns:1fr}
 .hb-kacheln{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px}
 .hb-kachel{display:flex; align-items:center; gap:8px; min-height:64px; padding:12px; border-radius:var(--radius-s); border:1px solid var(--line); background:var(--panel-2);
   color:var(--ink); text-align:left; cursor:pointer; font:inherit}
 .hb-kachel:hover{border-color:var(--accent); background:var(--panel-3)}
-.hb-kachel.fertig, .dx-karte.verstanden{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
+.hb-kachel.fertig, .dx-karte.verstanden, .ansicht .hb-kachel.fertig{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
 .hb-kachel-sym{font-size:var(--fs-5); line-height:1}
 .hb-kachel-text small, .hb-ziel{color:var(--faint); font-size:var(--fs-2); text-align:center}
 .hb-feierabend{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px; border-radius:var(--radius);
@@ -23,12 +23,12 @@
 .hb-feierabend p{font-size:var(--fs-3); margin-top:4px}
 .hb-ausblick{color:var(--muted)}
 .hb-feier-knoepfe{display:flex; flex-direction:column; align-items:stretch; gap:4px; flex:none}
-.hb-aufwaermen h2, .hb-raetsel h2, .hb-woche h2{font:800 var(--fs-5)/1.2 var(--display)}
+.hb-aufwaermen h2, .hb-raetsel h2, .hb-woche h2, .ansicht .hb-feierabend h3{font:800 var(--fs-5)/1.2 var(--display)}
 .hb-fortschritt{color:var(--muted); font-size:var(--fs-2); margin:4px 0 12px}
 .hb-teilen{font:var(--fs-4)/1.6 var(--mono); padding:12px 12px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line); margin:12px 0 8px; white-space:pre-wrap; user-select:all}
 .sp-raetsel .knopf{margin-left:6px}
 .sp-raetsel-zeile{letter-spacing:2px}
-@media (max-width:720px){ .hb-kacheln{grid-template-columns:1fr} .hb-seite{padding:20px 16px} }
+@media (max-width:720px){ .hb-kacheln, .ansicht .hb-kacheln{grid-template-columns:1fr} .hb-seite{padding:20px 16px} }
 
 /* Fehlerdex (Lernstand, #dex) */
 .dx-dex h3 small{font-weight:400; color:var(--muted); font-size:var(--fs-2)}
@@ -44,14 +44,14 @@ button.dx-karte:hover{border-color:var(--accent)}
 .dx-karte.gesehen .dx-sym{color:var(--warn)}
 .dx-sym{width:26px; height:26px; flex:none; display:grid; place-items:center; border-radius:50%; background:var(--panel-3); font-weight:800}
 .dx-karte.verstanden .dx-sym{background:var(--ok-soft); color:var(--ok)}
-.hb-kachel-text, .dx-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.hb-kachel-text, .dx-text, .ansicht .hb-auftrag-text{display:flex; flex-direction:column; gap:4px; min-width:0}
 .dx-text small{color:var(--muted); font-size:var(--fs-2)}
 .dialog-dex{width:min(560px, 100%)}
 .dx-detail h3{font:700 var(--fs-3)/1.3 var(--body); margin:14px 0 4px}
 .dx-detail ul{margin:0 0 0 18px}
 .dx-symptom{font-style:italic; font-size:var(--fs-4); margin-top:6px}
 /* Erste Stunde: der Anruf klingelt auf der Hauptkarte */
-.hb-auftrag.klingelt{border-color:var(--ok)}
+.hb-auftrag.klingelt, .ansicht .hb-auftrag.klingelt{border-color:var(--ok)}
 .hb-auftrag.klingelt .sp-kunde-sym{animation:ev-klingeln var(--dauer-lang) ease-in-out infinite}
 /* § 20 F7: Wahl unter der Hauptkarte und Wochenziel */
 .hb-oder{grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin-top:-4px}
@@ -84,3 +84,59 @@ button.dx-karte:hover{border-color:var(--accent)}
 .sp-einstieg-schluss h3{font:800 var(--fs-4)/1.2 var(--display); margin-bottom:4px}
 .sp-einstieg-schluss p{font-size:var(--fs-4); line-height:1.45; max-width:62ch}
 .sp-einstieg-schluss p + p{color:var(--muted); margin-top:4px}
+
+
+/* ============================================================
+   POLARIS-Editorial: „Heute" als Panel-Raster
+   ------------------------------------------------------------
+   hub.css lädt VOR zz-polaris.css; die Regeln beginnen deshalb mit `.ansicht`
+   (eine Klasse mehr, ohne !important). Maße nur aus Tokens/Skala, Licht nur
+   über color-mix(). Keine eigenen @keyframes (Bewegung: juice.css).
+   ============================================================ */
+.ansicht .hb-seite{max-width:1120px; margin:0 auto; padding:32px 24px; gap:24px}
+.ansicht .hb-kopf{display:flex; flex-direction:column; align-items:flex-start; gap:8px}
+.ansicht .hb-kopf::before{content:"// HEUTE"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; text-transform:uppercase; color:var(--faint)}
+.ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 4.6vw, var(--fs-8)); line-height:1.02; letter-spacing:-.045em; max-width:20ch}
+.ansicht .hb-kopf .hb-serie{display:flex; align-items:center; gap:8px; color:var(--muted); letter-spacing:.2em}
+
+.ansicht .hb-auftrag{gap:16px 24px; padding:24px; border:1px solid var(--line); border-left:2px solid var(--k, var(--accent)); border-radius:var(--radius);
+  background:radial-gradient(120% 150% at 100% 0%, color-mix(in srgb, var(--k, var(--accent)) 12%, transparent), transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--ink) 4%, var(--panel)), var(--panel) 58%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 8%, transparent), var(--schatten)}
+
+.ansicht .hb-auftrag .sp-kunde-sym.gross{width:44px; height:44px; border-radius:var(--radius-s)}
+
+.ansicht .hb-auftrag small{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--muted)}
+.ansicht .hb-auftrag h3{font:800 var(--fs-6)/1.06 var(--display); letter-spacing:-.02em; margin:4px 0; max-width:26ch}
+.ansicht .hb-auftrag p{margin:0; color:var(--muted); font:500 var(--fs-2)/1.5 var(--mono); letter-spacing:.06em}
+
+.ansicht .hb-oder{margin-top:0; padding-top:16px; border-top:1px solid var(--line); gap:8px}
+.ansicht .hb-oder small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--faint)}
+.ansicht .hb-oder-zeile{display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:999px; border:1px solid var(--line);
+  background:var(--panel-2); color:var(--muted); font:500 var(--fs-2)/1.4 var(--mono);
+  transition:transform var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard)}
+.ansicht .hb-oder-zeile:hover, .ansicht .hb-oder-zeile:focus-visible, .ansicht .hb-woche-knopf:hover, .ansicht .hb-woche-knopf:focus-visible{transform:translateY(-1px); border-color:var(--accent)}
+
+.ansicht .hb-kacheln{grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
+.ansicht .hb-kachel{gap:16px; padding:16px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2); box-shadow:var(--schatten)}
+.ansicht .hb-kachel:hover{transform:translateY(-2px)}
+.ansicht .hb-kachel:not(.fertig):hover{border-color:var(--line-2)}
+
+.ansicht .hb-kachel-sym{width:44px; height:44px; border-radius:var(--radius-s); background:var(--accent-soft); color:var(--accent); display:grid; place-items:center}
+.ansicht .hb-kachel-text b{font:700 var(--fs-4)/1.2 var(--display); letter-spacing:-.01em}
+
+.ansicht .hb-feierabend{gap:24px; padding:24px; border-radius:var(--radius); border:1px solid color-mix(in srgb, var(--info) 34%, var(--line));
+  background:linear-gradient(150deg, color-mix(in srgb, var(--info) 14%, var(--panel)), var(--panel) 62%); box-shadow:var(--schatten)}
+
+
+.ansicht .hb-feier-knoepfe{gap:8px}
+
+.ansicht .hb-ziel{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 12px; color:var(--faint)}
+.ansicht .hb-woche-knopf{color:var(--muted); transition:transform var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard)}
+
+.ansicht .hb-woche-knopf.fertig{color:var(--ok); border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
+
+@media (max-width:980px){ .ansicht .hb-kacheln{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:720px){
+  .ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 9vw, var(--fs-8))}
+}

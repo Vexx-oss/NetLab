@@ -1718,3 +1718,42 @@ kontrollraum-dichte, Hell abgeleitet, Fassung 2.2.0). Sie kann der Nutzer jederz
 | Reihenfolge Welle 1 | **Hub + Labor + Leiste zuerst** | andere Ansicht zuerst: § 18.13 tauschen |
 | Fassungsnummer | **2.2.0** (Vorschlag) | 3.0.0: `tools/fassung-ziehen.py --neu …` |
 
+### 18.15 POLARIS v4 — Ablösung von „Matrix-Elegant" (29.10.2026)
+
+Der Nutzer hat die A-Richtung (Matrix-Elegant) nach zwei Wellen verworfen: zu nah am Alten,
+zu blockig, Farben stumpf. POLARIS ist der dritte Vertragsentwurf und **gilt ab jetzt**;
+die Tabellen 18.2–18.7 bleiben als Herkunft stehen, werden aber von diesem Abschnitt überstimmt.
+
+**Farben (dunkel, Standard).** Grund `#0B0C0F`; Paneele dreistufig `#14161B` / `#191C22` / `#1F232B`;
+Haarlinien `rgba(255,255,255,.08)` und `.16`; Text `#F3F4F1` / `#B0B4AD` / `#6E726C`.
+Vier semantische Signalfarben, gleiche Helligkeit, je eine Aufgabe:
+**Minze `#7DF3C0`** Handlung/Erfolg/Live · **Iris `#9C8CFF`** Wissen/Reputation ·
+**Amber `#FFC46B`** Geld/Zeit · **Koralle `#FF8A7A`** Störung.
+Farbe erscheint nur als Punkt, 1-px-Kante, dünne Linie, Zahlenverlauf oder 6–10-%-Tönung — nie als Fläche.
+Die helle Ableitung ist mitgeführt (18.3-Struktur), aber nicht gesondert abgenommen.
+
+**Form.** Radien `--radius 14 / --radius-s 10 / --radius-xs 6`; Pille 999, Kreis 50 %.
+Weiche Elevation statt harter Blöcke: `--schatten` (0 30px 70px −50px) und 1-px-Innenlichtkante.
+Geräte-Karten: `rx 10`, Kante `--line`, Schatten nur bei Hover/Auswahl.
+
+**Shell.** Kopf 60 px, linke Leiste 76 px, Statusfuß 34 px, Dock-Vorgabe 76 px.
+Statusfuß ist eine Tickermonate: Live-Punkt, Ansicht, Ebene (Bus „ebene"), Version.
+
+**Kabel (neu).** Leitungen sind Patchkabel, keine Linien: Mantel `8 px` in
+`color-mix(--ink 16 %)`, Seele `3,2 px` in `--kf`, RJ45-Steckergehäuse `18 × 10` an beiden Enden
+(Rastnase, Kontaktfeld), leichter Durchhang als Quadratik (`Q`-Pfad, Bogen ≤ 20 Einheiten).
+Status-Symbole sitzen näher an den Karten (28/48 statt 38/66), damit sie die Stecker nicht überdecken.
+Das alte `<line>`-Paar bleibt als Logik/Trefferfläche erhalten; gezeichnet werden `path`-Elemente.
+
+**Bewegung.** Nur `transform`/`opacity`/`filter`; Dauer 160/320 ms bzw. `--dauer*`;
+Ruhige Reveals (6 px), Hover-Lift 1–2 px, Lichtschein am Hauptknopf, fließende Punkte nur am
+gestörten Kabel. Reduzierte Bewegung zentral in `basis.css` (ein Block, R8).
+
+**Stildateien.** Neu: `src/stil/zz-polaris.css` (lädt zuletzt, Overrides für Shell/Paneele/Hub/Kabel)
+und der Editorial-Block am Ende von `hub.css`. `basis.css` trägt die Tokens.
+`tests/stil-stand.json` wurde auf die POLARIS-Messung gezogen: R2 23 → 15, R4 128 → 109 (besser),
+R10 durch Blockzusammenlegungen 0. Ethos ist GRÜN gegen den neuen Stand.
+
+**Nicht geändert.** Datenformen, Simulation, Tests, Bedienlogik, Trefferflächen (`ger-treffer` 116 × 80,
+`kabel-treffer` 14), Tastenkürzel, Klassenraum, Kontrastregeln der Semantikfarben (18.4).
+

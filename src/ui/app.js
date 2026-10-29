@@ -39,7 +39,7 @@ UI.app = (() => {
   Bus.an("ui-bereit", () => setTimeout(themaAnwenden, 0));            /* nach Spiel.laden: gekauftes Aussehen anwenden */
   function einstSetzen(teil){ const e = einst(); Object.assign(e, teil); store.set("einst", e); }
   function themaAnwenden(){
-    const t = einst().thema, d = document.documentElement;
+    const t = einst().thema || "dunkel", d = document.documentElement;   /* § 18.3: Dunkel ist Standard */
     if (t === "hell") d.dataset.theme = "light"; else if (t === "dunkel") d.dataset.theme = "dark"; else delete d.dataset.theme;
     /* Aussehen aus dem Shop (Akzentfarbe, Leistenstil) – vorher wurde es gekauft, aber nie angewendet */
     const a = typeof Spiel !== "undefined" && Spiel._st && Spiel.karriere ? Spiel.karriere.daten().aussehen : null;
@@ -225,10 +225,18 @@ UI.app = (() => {
     el.flaeche = h("main", {class: "flaeche"});
     /* § 18.7: Statusfuß 28 px — reine Anzeige (Ansicht links, Zustand rechts), keine Bedienelemente. */
     el.fussWeg = h("span", {class: "fuss-text"}, "Bereit");
+    el.fussEbene = h("span", {class: "fuss-teil fuss-ebene"}, "Ebene IP");
     el.fuss = h("footer", {class: "fuss", "aria-label": "Statuszeile"},
+      h("span", {class: "fuss-teil fuss-live"}, h("i", {class: "fuss-punkt", "aria-hidden": "true"}), "live"),
       h("span", {class: "fuss-teil", role: "status", "aria-live": "polite"}, el.fussWeg),
+      el.fussEbene,
       h("span", {class: "fuss-teil"}, "lokal", h("span", {class: "fuss-trenner", "aria-hidden": "true"}, "·"), "kein Netz",
         h("span", {class: "fuss-trenner", "aria-hidden": "true"}, "·"), "v" + (typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : "dev")));
+    /* Statuszeile: Ebene mitziehen, wenn die Netz-Ebene wechselt (Bus „ebene" aus UI.ebenen) */
+    try {
+      const EBENEN_NAME = {physik: "Physik", vlan: "VLAN", ip: "IP-Netze", mac: "MAC-Tabellen", routen: "Routen"};
+      Bus.an("ebene", id => { if (el.fussEbene) el.fussEbene.textContent = "Ebene " + (EBENEN_NAME[id] || id); });
+    } catch (e) { console.error(e); }
     root.append(kopf, el.dock, el.flaeche, el.fuss);
     container.replaceChildren(root);
     gebaut = new Map();
@@ -347,7 +355,7 @@ UI.app = (() => {
     const l = [];
     l.push({titel: "Darstellung", fn: c => c.append(
       zeile("Farbschema", "Dunkel ist der Leitstand-Look. „System“ folgt der Einstellung des Betriebssystems.",
-        wahl("Farbschema", [["hell", "Hell"], ["dunkel", "Dunkel"], ["system", "System"]], e.thema || "system", v => { einstSetzen({thema: v}); themaAnwenden(); })),
+        wahl("Farbschema", [["hell", "Hell"], ["dunkel", "Dunkel"], ["system", "System"]], e.thema || "dunkel", v => { einstSetzen({thema: v}); themaAnwenden(); })),
       zeile("Animationen", "Pakete fliegen, Zahlen zählen hoch. „Reduziert“ blendet nur kurz ein, „Aus“ zeigt Ergebnisse sofort. Die Systemeinstellung „Bewegung reduzieren“ wird immer beachtet.",
         wahl("Animationen", [["an", "An"], ["reduziert", "Reduziert"], ["aus", "Aus"]], e.bewegung || "an", v => { einstSetzen({bewegung: v}); themaAnwenden(); })),
       zeile("Ton", "Leise Klänge bei Kabel, Ping, Haken und Sternen – alles bleibt auch ohne Ton verständlich. Die Leiste und ein Fenster im Hintergrund sind immer stumm.",

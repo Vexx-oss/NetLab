@@ -73,3 +73,36 @@
    (juice.js:10) — diese Regel ist das Netz darunter, falls das jemand ändert. */
 html[data-bewegung="reduziert"] .ger[class*="jc-"] .gb,
 html[data-bewegung="reduziert"] .kabel[class*="jc-"] *{animation:none}
+
+/* ---------- Ruhe in der Fläche (task-4): Werkzeuge und Dock ----------
+   POLARIS-Bewegung heißt hier: 1–2 px, 170 ms, kein Dauerblinken, kein Nachfedern über 1,05 hinaus.
+   Animiert werden NUR transform und opacity; kein Bedienelement endet unter Deckkraft 1 (der Ruhezustand
+   ist immer voll sichtbar), die Pseudo-Elemente sind Zierde mit pointer-events:none.
+   Reduzierte Bewegung: wieder KEIN eigener Medienblock (R8 verlangt genau einen zentralen, basis.css:85
+   klammert unter prefers-reduced-motion jede Bewegung auf 1 ms). Die eigene Abschaltung hängt am
+   Haus-Signal html[data-bewegung="reduziert"], das app.js aus UI.bewegung() setzt — dom.js:44 liest dafür
+   prefers-reduced-motion, und die Einstellung „Reduziert" (app.js:360 → themaAnwenden, app.js:48) setzt
+   dasselbe Attribut sofort. */
+
+/* Werkzeugleiste: 1 px Lift. editor.css setzt den Übergang von .lb-wz nur für background/color; die
+   transition-property-Zeile ergänzt transform, ohne den vorhandenen Übergang zu doppeln (Dauer und
+   Zeitkurve bleiben die der Grundregel). */
+.lb-wz:not(:disabled){transition-property:background, color, transform}
+.lb-wz:hover:not(:active):not(:disabled){transform:translateY(-1px)}
+
+/* Dock: 2 px Lift; den Übergang (transform, var(--dauer)) trägt zz-polaris.css:17. */
+.dock-knopf:hover:not(:active){transform:translateY(-2px)}
+
+/* Fokus: ein weicher Ring legt sich über das Werkzeug (nur opacity); die harte 2-px-Kontur aus
+   basis.css:83 bleibt der eigentliche Fokusring und wird nicht ersetzt. */
+.lb-wz::after{content:""; position:absolute; inset:0; border-radius:var(--radius-s); pointer-events:none;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 32%, transparent);
+  opacity:0; transition:opacity var(--dauer) var(--ease-standard)}
+.lb-wz:focus-visible::after{opacity:1}
+
+/* Reduzierte Bewegung: dieselben Bewegungen aus (keine Verschiebung, kein Übergang); der Fokusring
+   bleibt als fester Zustand sichtbar (Barrierefreiheit) und erscheint nur ohne Übergang. Die Selektoren
+   tragen die :hover-Klauseln der Lift-Regeln, damit sie diese auch in der Spezifität schlagen. */
+html[data-bewegung="reduziert"] .lb-wz::after,
+html[data-bewegung="reduziert"] .lb-wz:hover:not(:active):not(:disabled),
+html[data-bewegung="reduziert"] .dock-knopf:hover:not(:active){transition:none; transform:none}

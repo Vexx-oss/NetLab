@@ -1,6 +1,26 @@
 /* ---------- Spiel-Oberfläche (ui/spiel.js): Postfach, Auftragsleiste, Hilfe, Ergebnis, Onboarding ---------- */
-.knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); box-shadow:var(--glow)}
+.knopf.primaer{position:relative; background:var(--accent); border-color:var(--accent); color:var(--accent-ink); box-shadow:var(--glow)}
 .knopf.primaer:hover{background:var(--accent); filter:brightness(1.08)}
+/* ---- Ruhe statt Dauerblinken (task-4): der Hauptknopf antwortet mit einem Lichtschein ----
+   Der Schein ist ein Pseudo-Element; animiert werden NUR opacity und transform, keine Layout-Eigenschaft.
+   Dauer var(--dauer) = 170 ms (Leiter 120–240 ms), der Knopf selbst bleibt opacity:1 — der Schein ist
+   reine Zierde mit pointer-events:none, es gibt keinen Endzustand unter Deckkraft 1 an einem Bedienelement.
+   Den 1-px-Lift trägt der vorhandene Übergang der Grundregel .knopf (rahmen.css: transition ... transform).
+   Reduzierte Bewegung: html[data-bewegung="reduziert"] schaltet Schein und Lift ab (Regel unten).
+   Den Fall „Betriebssystem will weniger Bewegung" meldet app.js:16/48 über UI.bewegung(), das dom.js:44
+   aus matchMedia liest; zusätzlich klammert der EINE zentrale Block basis.css:85 jeden Übergang unter
+   prefers-reduced-motion auf 1 ms. Ein eigener Medienblock hier wäre gegen R8 (genau ein zentraler Block). */
+.knopf.primaer::after{content:""; position:absolute; inset:0; border-radius:var(--radius); pointer-events:none;
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 70%, transparent), 0 10px 26px -14px color-mix(in srgb, var(--accent) 62%, transparent);
+  opacity:0; transform:translateY(2px) scale(.98);
+  transition:opacity var(--dauer) var(--ease-standard), transform var(--dauer) var(--ease-standard)}
+.knopf.primaer:hover:not(:disabled)::after, .knopf.primaer:focus-visible::after{opacity:1; transform:none}
+.knopf.primaer:hover:not(:active):not(:disabled){transform:translateY(-1px)}
+/* Reduzierte Bewegung: derselbe Übergang aus (keine Verschiebung, keine Blende); der statische Schein
+   bleibt als Rückmeldung sichtbar, wechselt aber ohne Übergang. Die Selektoren tragen :hover:not(:active),
+   damit sie den 1-px-Lift oben auch in der Spezifität schlagen (0,5,1 gegen 0,5,0). */
+html[data-bewegung="reduziert"] .knopf.primaer::after,
+html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:none; transform:none}
 .knopf.geist{background:none; border-color:transparent; color:var(--muted)}
 .knopf.geist:hover, .am-zu:hover{color:var(--ink); background:var(--panel-3)}
 .knopf.klein{min-height:30px; padding:0 8px; font-size:var(--fs-2)}
@@ -8,7 +28,7 @@
 .sp-leise, .sp-ok{color:var(--ok); font-weight:600}
 
 /* ---- Kundensymbol ---- */
-.sp-kunde-sym{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; width:36px; height:36px; border-radius:11px; font-size:var(--fs-5);
+.sp-kunde-sym{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; width:36px; height:36px; border-radius:var(--radius-s); font-size:var(--fs-5);
   background:color-mix(in srgb, var(--k, var(--accent)) 18%, var(--panel-2)); border:1px solid color-mix(in srgb, var(--k, var(--accent)) 45%, transparent)}
 .sp-kunde-sym.gross{width:52px; height:52px; font-size:var(--fs-6); border-radius:var(--radius)}
 
@@ -44,7 +64,7 @@
 .am-mappe.rein{animation:am-rein var(--dauer) ease-out}
 @keyframes am-rein{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}
 .am-reiter{display:flex; align-items:center; gap:0px; padding:4px 8px 0 8px; border-bottom:1px solid var(--line)}
-.am-tab{border:0; background:none; color:var(--muted); font:700 var(--fs-3)/1 var(--body); padding:8px 12px 12px; border-bottom:2px solid transparent; border-radius:var(--radius-s) 8px 0 0}
+.am-tab{border:0; background:none; color:var(--muted); font:700 var(--fs-3)/1 var(--body); padding:8px 12px 12px; border-bottom:2px solid transparent; border-radius:var(--radius-s) 0 0 0}
 .am-tab:hover{color:var(--ink); background:var(--panel-2)}
 .am-tab.an{color:var(--accent); border-bottom-color:var(--accent)}
 .am-zu{margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted)}
@@ -59,7 +79,7 @@
 .am-ziele-liste{display:flex; flex-direction:column; gap:8px; padding-bottom:6px}
 .am-ziele-liste .sp-ziele li{font-size:var(--fs-3)}
 .am-ziel-text{flex:1 1 auto; min-width:0}
-.sp-naechste{padding:4px 8px; border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 6px 6px 0}
+.sp-naechste{padding:4px 8px; border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 var(--radius-xs) var(--radius-xs) 0}
 .am-antwort-zeile{display:flex; gap:4px; margin-top:4px; align-items:center}
 .am-antwort{flex:1 1 140px; max-width:220px; min-width:0; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3) var(--mono)}
 .am-antwort:focus{outline:2px solid var(--accent); outline-offset:1px}
@@ -245,7 +265,7 @@
 @media (max-width: 900px){ .sp-pf-teile{grid-template-columns:1fr} .sp-pf-teile > .sp-leser{display:none} }
 /* Schmal (F1): Leser als Blatt von unten */
 .sp-overlay.blatt{align-items:flex-end; padding:0}
-.sp-overlay.blatt .sp-karte{width:min(720px, 100%); max-height:88vh; padding:8px 12px 12px; border-radius:var(--radius) 18px 0 0; border-bottom:0; transform:translateY(40px)}
+.sp-overlay.blatt .sp-karte{width:min(720px, 100%); max-height:88vh; padding:8px 12px 12px; border-radius:var(--radius) var(--radius-s) 0 0; border-bottom:0; transform:translateY(40px)}
 .sp-blatt{display:flex; flex-direction:column; gap:6px}
 .sp-blatt-griff{align-self:center; width:56px; height:16px; padding:0; border:0; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer}
 .sp-blatt-griff::before{content:""; width:44px; height:5px; border-radius:var(--radius-xs); background:var(--line-2)}

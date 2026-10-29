@@ -45,8 +45,9 @@ UI.labor = (() => {
     Z.el.plan = h("div", {id: "labor-plan", class: "lb-plan"});
     Z.el.akte = h("div", {id: "labor-akte", class: "lb-akte"});
     Z.el.terminal = h("div", {id: "labor-terminal", class: "lb-terminal"});
-    Z.inspWartet = Z.inspWartet ?? true; Z.simWartet = Z.simWartet ?? true;
-    Z.dock ||= {reiter: "inspektor", zu: false}; Z.dockDa ||= {};
+    const SCHMAL = typeof innerWidth === "number" && innerWidth < 1100;
+  Z.inspWartet = Z.inspWartet ?? SCHMAL; Z.simWartet = Z.simWartet ?? true;  /* A: Inspektor ab 1100 px immer da */
+    Z.dock ||= {reiter: "inspektor", zu: SCHMAL}; Z.dockDa ||= {};
 
     /* Geräteleiste: vier Kategorien, Klick öffnet ein Fach (editor-fach.js) */
     const leiste = h("aside", {class: "lb-geraete", "aria-label": "Geräte"});
@@ -86,13 +87,18 @@ UI.labor = (() => {
       Z.el.verlaufGruppe);
     const unten = h("div", {class: "lb-leiste-unten"}, Z.el.zoomGruppe = h("div", {class: "lb-gruppe"}, Z.el.zoomText));
     Z.el.hinweis = h("div", {class: "lb-hinweis", "aria-live": "polite"});
+    /* § 18: Szenen-Legende wie im Prototyp (unten links) */
+    Z.el.legende = h("div", {class: "lb-legende", "aria-hidden": "true"},
+      h("span", {class: "lg lg-verbunden"}, "VERBUNDEN"),
+      h("span", {class: "lg lg-getrennt"}, "GETRENNT"),
+      h("span", {class: "lg lg-kein"}, "KEIN LINK"));
     Z.el.leer = h("div", {class: "lb-leer", hidden: true},
       h("strong", {}, "Die Fläche ist leer."),
       h("p", {}, "Öffne links ein Fach und zieh ein Gerät hierher – oder doppelklicke auf die Fläche."));
     /* Fernwartung (E1): Die Fläche ist verdeckt – man sieht nur, was die Befehle des einen Rechners zeigen */
     Z.el.fern = h("div", {class: "lb-fern-schild", hidden: true});
     Z.el.blatt = h("div", {class: "lb-blatt", hidden: true});                 /* Arbeitsblatt statt Fläche (E1: Adressplan) */
-    const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer, Z.el.fern, Z.el.blatt);
+    const leinwand = h("div", {class: "lb-leinwand"}, Z.svg, oben, unten, Z.el.hinweis, Z.el.leer, Z.el.fern, Z.el.blatt, Z.el.legende);
     Z.el.leinwand = leinwand;
 
     /* Dock rechts (K1): Inspektor · Simulation · Plan · Akte in EINEM Bereich mit Reitern – die Fläche behält die volle Höhe
@@ -379,6 +385,20 @@ UI.labor = (() => {
     const off = Z.versatz.get(k.id) || 0;
     return {ax: A.x + nx * off, ay: A.y + ny * off, bx: B.x + nx * off, by: B.y + ny * off, ux, uy, nx, ny, len};
   }
+  function kabelPfad(geo){
+    /* Patchkabel: leichter Durchhang quer zur Verbindung, keine starre Gerade */
+    const {ax, ay, bx, by, nx, ny, len} = geo;
+    const bogen = Math.min(20, len * 0.08);
+    const mx = (ax + bx) / 2 + nx * bogen, my = (ay + by) / 2 + ny * bogen;
+    return `M${ax.toFixed(1)} ${ay.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${bx.toFixed(1)} ${by.toFixed(1)}`;
+  }
+  function steckerZeichen(x, y, ux, uy){
+    const winkel = Math.atan2(uy, ux) * 180 / Math.PI;
+    return sv("g", {class: "kabel-stecker", transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${winkel.toFixed(1)})`},
+      sv("rect", {class: "stk-gehaeuse", x: -9, y: -5, width: 18, height: 10, rx: 3}),
+      sv("rect", {class: "stk-kontakt", x: -6, y: -3, width: 12, height: 6, rx: 1}),
+      sv("rect", {class: "stk-clip", x: 6, y: -2, width: 4, height: 4, rx: 1}));
+  }
   function statusSymbol(x, y, status, titel){
     const g = sv("g", {class: "ps ps-" + status});
     g.append(sv("circle", {class: "ps-grund", cx: x, cy: y, r: 7.5}));
@@ -429,15 +449,20 @@ UI.labor = (() => {
     const grund = (sa.status !== "oben" ? sa : sb).grund;
     const titel = `${na} ${k.a.port} ↔ ${nb} ${k.b.port}\n${klasse === "oben" ? "Link oben" : (klasse === "aus" ? "Port abgeschaltet" : "Link unten") + (grund ? ": " + grundText(grund) : "")}` +
       (trunk ? `\nTrunk (802.1Q), erlaubt: ${UI.ebenen.erlaubtText((va?.art === "trunk" ? va : vb).erlaubt)}` : "");
+    const d = kabelPfad(geo);
+    const abstand = Math.min(78, Math.max(66, len * 0.34));
     g.append(sv("line", {class: "kabel-treffer", x1: ax, y1: ay, x2: bx, y2: by}, sv("title", {text: titel + "\nKlicken zum Auswählen, Entf trennt."})));
+    g.append(sv("path", {class: "kabel-huelle", d}));
     if (trunk) {
-      g.append(sv("line", {class: "kabel-trunk-aussen", x1: ax, y1: ay, x2: bx, y2: by}));
-      g.append(sv("line", {class: "kabel-trunk-innen", x1: ax, y1: ay, x2: bx, y2: by}));
-    } else g.append(sv("line", {class: "kabel-linie", x1: ax, y1: ay, x2: bx, y2: by}));
+      g.append(sv("path", {class: "kabel-trunk-aussen", d}));
+      g.append(sv("path", {class: "kabel-trunk-innen", d}));
+    } else g.append(sv("path", {class: "kabel-linie", d}));
+    g.append(steckerZeichen(ax + ux * abstand, ay + uy * abstand, ux, uy));
+    g.append(steckerZeichen(bx - ux * abstand, by - uy * abstand, -ux, -uy));
     /* Enden: Statussymbol + Portname. Verlässt das Kabel das Gerät nach unten, beginnt es unter der Beschriftung. */
     const ende = (x, y, s, richtung, port, titelPort) => {
       const abwaerts = uy * richtung > 0.45;
-      const basis = abwaerts ? 66 : 38;
+      const basis = abwaerts ? 48 : 28;
       const dSym = Math.min(basis + 8, len * 0.36), dTxt = Math.min(basis + 24, len * 0.46);
       g.append(statusSymbol(x + ux * dSym * richtung, y + uy * dSym * richtung, s.status, `${titelPort}: ${STATUS_TEXT[s.status] || s.status}${s.grund && s.status !== "oben" ? " – " + grundText(s.grund) : ""}`));
       const ox = nx * 9, oy = ny * 9, senkrecht = Math.abs(ux) < 0.55;
@@ -471,20 +496,21 @@ UI.labor = (() => {
     if (UI.ebenen.aktuell === "ip" && Z.ohne.has(g.id)) klassen.push("ohne-ip");
     const el = sv("g", {class: klassen.join(" "), "data-id": g.id, transform: `translate(${p.x} ${p.y})`});
     const art = UI.geraeteArt(g.typ, g.skin);
-    el.append(sv("rect", {class: "ger-treffer", x: -34, y: -32, width: 68, height: 64, rx: 14}));
-    el.append(sv("circle", {class: "ger-auswahl", cx: 0, cy: 0, r: 38}));
-    el.append(UI.geraetebild(g.typ, g.skin));
+    el.append(sv("rect", {class: "ger-treffer", x: -58, y: -40, width: 116, height: 80, rx: 8}));
+    el.append(sv("rect", {class: "ger-auswahl", x: -62, y: -44, width: 124, height: 88, rx: 10}));
+    el.append(sv("rect", {class: "ger-karte", x: -58, y: -40, width: 116, height: 80, rx: 8}));
+    el.append(sv("g", {class: "ger-bild", transform: "translate(-34 -6) scale(.72)"}, UI.geraetebild(g.typ, g.skin)));
     const a = UI.ebenen.adresse(netz, g);
     /* Name und Adresse mit Luft: bei 12-13 px Schrift berührten sich die beiden Zeilen (Abstand 0 gemessen,
        Befund 05.10.2026) – das wirkt gedrängt, auch wenn sich die Kästen formal nicht schneiden. */
-    el.append(sv("text", {class: "ger-name", x: 0, y: 46, "text-anchor": "middle", text: g.name}));
+    el.append(sv("text", {class: "ger-name", x: -8, y: -4, "text-anchor": "start", text: g.name}));
     /* Auf der Fläche steht bewusst NUR die erste Adresse (Kurzform „… +2“ bei mehreren Schnittstellen).
        Alle Adressen mit Schnittstelle stehen im Tooltip. Begründung: Mit allen drei Adressen untereinander
        füllte der Router den Bereich unter sich voll und stieß an die Portnamen – dieselbe Dichte, die der
        Kunde bemängelt hat (Versuch und Messung 05.10.2026). Die Subnetz-Schilder sagen bereits, welche
        Netze es gibt; welcher Router-Port in welchem Netz liegt, verrät der Tooltip und der Inspektor. */
     if (a.text) {
-      const adr = sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: 0, y: 62, "text-anchor": "middle", text: a.text});
+      const adr = sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: -8, y: 14, "text-anchor": "start", text: a.text});
       /* Adresse anklicken = in die Zwischenablage (Wunsch 05.10.2026: „für easy von hand routing").
          Kopiert wird NUR die Adresse ohne Präfix und ohne „+2" – genau das, was man in eine Route tippt.
 
@@ -523,17 +549,17 @@ UI.labor = (() => {
       "Ziehen = verschieben · Doppelklick = Inspektor · Rechtsklick = Menü"].filter(Boolean).join("\n")}));
     const w = warnungenAn() ? Z.warn.get(g.id) : null;
     if (w && w.length) {
-      const b = sv("g", {class: "badge badge-warn", transform: "translate(24 -24)"});
+      const b = sv("g", {class: "badge badge-warn", transform: "translate(46 -32)"});
       b.append(sv("circle", {r: 9.5}), sv("path", {d: "M0 -4.5v5M0 3.6v.1"}), sv("title", {text: "Prüfung meldet:\n• " + w.join("\n• ")}));
       el.append(b);
     }
     if (Modell.ungespeichert(g)) {
-      const b = sv("g", {class: "badge badge-ungespeichert", transform: "translate(-24 -24)"});
+      const b = sv("g", {class: "badge badge-ungespeichert", transform: "translate(-46 -32)"});
       b.append(sv("circle", {r: 5.5}), sv("title", {text: "Ungespeichert: running-config ≠ startup-config.\nNach einem Neustart wäre die Änderung weg (copy running-config startup-config)."}));
       el.append(b);
     }
     if (!g.an) {
-      const b = sv("g", {class: "badge badge-aus", transform: "translate(0 -34)"});
+      const b = sv("g", {class: "badge badge-aus", transform: "translate(0 -52)"});
       b.append(sv("rect", {x: -16, y: -9, width: 32, height: 18, rx: 9}), sv("text", {x: 0, y: 4, "text-anchor": "middle", text: "aus"}));
       el.append(b);
     }
@@ -953,7 +979,7 @@ UI.labor = (() => {
     Z.auswahl = null; Z.auswahlSet = new Set(); Z.kabelWahl = null; Z.pos.clear(); Z.hover = null; Z.pingVon = null;
     if (Z.werkzeug !== "auswahl") Z.werkzeug = "auswahl";
     Z.einpassenAusstehend = true;
-    Z.inspWartet = true; Z.simWartet = true; Z.simZu = true;
+    Z.inspWartet = typeof innerWidth === "number" && innerWidth < 1100; Z.simWartet = true; Z.simZu = true;  /* A: Inspektor bleibt sichtbar (breit) */
     Z.dock = {reiter: "inspektor", zu: false}; Z.dockDa = {}; Z.dockZahl = {};
     F.fachZu?.();
     UI.ebenen.setzen(opt.ebene || UI.ebenen.gemerkt(), {merken: false});

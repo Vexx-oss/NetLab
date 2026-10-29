@@ -9,6 +9,39 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.3.0 — POLARIS: neue Gestaltung, Patchkabel, Bewegung (29.10.2026)
+
+**Warum.** Die A-Richtung (Matrix-Elegant) war dem Nutzer zu nah am Alten, zu blockig, die Farben
+stumpf. POLARIS ist der dritte Entwurf: geschichtete Neutraltöne, vier semantische Signalfarben,
+weiche Tiefe statt harter Flächen, technische Patchkabel. Vertrag: `docs/Architektur.md` § 18.15.
+
+**Umfang.**
+- Tokens in `basis.css`: Grund `#0B0C0F`, Paneele `#14161B/#191C22/#1F232B`, Haarlinien 8/16 %,
+  Minze `#7DF3C0` (Handlung), Iris `#9C8CFF` (Wissen), Amber `#FFC46B` (Geld), Koralle `#FF8A7A`
+  (Störung); Radien 14/10/6; weiche Elevation; helle Ableitung mitgeführt.
+- Shell: Kopf 60 px mit Markenblock, Werte als Mono-Chips; Leiste 76 px mit runden Knöpfen;
+  Statusfuß 34 px als Ticker mit Live-Punkt, Ansicht und **Ebene** (Bus „ebene").
+- Hub: editoriale Fläche (Overline „// HEUTE", Datum 34–44 px, Auftragskarte mit semantischer Kante
+  und Lichtkante, Kacheln als 3-Spalten-Panel-Raster, Feierabend-Panel in Iris).
+- Labor: Geräte-Karten mit Radius 10 und Schatten nur bei Hover/Auswahl; **Kabel sind Patchkabel**
+  (Mantel 8 px, Seele 3,2 px, RJ45-Stecker 18 × 10 an beiden Enden, leichter Durchhang als
+  Quadratik); Status-Symbole näher an den Karten; Legende/Hinweis als Glas-Pille in Mono.
+- Bewegung: ruhige Reveals (6 px, 240 ms), Hover-Lift 1–2 px, Lichtschein am Hauptknopf, fließende
+  Punkte nur am gestörten Kabel; reduzierte Bewegung zentral in `basis.css`.
+- Neu: `src/stil/zz-polaris.css` (lädt zuletzt, Overrides ohne `!important`).
+
+**Handwerk.** Zeilenenden LF erhalten. `tools/klassen.py`: 0 Klassen ohne CSS-Regel (neu:
+`fuss-live`, `fuss-punkt`, `fuss-ebene`, `lg-getrennt`). `tools/ethos.py`: R2 23 → 15,
+R4 128 → 109 (besser), R10 0; Stand in `tests/stil-stand.json` auf die POLARIS-Messung gezogen.
+Kontrast: `--faint` dunkel war 3,99:1 und wurde auf `#848981` (5,47/5,06/4,78) gehoben;
+alle Text-Tokens ≥ 4,5:1 in beiden Schemata. Dauer-Tokens unverändert 80/160/240/320 ms.
+
+**Gemessen (29.10.2026, diese Sitzung).**
+- Tests: **873/873 grün** über `sh tools/test.sh` (103 Testdateien, 95 Module, 0 übersprungen).
+- Rauchtest: **45/45 grün** (14 Ansichten × 3 Breiten + Erstabnahme mit echter Maus).
+- Einzeldatei: `Netzwerk-Labor.html` = `docs/index.html`, 0 Außenverweise, SHA256 im Stand.
+- Fassung: 2.3.0 (`VERSION_CODE = 20300`); Windows-Bau über `cargo build --release --features custom-protocol`.
+
 ## 2.2.0 — Frontend-Redesign „Matrix-Elegant" (A) (29.10.2026)
 
 **Warum.** Der Nutzer hat ein komplettes Redesign des Frontends beauftragt: **Optik + Shell neu,

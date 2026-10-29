@@ -54,7 +54,7 @@ UI.geraetebild = (() => {
       g.append(gl);
       return g;
     }
-    g.append(sv("rect", {class: "gb-kachel", x: -26, y: -26, width: 52, height: 52, rx: 13}));
+    g.append(sv("rect", {class: "gb-kachel", x: -26, y: -26, width: 52, height: 52, rx: 8}));
     const gl = sv("g", {class: "gb-glyph"});
     for (const d of (G[skin] || G[typ] || G.pc)) gl.append(sv("path", {d}));
     g.append(gl);

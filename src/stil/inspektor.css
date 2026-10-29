@@ -6,7 +6,7 @@
    Wer hier arbeitet: byteweise schreiben und CRLF erhalten — ein normalisierender Editor stellt die
    ganze Datei um und erzeugt einen Scheindiff ueber alle Zeilen. */
 .lb-inspektor.in{display:flex; flex-direction:column; overflow:hidden}
-.in-kopf{flex:0 0 auto; padding:12px 12px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px}
+.in-kopf{flex:0 0 auto; padding:12px 12px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px; background:var(--panel-2)}
 .in-kopf-zeile{display:flex; align-items:center; gap:8px; min-width:0}
 .in-kopf-zeile > svg, .in-speichern .in-knopf{flex:0 0 auto}
 .in-kopf-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
@@ -24,16 +24,18 @@
 .in-speichern b, .in-hinweis.warn, .in-meldung.warn, .in-werte dd.warn{color:var(--warn)}
 
 .in-reiter{flex:0 0 auto; display:flex; flex-wrap:wrap; gap:0px; padding:4px 8px 0; border-bottom:1px solid var(--line)}
-.in-tab{border:0; background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); padding:8px 8px 8px; border-bottom:2px solid transparent; border-radius:var(--radius-s) 6px 0 0}
+.in-tab{border:0; background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); padding:8px 8px 8px; border-bottom:2px solid transparent; border-radius:var(--radius-s) 0 0 0}
 .in-tab:hover{color:var(--ink); background:var(--panel-2)}
-.in-tab.an{color:var(--accent); border-bottom-color:var(--accent)}
+.in-tab.an{color:var(--accent); border-bottom-color:var(--accent); background:var(--panel-2); font-weight:700}
 
 .in-inhalt{flex:1 1 auto; min-height:0; overflow:auto; padding:12px 12px 16px; display:flex; flex-direction:column; gap:12px; scrollbar-width:thin}
 .in-inhalt-konsole{padding:0; gap:0; overflow:hidden}
 .in-konsole{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
-.in-abschnitt{display:flex; flex-direction:column; gap:9px}
-.in-abschnitt h4{font:700 var(--fs-1)/1 var(--body); letter-spacing:.09em; text-transform:uppercase; color:var(--faint)}
-.in-abschnitt h5{font:700 var(--fs-2)/1.2 var(--body); color:var(--muted); margin:6px 0 0}
+.in-abschnitt{display:flex; flex-direction:column; gap:8px; min-width:0}
+/* Ruhige Zeilen-Trenner zwischen den Abschnitten eines Reiters */
+.in-abschnitt + .in-abschnitt{border-top:1px solid var(--line); padding-top:12px}
+.in-abschnitt h4{font:700 var(--fs-1)/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.in-abschnitt h5{font:700 var(--fs-2)/1.2 var(--body); color:var(--muted); margin:8px 0 0}
 .in-hinweis{color:var(--muted); font-size:var(--fs-2); line-height:1.45}
 .in-hinweis.klein{font-size:var(--fs-2)}
 .in-hinweis code, .in-hinweis .mono{font-size:.95em}
@@ -41,13 +43,13 @@
 .in-leer, .in-fehler{color:var(--muted); padding:16px}
 .in-hinweis.bad, .in-meldung.bad, .in-fehler, .in-lease-konflikt{color:var(--bad)}
 
-.in-raster{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px 10px}
+.in-raster{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px 12px}
 .in-zeile{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
 .in-zeile.zwischen{justify-content:space-between; flex-wrap:nowrap}
 .in-feld{display:flex; flex-direction:column; gap:4px; min-width:0}
 .in-feld.breit{grid-column:1 / -1}
 .in-feld-titel{font:600 var(--fs-2)/1.2 var(--body); color:var(--muted)}
-.in-eingabe, .in-auswahl{width:100%; min-width:0; height:34px; padding:0 8px; border:1px solid var(--line-2); border-radius:7px; background:var(--panel-2); color:var(--ink); font:500 var(--fs-3) var(--body);
+.in-eingabe, .in-auswahl{width:100%; min-width:0; height:34px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-xs); background:var(--panel-2); color:var(--ink); font:500 var(--fs-3) var(--body);
   transition:border-color var(--dauer), background var(--dauer)}
 .in-eingabe.mono, .in-eingabe:focus, .in-auswahl:focus{border-color:var(--accent); outline:none; background:var(--panel)}
 .in-eingabe.bad{border-color:var(--bad); background:var(--bad-soft)}
@@ -59,7 +61,7 @@
 @keyframes in-wackeln{0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}}
 .in-eingabe.wackeln{animation:in-wackeln var(--dauer-lang) 2}
 
-.in-schalter{display:flex; align-items:flex-start; gap:8px; cursor:pointer; min-height:30px; padding:2px 0}
+.in-schalter{display:flex; align-items:flex-start; gap:8px; cursor:pointer; min-height:30px; padding:0}
 .in-schalter input{position:absolute; opacity:0; width:1px; height:1px}
 .in-schalter-bahn{flex:0 0 auto; position:relative; width:38px; height:22px; margin-top:0px; border-radius:999px; background:var(--panel-3); border:1px solid var(--line-2); transition:background var(--dauer), border-color var(--dauer)}
 .in-schalter-bahn::after{content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--muted); transition:transform var(--dauer), background var(--dauer)}
@@ -79,16 +81,16 @@
 .in-knopf.geist{background:none; border-color:transparent; color:var(--muted)}
 .in-knopf.warn{background:var(--warn); border-color:var(--warn); color:var(--accent-ink)}
 /* Terminal/Konsole: Knopf im Kopf statt Reiter (Ausbau 1.2, A3) */
-.in-terminal{gap:5px}
+.in-terminal{gap:4px}
 .in-terminal.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 .in-knopf.geist:hover{color:var(--ink); background:var(--panel-3)}
 .in-knopf.versteckt{visibility:hidden}
 
-.in-karte{display:flex; flex-direction:column; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
+.in-karte{display:flex; flex-direction:column; gap:8px; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
 .in-karte[style*="--v"]{border-left:3px solid var(--v)}
 .in-werte{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0; font-size:var(--fs-2)}
 .in-werte dt, .in-port, .in-lease-abgelaufen{color:var(--muted)}
-.in-werte dd{margin:0}
+.in-werte dd{margin:0; font-family:var(--mono); font-size:var(--fs-2); font-variant-numeric:tabular-nums}
 .in-if-name{border:0; background:none; color:var(--ink); font:700 var(--fs-3)/1.2 var(--mono); padding:4px 0; text-align:left; cursor:pointer}
 .in-if-name small{color:var(--accent); font-weight:600}
 .in-if.sub{margin-left:12px; border-style:dashed}
@@ -107,13 +109,13 @@
 .in-port-kopf .in-chip{align-self:center}
 .in-port-kopf .in-feld-titel{font-size:var(--fs-1)}   /* U02: war 10.5px – funktionale Beschriftung nie unter 11 */
 .in-port-name{border:0; background:none; color:var(--ink); font:700 var(--fs-2)/1 var(--mono); text-align:left; padding:8px 0; cursor:pointer; align-self:center}
-.in-vlan-chip{display:block; border-left:3px solid var(--v); padding-left:6px}
+.in-vlan-chip{display:block; border-left:3px solid var(--v); padding-left:8px}
 .in-port-details{display:flex; flex-direction:column; gap:8px; padding:8px 8px 12px 12px; border-left:2px solid var(--line-2); margin:0 0 6px 10px}
 .in-vlanliste{display:flex; flex-direction:column; gap:8px}
 .in-vlan-nr{color:var(--v, var(--ink))}
 
 .in-regeln{list-style:none; counter-reset:regel; margin:0; padding:0; display:flex; flex-direction:column; gap:3px}
-.in-regeln li{counter-increment:regel; display:flex; align-items:center; justify-content:space-between; gap:4px; padding:4px 4px 4px 8px; border-radius:7px; background:var(--panel); border-left:3px solid var(--line-2); font-size:var(--fs-2)}
+.in-regeln li{counter-increment:regel; display:flex; align-items:center; justify-content:space-between; gap:4px; padding:4px 4px 4px 8px; border-radius:var(--radius-xs); background:var(--panel); border-left:3px solid var(--line-2); font-size:var(--fs-2)}
 .in-regeln li::before{content:counter(regel); color:var(--faint); font:600 var(--fs-1) var(--mono); min-width:14px}
 .in-regeln li > span:first-of-type{flex:1 1 auto; min-width:0; overflow-wrap:anywhere}
 .in-regeln li.permit{border-left-color:var(--ok)}
@@ -127,7 +129,7 @@
 .in-neu{display:flex; flex-wrap:wrap; align-items:flex-end; gap:6px}
 .in-neu .in-feld{flex:1 1 110px}
 .in-neu .in-meldung{flex:1 1 100%}
-.in-listenzeile{padding:4px 4px; border-radius:7px; background:var(--panel); font-size:var(--fs-2)}
+.in-listenzeile{padding:4px 4px; border-radius:var(--radius-xs); background:var(--panel); font-size:var(--fs-2)}
 .in-warnliste{margin:0; padding-left:16px; color:var(--warn); font-size:var(--fs-2); display:flex; flex-direction:column; gap:4px}
 
 .in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 8px; display:flex; flex-direction:column; gap:4px; animation:in-rein var(--dauer) ease-out}
@@ -144,3 +146,14 @@
 .in-lease-reserviert{color:var(--accent)}
 .in-lease-alt td{opacity:.62}
 .in-lease-konflikt td{background:var(--bad-soft)}
+
+/* A (§ 18): leerer Inspektor als ruhige Mono-Liste statt zentrierter Werbeflaeche */
+.lb-insp-leer{display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:16px; text-align:left}
+.lb-insp-leer p{max-width:32ch}
+.lb-insp-leer-sym{display:none}
+.lb-insp-leer strong{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+.lb-insp-leer strong::before{content:"// "}
+.lb-insp-leer p, .lb-insp-leer small{font:500 var(--fs-1)/1.5 var(--mono); color:var(--faint); text-align:left}
+/* Tastenzeilen des Leerzustands: leise, gesperrt, ohne Aufzählungszeichen (= editor.css .lb-tipps) */
+.lb-insp-leer .lb-tipps{display:flex; flex-direction:column; gap:8px; margin:8px 0 0; padding:0; list-style:none;
+  font:500 var(--fs-1)/1.6 var(--mono); color:var(--faint)}
