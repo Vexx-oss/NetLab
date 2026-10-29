@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Redesign, Übergabe, Kontext]
 erstellt: 2026-10-29
-status: Übergabezettel für die nächste Sitzung — Stand v2.1.0, Redesign-Vorlage A favorisiert, Frontend noch nicht umgebaut; Plugin-Ausbau aus paralleler Sitzung dokumentiert, Workflow-Prompt in § 11.
+status: Übergabezettel für die nächste Sitzung — Stand v2.1.0, Redesign-Vorlage A favorisiert, Frontend noch nicht umgebaut; Plugin-Ausbau und 工艺-Prozess dokumentiert, Workflow-Prompt 2.0 in § 12.
 ---
 
 # Übergabe — Stand nach der Sitzung vom 29.10.2026 (Frontend-Redesign)
@@ -224,19 +224,41 @@ Schritten; der nötige **Neustart ist erfolgt** (zuletzt 29.10.2026 ~15:30, GUI
 `127.0.0.1:64030`). Seitdem sind Tabs, Seiten und Agent-Werkzeuge aktiv. Weitere Profiländerungen
 brauchen wieder einen vollständigen Neustart; gespeicherte Sessions bleiben dabei erhalten.
 
-**Verifiziert (hier nachgeprüft):** `package.json` listet inzwischen **13 Bundles** und sechs
-Dependencies; die Community-Pakete liegen in `…\.dsh\profiles\desktop\node_modules`;
+**Verifiziert (hier nachgeprüft, Stand 16:00):** `package.json` listet inzwischen **20 Bundles** und
+zwölf Dependencies; die Community-Pakete liegen in `…\.dsh\profiles\desktop\node_modules`;
 `cordis.patch.yml` enthält Markt-Indexe, Sitzungssuche-Timeout (300 s), Notify-Schalter und den
 Context7-MCP-Server; Backup: `cordis.patch.yml.bak-2026-10-29`. Beim Test in dieser Sitzung:
 persistentes Terminal, `mcp_skill_manager.overview` und `session_search` antworten, **Context7**
-ist als MCP-Server verbunden (Tool-Aufrufe verfügbar).
+ist als MCP-Server verbunden; die 工艺-Bibliothek ist aktiv (unten).
 
 **Bewusst nicht installiert:** Voice-Input (SenseVoice ohne Deutsch), CoT-Übersetzung
-(Datenschutz/Kosten), Ralph/Badge/Inspector/Subagent-Claude/Codex (Nischen), `dsh-plugin-health`,
-`dsh-plugin-guide`, `dshbase-catalog` (jung bzw. redundant), Werkzeuge mit festgenagelten
-0.1.x-Peers sowie `@ebony-vinyl/dsh-our-free-model` und `dsh-deepseek-web-login` (ToS-/Sicherheitsrisiko).
+(Datenschutz/Kosten), Badge/Inspector/Subagent-Claude/Codex (Nischen), `dsh-plugin-health`,
+`dshbase-catalog` (jung bzw. redundant), Werkzeuge mit festgenagelten 0.1.x-Peers sowie
+`@ebony-vinyl/dsh-our-free-model` und `dsh-deepseek-web-login` (ToS-/Sicherheitsrisiko).
 
-## 11 · Optimaler Workflow-Prompt für die nächste Sitzung
+### Workflow-Ebene: 工艺-Bibliothek (seit 29.10.2026 ~16:00 aktiv)
+
+Für mehrphasige Arbeit ist jetzt die **工艺-Bibliothek** installiert (`@weibaohui/dsh-process` 0.6.10,
+Werkzeuge `process_list`/`process_get`/`process_validate`/`process_save`, UI-Seitenleiste „工艺").
+Dazu kamen:
+
+| Neu | Version | Nutzen |
+|---|---|---|
+| `@weibaohui/dsh-process` | 0.6.10 | **Prozess-Templates** mit Phasen, Links, Gates und Rework — der Fahrplan für das Redesign |
+| `@deepseek-ai/dsh-experimental-ralph-bundle` | 0.2.1-rc.3 | **Ralph-Loop** (frische Agenten-Runden) — nur auf ausdrückliche Ansage |
+| `@silentforfar/dsh-computer-use` | Commit `adda1f3…` | **Windows-Desktop-Steuerung** (Fenster beobachten, klicken, tippen) für echte Sichtprüfungen |
+| `@liustack/modlens` | 3.27.2 | Bild-/Screenshot-Analyse als Vision-Brücke (`modlens_read_image`) |
+| `dsh-plugin-guide` | 0.3.39 | DSH-Plugin-Entwicklung/Review als Skill `dsh-plugin-guide` |
+| `dsh-context` | 0.78.1 | Kontext-Werkzeuge; die Skill `workflows` erklärt die Workflow-Ebenen |
+| `dsh-session-manager` | 0.7.5 | Sitzungsverwaltung in der Oberfläche |
+
+**Für dieses Projekt neu angelegt:** die 工艺
+`user:projekte/netzwerk-labor-redesign.yaml` — Anzeigename „Netzwerk-Labor-Frontend redesignen und
+abschliessen", **4 Phasen, 13 Links, Gates, Rework**. Sie führt von Vertrag und Gates über Welle 1
+und Welle 2 bis Doku, Fassung und Abschluss — inklusive Abnahmebelegen und explizitem Verbot von
+Push/Release ohne Freigabe. Einzusehen mit `process_get` (siehe § 12) oder in der UI unter „工艺".
+
+## 11 · Workflow-Prompt, Fassung 1 (nur noch Nachschlagewerk — gültig ist § 12)
 
 Der folgende Text ist als **erste Nachricht** einer neuen Sitzung gedacht (vollständig einfügen).
 Er setzt auf dieser Übergabe auf, nennt die neuen Werkzeuge und hält die Projektregeln ein.
@@ -318,4 +340,89 @@ Vorgabe: **Optik + Shell neu, Bedienlogik und Ansichten bleiben.**
 ## Bericht am Ende
 Deutsch, ehrlich, mit gemessenen Zahlen. Keine Behauptung ohne Beleg aus dieser Sitzung.
 Weder Push noch Auslieferung ohne ausdrückliche Freigabe.
+````
+
+## 12 · Workflow-Prompt 2.0 — Projekt vollständig abschließen (mit der 工艺-Bibliothek)
+
+**Gültig ab 29.10.2026, 16:00. Ersetzt den Prompt in § 11** (der bleibt als Fassung 1 stehen).
+Voraussetzung: Die App wurde nach dem Plugin-Einbau neu gestartet, die Werkzeuge sind aktiv
+(geprüft: `process_*`, `ralph`, `computer_*`, Goal, Context7). Zum Einfügen als erste Nachricht
+einer neuen Sitzung:
+
+````text
+# Auftrag: Netzwerk-Labor-Frontend vollständig redesignen und das Projekt abschließen
+
+## 1 · Einstieg
+Lies vollständig `AGENTS.md`, `docs/SITZUNGSABSCHLUSS.md` und
+`docs/entwicklung/Übergabe – Stand 29.10.2026 – Frontend-Redesign.md` (besonders § 5, § 8, § 10,
+§ 11). Sieh dir die Bild-Vorlagen unter `Nachweise/Prototypen-Redesign/matrix/` an (A ist Favorit;
+B und C sind Alternativen). Lade die Skill `workflows` — sie sagt, welche Workflow-Ebene wofür da
+ist.
+
+## 2 · Fahrplan: die 工艺 „user:projekte/netzwerk-labor-redesign.yaml"
+1. `process_get` mit `ref: "user:projekte/netzwerk-labor-redesign.yaml"` und `format: "summary"`.
+   Der Prozess hat 4 Phasen und 13 Links; jeder Link ist ein Deliverable mit eigenem Prompt,
+   erwarteten Artefakten und Gate.
+   **Bekannter Werkzeugfehler (29.10.2026):** `process_get` kann „invalid output: value is not
+   lossless JSON" melden. Dann lies die Datei direkt:
+   `C:\Users\Student\.ntd\processes\projekte\netzwerk-labor-redesign.yaml` (dasselbe YAML);
+   `process_list` funktioniert und zeigt den Prozess an.
+2. Lege ein Goal an (`create_goal`): „Frontend-Redesign Netzwerk-Labor vollständig umsetzen:
+   Vertrag, Gates, Welle 1–3, Doku, Fassung, Abschlussbericht." Das Goal hält die Arbeit über
+   mehrere Runden am Laufen, bis das Projekt fertig ist.
+3. Arbeite die Links der Reihe nach ab. Führe je Link den Prompt aus, erzeuge die erwarteten
+   Artefakte, prüfe die Gate-Kriterien (die AI-Gates sind zusätzliche Prüfungen); bei
+   Nichtbestehen laut `on_gate_fail` und `max_rework` zurückgehen. Nichts abschwächen.
+4. Der Prozess kann alternativ in der UI gestartet werden (Sidebar „工艺" → ▶ 按工艺执行).
+   Dann startet jeder Link eine neue Session und liest die Übergabe als Kontext. Standard hier:
+   du arbeitest die Links selbst in dieser Sitzung ab.
+5. Wirst du in einer Runde nicht fertig: Fortschritt in die Übergabe schreiben (welcher Link,
+   was fehlt, nächster Schritt) und mit dem Goal weiterarbeiten. Ralph nur, wenn der Nutzer es
+   ausdrücklich verlangt.
+
+## 3 · Werkzeuge (alle aktiv)
+- **工艺-Bibliothek**: `process_*` — Fahrplan, Gates, Rework (dein Prozess oben).
+- **Goal**: `create_goal`/`update_goal` — automatische Fortsetzung bis zum Abschluss.
+- **Ralph**: frische Agenten-Runden — nur auf ausdrückliche Ansage, `maxRounds` setzen.
+- **Sitzungssuche**: frühere Sessions durchsuchen (auch Prototyp- und Plugin-Sitzung); der erste
+  Aufruf baut den Index, Timeout 300 s.
+- **Persistente Terminals**: EIN PowerShell-Terminal für die Prüfschleife (Tests ~5 min).
+- **Git-Worktrees**: isolierte Experimente, nicht parallel im Hauptbaum committen.
+- **MCP Context7**: aktuelle Doku zu Web-APIs/CSS/JS/Bibliotheken, wenn du unsicher bist.
+- **Computer-Use** (Skill `computer-use`) + `modlens_read_image`: echte Fenster/Screenshots
+  ansehen und prüfen; nur selbst gestartete Prozesse, niemals fremde beenden.
+- **Notify**: aktiv (Ton/Toast/Desktop) — lange Läufe melden sich.
+- **Side-Task/Agent-Team**: nur mit ausdrücklicher Freigabe (gleicher Arbeitsordner!).
+- **Plugin-Markt/Discover**: keine Installation ohne Freigabe (Profiländerung braucht Neustart).
+
+## 4 · Projektregeln (verbindlich)
+- Zweig `ausbau-1.2`; **Committen ja, Push nur auf Zuruf**; kein Release und keine
+  Veröffentlichung ohne ausdrückliche Freigabe.
+- Qualitätsgates halten: Kontrast, Trefferflächen, keine Überläufe, 0 tote Links. Stil-Tests
+  bewusst auf das neue System ziehen, **nicht abschwächen**; Verhaltenstests unangetastet.
+- „Vertrag zuerst", senkrechter Schnitt, App bleibt nach jedem Schritt lauffähig, ehrlich messen
+  (`stand.py`, `seite.py`, `test.sh`, `ethos.py`, `rauch.py`).
+- Keine Prozesse beenden (außer selbst gestarteten), keine Software installieren, Zeilenenden
+  bewahren, deutsch und ehrlich berichten.
+- Übergabe, Vault-Log und Memory nach jedem Meilenstein nachziehen.
+
+## 5 · Definition of Done (Gesamtprojekt)
+Das Projekt ist fertig, wenn alle 13 Links abgearbeitet sind und:
+- alle Ansichten sichtbar im Stil A sind; Screenshots bei 1366/960/720 px vorliegen und am Bild
+  geprüft wurden — keine abgeschnittenen Texte, keine Überläufe;
+- `sh tools/test.sh` 873/873 grün, 0 übersprungen; `sh tools/test.sh --rauch` grün;
+  `python tools/ethos.py --dom`, `python tools/stand.py --pruefen` und
+  `python tools/seite.py --pruefen` grün; `node tools/sim-stand.js` unverändert;
+- Doku, `docs/STAND.md`, CHANGELOG und der Architektur-Vertrag aktuell sind;
+- die Fassung gebaut ist (Vorschlag 2.2.0 — vom Nutzer bestätigen lassen): Einzeldatei
+  byte-gleich, `.exe` mit passender ProductVersion, Paket bereit — aber **nicht gepusht und
+  nicht veröffentlicht**;
+- die Übergabe fortgeschrieben, lokal committet und der Abschlussbericht mit den offenen
+  Nutzerfreigaben (Push, Release) vorgelegt ist.
+
+## 6 · Erste Antwort an den Nutzer
+Kurz und konkret: Ist-Check (Zweig sauber, v2.1.0, Tests 873/873), Prozess-Outline (4 Phasen,
+13 Links), die offenen Entscheidungen aus § 8 der Übergabe — **A bestätigen**, Akzentfarbe,
+Dichte, Hellmodus, Fassung (2.2.0 oder 3.0.0) — und dann sofort mit Link 1 (Vertrag) beginnen,
+sobald er bestätigt oder „entscheide du" sagt.
 ````
