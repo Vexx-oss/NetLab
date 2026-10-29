@@ -208,23 +208,28 @@ DSH-Fassung: **0.2.1-rc.3**.
 
 | Plugin | Version | Was es im Alltag bringt |
 |---|---|---|
-| `@deepseek-ai/dsh-plugin-market` (+ Web-UI) | 0.2.1-rc.3 | **Discover-Tab** auf der Plugins-Seite + `plugin_market`-Agent-Werkzeug; Format-1-Index bereits vorkonfiguriert (~3.900 Plugins) |
-| `@deepseek-ai/dsh-experimental-session-search` | 0.2.1-rc.3 | **5 Lese-Werkzeuge**: frühere Sessions dieses Workspace durchsuchen und nachlesen (Index entsteht bei der ersten Suche) |
+| `@deepseek-ai/dsh-plugin-market` (+ Web-UI) | 0.2.1-rc.3 | **Discover-Tab** auf der Plugins-Seite + `plugin_market`-Agent-Werkzeug; **zwei** Format-1-Indexe vorkonfiguriert: awesome-dsh-plugin (~3.900) und Silentforfar (Windows-Werkzeuge, Side-Task) |
+| `@deepseek-ai/dsh-experimental-session-search` | 0.2.1-rc.3 | **5 Lese-Werkzeuge**: frühere Sessions dieses Workspace durchsuchen und nachlesen (Index beim ersten Aufruf; Timeout auf 300 s erhöht) |
 | `@deepseek-ai/dsh-experimental-terminal-bundle` | 0.2.1-rc.3 | **6 Werkzeuge**: persistente PowerShell-Terminals, die über Tool-Aufrufe hinweg leben |
 | `@deepseek-ai/dsh-experimental-tool-worktree` | 0.2.1-rc.3 | Agent-Werkzeug für **Git-Worktrees** (isolierte Experimente) |
 | [`dshmarket`](https://github.com/dsh-market/dsh-market) | 1.73.3 | **Plugin-Market-Tab** (4.200+ Plugins): Suche, Favoriten, Gruppen, Updates, Themes, Backup/Restore, Diagnose |
 | [`dsh-mcp-skill-manage`](https://github.com/sunChargedd/dsh-plugins) | 0.5.5 | Sidebar-Seite **„MCP & Skills"**: Skills/MCP-Server verwalten, bearbeiten, sichern |
-| [`@goodandready/dsh-plugin-notify`](https://npmjs.com/package/@goodandready/dsh-plugin-notify) | 0.4.7 | **Benachrichtigungen**: Ton, sessionübergreifende Toasts, Desktop-Push, IM-Webhooks, Web-Push — **Standard aus**, in Einstellungen aktivieren |
+| [`@goodandready/dsh-plugin-notify`](https://npmjs.com/package/@goodandready/dsh-plugin-notify) | 0.4.7 | **Benachrichtigungen**: Ton, sessionübergreifende Toasts, Desktop-Push, IM-Webhooks, Web-Push — **jetzt eingeschaltet** (Ton/Toast/Desktop; Webhooks aus) |
+| [`dsh-cool-theme`](https://www.npmjs.com/package/dsh-cool-theme) | 0.10.0 | 34 **Harness-Themes** (u. a. Matrix, Dracula, Tokyo Night), hell/dunkel, eigene Themes — betrifft nur die Harness-Oberfläche |
+| [`@silentforfar/dsh-side-task`](https://github.com/Silentforfar/dsh-side-task) | Commit `2843fa4…` | **Side-Task**: temporäre Parallel-Sitzung in der Seitenleiste, eigener Kontext, gleicher Workspace |
+| `@deepseek-ai/dsh-mcp-client` + **Context7** | 0.2.1-rc.3 / MCP 4.4.3 | **MCP-Server `context7`** (Streamable HTTP): aktuelle Doku zu Bibliotheken/Frameworks/APIs direkt im Agent |
 
-**Wichtig — Neustart nötig:** Die Desktop-App komponiert ihr Profil beim Start. Solange sie nicht
-vollständig beendet und neu gestartet wurde, sind die neuen Tabs/Seiten/Agent-Werkzeuge **nicht**
-aktiv; gespeicherte Sessions bleiben erhalten.
+**Neustart:** Die Desktop-App komponiert ihr Profil beim Start. Die Installationen liefen in zwei
+Schritten; der nötige **Neustart ist erfolgt** (zuletzt 29.10.2026 ~15:30, GUI
+`127.0.0.1:64030`). Seitdem sind Tabs, Seiten und Agent-Werkzeuge aktiv. Weitere Profiländerungen
+brauchen wieder einen vollständigen Neustart; gespeicherte Sessions bleiben dabei erhalten.
 
-**Verifiziert (von der parallelen Sitzung, hier nachgeprüft):** `package.json` listet 11 Bundles,
-die drei Community-Pakete liegen in `…\.dsh\profiles\desktop\node_modules`,
-`cordis.patch.yml` ist nur um den Markt-Index ergänzt, Backup:
-`cordis.patch.yml.bak-2026-10-29`. Die Sitzung selbst meldet zusätzlich: Kompositions-Dump
-(11 Bundles, 49 Layer) Exit 0; Test-Boot in isoliertem DSH-Home HTTP 200 ohne Warnungen.
+**Verifiziert (hier nachgeprüft):** `package.json` listet inzwischen **13 Bundles** und sechs
+Dependencies; die Community-Pakete liegen in `…\.dsh\profiles\desktop\node_modules`;
+`cordis.patch.yml` enthält Markt-Indexe, Sitzungssuche-Timeout (300 s), Notify-Schalter und den
+Context7-MCP-Server; Backup: `cordis.patch.yml.bak-2026-10-29`. Beim Test in dieser Sitzung:
+persistentes Terminal, `mcp_skill_manager.overview` und `session_search` antworten, **Context7**
+ist als MCP-Server verbunden (Tool-Aufrufe verfügbar).
 
 **Bewusst nicht installiert:** Voice-Input (SenseVoice ohne Deutsch), CoT-Übersetzung
 (Datenschutz/Kosten), Ralph/Badge/Inspector/Subagent-Claude/Codex (Nischen), `dsh-plugin-health`,
@@ -245,27 +250,36 @@ die Bild-Vorlagen an: `Nachweise/Prototypen-Redesign/matrix/` (Favorit A „Matr
 `matrix-board.png` sowie `-hub/-labor/-stil.png`; B und C liegen daneben als Alternativen.
 Vorgabe: **Optik + Shell neu, Bedienlogik und Ansichten bleiben.**
 
-## Werkzeuge, die dir neu zur Verfügung stehen (seit 29.10.2026)
+## Werkzeuge, die dir zur Verfügung stehen (seit 29.10.2026 aktiv)
 - **Sitzungssuche** (read-only Werkzeuge): durchsuche frühere Sessions dieses Workspace, bevor
   du die 214 KB Design-Doku liest — z. B. nach „Redesign", „Design-Tokens", „Prototyp", „2.1.0",
-  „Frontend". Die erste Suche baut den Index auf (kann kurz dauern).
+  „Frontend". Der **erste** Aufruf baut einen In-Memory-Index über ~155 MB Logs (Timeout ist auf
+  300 s erhöht); danach antwortet die Suche schnell. Findet eine Suche nichts: kürzer und
+  wörtlicher suchen (z. B. `dshmarket`, `Prototyp`, `v2.1.0`).
 - **Persistente Terminals**: EIN PowerShell-Terminal für die lange Prüfschleife offen halten
   (Testlauf ~5 min, stand.py ~2 min), statt für jeden Befehl einen neuen Prozess zu starten.
 - **Git-Worktrees**: nur für isolierte Experimente (z. B. zwei CSS-Richtungen vergleichen), nicht
   parallel in den Hauptbaum committen; nach dem Vergleich entfernen.
+- **MCP Context7** (`context7`, Streamable HTTP): aktuelle Doku zu Web-APIs/CSS/JS und
+  Bibliotheken — nutzen, wenn du bei einer API unsicher bist. Keine vertraulichen Inhalte in
+  Anfragen; für den Vault gilt: erst Vault/Repo lesen, Context7 nur für Fremd-Doku.
+- **Side-Task** (rechte Seitenleiste): temporäre Parallel-Sitzung mit eigenem Kontext, gleicher
+  Arbeitsordner — **nur mit Freigabe** (Schreibkonflikte!), sonst selbst und nacheinander arbeiten.
 - **Plugin-Markt/Discover**: nur nachsehen, ob es für fehlende Fähigkeiten etwas Geprüftes gibt.
   **Keine Installation ohne ausdrückliche Freigabe** (Profiländerung braucht Neustart).
 - **MCP & Skills** (Sidebar): nur anfassen, wenn der Nutzer danach fragt.
-- **Benachrichtigungen**: einmal in Einstellungen → Plugins aktivieren (Ton/Toast), damit lange
-  Läufe sichtbar werden; Standard ist aus.
-- Fehlen Sitzungssuche/Terminal-/Worktree-Werkzeuge: Die App wurde noch nicht neu gestartet.
-  Bitte den Nutzer um einen Neustart und arbeite bis dahin ohne diese Werkzeuge weiter.
+- **Benachrichtigungen**: sind jetzt aktiv (Ton, Toast, Windows-Hinweis) — bei langen Läufen
+  entfällt das Nachfragen; Webhooks/Web-Push bleiben aus.
+- **Theme** (`dsh-cool-theme`): Einstellungen → Theme, 34 Presets inkl. **Matrix** — betrifft nur
+  die Harness-Oberfläche, nicht das Spiel.
+- Fehlen Sitzungssuche/Terminal-/Worktree-/Context7-Werkzeuge: Die App wurde noch nicht neu
+  gestartet. Bitte den Nutzer um einen Neustart und arbeite bis dahin ohne sie weiter.
 - **Agenten-Team**: Projektregel ist „selbst und nacheinander" (`AGENTS.md`); Schwärme nur mit
   ausdrücklicher Freigabe. Wenn freigegeben: max. 3–5 Schreiber, ein Schreiber je Datei,
   gemeinsame Tasks mit Write-Scopes, Lead integriert und prüft.
 
 ## Ist-Check (vor allem anderen)
-1. `git status -sb` → Zweig `ausbau-1.2`, lokal vor `origin` (Übergabe + dieser Nachtrag;
+1. `git status -sb` → Zweig `ausbau-1.2`, lokal **mehrere Commits vor `origin`** (Übergaben;
    **nicht pushen**), Arbeitsbaum sauber.
 2. Prüfstand messen: `git describe --tags --exact-match` → `v2.1.0`;
    `sh tools/test.sh` → **873/873 grün, 0 übersprungen**.
