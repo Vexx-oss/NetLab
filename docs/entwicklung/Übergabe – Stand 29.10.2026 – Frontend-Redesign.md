@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Redesign, Übergabe, Kontext]
 erstellt: 2026-10-29
-status: Übergabezettel für die nächste Sitzung — Stand v2.1.0, Redesign-Vorlage A favorisiert, Frontend noch nicht umgebaut.
+status: Übergabezettel für die nächste Sitzung — Stand v2.1.0, Redesign-Vorlage A favorisiert, Frontend noch nicht umgebaut; Plugin-Ausbau aus paralleler Sitzung dokumentiert, Workflow-Prompt in § 11.
 ---
 
 # Übergabe — Stand nach der Sitzung vom 29.10.2026 (Frontend-Redesign)
@@ -198,3 +198,110 @@ $env:PATH = "$env:LOCALAPPDATA\node-portable\node-v24.21.0-win-x64;" + $env:PATH
 Dann **eine** Datei lesen, je nach Auftrag: diese Übergabe (Redesign), `matrix/NOTIZ.md`
 (Tokens und Begründungen), [Architektur § 16](../Architektur.md) (was heute schon als Design-Vertrag
 gilt), [SITZUNGSABSCHLUSS](../SITZUNGSABSCHLUSS.md) (wie eine Sitzung endet).
+
+## 10 · Plugin-Ausbau aus der parallelen Sitzung (29.10.2026)
+
+Eine **zweite Sitzung** hat auf Nutzerwunsch („suche breit und researche sowie installiere die
+besten Plugins für dieses Harness") das Profil **`desktop`** erweitert. Das ist das Profil, in dem
+diese App und alle ihre Sitzungen laufen; `profiles/web` bleibt unberührt. Installierte
+DSH-Fassung: **0.2.1-rc.3**.
+
+| Plugin | Version | Was es im Alltag bringt |
+|---|---|---|
+| `@deepseek-ai/dsh-plugin-market` (+ Web-UI) | 0.2.1-rc.3 | **Discover-Tab** auf der Plugins-Seite + `plugin_market`-Agent-Werkzeug; Format-1-Index bereits vorkonfiguriert (~3.900 Plugins) |
+| `@deepseek-ai/dsh-experimental-session-search` | 0.2.1-rc.3 | **5 Lese-Werkzeuge**: frühere Sessions dieses Workspace durchsuchen und nachlesen (Index entsteht bei der ersten Suche) |
+| `@deepseek-ai/dsh-experimental-terminal-bundle` | 0.2.1-rc.3 | **6 Werkzeuge**: persistente PowerShell-Terminals, die über Tool-Aufrufe hinweg leben |
+| `@deepseek-ai/dsh-experimental-tool-worktree` | 0.2.1-rc.3 | Agent-Werkzeug für **Git-Worktrees** (isolierte Experimente) |
+| [`dshmarket`](https://github.com/dsh-market/dsh-market) | 1.73.3 | **Plugin-Market-Tab** (4.200+ Plugins): Suche, Favoriten, Gruppen, Updates, Themes, Backup/Restore, Diagnose |
+| [`dsh-mcp-skill-manage`](https://github.com/sunChargedd/dsh-plugins) | 0.5.5 | Sidebar-Seite **„MCP & Skills"**: Skills/MCP-Server verwalten, bearbeiten, sichern |
+| [`@goodandready/dsh-plugin-notify`](https://npmjs.com/package/@goodandready/dsh-plugin-notify) | 0.4.7 | **Benachrichtigungen**: Ton, sessionübergreifende Toasts, Desktop-Push, IM-Webhooks, Web-Push — **Standard aus**, in Einstellungen aktivieren |
+
+**Wichtig — Neustart nötig:** Die Desktop-App komponiert ihr Profil beim Start. Solange sie nicht
+vollständig beendet und neu gestartet wurde, sind die neuen Tabs/Seiten/Agent-Werkzeuge **nicht**
+aktiv; gespeicherte Sessions bleiben erhalten.
+
+**Verifiziert (von der parallelen Sitzung, hier nachgeprüft):** `package.json` listet 11 Bundles,
+die drei Community-Pakete liegen in `…\.dsh\profiles\desktop\node_modules`,
+`cordis.patch.yml` ist nur um den Markt-Index ergänzt, Backup:
+`cordis.patch.yml.bak-2026-10-29`. Die Sitzung selbst meldet zusätzlich: Kompositions-Dump
+(11 Bundles, 49 Layer) Exit 0; Test-Boot in isoliertem DSH-Home HTTP 200 ohne Warnungen.
+
+**Bewusst nicht installiert:** Voice-Input (SenseVoice ohne Deutsch), CoT-Übersetzung
+(Datenschutz/Kosten), Ralph/Badge/Inspector/Subagent-Claude/Codex (Nischen), `dsh-plugin-health`,
+`dsh-plugin-guide`, `dshbase-catalog` (jung bzw. redundant), Werkzeuge mit festgenagelten
+0.1.x-Peers sowie `@ebony-vinyl/dsh-our-free-model` und `dsh-deepseek-web-login` (ToS-/Sicherheitsrisiko).
+
+## 11 · Optimaler Workflow-Prompt für die nächste Sitzung
+
+Der folgende Text ist als **erste Nachricht** einer neuen Sitzung gedacht (vollständig einfügen).
+Er setzt auf dieser Übergabe auf, nennt die neuen Werkzeuge und hält die Projektregeln ein.
+
+````text
+# Auftrag: Frontend-Redesign, Welle 1 (Netzwerk-Labor, Basis v2.1.0)
+
+Lies zuerst vollständig `docs/entwicklung/Übergabe – Stand 29.10.2026 – Frontend-Redesign.md`
+und danach `AGENTS.md`, `docs/SITZUNGSABSCHLUSS.md` und `docs/Architektur.md` § 16.4. Sieh dir
+die Bild-Vorlagen an: `Nachweise/Prototypen-Redesign/matrix/` (Favorit A „Matrix-Elegant") —
+`matrix-board.png` sowie `-hub/-labor/-stil.png`; B und C liegen daneben als Alternativen.
+Vorgabe: **Optik + Shell neu, Bedienlogik und Ansichten bleiben.**
+
+## Werkzeuge, die dir neu zur Verfügung stehen (seit 29.10.2026)
+- **Sitzungssuche** (read-only Werkzeuge): durchsuche frühere Sessions dieses Workspace, bevor
+  du die 214 KB Design-Doku liest — z. B. nach „Redesign", „Design-Tokens", „Prototyp", „2.1.0",
+  „Frontend". Die erste Suche baut den Index auf (kann kurz dauern).
+- **Persistente Terminals**: EIN PowerShell-Terminal für die lange Prüfschleife offen halten
+  (Testlauf ~5 min, stand.py ~2 min), statt für jeden Befehl einen neuen Prozess zu starten.
+- **Git-Worktrees**: nur für isolierte Experimente (z. B. zwei CSS-Richtungen vergleichen), nicht
+  parallel in den Hauptbaum committen; nach dem Vergleich entfernen.
+- **Plugin-Markt/Discover**: nur nachsehen, ob es für fehlende Fähigkeiten etwas Geprüftes gibt.
+  **Keine Installation ohne ausdrückliche Freigabe** (Profiländerung braucht Neustart).
+- **MCP & Skills** (Sidebar): nur anfassen, wenn der Nutzer danach fragt.
+- **Benachrichtigungen**: einmal in Einstellungen → Plugins aktivieren (Ton/Toast), damit lange
+  Läufe sichtbar werden; Standard ist aus.
+- Fehlen Sitzungssuche/Terminal-/Worktree-Werkzeuge: Die App wurde noch nicht neu gestartet.
+  Bitte den Nutzer um einen Neustart und arbeite bis dahin ohne diese Werkzeuge weiter.
+- **Agenten-Team**: Projektregel ist „selbst und nacheinander" (`AGENTS.md`); Schwärme nur mit
+  ausdrücklicher Freigabe. Wenn freigegeben: max. 3–5 Schreiber, ein Schreiber je Datei,
+  gemeinsame Tasks mit Write-Scopes, Lead integriert und prüft.
+
+## Ist-Check (vor allem anderen)
+1. `git status -sb` → Zweig `ausbau-1.2`, lokal vor `origin` (Übergabe + dieser Nachtrag;
+   **nicht pushen**), Arbeitsbaum sauber.
+2. Prüfstand messen: `git describe --tags --exact-match` → `v2.1.0`;
+   `sh tools/test.sh` → **873/873 grün, 0 übersprungen**.
+3. Kurz mit dem Nutzer bestätigen: **A als Basis?** Akzentfarbe (Emerald `#30E58B` oder
+   bestehendes Cyan)? Dichte (kontrollraumhaft vs. luftiger)? Hellmodus gleich mitdenken?
+   Reihenfolge Welle 1 (Hub + Labor + Leiste zuerst)? Ohne Antwort nicht mit dem Vertrag
+   beginnen — außer der Nutzer sagt „entscheide du".
+4. Grundsatzentscheidungen aus § 1 gelten unverändert: Optik + Shell; Qualitätsgates halten
+   (Stil-Tests bewusst ersetzen, nicht abschwächen); committen ja, Push nur auf Zuruf.
+
+## Reihenfolge (verbindlich)
+1. **Vertrag zuerst**: neuer Abschnitt in `docs/Architektur.md` — Tokens dunkel/hell, Typo-Skala
+   (funktionale Labels ≥ 11 px!), Shell-Maße, Komponenten, Zuordnung zu `src/stil/*.css` und
+   `src/ui/*.js`, Nicht-Ziele, Teststrategie. Keine Zeile CSS davor.
+2. **Gates**: `tools/ethos.py`-Skalen und `tests/stil-stand.json` bewusst neu einfrieren; die
+   Stil-Tests `ui-typografie`, `ui-kontrast`, `ui-trefferflaechen`, `ui-symbole`,
+   `ui-leiste-ueberlappung`, `klassen-20`, `texte-stil` auf das neue System ziehen.
+   Verhaltenstests bleiben unangetastet.
+3. **Welle 1**: Tokens + Shell (Kopfzeile, linke Leiste, Statusfuß) + Hub + Labor-Chrome + Leiste
+   in A. Nach jedem Teil: `python bauen.py` → `sh tools/test.sh` → Screenshot
+   (`python tools/starttest.py docs/index.html --bild …`) → erst dann weiter. App bleibt lauffähig.
+4. **Welle 2/3** nach § 5 dieser Übergabe.
+5. **Abschluss**: `python tools/stand.py` → `python tools/seite.py` → beide nochmal;
+   `stand.py --pruefen`, `seite.py --pruefen`, `ethos.py --dom`, `sh tools/test.sh --rauch`,
+   `node tools/sim-stand.js`; Übergabe fortschreiben, Log/Memory in der Vault, Stand nachziehen;
+   **lokaler Commit**, kein Push.
+
+## Definition of Done für Welle 1
+- `docs/Architektur.md` enthält den Gestaltungsvertrag; `ethos.py` und `stil-stand.json` passen dazu.
+- Hub, Labor und Leiste sehen sichtbar nach A „Matrix-Elegant" aus — Screenshots 1366/960/720 in
+  `Nachweise/`, am Bild geprüft: keine abgeschnittenen Texte, keine Überläufe.
+- `sh tools/test.sh` **873/873 grün, 0 übersprungen**; `sh tools/test.sh --rauch` grün;
+  `python tools/stand.py --pruefen` und `python tools/seite.py --pruefen` grün.
+- Ein lokaler Commit auf `ausbau-1.2` mit ehrlichem Bericht: was gemacht, was gemessen, was offen.
+
+## Bericht am Ende
+Deutsch, ehrlich, mit gemessenen Zahlen. Keine Behauptung ohne Beleg aus dieser Sitzung.
+Weder Push noch Auslieferung ohne ausdrückliche Freigabe.
+````
