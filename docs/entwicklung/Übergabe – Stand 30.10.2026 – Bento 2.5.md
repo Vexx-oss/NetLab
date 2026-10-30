@@ -106,3 +106,24 @@ Ursache und Reparatur sind im Bericht des Postfach-Teams belegt (horizontale Üb
    `Content-Disposition` prüfen (Schritt 8 der [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md)).
 5. Android-APK bleibt offen (Android-SDK fehlt auf diesem Rechner); R12 bleibt beim Nutzer.
 
+## 7 · Release-Nachweis (30.10.2026, selbst gemessen)
+
+- **Release:** [`v2.5.0 — Netzwerk-Labor 2.5.0`](https://github.com/Vexx-oss/NetLab/releases/tag/v2.5.0),
+  veröffentlicht 2026-10-30 22:39:59 UTC, kein Vorab-Release.
+- **Anhänge (3):** `Netzwerk-Labor.html` **3.581.197 B** · `Netzwerk-Labor-2.5.0-Browser.zip`
+  **1.997.992 B** · `Netzwerk-Labor.exe` **8.873.472 B**, ProductVersion **2.5.0**
+  (SHA256 `97C3BC83…40E387`). Alle drei antworten mit `Content-Disposition: attachment`.
+- **Live-Seite:** <https://vexx-oss.github.io/NetLab/index.html> — SHA256
+  `7F4F94B9729281D99912E8CF5B4626CCCCB484E51D753DB75395E3595010F3F4`, **byte-gleich** mit
+  `docs/index.html` und dem Release-HTML.
+- **GitHub-Abläufe auf `934e7fc`:** „Prüfen" **success**, „Spiel veröffentlichen" **success**,
+  „Release anlegen" **success**; im Release-Lauf sind die Jobs „Release bauen und anlegen",
+  „Android-APK bauen und anhaengen" und „Windows-Programm bauen und anhaengen" erfolgreich.
+  Die **APK wurde übersprungen** (die Android-Schlüssel-Secrets sind nicht gesetzt; der Ablauf
+  meldet das als Warnung) — das Release trägt deshalb drei Anhänge, keine APK.
+- **Browser-ZIP geprüft:** enthält `START-HIER.md`, `LIESMICH.txt`, `Netzwerk-Labor.html`,
+  `LIZENZEN/` und die komplette `doku/`; entpackt ohne Fehler.
+- **Nicht geprüft:** die CI-gebaute `.exe` wurde nicht gestartet (nur ihre Fassung 2.5.0
+  ausgelesen); die lokal gebaute `.exe` ist mit `tools/q-echt.py` abgenommen. Android-APK
+  nicht gebaut.
+

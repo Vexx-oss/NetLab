@@ -80,7 +80,10 @@ Sichtprüfung je Bereich bei 1440/960/720 mit Vorher-/Nachher-Bildern (`Nachweis
 versioniert), unabhängige Design- und Theme-Prüfung (7 Themes × 7 Ansichten ohne harten
 Kontrastbruch). R12 (`ethos --dom`) ist wie zuvor **nicht gemessen**; die fünf Themes wurden
 visuell geprüft. **Fassung 2.5.0 gezogen; Zweig, Tag `v2.5.0` und Release mit ausdrücklicher
-Nutzerfreigabe vom 30.10.2026 veröffentlicht.**
+Nutzerfreigabe vom 30.10.2026 veröffentlicht.** Das Release trägt drei Anhänge
+(`Netzwerk-Labor.html` 3.581.197 B, Browser-ZIP 1.997.992 B, Windows-`.exe` 8.873.472 B mit
+ProductVersion 2.5.0); die Live-Seite ist byte-gleich mit `docs/index.html`
+(SHA256 `7F4F94B9…010F3F4`). Die APK wurde übersprungen (Android-Schlüssel-Secrets fehlen).
 
 ---
 
