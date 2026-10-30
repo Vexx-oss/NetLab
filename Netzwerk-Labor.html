@@ -3244,6 +3244,20 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 
 .wk-mini-svg{min-height:110px}
 
+
+/* ===== Lagebild: Knoten als sauberes Raster (keine Überlappung, kein Abschneiden) ===== */
+.hb-lage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;align-content:start;padding:12px 16px 44px;min-height:0}
+.hb-lage .hb-panel-titel{position:static;left:auto;top:auto;grid-column:1/-1;margin:0 0 4px}
+.hb-lage-svg{display:none}
+.hb-lage .hb-knoten{position:static;max-width:none;min-width:0;padding:8px 10px}
+.hb-lage .hb-knoten b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb-lage .hb-knoten small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb-lage .hb-legende{position:static;grid-column:1/-1;margin-top:2px}
+/* Doppelte Klassenraum-Zeile aus der Injektion entfällt (das Bento hat das Panel) */
+.hb-seite .kl-start{display:none}
+@media (max-width:1024px){ .hb-lage{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){ .hb-lage{grid-template-columns:1fr} }
+
 </style>
 </head>
 <body>
@@ -3251,7 +3265,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "4a93daaa";
+const LABOR_BAU = "b476a879";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -29646,11 +29660,11 @@ UI.hub = (() => {
          <path d="M548 82 C 578 82, 600 82, 626 82" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
          <defs><linearGradient id="hblinie" x1="0" x2="1"><stop offset="0" stop-color="#7DF3C0"/><stop offset="1" stop-color="#9C8CFF"/></linearGradient>
          <radialGradient id="hbglut"><stop offset="0" stop-color="#7DF3C0" stop-opacity=".16"/><stop offset="1" stop-color="#7DF3C0" stop-opacity="0"/></radialGradient></defs>`; return el; })(),
-      h("div", {class: "hb-knoten", style: {"left": "2%", "top": "46%"}}, h("span", {}, "▭"), h("b", {}, "PC-KASSE"), h("small", {}, "192.168.10.50")),
-      h("div", {class: "hb-knoten", style: {"left": "30%", "top": "46%"}}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
-      h("div", {class: "hb-knoten", style: {"left": "44%", "top": "12%"}}, h("span", {}, "⌂"), h("b", {}, "R-SALON"), h("small", {}, "192.168.10.1")),
-      h("div", {class: "hb-knoten", style: {"left": "40%", "top": "68%"}}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
-      h("div", {class: "hb-knoten", style: {"left": "72%", "top": "8%"}}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
+      h("div", {class: "hb-knoten k-router"}, h("span", {}, "⌂"), h("b", {}, "R-SALON"), h("small", {}, "192.168.10.1")),
+      h("div", {class: "hb-knoten k-inet"}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
+      h("div", {class: "hb-knoten k-kasse"}, h("span", {}, "▭"), h("b", {}, "PC-KASSE"), h("small", {}, "192.168.10.50")),
+      h("div", {class: "hb-knoten k-sw"}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
+      h("div", {class: "hb-knoten k-buero"}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
       h("div", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")));
 
     /* Signal */
