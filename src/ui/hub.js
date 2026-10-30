@@ -103,11 +103,11 @@ UI.hub = (() => {
          <path d="M548 82 C 578 82, 600 82, 626 82" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
          <defs><linearGradient id="hblinie" x1="0" x2="1"><stop offset="0" stop-color="#7DF3C0"/><stop offset="1" stop-color="#9C8CFF"/></linearGradient>
          <radialGradient id="hbglut"><stop offset="0" stop-color="#7DF3C0" stop-opacity=".16"/><stop offset="1" stop-color="#7DF3C0" stop-opacity="0"/></radialGradient></defs>`; return el; })(),
-      h("div", {class: "hb-knoten", style: {"left": "4%", "top": "40%"}}, h("span", {}, "▭"), h("b", {}, "PC-KASSE"), h("small", {}, "192.168.10.50")),
-      h("div", {class: "hb-knoten", style: {"left": "28%", "top": "40%"}}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
+      h("div", {class: "hb-knoten", style: {"left": "2%", "top": "46%"}}, h("span", {}, "▭"), h("b", {}, "PC-KASSE"), h("small", {}, "192.168.10.50")),
+      h("div", {class: "hb-knoten", style: {"left": "32%", "top": "46%"}}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
       h("div", {class: "hb-knoten", style: {"left": "44%", "top": "12%"}}, h("span", {}, "⌂"), h("b", {}, "R-SALON"), h("small", {}, "192.168.10.1")),
-      h("div", {class: "hb-knoten", style: {"left": "46%", "top": "62%"}}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
-      h("div", {class: "hb-knoten", style: {"left": "62%", "top": "10%"}}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
+      h("div", {class: "hb-knoten", style: {"left": "42%", "top": "68%"}}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
+      h("div", {class: "hb-knoten", style: {"left": "68%", "top": "8%"}}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
       h("div", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")));
 
     /* Signal */

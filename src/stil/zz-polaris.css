@@ -327,3 +327,152 @@
 .hb-stat i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .hb-stat b{margin-left:auto;color:var(--ink);font-weight:600}
 .hb-ziel{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+
+
+/* Kopfzeile schmal: Navigation und Textknöpfe weichen, Werte bleiben */
+@media (max-width:1100px){
+  .kopf-nav{display:none}
+  .kopf-marke{padding-right:8px}
+}
+@media (max-width:900px){
+  .kopf{gap:8px;padding:0 12px}
+  .kopf-knopf.mit-text span{display:none}
+  .kopf-knoepfe{padding-left:8px;gap:2px}
+  .marke-name{font-size:var(--fs-2);letter-spacing:.08em}
+  .marke-version{display:none}
+  .wert{height:32px;padding:0 8px;font-size:var(--fs-1)}
+  .dock{width:64px}
+  .dock-knopf{width:52px;min-height:50px}
+  .dock-text{font-size:var(--fs-1)}
+}
+@media (max-width:1024px){
+  .hb-lage .hb-panel-titel{position:static;margin:0 16px 8px;padding-top:12px}
+  .hb-lage{display:flex;flex-direction:column;padding:0 0 12px}
+  .hb-lage .hb-legende{position:static;margin:8px 16px 0}
+  .hb-lage-svg{display:none}
+}
+
+
+/* ===== Responsive Nachbesserung: Bento und Band bei schmalen Breiten ===== */
+@media (max-width:1024px){
+  .hb-raster{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:auto}
+  .hb-hero,.hb-kenndaten,.hb-ziel-karte,.hb-sitzung,.hb-klasse,.hb-lage,.hb-signal{grid-column:1/-1;grid-row:auto}
+  .hb-knoten{position:static;margin:6px 16px}
+  .hb-lage{display:flex;flex-direction:column;min-height:0;padding:0 0 12px}
+  .hb-lage .hb-panel-titel{position:static;margin:0 16px 8px;padding-top:12px}
+  .hb-lage .hb-legende{position:static;margin:8px 16px 0}
+  .hb-lage-svg{display:none}
+  .hb-hero h1{font-size:var(--fs-6)}
+  .hb-aktionen{flex-wrap:wrap}
+}
+@media (max-width:900px){
+  .hb-raster{grid-auto-rows:auto}
+  .hb-ziel-karte{grid-template-columns:1fr;justify-items:start}
+  .lb-auftrag .am-zeile{grid-template-columns:40px minmax(0,1fr)}
+  .lb-auftrag .am-ziele{grid-column:1/-1}
+  .lb-auftrag .am-knoepfe{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap}
+  .lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font-size:var(--fs-5);white-space:normal}
+  .lb-auftrag .am-titel{min-width:0}
+}
+/* Kopfzeile: Werte passen sich an, Nebenzahlen weichen bei Platzmangel */
+.kopf-werte{gap:2px;overflow:hidden}
+.wert{flex:0 0 auto;max-width:min(21ch, 30vw)}
+@media (max-width:1150px){
+  .kopf-nav{display:none}
+  .kopf-marke{padding-right:8px}
+}
+@media (max-width:900px){
+  .kopf{gap:8px;padding:0 12px}
+  .kopf-knopf.mit-text span{display:none}
+  .kopf-knoepfe{padding-left:8px;gap:2px}
+  .marke-name{font-size:var(--fs-2);letter-spacing:.08em}
+  .marke-version{display:none}
+  .wert{height:32px;padding:0 8px;font-size:var(--fs-1)}
+  .kopf-werte .wert-ruf{display:none}
+  .dock{width:64px}
+  .dock-knopf{width:52px;min-height:50px}
+  .dock-text{font-size:var(--fs-1)}
+}
+/* Lagebild-Knoten entzerrt (keine Überlappung) */
+.hb-knoten{white-space:nowrap}
+.hb-knoten small{white-space:nowrap}
+
+
+/* Lagebild: Knoten in festen Zeilen, keine Überlappung */
+@media (min-width:1025px){
+  .hb-knoten{position:absolute}
+}
+@media (max-width:1024px){
+  .hb-knoten{position:static;margin:4px 16px}
+}
+
+
+/* Kopfzeile: Platz schaffen, ohne Inhalte zu verlieren */
+.kopf-nav{flex:0 0 auto;overflow:visible}
+.kopf .sp-leise{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;color:var(--faint);white-space:nowrap}
+@media (max-width:1150px){ .kopf-werte .wert-stufe{display:none} }
+@media (max-width:1600px){
+  .kopf-nav-knopf{padding:8px 9px;letter-spacing:.1em}
+  .kopf-knoepfe .kopf-knopf.mit-text span{display:none}
+  .kopf .sp-leise{display:none}
+}
+@media (max-width:1050px){ .kopf-werte .wert-offen{display:none} }
+
+
+/* Band: Umbruch statt Abschnitt, Begrüßung erst auf echten Schmalseiten */
+@media (min-width:900px){ .lb-auftrag .sp-einstieg{display:none} }
+@media (max-width:1200px){ .lb-auftrag .am-titel strong{white-space:normal} }
+@media (max-width:900px){
+  .lb-auftrag .am-ziele{display:none}
+  .lb-auftrag .am-knoepfe{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
+}
+/* Knoten im Lagebild: INTERNET weiter rechts, damit R-SALON frei bleibt */
+.hb-knoten:nth-of-type(5){left:72% !important}
+
+
+/* Tablett: Band in zwei Zeilen, Minimap weicht (überdeckte Geräte) */
+@media (max-width:1250px){ .wk-mini{display:none} }
+@media (max-width:1200px){
+  .lb-auftrag .am-zeile{grid-template-columns:48px minmax(0,1fr);gap:8px 12px}
+  .lb-auftrag .am-ziele{grid-column:2;justify-self:start}
+  .lb-auftrag .am-knoepfe{grid-column:1/-1;grid-row:3;justify-content:flex-start;flex-wrap:wrap}
+  .lb-auftrag .am-titel strong{font-size:var(--fs-6);white-space:normal}
+  .lb-auftrag :is(h1,h2){font-size:var(--fs-6)}
+}
+
+
+/* ===== Befunde aus dem Ansichten-Audit ===== */
+/* Wiki-Tabelle: auf schmalen Flächen keine Wortbrüche mitten im Wort */
+@media (max-width:900px){
+  .kr-artikel table{table-layout:auto;width:100%}
+  .kr-artikel th, .kr-artikel td{overflow-wrap:normal;word-break:normal}
+  .kr-wiki{grid-template-columns:1fr;height:auto}
+  .kr-wiki-liste{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:12px}
+}
+/* Klassenraum-Formular: Etikett und Feld bleiben zusammen */
+.kl-form{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:8px 12px}
+.kl-form > *{min-width:0}
+.kl-form > .knopf{justify-self:start}
+/* Lernstand: Karte darf nicht an der Unterkante abgeschnitten werden */
+@media (max-width:1100px){
+  .kr-seite{height:auto;max-height:none;overflow:visible}
+  .kk-karte{flex:0 0 auto}
+}
+
+
+/* ===== Labor-Audit: tote Spalte, Dock-Überlagerung, Inspektor-Scroll, Band ===== */
+.am-kunde{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-inspektor{overflow:auto}
+@media (max-width:1100px){
+  .labor, .labor.lb-fern{grid-template-columns:auto minmax(0,1fr)}
+  .lb-dock{display:none}
+  .labor.dock-da .lb-dock{display:flex;position:absolute;right:0;top:0;bottom:0;width:min(380px,92vw);z-index:45;
+    box-shadow:-24px 0 60px -20px rgba(0,0,0,.7)}
+  .labor.dock-da.dock-zu .lb-dock{position:absolute;width:auto}
+  /* Fernwartung behält das Terminal als echte Spalte (kein Overlay über der Abnahme) */
+  .labor.lb-fern.dock-da{grid-template-columns:auto minmax(0,1fr) var(--dock-b)}
+  .labor.lb-fern.dock-da .lb-dock{position:static;width:auto;box-shadow:none;display:flex}
+}
+@media (max-width:900px){
+  .lb-auftrag .am-ziele{display:inline-flex;grid-column:2;justify-self:start;padding:4px 8px}
+}

@@ -112,7 +112,8 @@ UI.app = (() => {
       if (a.name === aktiv) b.setAttribute("aria-current", "page");
       return b;
     }));
-    if (el.kopfNav) el.kopfNav.replaceChildren(...liste().filter(a => !a.platzhalter).map(a =>
+    const NAV = ["heute", "labor", "postfach", "wiki", "kunden", "lernstand"];
+    if (el.kopfNav) el.kopfNav.replaceChildren(...liste().filter(a => !a.platzhalter && NAV.includes(a.name)).map(a =>
       h("button", {type: "button", class: "kopf-nav-knopf" + (a.name === aktiv ? " an" : ""), "data-ansicht": a.name, title: a.titel, onclick: () => ansicht(a.name)}, a.titel)));
     aktualisieren();
   }
