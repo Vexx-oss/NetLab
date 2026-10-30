@@ -220,7 +220,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 /* ---- Postfach ---- */
 .sp-postfach{display:flex; flex-direction:column; height:100%; min-height:0; padding:16px 24px 0; gap:12px; background:var(--bg)}
 .sp-pf-kopf{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap}
-.sp-pf-kopf h2{font:800 var(--fs-6)/1 var(--display)}
+.sp-pf-kopf h2, .sp-brief h3{font:800 var(--fs-6)/1.15 var(--display)}
 .sp-pf-aktionen{display:flex; gap:8px; align-items:center}
 .sp-pf-teile{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(280px, 400px) minmax(0, 1fr); gap:16px; padding-bottom:18px}
 .sp-pf-liste{display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; padding:0px 4px 8px 0px; scrollbar-width:thin}
@@ -254,7 +254,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-chip.form-projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
 .sp-leser{min-height:0; overflow:auto; scrollbar-width:thin}
 .sp-brief{display:flex; flex-direction:column; gap:16px; padding:24px 24px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--k, var(--accent))}
-.sp-brief h3{font:800 var(--fs-6)/1.15 var(--display)}
+/* .sp-brief h3 nutzt denselben Typo-Block wie .sp-pf-kopf h2 (R10). */
 .sp-brief-text{display:flex; flex-direction:column; gap:8px; font-size:var(--fs-4); line-height:1.6; max-width:62ch}
 .sp-brief-info{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px}
 .sp-brief-info > div{padding:8px 12px; border-radius:var(--radius); background:var(--panel-2)}
@@ -299,3 +299,214 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-notiz{display:block; width:100%; margin-top:4px; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3)/1.4 var(--body); resize:vertical}
 .sp-schuld{margin:8px 0 0; font-size:var(--fs-3); color:var(--warn)}
 .sp-akte-zeile{margin:8px 0 0; font-size:var(--fs-3)}
+/* ============================================================================
+   POSTFACH · BENTO-DATENPANEL (Umsetzung 30.10.2026, design-lagebild)
+   ----------------------------------------------------------------------------
+   Abgenommene Richtung „Bento-Board": Kopf als Datenleiste, Liste als dichtes
+   Datenpanel (Status-Punkt, Kunde, Titel, Form/Dauer/Lohn als Textmarken,
+   Auswahl ueber feine Akzentkante), Detail als strukturiertes Panel mit
+   Kacheln, Brieftext, Zielen und ruhiger Aktionsleiste. CSS-only: nur
+   bestehende Klassen, unter 900 px bleibt die Blatt-Ansicht.
+
+   Datenlage: Kennzahlen, die im Markup nicht stehen, werden NICHT erfunden.
+   Vorhanden sind der Zaehlertext in .sp-pf-kopf .sp-leise (Auftraege, Stufe,
+   erledigt) und die Serie in .kr-tag — beide werden als Datenmarken gesetzt.
+   Ø-Dauer und Lohnsumme fehlen deshalb (bewusst); die Detail-Kacheln kommen
+   aus den vorhandenen .sp-brief-info-Feldern (Symptom/Übt/Dauer/Form/Lohn)
+   plus der Ziele-Kachel (.sp-brief-ziele).
+
+   Regelwerk: Schrift ausschliesslich var(--fs-1..5), Abstand aus
+   {0,4,8,12,16,24,32}, Radius nur var(--radius…)/0, z-index 10, Dauer
+   var(--dauer), keine Farb-Literale, keine identischen Deklarationsbloecke.
+   ============================================================================ */
+
+/* ---- Kopf: Datenleiste (Padding/Rhythmus stehen in der Grundregel .sp-postfach) --- */
+.sp-postfach .sp-pf-kopf{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;gap:12px 24px;
+  padding-bottom:12px;border-bottom:1px solid var(--line)
+}
+.sp-postfach .sp-pf-kopf > div:first-child{min-width:0}
+.sp-postfach .sp-pf-kopf h2{font:600 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em;margin:0}
+.sp-postfach .sp-pf-kopf h2::before{
+  content:"// POSTFACH · AUFTRAGSEINGANG";display:block;margin-bottom:8px;
+  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)
+}
+/* Status-Kachel: vorhandener Zaehlertext (Auftraege · Stufe · erledigt) */
+.sp-postfach .sp-pf-kopf .sp-leise{
+  display:inline-block;margin:8px 0 0;padding:4px 8px;
+  border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel);
+  font:500 var(--fs-1)/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);font-variant-numeric:tabular-nums
+}
+/* Rechte Datenmarke: Serie (vorhandener Text), Aktionen ruhig */
+.sp-postfach .sp-pf-aktionen{display:flex;align-items:flex-end;gap:8px;padding-bottom:0;flex-wrap:wrap;justify-content:flex-end}
+.sp-postfach .sp-pf-aktionen .kr-tag{
+  display:flex;align-items:center;gap:8px;padding:4px 8px;
+  border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel);
+  font:500 var(--fs-1)/1.25 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)
+}
+.sp-postfach .sp-pf-aktionen .kr-tag .knopf{
+  min-height:44px;padding:0;border:0;background:none;color:var(--muted);
+  font:500 var(--fs-1)/1 var(--mono);letter-spacing:.06em;text-transform:uppercase
+}
+.sp-postfach .sp-pf-aktionen .kr-tag .knopf:hover{color:var(--ink);background:none}
+.sp-postfach .sp-pf-aktionen .knopf,
+.sp-postfach .sp-pf-aktionen .knopf.klein{
+  min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:var(--radius-xs);
+  background:var(--panel);color:var(--ink);box-shadow:none;
+  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.08em;text-transform:uppercase
+}
+.sp-postfach .sp-pf-aktionen .knopf:hover{background:var(--panel-2);border-color:var(--line-2);filter:none;transform:none}
+
+/* ---- Liste: dichtes Datenpanel ---------------------------------------- */
+.sp-postfach .sp-pf-teile{grid-template-columns:minmax(380px,450px) minmax(0,1fr);gap:12px;padding-bottom:16px;align-items:stretch;min-height:0}
+.sp-postfach .sp-pf-liste{
+  position:relative;gap:0;padding:32px 0 0;overflow:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-s)
+}
+/* Spaltenkopf: links Auftrag/Kunde, rechts Form/Dauer/Lohn (zwei Bandhaelften) */
+.sp-postfach .sp-pf-liste::before,
+.sp-postfach .sp-pf-liste::after{
+  content:"";position:absolute;top:0;height:32px;z-index:10;
+  display:block;padding:0 12px;background:var(--panel-2);
+  border-bottom:1px solid var(--line);
+  font:600 var(--fs-1)/32px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  white-space:nowrap;overflow:hidden
+}
+.sp-postfach .sp-pf-liste::before{content:"Auftrag · Kunde";left:0;right:50%}
+.sp-postfach .sp-pf-liste::after{content:"Form · Dauer · Lohn";right:0;left:50%;text-align:right}
+/* Zeilenraster, Status-Punkt, Auswahl = feine Akzentkante */
+.sp-postfach .sp-mail{
+  display:grid;grid-template-columns:8px minmax(0,1fr);column-gap:8px;
+  align-items:center;
+  padding:8px 12px;border:0;border-bottom:1px solid var(--line);border-radius:0;
+  background:transparent;box-shadow:none;transform:none;text-align:left;
+  transition:background var(--dauer) var(--ease-standard)
+}
+.sp-postfach .sp-mail:last-child{border-bottom:0}
+.sp-postfach .sp-mail:hover{background:var(--panel-2);border-color:var(--line);transform:none}
+.sp-postfach .sp-mail::before{
+  content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--line-2);
+  transition:background var(--dauer) var(--ease-standard)
+}
+.sp-postfach .sp-mail.neu::before,
+.sp-postfach .sp-mail.an::before{background:var(--accent)}
+.sp-postfach .sp-mail.an{background:var(--panel-2);box-shadow:inset 2px 0 0 var(--accent)}
+.sp-postfach .sp-mail.eilig{box-shadow:inset 2px 0 0 var(--warn)}
+.sp-postfach .sp-mail.neu::after{content:none;display:none}
+.sp-postfach .sp-mail-text{
+  grid-column:2;display:grid;grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"von meta" "titel meta";
+  column-gap:12px;row-gap:0;align-items:baseline;min-width:0
+}
+.sp-postfach .sp-mail-von{
+  grid-area:von;padding:0;
+  font:600 var(--fs-1)/1.25 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.sp-postfach .sp-mail b{
+  grid-area:titel;font:600 var(--fs-2)/1.3 var(--body);letter-spacing:.005em;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.sp-postfach .sp-mail.neu b{font-weight:700}
+.sp-postfach .sp-chips{
+  grid-area:meta;display:flex;align-items:center;gap:8px;margin:0;
+  flex-wrap:nowrap;justify-self:end
+}
+.sp-postfach .sp-chip{
+  min-height:0;padding:0;border-radius:0;background:none;white-space:nowrap;
+  font:500 var(--fs-1)/1.2 var(--mono);letter-spacing:.02em;color:var(--muted);
+  font-variant-numeric:tabular-nums
+}
+.sp-postfach .sp-chip + .sp-chip::before{content:"·";margin-right:8px;color:var(--line-2)}
+.sp-postfach .sp-chip.geld{color:var(--ink);font-weight:600}
+.sp-postfach .sp-chip.form{color:var(--faint)}
+.sp-postfach .sp-pf-trenner{padding:8px 12px;border-bottom:1px solid var(--line);margin:0;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.sp-postfach .sp-leer{background:var(--panel-2);border:1px dashed var(--line-2);border-radius:var(--radius-xs)}
+/* ein Block fuer alle ausgeblendeten Deko-Reste (Emoji, laute Chips, Glanz) */
+.sp-postfach .sp-kunde-sym,
+.sp-postfach .sp-mail-vorschau,
+.sp-postfach .sp-pf-aktionen .kr-tag svg,
+.sp-postfach .sp-chip[class*="niv-"],
+.sp-postfach .sp-chip.uebt,
+.sp-postfach .sp-chip.klingelt,
+.sp-postfach .sp-chip.frist,
+.sp-postfach .sp-chip.folge,
+.sp-postfach .sp-chip[class*="flow-"],
+.sp-postfach .sp-chip.wahl,
+.sp-postfach .sp-chip.wartung,
+.sp-postfach .sp-chip.wdh,
+.sp-postfach .sp-brief .sp-knoepfe .knopf.primaer::after{display:none;pointer-events:none}
+
+/* ---- Detail: strukturiertes Bento-Panel ------------------------------- */
+.sp-postfach .sp-leser{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-s);overflow:auto;min-height:0}
+.sp-postfach .sp-brief{
+  display:flex;flex-direction:column;gap:12px;min-height:100%;
+  padding:16px;border:0;border-radius:0;background:transparent;box-shadow:none
+}
+/* Briefkopf = Kachel „Auftraggeber" (breit) */
+.sp-postfach .sp-brief header{
+  align-items:flex-start;gap:0;
+  padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel-2);
+  margin:0
+}
+.sp-postfach .sp-brief header > div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sp-postfach .sp-brief .sp-leise{
+  font:600 var(--fs-1)/1.35 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--faint)
+}
+.sp-postfach .sp-brief h3{font:600 var(--fs-5)/1.2 var(--display);letter-spacing:-.02em;color:var(--ink);margin:0}
+.sp-postfach .sp-brief-text{
+  display:flex;flex-direction:column;gap:8px;max-width:64ch;
+  font:400 var(--fs-3)/1.7 var(--body);color:var(--ink)
+}
+/* Kacheln: Symptom / Uebt / Dauer / Form / Lohn + Ziele ueber alle Spalten */
+.sp-postfach .sp-brief-info{
+  display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4, minmax(0,1fr));gap:8px;
+  border:0;padding:0;align-items:stretch
+}
+.sp-postfach .sp-brief-info > div{
+  display:flex;flex-direction:column;gap:4px;min-width:0;
+  padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel-2)
+}
+.sp-postfach .sp-brief-info small{
+  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--faint)
+}
+.sp-postfach .sp-brief-info p{margin:0;font:400 var(--fs-2)/1.5 var(--body);color:var(--ink)}
+.sp-postfach .sp-brief-ziele{grid-column:1/-1}
+.sp-postfach .sp-brief-ziele ul{
+  display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none
+}
+.sp-postfach .sp-brief-ziele li{
+  display:flex;align-items:flex-start;gap:8px;
+  font:400 var(--fs-2)/1.4 var(--body);color:var(--ink)
+}
+.sp-postfach .sp-brief-ziele li::before{content:"—";flex:0 0 auto;color:var(--faint)}
+/* Aktionsleiste ruhig, unten — sticky, damit die Hauptaktion ohne Scrollen erreichbar bleibt
+   (Rauchtest § 22: „Hauptaktion ohne Scrollen sichtbar und anklickbar", 1366/960 px). */
+.sp-postfach .sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{
+  position:sticky;bottom:0;z-index:10;
+  margin:auto -16px 0;padding:12px 16px;
+  border-top:1px solid var(--line);border-bottom:0;
+  background:var(--panel);
+  align-items:center;gap:12px
+}
+.sp-postfach .sp-brief .sp-knoepfe .knopf{
+  min-height:44px;padding:0 16px;border-radius:var(--radius-xs);box-shadow:none;
+  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.08em;text-transform:uppercase
+}
+.sp-postfach .sp-brief .sp-knoepfe .knopf.primaer{background:var(--ink);border:1px solid var(--ink);color:var(--bg)}
+.sp-postfach .sp-brief .sp-knoepfe .knopf.primaer:hover{filter:none;transform:none;background:color-mix(in srgb, var(--ink) 88%, var(--bg))}
+.sp-postfach .sp-brief .sp-knoepfe .knopf.geist{
+  min-height:44px;padding:0 12px;color:var(--muted);background:none;border:1px solid transparent;
+  text-transform:none;letter-spacing:0;font:500 var(--fs-2)/1 var(--body)
+}
+.sp-postfach .sp-brief .sp-knoepfe .knopf.geist:hover{color:var(--ink);background:var(--panel-2);border-color:var(--line)}
+
+/* ---- Schmal: Blatt-Ansicht bleibt; Datenleiste umbrechen -------------- */
+@media (max-width: 900px){
+  .sp-postfach .sp-pf-kopf{grid-template-columns:minmax(0,1fr)}
+  .sp-postfach .sp-pf-aktionen{justify-content:flex-start}
+  .sp-postfach .sp-pf-teile{grid-template-columns:1fr;padding-bottom:12px}
+}

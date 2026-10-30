@@ -345,7 +345,7 @@ Object.assign(DATEN.lehrtexte, {
     skill: "lab.dmz",
     E: "Dienste, die aus dem Internet erreichbar sein müssen (Web, Mail), gehören in eine eigene Zone – die DMZ. Sie liegt zwischen außen und innen, hat ein eigenes Netz und eigene Regeln: von außen nur der eine Dienst, aus der DMZ nichts ins interne Netz, aus dem LAN nur das Nötige in die DMZ. So ist ein gekaperter Webserver nicht sofort im LAN.",
     AP1: "Die DMZ ist eine eigene Firewall-Zone für öffentlich erreichbare Dienste. Regelwerk: außen → DMZ nur die veröffentlichten Ports, DMZ → innen kein Verkehr (Ausnahmen ausdrücklich), innen → DMZ nur was der Betrieb braucht.",
-    AP2: "Firewall-Protokoll: deny tcp 203.0.113.200 → 172.16.0.10:445 (von aussen nach dmz) · Windows: „Zeitüberschreitung der Anforderung.“",
+    AP2: "Firewall-Protokoll: deny tcp 203.0.113.200 → 172.16.0.10:445 (von außen nach dmz) · Windows: „Zeitüberschreitung der Anforderung.“",
     quelle: "05-AP2-Infrastruktur-Sicherheit (DMZ-Regelwerk) · Infrastruktur & Sicherheit – Visuelle Lernnotiz (Firmennetz mit DMZ und VLANs) · BSI IT-Grundschutz-Kompendium, NET.3.2 Firewall",
   },
   "lab.storage": {

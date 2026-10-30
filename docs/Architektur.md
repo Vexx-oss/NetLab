@@ -532,102 +532,73 @@ Spiel.VERTRAUEN_LOHN = {empfehlung:3, rabatt:4, rabattAnteil:0.2}
 st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stufe früher offen
 st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
 
-## 19 · Lagebild 2.0 — die Labor-Fläche neu gezeichnet (30.10.2026) — verbindlicher Vertrag
+## 20 · Lagebild 3.0 — Piktogramme, gerade Kabel, klare Zonen, Interaktion (30.10.2026) — verbindlicher Vertrag
 
-**Auftrag des Nutzers (wörtlich):** „nutze ein team um die Lab funktion zu optimieren. Es ist hässloch
-blockig und die daten werden fehlerhaft dargestellt. Überlege dir eine schöne alternative passend zu
-jedem Theme welche professionell und von profis designed aussieht".
+**Auftrag des Nutzers (wörtlich, 18:12/18:05):** „Die Piktogramme sind sehr schön und gefallen mir",
+„eckige Kabel find ich nicht gut", „Kabel soll nicht einfach durchhängen, es soll gerade sein aber sich
+auch um Ecken ziehen lassen", „die Zonen … einfach klar und verständlich anzeigen, wie die Zone zu
+welchem Gerät verläuft", „keine Dauerbeschallung an Effekten, nur bei Interaktion … ruhige, schöne und
+fließende Animationen", „ambient Effekte dürfen sein, es soll atmosphärisch und immersiv sein, nur eben
+kein Feuer an ablenkenden Stimuli", „Das Postfach … modern und professionell wie das Dashboard".
+Vorgänger: § 19 (Lagebild 2.0). Konzeptbretter und Messungen dieser Runde liegen (nicht
+versioniert) unter Nachweise/Prototypen-Runde3/.
 
-**Geltung.** Diese Fassung ersetzt für die Labor-Fläche (.lb-leinwand, .lb-svg) die Angaben aus
-§ 18.15 „Karten 168 × 112" und „Kabel (neu): Patchkabel mit Stecker" — beides war die Ursache der
-Befunde B4–B9. Sie gilt für POLARIS und alle fünf Themes; das Hub-Panel hb-lage bleibt unberührt.
-Arbeitsfassung mit dem vollen Wortlaut der Prüfungen:
-[Entwurf – Lagebild 2.0 (Gestaltungsvertrag)](<entwicklung/Entwurf – Lagebild 2.0 (Gestaltungsvertrag).md>).
+**Geltung.** Ersetzt für die Labor-Fläche die Knoten-, Kabel- und Zonenregeln aus § 19.2/19.3.
+Darstellung bleibt theme-übergreifend gleich; Material kommt aus den Theme-Dateien.
 
-### 19.1 Befunde (30.10.2026 gemessen, Belege in Nachweise/1.2-Topo/ und Nachweise/Lagebild-QA/)
+### 20.1 Knoten: Piktogramm + Beschriftung, keine Karte
 
-| # | Befund | Beleg |
-|---|---|---|
-| B1 | Zonen-CIDR wurde IMMER ausgeblendet (.lb-s-zonen .zone-text{display:none}) — farbige Flächen ohne Bedeutung | editor.css a. F., Zeile 34 |
-| B2 | Zonenform = harte konvexe Hülle um Mittelpunkte; bei mehreren Netzen überlappten die Hüllen zur ganzen Fläche | ebenen.js a. F. |
-| B3 | Router steckte mit allen Interfaces in JEDER Zone (Hüllen zogen sich über die Fläche) | alleAdressen a. F. |
-| B4 | Portname/Status-Symbol lag UNTER der Gerätekarte; .kabel-port war zusätzlich display:none | editor.js / editor.css a. F. |
-| B5 | Kabel endeten unter der Karte (Mitte→Mitte), Stecker schwammen im Freiraum | kabelGruppe a. F. |
-| B6 | Adresse lief über den Kartenrand („192.168.10.1/24 +2"), kein Messen/Kürzen | geraetGruppe a. F. |
-| B7 | Switch ohne IP zeigte eine leere zweite Zeile; „keine IP" wirkte wie ein Fehlerbild | Bilder vorher |
-| B8 | Legende versprach VERBUNDEN/GETRENNT/KEIN LINK, die Zustände waren aber nicht sichtbar | Bilder vorher |
-| B9 | Karten 168 × 112 mit viel Leerraum — Wireframe statt technischem Lagebild | Bilder vorher |
-| B10 | Minimap ohne sichtbaren Sichtrahmen; sie lag über Geräten | werkstatt.js a. F. |
+Geräteposition = **Zentrum des Piktogramms**. Piktogrammgröße in Bildschirm-pixeln: Infrastruktur
+(Internet/Router/Firewall/Switch) **40**, Server/NAS **32**, Endgeräte **28**. Beschriftung **mittig
+unter** dem Piktogramm: Name 12,5 px (700, Versalien, Sperrsatz), Rolle 11 px, Adresse 11 px; die drei
+Zeilen liegen bei y = +18/+31/+44 (relativ zur Icon-Mitte). Die Beschriftung hat einen Halo
+(paint-order:stroke, Flächenfarbe, 3–3,5 px), damit Kabel dahinter den Text nicht unlesbar machen.
+Knoten-Box für Kollisionen/Hüllen: x = ±max(iconHalb+6, 58), y = −(iconHalb+4) … +(iconHalb+48),
+skaliert mit s = min(2,6; max(1; 1/k)) — der ganze Block (Piktogramm + Labels) wird gemeinsam
+gegenskaliert; .ger-treffer deckt diesen Block. Kein .ger-karte-Rahmen mehr (bleibt nur als
+unsichtbare Struktur im Markup). Piktogramme: **Gerätereihe** (11 Zeichen, 24er-Raster, Standlinie
+20,5, Strich 2 px bei 24 / 2,5 px bei 40), erzeugt von UI.geraetebild(typ, skin, {px}); keine Platte,
+keine Kachel. Füllungen (Ports/Punkte) als .gb-tupfer.
 
-### 19.2 Neues Bild (verbindlich)
+### 20.2 Kabel: gerade, mit EINEM weichen Knick
 
-**Knoten** (src/ui/editor.js: geraetGruppe). Weltmaße KW × KH = **160 × 76** (breit) bzw.
-**118 × 64** (schmal, Fenster < 900 px), Mittelpunkt = Geräteposition, Radius 12/10.
-Markup: g.ger[data-id] → rect.ger-treffer, rect.ger-auswahl, rect.ger-karte, g.ger-bild
-(Icon-Platte 28 × 28 links, UI.geraetebild auf 0,538 skaliert), g.ger-text mit text.ger-name,
-text.ger-rolle, text.ger-ip (optional text.ger-mehr), Badges unverändert.
-Text linksbündig ab x0 = −KW/2 + 48, Zeilen y = −10 / +4 / +18.
-.ger-name 12,5 px (--fs-2) 700 Mono, .ger-rolle / .ger-ip / .ger-mehr 11 px (--fs-1).
-Die Adresse zeigt die ERSTE gültige Adresse MIT Präfix (Lehrinhalt: eine falsche Maske muss sichtbar
-sein); +N ist eine eigene Marke oben rechts, kein fließender Zusatz. Die Rolle ist nie leer:
-„Router · 3 Netze", „Switch · VLAN 10,20,30", „PC", „Drucker · Dienst 9100", „Provider",
-„kein Link" / „keine Adresse" / „DHCP – keine Adresse". Textbreiten werden VOR dem Setzen
-deterministisch geschätzt (11 px Mono = 6,05 px/Zeichen; Textfläche 104/62 px) und notfalls mit „…"
-gekürzt — nie über den Rahmen (B6).
+Standard ist die **direkte Gerade** von Port zu Port (Ray-Box-Anker auf dem Piktogramm-Rand,
+Port-LED auf dem Rand). Nur wenn diese Gerade eine **fremde** Piktogramm-Box schneidet, entsteht
+**ein** Ausweichpunkt mit weicher Rundung (Radius 12, diagonal erlaubt, deterministisch gesucht in
+drei Abständen × zwei Seiten). Kein Durchhang, keine S-Kurve, kein H+V-Raster. Trunk = zwei parallele
+Linien; Paket-/Ping-Animation läuft auf derselben Route (Längenparametrisierung, gemessen < 1 px
+Abweichung). Portnamen nur ab Zoom ≥ 0,9 oder bei Hover/Auswahl und nur, wenn sie weder Knoten-Box
+noch andere Portnamen treffen; Name/Adresse des Knotens haben Vorrang.
 
-**Kanten** (kabelGruppe). Endpunkte sind die Schnittpunkte der Geraden Mitte→Mitte mit dem
-KARTENRECHTECK (Ray-Box); dort sitzt der Port-Punkt .port-led (r 2,6) auf der Rahmenlinie. Pfad
-orthogonal mit 6-px-Rundung, gerade Strecken gerade; Z.versatz teilt Mehrfachkabel. .kabel-huelle
-(4 px, Flächenfarbe) trennt vom Raster, .kabel-linie 1,5 px (vector-effect:non-scaling-stroke);
-.k-unten gestrichelt 5 4, .k-aus gepunktet 1 5; Trunk = zwei parallele Haarlinien (4,5/2,5).
-Portnamen (.kabel-port) nur bei Zoom ≥ 0,9 oder Hover/Auswahl und mit Kollisionsliste. Steckerplastik
-und Status-Dreiecke (.kabel-stecker, .ps*) entfallen (B4/B5/B8).
+### 20.3 Zonen: klare, glatte Hülle mit Chip außerhalb
 
-**Zonen** (src/ui/ebenen.js). Mitglied einer Zone ist ein Gerät mit GENAU EINER gültigen Adresse in
-diesem Netz; Geräte mit mehreren Adressen (Router, Firewall) sind ANKER — sie liegen nicht in der
-Form, stehen aber im Chip als GW <ip> (B3). Form: konvexe Hülle über die KARTEN-RECHTECKE der
-Mitglieder, um 30 px (x) / 26 px (y) aufgeblasen, als geschlossener Catmull-Rom→Bézier-Pfad (weiche
-Insel statt Vieleck, B2). Netze mit höchstens zwei Mitgliedern (z. B. WAN /30) werden als KAPSEL
-entlang der Strecke gezeichnet. Chip .zone-label unten links an der Insel: Punkt in Zonenfarbe, CIDR,
-optionale Zeile GW <ip>; 11 px, NIE ausgeblendet (B1), mit Kollisionsliste gegen Karten und andere
-Chips.
+Hülle über die **Knoten-Boxen** der Mitglieder + 12 px Rand, glatt gerundeter Polygonzug (Ecken 24 px,
+keine Asymmetrie, kein Wobble). Router/Firewall bleiben **Anker** (nicht Teil der Form, mit „GW ip"
+im Chip). Netze mit ≤ 2 Mitgliedern bleiben Kapsel. Chip (CIDR + GW) sitzt **außerhalb** der Hülle
+(unten links → unten rechts → oben → seitlich, 10 px Abstand, an den Canvas-Rand geklemmt) und wird
+nie weggelassen; so liegt er nie auf einer Beschriftung. Mitglieder liegen immer innerhalb der Hülle.
 
-**Zoom.** s = min(1,12; max(1; 1/k)) — Beschriftungen werden gegenskaliert, aber höchstens um 12 %,
-damit sie in der Karte bleiben. Zoomklassen am svg: wenig-text (k < 0,8) blendet .ger-rolle und
-.kabel-port aus, klein (k < 0,7) zusätzlich .ger-ip / .ger-mehr, sehr-klein (k < 0,4) zuletzt
-.ger-name. Zonen-Chips fallen in KEINER Stufe weg.
+### 20.4 Effekte: Interaktion + eine ruhige Atmosphäre je Theme
 
-**Legende und Minimap.** .lb-legende zeigt drei echte Linienmuster (durchgezogen, gestrichelt,
-gepunktet) in den Kantenfarben. Die Minimap ist 148 × 92 px, ihr viewBox ist die Vereinigung aus
-Geräterahmen und sichtbarem Ausschnitt (+4 % Rand), der Sichtrahmen ist sichtbar (.wk-mini-rahmen);
-Punktgrößen in Bildschirm-px. Beim Einpassen reserviert die Fläche die Minimap-Breite und schiebt das
-Netz um 40 px nach oben (grenzen: x −96/+104, y −84/+104).
+Keine Dauerbewegung von Knoten, Kabeln oder Labels. **Ambient** ist erlaubt als genau EIN sehr ruhiger
+Hintergrund-Layer pro Fläche (Token --dauer-ambient: 36000 ms; Nordlicht Aurora-Drift, Pulsar
+Nebel/Sternen, Messing warmes Licht, Papier Papierkorn, Keramik Tageslicht, POLARIS leise Lichtbewegung).
+**Interaktion** nur bei Hover/Auswahl/Klick/Prozess (Lift, Halo, Akzentring, Druck, fließender Punkt).
+„Bewegung aus" schaltet alles zentral ab (basis.css). Dekorative Lichtbögen/Strahlen sind entfernt
+(Kopfzeilen-Akzentlinie, lb-auftrag-Lichtbogen, Dock-Kopf-Gradient).
 
-### 19.3 Tokens und Dateien
+### 20.5 Postfach: Bento-Datenpanel
 
-Neu ist src/stil/zz-lagebild.css (Basis; lädt nach editor.css, vor zz-polaris.css und den Themes) mit
-FALLBACK-Zugriffen var(--lage-…, var(--…)), damit ein Theme ohne Token nicht bricht. Die SVG-Textregeln
-bleiben in editor.css (tests/ui-typografie.test.js liest sie dort). Je Theme existieren 19 Tokens:
---lage-flaeche --lage-raster --lage-knoten-bg --lage-knoten-rand --lage-knoten-schatten --lage-name
---lage-rolle --lage-ip --lage-platte --lage-platte-rand --lage-kante --lage-kante-huelle --lage-chip-bg
---lage-chip-rand --lage-chip-text --lage-mini-bg --lage-mini-rand --lage-radius --lage-glow.
-Defaults in zz-polaris.css (:root), Theme-Werte im Token-Block :root[data-theme="<id>"], Materialregeln
-mit html[data-theme="<id>"]-Präfix (Themes-Vertrag, § 18.16). Neue JS-Klassen: ger-text, ger-rolle,
-ger-mehr, kabel-ende, port-led, zone-label, zone-punkt, zone-gw; entfallen: kabel-stecker, ps, ps-*,
-zone-schild.
+Das Postfach ist eine **Datentafel** im Stil der Heute-Ansicht: Kopf mit Overline und Datenmarken,
+dichte Auftragsliste als Zeilenraster (Status-Punkt, Kunde, Titel, Form/Dauer/Lohn als Textmarken;
+keine Karten pro Zeile, keine Emoji, keine Neon-Pillen), Detail als Panel mit Kacheln (Symptom, Übt,
+Dauer, Form, Lohn, Ziele), Brieftext in Lesebreite und ruhiger Aktionsleiste. Umsetzung CSS-only in
+spiel.css; im DOM ergänzt: Kacheln Dauer/Form und Ziele (spiel.js leserZeilen). Unter 900 px bleibt
+die Blatt-Ansicht.
 
-### 19.4 Was unverändert bleibt
+### 20.6 Leiste und Umlaute (Nebenkorrekturen)
 
-Öffentliche API UI.labor.* und UI.ebenen.* (nur erweitert: zonen() liefert zusätzlich anker/gw),
-Bedienung (Ziehen, Kabel, Ping, Auswahl, Inspektor, Dock), Datenformen und Simulation, Determinismus,
-das Hub-Panel hb-lage, die Test-Zugänge UI.labor._ und UI.labor._f, data-id am Geräte-g. Kein neues
-Bedien-Element, keine neuen Tastenkürzel.
-
-### 19.5 Abnahme
-
-Vorher-Bilder: Nachweise/Lagebild-QA/vorher/ (6 Theme-Varianten, Salon und Praxis).
-Nachher-Bilder: Nachweise/Lagebild-QA/fassung2/ (Salon, Praxis, Störung, 720 px) — je Bild mit
-read_image angesehen; gemessen: Einpasszoom 93–96 % bei 1440 × 900, 3 Zonen-Chips sichtbar (Praxis),
-2 (Salon), 10 Port-LEDs, 0 JS-Fehler. Gates: sh tools/test.sh, sh tools/test.sh --rauch,
-python tools/ethos.py, python tools/klassen.py, python tools/starttest.py — die Zahlen stehen in
-STAND.md. Prototypen und Theme-Referenz (nicht versioniert): Nachweise/Prototypen-Lagebild/.
+Leisten-Labels wurden abgeschnitten (POSTFACH/LERNSTAND): Knopfbreite 56 → 80 px, Leiste 84 → 88 px,
+Label mit Ellipsen-Schutz; unter 900 px nur Symbole (gemessen 0 Überläufe in allen 6 Themes).
+Umlaute: 8 Quelltext-Stellen korrigiert, 27 line-height-Deklarationen auf Headroom ≥ 1,15 gezogen
+(abgeschnittene Ö-Punkte bei Versalien-Überschriften), neues Werkzeug tools/umlaute.py.

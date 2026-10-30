@@ -49,8 +49,10 @@ if [ "$1" = "--rauch" ]; then
   "$NODE" tests/run.js "$@" || exit 1
   python tools/klassen.py || exit 1
   python tools/ethos.py || exit 1
+  python tools/umlaute.py || exit 1
   exec python tools/rauch.py
 fi
 pruefe_namen
 python tools/ethos.py || exit 1
+python tools/umlaute.py || exit 1
 exec "$NODE" tests/run.js "$@"

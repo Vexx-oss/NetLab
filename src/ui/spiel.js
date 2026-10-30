@@ -710,7 +710,7 @@ UI.spiel = (() => {
   /* Auftragsform als kleine Marke (Symbol + Wort), E1 */
   function formChip(def){
     const form = Spiel.formVon(def), F = Spiel.FORMEN[form] || Spiel.FORMEN.stoerung;
-    return h("span", {class: "sp-chip form form-" + form, title: F.text}, `${F.sym} ${F.titel}`);
+    return h("span", {class: "sp-chip form form-" + form, title: F.text}, F.titel);
   }
   function leserZeigen(el, inst, schliessen){
     if (!inst) return;
@@ -724,7 +724,11 @@ UI.spiel = (() => {
       h("div", {class: "sp-brief-info"},
         h("div", {}, h("small", {}, "Symptom"), h("p", {}, def.symptom || "—")),
         h("div", {}, h("small", {}, "Übt"), h("p", {}, (def.skills || []).map(s => Spiel.skill(s).name).join(" · "))),
-        h("div", {}, h("small", {}, "Lohn"), h("p", {}, `${fmtEuro((def.lohn || {}).euro || 0)} · ${(def.lohn || {}).ruf || 0} Ruf`))),
+        h("div", {}, h("small", {}, "Dauer"), h("p", {}, `~${Spiel.minuten(def)} min`)),
+        h("div", {}, h("small", {}, "Form"), h("p", {}, (Spiel.FORMEN[Spiel.formVon(def)] || Spiel.FORMEN.stoerung).titel)),
+        h("div", {}, h("small", {}, "Lohn"), h("p", {}, `${fmtEuro((def.lohn || {}).euro || 0)} · ${(def.lohn || {}).ruf || 0} Ruf`)),
+        h("div", {class: "sp-brief-ziele"}, h("small", {}, "Ziele"),
+          h("ul", {}, (def.ziele || []).map(z => h("li", {}, z.text || z.typ))))),
       h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer gross", onclick: () => { schliessen?.(); oeffnen(inst.iid); }}, angefangen ? "Weiterarbeiten ▸" : "Auftrag annehmen ▸"))));
   }
 

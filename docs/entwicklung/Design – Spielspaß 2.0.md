@@ -462,58 +462,62 @@ Verwandt: [[Plan – Ausbau 1.2]] · [[Konzept – Netzwerk-Labor]] · [[Archite
 ## 36 · Lagebild 2.0 — die Labor-Fläche (30.10.2026)
 
 **Auftrag (wörtlich):** „nutze ein team um die Lab funktion zu optimieren. Es ist hässloch blockig und
-die daten werden fehlerhaft dargestellt. Überlege dir eine schöne alternative passend zu jedem Theme
-welche professionell und von profis designed aussieht". Vertrag: Architektur § 19; Arbeitsfassung:
-Entwurf – Lagebild 2.0 (Gestaltungsvertrag).md.
 
-**Zuerst gemessen, dann gebaut.** Zehn Befunde mit Beleg (Datei/Zeile bzw. Vorher-Bild), darunter drei
-harte Datenfehler: die Zonen-CIDR war per CSS IMMER ausgeblendet (editor.css a. F. Zeile 34), die
-Portnamen ebenfalls (display:none), und Port-/Statussymbole lagen unter den 168 × 112-Karten. Der
-Router wurde als Mitglied JEDER Zone gezeichnet und zog die Hüllen über die ganze Fläche. Kabel endeten
-unsichtbar im Kartenzentrum. Das „+1" lief über den Kartenrand.
+## 37 · Runde 3 — Weltgefühl: Piktogramme, gerade Kabel, Bento-Postfach, Effekte (30.10.2026)
 
-**Bauweg (ein vertikaler Schnitt, Team mit getrennten Schreibbereichen).**
-1. Vorher-Bilder aller sechs Theme-Varianten (eigenes Messwerkzeug, Nachweise/Lagebild-QA/) und der
-   Gestaltungsvertrag, bevor eine Zeile Produktcode geändert wurde.
-2. Design-Referenz je Theme zuerst als Standalone-Prototyp (Nachweise/Prototypen-Lagebild/, nicht
-   versioniert): Token-Tabelle, Maße, Kontraste, 18 Renderings — davon wurden Token-Namen und
-   Materialsprache übernommen, nicht kopiert.
-3. Renderer (editor.js, ebenen.js, werkstatt.js): Knoten als Beschriftungsträger, Kanten orthogonal
-   mit Ray-Box-Ankern und Port-LEDs, Zonen als weiche Inseln mit Ankern für Router, Gegen-Skalierung
-   der Beschriftung, Minimap-Reservierung.
-4. Stil (zz-lagebild.css als Basis, zz-polaris.css als POLARIS-Default, fünf Theme-Dateien): je Theme
-   19 Tokens und Materialregeln; SVG-Textregeln bleiben in editor.css, weil der Typo-Test sie dort
-   liest.
+**Auftrag (wörtlich, mehrere Nachrichten).** „Der Vibe gefällt mir mittlerweile seeehr gut …
+vielleicht noch etwas zu klinisch und sagt zu sehr aus made by ai"; „mit links klick muss man das
+canvas verschieben können und nicht automatisch mehrfachauswahl betätigen"; „ab gewissen Zoomstufen
+fällt der text raus"; „die ganze darstellung der End- und Einzelgeräte nochmal überdenken"; „mir gefällt
+der Icon in einem Textfield nicht"; „die Kästen sehen scheiße aus"; „die Piktogramme sind sehr schön";
+„eckige Kabel find ich nicht gut"; „kein Durchhang, einfach natürlich"; „die Zonen … klar und
+verständlich"; „keine Dauerbeschallung an Effekten, nur bei Interaktion … ambient Effekte dürfen sein";
+„das Postfach … modern und professionell wie das Dashboard"; „Deutsch hat Ö, Ä und Ü — sowas will ich
+nirgends sonst mehr sehen"; „die linke Leiste schneidet POSTFACH ab".
 
-**Entscheidungen (und was verworfen wurde).**
-- Adresse am Knoten bleibt MIT Präfix — eine falsche Maske ist ein Lernfehler, der sichtbar bleiben
-  muss; das /N des Netzes steht zusätzlich im Zonen-Chip. Das „+N" wurde dafür aus der Zeile in eine
-  eigene Marke oben rechts verschoben, statt die Adresse zu kürzen.
-- Router/Firewall sind ANKER, keine Zonenmitglieder — sonst zieht sich jede Hülle über die Fläche.
-- Gegen-Skalierung nur bis s = 1,12 (nicht 1,6): mit 1,6 schob der Text die Karte auseinander; die
-  Restlesbarkeit bei kleinem Zoom übernehmen die Zoomklassen (Rolle ab k < 0,8, Adresse ab k < 0,7).
-- Portnamen nur ab Zoom 0,9 oder bei Hover/Auswahl — die Information ist am Kabel-Tooltip vollständig.
-- Minimap schwebt weiter auf der Fläche (keine neue Ansicht), Reservierung ihrer Breite hält sie frei;
-  Größe 184 × 112 → 148 × 92 verkleinert.
-- Verworfen: Karten breiter als 160 (mehr Leerraum), „+N" fließend in der Adresszeile, Zonen als
-  Rechteck-Bänder (zerstört die Zugehörigkeit), Wegfall des Präfixes am Knoten.
+**Vorgehen.** Konzept-Phase mit **neun Agenten** (vier Teammitglieder, fünf Subagenten) parallel:
+Knoten-Sprachen A/B/C, unabhängige V-D/V-E, Icon-Familie, organisches Kabel/Zonen-Brett, Flair-Boards
+für POLARIS/Nordlicht/Papier und Messing/Pulsar/Keramik, zwei Postfach-Richtungen, Anti-KI-Audit,
+Umlaut-Agent. Jede Abgabe als Bild mit read_image-Prüfung; danach Umsetzung in
+getrennten Schreibbereichen, Integration und Abnahme durch die Leitung.
 
-**Messpunkte (selbst gemessen, 30.10.2026).**
+**Entschieden (Nutzer).** Piktogramme als Knotensprache, **keine Karten**; Kabel **gerade**, bei
+Bedarf EIN weicher Knick (kein Durchhang, kein S); Zonen **schlicht und klar** (glatte Hülle, Chip
+außerhalb); Effekte **nur Interaktion + eine ruhige Ambient-Schicht**; Postfach als **Bento-Datenpanel**;
+dekorative Strahlen und alte Symbole raus; Bento-Sprache des Dashboards als Ziel.
 
+**Umgesetzt.**
+- Knoten: Piktogramm 40/32/28 px, Beschriftung mittig darunter (Name/Rolle/IP), Halo gegen Kabel,
+  Block gegenskaliert s = min(2,6; max(1; 1/k)); keine Karte, keine Platte; Auswahl als Ring.
+- Gerätereihe: 11 neue SVG-Zeichen (24er-Raster, Standlinie, Strich 2/2,5 px), UI.geraetebild(typ,
+  skin, {px}); .gb-kachel entfällt, .gb-tupfer für Ports.
+- Kabel: direkte Gerade, bei Blockade EIN Elbow (Radius 12); Paket/Ping folgt der Route; Trunk doppelt.
+- Zonen: glatte Hülle über Knoten-Boxen + 12 px, Anker für Router, /30-Kapsel; Chip außerhalb, an den
+  Rand geklemmt; nie auf einer Beschriftung.
+- Effekte: Ambient-Layer je Theme (--dauer-ambient 36 s: Aurora, Nebel, Licht, Papierkorn, Tageslicht),
+  Interaktion nur bei Hover/Klick/Auswahl/Prozess; „Bewegung aus" zentral.
+- Postfach: Bento-Datenpanel (Kopf-Datenmarken, dichtes Zeilenraster mit Status-Punkt, Detail mit
+  Kacheln Symptom/Übt/Dauer/Form/Lohn/Ziele), CSS-only in spiel.css; im DOM wurden Dauer/Form und Ziele
+  ergänzt; Emoji/Pillen/Neon entfernt.
+- Leiste: Knopf 56 → 80 px, Leiste 84 → 88 px, Ellipsen-Schutz; < 900 px nur Symbole; 0 Überläufe.
+- Umlaute: 8 Quelltextstellen, 27 line-height-Headroom-Regeln, neues Werkzeug tools/umlaute.py.
+
+**Messpunkte (selbst gemessen).**
 | Prüfung | Nachher |
 |---|---|
-| Einpasszoom 1440 × 900 (Praxisnetz, Ebene IP-Netze) | **93–96 %** (vorher 90–97 %, aber Zonen-CIDR/Portnamen unsichtbar) |
-| Sichtbare Daten | **3** Zonen-Chips (Praxis) / **2** (Salon), **10** Port-LEDs, Rollen und Adressen sichtbar; 0 JS-Fehler |
-| Texte außerhalb der Karte | **0** (Render-Messung über 18 Knotentexte bei k = 1,0 … 0,35) |
-| Zonen-Chips | Kollisionsliste; Salon/Praxis ohne Chip-Karte-Überdeckung |
-| Bild-Belege | Nachweise/Lagebild-QA/vorher/ und …/fassung2/ (Salon, Praxis, Störung, 720 px), je Bild mit read_image angesehen |
-| Design-Referenz | 19 Tokens je Theme, min. funktionale Schrift 11,0 px, min. Textkontrast 6,48 : 1 |
+| Leisten-Überlauf (6 Themes, 1466/1200 px) | **0** (vorher 3 Labels/Theme) |
+| Labor 1440×900 | Einpasszoom 95 %, 3 Zonen-Chips, 10 Port-LEDs, 0 JS-Fehler |
+| Kabel | 5/5 gerade; Elbow-Probe: ein Knick Radius 12; Paket max. 0,32 px neben der Route |
+| Zonen | 3 Hüllen, 0 Überlappung (Praxis), Mitglieder innerhalb, Chip außerhalb |
+| Texte | Knotentexte 12,5/11/11 px bei jedem Zoom (gegenskaliert), Halo |
+| Postfach | Kacheln 5-spaltig + Ziele; Listenzeile 52 px, Knöpfe 44 px; min. Schrift 11 px |
+| Umlaute | 873/873 Tests, 5761 sichtbare Texte geprüft, 0 Befunde |
+| Icons | Strich 2,01 px bei 24 px / 2,55 px bei 40 px; Kontrast 5,56–15,05 : 1 |
 
 **Was NICHT geprüft ist — ehrlich.**
-- Zonenrand- und Chip-Rand-Kontrast liegen bewusst unter 3 : 1 (dekorativ; die Information trägt der
-  Chip-Text ≥ 4,5 : 1). Nicht gegen WCAG 1.4.11 abgenommen.
-- Die WAN-Kapsel (Salon, /30) ist optisch die dünnste Stelle; sie ist funktional, aber nicht schön.
-- Echte Maus-Interaktion auf der neuen Fläche (Kabel ziehen, Hover-Portnamen) ist nur über die
-  bestehenden UI-Tests und den Rauchtest geprüft, nicht per Hand.
-- Hell-Modus der Themes ist Teil der Theme-Dateien, aber die Labor-Fläche wurde dort nicht separat
-  abgenommen.
+- Kein 60-fps-/Paint-Test der Ambient-Layer; nur Standbild und CSS-Regeln.
+- Hover/Auswahl-Prozess-Timing nicht im DOM gemessen; die Boards sind statisch.
+- 720-px-Breite des Labors: Labels bleiben lesbar, aber Rollen fallen bei engem Platz weg
+  (bewusste Regel: Name+Adresse haben Vorrang).
+- Salon-Netz hat engere Geräteabstände; im Bild geprüft, aber nicht mit der Messsonde.
+- Postfach: Kennzahlenleiste zeigt nur Werte, die im DOM vorhanden sind (keine erfundenen KPIs).

@@ -21,33 +21,33 @@
 .lb-raster-punkt{fill:var(--lage-raster, var(--bg-raster))}
 .lb-raster.fein{opacity:.35}
 
-/* ---- Knoten: Beschriftungsträger, kein Leerraum-Kasten -----------------
-   Geometrie (140×76 / 110×64, Text linksbündig ab x=-KW/2+48) setzt
-   src/ui/editor.js. CSS: Haarlinien-Rahmen, Typ-Platte, Auswahlring. */
+/* ---- Knoten 3.0 (Nutzerentscheidung 30.10.) --------------------------------
+   KEINE Karte, KEINE Platte: das Piktogramm steht frei auf der Fläche.
+   Groesse und Strichstaerke liefert UI.geraetebild(typ, skin, {px}) selbst
+   (Infra 40 / Server+NAS 34 / Endgeraete 30 Bildschirm-px, kein scale mehr);
+   der Textblock wird gegenskaliert. Label-Typografie: editor.css
+   (Name 12,5 px, Rolle/IP 11 px). */
 .ger{cursor:grab}
 .ger-treffer{fill:transparent}
-.ger-karte{fill:var(--lage-knoten-bg, var(--panel)); stroke:var(--lage-knoten-rand, var(--line)); stroke-width:1;
-  rx:var(--lage-radius, var(--radius-s)); filter:var(--lage-knoten-schatten, none);
-  transition:stroke var(--dauer) var(--ease-standard), fill var(--dauer) var(--ease-standard)}
-.ger.hover .ger-karte{stroke:var(--line-2)}
-.ger.gewaehlt .ger-karte, .ger.zielt .ger-karte{stroke:var(--accent); stroke-width:1.5}
-.ger-auswahl{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4; opacity:0;
+.ger-karte{fill:none; stroke:none; filter:none; transition:none}
+.ger .gb-glyph path{fill:none; stroke:color-mix(in srgb, var(--g, var(--ink)) 78%, var(--ink))}
+.ger .gb-tupfer{fill:color-mix(in srgb, var(--g, var(--ink)) 78%, var(--ink)); stroke:none}
+.ger.gewaehlt .gb-glyph path, .ger.zielt .gb-glyph path{stroke:var(--accent)}
+.ger.gewaehlt .gb-tupfer, .ger.zielt .gb-tupfer{fill:var(--accent); stroke:none}
+/* Hover: Lift (Transform setzt der Renderer) + weicher Halo; keine Dauer-Effekte */
+.ger-bild{transition:filter var(--dauer) var(--ease-standard)}
+.ger.hover .ger-bild{filter:drop-shadow(0 0 9px color-mix(in srgb, var(--accent) 52%, transparent))}
+/* Auswahl: feiner Akzentring um das Piktogramm (Geometrie setzt der Renderer) */
+.ger-auswahl{fill:none; stroke:var(--accent); stroke-width:1.5; stroke-dasharray:none; opacity:0;
   transition:opacity var(--dauer) var(--ease-standard)}
 .ger.gewaehlt .ger-auswahl{opacity:1}
-/* „ohne Link" ist ein Zustand, kein Fehlerbild: gestrichelter Koralle-Rahmen */
-.ger.ohne-ip .ger-karte{stroke:var(--bad); stroke-dasharray:4 3;
-  fill:color-mix(in srgb, var(--bad) 6%, var(--lage-knoten-bg, var(--panel)))}
-.ger.aus .ger-karte{stroke:var(--faint); stroke-dasharray:2 3}
-.ger.aus .ger-bild{opacity:.5}
-/* Icon-Platte: 28×28 links (Skalierung des Gerätebilds macht editor.js) */
-.ger .gb-kachel{fill:color-mix(in srgb, var(--g, var(--accent)) 12%, var(--lage-platte, var(--panel-2)));
-  stroke:var(--lage-platte-rand, var(--line))}
-.ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent)}
-.ger .gb-glyph path{stroke:var(--g, var(--ink))}
-/* Zoom-Stufen (Vertrag 3.4): wenig-text (< 0,9) nimmt die Rolle, klein (< 0,6) zusätzlich die
-   Adresse, sehr-klein (< 0,4) zuletzt den Namen. Zonen-Chips (.zone-text/.zone-gw) fallen in
-   KEINER Stufe weg — die CIDR bleibt immer lesbar (Befund B1). */
-.lb-svg.wenig-text .ger-rolle, .lb-svg.klein .ger-ip, .lb-svg.klein .ger-mehr, .lb-svg.sehr-klein .ger-name, .kabel-ende.ohne-name .kabel-port{display:none}
+/* Zustand „ohne Link": feiner gestrichelter Koralle-Ring, kein Fehlerbild */
+.ger.ohne-ip .ger-auswahl{opacity:1; stroke:var(--bad); stroke-dasharray:4 3}
+.ger.aus .ger-bild{opacity:.42}
+.ger.aus .ger-text{opacity:.6}
+/* Labels bleiben IMMER sichtbar (Nutzerentscheidung: gegenskaliert statt ausgeblendet);
+   nur Portnamen regelt der Renderer über .kabel-ende. */
+.kabel-ende.ohne-name .kabel-port{display:none}
 
 /* ---- Kanten: Verbindungen, kein Gekritzel ------------------------------
    Endpunkte an der Knotenkante, orthogonal gerundet und Port-LED zeichnet
@@ -60,7 +60,7 @@
 /* Hülle = Flächenfarbe: trennt Kabel von Raster und Zonenwäsche */
 .kabel-huelle{fill:none; stroke:var(--lage-kante-huelle, var(--lage-flaeche, var(--bg)));
   stroke-width:4; stroke-linecap:round; vector-effect:non-scaling-stroke}
-.kabel-linie{fill:none; stroke:var(--kf); stroke-width:1.5; stroke-linecap:round;
+.kabel-linie{fill:none; stroke:var(--kf); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round;
   vector-effect:non-scaling-stroke; transition:stroke-width var(--dauer) var(--ease-standard)}
 .k-unten .kabel-linie, .k-unten .kabel-trunk-aussen, .k-unten .kabel-trunk-innen{stroke-dasharray:5 4}
 .k-aus .kabel-linie, .k-aus .kabel-trunk-aussen, .k-aus .kabel-trunk-innen{stroke-dasharray:1 5}
@@ -83,8 +83,8 @@
 .zone, .ger-text{pointer-events:none}
 .zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
 .zone-d{--zf:var(--zone-d); --zl:var(--zone-d-linie)} .zone-e{--zf:var(--zone-e); --zl:var(--zone-e-linie)}
-.zone-flaeche{fill:var(--zf, transparent); stroke:var(--zl, var(--line)); stroke-width:1; stroke-dasharray:6 5;
-  stroke-linejoin:round; vector-effect:non-scaling-stroke}
+.zone-flaeche{fill:color-mix(in srgb, var(--zf, transparent) 78%, transparent); stroke:var(--zl, var(--line));
+  stroke-width:1.5; stroke-dasharray:none; stroke-linejoin:round; vector-effect:non-scaling-stroke}
 /* Chip: Rahmen + Punkt + CIDR; wird in KEINER Zoomstufe ausgeblendet (B1) */
 .zone-label rect{fill:var(--lage-chip-bg, var(--panel)); stroke:var(--lage-chip-rand, var(--line));
   stroke-width:1; rx:var(--radius-xs)}

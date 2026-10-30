@@ -9,6 +9,32 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.3.0 — Lagebild 3.0: Piktogramme, gerade Kabel, Bento-Postfach (30.10.2026, zweite Nachbesserung)
+
+**Warum.** Nutzerkritik nach Lagebild 2.0: „Icon in einem Textfield", „Kästen sehen scheiße aus",
+„eckige Kabel find ich nicht gut", „kein Durchhang, einfach natürlich", „Zonen klar und verständlich",
+„keine Dauerbeschallung, nur bei Interaktion", „Postfach modern wie das Dashboard", „Ö/Ä/Ü nirgends
+fehlen", „POSTFACH wird abgeschnitten". Vertrag: Architektur § 20, Design § 37.
+
+**Umfang.**
+- Knoten kartenlos: Piktogramm 40/32/28 px + Beschriftung mittig darunter (Name 12,5 / Rolle 11 /
+  Adresse 11 px), Halo, Block gegenskaliert; Auswahl als Ring; keine Platte/Kachel.
+- Gerätereihe: 11 neue SVG-Zeichen in einem Raster (24, Standlinie, Strich 2/2,5 px); UI.geraetebild
+  mit {px}; .gb-tupfer für Ports.
+- Kabel: direkte Gerade Port→Port, bei Blockade EIN weicher Elbow (Radius 12); Paket/Ping auf der Route.
+- Zonen: glatte Hülle über Knoten-Boxen + 12 px, Router als Anker, /30-Kapsel, Chip außerhalb.
+- Effekte: Ambient-Layer je Theme (36 s) + Interaktionseffekte nur bei Hover/Klick/Auswahl/Prozess;
+  dekorative Strahlen (Kopfzeile, Auftragsband, Dock-Kopf) entfernt.
+- Postfach: Bento-Datenpanel (CSS-only in spiel.css) + Kacheln Dauer/Form und Ziele im DOM.
+- Leiste: Knopf 56 → 80 px, Leiste 88 px, Ellipsen-Schutz, < 900 px nur Symbole (0 Überläufe).
+- Umlaute: 8 Quelltextstellen korrigiert, 27 line-height-Headroom-Regeln, Werkzeug tools/umlaute.py.
+- Gesten: Links-Ziehen = Ansicht verschieben, Shift+Ziehen = Auswahlrahmen, Shift+Klick = umschalten;
+  Hilfetexte angepasst.
+
+**Handwerk.** Zeilenenden LF erhalten. Konzeptbretter/Messungen (nicht versioniert):
+Nachweise/Prototypen-Runde3/. Tests 873/873, Klassengleichheit 0, ethos GRUEN nach R9-Bereinigung.
+Kein Push, keine Fassungserhöhung.
+
 ## 2.3.0 — Lagebild 2.0: die Labor-Fläche neu gezeichnet (30.10.2026)
 
 **Warum.** Nutzerbefund: „Es ist hässloch blockig und die daten werden fehlerhaft dargestellt." Drei
@@ -676,23 +702,3 @@ Vertrag: [`Architektur.md`](Architektur.md) § 12 (Spezifikation) · § 12.1 (En
   `abnehmen` + die Prüffläche `tabellen()`; seit 09.10.2026 steht diese Zählung so auch in § 12.2).
 - **Eigener Store-Schlüssel `klassenraum`** — der **fünfte** Schlüssel neben `lern`, `labor`, `einst` und
   `sandbox`, mit `fassung: 1` und einem eigenen Exportformat
-  `{format: "netzwerk-labor/klassenraum", …}`. Der Spielstand (`labor`) bleibt **unberührt** — eine
-  Klassensitzung kann ihn nicht beschädigen.
-- **Öffnungsweg** — `Spiel.instanzErstellen({ticketId｜gen, seed, quelle: "klassenraum", ohneFlow: true})`
-  setzt `inst.klassenraum = {sitzung, platz, code}`, geöffnet wird über den vorhandenen Weg
-  `UI.spiel.oeffnen(iid)`. **E1 gilt**: der Auftrag bleibt im sichtbaren Postfach **unsichtbar** und hebt
-  keinen Zähler.
-- **Zwei neue Ansichten.** `klassenraum` (Lehrkraft) legt eine Sitzung an, zeigt den Code **groß und
-  kopierbar**, eine Ampel über die eingegangenen Ergebnisse (Median als oberer Wert), eine Block-Eingabe
-  für eingetippte Ergebnis-Codes und **einen** Hausdialog für Sichern und Einlesen. `mitarbeit` (Azubi)
-  hat ein Eingabefeld, **markiert** Tippfehler und öffnet einen gültigen Code. **Sechs** sichtbare
-  Bedienelemente bei der Lehrkraft, **drei** beim Azubi (Regel R12: höchstens sechs je Ansicht).
-- **Startseiten-Zeile über einen Bus-Haken** — `Bus.an("ansicht" | "zustand-geaendert" | "spiel-geladen")`;
-  `src/ui/hub.js` bleibt **unangetastet**.
-- **Ergebnis-Code als Toast** — gemeldet über den Bus-Kanal `klassenraum`, mit Kopierknopf, statt als
-  dauerhafte Zeile im Abschlussfenster (Entscheidung L5; `B § 7.2` verbietet die Zeile ausdrücklich).
-- **Keine Bewertung.** Entschieden vom Nutzer am 09.10.2026: *„Nein, Lehreraufträge sollen nicht bewertet
-  werden."* Keine Note, keine Punkte, keine Rangfolge, kein Vergleich zwischen Azubis; der Auftrag zählt
-  ausschließlich für den Lernstand des Einzelnen ([`Architektur.md`](Architektur.md) § 12.1).
-- **Kein Server, kein QR.** Stufe C (Live-Server) und Stufe D (QR) kommen nach **E6** später; 2.0 bleibt
-  ohne Netz und ohne Konto benutzbar.

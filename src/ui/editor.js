@@ -56,7 +56,7 @@ UI.labor = (() => {
     Z.el.geraete = leiste;
 
     /* Fläche */
-    Z.svg = sv("svg", {class: "lb-svg", tabindex: "0", role: "application", "aria-label": "Netz-Zeichenfläche. Pfeiltasten verschieben die Ansicht, F passt ein, Fragezeichen zeigt alle Tasten."});
+    Z.svg = sv("svg", {class: "lb-svg", tabindex: "0", role: "application", "aria-label": "Netz-Zeichenfläche. Links ziehen verschiebt die Ansicht, Shift+Ziehen wählt mehrere Geräte aus, Klick wählt ein Gerät, F passt ein, Fragezeichen zeigt alle Tasten."});
   /* POLARIS: Die Karten sind größer – ändert sich die Fläche (Begrüßung klappt zu, Dock öffnet),
      wird neu eingepasst, sonst läge ein Gerät außerhalb der Zeichenfläche (Rauchtest 720 px). */
   if (typeof ResizeObserver === "function") {
@@ -103,7 +103,8 @@ UI.labor = (() => {
     Z.el.verlaufGruppe = h("div", {class: "lb-gruppe", hidden: true}, Z.el.zurueck, Z.el.vor);   /* erst sichtbar, wenn es etwas rückgängig zu machen gibt */
     const oben = h("div", {class: "lb-leiste-oben"},
       h("div", {class: "lb-gruppe lb-werkzeuge", role: "toolbar", "aria-label": "Werkzeuge"},
-        wz("auswahl", "zeiger", "Auswählen und verschieben (V)", "V"), wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen", "K"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen", "P")),
+        wz("auswahl", "zeiger", "Auswählen (V): Klick wählt, Ziehen auf freier Fläche verschiebt die Ansicht, Shift+Ziehen zieht einen Auswahlrahmen", "V"),
+        wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen", "K"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen", "P")),
       Z.el.ansichtGruppe,
       h("div", {class: "lb-luecke"}),
       Z.el.verlaufGruppe);
@@ -245,37 +246,62 @@ UI.labor = (() => {
     pat?.setAttribute("patternTransform", `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${k.toFixed(4)})`);
     Z.raster?.classList.toggle("fein", k < 0.5);
     if (Z.el.zoomText) Z.el.zoomText.textContent = Math.round(k * 100) + " %";
-    /* Lesbarkeit mit dem Zoom (Vertrag Lagebild 2.0 § 3.4, Befund B1/B6): Statt bei jedem Zoom zu
-       schrumpfen, werden die Beschriftungen gegenskaliert (s = min(1,6; max(1; 1/k))). Die drei
-       Stufen am <svg> blenden danach nur, was nicht mehr in die Karte passt; sichtbar bleiben immer
-       der Name und die Zonen-Chips – deren Container wird NIE per CSS versteckt. */
-    Z.svg?.classList.toggle("wenig-text", k < 0.8);
-    Z.svg?.classList.toggle("klein", k < 0.7);
-    Z.svg?.classList.toggle("sehr-klein", k < 0.4);
+    /* Beschriftung (Nutzerentscheidung 30.10.2026): KEINE Zoom-Ausblendung für Knotentexte mehr.
+       Name und Adresse bleiben bei jedem Zoom gleich groß, die Rolle erscheint nur bei Platz.
+       Portnamen (.kabel-port) bleiben davon unberührt (eigene Regel in kabelEndenAktualisieren). */
     beschriftungenSkalieren();
     kabelEndenAktualisieren();
+    /* Zonen hängen an den Node-Boxen (Weltmaß = lokal * s) – bei Skalenwechsel neu zeichnen. */
+    if (Z.netz && Z.s.zonen && UI.ebenen.aktuell === "ip") {
+      const sk = blockSkala(k);
+      if (Z.zonenSkala !== sk) { Z.zonenSkala = sk; Z.s.zonen.replaceChildren(); UI.ebenen.zeichneZonen(Z.s.zonen, Z.netz, pos, {masse: zonenMasse, raum: raumWelt()}); }
+    }
     UI.werkstatt?.ansichtGeaendert?.();
   }
-  /* Gegenskalierung der Beschriftungen: s = min(1,6; max(1; 1/k)). Skaliert wird um den Textanker
-     (x0, yOff) bzw. um den Chip-Anker – so bleibt die linke obere Ecke stehen. Der Vertrag notiert die
-     Formel mit x=0; ohne den x0-Anteil wanderte die Textkante beim Zoomen waagerecht weg. */
-  /* Obergrenze 1,12 (Vorgabe der Leitung 30.10.2026): Bei 1,6 sprengte der Textblock die Karte
-     (gemessen: k=0,65 -> s=1,54 -> Unterkante +57 Welt statt +38). Mit 1,12 bleibt der Block bei
-     jeder Zoomstufe innerhalb des Rahmens; unter k=0,8 fällt die Rolle weg, unter 0,7 die Adresse. */
-  function skalaFuerZoom(pk){ return Math.min(1.12, Math.max(1, 1 / (pk || 1))); }
+  /* ---------- Knoten: Piktogramm + Label-Block als EIN skalierender Block ----------
+     Nutzerentscheidung 30.10.2026: Geräteposition = Zentrum des Piktogramms. Label-Block IMMER rechts
+     daneben (kein Spiegeln): Name 12,5 px (y=-8), Rolle 11 px (y=+4), Adresse 11 px (y=+17),
+     linksbündig, x = iconHalf + 8. Piktogramm 36/30/26 px. Beides wird GEMEINSAM mit
+     s = min(2,6; max(1; 1/k)) um den Gerätepunkt skaliert – die Schrift bleibt dadurch unter 100 %
+     Zoom konstant groß. Kollisionen: NODE-BOX [x-iconHalf-4, y-24] .. [x+iconHalf+8+110, y+24];
+     überlappen sich zwei Node-Boxen, fällt NUR die Rolle weg (Name+Adresse bleiben immer).
+     Portnamen haben Nachrang (kabelEndenAktualisieren). */
+  const LABEL_BREITE = 110;             /* reservierte Labelbreite im Knoten (Bildschirm-px bei s=1) */
+  function blockSkala(k){ return Math.min(2.6, Math.max(1, 1 / (k || 1))); }
+  function labelUeber(a, b){ return a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1; }
+  const LABEL_HALB = 58;                /* halbe Reservierungsbreite für die Beschriftung (px bei s=1) */
+  function nodeBoxWelt(g, p, k){
+    const s = blockSkala(k), h = ikonPx(g) / 2, halb = Math.max(h + 6, LABEL_HALB);
+    return {x1: p.x - halb * s, y1: p.y - (h + 4) * s, x2: p.x + halb * s, y2: p.y + (h + 48) * s};
+  }
+  function raumWelt(){
+    let breite = 900, hoehe = 600;
+    try { const r = Z.svg.getBoundingClientRect(); if (r && r.width) { breite = r.width; hoehe = r.height; } } catch (e) { void e; }
+    return {x1: -Z.view.tx / Z.view.k, y1: -Z.view.ty / Z.view.k, x2: (breite - Z.view.tx) / Z.view.k, y2: (hoehe - Z.view.ty) / Z.view.k};
+  }
   function beschriftungenSkalieren(){
     if (!Z.netz) return;
-    const s = skalaFuerZoom(Z.view.k), sTxt = s.toFixed(3);
-    for (const el of Z.gEl.values()) {
-      const t = el.querySelector ? el.querySelector(".ger-text") : null;
-      if (!t) continue;
-      const x0 = Number(t.getAttribute("data-x")) || 0, yOff = Number(t.getAttribute("data-y")) || 0;
-      t.setAttribute("transform", `translate(${x0.toFixed(1)} ${yOff.toFixed(1)}) scale(${sTxt}) translate(${(-x0).toFixed(1)} ${(-yOff).toFixed(1)})`);
+    const k = Z.view.k || 1, s = blockSkala(k), sTxt = s.toFixed(3);
+    const knoten = [];
+    for (const [id, el] of Z.gEl) {
+      const inhalt = el.querySelector ? el.querySelector("[data-inhalt]") : null;
+      if (!inhalt) continue;
+      inhalt.setAttribute("transform", "scale(" + sTxt + ")");
+      const g = Z.netz.geraete[id], p = pos(id);
+      if (!g || !p) continue;
+      knoten.push({id: id, el: el, g: g, box: nodeBoxWelt(g, p, k)});
     }
-    for (const el of Z.s.zonen.querySelectorAll(".zone-label")) {
-      const x = Number(el.getAttribute("data-x")) || 0, y = Number(el.getAttribute("data-y")) || 0;
-      el.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${sTxt})`);
+    for (const n of knoten) {
+      const rolle = n.el.querySelector ? n.el.querySelector(".ger-rolle") : null;
+      if (!rolle) continue;
+      let stoert = false;
+      for (const o of knoten) if (o.id !== n.id && labelUeber(n.box, o.box)) { stoert = true; break; }
+      rolle.setAttribute("visibility", stoert ? "hidden" : "visible");
     }
+    Z.nodeBoxen = knoten.map(n => n.box);
+    /* Portnamen haben NACHrang: erst nach dem Setzen der Node-Boxen neu prüfen, sonst lagen sie
+       (Befund im Bild 18:36) auf den Labels, weil die Kollisionsliste noch leer/alt war. */
+    if (typeof kabelEndenAktualisieren === "function") kabelEndenAktualisieren();
   }
   function weltPunkt(clientX, clientY){
     const r = Z.svg.getBoundingClientRect();
@@ -404,7 +430,7 @@ UI.labor = (() => {
       catch (e) { console.error("Modell.pruefen", e); }
       Z.ohne = UI.ebenen.zonen(netz).ohne;
       versatzBerechnen();
-      if (ebene === "ip") UI.ebenen.zeichneZonen(Z.s.zonen, netz, pos);
+      if (ebene === "ip") UI.ebenen.zeichneZonen(Z.s.zonen, netz, pos, {masse: zonenMasse, raum: raumWelt()});
       for (const k of netz.kabel) { const el = kabelGruppe(k); Z.kEl.set(k.id, el); Z.s.kabel.append(el); }
       for (const g of Object.values(netz.geraete)) { const el = geraetGruppe(g); Z.gEl.set(g.id, el); Z.s.geraete.append(el); }
       Z.karten = UI.ebenen.zeichneKarten(Z.s.karten, netz, pos, ebene);
@@ -412,12 +438,19 @@ UI.labor = (() => {
          Beschriftungen bekommen sofort die Gegenskalierung des aktuellen Zooms (§ 3.4). */
       kabelEndenBauen();
       beschriftungenSkalieren();
+      /* Zonen erneut zeichnen: erst jetzt sind Piktogramm+Label-Boxen bekannt (Hülle, Chips).
+         Vorher leeren, sonst stünden zwei Zonenlagen übereinander. */
+      if (ebene === "ip") { Z.s.zonen.replaceChildren(); UI.ebenen.zeichneZonen(Z.s.zonen, netz, pos, {masse: zonenMasse, raum: raumWelt()}); }
       Z.gemaltKw = kartenMasse().kw;         /* für den Größenwechsel beim Fenster-Resize */
       Z.el.leer.hidden = Object.keys(netz.geraete).length > 0;
       if (Z.hover && !netz.geraete[Z.hover]) Z.hover = null;
       if (Z.kabelHover && !netz.kabel.some(k => k.id === Z.kabelHover)) Z.kabelHover = null;
       if (Z.geraeteHover && !netz.geraete[Z.geraeteHover]) Z.geraeteHover = null;
       F.hoverZeichnen?.();
+      /* Reihenfolge: erst Node-Boxen (Beschriftung), dann Portnamen – sonst liegen Portnamen auf Labels. */
+      beschriftungenSkalieren();
+      kabelEndenAktualisieren();
+      F.cursorSetzen?.();          /* neue Geräte bekommen den richtigen Cursor (pointer/grabbing) */
       knoepfeAktualisieren();
       if (Z.zeichenFehlerAktiv && Z.el.hinweis) { Z.el.hinweis.textContent = ""; Z.zeichenFehlerAktiv = false; }
     } catch (e) {
@@ -461,8 +494,13 @@ UI.labor = (() => {
       Z.versatz.set(k.id, (i - (liste.length - 1) / 2) * 12 * richtung);
     });
   }
-  /* Kartenmaße des Knotens (Vertrag § 3.1, Geometrie der Leitung vom 30.10.2026): 160x76 auf breiten,
-     118x64 auf schmalen Fenstern. Dieselben Maße braucht der Kanten-Anker – deshalb EINE Funktion. */
+  /* Knoten-Groessen (Nutzerentscheidung 30.10.2026, Piktogramm-Stil): Die Geräte sind reine
+     Strichzeichnungen ohne Karte, in KONSTANTER Bildschirmgröße. kartenMasse bleibt als grobes
+     Layout-Maß für Chips/Minimap; die echten Anker liefert ikonHalbWelt(). */
+  const IKON_PX = {internet: 40, router: 40, firewall: 40, switch: 40, server: 32, nas: 32, pc: 28};
+  function ikonPx(g){ return IKON_PX[g && g.typ] || 26; }
+  /* Welt-Halbkante: der Block skaliert mit s = blockSkala(k) um den Gerätepunkt. */
+  function ikonHalbWelt(g, k){ return ikonPx(g) / 2 * blockSkala(k); }
   function kartenMasse(){
     const breit = !(typeof innerWidth === "number" && innerWidth < 900);
     return breit ? {kw: 160, kh: 76} : {kw: 118, kh: 64};
@@ -486,42 +524,112 @@ UI.labor = (() => {
     /* Mehrfachkabel: der Versatz verschiebt den STRAHL, nicht den Gerätepunkt – die Enden bleiben auf
        dem Rahmen des eigenen Geräts (vorher ein Punkt 12 px neben der Mitte, oft unter der Karte). */
     const a2 = {x: A.x + nx * off, y: A.y + ny * off}, b2 = {x: B.x + nx * off, y: B.y + ny * off};
-    const m = kartenMasse();
-    const ea = randPunkt(a2, b2, m) || {x: A.x, y: A.y, seite: "h"};
-    const eb = randPunkt(b2, a2, m) || {x: B.x, y: B.y, seite: "h"};
+    /* Anker liegen auf dem Piktogramm-Rand (Kabel enden am Symbol, nicht mehr an einer unsichtbaren Karte). */
+    const ga = Z.netz?.geraete?.[k.a.geraet], gb = Z.netz?.geraete?.[k.b.geraet];
+    const ha = ikonHalbWelt(ga || {typ: "pc"}, Z.view.k), hb = ikonHalbWelt(gb || {typ: "pc"}, Z.view.k);
+    const ea = randPunkt(a2, b2, {kw: 2 * ha, kh: 2 * ha}) || {x: A.x, y: A.y, seite: "h"};
+    const eb = randPunkt(b2, a2, {kw: 2 * hb, kh: 2 * hb}) || {x: B.x, y: B.y, seite: "h"};
     return {ax: ea.x, ay: ea.y, bx: eb.x, by: eb.y, seiteA: ea.seite, seiteB: eb.seite, ux, uy, nx, ny, len};
   }
-  /* Polylinie mit 6-px-Rundungen: gerade Strecken bleiben gerade, Ecken laufen als kurze Quadratik um
-     (Vertrag § 3.2). Der Radius wird auf die halbe Segmentlänge begrenzt, damit kurze Stücke nicht
-     überschwingen. Doppelte Punkte fliegen raus – sonst entstünde ein Naht-Knick. */
-  function pfadMitRundung(punkte, r = 6){
-    const p = [];
-    for (const q of punkte) { const l = p[p.length - 1]; if (!l || Math.abs(q[0] - l[0]) > 0.01 || Math.abs(q[1] - l[1]) > 0.01) p.push(q); }
-    if (p.length < 2) return "";
-    let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
-    for (let i = 1; i < p.length - 1; i++) {
-      const a = p[i - 1], b = p[i], c = p[i + 1];
-      const l1 = Math.hypot(b[0] - a[0], b[1] - a[1]), l2 = Math.hypot(c[0] - b[0], c[1] - b[1]);
-      const gerade = Math.abs((b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0])) < 0.01;
-      if (gerade || !l1 || !l2) { d += ` L${b[0].toFixed(1)} ${b[1].toFixed(1)}`; continue; }
-      const rr = Math.min(r, l1 / 2, l2 / 2);
-      const s1x = (b[0] - a[0]) / l1, s1y = (b[1] - a[1]) / l1, s2x = (c[0] - b[0]) / l2, s2y = (c[1] - b[1]) / l2;
-      d += ` L${(b[0] - s1x * rr).toFixed(1)} ${(b[1] - s1y * rr).toFixed(1)} Q${b[0].toFixed(1)} ${b[1].toFixed(1)} ${(b[0] + s2x * rr).toFixed(1)} ${(b[1] + s2y * rr).toFixed(1)}`;
+  /* ---------- Kabel: direkte Gerade, bei Bedarf EIN weicher Knick (Nutzerentscheidung 30.10.2026) ----------
+     „Kein Durchhang, einfach natuerlich": Standard ist die direkte Gerade von Port zu Port (Ray-Box-
+     Anker, Port-LED). Nur wenn diese Gerade eine FREMDE Karte schneidet, bekommt sie EINEN Knick
+     (diagonal erlaubt) mit weichem Radius 10-14. Kein Catmull-Rom-S, keine 90-Grad-Pflicht. Die
+     Route wird bei jeder Bewegung neu gerechnet; kabelPunkt() liefert dieselbe Route fuer die
+     Paket-/Ping-Animation. */
+  const ELBOW_RADIUS = 12, ELBOW_ABSTAND = 56;
+  function streckeSchneidetKarte(ax, ay, bx, by, q){
+    const dx = bx - ax, dy = by - ay;
+    const p = [-dx, dx, -dy, dy];
+    const ab = [ax - q.x1, q.x2 - ax, ay - q.y1, q.y2 - ay];
+    let t0 = 0, t1 = 1;
+    for (let i = 0; i < 4; i++) {
+      if (Math.abs(p[i]) < 1e-9) { if (ab[i] < 0) return false; continue; }
+      const t = ab[i] / p[i];
+      if (p[i] < 0) { if (t > t1) return false; if (t > t0) t0 = t; }
+      else { if (t < t0) return false; if (t < t1) t1 = t; }
     }
-    const e = p[p.length - 1];
-    return d + ` L${e[0].toFixed(1)} ${e[1].toFixed(1)}`;
+    return true;
   }
-  function kabelPfad(geo){
-    const {ax, ay, bx, by, seiteA, seiteB} = geo;
-    const waagerecht = Math.abs(ay - by) < 0.6, senkrecht = Math.abs(ax - bx) < 0.6;
-    let punkte;
-    if (waagerecht && seiteA === "h" && seiteB === "h") punkte = [[ax, ay], [bx, by]];
-    else if (senkrecht && seiteA === "v" && seiteB === "v") punkte = [[ax, ay], [bx, by]];
-    else if (seiteA === "h" && seiteB === "h") { const mx = (ax + bx) / 2; punkte = [[ax, ay], [mx, ay], [mx, by], [bx, by]]; }
-    else if (seiteA === "v" && seiteB === "v") { const my = (ay + by) / 2; punkte = [[ax, ay], [ax, my], [bx, my], [bx, by]]; }
-    else if (seiteA === "h") punkte = [[ax, ay], [bx, ay], [bx, by]];
-    else punkte = [[ax, ay], [ax, by], [bx, by]];
-    return pfadMitRundung(punkte);
+  function kabelBlockiert(ax, ay, bx, by, k){
+    if (!Z.netz) return false;
+    for (const g of Object.values(Z.netz.geraete)) {
+      if (g.id === k.a.geraet || g.id === k.b.geraet) continue;
+      const p = pos(g.id); if (!p) continue;
+      const h = ikonHalbWelt(g, Z.view.k) + 6;
+      const q = {x1: p.x - h, y1: p.y - h, x2: p.x + h, y2: p.y + h};
+      if (streckeSchneidetKarte(ax, ay, bx, by, q)) return true;
+    }
+    return false;
+  }
+  /* Route: {art:"gerade"} oder {art:"elbow", p:{x,y}, c1:{x,y}, c2:{x,y}}. */
+  function kabelRoute(geo, k){
+    const {ax, ay, bx, by} = geo;
+    if (!k || !kabelBlockiert(ax, ay, bx, by, k)) return {art: "gerade"};
+    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
+    let wahl = null, wahlTreffer = 99;
+    for (const abst of [ELBOW_ABSTAND, ELBOW_ABSTAND + 40, ELBOW_ABSTAND + 90]) {
+      for (const seite of [1, -1]) {
+        const p = {x: (ax + bx) / 2 + nx * abst * seite, y: (ay + by) / 2 + ny * abst * seite};
+        let treffer = 0;
+        if (!Z.netz) treffer = 9;
+        else {
+          for (const g of Object.values(Z.netz.geraete)) {
+            if (g.id === k.a.geraet || g.id === k.b.geraet) continue;
+            const q = pos(g.id); if (!q) continue;
+            const h = ikonHalbWelt(g, Z.view.k) + 6;
+            const rect = {x1: q.x - h, y1: q.y - h, x2: q.x + h, y2: q.y + h};
+            if (streckeSchneidetKarte(ax, ay, p.x, p.y, rect)) treffer++;
+            if (streckeSchneidetKarte(p.x, p.y, bx, by, rect)) treffer++;
+          }
+        }
+        if (treffer < wahlTreffer) { wahlTreffer = treffer; wahl = p; if (!treffer) break; }
+      }
+      if (wahlTreffer === 0) break;
+    }
+    if (!wahl) return {art: "gerade"};
+    const l1 = Math.hypot(wahl.x - ax, wahl.y - ay) || 1, l2 = Math.hypot(bx - wahl.x, by - wahl.y) || 1;
+    const r = Math.min(ELBOW_RADIUS, l1 / 2, l2 / 2);
+    return {art: "elbow", p: wahl,
+      c1: {x: wahl.x - (wahl.x - ax) / l1 * r, y: wahl.y - (wahl.y - ay) / l1 * r},
+      c2: {x: wahl.x + (bx - wahl.x) / l2 * r, y: wahl.y + (by - wahl.y) / l2 * r}};
+  }
+  function kabelPfad(geo, k){
+    const route = kabelRoute(geo, k);
+    if (route.art === "gerade") return `M${geo.ax.toFixed(1)} ${geo.ay.toFixed(1)} L${geo.bx.toFixed(1)} ${geo.by.toFixed(1)}`;
+    return `M${geo.ax.toFixed(1)} ${geo.ay.toFixed(1)} L${route.c1.x.toFixed(1)} ${route.c1.y.toFixed(1)} ` +
+      `Q${route.p.x.toFixed(1)} ${route.p.y.toFixed(1)} ${route.c2.x.toFixed(1)} ${route.c2.y.toFixed(1)} ` +
+      `L${geo.bx.toFixed(1)} ${geo.by.toFixed(1)}`;
+  }
+  /* Punkt auf der Kabelroute (0 = A-Ende, 1 = B-Ende) – exakt auf dem gezeichneten Pfad. */
+  function kabelPunkt(kabel, t){
+    const geo = kabelGeo(kabel); if (!geo) return null;
+    const route = kabelRoute(geo, kabel);
+    const u = Math.max(0, Math.min(1, Number(t) || 0));
+    if (route.art === "gerade") return {x: geo.ax + (geo.bx - geo.ax) * u, y: geo.ay + (geo.by - geo.ay) * u};
+    /* Elbow: Laengen der drei Stuecke (Quadratik angenaehert), dann nach Bogenlaenge laufen. */
+    const a = {x: geo.ax, y: geo.ay}, b = {x: geo.bx, y: geo.by}, p = route.p, c1 = route.c1, c2 = route.c2;
+    const stuecke = [];
+    const linie = (q, r) => ({art: "linie", q, r, laenge: Math.hypot(r.x - q.x, r.y - q.y)});
+    const quadratikPunkte = [];
+    for (let i = 0; i <= 16; i++) {
+      const s = i / 16, v = 1 - s;
+      quadratikPunkte.push({x: v * v * c1.x + 2 * v * s * p.x + s * s * c2.x, y: v * v * c1.y + 2 * v * s * p.y + s * s * c2.y});
+    }
+    let quadLaenge = 0;
+    for (let i = 1; i < quadratikPunkte.length; i++) quadLaenge += Math.hypot(quadratikPunkte[i].x - quadratikPunkte[i - 1].x, quadratikPunkte[i].y - quadratikPunkte[i - 1].y);
+    stuecke.push(linie(a, c1), {art: "quad", punkte: quadratikPunkte, laenge: quadLaenge}, linie(c2, b));
+    const gesamt = stuecke.reduce((s, st) => s + st.laenge, 0) || 1;
+    let rest = u * gesamt;
+    for (const st of stuecke) {
+      if (rest > st.laenge) { rest -= st.laenge; continue; }
+      const q = st.laenge ? rest / st.laenge : 0;
+      if (st.art === "linie") return {x: st.q.x + (st.r.x - st.q.x) * q, y: st.q.y + (st.r.y - st.q.y) * q};
+      const pos = q * (st.punkte.length - 1), i = Math.min(st.punkte.length - 2, Math.floor(pos)), f = pos - i;
+      return {x: st.punkte[i].x + (st.punkte[i + 1].x - st.punkte[i].x) * f, y: st.punkte[i].y + (st.punkte[i + 1].y - st.punkte[i].y) * f};
+    }
+    return b;
   }
   /* Statusglyphen (.ps) und Steckerplastik (.kabel-stecker) sind entfallen: Die Port-LED übernimmt den
      Status als Farbe (Vertrag § 3.2), das Kabel endet exakt auf dem Kartenrahmen statt im Freiraum
@@ -567,7 +675,7 @@ UI.labor = (() => {
     const grund = (sa.status !== "oben" ? sa : sb).grund;
     const titel = `${na} ${k.a.port} ↔ ${nb} ${k.b.port}\n${klasse === "oben" ? "Link oben" : (klasse === "aus" ? "Port abgeschaltet" : "Link unten") + (grund ? ": " + grundText(grund) : "")}` +
       (trunk ? `\nTrunk (802.1Q), erlaubt: ${UI.ebenen.erlaubtText((va?.art === "trunk" ? va : vb).erlaubt)}` : "");
-    const d = kabelPfad(geo);
+    const d = kabelPfad(geo, k);
     if (!d) return g;
     /* Die Trefferlinie folgt dem sichtbaren Pfad – vorher lag sie Mitte→Mitte unter den Karten. */
     g.append(sv("path", {class: "kabel-treffer", d, fill: "none"}, sv("title", {text: titel + "\nKlicken zum Auswählen, Entf trennt."})));
@@ -653,11 +761,8 @@ UI.labor = (() => {
   function kabelEndenAktualisieren(){
     if (!Z.el.kabelEnden || !Z.netz) return;
     const k = Z.view.k || 1, grundSichtbar = k >= 0.9;
-    const m = kartenMasse(), karten = [];
-    for (const g of Object.values(Z.netz.geraete)) {
-      const p = pos(g.id); if (!p) continue;
-      karten.push({x1: p.x - m.kw / 2 - 4, y1: p.y - m.kh / 2 - 4, x2: p.x + m.kw / 2 + 4, y2: p.y + m.kh / 2 + 4});
-    }
+    /* Knoten-Boxen (Piktogramm + Label) haben Vorrang: Portnamen weichen ihnen aus. */
+    const karten = (Z.nodeBoxen || []).slice();
     const namen = [];
     const ueber = (a, b) => a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1;
     for (const e of Z.ende) {
@@ -703,71 +808,44 @@ UI.labor = (() => {
        eine Adresse" (Befund B7), kein Fehlerbild der IP-Ebene. */
     if (Z.ohne.has(g.id)) klassen.push("ohne-ip");
     const el = sv("g", {class: klassen.join(" "), "data-id": g.id, transform: `translate(${p.x} ${p.y})`});
+    /* Grundzeiger ueber einem Geraet: pointer (Vorgabe Nutzer 30.10.2026). editor-werkzeuge.js
+       ueberschreibt ihn bei Shift/Marquee/Ziehen; die CSS-Haelfte kann es spaeter uebernehmen. */
+    el.style.cursor = "pointer";
     const art = UI.geraeteArt(g.typ, g.skin);
-    /* Knotenmaße nach Vertrag § 3.1: 140x76 (breit) / 110x64 (schmal). Die Karte ist nur noch
-       Haarlinien-Rahmen; die Typfarbe steckt in der kleinen Platte links. */
-    const {kw: KW, kh: KH} = kartenMasse();
-    const radius = KW >= 120 ? 12 : 10;
-    el.append(sv("rect", {class: "ger-treffer", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: radius}));
-    el.append(sv("rect", {class: "ger-auswahl", x: -KW / 2 - 6, y: -KH / 2 - 6, width: KW + 12, height: KH + 12, rx: radius + 2}));
-    el.append(sv("rect", {class: "ger-karte", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: radius}));
-    /* Icon-Platte 28x28 links: UI.geraetebild zeichnet 52x52, 0,538 ergibt 28. Keine neue Platten-Klasse –
-       die vorhandene .gb-kachel wird nur skaliert und von der CSS-Hälfte gestylt. */
-    el.append(sv("g", {class: "ger-bild", transform: "translate(" + (-KW / 2 + 24) + " 0) scale(.538)"}, UI.geraetebild(g.typ, g.skin)));
+    /* Piktogramm + Label-Block als EIN Block (Nutzerentscheidung 30.10.2026): keine Karte, kein
+       Kasten; Position = Zentrum des Piktogramms; Block um den Nullpunkt skaliert (beschriftungenSkalieren). */
+    const ikonH = ikonPx(g) / 2;
+    /* Beschriftung UNTER dem Piktogramm, zentriert (Nutzerentscheidung 30.10.2026: keine Kästen,
+       klare Leserichtung). Breite = LABEL_HALB*2, damit „R-SALON"/„PC-BEHANDLUNG" sicher passen. */
+    const boxL = -Math.max(ikonH + 6, LABEL_HALB), boxR = Math.max(ikonH + 6, LABEL_HALB);
+    const boxO = -ikonH - 4, boxU = ikonH + 48, radius = 12;
+    const inhalt = sv("g", {});
+    inhalt.setAttribute("data-inhalt", "1");
+    inhalt.append(sv("rect", {class: "ger-treffer", x: boxL, y: boxO, width: boxR - boxL, height: boxU - boxO, rx: radius}));
+    inhalt.append(sv("rect", {class: "ger-auswahl", x: boxL - 6, y: boxO - 6, width: boxR - boxL + 12, height: boxU - boxO + 12, rx: radius + 2}));
+    inhalt.append(sv("rect", {class: "ger-karte", x: boxL, y: boxO, width: boxR - boxL, height: boxU - boxO, rx: radius}));
+    inhalt.append(sv("g", {class: "ger-bild"}, UI.geraetebild(g.typ, g.skin, {px: ikonPx(g)})));
     const a = UI.ebenen.adresse(netz, g);
-    /* Beschriftung als eigener Block: wird mit dem Zoom gegenskaliert (§ 3.4). Die Breiten werden VOR
-       dem Setzen deterministisch aus der Zeichenzahl geschätzt (Faktor unten, im Browser gemessen), damit
-       nie Text über den Rahmen läuft (Befund B6); nur sehr lange Texte enden mit „…".
-       Textfläche: x0 bis KW/2 - 8 = 104 px (breit) bzw. 62 px (schmal). Gemessen in Edge mit der
-       Mono-Ersatzschrift (Consolas): 11 px = 6,05 px/Zeichen; Name 12,5 px + Sperrsatz .04em = 7,37 px
-       (gerechnet wird mit 7,7 als Sicherheitszuschlag, damit nichts über den Rahmen läuft). */
-    const x0 = -KW / 2 + 48, yOff = -KH / 2 + 14;
-    const maxB = KW / 2 - 8 - x0;                       /* 104 px breit, 62 px schmal */
-    /* Schmal (KW<140) rechnet die Leitung mit 6,05 px/Zeichen fuer den Namen (Vorgabe 30.10.2026):
-       dann passen "PC-Empfang" (10) und knapp "Gast-Laptop" eher in die 62-px-Textflaeche. Auf breiten
-       Karten bleibt 7,7 (12,5 px + Sperrsatz) als Sicherheitszuschlag. */
-    /* Schmal (KW<140): 7,7 statt 6,05 (Vorgabe der Leitung war 6,05). GEMESSEN: 12,5-px-Monospace
-       ist real 7,37 px/Zeichen; mit 6,05 blieben "PC-Empfang"/"Gast-Laptop" ungekuerzt und liefen bei
-       k=0,73 durch die Gegenskalierung (s=1,12) 9,2 Bildschirm-px ueber den Kartenrahmen. Mit 7,7
-       bleiben sie gekuerzt, aber im Rahmen (gemessen 0 Ueberlauf). */
-    const ZEICHEN_11 = 6.05, ZEICHEN_NAME = KW < 140 ? 7.7 : 7.7;
-    const kuerze = (text, faktor, max) => {
-      const t = String(text == null ? "" : text);
-      if (!t || t.length * faktor <= max) return t;
-      const platz = Math.max(1, Math.floor(max / faktor) - 1);
-      return t.slice(0, platz) + "…";
-    };
+    /* Label-Block mittig unter dem Piktogramm: Name (12,5), Rolle (11), Adresse (11). */
+    const x0 = 0, yName = ikonH + 18, yRolle = ikonH + 31, yIP = ikonH + 44;
     const t = sv("g", {class: "ger-text"});
-    t.setAttribute("data-x", x0.toFixed(1));
-    t.setAttribute("data-y", yOff.toFixed(1));
-    t.append(sv("text", {class: "ger-name", x: x0, y: -10, "text-anchor": "start", text: kuerze(g.name, ZEICHEN_NAME, maxB)}));
-    /* Die Rolle erklärt den Zustand und ist NIE leer (Befund B7: „Switch ohne IP" zeigte nichts). Bei
-       Überlauf erst der Zusatz ohne Typ („VLAN 10,20,30" statt „Switch · VLAN 10,20,30"), dann „…". */
-    let rolle = rollenText(netz, g, art);
-    if (rolle.length * ZEICHEN_11 > maxB) {
-      const zusatz = rolle.includes(" · ") ? rolle.slice(rolle.indexOf(" · ") + 3) : rolle;
-      rolle = zusatz.length * ZEICHEN_11 <= maxB ? zusatz : kuerze(rolle, ZEICHEN_11, maxB);
-    }
-    t.append(sv("text", {class: "ger-rolle", x: x0, y: 4, "text-anchor": "start", text: rolle}));
-    /* Auf der Fläche steht NUR die erste gültige Adresse (Kurzform „+N" als eigener gedämpfter Zusatz);
+    t.append(sv("text", {class: "ger-name", x: x0, y: yName, "text-anchor": "middle", text: g.name}));
+    /* Die Rolle erklärt den Zustand und ist NIE leer (Befund B7); sie weicht, wenn Node-Boxen kollidieren. */
+    t.append(sv("text", {class: "ger-rolle", x: x0, y: yRolle, "text-anchor": "middle", text: rollenText(netz, g, art)}));
+    /* Auf der Fläche steht NUR die erste gültige Adresse („+N" als gedämpfter Zusatz in derselben Zeile);
        alle Adressen mit Schnittstelle stehen im Tooltip. Ohne Adresse gibt es KEIN .ger-ip-Element –
        die Rolle sagt stattdessen „keine Adresse" / „kein Link" / „DHCP – keine Adresse" (Befund B6/B7). */
     const alleAdr = UI.ebenen.alleAdressen(netz, g) || [];
     let ipText = a.ip ? String(a.ip) : "";
     if (ipText && IP.maskeGueltig(a.maske)) ipText += "/" + IP.praefix(a.maske);
-    /* „+N" bekommt eine eigene Ecke oben rechts, damit das Präfix am Knoten bleiben kann (Lehrinhalt). */
     const mehr = alleAdr.length > 1 ? "+" + (alleAdr.length - 1) : "";
     if (ipText) {
-      const adr = sv("text", {class: "ger-ip" + (a.gueltig ? "" : " schwach"), x: x0, y: 18, "text-anchor": "start"}, kuerze(ipText, ZEICHEN_11, maxB));
+      const adr = sv("text", {class: "ger-ip" + (a.gueltig ? "" : " schwach"), x: x0, y: yIP, "text-anchor": "middle"}, ipText);
+      if (mehr) adr.append(sv("tspan", {class: "ger-mehr", text: " " + mehr}));
       /* Adresse anklicken = in die Zwischenablage (Wunsch 05.10.2026: „für easy von hand routing").
          Kopiert wird NUR die Adresse ohne Präfix und ohne „+2" – genau das, was man in eine Route tippt.
-
-         WICHTIG (gemessen 05.10.2026, tools/zeiger-probe.py): Der Klick darf NICHT am „click" hängen.
-         Die Fläche ruft beim pointerdown setPointerCapture, danach gehen pointerup, mouseup UND click ans
-         SVG – der Text bekommt nur das pointerdown. Ereignisreihenfolge mit echter Maus:
-             pointerdown@ger-ip  → pointerup@lb-svg → mouseup@lb-svg → click@lb-svg
-         Deshalb hängt das Kopieren am pointerdown; stopPropagation verhindert zugleich, dass die Fläche
-         das Gerät auswählt und den Inspektor öffnet. */
+         WICHTIG (gemessen 05.10.2026): Der Klick hängt am pointerdown, nicht am click – die Fläche ruft
+         beim pointerdown setPointerCapture, danach gehen pointerup/mouseup/click ans SVG. */
       const blank = String(a.text).split(" ")[0].split("/")[0];
       if (IP.gueltig(blank)) {
         adr.setAttribute("class", adr.getAttribute("class") + " kopierbar");
@@ -785,10 +863,8 @@ UI.labor = (() => {
       }
       t.append(adr);
     }
-    /* Eigene Ecke oben rechts; mit den neuen Zeilen (Name y=-10) vier Pixel hoeher als zuerst
-       geplant, sonst ueberlappt der Zusatz den Namen. */
-    if (mehr) t.append(sv("text", {class: "ger-mehr", x: KW / 2 - 16, y: -KH / 2 + 16, "text-anchor": "end", text: mehr}));
-    el.append(t);
+    inhalt.append(t);
+    el.append(inhalt);
     /* Alle Adressen in den Tooltip: Auf der Fläche steht nur die erste (sonst wird es unleserlich) – hier muss
        vollständig stehen, welche Adresse zu welcher Schnittstelle gehört. Sonst findet der Spieler die Adressen
        der übrigen Subnetze nirgends (Befund 05.10.2026: Router zeigte nur „192.168.10.1/24 +2“). */
@@ -799,26 +875,32 @@ UI.labor = (() => {
     el.append(sv("title", {text: [g.name + " – " + art.titel + (g.an ? "" : " (ausgeschaltet)"),
       alle.length ? (alle.length > 1 ? alle.map(z => "  " + z).join("\n") : "  " + alle[0]) : (a.text ? "  " + a.text : ""),
       "Ziehen = verschieben · Doppelklick = Inspektor · Rechtsklick = Menü"].filter(Boolean).join("\n")}));
+    /* Badges am Piktogramm (Piktogramm-Stil): eigener Block [data-badges], der wie die Labels gegen
+       den Zoom skaliert wird – die Positionen sind Bildschirm-Pixel rund um das Symbol. */
     const w = warnungenAn() ? Z.warn.get(g.id) : null;
+    const hb = ikonPx(g) / 2, bo = 12;
+    const badges = sv("g", {});
+    badges.setAttribute("data-badges", "1");
     if (w && w.length) {
-      const b = sv("g", {class: "badge badge-warn", transform: "translate(46 -32)"});
+      const b = sv("g", {class: "badge badge-warn", transform: "translate(" + (hb + bo) + " " + (-hb - bo) + ")"});
       b.append(sv("circle", {r: 9.5}), sv("path", {d: "M0 -4.5v5M0 3.6v.1"}), sv("title", {text: "Prüfung meldet:\n• " + w.join("\n• ")}));
-      el.append(b);
+      badges.append(b);
     }
     if (Modell.ungespeichert(g)) {
-      const b = sv("g", {class: "badge badge-ungespeichert", transform: "translate(-46 -32)"});
+      const b = sv("g", {class: "badge badge-ungespeichert", transform: "translate(" + (-hb - bo) + " " + (-hb - bo) + ")"});
       b.append(sv("circle", {r: 5.5}), sv("title", {text: "Ungespeichert: running-config ≠ startup-config.\nNach einem Neustart wäre die Änderung weg (copy running-config startup-config)."}));
-      el.append(b);
+      badges.append(b);
     }
     if (!g.an) {
-      const b = sv("g", {class: "badge badge-aus", transform: "translate(0 -52)"});
+      const b = sv("g", {class: "badge badge-aus", transform: "translate(0 " + (-hb - 22) + ")"});
       b.append(sv("rect", {x: -16, y: -9, width: 32, height: 18, rx: 9}), sv("text", {x: 0, y: 4, "text-anchor": "middle", text: "aus"}));
-      el.append(b);
+      badges.append(b);
     }
+    if (badges.childNodes.length) inhalt.append(badges);
     /* Hover am Gerät zeigt seine Portnamen auch unter 90 % Zoom (Vertrag § 3.2). */
     if (typeof el.addEventListener === "function") {
-      el.addEventListener("pointerenter", () => { Z.geraeteHover = g.id; kabelEndenAktualisieren(); });
-      el.addEventListener("pointerleave", () => { if (Z.geraeteHover === g.id) Z.geraeteHover = null; kabelEndenAktualisieren(); });
+      el.addEventListener("pointerenter", () => { Z.geraeteHover = g.id; kabelEndenAktualisieren(); beschriftungenSkalieren(); });
+      el.addEventListener("pointerleave", () => { if (Z.geraeteHover === g.id) Z.geraeteHover = null; kabelEndenAktualisieren(); beschriftungenSkalieren(); });
     }
     return el;
   }
@@ -833,13 +915,23 @@ UI.labor = (() => {
     }
     if (Z.karten.size) UI.ebenen.platzieren(Z.karten, pos, id);
     kabelEndenBauen();                 /* LED/Portnamen sitzen auf dem Rahmen und wandern mit */
+    beschriftungenSkalieren();         /* Kollisions-/Hover-Regel folgt der Bewegung */
     F.hoverZeichnen?.(true);
+  }
+  /* Fussabdruck eines Geräts (Welt, relativ zur Mitte) für die Zonen-Hülle: das Piktogramm selbst.
+     Die Labels bleiben ausserhalb der Hülle – so bleiben die Zonen klein und überschneiden sich nicht. */
+  function zonenMasse(id){
+    const g = Z.netz && Z.netz.geraete[id], p = pos(id);
+    if (!g || !p) return {x1: -12, y1: -24, x2: 120, y2: 24};
+    /* Zonen sind stabile Weltflächen: Node-Box bei s=1 (nicht mit dem Zoom wachsend). */
+    const b = nodeBoxWelt(g, p, 1);
+    return {x1: b.x1 - p.x, y1: b.y1 - p.y, x2: b.x2 - p.x, y2: b.y2 - p.y};
   }
   let zonenGeplant = false;
   function zonenNeu(){
     if (UI.ebenen.aktuell !== "ip" || zonenGeplant) return;
     zonenGeplant = true;
-    requestAnimationFrame(() => { zonenGeplant = false; Z.s.zonen.replaceChildren(); UI.ebenen.zeichneZonen(Z.s.zonen, Z.netz, pos); beschriftungenSkalieren(); });
+    requestAnimationFrame(() => { zonenGeplant = false; Z.s.zonen.replaceChildren(); UI.ebenen.zeichneZonen(Z.s.zonen, Z.netz, pos, {masse: zonenMasse, raum: raumWelt()}); beschriftungenSkalieren(); });
   }
 
   /* ---------- Auswahl, Inspektor ----------
@@ -866,6 +958,7 @@ UI.labor = (() => {
     }
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
     kabelEndenAktualisieren();          /* gewählte Geräte zeigen ihre Portnamen auch unter 90 % Zoom */
+    beschriftungenSkalieren();          /* Auswahl hebt Labels hervor (Klasse „vorn") */
     const geaendert = vorher !== [...Z.auswahlSet].sort().join("|");
     if (!geaendert) return gueltig;
     Bus.senden("auswahl", {geraet: primaer || null, port: Z.auswahl?.port || null, geraete: gueltig.slice(), mehr: gueltig.length});
@@ -1327,7 +1420,7 @@ UI.labor = (() => {
   }
 
   Object.assign(F, {pos, raster, weltPunkt, zoomUm, ansichtSetzen, ansichtAnimieren, einpassen, sichtbarMachen, zeichnen, neuZeichnen,
-    geraetBewegt, zonenNeu, kabelGeo, kabelGruppe, auswaehlen, kabelWaehlen, inspektorZeigen, inspektorUmschalten, simUmschalten, simHoeheSetzen,
+    geraetBewegt, zonenNeu, kabelGeo, kabelGruppe, kabelPunkt, auswaehlen, kabelWaehlen, inspektorZeigen, inspektorUmschalten, simUmschalten, simHoeheSetzen,
     aendern, rueckgaengig, wiederholen, werkzeug, werkzeugAnzeigen, platzEnde, geraetAnlegen, einsetzen, loeschen, kabelTrennen, verbinden, aufraeumen, konsole,
     grundText, layoutAnwenden, STATUS_TEXT, zoomSchritt, dockZeigen, dockZu, dockOffen, dockReiter,
     auswahlSetzen, auswahlUmschalten, auswahlAlle, auswahlImRechteck, geraeteImRechteck, auswahlVorschau,

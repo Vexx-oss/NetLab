@@ -320,7 +320,7 @@ Spiel.INJEKTOREN = (() => {
     anwenden(n){ Modell.setzen(n, "fw", "regeln", fwRegeln(n).filter(r => r.id !== "r3")); },
     loesung: (n, k) => [{geraet: "fw", setzen: {regeln: k.regeln}, text: "Firewall: Regel außen → DMZ, TCP 443 zum Webshop wieder anlegen."}],
     hilfen: () => ({frage: ["Die Weiterleitung stimmt. Welche Regel erlaubt Verkehr von außen in die DMZ?"],
-      bereich: [{geraet: "fw"}], konkret: ["Es fehlt „aussen → dmz, tcp/443, Ziel Webshop, erlauben“."]}),
+      bereich: [{geraet: "fw"}], konkret: ["Es fehlt „außen → dmz, tcp/443, Ziel Webshop, erlauben“."]}),
     erklaerung: "Die DMZ ist eine eigene Zone zwischen Internet und LAN: Von außen darf nur genau das hinein, was die Dienste dort brauchen (hier HTTPS), und aus der DMZ darf nichts ins LAN. So bleibt das interne Netz geschützt, selbst wenn der Webserver angegriffen wird."});
 
   /* ---------- DHCP-Tiefe (D1, Architektur § 10) ---------- */
@@ -722,9 +722,9 @@ Spiel.INJEKTOREN = (() => {
     passt: n => { const f = n.geraete.fw && n.geraete.fw.running.if && n.geraete.fw.running.if["Gi0/1"]; return (f && f.zone) ? [{key: "fw", geraet: "fw", port: "Gi0/1", zone: f.zone}] : []; },
     anwenden(n, k){ Modell.setzen(n, "fw", `if.${k.port}.zone`, "innen"); },
     loesung: (n, k) => [{geraet: k.geraet, setzen: {["if." + k.port + ".zone"]: k.zone},
-      text: `Firewall: ${k.port} wieder der Zone „${k.zone}“ zuordnen – die Regeln (aussen → dmz) greifen sonst nicht.`}],
+      text: `Firewall: ${k.port} wieder der Zone „${k.zone}“ zuordnen – die Regeln (außen → dmz) greifen sonst nicht.`}],
     hilfen: (n, k) => ({frage: ["Die Regel „außen → dmz“ steht im Regelwerk. Warum trifft sie den Webshop trotzdem nicht?"],
-      bereich: [{geraet: k.geraet, port: k.port}], konkret: [`${k.port} steckt in der Zone „innen“ statt „${k.zone}“. Keine Regel von aussen nach innen erlaubt den Shop.`]}),
+      bereich: [{geraet: k.geraet, port: k.port}], konkret: [`${k.port} steckt in der Zone „innen“ statt „${k.zone}“. Keine Regel von außen nach innen erlaubt den Shop.`]}),
     erklaerung: "Firewall-Regeln gelten für Zonen, nicht für Kabel. Steckt eine Schnittstelle in der falschen Zone, wird jeder Verkehr aus Sicht einer anderen Zone bewertet – der Webshop ist dann weder von außen noch aus dem LAN erlaubt, obwohl die Regeln für „dmz“ richtig aussehen.",
     quelle: "05-AP2-Infrastruktur-Sicherheit (Firewall/Zonen) · BSI IT-Grundschutz-Kompendium, NET.3.2 Firewall"});
 

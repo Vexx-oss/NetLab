@@ -423,11 +423,11 @@ UI.app = (() => {
   }
   const KUERZEL = [
     ["Überall", [["Strg+K", "Befehlspalette: Gerät springen, „ping A B“, Ebene, Ansicht"], ["?", "diese Übersicht"], ["Esc", "abbrechen, Menü schließen, Auswahl aufheben"]]],
-    ["Labor – Werkzeuge", [["V", "Auswählen und verschieben"], ["K", "Kabel verlegen"], ["P", "Ping-Werkzeug (mit Auswahl: Ping von diesem Gerät)"],
+    ["Labor – Werkzeuge", [["V", "Auswählen (Ziehen auf freier Fläche verschiebt die Ansicht, Shift+Ziehen = Auswahlrahmen)"], ["K", "Kabel verlegen"], ["P", "Ping-Werkzeug (mit Auswahl: Ping von diesem Gerät)"],
       ["1 … 4", "Geräte-Fach öffnen: Endgeräte · Server · Netzwerk · Außenwelt (im offenen Fach: 1 … n wählt das Gerät)"], ["⇧1 … ⇧5", "Ebene: Physik · VLAN · IP-Netze · MAC · Routen"]]],
     ["Labor – Ansicht", [["F", "alles einpassen"], ["A", "aufräumen (Auto-Layout)"], ["+  −  0", "Zoom größer, kleiner, 100 %"], ["Pfeiltasten", "Ansicht verschieben (mit Auswahl: Gerät verschieben, Shift = weiter)"], ["I / S", "Inspektor / Simulation ein- und ausklappen"]]],
     ["Labor – Bearbeiten", [["Entf", "Gerät oder Kabel löschen (Rückgängig statt Nachfrage)"], ["Strg+Z", "rückgängig"], ["Strg+Y", "wiederholen"], ["T / C", "Terminal des gewählten Geräts (im Dock)"], ["Enter", "Inspektor des gewählten Geräts"]]],
-    ["Maus", [["Ziehen", "Gerät verschieben · leere Fläche: Ansicht verschieben"], ["⊕ oder Port-Punkt ziehen", "Kabel (Shift beim Loslassen: Port wählen)"], ["Mausrad", "Zoom um den Mauszeiger"], ["Doppelklick", "leere Fläche: Gerät einsetzen · Gerät: Terminal"], ["Rechtsklick", "Konsole, Ping, Strom, Neustart, Löschen · Kabel: testen, trennen"]]],
+    ["Maus", [["Ziehen (leer)", "Ansicht verschieben (Hand)"], ["Shift+Ziehen (leer)", "Auswahlrahmen: mehrere Geräte (additiv)"], ["Ziehen (Gerät)", "Gerät verschieben"], ["Shift+Klick", "Gerät zur Auswahl hinzufügen/entfernen"], ["⊕ oder Port-Punkt ziehen", "Kabel (Shift beim Loslassen: Port wählen)"], ["Mausrad", "Zoom um den Mauszeiger"], ["Doppelklick", "leere Fläche: Gerät einsetzen · Gerät: Terminal"], ["Rechtsklick", "Konsole, Ping, Strom, Neustart, Löschen · Kabel: testen, trennen"]]],
   ];
   function hilfe(){
     const inhalt = h("div", {class: "kuerzel"}, KUERZEL.map(([titel, l]) => h("section", {}, h("h3", {}, titel),

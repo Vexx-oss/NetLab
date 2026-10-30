@@ -154,9 +154,13 @@
 .lb-sim:hover .lb-sim-griff::after{opacity:1}
 /* TOPO-2: SVG-Beschriftung nie unter --fs-1 (11 px); Adressen und Portnamen in Monospace,
    damit die Ziffern untereinander stehen. Farbe über die Lagebild-Tokens (Fallback = POLARIS). */
-.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; fill:var(--lage-name, var(--ink))}
-.ger-rolle{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-rolle, var(--muted))}
-.ger-ip{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-ip, var(--faint))}
+/* Beschriftung mit Halo: Kabel/Leitungen dürfen hinter dem Text liegen, ohne ihn unlesbar zu machen. */
+.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; fill:var(--lage-name, var(--ink));
+  paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3.5px; stroke-linejoin:round}
+.ger-rolle{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-rolle, var(--muted));
+  paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3px; stroke-linejoin:round}
+.ger-ip{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-ip, var(--faint));
+  paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3px; stroke-linejoin:round}
 .ger-mehr{font:500 var(--fs-1)/1 var(--mono); fill:var(--faint)}
 /* Zonen-Chip (Lagebild 2.0 § 3.3): CIDR in Mono, Gateway-Zusatz leise. */
 .zone-text{font:600 var(--fs-1)/1 var(--mono); fill:var(--lage-chip-text, var(--ink)); paint-order:stroke; stroke:var(--lage-chip-bg, var(--panel)); stroke-width:3px; stroke-linejoin:round}
@@ -354,7 +358,7 @@
 .lb-auftrag .sp-leise, .lb-auftrag small{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
 
 /* A: Auftragszeile – Titel gross, Kunde/Ziele als Mono-Chips, Kunde-Symbol als Kachel */
-.lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.05 var(--display); letter-spacing:-.01em}
+.lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.01em}
 .lb-auftrag .am-kunde{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
 .lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
   border:1px solid var(--line); padding:8px 12px; border-radius:999px}

@@ -173,7 +173,7 @@ html[data-theme="papier"] .dock-knopf{color:var(--muted); border-radius:var(--ra
 html[data-theme="papier"] .dock-knopf:hover{background:var(--panel-2); color:var(--ink)}
 html[data-theme="papier"] .dock-knopf.an{background:var(--ink); color:var(--bg)}
 html[data-theme="papier"] .dock-knopf.an::before{width:4px; top:0; bottom:0; border-radius:var(--radius); background:var(--accent)}
-html[data-theme="papier"] .dock-text{font:600 var(--fs-1)/1.1 var(--mono); letter-spacing:.14em; color:var(--muted)}
+html[data-theme="papier"] .dock-text{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.14em; color:var(--muted)}
 html[data-theme="papier"] .dock-knopf.an .dock-text{color:var(--bg)}
 html[data-theme="papier"] .dock-zahl{
   border-radius:var(--radius-xs); background:var(--accent); color:var(--accent-ink);
@@ -251,7 +251,7 @@ html[data-theme="papier"] .hb-hero-kunde{
   text-transform:uppercase; color:var(--muted);
 }
 html[data-theme="papier"] .hb-hero h1{
-  font:800 clamp(var(--fs-7),3.3vw,var(--fs-9))/.94 var(--display);
+  font:800 clamp(var(--fs-7),3.3vw,var(--fs-9))/1.15 var(--display);
   letter-spacing:-.055em; margin:10px 0 12px; max-width:15ch;
 }
 html[data-theme="papier"] .hb-hero-lead{
@@ -358,7 +358,7 @@ html[data-theme="papier"] .lb-auftrag::before{
 }
 html[data-theme="papier"] .lb-auftrag :is(h1,h2),
 html[data-theme="papier"] .lb-auftrag .am-titel strong{
-  font:800 clamp(var(--fs-6),2.5vw,var(--fs-7))/.96 var(--display); letter-spacing:-.05em;
+  font:800 clamp(var(--fs-6),2.5vw,var(--fs-7))/1.15 var(--display); letter-spacing:-.05em;
 }
 html[data-theme="papier"] .lb-auftrag .am-kunde{
   font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.2em; color:var(--faint); margin-top:4px;
@@ -387,7 +387,20 @@ html[data-theme="papier"] .lb-leinwand{
   border:2px solid var(--ink); border-radius:var(--lage-radius); background:var(--lage-flaeche);
   box-shadow:var(--schatten); overflow:hidden;
 }
-html[data-theme="papier"] .lb-svg{background:var(--lage-flaeche)}
+html[data-theme="papier"] .lb-svg{
+  background-color:var(--lage-flaeche);
+  /* Ambient: sehr ruhiges Papierkorn (kein Flackern, keine Dauer-Action) */
+  background-image:
+    radial-gradient(1px 1px at 24% 18%, color-mix(in srgb, var(--ink) 7%, transparent), transparent 70%),
+    radial-gradient(1px 1px at 72% 62%, color-mix(in srgb, var(--ink) 5%, transparent), transparent 70%);
+  background-size:180px 140px, 220px 170px;
+  background-position:0 0, 60px 40px;
+  animation:papier-korn var(--dauer-ambient) ease-in-out infinite alternate;
+}
+@keyframes papier-korn{
+  from{background-position:0 0, 60px 40px}
+  to{background-position:20px 14px, 84px 58px}
+}
 html[data-theme="papier"] .lb-raster-punkt{fill:var(--lage-raster)}
 html[data-theme="papier"] .lb-leinwand::before{
   content:"// LAGEBILD"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--faint);
@@ -402,25 +415,25 @@ html[data-theme="papier"] .lb-hinweis,
 html[data-theme="papier"] .lb-legende,
 html[data-theme="papier"] .wk-mini{z-index:20}
 
-/* Knoten: Papierkarten mit hartem Tintenrahmen und Versatz-Schatten */
-html[data-theme="papier"] .labor .ger-karte{
-  fill:var(--lage-knoten-bg); stroke:var(--lage-knoten-rand); stroke-width:2;
-  filter:var(--lage-knoten-schatten);
+/* Knoten 3.0: freies Tintenpiktogramm, kein Rahmen, kein Kartenschatten */
+html[data-theme="papier"] .labor .ger .gb-glyph path{
+  stroke:color-mix(in srgb, var(--g) 62%, var(--ink));
 }
-html[data-theme="papier"] .labor .ger.hover .ger-karte{
-  fill:var(--panel-2); stroke:var(--ink); stroke-width:2;
+html[data-theme="papier"] .labor .ger .gb-tupfer{
+  fill:color-mix(in srgb, var(--g) 62%, var(--ink));
 }
-html[data-theme="papier"] .labor .ger.gewaehlt .ger-karte,
-html[data-theme="papier"] .labor .ger.zielt .ger-karte{
-  stroke:var(--accent); stroke-width:2.2;
-  filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--accent) 26%,transparent));
+html[data-theme="papier"] .labor .ger.gewaehlt .gb-glyph path,
+html[data-theme="papier"] .labor .ger.zielt .gb-glyph path{
+  stroke:var(--accent);
 }
-html[data-theme="papier"] .labor .ger-auswahl{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 4}
-/* Gerätepiktogramm: harte Papierfläche statt Farbmischung */
-html[data-theme="papier"] .labor .ger .gb-kachel{fill:var(--lage-platte); stroke:var(--lage-platte-rand); stroke-width:1.2}
-html[data-theme="papier"] .labor .gb-glyph path{stroke:var(--ink); stroke-width:2}
-html[data-theme="papier"] .labor .ger.gewaehlt .gb-kachel,
-html[data-theme="papier"] .labor .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.2; fill:var(--accent-soft)}
+html[data-theme="papier"] .labor .ger.gewaehlt .gb-tupfer,
+html[data-theme="papier"] .labor .ger.zielt .gb-tupfer{
+  fill:var(--accent);
+}
+/* Hover: Papierdicke nur am Piktogramm (harter Versatz), Lift setzt der Renderer */
+html[data-theme="papier"] .labor .ger.hover .ger-bild{
+  filter:drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 16%, transparent));
+}
 
 /* Kanten: Tintenstrich, Zinnober = Störung */
 html[data-theme="papier"] .labor .kabel-huelle{stroke:var(--lage-kante-huelle); stroke-width:6}

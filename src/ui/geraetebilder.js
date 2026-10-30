@@ -27,36 +27,71 @@ UI.KATEGORIEN = [
 ];
 UI.geraeteArt = (typ, skin) => UI.GERAETE.find(a => a.typ === typ && (a.skin || null) === (skin || null)) || UI.GERAETE.find(a => a.typ === typ) || {typ, titel: typ, text: ""};
 
+UI.GERAETEREIHE = {
+  raster: 24,
+  stand: 20.5,
+  strich: { klein: 2, gross: 2.5 },
+  formen: {
+    internet: { name: "Internet", rolle: "Außenwelt · Provider",
+      pfade: ["M6.6 18.5h10.8A3.4 3.4 0 0 0 18 12.2 4.2 4.2 0 0 0 13.2 8 3.4 3.4 0 0 0 8.4 10.2 4.3 4.3 0 0 0 6.6 18.5Z"],
+      tupfer: [] },
+    router: { name: "Router", rolle: "zwischen Netzen · Schicht 3",
+      pfade: ["M6 12.5h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z", "M7.2 12.5V5.6", "M16.8 12.5V9.6l-3.2-3.4"],
+      tupfer: [],
+      porten: [[7.4, 16.6, 2.2, 2, 0.35], [11, 16.6, 2.2, 2, 0.35]] },
+    firewall: { name: "Firewall", rolle: "Zonen und Regeln",
+      pfade: ["M5.6 20.5a1.6 1.6 0 0 1-1.6-1.6V13.5h3.4V10.5h2.9v3h3.4v-3h2.9v3H20v5.4a1.6 1.6 0 0 1-1.6 1.6z", "M4 17h16", "M9.2 17v3.5", "M14.8 17v3.5", "M12 13.5v3.5"],
+      tupfer: [] },
+    switch: { name: "Switch", rolle: "ein Netz · Schicht 2",
+      pfade: ["M6 12.5h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"],
+      tupfer: [],
+      porten: [[5.4, 16.6, 2.2, 2, 0.35], [8.8, 16.6, 2.2, 2, 0.35], [12.2, 16.6, 2.2, 2, 0.35], [15.6, 16.6, 2.2, 2, 0.35]] },
+    server: { name: "Server", rolle: "Dienste · SSH, DNS, DHCP",
+      pfade: ["M8 2.5h8a2 2 0 0 1 2 2v13.5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4.5a2 2 0 0 1 2-2z", "M6 6.4h12"],
+      tupfer: [],
+      porten: [[8.4, 8.8, 5.2, 2, 0.5], [8.4, 12.8, 5.2, 2, 0.5], [8.4, 16.8, 5.2, 2, 0.5]] },
+    nas: { name: "NAS", rolle: "Speicher · zwei Anschlüsse",
+      pfade: ["M6 4.5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-12a2 2 0 0 1 2-2z"],
+      tupfer: [[17.2, 7, 0.9]],
+      porten: [[7, 9.8, 10, 3.2, 2.3], [7, 14.8, 10, 3.2, 2.3]] },
+    pc: { name: "PC", rolle: "Arbeitsplatz · eine Karte",
+      pfade: ["M6 4.5h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z", "M10.2 15.5h3.6l.8 5", "M7.4 20.5h9.2", "M7.8 9h5.4", "M7.8 11.8h3.2"],
+      tupfer: [] },
+    laptop: { name: "Laptop", rolle: "wie ein PC, nur mobil",
+      pfade: ["M6.5 4.5h11a1.5 1.5 0 0 1 1.5 1.5v9.5h-14V6a1.5 1.5 0 0 1 1.5-1.5z", "M5 15.5h14l1.5 5H3.5z", "M8 11.5h5"],
+      tupfer: [] },
+    tablet: { name: "Tablet", rolle: "mobiles Gerät",
+      pfade: ["M9 2.5h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-14a2 2 0 0 1 2-2z", "M10.2 17.2h3.6"],
+      tupfer: [[12, 5.7, 0.95]] },
+    kasse: { name: "Kasse", rolle: "Kassensystem",
+      pfade: ["M7.5 3.5h9a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z", "M12 12.5v2.5", "M5.5 15h13a2 2 0 0 1 2 2v1.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V17a2 2 0 0 1 2-2z", "M10 18.2h4", "M8 6.4h3.4", "M8 9h6"],
+      tupfer: [] },
+    drucker: { name: "Drucker", rolle: "Netzwerkdrucker",
+      pfade: ["M8.4 8V5.2A1.6 1.6 0 0 1 10 3.6h4A1.6 1.6 0 0 1 15.6 5.2V8", "M6 8h12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z", "M8.4 17v3.5h7.2V17", "M9.8 11.8h4.4"],
+      tupfer: [[16.9, 9.8, 0.95]] },
+  }
+};
+
+/* UI.geraetebild(typ, skin, {px}) — Strichzeichnung aus EINEM Raster (24), keine Platte, keine Karte.
+   px = gewuenschte Anzeigegroesse in Pixeln (Strich 2,1 px bis 32, sonst 2,5 px). Ohne px: altes
+   Nominalmass 52 (zentriert), damit bestehende Aufrufer unveraendert funktionieren. */
 UI.geraetebild = (() => {
-  /* Glyphen im Feld -16..16, Strichstärke kommt aus CSS (.gb-glyph) */
-  const G = {
-    pc:       ["M-13 -12h26a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-26a2 2 0 0 1-2-2v-14a2 2 0 0 1 2-2z", "M0 6v5", "M-6 11h12", "M-9 -7h10"],
-    laptop:   ["M-10 -11h20a1.5 1.5 0 0 1 1.5 1.5v13h-23v-13a1.5 1.5 0 0 1 1.5-1.5z", "M-16 5h32l-2.5 5h-27z", "M-6 -6h8"],
-    drucker:  ["M-8 -4v-9h16v9", "M-14 -4h28a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5h-28a1.5 1.5 0 0 1-1.5-1.5v-10a1.5 1.5 0 0 1 1.5-1.5z", "M-8 4h16v10h-16z", "M-5 8h10", "M9 0h.01"],
-    kasse:    ["M-9 -14h18a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-18a1.5 1.5 0 0 1-1.5-1.5v-8a1.5 1.5 0 0 1 1.5-1.5z", "M0 -3v4", "M-14 1h28a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-28a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z", "M-6 8h12", "M-5 -10h6"],
-    tablet:   ["M-9 -15h18a3 3 0 0 1 3 3v24a3 3 0 0 1-3 3h-18a3 3 0 0 1-3-3v-24a3 3 0 0 1 3-3z", "M-2 10h4"],
-    server:   ["M-10 -15h20a2 2 0 0 1 2 2v26a2 2 0 0 1-2 2h-20a2 2 0 0 1-2-2v-26a2 2 0 0 1 2-2z", "M-7 -8h9", "M-7 -1h9", "M-7 6h9", "M6 -8h.01", "M6 -1h.01", "M6 6h.01"],
-    nas:      ["M-13 -12h26a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3h-26a3 3 0 0 1-3-3v-18a3 3 0 0 1 3-3z", "M-9 -8h7v16h-7z", "M2 -8h7v16h-7z", "M-5.5 4h.01", "M5.5 4h.01"],
-    switch:   ["M-15 -6h30a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-30a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z", "M-11 -1h3v2h-3z", "M-5 -1h3v2h-3z", "M1 -1h3v2h-3z", "M7 -1h3v2h-3z",
-               "M-9 -12h16", "M4 -15l3 3-3 3", "M9 12h-16", "M-4 9l-3 3 3 3"],
-    router:   ["M0 -14a14 14 0 1 1 0 28a14 14 0 1 1 0-28z", "M-9 0h7", "M-2 0l7-6", "M-2 0l7 6", "M2 -6h3v3", "M2 6h3v-3"],
-    firewall: ["M0 -15l12 5v8c0 8-5.5 13-12 16c-6.5-3-12-8-12-16v-8z", "M-8 -3h16", "M-7 4h14", "M0 -10v7", "M-4 -3v7", "M4 -3v7", "M0 4v7"],
-    internet: ["M-7 -2a7 7 0 0 1 14 0", "M-7 -2c0 5 3 8 7 8s7-3 7-8", "M0 -9v15", "M-7 -2h14"],
-  };
-  const WOLKE = "M-22 14h42a11 11 0 0 0 1-22a14 14 0 0 0-26-6a10 10 0 0 0-17 6a11 11 0 0 0 0 22z";
   const ART = {pc: "host", server: "server", nas: "nas", switch: "switch", router: "router", firewall: "firewall", internet: "internet"};
-  return function geraetebild(typ, skin){
-    const g = sv("g", {class: `gb gb-${ART[typ] || "host"}`});
-    if (typ === "internet") {
-      g.append(sv("path", {class: "gb-kachel", d: WOLKE}));
-      const gl = sv("g", {class: "gb-glyph", transform: "translate(-1 2) scale(.9)"});
-      for (const d of G.internet) gl.append(sv("path", {d}));
-      g.append(gl);
-      return g;
+  return function geraetebild(typ, skin, opt){
+    const form = UI.GERAETEREIHE.formen[skin] || UI.GERAETEREIHE.formen[typ] || UI.GERAETEREIHE.formen.pc;
+    const g = sv("g", {class: "gb gb-" + (ART[typ] || "host")});
+    const px = opt && +opt.px || 0;
+    const gl = sv("g", {class: "gb-glyph", fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round"});
+    if (px) {
+      gl.setAttribute("transform", `translate(${(-px / 2).toFixed(2)} ${(-px / 2).toFixed(2)}) scale(${(px / 24).toFixed(4)})`);
+      gl.setAttribute("stroke-width", ((px >= 34 ? 2.5 : 2.1) * 24 / px).toFixed(2));
+    } else {
+      gl.setAttribute("transform", `translate(-26 -26) scale(${(52 / 24).toFixed(4)})`);
+      gl.setAttribute("stroke-width", (2.2 * 24 / 52).toFixed(2));
     }
-    g.append(sv("rect", {class: "gb-kachel", x: -26, y: -26, width: 52, height: 52, rx: 8}));
-    const gl = sv("g", {class: "gb-glyph"});
-    for (const d of (G[skin] || G[typ] || G.pc)) gl.append(sv("path", {d}));
+    for (const d of form.pfade) gl.append(sv("path", {d}));
+    for (const t of form.tupfer) gl.append(sv("circle", {class: "gb-tupfer", cx: t[0], cy: t[1], r: t[2]}));
+    for (const t of form.porten || []) gl.append(sv("rect", {class: "gb-tupfer", x: t[0], y: t[1], width: t[2], height: t[3], rx: t[4] || 0}));
     g.append(gl);
     return g;
   };

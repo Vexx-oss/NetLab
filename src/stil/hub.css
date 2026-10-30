@@ -1,7 +1,7 @@
 /* ---------- Hub „Heute“ (hb-) und Fehlerdex (dx-) – Design – Spielspaß 2.0, Hebel 3/4 ---------- */
 .hb-seite{height:100%; overflow:auto; padding:32px 24px 32px; display:flex; flex-direction:column; align-items:center; gap:16px; background:var(--bg); scrollbar-width:thin}
 .hb-seite > *{width:min(660px, 100%)}
-.hb-kopf h2{font:800 var(--fs-6)/1.1 var(--display)}
+.hb-kopf h2{font:800 var(--fs-6)/1.15 var(--display)}
 .hb-serie{margin-top:4px; color:var(--muted); font-size:var(--fs-3)}
 .hb-auftrag{display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center; padding:16px 24px; border-radius:var(--radius); background:var(--panel);
   border:1px solid var(--line); border-left:2px solid var(--k, var(--accent))}
@@ -96,7 +96,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .ansicht .hb-seite{max-width:1120px; margin:0 auto; padding:32px 24px; gap:24px}
 .ansicht .hb-kopf{display:flex; flex-direction:column; align-items:flex-start; gap:8px}
 .ansicht .hb-kopf::before{content:"// HEUTE"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; text-transform:uppercase; color:var(--faint)}
-.ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 4.6vw, var(--fs-8)); line-height:1.02; letter-spacing:-.045em; max-width:20ch}
+.ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 4.6vw, var(--fs-8)); line-height:1.15; letter-spacing:-.045em; max-width:20ch}
 .ansicht .hb-kopf .hb-serie{display:flex; align-items:center; gap:8px; color:var(--muted); letter-spacing:.2em}
 
 .ansicht .hb-auftrag{gap:16px 24px; padding:24px; border:1px solid var(--line); border-left:2px solid var(--k, var(--accent)); border-radius:var(--radius);
@@ -107,7 +107,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .ansicht .hb-auftrag .sp-kunde-sym.gross{width:44px; height:44px; border-radius:var(--radius-s)}
 
 .ansicht .hb-auftrag small{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--muted)}
-.ansicht .hb-auftrag h3{font:800 var(--fs-6)/1.06 var(--display); letter-spacing:-.02em; margin:4px 0; max-width:26ch}
+.ansicht .hb-auftrag h3{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.02em; margin:4px 0; max-width:26ch}
 .ansicht .hb-auftrag p{margin:0; color:var(--muted); font:500 var(--fs-2)/1.5 var(--mono); letter-spacing:.06em}
 
 .ansicht .hb-oder{margin-top:0; padding-top:16px; border-top:1px solid var(--line); gap:8px}

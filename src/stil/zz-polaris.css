@@ -33,7 +33,7 @@
 
 /* ===== Shell ===== */
 .kopf{gap:12px;padding:0 16px;background:var(--panel)}
-.kopf::after{height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 30%,transparent) 35%,transparent 75%);opacity:.6}
+.kopf::after{height:1px;background:var(--line);opacity:1}
 .kopf-marke{gap:8px;padding-right:12px;border-right:1px solid var(--line)}
 .marke-name{font:800 var(--fs-3)/1 var(--display);letter-spacing:.16em;text-transform:uppercase}
 .marke-version{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;color:var(--faint);border-radius:var(--radius-xs);padding:4px 8px}
@@ -41,13 +41,16 @@
 .wert .sym{opacity:.9}
 .kopf-knoepfe{border-left:1px solid var(--line);padding-left:8px}
 .kopf-knopf{height:40px;min-width:40px;border-radius:var(--radius-s);transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard)}
-.dock{width:84px;padding:8px 0;gap:4px;background:var(--panel)}
-.dock-knopf{width:56px;min-height:56px;padding:8px 0;border-radius:var(--radius-s);
+.dock{width:88px;padding:8px 0;gap:4px;background:var(--panel)}
+/* Leisten-Label duerfen nicht abschneiden: gemessen 30.10.2026 — „LERNSTAND" braucht 69-73 px
+   (Theme-Sperrsatz .12-.14em), der Knopf war nur 56 px breit und die Schrift lief links aus dem
+   Dock (Nutzer-Screenshot „ROSTFACH"). 80 px Knopf + 88 px Leiste decken alle Labels ab. */
+.dock-knopf{width:80px;min-height:56px;padding:8px 0;border-radius:var(--radius-s);
   transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard),transform var(--dauer) var(--ease-standard)}
 .dock-knopf:hover{background:var(--panel-2)}
 .dock-knopf.an{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
 .dock-knopf.an::before{width:2px;border-radius:var(--radius-xs);background:var(--accent)}
-.dock-text{font:600 var(--fs-1)/1.15 var(--mono);letter-spacing:.12em;color:var(--muted)}
+.dock-text{font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.12em;color:var(--muted);max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
 .dock-knopf.an .dock-text{color:var(--accent)}
 .dock-zahl{background:var(--accent);color:var(--accent-ink);border-radius:999px;font:700 var(--fs-1)/18px var(--mono)}
 .fuss{background:var(--bg);border-top:1px solid var(--line);padding:0 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
@@ -56,9 +59,9 @@
 .fuss-punkt{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px color-mix(in srgb,var(--accent) 60%,transparent)}
 .fuss-ebene{color:var(--muted)}
 .lb-auftrag {padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);padding:0 16px 12px}
-.lb-auftrag::before{content:"// AUFTRAG";display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint);margin:0 0 8px}
-.lb-auftrag :is(h1,h2){font:800 var(--fs-6)/1.1 var(--display);letter-spacing:-.03em;margin:0}
-.lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.08 var(--display);letter-spacing:-.02em}
+.lb-auftrag::before{content:"// AUFTRAG";display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;color:var(--faint);margin:0 0 8px}
+.lb-auftrag :is(h1,h2){font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.03em;margin:0}
+.lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.02em}
 .lb-auftrag .am-kunde, .lb-auftrag .am-ziele{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .lb-auftrag .am-ziele{border:1px solid var(--line);border-radius:999px;padding:4px 8px}
 .lb-gruppe{border-radius:var(--radius-s);background:color-mix(in srgb,var(--panel) 86%,transparent);backdrop-filter:blur(12px) saturate(130%);
@@ -70,7 +73,7 @@
    zz-lagebild.css; POLARIS bringt nur die Default-Tokens (oben im :root-Block) mit.
    Die alten Karten-/Kabel-Regeln (168×112-Annahmen, .kabel-stecker) sind entfallen. */
 .hb-seite {max-width:1120px;margin:0 auto;padding:32px 24px;gap:16px;gap:16px;padding:32px 24px}
-.hb-kopf h2{font:800 var(--fs-8)/1.02 var(--display);letter-spacing:-.04em;max-width:16ch}
+.hb-kopf h2{font:800 var(--fs-8)/1.15 var(--display);letter-spacing:-.04em;max-width:16ch}
 .hb-kopf .hb-serie{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
 .hb-ziel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;color:var(--faint)}
 .hb-auftrag{position:relative;border:1px solid var(--line);border-radius:var(--radius);padding:24px;
@@ -78,7 +81,7 @@
     radial-gradient(90% 130% at 96% -30%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 58%),
     linear-gradient(158deg,color-mix(in srgb,var(--ink) 3%,transparent),transparent 60%),var(--panel);
   box-shadow:var(--schatten)}
-.hb-auftrag strong{font:800 var(--fs-6)/1.06 var(--display);letter-spacing:-.03em}
+.hb-auftrag strong{font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.03em}
 .hb-auftrag .sp-kunde-sym.gross{width:44px;height:44px;border-radius:var(--radius-s)}
 .hb-oder-zeile{border:1px solid var(--line);border-radius:var(--radius-s);background:var(--panel-2)}
 .hb-kacheln{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
@@ -110,11 +113,9 @@
 
 
 
-.lb-auftrag::before{margin:10px 0 4px}
 .lb-auftrag .sp-auftrag{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);
   padding:16px 20px;margin:0;box-shadow:var(--schatten)}
 .lb-auftrag .am-zeile{display:grid;grid-template-columns:48px minmax(0,1fr) auto auto;align-items:center;gap:16px}
-.lb-auftrag .am-titel strong{font-size:var(--fs-6)}
 .lb-auftrag .sp-kunde-sym{width:48px;height:48px;border-radius:var(--radius-s);display:grid;place-items:center;
   background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);font-size:var(--fs-5)}
 .lb-auftrag .am-kunde{display:block;margin-top:2px}
@@ -129,7 +130,7 @@
 .lb-inspektor{padding:0}
 .in-kopf{padding:16px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}
 .in-kopf-zeile{gap:12px;align-items:center}
-.in-kopf-text h3{font:800 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em}
+.in-kopf-text h3{font:800 var(--fs-5)/1.15 var(--display);letter-spacing:-.02em}
 .in-kopf-text span{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .in-reiter{display:flex;gap:2px;padding:10px 12px 0;border-bottom:1px solid var(--line)}
 .in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:8px 10px;border-radius:var(--radius-s) var(--radius-s) 0 0}
@@ -195,15 +196,12 @@
 /* Fläche: 20/24 Rand, 16 Abstand, Paneele als Karten mit Radius 14 */
 .lb-mitte{display:flex;flex-direction:column;gap:16px;padding:16px 20px 16px;min-height:0}
 .lb-auftrag{margin:0;padding:20px 24px;border:1px solid var(--line);border-radius:var(--radius);
-  background:radial-gradient(120% 150% at 100% 0%,color-mix(in srgb,var(--k,var(--accent)) 10%,transparent),transparent 60%),
-    linear-gradient(160deg,color-mix(in srgb,var(--ink) 4%,var(--panel)),var(--panel) 60%);
-  flex:0 0 auto}
-.lb-auftrag::before{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;color:var(--faint);margin:0 0 8px}
+  background:var(--panel); flex:0 0 auto}
 .lb-auftrag .sp-auftrag{padding:0;margin:0;border:0;background:none;box-shadow:none}
 .lb-auftrag .am-zeile{display:grid;grid-template-columns:56px minmax(0,1fr) auto auto;align-items:center;gap:20px}
 .lb-auftrag .sp-kunde-sym{width:56px;height:56px;border-radius:var(--radius);font-size:var(--fs-6);
   background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
-.lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font:800 var(--fs-8)/1.02 var(--display);letter-spacing:-.04em}
+.lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font:800 var(--fs-8)/1.15 var(--display);letter-spacing:-.04em}
 .lb-auftrag .am-kunde{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
 .lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;border:1px solid var(--line);border-radius:999px;padding:6px 10px}
 .lb-auftrag .am-knoepfe{gap:8px}
@@ -214,7 +212,7 @@
 .lb-leiste-oben{top:36px}
 
 .in-kopf{padding:18px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
-.in-kopf-text h3{font:800 var(--fs-5)/1.1 var(--display);letter-spacing:-.03em}
+.in-kopf-text h3{font:800 var(--fs-5)/1.15 var(--display);letter-spacing:-.03em}
 .in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
 .in-reiter{display:flex;gap:2px;padding:8px 14px 0;border-bottom:1px solid var(--line)}
 .in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
@@ -231,7 +229,7 @@
 
 .hb-kopf h2{font-size:clamp(var(--fs-7),4.6vw,var(--fs-8))}
 .hb-auftrag{padding:24px;border-radius:var(--radius);border-left:2px solid var(--k,var(--accent))}
-.hb-auftrag h3{font:800 var(--fs-6)/1.06 var(--display);letter-spacing:-.03em}
+.hb-auftrag h3{font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.03em;margin:0}
 .hb-kachel{padding:16px;gap:16px;border-radius:var(--radius);background:var(--panel)}
 .hb-kachel-sym{width:44px;height:44px;border-radius:var(--radius-s)}
 .hb-kacheln{gap:16px}
@@ -275,7 +273,7 @@
     linear-gradient(158deg,color-mix(in srgb,var(--ink) 3%,transparent),transparent 60%),var(--panel)}
 .hb-kicker{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
 .hb-hero-kunde{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:var(--fs-3);margin-top:8px}
-.hb-hero h1{font:800 var(--fs-7)/1 var(--display);letter-spacing:-.04em;margin:2px 0 6px;max-width:20ch}
+.hb-hero h1{font:800 var(--fs-7)/1.15 var(--display);letter-spacing:-.04em;margin:2px 0 6px;max-width:20ch}
 .hb-hero-lead{color:var(--muted);max-width:60ch;margin:0 0 6px;font-size:var(--fs-3)}
 .hb-hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .hb-hero-meta span{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;color:var(--muted);
@@ -400,6 +398,12 @@
   .dock{width:64px}
   .dock-knopf{width:52px;min-height:50px}
   .dock-text{font-size:var(--fs-1)}
+}
+/* Schmale Leiste (< 900 px): nur Symbole, keine Labels — 11-px-Schrift braucht >= 60 px und
+   die Leiste ist dort 64 px breit. Die Ziele bleiben als Knopf-Titel erreichbar (Fokus/Screenreader). */
+@media (max-width:900px){
+  .dock-text{display:none;white-space:nowrap}
+  .dock-knopf{min-height:52px;padding:8px 0}
 }
 /* Lagebild-Knoten entzerrt (keine Überlappung) */
 .hb-knoten{white-space:nowrap}
@@ -554,7 +558,7 @@ body{background-image:
 .hb-raster > .hb-klasse{background-image:linear-gradient(170deg, color-mix(in srgb, var(--iris) 6%, transparent), transparent 60%)}
 .hb-raster > .hb-lage{background-image:linear-gradient(180deg, color-mix(in srgb, var(--accent) 5%, transparent), transparent 52%)}
 .hb-raster > .hb-signal{background-image:linear-gradient(180deg, color-mix(in srgb, var(--iris) 6%, transparent), transparent 58%)}
-.lb-dock > .in-kopf{background-image:linear-gradient(120deg, color-mix(in srgb, var(--iris) 6%, transparent), transparent 60%)}
+.lb-dock > .in-kopf{background-image:none}
 /* Kopf und Schiene: angehobene Fläche plus feine Kante, damit der Rahmen nicht verschwindet */
 body > .kopf{background:color-mix(in srgb, var(--panel) 92%, var(--panel-2)); border-bottom:1px solid var(--line)}
 body > .ansicht .dock{background:color-mix(in srgb, var(--panel) 88%, var(--panel-2))}
@@ -569,3 +573,19 @@ body .lb-auftrag .am-titel{min-width:0;overflow:hidden}
 body .lb-auftrag .am-titel strong{display:block;max-width:100%;overflow-wrap:anywhere}
 body .lb-auftrag .am-kunde{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-auftrag .am-mehr{flex:0 0 auto}
+
+
+/* ===== Ambient Runde 3 (POLARIS): EINE sehr ruhige Lichtbewegung auf der Fläche =====
+   Kein Dauerfeuer: ein einzelner, 36-s-Lichtschleier; Hover/Auswahl bleiben Interaktion.
+   Reduced-Motion und „Bewegung aus" schalten zentral in basis.css ab. */
+.lb-svg{
+  background-color:var(--lage-flaeche, var(--bg));
+  background-image:radial-gradient(1100px 520px at 30% 0%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 62%);
+  background-size:150% 150%;
+  background-position:30% 0;
+  animation:polaris-licht var(--dauer-ambient) ease-in-out infinite alternate;
+}
+@keyframes polaris-licht{
+  from{background-position:30% 0}
+  to{background-position:30% 14%}
+}

@@ -143,20 +143,12 @@ UI.ebenen = (() => {
     if (dy) t = Math.min(t, hh / Math.abs(dy));
     return Number.isFinite(t) ? {x: p.x + dx * t, y: p.y + dy * t} : null;
   }
-  /* Weiche Insel (Vertrag § 3.3, Befund B2): konvexe Hülle über die KARTEN-RECHTECKE der Mitglieder,
-     aufgeblasen um dx/dy. Die Aufblasung schiebt jeden Hüllpunkt vom Hüllen-Schwerpunkt nach außen –
-     bei achsenparallelen Hüllen (der Normalfall) ist das die exakte Rechteck-Erweiterung. */
-  function huelleAufgeblasen(punkte, dx, dy){
-    const eindeutig = [];
-    for (const q of punkte) if (!eindeutig.some(p => Math.abs(p[0] - q[0]) < 0.01 && Math.abs(p[1] - q[1]) < 0.01)) eindeutig.push(q);
-    const hl = huelle(eindeutig);
-    if (hl.length < 3) return hl;
-    const cx = hl.reduce((s, q) => s + q[0], 0) / hl.length, cy = hl.reduce((s, q) => s + q[1], 0) / hl.length;
-    return hl.map(q => [q[0] + (q[0] >= cx ? dx : -dx), q[1] + (q[1] >= cy ? dy : -dy)]);
-  }
-  /* Gerundetes Vieleck: Ecken mit Radius r als kurze Quadratik, gerade Kanten bleiben gerade.
-     (Der Vertrag nennt „Catmull-Rom o. ä."; Catmull-Rom schwingt bei den aufgeblasenen Rechteck-
-     ecken nach außen und erzeugte so Überlappungen benachbarter Inseln — gemessen 604 px².) */
+  /* ---------- Ruhige Zonen-Huelle (Nutzerentscheidung 30.10.2026) ----------
+     „Einfach klar und verstaendlich zeigen, wie die Zone zu welchem Geraet verlaeuft": Eine glatte,
+     gleichmaessig gerundete Huelle um die Mitglieder (keine Wobble-Blobs, keine Asymmetrie).
+     Jedes Mitglied liegt vollstaendig innerhalb; Ecken mit 24 px gerundet (kein Ausschwingen,
+     damit benachbarte Zonen sich nicht schneiden). Router/Firewall bleiben Anker ausserhalb. */
+  const INSEL_RAND = 12;
   function gerundeterPfad(p, r){
     const n = p.length;
     if (n < 3) return "";
@@ -174,13 +166,27 @@ UI.ebenen = (() => {
     }
     return d + " Z";
   }
+  /* liste = [{id, p}]; masse(id) liefert den Fussabdruck (Welt, relativ zur Gerätemitte) aus
+     Piktogramm + Labels. Ohne masse gilt das alte Kartenmaß. */
+  function inselHuelle(liste, masse, m){
+    const ecken = [];
+    for (const e of liste) {
+      const f = masse ? masse(e.id) : {x1: -m.kw / 2, y1: -m.kh / 2, x2: m.kw / 2, y2: m.kh / 2};
+      ecken.push([e.p.x + f.x1 - INSEL_RAND, e.p.y + f.y1 - INSEL_RAND], [e.p.x + f.x2 + INSEL_RAND, e.p.y + f.y1 - INSEL_RAND],
+        [e.p.x + f.x1 - INSEL_RAND, e.p.y + f.y2 + INSEL_RAND], [e.p.x + f.x2 + INSEL_RAND, e.p.y + f.y2 + INSEL_RAND]);
+    }
+    const hl = huelle(ecken);
+    if (hl.length < 3) return null;
+    const xs = hl.map(q => q[0]), ys = hl.map(q => q[1]);
+    return {d: gerundeterPfad(hl, 24), minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys)};
+  }
   /* Freie Stelle für den Zonen-Chip (Vorgabe der Leitung 30.10.2026): Kandidaten unten-links →
      unten-rechts → oben-links → oben-rechts, je 18 px nach außen versetzt; Kapsel-Chip mittig darüber,
      dann darüber/darunter/seitlich weiter. Geprüft wird gegen Karten UND schon gesetzte Chips, mit
      6 px Mindestabstand. Bleibt nichts frei, gewinnt die Stelle mit der geringsten Überdeckung –
      der Chip wird NIE weggelassen (Befund B1). */
   const CHIP_ABSTAND = 6;
-  function chipStelle(belegt, form, b, h){
+  function chipStelle(belegt, form, b, h, raum){
     /* Der Mindestabstand von 6 px gilt zwischen CHIPS (beide bekommen 3 px Rand). Karten gegenueber
        genuegt Beruehrung: sonst rutschte der Kapsel-Chip 26 px von der Kapsel weg (gemessen), weil zwei
        Kandidaten wegen der 6-px-Zugabe als Ueberdeckung galten. */
@@ -201,13 +207,18 @@ UI.ebenen = (() => {
         kand.push([form.minX - b - 18 - n * 18, form.my - h / 2]);
       }
     } else {
-      for (let n = 0; n < 10; n++) {
-        const ab = (n + 1) * 18;
-        kand.push([form.minX + 14, form.maxY + ab]);
-        kand.push([form.maxX - b - 14, form.maxY + ab]);
-        kand.push([form.minX + 14, form.minY - h - ab]);
-        kand.push([form.maxX - b - 14, form.minY - h - ab]);
-      }
+      /* Chip AUSSERHALB der Insel (Nutzerentscheidung 30.10.2026: klar lesbar, kein Layout im Weg):
+         zuerst unter der Insel links/rechts, dann darüber, dann seitlich – jeweils 10 px Abstand und
+         an den Canvas-Rand geklemmt. Labels liegen innerhalb der Hülle, deshalb trifft der Chip dort
+         keine Beschriftung mehr. Gewählt wird die erste überdeckungsfreie Stelle, sonst die kleinste. */
+      const rX1 = raum ? raum.x1 : -1e9, rY1 = raum ? raum.y1 : -1e9, rX2 = raum ? raum.x2 : 1e9, rY2 = raum ? raum.y2 : 1e9;
+      const kx = x => Math.max(rX1 + 8, Math.min(rX2 - b - 8, x));
+      const ky = y => Math.max(rY1 + 8, Math.min(rY2 - h - 8, y));
+      const unten = ky(form.maxY + 10), oben = ky(form.minY - h - 10);
+      kand.push([kx(form.minX + 8), unten], [kx(form.maxX - b - 8), unten]);
+      kand.push([kx(form.minX + 8), oben], [kx(form.maxX - b - 8), oben]);
+      const mitteY = ky((form.minY + form.maxY - h) / 2);
+      kand.push([kx(form.maxX + 10), mitteY], [kx(form.minX - b - 10), mitteY]);
     }
     let wahl = kand[0], beste = ueber(wahl[0], wahl[1]);
     for (const q of kand) {
@@ -232,39 +243,29 @@ UI.ebenen = (() => {
     if (lang < 4) return null;
     return {p1, p2, lang, winkel: Math.atan2(dy, dx) * 180 / Math.PI, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2};
   }
-  function zeichneZonen(schicht, netz, pos){
+  function zeichneZonen(schicht, netz, pos, opt = {}){
     const {zonen: zl} = zonen(netz);
     const m = kartenMasse();
-    /* Vorbelegung: alle Karten randgenau. Chips dürfen weder auf Geräten noch auf anderen Chips liegen –
-       sonst verschwänden sie unter der Geräte-Ebene. */
+    /* Fussabdruck (Piktogramm + Labels) kommt vom Editor; ohne ihn gilt das Kartenmaß. */
+    const raum = opt.raum || null;
+    const masse = typeof opt.masse === "function" ? opt.masse
+      : (id => { void id; return {x1: -m.kw / 2, y1: -m.kh / 2, x2: m.kw / 2, y2: m.kh / 2}; });
+    /* Vorbelegung: alle Geräte-Fußabdrücke. Chips dürfen weder auf Geräten noch auf anderen Chips
+       liegen – sonst verschwänden sie unter der Geräte-Ebene. */
     const belegt = [];
     for (const g of Object.values(netz.geraete)) {
       const p = pos(g.id); if (!p) continue;
-      belegt.push({x1: p.x - m.kw / 2, y1: p.y - m.kh / 2, x2: p.x + m.kw / 2, y2: p.y + m.kh / 2, istChip: false});
+      const f = masse(g.id);
+      belegt.push({x1: p.x + f.x1, y1: p.y + f.y1, x2: p.x + f.x2, y2: p.y + f.y2, istChip: false});
     }
     for (const z of zl) {
-      const mitglieder = z.ids.map(pos).filter(Boolean);
+      const mitglieder = z.ids.map(id => ({id: id, p: pos(id)})).filter(e => e.p);
       const kapsel = z.ids.length <= 2 ? kapselForm(z, netz, pos, m) : null;
       let form = null;
       if (kapsel) form = {art: "kapsel", ...kapsel, minX: Math.min(kapsel.p1.x, kapsel.p2.x), maxX: Math.max(kapsel.p1.x, kapsel.p2.x)};
       else if (mitglieder.length) {
-        /* Aufblasung 20/20 (Leitung 30.10.2026 wollte 22/20): Bei 22 bleiben rechnerisch 4 Welt-px
-           Ueberlappung (2*(80+22) gegen 200 Kartenabstand, exakt gemessen 604 px²); mit 20/20 beruehren
-           sich die Inseln hoechstens. 30/26 liess sie ~20 px ineinanderschneiden. Ein einzelnes
-           Mitglied bekommt ein Ei (Ellipse) – die Huelle eines Punktes waere nur ein Rechteck. */
-        if (mitglieder.length === 1) {
-          const p = mitglieder[0], rx = m.kw / 2 + 20, ry = m.kh / 2 + 20;
-          const d = "M" + (p.x - rx).toFixed(1) + " " + p.y.toFixed(1) +
-            " A" + rx.toFixed(1) + " " + ry.toFixed(1) + " 0 1 0 " + (p.x + rx).toFixed(1) + " " + p.y.toFixed(1) +
-            " A" + rx.toFixed(1) + " " + ry.toFixed(1) + " 0 1 0 " + (p.x - rx).toFixed(1) + " " + p.y.toFixed(1) + " Z";
-          form = {art: "insel", d, minX: p.x - rx, maxX: p.x + rx, minY: p.y - ry, maxY: p.y + ry};
-        } else {
-          const ecken = [];
-          for (const p of mitglieder) ecken.push([p.x - m.kw / 2, p.y - m.kh / 2], [p.x + m.kw / 2, p.y - m.kh / 2], [p.x - m.kw / 2, p.y + m.kh / 2], [p.x + m.kw / 2, p.y + m.kh / 2]);
-          const aufgeblasen = huelleAufgeblasen(ecken, 20, 20);
-          const xs = aufgeblasen.map(q => q[0]), ys = aufgeblasen.map(q => q[1]);
-          form = {art: "insel", d: gerundeterPfad(aufgeblasen, 26), minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys)};
-        }
+        const huelleForm = inselHuelle(mitglieder, masse, m);
+        if (huelleForm) form = {art: "insel", ...huelleForm};
       }
       if (!form) continue;
       const g = sv("g", {class: "zone zone-" + z.farbe, "data-cidr": z.cidr});
@@ -283,7 +284,7 @@ UI.ebenen = (() => {
       const zeile2 = z.gw ? "GW " + z.gw : "";
       const b = Math.max(zeile1.length, zeile2.length) * 6.05 + 28;
       const h = zeile2 ? 34 : 22;
-      const [x, y] = chipStelle(belegt, form, b, h);
+      const [x, y] = chipStelle(belegt, form, b, h, raum);
       belegt.push({x1: x, y1: y, x2: x + b, y2: y + h, istChip: true});
       const lg = sv("g", {class: "zone-label"});
       lg.setAttribute("data-x", x.toFixed(1));

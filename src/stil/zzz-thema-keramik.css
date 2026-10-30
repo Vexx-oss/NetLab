@@ -110,14 +110,13 @@ html[data-theme="keramik"] .hb-panel:not(.hb-lage){
 html[data-theme="keramik"] .hb-lage{border-radius:var(--radius);box-shadow:var(--keramik-karte)}
 html[data-theme="keramik"] .hb-raster{gap:var(--keramik-gap)}
 html[data-theme="keramik"] .ansicht .hb-kachel{box-shadow:none;border-radius:var(--radius)}
-/* ---- Lagebild 2.0: Steinplatte auf Ton, weiche Formen, matte Tiefe ---- */
+/* ---- Lagebild 3.0: Tonfläche + EINE sehr ruhige Tageslicht-Drift (36 s) ---- */
 
 html[data-theme="keramik"] .labor .lb-leinwand{
   border:1px solid var(--line);
   border-radius:var(--radius);
   background:var(--lage-flaeche);
   background-image:none;
-  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 html[data-theme="keramik"] .labor .lb-leinwand::before{
@@ -127,103 +126,84 @@ html[data-theme="keramik"] .labor .lb-leinwand::before{
 }
 
 html[data-theme="keramik"] .labor .lb-svg{
-  background-color:transparent;
-  background-image:none;
+  background-color:var(--lage-flaeche);
+  background-image:
+    linear-gradient(115deg, color-mix(in srgb, var(--ink) 4%, transparent), transparent 55%),
+    radial-gradient(920px 500px at 30% 16%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 68%);
+  background-size:170% 170%, 140% 140%;
+  background-position:0 0, 30% 16%;
+  animation:keramik-tageslicht var(--dauer-ambient) ease-in-out infinite alternate;
 }
 
-html[data-theme="keramik"] .labor .lb-raster-punkt{
-  fill:var(--lage-raster);
+@keyframes keramik-tageslicht{
+  from{background-position:0 0, 30% 16%}
+  to{background-position:9% 7%, 42% 28%}
 }
 
-/* ---- Knoten: Steinplatte, grosse weiche Radien, matter Schatten ---- */
+html[data-theme="keramik"] .labor .lb-raster-punkt{fill:var(--lage-raster)}
 
-html[data-theme="keramik"] .labor .ger-karte{
-  fill:var(--lage-knoten-bg);
-  stroke:var(--lage-knoten-rand);
-  stroke-width:1;
-  rx:var(--lage-radius);
-  filter:var(--lage-knoten-schatten);
-  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard);
+/* ---- Knoten 3.0: freie Steinpiktogramme, matter Schatten statt Glow ---- */
+
+html[data-theme="keramik"] .labor .ger .gb-glyph path{
+  stroke:color-mix(in srgb, var(--g) 66%, var(--ink));
+}
+
+html[data-theme="keramik"] .labor .ger .gb-tupfer{
+  fill:color-mix(in srgb, var(--g) 16%, transparent);
+}
+
+html[data-theme="keramik"] .labor .ger.hover .ger-bild{
+  filter:drop-shadow(0 3px 6px color-mix(in srgb, var(--ink) 22%, transparent));
+}
+
+html[data-theme="keramik"] .labor .ger.gewaehlt .gb-glyph path,
+html[data-theme="keramik"] .labor .ger.zielt .gb-glyph path{
+  stroke:var(--accent);
+}
+
+html[data-theme="keramik"] .labor .ger.gewaehlt .gb-tupfer,
+html[data-theme="keramik"] .labor .ger.zielt .gb-tupfer{
+  fill:var(--accent);
 }
 
 html[data-theme="keramik"] .labor .ger-auswahl{
   stroke:var(--accent);
-  stroke-width:1;
+  stroke-width:1.5;
   stroke-dasharray:none;
-  rx:var(--radius-s);
-}
-
-html[data-theme="keramik"] .labor .ger.hover .ger-karte{
-  fill:color-mix(in srgb, var(--lage-knoten-bg) 70%, var(--panel-3));
-  stroke:var(--line-2);
-}
-
-html[data-theme="keramik"] .labor .ger.gewaehlt .ger-karte,
-html[data-theme="keramik"] .labor .ger.zielt .ger-karte{
-  fill:color-mix(in srgb, var(--accent-soft) 70%, var(--lage-knoten-bg));
-  stroke:var(--accent);
-  stroke-width:1.4;
-}
-
-html[data-theme="keramik"] .labor .ger.gewaehlt .ger-auswahl,
-html[data-theme="keramik"] .labor .ger.zielt .ger-auswahl{
-  opacity:.5;
-}
-
-html[data-theme="keramik"] .labor .ger.ohne-ip .ger-karte{
-  stroke:var(--bad);
-  stroke-dasharray:4 4;
-}
-
-html[data-theme="keramik"] .labor .ger.aus .ger-karte{
-  fill:color-mix(in srgb, var(--lage-knoten-bg) 62%, var(--panel-3));
-  stroke:color-mix(in srgb, var(--lage-knoten-rand) 60%, transparent);
-}
-
-html[data-theme="keramik"] .labor .ger.aus .ger-name{
-  fill:var(--faint);
-}
-
-html[data-theme="keramik"] .labor .ger.aus .ger-bild{
-  opacity:.4;
-}
-
-html[data-theme="keramik"] .labor .ger .gb-kachel{
-  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
-  stroke:var(--lage-platte-rand);
-  stroke-width:1;
-}
-
-html[data-theme="keramik"] .labor .ger.hover .gb-kachel,
-html[data-theme="keramik"] .labor .ger.gewaehlt .gb-kachel,
-html[data-theme="keramik"] .labor .ger.zielt .gb-kachel{
-  stroke:var(--accent);
-  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
 }
 
 html[data-theme="keramik"] .labor .ger-name{
-  font:600 var(--fs-2)/1 var(--display);
+  font:600 var(--fs-2)/1.2 var(--display);
   letter-spacing:var(--keramik-tracking);
+  text-transform:none;
   fill:var(--lage-name);
 }
 
 html[data-theme="keramik"] .labor .ger-rolle{
-  font:600 var(--fs-1)/1 var(--mono);
+  font:400 var(--fs-1)/1.3 var(--body);
   letter-spacing:.02em;
-  text-transform:uppercase;
+  text-transform:none;
   fill:var(--lage-rolle);
 }
 
 html[data-theme="keramik"] .labor .ger-ip{
-  font:500 var(--fs-1)/1 var(--mono);
-  letter-spacing:.03em;
+  font:500 var(--fs-1)/1.25 var(--mono);
+  letter-spacing:.01em;
   fill:var(--lage-ip);
 }
 
 html[data-theme="keramik"] .labor .ger-mehr{
+  font:500 var(--fs-1)/1 var(--mono);
   fill:var(--lage-rolle);
-  font-weight:500;
 }
+
+html[data-theme="keramik"] .labor .ger.aus .ger-bild{opacity:.42}
+html[data-theme="keramik"] .labor .ger.aus .ger-name{fill:var(--faint)}
+html[data-theme="keramik"] .labor .ger.ohne-ip .ger-bild{opacity:.72}
+
+/* ---- Prozess: mattter Punkt, Farbe bleibt Protokoll (--pf) ---- */
+html[data-theme="keramik"] .labor .puls{stroke-width:1.6;stroke-linecap:round}
+html[data-theme="keramik"] .labor .paket-kern{stroke-width:1.5}
 
 /* ---- Kanten: Salbei-Linie, Terrakotta bei Störung (Farbe über --kf) ---- */
 

@@ -33,6 +33,9 @@
   --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --mono:"JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
   --dauer-kurz:80ms; --dauer:160ms; --dauer-mittel:240ms; --dauer-lang:320ms; --dauer-zaehler:700ms;
+  /* Ambient (Runde 3): EINE sehr ruhige Hintergrundbewegung je Theme; der zentrale
+     Reduced-Motion-/Bewegung-aus-Block weiter unten schaltet sie mit ab. */
+  --dauer-ambient:36000ms;
   --ease-standard:cubic-bezier(.2,.7,.3,1); --ease-out:cubic-bezier(.16,.84,.44,1); --ease-pop:cubic-bezier(.3,1.6,.5,1);
   --fs-1:11px; --fs-2:12.5px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:28px; --fs-7:34px; --fs-8:44px;
   --typ-router:#7FD4F5; --typ-switch:#6FE0D4; --typ-firewall:#FFA08A; --typ-host:#C9D2E0; --typ-server:#B0A0FF; --typ-nas:#7FB6F5; --typ-internet:#8FD8F0;

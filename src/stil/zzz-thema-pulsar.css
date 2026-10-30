@@ -520,7 +520,7 @@ html[data-theme="pulsar"] .hb-hero h1{
   font-family:var(--display);
   font-weight:700;
   letter-spacing:.02em;
-  line-height:.96;
+  line-height:1.15;
   text-transform:uppercase;
   background:linear-gradient(180deg, var(--ink) 34%, color-mix(in srgb, var(--ink) 78%, var(--accent)));
   -webkit-background-clip:text;
@@ -1011,7 +1011,7 @@ html[data-theme="pulsar"] .lb-auftrag .am-titel strong{
   font-family:var(--display);
   font-weight:700;
   letter-spacing:.015em;
-  line-height:.98;
+  line-height:1.15;
   text-transform:uppercase;
   color:var(--ink);
   white-space:normal;
@@ -1074,54 +1074,38 @@ html[data-theme="pulsar"] .lb-auftrag .sp-einstieg-text{
 }
 
 /* ============================================================================
-   14 · Lagebild 2.0: Messfeld mit Glasplatten und Neonkante
+   14 · Lagebild 3.0: Messfeld mit EINER ruhigen Nebel-Drift (36 s)
    ============================================================================ */
 
-html[data-theme="pulsar"] .lb-leinwand{
+html[data-theme="pulsar"] .labor .lb-leinwand{
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius);
   background-color:var(--lage-flaeche);
-  background-image:
-    radial-gradient(64% 72% at 68% 20%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 72%),
-    radial-gradient(90% 80% at 8% 104%, color-mix(in srgb, var(--iris) 5%, transparent), transparent 66%);
 }
 
-html[data-theme="pulsar"] .lb-leinwand::before{
-  content:"// LAGEBILD";
-  font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
+html[data-theme="pulsar"] .labor .lb-leinwand::before{
   color:color-mix(in srgb, var(--accent) 55%, var(--faint));
-  z-index:30;
+  letter-spacing:.28em;
 }
 
-html[data-theme="pulsar"] .lb-leinwand::after{
-  content:"";
-  position:absolute;
-  right:var(--p-4);
-  top:var(--p-4);
-  width:var(--p-6);
-  height:var(--p-6);
-  border-right:var(--hud-linie) solid color-mix(in srgb, var(--line-2) 80%, transparent);
-  border-top:var(--hud-linie) solid color-mix(in srgb, var(--line-2) 80%, transparent);
-  z-index:10;
-  pointer-events:none;
-}
-
-html[data-theme="pulsar"] .lb-svg{
-  background-color:transparent;
+html[data-theme="pulsar"] .labor .lb-svg{
+  background-color:var(--lage-flaeche);
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px);
-  background-size:calc(var(--raster) * 4) calc(var(--raster) * 4);
+    linear-gradient(to right, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
+    radial-gradient(980px 540px at 62% 18%, color-mix(in srgb, var(--iris) 7%, transparent), transparent 66%);
+  background-size:var(--raster) var(--raster), var(--raster) var(--raster), 150% 150%;
+  background-position:0 0, 0 0, 62% 18%;
+  animation:pulsar-nebel var(--dauer-ambient) ease-in-out infinite alternate;
 }
 
-html[data-theme="pulsar"] .lb-raster-punkt{
-  fill:var(--lage-raster);
+@keyframes pulsar-nebel{
+  from{background-position:0 0, 0 0, 62% 18%}
+  to{background-position:0 0, 0 0, 44% 34%}
 }
 
-html[data-theme="pulsar"] .lb-raster{
-  opacity:.9;
-}
+html[data-theme="pulsar"] .labor .lb-raster-punkt{fill:var(--lage-raster)}
+html[data-theme="pulsar"] .labor .lb-raster{opacity:.9}
 
 html[data-theme="pulsar"] .lb-leiste-oben{
   top:var(--p-7);
@@ -1228,101 +1212,66 @@ html[data-theme="pulsar"] .labor .lb-legende .lg-kein::before{
   background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px);
 }
 
-/* ---- Knoten: Glasplatte, Glow nur bei Auswahl/Handlung ---- */
+/* ---- Knoten 3.0: freies Lichtpiktogramm, Glow nur bei Aktion ---- */
 
-html[data-theme="pulsar"] .labor .ger-karte{
-  fill:var(--lage-knoten-bg);
-  stroke:var(--lage-knoten-rand);
-  stroke-width:1;
-  rx:var(--lage-radius);
-  filter:var(--lage-knoten-schatten);
-  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard), filter var(--dauer) var(--ease-standard);
+html[data-theme="pulsar"] .labor .ger .gb-glyph path{
+  stroke:color-mix(in srgb, var(--g) 84%, var(--ink));
+}
+
+html[data-theme="pulsar"] .labor .ger .gb-tupfer{
+  fill:color-mix(in srgb, var(--g) 30%, transparent);
+}
+
+html[data-theme="pulsar"] .labor .ger.hover .ger-bild{
+  filter:drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 42%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .ger.gewaehlt .gb-glyph path,
+html[data-theme="pulsar"] .labor .ger.zielt .gb-glyph path{
+  stroke:var(--accent);
+}
+
+html[data-theme="pulsar"] .labor .ger.gewaehlt .gb-tupfer,
+html[data-theme="pulsar"] .labor .ger.zielt .gb-tupfer{
+  fill:var(--accent);
 }
 
 html[data-theme="pulsar"] .labor .ger-auswahl{
   stroke:var(--accent);
-  stroke-width:1;
+  stroke-width:1.3;
   stroke-dasharray:none;
-  rx:var(--radius-xs);
-}
-
-html[data-theme="pulsar"] .labor .ger.hover .ger-karte{
-  fill:color-mix(in srgb, var(--lage-knoten-bg) 80%, var(--accent));
-  stroke:color-mix(in srgb, var(--accent) 45%, var(--lage-knoten-rand));
-}
-
-html[data-theme="pulsar"] .labor .ger.gewaehlt .ger-karte,
-html[data-theme="pulsar"] .labor .ger.zielt .ger-karte{
-  fill:color-mix(in srgb, var(--accent) 10%, var(--lage-knoten-bg));
-  stroke:var(--accent);
-  stroke-width:1.4;
-  filter:drop-shadow(0 0 0 1px var(--accent)) drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 44%, transparent)) var(--lage-knoten-schatten);
-}
-
-html[data-theme="pulsar"] .labor .ger.gewaehlt .ger-auswahl,
-html[data-theme="pulsar"] .labor .ger.zielt .ger-auswahl{
-  opacity:.6;
-}
-
-html[data-theme="pulsar"] .labor .ger.ohne-ip .ger-karte{
-  stroke:var(--bad);
-  stroke-dasharray:4 4;
-}
-
-html[data-theme="pulsar"] .labor .ger.aus .ger-karte{
-  fill:color-mix(in srgb, var(--lage-knoten-bg) 68%, var(--bg));
-  stroke:color-mix(in srgb, var(--line) 80%, transparent);
-}
-
-html[data-theme="pulsar"] .labor .ger.aus .ger-name{
-  fill:var(--faint);
-}
-
-html[data-theme="pulsar"] .labor .ger.aus .ger-bild{
-  opacity:.4;
-}
-
-html[data-theme="pulsar"] .labor .ger .gb-kachel{
-  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
-  stroke:var(--lage-platte-rand);
-  stroke-width:1;
-}
-
-html[data-theme="pulsar"] .labor .ger.hover .gb-kachel{
-  stroke:var(--accent);
-}
-
-html[data-theme="pulsar"] .labor .ger.gewaehlt .gb-kachel,
-html[data-theme="pulsar"] .labor .ger.zielt .gb-kachel{
-  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
-  stroke:var(--accent);
 }
 
 html[data-theme="pulsar"] .labor .ger-name{
-  font:600 var(--fs-2)/1 var(--mono);
-  letter-spacing:.04em;
+  font:700 var(--fs-2)/1.15 var(--mono);
+  letter-spacing:.08em;
   text-transform:uppercase;
   fill:var(--lage-name);
 }
 
 html[data-theme="pulsar"] .labor .ger-rolle{
-  font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.02em;
-  text-transform:uppercase;
+  font:500 var(--fs-1)/1.25 var(--mono);
+  letter-spacing:.05em;
   fill:var(--lage-rolle);
 }
 
 html[data-theme="pulsar"] .labor .ger-ip{
-  font:500 var(--fs-1)/1 var(--mono);
-  font-variant-numeric:tabular-nums;
-  letter-spacing:.02em;
-  fill:var(--lage-ip);
+  font:500 var(--fs-1)/1.25 var(--mono);
+  letter-spacing:.01em;
+  fill:color-mix(in srgb, var(--lage-ip) 78%, var(--accent));
 }
 
 html[data-theme="pulsar"] .labor .ger-mehr{
+  font:500 var(--fs-1)/1 var(--mono);
   fill:var(--lage-rolle);
-  font-weight:500;
 }
+
+html[data-theme="pulsar"] .labor .ger.aus .ger-bild{opacity:.4}
+html[data-theme="pulsar"] .labor .ger.aus .ger-name{fill:var(--faint)}
+html[data-theme="pulsar"] .labor .ger.ohne-ip .ger-bild{opacity:.7}
+
+/* ---- Prozess: Signalpunkt, Farbe bleibt Protokoll (--pf) ---- */
+html[data-theme="pulsar"] .labor .puls{stroke-width:2;stroke-linecap:round}
 
 /* ---- Kanten: Neon-Mint mit leiser Glow-Kante, Koralle bei Störung ---- */
 

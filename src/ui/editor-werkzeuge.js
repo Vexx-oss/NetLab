@@ -211,18 +211,35 @@ UI.laborWerkzeuge = (() => {
       else if (t.art === "griff") G = {...basis, art: "kabel", von: {geraet: t.id, port: null}};
       else if (t.art === "geraet") G = geraetGeste(basis, t.id, e);
       else if (t.art === "kabel") { F.kabelWaehlen(t.kabel); G = {...basis, art: "pan", view: {...Z.view}, kabelKlick: true}; }
-      /* Leere Fläche: mit dem Zeiger-Werkzeug zieht man einen Auswahlrahmen (Marquee) auf;
-         die Ansicht verschiebt weiterhin die mittlere Maustaste (und außerhalb des Zeiger-Werkzeugs). */
-      else if (Z.werkzeug === "auswahl") G = {...basis, art: "marquee", additiv: e.shiftKey || e.ctrlKey || e.metaKey};
+      /* Leere Fläche (Vorgabe Nutzer 30.10.2026): Links-Ziehen verschiebt die Ansicht, erst
+         Shift+Links-Ziehen zieht den Auswahlrahmen (additiv zur bestehenden Auswahl). Die mittlere
+         Maustaste verschiebt weiterhin; Klick ohne Ziehen hebt die Auswahl auf (siehe ende()). */
+      else if (e.shiftKey || e.ctrlKey || e.metaKey) G = {...basis, art: "marquee", additiv: true};
       else G = {...basis, art: "pan", view: {...Z.view}};
       try { svg.setPointerCapture(e.pointerId); } catch {}
       if (G.art === "pan") svg.classList.add("greift");
+      cursorSetzen();
     });
+    /* Cursor-Zustaende (Vorgabe Nutzer 30.10.2026): freie Flaeche grab, beim Ziehen grabbing,
+       ueber Geraet pointer, bei Shift/Auswahlrahmen crosshair. Bewusst als Inline-Cursor hier,
+       damit die Mechanik ohne CSS-Nachzug funktioniert; die CSS-Haelfte kann es spaeter uebernehmen. */
+    let shiftGedrueckt = false;
+    function cursorSetzen(){
+      const zieht = !!G && (G.art === "pan" || G.art === "geraet");
+      const rahmen = !!G && G.art === "marquee";
+      const svgCursor = zieht ? "grabbing" : (rahmen || shiftGedrueckt) ? "crosshair" : "grab";
+      const gerCursor = G && G.art === "geraet" ? "grabbing" : (rahmen || shiftGedrueckt) ? "crosshair" : "pointer";
+      if (svg) svg.style.cursor = svgCursor;
+      if (Z.gEl) for (const el of Z.gEl.values()) el.style.cursor = gerCursor;
+    }
+    document.addEventListener("keydown", e => { if (e.key === "Shift" && !shiftGedrueckt) { shiftGedrueckt = true; cursorSetzen(); } });
+    document.addEventListener("keyup", e => { if (e.key === "Shift" && shiftGedrueckt) { shiftGedrueckt = false; cursorSetzen(); } });
     svg.addEventListener("pointermove", e => {
       if (!G) {
-        if (Z.werkzeug === "platzieren") { vorschau(F.weltPunkt(e.clientX, e.clientY)); return; }
+        if (Z.werkzeug === "platzieren") { vorschau(F.weltPunkt(e.clientX, e.clientY)); cursorSetzen(); return; }
         const t = ziel(e.target);
         hoverSetzen(t.id || null);
+        cursorSetzen();
         return;
       }
       if (e.pointerId !== G.pid) return;
@@ -237,6 +254,7 @@ UI.laborWerkzeuge = (() => {
         }
         if (G.art === "geraet") { hoverSetzen(null); svg.classList.add("zieht"); }
         if (G.art === "kabel" || G.art === "ping") { hoverSetzen(null); hoverZeichnen(); }
+        cursorSetzen();
       }
       if (!G.bewegt) return;
       G.letzt = e;
@@ -285,6 +303,7 @@ UI.laborWerkzeuge = (() => {
       const g = G; G = null;
       svg.classList.remove("greift", "zieht");
       try { svg.releasePointerCapture(g.pid); } catch {}
+      cursorSetzen();
       for (const el of Z.gEl.values()) el.classList.remove("zielt");
       bandLeeren();
       if (g.art === "marquee") { F.auswahlVorschau([]); }
@@ -529,7 +548,8 @@ UI.laborWerkzeuge = (() => {
       return false;
     }
 
-    Object.assign(F, {hoverZeichnen, bandLeeren, taste, schnellwahl, portWahl});
+    cursorSetzen();
+    Object.assign(F, {hoverZeichnen, bandLeeren, taste, schnellwahl, portWahl, cursorSetzen});
   }
   return {einrichten};
 })();

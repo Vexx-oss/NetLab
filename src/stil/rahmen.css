@@ -74,7 +74,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .dock-knopf.an::before{content:""; position:absolute; left:0; top:12px; bottom:12px; width:2px; background:var(--accent)}
 .dock-knopf.spaeter{opacity:.72}
 .dock-knopf.spaeter.an, .pal-huelle.da, .dialog-huelle.da{opacity:1}
-.dock-text{font:600 var(--fs-1)/1.1 var(--mono); letter-spacing:.06em; text-transform:uppercase}
+.dock-text{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase}
 .dock-zahl{position:absolute; top:4px; right:8px; min-width:18px; height:18px; padding:0 4px; border-radius:var(--radius-s); background:var(--accent); color:var(--accent-ink); font:700 var(--fs-1)/18px var(--body); text-align:center}
 
 /* ---- Fläche und Ansichten ---- */

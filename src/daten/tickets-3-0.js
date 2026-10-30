@@ -56,7 +56,7 @@
     zusatzZiele: [
       {typ: "notiz", id: "wlan-plan", min: 20, text: "WLAN-Plan notiert (SSID, eigenes VLAN, Gästenetz vom Firmennetz getrennt)"},
       {typ: "tabelle", id: "adressplan", basis: "192.168.40.0/24",
-       zeilen: [{name: "Gaeste", hosts: 40}, {name: "Empfang", hosts: 6}],
+       zeilen: [{name: "Gäste", hosts: 40}, {name: "Empfang", hosts: 6}],
        spalten: ["netz", "erster", "letzter", "broadcast"], text: "Adressplan für das Gästenetz vollständig ausgefüllt"},
     ],
     hilfen: {frage: ["Welche drei Dinge braucht ein Gäste-WLAN mindestens: Name (SSID), eigenes Netz – und was noch, damit Gäste nicht ins Firmennetz kommen?"],

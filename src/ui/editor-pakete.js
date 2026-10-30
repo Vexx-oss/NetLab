@@ -38,8 +38,12 @@ UI.laborPakete = (() => {
         if (x.port) {
           const ka = Modell.kabelAn(Z.netz, x.geraet, x.port), geo = ka && F.kabelGeo(ka.kabel);
           if (geo) {
-            const r = ka.kabel.a.geraet === x.geraet ? 1 : -1, sx = r > 0 ? geo.ax : geo.bx, sy = r > 0 ? geo.ay : geo.by, d = Math.min(46, geo.len * 0.3);
-            g.append(sv("circle", {class: "hl-port", cx: sx + geo.ux * d * r, cy: sy + geo.uy * d * r, r: 11}));
+            /* Mit weichen Kabeln liegt der Port nicht mehr auf der Geraden – den Punkt auf der Kurve
+               nehmen (kurz hinter dem Anker, Richtung Kabel). */
+            const vonA = ka.kabel.a.geraet === x.geraet;
+            const p = (typeof F.kabelPunkt === "function" ? F.kabelPunkt(ka.kabel, vonA ? 0.14 : 0.86) : null)
+              || {x: (vonA ? geo.ax : geo.bx), y: (vonA ? geo.ay : geo.by)};
+            g.append(sv("circle", {class: "hl-port", cx: p.x, cy: p.y, r: 11}));
           }
         }
         s.append(g);
@@ -55,10 +59,20 @@ UI.laborPakete = (() => {
              || Z.netz.kabel.find(k => (k.a.geraet === e.geraet && k.b.geraet === e.nach.geraet) || (k.b.geraet === e.geraet && k.a.geraet === e.nach.geraet));
       if (k) {
         const geo = F.kabelGeo(k); if (!geo) return null;
-        return k.a.geraet === e.geraet ? [geo.ax, geo.ay, geo.bx, geo.by] : [geo.bx, geo.by, geo.ax, geo.ay];
+        /* Kabel gefunden: das Paket laeuft entlang der weichen Kurve (kabelPunkt), nicht gerade. */
+        const a = {x: geo.ax, y: geo.ay}, b = {x: geo.bx, y: geo.by};
+        return {kabel: k, umkehr: k.b.geraet === e.geraet, a, b};
       }
       const A = F.pos(e.geraet), B = F.pos(e.nach.geraet);
-      return A && B ? [A.x, A.y, B.x, B.y] : null;
+      return A && B ? {a: {x: A.x, y: A.y}, b: {x: B.x, y: B.y}, umkehr: false} : null;
+    }
+    /* Punkt auf der Strecke: bevorzugt die echte Kabelkurve, sonst gerade Linie. */
+    function ort(w, q){
+      if (w.kabel && typeof F.kabelPunkt === "function") {
+        const p = F.kabelPunkt(w.kabel, w.umkehr ? 1 - q : q);
+        if (p) return p;
+      }
+      return {x: w.a.x + (w.b.x - w.a.x) * q, y: w.a.y + (w.b.y - w.a.y) * q};
     }
     function animiere(e, o = {}){
       const s = schicht(); if (!s || !e || !Z.netz) return Promise.resolve();
@@ -66,18 +80,19 @@ UI.laborPakete = (() => {
       if (e.art === "verwerfen") { if (e.grund) return platzen(e.geraet, e.grund); if (e.geraet) puls(e.geraet, "var(--faint)"); return Promise.resolve(); }
       if (e.art !== "senden" || !e.nach) { if (e.geraet) puls(e.geraet, farbe(e.proto)); return Promise.resolve(); }
       const w = weg(e); if (!w) return Promise.resolve();
-      const [x1, y1, x2, y2] = w, ms = o.ms ?? 620, bw = bewegung();
+      const ms = o.ms ?? 620, bw = bewegung();
       const g = sv("g", {class: "paket", style: `--pf:${farbe(e.proto)}`});
       g.append(sv("circle", {class: "paket-schein", r: 12}), sv("circle", {class: "paket-kern", r: 6}));
       if (o.beschriften !== false) g.append(sv("text", {class: "paket-text", x: 0, y: -13, "text-anchor": "middle", text: kurz(e)}));
       s.append(g);
       if (bw !== "voll") {
-        g.setAttribute("transform", `translate(${(x1 + x2) / 2} ${(y1 + y2) / 2})`);
+        const m = ort(w, 0.5);
+        g.setAttribute("transform", `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)})`);
         return tween(bw === "aus" ? 0 : Math.min(ms, 450), p => { g.style.opacity = String(1 - p * p); }).then(() => g.remove());
       }
       return tween(ms, p => {
-        const q = glatt(p);
-        g.setAttribute("transform", `translate(${(x1 + (x2 - x1) * q).toFixed(1)} ${(y1 + (y2 - y1) * q).toFixed(1)})`);
+        const q = glatt(p), pt = ort(w, q);
+        g.setAttribute("transform", `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
         g.style.opacity = p > .92 ? String((1 - p) / .08) : "1";
       }).then(() => g.remove());
     }
