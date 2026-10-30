@@ -38,9 +38,22 @@ UI.app = (() => {
   Bus.an("aussehen", () => themaAnwenden());
   Bus.an("ui-bereit", () => setTimeout(themaAnwenden, 0));            /* nach Spiel.laden: gekauftes Aussehen anwenden */
   function einstSetzen(teil){ const e = einst(); Object.assign(e, teil); store.set("einst", e); }
+  /* Zusätzliche Themes (§ 18.16): eigene Stildateien src/stil/zzz-thema-<id>.css, Tokens in
+     :root[data-theme="<id>"]; dunkel steuert nur die Sonne/Mond-Anzeige und color-scheme. */
+  const THEMEN = [
+    {id: "nordlicht", titel: "Nordlicht", dunkel: true},
+    {id: "messing", titel: "Messing", dunkel: true},
+    {id: "papier", titel: "Papier", dunkel: false},
+    {id: "pulsar", titel: "Pulsar", dunkel: true},
+    {id: "keramik", titel: "Keramik", dunkel: false},
+  ];
+  const eigenesTheme = t => THEMEN.find(x => x.id === t) || null;
   function themaAnwenden(){
     const t = einst().thema || "dunkel", d = document.documentElement;   /* § 18.3: Dunkel ist Standard */
-    if (t === "hell") d.dataset.theme = "light"; else if (t === "dunkel") d.dataset.theme = "dark"; else delete d.dataset.theme;
+    const eigen = eigenesTheme(t);
+    if (t === "hell") d.dataset.theme = "light"; else if (t === "dunkel") d.dataset.theme = "dark";
+    else if (t === "system") delete d.dataset.theme; else if (eigen) d.dataset.theme = eigen.id; else delete d.dataset.theme;
+    d.style.colorScheme = (eigen ? eigen.dunkel : t !== "hell") ? "dark" : "light";
     /* Aussehen aus dem Shop (Akzentfarbe, Leistenstil) – vorher wurde es gekauft, aber nie angewendet */
     const a = typeof Spiel !== "undefined" && Spiel._st && Spiel.karriere ? Spiel.karriere.daten().aussehen : null;
     if (a && a.akzent && a.akzent !== "cyan") d.dataset.akzent = a.akzent; else delete d.dataset.akzent;
@@ -49,6 +62,8 @@ UI.app = (() => {
     if (el.thema) { const dunkel = istDunkel(); el.thema.replaceChildren(UI.symbol(dunkel ? "sonne" : "mond", 18)); el.thema.title = dunkel ? "Helle Darstellung" : "Dunkle Darstellung"; }
   }
   function istDunkel(){
+    const eigen = eigenesTheme(einst().thema);
+    if (eigen) return eigen.dunkel;
     const t = document.documentElement.dataset.theme;
     if (t) return t === "dark";
     return !(typeof matchMedia !== "undefined" && matchMedia("(prefers-color-scheme: light)").matches);
@@ -357,7 +372,11 @@ UI.app = (() => {
     const l = [];
     l.push({titel: "Darstellung", fn: c => c.append(
       zeile("Farbschema", "Dunkel ist der Leitstand-Look. „System“ folgt der Einstellung des Betriebssystems.",
-        wahl("Farbschema", [["hell", "Hell"], ["dunkel", "Dunkel"], ["system", "System"]], e.thema || "dunkel", v => { einstSetzen({thema: v}); themaAnwenden(); })),
+        wahl("Farbschema", [["hell", "Hell"], ["dunkel", "Dunkel"], ["system", "System"]],
+          eigenesTheme(e.thema) ? "" : (e.thema || "dunkel"), v => { einstSetzen({thema: v}); themaAnwenden(); })),
+      zeile("Theme", "Fünf zusätzliche Themes mit eigenem Charakter – POLARIS bleibt der Standard. Ein Theme ersetzt das Farbschema.",
+        wahl("Theme", [["", "POLARIS"], ...THEMEN.map(x => [x.id, x.titel])], eigenesTheme(e.thema) ? e.thema : "",
+          v => { einstSetzen({thema: v || "dunkel"}); themaAnwenden(); })),
       zeile("Animationen", "Pakete fliegen, Zahlen zählen hoch. „Reduziert“ blendet nur kurz ein, „Aus“ zeigt Ergebnisse sofort. Die Systemeinstellung „Bewegung reduzieren“ wird immer beachtet.",
         wahl("Animationen", [["an", "An"], ["reduziert", "Reduziert"], ["aus", "Aus"]], e.bewegung || "an", v => { einstSetzen({bewegung: v}); themaAnwenden(); })),
       zeile("Ton", "Leise Klänge bei Kabel, Ping, Haken und Sternen – alles bleibt auch ohne Ton verständlich. Die Leiste und ein Fenster im Hintergrund sind immer stumm.",

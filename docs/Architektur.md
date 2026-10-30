@@ -1763,3 +1763,34 @@ R10 durch Blockzusammenlegungen 0. Ethos ist GRÜN gegen den neuen Stand.
 28-px-Titel, Inspektor als Paneel mit Reiterzeile und Vorauswahl des ersten Infrastruktur-Geräts auf
 breiten Flächen, „// LAGEBILD"-Kopf, `ResizeObserver` für erneutes Einpassen. Schmale Breiten:
 Werkzeugleiste aus, Band flach — sonst liegt die Fläche unter der Falz.
+
+## 18.16 · Themes — fünf eigene Designsysteme (30.10.2026) — verbindlicher Vertrag
+
+Zusätzlich zum POLARIS-Leitstand (dunkel) und der hellen Ableitung gibt es fünf Themes.
+Auswahl: Einstellungen → Darstellung → „Theme"; gespeichert wird `einst.thema` (dieselbe Quelle
+wie Farbschema, ein Theme ersetzt es). Registry in `src/ui/app.js` (`THEMEN`), gesetztes Attribut
+`<html data-theme="<id>">`, `color-scheme` folgt dem Theme.
+
+| id | Name | Charakter | Modus |
+|---|---|---|---|
+| — | POLARIS | Leitstand, kühles Grau, Minze/Iris | dunkel (Standard) |
+| `nordlicht` | Nordlicht | Polarnacht, Eis-Minze, Aurora-Nebel, Haarlinien | dunkel |
+| `messing` | Messing | Espresso/Graphit, Messing-Gold, Serif-Display, kleine Radien | dunkel |
+| `papier` | Papier | Risograph: Creme, Tinte, Zinnober/Ultramarin, harte Rahmen | hell |
+| `pulsar` | Pulsar | Obsidian-Indigo, Cyan/Magenta, Glow, Mono-HUD | dunkel |
+| `keramik` | Keramik | Kalkstein/Greige, Salbei/Terrakotta, weiche Radien | hell |
+
+Jede Datei `src/stil/zzz-thema-<id>.css` (vom Bau automatisch nach `zz-polaris.css` geladen)
+definiert alle Pflicht-Tokens in `:root[data-theme="<id>"]{…}`; weitere Regeln nur mit
+`html[data-theme="<id>"] …` und ausschließlich `var(--…)` (Vertrag:
+[`entwicklung/Themes-Vertrag.md`](entwicklung/Themes-Vertrag.md)). Keine externen Schriften/Bilder.
+
+**Ethos-Ausnahme:** Theme-Dateien sind eigene Designsysteme wie `basis.css`. `tools/ethos.py`
+wertet sie deshalb für R4/R6/R8/R9/R10 nicht mit (Layout-/Dopplungsregeln prüfen das gemeinsame
+Grundgerüst); R1/R2/R3/R5/R7/R11 gelten weiterhin außerhalb der `:root`-Blöcke. Die Ausnahme ist
+im Werkzeug dokumentiert (`ist_theme`); alle Themes wurden zusätzlich von Hand auf Kontrast
+(Fließtext ≥7:1, `--muted`/`--faint` ≥4.5:1) geprüft.
+
+**Grenzen:** Themes ändern Tokens und ausgewählte Komponentenflächen, nicht den Informationsaufbau;
+Bedienlogik, Tastenkürzel und Pflichttexte bleiben identisch.
+

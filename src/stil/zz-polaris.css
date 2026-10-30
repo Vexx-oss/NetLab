@@ -553,3 +553,11 @@ body > .ansicht .dock{background:color-mix(in srgb, var(--panel) 88%, var(--pane
 /* Fokusflächen bleiben klar, aber nicht grell */
 .knopf.primaer{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 55%, transparent)}
 .hb-lage-svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none}
+
+
+/* ===== Themen mit größeren Displayschriften (Messing, Papier): Band darf nicht kappen ===== */
+body .lb-auftrag .am-zeile{grid-template-columns:56px minmax(0,1fr) auto auto}
+body .lb-auftrag .am-titel{min-width:0;overflow:hidden}
+body .lb-auftrag .am-titel strong{display:block;max-width:100%;overflow-wrap:anywhere}
+body .lb-auftrag .am-kunde{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-auftrag .am-mehr{flex:0 0 auto}

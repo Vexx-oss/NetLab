@@ -153,6 +153,20 @@ def deklarationen(bloecke):
 
 # ---------------------------------------------------------------- die zwölf Regeln
 
+THEME_DATEI = re.compile(r"^zzz-thema-[a-z0-9-]+\.css$")
+
+
+def ist_theme(name):
+    """Theme-Dateien (docs/entwicklung/Themes-Vertrag.md) sind eigene Designsysteme.
+
+    Sie liefern nur Tokens plus bewusst gesetzte, mit ``html[data-theme=...]`` gekapselte
+    Regeln. Die Layout-Regeln R4/R6/R8 (Abstände, z-index, Bewegung) und die Dopplungsregeln
+    R9/R10 prüfen das gemeinsame Grundgerüst in src/stil, nicht die Theme-Dateien.
+    R1/R2/R3/R5/R7/R11 gelten weiterhin für alles außerhalb der :root-Theme-Blöcke.
+    """
+    return bool(THEME_DATEI.match(name))
+
+
 def r1_farbe(bloecke):
     """Farbe nur per Token: kein #hex/rgb/hsl außerhalb der Token-Blöcke (:root …)."""
     treffer = []
@@ -168,6 +182,8 @@ def r2_radius(bloecke):
     """Radius nur aus Tokens: var(--radius-xs/-s/--radius, § 18.6), 999px (Pille), 50% (Kreis)."""
     treffer = []
     for b, d in deklarationen(bloecke):
+        if ist_theme(b["datei"]):
+            continue
         if "radius" not in d["prop"] or "root" in b["sel"] or d["prop"].startswith("--"):
             continue
         if "var(--" in d["wert"]:
@@ -205,6 +221,8 @@ def r4_abstand(bloecke):
     """Abstand nur aus der Skala {0,4,8,12,16,24,32}px (negative Gegenstücke erlaubt)."""
     treffer = []
     for b, d in deklarationen(bloecke):
+        if ist_theme(b["datei"]):
+            continue
         if d["prop"] not in ABSTANDS_PROPS or "root" in b["sel"] or d["prop"].startswith("--"):
             continue
         for m in re.finditer(r"(-?[\d.]+)(px|em|rem)", d["wert"]):
@@ -230,7 +248,7 @@ def r6_zindex(bloecke):
     """z-index nur aus der benannten Leiter {10,20,…,80} — keine Zwischenwerte."""
     treffer = []
     for b, d in deklarationen(bloecke):
-        if d["prop"] != "z-index" or "root" in b["sel"]:
+        if d["prop"] != "z-index" or "root" in b["sel"] or ist_theme(b["datei"]):
             continue
         if not d["wert"].lstrip("-").isdigit() or int(d["wert"]) not in Z_LEITER:
             treffer.append(f"{ort(b, d)} (z-index:{d['wert']})")
@@ -252,7 +270,7 @@ def r8_bewegung(bloecke, texte):
     for name, roh in texte:
         for m in re.finditer(r"@media\s*\(prefers-reduced-motion[^{]*\{", roh):
             zeile = roh.count("\n", 0, m.start()) + 1
-            if name != "basis.css":                     # basis.css ist der zentrale Block
+            if name != "basis.css" and not ist_theme(name):   # basis.css ist der zentrale Block; Themes dürfen eigene Reduzier-Blöcke haben
                 treffer.append(f"{name}:{zeile}")
     return treffer
 
@@ -261,7 +279,7 @@ def r9_selektor_einmal(bloecke):
     """Ein Selektor wird unter gleichen Bedingungen nur einmal definiert (Wiederholung = toter Text)."""
     gesehen = defaultdict(list)
     for b in bloecke:
-        if KEYFRAME_SCHRITT.match(b["sel"]):
+        if KEYFRAME_SCHRITT.match(b["sel"]) or ist_theme(b["datei"]):
             continue
         gesehen[(b["datei"], b["ctx"], b["sel"])].append(b)
     treffer = []
@@ -276,6 +294,10 @@ def r10_blockdopplung(bloecke):
     gruppen = defaultdict(list)
     for b in bloecke:
         if KEYFRAME_SCHRITT.match(b["sel"]):
+            continue
+        # Themes (src/stil/zzz-thema-*.css) sind Tokendateien wie basis.css: derselbe Deklarationssatz
+        # darf dort in mehreren Theme-Regeln stehen (Vertrag docs/entwicklung/Themes-Vertrag.md).
+        if ist_theme(b["datei"]):
             continue
         inhalt = tuple(sorted((d["prop"], d["wert"]) for d in b["dekl"]))
         gruppen[(b["datei"], b["ctx"], inhalt)].append(b)

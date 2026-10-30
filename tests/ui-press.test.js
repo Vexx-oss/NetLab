@@ -28,7 +28,9 @@ gruppe("UI: Press (U06)", () => {
   };
   const stil = () => { const fs = require("fs"), path = require("path");
     const d = path.join(__dirname, "..", "src", "stil");
-    return fs.readdirSync(d).filter(n => n.endsWith(".css")).map(n => ({ name: n, regeln: regeln(fs.readFileSync(path.join(d, n), "utf8")) })); };
+    /* Theme-Dateien (zzz-thema-*.css) sind eigene Designsysteme und dürfen den Druckton setzen;
+       der Grundvertrag „genau eine Press-Regel" gilt für das gemeinsame Gerüst. */
+    return fs.readdirSync(d).filter(n => n.endsWith(".css") && !n.startsWith("zzz-thema-")).map(n => ({ name: n, regeln: regeln(fs.readFileSync(path.join(d, n), "utf8")) })); };
   const transformRegeln = () => {
     const out = [];
     for (const datei of stil()) for (const r of datei.regeln) {

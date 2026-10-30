@@ -173,7 +173,7 @@
   /* VLAN-Farben 1..8 (zyklisch), immer zusammen mit der Nummer zeigen */
   --vlan-1:#9AA3B2; --vlan-2:#7FD4F5; --vlan-3:#68E0A0; --vlan-4:#F3C46A; --vlan-5:#F5A0D0; --vlan-6:#B0A0FF; --vlan-7:#FFA06A; --vlan-8:#6FE0D4;
   /* Subnetz-Zonen (Ebene IP), halbtransparent */
-  --zone-a:rgba(127,212,245,.09); --zone-b:rgba(104,224,160,.09); --zone-c:rgba(243,196,106,.09); --zone-d:rgba(245,160,208,.09); --zone-e:rgba(176,160,255,.09);
+  --zone-a:rgba(127,212,245,.045); --zone-b:rgba(104,224,160,.045); --zone-c:rgba(243,196,106,.045); --zone-d:rgba(245,160,208,.045); --zone-e:rgba(176,160,255,.045);
   --schatten:0 30px 70px -50px rgba(0,0,0,.9);
   --glow:0 0 0 1px rgba(125,243,192,.28), 0 16px 36px -20px rgba(125,243,192,.42);
   --radius:14px; --radius-s:10px; --radius-xs:6px;
@@ -184,7 +184,7 @@
   --ease-standard:cubic-bezier(.2,.7,.3,1); --ease-out:cubic-bezier(.16,.84,.44,1); --ease-pop:cubic-bezier(.3,1.6,.5,1);
   --fs-1:11px; --fs-2:12.5px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:28px; --fs-7:34px; --fs-8:44px;
   --typ-router:#7FD4F5; --typ-switch:#6FE0D4; --typ-firewall:#FFA08A; --typ-host:#C9D2E0; --typ-server:#B0A0FF; --typ-nas:#7FB6F5; --typ-internet:#8FD8F0;
-  --zone-a-linie:rgba(127,212,245,.5); --zone-b-linie:rgba(104,224,160,.5); --zone-c-linie:rgba(243,196,106,.5); --zone-d-linie:rgba(245,160,208,.5); --zone-e-linie:rgba(176,160,255,.5);
+  --zone-a-linie:rgba(127,212,245,.32); --zone-b-linie:rgba(104,224,160,.32); --zone-c-linie:rgba(243,196,106,.32); --zone-d-linie:rgba(245,160,208,.32); --zone-e-linie:rgba(176,160,255,.32);
   --glas:rgba(11,12,15,.78); --leiste-bg:rgba(11,12,15,.92);
   --kopf-h:60px; --leiste-w:76px; --fuss-h:34px; --dock-b:76px;
 }
@@ -367,7 +367,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
   padding:8px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein var(--dauer) ease-out}
 /* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
    deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.wenig-text .zone-schild, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .lb-svg.klein .zone-schild, .lb-s-zonen .zone-schild, .lb-s-zonen .zone-text, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
 .pa-fach.zieht{opacity:.35; pointer-events:none}
 @keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
 .pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:0 0 4px 4px}
@@ -533,7 +533,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .ps-oben path, .pd-oben{fill:var(--ok)}
 .ps-unten path, .pd-unten, .splitter{fill:var(--bad)}
 .ps-aus rect, .pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
-.kabel-port{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
+.kabel-port{display:none; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
    /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
 .ger-ip.kopierbar{cursor:pointer; pointer-events:auto}
 .ger-ip.kopierbar:hover, .ger-ip.kopierbar:focus-visible{fill:var(--accent); text-decoration:underline}
@@ -754,10 +754,16 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-svg .ger-name{font-weight:700; letter-spacing:.08em; fill:var(--ink)}
 .lb-svg .ger-ip{font-size:var(--fs-2); fill:var(--muted)}
 /* Stecker: Gehäuse in Leiterfarbe (--kf), Kontakt als dunkler Schlitz */
-.kabel .kabel-stecker .stk-gehaeuse{fill:var(--kf); stroke:var(--bg); stroke-width:1}
-.kabel .kabel-stecker .stk-kontakt{stroke:var(--bg); opacity:.9}
+.kabel .kabel-stecker .stk-gehaeuse{fill:var(--panel-3); stroke:var(--line-2); stroke-width:1.2}
+.kabel .kabel-stecker .stk-kontakt{stroke:var(--line-2); opacity:1}
 /* Status-Punkte kompakt: skalieren um den eigenen Mittelpunkt (wie juice.css an .ps-oben path) */
-.ps{transform-box:fill-box; transform-origin:center; transform:scale(.88)}
+.ps{transform-box:fill-box; transform-origin:center; transform:scale(.88); opacity:.82}
+
+
+/* Portnamen erscheinen nur beim Überfahren des Kabels (Inspektor listet sie ohnehin);
+   Zonen sind Hintergrund-Wäsche, keine Kästchen und keine Labels – so bleibt die Fläche ruhig. */
+.kabel:hover .kabel-port, .kabel.gewaehlt .kabel-port{display:inline}
+.lb-s-zonen .zone-flaeche{stroke:none}
 
 /* ---- ereignisse.css ---- */
 /* Ereignisse (E1): Karte oben über der Fläche – Toasts stehen unten, die Karte stört sie nicht. Präfix ev-.
@@ -3306,6 +3312,5172 @@ body > .ansicht .dock{background:color-mix(in srgb, var(--panel) 88%, var(--pane
 .knopf.primaer{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 55%, transparent)}
 .hb-lage-svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none}
 
+
+/* ===== Themen mit größeren Displayschriften (Messing, Papier): Band darf nicht kappen ===== */
+body .lb-auftrag .am-zeile{grid-template-columns:56px minmax(0,1fr) auto auto}
+body .lb-auftrag .am-titel{min-width:0;overflow:hidden}
+body .lb-auftrag .am-titel strong{display:block;max-width:100%;overflow-wrap:anywhere}
+body .lb-auftrag .am-kunde{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-auftrag .am-mehr{flex:0 0 auto}
+
+/* ---- zzz-thema-keramik.css ---- */
+/* ---------- Theme „keramik" (Stone Studio, hell-warm) ----------
+   Richtung: Töpfer-/Designstudio. Kalkstein und Greige als Grund, Salbei als Handlung,
+   Terrakotta als Störung, Ocker als Zeit/Geld, Schiefer als Wissen. Matte Flächen,
+   große weiche Radien, weiche niedrige Schatten, humanistische Sans.
+   Vertrag: docs/entwicklung/Themes-Vertrag.md — alle Literale stehen im Token-Block,
+   außerhalb nur `html[data-theme="keramik"] …` mit var(--…). Kein dunkles Theme,
+   keine bunten Verläufe, keine externen Assets. */
+
+:root[data-theme="keramik"]{
+  color-scheme:light;
+
+  /* Grund: Kalkstein (bg) und Greige-Schichten (panel …) */
+  --bg:#EDE6DA; --bg-raster:rgba(58,48,36,.06); --raster:28px;
+  --panel:#FAF6EE; --panel-2:#F3EDE2; --panel-3:#E9E1D2;
+  --line:rgba(58,48,36,.15); --line-2:rgba(58,48,36,.28);
+  --ink:#26201A; --muted:#554C40; --faint:#665D50;
+
+  /* Signalfarben: Salbei = Handlung/Erfolg, Terrakotta = Störung, Ocker = Zeit/Geld, Schiefer = Wissen */
+  --accent:#4B6650; --accent-ink:#FBF7EF; --accent-soft:#E3E9DB;
+  --mint:#4B6650; --iris:#556A72; --amber:#8A5F2C; --koralle:#A34E33;
+  --ok:#4B6650; --ok-soft:#E3E9DB;
+  --warn:#8A5F2C; --warn-soft:#F4E9D5;
+  --bad:#A34E33; --bad-soft:#F5E1D7;
+  --info:#556A72; --info-soft:#E5EBEA;
+  --geld:#8A5F2C; --ruf:#556A72;
+
+  /* Paketfarben (immer mit Beschriftung): gedeckte Glasuren */
+  --p-arp:#8A6A2E; --p-icmp:#3E6E85; --p-tcp:#6A5E93; --p-udp:#4C7A5C;
+  --p-dhcp:#8A5570; --p-dns:#A2563A; --p-http:#4A6C96;
+
+  /* VLAN 1..8: gebrannte Töne, immer mit Nummer */
+  --vlan-1:#7A6B58; --vlan-2:#3E6E85; --vlan-3:#4C7A5C; --vlan-4:#8A6A2E;
+  --vlan-5:#8A5570; --vlan-6:#6A5E93; --vlan-7:#A2563A; --vlan-8:#4A7A76;
+
+  /* Subnetz-Zonen: sehr leichte Mineralschleier */
+  --zone-a:rgba(75,102,80,.09); --zone-b:rgba(85,106,114,.09); --zone-c:rgba(138,95,44,.09);
+  --zone-d:rgba(163,78,51,.08); --zone-e:rgba(106,94,147,.08);
+  --zone-a-linie:rgba(75,102,80,.45); --zone-b-linie:rgba(85,106,114,.45); --zone-c-linie:rgba(138,95,44,.45);
+  --zone-d-linie:rgba(163,78,51,.42); --zone-e-linie:rgba(106,94,147,.42);
+
+  /* Gerätetypen: ruhige Glasurfarben auf warmem Grund */
+  --typ-router:#4F6E7A; --typ-switch:#4B6650; --typ-firewall:#A2503A; --typ-host:#665E52;
+  --typ-server:#6F6380; --typ-nas:#4F6E78; --typ-internet:#3F6E6A;
+
+  /* Form: große weiche Radien, matte niedrige Schatten */
+  --radius:20px; --radius-s:14px; --radius-xs:10px;
+  --schatten:0 22px 50px -40px rgba(58,44,30,.50);
+  --glow:0 0 0 1px rgba(75,102,80,.20), 0 12px 28px -24px rgba(75,102,80,.30);
+
+  /* Schrift: humanistische Sans aus dem Projekt, Mono nur für Labels */
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  /* Maße nur für dieses Theme (Literale gehören hierher, außen nur var()) */
+  --keramik-panel-pad:22px;
+  --keramik-gap:20px;
+  --keramik-tracking:-.018em;
+  --keramik-label-tracking:.16em;
+  --keramik-gewicht:600;
+  --keramik-karte:inset 0 1px 0 rgba(255,252,245,.85), 0 18px 40px -36px rgba(58,44,30,.45);
+  --keramik-knopf:inset 0 1px 0 rgba(255,252,245,.65), 0 10px 22px -22px rgba(58,44,30,.38);
+  --keramik-punkte:radial-gradient(circle at 1px 1px, var(--bg-raster) 1px, transparent 0);
+  --keramik-ring:conic-gradient(from -90deg, var(--accent) var(--anteil,0%), var(--line) 0);
+
+  /* Glas/Leisten in warmem Schimmer statt kühlem Schwarz */
+  --glas:rgba(250,246,238,.86); --leiste-bg:rgba(250,246,238,.94);
+}
+
+/* ---- Papier statt Farbnebel: nur das feine Punktraster bleibt ---- */
+html[data-theme="keramik"] body{
+  background-image:var(--keramik-punkte);
+  background-size:var(--raster) var(--raster);
+}
+
+/* ---- Kopfzeile: feine Haarlinie statt Akzent-Schimmer ---- */
+html[data-theme="keramik"] .kopf::after{background:var(--line-2);opacity:1}
+
+/* ---- Hero, Auftragsband, Feierabend: matte Fläche, keine Verläufe ---- */
+html[data-theme="keramik"] :is(.hb-hero,.ansicht .hb-auftrag,.hb-feierabend){background:var(--panel);background-image:none;box-shadow:var(--keramik-karte)}
+html[data-theme="keramik"] .lb-auftrag{background:var(--panel);background-image:none}
+html[data-theme="keramik"] :is(.hb-raster > .hb-kenndaten,.hb-raster > .hb-klasse,.hb-raster > .hb-lage,.hb-raster > .hb-signal,.lb-dock > .in-kopf){background-image:none}
+html[data-theme="keramik"] :is(.sp-einstieg-start,.auftrag-sandbox,.sp-auftrag){background:var(--panel-2);background-image:none}
+
+/* ---- Flächen: große Radien, matte Kante mit Lichtkante oben ---- */
+html[data-theme="keramik"] .hb-panel:not(.hb-lage){
+  padding:var(--keramik-panel-pad); border-radius:var(--radius); box-shadow:var(--keramik-karte);
+}
+html[data-theme="keramik"] .hb-lage{border-radius:var(--radius);box-shadow:var(--keramik-karte)}
+html[data-theme="keramik"] .hb-raster{gap:var(--keramik-gap)}
+html[data-theme="keramik"] .ansicht .hb-kachel{box-shadow:none;border-radius:var(--radius)}
+html[data-theme="keramik"] .lb-leinwand{background:var(--panel-3);border-radius:var(--radius)}
+
+/* ---- Knöpfe: weich, matt, ohne Leuchtspur ---- */
+html[data-theme="keramik"] .knopf{border-radius:var(--radius-s);box-shadow:var(--keramik-knopf)}
+html[data-theme="keramik"] .knopf.primaer, html[data-theme="keramik"] .knopf.primaer::after{box-shadow:none;background:var(--accent)}
+html[data-theme="keramik"] .dock-knopf.an{background:var(--accent-soft);color:var(--accent)}
+
+/* ---- Legende und Ring: matte Tafel, ruhiger Fortschritt ---- */
+html[data-theme="keramik"] .lb-legende{
+  background:var(--panel-2); box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+html[data-theme="keramik"] .hb-ring{background:var(--keramik-ring)}
+
+/* ---- Typografie: weichere Display-Spannung, ruhigere Labels ---- */
+html[data-theme="keramik"] :is(.hb-kopf h2,.hb-hero h1,.ansicht .hb-auftrag h3,.hb-feierabend h2,.lb-auftrag :is(h1,h2),.lb-auftrag .am-titel strong){
+  font-weight:var(--keramik-gewicht); letter-spacing:var(--keramik-tracking);
+}
+html[data-theme="keramik"] :is(.hb-panel-titel,.hb-kicker,.hb-kopf::before,.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.hb-serie,.hb-lage-titel){
+  letter-spacing:var(--keramik-label-tracking);
+}
+
+/* ---- zzz-thema-messing.css ---- */
+/* ============================================================================
+   MESSING â€” â€žBrass Atelier" fÃ¼r das Netzwerk-Labor
+   ----------------------------------------------------------------------------
+   Idee: Ein Boutique-Architekturstudio am Abend. Warmes Espresso-Graphit, auf
+   dem Tisch ein Blatt Elfenbeinpapier; Messing ist das einzige Licht: feine
+   Haarlinien, Kanten, BeschlÃ¤ge. Patina-GrÃ¼n und Ziegel sind die Materialien,
+   die dazukommen dÃ¼rfen â€” nie als zweiter Akzent, nur als Zustand.
+   Typografie: Serif-Display (Georgia / Palatino, lokal) fÃ¼r Titel und Zahlen,
+   Atkinson fÃ¼r den FlieÃŸtext, JetBrains Mono als technische Beschriftung.
+   Geometrie: scharfe Radien (8/5/4 px), weiche, tiefe Schatten, Haarlinien.
+   Alle Literale stehen ausschlieÃŸlich im Token-Block; alle weiteren Regeln
+   beginnen mit html[data-theme="messing"] und fÃ¤rben nur Ã¼ber var(--â€¦).
+   Vertrag: docs/entwicklung/Themes-Vertrag.md Â· Ethos R1â€“R11.
+   ============================================================================ */
+
+:root[data-theme="messing"]{
+  color-scheme:dark;
+
+  /* ---- Grund: Espresso-Graphit mit warmem Werkstattlicht ---- */
+  --bg:#100D0A;
+  --bg-raster:rgba(212,176,106,.055);
+  --raster:20px;
+  --panel:#191512;
+  --panel-2:#211B15;
+  --panel-3:#2B231B;
+  --line:rgba(214,178,106,.16);
+  --line-2:rgba(224,190,120,.32);
+
+  /* ---- Papier & Schrift: Elfenbein, Stein, Rauch ---- */
+  --ink:#F4ECDE;
+  --muted:#B8A88F;
+  --faint:#9C8E77;
+
+  /* ---- Messing ist das einzige Licht ---- */
+  --accent:#D2A85F;
+  --accent-ink:#1A1209;
+  --accent-soft:#2C2213;
+  --mint:#A9C6A4;
+  --iris:#8FA79B;
+  --amber:#E3B96C;
+  --koralle:#CE7C62;
+
+  --ok:#A9C6A4;      --ok-soft:#16241A;
+  --warn:#E3B96C;    --warn-soft:#2E2411;
+  --bad:#D4806A;     --bad-soft:#2E1712;
+  --info:#8FA79B;    --info-soft:#1B2420;
+  --geld:#E3B96C;
+  --ruf:#8FA79B;
+
+  /* ---- Protokollfarben: Patina, Zinn, Ziegel, Altgold ---- */
+  --p-arp:#D9B577; --p-icmp:#8FB3A6; --p-tcp:#A8A6B8; --p-udp:#9DBFA8;
+  --p-dhcp:#C79BA6; --p-dns:#CE9A72; --p-http:#9EAFBF;
+
+  /* ---- VLAN-Farben 1..8 ---- */
+  --vlan-1:#A79B88; --vlan-2:#8FB3A6; --vlan-3:#9DBFA8; --vlan-4:#D9B577;
+  --vlan-5:#C79BA6; --vlan-6:#A8A6B8; --vlan-7:#CE9A72; --vlan-8:#8FB3A6;
+
+  /* ---- Subnetz-Zonen (Ebene IP) ---- */
+  --zone-a:rgba(143,179,166,.07); --zone-b:rgba(157,191,168,.07); --zone-c:rgba(217,181,119,.07);
+  --zone-d:rgba(199,155,166,.07); --zone-e:rgba(168,166,184,.07);
+  --zone-a-linie:rgba(143,179,166,.42); --zone-b-linie:rgba(157,191,168,.42); --zone-c-linie:rgba(217,181,119,.42);
+  --zone-d-linie:rgba(199,155,166,.42); --zone-e-linie:rgba(168,166,184,.42);
+
+  /* ---- GerÃ¤tetypen ---- */
+  --typ-router:#8FB3A6; --typ-switch:#9DBFA8; --typ-firewall:#CE8B72; --typ-host:#D6CBB6;
+  --typ-server:#A8A6B8; --typ-nas:#9EAFBF; --typ-internet:#8FB3A6;
+
+  /* ---- Tiefe: weich, tief, nie grell ---- */
+  --schatten:0 44px 96px -56px rgba(0,0,0,.95), 0 16px 40px -36px rgba(0,0,0,.7);
+  --glow:0 0 0 1px rgba(210,168,95,.30), 0 24px 56px -28px rgba(210,168,95,.28);
+  --glas:rgba(16,13,10,.82);
+  --leiste-bg:rgba(16,13,10,.95);
+
+  /* ---- Geometrie: klein, scharf, prÃ¤zise ---- */
+  --radius:8px;
+  --radius-s:5px;
+  --radius-xs:4px;
+
+  /* ---- Schriften: nur lokal vorhandene ---- */
+  --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",Consolas,"DejaVu Sans Mono",monospace;
+
+  /* ---- Typo-Skala + eigene Display-MaÃŸe (nur hier Literale) ---- */
+  --fs-1:11px; --fs-2:12.5px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:28px; --fs-7:34px; --fs-8:44px;
+  --messing-hero:clamp(34px,3.6vw,50px);
+  --messing-band:clamp(26px,2.2vw,34px);
+  --messing-zahl:clamp(28px,2vw,34px);
+
+  /* ---- Zeiten: ruhig, ein Atemzug ---- */
+  --dauer-kurz:80ms; --dauer:160ms; --dauer-mittel:240ms; --dauer-lang:320ms; --dauer-zaehler:700ms;
+  --ease-standard:cubic-bezier(.2,.7,.3,1);
+  --ease-out:cubic-bezier(.16,.84,.44,1);
+  --ease-pop:cubic-bezier(.3,1.6,.5,1);
+}
+
+/* ============================================================================
+   1 Â· GrundflÃ¤che: Espresso mit Werkstattlicht, Zeichenraster und Papierlinien
+   ============================================================================ */
+
+html[data-theme="messing"] body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(1200px 560px at 16% -14%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 62%),
+    radial-gradient(900px 520px at 96% -8%, color-mix(in srgb, var(--iris) 9%, transparent), transparent 58%),
+    radial-gradient(900px 480px at 50% 112%, color-mix(in srgb, var(--amber) 5%, transparent), transparent 62%),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--ink) 3.5%, transparent) 0 1px, transparent 1px 96px),
+    radial-gradient(circle at 1px 1px, var(--bg-raster) 1px, transparent 0);
+  background-size:auto, auto, auto, auto, var(--raster) var(--raster);
+}
+
+html[data-theme="messing"] ::selection{
+  background:color-mix(in srgb, var(--accent) 28%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="messing"] :is(a, button, [tabindex]):focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+html[data-theme="messing"]{
+  scrollbar-color:color-mix(in srgb, var(--accent) 32%, transparent) transparent;
+}
+
+html[data-theme="messing"] code{
+  background:color-mix(in srgb, var(--panel-3) 88%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  color:color-mix(in srgb, var(--amber) 84%, var(--ink));
+  padding:0 4px;
+}
+
+html[data-theme="messing"] kbd{
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 74%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="messing"] :is(h1, h2, h3, h4){
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+
+/* ============================================================================
+   2 Â· Kopfzeile: Messingbeschlag Ã¼ber warmem Graphit
+   ============================================================================ */
+
+html[data-theme="messing"] .kopf{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--panel) 96%, transparent),
+    color-mix(in srgb, var(--panel) 86%, var(--bg)));
+  border-bottom:1px solid var(--line);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="messing"] .kopf::after{
+  height:1px;
+  background:linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 58%, transparent) 22%,
+    color-mix(in srgb, var(--iris) 30%, transparent) 64%,
+    transparent 92%);
+  opacity:.9;
+}
+
+html[data-theme="messing"] .kopf-marke{
+  gap:12px;
+  padding-right:16px;
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="messing"] .marke-sym rect{
+  fill:transparent;
+  stroke:var(--accent);
+  stroke-width:1.2;
+}
+
+html[data-theme="messing"] .marke-sym path{
+  stroke:var(--accent);
+  stroke-width:1.8;
+}
+
+html[data-theme="messing"] .marke-sym circle{
+  fill:var(--accent);
+}
+
+html[data-theme="messing"] .marke-name{
+  font:700 var(--fs-4)/1 var(--display);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+
+html[data-theme="messing"] .marke-version{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:4px 8px;
+  background:color-mix(in srgb, var(--bg) 34%, transparent);
+}
+
+html[data-theme="messing"] .kopf .sp-leise{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .kopf-werte{
+  gap:4px;
+}
+
+html[data-theme="messing"] .wert{
+  height:36px;
+  font:600 var(--fs-2)/1 var(--mono);
+  letter-spacing:.04em;
+  color:var(--muted);
+  background:color-mix(in srgb, var(--panel) 62%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="messing"] .wert .wert-zahl{
+  color:var(--ink);
+}
+
+html[data-theme="messing"] .wert:hover{
+  background:color-mix(in srgb, var(--panel-2) 82%, transparent);
+  border-color:var(--line-2);
+}
+
+html[data-theme="messing"] .wert-offen.hat{
+  border-color:color-mix(in srgb, var(--accent) 48%, var(--line));
+  background:color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+html[data-theme="messing"] .wert.mit-fortschritt::after{
+  height:2px;
+  background:var(--accent);
+}
+
+html[data-theme="messing"] .kopf-knoepfe{
+  border-left:1px solid var(--line);
+  padding-left:12px;
+  gap:4px;
+}
+
+html[data-theme="messing"] .kopf-knopf{
+  height:36px;
+  min-width:36px;
+  border:1px solid transparent;
+  border-radius:var(--radius-xs);
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .kopf-knopf:hover{
+  color:var(--ink);
+  border-color:var(--line);
+  background:color-mix(in srgb, var(--panel-2) 86%, transparent);
+}
+
+/* ============================================================================
+   3 Â· Schiene und Statusfuss: technische Beschriftung, Messing als Aktiv-Marke
+   ============================================================================ */
+
+html[data-theme="messing"] .dock{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--panel) 92%, transparent),
+    color-mix(in srgb, var(--bg) 82%, var(--panel)) 62%,
+    var(--bg));
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="messing"] .dock-knopf{
+  color:var(--faint);
+  border-radius:var(--radius-s);
+  transition:background var(--dauer) var(--ease-standard), color var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="messing"] .dock-knopf:hover{
+  color:var(--muted);
+  background:color-mix(in srgb, var(--panel-2) 78%, transparent);
+}
+
+html[data-theme="messing"] .dock-knopf.an{
+  color:var(--accent);
+  background:linear-gradient(160deg,
+    color-mix(in srgb, var(--accent) 14%, transparent),
+    color-mix(in srgb, var(--iris) 6%, transparent));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+html[data-theme="messing"] .dock-knopf.an::before{
+  width:2px;
+  top:8px;
+  bottom:8px;
+  border-radius:999px;
+  background:var(--accent);
+  box-shadow:0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+html[data-theme="messing"] .dock-text{
+  font:600 var(--fs-1)/1.1 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+
+html[data-theme="messing"] .dock-knopf.an .dock-text{
+  color:var(--accent);
+}
+
+html[data-theme="messing"] .dock-zahl{
+  background:transparent;
+  color:var(--faint);
+  box-shadow:inset 0 0 0 1px var(--line);
+  border-radius:999px;
+  font:700 var(--fs-1)/18px var(--mono);
+}
+
+html[data-theme="messing"] .dock-knopf.an .dock-zahl{
+  background:var(--accent);
+  color:var(--accent-ink);
+  box-shadow:none;
+}
+
+html[data-theme="messing"] .fuss{
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  border-top:1px solid var(--line);
+  color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+}
+
+html[data-theme="messing"] .fuss-live{
+  color:var(--accent);
+  letter-spacing:.24em;
+}
+
+html[data-theme="messing"] .fuss-punkt{
+  width:6px;
+  height:6px;
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
+  animation:messing-atem var(--dauer-lang) ease-in-out infinite alternate;
+}
+
+html[data-theme="messing"] .fuss-ebene{
+  color:var(--muted);
+}
+
+html[data-theme="messing"] .fuss-trenner{
+  color:color-mix(in srgb, var(--faint) 60%, transparent);
+}
+
+@keyframes messing-atem{
+  from{opacity:1}
+  to{opacity:.38}
+}
+
+/* ============================================================================
+   4 Â· KnÃ¶pfe: MessingbeschlÃ¤ge, keine Kissen
+   ============================================================================ */
+
+html[data-theme="messing"] .knopf{
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 76%, transparent);
+  color:var(--ink);
+  font:600 var(--fs-2)/1 var(--body);
+  letter-spacing:.06em;
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="messing"] .knopf:hover{
+  border-color:color-mix(in srgb, var(--accent) 48%, var(--line-2));
+  background:color-mix(in srgb, var(--panel-3) 82%, transparent);
+}
+
+html[data-theme="messing"] .knopf.primaer,
+html[data-theme="messing"] .knopf-haupt{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 92%, var(--ink)),
+    var(--accent));
+  border-color:color-mix(in srgb, var(--accent) 82%, var(--line));
+  color:var(--accent-ink);
+  box-shadow:0 12px 28px -18px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+html[data-theme="messing"] .knopf.primaer:hover,
+html[data-theme="messing"] .knopf-haupt:hover{
+  filter:brightness(1.06);
+  border-color:var(--accent);
+}
+
+html[data-theme="messing"] .knopf.geist{
+  background:transparent;
+  border-color:var(--line-2);
+  color:var(--muted);
+}
+
+html[data-theme="messing"] .knopf.geist:hover{
+  color:var(--ink);
+  border-color:color-mix(in srgb, var(--accent) 55%, var(--line-2));
+  background:color-mix(in srgb, var(--panel-2) 64%, transparent);
+}
+
+/* ============================================================================
+   5 Â· Startseite (Heute): Bento als Atelier-Editorial
+   ============================================================================ */
+
+html[data-theme="messing"] .ansicht .hb-seite{
+  position:relative;
+  max-width:1180px;
+  padding:24px 24px 16px;
+  gap:16px;
+  background:transparent;
+}
+
+/* Randnotiz am Satzspiegel â€” die Signatur des Ateliers */
+html[data-theme="messing"] .ansicht .hb-seite::after{
+  content:"ATELIER MESSING Â· HAUS 12";
+  position:absolute;
+  top:16px;
+  right:4px;
+  writing-mode:vertical-rl;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  color:color-mix(in srgb, var(--faint) 62%, transparent);
+  pointer-events:none;
+}
+
+html[data-theme="messing"] .ansicht .hb-raster{
+  gap:16px;
+  position:relative;
+}
+
+html[data-theme="messing"] .ansicht .hb-panel{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--panel);
+  background-image:
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 3%, transparent), transparent 22%),
+    linear-gradient(100deg, color-mix(in srgb, var(--accent) 4%, transparent), transparent 42%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    var(--schatten);
+}
+
+/* Messingkante an jeder Karte: der Beschlag, der die FlÃ¤che hÃ¤lt */
+html[data-theme="messing"] .ansicht .hb-panel::after{
+  content:"";
+  position:absolute;
+  top:-1px;
+  left:-1px;
+  width:32px;
+  height:1px;
+  background:var(--accent);
+  opacity:.55;
+  pointer-events:none;
+}
+
+html[data-theme="messing"] .ansicht .hb-klasse{
+  background-image:linear-gradient(170deg, color-mix(in srgb, var(--iris) 7%, transparent), transparent 56%);
+}
+
+html[data-theme="messing"] .ansicht .hb-signal{
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--iris) 8%, transparent), transparent 58%);
+}
+
+html[data-theme="messing"] .ansicht .hb-sitzung{
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--amber) 4%, transparent), transparent 46%);
+}
+
+html[data-theme="messing"] .ansicht .hb-panel-titel{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:0 0 12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-panel-titel::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent);
+}
+
+/* ---- Hero: der Auftrag als Titelgeschichte ---- */
+
+html[data-theme="messing"] .ansicht .hb-hero{
+  padding:24px 24px;
+  gap:8px;
+  background-color:var(--panel);
+  background-image:
+    radial-gradient(120% 140% at 92% -20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 58%),
+    linear-gradient(160deg, color-mix(in srgb, var(--panel-2) 70%, transparent), var(--panel) 58%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 8%, transparent),
+    var(--schatten);
+}
+
+/* Passepartout: eine zweite Haarlinie im Papierrand */
+html[data-theme="messing"] .ansicht .hb-hero::before{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border:1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius:var(--radius-xs);
+  pointer-events:none;
+}
+
+html[data-theme="messing"] .ansicht .hb-kicker{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  color:color-mix(in srgb, var(--accent) 78%, var(--faint));
+}
+
+html[data-theme="messing"] .ansicht .hb-kicker::before{
+  content:"";
+  width:24px;
+  height:1px;
+  background:var(--accent);
+}
+
+html[data-theme="messing"] .ansicht .hb-hero-kunde{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+  gap:8px;
+  margin-top:8px;
+}
+
+html[data-theme="messing"] .ansicht .hb-hero h1{
+  font:700 var(--messing-hero)/1 var(--display);
+  letter-spacing:-.015em;
+  color:var(--ink);
+  margin:4px 0 8px;
+  max-width:22ch;
+}
+
+html[data-theme="messing"] .ansicht .hb-hero-lead{
+  font:italic 400 var(--fs-4)/1.45 var(--display);
+  color:var(--muted);
+  max-width:62ch;
+  margin:0 0 8px;
+}
+
+html[data-theme="messing"] .ansicht .hb-hero-meta{
+  gap:8px;
+  margin-bottom:16px;
+}
+
+html[data-theme="messing"] .ansicht .hb-hero-meta span{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:8px 12px;
+  background:color-mix(in srgb, var(--bg) 22%, transparent);
+}
+
+html[data-theme="messing"] .ansicht .hb-hero-meta .warn{
+  color:var(--koralle);
+  border-color:color-mix(in srgb, var(--koralle) 38%, transparent);
+  background:color-mix(in srgb, var(--koralle) 8%, transparent);
+}
+
+html[data-theme="messing"] .ansicht .hb-aktionen{
+  gap:12px;
+  margin-top:16px;
+}
+
+html[data-theme="messing"] .ansicht .hb-aktionen .knopf{
+  height:44px;
+  border-radius:var(--radius-xs);
+  padding:0 24px;
+  font:700 var(--fs-2)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+/* ---- Kenndaten: Zahlen als Plakate ---- */
+
+html[data-theme="messing"] .ansicht .hb-kenndaten{
+  padding:0;
+  background-image:linear-gradient(180deg,
+    color-mix(in srgb, var(--panel-2) 62%, transparent),
+    var(--panel) 62%);
+}
+
+html[data-theme="messing"] .ansicht .hb-kd{
+  padding:16px 24px;
+  gap:12px;
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="messing"] .ansicht .hb-kd .lab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-kd > b{
+  font:700 var(--messing-zahl)/1 var(--display);
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+
+html[data-theme="messing"] .ansicht .hb-kd small{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-kd > i{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  box-shadow:0 0 10px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* ---- Tagesziel: Fortschritt als Messingring ---- */
+
+html[data-theme="messing"] .ansicht .hb-ring{
+  background:conic-gradient(from -90deg,
+    var(--accent) var(--anteil, 0%),
+    color-mix(in srgb, var(--ink) 14%, transparent) 0);
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+
+html[data-theme="messing"] .ansicht .hb-ring::after{
+  background:var(--panel);
+}
+
+html[data-theme="messing"] .ansicht .hb-ring b{
+  position:relative;
+  z-index:10;
+  font:700 var(--fs-5)/1 var(--display);
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+
+html[data-theme="messing"] .ansicht .hb-zeile{
+  border-top:1px solid color-mix(in srgb, var(--ink) 6%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="messing"] .ansicht .hb-zeile i{
+  border-radius:var(--radius-xs);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--faint) 70%, transparent);
+}
+
+html[data-theme="messing"] .ansicht .hb-zeile.fertig i{
+  background:var(--accent);
+  box-shadow:none;
+}
+
+html[data-theme="messing"] .ansicht .hb-zeile.fertig{
+  color:var(--ink);
+  letter-spacing:.01em;
+}
+
+html[data-theme="messing"] .ansicht .hb-zeile b{
+  font:600 var(--fs-3)/1.3 var(--body);
+  letter-spacing:.01em;
+}
+
+html[data-theme="messing"] .ansicht .hb-zeile small{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  color:var(--faint);
+}
+
+/* ---- Letzte Sitzung: Fahrplan in Mono ---- */
+
+html[data-theme="messing"] .ansicht .hb-sz{
+  border-top:1px solid color-mix(in srgb, var(--ink) 6%, transparent);
+  padding:8px 0;
+}
+
+html[data-theme="messing"] .ansicht .hb-sz time{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-sz b{
+  font:600 var(--fs-3)/1.3 var(--body);
+  color:var(--ink);
+}
+
+html[data-theme="messing"] .ansicht .hb-sz small{
+  color:var(--faint);
+  font-size:var(--fs-2);
+}
+
+html[data-theme="messing"] .ansicht .hb-sz em{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  font-style:normal;
+  color:color-mix(in srgb, var(--accent) 85%, var(--faint));
+}
+
+/* ---- Klassenraum ---- */
+
+html[data-theme="messing"] .ansicht .hb-klasse-hinweis{
+  color:var(--faint);
+  font-size:var(--fs-2);
+  line-height:1.55;
+}
+
+html[data-theme="messing"] .ansicht .hb-klasse .knopf{
+  height:40px;
+  border-radius:var(--radius-xs);
+}
+
+/* ---- Lagebild: Karte auf warmem Papier, Chips wie Beschriftungsschilder ---- */
+
+html[data-theme="messing"] .ansicht .hb-lage{
+  background-color:color-mix(in srgb, var(--panel) 74%, var(--bg));
+  background-image:radial-gradient(90% 120% at 50% -20%,
+    color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%);
+}
+
+html[data-theme="messing"] .ansicht .hb-lage-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-lage-zaehler{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+}
+
+html[data-theme="messing"] .ansicht .hb-lage-zaehler.ok{
+  color:var(--ok);
+}
+
+html[data-theme="messing"] .ansicht .hb-lage-zaehler.bad{
+  color:var(--bad);
+}
+
+html[data-theme="messing"] .ansicht .hb-chip{
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 88%, transparent);
+  color:var(--ink);
+  font:600 var(--fs-1)/1.1 var(--mono);
+  letter-spacing:.04em;
+  box-shadow:0 8px 18px -14px color-mix(in srgb, var(--bg) 90%, transparent);
+}
+
+html[data-theme="messing"] .ansicht .hb-chip:hover{
+  border-color:color-mix(in srgb, var(--accent) 55%, var(--line-2));
+  background:color-mix(in srgb, var(--panel-3) 88%, transparent);
+}
+
+html[data-theme="messing"] .ansicht .hb-chip-sym{
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--accent) 12%, transparent);
+  color:var(--accent);
+}
+
+html[data-theme="messing"] .ansicht .hb-chip.typ-internet .hb-chip-sym{
+  background:color-mix(in srgb, var(--iris) 14%, transparent);
+  color:var(--iris);
+}
+
+html[data-theme="messing"] .ansicht .hb-chip.typ-router .hb-chip-sym,
+html[data-theme="messing"] .ansicht .hb-chip.typ-firewall .hb-chip-sym{
+  background:color-mix(in srgb, var(--amber) 14%, transparent);
+  color:var(--amber);
+}
+
+html[data-theme="messing"] .ansicht .hb-chip.hb-chip-mehr{
+  border-style:dashed;
+  background:transparent;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-lage-fuss .hb-legende,
+html[data-theme="messing"] .ansicht .hb-lage-tipp{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+}
+
+/* ---- Signal: eine ruhige Messingkurve ---- */
+
+html[data-theme="messing"] .ansicht .hb-signal-svg path:first-of-type{
+  stroke:var(--accent);
+}
+
+html[data-theme="messing"] .ansicht .hb-signal-svg path:last-of-type{
+  stroke:color-mix(in srgb, var(--iris) 40%, transparent);
+}
+
+html[data-theme="messing"] .ansicht .hb-stat{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-stat b{
+  color:var(--ink);
+  font-weight:700;
+}
+
+/* ---- FuÃŸzeile der Startseite ---- */
+
+html[data-theme="messing"] .ansicht .hb-ziel{
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .ansicht .hb-woche-knopf{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:1px dashed color-mix(in srgb, var(--line-2) 70%, transparent);
+  padding:4px 0;
+}
+
+html[data-theme="messing"] .ansicht .hb-woche-knopf:hover{
+  color:var(--accent);
+  border-bottom-color:var(--accent);
+}
+
+/* ============================================================================
+   6 Â· Labor: Auftragsband, ZeichenflÃ¤che, GerÃ¤te, Kabel
+   ============================================================================ */
+
+html[data-theme="messing"] .labor .lb-mitte{
+  gap:16px;
+  padding:16px 24px;
+}
+
+/* ---- Auftragsband: Messingplakette Ã¼ber dem Blatt ---- */
+
+html[data-theme="messing"] .labor .lb-auftrag{
+  position:relative;
+  padding:24px 24px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--panel);
+  background-image:
+    linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 54%, transparent), var(--panel) 64%),
+    radial-gradient(120% 160% at 100% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 58%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    0 24px 48px -44px color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-auftrag::before{
+  display:block;
+  margin:0 0 12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  color:color-mix(in srgb, var(--accent) 72%, var(--faint));
+}
+
+html[data-theme="messing"] .labor .lb-auftrag::after{
+  content:"";
+  position:absolute;
+  top:-1px;
+  left:24px;
+  width:64px;
+  height:2px;
+  background:linear-gradient(90deg, var(--accent), transparent);
+  pointer-events:none;
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .am-titel strong{
+  font:700 var(--messing-band)/1.02 var(--display);
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .am-kunde{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.20em;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .am-ziele{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:8px 12px;
+  background:color-mix(in srgb, var(--bg) 26%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .sp-kunde-sym{
+  border:1px solid color-mix(in srgb, var(--accent) 26%, var(--line));
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--accent) 9%, transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .sp-abnahme{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 92%, var(--ink)),
+    var(--accent));
+  color:var(--accent-ink);
+  border:1px solid color-mix(in srgb, var(--accent) 72%, var(--line));
+  border-radius:var(--radius-xs);
+  font:700 var(--fs-2)/1 var(--mono);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  box-shadow:0 12px 26px -18px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .am-lesen{
+  background:transparent;
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+  font:600 var(--fs-2)/1 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .am-lesen:hover{
+  color:var(--accent);
+  border-color:color-mix(in srgb, var(--accent) 60%, var(--line-2));
+}
+
+html[data-theme="messing"] .labor .lb-auftrag .am-mehr{
+  background:transparent;
+  border:1px solid transparent;
+  color:var(--faint);
+}
+
+/* ---- ZeichenflÃ¤che: warmes Papier unter einer tiefen Lampe ---- */
+
+html[data-theme="messing"] .labor .lb-leinwand{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(120% 100% at 50% -20%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 56%),
+    radial-gradient(90% 70% at 50% 120%, color-mix(in srgb, var(--bg) 85%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 86%, var(--bg)), var(--bg) 72%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-leinwand::before{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  color:color-mix(in srgb, var(--accent) 58%, var(--faint));
+}
+
+html[data-theme="messing"] .labor .lb-raster-punkt{
+  fill:color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* ---- GerÃ¤te: Karten mit Messingkante ---- */
+
+html[data-theme="messing"] .labor .ger-karte{
+  rx:var(--radius-xs);
+  fill:var(--panel-2);
+  stroke:var(--line);
+  stroke-width:1;
+}
+
+html[data-theme="messing"] .labor .ger.hover .ger-karte{
+  fill:var(--panel-3);
+  stroke:var(--line-2);
+}
+
+html[data-theme="messing"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="messing"] .labor .ger.zielt .ger-karte{
+  stroke:var(--accent);
+  stroke-width:1.6;
+}
+
+html[data-theme="messing"] .labor .ger-name{
+  font:600 var(--fs-1)/1 var(--display);
+  letter-spacing:.14em;
+  fill:var(--ink);
+}
+
+html[data-theme="messing"] .labor .ger-ip{
+  font:500 var(--fs-1)/1 var(--mono);
+  fill:color-mix(in srgb, var(--accent) 62%, var(--muted));
+}
+
+html[data-theme="messing"] .labor .kabel-linie{
+  stroke-width:2.4;
+  stroke-opacity:.85;
+}
+
+html[data-theme="messing"] .labor .kabel-huelle{
+  stroke:color-mix(in srgb, var(--ink) 18%, transparent);
+  stroke-width:7;
+}
+
+html[data-theme="messing"] .labor .kabel-port{
+  fill:color-mix(in srgb, var(--faint) 88%, transparent);
+}
+
+html[data-theme="messing"] .labor .ps-grund{
+  fill:var(--panel-2);
+  stroke:var(--line-2);
+}
+
+/* ---- Schwebende Werkzeuge: Milchglas Ã¼ber warmem Grund ---- */
+
+html[data-theme="messing"] .labor .lb-gruppe{
+  background:color-mix(in srgb, var(--bg) 66%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  box-shadow:0 12px 28px -24px color-mix(in srgb, var(--bg) 90%, transparent);
+  -webkit-backdrop-filter:blur(10px) saturate(120%);
+  backdrop-filter:blur(10px) saturate(120%);
+}
+
+html[data-theme="messing"] .labor .lb-wz{
+  color:var(--faint);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="messing"] .labor .lb-wz:hover{
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel-2) 80%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-wz.an{
+  color:var(--accent);
+  background:color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-wz-taste{
+  color:var(--faint);
+  border-color:var(--line-2);
+  background:transparent;
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="messing"] .labor .lb-hinweis{
+  background:color-mix(in srgb, var(--bg) 72%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+  font:500 var(--fs-2)/1.4 var(--body);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+
+html[data-theme="messing"] .labor .lb-legende{
+  color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  gap:16px;
+}
+
+/* ---- Minimap: kleine Werkstattkarte ---- */
+
+html[data-theme="messing"] .labor .wk-mini{
+  background:color-mix(in srgb, var(--glas) 90%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  box-shadow:var(--schatten);
+}
+
+html[data-theme="messing"] .labor .wk-mini-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .wk-mini-svg{
+  background-color:var(--bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="messing"] .labor .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+html[data-theme="messing"] .labor .wk-mini-punkt{
+  stroke:var(--bg);
+}
+
+html[data-theme="messing"] .labor .wk-mini-punkt.an{
+  fill:var(--accent);
+  stroke:var(--bg);
+}
+
+html[data-theme="messing"] .labor .wk-mini-knopf{
+  background:color-mix(in srgb, var(--panel-2) 72%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+}
+
+html[data-theme="messing"] .labor .wk-mini-zoomtext{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.12em;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .wk-zoomfeld,
+html[data-theme="messing"] .labor .wk-stufe{
+  background:color-mix(in srgb, var(--panel-2) 72%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  color:var(--ink);
+  font:600 var(--fs-1)/1 var(--mono);
+}
+
+/* ---- GerÃ¤teleiste links (schmale Breiten) ---- */
+
+html[data-theme="messing"] .labor .lb-geraete{
+  background:color-mix(in srgb, var(--panel) 94%, var(--bg));
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="messing"] .labor .lb-geraete-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .pa-kat{
+  color:var(--faint);
+  border:1px solid transparent;
+  border-radius:var(--radius-s);
+}
+
+html[data-theme="messing"] .labor .pa-kat:hover{
+  color:var(--muted);
+  background:color-mix(in srgb, var(--panel-2) 72%, transparent);
+}
+
+html[data-theme="messing"] .labor .pa-kat.an{
+  color:var(--accent);
+  border-color:color-mix(in srgb, var(--accent) 34%, transparent);
+  background:color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+/* ============================================================================
+   7 Â· Dock, Inspektor und Eingaben: Datenblatt statt Werkzeugkasten
+   ============================================================================ */
+
+html[data-theme="messing"] .labor .lb-dock{
+  background:color-mix(in srgb, var(--panel) 94%, var(--bg));
+  border-left:1px solid var(--line);
+  box-shadow:-24px 0 48px -40px color-mix(in srgb, var(--bg) 90%, transparent);
+}
+
+html[data-theme="messing"] .labor .lb-dock-reiter{
+  gap:4px;
+  padding:8px 12px;
+  border-bottom:1px solid var(--line);
+}
+
+html[data-theme="messing"] .labor .lb-dock-tab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="messing"] .labor .lb-dock-tab.an{
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel-2) 70%, transparent);
+  box-shadow:inset 0 -1px 0 var(--accent);
+}
+
+html[data-theme="messing"] .labor .lb-inspektor::before{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .in-kopf{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--line);
+  background:color-mix(in srgb, var(--panel-2) 56%, transparent);
+}
+
+html[data-theme="messing"] .labor .in-kopf-text h3{
+  font:700 var(--fs-5)/1.08 var(--display);
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+
+html[data-theme="messing"] .labor .in-kopf-text span{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .in-chip{
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-3) 56%, transparent);
+  font:600 var(--fs-1)/1.6 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+html[data-theme="messing"] .labor .in-chip.ok{
+  border-color:color-mix(in srgb, var(--ok) 36%, transparent);
+  background:color-mix(in srgb, var(--ok) 9%, transparent);
+  color:var(--ok);
+}
+
+html[data-theme="messing"] .labor .in-chip.bad{
+  border-color:color-mix(in srgb, var(--bad) 36%, transparent);
+  background:color-mix(in srgb, var(--bad) 9%, transparent);
+  color:var(--bad);
+}
+
+html[data-theme="messing"] .labor .in-chip.warn{
+  border-color:color-mix(in srgb, var(--warn) 36%, transparent);
+  background:color-mix(in srgb, var(--warn) 9%, transparent);
+  color:var(--warn);
+}
+
+html[data-theme="messing"] .labor .in-chip.info{
+  border-color:color-mix(in srgb, var(--info) 36%, transparent);
+  background:color-mix(in srgb, var(--info) 9%, transparent);
+  color:var(--info);
+}
+
+html[data-theme="messing"] .labor .in-reiter{
+  gap:4px;
+  padding:8px 12px 0;
+  border-bottom:1px solid var(--line);
+}
+
+html[data-theme="messing"] .labor .in-tab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+  padding:8px 8px;
+  border:0;
+  border-bottom:1px solid transparent;
+  border-radius:0;
+  background:none;
+}
+
+html[data-theme="messing"] .labor .in-tab.an{
+  color:var(--ink);
+  border-bottom-color:var(--accent);
+  background:none;
+}
+
+html[data-theme="messing"] .labor .in-abschnitt{
+  padding:16px 16px;
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="messing"] .labor .in-abschnitt h4{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .in-feld-titel{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .in-eingabe,
+html[data-theme="messing"] .labor .in-auswahl{
+  height:32px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 56%, transparent);
+  color:var(--ink);
+  font:500 var(--fs-2)/1 var(--mono);
+}
+
+html[data-theme="messing"] .labor .in-eingabe:focus,
+html[data-theme="messing"] .labor .in-auswahl:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+html[data-theme="messing"] .labor .in-schalter-bahn{
+  background:color-mix(in srgb, var(--bg) 64%, transparent);
+  border:1px solid var(--line-2);
+}
+
+html[data-theme="messing"] .labor .in-schalter input:checked + .in-schalter-bahn{
+  background:color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color:color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+html[data-theme="messing"] .labor .in-schalter input:checked + .in-schalter-bahn::after{
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+html[data-theme="messing"] .labor .in-knopf{
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 66%, transparent);
+  color:var(--ink);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+html[data-theme="messing"] .labor .in-knopf:hover{
+  border-color:color-mix(in srgb, var(--accent) 45%, var(--line-2));
+  background:color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+html[data-theme="messing"] .labor .in-knopf.primaer{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--accent-ink);
+}
+
+html[data-theme="messing"] .labor .in-tabelle td{
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="messing"] .labor .in-tabelle td.mono{
+  font:500 var(--fs-2)/1 var(--mono);
+  color:color-mix(in srgb, var(--accent) 72%, var(--muted));
+}
+
+html[data-theme="messing"] .labor .in-gegen{
+  color:var(--muted);
+  font-size:var(--fs-2);
+}
+
+html[data-theme="messing"] .labor .in-hinweis{
+  font:500 var(--fs-2)/1.55 var(--body);
+  color:var(--muted);
+}
+
+html[data-theme="messing"] .labor .lb-insp-leer::before{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.32em;
+  color:var(--faint);
+}
+
+html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
+  font:500 var(--fs-1)/1.7 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   8 Â· Schmale Breiten: die Marginalspalte weicht, das Papier bleibt
+   ============================================================================ */
+
+@media (max-width:1200px){
+  html[data-theme="messing"] .ansicht .hb-seite::after{
+    display:none;
+  }
+}
+
+@media (max-width:900px){
+  html[data-theme="messing"] .kopf{
+    gap:8px;
+    padding:0 12px;
+  }
+
+  html[data-theme="messing"] .marke-name{
+    font-size:var(--fs-2);
+    letter-spacing:.12em;
+  }
+
+  html[data-theme="messing"] .ansicht .hb-seite{
+    padding:16px 16px 12px;
+    gap:16px;
+  }
+
+  html[data-theme="messing"] .dock-text{
+    letter-spacing:.02em;
+  }
+
+  html[data-theme="messing"] .ansicht .hb-hero{
+    padding:16px 16px;
+  }
+
+  html[data-theme="messing"] .ansicht .hb-hero::before{
+    inset:4px;
+  }
+
+  html[data-theme="messing"] .ansicht .hb-hero h1{
+    font-size:var(--fs-6);
+    letter-spacing:-.01em;
+  }
+
+  html[data-theme="messing"] .ansicht .hb-hero-lead{
+    font-size:var(--fs-3);
+  }
+
+  html[data-theme="messing"] .ansicht .hb-kicker{
+    letter-spacing:.20em;
+  }
+
+  html[data-theme="messing"] .labor .lb-mitte{
+    padding:8px 12px;
+  }
+
+  html[data-theme="messing"] .labor .lb-auftrag{
+    padding:12px 12px;
+  }
+
+  html[data-theme="messing"] .labor .lb-auftrag::after{
+    display:none;
+  }
+
+  html[data-theme="messing"] .labor .lb-auftrag .am-titel strong{
+    font-size:var(--fs-5);
+    letter-spacing:0;
+  }
+}
+
+/* ---- zzz-thema-nordlicht.css ---- */
+/* ============================================================================
+   NORDLICHT — arktisches Editorial-Theme für das Netzwerk-Labor
+   ----------------------------------------------------------------------------
+   Idee: Eine Beobachtungsstation in der Polarnacht. Der Grund ist tiefes,
+   blaugrünes Schiefer; alle Flächen sind Eispaneele mit hauchfeiner Kante und
+   kaltem Licht obenauf. Das einzige gesättigte Licht ist das Nordlicht:
+   Aurora-Minze → Eis-Cyan → zartes Violett. Es erscheint nur dort, wo etwas
+   passiert (Handlung, Auswahl, Live, Fokus) — nie als Dekoration.
+   Typografie: Bricolage Grotesque als große, eng gesetzte Display-Schrift,
+   Atkinson als ruhiger Fließtext, JetBrains Mono als technische Beschriftung
+   mit weitem Sperrsatz. Geometrie: 12/8/4 px — präzise statt weich.
+   Alle Literale stehen ausschließlich im Token-Block; alle weiteren Regeln
+   beginnen mit html[data-theme="nordlicht"] und färben nur über var(--…).
+   Vertrag: docs/entwicklung/Themes-Vertrag.md · Ethos R1–R5.
+   ============================================================================ */
+
+:root[data-theme="nordlicht"]{
+  color-scheme:dark;
+
+  /* ---- Grund: Polarnacht (blaugrünes Schiefer, kein Schwarz) ---- */
+  --bg:#070D11;
+  --bg-raster:rgba(210,255,244,.055);
+  --raster:28px;
+  --panel:#0D161B;
+  --panel-2:#121E24;
+  --panel-3:#18262D;
+  --line:rgba(210,255,244,.10);
+  --line-2:rgba(210,255,244,.20);
+
+  /* ---- Eis & Schrift ---- */
+  --ink:#E9F3EF;
+  --muted:#A8BCB7;
+  --faint:#819792;
+
+  /* ---- Aurora: das einzige Licht. Minze → Eis-Cyan → Violett ---- */
+  --accent:#8AF3CB;
+  --accent-ink:#04140E;
+  --accent-soft:#0C2A23;
+  --mint:#8AF3CB;
+  --iris:#B4A8FF;
+  --amber:#F2CB8B;
+  --koralle:#F2958A;
+
+  --ok:#8AF3CB;      --ok-soft:#0B2721;
+  --warn:#F2CB8B;    --warn-soft:#282113;
+  --bad:#F2958A;     --bad-soft:#2B1717;
+  --info:#B4A8FF;    --info-soft:#1A1830;
+  --geld:#F2CB8B;
+  --ruf:#B4A8FF;
+
+  /* ---- Paketfarben (kühler und entsättigter als im Leitstand) ---- */
+  --p-arp:#E7C179; --p-icmp:#9BE8F2; --p-tcp:#B7ACF2; --p-udp:#7FE0B4; --p-dhcp:#E7A2C9; --p-dns:#EFA97E; --p-http:#8FB8E8;
+
+  /* ---- VLAN-Farben 1..8 ---- */
+  --vlan-1:#93A1AC; --vlan-2:#9BE8F2; --vlan-3:#7FE0B4; --vlan-4:#E7C179; --vlan-5:#E7A2C9; --vlan-6:#B7ACF2; --vlan-7:#EFA97E; --vlan-8:#86E0D6;
+
+  /* ---- Subnetz-Zonen (Ebene IP), halbtransparent ---- */
+  --zone-a:rgba(155,232,242,.07); --zone-b:rgba(127,224,180,.07); --zone-c:rgba(231,193,121,.07); --zone-d:rgba(231,162,201,.07); --zone-e:rgba(183,172,242,.07);
+  --zone-a-linie:rgba(155,232,242,.42); --zone-b-linie:rgba(127,224,180,.42); --zone-c-linie:rgba(231,193,121,.42); --zone-d-linie:rgba(231,162,201,.42); --zone-e-linie:rgba(183,172,242,.42);
+
+  /* ---- Gerätetypen ---- */
+  --typ-router:#9BE8F2; --typ-switch:#86E0D6; --typ-firewall:#F2A292; --typ-host:#CBD6D6; --typ-server:#B7ACF2; --typ-nas:#8FB8E8; --typ-internet:#9BE8F2;
+
+  /* ---- Tiefe & Licht ---- */
+  --schatten:0 36px 84px -56px rgba(0,0,0,.94);
+  --glow:0 0 0 1px rgba(138,243,203,.20), 0 24px 64px -34px rgba(138,243,203,.30);
+  --glas:rgba(7,13,17,.74);
+  --leiste-bg:rgba(7,13,17,.94);
+
+  /* ---- Geometrie: präzise, kalt, nordisch ---- */
+  --radius:12px;
+  --radius-s:8px;
+  --radius-xs:4px;
+
+  /* ---- Schrift: nur lokale Projektschriften ---- */
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  /* ---- Typo-Skala: mehr Spannung zwischen Mikro-Label und Display ---- */
+  --fs-1:11px; --fs-2:12px; --fs-3:14px; --fs-4:15px; --fs-5:20px; --fs-6:32px; --fs-7:40px; --fs-8:54px;
+  --schrift-hero:clamp(34px,3.6vw,54px);
+  --schrift-band:clamp(26px,2.2vw,34px);
+
+  /* ---- Zeiten ---- */
+  --dauer-kurz:80ms; --dauer:160ms; --dauer-mittel:240ms; --dauer-lang:320ms; --dauer-zaehler:700ms;
+  --dauer-atem:9s;
+  --dauer-aurora:26s;
+  --ease-standard:cubic-bezier(.2,.7,.3,1);
+  --ease-out:cubic-bezier(.16,.84,.44,1);
+  --ease-pop:cubic-bezier(.3,1.6,.5,1);
+  --ease-aurora:cubic-bezier(.33,0,.2,1);
+}
+
+/* ============================================================================
+   1 · Grundfläche: Polarnacht mit drei sehr leisen Nordlicht-Nebeln
+   ============================================================================ */
+
+html[data-theme="nordlicht"] body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(1200px 560px at 50% -14%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 64%),
+    radial-gradient(900px 520px at 6% -10%, color-mix(in srgb, var(--iris) 8%, transparent), transparent 60%),
+    radial-gradient(1000px 620px at 96% 6%, color-mix(in srgb, var(--p-icmp) 5%, transparent), transparent 62%),
+    radial-gradient(circle at 1px 1px, var(--bg-raster) 1px, transparent 0);
+  background-size:auto, auto, auto, var(--raster) var(--raster);
+}
+
+html[data-theme="nordlicht"]{
+  scrollbar-color:color-mix(in srgb, var(--ink) 22%, transparent) transparent;
+}
+
+html[data-theme="nordlicht"] ::selection{
+  background:color-mix(in srgb, var(--accent) 26%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] :is(button, a, [tabindex]):focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+/* ============================================================================
+   2 · Kopfzeile: Milchglas über der Polarnacht, Aurora als Horizontlinie
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .kopf{
+  background:color-mix(in srgb, var(--bg) 74%, transparent);
+  border-bottom:1px solid var(--line);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  backdrop-filter:blur(18px) saturate(140%);
+}
+
+html[data-theme="nordlicht"] .kopf::after{
+  height:1px;
+  background:linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 62%, transparent) 18%,
+    color-mix(in srgb, var(--p-icmp) 46%, transparent) 46%,
+    color-mix(in srgb, var(--iris) 52%, transparent) 72%,
+    transparent 92%);
+  opacity:.9;
+}
+
+html[data-theme="nordlicht"] .kopf-marke{
+  gap:12px;
+  padding-right:16px;
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .marke-sym rect{
+  fill:transparent;
+  stroke:color-mix(in srgb, var(--accent) 55%, var(--line-2));
+  stroke-width:1.2;
+}
+
+html[data-theme="nordlicht"] .marke-sym path{
+  stroke:var(--accent);
+  stroke-width:1.8;
+}
+
+html[data-theme="nordlicht"] .marke-sym circle{
+  fill:var(--accent);
+}
+
+html[data-theme="nordlicht"] .marke-name{
+  font:700 var(--fs-2)/1 var(--mono);
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .marke-version{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:4px 8px;
+}
+
+html[data-theme="nordlicht"] .kopf-werte{
+  gap:4px;
+}
+
+html[data-theme="nordlicht"] .wert{
+  height:36px;
+  font:600 var(--fs-3)/1 var(--body);
+  letter-spacing:.02em;
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel) 72%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+html[data-theme="nordlicht"] .wert:hover{
+  background:color-mix(in srgb, var(--panel-2) 82%, transparent);
+  border-color:var(--line-2);
+}
+
+html[data-theme="nordlicht"] .wert-offen.hat{
+  border-color:color-mix(in srgb, var(--accent) 55%, var(--line));
+  background:color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+html[data-theme="nordlicht"] .kopf-knoepfe{
+  border-left:1px solid var(--line);
+  padding-left:12px;
+}
+
+html[data-theme="nordlicht"] .kopf-knopf{
+  height:40px;
+  border:1px solid transparent;
+  border-radius:var(--radius-s);
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .kopf-knopf:hover{
+  color:var(--ink);
+  border-color:var(--line);
+  background:color-mix(in srgb, var(--panel-2) 82%, transparent);
+}
+
+html[data-theme="nordlicht"] .kopf .sp-leise{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   3 · Schiene und Statusfuss: technische Beschriftung, Aurora als Aktiv-Marke
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .dock{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--panel) 92%, transparent),
+    color-mix(in srgb, var(--bg) 74%, var(--panel)) 68%,
+    color-mix(in srgb, var(--bg) 92%, transparent));
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .dock-knopf{
+  color:var(--faint);
+  border-radius:var(--radius-s);
+  transition:background var(--dauer) var(--ease-standard), color var(--dauer) var(--ease-standard), transform var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="nordlicht"] .dock-knopf:hover{
+  color:var(--muted);
+  background:color-mix(in srgb, var(--panel-2) 84%, transparent);
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an{
+  color:var(--accent);
+  background:linear-gradient(160deg,
+    color-mix(in srgb, var(--accent) 14%, transparent),
+    color-mix(in srgb, var(--iris) 7%, transparent));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an::before{
+  width:2px;
+  top:8px;
+  bottom:8px;
+  border-radius:999px;
+  background:linear-gradient(180deg, var(--accent), var(--p-icmp) 55%, var(--iris));
+  box-shadow:0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="nordlicht"] .dock-text{
+  font:600 var(--fs-1)/1.1 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an .dock-text{
+  color:var(--accent);
+}
+
+html[data-theme="nordlicht"] .dock-zahl{
+  background:transparent;
+  color:var(--faint);
+  box-shadow:inset 0 0 0 1px var(--line);
+  border-radius:999px;
+  font:700 var(--fs-1)/18px var(--mono);
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an .dock-zahl{
+  background:var(--accent);
+  color:var(--accent-ink);
+  box-shadow:none;
+}
+
+html[data-theme="nordlicht"] .fuss{
+  background:color-mix(in srgb, var(--bg) 86%, transparent);
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .fuss-live{
+  color:var(--accent);
+  letter-spacing:.22em;
+}
+
+html[data-theme="nordlicht"] .fuss-punkt{
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+  animation:fuss-atem var(--dauer-atem) ease-in-out infinite alternate;
+}
+
+html[data-theme="nordlicht"] .fuss-ebene{
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .fuss-trenner{
+  color:color-mix(in srgb, var(--faint) 62%, transparent);
+}
+
+@keyframes fuss-atem{
+  from{opacity:1}
+  to{opacity:.42}
+}
+
+/* ============================================================================
+   4 · Startseite (Heute): Bento als Editorial-Doppelseite
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .ansicht .hb-seite{
+  max-width:1180px;
+  padding:24px 24px 16px;
+  gap:16px;
+  background:transparent;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-raster{
+  position:relative;
+  gap:16px;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--panel);
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--ink) 3%, transparent), transparent 24%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    0 32px 64px -56px color-mix(in srgb, var(--bg) 92%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel-titel{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:0 0 12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel-titel::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--ink) 12%, transparent), transparent);
+}
+
+/* ---- Hero: der Auftrag als Titelgeschichte ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-hero{
+  overflow:hidden;
+  border-color:color-mix(in srgb, var(--accent) 16%, var(--line));
+  background-image:
+    radial-gradient(120% 160% at 100% -24%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 58%),
+    linear-gradient(104deg, transparent 40%, color-mix(in srgb, var(--p-icmp) 7%, transparent) 54%, color-mix(in srgb, var(--iris) 9%, transparent) 64%, transparent 80%),
+    radial-gradient(90% 120% at 0% 120%, color-mix(in srgb, var(--iris) 10%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 4%, transparent), transparent 42%);
+}
+
+/* Polarzirkel: ein hauchfeiner Kreisbogen im Eck — Geometrie statt Dekoration */
+html[data-theme="nordlicht"] .ansicht .hb-hero::before{
+  content:"";
+  position:absolute;
+  top:-300px;
+  right:-190px;
+  width:560px;
+  height:560px;
+  border:1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius:50%;
+  pointer-events:none;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:96px;
+  height:1px;
+  background:linear-gradient(90deg, var(--accent), transparent);
+  opacity:.9;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero .hb-kicker{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  color:color-mix(in srgb, var(--accent) 60%, var(--muted));
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero .hb-kicker::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 38%, transparent), transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero h1{
+  margin:0 0 4px;
+  font:800 var(--schrift-hero)/.98 var(--display);
+  letter-spacing:-.055em;
+  color:var(--ink);
+  background-image:linear-gradient(96deg, var(--ink) 34%, color-mix(in srgb, var(--accent) 52%, var(--ink)));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-lead{
+  margin:4px 0 8px;
+  font:600 var(--fs-1)/1.7 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-kunde{
+  gap:8px;
+  font:600 var(--fs-2)/1.4 var(--mono);
+  letter-spacing:.08em;
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-meta span{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:8px 12px;
+  background:color-mix(in srgb, var(--panel-2) 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-meta .warn{
+  color:var(--koralle);
+  border-color:color-mix(in srgb, var(--koralle) 42%, transparent);
+  background:color-mix(in srgb, var(--koralle) 8%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.primaer{
+  height:44px;
+  padding:0 24px;
+  border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius:var(--radius-s);
+  font:700 var(--fs-3)/1 var(--body);
+  color:var(--accent-ink);
+  background-image:linear-gradient(116deg, var(--mint), color-mix(in srgb, var(--mint) 58%, var(--p-icmp)) 52%, color-mix(in srgb, var(--iris) 52%, var(--mint)));
+  box-shadow:0 20px 44px -26px color-mix(in srgb, var(--accent) 70%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.primaer:hover{
+  filter:brightness(1.06);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.geist{
+  height:44px;
+  padding:0 16px;
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 44%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.geist:hover{
+  border-color:color-mix(in srgb, var(--accent) 50%, var(--line-2));
+  background:color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* ---- Kenndaten: Zahlen als Plakate ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-kenndaten{
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--iris) 7%, transparent), transparent 64%);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd{
+  padding:12px 16px;
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd > b{
+  font:800 var(--fs-6)/1 var(--display);
+  letter-spacing:-.045em;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd .lab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd small{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-spark{
+  gap:4px;
+  height:40px;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-spark i{
+  width:4px;
+  border-radius:999px;
+  background:color-mix(in srgb, var(--c) 30%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-spark i.spitze{
+  background:var(--c);
+  box-shadow:0 0 10px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* ---- Tagesziel: Fortschritt als Nordlicht-Ring ---- */
+html[data-theme="nordlicht"] .ansicht .hb-ziel-karte{
+  gap:16px;
+  align-items:center;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ring{
+  width:92px;
+  height:92px;
+  background:conic-gradient(from -90deg,
+    var(--accent) 0,
+    color-mix(in srgb, var(--iris) 55%, var(--accent)) var(--anteil, 0%),
+    color-mix(in srgb, var(--ink) 8%, transparent) var(--anteil, 0%));
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 20px 44px -30px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ring::after{
+  inset:9px;
+  background:var(--panel);
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ring b{
+  position:relative;
+  z-index:10;
+  font:800 var(--fs-5)/1 var(--display);
+  letter-spacing:-.04em;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile{
+  padding:8px 0;
+  border-top:1px solid color-mix(in srgb, var(--ink) 6%, transparent);
+  color:var(--muted);
+  transition:color var(--dauer) var(--ease-standard), transform var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile:hover{
+  color:var(--ink);
+  transform:translateX(2px);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile i{
+  width:10px;
+  height:10px;
+  border-radius:var(--radius-xs);
+  box-shadow:inset 0 0 0 1px var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile.fertig i{
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile.fertig{
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile b{
+  font:600 var(--fs-2)/1.35 var(--body);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile small{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  color:var(--faint);
+}
+
+/* ---- Letzte Sitzung: Fahrplan in Mono ---- */
+html[data-theme="nordlicht"] .ansicht .hb-sz{
+  padding:8px 0;
+  border-top:1px solid color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz time{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+  font-variant-numeric:tabular-nums;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz b{
+  font:700 var(--fs-2)/1.3 var(--body);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz small{
+  font:500 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.04em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz em{
+  font:600 var(--fs-1)/1 var(--mono);
+  font-style:normal;
+  letter-spacing:.16em;
+  color:var(--accent);
+}
+
+/* ---- Klassenraum: Iris-Tönung, zwei ruhige Knöpfe ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-klasse{
+  background-image:linear-gradient(170deg, color-mix(in srgb, var(--iris) 8%, transparent), transparent 62%);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-klasse .knopf.primaer{
+  border:1px solid color-mix(in srgb, var(--iris) 40%, var(--line-2));
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--iris) 12%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-klasse .knopf.primaer:hover{
+  border-color:var(--iris);
+  background:color-mix(in srgb, var(--iris) 18%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-klasse-hinweis{
+  font:500 var(--fs-1)/1.6 var(--mono);
+  letter-spacing:.02em;
+  color:var(--faint);
+}
+
+/* ---- Lagebild: Karte auf dem Eis, Chips wie Koordinatenmarken ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-lage{
+  border-color:color-mix(in srgb, var(--accent) 14%, var(--line));
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(120% 150% at 50% -30%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 62%),
+    radial-gradient(80% 120% at 100% 110%, color-mix(in srgb, var(--iris) 9%, transparent), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 47px, color-mix(in srgb, var(--ink) 4%, transparent) 47px, color-mix(in srgb, var(--ink) 4%, transparent) 48px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 47px, color-mix(in srgb, var(--ink) 4%, transparent) 47px, color-mix(in srgb, var(--ink) 4%, transparent) 48px);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-lage-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-lage-zaehler{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-chip{
+  padding:4px 8px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 80%, transparent);
+  color:var(--ink);
+  font:600 var(--fs-1)/1.1 var(--mono);
+  letter-spacing:.08em;
+  box-shadow:0 12px 28px -20px color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-chip:hover{
+  border-color:color-mix(in srgb, var(--accent) 55%, var(--line-2));
+  background:var(--panel-2);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-chip .hb-chip-sym{
+  border-radius:var(--radius-xs);
+  overflow:hidden;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-lage .hb-legende,
+html[data-theme="nordlicht"] .ansicht .hb-lage-tipp{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kante.ok{
+  stroke:var(--accent);
+  stroke-opacity:.85;
+}
+
+/* ---- Signal: Aurora-Kurve, ruhige Statistikzeilen ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-signal{
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--iris) 8%, transparent), transparent 62%);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-signal-svg{
+  margin-bottom:8px;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-signal-svg path:last-of-type{
+  stroke:color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-stat{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.20em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-stat i{
+  box-shadow:0 0 10px color-mix(in srgb, currentColor 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-stat b{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ziel{
+  font:600 var(--fs-1)/1.5 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-woche-knopf{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:1px solid var(--line);
+}
+
+/* ============================================================================
+   5 · Labor: Auftragsband, Werkstatt, Fläche, Geräte, Kabel, Werkzeuge
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .labor .lb-mitte{
+  gap:12px;
+}
+
+html[data-theme="nordlicht"] .labor .lb-auftrag{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--panel);
+  background-image:
+    radial-gradient(120% 170% at 100% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 56%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 3%, transparent), transparent 52%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent),
+    0 32px 64px -56px color-mix(in srgb, var(--bg) 92%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-auftrag::before, .lb-leinwand::before, .lb-inspektor::before){
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .am-titel strong{
+  font:800 var(--schrift-band)/1.02 var(--display);
+  letter-spacing:-.05em;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .labor .am-titel{
+  gap:16px;
+}
+
+html[data-theme="nordlicht"] .labor .am-kunde{
+  font:600 var(--fs-1)/1.5 var(--mono);
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .am-ziele{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:8px 12px;
+  background:color-mix(in srgb, var(--panel-2) 50%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .sp-kunde-sym{
+  border:1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--accent) 10%, transparent);
+  color:var(--accent);
+}
+
+html[data-theme="nordlicht"] .labor .am-lesen{
+  height:44px;
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 44%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .labor .am-lesen:hover{
+  border-color:var(--line-2);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .labor .sp-abnahme{
+  height:44px;
+  border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius:var(--radius-s);
+  color:var(--accent-ink);
+  background-image:linear-gradient(116deg, var(--mint), color-mix(in srgb, var(--mint) 58%, var(--p-icmp)) 52%, color-mix(in srgb, var(--iris) 52%, var(--mint)));
+  box-shadow:0 18px 40px -26px color-mix(in srgb, var(--accent) 68%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 50%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .am-mehr{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  color:var(--muted);
+}
+
+/* ---- Werkstattleiste: ruhige Werkbank über der Fläche ---- */
+html[data-theme="nordlicht"] .labor .wk-leiste{
+  min-height:44px;
+  border-bottom:1px solid var(--line);
+  background:transparent;
+}
+
+html[data-theme="nordlicht"] .labor :is(.wk-titel, .lb-geraete-titel){
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .wk-suche{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .wk-kennwerte{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.12em;
+  color:var(--faint);
+}
+
+/* ---- Zeichenfläche: tiefes Eis mit Raster und Horizontlicht ---- */
+html[data-theme="nordlicht"] .labor .lb-leinwand{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--bg);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:16px;
+  pointer-events:none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent));
+  background-repeat:no-repeat;
+  background-size:16px 1px, 1px 16px, 16px 1px, 1px 16px, 16px 1px, 1px 16px, 16px 1px, 1px 16px;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+  opacity:.6;
+}
+
+html[data-theme="nordlicht"] .labor .lb-svg{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(1200px 460px at 50% -18%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 66%),
+    radial-gradient(800px 420px at 88% 108%, color-mix(in srgb, var(--iris) 7%, transparent), transparent 60%);
+}
+
+html[data-theme="nordlicht"] .labor .lb-raster-punkt{
+  fill:color-mix(in srgb, var(--ink) 20%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-raster.fein{
+  opacity:.42;
+}
+
+/* ---- Geräte: Eispaneele mit kaltem Licht obenauf ---- */
+html[data-theme="nordlicht"] .labor .ger-karte{
+  fill:var(--panel-2);
+  stroke:color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .ger.hover .ger-karte{
+  fill:var(--panel-3);
+  stroke:color-mix(in srgb, var(--accent) 45%, var(--line-2));
+}
+
+html[data-theme="nordlicht"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="nordlicht"] .labor .ger.zielt .ger-karte{
+  fill:color-mix(in srgb, var(--accent) 7%, var(--panel-2));
+  stroke:var(--accent);
+  stroke-width:1.6;
+}
+
+html[data-theme="nordlicht"] .labor .ger-name{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  fill:var(--ink);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="nordlicht"] .labor .ger-ip{
+  font:500 var(--fs-2)/1 var(--mono);
+  fill:var(--muted);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="nordlicht"] .labor .gb-kachel{
+  stroke:color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+/* ---- Kabel: Nordlichtadern ---- */
+html[data-theme="nordlicht"] .labor .kabel-huelle{
+  stroke:color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .kabel-linie{
+  filter:drop-shadow(0 0 3px color-mix(in srgb, var(--kf) 26%, transparent));
+}
+
+html[data-theme="nordlicht"] .labor .kabel-stecker .stk-gehaeuse{
+  fill:var(--panel-3);
+  stroke:color-mix(in srgb, var(--kf) 80%, var(--ink));
+}
+
+/* ---- Schwebende Werkzeuge: Milchglas, Aurora als aktives Werkzeug ---- */
+html[data-theme="nordlicht"] .labor .lb-gruppe{
+  padding:4px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel) 66%, transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    0 18px 40px -32px color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz,
+html[data-theme="nordlicht"] .labor .lb-knopf,
+html[data-theme="nordlicht"] .labor .lb-ansicht{
+  color:var(--muted);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz:hover,
+html[data-theme="nordlicht"] .labor .lb-knopf:hover,
+html[data-theme="nordlicht"] .labor .lb-ansicht:hover{
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel-2) 82%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz.an{
+  color:var(--accent);
+  background:color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz-taste{
+  font:600 var(--fs-1)/1 var(--mono);
+  color:var(--faint);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz.an .lb-wz-taste{
+  color:var(--accent);
+  background:transparent;
+}
+
+html[data-theme="nordlicht"] .labor .lb-zoomtext{
+  font:600 var(--fs-2)/1 var(--mono);
+  color:var(--muted);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="nordlicht"] .labor .lb-hinweis{
+  padding:8px 12px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel) 70%, transparent);
+  color:var(--muted);
+  font:600 var(--fs-1)/1.6 var(--mono);
+  letter-spacing:.04em;
+}
+
+html[data-theme="nordlicht"] .labor .lb-legende{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel) 62%, transparent);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.20em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .lb-legende .lg-verbunden::before{
+  background:var(--accent);
+  box-shadow:0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* ---- Minimap: kleine Seekarte ---- */
+html[data-theme="nordlicht"] .labor .wk-mini{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:color-mix(in srgb, var(--panel) 72%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-svg{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background-color:var(--bg);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-knopf{
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--ink) 26%, transparent);
+}
+
+/* ---- Geräteleiste links: Fächer als Werkzeugschubladen ---- */
+html[data-theme="nordlicht"] .labor .lb-geraete{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--panel) 92%, transparent),
+    color-mix(in srgb, var(--bg) 86%, transparent));
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .labor .pa-kat{
+  color:var(--muted);
+  border:1px solid transparent;
+  border-radius:var(--radius-s);
+}
+
+html[data-theme="nordlicht"] .labor .pa-kat:hover{
+  border-color:var(--line);
+  background:color-mix(in srgb, var(--panel-2) 74%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .pa-kat.an{
+  color:var(--accent);
+  border-color:color-mix(in srgb, var(--accent) 34%, transparent);
+  background:color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+/* ============================================================================
+   6 · Inspektor und Dock: Datenblatt statt Werkzeugkasten
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .labor .lb-dock{
+  background:color-mix(in srgb, var(--panel) 92%, var(--bg));
+  border-left:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .labor .lb-dock::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 42%, transparent),
+    color-mix(in srgb, var(--iris) 22%, transparent) 38%,
+    transparent 72%);
+  pointer-events:none;
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-dock-reiter, .in-reiter){
+  gap:4px;
+  padding:8px 12px 0;
+  border-bottom:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .labor .lb-dock-tab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+  border-radius:var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+html[data-theme="nordlicht"] .labor .lb-dock-tab.an{
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel-2) 72%, transparent);
+  box-shadow:inset 0 -1px 0 var(--accent);
+}
+
+html[data-theme="nordlicht"] .labor .in-kopf{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--line);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-kopf-text h3{
+  font:800 var(--fs-5)/1.08 var(--display);
+  letter-spacing:-.03em;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .labor .in-kopf-text span{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip{
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-3) 62%, transparent);
+  font:600 var(--fs-1)/1.6 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip.ok{
+  border-color:color-mix(in srgb, var(--ok) 38%, transparent);
+  background:color-mix(in srgb, var(--ok) 10%, transparent);
+  color:var(--ok);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip.bad{
+  border-color:color-mix(in srgb, var(--bad) 38%, transparent);
+  background:color-mix(in srgb, var(--bad) 10%, transparent);
+  color:var(--bad);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip.frei{
+  border:1px dashed var(--line-2);
+  background:transparent;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-tab{
+  padding:8px 8px;
+  border:0;
+  border-bottom:1px solid transparent;
+  background:none;
+  color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .labor .in-tab.an{
+  color:var(--ink);
+  border-bottom-color:var(--accent);
+  background:none;
+}
+
+html[data-theme="nordlicht"] .labor .in-inhalt{
+  padding:12px 16px 16px;
+  gap:12px;
+}
+
+html[data-theme="nordlicht"] .labor .in-abschnitt h4{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-abschnitt h4::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--ink) 10%, transparent), transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-abschnitt + .in-abschnitt{
+  border-top:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-feld-titel{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-eingabe,
+html[data-theme="nordlicht"] .labor .in-auswahl{
+  height:34px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 60%, transparent);
+  color:var(--ink);
+  font:500 var(--fs-2)/1 var(--mono);
+}
+
+html[data-theme="nordlicht"] .labor .in-eingabe:focus,
+html[data-theme="nordlicht"] .labor .in-auswahl:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-schalter-bahn{
+  border:1px solid var(--line-2);
+  background:color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-schalter input:checked + .in-schalter-bahn{
+  border-color:color-mix(in srgb, var(--accent) 60%, transparent);
+  background:color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-schalter input:checked + .in-schalter-bahn::after{
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-knopf{
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 70%, transparent);
+  color:var(--ink);
+  font:600 var(--fs-2)/1 var(--body);
+  letter-spacing:.02em;
+}
+
+html[data-theme="nordlicht"] .labor .in-knopf:hover{
+  border-color:color-mix(in srgb, var(--accent) 45%, var(--line-2));
+  background:color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-knopf.primaer{
+  border-color:color-mix(in srgb, var(--accent) 55%, transparent);
+  background:var(--accent);
+  color:var(--accent-ink);
+}
+
+html[data-theme="nordlicht"] .labor .in-karte{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-hinweis{
+  color:var(--muted);
+  font:500 var(--fs-2)/1.55 var(--body);
+}
+
+html[data-theme="nordlicht"] .labor .in-port-kopf{
+  border-radius:var(--radius-xs);
+  transition:background var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="nordlicht"] .labor .in-port-kopf:hover{
+  background:color-mix(in srgb, var(--panel-2) 66%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-port-name{
+  color:var(--ink);
+  font:600 var(--fs-2)/1 var(--mono);
+  letter-spacing:.06em;
+}
+
+html[data-theme="nordlicht"] .labor .in-tabelle td{
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-insp-leer{
+  padding:24px 16px;
+  gap:8px;
+}
+
+html[data-theme="nordlicht"] .labor .lb-insp-leer::before{
+  content:"// NICHTS AUSGEWÄHLT";
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .lb-insp-leer .lb-tipps{
+  font:500 var(--fs-1)/1.7 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   7 · Schmale Breiten: die Marginalspalte weicht, das Licht bleibt
+   ============================================================================ */
+
+@media (max-width:1200px){
+  html[data-theme="nordlicht"] .labor .lb-leinwand::after{
+    inset:8px;
+  }
+}
+
+/* ---- zzz-thema-papier.css ---- */
+/* ==========================================================================
+   THEME „PAPIER“ – Risograph-Editorial (hell)
+   --------------------------------------------------------------------------
+   Ein gedrucktes Magazin im Browser: warmes Papier, Tintenschwarz, Zinnober
+   und Ultramarin. Harte 2-px-Tintenrahmen, versetzte Druckschatten ohne
+   Weichzeichner, Mono-Beschriftungen gegen große Display-Typografie.
+   Technik: alle Literale im Token-Block; alles andere nur var(--…)-Farben,
+   -Radien und -Schriften (Themes-Vertrag, docs/entwicklung/Themes-Vertrag.md).
+   ========================================================================== */
+
+:root[data-theme="papier"]{
+  color-scheme:light;
+
+  /* ---- Papier ---- */
+  --bg:#EFE6D4;
+  --bg-raster:rgba(27,23,16,.12);
+  --raster:20px;
+  --panel:#FAF4E6;
+  --panel-2:#F3EBDA;
+  --panel-3:#E8DDC6;
+  --line:rgba(27,23,16,.30);
+  --line-2:rgba(27,23,16,.62);
+
+  /* ---- Tinte ---- */
+  --ink:#1B1710;
+  --muted:#4F4636;
+  --faint:#5C5339;
+
+  /* ---- Zinnober: Handlung, Geld, Störung ---- */
+  --accent:#A22A12;
+  --accent-ink:#FCF7EA;
+  --accent-soft:#F1D5C5;
+  --amber:#923312;
+  --koralle:#A22A12;
+  --warn:#8A3313;
+  --warn-soft:#F0D9C9;
+  --bad:#A22A12;
+  --bad-soft:#F3D5C8;
+  --geld:#923312;
+
+  /* ---- Ultramarin: Ordnung, Wissen, Verbindung ---- */
+  --mint:#22347F;
+  --iris:#233A96;
+  --ok:#1F3A8F;
+  --ok-soft:#E0E4F2;
+  --info:#233A96;
+  --info-soft:#E2E6F4;
+  --ruf:#233A96;
+
+  /* ---- Protokolle: zwei Druckfarben, Überdruck als Violett ---- */
+  --p-arp:#8A3313; --p-icmp:#1F3A8F; --p-tcp:#3A2A6E; --p-udp:#923312;
+  --p-dhcp:#233A96; --p-dns:#A22A12; --p-http:#2F4DA8;
+
+  /* ---- VLAN-Farben (immer mit Nummer) ---- */
+  --vlan-1:#6B6152; --vlan-2:#2F4DA8; --vlan-3:#3A2A6E; --vlan-4:#A22A12;
+  --vlan-5:#8A3313; --vlan-6:#4B3F8F; --vlan-7:#6B4A16; --vlan-8:#20595E;
+
+  /* ---- Zonen ---- */
+  --zone-a:rgba(31,58,143,.09); --zone-b:rgba(47,77,168,.08); --zone-c:rgba(162,42,18,.08);
+  --zone-d:rgba(58,42,110,.09); --zone-e:rgba(107,74,22,.08);
+  --zone-a-linie:rgba(31,58,143,.55); --zone-b-linie:rgba(47,77,168,.5);
+  --zone-c-linie:rgba(162,42,18,.5); --zone-d-linie:rgba(58,42,110,.5);
+  --zone-e-linie:rgba(107,74,22,.5);
+
+  /* ---- Gerätetypen ---- */
+  --typ-router:#2F4DA8; --typ-switch:#3A2A6E; --typ-firewall:#A22A12;
+  --typ-host:#1B1710; --typ-server:#233A96; --typ-nas:#923312; --typ-internet:#8A3313;
+
+  /* ---- Form: gedruckt, nicht gerundet ---- */
+  --radius:0px;
+  --radius-s:2px;
+  --radius-xs:1px;
+  --schatten:4px 4px 0 rgba(27,23,16,.20);
+  --schatten-flach:2px 2px 0 rgba(27,23,16,.16);
+  --schatten-hart:3px 3px 0 rgba(27,23,16,.88);
+  --glow:0 0 0 2px rgba(162,42,18,.34), 4px 4px 0 rgba(162,42,18,.16);
+
+  /* ---- Schrift: groteske Schlagzeile, Mono-Etikett, Serifendeck ---- */
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",Consolas,"DejaVu Sans Mono",monospace;
+  --serif:"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+
+  /* ---- Skala: weit gespannt wie eine Zeitschriftseite ---- */
+  --fs-1:11px; --fs-2:12.5px; --fs-3:13.5px; --fs-4:16px;
+  --fs-5:20px; --fs-6:29px; --fs-7:37px; --fs-8:46px; --fs-9:60px;
+
+  /* ---- Zeiten: knapp, wie ein Stempel ---- */
+  --dauer-kurz:60ms; --dauer:140ms; --dauer-mittel:220ms; --dauer-lang:300ms;
+  --dauer-zaehler:700ms;
+  --ease-standard:cubic-bezier(.2,.7,.3,1); --ease-out:cubic-bezier(.16,.84,.44,1);
+  --ease-pop:cubic-bezier(.3,1.6,.5,1);
+
+  /* ---- Flächenglas (Werkzeugleisten, Legenden) ---- */
+  --glas:rgba(250,244,230,.92);
+  --leiste-bg:rgba(250,244,230,.97);
+}
+
+/* ==========================================================================
+   1 · PAPIER: Halbton-Korn, zwei Farbnebel, keine Weichzeichner
+   ========================================================================== */
+html[data-theme="papier"] body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb,var(--ink) 10%,transparent) .6px, transparent 1.3px),
+    radial-gradient(circle at 2px 2px, color-mix(in srgb,var(--accent) 9%,transparent) .6px, transparent 1.3px),
+    radial-gradient(1100px 640px at 10% -12%, color-mix(in srgb,var(--accent) 5%,transparent), transparent 62%),
+    radial-gradient(900px 560px at 94% 0%, color-mix(in srgb,var(--info) 5%,transparent), transparent 60%);
+  background-size:7px 7px, 7px 7px, auto, auto;
+}
+html[data-theme="papier"] ::selection{background:var(--accent-soft)}
+
+/* ==========================================================================
+   2 · RAHMEN: Kopfzeile, Schiene, Fuß – Tinte auf Papier
+   ========================================================================== */
+html[data-theme="papier"] .kopf{
+  gap:14px; padding:0 14px; background:var(--panel);
+  border-bottom:2px solid var(--ink);
+}
+html[data-theme="papier"] .kopf::after{display:none}
+html[data-theme="papier"] .kopf-marke{gap:10px; padding-right:14px; border-right:1px solid var(--line)}
+html[data-theme="papier"] .marke-sym rect{fill:var(--ink); stroke:var(--ink); stroke-width:1}
+html[data-theme="papier"] .marke-sym path{stroke:var(--bg); stroke-width:2.2; fill:none}
+html[data-theme="papier"] .marke-sym circle{fill:var(--accent)}
+html[data-theme="papier"] .marke-name{font:800 var(--fs-4)/1 var(--display); letter-spacing:.18em}
+html[data-theme="papier"] .marke-version{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.1em; color:var(--faint);
+  border:1px solid var(--line-2); border-radius:var(--radius); padding:4px 6px;
+}
+
+html[data-theme="papier"] .kopf-werte{gap:6px}
+html[data-theme="papier"] .wert{
+  height:38px; padding:0 10px; border:1px solid var(--line-2); border-radius:var(--radius-s);
+  background:var(--panel-2); color:var(--ink);
+  font:600 var(--fs-2)/1 var(--mono); letter-spacing:.02em;
+  box-shadow:var(--schatten-flach); transition:none;
+}
+html[data-theme="papier"] button.wert:hover{background:var(--panel); border-color:var(--ink)}
+html[data-theme="papier"] .wert-offen.hat{border:1px solid var(--ink); background:var(--accent-soft); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .wert-offen.hat .sym{color:var(--accent)}
+html[data-theme="papier"] .wert.mit-fortschritt::after{height:2px; background:var(--accent); border-radius:var(--radius)}
+html[data-theme="papier"] .kopf-knoepfe{gap:2px; padding-left:10px; border-left:1px solid var(--line)}
+html[data-theme="papier"] .kopf-knopf{border-radius:var(--radius-s); color:var(--muted)}
+html[data-theme="papier"] .kopf-knopf:hover{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+html[data-theme="papier"] .kopf-knopf.mit-text span{font:600 var(--fs-2)/1 var(--mono); letter-spacing:.1em; text-transform:uppercase}
+
+html[data-theme="papier"] .dock{
+  gap:2px; padding:6px 0; background:var(--bg); border-right:2px solid var(--ink);
+}
+html[data-theme="papier"] .dock-knopf{color:var(--muted); border-radius:var(--radius-s); padding:6px 0}
+html[data-theme="papier"] .dock-knopf:hover{background:var(--panel-2); color:var(--ink)}
+html[data-theme="papier"] .dock-knopf.an{background:var(--ink); color:var(--bg)}
+html[data-theme="papier"] .dock-knopf.an::before{width:4px; top:0; bottom:0; border-radius:var(--radius); background:var(--accent)}
+html[data-theme="papier"] .dock-text{font:600 var(--fs-1)/1.1 var(--mono); letter-spacing:.14em; color:var(--muted)}
+html[data-theme="papier"] .dock-knopf.an .dock-text{color:var(--bg)}
+html[data-theme="papier"] .dock-zahl{
+  border-radius:var(--radius-xs); background:var(--accent); color:var(--accent-ink);
+  font:700 var(--fs-1)/18px var(--mono); box-shadow:0 0 0 1px var(--bg);
+}
+html[data-theme="papier"] .dock-knopf.an .dock-zahl{box-shadow:0 0 0 1px var(--ink)}
+html[data-theme="papier"] .dock-knopf.spaeter{opacity:.6}
+
+html[data-theme="papier"] .fuss{
+  padding:0 14px; background:var(--panel); border-top:2px solid var(--ink);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--faint);
+}
+html[data-theme="papier"] .fuss-live{color:var(--accent)}
+html[data-theme="papier"] .fuss-punkt{
+  width:8px; height:8px; border-radius:var(--radius); background:var(--accent); box-shadow:none;
+}
+html[data-theme="papier"] .fuss-ebene{color:var(--ink)}
+
+/* ==========================================================================
+   3 · KNÖPFE: Stempel und Felder, versetzter Tintenschatten
+   ========================================================================== */
+html[data-theme="papier"] .knopf{
+  border:1px solid var(--line-2); border-radius:var(--radius-s);
+  background:var(--panel-2); color:var(--ink); box-shadow:var(--schatten-flach);
+  font-weight:700; letter-spacing:.01em;
+}
+html[data-theme="papier"] .knopf:hover{background:var(--panel); border-color:var(--ink)}
+html[data-theme="papier"] .knopf:active{transform:translate(1px,1px); box-shadow:none}
+html[data-theme="papier"] .knopf.primaer,
+html[data-theme="papier"] .knopf-haupt{
+  border:1.5px solid var(--ink); border-radius:var(--radius-s);
+  background:var(--accent); color:var(--accent-ink); box-shadow:var(--schatten-hart);
+}
+html[data-theme="papier"] .knopf.primaer:hover,
+html[data-theme="papier"] .knopf-haupt:hover{
+  background:var(--accent); border-color:var(--ink); filter:none;
+  transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--ink);
+}
+html[data-theme="papier"] .knopf.geist{background:transparent; border-color:transparent; box-shadow:none; color:var(--muted)}
+html[data-theme="papier"] .knopf.geist:hover{background:var(--panel-2); border-color:var(--line-2); color:var(--ink)}
+html[data-theme="papier"] .knopf:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ==========================================================================
+   4 · HUB „HEUTE“: Bogen im Raster, jede Platte ein Tintenrahmen
+   ========================================================================== */
+html[data-theme="papier"] .hb-seite{
+  max-width:1180px; padding:26px 24px 22px; gap:18px; background:transparent;
+}
+html[data-theme="papier"] .hb-raster{gap:18px}
+
+html[data-theme="papier"] .hb-panel{
+  background:var(--panel); border:2px solid var(--ink); border-radius:var(--radius);
+  box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .hb-panel-titel{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint);
+}
+html[data-theme="papier"] .hb-panel-titel::before{
+  content:""; display:inline-block; width:7px; height:7px; margin-right:8px;
+  background:var(--accent); vertical-align:1px;
+}
+
+/* Hero: Doppelrahmen, Schlagzeile, Serifendeck */
+html[data-theme="papier"] .hb-hero{
+  background:var(--panel); padding:22px 24px 24px; gap:4px;
+}
+html[data-theme="papier"] .hb-hero::before{
+  content:""; position:absolute; inset:7px; border:1px solid var(--line); pointer-events:none;
+}
+html[data-theme="papier"] .hb-kicker{
+  color:var(--accent); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.26em;
+}
+html[data-theme="papier"] .hb-hero-kunde{
+  margin-top:14px; font:600 var(--fs-2)/1.3 var(--mono); letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted);
+}
+html[data-theme="papier"] .hb-hero h1{
+  font:800 clamp(var(--fs-7),3.3vw,var(--fs-9))/.94 var(--display);
+  letter-spacing:-.055em; margin:10px 0 12px; max-width:15ch;
+}
+html[data-theme="papier"] .hb-hero-lead{
+  font:italic 400 var(--fs-4)/1.4 var(--serif); color:var(--muted); max-width:44ch; margin:0 0 12px;
+}
+html[data-theme="papier"] .hb-hero-meta{gap:6px; margin-bottom:6px}
+html[data-theme="papier"] .hb-hero-meta span{
+  border:1px solid var(--line-2); border-radius:var(--radius); background:transparent;
+  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em;
+  text-transform:uppercase; padding:7px 8px;
+}
+html[data-theme="papier"] .hb-hero-meta .warn{
+  color:var(--accent); border-color:var(--accent); background:var(--accent-soft);
+}
+html[data-theme="papier"] .hb-aktionen{margin-top:18px; gap:10px}
+
+/* Kenndaten: Ziffern wie gesetzte Seitenzahlen */
+html[data-theme="papier"] .hb-kd{padding:15px 18px; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .hb-kd > i{width:9px; height:9px; border-radius:var(--radius)}
+html[data-theme="papier"] .hb-kd .lab{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint)}
+html[data-theme="papier"] .hb-kd > b{
+  font:800 var(--fs-7)/.9 var(--display); letter-spacing:-.045em;
+}
+html[data-theme="papier"] .hb-kd small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .hb-spark{gap:4px; height:30px}
+html[data-theme="papier"] .hb-spark i{width:4px; border-radius:var(--radius)}
+html[data-theme="papier"] .hb-spark i.spitze{background:var(--c)}
+
+/* Ziel, Sitzung, Klasse */
+html[data-theme="papier"] .hb-ring{
+  border:2px solid var(--ink); border-radius:50%;
+}
+html[data-theme="papier"] .hb-ring b{font:800 var(--fs-6)/1 var(--display); letter-spacing:-.04em; position:relative; z-index:1}
+html[data-theme="papier"] .hb-ring::after{background:var(--panel); z-index:0}
+html[data-theme="papier"] .hb-ring::after{background:var(--panel)}
+html[data-theme="papier"] .hb-zeile{
+  border-top:1px solid var(--line); color:var(--muted); padding:9px 0;
+}
+html[data-theme="papier"] .hb-zeile i{width:9px; height:9px; border-radius:var(--radius); box-shadow:inset 0 0 0 1.5px var(--faint)}
+html[data-theme="papier"] .hb-zeile.fertig i{background:var(--ink); box-shadow:none}
+html[data-theme="papier"] .hb-zeile.fertig{color:var(--ink)}
+html[data-theme="papier"] .hb-zeile b{font:700 var(--fs-3)/1.3 var(--body)}
+html[data-theme="papier"] .hb-zeile small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--faint)}
+html[data-theme="papier"] .hb-sz{border-top:1px solid var(--line); padding:9px 0}
+html[data-theme="papier"] .hb-sz time{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .hb-sz b{font:700 var(--fs-3)/1.3 var(--body)}
+html[data-theme="papier"] .hb-sz small{font-size:var(--fs-2)}
+html[data-theme="papier"] .hb-sz em{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; color:var(--accent)}
+html[data-theme="papier"] .hb-klasse{gap:12px}
+html[data-theme="papier"] .hb-klasse-zeile .knopf{height:42px}
+html[data-theme="papier"] .hb-klasse-zeile small{color:var(--faint); font-size:var(--fs-2)}
+
+/* Lagebild */
+html[data-theme="papier"] .hb-lage{background:var(--panel)}
+html[data-theme="papier"] .hb-signal-svg path:first-of-type{stroke:var(--ink)}
+html[data-theme="papier"] .hb-signal-svg path:last-of-type{stroke:color-mix(in srgb,var(--ink) 18%,transparent)}
+html[data-theme="papier"] .hb-lage-titel{letter-spacing:.24em; color:var(--faint)}
+html[data-theme="papier"] .hb-lage-zaehler{letter-spacing:.16em; color:var(--muted)}
+html[data-theme="papier"] .hb-lage-zaehler.ok{color:var(--ok)}
+html[data-theme="papier"] .hb-lage-zaehler.bad{color:var(--accent)}
+html[data-theme="papier"] .hb-kante.ok{stroke:var(--ok); stroke-opacity:.85}
+html[data-theme="papier"] .hb-kante.unten{stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4}
+html[data-theme="papier"] .hb-kante.aus{stroke:var(--warn); stroke-width:2; stroke-dasharray:2 4}
+html[data-theme="papier"] .hb-chip{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  color:var(--ink); font:600 var(--fs-1)/1.1 var(--mono); letter-spacing:.06em;
+  padding:5px 8px; box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .hb-chip:hover{border-color:var(--accent); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .hb-chip-sym{
+  border-radius:var(--radius-xs); background:var(--accent-soft); color:var(--accent);
+}
+html[data-theme="papier"] .hb-chip-mehr{border-style:dashed; border-color:var(--line-2); background:transparent; box-shadow:none}
+html[data-theme="papier"] .hb-lage-fuss .hb-legende{letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .hb-lage-tipp{letter-spacing:.14em; color:var(--faint)}
+
+/* Signal */
+html[data-theme="papier"] .hb-stat{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; color:var(--faint)}
+html[data-theme="papier"] .hb-stat i{width:7px; height:7px; border-radius:var(--radius); background:var(--accent)}
+html[data-theme="papier"] .hb-stat b{color:var(--ink)}
+
+/* Feierabend-Karte: nur die linke Kante trägt die Farbe */
+html[data-theme="papier"] .hb-feierabend{
+  background:var(--panel); border:2px solid var(--ink); border-left:6px solid var(--info);
+  border-radius:var(--radius); box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .hb-woche-knopf{
+  color:var(--muted); border-bottom:1px dashed var(--line-2);
+  font-family:var(--mono); letter-spacing:.06em;
+}
+html[data-theme="papier"] .hb-ziel{color:var(--faint)}
+
+/* ==========================================================================
+   5 · LABOR: Auftragsband, Zeichenfläche, Werkzeugleisten
+   ========================================================================== */
+html[data-theme="papier"] .lb-mitte{padding:16px 20px; gap:16px}
+html[data-theme="papier"] .lb-auftrag{
+  margin:0; padding:18px 22px; border:2px solid var(--ink); border-radius:var(--radius);
+  background:var(--panel); box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .lb-auftrag::before{
+  content:"// AUFTRAG"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em;
+  color:var(--accent); margin:0 0 10px;
+}
+html[data-theme="papier"] .lb-auftrag :is(h1,h2),
+html[data-theme="papier"] .lb-auftrag .am-titel strong{
+  font:800 clamp(var(--fs-6),2.5vw,var(--fs-7))/.96 var(--display); letter-spacing:-.05em;
+}
+html[data-theme="papier"] .lb-auftrag .am-kunde{
+  font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.2em; color:var(--faint); margin-top:4px;
+}
+html[data-theme="papier"] .lb-auftrag .am-ziele{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel-2);
+  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; padding:7px 9px;
+  box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .lb-auftrag .am-lesen{
+  border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel);
+  color:var(--ink);
+}
+html[data-theme="papier"] .lb-auftrag .sp-kunde-sym{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--accent-soft);
+  color:var(--accent); box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .lb-auftrag .sp-einstieg{background:none; border:0}
+html[data-theme="papier"] .lb-auftrag .sp-einstieg-text{font:italic 400 var(--fs-3)/1.4 var(--serif); color:var(--muted)}
+html[data-theme="papier"] .lb-auftrag .sp-einstieg-start{border:1px solid var(--accent); background:var(--accent-soft); padding:8px 12px}
+html[data-theme="papier"] .sp-stufe-knopf{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.1em; border-radius:var(--radius-s)}
+html[data-theme="papier"] .sp-stufe-knopf.an{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+
+/* Zeichenfläche: die Druckplatte */
+html[data-theme="papier"] .lb-leinwand{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten); overflow:hidden;
+}
+html[data-theme="papier"] .lb-svg{background:var(--panel)}
+html[data-theme="papier"] .lb-raster-punkt{fill:color-mix(in srgb,var(--ink) 14%,transparent)}
+html[data-theme="papier"] .lb-leinwand::before{
+  content:"// LAGEBILD"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--faint);
+}
+html[data-theme="papier"] .lb-leiste-oben{top:32px}
+html[data-theme="papier"] .lb-leinwand::after{
+  content:""; position:absolute; inset:8px; border:1px solid var(--line); pointer-events:none; z-index:1;
+}
+html[data-theme="papier"] .lb-leiste-oben,
+html[data-theme="papier"] .lb-leiste-unten,
+html[data-theme="papier"] .lb-hinweis,
+html[data-theme="papier"] .lb-legende,
+html[data-theme="papier"] .wk-mini{z-index:20}
+
+/* Geräte: Papierkarten mit Tintenkante */
+html[data-theme="papier"] .ger-karte{
+  fill:var(--panel); stroke:var(--ink); stroke-width:1.5; rx:1px;
+  filter:drop-shadow(3px 3px 0 color-mix(in srgb,var(--ink) 18%,transparent));
+}
+html[data-theme="papier"] .ger.hover .ger-karte{
+  fill:var(--panel-2); stroke:var(--ink); stroke-width:2;
+  filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--ink) 24%,transparent));
+}
+html[data-theme="papier"] .ger.gewaehlt .ger-karte,
+html[data-theme="papier"] .ger.zielt .ger-karte{
+  stroke:var(--accent); stroke-width:2.2;
+  filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--accent) 26%,transparent));
+}
+html[data-theme="papier"] .ger-name{font-weight:700; letter-spacing:.14em; stroke-width:5px}
+html[data-theme="papier"] .ger-ip{font-weight:600; letter-spacing:.02em; stroke-width:5px}
+html[data-theme="papier"] .ger-auswahl{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 4}
+/* Gerätepiktogramm: harte Papierfläche statt Farbmischung */
+html[data-theme="papier"] .gb-kachel{fill:var(--panel); stroke:var(--line-2); stroke-width:1.2}
+html[data-theme="papier"] .ger .gb-kachel{fill:var(--panel-2); stroke:var(--line-2)}
+html[data-theme="papier"] .gb-glyph path{stroke:var(--ink); stroke-width:2}
+html[data-theme="papier"] .ger.gewaehlt .gb-kachel,
+html[data-theme="papier"] .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.2; fill:var(--accent-soft)}
+html[data-theme="papier"] .ger.hover .gb-kachel{stroke:var(--ink); fill:var(--panel-3)}
+
+/* Kabel: Ultramarin ist die Leitung, Zinnober der Fehler */
+html[data-theme="papier"] .kabel-huelle{stroke:color-mix(in srgb,var(--ink) 12%,transparent); stroke-width:7}
+html[data-theme="papier"] .kabel-linie{stroke-width:2.4; stroke-opacity:1}
+html[data-theme="papier"] .kabel.k-unten .kabel-linie{stroke-dasharray:1 6; stroke-width:2.6}
+html[data-theme="papier"] .kabel.k-aus .kabel-linie{stroke-dasharray:2 7}
+html[data-theme="papier"] .kabel.gewaehlt .kabel-linie{stroke-width:3.6}
+html[data-theme="papier"] .kabel-port{font-weight:600; letter-spacing:.06em; stroke-width:5px}
+html[data-theme="papier"] .kabel-stecker .stk-gehaeuse{fill:var(--panel); stroke:var(--ink); stroke-width:1.4}
+
+/* Werkzeugleisten: Papierstempel mit harter Kante */
+html[data-theme="papier"] .lb-gruppe{
+  padding:4px; border:1.5px solid var(--ink); border-radius:var(--radius);
+  background:var(--panel); box-shadow:var(--schatten-hart); backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+html[data-theme="papier"] .lb-wz,
+html[data-theme="papier"] .lb-knopf{color:var(--ink); border-radius:var(--radius-s)}
+html[data-theme="papier"] .lb-wz:hover,
+html[data-theme="papier"] .lb-knopf:hover{background:var(--panel-2)}
+html[data-theme="papier"] .lb-wz.an{
+  background:var(--ink); color:var(--bg); box-shadow:none;
+}
+html[data-theme="papier"] .lb-wz.an .lb-wz-taste{color:var(--bg); background:transparent}
+html[data-theme="papier"] .lb-wz-taste{
+  font:600 var(--fs-1)/1 var(--mono); color:var(--faint); border:0; background:transparent;
+}
+html[data-theme="papier"] .lb-zoomtext{font:600 var(--fs-2)/1 var(--mono); letter-spacing:.04em; color:var(--ink)}
+html[data-theme="papier"] .lb-ansicht{color:var(--ink); font:700 var(--fs-2)/1 var(--body)}
+
+/* Hinweis + Legende wie ein gedruckter Vermerk */
+html[data-theme="papier"] .lb-hinweis{
+  border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel-2);
+  color:var(--muted); font:600 var(--fs-1)/1.5 var(--mono); letter-spacing:.06em;
+}
+html[data-theme="papier"] .lb-legende{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  padding:5px 10px; box-shadow:var(--schatten-flach);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint);
+}
+html[data-theme="papier"] .lb-legende .lg-verbunden::before{background:var(--ok); height:2px}
+html[data-theme="papier"] .lb-legende .lg-getrennt::before{background:var(--accent); height:2px}
+html[data-theme="papier"] .lb-legende .lg-kein::before{border-top:1px dashed var(--warn); background:transparent}
+
+/* Minimap */
+html[data-theme="papier"] .wk-mini{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .wk-mini-kopf{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .wk-mini-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .wk-mini-fuss{border-top:1px solid var(--line)}
+
+/* Kleine Geräteleiste links */
+html[data-theme="papier"] .lb-geraete{background:var(--bg); border-right:2px solid var(--ink)}
+html[data-theme="papier"] .lb-geraete-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--faint)}
+html[data-theme="papier"] .pa-kat{border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
+
+/* ==========================================================================
+   6 · INSPEKTOR UND ANDOCKUNG
+   ========================================================================== */
+html[data-theme="papier"] .lb-dock{background:var(--bg); border-left:2px solid var(--ink)}
+html[data-theme="papier"] .lb-dock-reiter{padding:6px 8px 0; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .lb-dock-tab{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint);
+  border-radius:var(--radius-s) var(--radius-s) var(--radius) var(--radius);
+}
+html[data-theme="papier"] .lb-dock-tab.an{background:var(--panel); border-color:var(--ink); color:var(--ink)}
+html[data-theme="papier"] .lb-inspektor::before{
+  content:"// INSPEKTOR"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--accent);
+}
+html[data-theme="papier"] .in-kopf{
+  background:var(--panel); border-bottom:2px solid var(--ink); padding:14px 16px 10px;
+}
+html[data-theme="papier"] .in-kopf-text h3{font:800 var(--fs-6)/1 var(--display); letter-spacing:-.04em}
+html[data-theme="papier"] .in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .in-reiter{padding:8px 12px 0; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .in-tab{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; border-bottom-width:2px;
+}
+html[data-theme="papier"] .in-tab.an{color:var(--accent); border-bottom-color:var(--accent); background:none; font-weight:700}
+html[data-theme="papier"] .in-inhalt{padding:0; gap:0}
+html[data-theme="papier"] .in-abschnitt{padding:14px 16px; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .in-abschnitt + .in-abschnitt{border-top:0; padding-top:14px}
+html[data-theme="papier"] .in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint); margin:0 0 10px}
+html[data-theme="papier"] .in-abschnitt h4::before{
+  content:""; display:inline-block; width:6px; height:6px; margin-right:7px;
+  background:var(--ink); vertical-align:1px;
+}
+html[data-theme="papier"] .in-hinweis{font-size:var(--fs-3); color:var(--muted); line-height:1.5}
+html[data-theme="papier"] .in-feld-titel{font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .in-eingabe,
+html[data-theme="papier"] .in-auswahl{
+  border:1.5px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel);
+  font:600 var(--fs-2)/1 var(--mono); box-shadow:inset 2px 2px 0 color-mix(in srgb,var(--ink) 6%,transparent);
+}
+html[data-theme="papier"] .in-eingabe:focus,
+html[data-theme="papier"] .in-auswahl:focus{border-color:var(--accent); outline:none}
+html[data-theme="papier"] .in-chip{
+  border:1px solid var(--line-2); border-radius:var(--radius); font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.06em; background:var(--panel-2); color:var(--muted);
+}
+html[data-theme="papier"] .in-chip.ok{background:var(--ok-soft); border-color:var(--ok); color:var(--ok)}
+html[data-theme="papier"] .in-chip.bad{background:var(--bad-soft); border-color:var(--bad); color:var(--bad)}
+html[data-theme="papier"] .in-chip.warn{background:var(--warn-soft); border-color:var(--warn); color:var(--warn)}
+html[data-theme="papier"] .in-chip.info{background:var(--info-soft); border-color:var(--info); color:var(--info)}
+html[data-theme="papier"] .in-chip.aus{background:var(--panel-2); border-color:var(--line); color:var(--faint)}
+html[data-theme="papier"] .in-chip.frei{border-style:dashed; background:transparent}
+html[data-theme="papier"] .in-karte{
+  border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .in-tabelle td{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .in-tabelle.mono{font-family:var(--mono)}
+html[data-theme="papier"] .in-knopf{
+  border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2);
+  font:700 var(--fs-2)/1 var(--body); box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .in-knopf:hover{background:var(--panel); border-color:var(--ink)}
+html[data-theme="papier"] .in-knopf.primaer{border:1.5px solid var(--ink); background:var(--accent); color:var(--accent-ink); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .in-knopf.warn{border:1.5px solid var(--ink); background:var(--warn); color:var(--accent-ink); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .in-schalter-bahn{border:1px solid var(--line-2); background:var(--panel-3)}
+html[data-theme="papier"] .in-schalter input:checked + .in-schalter-bahn{background:var(--ink); border-color:var(--ink)}
+html[data-theme="papier"] .in-schalter input:checked + .in-schalter-bahn::after{background:var(--bg)}
+html[data-theme="papier"] .in-portliste{font-family:var(--mono)}
+html[data-theme="papier"] .in-port-kopf{border-radius:var(--radius)}
+html[data-theme="papier"] .in-port-kopf:hover,
+html[data-theme="papier"] .in-port.auf .in-port-kopf{background:var(--panel-2)}
+html[data-theme="papier"] .in-port-name{font:700 var(--fs-2)/1 var(--mono); color:var(--ink)}
+html[data-theme="papier"] .in-regeln li{background:var(--panel); border-left:3px solid var(--ink); border-radius:var(--radius)}
+html[data-theme="papier"] .in-regeln li::before{color:var(--accent); font-family:var(--mono)}
+html[data-theme="papier"] .lb-insp-leer{background:var(--panel)}
+html[data-theme="papier"] .lb-insp-leer::before{content:"// NICHTS AUSGEWÄHLT"; color:var(--accent); letter-spacing:.24em}
+html[data-theme="papier"] .lb-tipps{font-family:var(--mono); color:var(--faint)}
+html[data-theme="papier"] .in-kopf .in-speichern{border:1px solid var(--warn); background:var(--warn-soft)}
+
+/* ==========================================================================
+   7 · DIALOGE, MENÜS, TOASTS, PALETTE
+   ========================================================================== */
+html[data-theme="papier"] .toast{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten-hart);
+}
+html[data-theme="papier"] .toast-sym{border-radius:var(--radius); border:1px solid var(--line)}
+html[data-theme="papier"] .menue{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .menue-titel{border-bottom:1px solid var(--line); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.16em; text-transform:uppercase}
+html[data-theme="papier"] .menue-punkt{border-radius:var(--radius-s); font-weight:600}
+html[data-theme="papier"] .menue-punkt:hover:not([disabled]){background:var(--panel-2)}
+html[data-theme="papier"] .dialog,
+html[data-theme="papier"] .pal-kasten{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .dialog-huelle,
+html[data-theme="papier"] .pal-huelle{background:color-mix(in srgb,var(--ink) 34%,transparent)}
+html[data-theme="papier"] .dialog-kopf{border-bottom:2px solid var(--ink)}
+html[data-theme="papier"] .dialog-kopf h2{font:800 var(--fs-6)/1 var(--display); letter-spacing:-.03em}
+html[data-theme="papier"] .pal-kopf{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .pal-eingabe{font-family:var(--mono); font-size:var(--fs-3)}
+html[data-theme="papier"] .wahl{border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2)}
+html[data-theme="papier"] .wahl-knopf{border-radius:var(--radius-xs); font-family:var(--mono); letter-spacing:.04em}
+html[data-theme="papier"] .wahl-knopf.an{background:var(--ink); color:var(--bg); box-shadow:none}
+html[data-theme="papier"] .schalter{border:1px solid var(--line-2); background:var(--panel-3)}
+html[data-theme="papier"] .schalter.an{background:var(--ink); border-color:var(--ink)}
+html[data-theme="papier"] .schalter.an span{background:var(--accent)}
+html[data-theme="papier"] .einst-abschnitt{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .einst-abschnitt h3,
+html[data-theme="papier"] .kuerzel h3{color:var(--accent); font-family:var(--mono); letter-spacing:.16em}
+html[data-theme="papier"] .platzhalter{border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel); box-shadow:var(--schatten)}
+html[data-theme="papier"] .ph-sym{border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--accent-soft); color:var(--accent)}
+
+/* ==========================================================================
+   8 · SCHMAL (720 px): Rahmen bleiben, Abstände schrumpfen
+   ========================================================================== */
+@media (max-width:900px){
+  html[data-theme="papier"] .hb-seite{padding:18px 14px 16px; gap:14px}
+  html[data-theme="papier"] .hb-raster{gap:14px}
+  html[data-theme="papier"] .hb-hero{padding:16px 18px 18px}
+  html[data-theme="papier"] .hb-hero h1{font-size:clamp(var(--fs-6),7vw,var(--fs-8))}
+  html[data-theme="papier"] .lb-mitte{padding:10px 12px; gap:12px}
+  html[data-theme="papier"] .lb-auftrag{padding:12px 14px}
+  html[data-theme="papier"] .lb-auftrag::before{display:none}
+  html[data-theme="papier"] .lb-auftrag :is(h1,h2),
+  html[data-theme="papier"] .lb-auftrag .am-titel strong{font-size:var(--fs-5); letter-spacing:-.03em}
+  html[data-theme="papier"] .lb-leinwand::after{inset:5px}
+  html[data-theme="papier"] .dock-text{letter-spacing:.02em}
+  html[data-theme="papier"] .fuss{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  html[data-theme="papier"] .knopf.primaer:hover{transform:none}
+}
+
+/* ---- zzz-thema-pulsar.css ---- */
+/* ============================================================================
+   PULSAR — Signalschirm (Cyber-HUD, dunkel)
+   ----------------------------------------------------------------------------
+   Idee: ein Premium-Kontrollraum, kein Spielzeug. Der Grund ist Obsidian-Indigo,
+   fast schwarz, mit einem feinen Messraster darunter; alle Flächen sind
+   Instrumentenpaneele mit Haarlinienkante und einer registrierten Ecke.
+   Zwei Signalfarben tragen die Handlung: elektrisches Cyan (Aktion/Live) und
+   Magenta (Wissen/Reputation). Amber ist Zeit und Geld, Koralle ist Störung —
+   Signale, nie Dekoration. Glow erscheint nur an dem, was gerade gilt.
+   Typografie: Bahnschrift SemiCondensed als enge, technische Display-Schrift,
+   Atkinson Hyperlegible als ruhiger Fließtext, Cascadia Mono als
+   Beschriftung mit weitem Sperrsatz — die Spannung kommt aus dem Kontrast
+   zwischen 11-px-Monolabel und 52-px-Displayzeile.
+   Geometrie: 4/3/2 px Radius, angeschnittene Chips, 1-px-Raster, keine Pillen.
+   Alle Literale stehen ausschließlich im Token-Block; jede weitere Regel
+   beginnt mit html[data-theme="pulsar"] und färbt nur über var(--…).
+   Vertrag: docs/entwicklung/Themes-Vertrag.md · Ethos R1–R11.
+   ============================================================================ */
+
+:root[data-theme="pulsar"]{
+  color-scheme:dark;
+
+  /* ---- Grund: Obsidian-Indigo, kein reines Schwarz ---- */
+  --bg:#050810;
+  --bg-raster:rgba(59,225,255,.055);
+  --raster:32px;
+  --panel:#0A1120;
+  --panel-2:#0E1728;
+  --panel-3:#131F35;
+  --line:rgba(126,224,255,.12);
+  --line-2:rgba(126,224,255,.24);
+
+  /* ---- Schriftstufen: kaltes Weiß, klar gestuft (ink 16.6:1, muted 9.4:1, faint 6.4:1 auf --panel) ---- */
+  --ink:#E8F2FB;
+  --muted:#A6BACD;
+  --faint:#8399AE;
+
+  /* ---- Signalpaar: Cyan = Handlung, Magenta = Wissen ---- */
+  --accent:#3BE1FF;
+  --accent-ink:#021018;
+  --accent-soft:#062430;
+  --mint:#66F5CE;
+  --iris:#E07BFF;
+  --amber:#FFC857;
+  --koralle:#FF6470;
+
+  --ok:#66F5CE;      --ok-soft:#06251D;
+  --warn:#FFC857;    --warn-soft:#2A2110;
+  --bad:#FF6470;     --bad-soft:#2C1118;
+  --info:#E07BFF;    --info-soft:#241033;
+  --geld:#FFC857;
+  --ruf:#E07BFF;
+
+  /* ---- Paketfarben je Protokoll (immer mit Beschriftung) ---- */
+  --p-arp:#FFC857; --p-icmp:#3BE1FF; --p-tcp:#C08BFF; --p-udp:#66F5CE; --p-dhcp:#FF9AD5; --p-dns:#FFA06A; --p-http:#7FB6FF;
+
+  /* ---- VLAN-Farben 1..8 ---- */
+  --vlan-1:#93A6BA; --vlan-2:#3BE1FF; --vlan-3:#66F5CE; --vlan-4:#FFC857; --vlan-5:#FF9AD5; --vlan-6:#C08BFF; --vlan-7:#FFA06A; --vlan-8:#6FE8E0;
+
+  /* ---- Subnetz-Zonen (Ebene IP), halbtransparent ---- */
+  --zone-a:rgba(59,225,255,.07); --zone-b:rgba(102,245,206,.07); --zone-c:rgba(255,200,87,.06); --zone-d:rgba(224,123,255,.07); --zone-e:rgba(192,139,255,.06);
+  --zone-a-linie:rgba(59,225,255,.40); --zone-b-linie:rgba(102,245,206,.40); --zone-c-linie:rgba(255,200,87,.36); --zone-d-linie:rgba(224,123,255,.40); --zone-e-linie:rgba(192,139,255,.36);
+
+  /* ---- Gerätetypen ---- */
+  --typ-router:#3BE1FF; --typ-switch:#66F5CE; --typ-firewall:#FF6470; --typ-host:#D9E6F5; --typ-server:#E07BFF; --typ-nas:#7FB6FF; --typ-internet:#3BE1FF;
+
+  /* ---- Tiefe: zwei dunkle Schichten, ein Signal-Glow aus zwei Ebenen ---- */
+  --schatten:0 34px 78px -56px rgba(0,0,0,.94), 0 2px 0 -1px rgba(0,0,0,.55);
+  --glow:0 0 0 1px rgba(59,225,255,.22), 0 20px 52px -30px rgba(59,225,255,.36);
+  --glas:rgba(5,8,16,.74);
+  --leiste-bg:rgba(5,8,16,.92);
+
+  /* ---- Geometrie: scharfe Ecken, 4/3/2 ---- */
+  --radius:4px;
+  --radius-s:3px;
+  --radius-xs:2px;
+
+  /* ---- Schrift: ausschließlich lokal vorhandene Schriften ---- */
+  --display:"Bahnschrift SemiCondensed", "Bahnschrift", "Bricolage Grotesque", "Segoe UI", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"Cascadia Mono", "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  /* ---- Typo-Skala: mehr Spannung zwischen Mikro-Label und Display ---- */
+  --fs-1:11px; --fs-2:12px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:28px; --fs-7:38px; --fs-8:52px;
+
+  /* ---- Abstands-Token (feine HUD-Schritte, damit keine Fremd-Pixel entstehen) ---- */
+  --p-1:4px; --p-2:6px; --p-3:8px; --p-4:12px; --p-5:16px; --p-6:24px; --p-7:32px; --p-fein:3px;
+  --hud-ecke:10px;
+  --hud-linie:1px;
+
+  /* ---- Zeiten und Kurven ---- */
+  --dauer-kurz:80ms; --dauer:160ms; --dauer-mittel:240ms; --dauer-lang:320ms; --dauer-zaehler:700ms;
+  --ease-standard:cubic-bezier(.2,.7,.3,1);
+  --ease-out:cubic-bezier(.16,.84,.44,1);
+  --ease-pop:cubic-bezier(.3,1.6,.5,1);
+}
+
+/* ============================================================================
+   1 · Grundfläche: Messraster plus zwei leise Signalnebel
+   ============================================================================ */
+
+html[data-theme="pulsar"] body{
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(to right, var(--bg-raster) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--bg-raster) 1px, transparent 1px),
+    linear-gradient(to right, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
+    radial-gradient(1100px 620px at 8% -14%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 62%),
+    radial-gradient(900px 540px at 94% -6%, color-mix(in srgb, var(--iris) 7%, transparent), transparent 60%);
+  background-size:var(--raster) var(--raster), var(--raster) var(--raster), calc(var(--raster) * 4) calc(var(--raster) * 4), calc(var(--raster) * 4) calc(var(--raster) * 4), auto, auto;
+}
+
+html[data-theme="pulsar"]{
+  scrollbar-color:color-mix(in srgb, var(--accent) 26%, transparent) transparent;
+  scrollbar-width:thin;
+}
+
+html[data-theme="pulsar"] ::selection{
+  background:color-mix(in srgb, var(--accent) 24%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] :is(button, a, [tabindex]):focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+html[data-theme="pulsar"] :is(code, kbd){
+  border:var(--hud-linie) solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:var(--panel-3);
+  color:var(--ink);
+}
+
+/* ============================================================================
+   2 · Kopfzeile: Instrumentenleiste mit Horizontlinie
+   ============================================================================ */
+
+html[data-theme="pulsar"] .kopf{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--panel) 96%, var(--ink)), var(--panel) 70%);
+  border-bottom:var(--hud-linie) solid var(--line);
+  box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="pulsar"] .kopf::after{
+  height:1px;
+  background:linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 72%, transparent) 14%,
+    color-mix(in srgb, var(--accent) 30%, transparent) 42%,
+    color-mix(in srgb, var(--iris) 44%, transparent) 68%,
+    transparent 90%);
+  opacity:.85;
+}
+
+html[data-theme="pulsar"] .kopf-marke{
+  gap:var(--p-3);
+  padding-right:var(--p-4);
+  border-right:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .marke-sym rect{
+  fill:transparent;
+  stroke:color-mix(in srgb, var(--accent) 45%, var(--line-2));
+  stroke-width:1.2;
+}
+
+html[data-theme="pulsar"] .marke-sym path{
+  stroke:var(--accent);
+  stroke-width:1.8;
+}
+
+html[data-theme="pulsar"] .marke-sym circle{
+  fill:var(--accent);
+}
+
+html[data-theme="pulsar"] .marke-name{
+  font-family:var(--display);
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .marke-version{
+  font-family:var(--mono);
+  font-weight:600;
+  letter-spacing:.14em;
+  color:var(--faint);
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 70%, transparent);
+  padding:var(--p-1) var(--p-2);
+}
+
+html[data-theme="pulsar"] .sp-leise{
+  font-family:var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .wert{
+  background:color-mix(in srgb, var(--panel-2) 72%, transparent);
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  letter-spacing:.1em;
+  color:var(--muted);
+  transition:background var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard), color var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="pulsar"] button.wert:hover{
+  background:var(--panel-3);
+  border-color:var(--line-2);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .wert-zahl{
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+html[data-theme="pulsar"] .kopf-knoepfe{
+  border-left:var(--hud-linie) solid var(--line);
+  padding-left:var(--p-3);
+}
+
+html[data-theme="pulsar"] .kopf-knopf{
+  border:var(--hud-linie) solid transparent;
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+  transition:background var(--dauer) var(--ease-standard), color var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="pulsar"] .kopf-knopf:hover{
+  background:var(--panel-2);
+  border-color:var(--line);
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .kopf-knopf.mit-text span{
+  font-family:var(--mono);
+  letter-spacing:.12em;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   3 · Schiene: zehn Kanäle, ein aktives Signal
+   ============================================================================ */
+
+html[data-theme="pulsar"] .dock{
+  background:linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 84%, var(--bg)));
+  border-right:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .dock-knopf{
+  border:var(--hud-linie) solid transparent;
+  border-radius:var(--radius-xs);
+  color:var(--faint);
+  transition:background var(--dauer) var(--ease-standard), color var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="pulsar"] .dock-knopf:hover{
+  background:var(--panel-2);
+  border-color:var(--line);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .dock-knopf.an{
+  background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 13%, transparent), transparent 78%);
+  border-color:color-mix(in srgb, var(--accent) 26%, transparent);
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .dock-knopf.an::before{
+  top:var(--p-3);
+  bottom:var(--p-3);
+  width:2px;
+  border-radius:0;
+  background:var(--accent);
+  box-shadow:0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+html[data-theme="pulsar"] .dock-text{
+  font-family:var(--mono);
+  letter-spacing:.14em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .dock-knopf.an .dock-text{
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .dock-zahl{
+  min-width:16px;
+  height:16px;
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--accent) 16%, transparent);
+  border:var(--hud-linie) solid color-mix(in srgb, var(--accent) 34%, transparent);
+  color:var(--accent);
+  font:600 var(--fs-1)/14px var(--mono);
+}
+
+/* ============================================================================
+   4 · Statusfuss: Messleiste mit Signalabschnitt
+   ============================================================================ */
+
+html[data-theme="pulsar"] .fuss{
+  position:relative;
+  background:linear-gradient(90deg, var(--panel), color-mix(in srgb, var(--bg) 88%, var(--panel)) 60%);
+  border-top:var(--hud-linie) solid var(--line);
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .fuss::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:-1px;
+  width:120px;
+  height:1px;
+  background:linear-gradient(90deg, var(--accent), transparent);
+  opacity:.85;
+}
+
+html[data-theme="pulsar"] .fuss-live{
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .fuss-punkt{
+  width:5px;
+  height:5px;
+  border-radius:0;
+  transform:rotate(45deg);
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 75%, transparent);
+}
+
+html[data-theme="pulsar"] .fuss-text{
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .fuss-ebene{
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .fuss-trenner{
+  opacity:.45;
+}
+
+/* ============================================================================
+   5 · Flächen-Grammatik: Paneele mit registrierter Ecke
+   ============================================================================ */
+
+html[data-theme="pulsar"] .hb-seite{
+  max-width:1240px;
+}
+
+html[data-theme="pulsar"] .hb-panel{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(168deg, color-mix(in srgb, var(--panel-2) 58%, var(--panel)), var(--panel) 72%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent), var(--schatten);
+}
+
+html[data-theme="pulsar"] .hb-panel::before{
+  content:"";
+  position:absolute;
+  left:calc(-1 * var(--hud-linie));
+  top:calc(-1 * var(--hud-linie));
+  width:calc(var(--hud-ecke) + var(--p-1));
+  height:calc(var(--hud-ecke) + var(--p-1));
+  border-left:var(--hud-linie) solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-top:var(--hud-linie) solid color-mix(in srgb, var(--accent) 55%, transparent);
+  z-index:10;
+  pointer-events:none;
+}
+
+html[data-theme="pulsar"] .hb-panel::after{
+  content:"";
+  position:absolute;
+  right:calc(-1 * var(--hud-linie));
+  bottom:calc(-1 * var(--hud-linie));
+  width:var(--hud-ecke);
+  height:var(--hud-ecke);
+  border-right:var(--hud-linie) solid var(--line-2);
+  border-bottom:var(--hud-linie) solid var(--line-2);
+  z-index:10;
+  pointer-events:none;
+}
+
+html[data-theme="pulsar"] .hb-panel-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  color:var(--faint);
+  display:flex;
+  align-items:center;
+  gap:var(--p-3);
+}
+
+
+html[data-theme="pulsar"] .hb-kachel{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-kachel:hover{
+  border-color:color-mix(in srgb, var(--accent) 34%, var(--line));
+  background:color-mix(in srgb, var(--panel-2) 70%, var(--panel));
+}
+
+html[data-theme="pulsar"] .hb-kachel-sym{
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--accent) 10%, transparent);
+  color:var(--accent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-pill{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  color:var(--accent);
+  border:var(--hud-linie) solid color-mix(in srgb, var(--accent) 32%, transparent);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--accent) 7%, transparent);
+  padding:var(--p-2) var(--p-3);
+}
+
+/* ============================================================================
+   6 · Hub-Band: Mission als Instrumentenanzeige
+   ============================================================================ */
+
+html[data-theme="pulsar"] .hb-hero{
+  background:
+    radial-gradient(120% 160% at 94% -24%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 56%),
+    radial-gradient(90% 120% at 2% 112%, color-mix(in srgb, var(--iris) 8%, transparent), transparent 60%),
+    linear-gradient(158deg, color-mix(in srgb, var(--panel-2) 64%, var(--panel)), var(--panel) 74%);
+}
+
+html[data-theme="pulsar"] .hb-hero::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:var(--p-4);
+  bottom:var(--p-4);
+  width:2px;
+  background:linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--iris) 70%, transparent) 62%, transparent);
+  border-radius:0;
+  z-index:10;
+  pointer-events:none;
+}
+
+html[data-theme="pulsar"] .hb-hero::after{
+  content:"";
+  position:absolute;
+  right:var(--p-6);
+  bottom:var(--p-6);
+  width:52px;
+  height:52px;
+  border:var(--hud-linie) solid color-mix(in srgb, var(--line-2) 76%, transparent);
+  background-image:
+    linear-gradient(90deg, transparent calc(50% - .5px), color-mix(in srgb, var(--accent) 58%, transparent) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)),
+    linear-gradient(0deg, transparent calc(50% - .5px), color-mix(in srgb, var(--accent) 58%, transparent) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px));
+  opacity:.6;
+  z-index:10;
+  pointer-events:none;
+}
+
+html[data-theme="pulsar"] .hb-kicker{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  color:var(--faint);
+  display:flex;
+  align-items:center;
+  gap:var(--p-3);
+}
+
+html[data-theme="pulsar"] .hb-kicker::before{
+  content:"";
+  flex:0 0 auto;
+  width:var(--p-2);
+  height:var(--p-2);
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-hero-kunde{
+  color:var(--muted);
+  font-family:var(--mono);
+  font-size:var(--fs-2);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+html[data-theme="pulsar"] .hb-hero h1{
+  font-family:var(--display);
+  font-weight:700;
+  letter-spacing:.02em;
+  line-height:.96;
+  text-transform:uppercase;
+  background:linear-gradient(180deg, var(--ink) 34%, color-mix(in srgb, var(--ink) 78%, var(--accent)));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+html[data-theme="pulsar"] .hb-hero-lead{
+  color:var(--muted);
+  max-width:62ch;
+}
+
+html[data-theme="pulsar"] .hb-hero-meta{
+  gap:var(--p-3);
+}
+
+html[data-theme="pulsar"] .hb-hero-meta span{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--muted);
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 66%, transparent);
+  padding:var(--p-2) var(--p-3);
+}
+
+html[data-theme="pulsar"] .hb-hero-meta .warn{
+  color:var(--koralle);
+  border-color:color-mix(in srgb, var(--koralle) 42%, transparent);
+  background:color-mix(in srgb, var(--koralle) 8%, transparent);
+  box-shadow:inset 2px 0 0 var(--koralle);
+}
+
+html[data-theme="pulsar"] .hb-aktionen .knopf.primaer{
+  border-radius:var(--radius-xs);
+  border-color:color-mix(in srgb, var(--accent) 70%, var(--ink));
+  background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, var(--ink)), var(--accent));
+  color:var(--accent-ink);
+  letter-spacing:.06em;
+}
+
+html[data-theme="pulsar"] .hb-aktionen .knopf.geist{
+  border-radius:var(--radius-xs);
+  border:var(--hud-linie) solid var(--line-2);
+  background:color-mix(in srgb, var(--panel-2) 60%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .knopf.primaer::after{
+  display:none;
+}
+
+html[data-theme="pulsar"] .knopf.primaer{
+  border-radius:var(--radius-xs);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, var(--ink)), var(--accent));
+  border-color:color-mix(in srgb, var(--accent) 66%, var(--ink));
+  color:var(--accent-ink);
+}
+
+/* ============================================================================
+   7 · Kenndaten: analoge Anzeigen mit Signalstreifen
+   ============================================================================ */
+
+html[data-theme="pulsar"] .hb-kenndaten{
+  padding:0;
+  overflow:hidden;
+}
+
+html[data-theme="pulsar"] .hb-kd{
+  grid-template-columns:auto 1fr auto;
+  grid-template-rows:auto auto;
+  row-gap:var(--p-2);
+  padding:var(--p-4) var(--p-5);
+  border-bottom:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .hb-kd:last-child{
+  border-bottom:0;
+}
+
+html[data-theme="pulsar"] .hb-kd > i{
+  width:6px;
+  height:6px;
+  border-radius:var(--radius-xs);
+  background:var(--c);
+  box-shadow:0 0 10px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-kd .lab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-kd > b{
+  font-family:var(--display);
+  font-weight:700;
+  letter-spacing:.01em;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+html[data-theme="pulsar"] .hb-kd small{
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-spark{
+  grid-column:1 / -1;
+  grid-row:2;
+  height:22px;
+  gap:var(--p-fein);
+}
+
+html[data-theme="pulsar"] .hb-spark i{
+  width:2px;
+  border-radius:0;
+  background:color-mix(in srgb, var(--c) 46%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-spark i.spitze{
+  background:var(--c);
+  box-shadow:0 0 8px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* ============================================================================
+   8 · Tagesziel: Ring als Messuhr, Zeilen als Checkliste
+   ============================================================================ */
+
+html[data-theme="pulsar"] .hb-ring{
+  background:conic-gradient(from -90deg, var(--accent) var(--anteil,0%), color-mix(in srgb, var(--accent) 22%, var(--panel-3)) 0);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent), 0 0 30px -12px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-ring::after{
+  background:var(--panel);
+  border:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .hb-ring b{
+  position:relative;
+  z-index:10;
+  font-family:var(--display);
+  font-weight:700;
+  letter-spacing:.02em;
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .hb-zeile{
+  border-top:var(--hud-linie) solid var(--line);
+  color:var(--muted);
+  gap:var(--p-3);
+}
+
+html[data-theme="pulsar"] .hb-zeile:first-of-type{
+  border-top:0;
+}
+
+html[data-theme="pulsar"] .hb-zeile:hover{
+  background:color-mix(in srgb, var(--panel-2) 80%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .hb-zeile i{
+  border-radius:var(--radius-xs);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--faint) 80%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-zeile.fertig i{
+  background:var(--accent);
+  box-shadow:0 0 8px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-zeile.fertig{
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .hb-zeile small{
+  letter-spacing:.14em;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   9 · Sitzung und Klassenraum: Protokollzeilen statt Karten
+   ============================================================================ */
+
+html[data-theme="pulsar"] .hb-sz{
+  grid-template-columns:56px 1fr auto;
+  padding:var(--p-3) 0 var(--p-3) var(--p-4);
+  border-top:var(--hud-linie) solid var(--line);
+  border-left:2px solid color-mix(in srgb, var(--line-2) 70%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-sz:first-of-type{
+  border-top:0;
+}
+
+html[data-theme="pulsar"] .hb-sz time{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-sz b{
+  font-weight:700;
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .hb-sz small{
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-sz em{
+  font:600 var(--fs-1)/1 var(--mono);
+  font-style:normal;
+  letter-spacing:.16em;
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .hb-klasse-zeile .knopf{
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="pulsar"] .hb-klasse-hinweis{
+  color:var(--faint);
+}
+
+/* ============================================================================
+   10 · Lagebild: Messfeld mit Knotenchips
+   ============================================================================ */
+
+html[data-theme="pulsar"] .hb-lage-svg{
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--line) 70%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 70%, transparent) 1px, transparent 1px),
+    radial-gradient(58% 68% at 50% 38%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 72%);
+  background-size:var(--raster) var(--raster), var(--raster) var(--raster), auto;
+}
+
+html[data-theme="pulsar"] .hb-lage-kopf{
+  z-index:30;
+}
+
+html[data-theme="pulsar"] .hb-lage-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-lage-zaehler{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+}
+
+html[data-theme="pulsar"] .hb-lage-zaehler.ok{
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .hb-lage-zaehler.bad{
+  color:var(--koralle);
+}
+
+html[data-theme="pulsar"] .hb-chip{
+  border:var(--hud-linie) solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 92%, var(--bg));
+  color:var(--ink);
+  letter-spacing:.06em;
+  box-shadow:0 6px 18px -14px color-mix(in srgb, var(--bg) 90%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-chip:hover{
+  border-color:var(--accent);
+}
+
+html[data-theme="pulsar"] .hb-chip-sym{
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--accent) 12%, transparent);
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .hb-chip.typ-internet{
+  box-shadow:inset 2px 0 0 var(--iris);
+}
+
+html[data-theme="pulsar"] .hb-chip.typ-router,
+html[data-theme="pulsar"] .hb-chip.typ-firewall{
+  box-shadow:inset 2px 0 0 var(--amber);
+}
+
+html[data-theme="pulsar"] .hb-chip.typ-switch{
+  box-shadow:inset 2px 0 0 var(--mint);
+}
+
+html[data-theme="pulsar"] .hb-chip.typ-pc{
+  box-shadow:inset 2px 0 0 var(--line-2);
+}
+
+html[data-theme="pulsar"] .hb-chip-mehr{
+  background:transparent;
+  border-style:dashed;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-chip.ohne-link{
+  border-color:color-mix(in srgb, var(--koralle) 45%, transparent);
+  border-style:dashed;
+  box-shadow:inset 2px 0 0 var(--koralle);
+}
+
+html[data-theme="pulsar"] .hb-lage-fuss .hb-legende{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-lage-tipp{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.12em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-lage-hinweis{
+  color:var(--muted);
+}
+
+/* ============================================================================
+   11 · Signal und Wochenziel
+   ============================================================================ */
+
+html[data-theme="pulsar"] .hb-signal-svg path{
+  stroke:var(--accent);
+  stroke-width:1.6;
+}
+
+html[data-theme="pulsar"] .hb-signal-svg path + path{
+  stroke:var(--line-2);
+  stroke-width:1;
+}
+
+html[data-theme="pulsar"] .hb-stat{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  color:var(--faint);
+  padding:var(--p-2) 0;
+  border-top:var(--hud-linie) solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+html[data-theme="pulsar"] .hb-stat i{
+  width:5px;
+  height:5px;
+  border-radius:var(--radius-xs);
+  background:var(--accent);
+}
+
+html[data-theme="pulsar"] .hb-stat b{
+  color:var(--ink);
+  font-weight:600;
+  letter-spacing:.08em;
+}
+
+html[data-theme="pulsar"] .hb-ziel{
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .hb-woche-knopf{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--muted);
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel) 80%, transparent);
+  padding:var(--p-2) var(--p-4);
+}
+
+html[data-theme="pulsar"] .hb-woche-knopf:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+/* ============================================================================
+   12 · Labor: Geräteschiene und Werkstattleiste
+   ============================================================================ */
+
+html[data-theme="pulsar"] .lb-geraete{
+  background:linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 82%, var(--bg)));
+  border-right:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .lb-geraete-titel{
+  font-family:var(--mono);
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .pa-kat{
+  border-radius:var(--radius-xs);
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .pa-kat:hover{
+  background:var(--panel-2);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .pa-kat.an{
+  background:color-mix(in srgb, var(--accent) 11%, transparent);
+  border-color:color-mix(in srgb, var(--accent) 40%, transparent);
+  color:var(--accent);
+}
+
+html[data-theme="pulsar"] .wk-leiste{
+  background:var(--panel);
+  border-bottom:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .wk-titel{
+  font-family:var(--mono);
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .wk-suche{
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 64%, var(--panel));
+  border:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .wk-suche:focus-within{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+html[data-theme="pulsar"] .wk-suche-feld{
+  font-family:var(--mono);
+  font-size:var(--fs-2);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .wk-knopf{
+  border-radius:var(--radius-xs);
+  border:var(--hud-linie) solid var(--line);
+  background:var(--panel-2);
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .wk-kennwerte{
+  font-family:var(--mono);
+  letter-spacing:.1em;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   13 · Auftragsband: Missionsanzeige mit Signalstatus
+   ============================================================================ */
+
+html[data-theme="pulsar"] .lb-auftrag{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius);
+  background:
+    radial-gradient(120% 170% at 100% -30%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 58%),
+    linear-gradient(160deg, color-mix(in srgb, var(--panel-2) 52%, var(--panel)), var(--panel) 70%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+html[data-theme="pulsar"] .lb-auftrag::before{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  color:color-mix(in srgb, var(--accent) 62%, var(--faint));
+}
+
+html[data-theme="pulsar"] .lb-auftrag .sp-kunde-sym{
+  border-radius:0;
+  border:var(--hud-linie) solid color-mix(in srgb, var(--accent) 34%, transparent);
+  background:linear-gradient(145deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  color:var(--accent);
+  clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+
+html[data-theme="pulsar"] .lb-auftrag .am-titel{
+  display:flex;
+  flex-direction:column;
+  gap:var(--p-1);
+  min-width:0;
+}
+
+html[data-theme="pulsar"] .lb-auftrag .am-titel strong{
+  font-family:var(--display);
+  font-weight:700;
+  letter-spacing:.015em;
+  line-height:.98;
+  text-transform:uppercase;
+  color:var(--ink);
+  white-space:normal;
+  overflow:visible;
+}
+
+html[data-theme="pulsar"] .lb-auftrag .am-kunde{
+  font:600 var(--fs-1)/1.2 var(--mono);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .lb-auftrag .am-ziele{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--muted);
+  border:var(--hud-linie) solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 70%, transparent);
+  padding:var(--p-2) var(--p-3);
+}
+
+html[data-theme="pulsar"] .lb-auftrag .am-lesen{
+  border-radius:var(--radius-xs);
+  border:var(--hud-linie) solid var(--line-2);
+  background:color-mix(in srgb, var(--panel-2) 60%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .lb-auftrag .am-lesen:hover{
+  border-color:var(--accent);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .lb-auftrag .sp-abnahme{
+  border-radius:var(--radius-xs);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, var(--ink)), var(--accent));
+  border-color:color-mix(in srgb, var(--accent) 66%, var(--ink));
+  color:var(--accent-ink);
+  letter-spacing:.06em;
+}
+
+html[data-theme="pulsar"] .lb-auftrag .am-mehr{
+  border-radius:var(--radius-xs);
+  border:var(--hud-linie) solid var(--line);
+  background:transparent;
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .lb-auftrag .sp-einstieg{
+  border-radius:var(--radius-xs);
+  border:var(--hud-linie) solid color-mix(in srgb, var(--accent) 26%, transparent);
+  background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent 62%);
+}
+
+html[data-theme="pulsar"] .lb-auftrag .sp-einstieg-text{
+  color:var(--muted);
+  font-size:var(--fs-2);
+}
+
+/* ============================================================================
+   14 · Leinwand: Messfeld, Geräte, Kabel, Werkzeuge
+   ============================================================================ */
+
+html[data-theme="pulsar"] .lb-leinwand{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+}
+
+html[data-theme="pulsar"] .lb-leinwand::before{
+  content:"// LAGEBILD";
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.28em;
+  color:color-mix(in srgb, var(--accent) 55%, var(--faint));
+  z-index:30;
+}
+
+html[data-theme="pulsar"] .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  right:var(--p-4);
+  top:var(--p-4);
+  width:var(--p-6);
+  height:var(--p-6);
+  border-right:var(--hud-linie) solid color-mix(in srgb, var(--line-2) 80%, transparent);
+  border-top:var(--hud-linie) solid color-mix(in srgb, var(--line-2) 80%, transparent);
+  z-index:10;
+  pointer-events:none;
+}
+
+html[data-theme="pulsar"] .lb-svg{
+  background-color:color-mix(in srgb, var(--bg) 86%, var(--panel));
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to right, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
+    radial-gradient(70% 80% at 68% 22%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%);
+  background-size:var(--raster) var(--raster), var(--raster) var(--raster), calc(var(--raster) * 4) calc(var(--raster) * 4), calc(var(--raster) * 4) calc(var(--raster) * 4), auto;
+}
+
+html[data-theme="pulsar"] .lb-raster{
+  opacity:0;
+}
+
+html[data-theme="pulsar"] .lb-leiste-oben{
+  top:var(--p-7);
+}
+
+html[data-theme="pulsar"] .lb-gruppe{
+  background:var(--glas);
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  box-shadow:0 10px 30px -24px color-mix(in srgb, var(--bg) 92%, transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(130%);
+  backdrop-filter:blur(14px) saturate(130%);
+}
+
+html[data-theme="pulsar"] .lb-wz,
+html[data-theme="pulsar"] .lb-knopf{
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .lb-wz:hover,
+html[data-theme="pulsar"] .lb-knopf:hover:not([disabled]){
+  background:var(--panel-2);
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .lb-wz.an{
+  background:color-mix(in srgb, var(--accent) 13%, transparent);
+  color:var(--accent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 46%, transparent);
+}
+
+html[data-theme="pulsar"] .lb-wz.an .lb-wz-taste{
+  color:var(--accent);
+  background:transparent;
+}
+
+html[data-theme="pulsar"] .lb-wz-taste{
+  font:600 var(--fs-1)/1 var(--mono);
+  color:var(--faint);
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:var(--panel);
+  padding:0 var(--p-1);
+}
+
+html[data-theme="pulsar"] .lb-ansicht{
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+  font-family:var(--mono);
+  letter-spacing:.08em;
+}
+
+html[data-theme="pulsar"] .lb-ansicht-text{
+  color:var(--ink);
+}
+
+html[data-theme="pulsar"] .lb-zoomtext{
+  font-family:var(--mono);
+  letter-spacing:.06em;
+  color:var(--muted);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="pulsar"] .lb-hinweis{
+  border:var(--hud-linie) solid var(--line);
+  border-left:2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border-radius:var(--radius-xs);
+  background:var(--glas);
+  color:var(--muted);
+  font-size:var(--fs-2);
+}
+
+html[data-theme="pulsar"] .lb-legende{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:var(--glas);
+  color:var(--faint);
+  font-family:var(--mono);
+  letter-spacing:.14em;
+}
+
+html[data-theme="pulsar"] .lb-legende .lg-verbunden::before{
+  background:var(--mint);
+}
+
+html[data-theme="pulsar"] .lb-legende .lg-getrennt::before{
+  background:var(--line-2);
+}
+
+html[data-theme="pulsar"] .lb-legende .lg-kein::before{
+  border-top:1px dashed var(--amber);
+}
+
+html[data-theme="pulsar"] .ger-karte{
+  fill:color-mix(in srgb, var(--panel) 82%, var(--bg));
+  stroke:var(--line-2);
+  stroke-width:1;
+}
+
+html[data-theme="pulsar"] .ger.hover .ger-karte{
+  fill:var(--panel-2);
+  stroke:color-mix(in srgb, var(--accent) 45%, var(--line-2));
+}
+
+html[data-theme="pulsar"] .ger.gewaehlt .ger-karte,
+html[data-theme="pulsar"] .ger.zielt .ger-karte{
+  fill:color-mix(in srgb, var(--accent) 8%, var(--panel));
+  stroke:var(--accent);
+  stroke-width:1.6;
+}
+
+html[data-theme="pulsar"] .ger-name{
+  fill:var(--ink);
+  font-family:var(--mono);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+html[data-theme="pulsar"] .ger-ip{
+  fill:var(--muted);
+  font-family:var(--mono);
+}
+
+html[data-theme="pulsar"] .ger-ip.schwach{
+  fill:var(--faint);
+}
+
+html[data-theme="pulsar"] .ger.aus .ger-name{
+  fill:var(--faint);
+}
+
+html[data-theme="pulsar"] .kabel-huelle{
+  stroke:color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+html[data-theme="pulsar"] .kabel-stecker .stk-gehaeuse{
+  fill:var(--panel-3);
+  stroke:var(--kf, var(--accent));
+}
+
+html[data-theme="pulsar"] .kabel-stecker .stk-clip{
+  fill:var(--panel);
+}
+
+html[data-theme="pulsar"] .kabel-port{
+  fill:var(--muted);
+  font-family:var(--mono);
+}
+
+html[data-theme="pulsar"] .wk-mini{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:var(--glas);
+  -webkit-backdrop-filter:blur(14px) saturate(130%);
+  backdrop-filter:blur(14px) saturate(130%);
+  box-shadow:0 20px 50px -36px color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+html[data-theme="pulsar"] .wk-mini-titel{
+  font-family:var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .wk-mini-svg{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 72%, var(--panel));
+}
+
+html[data-theme="pulsar"] .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--accent) 34%, transparent);
+}
+
+html[data-theme="pulsar"] .wk-mini-punkt{
+  fill:var(--muted);
+  stroke:var(--bg);
+}
+
+html[data-theme="pulsar"] .wk-mini-punkt.an{
+  fill:var(--accent);
+}
+
+html[data-theme="pulsar"] .wk-mini-knopf{
+  border-radius:var(--radius-xs);
+  border:var(--hud-linie) solid var(--line);
+  background:var(--panel-2);
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .wk-mini-zoomtext{
+  font-family:var(--mono);
+  color:var(--faint);
+}
+
+/* ============================================================================
+   15 · Inspektor: Messpult mit Reitern und Feldern
+   ============================================================================ */
+
+html[data-theme="pulsar"] .lb-dock{
+  border-left:var(--hud-linie) solid var(--line);
+  background:linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 86%, var(--bg)));
+}
+
+html[data-theme="pulsar"] .lb-dock-reiter{
+  border-bottom:var(--hud-linie) solid var(--line);
+  background:color-mix(in srgb, var(--panel) 70%, var(--bg));
+}
+
+html[data-theme="pulsar"] .lb-dock-tab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+  border-radius:var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+html[data-theme="pulsar"] .lb-dock-tab.an{
+  color:var(--ink);
+  background:var(--panel-2);
+  border-color:var(--line);
+  box-shadow:inset 0 2px 0 var(--accent);
+}
+
+html[data-theme="pulsar"] .lb-dock-einklappen{
+  border-radius:var(--radius-xs);
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .lb-inspektor::before{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.28em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .in-kopf{
+  background:linear-gradient(180deg, var(--panel-2), color-mix(in srgb, var(--panel-2) 55%, var(--panel)));
+  border-bottom:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .in-kopf-zeile{
+  gap:var(--p-3);
+}
+
+html[data-theme="pulsar"] .in-kopf-text h3{
+  font-family:var(--display);
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+html[data-theme="pulsar"] .in-kopf-text span{
+  font:600 var(--fs-1)/1.3 var(--mono);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .in-chip{
+  border-radius:var(--radius-xs);
+  font-family:var(--mono);
+  font-size:var(--fs-1);
+  letter-spacing:.1em;
+  border:var(--hud-linie) solid transparent;
+}
+
+html[data-theme="pulsar"] .in-chip.ok{
+  background:var(--ok-soft);
+  color:var(--ok);
+  border-color:color-mix(in srgb, var(--ok) 24%, transparent);
+}
+
+html[data-theme="pulsar"] .in-chip.bad{
+  background:var(--bad-soft);
+  color:var(--bad);
+  border-color:color-mix(in srgb, var(--bad) 24%, transparent);
+}
+
+html[data-theme="pulsar"] .in-chip.warn{
+  background:var(--warn-soft);
+  color:var(--warn);
+  border-color:color-mix(in srgb, var(--warn) 24%, transparent);
+}
+
+html[data-theme="pulsar"] .in-chip.frei{
+  background:transparent;
+  border:1px dashed var(--line-2);
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .in-reiter{
+  padding:var(--p-3) var(--p-4) 0;
+  border-bottom:var(--hud-linie) solid var(--line);
+}
+
+html[data-theme="pulsar"] .in-tab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+  border-radius:0;
+  border-bottom:2px solid transparent;
+}
+
+html[data-theme="pulsar"] .in-tab:hover{
+  color:var(--ink);
+  background:transparent;
+}
+
+html[data-theme="pulsar"] .in-tab.an{
+  color:var(--accent);
+  background:transparent;
+  border-bottom-color:var(--accent);
+}
+
+html[data-theme="pulsar"] .in-abschnitt{
+  gap:var(--p-3);
+}
+
+html[data-theme="pulsar"] .in-abschnitt h4{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  color:var(--faint);
+  display:flex;
+  align-items:center;
+  gap:var(--p-3);
+}
+
+html[data-theme="pulsar"] .in-abschnitt h4::before{
+  content:"";
+  flex:0 0 auto;
+  width:var(--p-3);
+  height:1px;
+  background:var(--accent);
+}
+
+html[data-theme="pulsar"] .in-feld-titel{
+  font:600 var(--fs-1)/1.2 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .in-eingabe,
+html[data-theme="pulsar"] .in-auswahl{
+  border:var(--hud-linie) solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 62%, var(--panel));
+  color:var(--ink);
+  font-family:var(--mono);
+}
+
+html[data-theme="pulsar"] .in-eingabe:focus,
+html[data-theme="pulsar"] .in-auswahl:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent);
+  background:var(--panel);
+}
+
+html[data-theme="pulsar"] .in-schalter-bahn{
+  border-radius:999px;
+  background:var(--panel-3);
+  border:var(--hud-linie) solid var(--line-2);
+}
+
+html[data-theme="pulsar"] .in-schalter-bahn::after{
+  border-radius:50%;
+  background:var(--faint);
+}
+
+html[data-theme="pulsar"] .in-schalter input:checked + .in-schalter-bahn{
+  background:color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color:var(--accent);
+}
+
+html[data-theme="pulsar"] .in-schalter input:checked + .in-schalter-bahn::after{
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="pulsar"] .in-schalter-text small{
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .in-knopf{
+  border-radius:var(--radius-xs);
+  border:var(--hud-linie) solid var(--line-2);
+  background:var(--panel-2);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:var(--fs-1);
+  letter-spacing:.04em;
+}
+
+html[data-theme="pulsar"] .in-knopf:hover{
+  background:var(--panel-3);
+  border-color:var(--accent);
+}
+
+html[data-theme="pulsar"] .in-knopf.primaer{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--accent-ink);
+}
+
+html[data-theme="pulsar"] .in-knopf.geist{
+  background:transparent;
+  border-color:transparent;
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .in-tabelle{
+  font-size:var(--fs-2);
+}
+
+html[data-theme="pulsar"] .in-tabelle td{
+  border-bottom:var(--hud-linie) solid var(--line);
+  padding:var(--p-3) var(--p-2);
+}
+
+html[data-theme="pulsar"] .in-tabelle tr.klickbar:hover{
+  background:color-mix(in srgb, var(--panel-2) 70%, transparent);
+}
+
+html[data-theme="pulsar"] .in-gegen{
+  color:var(--muted);
+}
+
+html[data-theme="pulsar"] .in-hinweis{
+  color:var(--muted);
+  font-size:var(--fs-2);
+}
+
+html[data-theme="pulsar"] .in-hinweis code{
+  background:var(--panel-3);
+}
+
+html[data-theme="pulsar"] .in-meldung{
+  color:var(--faint);
+}
+
+/* ============================================================================
+   16 · Klassenraum-Start (Hub-Fuß): Feld mit Signalrahmen
+   ============================================================================ */
+
+html[data-theme="pulsar"] .kl-start{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius);
+  background:color-mix(in srgb, var(--panel) 70%, transparent);
+  padding:var(--p-4);
+}
+
+html[data-theme="pulsar"] .kl-start-etikett{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="pulsar"] .kl-start-feld{
+  border:var(--hud-linie) solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--mono);
+  padding:var(--p-2) var(--p-3);
+}
+
+html[data-theme="pulsar"] .kl-start-knopf{
+  border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
+  background:var(--panel-2);
+  color:var(--muted);
+}
+
+/* ============================================================================
+   17 · Schmale Breiten: Anzeigen bleiben lesbar, Dekor weicht
+   ============================================================================ */
+
+@media (max-width:1100px){
+  html[data-theme="pulsar"] .hb-hero::after{
+    display:none;
+  }
+  html[data-theme="pulsar"] .hb-hero h1{
+    letter-spacing:.01em;
+  }
+}
+
+@media (max-width:900px){
+  html[data-theme="pulsar"] .kopf{
+    box-shadow:none;
+  }
+  html[data-theme="pulsar"] .marke-name{
+    letter-spacing:.14em;
+  }
+  html[data-theme="pulsar"] .dock{
+    width:72px;
+  }
+  html[data-theme="pulsar"] .dock-knopf{
+    width:64px;
+    min-height:52px;
+    border-radius:var(--radius-xs);
+  }
+  html[data-theme="pulsar"] .dock-text{
+    letter-spacing:0;
+  }
+  html[data-theme="pulsar"] .hb-ziel-karte{
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:center;
+  }
+  html[data-theme="pulsar"] .hb-panel::before{
+    width:var(--p-4);
+    height:var(--p-4);
+  }
+  html[data-theme="pulsar"] .hb-panel::after{
+    width:var(--p-3);
+    height:var(--p-3);
+  }
+  html[data-theme="pulsar"] .hb-hero::before{
+    top:var(--p-3);
+    bottom:var(--p-3);
+  }
+  html[data-theme="pulsar"] .lb-auftrag .sp-kunde-sym{
+    clip-path:none;
+  }
+  html[data-theme="pulsar"] .lb-leinwand::after{
+    display:none;
+  }
+  html[data-theme="pulsar"] .in-reiter{
+    padding:var(--p-2) var(--p-3) 0;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3313,7 +8485,7 @@ body > .ansicht .dock{background:color-mix(in srgb, var(--panel) 88%, var(--pane
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "ed993463";
+const LABOR_BAU = "794857d2";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -28446,6 +33618,18 @@ UI.labor = (() => {
       g.append(statusSymbol(x + ux * dSym * richtung, y + uy * dSym * richtung, s.status, `${titelPort}: ${STATUS_TEXT[s.status] || s.status}${s.grund && s.status !== "oben" ? " – " + grundText(s.grund) : ""}`));
       const ox = nx * 9, oy = ny * 9, senkrecht = Math.abs(ux) < 0.55;
       const tx = x + ux * dTxt * richtung + ox, ty = y + uy * dTxt * richtung + oy + 3.5;
+      /* Qualitätskontrolle: Portname nur zeichnen, wenn er ganz in die Fläche passt – sonst
+         blieb am Rand ein abgeschnittenes Kürzel („i0/1") stehen. */
+      const sicht = sichtbereich();
+      if (sicht){
+        /* Textbreite mitrechnen und je nach Anker links/rechts/mittig begrenzen – sonst
+           stand am Rand ein abgeschnittenes Kürzel („i0/1"). */
+        const tw = port.length * 6.6, rand = 14;
+        const anker = senkrecht ? (ox >= 0 ? "start" : "end") : "middle";
+        const links = anker === "start" ? tx : anker === "end" ? tx - tw : tx - tw / 2;
+        const rechts = anker === "start" ? tx + tw : anker === "end" ? tx : tx + tw / 2;
+        if (links < sicht.x1 + rand || rechts > sicht.x2 - rand || ty < sicht.y1 + 14 || ty > sicht.y2 - 14) return;
+      }
       g.append(sv("text", {class: "kabel-port", x: tx.toFixed(1), y: ty.toFixed(1), "text-anchor": senkrecht ? (ox >= 0 ? "start" : "end") : "middle", text: port}));
     };
     ende(ax, ay, sa, 1, k.a.port, `${na} ${k.a.port}`);
@@ -35806,9 +40990,22 @@ UI.app = (() => {
   Bus.an("aussehen", () => themaAnwenden());
   Bus.an("ui-bereit", () => setTimeout(themaAnwenden, 0));            /* nach Spiel.laden: gekauftes Aussehen anwenden */
   function einstSetzen(teil){ const e = einst(); Object.assign(e, teil); store.set("einst", e); }
+  /* Zusätzliche Themes (§ 18.16): eigene Stildateien src/stil/zzz-thema-<id>.css, Tokens in
+     :root[data-theme="<id>"]; dunkel steuert nur die Sonne/Mond-Anzeige und color-scheme. */
+  const THEMEN = [
+    {id: "nordlicht", titel: "Nordlicht", dunkel: true},
+    {id: "messing", titel: "Messing", dunkel: true},
+    {id: "papier", titel: "Papier", dunkel: false},
+    {id: "pulsar", titel: "Pulsar", dunkel: true},
+    {id: "keramik", titel: "Keramik", dunkel: false},
+  ];
+  const eigenesTheme = t => THEMEN.find(x => x.id === t) || null;
   function themaAnwenden(){
     const t = einst().thema || "dunkel", d = document.documentElement;   /* § 18.3: Dunkel ist Standard */
-    if (t === "hell") d.dataset.theme = "light"; else if (t === "dunkel") d.dataset.theme = "dark"; else delete d.dataset.theme;
+    const eigen = eigenesTheme(t);
+    if (t === "hell") d.dataset.theme = "light"; else if (t === "dunkel") d.dataset.theme = "dark";
+    else if (t === "system") delete d.dataset.theme; else if (eigen) d.dataset.theme = eigen.id; else delete d.dataset.theme;
+    d.style.colorScheme = (eigen ? eigen.dunkel : t !== "hell") ? "dark" : "light";
     /* Aussehen aus dem Shop (Akzentfarbe, Leistenstil) – vorher wurde es gekauft, aber nie angewendet */
     const a = typeof Spiel !== "undefined" && Spiel._st && Spiel.karriere ? Spiel.karriere.daten().aussehen : null;
     if (a && a.akzent && a.akzent !== "cyan") d.dataset.akzent = a.akzent; else delete d.dataset.akzent;
@@ -35817,6 +41014,8 @@ UI.app = (() => {
     if (el.thema) { const dunkel = istDunkel(); el.thema.replaceChildren(UI.symbol(dunkel ? "sonne" : "mond", 18)); el.thema.title = dunkel ? "Helle Darstellung" : "Dunkle Darstellung"; }
   }
   function istDunkel(){
+    const eigen = eigenesTheme(einst().thema);
+    if (eigen) return eigen.dunkel;
     const t = document.documentElement.dataset.theme;
     if (t) return t === "dark";
     return !(typeof matchMedia !== "undefined" && matchMedia("(prefers-color-scheme: light)").matches);
@@ -36125,7 +41324,11 @@ UI.app = (() => {
     const l = [];
     l.push({titel: "Darstellung", fn: c => c.append(
       zeile("Farbschema", "Dunkel ist der Leitstand-Look. „System“ folgt der Einstellung des Betriebssystems.",
-        wahl("Farbschema", [["hell", "Hell"], ["dunkel", "Dunkel"], ["system", "System"]], e.thema || "dunkel", v => { einstSetzen({thema: v}); themaAnwenden(); })),
+        wahl("Farbschema", [["hell", "Hell"], ["dunkel", "Dunkel"], ["system", "System"]],
+          eigenesTheme(e.thema) ? "" : (e.thema || "dunkel"), v => { einstSetzen({thema: v}); themaAnwenden(); })),
+      zeile("Theme", "Fünf zusätzliche Themes mit eigenem Charakter – POLARIS bleibt der Standard. Ein Theme ersetzt das Farbschema.",
+        wahl("Theme", [["", "POLARIS"], ...THEMEN.map(x => [x.id, x.titel])], eigenesTheme(e.thema) ? e.thema : "",
+          v => { einstSetzen({thema: v || "dunkel"}); themaAnwenden(); })),
       zeile("Animationen", "Pakete fliegen, Zahlen zählen hoch. „Reduziert“ blendet nur kurz ein, „Aus“ zeigt Ergebnisse sofort. Die Systemeinstellung „Bewegung reduzieren“ wird immer beachtet.",
         wahl("Animationen", [["an", "An"], ["reduziert", "Reduziert"], ["aus", "Aus"]], e.bewegung || "an", v => { einstSetzen({bewegung: v}); themaAnwenden(); })),
       zeile("Ton", "Leise Klänge bei Kabel, Ping, Haken und Sternen – alles bleibt auch ohne Ton verständlich. Die Leiste und ein Fenster im Hintergrund sind immer stumm.",

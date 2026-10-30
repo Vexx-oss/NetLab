@@ -25,7 +25,7 @@
   /* VLAN-Farben 1..8 (zyklisch), immer zusammen mit der Nummer zeigen */
   --vlan-1:#9AA3B2; --vlan-2:#7FD4F5; --vlan-3:#68E0A0; --vlan-4:#F3C46A; --vlan-5:#F5A0D0; --vlan-6:#B0A0FF; --vlan-7:#FFA06A; --vlan-8:#6FE0D4;
   /* Subnetz-Zonen (Ebene IP), halbtransparent */
-  --zone-a:rgba(127,212,245,.09); --zone-b:rgba(104,224,160,.09); --zone-c:rgba(243,196,106,.09); --zone-d:rgba(245,160,208,.09); --zone-e:rgba(176,160,255,.09);
+  --zone-a:rgba(127,212,245,.045); --zone-b:rgba(104,224,160,.045); --zone-c:rgba(243,196,106,.045); --zone-d:rgba(245,160,208,.045); --zone-e:rgba(176,160,255,.045);
   --schatten:0 30px 70px -50px rgba(0,0,0,.9);
   --glow:0 0 0 1px rgba(125,243,192,.28), 0 16px 36px -20px rgba(125,243,192,.42);
   --radius:14px; --radius-s:10px; --radius-xs:6px;
@@ -36,7 +36,7 @@
   --ease-standard:cubic-bezier(.2,.7,.3,1); --ease-out:cubic-bezier(.16,.84,.44,1); --ease-pop:cubic-bezier(.3,1.6,.5,1);
   --fs-1:11px; --fs-2:12.5px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:28px; --fs-7:34px; --fs-8:44px;
   --typ-router:#7FD4F5; --typ-switch:#6FE0D4; --typ-firewall:#FFA08A; --typ-host:#C9D2E0; --typ-server:#B0A0FF; --typ-nas:#7FB6F5; --typ-internet:#8FD8F0;
-  --zone-a-linie:rgba(127,212,245,.5); --zone-b-linie:rgba(104,224,160,.5); --zone-c-linie:rgba(243,196,106,.5); --zone-d-linie:rgba(245,160,208,.5); --zone-e-linie:rgba(176,160,255,.5);
+  --zone-a-linie:rgba(127,212,245,.32); --zone-b-linie:rgba(104,224,160,.32); --zone-c-linie:rgba(243,196,106,.32); --zone-d-linie:rgba(245,160,208,.32); --zone-e-linie:rgba(176,160,255,.32);
   --glas:rgba(11,12,15,.78); --leiste-bg:rgba(11,12,15,.92);
   --kopf-h:60px; --leiste-w:76px; --fuss-h:34px; --dock-b:76px;
 }

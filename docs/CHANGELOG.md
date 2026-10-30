@@ -9,6 +9,23 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.3.0 — POLARIS: Themes, Long-Session-Licht, Lagebild-Topologie (30.10.2026, Nachtrag)
+
+- **Fünf Themes** zusätzlich zu POLARIS/Hell: Nordlicht, Messing, Papier, Pulsar, Keramik
+  (`src/stil/zzz-thema-*.css`, Auswahl in Einstellungen → Darstellung → Theme). Jedes Theme
+  bringt eigene Farben, Typografie, Radien, Schatten und Flächenbehandlung mit; Vertrag in
+  `docs/entwicklung/Themes-Vertrag.md`, Architektur § 18.16.
+- **Long-Session-Palette:** Tiefen angehoben (`--bg #15181F`, Panels `#1D212A…#2C313E`), `--ink`
+  weicher, kleine Labels heller, leise Farbnebel und Panel-Tints; Kontrast Fließtext 17,7:1 → 15,1:1,
+  `--faint` 5,5:1 → 6,1:1.
+- **Lagebild im Hub:** echte Mini-Topologie aus `UI.labor.netz` (Schichten Internet/Router/Switch/
+  Hosts, Kanten mit Linkstatus, Zähler, Klick ins Labor, Leer- und Dichtemodus) statt statischer Grafik.
+- **Qualitätskontrolle Sandbox:** keine leeren Zonen-Pillen mehr, Zonen nur noch als leise Fläche,
+  Portnamen erst beim Kabel-Hover, Statusleuchten der Kabelstecker auf neutrale Gehäuse reduziert,
+  Zonen-Labels auch bei wenig Platz aus.
+- **Ethos:** Theme-Dateien von R4/R6/R8/R9/R10 ausgenommen (dokumentiert in `tools/ethos.py`);
+  R1/R2/R3/R5/R7/R11 gelten weiter.
+
 ## 2.3.0 — POLARIS: neue Gestaltung, Patchkabel, Bewegung (29.10.2026)
 
 **Warum.** Die A-Richtung (Matrix-Elegant) war dem Nutzer zu nah am Alten, zu blockig, die Farben

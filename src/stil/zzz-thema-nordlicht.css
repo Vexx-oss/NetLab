@@ -1,0 +1,1353 @@
+/* ============================================================================
+   NORDLICHT — arktisches Editorial-Theme für das Netzwerk-Labor
+   ----------------------------------------------------------------------------
+   Idee: Eine Beobachtungsstation in der Polarnacht. Der Grund ist tiefes,
+   blaugrünes Schiefer; alle Flächen sind Eispaneele mit hauchfeiner Kante und
+   kaltem Licht obenauf. Das einzige gesättigte Licht ist das Nordlicht:
+   Aurora-Minze → Eis-Cyan → zartes Violett. Es erscheint nur dort, wo etwas
+   passiert (Handlung, Auswahl, Live, Fokus) — nie als Dekoration.
+   Typografie: Bricolage Grotesque als große, eng gesetzte Display-Schrift,
+   Atkinson als ruhiger Fließtext, JetBrains Mono als technische Beschriftung
+   mit weitem Sperrsatz. Geometrie: 12/8/4 px — präzise statt weich.
+   Alle Literale stehen ausschließlich im Token-Block; alle weiteren Regeln
+   beginnen mit html[data-theme="nordlicht"] und färben nur über var(--…).
+   Vertrag: docs/entwicklung/Themes-Vertrag.md · Ethos R1–R5.
+   ============================================================================ */
+
+:root[data-theme="nordlicht"]{
+  color-scheme:dark;
+
+  /* ---- Grund: Polarnacht (blaugrünes Schiefer, kein Schwarz) ---- */
+  --bg:#070D11;
+  --bg-raster:rgba(210,255,244,.055);
+  --raster:28px;
+  --panel:#0D161B;
+  --panel-2:#121E24;
+  --panel-3:#18262D;
+  --line:rgba(210,255,244,.10);
+  --line-2:rgba(210,255,244,.20);
+
+  /* ---- Eis & Schrift ---- */
+  --ink:#E9F3EF;
+  --muted:#A8BCB7;
+  --faint:#819792;
+
+  /* ---- Aurora: das einzige Licht. Minze → Eis-Cyan → Violett ---- */
+  --accent:#8AF3CB;
+  --accent-ink:#04140E;
+  --accent-soft:#0C2A23;
+  --mint:#8AF3CB;
+  --iris:#B4A8FF;
+  --amber:#F2CB8B;
+  --koralle:#F2958A;
+
+  --ok:#8AF3CB;      --ok-soft:#0B2721;
+  --warn:#F2CB8B;    --warn-soft:#282113;
+  --bad:#F2958A;     --bad-soft:#2B1717;
+  --info:#B4A8FF;    --info-soft:#1A1830;
+  --geld:#F2CB8B;
+  --ruf:#B4A8FF;
+
+  /* ---- Paketfarben (kühler und entsättigter als im Leitstand) ---- */
+  --p-arp:#E7C179; --p-icmp:#9BE8F2; --p-tcp:#B7ACF2; --p-udp:#7FE0B4; --p-dhcp:#E7A2C9; --p-dns:#EFA97E; --p-http:#8FB8E8;
+
+  /* ---- VLAN-Farben 1..8 ---- */
+  --vlan-1:#93A1AC; --vlan-2:#9BE8F2; --vlan-3:#7FE0B4; --vlan-4:#E7C179; --vlan-5:#E7A2C9; --vlan-6:#B7ACF2; --vlan-7:#EFA97E; --vlan-8:#86E0D6;
+
+  /* ---- Subnetz-Zonen (Ebene IP), halbtransparent ---- */
+  --zone-a:rgba(155,232,242,.07); --zone-b:rgba(127,224,180,.07); --zone-c:rgba(231,193,121,.07); --zone-d:rgba(231,162,201,.07); --zone-e:rgba(183,172,242,.07);
+  --zone-a-linie:rgba(155,232,242,.42); --zone-b-linie:rgba(127,224,180,.42); --zone-c-linie:rgba(231,193,121,.42); --zone-d-linie:rgba(231,162,201,.42); --zone-e-linie:rgba(183,172,242,.42);
+
+  /* ---- Gerätetypen ---- */
+  --typ-router:#9BE8F2; --typ-switch:#86E0D6; --typ-firewall:#F2A292; --typ-host:#CBD6D6; --typ-server:#B7ACF2; --typ-nas:#8FB8E8; --typ-internet:#9BE8F2;
+
+  /* ---- Tiefe & Licht ---- */
+  --schatten:0 36px 84px -56px rgba(0,0,0,.94);
+  --glow:0 0 0 1px rgba(138,243,203,.20), 0 24px 64px -34px rgba(138,243,203,.30);
+  --glas:rgba(7,13,17,.74);
+  --leiste-bg:rgba(7,13,17,.94);
+
+  /* ---- Geometrie: präzise, kalt, nordisch ---- */
+  --radius:12px;
+  --radius-s:8px;
+  --radius-xs:4px;
+
+  /* ---- Schrift: nur lokale Projektschriften ---- */
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  /* ---- Typo-Skala: mehr Spannung zwischen Mikro-Label und Display ---- */
+  --fs-1:11px; --fs-2:12px; --fs-3:14px; --fs-4:15px; --fs-5:20px; --fs-6:32px; --fs-7:40px; --fs-8:54px;
+  --schrift-hero:clamp(34px,3.6vw,54px);
+  --schrift-band:clamp(26px,2.2vw,34px);
+
+  /* ---- Zeiten ---- */
+  --dauer-kurz:80ms; --dauer:160ms; --dauer-mittel:240ms; --dauer-lang:320ms; --dauer-zaehler:700ms;
+  --dauer-atem:9s;
+  --dauer-aurora:26s;
+  --ease-standard:cubic-bezier(.2,.7,.3,1);
+  --ease-out:cubic-bezier(.16,.84,.44,1);
+  --ease-pop:cubic-bezier(.3,1.6,.5,1);
+  --ease-aurora:cubic-bezier(.33,0,.2,1);
+}
+
+/* ============================================================================
+   1 · Grundfläche: Polarnacht mit drei sehr leisen Nordlicht-Nebeln
+   ============================================================================ */
+
+html[data-theme="nordlicht"] body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(1200px 560px at 50% -14%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 64%),
+    radial-gradient(900px 520px at 6% -10%, color-mix(in srgb, var(--iris) 8%, transparent), transparent 60%),
+    radial-gradient(1000px 620px at 96% 6%, color-mix(in srgb, var(--p-icmp) 5%, transparent), transparent 62%),
+    radial-gradient(circle at 1px 1px, var(--bg-raster) 1px, transparent 0);
+  background-size:auto, auto, auto, var(--raster) var(--raster);
+}
+
+html[data-theme="nordlicht"]{
+  scrollbar-color:color-mix(in srgb, var(--ink) 22%, transparent) transparent;
+}
+
+html[data-theme="nordlicht"] ::selection{
+  background:color-mix(in srgb, var(--accent) 26%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] :is(button, a, [tabindex]):focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+/* ============================================================================
+   2 · Kopfzeile: Milchglas über der Polarnacht, Aurora als Horizontlinie
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .kopf{
+  background:color-mix(in srgb, var(--bg) 74%, transparent);
+  border-bottom:1px solid var(--line);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  backdrop-filter:blur(18px) saturate(140%);
+}
+
+html[data-theme="nordlicht"] .kopf::after{
+  height:1px;
+  background:linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 62%, transparent) 18%,
+    color-mix(in srgb, var(--p-icmp) 46%, transparent) 46%,
+    color-mix(in srgb, var(--iris) 52%, transparent) 72%,
+    transparent 92%);
+  opacity:.9;
+}
+
+html[data-theme="nordlicht"] .kopf-marke{
+  gap:12px;
+  padding-right:16px;
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .marke-sym rect{
+  fill:transparent;
+  stroke:color-mix(in srgb, var(--accent) 55%, var(--line-2));
+  stroke-width:1.2;
+}
+
+html[data-theme="nordlicht"] .marke-sym path{
+  stroke:var(--accent);
+  stroke-width:1.8;
+}
+
+html[data-theme="nordlicht"] .marke-sym circle{
+  fill:var(--accent);
+}
+
+html[data-theme="nordlicht"] .marke-name{
+  font:700 var(--fs-2)/1 var(--mono);
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .marke-version{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  color:var(--faint);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:4px 8px;
+}
+
+html[data-theme="nordlicht"] .kopf-werte{
+  gap:4px;
+}
+
+html[data-theme="nordlicht"] .wert{
+  height:36px;
+  font:600 var(--fs-3)/1 var(--body);
+  letter-spacing:.02em;
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel) 72%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+html[data-theme="nordlicht"] .wert:hover{
+  background:color-mix(in srgb, var(--panel-2) 82%, transparent);
+  border-color:var(--line-2);
+}
+
+html[data-theme="nordlicht"] .wert-offen.hat{
+  border-color:color-mix(in srgb, var(--accent) 55%, var(--line));
+  background:color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+html[data-theme="nordlicht"] .kopf-knoepfe{
+  border-left:1px solid var(--line);
+  padding-left:12px;
+}
+
+html[data-theme="nordlicht"] .kopf-knopf{
+  height:40px;
+  border:1px solid transparent;
+  border-radius:var(--radius-s);
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .kopf-knopf:hover{
+  color:var(--ink);
+  border-color:var(--line);
+  background:color-mix(in srgb, var(--panel-2) 82%, transparent);
+}
+
+html[data-theme="nordlicht"] .kopf .sp-leise{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   3 · Schiene und Statusfuss: technische Beschriftung, Aurora als Aktiv-Marke
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .dock{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--panel) 92%, transparent),
+    color-mix(in srgb, var(--bg) 74%, var(--panel)) 68%,
+    color-mix(in srgb, var(--bg) 92%, transparent));
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .dock-knopf{
+  color:var(--faint);
+  border-radius:var(--radius-s);
+  transition:background var(--dauer) var(--ease-standard), color var(--dauer) var(--ease-standard), transform var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="nordlicht"] .dock-knopf:hover{
+  color:var(--muted);
+  background:color-mix(in srgb, var(--panel-2) 84%, transparent);
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an{
+  color:var(--accent);
+  background:linear-gradient(160deg,
+    color-mix(in srgb, var(--accent) 14%, transparent),
+    color-mix(in srgb, var(--iris) 7%, transparent));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an::before{
+  width:2px;
+  top:8px;
+  bottom:8px;
+  border-radius:999px;
+  background:linear-gradient(180deg, var(--accent), var(--p-icmp) 55%, var(--iris));
+  box-shadow:0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="nordlicht"] .dock-text{
+  font:600 var(--fs-1)/1.1 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an .dock-text{
+  color:var(--accent);
+}
+
+html[data-theme="nordlicht"] .dock-zahl{
+  background:transparent;
+  color:var(--faint);
+  box-shadow:inset 0 0 0 1px var(--line);
+  border-radius:999px;
+  font:700 var(--fs-1)/18px var(--mono);
+}
+
+html[data-theme="nordlicht"] .dock-knopf.an .dock-zahl{
+  background:var(--accent);
+  color:var(--accent-ink);
+  box-shadow:none;
+}
+
+html[data-theme="nordlicht"] .fuss{
+  background:color-mix(in srgb, var(--bg) 86%, transparent);
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .fuss-live{
+  color:var(--accent);
+  letter-spacing:.22em;
+}
+
+html[data-theme="nordlicht"] .fuss-punkt{
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+  animation:fuss-atem var(--dauer-atem) ease-in-out infinite alternate;
+}
+
+html[data-theme="nordlicht"] .fuss-ebene{
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .fuss-trenner{
+  color:color-mix(in srgb, var(--faint) 62%, transparent);
+}
+
+@keyframes fuss-atem{
+  from{opacity:1}
+  to{opacity:.42}
+}
+
+/* ============================================================================
+   4 · Startseite (Heute): Bento als Editorial-Doppelseite
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .ansicht .hb-seite{
+  max-width:1180px;
+  padding:24px 24px 16px;
+  gap:16px;
+  background:transparent;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-raster{
+  position:relative;
+  gap:16px;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--panel);
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--ink) 3%, transparent), transparent 24%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    0 32px 64px -56px color-mix(in srgb, var(--bg) 92%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel-titel{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:0 0 12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel-titel::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--ink) 12%, transparent), transparent);
+}
+
+/* ---- Hero: der Auftrag als Titelgeschichte ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-hero{
+  overflow:hidden;
+  border-color:color-mix(in srgb, var(--accent) 16%, var(--line));
+  background-image:
+    radial-gradient(120% 160% at 100% -24%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 58%),
+    linear-gradient(104deg, transparent 40%, color-mix(in srgb, var(--p-icmp) 7%, transparent) 54%, color-mix(in srgb, var(--iris) 9%, transparent) 64%, transparent 80%),
+    radial-gradient(90% 120% at 0% 120%, color-mix(in srgb, var(--iris) 10%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 4%, transparent), transparent 42%);
+}
+
+/* Polarzirkel: ein hauchfeiner Kreisbogen im Eck — Geometrie statt Dekoration */
+html[data-theme="nordlicht"] .ansicht .hb-hero::before{
+  content:"";
+  position:absolute;
+  top:-300px;
+  right:-190px;
+  width:560px;
+  height:560px;
+  border:1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius:50%;
+  pointer-events:none;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:96px;
+  height:1px;
+  background:linear-gradient(90deg, var(--accent), transparent);
+  opacity:.9;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero .hb-kicker{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  color:color-mix(in srgb, var(--accent) 60%, var(--muted));
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero .hb-kicker::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 38%, transparent), transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero h1{
+  margin:0 0 4px;
+  font:800 var(--schrift-hero)/.98 var(--display);
+  letter-spacing:-.055em;
+  color:var(--ink);
+  background-image:linear-gradient(96deg, var(--ink) 34%, color-mix(in srgb, var(--accent) 52%, var(--ink)));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-lead{
+  margin:4px 0 8px;
+  font:600 var(--fs-1)/1.7 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-kunde{
+  gap:8px;
+  font:600 var(--fs-2)/1.4 var(--mono);
+  letter-spacing:.08em;
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-meta span{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:8px 12px;
+  background:color-mix(in srgb, var(--panel-2) 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-hero-meta .warn{
+  color:var(--koralle);
+  border-color:color-mix(in srgb, var(--koralle) 42%, transparent);
+  background:color-mix(in srgb, var(--koralle) 8%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.primaer{
+  height:44px;
+  padding:0 24px;
+  border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius:var(--radius-s);
+  font:700 var(--fs-3)/1 var(--body);
+  color:var(--accent-ink);
+  background-image:linear-gradient(116deg, var(--mint), color-mix(in srgb, var(--mint) 58%, var(--p-icmp)) 52%, color-mix(in srgb, var(--iris) 52%, var(--mint)));
+  box-shadow:0 20px 44px -26px color-mix(in srgb, var(--accent) 70%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.primaer:hover{
+  filter:brightness(1.06);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.geist{
+  height:44px;
+  padding:0 16px;
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 44%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-aktionen .knopf.geist:hover{
+  border-color:color-mix(in srgb, var(--accent) 50%, var(--line-2));
+  background:color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* ---- Kenndaten: Zahlen als Plakate ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-kenndaten{
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--iris) 7%, transparent), transparent 64%);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd{
+  padding:12px 16px;
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd > b{
+  font:800 var(--fs-6)/1 var(--display);
+  letter-spacing:-.045em;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd .lab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kd small{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-spark{
+  gap:4px;
+  height:40px;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-spark i{
+  width:4px;
+  border-radius:999px;
+  background:color-mix(in srgb, var(--c) 30%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-spark i.spitze{
+  background:var(--c);
+  box-shadow:0 0 10px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* ---- Tagesziel: Fortschritt als Nordlicht-Ring ---- */
+html[data-theme="nordlicht"] .ansicht .hb-ziel-karte{
+  gap:16px;
+  align-items:center;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ring{
+  width:92px;
+  height:92px;
+  background:conic-gradient(from -90deg,
+    var(--accent) 0,
+    color-mix(in srgb, var(--iris) 55%, var(--accent)) var(--anteil, 0%),
+    color-mix(in srgb, var(--ink) 8%, transparent) var(--anteil, 0%));
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 20px 44px -30px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ring::after{
+  inset:9px;
+  background:var(--panel);
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ring b{
+  position:relative;
+  z-index:10;
+  font:800 var(--fs-5)/1 var(--display);
+  letter-spacing:-.04em;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile{
+  padding:8px 0;
+  border-top:1px solid color-mix(in srgb, var(--ink) 6%, transparent);
+  color:var(--muted);
+  transition:color var(--dauer) var(--ease-standard), transform var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile:hover{
+  color:var(--ink);
+  transform:translateX(2px);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile i{
+  width:10px;
+  height:10px;
+  border-radius:var(--radius-xs);
+  box-shadow:inset 0 0 0 1px var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile.fertig i{
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile.fertig{
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile b{
+  font:600 var(--fs-2)/1.35 var(--body);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-zeile small{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  color:var(--faint);
+}
+
+/* ---- Letzte Sitzung: Fahrplan in Mono ---- */
+html[data-theme="nordlicht"] .ansicht .hb-sz{
+  padding:8px 0;
+  border-top:1px solid color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz time{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+  font-variant-numeric:tabular-nums;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz b{
+  font:700 var(--fs-2)/1.3 var(--body);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz small{
+  font:500 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.04em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-sz em{
+  font:600 var(--fs-1)/1 var(--mono);
+  font-style:normal;
+  letter-spacing:.16em;
+  color:var(--accent);
+}
+
+/* ---- Klassenraum: Iris-Tönung, zwei ruhige Knöpfe ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-klasse{
+  background-image:linear-gradient(170deg, color-mix(in srgb, var(--iris) 8%, transparent), transparent 62%);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-klasse .knopf.primaer{
+  border:1px solid color-mix(in srgb, var(--iris) 40%, var(--line-2));
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--iris) 12%, transparent);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-klasse .knopf.primaer:hover{
+  border-color:var(--iris);
+  background:color-mix(in srgb, var(--iris) 18%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-klasse-hinweis{
+  font:500 var(--fs-1)/1.6 var(--mono);
+  letter-spacing:.02em;
+  color:var(--faint);
+}
+
+/* ---- Lagebild: Karte auf dem Eis, Chips wie Koordinatenmarken ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-lage{
+  border-color:color-mix(in srgb, var(--accent) 14%, var(--line));
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(120% 150% at 50% -30%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 62%),
+    radial-gradient(80% 120% at 100% 110%, color-mix(in srgb, var(--iris) 9%, transparent), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 47px, color-mix(in srgb, var(--ink) 4%, transparent) 47px, color-mix(in srgb, var(--ink) 4%, transparent) 48px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 47px, color-mix(in srgb, var(--ink) 4%, transparent) 47px, color-mix(in srgb, var(--ink) 4%, transparent) 48px);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-lage-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-lage-zaehler{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-chip{
+  padding:4px 8px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 80%, transparent);
+  color:var(--ink);
+  font:600 var(--fs-1)/1.1 var(--mono);
+  letter-spacing:.08em;
+  box-shadow:0 12px 28px -20px color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-chip:hover{
+  border-color:color-mix(in srgb, var(--accent) 55%, var(--line-2));
+  background:var(--panel-2);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-chip .hb-chip-sym{
+  border-radius:var(--radius-xs);
+  overflow:hidden;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-lage .hb-legende,
+html[data-theme="nordlicht"] .ansicht .hb-lage-tipp{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-kante.ok{
+  stroke:var(--accent);
+  stroke-opacity:.85;
+}
+
+/* ---- Signal: Aurora-Kurve, ruhige Statistikzeilen ---- */
+html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-signal{
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--iris) 8%, transparent), transparent 62%);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-signal-svg{
+  margin-bottom:8px;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-signal-svg path:last-of-type{
+  stroke:color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-stat{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.20em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-stat i{
+  box-shadow:0 0 10px color-mix(in srgb, currentColor 55%, transparent);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-stat b{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-ziel{
+  font:600 var(--fs-1)/1.5 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-woche-knopf{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:1px solid var(--line);
+}
+
+/* ============================================================================
+   5 · Labor: Auftragsband, Werkstatt, Fläche, Geräte, Kabel, Werkzeuge
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .labor .lb-mitte{
+  gap:12px;
+}
+
+html[data-theme="nordlicht"] .labor .lb-auftrag{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--panel);
+  background-image:
+    radial-gradient(120% 170% at 100% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 56%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 3%, transparent), transparent 52%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent),
+    0 32px 64px -56px color-mix(in srgb, var(--bg) 92%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-auftrag::before, .lb-leinwand::before, .lb-inspektor::before){
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .am-titel strong{
+  font:800 var(--schrift-band)/1.02 var(--display);
+  letter-spacing:-.05em;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .labor .am-titel{
+  gap:16px;
+}
+
+html[data-theme="nordlicht"] .labor .am-kunde{
+  font:600 var(--fs-1)/1.5 var(--mono);
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .am-ziele{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  padding:8px 12px;
+  background:color-mix(in srgb, var(--panel-2) 50%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .sp-kunde-sym{
+  border:1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--accent) 10%, transparent);
+  color:var(--accent);
+}
+
+html[data-theme="nordlicht"] .labor .am-lesen{
+  height:44px;
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 44%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .labor .am-lesen:hover{
+  border-color:var(--line-2);
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .labor .sp-abnahme{
+  height:44px;
+  border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius:var(--radius-s);
+  color:var(--accent-ink);
+  background-image:linear-gradient(116deg, var(--mint), color-mix(in srgb, var(--mint) 58%, var(--p-icmp)) 52%, color-mix(in srgb, var(--iris) 52%, var(--mint)));
+  box-shadow:0 18px 40px -26px color-mix(in srgb, var(--accent) 68%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--ink) 50%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .am-mehr{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  color:var(--muted);
+}
+
+/* ---- Werkstattleiste: ruhige Werkbank über der Fläche ---- */
+html[data-theme="nordlicht"] .labor .wk-leiste{
+  min-height:44px;
+  border-bottom:1px solid var(--line);
+  background:transparent;
+}
+
+html[data-theme="nordlicht"] .labor :is(.wk-titel, .lb-geraete-titel){
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .wk-suche{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .wk-kennwerte{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.12em;
+  color:var(--faint);
+}
+
+/* ---- Zeichenfläche: tiefes Eis mit Raster und Horizontlicht ---- */
+html[data-theme="nordlicht"] .labor .lb-leinwand{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background-color:var(--bg);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:16px;
+  pointer-events:none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent)),
+    linear-gradient(color-mix(in srgb, var(--ink) 16%, transparent), color-mix(in srgb, var(--ink) 16%, transparent));
+  background-repeat:no-repeat;
+  background-size:16px 1px, 1px 16px, 16px 1px, 1px 16px, 16px 1px, 1px 16px, 16px 1px, 1px 16px;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+  opacity:.6;
+}
+
+html[data-theme="nordlicht"] .labor .lb-svg{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(1200px 460px at 50% -18%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 66%),
+    radial-gradient(800px 420px at 88% 108%, color-mix(in srgb, var(--iris) 7%, transparent), transparent 60%);
+}
+
+html[data-theme="nordlicht"] .labor .lb-raster-punkt{
+  fill:color-mix(in srgb, var(--ink) 20%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-raster.fein{
+  opacity:.42;
+}
+
+/* ---- Geräte: Eispaneele mit kaltem Licht obenauf ---- */
+html[data-theme="nordlicht"] .labor .ger-karte{
+  fill:var(--panel-2);
+  stroke:color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .ger.hover .ger-karte{
+  fill:var(--panel-3);
+  stroke:color-mix(in srgb, var(--accent) 45%, var(--line-2));
+}
+
+html[data-theme="nordlicht"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="nordlicht"] .labor .ger.zielt .ger-karte{
+  fill:color-mix(in srgb, var(--accent) 7%, var(--panel-2));
+  stroke:var(--accent);
+  stroke-width:1.6;
+}
+
+html[data-theme="nordlicht"] .labor .ger-name{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  fill:var(--ink);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="nordlicht"] .labor .ger-ip{
+  font:500 var(--fs-2)/1 var(--mono);
+  fill:var(--muted);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="nordlicht"] .labor .gb-kachel{
+  stroke:color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+/* ---- Kabel: Nordlichtadern ---- */
+html[data-theme="nordlicht"] .labor .kabel-huelle{
+  stroke:color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .kabel-linie{
+  filter:drop-shadow(0 0 3px color-mix(in srgb, var(--kf) 26%, transparent));
+}
+
+html[data-theme="nordlicht"] .labor .kabel-stecker .stk-gehaeuse{
+  fill:var(--panel-3);
+  stroke:color-mix(in srgb, var(--kf) 80%, var(--ink));
+}
+
+/* ---- Schwebende Werkzeuge: Milchglas, Aurora als aktives Werkzeug ---- */
+html[data-theme="nordlicht"] .labor .lb-gruppe{
+  padding:4px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel) 66%, transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent),
+    0 18px 40px -32px color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz,
+html[data-theme="nordlicht"] .labor .lb-knopf,
+html[data-theme="nordlicht"] .labor .lb-ansicht{
+  color:var(--muted);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz:hover,
+html[data-theme="nordlicht"] .labor .lb-knopf:hover,
+html[data-theme="nordlicht"] .labor .lb-ansicht:hover{
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel-2) 82%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz.an{
+  color:var(--accent);
+  background:color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz-taste{
+  font:600 var(--fs-1)/1 var(--mono);
+  color:var(--faint);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-wz.an .lb-wz-taste{
+  color:var(--accent);
+  background:transparent;
+}
+
+html[data-theme="nordlicht"] .labor .lb-zoomtext{
+  font:600 var(--fs-2)/1 var(--mono);
+  color:var(--muted);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="nordlicht"] .labor .lb-hinweis{
+  padding:8px 12px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel) 70%, transparent);
+  color:var(--muted);
+  font:600 var(--fs-1)/1.6 var(--mono);
+  letter-spacing:.04em;
+}
+
+html[data-theme="nordlicht"] .labor .lb-legende{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel) 62%, transparent);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.20em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .lb-legende .lg-verbunden::before{
+  background:var(--accent);
+  box-shadow:0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* ---- Minimap: kleine Seekarte ---- */
+html[data-theme="nordlicht"] .labor .wk-mini{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:color-mix(in srgb, var(--panel) 72%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-svg{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background-color:var(--bg);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-knopf{
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .labor .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--ink) 26%, transparent);
+}
+
+/* ---- Geräteleiste links: Fächer als Werkzeugschubladen ---- */
+html[data-theme="nordlicht"] .labor .lb-geraete{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--panel) 92%, transparent),
+    color-mix(in srgb, var(--bg) 86%, transparent));
+  border-right:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .labor .pa-kat{
+  color:var(--muted);
+  border:1px solid transparent;
+  border-radius:var(--radius-s);
+}
+
+html[data-theme="nordlicht"] .labor .pa-kat:hover{
+  border-color:var(--line);
+  background:color-mix(in srgb, var(--panel-2) 74%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .pa-kat.an{
+  color:var(--accent);
+  border-color:color-mix(in srgb, var(--accent) 34%, transparent);
+  background:color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+/* ============================================================================
+   6 · Inspektor und Dock: Datenblatt statt Werkzeugkasten
+   ============================================================================ */
+
+html[data-theme="nordlicht"] .labor .lb-dock{
+  background:color-mix(in srgb, var(--panel) 92%, var(--bg));
+  border-left:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .labor .lb-dock::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 42%, transparent),
+    color-mix(in srgb, var(--iris) 22%, transparent) 38%,
+    transparent 72%);
+  pointer-events:none;
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-dock-reiter, .in-reiter){
+  gap:4px;
+  padding:8px 12px 0;
+  border-bottom:1px solid var(--line);
+}
+
+html[data-theme="nordlicht"] .labor .lb-dock-tab{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+  border-radius:var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+html[data-theme="nordlicht"] .labor .lb-dock-tab.an{
+  color:var(--ink);
+  background:color-mix(in srgb, var(--panel-2) 72%, transparent);
+  box-shadow:inset 0 -1px 0 var(--accent);
+}
+
+html[data-theme="nordlicht"] .labor .in-kopf{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--line);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-kopf-text h3{
+  font:800 var(--fs-5)/1.08 var(--display);
+  letter-spacing:-.03em;
+  color:var(--ink);
+}
+
+html[data-theme="nordlicht"] .labor .in-kopf-text span{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip{
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-3) 62%, transparent);
+  font:600 var(--fs-1)/1.6 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip.ok{
+  border-color:color-mix(in srgb, var(--ok) 38%, transparent);
+  background:color-mix(in srgb, var(--ok) 10%, transparent);
+  color:var(--ok);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip.bad{
+  border-color:color-mix(in srgb, var(--bad) 38%, transparent);
+  background:color-mix(in srgb, var(--bad) 10%, transparent);
+  color:var(--bad);
+}
+
+html[data-theme="nordlicht"] .labor .in-chip.frei{
+  border:1px dashed var(--line-2);
+  background:transparent;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-tab{
+  padding:8px 8px;
+  border:0;
+  border-bottom:1px solid transparent;
+  background:none;
+  color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+html[data-theme="nordlicht"] .labor .in-tab.an{
+  color:var(--ink);
+  border-bottom-color:var(--accent);
+  background:none;
+}
+
+html[data-theme="nordlicht"] .labor .in-inhalt{
+  padding:12px 16px 16px;
+  gap:12px;
+}
+
+html[data-theme="nordlicht"] .labor .in-abschnitt h4{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-abschnitt h4::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--ink) 10%, transparent), transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-abschnitt + .in-abschnitt{
+  border-top:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-feld-titel{
+  font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .in-eingabe,
+html[data-theme="nordlicht"] .labor .in-auswahl{
+  height:34px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--bg) 60%, transparent);
+  color:var(--ink);
+  font:500 var(--fs-2)/1 var(--mono);
+}
+
+html[data-theme="nordlicht"] .labor .in-eingabe:focus,
+html[data-theme="nordlicht"] .labor .in-auswahl:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-schalter-bahn{
+  border:1px solid var(--line-2);
+  background:color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-schalter input:checked + .in-schalter-bahn{
+  border-color:color-mix(in srgb, var(--accent) 60%, transparent);
+  background:color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-schalter input:checked + .in-schalter-bahn::after{
+  background:var(--accent);
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-knopf{
+  border:1px solid var(--line-2);
+  border-radius:var(--radius-xs);
+  background:color-mix(in srgb, var(--panel-2) 70%, transparent);
+  color:var(--ink);
+  font:600 var(--fs-2)/1 var(--body);
+  letter-spacing:.02em;
+}
+
+html[data-theme="nordlicht"] .labor .in-knopf:hover{
+  border-color:color-mix(in srgb, var(--accent) 45%, var(--line-2));
+  background:color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-knopf.primaer{
+  border-color:color-mix(in srgb, var(--accent) 55%, transparent);
+  background:var(--accent);
+  color:var(--accent-ink);
+}
+
+html[data-theme="nordlicht"] .labor .in-karte{
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  background:color-mix(in srgb, var(--panel-2) 62%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-hinweis{
+  color:var(--muted);
+  font:500 var(--fs-2)/1.55 var(--body);
+}
+
+html[data-theme="nordlicht"] .labor .in-port-kopf{
+  border-radius:var(--radius-xs);
+  transition:background var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="nordlicht"] .labor .in-port-kopf:hover{
+  background:color-mix(in srgb, var(--panel-2) 66%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .in-port-name{
+  color:var(--ink);
+  font:600 var(--fs-2)/1 var(--mono);
+  letter-spacing:.06em;
+}
+
+html[data-theme="nordlicht"] .labor .in-tabelle td{
+  border-bottom:1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+html[data-theme="nordlicht"] .labor .lb-insp-leer{
+  padding:24px 16px;
+  gap:8px;
+}
+
+html[data-theme="nordlicht"] .labor .lb-insp-leer::before{
+  content:"// NICHTS AUSGEWÄHLT";
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.30em;
+  color:var(--faint);
+}
+
+html[data-theme="nordlicht"] .labor .lb-insp-leer .lb-tipps{
+  font:500 var(--fs-1)/1.7 var(--mono);
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+/* ============================================================================
+   7 · Schmale Breiten: die Marginalspalte weicht, das Licht bleibt
+   ============================================================================ */
+
+@media (max-width:1200px){
+  html[data-theme="nordlicht"] .labor .lb-leinwand::after{
+    inset:8px;
+  }
+}

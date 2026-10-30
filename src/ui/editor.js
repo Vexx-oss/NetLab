@@ -479,6 +479,18 @@ UI.labor = (() => {
       g.append(statusSymbol(x + ux * dSym * richtung, y + uy * dSym * richtung, s.status, `${titelPort}: ${STATUS_TEXT[s.status] || s.status}${s.grund && s.status !== "oben" ? " – " + grundText(s.grund) : ""}`));
       const ox = nx * 9, oy = ny * 9, senkrecht = Math.abs(ux) < 0.55;
       const tx = x + ux * dTxt * richtung + ox, ty = y + uy * dTxt * richtung + oy + 3.5;
+      /* Qualitätskontrolle: Portname nur zeichnen, wenn er ganz in die Fläche passt – sonst
+         blieb am Rand ein abgeschnittenes Kürzel („i0/1") stehen. */
+      const sicht = sichtbereich();
+      if (sicht){
+        /* Textbreite mitrechnen und je nach Anker links/rechts/mittig begrenzen – sonst
+           stand am Rand ein abgeschnittenes Kürzel („i0/1"). */
+        const tw = port.length * 6.6, rand = 14;
+        const anker = senkrecht ? (ox >= 0 ? "start" : "end") : "middle";
+        const links = anker === "start" ? tx : anker === "end" ? tx - tw : tx - tw / 2;
+        const rechts = anker === "start" ? tx + tw : anker === "end" ? tx : tx + tw / 2;
+        if (links < sicht.x1 + rand || rechts > sicht.x2 - rand || ty < sicht.y1 + 14 || ty > sicht.y2 - 14) return;
+      }
       g.append(sv("text", {class: "kabel-port", x: tx.toFixed(1), y: ty.toFixed(1), "text-anchor": senkrecht ? (ox >= 0 ? "start" : "end") : "middle", text: port}));
     };
     ende(ax, ay, sa, 1, k.a.port, `${na} ${k.a.port}`);

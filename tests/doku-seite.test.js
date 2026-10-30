@@ -108,7 +108,7 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
     const r = python([path.join("tools", "seite.py"), "--pruefen"]);
     erwarte.gleich(r.code, 0, `--pruefen meldete Exit ${r.code}:\n${r.ausgabe.slice(-800)}${r.fehler.slice(-400)}`);
     erwarte.enthaelt(r.ausgabe, "GRUEN", "der Lauf meldet GRUEN");
-    erwarte.enthaelt(r.ausgabe, "29 Dokumente", "alle 29 Dokumente erzeugt");
+    erwarte.passt(r.ausgabe, /\b\d+ Dokumente/, "die Dokumentzahl wird gemeldet");
   });
 
   /* Wie viele Dokumente hat die Quelle? Gezählt, nicht geschrieben — sonst wird diese Datei bei

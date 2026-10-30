@@ -1,0 +1,600 @@
+/* ==========================================================================
+   THEME „PAPIER“ – Risograph-Editorial (hell)
+   --------------------------------------------------------------------------
+   Ein gedrucktes Magazin im Browser: warmes Papier, Tintenschwarz, Zinnober
+   und Ultramarin. Harte 2-px-Tintenrahmen, versetzte Druckschatten ohne
+   Weichzeichner, Mono-Beschriftungen gegen große Display-Typografie.
+   Technik: alle Literale im Token-Block; alles andere nur var(--…)-Farben,
+   -Radien und -Schriften (Themes-Vertrag, docs/entwicklung/Themes-Vertrag.md).
+   ========================================================================== */
+
+:root[data-theme="papier"]{
+  color-scheme:light;
+
+  /* ---- Papier ---- */
+  --bg:#EFE6D4;
+  --bg-raster:rgba(27,23,16,.12);
+  --raster:20px;
+  --panel:#FAF4E6;
+  --panel-2:#F3EBDA;
+  --panel-3:#E8DDC6;
+  --line:rgba(27,23,16,.30);
+  --line-2:rgba(27,23,16,.62);
+
+  /* ---- Tinte ---- */
+  --ink:#1B1710;
+  --muted:#4F4636;
+  --faint:#5C5339;
+
+  /* ---- Zinnober: Handlung, Geld, Störung ---- */
+  --accent:#A22A12;
+  --accent-ink:#FCF7EA;
+  --accent-soft:#F1D5C5;
+  --amber:#923312;
+  --koralle:#A22A12;
+  --warn:#8A3313;
+  --warn-soft:#F0D9C9;
+  --bad:#A22A12;
+  --bad-soft:#F3D5C8;
+  --geld:#923312;
+
+  /* ---- Ultramarin: Ordnung, Wissen, Verbindung ---- */
+  --mint:#22347F;
+  --iris:#233A96;
+  --ok:#1F3A8F;
+  --ok-soft:#E0E4F2;
+  --info:#233A96;
+  --info-soft:#E2E6F4;
+  --ruf:#233A96;
+
+  /* ---- Protokolle: zwei Druckfarben, Überdruck als Violett ---- */
+  --p-arp:#8A3313; --p-icmp:#1F3A8F; --p-tcp:#3A2A6E; --p-udp:#923312;
+  --p-dhcp:#233A96; --p-dns:#A22A12; --p-http:#2F4DA8;
+
+  /* ---- VLAN-Farben (immer mit Nummer) ---- */
+  --vlan-1:#6B6152; --vlan-2:#2F4DA8; --vlan-3:#3A2A6E; --vlan-4:#A22A12;
+  --vlan-5:#8A3313; --vlan-6:#4B3F8F; --vlan-7:#6B4A16; --vlan-8:#20595E;
+
+  /* ---- Zonen ---- */
+  --zone-a:rgba(31,58,143,.09); --zone-b:rgba(47,77,168,.08); --zone-c:rgba(162,42,18,.08);
+  --zone-d:rgba(58,42,110,.09); --zone-e:rgba(107,74,22,.08);
+  --zone-a-linie:rgba(31,58,143,.55); --zone-b-linie:rgba(47,77,168,.5);
+  --zone-c-linie:rgba(162,42,18,.5); --zone-d-linie:rgba(58,42,110,.5);
+  --zone-e-linie:rgba(107,74,22,.5);
+
+  /* ---- Gerätetypen ---- */
+  --typ-router:#2F4DA8; --typ-switch:#3A2A6E; --typ-firewall:#A22A12;
+  --typ-host:#1B1710; --typ-server:#233A96; --typ-nas:#923312; --typ-internet:#8A3313;
+
+  /* ---- Form: gedruckt, nicht gerundet ---- */
+  --radius:0px;
+  --radius-s:2px;
+  --radius-xs:1px;
+  --schatten:4px 4px 0 rgba(27,23,16,.20);
+  --schatten-flach:2px 2px 0 rgba(27,23,16,.16);
+  --schatten-hart:3px 3px 0 rgba(27,23,16,.88);
+  --glow:0 0 0 2px rgba(162,42,18,.34), 4px 4px 0 rgba(162,42,18,.16);
+
+  /* ---- Schrift: groteske Schlagzeile, Mono-Etikett, Serifendeck ---- */
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",Consolas,"DejaVu Sans Mono",monospace;
+  --serif:"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+
+  /* ---- Skala: weit gespannt wie eine Zeitschriftseite ---- */
+  --fs-1:11px; --fs-2:12.5px; --fs-3:13.5px; --fs-4:16px;
+  --fs-5:20px; --fs-6:29px; --fs-7:37px; --fs-8:46px; --fs-9:60px;
+
+  /* ---- Zeiten: knapp, wie ein Stempel ---- */
+  --dauer-kurz:60ms; --dauer:140ms; --dauer-mittel:220ms; --dauer-lang:300ms;
+  --dauer-zaehler:700ms;
+  --ease-standard:cubic-bezier(.2,.7,.3,1); --ease-out:cubic-bezier(.16,.84,.44,1);
+  --ease-pop:cubic-bezier(.3,1.6,.5,1);
+
+  /* ---- Flächenglas (Werkzeugleisten, Legenden) ---- */
+  --glas:rgba(250,244,230,.92);
+  --leiste-bg:rgba(250,244,230,.97);
+}
+
+/* ==========================================================================
+   1 · PAPIER: Halbton-Korn, zwei Farbnebel, keine Weichzeichner
+   ========================================================================== */
+html[data-theme="papier"] body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb,var(--ink) 10%,transparent) .6px, transparent 1.3px),
+    radial-gradient(circle at 2px 2px, color-mix(in srgb,var(--accent) 9%,transparent) .6px, transparent 1.3px),
+    radial-gradient(1100px 640px at 10% -12%, color-mix(in srgb,var(--accent) 5%,transparent), transparent 62%),
+    radial-gradient(900px 560px at 94% 0%, color-mix(in srgb,var(--info) 5%,transparent), transparent 60%);
+  background-size:7px 7px, 7px 7px, auto, auto;
+}
+html[data-theme="papier"] ::selection{background:var(--accent-soft)}
+
+/* ==========================================================================
+   2 · RAHMEN: Kopfzeile, Schiene, Fuß – Tinte auf Papier
+   ========================================================================== */
+html[data-theme="papier"] .kopf{
+  gap:14px; padding:0 14px; background:var(--panel);
+  border-bottom:2px solid var(--ink);
+}
+html[data-theme="papier"] .kopf::after{display:none}
+html[data-theme="papier"] .kopf-marke{gap:10px; padding-right:14px; border-right:1px solid var(--line)}
+html[data-theme="papier"] .marke-sym rect{fill:var(--ink); stroke:var(--ink); stroke-width:1}
+html[data-theme="papier"] .marke-sym path{stroke:var(--bg); stroke-width:2.2; fill:none}
+html[data-theme="papier"] .marke-sym circle{fill:var(--accent)}
+html[data-theme="papier"] .marke-name{font:800 var(--fs-4)/1 var(--display); letter-spacing:.18em}
+html[data-theme="papier"] .marke-version{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.1em; color:var(--faint);
+  border:1px solid var(--line-2); border-radius:var(--radius); padding:4px 6px;
+}
+
+html[data-theme="papier"] .kopf-werte{gap:6px}
+html[data-theme="papier"] .wert{
+  height:38px; padding:0 10px; border:1px solid var(--line-2); border-radius:var(--radius-s);
+  background:var(--panel-2); color:var(--ink);
+  font:600 var(--fs-2)/1 var(--mono); letter-spacing:.02em;
+  box-shadow:var(--schatten-flach); transition:none;
+}
+html[data-theme="papier"] button.wert:hover{background:var(--panel); border-color:var(--ink)}
+html[data-theme="papier"] .wert-offen.hat{border:1px solid var(--ink); background:var(--accent-soft); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .wert-offen.hat .sym{color:var(--accent)}
+html[data-theme="papier"] .wert.mit-fortschritt::after{height:2px; background:var(--accent); border-radius:var(--radius)}
+html[data-theme="papier"] .kopf-knoepfe{gap:2px; padding-left:10px; border-left:1px solid var(--line)}
+html[data-theme="papier"] .kopf-knopf{border-radius:var(--radius-s); color:var(--muted)}
+html[data-theme="papier"] .kopf-knopf:hover{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+html[data-theme="papier"] .kopf-knopf.mit-text span{font:600 var(--fs-2)/1 var(--mono); letter-spacing:.1em; text-transform:uppercase}
+
+html[data-theme="papier"] .dock{
+  gap:2px; padding:6px 0; background:var(--bg); border-right:2px solid var(--ink);
+}
+html[data-theme="papier"] .dock-knopf{color:var(--muted); border-radius:var(--radius-s); padding:6px 0}
+html[data-theme="papier"] .dock-knopf:hover{background:var(--panel-2); color:var(--ink)}
+html[data-theme="papier"] .dock-knopf.an{background:var(--ink); color:var(--bg)}
+html[data-theme="papier"] .dock-knopf.an::before{width:4px; top:0; bottom:0; border-radius:var(--radius); background:var(--accent)}
+html[data-theme="papier"] .dock-text{font:600 var(--fs-1)/1.1 var(--mono); letter-spacing:.14em; color:var(--muted)}
+html[data-theme="papier"] .dock-knopf.an .dock-text{color:var(--bg)}
+html[data-theme="papier"] .dock-zahl{
+  border-radius:var(--radius-xs); background:var(--accent); color:var(--accent-ink);
+  font:700 var(--fs-1)/18px var(--mono); box-shadow:0 0 0 1px var(--bg);
+}
+html[data-theme="papier"] .dock-knopf.an .dock-zahl{box-shadow:0 0 0 1px var(--ink)}
+html[data-theme="papier"] .dock-knopf.spaeter{opacity:.6}
+
+html[data-theme="papier"] .fuss{
+  padding:0 14px; background:var(--panel); border-top:2px solid var(--ink);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--faint);
+}
+html[data-theme="papier"] .fuss-live{color:var(--accent)}
+html[data-theme="papier"] .fuss-punkt{
+  width:8px; height:8px; border-radius:var(--radius); background:var(--accent); box-shadow:none;
+}
+html[data-theme="papier"] .fuss-ebene{color:var(--ink)}
+
+/* ==========================================================================
+   3 · KNÖPFE: Stempel und Felder, versetzter Tintenschatten
+   ========================================================================== */
+html[data-theme="papier"] .knopf{
+  border:1px solid var(--line-2); border-radius:var(--radius-s);
+  background:var(--panel-2); color:var(--ink); box-shadow:var(--schatten-flach);
+  font-weight:700; letter-spacing:.01em;
+}
+html[data-theme="papier"] .knopf:hover{background:var(--panel); border-color:var(--ink)}
+html[data-theme="papier"] .knopf:active{transform:translate(1px,1px); box-shadow:none}
+html[data-theme="papier"] .knopf.primaer,
+html[data-theme="papier"] .knopf-haupt{
+  border:1.5px solid var(--ink); border-radius:var(--radius-s);
+  background:var(--accent); color:var(--accent-ink); box-shadow:var(--schatten-hart);
+}
+html[data-theme="papier"] .knopf.primaer:hover,
+html[data-theme="papier"] .knopf-haupt:hover{
+  background:var(--accent); border-color:var(--ink); filter:none;
+  transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--ink);
+}
+html[data-theme="papier"] .knopf.geist{background:transparent; border-color:transparent; box-shadow:none; color:var(--muted)}
+html[data-theme="papier"] .knopf.geist:hover{background:var(--panel-2); border-color:var(--line-2); color:var(--ink)}
+html[data-theme="papier"] .knopf:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ==========================================================================
+   4 · HUB „HEUTE“: Bogen im Raster, jede Platte ein Tintenrahmen
+   ========================================================================== */
+html[data-theme="papier"] .hb-seite{
+  max-width:1180px; padding:26px 24px 22px; gap:18px; background:transparent;
+}
+html[data-theme="papier"] .hb-raster{gap:18px}
+
+html[data-theme="papier"] .hb-panel{
+  background:var(--panel); border:2px solid var(--ink); border-radius:var(--radius);
+  box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .hb-panel-titel{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint);
+}
+html[data-theme="papier"] .hb-panel-titel::before{
+  content:""; display:inline-block; width:7px; height:7px; margin-right:8px;
+  background:var(--accent); vertical-align:1px;
+}
+
+/* Hero: Doppelrahmen, Schlagzeile, Serifendeck */
+html[data-theme="papier"] .hb-hero{
+  background:var(--panel); padding:22px 24px 24px; gap:4px;
+}
+html[data-theme="papier"] .hb-hero::before{
+  content:""; position:absolute; inset:7px; border:1px solid var(--line); pointer-events:none;
+}
+html[data-theme="papier"] .hb-kicker{
+  color:var(--accent); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.26em;
+}
+html[data-theme="papier"] .hb-hero-kunde{
+  margin-top:14px; font:600 var(--fs-2)/1.3 var(--mono); letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted);
+}
+html[data-theme="papier"] .hb-hero h1{
+  font:800 clamp(var(--fs-7),3.3vw,var(--fs-9))/.94 var(--display);
+  letter-spacing:-.055em; margin:10px 0 12px; max-width:15ch;
+}
+html[data-theme="papier"] .hb-hero-lead{
+  font:italic 400 var(--fs-4)/1.4 var(--serif); color:var(--muted); max-width:44ch; margin:0 0 12px;
+}
+html[data-theme="papier"] .hb-hero-meta{gap:6px; margin-bottom:6px}
+html[data-theme="papier"] .hb-hero-meta span{
+  border:1px solid var(--line-2); border-radius:var(--radius); background:transparent;
+  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em;
+  text-transform:uppercase; padding:7px 8px;
+}
+html[data-theme="papier"] .hb-hero-meta .warn{
+  color:var(--accent); border-color:var(--accent); background:var(--accent-soft);
+}
+html[data-theme="papier"] .hb-aktionen{margin-top:18px; gap:10px}
+
+/* Kenndaten: Ziffern wie gesetzte Seitenzahlen */
+html[data-theme="papier"] .hb-kd{padding:15px 18px; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .hb-kd > i{width:9px; height:9px; border-radius:var(--radius)}
+html[data-theme="papier"] .hb-kd .lab{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint)}
+html[data-theme="papier"] .hb-kd > b{
+  font:800 var(--fs-7)/.9 var(--display); letter-spacing:-.045em;
+}
+html[data-theme="papier"] .hb-kd small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .hb-spark{gap:4px; height:30px}
+html[data-theme="papier"] .hb-spark i{width:4px; border-radius:var(--radius)}
+html[data-theme="papier"] .hb-spark i.spitze{background:var(--c)}
+
+/* Ziel, Sitzung, Klasse */
+html[data-theme="papier"] .hb-ring{
+  border:2px solid var(--ink); border-radius:50%;
+}
+html[data-theme="papier"] .hb-ring b{font:800 var(--fs-6)/1 var(--display); letter-spacing:-.04em; position:relative; z-index:1}
+html[data-theme="papier"] .hb-ring::after{background:var(--panel); z-index:0}
+html[data-theme="papier"] .hb-ring::after{background:var(--panel)}
+html[data-theme="papier"] .hb-zeile{
+  border-top:1px solid var(--line); color:var(--muted); padding:9px 0;
+}
+html[data-theme="papier"] .hb-zeile i{width:9px; height:9px; border-radius:var(--radius); box-shadow:inset 0 0 0 1.5px var(--faint)}
+html[data-theme="papier"] .hb-zeile.fertig i{background:var(--ink); box-shadow:none}
+html[data-theme="papier"] .hb-zeile.fertig{color:var(--ink)}
+html[data-theme="papier"] .hb-zeile b{font:700 var(--fs-3)/1.3 var(--body)}
+html[data-theme="papier"] .hb-zeile small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--faint)}
+html[data-theme="papier"] .hb-sz{border-top:1px solid var(--line); padding:9px 0}
+html[data-theme="papier"] .hb-sz time{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .hb-sz b{font:700 var(--fs-3)/1.3 var(--body)}
+html[data-theme="papier"] .hb-sz small{font-size:var(--fs-2)}
+html[data-theme="papier"] .hb-sz em{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; color:var(--accent)}
+html[data-theme="papier"] .hb-klasse{gap:12px}
+html[data-theme="papier"] .hb-klasse-zeile .knopf{height:42px}
+html[data-theme="papier"] .hb-klasse-zeile small{color:var(--faint); font-size:var(--fs-2)}
+
+/* Lagebild */
+html[data-theme="papier"] .hb-lage{background:var(--panel)}
+html[data-theme="papier"] .hb-signal-svg path:first-of-type{stroke:var(--ink)}
+html[data-theme="papier"] .hb-signal-svg path:last-of-type{stroke:color-mix(in srgb,var(--ink) 18%,transparent)}
+html[data-theme="papier"] .hb-lage-titel{letter-spacing:.24em; color:var(--faint)}
+html[data-theme="papier"] .hb-lage-zaehler{letter-spacing:.16em; color:var(--muted)}
+html[data-theme="papier"] .hb-lage-zaehler.ok{color:var(--ok)}
+html[data-theme="papier"] .hb-lage-zaehler.bad{color:var(--accent)}
+html[data-theme="papier"] .hb-kante.ok{stroke:var(--ok); stroke-opacity:.85}
+html[data-theme="papier"] .hb-kante.unten{stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4}
+html[data-theme="papier"] .hb-kante.aus{stroke:var(--warn); stroke-width:2; stroke-dasharray:2 4}
+html[data-theme="papier"] .hb-chip{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  color:var(--ink); font:600 var(--fs-1)/1.1 var(--mono); letter-spacing:.06em;
+  padding:5px 8px; box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .hb-chip:hover{border-color:var(--accent); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .hb-chip-sym{
+  border-radius:var(--radius-xs); background:var(--accent-soft); color:var(--accent);
+}
+html[data-theme="papier"] .hb-chip-mehr{border-style:dashed; border-color:var(--line-2); background:transparent; box-shadow:none}
+html[data-theme="papier"] .hb-lage-fuss .hb-legende{letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .hb-lage-tipp{letter-spacing:.14em; color:var(--faint)}
+
+/* Signal */
+html[data-theme="papier"] .hb-stat{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; color:var(--faint)}
+html[data-theme="papier"] .hb-stat i{width:7px; height:7px; border-radius:var(--radius); background:var(--accent)}
+html[data-theme="papier"] .hb-stat b{color:var(--ink)}
+
+/* Feierabend-Karte: nur die linke Kante trägt die Farbe */
+html[data-theme="papier"] .hb-feierabend{
+  background:var(--panel); border:2px solid var(--ink); border-left:6px solid var(--info);
+  border-radius:var(--radius); box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .hb-woche-knopf{
+  color:var(--muted); border-bottom:1px dashed var(--line-2);
+  font-family:var(--mono); letter-spacing:.06em;
+}
+html[data-theme="papier"] .hb-ziel{color:var(--faint)}
+
+/* ==========================================================================
+   5 · LABOR: Auftragsband, Zeichenfläche, Werkzeugleisten
+   ========================================================================== */
+html[data-theme="papier"] .lb-mitte{padding:16px 20px; gap:16px}
+html[data-theme="papier"] .lb-auftrag{
+  margin:0; padding:18px 22px; border:2px solid var(--ink); border-radius:var(--radius);
+  background:var(--panel); box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .lb-auftrag::before{
+  content:"// AUFTRAG"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em;
+  color:var(--accent); margin:0 0 10px;
+}
+html[data-theme="papier"] .lb-auftrag :is(h1,h2),
+html[data-theme="papier"] .lb-auftrag .am-titel strong{
+  font:800 clamp(var(--fs-6),2.5vw,var(--fs-7))/.96 var(--display); letter-spacing:-.05em;
+}
+html[data-theme="papier"] .lb-auftrag .am-kunde{
+  font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.2em; color:var(--faint); margin-top:4px;
+}
+html[data-theme="papier"] .lb-auftrag .am-ziele{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel-2);
+  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; padding:7px 9px;
+  box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .lb-auftrag .am-lesen{
+  border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel);
+  color:var(--ink);
+}
+html[data-theme="papier"] .lb-auftrag .sp-kunde-sym{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--accent-soft);
+  color:var(--accent); box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .lb-auftrag .sp-einstieg{background:none; border:0}
+html[data-theme="papier"] .lb-auftrag .sp-einstieg-text{font:italic 400 var(--fs-3)/1.4 var(--serif); color:var(--muted)}
+html[data-theme="papier"] .lb-auftrag .sp-einstieg-start{border:1px solid var(--accent); background:var(--accent-soft); padding:8px 12px}
+html[data-theme="papier"] .sp-stufe-knopf{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.1em; border-radius:var(--radius-s)}
+html[data-theme="papier"] .sp-stufe-knopf.an{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+
+/* Zeichenfläche: die Druckplatte */
+html[data-theme="papier"] .lb-leinwand{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten); overflow:hidden;
+}
+html[data-theme="papier"] .lb-svg{background:var(--panel)}
+html[data-theme="papier"] .lb-raster-punkt{fill:color-mix(in srgb,var(--ink) 14%,transparent)}
+html[data-theme="papier"] .lb-leinwand::before{
+  content:"// LAGEBILD"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--faint);
+}
+html[data-theme="papier"] .lb-leiste-oben{top:32px}
+html[data-theme="papier"] .lb-leinwand::after{
+  content:""; position:absolute; inset:8px; border:1px solid var(--line); pointer-events:none; z-index:1;
+}
+html[data-theme="papier"] .lb-leiste-oben,
+html[data-theme="papier"] .lb-leiste-unten,
+html[data-theme="papier"] .lb-hinweis,
+html[data-theme="papier"] .lb-legende,
+html[data-theme="papier"] .wk-mini{z-index:20}
+
+/* Geräte: Papierkarten mit Tintenkante */
+html[data-theme="papier"] .ger-karte{
+  fill:var(--panel); stroke:var(--ink); stroke-width:1.5; rx:1px;
+  filter:drop-shadow(3px 3px 0 color-mix(in srgb,var(--ink) 18%,transparent));
+}
+html[data-theme="papier"] .ger.hover .ger-karte{
+  fill:var(--panel-2); stroke:var(--ink); stroke-width:2;
+  filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--ink) 24%,transparent));
+}
+html[data-theme="papier"] .ger.gewaehlt .ger-karte,
+html[data-theme="papier"] .ger.zielt .ger-karte{
+  stroke:var(--accent); stroke-width:2.2;
+  filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--accent) 26%,transparent));
+}
+html[data-theme="papier"] .ger-name{font-weight:700; letter-spacing:.14em; stroke-width:5px}
+html[data-theme="papier"] .ger-ip{font-weight:600; letter-spacing:.02em; stroke-width:5px}
+html[data-theme="papier"] .ger-auswahl{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 4}
+/* Gerätepiktogramm: harte Papierfläche statt Farbmischung */
+html[data-theme="papier"] .gb-kachel{fill:var(--panel); stroke:var(--line-2); stroke-width:1.2}
+html[data-theme="papier"] .ger .gb-kachel{fill:var(--panel-2); stroke:var(--line-2)}
+html[data-theme="papier"] .gb-glyph path{stroke:var(--ink); stroke-width:2}
+html[data-theme="papier"] .ger.gewaehlt .gb-kachel,
+html[data-theme="papier"] .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.2; fill:var(--accent-soft)}
+html[data-theme="papier"] .ger.hover .gb-kachel{stroke:var(--ink); fill:var(--panel-3)}
+
+/* Kabel: Ultramarin ist die Leitung, Zinnober der Fehler */
+html[data-theme="papier"] .kabel-huelle{stroke:color-mix(in srgb,var(--ink) 12%,transparent); stroke-width:7}
+html[data-theme="papier"] .kabel-linie{stroke-width:2.4; stroke-opacity:1}
+html[data-theme="papier"] .kabel.k-unten .kabel-linie{stroke-dasharray:1 6; stroke-width:2.6}
+html[data-theme="papier"] .kabel.k-aus .kabel-linie{stroke-dasharray:2 7}
+html[data-theme="papier"] .kabel.gewaehlt .kabel-linie{stroke-width:3.6}
+html[data-theme="papier"] .kabel-port{font-weight:600; letter-spacing:.06em; stroke-width:5px}
+html[data-theme="papier"] .kabel-stecker .stk-gehaeuse{fill:var(--panel); stroke:var(--ink); stroke-width:1.4}
+
+/* Werkzeugleisten: Papierstempel mit harter Kante */
+html[data-theme="papier"] .lb-gruppe{
+  padding:4px; border:1.5px solid var(--ink); border-radius:var(--radius);
+  background:var(--panel); box-shadow:var(--schatten-hart); backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+html[data-theme="papier"] .lb-wz,
+html[data-theme="papier"] .lb-knopf{color:var(--ink); border-radius:var(--radius-s)}
+html[data-theme="papier"] .lb-wz:hover,
+html[data-theme="papier"] .lb-knopf:hover{background:var(--panel-2)}
+html[data-theme="papier"] .lb-wz.an{
+  background:var(--ink); color:var(--bg); box-shadow:none;
+}
+html[data-theme="papier"] .lb-wz.an .lb-wz-taste{color:var(--bg); background:transparent}
+html[data-theme="papier"] .lb-wz-taste{
+  font:600 var(--fs-1)/1 var(--mono); color:var(--faint); border:0; background:transparent;
+}
+html[data-theme="papier"] .lb-zoomtext{font:600 var(--fs-2)/1 var(--mono); letter-spacing:.04em; color:var(--ink)}
+html[data-theme="papier"] .lb-ansicht{color:var(--ink); font:700 var(--fs-2)/1 var(--body)}
+
+/* Hinweis + Legende wie ein gedruckter Vermerk */
+html[data-theme="papier"] .lb-hinweis{
+  border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel-2);
+  color:var(--muted); font:600 var(--fs-1)/1.5 var(--mono); letter-spacing:.06em;
+}
+html[data-theme="papier"] .lb-legende{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  padding:5px 10px; box-shadow:var(--schatten-flach);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint);
+}
+html[data-theme="papier"] .lb-legende .lg-verbunden::before{background:var(--ok); height:2px}
+html[data-theme="papier"] .lb-legende .lg-getrennt::before{background:var(--accent); height:2px}
+html[data-theme="papier"] .lb-legende .lg-kein::before{border-top:1px dashed var(--warn); background:transparent}
+
+/* Minimap */
+html[data-theme="papier"] .wk-mini{
+  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .wk-mini-kopf{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .wk-mini-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .wk-mini-fuss{border-top:1px solid var(--line)}
+
+/* Kleine Geräteleiste links */
+html[data-theme="papier"] .lb-geraete{background:var(--bg); border-right:2px solid var(--ink)}
+html[data-theme="papier"] .lb-geraete-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--faint)}
+html[data-theme="papier"] .pa-kat{border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
+
+/* ==========================================================================
+   6 · INSPEKTOR UND ANDOCKUNG
+   ========================================================================== */
+html[data-theme="papier"] .lb-dock{background:var(--bg); border-left:2px solid var(--ink)}
+html[data-theme="papier"] .lb-dock-reiter{padding:6px 8px 0; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .lb-dock-tab{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint);
+  border-radius:var(--radius-s) var(--radius-s) var(--radius) var(--radius);
+}
+html[data-theme="papier"] .lb-dock-tab.an{background:var(--panel); border-color:var(--ink); color:var(--ink)}
+html[data-theme="papier"] .lb-inspektor::before{
+  content:"// INSPEKTOR"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--accent);
+}
+html[data-theme="papier"] .in-kopf{
+  background:var(--panel); border-bottom:2px solid var(--ink); padding:14px 16px 10px;
+}
+html[data-theme="papier"] .in-kopf-text h3{font:800 var(--fs-6)/1 var(--display); letter-spacing:-.04em}
+html[data-theme="papier"] .in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .in-reiter{padding:8px 12px 0; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .in-tab{
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; border-bottom-width:2px;
+}
+html[data-theme="papier"] .in-tab.an{color:var(--accent); border-bottom-color:var(--accent); background:none; font-weight:700}
+html[data-theme="papier"] .in-inhalt{padding:0; gap:0}
+html[data-theme="papier"] .in-abschnitt{padding:14px 16px; border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .in-abschnitt + .in-abschnitt{border-top:0; padding-top:14px}
+html[data-theme="papier"] .in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint); margin:0 0 10px}
+html[data-theme="papier"] .in-abschnitt h4::before{
+  content:""; display:inline-block; width:6px; height:6px; margin-right:7px;
+  background:var(--ink); vertical-align:1px;
+}
+html[data-theme="papier"] .in-hinweis{font-size:var(--fs-3); color:var(--muted); line-height:1.5}
+html[data-theme="papier"] .in-feld-titel{font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .in-eingabe,
+html[data-theme="papier"] .in-auswahl{
+  border:1.5px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel);
+  font:600 var(--fs-2)/1 var(--mono); box-shadow:inset 2px 2px 0 color-mix(in srgb,var(--ink) 6%,transparent);
+}
+html[data-theme="papier"] .in-eingabe:focus,
+html[data-theme="papier"] .in-auswahl:focus{border-color:var(--accent); outline:none}
+html[data-theme="papier"] .in-chip{
+  border:1px solid var(--line-2); border-radius:var(--radius); font:600 var(--fs-1)/1.4 var(--mono);
+  letter-spacing:.06em; background:var(--panel-2); color:var(--muted);
+}
+html[data-theme="papier"] .in-chip.ok{background:var(--ok-soft); border-color:var(--ok); color:var(--ok)}
+html[data-theme="papier"] .in-chip.bad{background:var(--bad-soft); border-color:var(--bad); color:var(--bad)}
+html[data-theme="papier"] .in-chip.warn{background:var(--warn-soft); border-color:var(--warn); color:var(--warn)}
+html[data-theme="papier"] .in-chip.info{background:var(--info-soft); border-color:var(--info); color:var(--info)}
+html[data-theme="papier"] .in-chip.aus{background:var(--panel-2); border-color:var(--line); color:var(--faint)}
+html[data-theme="papier"] .in-chip.frei{border-style:dashed; background:transparent}
+html[data-theme="papier"] .in-karte{
+  border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .in-tabelle td{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .in-tabelle.mono{font-family:var(--mono)}
+html[data-theme="papier"] .in-knopf{
+  border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2);
+  font:700 var(--fs-2)/1 var(--body); box-shadow:var(--schatten-flach);
+}
+html[data-theme="papier"] .in-knopf:hover{background:var(--panel); border-color:var(--ink)}
+html[data-theme="papier"] .in-knopf.primaer{border:1.5px solid var(--ink); background:var(--accent); color:var(--accent-ink); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .in-knopf.warn{border:1.5px solid var(--ink); background:var(--warn); color:var(--accent-ink); box-shadow:var(--schatten-hart)}
+html[data-theme="papier"] .in-schalter-bahn{border:1px solid var(--line-2); background:var(--panel-3)}
+html[data-theme="papier"] .in-schalter input:checked + .in-schalter-bahn{background:var(--ink); border-color:var(--ink)}
+html[data-theme="papier"] .in-schalter input:checked + .in-schalter-bahn::after{background:var(--bg)}
+html[data-theme="papier"] .in-portliste{font-family:var(--mono)}
+html[data-theme="papier"] .in-port-kopf{border-radius:var(--radius)}
+html[data-theme="papier"] .in-port-kopf:hover,
+html[data-theme="papier"] .in-port.auf .in-port-kopf{background:var(--panel-2)}
+html[data-theme="papier"] .in-port-name{font:700 var(--fs-2)/1 var(--mono); color:var(--ink)}
+html[data-theme="papier"] .in-regeln li{background:var(--panel); border-left:3px solid var(--ink); border-radius:var(--radius)}
+html[data-theme="papier"] .in-regeln li::before{color:var(--accent); font-family:var(--mono)}
+html[data-theme="papier"] .lb-insp-leer{background:var(--panel)}
+html[data-theme="papier"] .lb-insp-leer::before{content:"// NICHTS AUSGEWÄHLT"; color:var(--accent); letter-spacing:.24em}
+html[data-theme="papier"] .lb-tipps{font-family:var(--mono); color:var(--faint)}
+html[data-theme="papier"] .in-kopf .in-speichern{border:1px solid var(--warn); background:var(--warn-soft)}
+
+/* ==========================================================================
+   7 · DIALOGE, MENÜS, TOASTS, PALETTE
+   ========================================================================== */
+html[data-theme="papier"] .toast{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten-hart);
+}
+html[data-theme="papier"] .toast-sym{border-radius:var(--radius); border:1px solid var(--line)}
+html[data-theme="papier"] .menue{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .menue-titel{border-bottom:1px solid var(--line); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.16em; text-transform:uppercase}
+html[data-theme="papier"] .menue-punkt{border-radius:var(--radius-s); font-weight:600}
+html[data-theme="papier"] .menue-punkt:hover:not([disabled]){background:var(--panel-2)}
+html[data-theme="papier"] .dialog,
+html[data-theme="papier"] .pal-kasten{
+  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  box-shadow:var(--schatten);
+}
+html[data-theme="papier"] .dialog-huelle,
+html[data-theme="papier"] .pal-huelle{background:color-mix(in srgb,var(--ink) 34%,transparent)}
+html[data-theme="papier"] .dialog-kopf{border-bottom:2px solid var(--ink)}
+html[data-theme="papier"] .dialog-kopf h2{font:800 var(--fs-6)/1 var(--display); letter-spacing:-.03em}
+html[data-theme="papier"] .pal-kopf{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .pal-eingabe{font-family:var(--mono); font-size:var(--fs-3)}
+html[data-theme="papier"] .wahl{border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2)}
+html[data-theme="papier"] .wahl-knopf{border-radius:var(--radius-xs); font-family:var(--mono); letter-spacing:.04em}
+html[data-theme="papier"] .wahl-knopf.an{background:var(--ink); color:var(--bg); box-shadow:none}
+html[data-theme="papier"] .schalter{border:1px solid var(--line-2); background:var(--panel-3)}
+html[data-theme="papier"] .schalter.an{background:var(--ink); border-color:var(--ink)}
+html[data-theme="papier"] .schalter.an span{background:var(--accent)}
+html[data-theme="papier"] .einst-abschnitt{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .einst-abschnitt h3,
+html[data-theme="papier"] .kuerzel h3{color:var(--accent); font-family:var(--mono); letter-spacing:.16em}
+html[data-theme="papier"] .platzhalter{border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel); box-shadow:var(--schatten)}
+html[data-theme="papier"] .ph-sym{border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--accent-soft); color:var(--accent)}
+
+/* ==========================================================================
+   8 · SCHMAL (720 px): Rahmen bleiben, Abstände schrumpfen
+   ========================================================================== */
+@media (max-width:900px){
+  html[data-theme="papier"] .hb-seite{padding:18px 14px 16px; gap:14px}
+  html[data-theme="papier"] .hb-raster{gap:14px}
+  html[data-theme="papier"] .hb-hero{padding:16px 18px 18px}
+  html[data-theme="papier"] .hb-hero h1{font-size:clamp(var(--fs-6),7vw,var(--fs-8))}
+  html[data-theme="papier"] .lb-mitte{padding:10px 12px; gap:12px}
+  html[data-theme="papier"] .lb-auftrag{padding:12px 14px}
+  html[data-theme="papier"] .lb-auftrag::before{display:none}
+  html[data-theme="papier"] .lb-auftrag :is(h1,h2),
+  html[data-theme="papier"] .lb-auftrag .am-titel strong{font-size:var(--fs-5); letter-spacing:-.03em}
+  html[data-theme="papier"] .lb-leinwand::after{inset:5px}
+  html[data-theme="papier"] .dock-text{letter-spacing:.02em}
+  html[data-theme="papier"] .fuss{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  html[data-theme="papier"] .knopf.primaer:hover{transform:none}
+}

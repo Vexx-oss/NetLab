@@ -1,0 +1,111 @@
+/* ---------- Theme „keramik" (Stone Studio, hell-warm) ----------
+   Richtung: Töpfer-/Designstudio. Kalkstein und Greige als Grund, Salbei als Handlung,
+   Terrakotta als Störung, Ocker als Zeit/Geld, Schiefer als Wissen. Matte Flächen,
+   große weiche Radien, weiche niedrige Schatten, humanistische Sans.
+   Vertrag: docs/entwicklung/Themes-Vertrag.md — alle Literale stehen im Token-Block,
+   außerhalb nur `html[data-theme="keramik"] …` mit var(--…). Kein dunkles Theme,
+   keine bunten Verläufe, keine externen Assets. */
+
+:root[data-theme="keramik"]{
+  color-scheme:light;
+
+  /* Grund: Kalkstein (bg) und Greige-Schichten (panel …) */
+  --bg:#EDE6DA; --bg-raster:rgba(58,48,36,.06); --raster:28px;
+  --panel:#FAF6EE; --panel-2:#F3EDE2; --panel-3:#E9E1D2;
+  --line:rgba(58,48,36,.15); --line-2:rgba(58,48,36,.28);
+  --ink:#26201A; --muted:#554C40; --faint:#665D50;
+
+  /* Signalfarben: Salbei = Handlung/Erfolg, Terrakotta = Störung, Ocker = Zeit/Geld, Schiefer = Wissen */
+  --accent:#4B6650; --accent-ink:#FBF7EF; --accent-soft:#E3E9DB;
+  --mint:#4B6650; --iris:#556A72; --amber:#8A5F2C; --koralle:#A34E33;
+  --ok:#4B6650; --ok-soft:#E3E9DB;
+  --warn:#8A5F2C; --warn-soft:#F4E9D5;
+  --bad:#A34E33; --bad-soft:#F5E1D7;
+  --info:#556A72; --info-soft:#E5EBEA;
+  --geld:#8A5F2C; --ruf:#556A72;
+
+  /* Paketfarben (immer mit Beschriftung): gedeckte Glasuren */
+  --p-arp:#8A6A2E; --p-icmp:#3E6E85; --p-tcp:#6A5E93; --p-udp:#4C7A5C;
+  --p-dhcp:#8A5570; --p-dns:#A2563A; --p-http:#4A6C96;
+
+  /* VLAN 1..8: gebrannte Töne, immer mit Nummer */
+  --vlan-1:#7A6B58; --vlan-2:#3E6E85; --vlan-3:#4C7A5C; --vlan-4:#8A6A2E;
+  --vlan-5:#8A5570; --vlan-6:#6A5E93; --vlan-7:#A2563A; --vlan-8:#4A7A76;
+
+  /* Subnetz-Zonen: sehr leichte Mineralschleier */
+  --zone-a:rgba(75,102,80,.09); --zone-b:rgba(85,106,114,.09); --zone-c:rgba(138,95,44,.09);
+  --zone-d:rgba(163,78,51,.08); --zone-e:rgba(106,94,147,.08);
+  --zone-a-linie:rgba(75,102,80,.45); --zone-b-linie:rgba(85,106,114,.45); --zone-c-linie:rgba(138,95,44,.45);
+  --zone-d-linie:rgba(163,78,51,.42); --zone-e-linie:rgba(106,94,147,.42);
+
+  /* Gerätetypen: ruhige Glasurfarben auf warmem Grund */
+  --typ-router:#4F6E7A; --typ-switch:#4B6650; --typ-firewall:#A2503A; --typ-host:#665E52;
+  --typ-server:#6F6380; --typ-nas:#4F6E78; --typ-internet:#3F6E6A;
+
+  /* Form: große weiche Radien, matte niedrige Schatten */
+  --radius:20px; --radius-s:14px; --radius-xs:10px;
+  --schatten:0 22px 50px -40px rgba(58,44,30,.50);
+  --glow:0 0 0 1px rgba(75,102,80,.20), 0 12px 28px -24px rgba(75,102,80,.30);
+
+  /* Schrift: humanistische Sans aus dem Projekt, Mono nur für Labels */
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+
+  /* Maße nur für dieses Theme (Literale gehören hierher, außen nur var()) */
+  --keramik-panel-pad:22px;
+  --keramik-gap:20px;
+  --keramik-tracking:-.018em;
+  --keramik-label-tracking:.16em;
+  --keramik-gewicht:600;
+  --keramik-karte:inset 0 1px 0 rgba(255,252,245,.85), 0 18px 40px -36px rgba(58,44,30,.45);
+  --keramik-knopf:inset 0 1px 0 rgba(255,252,245,.65), 0 10px 22px -22px rgba(58,44,30,.38);
+  --keramik-punkte:radial-gradient(circle at 1px 1px, var(--bg-raster) 1px, transparent 0);
+  --keramik-ring:conic-gradient(from -90deg, var(--accent) var(--anteil,0%), var(--line) 0);
+
+  /* Glas/Leisten in warmem Schimmer statt kühlem Schwarz */
+  --glas:rgba(250,246,238,.86); --leiste-bg:rgba(250,246,238,.94);
+}
+
+/* ---- Papier statt Farbnebel: nur das feine Punktraster bleibt ---- */
+html[data-theme="keramik"] body{
+  background-image:var(--keramik-punkte);
+  background-size:var(--raster) var(--raster);
+}
+
+/* ---- Kopfzeile: feine Haarlinie statt Akzent-Schimmer ---- */
+html[data-theme="keramik"] .kopf::after{background:var(--line-2);opacity:1}
+
+/* ---- Hero, Auftragsband, Feierabend: matte Fläche, keine Verläufe ---- */
+html[data-theme="keramik"] :is(.hb-hero,.ansicht .hb-auftrag,.hb-feierabend){background:var(--panel);background-image:none;box-shadow:var(--keramik-karte)}
+html[data-theme="keramik"] .lb-auftrag{background:var(--panel);background-image:none}
+html[data-theme="keramik"] :is(.hb-raster > .hb-kenndaten,.hb-raster > .hb-klasse,.hb-raster > .hb-lage,.hb-raster > .hb-signal,.lb-dock > .in-kopf){background-image:none}
+html[data-theme="keramik"] :is(.sp-einstieg-start,.auftrag-sandbox,.sp-auftrag){background:var(--panel-2);background-image:none}
+
+/* ---- Flächen: große Radien, matte Kante mit Lichtkante oben ---- */
+html[data-theme="keramik"] .hb-panel:not(.hb-lage){
+  padding:var(--keramik-panel-pad); border-radius:var(--radius); box-shadow:var(--keramik-karte);
+}
+html[data-theme="keramik"] .hb-lage{border-radius:var(--radius);box-shadow:var(--keramik-karte)}
+html[data-theme="keramik"] .hb-raster{gap:var(--keramik-gap)}
+html[data-theme="keramik"] .ansicht .hb-kachel{box-shadow:none;border-radius:var(--radius)}
+html[data-theme="keramik"] .lb-leinwand{background:var(--panel-3);border-radius:var(--radius)}
+
+/* ---- Knöpfe: weich, matt, ohne Leuchtspur ---- */
+html[data-theme="keramik"] .knopf{border-radius:var(--radius-s);box-shadow:var(--keramik-knopf)}
+html[data-theme="keramik"] .knopf.primaer, html[data-theme="keramik"] .knopf.primaer::after{box-shadow:none;background:var(--accent)}
+html[data-theme="keramik"] .dock-knopf.an{background:var(--accent-soft);color:var(--accent)}
+
+/* ---- Legende und Ring: matte Tafel, ruhiger Fortschritt ---- */
+html[data-theme="keramik"] .lb-legende{
+  background:var(--panel-2); box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+html[data-theme="keramik"] .hb-ring{background:var(--keramik-ring)}
+
+/* ---- Typografie: weichere Display-Spannung, ruhigere Labels ---- */
+html[data-theme="keramik"] :is(.hb-kopf h2,.hb-hero h1,.ansicht .hb-auftrag h3,.hb-feierabend h2,.lb-auftrag :is(h1,h2),.lb-auftrag .am-titel strong){
+  font-weight:var(--keramik-gewicht); letter-spacing:var(--keramik-tracking);
+}
+html[data-theme="keramik"] :is(.hb-panel-titel,.hb-kicker,.hb-kopf::before,.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.hb-serie,.hb-lage-titel){
+  letter-spacing:var(--keramik-label-tracking);
+}

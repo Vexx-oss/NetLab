@@ -31,7 +31,7 @@
   padding:8px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein var(--dauer) ease-out}
 /* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
    deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.wenig-text .zone-schild, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .lb-svg.klein .zone-schild, .lb-s-zonen .zone-schild, .lb-s-zonen .zone-text, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
 .pa-fach.zieht{opacity:.35; pointer-events:none}
 @keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
 .pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:0 0 4px 4px}
@@ -197,7 +197,7 @@
 .ps-oben path, .pd-oben{fill:var(--ok)}
 .ps-unten path, .pd-unten, .splitter{fill:var(--bad)}
 .ps-aus rect, .pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
-.kabel-port{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
+.kabel-port{display:none; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
    /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
 .ger-ip.kopierbar{cursor:pointer; pointer-events:auto}
 .ger-ip.kopierbar:hover, .ger-ip.kopierbar:focus-visible{fill:var(--accent); text-decoration:underline}
@@ -418,7 +418,13 @@
 .lb-svg .ger-name{font-weight:700; letter-spacing:.08em; fill:var(--ink)}
 .lb-svg .ger-ip{font-size:var(--fs-2); fill:var(--muted)}
 /* Stecker: Gehäuse in Leiterfarbe (--kf), Kontakt als dunkler Schlitz */
-.kabel .kabel-stecker .stk-gehaeuse{fill:var(--kf); stroke:var(--bg); stroke-width:1}
-.kabel .kabel-stecker .stk-kontakt{stroke:var(--bg); opacity:.9}
+.kabel .kabel-stecker .stk-gehaeuse{fill:var(--panel-3); stroke:var(--line-2); stroke-width:1.2}
+.kabel .kabel-stecker .stk-kontakt{stroke:var(--line-2); opacity:1}
 /* Status-Punkte kompakt: skalieren um den eigenen Mittelpunkt (wie juice.css an .ps-oben path) */
-.ps{transform-box:fill-box; transform-origin:center; transform:scale(.88)}
+.ps{transform-box:fill-box; transform-origin:center; transform:scale(.88); opacity:.82}
+
+
+/* Portnamen erscheinen nur beim Überfahren des Kabels (Inspektor listet sie ohnehin);
+   Zonen sind Hintergrund-Wäsche, keine Kästchen und keine Labels – so bleibt die Fläche ruhig. */
+.kabel:hover .kabel-port, .kabel.gewaehlt .kabel-port{display:inline}
+.lb-s-zonen .zone-flaeche{stroke:none}
