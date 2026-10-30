@@ -96,7 +96,7 @@ UI.spiel = (() => {
     if (!inst || !Spiel.instanz(inst.iid)) {
       /* gerade abgenommen (Funktionsprobe läuft): Titel bleibt stehen, mit Haken */
       const f = S.fertig;
-      el.append(f ? h("div", {class: "am-zeile am-fertig"}, h("span", {class: "sp-kunde-sym", style: {"--k": `var(${f.farbe || "--accent"})`}}, f.symbol || "✉"),
+      el.append(f ? h("div", {class: "am-zeile am-fertig"}, marke(f.name || f.titel, f.farbe),
           h("div", {class: "am-titel"}, h("strong", {}, "✓ " + f.titel), h("span", {class: "am-kunde"}, "abgenommen – Funktionsprobe")))
         : h("div", {class: "lb-auftrag-standard"}, h("strong", {}, "Kein offenes Ticket")));
       return;
@@ -109,7 +109,7 @@ UI.spiel = (() => {
     const naechste = Spiel.naechsteHilfe(inst);
     const abnahme = h("button", {type: "button", class: "knopf primaer sp-abnahme" + (alle ? " bereit" : ""), title: "Abnahme anfordern: Der Kunde prüft selbst nach.", onclick: abnahmeAnfordern}, "✓ Abnahme");
     const zeile = h("div", {class: "am-zeile"},
-      h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}, title: k.name}, k.symbol || "✉"),
+      marke(k.name, k.farbe),
       h("div", {class: "am-titel"}, h("strong", {}, def.titel), h("span", {class: "am-kunde"}, inst.raetsel ? [UI.symbol("raetsel", 14), ` Tagesrätsel #${inst.raetsel.nr} · ${Spiel.NIVEAU_NAME[inst.raetsel.niveau] || inst.raetsel.niveau}`] : k.name)),
       h("span", {class: "am-ziele" + (alle ? " fertig" : ""), title: live ? "Erfüllte Ziele – Liste in der Mappe" : "AP2: Ziele prüfst du selbst"},
         live ? `Ziele ${erfuellt}/${n}` : `${n} ${n === 1 ? "Ziel" : "Ziele"}`),
@@ -172,7 +172,7 @@ UI.spiel = (() => {
       if (kurz) { let z = 0, i = 0; for (const t of text.split(/(\s+)/)) { if (t.trim()) z++; if (z > 60) break; i += t.length; } sichtbar = text.slice(0, i).trimEnd() + " …"; }
       const ap = k.ansprechpartner || {};
       inhalt = h("div", {class: "am-brief"},
-        h("div", {class: "am-absender"}, h("span", {class: "sp-kunde-sym", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
+        h("div", {class: "am-absender"}, marke(k.name, k.farbe),
           h("span", {}, h("b", {}, ap.name || k.name), ap.rolle ? `, ${ap.rolle}` : "", ` · ${k.name}`)),
         klassenraumZeile(),
         h("div", {class: "am-text"}, absaetze(sichtbar)),
@@ -325,15 +325,23 @@ UI.spiel = (() => {
     S.liveTimer = setTimeout(liveJetzt, 400);
   }
 
-  /* ---------- Hilfeleiter ---------- */
+  /* ---------- Hilfeleiter (Bento 2.5, Vertrag § 3.1: Diagnose-Assistent statt Werbeplakat) ----------
+     Kopf: Mikrolabel + kompakte Stufenleiste (Zustände frei/gesperrt/an wie bisher). Inhalt als ruhige
+     Bento-Inseln: „Nächste Diagnose" als eine hervorgehobene Zeile, Werkzeuge als Chips, Simulations-
+     hinweis als leise Meta-Zeile, Stufe 3 als Zitatkarte. Bewusst KEINE `.sp-leise`-Klasse:
+     editor.css:357 setzt `.lb-auftrag .sp-leise` auf 28 px/800 (belegter Befund „44-px-Grünslogan",
+     gemessen am 30.10.2026) – der Hilfeleiter nutzt eigene, leise Klassen.
+     Fuß: Label und Funktion der nächsten Sprosse bleiben; „Senior fragen · frei" ist der Hauptknopf. */
   function hilfePanel(inst, def, naechste){
     const stufe = inst.hilfeStufe || 0;
     const zeigen = S.hilfeAnsicht ?? stufe;
-    const leiter = h("ol", {class: "sp-leiter"}, Spiel.HILFE.slice(1).map(x => h("li", {class: (x.stufe <= stufe ? "frei" : "") + (x.stufe === zeigen ? " an" : "")},
+    const leiter = h("ol", {class: "sp-leiter", "aria-label": "Hilfestufen"}, Spiel.HILFE.slice(1).map(x => h("li", {class: (x.stufe <= stufe ? "frei" : "") + (x.stufe === zeigen ? " an" : "")},
       h("button", {type: "button", disabled: x.stufe > stufe, title: x.name + (x.kosten ? ` (−${x.kosten === 0.5 ? "½" : x.kosten} ★)` : " (frei)"),
-        onclick: () => { S.hilfeAnsicht = x.stufe; UI.labor.auftragNeu(); }}, x.stufe), h("span", {}, x.name))));
+        "aria-label": `Stufe ${x.stufe}: ${x.name}`, onclick: () => { S.hilfeAnsicht = x.stufe; UI.labor.auftragNeu(); }}, x.stufe),
+      h("span", {}, x.name))));
     const inhalt = h("div", {class: "sp-hilfe-inhalt"});
-    if (zeigen === 0) inhalt.append(h("p", {}, "Die Hilfe beginnt kostenlos: Checkliste, Werkzeugtipp, eine Frage vom Senior. Erst danach kostet sie Sterne – und selbst die vorgeführte Lösung ist kein Scheitern."));
+    if (zeigen === 0) inhalt.append(h("div", {class: "sp-hilfe-block"},
+      h("p", {class: "sp-hilfe-lead"}, "Die Hilfe beginnt kostenlos: Checkliste, Werkzeugtipp, eine Frage vom Senior. Erst danach kostet sie Sterne – und selbst die vorgeführte Lösung ist kein Scheitern.")));
     else inhalt.append(hilfeInhalt(inst, Spiel.hilfeInhalt(inst, zeigen)));
     const knopf = naechste ? h("button", {type: "button", class: "knopf" + (naechste.kosten ? "" : " primaer"), onclick: () => {
         const r = Spiel.hilfe(inst); S.hilfeAnsicht = r.stufe;
@@ -341,25 +349,40 @@ UI.spiel = (() => {
         if (r.stufe === 4 && r.bereich?.length) UI.labor.hervorheben(r.bereich, 6000);
         if (r.stufe === 6) S.demo = {i: 0, schritte: r.schritte};
         UI.labor.auftragNeu();
-      }}, naechste.knopf, naechste.kosten ? h("small", {}, ` −${naechste.kosten === 0.5 ? "½" : naechste.kosten} ★`) : h("small", {}, " frei")) : null;
-    return h("section", {class: "sp-hilfe"}, h("div", {class: "sp-hilfe-kopf"}, h("strong", {}, "Hilfeleiter"), leiter), inhalt, h("div", {class: "sp-hilfe-fuss"}, knopf,
-      h("button", {type: "button", class: "knopf geist", onclick: () => { S.hilfeOffen = false; UI.labor.auftragNeu(); }}, "Schließen")));
+      }}, naechste.knopf, h("span", {class: "sp-hilfe-preis"}, naechste.kosten ? ` · −${naechste.kosten === 0.5 ? "½" : naechste.kosten} ★` : " · frei")) : null;
+    return h("section", {class: "sp-hilfe"},
+      h("div", {class: "sp-hilfe-kopf"},
+        h("div", {class: "sp-hilfe-titel"},
+          h("span", {class: "bn-kicker"}, "Hilfeleiter"),
+          h("strong", {class: "sp-hilfe-name"}, zeigen === 0 ? "Diagnose-Assistent" : Spiel.HILFE[zeigen].name)),
+        leiter),
+      inhalt,
+      h("div", {class: "sp-hilfe-fuss"}, knopf,
+        h("button", {type: "button", class: "knopf geist", onclick: () => { S.hilfeOffen = false; UI.labor.auftragNeu(); }}, "Schließen")));
   }
   function hilfeInhalt(inst, r){
     switch (r.stufe) {
-      case 1: return h("div", {}, h("p", {class: "sp-leise"}, "Von unten nach oben – hak ab, was du geprüft hast:"),
+      case 1: return h("div", {class: "sp-hilfe-block"},
+        h("p", {class: "sp-hilfe-meta"}, "Von unten nach oben – hak ab, was du geprüft hast:"),
         h("ul", {class: "sp-check"}, r.leiter.map(s => h("li", {}, h("label", {},
           h("input", {type: "checkbox", checked: s.erledigt, onchange: e => Spiel.leiterHaken(inst, s.id, e.target.checked)}),
-          h("span", {}, h("b", {}, s.titel + ": "), s.frage, h("small", {}, " Werkzeug: " + s.werkzeug)))))));
-      case 2: return h("div", {}, r.naechste ? h("p", {class: "sp-naechste"}, h("b", {}, "Nächste Diagnose: "), r.naechste) : null,
-        ...r.werkzeuge.map(w => h("p", {}, UI.symbol("werkzeug", 15), " ", w)), h("p", {class: "sp-leise"}, r.simulation));
-      case 3: return h("div", {class: "sp-senior"}, h("span", {class: "sp-senior-sym"}, UI.symbol("senior", 28)), h("div", {}, ...r.fragen.map(f => h("p", {}, "„" + f + "“")), h("small", {}, "— der Senior")));
-      case 4: return h("div", {}, h("p", {}, "Schau dir diese Stelle genauer an: ", h("b", {}, r.namen.join(", ") || "—")),
+          h("span", {}, h("b", {}, s.titel + ": "), s.frage, h("span", {class: "sp-check-werkzeug"}, "Werkzeug: " + s.werkzeug)))))));
+      case 2: return h("div", {class: "sp-hilfe-block"},
+        h("div", {class: "sp-naechste"},
+          h("span", {class: "sp-naechste-label"}, "Nächste Diagnose"),
+          h("p", {}, r.naechste || "Für diesen Auftrag gibt es keine Rechner-Diagnose – die Fehlersuche-Leiter (Stufe 1) führt weiter.")),
+        h("ul", {class: "sp-hilfe-werkzeuge"}, r.werkzeuge.map(w => h("li", {}, UI.symbol("werkzeug", 14), h("span", {}, w)))),
+        h("p", {class: "sp-hilfe-meta"}, UI.symbol("sim", 14), h("span", {}, r.simulation)));
+      case 3: return h("div", {class: "sp-senior"},
+        h("span", {class: "sp-hilfe-marke", "aria-hidden": "true"}, UI.symbol("senior", 20)),
+        h("div", {class: "sp-senior-text"}, ...r.fragen.map(f => h("p", {}, "„" + f + "“")), h("span", {class: "sp-senior-quelle"}, "— der Senior")));
+      case 4: return h("div", {class: "sp-hilfe-block"},
+        h("p", {}, "Schau dir diese Stelle genauer an: ", h("b", {}, r.namen.join(", ") || "—")),
         h("button", {type: "button", class: "knopf klein", onclick: () => UI.labor.hervorheben(r.bereich, 5000)}, "Noch einmal zeigen"));
-      case 5: return h("div", {}, ...r.konkret.map(k => h("p", {}, UI.symbol("idee", 15), " ", k)));
+      case 5: return h("ul", {class: "sp-hilfe-hinweise"}, r.konkret.map(k => h("li", {}, UI.symbol("idee", 14), h("span", {}, k))));
       case 6: return demoAnsicht(inst, r);
     }
-    return h("p", {}, r.name);
+    return h("p", {class: "sp-hilfe-lead"}, r.name);
   }
   /* Lösung vorführen: Schritt für Schritt sichtbar, jeder Schritt über den Verlauf (rückgängig machbar) */
   function demoAnsicht(inst, r){
@@ -373,7 +396,9 @@ UI.spiel = (() => {
     const weiter = d.i < alle.length
       ? h("button", {type: "button", class: "knopf primaer", onclick: () => demoSchritt(inst)}, `Schritt ${d.i + 1} ausführen ▸`)
       : h("p", {class: "sp-ok"}, "✓ Alle Schritte ausgeführt. Jetzt „Abnahme anfordern“. Dieses Thema kommt als Wiederholung wieder – dann löst du es selbst.");
-    return h("div", {}, h("p", {class: "sp-leise"}, "Sieh zu, was passiert – jeder Schritt ist ein echter Konfigurationsschritt (Strg+Z macht ihn rückgängig)."), liste, weiter);
+    return h("div", {class: "sp-hilfe-block"},
+      h("p", {class: "sp-hilfe-meta"}, "Sieh zu, was passiert – jeder Schritt ist ein echter Konfigurationsschritt (Strg+Z macht ihn rückgängig)."),
+      liste, weiter);
   }
   function demoSchritt(inst){
     const d = S.demo; if (!d) return;
@@ -416,7 +441,7 @@ UI.spiel = (() => {
     if (!form || form.art !== "fernwartung") aufdecken();
     UI.toast.zu?.("ziele");                                /* „Alle Ziele erfüllt – jetzt die Abnahme“ ist erledigt */
     const kd = kunde(erg.inst.kunde || erg.def.kunde);
-    S.fertig = {titel: erg.def.titel, symbol: kd.symbol, farbe: kd.farbe};
+    S.fertig = {titel: erg.def.titel, name: kd.name, symbol: kd.symbol, farbe: kd.farbe};
     UI.labor.werkzeug("auswahl");
     UI.labor.auftragNeu();
     erg.weg = weg;
@@ -535,7 +560,7 @@ UI.spiel = (() => {
       : erg.naechstes ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); oeffnen(erg.naechstes); }}, "Nächstes Ticket ▸") : null;
     const zu = overlay(h("div", {class: "sp-ergebnis"},
       h("section", {class: "sp-block sp-block-lohn"},
-        h("div", {class: "sp-erg-kopf"}, h("span", {class: "sp-kunde-sym gross", style: {"--k": `var(${k.farbe || "--accent"})`}}, k.symbol || "✉"),
+        h("div", {class: "sp-erg-kopf"}, marke(k.name, k.farbe, {gross: true}),
           h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"),
             kurz ? h("p", {class: "sp-leise"}, kurz) : null)),
         h("div", {class: "sp-lohn-reihe"}, sternEl,
@@ -613,22 +638,80 @@ UI.spiel = (() => {
     requestAnimationFrame(f);
   }
 
-  /* ---------- Postfach ---------- */
+  /* ---------- Postfach (Bento 2.5, Vertrag § 3.1: Posteingang eines IT-Dienstleisters) ----------
+     Kopf: Mikrolabel, Titel, Kontextsatz, rechts eine Zeile echter Kennzahlen (offene Aufträge,
+     ungelesen, Bereitschaft fällig, Stufe – alle aus Spiel.*). Hauptbento zweispaltig: Liste
+     (400–440 px) und Leser; unter 900 px öffnet die Zeile den vorhandenen Blatt-Leser von unten.
+     Kunden-Emoji aus DATEN wird durch das Monogramm ersetzt (UI.bento.monogramm; fehlt der Baustein,
+     entsteht dieselbe Marke aus den Initialen – so bleibt der UI-Prüfstand ohne bento.js lauffähig). */
+  function initialenVon(name){
+    const stumm = /^(der|die|das|und|&)$/i;
+    const worte = String(name || "").replace(/[^\p{L}\p{N} .&/-]/gu, " ").split(/[\s/&.-]+/).filter(Boolean);
+    const gut = worte.filter(w => !stumm.test(w));
+    const quelle = gut.length ? gut : worte;
+    return (quelle.slice(0, 2).map(w => w[0]).join("") || "?").toUpperCase();
+  }
+  function marke(name, farbe, {gross = false, klein = false} = {}){
+    if (UI.bento && typeof UI.bento.monogramm === "function") return UI.bento.monogramm(name, {farbe: farbe || "--accent", gross, klein});
+    const el = h("span", {class: "bn-marke" + (gross ? " gross" : klein ? " klein" : ""), style: {"--bn-f": `var(${farbe || "--accent"})`}, "aria-hidden": "true"});
+    el.textContent = initialenVon(name);
+    return el;
+  }
+  function seniorMarke(gross){
+    return h("span", {class: "bn-marke" + (gross ? " gross" : ""), style: {"--bn-f": "var(--accent)"}, "aria-hidden": "true"}, UI.symbol("senior", gross ? 24 : 18));
+  }
+  /* Auftragsform als kleine Marke (Symbol + Wort), E1 */
+  function formChip(def){
+    const form = Spiel.formVon(def), F = Spiel.FORMEN[form] || Spiel.FORMEN.stoerung;
+    return h("span", {class: "sp-chip form form-" + form, title: F.text}, F.titel);
+  }
+  /* Zustand einer Auftragszeile – nur echte Werte der Instanz (neu/angerissen/eilig/klingelt) */
+  function mailZustand(inst, frist, klingelt, an){
+    if (klingelt) return h("span", {class: "sp-chip klingelt", title: "Der Kunde ist am Telefon"}, UI.symbol("telefon", 13), " klingelt");
+    if (frist != null && frist < 15) return h("span", {class: "sp-chip eilig", title: frist <= 0 ? "Die Frist ist abgelaufen" : `Noch ${frist} min Zeit`}, frist <= 0 ? "überfällig" : "eilig");
+    if (!an && !inst.gelesen) return h("span", {class: "sp-chip neu"}, "neu");
+    if (inst.geoeffnet) return h("span", {class: "sp-chip angerissen"}, "angerissen");
+    return null;
+  }
   function postfachAnsicht(c){
     const st = Spiel.st;
     const liste = Spiel.postfach(), post = Spiel.post.liste();
     const gibt = id => liste.some(i => i.iid === id) || post.some(n => n.id === id);
     const aktiv = S.postfachWahl && gibt(S.postfachWahl) ? S.postfachWahl : (liste[0] ? liste[0].iid : post[0] ? post[0].id : null);
     S.postfachWahl = aktiv;
+    /* Punkt 5 (Theme-Prüfung): KPI „ungelesen" erst zählen, nachdem der automatisch gewählte
+       Eintrag als gelesen verbucht ist – sonst zeigt der Kopf eine veraltete Zahl, bis die
+       Ansicht neu aufgebaut wird. `leserZeigen`/`postLesen` erkennen den Stand danach und
+       verbuchen nicht doppelt. */
+    if (aktiv && !String(aktiv).startsWith("post-")) {
+      const a = Spiel.instanz(aktiv);
+      if (a && !a.gelesen) { Spiel.alsGelesen(a.iid); status(); }
+    } else if (aktiv) {
+      const a = Spiel.post.von(aktiv);
+      if (a && !a.gelesen) { Spiel.post.gelesen(a.id); status(); }
+    }
     const leser = h("div", {class: "sp-leser"});
     const waehlen = id => { S.postfachWahl = id; postfachAnsicht(c); if (schmal()) blattZeigen(c, id); };
     const karten = liste.map(inst => mailKarte(inst, inst.iid === aktiv, () => waehlen(inst.iid)));
     if (post.length) karten.push(h("div", {class: "sp-pf-trenner", role: "presentation"}, "Nachrichten"),
       ...post.map(n => postKarte(n, n.id === aktiv, () => waehlen(n.id))));
+    let bereitschaft = 0;
+    try { bereitschaft = Spiel.tag && Spiel.tag.heute ? Spiel.tag.heute().faellig.length : 0; } catch (e) { bereitschaft = 0; }
+    const ungelesen = Spiel.ungelesen();
+    const kontext = liste.length === Spiel.POSTFACH_WAHL && st.erledigt.length === 1
+      ? "Zwei Angebote zur Wahl – Lohn, Zeit und Thema unterscheiden sich."
+      : liste.length ? "Angebote, Aufträge und Nachrichten deiner Kunden. Was zuerst dran ist, steht oben."
+      : "Dein Posteingang ist leer.";
     const kopf = h("header", {class: "sp-pf-kopf"},
-      h("div", {}, h("h2", {}, "Postfach"), h("p", {class: "sp-leise"}, liste.length === Spiel.POSTFACH_WAHL && st.erledigt.length === 1
-        ? "Wähle deinen nächsten Auftrag – Lohn, Zeit und Thema unterscheiden sich."
-        : liste.length ? `${liste.length} ${liste.length === 1 ? "Auftrag wartet" : "Aufträge warten"} · Stufe ${st.stufe} · ${st.erledigt.length} erledigt` : "Alles erledigt.")),
+      h("div", {class: "sp-pf-titel"},
+        h("span", {class: "bn-kicker"}, "Postfach · Auftragseingang"),
+        h("h2", {}, "Postfach"),
+        h("p", {class: "sp-pf-kontext"}, kontext)),
+      h("div", {class: "sp-pf-kennzahlen"},
+        h("span", {class: "sp-kennzahl", title: "Offene Aufträge im Postfach"}, h("b", {}, String(liste.length)), h("span", {}, liste.length === 1 ? "offener Auftrag" : "offene Aufträge")),
+        h("span", {class: "sp-kennzahl" + (ungelesen ? " neu" : ""), title: "Ungelesene Aufträge und Nachrichten"}, h("b", {}, String(ungelesen)), h("span", {}, "ungelesen")),
+        h("span", {class: "sp-kennzahl" + (bereitschaft ? " neu" : ""), title: "Fällige Wiederholungen für den Bereitschaftsdienst"}, h("b", {}, String(bereitschaft)), h("span", {}, "Bereitschaft fällig")),
+        h("span", {class: "sp-kennzahl", title: "Karriere-Stufe"}, h("b", {}, String(st.stufe)), h("span", {}, "Stufe"))),
       h("div", {class: "sp-pf-aktionen"},
         UI.tag?.karte ? UI.tag.karte() : null,
         h("button", {type: "button", class: "knopf", onclick: () => { UI.sandbox.laden(); UI.app.ansicht("labor"); }, title: "Ohne Auftrag frei ausprobieren"}, UI.symbol("test", 16), " Freies Labor")));
@@ -638,6 +721,7 @@ UI.spiel = (() => {
     c.replaceChildren(h("div", {class: "sp-postfach"}, kopf, h("div", {class: "sp-pf-teile"}, links, leser)));
     if (aktiv && String(aktiv).startsWith("post-")) postLesen(leser, Spiel.post.von(aktiv), c);
     else if (aktiv) leserZeigen(leser, Spiel.instanz(aktiv));
+    else leser.append(h("div", {class: "sp-leser-leer"}, h("p", {}, "Wähle links einen Auftrag oder eine Nachricht.")));
   }
   /* Postfach schmal (< 900 px, Design § 20 F1): Der Leser hat neben der Liste keinen Platz – die Karte öffnet ihn
      als Blatt von unten, mit „Annehmen“. Esc, Klick daneben oder der Griff schließen es. */
@@ -651,19 +735,23 @@ UI.spiel = (() => {
     zu = overlay(h("div", {class: "sp-blatt"},
       h("button", {type: "button", class: "sp-blatt-griff", title: "Zurück zur Liste", "aria-label": "Zurück zur Liste", onclick: schliessen}), el), "blatt", {aussenZu: true});
   }
-  /* Kundenpost: Nachricht ohne Auftrag (Lob vom Kunden oder Notiz vom Senior) */
+  /* Kundenpost: Nachricht ohne Auftrag (Lob vom Kunden oder Notiz vom Senior) – dieselbe ruhige
+     Zeilenform wie ein Auftrag, ohne Betreff: Absender, eine Vorschauzeile, eine Marke. */
   function postAbsender(n){
+    if (n.art === "senior") return {name: "Der Senior", person: "Notiz", farbe: "--accent", senior: true};
     const k = kunde(n.kunde);
-    return n.art === "senior" ? {sym: UI.symbol("senior", 20), name: "Der Senior", zusatz: "Notiz", farbe: "--accent"}
-      : {sym: k.symbol || "✉", name: k.ansprechpartner?.name || k.name, zusatz: k.name, farbe: k.farbe || "--accent"};
+    return {name: k.name, person: [k.ansprechpartner?.name, k.ansprechpartner?.rolle].filter(Boolean).join(", "), farbe: k.farbe || "--accent", senior: false};
   }
   function postKarte(n, an, wahl){
-    const a = postAbsender(n), text = String(n.text).replace(/\s+/g, " ");
-    return h("button", {type: "button", role: "listitem", class: "sp-mail sp-post" + (an ? " an" : "") + (n.gelesen ? "" : " neu"), style: {"--k": `var(${a.farbe})`}, onclick: wahl},
-      h("span", {class: "sp-kunde-sym"}, a.sym),
+    const a = postAbsender(n), text = String(n.text).replace(/\s+/g, " ").trim();
+    const roh = !an && !n.gelesen;
+    return h("button", {type: "button", role: "listitem", class: "sp-mail sp-post" + (an ? " an" : "") + (roh ? " neu" : ""), style: {"--k": `var(${a.farbe})`}, onclick: wahl},
+      a.senior ? seniorMarke(false) : marke(a.name, a.farbe),
       h("span", {class: "sp-mail-text"},
-        h("span", {class: "sp-mail-von"}, `${a.name} · ${a.zusatz}`),
-        h("span", {class: "sp-mail-vorschau"}, text.slice(0, 110) + (text.length > 110 ? " …" : "")),
+        h("span", {class: "sp-mail-kopf"},
+          h("span", {class: "sp-mail-name"}, a.name),
+          h("span", {class: "sp-mail-person"}, a.person)),
+        h("span", {class: "sp-mail-vorschau"}, text),
         h("span", {class: "sp-chips"}, h("span", {class: "sp-chip"}, n.art === "senior" ? "Notiz" : "Nachricht"))));
   }
   function postLesen(el, n, c, schliessen){
@@ -671,65 +759,86 @@ UI.spiel = (() => {
     if (!n.gelesen) { Spiel.post.gelesen(n.id); status(); }
     const a = postAbsender(n);
     el.replaceChildren(h("article", {class: "sp-brief", style: {"--k": `var(${a.farbe})`}},
-      h("header", {}, h("span", {class: "sp-kunde-sym gross"}, a.sym),
-        h("div", {}, h("span", {class: "sp-leise"}, a.zusatz), h("h3", {}, a.name))),
+      h("header", {class: "sp-brief-kopf"},
+        a.senior ? seniorMarke(true) : marke(a.name, a.farbe, {gross: true}),
+        h("div", {class: "sp-brief-absender"},
+          h("span", {class: "sp-brief-firma"}, a.name),
+          h("span", {class: "sp-brief-person"}, a.person))),
+      h("h2", {class: "sp-brief-titel"}, a.senior ? "Notiz vom Senior" : "Nachricht vom Kunden"),
       h("div", {class: "sp-brief-text"}, absaetze(n.text)),
       h("div", {class: "sp-knoepfe"},
         n.art === "senior" ? h("button", {type: "button", class: "knopf", onclick: () => { schliessen?.(); UI.app.ansicht("kunden"); }}, "Zu den Kunden") : null,
-        h("button", {type: "button", class: "knopf geist", onclick: () => { schliessen?.(); Spiel.post.ablegen(n.id); S.postfachWahl = null; postfachAnsicht(c); }}, "Ablegen"))));
+        h("button", {type: "button", class: "knopf geist", onclick: () => { schliessen?.(); Spiel.post.ablegen(n.id); S.postfachWahl = null; postfachAnsicht(c); }}, "Ablegen"),
+        schliessen ? h("button", {type: "button", class: "knopf geist", onclick: () => schliessen()}, "Später") : null)));
   }
   function mailKarte(inst, an, wahl){
-    const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde);
-    const vorschau = String(def.briefing || "").replace(/\s+/g, " ").slice(0, 110);
+    const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde), ap = k.ansprechpartner || {};
     const frist = inst.frist ? Math.round((inst.frist - jetzt()) / 60000) : null;
     const klingelt = !!inst.klingelt && !inst.geoeffnet;
-    return h("button", {type: "button", role: "listitem", class: "sp-mail" + (an ? " an" : "") + (inst.gelesen ? "" : " neu") + (frist != null && frist < 15 ? " eilig" : "") + (klingelt ? " klingelt" : ""),
+    const roh = !an && !inst.gelesen;
+    return h("button", {type: "button", role: "listitem", class: "sp-mail" + (an ? " an" : "") + (roh ? " neu" : "") + (frist != null && frist < 15 ? " eilig" : "") + (klingelt ? " klingelt" : ""),
       style: {"--k": `var(${k.farbe || "--accent"})`}, onclick: wahl},
-      h("span", {class: "sp-kunde-sym"}, k.symbol || "✉"),
+      marke(k.name, k.farbe),
       h("span", {class: "sp-mail-text"},
-        h("span", {class: "sp-mail-von"}, `${k.ansprechpartner?.name || k.name} · ${k.name}`),
-        h("b", {}, def.titel),
-        h("span", {class: "sp-mail-vorschau"}, vorschau + (String(def.briefing || "").length > 110 ? " …" : "")),
-        h("span", {class: "sp-chips"},
-          klingelt ? h("span", {class: "sp-chip klingelt", title: "Der Kunde ist am Telefon"}, h("i", {class: "sp-klingel", "aria-hidden": "true"}, "☎"), " klingelt") : null,
-          formChip(def),
-          h("span", {class: "sp-chip niv-" + (Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe), title: "Risiko: " + Spiel.risikoVon(def).warum},
-            `${NIV[Spiel.niveauFuer ? Spiel.niveauFuer(def) : def.stufe] || def.stufe} · Risiko ${Spiel.risikoVon(def).text}`),
+        h("span", {class: "sp-mail-kopf"},
+          h("span", {class: "sp-mail-name"}, k.name),
+          h("span", {class: "sp-mail-person"}, [ap.name, ap.rolle].filter(Boolean).join(", "))),
+        h("b", {class: "sp-mail-betreff"}, def.titel),
+        h("span", {class: "sp-mail-vorschau"}, String(def.briefing || "").replace(/\s+/g, " ")),
+        h("span", {class: "sp-chips"}, formChip(def),
           h("span", {class: "sp-chip"}, `~${Spiel.minuten(def)} min`),
           h("span", {class: "sp-chip geld"}, fmtEuro((def.lohn || {}).euro || 0)),
-          (def.skills || [])[0] ? h("span", {class: "sp-chip uebt", title: "Das übst du dabei"}, "Übt: " + Spiel.skill(def.skills[0]).name) : null,
-          inst.quelle === "wartung" ? h("span", {class: "sp-chip wartung"}, "Wartung") : null,
-          inst.quelle === "wiederholung" ? h("span", {class: "sp-chip wdh"}, "Wiederholung") : null,
-          inst.quelle === "folge" ? h("span", {class: "sp-chip folge", title: "Ein Provisorium von neulich hat nicht gehalten"}, "↩ Folgeauftrag") : null,
-          inst.flow === "geruest" ? h("span", {class: "sp-chip flow-geruest", title: "Die letzten zwei Aufträge dieser Fertigkeit waren zäh: diesmal mit Tipp, Haken und Warnungen"}, UI.symbol("trace", 14), " mit Gerüst") : null,
-          inst.flow === "verwicklung" ? h("span", {class: "sp-chip flow-verwicklung", title: "Drei Glanzergebnisse in Folge: diesmal kniffliger, ohne Warnungen"}, UI.symbol("serie", 14), " kniffliger") : null,
-          Spiel.varianten.fuer(def) ? h("span", {class: "sp-chip wahl", title: "Du entscheidest: Provisorium (schnell, 60 % Lohn, kommt wieder) oder sauber (gesichert und dokumentiert, 120 %)"}, UI.symbol("provisorium", 14), "/", UI.symbol("werkzeug", 14), " Wahl") : null,
-
-          frist != null ? h("span", {class: "sp-chip frist"}, frist > 0 ? `⏱ ${frist} min` : "⏱ überfällig") : null)));
+          mailZustand(inst, frist, klingelt, an))));
   }
-  /* Auftragsform als kleine Marke (Symbol + Wort), E1 */
-  function formChip(def){
-    const form = Spiel.formVon(def), F = Spiel.FORMEN[form] || Spiel.FORMEN.stoerung;
-    return h("span", {class: "sp-chip form form-" + form, title: F.text}, F.titel);
+  /* Kundenkontext im Brief (Bento 2.5 § 3.1): füllt die Fläche unter den Datenkacheln mit echten
+     Werten aus Spiel.* und DATEN – Branche, Vertragsstand, letzter Auftrag, „Kunde seit“. Nichts
+     davon ist erfunden; fehlt ein Wert, fällt die Zeile weg. */
+  function kundenkontext(k){
+    const roh = (DATEN.kunden || {})[k.id] || {};
+    const zeilen = [];
+    if (roh.branche) zeilen.push(["Branche", roh.branche]);
+    const hat = !!(Spiel.karriere && typeof Spiel.karriere.hatVertrag === "function" && Spiel.karriere.hatVertrag(k.id));
+    const eph = +((roh.vertrag || {}).euroProStunde || 0);
+    zeilen.push(["Vertrag", hat ? `Wartungsvertrag${eph ? " · " + fmtEuro(eph) + "/h" : ""}` : "kein Wartungsvertrag"]);
+    const stk = (Spiel.st.kunden || {})[k.id] || {};
+    if (stk.seit) zeilen.push(["Kunde seit", datumDe(stk.seit)]);
+    let letzte = null;
+    for (const e of (Spiel.st.erledigt || [])) if (e && e.kunde === k.id) letzte = e;
+    if (letzte) {
+      let titel = "Auftrag";
+      try { const d = Spiel.ticketDef ? Spiel.ticketDef(letzte.id) : null; if (d && d.titel) titel = d.titel; } catch (e) { /* Titel bleibt allgemein */ }
+      zeilen.push(["Zuletzt", `${titel} · ${sterneText(+letzte.sterne || 0)}${letzte.tag ? " · " + datumDe(letzte.tag) : ""}`]);
+    } else zeilen.push(["Zuletzt", "noch kein Auftrag bei diesem Kunden"]);
+    return h("div", {class: "sp-brief-kundenkontext"},
+      h("strong", {}, "Kundenkontext"),
+      ...zeilen.map(([label, wert]) => h("p", {class: "sp-brief-kontextzeile"}, h("small", {}, label), h("span", {}, wert))));
   }
   function leserZeigen(el, inst, schliessen){
     if (!inst) return;
-    const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde);
+    const def = Spiel.defVon(inst), k = kunde(inst.kunde || def.kunde), ap = k.ansprechpartner || {};
     if (!inst.gelesen) { Spiel.alsGelesen(inst.iid); status(); }
     const angefangen = !!inst.geoeffnet;
+    const form = Spiel.FORMEN[Spiel.formVon(def)] || Spiel.FORMEN.stoerung;
     el.replaceChildren(h("article", {class: "sp-brief", style: {"--k": `var(${k.farbe || "--accent"})`}},
-      h("header", {}, h("span", {class: "sp-kunde-sym gross"}, k.symbol || "✉"),
-        h("div", {}, h("span", {class: "sp-leise"}, `${k.ansprechpartner?.name || ""}${k.ansprechpartner?.rolle ? ", " + k.ansprechpartner.rolle : ""} · ${k.name}`), h("h3", {}, def.titel))),
+      h("header", {class: "sp-brief-kopf"},
+        marke(k.name, k.farbe, {gross: true}),
+        h("div", {class: "sp-brief-absender"},
+          h("span", {class: "sp-brief-firma"}, k.name),
+          h("span", {class: "sp-brief-person"}, [ap.name, ap.rolle].filter(Boolean).join(", ")))),
+      h("h2", {class: "sp-brief-titel"}, def.titel),
       h("div", {class: "sp-brief-text"}, absaetze(def.briefing)),
       h("div", {class: "sp-brief-info"},
-        h("div", {}, h("small", {}, "Symptom"), h("p", {}, def.symptom || "—")),
-        h("div", {}, h("small", {}, "Übt"), h("p", {}, (def.skills || []).map(s => Spiel.skill(s).name).join(" · "))),
+        h("div", {}, h("small", {}, "Kunde"), h("p", {}, k.name)),
+        h("div", {}, h("small", {}, "Form"), h("p", {}, form.titel)),
         h("div", {}, h("small", {}, "Dauer"), h("p", {}, `~${Spiel.minuten(def)} min`)),
-        h("div", {}, h("small", {}, "Form"), h("p", {}, (Spiel.FORMEN[Spiel.formVon(def)] || Spiel.FORMEN.stoerung).titel)),
-        h("div", {}, h("small", {}, "Lohn"), h("p", {}, `${fmtEuro((def.lohn || {}).euro || 0)} · ${(def.lohn || {}).ruf || 0} Ruf`)),
-        h("div", {class: "sp-brief-ziele"}, h("small", {}, "Ziele"),
-          h("ul", {}, (def.ziele || []).map(z => h("li", {}, z.text || z.typ))))),
-      h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer gross", onclick: () => { schliessen?.(); oeffnen(inst.iid); }}, angefangen ? "Weiterarbeiten ▸" : "Auftrag annehmen ▸"))));
+        h("div", {}, h("small", {}, "Lohn"), h("p", {}, `${fmtEuro((def.lohn || {}).euro || 0)} · ${(def.lohn || {}).ruf || 0} Ruf`))),
+      kundenkontext(k),
+      h("div", {class: "sp-brief-ziele"},
+        h("strong", {}, "Ziele"),
+        h("ul", {}, (def.ziele || []).map(z => h("li", {}, h("span", {class: "sp-haken", "aria-hidden": "true"}, "○"), h("span", {}, z.text || z.typ))))),
+      h("div", {class: "sp-knoepfe"},
+        h("button", {type: "button", class: "knopf primaer", onclick: () => { schliessen?.(); oeffnen(inst.iid); }}, angefangen ? "Weiterarbeiten ▸" : "Auftrag annehmen ▸"),
+        schliessen ? h("button", {type: "button", class: "knopf geist", onclick: () => schliessen()}, "Später") : null)));
   }
 
   /* ---------- Sanftes Onboarding (Bau P7), Station 1: die Begrüßungskarte ----------

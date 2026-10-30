@@ -489,3 +489,54 @@ pulsierenden Effekte".
 **Ehrlich offen.** R12 (ethos --dom) nicht gemessen; Ambient nicht auf 60 fps/Paint geprüft; die
 Heute-Ansicht in Messing/Papier wurde über Kontrastpaare geprüft (8,38/6,83 : 1), nicht per
 Bildschirmfoto aus der laufenden .exe (Desktop war durch eine parallele Sitzung belegt).
+
+## 39 · Bento 2.5 — die fünf Arbeitsflächen (30.10.2026)
+
+**Was der Nutzer bemängelte.** Postfach „lieblos und unpersönlich"; Kundenbereich „zu kindlich,
+weniger wie in einer Job-Simulation mit Kundenprofil", verlangt eine „ansprechende Bento-Ästhetik";
+Dashboard: Ziele, Sitzungen und Klassenraum liegen so, dass es „wie ein einzelnes unordentliches
+Objekt" aussieht; Training „zu sehr altes Design, kindlich, unprofessionell" und „nur eine
+unübersichtliche Kaskade an Einheiten"; die minimierte Leiste soll „komplett überarbeitet" werden —
+„viel interaktiver, bessere und innovativere Inhalte"; dazu der Hilfeleiter-Slogan aus dem ersten
+Screenshot. Der Vertrag steht in
+[`Entwurf – Bento 2.5 (Arbeitsplatz)`](<Entwurf – Bento 2.5 (Arbeitsplatz).md>) und
+[`Architektur § 22`](../Architektur.md).
+
+**Die Gestaltungssprache.** Ein 12-Spalten-Raster mit 12/16-px-Abstand, Kacheln mit einer Haarlinie,
+`var(--radius)` und 16-px-Innenabstand; Mikrolabel in Mono (11 px), Titel in der Display-Schrift,
+Fließtext 14 px; genau eine farblich hervorgehobene Kachel und eine Hauptaktion je Ansicht;
+Monogramme statt Emoji; Kundenfarbe nur als Tint/Rail; keine erfundenen Zahlen. Gemeinsame
+Bausteine: `src/stil/bento.css` und `src/ui/bento.js`.
+
+**Die fünf Flächen (Kurzfassung).**
+- **Postfach:** Kopf mit vier echten Kennzahlen, Liste 420 px mit Monogramm, Ansprechpartner,
+  Vorschauzeile und Meta-Chips; Leser als Brief mit Absenderblock, vier Datenkacheln, Kundenkontext
+  und Zielen; Blatt < 900 px. **Hilfeleiter:** Diagnose-Assistent mit 1–6-Stufenleiste,
+  „Nächste Diagnose" als echte Zeile, Werkzeug-Chips, leiser Simulationshinweis, 44-px-Trefferflächen.
+- **Kunden:** Portfolio mit einer breiten Hauptkachel, Profilkacheln (Branche, Kontakt, Vertrag/
+  Ampel + €/h, Aufträge/Ø-Sterne, Vertrauenssegmente, „Zuletzt") und eigener Sektion für gesperrte
+  Kunden. **Kundenakte:** Dossier aus Kopfkachel, vier Datenkacheln, begrenztem Netz-Atlas mit
+  Leerzustand, Geschichten, Zuletzt und Belohnungen.
+- **Dashboard:** Hero (8) + Kennzahlen (4); darunter drei gleich hohe, gleich gekleidete Kacheln
+  Tagesziel / Letzte Sitzung / Klassenraum; darunter Lagebild + „Heute dran" mit echten Werten.
+  Die Signal-Kachel mit erfundenen Zahlen ist entfernt, der Klassenraum-Code sitzt in seiner Kachel.
+- **Training:** Trainingsarena mit Kennzahlen, Filterleiste (Alle/Basis/Störung/Prüfung/Empfohlen/
+  Noch offen), Weiterlernen-Kachel und sieben Lernpfaden mit klebenden Köpfen; je Pfad eine Karte
+  als „Nächster Schritt" (nur diese primär, 1 Primärknopf im Bild statt 6); Quelle zweizeilig,
+  Ergebnis-/Fehlerkarte ruhiger.
+- **Leiste:** „Nebenbei-Cockpit": zugeklappt unveränderte 300 × 56-Statuszeile; aufgeklappt
+  320 × 300 mit „Jetzt dran", Mini-Ticket (Frage/Antwort/Denkhilfe/Anker) und Status & Verträgen
+  plus Fußzeile mit Postfach-Zähler und Labor. Nur Maus, kein Fokusklau.
+
+**Was gemessen ist.** 873/873 Tests grün, 0 übersprungen; `klassen.py` 0; `ethos.py` GRÜN und besser
+als der eingefrorene Stand (R2 19, R4 153, R9 58, R10 39); `umlaute.py` GRÜN; `seite.py --pruefen`
+GRÜN (54 Dokumente). Sichtprüfung je Bereich bei 1440/960/720 (Vorher/Nachher unter
+`Nachweise/bento/`); unabhängige Design- und Theme-Prüfung: 7 Zustände × 7 Ansichten ohne harten
+Kontrastbruch, 0 Emoji in UI/CSS, 0 JS-Fehler, 52 `.tr-karte` mit intakten Haken. **Nicht gemessen:**
+R12 (`--dom`), das echte Tauri-Fenster, Hover-/Tastaturzustände im Vollbild, Android.
+
+**Was bewusst offen bleibt.** Die Leiste bleibt im zugeklappten Zustand bewusst nah am alten
+Verhalten (Testvertrag: exakte Statuszeile, 300 × 56) — die neuen Inhalte entfalten sich aufgeklappt.
+R12 ist mit 7 Filtern und 52 Karten im Training designgemäß über der alten 6-Bedienelemente-Grenze;
+die Entscheidung „einfrieren oder Oberfläche reduzieren" bleibt dem Nutzer, wie in der Übergabe
+vom 29.10.2026 notiert.

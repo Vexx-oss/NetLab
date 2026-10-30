@@ -9,6 +9,70 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.4.0 — Bento 2.5: Postfach, Kunden, Dashboard, Training und Leiste (30.10.2026)
+
+**Was diese Fassung ist.** Ein Gestaltungs- und Sprachumbau der fünf Arbeitsflächen, kein
+Feature-Sprung. Postfach und Hilfeleiter, Kundenbereich und Kundenakte, Dashboard „Heute",
+Training und die minimierte Leiste folgen jetzt einer gemeinsamen Bento-Sprache: 12-Spalten-Raster,
+Kacheln mit Kante und Radius, Mikrolabels, Monogramme statt Emoji, echte Daten statt Dekoration,
+eine Hauptaktion je Kachel. Neue gemeinsame Bausteine: `src/stil/bento.css` (Raster, Kachel,
+Chips, Monogramm) und `src/ui/bento.js` (`UI.bento.monogramm/kachel/kopf`); neues Werkzeug
+`tools/vorschau.py` für private Vorschau-Bauten der Bereichsteams. Datenformate, Simulation,
+Codec, Ansichten und Bedienwege sind unverändert.
+
+**Warum.** Nutzerkritik (sinngemäß): Postfach „lieblos und unpersönlich"; Kunden „zu kindlich,
+weniger wie eine Job-Simulation mit Kundenprofil und Bento-Ästhetik"; Dashboard wegen Ziele/
+Sitzung/Klassenraum „ein einzelnes unordentliches Objekt"; Training „zu sehr altes Design,
+kindlich, unprofessionell, nur eine unübersichtliche Kaskade an Einheiten"; minimierte Leiste
+„komplett überarbeiten, viel interaktiver, bessere und innovativere Inhalte"; dazu der
+Hilfeleiter-Slogan aus dem Labor. Vertrag: [`Architektur § 22`](Architektur.md) und
+[`Entwurf – Bento 2.5 (Arbeitsplatz)`](<entwicklung/Entwurf – Bento 2.5 (Arbeitsplatz).md>).
+
+**Umfang.**
+- **Postfach + Hilfeleiter:** Posteingang eines Dienstleisters – vier echte Kennzahlen im Kopf,
+  Liste mit Monogramm, Ansprechpartner, sauberer Vorschauzeile und Meta-Chips; Leser als echter
+  Brief mit Absenderblock, Datenkacheln, Kundenkontext (Branche/Vertrag/Zuletzt) und Zielen;
+  Blatt von unten < 900 px; ruhiger Leerzustand. Hilfeleiter als Diagnose-Assistent: kompakte
+  1–6-Stufenleiste, „Nächste Diagnose" als echte Zeile, Werkzeug-Chips, leiser Simulationshinweis;
+  der 28–44-px-Grünslogan ist aus der Funktionsfläche verschwunden. Kunden-Emoji aus der
+  Labor-Auftragszeile durch Monogramm ersetzt; Stufenknöpfe 28 px sichtbar, 44 px Trefferfläche;
+  KPI „ungelesen" wird nach dem Lesen frisch gezeichnet; Chip-Kontrast ≥ 4,5:1.
+- **Kunden + Kundenakte:** Kundenportfolio statt Kinderquartett – breite Hauptkachel, Profilkacheln
+  mit Branche, Ansprechpartner/Rolle, Vertrag (Ampel + €/h) oder Stufe, Aufträgen/Ø-Sternen,
+  Vertrauenssegmenten x/5 und „Zuletzt"-Zeile; gesperrte Kunden in eigener, ruhiger Sektion.
+  Kundenakte als Dossier: Kopfkachel mit Vertrauen/Fortschritt, vier Datenkacheln, begrenzter
+  Netz-Atlas mit Leerzustand, Geschichten, Zuletzt, Belohnungen. Keine Herzen/Emoji mehr.
+- **Dashboard „Heute":** echtes 12-Spalten-Bento – Hero (8 Spalten) + Kennzahlenkachel (4), darunter
+  drei gleich hohe, gleich gekleidete Kacheln Tagesziel / Letzte Sitzung / Klassenraum (die
+  eigentliche Reparatur des „unordentlichen Objekts"), dann Lagebild + „Heute dran" mit echten
+  Werten. Die erfundene Signal-Kachel (PAKETE/S, GERÄTE 6) und „ZIELE 0/1" sind entfernt; der
+  Klassenraum-Code sitzt in der Klassenraum-Kachel.
+- **Training:** Trainingsarena mit Kennzahlen (bestanden-Ring, Durchgänge, Bildungsstand),
+  funktionaler Filterleiste (Alle/Basis/Störung/Prüfung/Empfohlen/Noch offen; Standard Alle zeigt
+  alle 52), Weiterlernen-Kachel und sieben Lernpfaden mit klebenden Gruppenköpfen; je Pfad eine
+  Karte als „Nächster Schritt" (nur diese primär), kompakte `.tr-karte` mit Gerüst und Quelle;
+  Ergebnis-/Fehlerkarte ruhiger, Aufbau und Verhalten unverändert.
+- **Minimierte Leiste:** „Nebenbei-Cockpit" – zugeklappt 300 × 56 mit Statuszeile (Ampeln, Werte,
+  Mini-Signal, Hilfe, Öffnen; Kindfolge unverändert), aufgeklappt 320 × 300 mit drei Modulen
+  „Jetzt dran" (aktives Ticket → Fortsetzen), Mini-Ticket (Frage/Antwort/Denkhilfe/Anker) und
+  Status & Verträge (Ampel, €/h, offene Tickets, Serie) plus fester Fußzeile (Postfach mit Zähler,
+  Labor); nur Maus, `tabindex="-1"`, kein Fokusklau.
+
+**Handwerk.** Zeilenenden LF erhalten; gemeinsame Gates: `node tests/run.js` **873/873 grün**
+(103 Testdateien, 95 Module, 0 übersprungen) · `sh tools/test.sh --rauch` **45/45** ·
+`python tools/klassen.py` **0** ·
+`python tools/ethos.py` **GRÜN** und besser als der eingefrorene Stand (R2 20→19, R4 169→153,
+R9 62→58, R10 42→39) · `python tools/umlaute.py` **GRÜN** · `python tools/seite.py --pruefen`
+**GRÜN** (54 Dokumente). Einzeldatei **3.576.420 B**, SHA256 `C5CD676F…162B683`,
+**0 Außenverweise**, `docs/index.html` und `Netzwerk-Labor.html` byte-gleich; README-/Doku-Bilder
+(8 Aufnahmen) aus dem neuen Bau erneuert (`docs/bilder/HERKUNFT.md`). Sichtprüfung je Bereich bei
+1440/960/720 mit Vorher-/Nachher-Bildern (`Nachweise/bento/`, nicht versioniert), unabhängige
+Design- und Theme-Prüfung (7 Themes × 7 Ansichten ohne harten Kontrastbruch). R12 (`ethos --dom`)
+ist wie zuvor **nicht gemessen**; die fünf Themes wurden visuell geprüft, nicht im echten
+Tauri-Fenster. Kein Push, keine Fassungserhöhung, kein Release.
+
+---
+
 ## 2.4.0 — ReMASTER (30.10.2026)
 
 **Was diese Fassung ist.** Eine Darstellungs- und Sprachrunde, kein Feature-Sprung: Labor-Fläche

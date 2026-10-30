@@ -87,126 +87,151 @@ button.dx-karte:hover{border-color:var(--accent)}
 
 
 /* ============================================================
-   POLARIS-Editorial: „Heute" als Panel-Raster
+   Bento 2.5 „Heute" (Vertrag: docs/Architektur.md § 22 · Entwurf § 3.3)
    ------------------------------------------------------------
-   hub.css lädt VOR zz-polaris.css; die Regeln beginnen deshalb mit `.ansicht`
-   (eine Klasse mehr, ohne !important). Maße nur aus Tokens/Skala, Licht nur
-   über color-mix(). Keine eigenen @keyframes (Bewegung: juice.css).
+   Ein Raster, drei Zeilen: Auftrag + Kennzahlen · Tagesziel / Letzte
+   Sitzung / Klassenraum (drei gleich hohe Kacheln mit derselben Kante,
+   demselben Innenabstand und derselben Titelzeile) · Lagebild + „Heute
+   dran". Die Klassen .hb-* bleiben, damit die Theme-Regeln weiter greifen;
+   Maße nur aus der Skala, Flächen nur über Tokens.
    ============================================================ */
-.ansicht .hb-seite{max-width:1120px; margin:0 auto; padding:12px 24px 4px; gap:8px}
-.ansicht .hb-kopf{display:flex; flex-direction:column; align-items:flex-start; gap:8px}
-.ansicht .hb-kopf::before{content:""; display:block; width:32px; height:2px; border-radius:0; background:var(--accent); margin-bottom:8px}
-.ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 4.6vw, var(--fs-8)); line-height:1.15; letter-spacing:-.045em; max-width:20ch}
-.ansicht .hb-kopf .hb-serie{display:flex; align-items:center; gap:8px; color:var(--muted); letter-spacing:.2em}
 
-.ansicht .hb-auftrag{gap:16px 24px; padding:24px; border:1px solid var(--line); border-left:2px solid var(--k, var(--accent)); border-radius:var(--radius);
-  background:radial-gradient(120% 150% at 100% 0%, color-mix(in srgb, var(--k, var(--accent)) 12%, transparent), transparent 60%),
-    linear-gradient(160deg, color-mix(in srgb, var(--ink) 4%, var(--panel)), var(--panel) 58%);
-  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 8%, transparent), var(--schatten)}
+/* --- Fläche und Raster --- */
+.ansicht .hb-seite{width:100%;max-width:1180px;margin:0 auto;padding:24px 24px 32px;gap:12px;align-items:center}
+.hb-seite .hb-raster{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;width:100%;align-items:stretch;align-content:start}
 
-.ansicht .hb-auftrag .sp-kunde-sym.gross{width:44px; height:44px; border-radius:var(--radius-s)}
+/* Die Kachel: eine Kante, ein Radius, ein Innenabstand (große Flächen 24 px) */
+.hb-seite .hb-raster > .hb-panel{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0;min-height:0;
+  padding:16px;border:1px solid var(--line);border-radius:var(--radius);background-color:var(--panel);color:var(--ink)}
 
-.ansicht .hb-auftrag small{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--muted)}
-.ansicht .hb-auftrag h3{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.02em; margin:4px 0; max-width:26ch}
-.ansicht .hb-auftrag p{margin:0; color:var(--muted); font:500 var(--fs-2)/1.5 var(--mono); letter-spacing:.06em}
+/* Zeile 1: Auftrag (8 Spalten) + Kennzahlen (4) */
+.hb-seite .hb-raster > .hb-hero{grid-column:1 / 9;grid-row:1;padding:24px;gap:8px}
+.hb-seite .hb-raster > .hb-kenndaten{grid-column:9 / 13;grid-row:1;padding:0;gap:0;justify-content:space-between}
+/* Zeile 2: drei gleich hohe Kacheln – Tagesziel · Letzte Sitzung · Klassenraum */
+.hb-seite .hb-raster > .hb-ziel-karte{grid-column:1 / 5;grid-row:2}
+.hb-seite .hb-raster > .hb-sitzung{grid-column:5 / 9;grid-row:2}
+.hb-seite .hb-raster > .hb-klasse{grid-column:9 / 13;grid-row:2}
+/* Zeile 3: Lagebild (8) + echte Werte (4) */
+.hb-seite .hb-raster > .hb-lage{grid-column:1 / 9;grid-row:3;display:block;padding:0;overflow:hidden;min-height:250px}
+.hb-seite .hb-raster > .hb-signal{grid-column:9 / 13;grid-row:3;gap:0}
+.hb-seite .hb-raster > .hb-lage-leer{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:16px}
 
-.ansicht .hb-oder{margin-top:0; padding-top:16px; border-top:1px solid var(--line); gap:8px}
-.ansicht .hb-oder small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--faint)}
-.ansicht .hb-oder-zeile{display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:999px; border:1px solid var(--line);
-  background:var(--panel-2); color:var(--muted); font:500 var(--fs-2)/1.4 var(--mono);
-  transition:transform var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard)}
-.ansicht .hb-oder-zeile:hover, .ansicht .hb-oder-zeile:focus-visible, .ansicht .hb-woche-knopf:hover, .ansicht .hb-woche-knopf:focus-visible{transform:translateY(-1px); border-color:var(--accent)}
+/* Titelzeile: in allen Kacheln gleich – Titel, Trennlinie, sonst nichts */
+.ansicht .hb-seite .hb-raster > .hb-panel > .hb-panel-titel{font:600 var(--fs-4)/1.25 var(--display);letter-spacing:-.01em;color:var(--ink);
+  margin:0;padding-bottom:8px;border-bottom:1px solid var(--line)}
 
-.ansicht .hb-kacheln{grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
-.ansicht .hb-kachel{gap:16px; padding:16px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2); box-shadow:var(--schatten)}
-.ansicht .hb-kachel:hover{transform:translateY(-2px)}
-.ansicht .hb-kachel:not(.fertig):hover{border-color:var(--line-2)}
+/* Zeile 1 · Auftrag */
+.ansicht .hb-seite .hb-raster .hb-kicker{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:0}
+.ansicht .hb-seite .hb-raster .hb-hero-kunde{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:var(--fs-3);margin:0}
+.ansicht .hb-seite .hb-raster .hb-hero h1{font:700 var(--fs-6)/1.1 var(--display);letter-spacing:-.02em;color:var(--ink);margin:0;max-width:32ch}
+.ansicht .hb-seite .hb-raster .hb-hero-lead{font-size:var(--fs-3);line-height:1.5;color:var(--muted);margin:0;max-width:64ch}
+.ansicht .hb-seite .hb-raster .hb-hero-meta{display:flex;flex-wrap:wrap;align-items:center;margin:0}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span{font:500 var(--fs-2)/1.3 var(--body);color:var(--muted);padding:0 12px;border-left:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span:first-child{padding-left:0;border-left:0}
+.ansicht .hb-seite .hb-raster .hb-hero-meta .warn{color:var(--warn);font-weight:600}
+.ansicht .hb-seite .hb-raster .hb-aktionen{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+.ansicht .hb-seite .hb-raster .hb-hero > .bn-marke{position:absolute;top:24px;right:24px}
 
-.ansicht .hb-kachel-sym{width:44px; height:44px; border-radius:var(--radius-s); background:var(--accent-soft); color:var(--accent); display:grid; place-items:center}
-.ansicht .hb-kachel-text b{font:700 var(--fs-4)/1.2 var(--display); letter-spacing:-.01em}
+/* Zeile 1 · Kennzahlen: drei gestapelte Zeilen (Konto · Ruf · Serie) */
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd{display:grid;grid-template-columns:auto minmax(0,1fr);align-content:center;
+  column-gap:8px;row-gap:4px;flex:1;min-width:0;padding:12px 16px;border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd:first-child{border-top:0}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd > i{grid-column:1;grid-row:1;align-self:center;width:8px;height:8px;border-radius:50%;background:var(--c, var(--accent))}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd .lab{grid-column:2;grid-row:1;min-width:0;font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd > b{grid-column:1 / -1;grid-row:2;display:flex;align-items:baseline;gap:4px;
+  font:700 var(--fs-6)/1 var(--display);letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd > b small{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 
-.ansicht .hb-feierabend{gap:24px; padding:24px; border-radius:var(--radius); border:1px solid color-mix(in srgb, var(--info) 34%, var(--line));
-  background:linear-gradient(150deg, color-mix(in srgb, var(--info) 14%, var(--panel)), var(--panel) 62%); box-shadow:var(--schatten)}
-
-
-.ansicht .hb-feier-knoepfe{gap:8px}
-
-.ansicht .hb-ziel{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 12px; color:var(--faint)}
-.ansicht .hb-woche-knopf{color:var(--muted); transition:transform var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard)}
-
-.ansicht .hb-woche-knopf.fertig{color:var(--ok); border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
-
-@media (max-width:980px){ .ansicht .hb-kacheln{grid-template-columns:repeat(2,minmax(0,1fr))} }
-@media (max-width:720px){
-  .ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 9vw, var(--fs-8))}
-}
-
-/* ============================================================
-   Audit-Nachzug (Umsetzung 30.10.2026, design-lagebild):
-   „Heute" als offene Typo-Fläche – nur Lagebild und Signal gerahmt,
-   randloser Hero, ungleiche Spalten, Typo-Hierarchie statt Mono-Monokultur.
-   ============================================================ */
-.ansicht .hb-seite .hb-raster{gap:8px;align-items:stretch;align-content:start}
-.ansicht .hb-seite .hb-raster > .hb-panel{box-shadow:none;min-width:0}
-.ansicht .hb-seite .hb-raster > .hb-hero,
-.ansicht .hb-seite .hb-raster > .hb-kenndaten,
-.ansicht .hb-seite .hb-raster > .hb-ziel-karte,
-.ansicht .hb-seite .hb-raster > .hb-sitzung,
-.ansicht .hb-seite .hb-raster > .hb-klasse{padding:0;border:0;border-radius:0;background:none;box-shadow:none;min-height:0}
-.ansicht .hb-seite .hb-raster > .hb-lage,
-.ansicht .hb-seite .hb-raster > .hb-signal{border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel);padding:12px;min-height:0;box-shadow:none}
-.ansicht .hb-seite .hb-raster > .hb-hero{grid-column:1/-1;grid-row:1;min-width:0;color:var(--ink)}
-.ansicht .hb-seite .hb-raster > .hb-kenndaten{
-  grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
-  padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)
-}
-.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd{border:0;border-left:1px solid var(--line);padding:4px 16px;min-width:0}
-.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd:first-child{border-left:0;padding-left:0}
-.ansicht .hb-seite .hb-raster > .hb-ziel-karte{grid-column:1/6;grid-row:3;min-width:0}
-.ansicht .hb-seite .hb-raster > .hb-sitzung{grid-column:6/10;grid-row:3;min-width:0}
-.ansicht .hb-seite .hb-raster > .hb-klasse{grid-column:10/13;grid-row:3;min-width:0}
-.ansicht .hb-seite .hb-raster > .hb-lage{grid-column:1/9;grid-row:4;padding:0}
-.ansicht .hb-seite .hb-raster > .hb-signal{grid-column:9/13;grid-row:4;min-width:0}
-.ansicht .hb-seite .hb-raster .hb-aktionen{margin-top:4px;gap:8px}
-.ansicht .hb-seite .hb-ziel{margin:0;padding-top:0}
-.ansicht .hb-seite .hb-raster .hb-signal-svg{height:40px;width:100%}
-.ansicht .hb-seite .hb-raster .hb-kicker{font:600 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-bottom:4px}
-.ansicht .hb-seite .hb-raster .hb-hero h1{font:700 var(--fs-6)/1.1 var(--display);letter-spacing:-.02em;margin:4px 0;max-width:30ch;color:var(--ink)}
-.ansicht .hb-seite .hb-raster .hb-hero-lead{font-size:var(--fs-3);line-height:1.5;max-width:64ch;margin:0;color:var(--muted)}
-.ansicht .hb-seite .hb-raster .hb-hero-meta{margin:4px 0;gap:0}
-.ansicht .hb-seite .hb-raster .hb-hero-meta span{font:500 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;border:0;padding:0 12px;color:var(--muted)}
-.ansicht .hb-seite .hb-raster .hb-hero-meta span:first-child{padding-left:0}
-.ansicht .hb-seite .hb-raster .hb-hero-meta span + span{border-left:1px solid var(--line)}
-.ansicht .hb-seite .hb-raster :is(.hb-panel-titel,.hb-zeile b,.hb-sz b){font:600 var(--fs-3)/1.3 var(--body);color:var(--ink)}
-.ansicht .hb-seite .hb-raster .hb-panel-titel{letter-spacing:0;text-transform:none;margin-bottom:8px}
-.ansicht .hb-seite .hb-raster .hb-kd .lab{font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
-.ansicht .hb-seite .hb-raster .hb-kd > b{font:700 var(--fs-5)/1 var(--display);letter-spacing:-.02em}
-.ansicht .hb-seite .hb-raster :is(.hb-kd small,.hb-zeile small){font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;color:var(--faint)}
-.ansicht .hb-seite .hb-raster .hb-spark{display:none;pointer-events:none}
-.ansicht .hb-seite .hb-raster .hb-zeile{padding:4px 0;color:var(--ink);border-top:1px solid var(--line)}
-.ansicht .hb-seite .hb-raster .hb-sz{padding:4px 0;border-top:1px solid var(--line)}
-.ansicht .hb-seite .hb-raster .hb-sz time{font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--faint)}
-.ansicht .hb-seite .hb-raster :is(.hb-sz small,.hb-klasse-zeile small){font-size:var(--fs-2);line-height:1.3;color:var(--muted)}
-.ansicht .hb-seite .hb-raster .hb-sz em{font:600 var(--fs-2)/1 var(--mono);letter-spacing:0}
-.ansicht .hb-seite .hb-raster .hb-ring{width:64px;height:64px}
+/* Zeile 2 · Tagesziel: Ring + drei klickbare Zeilen */
+.ansicht .hb-seite .hb-raster .hb-ziel-inhalt{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:12px;flex:0 0 auto;min-width:0}
+.ansicht .hb-seite .hb-raster .hb-ring{width:56px;height:56px;flex:none;align-self:start}
 .ansicht .hb-seite .hb-raster .hb-ring::after{inset:6px}
-.ansicht .hb-seite .hb-raster .hb-ring b{font:700 var(--fs-4)/1 var(--display)}
-.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf{height:44px;border-radius:var(--radius-xs)}
-.ansicht .hb-seite .hb-raster :is(.hb-stat,.hb-legende){font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none}
-/* Theme-Festigkeit: Flaechen bleiben offen, aber Text und Knoepfe tragen
-   ihre Tokens selbst — sonst kippen Theme-Regeln (Messing) auf dunkel/dunkel. */
-.ansicht .hb-seite .hb-raster .hb-hero-kunde{color:var(--muted);font-size:var(--fs-3)}
-.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer,
-.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.primaer{
-  height:44px;padding:0 16px;border-radius:var(--radius-xs);
-  background:var(--accent);border:1px solid var(--accent);color:var(--accent-ink);box-shadow:none
-}
-.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer:hover,
-.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.primaer:hover{filter:none;transform:none;border-color:var(--accent)}
+.ansicht .hb-seite .hb-raster .hb-ring b{position:relative;z-index:10;font:700 var(--fs-3)/1 var(--display);letter-spacing:0}
+.ansicht .hb-seite .hb-raster .hb-ziel-liste{display:flex;flex-direction:column;gap:0;min-width:0}
+.ansicht .hb-seite .hb-raster .hb-zeile{display:flex;align-items:flex-start;gap:8px;flex:0 0 44px;padding:4px 0;border:0;background:none;
+  color:var(--muted);font:inherit;text-align:left;cursor:pointer}
+.ansicht .hb-seite .hb-raster :is(.hb-zeile + .hb-zeile, .hb-sz + .hb-sz){border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-zeile i{width:8px;height:8px;flex:none;margin-top:4px;border-radius:var(--radius-xs);box-shadow:inset 0 0 0 1px var(--faint)}
+.ansicht .hb-seite .hb-raster .hb-zeile b{min-width:0;font:600 var(--fs-3)/1.3 var(--body);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ansicht .hb-seite .hb-raster .hb-zeile small{margin-left:auto;font-size:var(--fs-2);color:var(--faint);white-space:nowrap}
+.ansicht .hb-seite .hb-raster .hb-zeile.fertig i{background:var(--accent);box-shadow:none}
+.ansicht .hb-seite .hb-raster .hb-zeile.fertig small{color:var(--ok);font-weight:600}
+
+/* Zeile 2 · Letzte Sitzung: HEUTE · SERIE · POST */
+.ansicht .hb-seite .hb-raster .hb-sitzung{gap:0}
+.ansicht .hb-seite .hb-raster .hb-sitzung > .hb-panel-titel{margin-bottom:12px}
+.ansicht .hb-seite .hb-raster .hb-sz{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:8px;flex:0 0 44px;min-height:44px;padding:4px 0}
+
+.ansicht .hb-seite .hb-raster .hb-sz time{font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.ansicht .hb-seite .hb-raster .hb-sz b{display:block;font:600 var(--fs-3)/1.3 var(--body);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ansicht .hb-seite .hb-raster .hb-sz small{display:block;font-size:var(--fs-2);color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ansicht .hb-seite .hb-raster .hb-sz em{font:600 var(--fs-1)/1 var(--mono);font-style:normal;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+
+/* Zeile 2 · Klassenraum: Status, zwei Aktionen, Code-Zeile unten */
+.ansicht .hb-seite .hb-raster .hb-klasse-hinweis{font-size:var(--fs-2);line-height:1.45;color:var(--muted);margin:0}
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ansicht .hb-seite .hb-raster .hb-klasse-code{margin-top:auto;padding-top:8px;border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-klasse-code .kl-start{margin-top:0;gap:8px}
+.ansicht .hb-seite .hb-raster .hb-klasse-code .kl-start-etikett{display:none;margin:0}
+.ansicht .hb-seite .hb-raster .hb-klasse-code .kl-start-feld{flex:1 1 auto;width:auto;min-width:0;max-width:200px}
+.ansicht .hb-seite .hb-raster .hb-klasse-code .hb-oder-zeile{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;
+  border:1px solid var(--line-2);border-radius:var(--radius-s);background:var(--panel-2);color:var(--ink);font-size:var(--fs-3)}
+.ansicht .hb-seite .hb-raster .hb-klasse-code .kl-hinweis{flex:1 0 100%;margin:0}
+
+/* Zeile 3 · „Heute dran": echte Werte aus Spiel.hub.stand() */
+.ansicht .hb-seite .hb-raster .hb-signal .hb-stat{display:flex;align-items:center;gap:8px;flex:1;padding:8px 0;
+  font-size:var(--fs-3);color:var(--muted);border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-signal .hb-stat:nth-child(2){border-top:0;padding-top:0}
+.ansicht .hb-seite .hb-raster .hb-signal .hb-stat i{width:6px;height:6px;flex:none;border-radius:50%;background:var(--c, var(--accent))}
+.ansicht .hb-seite .hb-raster .hb-signal .hb-stat b{margin-left:auto;font:600 var(--fs-3)/1.2 var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+.ansicht .hb-seite .hb-raster .hb-signal-woche{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-signal-label{font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);white-space:nowrap}
+.ansicht .hb-seite .hb-raster .hb-signal .hb-woche-knopf{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:999px}
+
+/* Aktionen: ein Hauptknopf je Kachel, ruhige Zweitaktion – Tokens auch in den Themes */
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer{height:44px;padding:0 16px;border-radius:var(--radius-s);
+  background:var(--accent);border:1px solid var(--accent);color:var(--accent-ink);box-shadow:none}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer:hover{filter:none;transform:none;border-color:var(--accent)}
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf{height:44px;padding:0 16px;border-radius:var(--radius-s)}
 .ansicht .hb-seite .hb-raster .hb-aktionen .knopf.geist,
-.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.geist{
-  height:44px;padding:0 16px;border-radius:var(--radius-xs);
-  background:transparent;border:1px solid var(--line-2);color:var(--ink)
-}
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.geist{height:44px;padding:0 16px;border-radius:var(--radius-s);
+  background:transparent;border:1px solid var(--line-2);color:var(--ink)}
 .ansicht .hb-seite .hb-raster .hb-aktionen .knopf.geist:hover,
 .ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.geist:hover{background:var(--panel-2);border-color:var(--ink)}
+
+/* Lagebild: Knoten sind 32 px hoch anklickbar (vorher 26 px); das Svg trägt die Kanten */
+.ansicht .hb-seite .hb-raster .hb-lage .hb-chip{min-height:32px;padding:4px 8px}
+.ansicht .hb-seite .hb-raster > .hb-lage .hb-lage-svg{display:block}
+
+/* ---------- Schmaler Desktop/Tablet (≤ 1199 px): zwei Spalten, Klassenraum volle Breite ---------- */
+@media (max-width:1199px){
+  .ansicht .hb-seite{padding:16px 16px 24px}
+  .ansicht .hb-seite .hb-raster{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .ansicht .hb-seite .hb-raster > .hb-hero{grid-column:1 / -1;grid-row:1}
+  .ansicht .hb-seite .hb-raster > .hb-kenndaten{grid-column:1 / -1;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd{border-top:0;border-left:1px solid var(--line)}
+  .ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd:first-child{border-top:0;border-left:0}
+  .ansicht .hb-seite .hb-raster > .hb-ziel-karte{grid-column:1 / 4;grid-row:3}
+  .ansicht .hb-seite .hb-raster > .hb-sitzung{grid-column:4 / 7;grid-row:3}
+  .ansicht .hb-seite .hb-raster > .hb-klasse{grid-column:1 / -1;grid-row:4}
+  .ansicht .hb-seite .hb-raster > .hb-lage{grid-column:1 / -1;grid-row:5}
+  .ansicht .hb-seite .hb-raster > .hb-signal{grid-column:1 / -1;grid-row:6}
+  .ansicht .hb-seite .hb-raster .hb-klasse-code .kl-start-etikett{display:block}
+  .ansicht .hb-seite .hb-raster .hb-klasse-code .kl-start-feld{max-width:320px}
+}
+
+/* ---------- Schmal (≤ 720 px): eine Spalte, alles untereinander ---------- */
+@media (max-width:720px){
+  .ansicht .hb-seite{padding:12px 12px 24px;gap:8px}
+  .ansicht .hb-seite .hb-raster{grid-template-columns:minmax(0,1fr);gap:8px}
+  .ansicht .hb-seite .hb-raster > .hb-hero,
+  .ansicht .hb-seite .hb-raster > .hb-kenndaten,
+  .ansicht .hb-seite .hb-raster > .hb-ziel-karte,
+  .ansicht .hb-seite .hb-raster > .hb-sitzung,
+  .ansicht .hb-seite .hb-raster > .hb-klasse,
+  .ansicht .hb-seite .hb-raster > .hb-lage,
+  .ansicht .hb-seite .hb-raster > .hb-signal{grid-column:1 / -1;grid-row:auto}
+  .ansicht .hb-seite .hb-raster > .hb-hero{padding:16px}
+  .ansicht .hb-seite .hb-raster > .hb-kenndaten{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd{padding:12px 8px}
+}

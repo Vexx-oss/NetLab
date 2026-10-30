@@ -563,3 +563,58 @@ Beleg: Nachweise/Prototypen-Runde3/audit/NOTIZ.md (13 Signale mit Messwerten) un
 **Gates (letzte Messung).** 873/873 Tests, ethos GRÜN (R4 169, R6 7, R9 58, R10 40 — besser als Stand),
 klassen 0, umlaute GRÜN, Rauchtest 45/45 (letzter Lauf), starttest GRÜN. R12 nicht gemessen (--dom).
 Ambient im Build per CDP-Frames belegt (16,5 % Pixel sichtbar verändert; „Bewegung aus" = 0 Animationen).
+
+## 22 · Bento 2.5 „Arbeitsplatz" (30.10.2026) — verbindlicher Gestaltungsvertrag
+
+**Auftrag (Nutzer, sinngemäß).** Postfach „lieblos und unpersönlich", Kunden „zu kindlich statt
+Job-Simulation mit Kundenprofil", Dashboard „einzelnes unordentliches Objekt" (Ziele, Sitzung,
+Klassenraum), Training „Kaskade an Einheiten" und „altes Design", minimierte Leiste „komplett
+überarbeiten: viel interaktiver, bessere und innovativere Inhalte"; dazu der Hilfeleiter-Slogan aus
+dem ersten Screenshot. Ziel: eine ruhige, dichte Arbeitsoberfläche eines IT-Dienstleisters in
+Bento-Form — echte Hierarchie, glaubwürdige Daten, wenig Farbe, keine Emoji-Deko, keine
+Riesen-Slogans in Funktionsflächen.
+
+**Vertrag.** Vollfassung: [`Entwurf – Bento 2.5 (Arbeitsplatz).md`](<entwicklung/Entwurf – Bento 2.5 (Arbeitsplatz).md>).
+Die Leitsätze:
+
+1. **Bedienlogik, Datenwege und Spielzustand bleiben unverändert.** Keine Änderung an
+   `src/sim/`, `src/modell/`, `src/kern/`, `src/cli/`; Ansichten rufen dieselben `Spiel.*`-Wege.
+2. **Test-Haken bleiben** (Klassen und Bedeutung): `.sp-postfach/.sp-pf-liste/.sp-leser/.sp-mail/
+   .sp-brief/.sp-knoepfe/.sp-blatt/.sp-hilfe/.sp-leiter`, `.hb-seite`, `.kr-seite/.kr-kopf/
+   .kr-raster/.kr-kunde/.ka-block`, `.tr-seite/.tr-liste/.tr-karte/.tr-geruest/.tr-quelle/
+   .tr-ergebnis/.tr-offen/.tr-grund/.tr-lernen/.tr-fehler*`, Leisten-Haken siehe Test
+   `spiel-leiste-hilfe.test.js` (`.lk-zeile` mit exakter Kindfolge, `.lk-auf`, `.lk-mini`,
+   `.lk-mini-hilfe`, `Mini`-Zeichen, Hilfe-Knopf).
+3. **Nur Tokens.** Neue Flächen nutzen ausschließlich `basis.css`-Tokens. Schrift nur
+   `var(--fs-*)`, Abstand nur {0,4,8,12,16,24,32}px, Radius nur Tokens, keine Farb-Literale,
+   kein `!important` außerhalb `basis.css` (Gates: `tools/ethos.py`, `tools/klassen.py`,
+   `ui-typografie`, `ui-symbole`). Die fünf Theme-Dateien `zzz-thema-*.css` bleiben unangetastet;
+   bestehende Klassennamen bleiben, damit ihre Regeln weiter greifen.
+4. **Keine erfundenen Zahlen, keine Emoji in der UI-Chrome.** Anzeige nur aus `Spiel.*`/`DATEN`;
+   Kunden-Emoji (`DATEN.kunden[*].symbol`) wird in den Kundenflächen durch Monogramme ersetzt.
+5. **Gemeinsame Bausteine der Leitung:** `src/stil/bento.css` (12-Spalten-Raster `.bn-raster`,
+   Kachel `.bn-k` mit Varianten `flach|akzent|iris|geld`, `.bn-kopf/.bn-kicker/.bn-titel/.bn-lead/
+   .bn-meta/.bn-fuss/.bn-zeile/.bn-wert/.bn-chips/.bn-chip/.bn-marke/.bn-trenner/.bn-leer`,
+   Spalten `.bn-s3…s12`) und `src/ui/bento.js` (`UI.bento.monogramm/initialen/kachel/kopf`).
+6. **Ein Schreiber je Datei.** Postfach: `spiel.js` + `spiel.css`; Kunden: `karriere.js` (nur
+   Kunden/Kundenakte) + `karriere.css` + `kundenakte.css`; Dashboard: `hub.js` + `hub.css`;
+   Training: `training.js` + `training.css`; Leiste: `leiste.js` + `leiste.css`; Grundlage und
+   Integration: Leitung (`bento.*`, Doku, Werkzeuge, Nachweise).
+7. **Abnahme je Bereich:** private Vorschau `python tools/vorschau.py --name <bereich>` +
+   `python Nachweise/bento/foto.py --html vorschau-<bereich>.html --marke <bereich>` (Bilder
+   1440/960/720), Sichtprüfung, mindestens zwei Iterationen; `node tests/run.js` grün,
+   `klassen.py` 0, `ethos.py` GRÜN (R4/R9/R10 dürfen nicht steigen), `umlaute.py` GRÜN.
+8. **Nicht Teil des Umbaus:** neue Ansichten, Änderungen an Simulation/Netz/Codec/Spielstand,
+   Themes, Fassung, Push/Release. Die Leitung committet, zieht Doku/Stand nach und legt die
+   Abnahme vor.
+
+**Stand (30.10.2026).** Umgesetzt von fünf parallelen Bereichsteams (ein Schreiber je Datei), danach
+von der Leitung integriert und von zwei unabhängigen Prüfungen (Design; Theme/Struktur) gegengelesen.
+Gates: `node tests/run.js` **873/873 grün**, 0 übersprungen · `sh tools/test.sh --rauch` **45/45** ·
+`python tools/klassen.py` **0** · `python tools/ethos.py` **GRÜN** (R2 20→19, R4 169→153, R9 62→58,
+R10 42→39) · `python tools/umlaute.py` **GRÜN** · `node tools/sim-stand.js` **unverändert** ·
+`python tools/seite.py --pruefen` **GRÜN** (54 Dokumente). Sichtprüfung je Bereich bei 1440/960/720,
+Theme-Prüfung 7 Zustände × 7 Ansichten ohne harten Kontrastbruch, 0 Emoji in `src/ui/**`/`src/stil/**`.
+**Nicht gemessen:** R12 (`--dom`), Lauf im echten Tauri-/Android-Fenster, Hover-/Tastaturzustände
+im Vollbild. Kein Push, kein Release, keine Fassungserhöhung. Einzelheiten und offene
+Nutzerentscheidungen: [`Übergabe – Stand 30.10.2026 – Bento 2.5`](<entwicklung/Übergabe – Stand 30.10.2026 – Bento 2.5.md>).

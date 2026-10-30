@@ -1,0 +1,86 @@
+/* ---------- Bento 2.5 „Arbeitsplatz" – gemeinsame Bausteine ----------
+   Vertrag: docs/Architektur.md § 22, Entwurf: docs/entwicklung/Entwurf – Bento 2.5 (Arbeitsplatz).md
+   Diese Datei gehört der Leitung (Integration). Bereichs-Dateien dürfen lesen, aber nicht ändern.
+   Regeln: nur Tokens aus basis.css, Schrift nur var(--fs-*), Abstand nur {0,4,8,12,16,24,32}px,
+   Radius nur Tokens, keine Bewegung außer var(--dauer), keine Farb-Literale. */
+
+:root{
+  --bn-gap:12px; --bn-gap-l:16px; --bn-pad:16px; --bn-pad-l:24px;
+  --bn-kante:1px solid var(--line);
+  --bn-tiefe:var(--panel); --bn-tiefe-2:var(--panel-2);
+}
+
+/* 12-Spalten-Raster der Bereichsseiten */
+.bn-raster{display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:var(--bn-gap); align-items:stretch}
+
+/* Die Kachel – Grundbaustein jeder Ansicht */
+.bn-k{position:relative; display:flex; flex-direction:column; gap:8px; min-width:0; padding:var(--bn-pad);
+  border:var(--bn-kante); border-radius:var(--radius); background:var(--bn-tiefe); color:var(--ink)}
+.bn-k.flach{background:var(--bn-tiefe-2)}
+.bn-k.akzent{background:linear-gradient(160deg, var(--accent-soft), var(--panel) 72%); border-color:color-mix(in srgb, var(--accent) 38%, var(--line))}
+.bn-k.iris{background:linear-gradient(160deg, var(--info-soft), var(--panel) 72%)}
+.bn-k.geld{background:linear-gradient(160deg, var(--warn-soft), var(--panel) 72%)}
+.bn-k.ruhig{padding:0; overflow:hidden}
+
+/* Kachel-Kopf: Mikrolabel oben, Titel darunter, Aktion rechts */
+.bn-kopf{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; min-width:0}
+.bn-kicker{display:block; font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+.bn-titel{font:700 var(--fs-4)/1.25 var(--display); letter-spacing:-.01em; margin-top:4px; color:var(--ink)}
+.bn-lead{margin:0; font:400 var(--fs-3)/1.5 var(--body); color:var(--muted)}
+.bn-meta{margin:0; font:400 var(--fs-2)/1.45 var(--body); color:var(--faint)}
+.bn-fuss{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:8px}
+.bn-trenner{height:1px; border:0; margin:8px 0 4px; background:var(--line)}
+
+/* Kennzahlen und Werte */
+.bn-wert{font:700 var(--fs-6)/1 var(--display); letter-spacing:-.02em; color:var(--ink); font-variant-numeric:tabular-nums}
+.bn-wert small{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint); margin-left:4px}
+.bn-zeile{display:flex; align-items:center; gap:8px; min-width:0; padding:8px 0; border-top:var(--bn-kante)}
+.bn-zeile:first-child{border-top:0; padding-top:0}
+.bn-zeile b{font:600 var(--fs-3)/1.35 var(--body); color:var(--ink); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bn-zeile small{font:400 var(--fs-2)/1.35 var(--body); color:var(--faint); margin-left:auto; white-space:nowrap}
+
+/* Chips: eine Form, vier Bedeutungen */
+.bn-chips{display:flex; align-items:center; flex-wrap:wrap; gap:4px; min-width:0}
+.bn-chip{display:inline-flex; align-items:center; gap:4px; min-height:24px; padding:0 8px; border-radius:999px;
+  border:1px solid var(--line); background:var(--panel-2); color:var(--muted);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap}
+.bn-chip.ok{color:var(--ok); border-color:color-mix(in srgb, var(--ok) 38%, var(--line)); background:var(--ok-soft)}
+.bn-chip.warn{color:var(--warn); border-color:color-mix(in srgb, var(--warn) 38%, var(--line)); background:var(--warn-soft)}
+.bn-chip.bad{color:var(--bad); border-color:color-mix(in srgb, var(--bad) 38%, var(--line)); background:var(--bad-soft)}
+.bn-chip.iris{color:var(--info); border-color:color-mix(in srgb, var(--info) 38%, var(--line)); background:var(--info-soft)}
+.bn-chip.geld{color:var(--geld)}
+.bn-chip.wert{text-transform:none; letter-spacing:.02em}
+
+/* Marke/Initialen (statt Emoji): Firmen-Kürzel, Kunden-Monogramm */
+.bn-marke{display:inline-grid; place-items:center; flex:0 0 auto; width:40px; height:40px; border-radius:var(--radius-s);
+  border:1px solid color-mix(in srgb, var(--bn-f, var(--accent)) 30%, var(--line));
+  background:color-mix(in srgb, var(--bn-f, var(--accent)) 14%, var(--panel-2));
+  color:var(--ink); font:700 var(--fs-3)/1 var(--display); letter-spacing:.02em}
+.bn-marke.gross{width:56px; height:56px; border-radius:var(--radius); font-size:var(--fs-5)}
+.bn-marke.klein{width:28px; height:28px; font-size:var(--fs-1)}
+
+/* Leere Zustände */
+.bn-leer{display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:var(--bn-pad); border:1px dashed var(--line-2); border-radius:var(--radius); color:var(--muted)}
+
+/* Spaltenbreiten – nur für Bereichsseiten, die das 12er-Raster nutzen */
+.bn-s3{grid-column:span 3}
+.bn-s4{grid-column:span 4}
+.bn-s5{grid-column:span 5}
+.bn-s6{grid-column:span 6}
+.bn-s7{grid-column:span 7}
+.bn-s8{grid-column:span 8}
+.bn-s12,.bn-k.breit{grid-column:span 12}
+
+/* Raster bricht bei schmalen Fenstern auf eine Spalte; Kacheln behalten ihre Kanten */
+@media (max-width:1100px){
+  .bn-s8{grid-column:span 12}
+  .bn-s5,.bn-s7{grid-column:span 6}
+}
+@media (max-width:900px){
+  .bn-raster{grid-template-columns:minmax(0,1fr); gap:var(--bn-gap-l)}
+  .bn-s3,.bn-s4,.bn-s5,.bn-s6,.bn-s7,.bn-s8{grid-column:span 1}
+}
+@media (max-width:720px){
+  .bn-k{padding:12px}
+  .bn-raster{gap:8px}
+}

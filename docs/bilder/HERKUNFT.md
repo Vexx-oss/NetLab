@@ -14,14 +14,14 @@ Neu bauen: `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/2.4-
 
 | Bild | aus Nachweise/ | Groesse | SHA256 (Bild) |
 |---|---|---|---|
-| `topologie-2.4.0.jpg` | `2.4-Bilder/topologie.png` | 89,894 B | aef8388b837f9807 |
-| `einstieg-2.4.0.jpg` | `2.4-Bilder/einstieg.png` | 109,904 B | fe6274888254e47e |
-| `konsole-2.4.0.jpg` | `2.4-Bilder/konsole.png` | 136,286 B | edd020ba4439b455 |
-| `simulation-2.4.0.jpg` | `2.4-Bilder/simulation.png` | 129,021 B | 7a2a853fc6a433e7 |
+| `topologie-2.4.0.jpg` | `2.4-Bilder/topologie.png` | 89,928 B | 31480f9d58e94502 |
+| `einstieg-2.4.0.jpg` | `2.4-Bilder/einstieg.png` | 109,239 B | b6240db570b366d4 |
+| `konsole-2.4.0.jpg` | `2.4-Bilder/konsole.png` | 135,566 B | c47841726b5e7de6 |
+| `simulation-2.4.0.jpg` | `2.4-Bilder/simulation.png` | 128,431 B | c73575960f2ad2bd |
 | `kompetenzkarte-2.4.0.jpg` | `2.4-Bilder/kompetenzkarte.png` | 102,101 B | a58d1acf25b121ee |
-| `ergebnis-2.4.0.jpg` | `2.4-Bilder/ergebnis.png` | 77,786 B | 33c91ca7865163d5 |
-| `postfach-2.4.0.jpg` | `2.4-Bilder/postfach.png` | 119,760 B | b245dc64cc41ab99 |
-| `hilfe-2.4.0.jpg` | `2.4-Bilder/hilfe.png` | 122,950 B | 07fb60f494288c50 |
+| `ergebnis-2.4.0.jpg` | `2.4-Bilder/ergebnis.png` | 78,384 B | d9baf73b75e448ec |
+| `postfach-2.4.0.jpg` | `2.4-Bilder/postfach.png` | 125,291 B | b6e2f3181664ce38 |
+| `hilfe-2.4.0.jpg` | `2.4-Bilder/hilfe.png` | 111,219 B | d6fefc431772c8c3 |
 
 ## Was auf welchem Bild zu sehen ist
 

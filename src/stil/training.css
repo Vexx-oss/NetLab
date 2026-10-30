@@ -1,40 +1,136 @@
-/* ---------- Trainingsbereich (ui/training.js): Karten der Übungsszenarien ----------
-   Nur Tokens aus basis.css, nur die Skalen aus tools/ethos.py (Abstand 0/4/8/12/16/24/32,
-   Schrift 11/12/13/15/20/28). Keine Farbe als Literal, kein !important, keine eigenen Zeiten. */
-.tr-seite{height:100%; overflow:auto; padding:16px 24px 32px; display:flex; flex-direction:column; gap:16px; background:var(--bg); scrollbar-width:thin}
-.tr-kopf h2{font-size:var(--fs-6); font-weight:800; font-family:var(--display)}
-.tr-kopf p{margin-top:4px}
-.tr-liste{display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px}
-.tr-karte{display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--line-2)}
+/* ---------- Trainingsbereich (ui/training.js): Bento-Trainingsarena ----------
+   Entwurf „Bento 2.5" § 3.4. Nur Tokens aus basis.css, Schrift nur var(--fs-*), Abstand nur
+   {0,4,8,12,16,24,32}px, Radius nur Tokens, keine Farb-Literale, kein !important.
+   Die Flächen selbst kommen aus bento.css (.bn-k): gleiche Kanten, gleicher Innenabstand. */
+
+/* Seite und Kopf.
+   Kein Innenabstand oben: so klebt der Lernpfad-Kopf beim Scrollen bündig unter der Kopfzeile
+   (position:sticky bezieht sich auf den Innenrand des Scrollbereichs); der Abstand sitzt am Kopf. */
+.tr-seite{height:100%; overflow:auto; padding:0 24px 32px; display:flex; flex-direction:column; gap:16px; background:var(--bg); scrollbar-width:thin}
+.tr-kopf{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-top:16px}
+.tr-kopf-text, .tr-kennzahl-text, .tr-weiter-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.tr-kopf h2{font:800 var(--fs-6)/1.15 var(--display); color:var(--ink)}
+.tr-kontext{max-width:76ch; font-size:var(--fs-3); line-height:1.5; color:var(--muted)}
+.tr-kennzahlen{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; flex:0 1 540px}
+.tr-kennzahl{flex-direction:row; align-items:center; gap:12px; padding:12px}
+.tr-kennzahl-wert{font:700 var(--fs-5)/1.1 var(--display); color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap}
+.tr-kennzahl-meta{font-size:var(--fs-1); line-height:1.35; color:var(--faint)}
+.tr-ring{width:56px; height:56px; flex:none; border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--tr-p, 0) * 1%), var(--panel-3) 0)}
+.tr-ring::before{content:""; grid-area:1 / 1; width:40px; height:40px; border-radius:50%; background:var(--panel)}
+
+/* Filterleiste: ändert nur die Sichtbarkeit, nie die Daten. Alle Karten bleiben im DOM. */
+.tr-filter{flex-direction:row; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 12px}
+.tr-filter-knoepfe, .tr-marken{display:flex; align-items:center; flex-wrap:wrap; gap:4px; min-width:0}
+.tr-filter-knopf{display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 12px; border-radius:999px;
+  border:1px solid var(--line); background:var(--panel-2); color:var(--muted); font:600 var(--fs-2)/1 var(--body)}
+.tr-filter-knopf:hover{border-color:var(--line-2); color:var(--ink)}
+.tr-filter-knopf[aria-pressed="true"]{border-color:color-mix(in srgb, var(--accent) 55%, var(--line)); background:var(--accent-soft); color:var(--ink)}
+.tr-filter-zahl{font:600 var(--fs-1)/1 var(--mono); color:var(--faint); font-variant-numeric:tabular-nums}
+.tr-filter-knopf[aria-pressed="true"] .tr-filter-zahl{color:var(--accent)}
+
+/* Weiterlernen-Kachel: die eine hervorgehobene Kachel der Ansicht (bn-k akzent im Markup) */
+.tr-weiter{gap:8px}
+.tr-weiter-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.tr-weiter-zahl{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.tr-weiter-zeile{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--line)}
+.tr-weiter-meta{font-size:var(--fs-2); color:var(--muted)}
+
+/* Lernpfade – der Kopf bleibt beim Scrollen stehen und benennt den Abschnitt (Lesbarkeit bei 52 Karten). */
+.tr-liste{display:flex; flex-direction:column; gap:24px}
+.tr-pfad{display:flex; flex-direction:column; gap:8px; min-width:0}
+.tr-pfad-kopf{position:sticky; top:0; display:flex; align-items:center; flex-wrap:wrap; gap:12px; padding:8px 4px; border-bottom:1px solid var(--line); background:var(--bg)}
+.tr-pfad-titel, .tr-ergebnis h3{font:700 var(--fs-5)/1.2 var(--display); color:var(--ink)}
+/* Zahl und Balken stehen zusammen: „x von y bestanden" direkt neben dem Fortschrittsbalken. */
+.tr-pfad-stand{margin-left:auto; display:flex; align-items:center; gap:8px}
+.tr-pfad-meta{font-size:var(--fs-2); color:var(--faint); white-space:nowrap}
+.tr-pfad-balken{width:120px; height:4px; flex:none; border-radius:999px;
+  background:linear-gradient(90deg, var(--accent) calc(var(--tr-p, 0) * 1%), var(--panel-3) 0)}
+.tr-pfad-raster{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; align-items:stretch}
+
+/* Szenariokarte: kompakt, gleiche Kanten wie alle Bento-Kacheln (bn-k im Markup) */
+.tr-karte{transition:border-color var(--dauer)}
 .tr-karte:hover{border-color:var(--line-2)}
-.tr-basis{border-top-color:var(--accent)}
-.tr-stoerung{border-top-color:var(--warn)}
-.tr-pruefung{border-top-color:var(--info)}
-.tr-karte.tr-fertig{border-top-color:var(--ok)}
-.tr-kopf-zeile{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
-.tr-kopf-zeile h3, .tr-ergebnis h3{font-size:var(--fs-5); font-weight:800; font-family:var(--display)}
-.tr-marke{padding:4px 8px; border-radius:999px; background:var(--panel-3); color:var(--muted); font-size:var(--fs-1); font-weight:700; letter-spacing:.09em; text-transform:uppercase; white-space:nowrap}
-.tr-summe, .tr-text{font-size:var(--fs-2); color:var(--muted)}
+.tr-karte.tr-fertig{border-color:color-mix(in srgb, var(--ok) 26%, var(--line))}
+/* Empfohlen (karriere-stufengerecht): leise Akzentkante. Der nächste Schritt je Lernpfad trägt
+   zusätzlich Chip und 2-px-Rail – so ist genau eine Karte je Pfad die Hauptaktion. */
+.tr-karte.tr-empfohlen{border-color:color-mix(in srgb, var(--accent) 24%, var(--line))}
+.tr-karte.tr-naechster{border-color:color-mix(in srgb, var(--accent) 60%, var(--line)); border-left:2px solid var(--accent)}
+.tr-karte-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.tr-marke{padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:var(--panel-3); color:var(--muted);
+  font:700 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; white-space:nowrap}
+/* Chip „Nächster Schritt": die Empfehlung je Lernpfad, nicht jede Karte tragen ihn. */
+.tr-schritt{padding:4px 8px; border-radius:999px; border:1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  background:var(--accent-soft); color:var(--accent); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap}
+.tr-art-basis .tr-marke{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 45%, var(--line))}
+.tr-art-stoerung .tr-marke{color:var(--warn); border-color:color-mix(in srgb, var(--warn) 45%, var(--line))}
+.tr-art-pruefung .tr-marke{color:var(--info); border-color:color-mix(in srgb, var(--info) 45%, var(--line))}
+.tr-sterne{font-size:var(--fs-2); letter-spacing:.04em; color:var(--warn); white-space:nowrap}
+.tr-titel, .tr-weiter-titel{font:700 var(--fs-4)/1.25 var(--display); color:var(--ink)}
 .tr-meta{font-size:var(--fs-2); color:var(--faint)}
+.tr-text{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  font-size:var(--fs-2); line-height:1.45; color:var(--muted)}
 .tr-stand-zeile{font-size:var(--fs-2); color:var(--ink)}
-.tr-geruest{padding:8px 12px; border-radius:var(--radius-s); background:var(--panel-2); border:1px solid var(--line)}
-.tr-geruest summary{font-size:var(--fs-2); font-weight:700; color:var(--accent); cursor:pointer}
+.tr-hinweis{font-size:var(--fs-1); color:var(--faint)}
+/* Quelle klein, aber vollständig lesbar: zwei Zeilen mit Umbruch statt harter Ellipse. */
+.tr-quelle{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  font-size:var(--fs-1); line-height:1.35; color:var(--faint)}
+.tr-knoepfe{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:auto; padding-top:4px}
+.tr-knoepfe .knopf{min-height:44px}
+.tr-grund{font-size:var(--fs-2); line-height:1.4; color:var(--warn)}
+
+/* Gerüst (details): zugeklappt eine Zeile, aufgeklappt der geführte Weg */
+.tr-geruest, .tr-fehler{padding:8px 12px; border-radius:var(--radius-s); border:1px solid var(--line); background:var(--panel-2)}
+.tr-geruest summary{font-size:var(--fs-2); font-weight:700; color:var(--muted); cursor:pointer}
 .tr-tipp{margin-top:8px; font-size:var(--fs-2); color:var(--ink)}
 .tr-schritte{margin:8px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); color:var(--ink)}
 .tr-werkzeug{margin-top:4px; font-size:var(--fs-2); color:var(--muted)}
 .tr-leiter{margin:8px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); color:var(--muted)}
-.tr-leiter b{color:var(--ink)}
-.tr-quelle{font-size:var(--fs-1); color:var(--faint)}
-.tr-knoepfe{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:4px}
-.tr-grund, .tr-ergebnis{display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--warn)}
+.tr-geruest summary:hover, .tr-leiter b, .tr-offen b{color:var(--ink)}
+
+/* Ergebnis-/Fehlerkarte: Aufbau und Klassen bleiben, nur ruhiger – eine Kante, ein leiser Balken */
+.tr-ergebnis{border-left:2px solid var(--warn)}
 .tr-ergebnis.tr-gut{border-left-color:var(--ok)}
+.tr-ergebnis .sp-leise{font-size:var(--fs-2); font-weight:400; color:var(--muted)}
+.tr-ergebnis .knopf.geist{border-color:var(--line-2); background:var(--panel-2); color:var(--ink)}
 .tr-offen{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); color:var(--muted)}
-/* „Was schiefging" je Fertigkeit (Review Lernwirkung, P2-5): die Erklärung steht am Ziel,
-   die Zuordnung zum Thema hier – offen, weil genau das der Lernwert des Trainings ist. */
-.tr-fehler{padding:8px 12px; border-radius:var(--radius-s); background:var(--panel-2); border:1px solid var(--line); border-left:2px solid var(--warn)}
 .tr-fehler summary{font-size:var(--fs-2); font-weight:700; color:var(--ink); cursor:pointer}
 .tr-fehler-gruppe{margin-top:8px}
 .tr-fehler-gruppe h4{font-size:var(--fs-2); color:var(--warn)}
 .tr-fehler-liste{margin:4px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); color:var(--muted)}
 .tr-lernen{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); color:var(--ink)}
-@media (max-width: 900px){ .tr-liste{grid-template-columns:1fr} }
+
+/* Filter: blendet nur aus – alle Karten bleiben im DOM, „Alle“ ist der Grundzustand ohne Zusatzklasse. */
+.tr-seite.tr-f-basis .tr-karte:not(.tr-art-basis),
+.tr-seite.tr-f-stoerung .tr-karte:not(.tr-art-stoerung),
+.tr-seite.tr-f-pruefung .tr-karte:not(.tr-art-pruefung),
+.tr-seite.tr-f-empfohlen .tr-karte:not(.tr-empfohlen),
+.tr-seite.tr-f-offen .tr-karte:not(.tr-noch-offen),
+.tr-seite.tr-f-basis .tr-pfad:not(:has(.tr-art-basis)),
+.tr-seite.tr-f-stoerung .tr-pfad:not(:has(.tr-art-stoerung)),
+.tr-seite.tr-f-pruefung .tr-pfad:not(:has(.tr-art-pruefung)),
+.tr-seite.tr-f-empfohlen .tr-pfad:not(:has(.tr-empfohlen)),
+.tr-seite.tr-f-offen .tr-pfad:not(:has(.tr-noch-offen)){display:none}
+
+@media (max-width:1100px){
+  /* Kompaktere Flächen, damit die Hauptaktion der ersten Karte auch bei 960×700 über der Fußzeile liegt. */
+  .tr-seite, .tr-kopf{gap:12px}
+  .tr-kennzahlen{flex:1 1 100%}
+  .tr-kennzahl{padding:8px}
+  .tr-ring{width:44px; height:44px}
+  .tr-ring::before{width:32px; height:32px}
+  .tr-karte{padding:12px}
+  .tr-pfad-raster{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  .tr-seite{padding:0 16px 16px; gap:12px}
+  .tr-kopf{align-items:flex-start}
+  .tr-kennzahl{padding:8px}
+  .tr-ring{width:40px; height:40px}
+  .tr-ring::before{width:28px; height:28px}
+  .tr-filter-knopf{padding:0 8px}
+  .tr-pfad-raster{grid-template-columns:minmax(0,1fr)}
+  .tr-karte{gap:4px}
+  .tr-text{-webkit-line-clamp:1}
+  .tr-geruest{padding:4px 8px}
+}

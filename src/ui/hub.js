@@ -70,11 +70,12 @@ UI.hub = (() => {
     }
     const sichtbar = hosts.slice(0, 6);
     const versteckt = hosts.length - sichtbar.length;
+    const HOST_SCHRITT = 14;                 /* % der Breite: hält die 32-px-Knoten auch bei 720 px auseinander */
     for (const [swId, liste] of gruppen) {
       const basis = pos.get(swId)?.x ?? 50, n = liste.length;
-      liste.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: Math.max(8, Math.min(92, basis + (i - (n - 1) / 2) * 11)), y: Y_SCHICHT[3]}); });
+      liste.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: Math.max(8, Math.min(92, basis + (i - (n - 1) / 2) * HOST_SCHRITT)), y: Y_SCHICHT[3]}); });
     }
-    ohneSwitch.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: 12 + i * 10, y: Y_SCHICHT[3]}); });
+    ohneSwitch.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: Math.min(92, 12 + i * HOST_SCHRITT), y: Y_SCHICHT[3]}); });
 
     const kanten = kabel.map(k => ({k, s: kabelStatus(netz, k)})).filter(x => pos.has(x.k.a?.geraet) && pos.has(x.k.b?.geraet));
     const verbunden = kanten.filter(x => x.s === "oben").length;
@@ -113,7 +114,7 @@ UI.hub = (() => {
         h("span", {class: "hb-lage-zaehler" + (offen || ohneLink ? " bad" : " ok")}, zaehler)),
       svg,
       ...geraete.filter(g => pos.has(g.id)).map(chip),
-      versteckt > 0 ? h("button", {type: "button", class: "hb-chip hb-chip-mehr", style: {"left": "88%", "top": Y_SCHICHT[3] + "%"},
+      versteckt > 0 ? h("button", {type: "button", class: "hb-chip hb-chip-mehr", style: {"left": "96%", "top": Y_SCHICHT[3] + "%"},
         title: `${versteckt} weitere Geräte — im Labor zeigen`, onclick: () => UI.app.ansicht("labor")}, "+" + versteckt) : null,
       h("div", {class: "hb-lage-fuss"},
         h("span", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")),
@@ -126,11 +127,15 @@ UI.hub = (() => {
     const s = Spiel.hub.stand(), n = s.naechster, fa = s.feierabend;
     const w = UI.app.werte || {euro: 0, ruf: 0, stufe: 1, offen: 0};
     const serie = s.serie.tage || 0;
+    const tagHeute = Spiel.tag.heute();   /* fällige Wiederholungen, Bereitschaft, Übungen heute */
     const weiterFn = () => { if (n.art === "leer") { const i = Spiel.nachschub(); UI.spiel.status(); if (i) UI.spiel.oeffnen(i.iid); } else UI.spiel.oeffnen(n.iid); };
     const form = (Spiel.FORMEN[n.form] || Spiel.FORMEN.stoerung);
     const euroText = `${zahl(w.euro)} €`, rufText = `${zahl(w.ruf)}`;
 
-    /* Hero: Auftrag (oder Feierabend) wie im Mockup – Kicker, Kunde, grosser Titel, Fliesstext, Chips, Aktionen */
+    /* Hero: Auftrag (oder Feierabend) wie im Mockup – Kicker, Kunde, grosser Titel, Fliesstext, Chips, Aktionen.
+       Das Monogramm rechts oben ist der Bento-Baustein der Leitung (UI.bento); fehlt er, bleibt die Ecke leer. */
+    const marke = !fa && n.art !== "leer" && UI.bento?.monogramm && n.kunde
+      ? UI.bento.monogramm(n.kunde, {farbe: n.farbe || "--accent", gross: true}) : null;
     const hero = fa
       ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "Heute · Feierabend"),
           h("div", {class: "hb-hero-kunde"}, h("h3", {}, UI.symbol("feierabend", 18), " Feierabend")),
@@ -151,63 +156,79 @@ UI.hub = (() => {
           h("div", {class: "hb-hero-meta"},
             h("span", {class: "warn"}, form.titel.toUpperCase()),
             h("span", {}, `~${n.minuten} MIN`),
-            h("span", {}, `${eur(n.euro)} €`),
-            h("span", {}, `ZIELE 0/1`)),
+            h("span", {}, `${eur(n.euro)} €`)),
           h("div", {class: "hb-aktionen"},
             h("button", {type: "button", class: "knopf primaer hb-annehmen", onclick: () => UI.spiel.oeffnen(n.iid)}, n.klingelt ? "Rangehen ▸" : n.art === "weiter" ? "Weiterarbeiten ▸" : "Annehmen ▸"),
-            s.weitere.length ? h("button", {type: "button", class: "knopf geist", onclick: () => UI.spiel.oeffnen(s.weitere[0].iid)}, "Anderer Auftrag") : h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("postfach")}, "Postfach")));
+            s.weitere.length ? h("button", {type: "button", class: "knopf geist", onclick: () => UI.spiel.oeffnen(s.weitere[0].iid)}, "Anderer Auftrag") : h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("postfach")}, "Postfach")),
+          marke);
 
-    /* Kennzahlen-Spalte */
-    const spark = (...hoehen) => h("span", {class: "hb-spark"}, hoehen.map((x, i) => h("i", {style: {"height": x + "px"}, class: i === hoehen.length - 1 ? "spitze" : ""})));
+    /* Kennzahlen-Spalte: drei gestapelte Zeilen, nur echte Werte – kein erfundener Verlauf */
+    const kennzahl = (farbe, label, wert, einheit) => h("div", {class: "hb-kd", style: {"--c": `var(${farbe})`}},
+      h("i"), h("span", {class: "lab"}, label), h("b", {}, wert, einheit ? h("small", {}, einheit) : null));
     const kennzahlen = h("aside", {class: "hb-kenndaten hb-panel"},
-      h("div", {class: "hb-kd", style: {"--c": "var(--amber)"}}, h("i"), h("span", {class: "lab"}, "KONTO"), h("b", {}, euroText), spark(10, 16, 12, 22, 17, 26, 34)),
-      h("div", {class: "hb-kd", style: {"--c": "var(--iris)"}}, h("i"), h("span", {class: "lab"}, "RUF"), h("b", {}, rufText), spark(22, 15, 27, 19, 30, 26, 33)),
-      h("div", {class: "hb-kd", style: {"--c": "var(--accent)"}}, h("i"), h("span", {class: "lab"}, "SERIE"), h("b", {}, String(serie), h("small", {}, serie === 1 ? "TAG" : "TAGE")), spark(12, 18, 14, 22, 20, 26, 28)));
+      kennzahl("--amber", "KONTO", euroText),
+      kennzahl("--iris", "RUF", rufText),
+      kennzahl("--accent", "SERIE", String(serie), serie === 1 ? "TAG" : "TAGE"));
 
     const kachel = (sym, titel, info, fn, fertig) => h("button", {type: "button", class: "hb-zeile" + (fertig ? " fertig" : ""), onclick: fn},
       h("i", {"aria-hidden": "true"}), h("b", {}, titel), h("small", {}, info));
-    /* Tagesziel mit Ring und Zeilen (klickbar) */
+    /* Tagesziel: Ring und drei Zeilen (klickbar) */
     const anteil = Math.min(1, s.tagesziel.erledigt / Math.max(1, s.tagesziel.ziel));
     const ziel = h("section", {class: "hb-panel hb-ziel-karte"},
-      h("div", {class: "hb-ring", style: {"--anteil": Math.round(anteil * 100) + "%"}}, h("b", {}, `${s.tagesziel.erledigt}/${s.tagesziel.ziel}`)),
-      h("div", {class: "hb-ziel-liste"},
-        h("div", {class: "hb-panel-titel"}, "Tagesziel"),
-        kachel(UI.symbol("kaffee", 22), "Aufwärmen", `${s.aufwaermen.erledigt}/${s.aufwaermen.ziel} Karten`, aufwaermen, s.aufwaermen.erledigt >= s.aufwaermen.ziel),
-        kachel(UI.symbol("raetsel", 22), `Tagesrätsel #${s.raetsel.nr}`, s.raetsel.geloest ? "gelöst" : (Spiel.NIVEAU_NAME[s.raetsel.niveau] || s.raetsel.niveau), raetsel, s.raetsel.geloest),
-        kachel(UI.symbol("dex", 22), "Fehlerdex", `${s.dex.verstanden}/${s.dex.gesamt}`, () => s.post.ungelesen ? UI.app.ansicht("postfach") : dexOeffnen(), s.dex.verstanden >= s.dex.gesamt)));
+      h("div", {class: "hb-panel-titel"}, "Tagesziel"),
+      h("div", {class: "hb-ziel-inhalt"},
+        h("div", {class: "hb-ring", style: {"--anteil": Math.round(anteil * 100) + "%"}}, h("b", {}, `${s.tagesziel.erledigt}/${s.tagesziel.ziel}`)),
+        h("div", {class: "hb-ziel-liste"},
+          kachel(UI.symbol("kaffee", 22), "Aufwärmen", `${s.aufwaermen.erledigt}/${s.aufwaermen.ziel} Karten`, aufwaermen, s.aufwaermen.erledigt >= s.aufwaermen.ziel),
+          kachel(UI.symbol("raetsel", 22), `Tagesrätsel #${s.raetsel.nr}`, s.raetsel.geloest ? "gelöst" : (Spiel.NIVEAU_NAME[s.raetsel.niveau] || s.raetsel.niveau), raetsel, s.raetsel.geloest),
+          kachel(UI.symbol("dex", 22), "Fehlerdex", `${s.dex.verstanden}/${s.dex.gesamt}`, dexOeffnen, s.dex.verstanden >= s.dex.gesamt))));
 
   /* Letzte Sitzung: Zustand von heute als ruhige Zeilen */
     const sitzung = h("section", {class: "hb-panel hb-sitzung"},
       h("div", {class: "hb-panel-titel"}, "Letzte Sitzung"),
       h("div", {class: "hb-sz"}, h("time", {}, "HEUTE"), h("div", {}, h("b", {}, n.art === "leer" ? "Kein offener Auftrag" : `Auftrag: ${n.titel}`), h("small", {}, n.art === "leer" ? "Postfach leer" : n.kunde)), h("em", {}, n.klingelt ? "ANRUF" : "OFFEN")),
-      h("div", {class: "hb-sz"}, h("time", {}, "SERIE"), h("div", {}, h("b", {}, `${serie} ${serie === 1 ? "Tag" : "Tage"} in Folge`), h("small", {}, "Tagesziel zählt weiter")), h("em", {}, serie ? "+1" : "0")),
+      h("div", {class: "hb-sz"}, h("time", {}, "SERIE"), h("div", {}, h("b", {}, `${serie} ${serie === 1 ? "Tag" : "Tage"} in Folge`), h("small", {}, "Tagesziel zählt weiter")), h("em", {title: "freie Urlaubstage diese Woche"}, `${s.serie.frei} frei`)),
       h("div", {class: "hb-sz"}, h("time", {}, "POST"), h("div", {}, h("b", {}, "Postfach"), h("small", {}, `${s.post.ungelesen} ungelesen`)), h("em", {}, String(s.post.ungelesen))));
 
-    /* Klassenraum */
+    /* Klassenraum: Status, zwei Aktionen – der Code hängt in der Kachel (klassenraum.js, B § 4) */
     const klasse = h("section", {class: "hb-panel hb-klasse"},
       h("div", {class: "hb-panel-titel"}, "Klassenraum"),
+      h("small", {class: "hb-klasse-hinweis"}, "Kein Server, kein Login – Code mündlich weitergeben."),
       h("div", {class: "hb-klasse-zeile"},
-        h("button", {type: "button", class: "knopf primaer", onclick: () => UI.app.ansicht("klassenraum")}, "Klassenraum öffnen"),
+        h("button", {type: "button", class: "knopf", onclick: () => UI.app.ansicht("klassenraum")}, "Klassenraum öffnen"),
         h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("mitarbeit")}, "Auftragscode")),
-      h("small", {class: "hb-klasse-hinweis"}, "Kein Server, kein Login – Code mündlich weitergeben."));
+      h("div", {class: "hb-klasse-code"}));
 
     /* Lagebild: echte Mini-Topologie des geladenen Netzes (Knoten + Kanten mit Linkstatus) */
     const lage = lagePanel();
 
-    /* Signal */
-    const signal = h("section", {class: "hb-panel hb-signal"},
-      h("div", {class: "hb-panel-titel"}, "Signal"),
-      (() => { const el = sv("svg", {class: "hb-signal-svg", viewBox: "0 0 300 64", preserveAspectRatio: "none", "aria-hidden": "true"}); el.innerHTML =
-        `<path d="M0 44 C 30 44, 34 26, 60 26 S 96 46, 120 40 156 18, 180 24 216 44, 240 36 276 20, 300 24" fill="none" stroke="url(#hbw)" stroke-width="1.6"/>
-         <path d="M0 50 C 30 50, 34 34, 60 34 S 96 52, 120 46 156 26, 180 32 216 50, 240 42 276 28, 300 32" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>
-         <defs><linearGradient id="hbw" x1="0" x2="1"><stop offset="0" stop-color="#7DF3C0"/><stop offset="1" stop-color="#9C8CFF" stop-opacity=".4"/></linearGradient></defs>`; return el; })(),
-      h("div", {class: "hb-stat"}, h("i"), "EBENE IP", h("b", {}, "AKTIV")),
-      h("div", {class: "hb-stat"}, h("i", {style: {"background": "var(--iris)"}}), "GERÄTE", h("b", {}, "6")),
-      h("div", {class: "hb-stat"}, h("i", {style: {"background": "var(--amber)"}}), "PAKETE/S", h("b", {}, "3")));
+    /* „Heute dran": echte Werte, die links nicht schon stehen (Wiederholungen, Bereitschaft,
+       Übungen) – der Tagesstand selbst steht in Hero, Kennzahlen, Tagesziel und Letzte Sitzung.
+       Unten das Wochenziel: es ersetzt die verwaiste Fußzeile und ist der einzige Weg dorthin. */
+    const dran = h("section", {class: "hb-panel hb-signal"},
+      h("div", {class: "hb-panel-titel"}, "Heute dran"),
+      h("div", {class: "hb-stat", style: {"--c": "var(--accent)"}}, h("i"), "WIEDERHOLUNG", h("b", {}, tagHeute.faellig.length ? `${tagHeute.faellig.length} fällig` : "nichts fällig")),
+      h("div", {class: "hb-stat", style: {"--c": "var(--iris)"}}, h("i"), "BEREITSCHAFT", h("b", {}, tagHeute.bereitschaft.length ? `${tagHeute.bereitschaft.length} offen` : "nichts offen")),
+      h("div", {class: "hb-stat", style: {"--c": "var(--amber)"}}, h("i"), "ÜBUNGEN HEUTE", h("b", {}, tagHeute.heuteUebungen ? String(tagHeute.heuteUebungen) : "keine")),
+      h("div", {class: "hb-signal-woche"},
+        h("span", {class: "hb-signal-label"}, "Wochenziel"),
+        wocheZeile(s.woche)));
 
     c.replaceChildren(h("div", {class: "hb-seite"},
-      h("div", {class: "hb-raster"}, hero, kennzahlen, ziel, sitzung, klasse, lage, signal),
-      h("p", {class: "hb-ziel"}, fa ? null : `Heute ${s.tagesziel.erledigt}/${s.tagesziel.ziel} · `, wocheZeile(s.woche))));
+      h("div", {class: "hb-raster"}, hero, kennzahlen, ziel, sitzung, klasse, lage, dran)));
+    klassenraumZeile(c);
+  }
+  /* Die Klassenraum-Zeile hängt `klassenraum.js` selbst an `.hb-seite` (startEinhaengen, B § 4);
+     hier zieht sie in die Klassenraum-Kachel um. Idempotent, weil startEinhaengen eine vorhandene
+     Zeile erkennt – auch beim Neuaufbau (Spiel.neu) und auf dem Bus „ansicht". */
+  function klassenraumZeile(el){
+    const ziel = el.querySelector(".hb-klasse-code");
+    if (!ziel || typeof UI.klassenraum?.startEinhaengen !== "function") return false;
+    UI.klassenraum.startEinhaengen();
+    const zeile = el.querySelector(".kl-start");
+    if (!zeile || zeile.parentNode === ziel) return false;
+    ziel.append(zeile);
+    return true;
   }
   /* Wochenziel (§ 20 F7): frei wählbar aus drei Vorschlägen; ohne Wahl nur ein kleiner Knopf */
   function wocheZeile(w){

@@ -8,73 +8,217 @@ UI.karriere = (() => {
   const AMPEL = {gruen: ["ok", "●", "läuft"], gelb: ["warn", "▲", "Frist überschritten"], rot: ["bad", "■", "steht – kein Geld"]};
   const NIV = {E: "Einstieg", AP1: "AP1", AP2: "AP2"};
 
-  /* ---------- Kunden ---------- */
+  /* ---------- Kunden: Kundenportfolio (Bento 2.5, Vertrag § 3.2) ----------
+     Profilkacheln statt Regenbogenkarten: Monogramm statt Emoji, Branche und Ansprechpartner,
+     Vertragsstatus, Stufe, gelöste Aufträge, Ø-Sterne und Vertrauen auf einen Blick.
+     Der Kunde mit dem dringendsten Anlass steht als Hauptkachel oben (der Kicker nennt den Grund);
+     gesperrte Kunden folgen in einer eigenen ruhigen Sektion – so bleibt das Raster lückenfrei.
+     Kundenfarbe nur als leiser Akzent (Monogramm-Tint, 2-px-Rail) – keine Vollflächen. */
+  const SEG = 5;
+  const branche = k => (k.daten && k.daten.branche) || "";
+  const kontakt = k => [k.ansprechpartner, k.rolle].filter(Boolean).join(", ");
+  const letzterAuftrag = id => Spiel.st.erledigt.filter(e => e.kunde === id).slice(-1)[0] || null;
+  const auftragszahl = id => (Spiel.karriere.sterneBei ? Spiel.karriere.sterneBei(id) : []).length;
+  function segmente(wert, gross = false){
+    const el = h("span", {class: "kr-seg" + (gross ? " gross" : ""), role: "img", "aria-label": `Vertrauen ${wert} von ${SEG}`});
+    for (let i = 1; i <= SEG; i++) el.append(h("i", {class: i <= wert ? "an" : ""}));
+    return el;
+  }
+  function ampelChip(id, mitPreis){
+    const k = kd(id), a = AMPEL[Spiel.wartung.ampelBei(id)] || AMPEL.gruen;
+    return h("span", {class: "bn-chip " + a[0] + " wert", title: "Wartungsvertrag"}, a[1] + " " + a[2] + (mitPreis ? ` · ${eur(k.euroProStunde)} €/h` : ""));
+  }
+  function auftragsText(id){
+    const s = Spiel.karriere.sterneBei ? Spiel.karriere.sterneBei(id) : [];
+    if (!s.length) return null;
+    const mittel = Math.round(10 * s.reduce((a, b) => a + b, 0) / s.length) / 10;
+    return `${s.length} ${s.length === 1 ? "Auftrag" : "Aufträge"} · Ø ${mittel.toFixed(1).replace(".", ",")} ★`;
+  }
+  function freischaltSatz(k){
+    const def = Spiel.KARRIERE_STUFEN.find(x => x.nr === k.stufe);
+    return `Ab Stufe ${k.stufe}${def ? ` (${def.name})` : ""} und ${k.abRuf} Ruf.` + (k.spaeter ? " Kommt in einer späteren Version." : "");
+  }
+  function kundenChips(id, k, vertrag){
+    const s = auftragsText(id), empf = Spiel.kundenakte.empfohlen(id);
+    const von = empf ? Spiel.kundenDaten(Spiel.kundenakte.empfehlungen()[id].von) : null;
+    return [
+      vertrag ? ampelChip(id, true) : h("span", {class: "bn-chip wert"}, "ohne Vertrag"),
+      h("span", {class: "bn-chip wert"}, "Stufe " + k.stufe),
+      s ? h("span", {class: "bn-chip wert"}, s) : null,
+      von ? h("span", {class: "bn-chip iris wert", title: `Empfohlen von ${von.name} – der Kunde kam eine Stufe früher`}, UI.symbol("sprechblase", 12), " empfohlen") : null,
+    ];
+  }
+  function kundenFuss(c, id, vertrag, weit){
+    const shopEintrag = vertrag ? null : Spiel.shop.liste().find(e => e.id === "vertrag:" + id);
+    return [
+      /* EINE Hauptaktion je Bild: nur die Hauptkachel trägt den Primärknopf */
+      h("button", {type: "button", class: "knopf" + (weit ? " primaer" : ""), onclick: () => akteAnsicht(c, id)}, "Akte öffnen"),
+      shopEintrag ? h("button", {type: "button", class: "knopf klein geist", disabled: shopEintrag.zustand !== "kaufbar", title: shopEintrag.grund || "",
+        onclick: () => kaufen(shopEintrag.id, () => kundenAnsicht(c))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null,
+    ];
+  }
+  function zuletztZeile(id){
+    const e = letzterAuftrag(id);
+    return h("p", {class: "kr-kunde-zuletzt"}, e ? `Zuletzt: ${(Spiel.ticketDef(e.id) || {}).titel || "Auftrag"} · ${datumDe(e.tag)}` : "Noch kein Auftrag gelöst.");
+  }
+  function kundenKopf(k, offen, weit, kicker){
+    return h("header", {class: "kr-kunde-kopf"},
+      UI.bento.monogramm(k.name, {farbe: offen ? (k.farbe || "--accent") : "--faint", gross: weit}),
+      h("div", {class: "kr-kunde-titel"},
+        kicker ? h("span", {class: "bn-kicker"}, kicker) : null,
+        h("h3", {}, k.name),
+        branche(k) ? h("p", {class: "kr-kunde-branche"}, branche(k)) : null),
+      offen ? null : h("span", {class: "kr-schloss", title: "Gesperrt"}, UI.symbol("schloss", 18)));
+  }
+  /* Wer steht oben? Immer mit echtem Anlass – der Kicker sagt, warum. */
+  function hauptkunde(offene){
+    const auftrag = offene.find(id => Spiel.postfach().some(i => i.kunde === id));
+    if (auftrag) return {id: auftrag, kicker: "Aktuell · Auftrag im Postfach"};
+    const wartung = offene.find(id => Spiel.karriere.hatVertrag(id) && (Spiel.wartung.ampelBei(id) === "gelb" || Spiel.wartung.ampelBei(id) === "rot"));
+    if (wartung) return {id: wartung, kicker: "Aktuell · Wartung fällig"};
+    const bester = offene.slice().sort((a, b) => auftragszahl(b) - auftragszahl(a))[0];
+    if (bester && auftragszahl(bester) > 0) return {id: bester, kicker: "Hauptkunde · meiste Aufträge"};
+    return offene.length ? {id: offene[0], kicker: "Hauptkunde · erster Kunde"} : null;
+  }
+  function kundeKarte(c, id, weit, kicker){
+    const k = kd(id), offen = Spiel.karriere.kundeOffen(id), vertrag = Spiel.karriere.hatVertrag(id);
+    const v = Spiel.kundenakte.vertrauen(id);
+    const klasse = "kr-kunde" + (offen ? "" : " zu") + (weit ? " kr-kunde-weit" : "");
+    const kopf = kundenKopf(k, offen, weit, kicker);
+    const beschreibung = weit && k.beschreibung ? h("p", {class: "kr-kunde-lead"}, k.beschreibung) : null;
+    const kontaktZeile = kontakt(k) ? h("p", {class: "kr-kunde-kontakt"}, UI.symbol("kunden", 14), " " + kontakt(k)) : null;
+    const chips = h("div", {class: "bn-chips"}, kundenChips(id, k, vertrag));
+    const vertrauen = h("div", {class: "kr-kunde-vertrauen"}, h("span", {class: "kr-kunde-label"}, `Vertrauen ${v}/${SEG}`), segmente(v));
+    const zuletzt = zuletztZeile(id);
+    const fuss = h("div", {class: "ka-zeile"}, kundenFuss(c, id, vertrag, weit));
+    return h("article", {class: klasse, style: {"--k": `var(${k.farbe || "--accent"})`}},
+      offen
+        ? weit
+          ? [h("div", {class: "kr-kunde-haupt"}, kopf, kontaktZeile, beschreibung),
+            h("div", {class: "kr-kunde-neben"}, chips, vertrauen, zuletzt, fuss)]
+          : [kopf, kontaktZeile, chips, vertrauen, zuletzt, fuss]
+        : [kopf, h("p", {class: "kr-kunde-gesperrt"}, freischaltSatz(k))]);
+  }
   function kundenAnsicht(c){
     const st = Spiel.st;
-    const karten = Spiel.karriere.kundenIds().map(id => {
-      const k = kd(id), offen = Spiel.karriere.kundeOffen(id), vertrag = Spiel.karriere.hatVertrag(id);
-      const ampel = vertrag ? Spiel.wartung.ampelBei(id) : null, a = AMPEL[ampel] || null;
-      const sterne = Spiel.karriere.sterneBei ? Spiel.karriere.sterneBei(id) : null;
-      const shopEintrag = Spiel.shop.liste().find(e => e.id === "vertrag:" + id);
-      return h("article", {class: "kr-kunde" + (offen ? "" : " zu"), style: {"--k": `var(${k.farbe || "--accent"})`}},
-        h("header", {}, h("span", {class: "sp-kunde-sym gross"}, k.symbol),
-          h("div", {}, h("h3", {}, k.name), h("span", {class: "sp-leise"}, [k.ansprechpartner, k.rolle].filter(Boolean).join(", ")))),
-        h("p", {class: "kr-text"}, offen ? k.beschreibung : `Ab Stufe ${k.stufe} (${Spiel.KARRIERE_STUFEN.find(x => x.nr === k.stufe)?.name || ""}) und ${k.abRuf} Ruf. ${k.spaeter ? "Kommt in einer späteren Version." : ""}`),
-        offen ? akteZeile(id, c) : null,
-        offen ? h("div", {class: "kr-kunde-fuss"},
-          h("span", {class: "sp-chip"}, "Stufe " + k.stufe),
-          Spiel.kundenakte.empfohlen(id) ? h("span", {class: "sp-chip uebt", title: "Durch eine Empfehlung eine Stufe früher"}, UI.symbol("sprechblase", 13), ` empfohlen von ${Spiel.kundenDaten(Spiel.kundenakte.empfehlungen()[id].von).name}`) : null,
-          sterne && sterne.anzahl ? h("span", {class: "sp-chip geld", title: `${sterne.anzahl} Tickets`}, `★ ${String(sterne.schnitt ?? sterne.mittel ?? "").replace(".", ",")}`) : null,
-          vertrag ? h("span", {class: "kr-ampel " + a[0]}, a[1] + " Vertrag: " + a[2] + ` · ${eur(k.euroProStunde)} €/h`) :
-            shopEintrag ? h("button", {type: "button", class: "knopf klein" + (shopEintrag.zustand === "kaufbar" ? " primaer" : ""), disabled: shopEintrag.zustand !== "kaufbar", title: shopEintrag.grund || "",
-              onclick: () => kaufen(shopEintrag.id, () => kundenAnsicht(c))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null) : h("span", {class: "kr-schloss", "aria-hidden": "true"}, UI.symbol("schloss", 18)));
-    });
-    c.replaceChildren(h("div", {class: "kr-seite"}, h("header", {class: "kr-kopf"}, h("h2", {}, "Kunden"),
-      h("p", {class: "sp-leise"}, `Stufe ${st.stufe} · ${st.ruf} Ruf · ${Spiel.karriere.vertragskunden().length} Wartungsverträge · ${eur(Spiel.euroProStunde())} €/h passiv`)),
-      h("div", {class: "kr-raster"}, karten)));
+    const alle = Spiel.karriere.kundenIds();
+    const offene = alle.filter(id => Spiel.karriere.kundeOffen(id));
+    const gesperrte = alle.filter(id => !Spiel.karriere.kundeOffen(id));
+    const haupt = hauptkunde(offene);
+    const offeneKarten = offene.map(id => kundeKarte(c, id, !!haupt && haupt.id === id, haupt && haupt.id === id ? haupt.kicker : ""));
+    const gesperrteKarten = gesperrte.map(id => kundeKarte(c, id, false, ""));
+    c.replaceChildren(h("div", {class: "kr-seite"},
+      h("header", {class: "kr-kopf"},
+        h("div", {}, h("span", {class: "bn-kicker"}, "Kunden · Bestand"), h("h2", {}, "Kunden")),
+        h("p", {class: "bn-lead"}, `Stufe ${st.stufe} · ${st.ruf} Ruf · ${Spiel.karriere.vertragskunden().length} Wartungsverträge · ${eur(Spiel.euroProStunde())} €/h passiv`)),
+      h("div", {class: "kr-raster"}, offeneKarten),
+      gesperrte.length ? h("section", {class: "kr-gruppe"},
+        h("h3", {}, `Gesperrt · ab Stufe ${Math.min(...gesperrte.map(id => kd(id).stufe))}`),
+        h("div", {class: "kr-raster"}, gesperrteKarten)) : null));
   }
-  /* ---------- Kundenakte (E2, Hebel 10; Präfix ka-) ---------- */
-  const herzen = v => "♥".repeat(v) + "♡".repeat(5 - v);
-  function akteZeile(id, c){
-    const v = Spiel.kundenakte.vertrauen(id), a = Spiel.kundenakte.atlas(id), bau = Spiel.kundenakte.baustellen(id).length;
-    const neu = Spiel.kundenakte.kapitel(id).filter(x => x.frei && !x.gelesen).length;
-    return h("div", {class: "ka-zeile"},
-      h("span", {class: "ka-herzen", title: `Vertrauen ${v} von 5`}, herzen(v)),
-      a ? h("span", {class: "sp-chip", title: "Geräte im Netz-Atlas, an denen du gearbeitet hast"}, UI.symbol("plan", 13), ` ${a.hell.length}/${a.gesamt.length}`) : null,
-      bau ? h("span", {class: "sp-chip folge", title: "Offene Provisorien"}, UI.symbol("provisorium", 13), ` ${bau}`) : null,
-      neu ? h("span", {class: "sp-chip uebt"}, UI.symbol("wiki", 13), ` ${neu} neu`) : null,
-      h("button", {type: "button", class: "knopf klein", onclick: () => akteAnsicht(c, id)}, "Akte ▸"));
+
+  /* ---------- Kundenakte (E2, Hebel 10; Präfix ka-) als Dossier ----------
+     Kopfkachel, vier Datenkacheln und die großen Kacheln Atlas, Geschichten, Zuletzt, Belohnungen.
+     Der Atlas sitzt in einem begrenzten Rahmen (feste Höhe, scrollbar). Ohne betreutes Gerät ist er
+     eine schmale ruhige Zeile mit echtem Weg ins Postfach statt einer großen leeren Planfläche.
+     Alle Zahlen kommen aus Spiel.kundenakte/Spiel.karriere – nichts erfunden. */
+  function kapitelZeile(c, id, x){
+    const status = x.frei ? (x.gelesen ? (x.beantwortet ? "✓ gelesen" : "gelesen") : "neu") : `ab Vertrauen ${x.ab}`;
+    return h("li", {class: x.frei ? (x.gelesen ? "gelesen" : "frei") : "zu"},
+      x.frei
+        ? h("button", {type: "button", class: "ka-kapitel-knopf", onclick: () => kapitelLesen(id, x.nr, () => akteAnsicht(c, id))},
+          h("span", {}, `${x.nr}. ${x.titel}`), h("small", {}, status))
+        : h("span", {class: "ka-kapitel-zu"}, h("span", {}, `${x.nr}. ${x.titel}`), h("small", {}, UI.symbol("schloss", 13), " " + status)));
   }
   function akteAnsicht(c, id){
     const k = kd(id), v = Spiel.kundenakte.vertrauen(id), schwelle = Spiel.kundenakte.naechsteSchwelle(id);
-    const atlas = Spiel.kundenakte.atlas(id, {breite: 520}), bau = Spiel.kundenakte.baustellen(id), kap = Spiel.kundenakte.kapitel(id);
+    const daten = Spiel.kundenakte.daten(id);
+    const atlas = Spiel.kundenakte.atlas(id, {breite: 720}), bau = Spiel.kundenakte.baustellen(id), kap = Spiel.kundenakte.kapitel(id);
     const verlauf = Spiel.st.erledigt.filter(e => e.kunde === id).slice(-5).reverse();
+    const vertrag = Spiel.karriere.hatVertrag(id), shopEintrag = Spiel.shop.liste().find(e => e.id === "vertrag:" + id);
+    const sterne = Spiel.karriere.sterneBei(id) || [];
+    const mittel = sterne.length ? Math.round(10 * sterne.reduce((a, b) => a + b, 0) / sterne.length) / 10 : null;
+    const empf = Spiel.kundenakte.empfohlen(id), von = empf ? Spiel.kundenDaten(Spiel.kundenakte.empfehlungen()[id].von) : null;
+    const gegeben = !!daten.empfohlen, belohnungen = Spiel.kundenakte.belohnungen(id);
+    const naechste = Spiel.VERTRAUEN_SCHWELLEN.find(x => x > daten.punkte);
+    const vorher = Spiel.VERTRAUEN_SCHWELLEN.filter(x => x <= daten.punkte).pop() || 0;
+    const prozent = naechste == null ? 100 : Math.round(100 * (daten.punkte - vorher) / Math.max(1, naechste - vorher));
+    const gelesen = kap.filter(x => x.gelesen).length;
     let bild = null;
-    if (atlas && UI.netzplan.zeichnung) {
+    if (atlas && atlas.hell.length && UI.netzplan.zeichnung) {
       bild = UI.netzplan.zeichnung(atlas.plan, "netzplan", null);
       bild.classList.add("ka-atlas");
       for (const g of bild.querySelectorAll(".np-geraet")) { g.onclick = null; g.onkeydown = null; g.removeAttribute("tabindex"); g.removeAttribute("role"); g.classList.toggle("ka-hell", atlas.hell.includes(g.dataset.id)); }
     }
+    const gittern = bn => "ka-block" + (bn ? " " + bn : "");
+    const kachelGeschichten = bn => h("section", {class: gittern(bn)},
+      UI.bento.kopf("Geschichten", `${gelesen}/${kap.length} gelesen`),
+      h("p", {class: "bn-meta"}, "Kapitel öffnen sich mit dem Vertrauen; jede Frage bringt beim ersten richtigen Versuch +1 Ruf."),
+      h("ol", {class: "ka-kapitel"}, kap.map(x => kapitelZeile(c, id, x))));
+    const kachelZuletzt = bn => h("section", {class: gittern(bn)},
+      UI.bento.kopf("Zuletzt", verlauf.length ? `${verlauf.length} ${verlauf.length === 1 ? "Auftrag" : "Aufträge"}` : "Noch nichts"),
+      verlauf.length ? h("ul", {class: "ka-verlauf"}, verlauf.map(e => h("li", {},
+        h("b", {}, (Spiel.ticketDef(e.id) || {}).titel || "Auftrag"),
+        h("small", {}, `${"★".repeat(Math.floor(e.sterne || 0))}${(e.sterne || 0) % 1 ? "½" : ""} · ${datumDe(e.tag)}`)))) : h("p", {class: "bn-meta"}, "Noch kein Auftrag für diesen Kunden."));
+    const kachelBelohnungen = bn => h("section", {class: gittern(bn)},
+      UI.bento.kopf("Vertrauen", "Belohnungen"),
+      h("p", {class: "bn-meta"}, "Was das Vertrauen bei diesem Kunden schon geöffnet hat."),
+      h("ul", {class: "ka-lohn"}, belohnungen.map(b => h("li", {class: b.da ? "da" : v >= b.ab ? "bald" : "zu"},
+        h("b", {}, b.text),
+        h("small", {}, b.da ? "✓ erreicht" : v >= b.ab ? "beim nächsten Auftrag" : `ab Vertrauen ${b.ab}`)))));
+    const grosseKacheln = bild
+      ? [h("section", {class: "ka-block bn-s8"},
+          UI.bento.kopf("Netz-Atlas", atlas.komplett ? "Komplett betreut" : `${atlas.hell.length} von ${atlas.gesamt.length} Geräten`),
+          h("p", {class: "bn-meta"}, "Hell sind die Geräte, an denen du schon gearbeitet hast."),
+          h("div", {class: "ka-atlas-rahmen"}, bild)),
+        h("div", {class: "ka-rechts bn-s4"}, kachelGeschichten(), kachelZuletzt(), kachelBelohnungen())]
+      : [h("section", {class: "ka-block bn-s12"},
+          UI.bento.kopf("Netz-Atlas", atlas ? "Noch kein Gerät" : "Kein Plan"),
+          h("div", {class: "ka-atlas-leer"},
+            h("p", {class: "bn-lead"}, atlas
+              ? `Der Atlas zeigt das dokumentierte Netz von ${k.name}; mit deinem ersten Auftrag leuchtet hier ein Gerät auf.`
+              : "Für diesen Kunden liegt kein dokumentiertes Netz vor."),
+            atlas ? h("button", {type: "button", class: "knopf geist klein", onclick: () => UI.app.ansicht("postfach")}, "Zum Postfach") : null)),
+        kachelGeschichten("bn-s4"), kachelZuletzt("bn-s4"), kachelBelohnungen("bn-s4")];
     c.replaceChildren(h("div", {class: "kr-seite ka-seite", style: {"--k": `var(${k.farbe || "--accent"})`}},
-      h("button", {type: "button", class: "knopf geist klein ka-zurueck", onclick: () => kundenAnsicht(c)}, "← Alle Kunden"),
-      h("header", {class: "ka-kopf"}, h("span", {class: "sp-kunde-sym gross"}, k.symbol),
-        h("div", {}, h("h2", {}, k.name), h("p", {class: "sp-leise"}, [k.ansprechpartner, k.rolle].filter(Boolean).join(", ")),
-          h("p", {class: "ka-vertrauen"}, h("span", {class: "ka-herzen gross"}, herzen(v)), ` Vertrauen ${v}/5`,
-            schwelle ? h("small", {class: "sp-leise"}, ` · noch ${schwelle.bis - schwelle.punkte} saubere ${schwelle.bis - schwelle.punkte === 1 ? "Arbeit" : "Arbeiten"} bis ${v + 1}`) : null),
-          /* Vertrauen zahlt aus (§ 20 F5): was es geöffnet hat und was als Nächstes kommt */
-          h("ul", {class: "ka-lohn"}, Spiel.kundenakte.belohnungen(id).map(b => h("li", {class: b.da ? "da" : v >= b.ab ? "bald" : "zu"},
-            h("span", {class: "ka-herzen", "aria-hidden": "true"}, "♥".repeat(b.ab)), " ", b.text, b.da ? " ✓" : v >= b.ab ? " – beim nächsten Auftrag" : ""))))),
-      h("section", {class: "ka-block"}, h("h3", {}, "Netz-Atlas ", h("small", {}, atlas ? (atlas.komplett ? "✓ komplett betreut" : `${atlas.hell.length} von ${atlas.gesamt.length} Geräten betreut`) : "")),
-        h("p", {class: "sp-leise"}, "Hell sind die Geräte, an denen du schon gearbeitet hast."), bild ? h("div", {class: "ka-atlas-rahmen"}, bild) : null),
-      h("section", {class: "ka-block"}, h("h3", {}, "Geschichten"),
-        h("ol", {class: "ka-kapitel"}, kap.map(x => h("li", {class: x.frei ? (x.gelesen ? "gelesen" : "frei") : "zu"},
-          x.frei ? h("button", {type: "button", class: "ka-kapitel-knopf", onclick: () => kapitelLesen(id, x.nr, () => akteAnsicht(c, id))}, `${x.nr}. ${x.titel}`, x.gelesen ? (x.beantwortet ? " ✓" : "") : h("span", {class: "ka-neu"}, " neu"))
-            : h("span", {}, `${x.nr}. `, UI.symbol("schloss", 13), ` ab Vertrauen ${x.ab}`))))),
-      bau.length ? h("section", {class: "ka-block"}, h("h3", {}, "Offene Baustellen"),
-        h("ul", {class: "ka-baustellen"}, bau.map(b => h("li", {}, UI.symbol("provisorium", 13), ` Provisorium bei „${b.titel}“ – `, b.imPostfach ? "der Folgeauftrag liegt im Postfach." : b.offen ? `meldet sich in etwa ${b.offen} ${b.offen === 1 ? "Auftrag" : "Aufträgen"} wieder.` : "meldet sich bald wieder.")))) : null,
-      h("section", {class: "ka-block"}, h("h3", {}, "Zuletzt"),
-        verlauf.length ? h("ul", {class: "ka-verlauf"}, verlauf.map(e => h("li", {}, `${(Spiel.ticketDef(e.id) || {}).titel || e.id} · ${"★".repeat(Math.floor(e.sterne || 0))}${(e.sterne || 0) % 1 ? "½" : ""} · ${datumDe(e.tag)}`)))
-          : h("p", {class: "sp-leise"}, "Noch kein Auftrag für diesen Kunden."))));
+      h("button", {type: "button", class: "knopf geist ka-zurueck", onclick: () => kundenAnsicht(c)}, "← Alle Kunden"),
+      h("div", {class: "bn-raster"},
+        /* Kopfkachel: wer der Kunde ist, wie viel Vertrauen da ist und was bis zur nächsten Stufe fehlt */
+        h("header", {class: "ka-block ka-kopf bn-s12"},
+          h("div", {class: "ka-person"},
+            UI.bento.monogramm(k.name, {farbe: k.farbe || "--accent", gross: true}),
+            h("div", {class: "ka-person-text"},
+              h("h2", {}, k.name),
+              h("p", {class: "ka-person-meta"}, [branche(k), kontakt(k)].filter(Boolean).join(" · ")),
+              k.beschreibung ? h("p", {class: "ka-person-lead"}, k.beschreibung) : null)),
+          h("div", {class: "ka-vertrauen"},
+            h("div", {class: "ka-vertrauen-zeile"}, h("span", {class: "kr-kunde-label"}, `Vertrauen ${v}/${SEG}`), segmente(v, true)),
+            h("div", {class: "ka-bar", role: "img", "aria-label": `Fortschritt bis zur nächsten Vertrauensstufe: ${prozent} Prozent`}, h("i", {style: {width: prozent + "%"}})),
+            h("p", {class: "bn-meta"}, naechste == null || !schwelle ? "Höchstes Vertrauen erreicht." : `Noch ${schwelle.bis - schwelle.punkte} saubere ${schwelle.bis - schwelle.punkte === 1 ? "Arbeit" : "Arbeiten"} bis Vertrauen ${v + 1}.`))),
+        /* Datenkacheln: Vertrag, Leistung, Empfehlung, Baustellen */
+        h("section", {class: "ka-block bn-s3"},
+          UI.bento.kopf("Vertrag", vertrag ? "Wartungsvertrag" : "Ohne Vertrag"),
+          vertrag ? h("p", {class: "bn-wert"}, eur(k.euroProStunde), h("small", {}, "€/h")) : h("p", {class: "bn-lead"}, "Ohne Vertrag fließt kein passives €/h."),
+          vertrag ? ampelChip(id, false) :
+            shopEintrag ? h("button", {type: "button", class: "knopf klein" + (shopEintrag.zustand === "kaufbar" ? " primaer" : ""), disabled: shopEintrag.zustand !== "kaufbar", title: shopEintrag.grund || "",
+              onclick: () => kaufen(shopEintrag.id, () => akteAnsicht(c, id))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null,
+          !vertrag && shopEintrag && shopEintrag.grund ? h("p", {class: "bn-meta"}, shopEintrag.grund) : null),
+        h("section", {class: "ka-block bn-s3"},
+          UI.bento.kopf("Leistung", "Aufträge"),
+          h("p", {class: "bn-wert"}, String(sterne.length), h("small", {}, sterne.length === 1 ? "Auftrag" : "Aufträge")),
+          h("p", {class: "bn-meta"}, mittel == null ? "noch kein Auftrag" : `Ø ${mittel.toFixed(1).replace(".", ",")} ★`),
+          verlauf[0] ? h("p", {class: "bn-meta"}, "zuletzt " + datumDe(verlauf[0].tag)) : null),
+        h("section", {class: "ka-block bn-s3"},
+          UI.bento.kopf("Empfehlung", von ? "Empfohlen" : gegeben ? "Ausgesprochen" : "Noch keine"),
+          h("p", {class: von ? "bn-lead" : "bn-meta"}, von ? `von ${von.name}` : gegeben ? (belohnungen[0] || {}).text || "Dieser Kunde hat dich weiterempfohlen." : `Ab Vertrauen ${Spiel.VERTRAUEN_LOHN.empfehlung} spricht dieser Kunde eine Empfehlung aus.`),
+          empf ? h("p", {class: "bn-meta"}, "am " + datumDe(Spiel.kundenakte.empfehlungen()[id].tag)) : null),
+        h("section", {class: "ka-block bn-s3"},
+          UI.bento.kopf("Baustellen", bau.length ? `${bau.length} offen` : "Alles sauber"),
+          bau.length ? h("ul", {class: "ka-baustellen"}, bau.map(b => h("li", {},
+            h("b", {}, "Provisorium: " + b.titel),
+            h("p", {class: "bn-meta"}, b.imPostfach ? "Der Folgeauftrag liegt im Postfach." : b.offen ? `Meldet sich in etwa ${b.offen} ${b.offen === 1 ? "Auftrag" : "Aufträgen"} wieder.` : "Meldet sich bald wieder.")))) : h("p", {class: "bn-meta"}, "Keine offenen Provisorien aus deinen Aufträgen.")),
+        /* Große Kacheln */
+        ...grosseKacheln)));
   }
   function kapitelLesen(kunde, nr, danach){
     const g = Spiel.kundenakte.lesen(kunde, nr); if (!g) return;

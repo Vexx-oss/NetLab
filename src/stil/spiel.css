@@ -34,7 +34,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 
 /* ---- Auftragszeile (eine Zeile) und Auftragsmappe (Präfix am-) ---- */
 .am-zeile{display:flex; align-items:center; gap:8px; min-width:0; flex-wrap:nowrap}
-.am-zeile .sp-kunde-sym{width:32px; height:32px; font-size:var(--fs-4); border-radius:var(--radius)}
+.am-zeile .bn-marke{width:40px; height:40px; font-size:var(--fs-3); border-radius:var(--radius-s)}
 .am-titel{flex:1 1 auto; min-width:0; display:flex; align-items:baseline; gap:8px; white-space:nowrap; overflow:hidden}
 .am-titel strong{font:800 var(--fs-4)/1.2 var(--display); overflow:hidden; text-overflow:ellipsis; min-width:0}
 .am-kunde{color:var(--muted); font-size:var(--fs-2); overflow:hidden; text-overflow:ellipsis; min-width:0}
@@ -46,7 +46,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-mehr{min-width:40px; padding:0 8px; font-size:var(--fs-5); letter-spacing:.05em}
 .lb-auftrag{container-type:inline-size}
 @container (max-width:700px){ .am-kunde{display:none} .am-lesen{font-size:0; gap:0; padding:0 11px} .am-lesen .sym{margin:0} }
-@container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .sp-kunde-sym{display:none} }
+@container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .bn-marke{width:32px; height:32px; font-size:var(--fs-2)} }
 /* `--am-kopfraum` ist der Kopfraum unter der Werkzeugleiste der Fläche (`--leiste-h`, gemessen in
    src/ui/editor.js). Ohne ihn liegt der Reiter „Brief/Ziele/Plan" exakt unter der schwebenden
    Leiste (gemessen 09.10.2026: Mappen-Reiter y=120–164, Leiste y=121–169) – und durch deren
@@ -71,6 +71,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-inhalt{flex:1 1 auto; min-height:0; overflow:auto; padding:14px 18px 6px}
 .am-brief{display:flex; flex-direction:column; gap:10px}
 .am-absender{display:flex; align-items:center; gap:8px; color:var(--muted); font-size:var(--fs-2)}
+.am-absender .bn-marke{width:32px; height:32px; font-size:var(--fs-2)}
 .am-absender b, .sp-demo li.jetzt, .sp-demo-kopf b{color:var(--ink)}
 .am-text{display:flex; flex-direction:column; gap:8px; font-size:var(--fs-4); line-height:1.55; max-width:62ch}
 .am-text p, .sp-brief-text p{margin:0}
@@ -79,7 +80,6 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-ziele-liste{display:flex; flex-direction:column; gap:8px; padding-bottom:6px}
 .am-ziele-liste .sp-ziele li{font-size:var(--fs-3)}
 .am-ziel-text{flex:1 1 auto; min-width:0}
-.sp-naechste{padding:4px 8px; border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 var(--radius-xs) var(--radius-xs) 0}
 .am-antwort-zeile{display:flex; gap:4px; margin-top:4px; align-items:center}
 .am-antwort{flex:1 1 140px; max-width:220px; min-width:0; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3) var(--mono)}
 .am-antwort:focus{outline:2px solid var(--accent); outline-offset:1px}
@@ -128,35 +128,59 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 @keyframes sp-rein{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
 
 
-/* ---- Hilfeleiter ---- */
-.sp-hilfe{display:flex; flex-direction:column; gap:8px; padding:8px 12px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line); max-height:min(32vh, 290px); overflow:auto; animation:sp-rein var(--dauer) ease-out}   /* Fläche bleibt nutzbar; Inhalt scrollt */
-.sp-hilfe-kopf{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
-.sp-leiter{list-style:none; margin:0; padding:0; display:flex; gap:4px; flex-wrap:wrap}
-.sp-leiter li{display:flex; align-items:center; gap:4px; font-size:var(--fs-2); color:var(--faint)}
+/* ---- Hilfeleiter (Bento 2.5 § 3.1: Diagnose-Assistent statt Werbeplakat) ----
+   Kopf aus Mikrolabel und kompakter Stufenleiste, Inhalt als ruhige Bento-Inseln. Der
+   Simulationshinweis ist eine leise Meta-Zeile – bewusst KEIN .sp-leise: editor.css:357 setzt
+   `.lb-auftrag .sp-leise` auf 28 px/800 (belegter Befund „44-px-Grünslogan", gemessen 30.10.2026). */
+.sp-hilfe{display:flex; flex-direction:column; gap:12px; padding:12px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); max-height:min(32vh, 320px); overflow:auto; animation:sp-rein var(--dauer) ease-out}
+.sp-hilfe-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px 16px; flex-wrap:wrap; padding-bottom:8px; border-bottom:1px solid var(--line)}
+.sp-hilfe-titel, .sp-pf-titel, .sp-senior-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.sp-hilfe-name{font:700 var(--fs-4)/1.2 var(--display); color:var(--ink)}
+.sp-leiter{list-style:none; margin:0; padding:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.sp-leiter li{display:flex; align-items:center; gap:4px; color:var(--faint); font-size:var(--fs-2)}
 .sp-leiter li span{display:none}
-.sp-leiter li.an span{display:inline; color:var(--ink); font-weight:600}
-.sp-leiter button{width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line-2); background:var(--panel); color:var(--faint); font:700 var(--fs-2) var(--mono)}
-.sp-leiter li.frei button{border-color:var(--accent); color:var(--accent)}
-.sp-leiter li.an button{background:var(--accent); color:var(--accent-ink)}
-.sp-leiter button:disabled{cursor:default; opacity:.6}
-.sp-hilfe-inhalt p{margin:0 0 4px; font-size:var(--fs-3); line-height:1.5}
-.sp-hilfe-fuss{display:flex; gap:8px; align-items:center; position:sticky; bottom:-10px; margin:0 -12px -8px; padding:8px 12px 8px; background:linear-gradient(transparent, var(--panel-2) 10px)}   /* nächste Stufe immer erreichbar */
-.sp-hilfe-fuss small{opacity:.8}
-.sp-check{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px}
-.sp-check label{display:flex; gap:8px; align-items:flex-start; font-size:var(--fs-3); cursor:pointer}
-.sp-check input{margin-top:4px; accent-color:var(--accent)}
-.sp-check small{display:block; color:var(--faint); font-size:var(--fs-2)}
-.sp-senior{display:flex; gap:12px; align-items:flex-start}
-.sp-senior p{font-style:italic; font-size:var(--fs-4)}
+.sp-leiter button{position:relative; width:28px; height:28px; border-radius:50%; border:1px solid var(--line-2); background:var(--panel-2); color:var(--faint); font:700 var(--fs-2) var(--mono)}
+.sp-leiter button::after{content:""; position:absolute; inset:-8px; border-radius:50%}
+.sp-leiter li.frei button{border-color:var(--line-2); color:var(--muted)}
+.sp-leiter li.an button{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.sp-leiter button:disabled{cursor:default; opacity:.5}
+.sp-hilfe-inhalt, .sp-hilfe-block{display:flex; flex-direction:column; gap:8px; min-width:0}
+.sp-hilfe-werkzeuge, .sp-check, .sp-hilfe-hinweise, .sp-brief-ziele ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.sp-hilfe-lead{margin:0; max-width:72ch; color:var(--muted); font:400 var(--fs-3)/1.5 var(--body)}
+.sp-hilfe-meta{display:flex; align-items:flex-start; gap:4px; margin:0; color:var(--faint); font:400 var(--fs-2)/1.45 var(--body)}
+.sp-hilfe-meta svg{flex:0 0 auto; margin-top:4px}
+.sp-naechste{display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-left:2px solid var(--accent); border-radius:var(--radius-s); background:var(--accent-soft)}
+.sp-naechste-label{color:var(--accent); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.sp-naechste p{margin:0; color:var(--ink); font:400 var(--fs-3)/1.5 var(--body)}
+.sp-hilfe-werkzeuge li{display:flex; align-items:flex-start; gap:8px; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--muted); font:400 var(--fs-2)/1.5 var(--body)}
+.sp-hilfe-werkzeuge svg, .sp-hilfe-hinweise svg{flex:0 0 auto; margin-top:4px; color:var(--faint)}
+.sp-hilfe-werkzeuge span, .sp-hilfe-hinweise span{min-width:0}
+.sp-hilfe-fuss{display:flex; align-items:center; gap:8px; flex-wrap:wrap; position:sticky; bottom:-12px; margin:0 -16px -12px; padding:8px 16px 12px; border-top:1px solid var(--line); background:var(--panel)}
+.sp-hilfe-block > .knopf{align-self:flex-start; min-height:44px}
+.sp-hilfe-fuss .knopf, .sp-leer .knopf{min-height:44px}
+.sp-hilfe-preis{font:500 var(--fs-2)/1 var(--body); opacity:.85}
+.sp-check li{padding-top:4px; border-top:1px solid var(--line)}
+.sp-check li:first-child{padding-top:0; border-top:0}
+.sp-check label{display:flex; align-items:flex-start; gap:8px; cursor:pointer}
+.sp-check input{flex:0 0 auto; width:16px; height:16px; margin-top:4px; accent-color:var(--accent)}
+.sp-check b{color:var(--ink); font-weight:700}
+.sp-check-werkzeug{display:block; margin-top:4px; color:var(--faint); font:400 var(--fs-2)/1.4 var(--body)}
+.sp-senior{display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.sp-hilfe-marke{display:grid; place-items:center; flex:0 0 auto; width:32px; height:32px; border-radius:var(--radius-s); background:var(--accent-soft); color:var(--accent)}
+.sp-senior p{margin:0; color:var(--ink); font:italic 400 var(--fs-3)/1.5 var(--body)}
+.sp-senior-quelle{color:var(--faint); font:400 var(--fs-2)/1.4 var(--body)}
+/* Senior-Symbol: auch die Kundenakte (karriere.js) und die Aufstiegsfeier nutzen diese Klasse – unverändert. */
 .sp-senior-sym{font-size:var(--fs-6); line-height:1}
 .sp-senior-sym.gross{font-size:calc(var(--fs-6) * 2)}
-.sp-demo{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:8px}
-.sp-demo li{font-size:var(--fs-3); color:var(--faint)}
+.sp-hilfe-hinweise li{display:flex; align-items:flex-start; gap:8px; color:var(--muted); font:400 var(--fs-3)/1.5 var(--body)}
+.sp-demo{margin:0; padding-left:24px; display:flex; flex-direction:column; gap:8px}
+.sp-demo li{color:var(--faint); font:400 var(--fs-3)/1.45 var(--body)}
 .sp-demo li.fertig, .sp-pruefliste li.ok > span, .am-fertig .am-titel strong{color:var(--ok)}
+.sp-demo li.jetzt{color:var(--ink); font-weight:600}
 .sp-demo li.fertig::marker{content:"✓ "}
-.sp-demo-kopf{line-height:1.45}
-.sp-demo-cli{margin:4px 0 0; padding:8px 8px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 var(--fs-2)/1.5 var(--mono); white-space:pre-wrap}
-.sp-demo-felder{margin:4px 0 0; padding-left:16px; font-size:var(--fs-2)}
+.sp-demo-kopf{line-height:1.5}
+.sp-demo-cli{margin:4px 0 0; padding:8px 12px; border-radius:var(--radius-xs); background:var(--bg); color:var(--ok); font:500 var(--fs-2)/1.5 var(--mono); white-space:pre-wrap}
+.sp-demo-felder{margin:4px 0 0; padding-left:24px; font:400 var(--fs-2)/1.5 var(--body)}
 
 /* ---- Overlays: Ergebnis, Willkommen, Vorhersage ---- */
 .sp-overlay{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(6,10,16,.55); backdrop-filter:blur(3px); opacity:0; transition:opacity var(--dauer) ease}
@@ -217,68 +241,125 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-vorhersage h3{font:800 var(--fs-5)/1.2 var(--display)}
 .sp-vorhersage .sp-knoepfe{justify-content:center}
 
-/* ---- Postfach ---- */
+/* ---- Postfach (Bento 2.5 § 3.1: Posteingang eines IT-Dienstleisters) ----
+   Kopf aus Mikrolabel, Titel, Kontextsatz, Kennzahlen und ruhiger Aktionszeile; Hauptbento mit
+   Liste (400–440 px) und Leser. Unter 900 px bleibt der Leser das Blatt von unten. Kundenfarbe
+   nur als Monogramm und 2-px-Rail; das Kunden-Emoji aus DATEN wird durch das Monogramm ersetzt.
+   Keine erfundenen Zahlen: die Kennzahlen kommen ausschließlich aus Spiel.*. */
 .sp-postfach{display:flex; flex-direction:column; height:100%; min-height:0; padding:16px 24px 0; gap:12px; background:var(--bg)}
-.sp-pf-kopf{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap}
-.sp-pf-kopf h2, .sp-brief h3{font:800 var(--fs-6)/1.15 var(--display)}
-.sp-pf-aktionen{display:flex; gap:8px; align-items:center}
-.sp-pf-teile{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(280px, 400px) minmax(0, 1fr); gap:16px; padding-bottom:18px}
-.sp-pf-liste{display:flex; flex-direction:column; gap:8px; overflow:auto; min-height:0; padding:0px 4px 8px 0px; scrollbar-width:thin}
-.sp-mail{display:flex; gap:12px; text-align:left; padding:12px 12px; border-radius:var(--radius); border:1px solid var(--line); background:var(--panel); color:var(--ink); position:relative;
-  transition:border-color var(--dauer), background var(--dauer), transform var(--dauer)}
-.sp-mail:hover{border-color:var(--line-2); transform:translateX(2px)}
-.sp-mail.an{border-color:var(--k, var(--accent)); background:color-mix(in srgb, var(--k, var(--accent)) 8%, var(--panel))}
-.sp-mail.neu::after{content:""; position:absolute; top:12px; right:12px; width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--panel)}
-.sp-mail.eilig, .sp-weg-chips li.nicht{border-color:var(--warn)}   /* an der LETZTEN Fundstelle zusammengeführt: `.sp-mail.an` + `.eilig` können am selben Element stehen */
-/* Kundenpost (Nachrichten ohne Auftrag): ruhiger als Aufträge, unter einem Trenner */
-.sp-pf-trenner{margin:8px 0px 0; color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
-.sp-post{background:var(--panel-2); border-style:dashed}
-.sp-post.an{border-style:solid}
-.sp-mail-text{display:flex; flex-direction:column; gap:0px; min-width:0; flex:1 1 auto}
-.sp-mail-von{color:var(--muted); font-size:var(--fs-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:14px}
-.sp-mail b{font:700 var(--fs-4)/1.25 var(--body)}
-.sp-mail.neu b{font-weight:800}
-.sp-mail-vorschau{color:var(--faint); font-size:var(--fs-2); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.sp-pf-kopf{display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:end; gap:12px 24px; padding-bottom:12px; border-bottom:1px solid var(--line)}
+.sp-pf-kopf h2{font:700 var(--fs-6)/1.1 var(--display); letter-spacing:-.02em; margin:0}
+.sp-pf-kontext{margin:0; max-width:72ch; color:var(--muted); font:400 var(--fs-3)/1.45 var(--body)}
+.sp-pf-kennzahlen{display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px}
+.sp-kennzahl{display:inline-flex; flex-direction:column; align-items:flex-start; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
+.sp-kennzahl b{color:var(--ink); font:700 var(--fs-5)/1 var(--display); font-variant-numeric:tabular-nums}
+.sp-kennzahl span{color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase}
+.sp-kennzahl.neu b{color:var(--accent)}
+.sp-pf-aktionen{grid-column:1 / -1; display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px}
+.sp-pf-aktionen .kr-tag{display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; color:var(--muted); font:400 var(--fs-2)/1.35 var(--body)}
+.sp-pf-aktionen .kr-tag > span{display:inline-flex; align-items:center; gap:4px}
+.sp-pf-aktionen .knopf, .sp-pf-aktionen .kr-tag .knopf{min-height:44px; padding:0 12px; border-radius:var(--radius-s); border:1px solid var(--line); background:var(--panel); color:var(--ink); font:600 var(--fs-2)/1 var(--body)}
+.sp-pf-aktionen .knopf:hover, .sp-pf-aktionen .kr-tag .knopf:hover{background:var(--panel-2); border-color:var(--line-2)}
+.sp-pf-aktionen .kr-tag .knopf.geist{border:1px solid transparent; background:none}
+.sp-pf-teile{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0, 420px) minmax(0, 1fr); gap:16px; padding-bottom:16px}
+.sp-pf-liste{display:flex; flex-direction:column; min-height:0; overflow:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); scrollbar-width:thin}
+.sp-mail{display:flex; align-items:flex-start; gap:12px; width:100%; padding:12px; border:0; border-bottom:1px solid var(--line); border-radius:0; background:transparent; color:var(--ink); text-align:left; transition:background var(--dauer) var(--ease-standard)}
+.sp-mail:last-child{border-bottom:0}
+.sp-mail:hover{background:var(--panel-2)}
+.sp-mail.an{background:var(--panel-2); box-shadow:inset 2px 0 0 var(--k, var(--accent))}
+.sp-mail.eilig{box-shadow:inset 2px 0 0 var(--warn)}
+.sp-mail.klingelt{box-shadow:inset 2px 0 0 var(--ok)}
+.sp-mail-text{display:flex; flex-direction:column; gap:4px; min-width:0; flex:1 1 auto}
+.sp-mail-kopf{display:flex; align-items:baseline; flex-wrap:wrap; gap:0 8px; min-width:0}
+.sp-mail-name{color:var(--ink); font:600 var(--fs-2)/1.3 var(--body); overflow-wrap:anywhere}
+.sp-mail-person{color:var(--faint); font:400 var(--fs-2)/1.3 var(--body); overflow-wrap:anywhere}
+.sp-mail-betreff{color:var(--ink); font:600 var(--fs-3)/1.35 var(--body); overflow-wrap:anywhere}
+.sp-mail.neu .sp-mail-betreff{font-weight:700}
+.sp-mail-vorschau{display:block; color:var(--faint); font:400 var(--fs-2)/1.35 var(--body); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.sp-mail .sp-chips{gap:4px; margin-top:4px}
+.sp-mail .sp-chip{min-height:0; padding:0 8px; border-radius:999px; background:var(--panel-3); color:color-mix(in srgb, var(--ink) 78%, var(--muted)); font:600 var(--fs-1)/1.7 var(--mono); letter-spacing:.02em}
+.sp-mail .sp-chip.form{color:color-mix(in srgb, var(--ink) 78%, var(--muted))}
+.sp-mail .sp-chip.geld{color:var(--ink); font-variant-numeric:tabular-nums}
+.sp-mail .sp-chip.neu{background:var(--accent-soft); color:var(--accent); font-weight:600}
+.sp-mail .sp-chip.angerissen{background:var(--panel-3); color:color-mix(in srgb, var(--ink) 78%, var(--muted))}
+.sp-mail .sp-chip.eilig{background:var(--warn-soft); color:var(--warn); font-weight:600}
+.sp-mail .sp-chip.klingelt{background:var(--ok-soft); color:var(--ok); font-weight:600}
+.sp-post .sp-mail-vorschau{color:var(--muted); font-weight:600; line-height:1.4}
+.sp-pf-trenner{margin:0; padding:12px 12px 8px; border-bottom:1px solid var(--line); color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.sp-leer{display:flex; flex-direction:column; align-items:flex-start; gap:12px; margin:12px; padding:16px; border:1px dashed var(--line-2); border-radius:var(--radius); color:var(--muted); font:400 var(--fs-3)/1.5 var(--body)}
+.sp-leer p{max-width:40ch; margin:0}
+/* Chips: eine Form, vier Bedeutungen – auch Kunden- und Lernstandansicht nutzen sie (karriere.js). */
 .sp-chips{display:flex; gap:4px; flex-wrap:wrap; margin-top:4px}
-.sp-chip{padding:0px 8px; border-radius:999px; background:var(--panel-3); color:var(--muted); font:600 var(--fs-1)/1.6 var(--body)}
+.sp-chip{padding:0 8px; border-radius:999px; background:var(--panel-3); color:color-mix(in srgb, var(--ink) 78%, var(--muted)); font:600 var(--fs-1)/1.6 var(--body)}
 .sp-chip.niv-AP2, .sp-chip.wartung, .sp-chip.flow-geruest{background:var(--info-soft); color:var(--info)}
 .sp-chip.geld{color:var(--geld)}
 .sp-chip.frist, .sp-chip.flow-verwicklung, .sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
-.sp-klingel{display:inline-block; font-style:normal; animation:ev-klingeln var(--dauer-lang) ease-in-out 3}   /* dreimal läuten statt endlos (R5) — der Chip „klingelt“ bleibt als Signal stehen */
-.sp-mail.klingelt{border-color:var(--ok)}
-/* Flow-Regler (§ 20 F6): die beiden Flow-Chips stehen bei ihren Farbgruppen oben; .sp-chip.folge bei warn */
+.sp-weg-chips li.nicht{border-color:var(--warn)}
+/* Flow-Regler (§ 20 F6): Gerüst-Tipp in der Auftragsmappe */
 .am-geruest{margin:0; padding:8px 12px; border-radius:var(--radius); background:var(--info-soft); color:var(--ink); font-size:var(--fs-3); line-height:1.45}
 .am-geruest small{display:block; margin-top:4px; color:var(--muted); font-size:var(--fs-2)}
 .sp-chip.form{background:var(--panel-3); color:var(--text)}
 .sp-chip.form-terminal, .sp-chip.form-forensik{font-family:var(--mono)}
 .sp-chip.form-projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
-.sp-leser{min-height:0; overflow:auto; scrollbar-width:thin}
-.sp-brief{display:flex; flex-direction:column; gap:16px; padding:24px 24px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--k, var(--accent))}
-/* .sp-brief h3 nutzt denselben Typo-Block wie .sp-pf-kopf h2 (R10). */
-.sp-brief-text{display:flex; flex-direction:column; gap:8px; font-size:var(--fs-4); line-height:1.6; max-width:62ch}
-.sp-brief-info{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px}
-.sp-brief-info > div{padding:8px 12px; border-radius:var(--radius); background:var(--panel-2)}
-.sp-brief-info small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
-.sp-brief-info p{margin:4px 0 0; font-size:var(--fs-3)}
-.sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{position:sticky; bottom:0; margin:0 -24px; padding:12px 24px; background:linear-gradient(transparent, var(--panel) 12px); z-index:10}   /* „Auftrag annehmen“ bleibt sichtbar, wenn der Brief länger ist als der Platz (Rauchtest § 22: 960 × 700 in der ersten Stunde) */
-.sp-leer{display:flex; flex-direction:column; gap:12px; align-items:flex-start; padding:16px; border-radius:var(--radius); border:1px dashed var(--line-2); color:var(--muted)}
-@media (max-width: 900px){ .sp-pf-teile{grid-template-columns:1fr} .sp-pf-teile > .sp-leser{display:none} }
-/* Schmal (F1): Leser als Blatt von unten */
+/* Leser: echter Brief mit Absenderblock, Betreff, Text, Datenkacheln, Zielen, Hauptaktion */
+.sp-leser{min-height:0; overflow:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); scrollbar-width:thin}
+.sp-leser-leer{display:flex; align-items:center; justify-content:center; height:100%; padding:24px; text-align:center; color:var(--muted); font:400 var(--fs-3)/1.5 var(--body)}
+.sp-brief{display:flex; flex-direction:column; gap:16px; min-height:100%; padding:24px; border:0; border-radius:0; background:transparent; box-shadow:inset 0 2px 0 var(--k, var(--accent))}
+.sp-brief-kopf{display:flex; align-items:center; gap:12px; min-width:0}
+.sp-brief-absender{display:flex; flex-direction:column; gap:4px; justify-content:center; min-width:0}
+.sp-brief-firma, .sp-brief-info small, .sp-brief-ziele strong, .sp-brief-kundenkontext strong, .sp-brief-kontextzeile small{color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.sp-brief-person{color:var(--ink); font:600 var(--fs-4)/1.3 var(--display); overflow-wrap:anywhere}
+.sp-brief-titel{margin:0; color:var(--ink); font:700 var(--fs-5)/1.2 var(--display); letter-spacing:-.01em; overflow-wrap:anywhere}
+.sp-brief-text{display:flex; flex-direction:column; gap:8px; max-width:64ch; color:var(--ink); font:400 var(--fs-3)/1.7 var(--body)}
+.sp-brief-info{display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px}
+.sp-brief-info > div{display:flex; flex-direction:column; gap:4px; min-width:0; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.sp-brief-info p{margin:0; color:var(--ink); font:400 var(--fs-3)/1.45 var(--body); overflow-wrap:anywhere}
+.sp-brief-ziele, .sp-brief-kundenkontext{display:flex; flex-direction:column; gap:8px; padding:12px 16px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.sp-brief-ziele li{display:flex; align-items:flex-start; gap:8px; color:var(--ink); font:400 var(--fs-3)/1.45 var(--body)}
+.sp-brief-kontextzeile{display:grid; grid-template-columns:96px minmax(0, 1fr); align-items:baseline; gap:8px; margin:0; color:var(--ink); font:400 var(--fs-3)/1.45 var(--body)}
+.sp-brief-kontextzeile span{min-width:0; overflow-wrap:anywhere}
+.sp-brief-ziele .sp-haken{width:16px; height:16px; flex:0 0 auto; margin-top:0; transform:none; background:none; border:1px solid var(--line-2); color:var(--faint); font-size:var(--fs-2)}
+.sp-brief > .sp-knoepfe{margin-top:auto; padding-top:8px; gap:8px}
+.sp-brief > .sp-knoepfe .knopf{min-height:44px; padding:0 16px}
+/* Hauptaktion bleibt ohne Scrollen erreichbar (Rauchtest § 22: „Auftrag annehmen“ bei 960 × 700). */
+.sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{position:sticky; bottom:0; z-index:10; margin:auto -24px 0; padding:12px 24px; border-top:1px solid var(--line); background:var(--panel)}
+/* Schmal (< 900 px): Leser als Blatt von unten – Verhalten und Klassen unverändert. */
 .sp-overlay.blatt{align-items:flex-end; padding:0}
 .sp-overlay.blatt .sp-karte{width:min(720px, 100%); max-height:88vh; padding:8px 12px 12px; border-radius:var(--radius) var(--radius-s) 0 0; border-bottom:0; transform:translateY(40px)}
-.sp-blatt{display:flex; flex-direction:column; gap:6px}
+.sp-blatt{display:flex; flex-direction:column; gap:8px}
 .sp-blatt-griff{align-self:center; width:56px; height:16px; padding:0; border:0; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer}
 .sp-blatt-griff::before{content:""; width:44px; height:5px; border-radius:var(--radius-xs); background:var(--line-2)}
 .sp-blatt-griff:hover::before, .sp-blatt-griff:focus-visible::before{background:var(--muted)}
-.sp-blatt-leser{overflow:visible}
-.sp-blatt-leser .sp-brief{padding:16px 16px 18px}
-.sp-blatt-leser .sp-knoepfe{position:sticky; bottom:-14px; padding:8px 0 4px; background:var(--panel)}
+.sp-blatt-leser{overflow:visible; border:0; border-radius:0; background:transparent}
+.sp-blatt-leser .sp-brief{padding:16px; gap:12px}
+.sp-blatt-leser .sp-brief > .sp-knoepfe{position:sticky; bottom:0; margin:auto 0 0; padding:8px 0 4px; background:var(--panel)}
 /* (§ 8) Kein eigener Bewegungs-Block mehr: basis.css:91 schaltet JEDE Animation und jeden Übergang
    zentral ab (1 ms, einmalig). Der sichtbare Zustand der Blatt-Karte hat ohnehin `transform:none`
    (`.sp-overlay.blatt.da .sp-karte`), die Regel hier war also doppelt. */
 
 
 
+/* Hilfeleiter auf niedrigen Fenstern: ganze Diagnose sichtbar, statt Text unter dem Fuß abzuschneiden. */
+@media (max-width:900px){
+  .sp-hilfe{max-height:min(56vh, 460px)}
+}
+/* Tablet: schmalere Liste, Datenkacheln zweispaltig – der Leser behält lesbare Breite. */
+@media (max-width:1200px){
+  .sp-pf-teile{grid-template-columns:minmax(0, 360px) minmax(0, 1fr)}
+  .sp-brief{padding:16px; gap:12px}
+  .sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{margin:auto -16px 0; padding:12px 16px}
+  .sp-brief-info{grid-template-columns:repeat(4, minmax(0, 1fr))}
+  .sp-brief-info > div{padding:4px 8px}
+  .sp-brief-kontextzeile{font-size:var(--fs-2)}
+}
+/* Schmal (< 900 px): Leser als Blatt von unten – Liste über die volle Breite, Verhalten unverändert. */
+@media (max-width:900px){
+  .sp-postfach{padding:12px 16px 0}
+  .sp-pf-kopf{grid-template-columns:minmax(0, 1fr); align-items:start; gap:12px}
+  .sp-pf-kennzahlen, .sp-pf-aktionen{justify-content:flex-start}
+  .sp-pf-teile{grid-template-columns:minmax(0, 1fr); padding-bottom:12px}
+  .sp-pf-teile > .sp-leser{display:none}
+}
 /* Aufstieg: kleine Feier (respektiert „Bewegung reduzieren“) */
 .sp-fest{background:radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--geld) 20%, transparent), transparent 62%)}
 .sp-fest .sp-senior-sym{animation:sp-fest-pop var(--dauer-lang) var(--ease-pop) both}
@@ -299,214 +380,3 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-notiz{display:block; width:100%; margin-top:4px; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3)/1.4 var(--body); resize:vertical}
 .sp-schuld{margin:8px 0 0; font-size:var(--fs-3); color:var(--warn)}
 .sp-akte-zeile{margin:8px 0 0; font-size:var(--fs-3)}
-/* ============================================================================
-   POSTFACH · BENTO-DATENPANEL (Umsetzung 30.10.2026, design-lagebild)
-   ----------------------------------------------------------------------------
-   Abgenommene Richtung „Bento-Board": Kopf als Datenleiste, Liste als dichtes
-   Datenpanel (Status-Punkt, Kunde, Titel, Form/Dauer/Lohn als Textmarken,
-   Auswahl ueber feine Akzentkante), Detail als strukturiertes Panel mit
-   Kacheln, Brieftext, Zielen und ruhiger Aktionsleiste. CSS-only: nur
-   bestehende Klassen, unter 900 px bleibt die Blatt-Ansicht.
-
-   Datenlage: Kennzahlen, die im Markup nicht stehen, werden NICHT erfunden.
-   Vorhanden sind der Zaehlertext in .sp-pf-kopf .sp-leise (Auftraege, Stufe,
-   erledigt) und die Serie in .kr-tag — beide werden als Datenmarken gesetzt.
-   Ø-Dauer und Lohnsumme fehlen deshalb (bewusst); die Detail-Kacheln kommen
-   aus den vorhandenen .sp-brief-info-Feldern (Symptom/Übt/Dauer/Form/Lohn)
-   plus der Ziele-Kachel (.sp-brief-ziele).
-
-   Regelwerk: Schrift ausschliesslich var(--fs-1..5), Abstand aus
-   {0,4,8,12,16,24,32}, Radius nur var(--radius…)/0, z-index 10, Dauer
-   var(--dauer), keine Farb-Literale, keine identischen Deklarationsbloecke.
-   ============================================================================ */
-
-/* ---- Kopf: Datenleiste (Padding/Rhythmus stehen in der Grundregel .sp-postfach) --- */
-.sp-postfach .sp-pf-kopf{
-  display:grid;grid-template-columns:minmax(0,1fr) auto;
-  align-items:end;gap:12px 24px;
-  padding-bottom:12px;border-bottom:1px solid var(--line)
-}
-.sp-postfach .sp-pf-kopf > div:first-child{min-width:0}
-.sp-postfach .sp-pf-kopf h2{font:600 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em;margin:0}
-.sp-postfach .sp-pf-kopf h2::before{
-  content:"POSTFACH · AUFTRAGSEINGANG";display:block;margin-bottom:8px;
-  font:600 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--faint)
-}
-/* Status-Kachel: vorhandener Zaehlertext (Auftraege · Stufe · erledigt) */
-.sp-postfach .sp-pf-kopf .sp-leise{
-  display:inline-block;margin:8px 0 0;padding:4px 8px;
-  border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel);
-  font:500 var(--fs-1)/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);font-variant-numeric:tabular-nums
-}
-/* Rechte Datenmarke: Serie (vorhandener Text), Aktionen ruhig */
-.sp-postfach .sp-pf-aktionen{display:flex;align-items:flex-end;gap:8px;padding-bottom:0;flex-wrap:wrap;justify-content:flex-end}
-.sp-postfach .sp-pf-aktionen .kr-tag{
-  display:flex;align-items:center;gap:8px;padding:4px 8px;
-  border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel);
-  font:500 var(--fs-1)/1.25 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)
-}
-.sp-postfach .sp-pf-aktionen .kr-tag .knopf{
-  min-height:44px;padding:0;border:0;background:none;color:var(--muted);
-  font:500 var(--fs-1)/1 var(--mono);letter-spacing:.06em;text-transform:uppercase
-}
-.sp-postfach .sp-pf-aktionen .kr-tag .knopf:hover{color:var(--ink);background:none}
-.sp-postfach .sp-pf-aktionen .knopf,
-.sp-postfach .sp-pf-aktionen .knopf.klein{
-  min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:var(--radius-xs);
-  background:var(--panel);color:var(--ink);box-shadow:none;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.08em;text-transform:uppercase
-}
-.sp-postfach .sp-pf-aktionen .knopf:hover{background:var(--panel-2);border-color:var(--line-2);filter:none;transform:none}
-
-/* ---- Liste: dichtes Datenpanel ---------------------------------------- */
-.sp-postfach .sp-pf-teile{grid-template-columns:minmax(380px,450px) minmax(0,1fr);gap:12px;padding-bottom:16px;align-items:stretch;min-height:0}
-.sp-postfach .sp-pf-liste{
-  position:relative;gap:0;padding:32px 0 0;overflow:auto;
-  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-s)
-}
-/* Spaltenkopf: links Auftrag/Kunde, rechts Form/Dauer/Lohn (zwei Bandhaelften) */
-.sp-postfach .sp-pf-liste::before,
-.sp-postfach .sp-pf-liste::after{
-  content:"";position:absolute;top:0;height:32px;z-index:10;
-  display:block;padding:0 12px;background:var(--panel-2);
-  border-bottom:1px solid var(--line);
-  font:600 var(--fs-2)/32px var(--body);letter-spacing:0;text-transform:none;color:var(--faint);
-  white-space:nowrap;overflow:hidden
-}
-.sp-postfach .sp-pf-liste::before{content:"Auftrag · Kunde";left:0;right:50%}
-.sp-postfach .sp-pf-liste::after{content:"Form · Dauer · Lohn";right:0;left:50%;text-align:right}
-/* Zeilenraster, Status-Punkt, Auswahl = feine Akzentkante */
-.sp-postfach .sp-mail{
-  display:grid;grid-template-columns:8px minmax(0,1fr);column-gap:8px;
-  align-items:center;
-  padding:8px 12px;border:0;border-bottom:1px solid var(--line);border-radius:0;
-  background:transparent;box-shadow:none;transform:none;text-align:left;
-  transition:background var(--dauer) var(--ease-standard)
-}
-.sp-postfach .sp-mail:last-child{border-bottom:0}
-.sp-postfach .sp-mail:hover{background:var(--panel-2);border-color:var(--line);transform:none}
-.sp-postfach .sp-mail::before{
-  content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  width:6px;height:6px;border-radius:50%;background:var(--line-2);
-  transition:background var(--dauer) var(--ease-standard)
-}
-.sp-postfach .sp-mail.neu::before,
-.sp-postfach .sp-mail.an::before{background:var(--accent)}
-.sp-postfach .sp-mail.an{background:var(--panel-2);box-shadow:inset 2px 0 0 var(--accent)}
-.sp-postfach .sp-mail.eilig{box-shadow:inset 2px 0 0 var(--warn)}
-.sp-postfach .sp-mail.neu::after{content:none;display:none}
-.sp-postfach .sp-mail-text{
-  grid-column:2;display:grid;grid-template-columns:minmax(0,1fr) auto;
-  grid-template-areas:"von meta" "titel meta";
-  column-gap:12px;row-gap:0;align-items:baseline;min-width:0
-}
-.sp-postfach .sp-mail-von{
-  grid-area:von;padding:0;
-  font:600 var(--fs-1)/1.25 var(--mono);letter-spacing:.1em;text-transform:uppercase;
-  color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis
-}
-.sp-postfach .sp-mail b{
-  grid-area:titel;font:600 var(--fs-2)/1.3 var(--body);letter-spacing:.005em;color:var(--ink);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
-}
-.sp-postfach .sp-mail.neu b{font-weight:700}
-.sp-postfach .sp-chips{
-  grid-area:meta;display:flex;align-items:center;gap:8px;margin:0;
-  flex-wrap:nowrap;justify-self:end
-}
-.sp-postfach .sp-chip{
-  min-height:0;padding:0;border-radius:0;background:none;white-space:nowrap;
-  font:500 var(--fs-1)/1.2 var(--mono);letter-spacing:.02em;color:var(--muted);
-  font-variant-numeric:tabular-nums
-}
-.sp-postfach .sp-chip + .sp-chip::before{content:"·";margin-right:8px;color:var(--line-2)}
-.sp-postfach .sp-chip.geld{color:var(--ink);font-weight:600}
-.sp-postfach .sp-chip.form{color:var(--faint)}
-.sp-postfach .sp-pf-trenner{padding:8px 12px;border-bottom:1px solid var(--line);margin:0;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-.sp-postfach .sp-leer{background:var(--panel-2);border:1px dashed var(--line-2);border-radius:var(--radius-xs)}
-/* ein Block fuer alle ausgeblendeten Deko-Reste (Emoji, laute Chips, Glanz) */
-.sp-postfach .sp-kunde-sym,
-.sp-postfach .sp-mail-vorschau,
-.sp-postfach .sp-pf-aktionen .kr-tag svg,
-.sp-postfach .sp-chip[class*="niv-"],
-.sp-postfach .sp-chip.uebt,
-.sp-postfach .sp-chip.klingelt,
-.sp-postfach .sp-chip.frist,
-.sp-postfach .sp-chip.folge,
-.sp-postfach .sp-chip[class*="flow-"],
-.sp-postfach .sp-chip.wahl,
-.sp-postfach .sp-chip.wartung,
-.sp-postfach .sp-chip.wdh,
-.sp-postfach .sp-brief .sp-knoepfe .knopf.primaer::after{display:none;pointer-events:none}
-
-/* ---- Detail: strukturiertes Bento-Panel ------------------------------- */
-.sp-postfach .sp-leser{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-s);overflow:auto;min-height:0}
-.sp-postfach .sp-brief{
-  display:flex;flex-direction:column;gap:12px;min-height:100%;
-  padding:16px;border:0;border-radius:0;background:transparent;box-shadow:none
-}
-/* Briefkopf = Kachel „Auftraggeber" (breit) */
-.sp-postfach .sp-brief header{
-  align-items:flex-start;gap:0;
-  padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel-2);
-  margin:0
-}
-.sp-postfach .sp-brief header > div{display:flex;flex-direction:column;gap:4px;min-width:0}
-.sp-postfach .sp-brief .sp-leise{
-  font:600 var(--fs-1)/1.35 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--faint)
-}
-.sp-postfach .sp-brief h3{font:600 var(--fs-5)/1.2 var(--display);letter-spacing:-.02em;color:var(--ink);margin:0}
-.sp-postfach .sp-brief-text{
-  display:flex;flex-direction:column;gap:8px;max-width:64ch;
-  font:400 var(--fs-3)/1.7 var(--body);color:var(--ink)
-}
-/* Kacheln: Symptom / Uebt / Dauer / Form / Lohn + Ziele ueber alle Spalten */
-.sp-postfach .sp-brief-info{
-  display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4, minmax(0,1fr));gap:8px;
-  border:0;padding:0;align-items:stretch;flex:1 1 auto;grid-template-rows:minmax(0,1fr) auto
-}
-.sp-postfach .sp-brief-info > div{
-  display:flex;flex-direction:column;gap:4px;min-width:0;
-  padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel-2)
-}
-.sp-postfach .sp-brief-info small{
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--faint)
-}
-.sp-postfach .sp-brief-info p{margin:0;font:400 var(--fs-2)/1.5 var(--body);color:var(--ink)}
-.sp-postfach .sp-brief-ziele{grid-column:1/-1}
-.sp-postfach .sp-brief-ziele ul{
-  display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none
-}
-.sp-postfach .sp-brief-ziele li{
-  display:flex;align-items:flex-start;gap:8px;
-  font:400 var(--fs-2)/1.4 var(--body);color:var(--ink)
-}
-.sp-postfach .sp-brief-ziele li::before{content:"—";flex:0 0 auto;color:var(--faint)}
-/* Aktionsleiste ruhig, unten — sticky, damit die Hauptaktion ohne Scrollen erreichbar bleibt
-   (Rauchtest § 22: „Hauptaktion ohne Scrollen sichtbar und anklickbar", 1366/960 px). */
-.sp-postfach .sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{
-  position:sticky;bottom:0;z-index:10;
-  margin:auto -16px 0;padding:12px 16px;
-  border-top:1px solid var(--line);border-bottom:0;
-  background:var(--panel);
-  align-items:center;gap:12px
-}
-.sp-postfach .sp-brief .sp-knoepfe .knopf{
-  min-height:44px;padding:0 16px;border-radius:var(--radius-xs);box-shadow:none;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.08em;text-transform:uppercase
-}
-.sp-postfach .sp-brief .sp-knoepfe .knopf.primaer{background:var(--ink);border:1px solid var(--ink);color:var(--bg)}
-.sp-postfach .sp-brief .sp-knoepfe .knopf.primaer:hover{filter:none;transform:none;background:color-mix(in srgb, var(--ink) 88%, var(--bg))}
-.sp-postfach .sp-brief .sp-knoepfe .knopf.geist{
-  min-height:44px;padding:0 12px;color:var(--muted);background:none;border:1px solid transparent;
-  text-transform:none;letter-spacing:0;font:500 var(--fs-2)/1 var(--body)
-}
-.sp-postfach .sp-brief .sp-knoepfe .knopf.geist:hover{color:var(--ink);background:var(--panel-2);border-color:var(--line)}
-
-/* ---- Schmal: Blatt-Ansicht bleibt; Datenleiste umbrechen -------------- */
-@media (max-width: 900px){
-  .sp-postfach .sp-pf-kopf{grid-template-columns:minmax(0,1fr)}
-  .sp-postfach .sp-pf-aktionen{justify-content:flex-start}
-  .sp-postfach .sp-pf-teile{grid-template-columns:1fr;padding-bottom:12px}
-}
