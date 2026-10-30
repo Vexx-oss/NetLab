@@ -24,7 +24,9 @@ setzt den Timer; nach **600 ms** ist die Karte noch offen, nach **1,1 s** zu (Kl
 weg), 0 JS-Fehler. Gates dieser Fassung: `node tests/run.js` **878/878 grün**, Rauchtest
 **45/45**, `klassen.py` 0, `ethos.py` GRÜN, `umlaute.py` GRÜN, Simulation unverändert,
 `seite.py --pruefen` und `stand.py --pruefen` grün. Fassung **2.5.1** gezogen
-(`VERSION_CODE 20502`), Einzeldatei und `.exe` neu gebaut, als Patch-Release veröffentlicht.
+(`VERSION_CODE 20502`), Einzeldatei und `.exe` neu gebaut, als Patch-Release veröffentlicht:
+<https://github.com/Vexx-oss/NetLab/releases/tag/v2.5.1> (drei Anhänge, Live-Seite byte-gleich,
+SHA256 `9DA8261C…CE57E77A`; APK übersprungen, weil die Android-Schlüssel-Secrets fehlen).
 
 ---
 

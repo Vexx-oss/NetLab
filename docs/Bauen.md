@@ -151,6 +151,40 @@ zusätzlich hier nachgestellt und grün: `python tools/ci-nachbau.py`.
 Nachholen von Hand: *Actions → Prüfen → Run workflow*. Damit sich nichts staut, hat der
 Ablauf eine Concurrency-Gruppe je Zweig; zusätzlich läuft er nachts um 03:17 UTC.
 
+### Die Vorführ-Fassung (Kiosk, 60 Minuten)
+
+Für Vorführungen (Messe, Beamer, Präsentationsrechner) gibt es eine eigene Datei, die sich
+**nach 60 Minuten selbst zurücksetzt** und bei jedem neuen Fenster mit leerem Spielstand
+beginnt. Sie wird aus der fertigen Einzeldatei gebaut — das normale Spiel bleibt byte-gleich,
+und der Spielstand der normalen Fassung auf demselben Rechner bleibt unberührt (eigener
+Speicherplatz).
+
+```bash
+python tools/kiosk.py                        # -> Programm/Netzwerk-Labor-Demo.html (60 Minuten)
+python tools/kiosk.py --minuten 45           # andere Dauer
+python tools/kiosk.py --ziel woanders.html   # anderes Ziel
+python tools/kiosk.py --pruefen DATEI        # Struktur prüfen
+python tools/kiosk.py --messen               # Verhalten in Edge headless messen (~1 Minute)
+```
+
+| Fall | Verhalten (gemessen 31.10.2026, `--messen`: 22 von 22 grün) |
+|---|---|
+| Datei öffnen (Doppelklick) | frischer Spielstand, Chip „Vorführung · 60 Min" mit Restzeit |
+| Neuladen (F5) | Fortschritt bleibt (gemessen: 999 € vor und nach dem Neuladen) |
+| Fenster/Tab schließen, neu öffnen | frischer Spielstand — der nächste Besucher beginnt bei 0 |
+| 60 Minuten um | Karte „Vorführung beendet", dann Neuladen mit frischem Stand; die neue Stunde beginnt sofort |
+| Spielstand der normalen Fassung | unberührt (eigener Speicher `netzwerk-labor-vorfuehrung`) |
+| JS-Fehler | 0 |
+
+Der Speicher wird **vor** dem Start der Spielskripte entschieden bzw. geleert (Vorlauf im
+`<head>`); die drei Stellen, an denen die Einzeldatei ihren Speicherplatz nennt, werden beim
+Bau umgeschrieben. **Kein Kopierschutz** — eine `.html`-Datei ist lesbar; die Fassung ist
+eine Vorführhilfe, kein Verkaufsschloss. Nur ein Fenster verwenden; eine `.exe`-Variante gibt
+es nicht (dort liegt der Spielstand in der Rust-Hülle, siehe `src/ui/uebergabe.js`).
+
+Gemessener Bau: **3.591.584 B**, SHA256 `17690c49…c3461a81`, 0 Außenverweise, Lizenzblock
+enthalten. Gründe, Messwerte und Grenzen: [`Vorführfassung – Kiosk-Demo (60 Minuten)`](<entwicklung/Vorführfassung – Kiosk-Demo (60 Minuten).md>).
+
 ## Das Auslieferungspaket
 
 ```bash

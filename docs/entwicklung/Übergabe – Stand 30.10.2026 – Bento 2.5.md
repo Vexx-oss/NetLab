@@ -145,6 +145,14 @@ nach **600 ms** Karte noch offen, nach **1,1 s** geschlossen (`auf`-Klasse weg),
 **Erzeugnisse 2.5.1:** Einzeldatei **3.581.472 B**, SHA256
 `9DA8261C…CE57E77A`, 0 Außenverweise, `docs/index.html` und `Netzwerk-Labor.html`
 byte-gleich; Windows-`.exe` **13.905.408 B**, ProductVersion **2.5.1**, SHA256
-`B5DBBF93…F59F0E9`, `tools/q-echt.py` **0 Fehler**. Fassung und Release werden mit
-ausdrücklicher Nutzerfreigabe als Patch `v2.5.1` veröffentlicht.
+`B5DBBF93…F59F0E9`, `tools/q-echt.py` **0 Fehler**.
+
+**Release 2.5.1 (veröffentlicht 30.10.2026 23:26:19 UTC):**
+<https://github.com/Vexx-oss/NetLab/releases/tag/v2.5.1> — drei Anhänge
+(`Netzwerk-Labor.html` 3.581.472 B, Browser-ZIP 1.999.988 B, Windows-`.exe` 8.873.472 B,
+ProductVersion 2.5.1, SHA256 `8221380B…7A5F3678`). Live-Seite
+<https://vexx-oss.github.io/NetLab/index.html> SHA256 `9DA8261C…CE57E77A` — byte-gleich mit
+`docs/index.html` und dem Release-HTML. Abläufe auf `5ddcd7e`: „Prüfen", „Spiel
+veröffentlichen" und „Release anlegen" **success**. Die APK wurde wieder übersprungen
+(Android-Schlüssel-Secrets fehlen).
 

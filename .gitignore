@@ -13,6 +13,8 @@ Programm/linux/netzwerk-labor
 Programm/Endversion-*/linux/netzwerk-labor
 # fremde Archive im Programm-Ordner (nicht Teil des Projekts)
 Programm/**/*.rar
+# Die Vorführ-Fassung (tools/kiosk.py) ist ein Erzeugnis wie die .exe: gebaut, nicht gepflegt.
+Programm/**/*.html
 
 # Bildschirmfotos und Messwerte der Abnahmen (liegen im Vault, nicht im Git)
 Nachweise/

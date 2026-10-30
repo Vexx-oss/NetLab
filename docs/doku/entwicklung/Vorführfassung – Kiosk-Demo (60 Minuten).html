@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorführ-Fassung – Kiosk-Demo (60 Minuten) · Netzwerk-Labor</title>
+<meta name="description" content="Auftrag des Nutzers (31.10.2026): „ließe sich netlab so einrichten dass es ne 1 stündige.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Vorführ-Fassung – Kiosk-Demo (60 Minuten)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-warum-nicht-im-spielcode">1 · Warum nicht im Spielcode</a></li>
+<li><a href="#2-aufbau-zwei-einschube-drei-ersetzungen">2 · Aufbau (zwei Einschübe, drei Ersetzungen)</a></li>
+<li><a href="#3-gemessen-edge-headless-uber-file-31-10-2026-fassung-2-5-1">3 · Gemessen (Edge headless über file://, 31.10.2026, Fassung 2.5.1)</a></li>
+<li><a href="#4-verhalten-im-betrieb">4 · Verhalten im Betrieb</a></li>
+<li><a href="#5-grenzen-bewusst-und-benannt">5 · Grenzen — bewusst und benannt</a></li>
+<li><a href="#6-dateien-und-befehle">6 · Dateien und Befehle</a></li>
+<li><a href="#7-offen-nicht-teil-dieses-auftrags">7 · Offen (nicht Teil dieses Auftrags)</a></li>
+</ul>
+</nav><h1 id="vorfuhr-fassung-kiosk-demo-60-minuten">Vorführ-Fassung – Kiosk-Demo (60 Minuten)</h1>
+<p><strong>Auftrag des Nutzers (31.10.2026):</strong> „ließe sich netlab so einrichten dass es ne 1 stündige demo version ist?" — gewählt wurde im Gespräch die <strong>Vorführ-/Kiosk-Variante</strong>: nach 60 Minuten automatisch zurück auf einen frischen Spielstand, gedacht für Beamer, Messe oder einen Rechner im Computerraum, an dem mehrere Besucher nacheinander spielen.</p>
+<p><strong>Was es geworden ist.</strong> Eine eigene <strong>Auslieferungsdatei</strong> <code>Programm/Netzwerk-Labor-Demo.html</code>, gebaut aus der fertigen Einzeldatei. Das normale Spiel bleibt byte-gleich; es wird nur gelesen. Der Spielstand der normalen Fassung auf demselben Rechner bleibt unberührt, weil die Vorführ-Fassung einen <strong>eigenen Speicherplatz</strong> benutzt. Kurz: <code>python tools/kiosk.py</code> → fertig.</p>
+<h2 id="1-warum-nicht-im-spielcode">1 · Warum nicht im Spielcode</h2>
+<p>Die Vorführ-Fassung ist eine <strong>Betriebsart der Auslieferung</strong>, keine Spielfunktion. Drei Gründe für den Weg über das Werkzeug statt über <code>src/</code>:</p>
+<ol><li><strong>Kein Risiko für das Spiel.</strong> Kein Modul, keine Datenform, kein Testhaken ändert sich; die 878 Tests und die Simulation bleiben unberührt. Der normale Bau ist und bleibt die Grundlage — die Demo entsteht nur, wenn jemand sie ausdrücklich baut.</li><li><strong>Die Rücksetzung braucht keine Spiel-API.</strong> Sie löscht den eigenen Speicher <em>vor</em> dem Start der Spielskripte und lädt die Seite neu. Das Spiel merkt davon nichts und kann sich auch nicht dagegen wehren (kein Sonderfall in <code>Spiel</code>, <code>store</code> oder <code>UI</code>).</li><li><strong>Ein Spielstand pro Rechner bleibt heil.</strong> Der eigene Speicherplatz ist die Voraussetzung dafür, dass eine Vorführdatei auf demselben Rechner nicht den privaten Spielstand der normalen Fassung löscht.</li></ol>
+<h2 id="2-aufbau-zwei-einschube-drei-ersetzungen">2 · Aufbau (zwei Einschübe, drei Ersetzungen)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Was</th><th>Wo im Bau</th><th>Datei</th><th>Zweck</th></tr></thead><tbody><tr><td><strong>Vorlauf</strong></td><td>im <code>&lt;head&gt;</code>, vor allen Spielskripten</td><td><code>tools/kiosk/vorlauf.js</code></td><td>entscheidet <strong>vor</strong> dem Laden des Spielstands: neuer Besuch = frisch; Neuladen (F5) = behalten; Stunde abgelaufen = frisch. Setzt den Startzeitpunkt.</td></tr><tr><td><strong>Anzeige</strong></td><td>nach dem Spiel, vor dem Lizenzblock</td><td><code>tools/kiosk/anzeige.js</code></td><td>Chip „Vorführung · 47 Min" unten, nach Ablauf die Karte „Vorführung beendet" und dann Neuladen.</td></tr><tr><td><strong>Speicherplatz</strong></td><td>3 Stellen in der Einzeldatei</td><td><code>tools/kiosk.py</code>, <code>ERSETZUNGEN</code></td><td>aus <code>"netzwerk-labor"</code> wird <code>"netzwerk-labor-vorfuehrung"</code> — eigener Speicher.</td></tr></tbody></table></div>
+<p>Die drei Stellen des Speicherplatzes sind <strong>nicht optional</strong>:</p>
+<ol><li><code>const SCHLUESSEL = "netzwerk-labor";</code> (<code>src/plattform/plattform-browser.js</code>) — Lesen/Schreiben.</li><li><code>window.localStorage.getItem("netzwerk-labor")</code> (<code>src/kern/basis.js</code>, „Frühstart") — füllt den Speicher <strong>bevor</strong> der Lernmotor lädt.</li><li><code>e.key !== "netzwerk-labor"</code> (<code>src/ui/start.js</code>) — Fenster-Wächter (zwei Fenster auf einem Stand).</li></ol>
+<p><strong>Dieser Befund hat die Bauform gerettet:</strong> Der erste Messlauf war <strong>21/22</strong> — „Neuladen (F5) hält den Fortschritt" war rot. Ursache: Die Ersetzung kannte nur Stelle 1; der Frühstart in <code>kern/basis.js</code> las weiter den <strong>leeren normalen</strong> Speicher, hielt den Stand für „keiner da" und schrieb beim ersten Speichern einen frischen Stand über den Vorführ-Speicher. Ergebnis: Rücksetzung bei jedem Neuladen statt nach 60 Minuten. Erst nach der zweiten Ersetzung war der Lauf 22/22 grün. Die Format-Kennung <code>"format": "netzwerk-labor"</code> für Export/Import bleibt absichtlich unangetastet — die gehört zum Dateiformat, nicht zum Speicher.</p>
+<h2 id="3-gemessen-edge-headless-uber-file-31-10-2026-fassung-2-5-1">3 · Gemessen (Edge headless über <code>file://</code>, 31.10.2026, Fassung 2.5.1)</h2>
+<p><code>python tools/kiosk.py --messen</code> baut zwei Probefassungen (9 s und 60 Minuten), startet Edge headless über <code>file://</code> (der Weg eines Doppelklicks) und misst:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Fall</th><th>Messwert</th></tr></thead><tbody><tr><td>Start</td><td>Chip sichtbar, „Vorführung · 0:09", unterer Rand 635 px; frischer Stand 0 € / Stufe 1</td></tr><tr><td>Restzeit läuft</td><td>7.922 → 6.620 ms</td></tr><tr><td>Fortschritt gesetzt</td><td>4.242 € im Vorführ-Speicher, <code>localStorage["netzwerk-labor"]</code> = <strong>null</strong></td></tr><tr><td>60-Minuten-Fassung: 999 € gesetzt</td><td>steht im Vorführ-Speicher (26.895 B)</td></tr><tr><td>Neuladen (F5)</td><td>999 € und Stufe 3 <strong>bleiben</strong>; Sitzung <code>"1"</code>, Startzeit unverändert</td></tr><tr><td>Neues Fenster (neuer Browserstart)</td><td>frischer Stand 0 € / Stufe 1 — der vorherige Fortschritt ist weg</td></tr><tr><td>Ablauf (9-s-Probe)</td><td>Karte „Vorführung beendet", danach Neuladen: 0 € / 0 Ruf / Stufe 1 / 0 erledigt; neue Stunde mit Restzeit 5.629 ms</td></tr><tr><td>normaler Speicher</td><td>in allen Läufen <code>localStorage["netzwerk-labor"]</code> = null (unberührt)</td></tr><tr><td>JS-/Konsolenfehler</td><td>0 in beiden Läufen</td></tr><tr><td>Grundlage</td><td><code>Netzwerk-Labor.html</code> und <code>docs/index.html</code> vor/nach dem Bau byte-gleich</td></tr></tbody></table></div>
+<p>Bilder: <code>Nachweise/vorfuehrung/kiosk-chip.png</code> und <code>kiosk-ruecksetzung.png</code> (nicht versioniert).</p>
+<p><strong>Der ausgelieferte Bau:</strong> <code>Programm/Netzwerk-Labor-Demo.html</code> — <strong>3.591.584 B</strong>, SHA256 <code>17690c49779f20f3…c3461a81</code>, 0 Außenverweise, Lizenzblock enthalten, Titel „Netzwerk-Labor – Vorführung". <code>python tools/kiosk.py --pruefen</code> und <code>python tools/einfach.py --pruefen</code> sind grün; <code>tools/starttest.py</code> meldet 0 JS-Fehler, drei geladene Schriften, 3.393 CSS-Regeln (dieselben 47 Knöpfe wie die normale Fassung).</p>
+<h2 id="4-verhalten-im-betrieb">4 · Verhalten im Betrieb</h2>
+<ul><li><strong>Doppelklick</strong> auf die Datei → frischer Stand, Chip unten mit Restzeit.</li><li><strong>F5/Neuladen</strong> → Stand bleibt (niemand verliert Fortschritt durch einen Unfall).</li><li><strong>Fenster schließen und neu öffnen</strong> → neuer Besucher beginnt bei 0.</li><li><strong>Nach 60 Minuten</strong> → kurze Karte, automatischer Neustart mit frischem Stand; die nächste Stunde läuft sofort weiter. Niemand muss etwas drücken.</li><li><strong>Der Betreiber</strong> kann jederzeit über <em>Einstellungen → Neu anfangen → „Von 0 anfangen"</em> zurücksetzen — das ist der normale Weg des Spiels und funktioniert auch hier.</li></ul>
+<h2 id="5-grenzen-bewusst-und-benannt">5 · Grenzen — bewusst und benannt</h2>
+<ul><li><strong>Kein Kopierschutz.</strong> Eine <code>.html</code>-Datei ist lesbar, und die normale Fassung ist frei herunterladbar. Die Vorführ-Fassung ist eine Hilfe für den Stand, <strong>kein Verkaufsschloss</strong> (dieselbe Einschätzung wie <code>Markt – Monetarisierung.md</code> § 10.5: Kopierschutz/DRM wird nicht funktionieren).</li><li><strong>Ein Fenster.</strong> Zwei Tabs auf demselben Speicher überschreiben sich (bei der normalen Fassung genauso). Für den Stand: ein Fenster, Vollbild (F11).</li><li><strong>Nur Browser.</strong> Eine <code>.exe</code>-Vorführ-Fassung wurde <strong>nicht gebaut</strong>: In der Rust-Hülle liegt der Spielstand außerhalb von <code>localStorage</code>, und ein Seiten-Neuladen brächte den alten Stand zurück (Befund 30.10.2026, <code>src/ui/uebergabe.js</code>). Die Anzeige hat einen vorbereiteten Weg für diesen Fall, er ist aber <strong>in dieser Sitzung nicht gemessen</strong>.</li><li><strong>Die Uhr ist die Systemzeit.</strong> Wer sie stellt, verschiebt die Stunde. Für eine Vorführung reicht das; für einen Schutz nicht (siehe oben).</li><li><strong>Der Chip ist sichtbar.</strong> Das ist Absicht — bei einer Vorführung soll man sehen, dass es eine Vorführung ist.</li></ul>
+<h2 id="6-dateien-und-befehle">6 · Dateien und Befehle</h2>
+<pre><code>tools/kiosk.py                 Bau, Prüfung, Messung; Kopfkommentar = Bedienungsanleitung
+tools/kiosk/vorlauf.js         Einschub 1: Speicher, Sitzung, Startzeit
+tools/kiosk/anzeige.js         Einschub 2: Chip, Rücksetzung, Messhaken (window.__vorfuehrung)
+Programm/Netzwerk-Labor-Demo.html   Erzeugnis (nicht versioniert, wie die .exe)
+Programm/LIESMICH-Demo.txt     kurze Anleitung neben der Datei</code></pre>
+<pre><code class="sprache-bash">python tools/kiosk.py                        # bauen (60 Minuten) -&gt; Programm/Netzwerk-Labor-Demo.html
+python tools/kiosk.py --minuten 45           # andere Dauer
+python tools/kiosk.py --pruefen DATEI        # Struktur prüfen
+python tools/kiosk.py --messen               # Verhalten in Edge headless messen (~1 Minute)</code></pre>
+<p>Bau und Bedienung stehen auch in <a href="../Bauen.html">Bauen.md</a> (Abschnitt „Die Vorführ-Fassung (Kiosk, 60 Minuten)").</p>
+<h2 id="7-offen-nicht-teil-dieses-auftrags">7 · Offen (nicht Teil dieses Auftrags)</h2>
+<ul><li><strong><code>.exe</code>-Vorführ-Fassung</strong> — bräuchte eine Rücksetzung in der Rust-Hülle (oder das Nachbauen der Oberfläche im laufenden Prozess wie <code>src/ui/uebergabe.js</code>); erst sinnvoll, wenn die Vorführung wirklich auf dem Windows-Programm laufen soll.</li><li><strong>Automatischer Vollbild-Start</strong> beim Öffnen der Demo-Datei — geht im Browser nur nach einer Nutzergeste, ist also für einen Doppelklick-Ablauf nicht verlässlich.</li><li><strong>Leerlauf-Rücksetzung</strong> (z. B. nach 10 Minuten ohne Eingabe) — bewusst nicht eingebaut: der Auftrag war die Stunde, und eine zweite Uhr hätte die Vorführung nur unberechenbar gemacht.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

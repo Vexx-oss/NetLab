@@ -70,6 +70,7 @@ img{max-width:100%;height:auto}
 <li style="margin-left:16px"><a href="#beweisen-dass-sie-lauft">Beweisen, dass sie läuft</a></li>
 <li style="margin-left:16px"><a href="#automatisch-veroffentlichen">Automatisch veröffentlichen</a></li>
 <li style="margin-left:16px"><a href="#wenn-ein-pruflauf-als-cancelled-mit-0-schritten-dasteht">Wenn ein Prüflauf als „cancelled" mit 0 Schritten dasteht</a></li>
+<li style="margin-left:16px"><a href="#die-vorfuhr-fassung-kiosk-60-minuten">Die Vorführ-Fassung (Kiosk, 60 Minuten)</a></li>
 <li><a href="#das-auslieferungspaket">Das Auslieferungspaket</a></li>
 <li style="margin-left:16px"><a href="#fassung-ziehen-und-prufen">Fassung ziehen und prüfen</a></li>
 <li style="margin-left:16px"><a href="#eine-release-anlegen">Eine Release anlegen</a></li>
@@ -133,6 +134,16 @@ python tools/starttest.py pfad/zur/datei.html --bild beweis.png</code></pre>
 <p>Gemessen am 05.10.2026: Mehrere Läufe von <code>pruefen.yml</code> bekamen <strong>keinen Läufer</strong> zugeteilt, blieben rund 15 Minuten in der Warteschlange und wurden dann von GitHub abgebrochen — Status <code>cancelled</code>, 0 Schritte, kein Runner. Das ist Verhalten der Plattform, <strong>kein Testergebnis</strong>: es wurde nichts gemessen, also ist auch nichts rot.</p>
 <p>Der Gegenbeweis liegt vor: Lauf <code>37367258747</code> (Job „Bauen und prüfen") hatte <strong>alle 13 Schritte erfolgreich</strong>, einschließlich Einzeldatei und Bilderprüfung. Derselbe Stand ist zusätzlich hier nachgestellt und grün: <code>python tools/ci-nachbau.py</code>.</p>
 <p>Nachholen von Hand: <em>Actions → Prüfen → Run workflow</em>. Damit sich nichts staut, hat der Ablauf eine Concurrency-Gruppe je Zweig; zusätzlich läuft er nachts um 03:17 UTC.</p>
+<h3 id="die-vorfuhr-fassung-kiosk-60-minuten">Die Vorführ-Fassung (Kiosk, 60 Minuten)</h3>
+<p>Für Vorführungen (Messe, Beamer, Präsentationsrechner) gibt es eine eigene Datei, die sich <strong>nach 60 Minuten selbst zurücksetzt</strong> und bei jedem neuen Fenster mit leerem Spielstand beginnt. Sie wird aus der fertigen Einzeldatei gebaut — das normale Spiel bleibt byte-gleich, und der Spielstand der normalen Fassung auf demselben Rechner bleibt unberührt (eigener Speicherplatz).</p>
+<pre><code class="sprache-bash">python tools/kiosk.py                        # -&gt; Programm/Netzwerk-Labor-Demo.html (60 Minuten)
+python tools/kiosk.py --minuten 45           # andere Dauer
+python tools/kiosk.py --ziel woanders.html   # anderes Ziel
+python tools/kiosk.py --pruefen DATEI        # Struktur prüfen
+python tools/kiosk.py --messen               # Verhalten in Edge headless messen (~1 Minute)</code></pre>
+<div class="dk-tabelle"><table><thead><tr><th>Fall</th><th>Verhalten (gemessen 31.10.2026, <code>--messen</code>: 22 von 22 grün)</th></tr></thead><tbody><tr><td>Datei öffnen (Doppelklick)</td><td>frischer Spielstand, Chip „Vorführung · 60 Min" mit Restzeit</td></tr><tr><td>Neuladen (F5)</td><td>Fortschritt bleibt (gemessen: 999 € vor und nach dem Neuladen)</td></tr><tr><td>Fenster/Tab schließen, neu öffnen</td><td>frischer Spielstand — der nächste Besucher beginnt bei 0</td></tr><tr><td>60 Minuten um</td><td>Karte „Vorführung beendet", dann Neuladen mit frischem Stand; die neue Stunde beginnt sofort</td></tr><tr><td>Spielstand der normalen Fassung</td><td>unberührt (eigener Speicher <code>netzwerk-labor-vorfuehrung</code>)</td></tr><tr><td>JS-Fehler</td><td>0</td></tr></tbody></table></div>
+<p>Der Speicher wird <strong>vor</strong> dem Start der Spielskripte entschieden bzw. geleert (Vorlauf im <code>&lt;head&gt;</code>); die drei Stellen, an denen die Einzeldatei ihren Speicherplatz nennt, werden beim Bau umgeschrieben. <strong>Kein Kopierschutz</strong> — eine <code>.html</code>-Datei ist lesbar; die Fassung ist eine Vorführhilfe, kein Verkaufsschloss. Nur ein Fenster verwenden; eine <code>.exe</code>-Variante gibt es nicht (dort liegt der Spielstand in der Rust-Hülle, siehe <code>src/ui/uebergabe.js</code>).</p>
+<p>Gemessener Bau: <strong>3.591.584 B</strong>, SHA256 <code>17690c49…c3461a81</code>, 0 Außenverweise, Lizenzblock enthalten. Gründe, Messwerte und Grenzen: <a href="entwicklung/Vorf%C3%BChrfassung%20%E2%80%93%20Kiosk-Demo%20%2860%20Minuten%29.html"><code>Vorführfassung – Kiosk-Demo (60 Minuten)</code></a>.</p>
 <h2 id="das-auslieferungspaket">Das Auslieferungspaket</h2>
 <pre><code class="sprache-bash">python tools/paket.py               # mit .exe, falls Programm/ sie hat -&gt; ...-Windows.zip
 python tools/paket.py --ohne-exe    # nur die Browser-Fassung -&gt; ...-Browser.zip (so im Release)

@@ -41,7 +41,7 @@ Netzwerk-Labor/
   src/**/*.js          Reihenfolge in bauen.py (MODULE)
   shell/src-tauri/     Tauri-Projekt (frontendDist = ../../web)
   tests/               harness.js, run.js (Node), tests.html (Browser), *.test.js
-  tools/               messen.ps1, linux-bauen.sh, cdp.py (Test im echten Programm), klassen.py (Klassen ↔ CSS), rauch.py (Rauchtest der Oberfläche)
+  tools/               messen.ps1, linux-bauen.sh, cdp.py (Test im echten Programm), klassen.py (Klassen ↔ CSS), rauch.py (Rauchtest der Oberfläche), kiosk.py (Vorführ-Fassung)
   web/                 Build-Ausgabe
 ```
 

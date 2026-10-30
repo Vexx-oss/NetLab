@@ -1,0 +1,25 @@
+Netzwerk-Labor – Vorführ-Fassung (60 Minuten)
+=============================================
+
+Gedacht für Vorführungen: Doppelklick genügt, die Datei läuft offline im Browser
+(Edge/Chrome). Kein Konto, keine Installation, kein Netz.
+
+Verhalten
+  • Öffnen: frischer Spielstand. Chip unten zeigt die Restzeit.
+  • Neuladen (F5): der Fortschritt bleibt.
+  • Fenster/Tab schließen und neu öffnen: frischer Spielstand (neuer Besucher).
+  • Nach 60 Minuten: Karte „Vorführung beendet", danach automatisch eine neue Stunde.
+  • Der Spielstand der normalen Fassung auf diesem Rechner bleibt unberührt.
+
+Gut zu wissen
+  • Kein Kopierschutz — eine Vorführhilfe, keine Sperre.
+  • Nur ein Fenster verwenden; zwei Tabs teilen sich den Speicher.
+  • Läuft im Browser; eine .exe-Variante der Vorführung gibt es nicht.
+
+Neu bauen (im Projektordner)
+  python tools/kiosk.py                  (60 Minuten)
+  python tools/kiosk.py --minuten 45     (andere Dauer)
+  python tools/kiosk.py --messen         (Verhalten in Edge headless messen)
+
+Stand: 31.10.2026, Fassung 2.5.1. Die normale Fassung ist Netzwerk-Labor.html bzw.
+Netzwerk-Labor.exe; Lizenz siehe LICENSE und LIZENZ.md im Projekt.

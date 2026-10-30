@@ -105,7 +105,7 @@ img{max-width:100%;height:auto}
   src/**/*.js          Reihenfolge in bauen.py (MODULE)
   shell/src-tauri/     Tauri-Projekt (frontendDist = ../../web)
   tests/               harness.js, run.js (Node), tests.html (Browser), *.test.js
-  tools/               messen.ps1, linux-bauen.sh, cdp.py (Test im echten Programm), klassen.py (Klassen ↔ CSS), rauch.py (Rauchtest der Oberfläche)
+  tools/               messen.ps1, linux-bauen.sh, cdp.py (Test im echten Programm), klassen.py (Klassen ↔ CSS), rauch.py (Rauchtest der Oberfläche), kiosk.py (Vorführ-Fassung)
   web/                 Build-Ausgabe</code></pre>
 <p><strong>Neue Datei?</strong> In <code>bauen.py</code> in <code>MODULE</code> (bzw. <code>STILE</code>) an der richtigen Stelle eintragen, und – falls headless-fähig – in <code>tests/run.js</code> in <code>HEADLESS</code>. Eine Datei, die nicht in <code>MODULE</code> steht, existiert für das Programm nicht.</p>
 <p>Tests: <code>sh tools/test.sh [filter]</code> (Node 24 portabel; früher WSL). Testdateien nutzen <code>pruefe(name, fn)</code> und <code>erwarte</code>-Hilfen aus <code>tests/harness.js</code>. Die Tests laden <code>ui/</code> nicht – dafür gibt es <code>sh tools/test.sh --rauch</code>: Node-Tests, <code>tools/klassen.py</code> (muss 0 melden) und <code>tools/rauch.py</code> (jede Ansicht in 1366/960/720 px in Edge headless: Hauptaktion sichtbar und anklickbar, kein waagerechter Überlauf, keine JS-Fehler; <code>--exe</code> prüft das echte Programm).</p>
