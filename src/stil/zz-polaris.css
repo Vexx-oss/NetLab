@@ -238,3 +238,20 @@
 .lb-auftrag .sp-einstieg-knoepfe{gap:8px}
 .lb-auftrag .sp-stufe{gap:4px;padding-top:4px}
 .lb-auftrag .sp-einstieg .knopf{height:36px;border-radius:var(--radius-s)}
+
+
+/* ===== Mockup-Shell: horizontale Navigation, App-Zutaten weichen ===== */
+.kopf-nav{display:flex;align-items:center;gap:2px;margin-left:8px;min-width:0;overflow:hidden}
+.kopf-nav-knopf{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+  padding:8px 12px;border:1px solid transparent;border-radius:999px;background:none}
+.kopf-nav-knopf:hover{color:var(--muted);background:var(--panel-2)}
+.kopf-nav-knopf.an{color:var(--ink);background:var(--panel-2);border-color:var(--line)}
+.kopf-nav-knopf.an::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:1px}
+/* Geräteleiste und Begrüßungskarte sind App-Zutaten, im Mockup nicht vorhanden */
+@media (min-width:1100px){
+  .lb-geraete{display:none}
+  .labor{grid-template-columns:minmax(0,1fr) var(--dock-b)}
+  .labor.lb-fern{grid-template-columns:minmax(0,1fr) var(--dock-b)}
+  .lb-auftrag .sp-einstieg{display:none}
+  .sz-blase, .sp-coach{display:none}
+}
