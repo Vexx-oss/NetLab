@@ -14,13 +14,13 @@ Läuft lokal und offline; nichts wird gesendet.
 
 <div class="stand">
 <!-- STAND:ANFANG -->
-<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.4.0</strong> · Baukennung <code>efbdad0c</code> · Tests <strong>878/878 grün</strong> (0 uebersprungen, 103 Testdateien, 95 headless Module) · Bau <strong>134 Module</strong> · src/ <strong>133 Dateien / 34.172 Zeilen</strong> · Einzeldatei <strong>3.581.197 B</strong>, SHA256 <code>09647D34…A994572</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>55</strong> Doku-Seiten · relative Verweise <strong>250 geprueft, 0 tot</strong>.</p>
+<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.5.0</strong> · Baukennung <code>efbdad0c</code> · Tests <strong>878/878 grün</strong> (0 uebersprungen, 103 Testdateien, 95 headless Module) · Bau <strong>134 Module</strong> · src/ <strong>133 Dateien / 34.172 Zeilen</strong> · Einzeldatei <strong>3.581.197 B</strong>, SHA256 <code>7F4F94B9…010F3F4</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>55</strong> Doku-Seiten · relative Verweise <strong>251 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div>
 
-![Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern](docs/bilder/topologie-2.4.0.jpg)
+![Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern](docs/bilder/topologie-2.5.0.jpg)
 
-> **Alle Bilder in diesem README stammen aus dem 2.4.0-Bau** — aufgenommen am 30.10.2026 in
+> **Alle Bilder in diesem README stammen aus dem 2.5.0-Bau** — aufgenommen am 30.10.2026 in
 > Edge headless (1440 × 950, Theme POLARIS), danach nur skaliert. Herkunft, Quellpfade und
 > Prüfsummen jeder Aufnahme: [`docs/bilder/HERKUNFT.md`](docs/bilder/HERKUNFT.md). Neu bauen
 > mit `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/2.4-Bilder/`).
@@ -33,15 +33,15 @@ Läuft lokal und offline; nichts wird gesendet.
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)**, Doppelklick | nur einen Browser |
-| **Zum Entpacken** | [Netzwerk-Labor-2.4.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner `doku/`**, Anleitungen, Lizenztexte | nur einen Browser |
+| **Zum Entpacken** | [Netzwerk-Labor-2.5.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner `doku/`**, Anleitungen, Lizenztexte | nur einen Browser |
 | **Windows-Programm** | **[Netzwerk-Labor.exe herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe)** — mit Leiste am Bildschirmrand, Tray-Symbol und globalem Tastenkürzel | Windows 10/11 |
 
 Größe und Prüfsumme der Einzeldatei stehen **gemessen** im Stand-Block oben und in
 [`docs/STAND.md`](docs/STAND.md); dieses README wiederholt sie nicht von Hand, damit sie
-nicht wieder veralten. Alle Wege liefern dieselbe Fassung **2.4.0** (gemessen: `LABOR_VERSION`
+nicht wieder veralten. Alle Wege liefern dieselbe Fassung **2.5.0** (gemessen: `LABOR_VERSION`
 in `docs/index.html` und `VERSION` in `bauen.py`).
 
-> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-2.4.0-Browser.zip` — das Spiel
+> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-2.5.0-Browser.zip` — das Spiel
 > als Einzeldatei, **die ganze Doku im Ordner `doku/`**, Anleitungen und Lizenztexte; kommt aus dem
 > Linux-Job und ist deshalb **ohne** `.exe` (`tools/paket.py --ohne-exe`). (2) `Netzwerk-Labor.html`
 > — dieselbe Einzeldatei einzeln, für den stabilen Download-Link. (3) `Netzwerk-Labor.exe` — das
@@ -128,17 +128,17 @@ am Anfang gratis und führt notfalls bis zur vorgeführten Lösung.
 
 <table>
 <tr>
-<td width="50%"><img src="docs/bilder/einstieg-2.4.0.jpg" alt="Erster Auftrag mit Ticket, Zielen und Hinweis"><br><em>Der erste Auftrag: Ticket, Ziele, Senioren-Hinweis.</em></td>
-<td width="50%"><img src="docs/bilder/konsole-2.4.0.jpg" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole am Switch: Schnittstellen, VLANs, Hilfe daneben.</em></td>
+<td width="50%"><img src="docs/bilder/einstieg-2.5.0.jpg" alt="Erster Auftrag mit Ticket, Zielen und Hinweis"><br><em>Der erste Auftrag: Ticket, Ziele, Senioren-Hinweis.</em></td>
+<td width="50%"><img src="docs/bilder/konsole-2.5.0.jpg" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole am Switch: Schnittstellen, VLANs, Hilfe daneben.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="docs/bilder/simulation-2.4.0.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
-<td width="50%"><img src="docs/bilder/hilfe-2.4.0.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
+<td width="50%"><img src="docs/bilder/simulation-2.5.0.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
+<td width="50%"><img src="docs/bilder/hilfe-2.5.0.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
 </tr>
 </table>
 
 Weitere Bilder und die Herkunft jeder Aufnahme: [`docs/bilder/HERKUNFT.md`](docs/bilder/HERKUNFT.md).
-**Die Aufnahmen zeigen die Fassung 2.4.0** (siehe Hinweis oben).
+**Die Aufnahmen zeigen die Fassung 2.5.0** (siehe Hinweis oben).
 
 ---
 
@@ -172,8 +172,8 @@ automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: L
 
 <table>
 <tr>
-<td width="50%"><img src="docs/bilder/postfach-2.4.0.jpg" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
-<td width="50%"><img src="docs/bilder/kompetenzkarte-2.4.0.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
+<td width="50%"><img src="docs/bilder/postfach-2.5.0.jpg" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
+<td width="50%"><img src="docs/bilder/kompetenzkarte-2.5.0.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
 </tr>
 </table>
 
@@ -345,7 +345,7 @@ dieselben Dateien als durchsuchbare Seiten.
 
 | Zweig / Tag | Inhalt |
 |---|---|
-| `ausbau-1.2` ← **Standardzweig** | Version 2.4.0: Auftragstexte als Störungsberichte; davor 2.0.0–2.0.4 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte, Überlappung) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
+| `ausbau-1.2` ← **Standardzweig** | Version 2.5.0: Auftragstexte als Störungsberichte; davor 2.0.0–2.0.4 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte, Überlappung) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 

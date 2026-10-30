@@ -10,7 +10,7 @@ Browser-Fassung, die auch die `.exe` und die Seite im Netz benutzen. Eine Quelle
 kein zweiter Stand — es wird nichts nachgebaut und nichts gepflegt, was es doppelt gibt.
 
 **Fertige App — 30.10.2026 gebaut und geprüft.** Die APK liegt als
-`Programm/Netzwerk-Labor-2.4.0-Android.apk` vor: versionName 2.4.0, versionCode **20400**
+`Programm/Netzwerk-Labor-2.5.0-Android.apk` vor: versionName 2.5.0, versionCode **20501**
 (aus `android/bauen.py`), **1.336.860 Bytes**, SHA256
 `0a661919fafd23c9e97fb9bdbac5e60aef7e523f4cbc27f526033e1db75ad18d`. Der Bau endete mit
 `GRUEN: Signatur gültig, Kennwerte stimmen, keine Rechte, Assets vollständig`; das

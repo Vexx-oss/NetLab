@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Redesign, Bento, Übergabe, Kontext]
 erstellt: 2026-10-30
-status: Umbau gebaut, Gates gemessen, lokal zu committen; Push/Release/Tauri-Bau offen (Nutzerentscheidung).
+status: Fassung 2.5.0 gebaut, getestet und (mit Freigabe) veröffentlicht; Abnahme in § 3/§ 6.
 ---
 
 # Übergabe — Stand 30.10.2026 (Bento 2.5 „Arbeitsplatz")
@@ -45,14 +45,13 @@ Agenten-Ausnahme (Schreib-Owner begrenzt, ein Schreiber je Datei, Leitung integr
 - `node tools/sim-stand.js`: **Simulation unverändert** gegenüber dem Referenzstand.
 - `python tools/seite.py --pruefen`: **GRÜN**, 54 Dokumente, 0 tote Verweise.
 - `python tools/einfach.py` / `--ziel Netzwerk-Labor.html`: **3.581.197 B**, SHA256
-  `09647D34…94572`, **0 Außenverweise**, beide byte-gleich; README-/Doku-Bilder (8 Aufnahmen)
-  aus dem neuen Bau erneuert (`docs/bilder/HERKUNFT.md`).
-- **Programm gebaut und gestartet:** `Programm/Netzwerk-Labor.exe`, Release-Bau
-  **13.905.408 B**, ProductVersion **2.4.0**, SHA256 `0AF8B38C…FEB1B7`, Integritätsstufe
+  `7F4F94B9…010F3F4`, **0 Außenverweise**, beide byte-gleich; README-/Doku-Bilder (8 Aufnahmen)
+  aus dem **2.5.0-Bau** erneuert (`docs/bilder/HERKUNFT.md`).
+- **Programm gebaut (Fassung 2.5.0):** `Programm/Netzwerk-Labor.exe`, Release-Bau
+  **13.905.408 B**, ProductVersion **2.5.0**, SHA256 `9B4E2379…C40726B`, Integritätsstufe
   „Mittel"; `python tools/q-echt.py` auf diesem Bau **0 Fehler** (erster Auftrag mit echter Maus
-  gelöst, **5 ★**, Fernwartungs-Schild sichtbar, 5 Bildschirmfotos); das Programm läuft aktuell
-  mit dem echten Spielstand. Alter Bau gesichert unter `Programm/Netzwerk-Labor-vor-Reset.exe`
-  (und `…-vor-Bento.exe`).
+  gelöst, **5 ★**, Fernwartungs-Schild sichtbar, 5 Bildschirmfotos). Alter Bau gesichert unter
+  `Programm/Netzwerk-Labor-vor-2.5.0.exe` (davor `…-vor-Reset.exe` und `…-vor-Bento.exe`).
 - **„Von 0 anfangen" im echten Programm nachgemessen:** Der E2E-Lauf über CDP auf einer Kopie
   des echten Spielstands drückte „Neu anfangen" → danach im Speicher **Stufe 1, 0 €, 0 Ruf,
   Postfach 2, 0 erledigte Tickets, Lernstand 0**, Ansicht „Heute"; die Datei
@@ -92,10 +91,18 @@ Ursache und Reparatur sind im Bericht des Postfach-Teams belegt (horizontale Üb
 960er-Leser, behoben in `src/stil/spiel.css`); der Lauf wurde danach wiederholt.
 **Ehrlich:** der erste Rauchlauf war rot; die Wiederholung nach dem Fix ist die Abnahme.
 
-## 6 · Nächster Schritt
+## 6 · Veröffentlichung 2.5.0
 
-1. Diesen Stand lokal committen (auf `ausbau-1.2`, kein Push).
-2. Nutzer entscheidet über: Fassung (Vorschlag 2.5.0), Push/Tag/Release, Android-APK,
-   R12 einfrieren oder Oberfläche reduzieren.
-3. Danach ggf. README-Bilder erneut ziehen, sobald die Fassung steht
-   (`python tools/bilder.py` + Cache-Buster in `README.md`).
+1. Fassung **2.5.0** gezogen (`tools/fassung-ziehen.py --neu 2.5.0 --setzen`), `VERSION_CODE`
+   in `android/bauen.py` auf **20501**; alle Erzeugnisse neu gebaut (web, Einzeldatei, `.exe`,
+   README-Bilder).
+2. `tools/stand.py` und `tools/seite.py` neu gelaufen; `stand.py --pruefen`,
+   `seite.py --pruefen`, `fassung-ziehen.py --pruefen` grün.
+3. Commit auf `ausbau-1.2`, **Push des Zweigs**, Tag **`v2.5.0`**, Push des Tags — mit der
+   ausdrücklichen Freigabe des Nutzers vom 30.10.2026. Die Abläufe „Prüfen", „Seite" und
+   „Release anlegen" laufen danach auf GitHub; das Release trägt `Netzwerk-Labor.html`,
+   das Browser-ZIP und die Windows-`.exe`.
+4. Nachmessen: Live-Seite gegen `docs/index.html` hashen, Release-Anhänge und
+   `Content-Disposition` prüfen (Schritt 8 der [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md)).
+5. Android-APK bleibt offen (Android-SDK fehlt auf diesem Rechner); R12 bleibt beim Nutzer.
+

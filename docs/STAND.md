@@ -10,9 +10,9 @@ Diese Seite ist die **einzige Zahlenquelle** des Projekts (Vertrag: [`Architektu
 
 | Groesse | Wert | Gemessen mit |
 |---|---|---|
-| Fassung (Quelle) | **2.4.0** | `bauen.py`, Zeile `VERSION = ...` (Regex) |
-| Android-Bauzaehlung | `VERSION_CODE = 20400` | `android/bauen.py` (Regex) |
-| Baukennung | **`efbdad0c`** (gebaut aus Fassung `2.4.0`) | `docs/index.html`, `LABOR_BAU` (Regex) |
+| Fassung (Quelle) | **2.5.0** | `bauen.py`, Zeile `VERSION = ...` (Regex) |
+| Android-Bauzaehlung | `VERSION_CODE = 20501` | `android/bauen.py` (Regex) |
+| Baukennung | **`efbdad0c`** (gebaut aus Fassung `2.5.0`) | `docs/index.html`, `LABOR_BAU` (Regex) |
 | Tests | **878/878 grün** | echter Lauf `node tests/run.js`, Bilanzzeile |
 | davon uebersprungen | **0** | Zeile „davon N uebersprungen“ (`tests/harness.js`: Test mit 0 Zusicherungen) |
 | Exit-Code des Testlaufs | **0** | Rueckgabewert desselben Laufs |
@@ -20,8 +20,8 @@ Diese Seite ist die **einzige Zahlenquelle** des Projekts (Vertrag: [`Architektu
 | headless Module (Testlauf) | 95 | dieselbe Bilanzzeile |
 | Bau-Module | 134 (davon 95 headless) | `python bauen.py --liste` (JSON, gezaehlt) |
 | src/ | 133 JS-Dateien, 34.172 Zeilen | alle `src/**/*.js`, Zeilen = Summe `str.splitlines()` je Datei (inkl. Leerzeilen, CRLF = ein Umbruch) |
-| Einzeldatei `Netzwerk-Labor.html` | **3.581.197 B** · SHA256 `09647D34B775D49C6F26C15E73BAF9A88F43657E3A9780535D9434183A994572` | Bytes zaehlen, `hashlib.sha256` ueber die Bytes |
-| Einzeldatei `docs/index.html` | **3.581.197 B** · SHA256 `09647D34B775D49C6F26C15E73BAF9A88F43657E3A9780535D9434183A994572` | Bytes zaehlen, `hashlib.sha256` ueber die Bytes |
+| Einzeldatei `Netzwerk-Labor.html` | **3.581.197 B** · SHA256 `7F4F94B9729281D99912E8CF5B4626CCCCB484E51D753DB75395E3595010F3F4` | Bytes zaehlen, `hashlib.sha256` ueber die Bytes |
+| Einzeldatei `docs/index.html` | **3.581.197 B** · SHA256 `7F4F94B9729281D99912E8CF5B4626CCCCB484E51D753DB75395E3595010F3F4` | Bytes zaehlen, `hashlib.sha256` ueber die Bytes |
 | Einzeldateien byte-gleich | **ja** | gleicher SHA256 |
 | Tickets | 76 | `DATEN.tickets` (headless Module geladen wie `tests/run.js`) |
 | Kunden | 7 | `Object.keys(DATEN.kunden)` (headless Module geladen wie `tests/run.js`) |
@@ -38,7 +38,7 @@ Diese Seite ist die **einzige Zahlenquelle** des Projekts (Vertrag: [`Architektu
 | Doku-Seiten docs/doku | 55 HTML-Dateien (inkl. Uebersicht) | HTML-Dateien zaehlen |
 | Doku-Quellen | 54 Markdown-Dokumente | was `tools/seite.py` veroeffentlicht: `README.md` + `AGENTS.md` + `docs/**/*.md` |
 | Markdown-Dateien | 90 | `git ls-files` auf `*.md` + unversionierte `*.md` |
-| Relative Verweise | 250 geprueft, **0 tot** | wie `tools/repo-verweise-flicken.py` |
+| Relative Verweise | 251 geprueft, **0 tot** | wie `tools/repo-verweise-flicken.py` |
 
 ## Bekannte, begruendete Ausnahmen
 
@@ -81,5 +81,5 @@ Nach einer Aenderung an den Dokumenten ist die Reihenfolge: `python tools/stand.
 - **Kein Datum, keine Uhr:** siehe oben; der Pruefmodus vergleicht Text gegen Messung, nicht Zeitstempel.
 
 <div hidden>
-<!-- STAND:ZAHLEN {"android_code": "20400", "bau": {"gesamt": 134, "headless": 95}, "codec": {"auftraege": 58}, "doku": {"quellen": 54, "seiten": 55}, "einzeldatei": {"dateien": [{"bau": "efbdad0c", "bytes": 3581197, "fassung": "2.4.0", "pfad": "Netzwerk-Labor.html", "sha256": "09647d34b775d49c6f26c15e73baf9a88f43657e3a9780535d9434183a994572"}, {"bau": "efbdad0c", "bytes": 3581197, "fassung": "2.4.0", "pfad": "docs/index.html", "sha256": "09647d34b775d49c6f26c15e73baf9a88f43657e3a9780535d9434183a994572"}], "gleich": true}, "fassung": "2.4.0", "inhalte": {"abzeichen": 17, "fehlertexte": 82, "fertigkeiten": 30, "injektoren": 55, "karrierestufen": 6, "kunden": 7, "minis": 150, "netzvorlagen": 5, "projekte": 4, "tickets": 76, "trainings": 52, "trainingsSkills": ["lab.link", "lab.link", "lab.ip", "lab.ip", "lab.netz", "lab.gateway", "lab.gateway", "lab.arp", "lab.ping", "lab.switch", "lab.subnetz", "lab.subnetz", "lab.dhcp", "lab.dns", "lab.ports", "lab.tcp", "lab.cli", "lab.speichern", "lab.vlan", "lab.vlan", "lab.trunk", "lab.rostick", "lab.acl", "lab.acl", "lab.route", "lab.route", "lab.ttl", "lab.nat", "lab.portfwd", "lab.fw", "lab.dmz", "lab.portsec", "lab.stp", "lab.storage", "lab.link", "lab.dhcp", "lab.dhcp", "lab.dhcp", "lab.route", "lab.dns", "lab.betrieb", "lab.netz", "lab.arp", "lab.ports", "lab.tcp", "lab.speichern", "lab.trunk", "lab.rostick", "lab.ttl", "lab.portfwd", "lab.fw", "lab.dmz"], "wikiSeiten": 37}, "src": {"dateien": 133, "zeilen": 34172}, "tests": {"exit": 0, "gesamt": 878, "gruen": 878, "headless": 95, "rot": 0, "testdateien": 103, "uebersprungen": 0}, "verweise": {"geprueft": 250, "md": 90, "tot": []}} -->
+<!-- STAND:ZAHLEN {"android_code": "20501", "bau": {"gesamt": 134, "headless": 95}, "codec": {"auftraege": 58}, "doku": {"quellen": 54, "seiten": 55}, "einzeldatei": {"dateien": [{"bau": "efbdad0c", "bytes": 3581197, "fassung": "2.5.0", "pfad": "Netzwerk-Labor.html", "sha256": "7f4f94b9729281d99912e8cf5b4626ccccb484e51d753db75395e3595010f3f4"}, {"bau": "efbdad0c", "bytes": 3581197, "fassung": "2.5.0", "pfad": "docs/index.html", "sha256": "7f4f94b9729281d99912e8cf5b4626ccccb484e51d753db75395e3595010f3f4"}], "gleich": true}, "fassung": "2.5.0", "inhalte": {"abzeichen": 17, "fehlertexte": 82, "fertigkeiten": 30, "injektoren": 55, "karrierestufen": 6, "kunden": 7, "minis": 150, "netzvorlagen": 5, "projekte": 4, "tickets": 76, "trainings": 52, "trainingsSkills": ["lab.link", "lab.link", "lab.ip", "lab.ip", "lab.netz", "lab.gateway", "lab.gateway", "lab.arp", "lab.ping", "lab.switch", "lab.subnetz", "lab.subnetz", "lab.dhcp", "lab.dns", "lab.ports", "lab.tcp", "lab.cli", "lab.speichern", "lab.vlan", "lab.vlan", "lab.trunk", "lab.rostick", "lab.acl", "lab.acl", "lab.route", "lab.route", "lab.ttl", "lab.nat", "lab.portfwd", "lab.fw", "lab.dmz", "lab.portsec", "lab.stp", "lab.storage", "lab.link", "lab.dhcp", "lab.dhcp", "lab.dhcp", "lab.route", "lab.dns", "lab.betrieb", "lab.netz", "lab.arp", "lab.ports", "lab.tcp", "lab.speichern", "lab.trunk", "lab.rostick", "lab.ttl", "lab.portfwd", "lab.fw", "lab.dmz"], "wikiSeiten": 37}, "src": {"dateien": 133, "zeilen": 34172}, "tests": {"exit": 0, "gesamt": 878, "gruen": 878, "headless": 95, "rot": 0, "testdateien": 103, "uebersprungen": 0}, "verweise": {"geprueft": 251, "md": 90, "tot": []}} -->
 </div>

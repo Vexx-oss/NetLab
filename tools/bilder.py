@@ -9,7 +9,7 @@ keine Angabe steht ohne Beleg da.
 
 Bilder werden NICHT beschnitten oder retuschiert, nur auf Breite skaliert und als JPEG
 gespeichert (deutlich kleiner als PNG bei Fotos von Oberflaechen). Die Bilder zeigen
-Version 2.4.0 — das steht auch so in der HERKUNFT.md.
+Version 2.5.0 — das steht auch so in der HERKUNFT.md.
 
 Aufruf: python tools/bilder.py            (baut docs/bilder/ neu)
         python tools/bilder.py --pruefen  (nur pruefen, ob alles da und unveraendert ist)
@@ -28,27 +28,27 @@ ZIEL = HIER / "docs" / "bilder"
 
 # (Zieldatei, Quelle in Nachweise/, Breite, Bildunterschrift)
 AUSWAHL = [
-    ("topologie-2.4.0.jpg", "2.4-Bilder/topologie.png", 1440,
-     "Lagebild der Arztpraxis im 2.4.0-Bau: Geraete, gerade Kabel und VLAN-Zonen mit Adressschildern"),
-    ("einstieg-2.4.0.jpg", "2.4-Bilder/einstieg.png", 1440,
+    ("topologie-2.5.0.jpg", "2.4-Bilder/topologie.png", 1440,
+     "Lagebild der Arztpraxis im 2.5.0-Bau: Geraete, gerade Kabel und VLAN-Zonen mit Adressschildern"),
+    ("einstieg-2.5.0.jpg", "2.4-Bilder/einstieg.png", 1440,
      "Der erste Auftrag „Kasse ohne Netz“: Ticket, Ziele, Labor und Inspektor"),
-    ("konsole-2.4.0.jpg", "2.4-Bilder/konsole.png", 1440,
+    ("konsole-2.5.0.jpg", "2.4-Bilder/konsole.png", 1440,
      "IOS-Konsole am Switch: Schnittstellen und VLANs pruefen"),
-    ("simulation-2.4.0.jpg", "2.4-Bilder/simulation.png", 1440,
+    ("simulation-2.5.0.jpg", "2.4-Bilder/simulation.png", 1440,
      "Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter und Schritt-fuer-Schritt"),
-    ("kompetenzkarte-2.4.0.jpg", "2.4-Bilder/kompetenzkarte.png", 1440,
+    ("kompetenzkarte-2.5.0.jpg", "2.4-Bilder/kompetenzkarte.png", 1440,
      "Lernstand: Kompetenzkarte, Fehlerheft und Stufen"),
-    ("ergebnis-2.4.0.jpg", "2.4-Bilder/ergebnis.png", 1440,
+    ("ergebnis-2.5.0.jpg", "2.4-Bilder/ergebnis.png", 1440,
      "Abnahme bestanden: Sterne, Lohn, Abzeichen und Merke-Kasten"),
-    ("postfach-2.4.0.jpg", "2.4-Bilder/postfach.png", 1440,
+    ("postfach-2.5.0.jpg", "2.4-Bilder/postfach.png", 1440,
      "Postfach als Datentafel: Auftraege, Kunde, Form/Dauer/Lohn und Brief"),
-    ("hilfe-2.4.0.jpg", "2.4-Bilder/hilfe.png", 1440,
+    ("hilfe-2.5.0.jpg", "2.4-Bilder/hilfe.png", 1440,
      "Die Hilfeleiter: naechste Diagnose vorschlagen, Fehler kostet nichts"),
 ]
 
 # Der Kopf sagt „Fassung 1.1.0". Kommt eine neue Nachweis-Runde mit anderer Fassung,
 # hier eintragen — sonst behauptet die Doku eine Herkunft, die nicht mehr stimmt.
-FASSUNG_DER_BILDER = "2.4.0"
+FASSUNG_DER_BILDER = "2.5.0"
 
 QUELLTEXT_KOPF = """# Herkunft der Bilder
 

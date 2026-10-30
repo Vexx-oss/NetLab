@@ -9,7 +9,7 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
-## 2.4.0 — Bento 2.5: Postfach, Kunden, Dashboard, Training und Leiste (30.10.2026)
+## 2.5.0 — Bento 2.5: Postfach, Kunden, Dashboard, Training und Leiste (30.10.2026)
 
 **Was diese Fassung ist.** Ein Gestaltungs- und Sprachumbau der fünf Arbeitsflächen, kein
 Feature-Sprung. Postfach und Hilfeleiter, Kundenbereich und Kundenakte, Dashboard „Heute",
@@ -70,16 +70,17 @@ Hilfeleiter-Slogan aus dem Labor. Vertrag: [`Architektur § 22`](Architektur.md)
 `python tools/klassen.py` **0** ·
 `python tools/ethos.py` **GRÜN** und besser als der eingefrorene Stand (R2 20→19, R4 169→153,
 R9 62→58, R10 42→39) · `python tools/umlaute.py` **GRÜN** · `python tools/seite.py --pruefen`
-**GRÜN** (54 Dokumente). Einzeldatei **3.581.197 B**, SHA256 `09647D34…94572`,
+**GRÜN** (54 Dokumente). Einzeldatei **3.581.197 B**, SHA256 `7F4F94B9…010F3F4`,
 **0 Außenverweise**, `docs/index.html` und `Netzwerk-Labor.html` byte-gleich; README-/Doku-Bilder
-(8 Aufnahmen) aus dem neuen Bau erneuert (`docs/bilder/HERKUNFT.md`). **Programm:** Release-Bau
-`Programm/Netzwerk-Labor.exe` **13.905.408 B**, ProductVersion 2.4.0, SHA256 `0AF8B38C…FEB1B7`,
+(8 Aufnahmen) aus dem **2.5.0-Bau** erneuert (`docs/bilder/HERKUNFT.md`). **Programm:** Release-Bau
+`Programm/Netzwerk-Labor.exe` **13.905.408 B**, ProductVersion **2.5.0**, SHA256 `9B4E2379…C40726B`,
 `tools/q-echt.py` **0 Fehler** (erster Auftrag mit echter Maus, 5 ★); „Von 0 anfangen" im echten
 Programm per CDP nachgemessen (danach Stufe 1, 0 €, Lernstand 0, Datei 359 KB → 99 KB).
 Sichtprüfung je Bereich bei 1440/960/720 mit Vorher-/Nachher-Bildern (`Nachweise/bento/`, nicht
 versioniert), unabhängige Design- und Theme-Prüfung (7 Themes × 7 Ansichten ohne harten
 Kontrastbruch). R12 (`ethos --dom`) ist wie zuvor **nicht gemessen**; die fünf Themes wurden
-visuell geprüft. Kein Push, keine Fassungserhöhung, kein Release.
+visuell geprüft. **Fassung 2.5.0 gezogen; Zweig, Tag `v2.5.0` und Release mit ausdrücklicher
+Nutzerfreigabe vom 30.10.2026 veröffentlicht.**
 
 ---
 
