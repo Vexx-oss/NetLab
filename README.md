@@ -18,14 +18,12 @@ Läuft lokal und offline; nichts wird gesendet.
 <!-- STAND:ENDE -->
 </div>
 
-![Topologie der Arztpraxis mit Adressschildern, VLAN-Flächen und den drei Werkzeugen](docs/bilder/topologie.jpg)
+![Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern](docs/bilder/topologie.jpg)
 
-> **Die Bilder in diesem README zeigen die Fassung 1.1.0** — die Aufnahmen stammen aus den
-> Abnahme-Nachweisen vor dem Versionssprung auf 1.2.0. Oberfläche und Aufbau sind gleich
-> geblieben, nur die kleinen Ziffern in der Kopfzeile der Bilder sind älter. Herkunft,
-> Quellpfade und Prüfsummen jeder Aufnahme: [`docs/bilder/HERKUNFT.md`](docs/bilder/HERKUNFT.md).
-> **In dieser Sitzung (26.10.2026) wurde kein Bild neu erzeugt** — ohne Browser ist die
-> Bilderzeugung mit `python tools/bilder.py` **nicht geprüft**.
+> **Alle Bilder in diesem README stammen aus dem 2.4.0-Bau** — aufgenommen am 30.10.2026 in
+> Edge headless (1440 × 950, Theme POLARIS), danach nur skaliert. Herkunft, Quellpfade und
+> Prüfsummen jeder Aufnahme: [`docs/bilder/HERKUNFT.md`](docs/bilder/HERKUNFT.md). Neu bauen
+> mit `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/2.4-Bilder/`).
 
 ---
 
@@ -131,16 +129,16 @@ am Anfang gratis und führt notfalls bis zur vorgeführten Lösung.
 <table>
 <tr>
 <td width="50%"><img src="docs/bilder/einstieg.jpg" alt="Erster Auftrag mit Ticket, Zielen und Hinweis"><br><em>Der erste Auftrag: Ticket, Ziele, Senioren-Hinweis.</em></td>
-<td width="50%"><img src="docs/bilder/konsole.jpg" alt="IOS-ähnliche Konsole und Windows-Terminal bei der Fehlersuche"><br><em>Konsole und Terminal bei der Fehlersuche.</em></td>
+<td width="50%"><img src="docs/bilder/konsole.jpg" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole am Switch: Schnittstellen, VLANs, Hilfe daneben.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="docs/bilder/simulation.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und PDU-Ansicht"><br><em>Simulation auf Frame-Ebene: 42 Ereignisse, Filter, PDU-Ansicht.</em></td>
+<td width="50%"><img src="docs/bilder/simulation.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
 <td width="50%"><img src="docs/bilder/hilfe.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
 </tr>
 </table>
 
 Weitere Bilder und die Herkunft jeder Aufnahme: [`docs/bilder/HERKUNFT.md`](docs/bilder/HERKUNFT.md).
-**Die Aufnahmen zeigen die Fassung 1.1.0** (siehe Hinweis oben).
+**Die Aufnahmen zeigen die Fassung 2.4.0** (siehe Hinweis oben).
 
 ---
 
@@ -174,7 +172,7 @@ automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: L
 
 <table>
 <tr>
-<td width="50%"><img src="docs/bilder/postfach.jpg" alt="Postfach mit Kundenmails, Symptom aus Kundensicht"><br><em>Aufträge kommen als Kundenmail — Symptom, nicht Ursache.</em></td>
+<td width="50%"><img src="docs/bilder/postfach.jpg" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
 <td width="50%"><img src="docs/bilder/kompetenzkarte.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
 </tr>
 </table>

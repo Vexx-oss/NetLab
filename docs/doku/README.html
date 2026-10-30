@@ -85,9 +85,9 @@ img{max-width:100%;height:auto}
 <p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="STAND.html">docs/STAND.md</a>): Fassung <strong>2.4.0</strong> · Baukennung <code>5760d310</code> · Tests <strong>873/873 grün</strong> (0 uebersprungen, 103 Testdateien, 95 headless Module) · Bau <strong>133 Module</strong> · src/ <strong>132 Dateien / 33.395 Zeilen</strong> · Einzeldatei <strong>3.513.631 B</strong>, SHA256 <code>EC871754…2D16A43</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>53</strong> Doku-Seiten · relative Verweise <strong>244 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div></div>
-<p><img src="../bilder/topologie.jpg" alt="Topologie der Arztpraxis mit Adressschildern, VLAN-Flächen und den drei Werkzeugen"></p>
+<p><img src="../bilder/topologie.jpg" alt="Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern"></p>
 <blockquote>
-<p><strong>Die Bilder in diesem README zeigen die Fassung 1.1.0</strong> — die Aufnahmen stammen aus den Abnahme-Nachweisen vor dem Versionssprung auf 1.2.0. Oberfläche und Aufbau sind gleich geblieben, nur die kleinen Ziffern in der Kopfzeile der Bilder sind älter. Herkunft, Quellpfade und Prüfsummen jeder Aufnahme: <a href="bilder/HERKUNFT.html"><code>docs/bilder/HERKUNFT.md</code></a>. <strong>In dieser Sitzung (26.10.2026) wurde kein Bild neu erzeugt</strong> — ohne Browser ist die Bilderzeugung mit <code>python tools/bilder.py</code> <strong>nicht geprüft</strong>.</p>
+<p><strong>Alle Bilder in diesem README stammen aus dem 2.4.0-Bau</strong> — aufgenommen am 30.10.2026 in Edge headless (1440 × 950, Theme POLARIS), danach nur skaliert. Herkunft, Quellpfade und Prüfsummen jeder Aufnahme: <a href="bilder/HERKUNFT.html"><code>docs/bilder/HERKUNFT.md</code></a>. Neu bauen mit <code>python tools/bilder.py</code> (braucht die Aufnahmen unter <code>Nachweise/2.4-Bilder/</code>).</p>
 </blockquote>
 <hr>
 <h2 id="sofort-spielen">Sofort spielen</h2>
@@ -121,14 +121,14 @@ img{max-width:100%;height:auto}
 <div class="dk-html"><table>
 <tr>
 <td width="50%"><img src="../bilder/einstieg.jpg" alt="Erster Auftrag mit Ticket, Zielen und Hinweis"><br><em>Der erste Auftrag: Ticket, Ziele, Senioren-Hinweis.</em></td>
-<td width="50%"><img src="../bilder/konsole.jpg" alt="IOS-ähnliche Konsole und Windows-Terminal bei der Fehlersuche"><br><em>Konsole und Terminal bei der Fehlersuche.</em></td>
+<td width="50%"><img src="../bilder/konsole.jpg" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole am Switch: Schnittstellen, VLANs, Hilfe daneben.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="../bilder/simulation.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und PDU-Ansicht"><br><em>Simulation auf Frame-Ebene: 42 Ereignisse, Filter, PDU-Ansicht.</em></td>
+<td width="50%"><img src="../bilder/simulation.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
 <td width="50%"><img src="../bilder/hilfe.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
 </tr>
 </table></div>
-<p>Weitere Bilder und die Herkunft jeder Aufnahme: <a href="bilder/HERKUNFT.html"><code>docs/bilder/HERKUNFT.md</code></a>. <strong>Die Aufnahmen zeigen die Fassung 1.1.0</strong> (siehe Hinweis oben).</p>
+<p>Weitere Bilder und die Herkunft jeder Aufnahme: <a href="bilder/HERKUNFT.html"><code>docs/bilder/HERKUNFT.md</code></a>. <strong>Die Aufnahmen zeigen die Fassung 2.4.0</strong> (siehe Hinweis oben).</p>
 <hr>
 <h2 id="was-drin-ist">Was drin ist</h2>
 <p><strong>Simulation auf Frame-Ebene.</strong> ARP, Switching mit MAC-Lernen, VLAN und 802.1Q, Router-on-a-Stick, statische Routen, ICMP (Timeout gegen unreachable, TTL), ACL, NAT/PAT, DHCP mit Relay, Reservierung, Lease-Laufzeit und Snooping, DNS, TCP-Handshake, HTTP, Firewall mit Zonen und Port-Weiterleitung, Internet als Kulisse, Broadcast-Sturm. Jede Antwort ist aus Paketen hergeleitet, nichts ist vorgetäuscht.</p>
@@ -138,7 +138,7 @@ img{max-width:100%;height:auto}
 <p><strong>Lernen statt Klicken.</strong> Können ist die Währung: Wer etwas sicher beherrscht, darf es automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: Leitner-Fächer, 1/3/7/14/30 Tage), Fehler landen im Fehlerheft, Abzeichen belohnen Arbeitsweisen.</p>
 <div class="dk-html"><table>
 <tr>
-<td width="50%"><img src="../bilder/postfach.jpg" alt="Postfach mit Kundenmails, Symptom aus Kundensicht"><br><em>Aufträge kommen als Kundenmail — Symptom, nicht Ursache.</em></td>
+<td width="50%"><img src="../bilder/postfach.jpg" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
 <td width="50%"><img src="../bilder/kompetenzkarte.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
 </tr>
 </table></div>

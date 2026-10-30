@@ -9,7 +9,7 @@ keine Angabe steht ohne Beleg da.
 
 Bilder werden NICHT beschnitten oder retuschiert, nur auf Breite skaliert und als JPEG
 gespeichert (deutlich kleiner als PNG bei Fotos von Oberflaechen). Die Bilder zeigen
-Version 1.1.0 — das steht auch so in der HERKUNFT.md.
+Version 2.4.0 — das steht auch so in der HERKUNFT.md.
 
 Aufruf: python tools/bilder.py            (baut docs/bilder/ neu)
         python tools/bilder.py --pruefen  (nur pruefen, ob alles da und unveraendert ist)
@@ -28,43 +28,40 @@ ZIEL = HIER / "docs" / "bilder"
 
 # (Zieldatei, Quelle in Nachweise/, Breite, Bildunterschrift)
 AUSWAHL = [
-    ("topologie.jpg", "1.2-Topo/topo-praxis-mit-tasten.png", 1500,
-     "Topologie der Arztpraxis mit Adressschildern, VLAN-Flaechen und den drei Werkzeugen"),
-    ("einstieg.jpg", "1.2-Phase-A/nachher-1366-1-start.png", 1366,
-     "Der erste Auftrag „Kasse ohne Netz“: Ticket, Ziele, Senioren-Hinweis, Labor"),
-    ("konsole.jpg", "1.2-C/c-1366-3-terminal-diagnose.png", 1366,
-     "IOS-aehnliche Konsole und Windows-Terminal bei der Fehlersuche (ping, nslookup)"),
-    ("simulation.jpg", "1.2-Phase-A/nachher-1366-8-sim.png", 1366,
-     "Simulation auf Frame-Ebene: 42 Ereignisse, Filter nach ARP/ICMP, PDU-Ansicht"),
-    ("kompetenzkarte.jpg", "1.2-E2/e2-1366-5-kompetenzkarte.png", 1366,
-     "Lernstand: Kompetenzkarte, Fehlerheft, Stufen „neu“ bis „gemeistert“"),
-    ("ergebnis.jpg", "1.2-S2/s2-1366-1-erster-auftrag.png", 1366,
-     "Abnahme bestanden: Sterne, Lohn, Abzeichen, „Merke“-Kasten mit Lernquelle"),
-    ("postfach.jpg", "1.2-C/c-1366-1-postfach.png", 1366,
-     "Postfach: Kundenmails mit Symptom aus Kundensicht"),
-    ("hilfe.jpg", "1.2-C/c-1366-8-hilfe-naechste-diagnose.png", 1366,
+    ("topologie.jpg", "2.4-Bilder/topologie.png", 1440,
+     "Lagebild der Arztpraxis im 2.4.0-Bau: Geraete, gerade Kabel und VLAN-Zonen mit Adressschildern"),
+    ("einstieg.jpg", "2.4-Bilder/einstieg.png", 1440,
+     "Der erste Auftrag „Kasse ohne Netz“: Ticket, Ziele, Labor und Inspektor"),
+    ("konsole.jpg", "2.4-Bilder/konsole.png", 1440,
+     "IOS-Konsole am Switch: Schnittstellen und VLANs pruefen"),
+    ("simulation.jpg", "2.4-Bilder/simulation.png", 1440,
+     "Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter und Schritt-fuer-Schritt"),
+    ("kompetenzkarte.jpg", "2.4-Bilder/kompetenzkarte.png", 1440,
+     "Lernstand: Kompetenzkarte, Fehlerheft und Stufen"),
+    ("ergebnis.jpg", "2.4-Bilder/ergebnis.png", 1440,
+     "Abnahme bestanden: Sterne, Lohn, Abzeichen und Merke-Kasten"),
+    ("postfach.jpg", "2.4-Bilder/postfach.png", 1440,
+     "Postfach als Datentafel: Auftraege, Kunde, Form/Dauer/Lohn und Brief"),
+    ("hilfe.jpg", "2.4-Bilder/hilfe.png", 1440,
      "Die Hilfeleiter: naechste Diagnose vorschlagen, Fehler kostet nichts"),
 ]
 
 # Der Kopf sagt „Fassung 1.1.0". Kommt eine neue Nachweis-Runde mit anderer Fassung,
 # hier eintragen — sonst behauptet die Doku eine Herkunft, die nicht mehr stimmt.
-FASSUNG_DER_BILDER = "1.1.0"
+FASSUNG_DER_BILDER = "2.4.0"
 
 QUELLTEXT_KOPF = """# Herkunft der Bilder
 
-Diese Bilder sind **Ausschnitte aus den Abnahme-Nachweisen** des Projekts, keine
-gestellten Aufnahmen. Quelldatei, Pruefsumme und Groesse stehen unten; die Originale
-liegen unter `Nachweise/` (nicht im Git, weil 22 MB Beweismaterial).
+Diese Bilder sind **Aufnahmen aus dem gebauten Programm** — gebaut aus dem Stand {spiel},
+aufgenommen am 30.10.2026 mit `Nachweise/2.4-Bilder/foto.py` in Edge headless (1440 × 950,
+Theme POLARIS/dunkel), danach **nur auf Breite skaliert und als JPEG gespeichert**. Nicht
+beschnitten, nicht retuschiert. Quelldatei, Pruefsumme und Groesse stehen unten; die
+Originale liegen unter `Nachweise/` (nicht im Git).
 
-Bearbeitung: **nur auf Breite skaliert und als JPEG gespeichert.** Nicht beschnitten,
-nicht retuschiert.
+**Die Bilder zeigen die Fassung {fassung}.**
 
-**Die Bilder zeigen die Fassung {fassung}** — die Nachweise wurden vor dem Versionssprung
-auf {spiel} aufgenommen. Die Oberflaeche ist dieselbe; die kleinen Ziffern in der Kopfzeile
-der Bilder sind der einzige Unterschied. Neue Nachweise werden mit der jeweils aktuellen
-Fassung erzeugt.
-
-Neu bauen: `python tools/bilder.py` · Pruefen: `python tools/bilder.py --pruefen`
+Neu bauen: `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/2.4-Bilder/`)
+· Pruefen: `python tools/bilder.py --pruefen`
 """
 
 
