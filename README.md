@@ -18,7 +18,7 @@ Läuft lokal und offline; nichts wird gesendet.
 <!-- STAND:ENDE -->
 </div>
 
-![Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern](docs/bilder/topologie.jpg?v=2.4.0)
+![Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern](docs/bilder/topologie-2.4.0.jpg)
 
 > **Alle Bilder in diesem README stammen aus dem 2.4.0-Bau** — aufgenommen am 30.10.2026 in
 > Edge headless (1440 × 950, Theme POLARIS), danach nur skaliert. Herkunft, Quellpfade und
@@ -128,12 +128,12 @@ am Anfang gratis und führt notfalls bis zur vorgeführten Lösung.
 
 <table>
 <tr>
-<td width="50%"><img src="docs/bilder/einstieg.jpg?v=2.4.0" alt="Erster Auftrag mit Ticket, Zielen und Hinweis"><br><em>Der erste Auftrag: Ticket, Ziele, Senioren-Hinweis.</em></td>
-<td width="50%"><img src="docs/bilder/konsole.jpg?v=2.4.0" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole am Switch: Schnittstellen, VLANs, Hilfe daneben.</em></td>
+<td width="50%"><img src="docs/bilder/einstieg-2.4.0.jpg" alt="Erster Auftrag mit Ticket, Zielen und Hinweis"><br><em>Der erste Auftrag: Ticket, Ziele, Senioren-Hinweis.</em></td>
+<td width="50%"><img src="docs/bilder/konsole-2.4.0.jpg" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole am Switch: Schnittstellen, VLANs, Hilfe daneben.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="docs/bilder/simulation.jpg?v=2.4.0" alt="Simulation auf Frame-Ebene mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
-<td width="50%"><img src="docs/bilder/hilfe.jpg?v=2.4.0" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
+<td width="50%"><img src="docs/bilder/simulation-2.4.0.jpg" alt="Simulation auf Frame-Ebene mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
+<td width="50%"><img src="docs/bilder/hilfe-2.4.0.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
 </tr>
 </table>
 
@@ -172,8 +172,8 @@ automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: L
 
 <table>
 <tr>
-<td width="50%"><img src="docs/bilder/postfach.jpg?v=2.4.0" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
-<td width="50%"><img src="docs/bilder/kompetenzkarte.jpg?v=2.4.0" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
+<td width="50%"><img src="docs/bilder/postfach-2.4.0.jpg" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
+<td width="50%"><img src="docs/bilder/kompetenzkarte-2.4.0.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
 </tr>
 </table>
 

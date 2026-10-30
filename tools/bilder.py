@@ -28,21 +28,21 @@ ZIEL = HIER / "docs" / "bilder"
 
 # (Zieldatei, Quelle in Nachweise/, Breite, Bildunterschrift)
 AUSWAHL = [
-    ("topologie.jpg", "2.4-Bilder/topologie.png", 1440,
+    ("topologie-2.4.0.jpg", "2.4-Bilder/topologie.png", 1440,
      "Lagebild der Arztpraxis im 2.4.0-Bau: Geraete, gerade Kabel und VLAN-Zonen mit Adressschildern"),
-    ("einstieg.jpg", "2.4-Bilder/einstieg.png", 1440,
+    ("einstieg-2.4.0.jpg", "2.4-Bilder/einstieg.png", 1440,
      "Der erste Auftrag „Kasse ohne Netz“: Ticket, Ziele, Labor und Inspektor"),
-    ("konsole.jpg", "2.4-Bilder/konsole.png", 1440,
+    ("konsole-2.4.0.jpg", "2.4-Bilder/konsole.png", 1440,
      "IOS-Konsole am Switch: Schnittstellen und VLANs pruefen"),
-    ("simulation.jpg", "2.4-Bilder/simulation.png", 1440,
+    ("simulation-2.4.0.jpg", "2.4-Bilder/simulation.png", 1440,
      "Simulation auf Frame-Ebene: Ereignisse mit Grund, Filter und Schritt-fuer-Schritt"),
-    ("kompetenzkarte.jpg", "2.4-Bilder/kompetenzkarte.png", 1440,
+    ("kompetenzkarte-2.4.0.jpg", "2.4-Bilder/kompetenzkarte.png", 1440,
      "Lernstand: Kompetenzkarte, Fehlerheft und Stufen"),
-    ("ergebnis.jpg", "2.4-Bilder/ergebnis.png", 1440,
+    ("ergebnis-2.4.0.jpg", "2.4-Bilder/ergebnis.png", 1440,
      "Abnahme bestanden: Sterne, Lohn, Abzeichen und Merke-Kasten"),
-    ("postfach.jpg", "2.4-Bilder/postfach.png", 1440,
+    ("postfach-2.4.0.jpg", "2.4-Bilder/postfach.png", 1440,
      "Postfach als Datentafel: Auftraege, Kunde, Form/Dauer/Lohn und Brief"),
-    ("hilfe.jpg", "2.4-Bilder/hilfe.png", 1440,
+    ("hilfe-2.4.0.jpg", "2.4-Bilder/hilfe.png", 1440,
      "Die Hilfeleiter: naechste Diagnose vorschlagen, Fehler kostet nichts"),
 ]
 
