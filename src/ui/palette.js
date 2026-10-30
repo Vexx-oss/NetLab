@@ -56,6 +56,7 @@ UI.palette = (() => {
       {gruppe: "Werkzeug", text: "Auswählen", taste: "V", sym: "zeiger", aktion: nachLabor(() => UI.labor.werkzeug("auswahl"))},
       {gruppe: "Labor", text: "Inspektor ein-/ausklappen", taste: "I", sym: "inspektor", aktion: nachLabor(() => UI.labor.inspektor())},
       {gruppe: "Labor", text: "Simulation ein-/ausklappen", taste: "S", sym: "sim", aktion: nachLabor(() => UI.labor.simulation())},
+      {gruppe: "Labor", text: "Terminal öffnen", taste: "T", sym: "terminal", aktion: nachLabor(() => { const id = UI.labor?.auswahl?.geraet; if (id) UI.labor.konsole(id); })},
       {gruppe: "Programm", text: "Zur Leiste wechseln", sym: "leiste", aktion: () => UI.modus?.("leiste")},
       {gruppe: "Programm", text: "Hell/Dunkel umschalten", sym: "sonne", aktion: () => UI.app?.themaUmschalten?.()},
       {gruppe: "Programm", text: "Einstellungen", sym: "zahnrad", aktion: () => UI.app?.einstellungen?.()},

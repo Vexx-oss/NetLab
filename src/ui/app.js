@@ -139,7 +139,7 @@ UI.app = (() => {
        Erklärtiefe, Hilfeleiter). Der Tooltip dieser Fläche sagte schon immer „Karriere-Stufe", die
        sichtbare Beschriftung widersprach ihm (Review Auffindbarkeit, Befund 4, 07.10.2026). */
     stufe: x => x == null ? "Karriere –" : `Karriere ${x}`,
-    offen: x => x == null ? "0 offen" : `${zahlDe(x)} offen`,
+    offen: x => x == null ? "0 Tickets" : `${zahlDe(x)} ${x === 1 ? "Ticket" : "Tickets"}`,
   };
   /* Speicher-Kennzeichen: drei Zustände, kein Klickziel, keine Animation, nur ein leiser Text.
      Die Breite zählt (Telefon in beiden Ausrichtungen): auf sehr schmalen Geräten (≤ 380 px)
@@ -224,7 +224,7 @@ UI.app = (() => {
       h("div", {class: "kopf-werte"}, el.werte.euro.b, el.werte.ruf.b, el.werte.stufe.b, el.werte.offen.b),
       h("div", {class: "kopf-knoepfe"},
         knopf("suche", "Befehlspalette (Strg+K)", () => UI.palette.oeffnen(), "Strg+K"),
-        knopf("leiste", "Zur Leiste wechseln (kompakte Ansicht am Rand)", () => UI.modus("leiste"), "Leiste"),
+        knopf("leiste", "Zur Leiste wechseln (kompakte Ansicht am Rand)", () => UI.modus("leiste"), "Zur Leiste"),
         el.thema,
         knopf("zahnrad", "Einstellungen", () => einstellungen()),
         knopf("hilfe", "Tastenkürzel (?)", () => hilfe())));

@@ -3227,6 +3227,24 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 }
 
 
+/* Doppelter Zoom: die Minimap trägt die Zoom-Pille, die Werkzeugleiste nur noch schmal */
+
+
+/* Rail zeigt nur Symbole, solange die Kopf-Navigation die Ansichten benennt */
+@media (min-width:1101px){ .dock-text{display:none} .dock-knopf{min-height:52px} }
+.hb-klasse-hinweis{color:var(--faint);font-size:var(--fs-2)}
+
+
+/* ===== UX-Entdopplung im Labor (Audit task-9) ===== */
+/* Ein Zoom-Regler: die Minimap trägt keinen eigenen Zoom mehr, die Werkzeugleiste bleibt */
+.wk-mini-fuss .wk-stufe{display:none}
+/* Terminal öffnet über Dock-Reiter oder Taste C/T – der Knopf im Inspektorkopf entfällt */
+@media (min-width:1101px){ .in-terminal{display:none} }
+/* Inspektor schließen: nur die Reiterlasche, nicht zusätzlich der Kopf-Knopf */
+.labor:not(.dock-zu) .lb-dock-einklappen{display:none}
+
+.wk-mini-svg{min-height:110px}
+
 </style>
 </head>
 <body>
@@ -3234,7 +3252,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "7cba6706";
+const LABOR_BAU = "0481ce31";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -29614,9 +29632,9 @@ UI.hub = (() => {
     const klasse = h("section", {class: "hb-panel hb-klasse"},
       h("div", {class: "hb-panel-titel"}, "// KLASSENRAUM"),
       h("div", {class: "hb-klasse-zeile"},
-        h("button", {type: "button", class: "knopf primaer", onclick: () => UI.app.ansicht("klasse")}, "Code anzeigen"),
-        h("small", {}, "Kein Server, kein Login.")),
-      h("div", {class: "hb-klasse-zeile"}, h("small", {}, "Auftragscode eingeben"), h("span", {class: "hb-pill"}, "NL-····")));
+        h("button", {type: "button", class: "knopf primaer", onclick: () => UI.app.ansicht("klassenraum")}, "Klassenraum öffnen"),
+        h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("mitarbeit")}, "Auftragscode")),
+      h("small", {class: "hb-klasse-hinweis"}, "Kein Server, kein Login – Code mündlich weitergeben."));
 
     /* Lagebild (ruhige Vorschau wie im Mockup) */
     const lage = h("section", {class: "hb-panel hb-lage"},
@@ -29795,7 +29813,7 @@ UI.inspektor = (() => {
     if (g.typ !== "pc" || g.skin === "drucker" || Object.values(g.running.dienste || {}).some(d => d && d.an)) r.push(["dienste", "Dienste"]);
     return r;
   }
-  const terminalName = g => HOST(g) ? "Terminal" : "Konsole";
+  const terminalName = () => "Terminal";
 
   /* ---------- Öffentliche Aufrufe ---------- */
   function zeigen(container, netz, id, verlauf){
@@ -32880,6 +32898,7 @@ UI.palette = (() => {
       {gruppe: "Werkzeug", text: "Auswählen", taste: "V", sym: "zeiger", aktion: nachLabor(() => UI.labor.werkzeug("auswahl"))},
       {gruppe: "Labor", text: "Inspektor ein-/ausklappen", taste: "I", sym: "inspektor", aktion: nachLabor(() => UI.labor.inspektor())},
       {gruppe: "Labor", text: "Simulation ein-/ausklappen", taste: "S", sym: "sim", aktion: nachLabor(() => UI.labor.simulation())},
+      {gruppe: "Labor", text: "Terminal öffnen", taste: "T", sym: "terminal", aktion: nachLabor(() => { const id = UI.labor?.auswahl?.geraet; if (id) UI.labor.konsole(id); })},
       {gruppe: "Programm", text: "Zur Leiste wechseln", sym: "leiste", aktion: () => UI.modus?.("leiste")},
       {gruppe: "Programm", text: "Hell/Dunkel umschalten", sym: "sonne", aktion: () => UI.app?.themaUmschalten?.()},
       {gruppe: "Programm", text: "Einstellungen", sym: "zahnrad", aktion: () => UI.app?.einstellungen?.()},
@@ -33735,7 +33754,7 @@ UI.spiel = (() => {
         h("button", {type: "button", class: "knopf am-lesen" + (S.mappe.offen ? " an" : ""), "aria-expanded": String(S.mappe.offen), title: "Auftragsmappe: Brief und Ziele",
           onclick: () => S.mappe.offen ? mappeZu() : mappeAuf("brief")}, UI.symbol("mappe", 17), "Auftrag lesen"),
         abnahme,
-        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfe, Nachschlagen, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
+        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfeleiter, Wiki, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
     const ungespeichert = Spiel.speichernErwartet(def, niveau) ? Spiel.ungespeicherteGeraete(inst) : [];
     el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, zeile,
       S.einstiegStart ? einstiegKarte() : null,
@@ -33902,7 +33921,7 @@ UI.spiel = (() => {
       /* „Hilfe 3/6" statt „Stufe 3/6": das Wort „Stufe" bedeutet im Programm schon vier andere Dinge
          (Karriere, Bildungsstand, Erklärtiefe, Prüfungsstrenge) — hier ist die Sprosse der Hilfeleiter
          gemeint. Der Knopf daneben heißt ohnehin „Hilfe" (Review Auffindbarkeit, Befund 4). */
-      {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfe", sym: "hilfe", info: stufe ? `Hilfe ${stufe}/6` : "vom Hinweis bis zur Lösung",
+      {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfeleiter", sym: "hilfe", info: stufe ? `Hilfe ${stufe}/6` : "vom Hinweis bis zur Lösung",
         fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
     if (!def.fernwartung && !def.blatt) eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});
@@ -33912,7 +33931,7 @@ UI.spiel = (() => {
       eintraege.push({text: inst.netzpruefer ? "Netzprüfer ausschalten" : "Netzprüfer einschalten", sym: "warnung", info: "Werkzeug",
         fn: () => { Spiel.werkzeug.netzpruefer(inst); UI.labor.auffrischen?.(); UI.labor.auftragNeu(); }});
     if (Spiel.niveauVon(inst) !== "AP2" && typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0])
-      eintraege.push({text: "Nachschlagen: " + Spiel.skill(def.skills[0]).name, sym: "wiki", fn: () => UI.wiki.oeffnen(def.skills[0])});
+      eintraege.push({text: "Wiki: " + Spiel.skill(def.skills[0]).name, sym: "wiki", fn: () => UI.wiki.oeffnen(def.skills[0])});
     eintraege.push("-",
       {text: "Ticket zurücksetzen", sym: "neustart", fn: () => { Spiel.zuruecksetzen(inst); S.live = null; liveJetzt(); UI.labor.einpassen(); UI.toast("Das Ticket steht wieder auf Anfang (Strg+Z holt deinen Stand zurück).", "info"); }},
       {text: "Zum Postfach", sym: "postfach", fn: () => UI.app.ansicht("postfach")});
@@ -35743,7 +35762,7 @@ UI.app = (() => {
        Erklärtiefe, Hilfeleiter). Der Tooltip dieser Fläche sagte schon immer „Karriere-Stufe", die
        sichtbare Beschriftung widersprach ihm (Review Auffindbarkeit, Befund 4, 07.10.2026). */
     stufe: x => x == null ? "Karriere –" : `Karriere ${x}`,
-    offen: x => x == null ? "0 offen" : `${zahlDe(x)} offen`,
+    offen: x => x == null ? "0 Tickets" : `${zahlDe(x)} ${x === 1 ? "Ticket" : "Tickets"}`,
   };
   /* Speicher-Kennzeichen: drei Zustände, kein Klickziel, keine Animation, nur ein leiser Text.
      Die Breite zählt (Telefon in beiden Ausrichtungen): auf sehr schmalen Geräten (≤ 380 px)
@@ -35828,7 +35847,7 @@ UI.app = (() => {
       h("div", {class: "kopf-werte"}, el.werte.euro.b, el.werte.ruf.b, el.werte.stufe.b, el.werte.offen.b),
       h("div", {class: "kopf-knoepfe"},
         knopf("suche", "Befehlspalette (Strg+K)", () => UI.palette.oeffnen(), "Strg+K"),
-        knopf("leiste", "Zur Leiste wechseln (kompakte Ansicht am Rand)", () => UI.modus("leiste"), "Leiste"),
+        knopf("leiste", "Zur Leiste wechseln (kompakte Ansicht am Rand)", () => UI.modus("leiste"), "Zur Leiste"),
         el.thema,
         knopf("zahnrad", "Einstellungen", () => einstellungen()),
         knopf("hilfe", "Tastenkürzel (?)", () => hilfe())));

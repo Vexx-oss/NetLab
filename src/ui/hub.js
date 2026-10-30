@@ -88,9 +88,9 @@ UI.hub = (() => {
     const klasse = h("section", {class: "hb-panel hb-klasse"},
       h("div", {class: "hb-panel-titel"}, "// KLASSENRAUM"),
       h("div", {class: "hb-klasse-zeile"},
-        h("button", {type: "button", class: "knopf primaer", onclick: () => UI.app.ansicht("klasse")}, "Code anzeigen"),
-        h("small", {}, "Kein Server, kein Login.")),
-      h("div", {class: "hb-klasse-zeile"}, h("small", {}, "Auftragscode eingeben"), h("span", {class: "hb-pill"}, "NL-····")));
+        h("button", {type: "button", class: "knopf primaer", onclick: () => UI.app.ansicht("klassenraum")}, "Klassenraum öffnen"),
+        h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("mitarbeit")}, "Auftragscode")),
+      h("small", {class: "hb-klasse-hinweis"}, "Kein Server, kein Login – Code mündlich weitergeben."));
 
     /* Lagebild (ruhige Vorschau wie im Mockup) */
     const lage = h("section", {class: "hb-panel hb-lage"},

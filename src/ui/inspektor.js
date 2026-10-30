@@ -30,7 +30,7 @@ UI.inspektor = (() => {
     if (g.typ !== "pc" || g.skin === "drucker" || Object.values(g.running.dienste || {}).some(d => d && d.an)) r.push(["dienste", "Dienste"]);
     return r;
   }
-  const terminalName = g => HOST(g) ? "Terminal" : "Konsole";
+  const terminalName = () => "Terminal";
 
   /* ---------- Öffentliche Aufrufe ---------- */
   function zeigen(container, netz, id, verlauf){

@@ -117,7 +117,7 @@ UI.spiel = (() => {
         h("button", {type: "button", class: "knopf am-lesen" + (S.mappe.offen ? " an" : ""), "aria-expanded": String(S.mappe.offen), title: "Auftragsmappe: Brief und Ziele",
           onclick: () => S.mappe.offen ? mappeZu() : mappeAuf("brief")}, UI.symbol("mappe", 17), "Auftrag lesen"),
         abnahme,
-        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfe, Nachschlagen, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
+        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfeleiter, Wiki, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
     const ungespeichert = Spiel.speichernErwartet(def, niveau) ? Spiel.ungespeicherteGeraete(inst) : [];
     el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, zeile,
       S.einstiegStart ? einstiegKarte() : null,
@@ -284,7 +284,7 @@ UI.spiel = (() => {
       /* „Hilfe 3/6" statt „Stufe 3/6": das Wort „Stufe" bedeutet im Programm schon vier andere Dinge
          (Karriere, Bildungsstand, Erklärtiefe, Prüfungsstrenge) — hier ist die Sprosse der Hilfeleiter
          gemeint. Der Knopf daneben heißt ohnehin „Hilfe" (Review Auffindbarkeit, Befund 4). */
-      {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfe", sym: "hilfe", info: stufe ? `Hilfe ${stufe}/6` : "vom Hinweis bis zur Lösung",
+      {text: S.hilfeOffen ? "Hilfeleiter schließen" : "Hilfeleiter", sym: "hilfe", info: stufe ? `Hilfe ${stufe}/6` : "vom Hinweis bis zur Lösung",
         fn: () => { S.hilfeOffen = !S.hilfeOffen; if (S.hilfeOffen) S.mappe.offen = false; UI.labor.auftragNeu(); }},
     ];
     if (!def.fernwartung && !def.blatt) eintraege.push({text: "Netzplan neben dem Labor", sym: "plan", fn: () => UI.netzplan.anheften(inst)});
@@ -294,7 +294,7 @@ UI.spiel = (() => {
       eintraege.push({text: inst.netzpruefer ? "Netzprüfer ausschalten" : "Netzprüfer einschalten", sym: "warnung", info: "Werkzeug",
         fn: () => { Spiel.werkzeug.netzpruefer(inst); UI.labor.auffrischen?.(); UI.labor.auftragNeu(); }});
     if (Spiel.niveauVon(inst) !== "AP2" && typeof UI.wiki?.oeffnen === "function" && (def.skills || [])[0])
-      eintraege.push({text: "Nachschlagen: " + Spiel.skill(def.skills[0]).name, sym: "wiki", fn: () => UI.wiki.oeffnen(def.skills[0])});
+      eintraege.push({text: "Wiki: " + Spiel.skill(def.skills[0]).name, sym: "wiki", fn: () => UI.wiki.oeffnen(def.skills[0])});
     eintraege.push("-",
       {text: "Ticket zurücksetzen", sym: "neustart", fn: () => { Spiel.zuruecksetzen(inst); S.live = null; liveJetzt(); UI.labor.einpassen(); UI.toast("Das Ticket steht wieder auf Anfang (Strg+Z holt deinen Stand zurück).", "info"); }},
       {text: "Zum Postfach", sym: "postfach", fn: () => UI.app.ansicht("postfach")});

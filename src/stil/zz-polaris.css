@@ -476,3 +476,21 @@
   .lb-auftrag .am-ziele{display:inline-flex;grid-column:2;justify-self:start;padding:4px 8px}
 }
 
+
+/* Doppelter Zoom: die Minimap trägt die Zoom-Pille, die Werkzeugleiste nur noch schmal */
+
+
+/* Rail zeigt nur Symbole, solange die Kopf-Navigation die Ansichten benennt */
+@media (min-width:1101px){ .dock-text{display:none} .dock-knopf{min-height:52px} }
+.hb-klasse-hinweis{color:var(--faint);font-size:var(--fs-2)}
+
+
+/* ===== UX-Entdopplung im Labor (Audit task-9) ===== */
+/* Ein Zoom-Regler: die Minimap trägt keinen eigenen Zoom mehr, die Werkzeugleiste bleibt */
+.wk-mini-fuss .wk-stufe{display:none}
+/* Terminal öffnet über Dock-Reiter oder Taste C/T – der Knopf im Inspektorkopf entfällt */
+@media (min-width:1101px){ .in-terminal{display:none} }
+/* Inspektor schließen: nur die Reiterlasche, nicht zusätzlich der Kopf-Knopf */
+.labor:not(.dock-zu) .lb-dock-einklappen{display:none}
+
+.wk-mini-svg{min-height:110px}
