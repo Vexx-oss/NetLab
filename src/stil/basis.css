@@ -7,10 +7,12 @@
   color-scheme:dark;
   /* POLARIS (§ 18.2 neu): geschichtete Neutraltoene, vier semantische Signalfarben.
      Minze = Handlung/Erfolg/Live, Iris = Wissen/Reputation, Amber = Geld/Zeit, Koralle = Stoerung. */
-  --bg:#0B0C0F; --bg-raster:rgba(255,255,255,.022); --raster:24px;
-  --panel:#14161B; --panel-2:#191C22; --panel-3:#1F232B;
-  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.16);
-  --ink:#F3F4F1; --muted:#B0B4AD; --faint:#848981;
+  /* POLARIS 2.3: angehobene Tiefen für lange Sitzungen – dunkel, aber nicht schwarz.
+     Die Flächen tragen einen kühlen Blaustich, die Akzente bleiben warm (Minze/Iris/Amber). */
+  --bg:#15181F; --bg-raster:rgba(255,255,255,.028); --raster:24px;
+  --panel:#1D212A; --panel-2:#242834; --panel-3:#2C313E;
+  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.19);
+  --ink:#ECEDE8; --muted:#BCC0B9; --faint:#93998E;
   --accent:#7DF3C0; --accent-ink:#08130F; --accent-soft:#12251E;
   --mint:#7DF3C0; --iris:#9C8CFF; --amber:#FFC46B; --koralle:#FF8A7A;
   --ok:#7DF3C0; --ok-soft:#10241C;
