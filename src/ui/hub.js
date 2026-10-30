@@ -20,6 +20,105 @@ UI.hub = (() => {
     return zu;
   }
 
+  /* ---------- Lagebild: echte Mini-Topologie (Entwurf „lagebild", SPEC.md) ---------- */
+  const TYP_SYM = {internet: "◎", router: "⌂", firewall: "⛨", switch: "⇄", server: "▤", nas: "▥"};
+  const typSym = g => TYP_SYM[g.typ] || "▭";
+  const schicht = g => g.typ === "internet" ? 0 : (g.typ === "router" || g.typ === "firewall") ? 1 : g.typ === "switch" ? 2 : 3;
+  const Y_SCHICHT = [12, 36, 60, 84];        /* Prozent der Panelhöhe */
+
+  /* Kante „oben" nur, wenn beide Ports oben sind (wie editor.js kabelZustand). */
+  function kabelStatus(netz, k){
+    try {
+      const a = Modell.portStatus(netz, k.a.geraet, k.a.port), b = Modell.portStatus(netz, k.b.geraet, k.b.port);
+      if (a.status === "oben" && b.status === "oben") return "oben";
+      return (a.status === "aus" || b.status === "aus") ? "aus" : "unten";
+    } catch (e) { return "unten"; }
+  }
+  function lagePanel(){
+    const titel = "// LAGEBILD" + (UI.ebenen?.aktuell ? " · EBENE " + String(UI.ebenen.aktuell).toUpperCase() : "");
+    const netz = UI.labor?.netz;
+    if (!netz?.geraete) {
+      return h("section", {class: "hb-panel hb-lage hb-lage-leer"},
+        h("div", {class: "hb-panel-titel"}, titel),
+        h("p", {class: "hb-lage-hinweis"}, "Kein Netz geladen — öffne das Labor oder einen Auftrag."),
+        h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("labor")}, "Labor öffnen"));
+    }
+    const geraete = Object.values(netz.geraete);
+    const kabel = Array.isArray(netz.kabel) ? netz.kabel : [];
+    const nachId = new Map(geraete.map(g => [g.id, g]));
+    const schichten = [[], [], [], []];
+    for (const g of geraete) schichten[schicht(g)].push(g);
+
+    const pos = new Map();
+    const setze = (liste, yProz) => {
+      const n = liste.length;
+      liste.forEach((g, i) => pos.set(g.id, {x: n === 1 ? 50 : 15 + (70 * i) / (n - 1), y: yProz}));
+    };
+    setze(schichten[0], Y_SCHICHT[0]);
+    setze(schichten[1], Y_SCHICHT[1]);
+    setze(schichten[2], Y_SCHICHT[2]);
+
+    /* Hosts unter „ihrem" Switch: Kabel zum Switch suchen; ohne Kabel gleichmäßig verteilen. */
+    const hosts = schichten[3];
+    const switchIndex = new Map(schichten[2].map((g, i) => [g.id, i]));
+    const gruppen = new Map();
+    const ohneSwitch = [];
+    for (const g of hosts) {
+      const k = kabel.find(k => (k.a.geraet === g.id && switchIndex.has(k.b.geraet)) || (k.b.geraet === g.id && switchIndex.has(k.a.geraet)));
+      const sw = k ? (k.a.geraet === g.id ? k.b.geraet : k.a.geraet) : null;
+      if (sw) { if (!gruppen.has(sw)) gruppen.set(sw, []); gruppen.get(sw).push(g); } else ohneSwitch.push(g);
+    }
+    const sichtbar = hosts.slice(0, 6);
+    const versteckt = hosts.length - sichtbar.length;
+    for (const [swId, liste] of gruppen) {
+      const basis = pos.get(swId)?.x ?? 50, n = liste.length;
+      liste.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: Math.max(8, Math.min(92, basis + (i - (n - 1) / 2) * 11)), y: Y_SCHICHT[3]}); });
+    }
+    ohneSwitch.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: 12 + i * 10, y: Y_SCHICHT[3]}); });
+
+    const kanten = kabel.map(k => ({k, s: kabelStatus(netz, k)})).filter(x => pos.has(x.k.a?.geraet) && pos.has(x.k.b?.geraet));
+    const verbunden = kanten.filter(x => x.s === "oben").length;
+    const offen = kanten.filter(x => x.s !== "oben").length;
+    const mitLink = new Set();
+    for (const {k, s} of kanten) if (s === "oben") { mitLink.add(k.a.geraet); mitLink.add(k.b.geraet); }
+    const ohneLink = geraete.filter(g => !mitLink.has(g.id)).length;
+
+    const svg = sv("svg", {class: "hb-lage-svg", viewBox: "0 0 100 100", preserveAspectRatio: "none", "aria-hidden": "true"});
+    svg.innerHTML = kanten.map(({k, s}) => {
+      const a = pos.get(k.a.geraet), b = pos.get(k.b.geraet);
+      const my = (a.y + b.y) / 2;
+      const d = Math.abs(a.x - b.x) < 0.5
+        ? `M${a.x} ${a.y} V${b.y}`
+        : `M${a.x} ${a.y} C${a.x} ${my} ${b.x} ${my} ${b.x} ${b.y}`;
+      const klasse = s === "oben" ? "ok" : s === "aus" ? "aus" : "unten";
+      return `<path class="hb-kante ${klasse}" d="${d}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
+    }).join("");
+
+    const chip = g => {
+      const p = pos.get(g.id);
+      const adr = UI.ebenen.adresse(netz, g);
+      const ip = adr?.ip || "";
+      return h("button", {type: "button", class: "hb-chip typ-" + g.typ + (mitLink.has(g.id) ? "" : " ohne-link"), style: {"left": p.x + "%", "top": p.y + "%"},
+        title: `${g.name}${ip ? " · " + ip : ""} — im Labor zeigen`,
+        onclick: () => { UI.app.ansicht("labor"); requestAnimationFrame(() => { try { UI.labor.auswaehlen?.(g.id); UI.labor.zentrieren?.(g.id); } catch (e) { console.error(e); } }); }},
+        h("span", {class: "hb-chip-sym", "aria-hidden": "true"}, typSym(g)),
+        h("b", {}, String(g.name).replace(/^PC-/i, "")));
+    };
+    const zaehler = `${geraete.length} Geräte · ${verbunden} verbunden` +
+      (ohneLink ? ` · ${ohneLink} ohne Link` : "") + (offen ? ` · ${offen} Link${offen === 1 ? "" : "s"} unten` : "");
+
+    return h("section", {class: "hb-panel hb-lage"},
+      h("div", {class: "hb-lage-kopf"},
+        h("span", {class: "hb-lage-titel"}, titel),
+        h("span", {class: "hb-lage-zaehler" + (offen || ohneLink ? " bad" : " ok")}, zaehler)),
+      svg,
+      ...geraete.filter(g => pos.has(g.id)).map(chip),
+      versteckt > 0 ? h("button", {type: "button", class: "hb-chip hb-chip-mehr", style: {"left": "88%", "top": Y_SCHICHT[3] + "%"},
+        title: `${versteckt} weitere Geräte — im Labor zeigen`, onclick: () => UI.app.ansicht("labor")}, "+" + versteckt) : null,
+      h("div", {class: "hb-lage-fuss"},
+        h("span", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")),
+        h("span", {class: "hb-lage-tipp"}, "Klick auf einen Knoten → Labor")));
+  }
   /* ---------- Startseite ---------- */
   function zeigen(c){
     wurzel = c;
@@ -92,23 +191,8 @@ UI.hub = (() => {
         h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("mitarbeit")}, "Auftragscode")),
       h("small", {class: "hb-klasse-hinweis"}, "Kein Server, kein Login – Code mündlich weitergeben."));
 
-    /* Lagebild (ruhige Vorschau wie im Mockup) */
-    const lage = h("section", {class: "hb-panel hb-lage"},
-      h("div", {class: "hb-panel-titel"}, "// LAGEBILD · EBENE " + String((UI.ebenen && UI.ebenen.aktuell) || "ip").toUpperCase()),
-      (() => { const el = sv("svg", {class: "hb-lage-svg", viewBox: "0 0 900 236", preserveAspectRatio: "none", "aria-hidden": "true"}); el.innerHTML =
-        `<circle cx="330" cy="120" r="54" fill="url(#hbglut)"/>
-         <path d="M212 120 C 226 120, 234 120, 248 120" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
-         <path d="M320 96 C 320 66, 406 82, 470 82" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
-         <path d="M320 144 C 320 174, 406 158, 470 158" fill="none" stroke="#FF8A7A" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 8"/>
-         <path d="M548 82 C 578 82, 600 82, 626 82" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
-         <defs><linearGradient id="hblinie" x1="0" x2="1"><stop offset="0" stop-color="#7DF3C0"/><stop offset="1" stop-color="#9C8CFF"/></linearGradient>
-         <radialGradient id="hbglut"><stop offset="0" stop-color="#7DF3C0" stop-opacity=".16"/><stop offset="1" stop-color="#7DF3C0" stop-opacity="0"/></radialGradient></defs>`; return el; })(),
-      h("div", {class: "hb-knoten k-router"}, h("span", {}, "⌂"), h("b", {}, "R-SALON"), h("small", {}, "192.168.10.1")),
-      h("div", {class: "hb-knoten k-inet"}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
-      h("div", {class: "hb-knoten k-kasse"}, h("span", {}, "▭"), h("b", {}, "PC-KASSE"), h("small", {}, "192.168.10.50")),
-      h("div", {class: "hb-knoten k-sw"}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
-      h("div", {class: "hb-knoten k-buero"}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
-      h("div", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")));
+    /* Lagebild: echte Mini-Topologie des geladenen Netzes (Knoten + Kanten mit Linkstatus) */
+    const lage = lagePanel();
 
     /* Signal */
     const signal = h("section", {class: "hb-panel hb-signal"},

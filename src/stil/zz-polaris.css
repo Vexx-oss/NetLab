@@ -495,15 +495,34 @@
 .wk-mini-svg{min-height:110px}
 
 
-/* ===== Lagebild: Knoten als sauberes Raster (keine Überlappung, kein Abschneiden) ===== */
-.hb-lage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;align-content:start;padding:12px 16px 44px;min-height:0}
-.hb-lage .hb-panel-titel{position:static;left:auto;top:auto;grid-column:1/-1;margin:0 0 4px}
-.hb-lage-svg{display:none}
-.hb-lage .hb-knoten{position:static;max-width:none;min-width:0;padding:8px 10px}
-.hb-lage .hb-knoten b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hb-lage .hb-knoten small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hb-lage .hb-legende{position:static;grid-column:1/-1;margin-top:2px}
-/* Doppelte Klassenraum-Zeile aus der Injektion entfällt (das Bento hat das Panel) */
-.hb-seite .kl-start{display:none}
-@media (max-width:1024px){ .hb-lage{grid-template-columns:repeat(2,minmax(0,1fr))} }
-@media (max-width:640px){ .hb-lage{grid-template-columns:1fr} }
+/* ===== Lagebild v3 (SPEC): Kopf mit Zählern, Knoten auf Schichten, Kanten orthogonal ===== */
+.hb-lage{position:relative;min-height:250px;padding:0;overflow:hidden;display:block}
+.hb-lage-kopf{position:absolute;left:16px;right:16px;top:12px;z-index:3;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.hb-lage-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.hb-lage-zaehler{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.hb-lage-zaehler.ok{color:var(--accent)}
+.hb-lage-zaehler.bad{color:var(--koralle)}
+.hb-lage-svg{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.hb-kante.ok{stroke:var(--accent);stroke-opacity:.9}
+.hb-kante.unten{stroke:var(--koralle);stroke-width:2.2;stroke-dasharray:4 5}
+.hb-kante.aus{stroke:var(--warn);stroke-width:2.2;stroke-dasharray:1 4;stroke-opacity:.9}
+.hb-chip{position:absolute;z-index:2;transform:translate(-50%,-50%);display:flex;align-items:center;gap:5px;
+  padding:4px 7px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink);
+  font:600 var(--fs-1)/1.1 var(--mono);letter-spacing:.02em;white-space:nowrap;cursor:pointer;
+  transition:border-color var(--dauer) var(--ease-standard),transform var(--dauer) var(--ease-standard)}
+.hb-chip:hover{border-color:var(--line-2);transform:translate(-50%,-52%)}
+.hb-chip-sym{width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:var(--fs-1);
+  background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.hb-chip.typ-internet .hb-chip-sym{background:color-mix(in srgb,var(--iris) 12%,transparent);color:var(--iris)}
+.hb-chip.typ-router .hb-chip-sym, .hb-chip.typ-firewall .hb-chip-sym{background:color-mix(in srgb,var(--amber) 12%,transparent);color:var(--amber)}
+.hb-chip-mehr{background:transparent;border-style:dashed;color:var(--faint)}
+.hb-lage-fuss{position:absolute;left:16px;right:16px;bottom:9px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hb-lage-fuss .hb-legende{position:static;display:flex;gap:12px;color:var(--faint);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.hb-lage-tipp{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+.hb-lage-leer{display:flex;flex-direction:column;gap:8px;padding:16px;justify-content:center}
+.hb-lage-leer .hb-panel-titel{position:static;margin:0}
+.hb-lage-hinweis{color:var(--muted);font-size:var(--fs-3);margin:0}
+.hb-lage-leer .knopf{align-self:flex-start}
+@media (max-width:720px){ .hb-lage{min-height:250px} .hb-lage-tipp{display:none} }
+
+.hb-chip.ohne-link{border-color:color-mix(in srgb,var(--koralle) 45%,transparent);border-style:dashed}

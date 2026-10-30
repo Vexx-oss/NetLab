@@ -3245,18 +3245,37 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .wk-mini-svg{min-height:110px}
 
 
-/* ===== Lagebild: Knoten als sauberes Raster (keine Überlappung, kein Abschneiden) ===== */
-.hb-lage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;align-content:start;padding:12px 16px 44px;min-height:0}
-.hb-lage .hb-panel-titel{position:static;left:auto;top:auto;grid-column:1/-1;margin:0 0 4px}
-.hb-lage-svg{display:none}
-.hb-lage .hb-knoten{position:static;max-width:none;min-width:0;padding:8px 10px}
-.hb-lage .hb-knoten b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hb-lage .hb-knoten small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hb-lage .hb-legende{position:static;grid-column:1/-1;margin-top:2px}
-/* Doppelte Klassenraum-Zeile aus der Injektion entfällt (das Bento hat das Panel) */
-.hb-seite .kl-start{display:none}
-@media (max-width:1024px){ .hb-lage{grid-template-columns:repeat(2,minmax(0,1fr))} }
-@media (max-width:640px){ .hb-lage{grid-template-columns:1fr} }
+/* ===== Lagebild v3 (SPEC): Kopf mit Zählern, Knoten auf Schichten, Kanten orthogonal ===== */
+.hb-lage{position:relative;min-height:250px;padding:0;overflow:hidden;display:block}
+.hb-lage-kopf{position:absolute;left:16px;right:16px;top:12px;z-index:3;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.hb-lage-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.hb-lage-zaehler{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.hb-lage-zaehler.ok{color:var(--accent)}
+.hb-lage-zaehler.bad{color:var(--koralle)}
+.hb-lage-svg{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.hb-kante.ok{stroke:var(--accent);stroke-opacity:.9}
+.hb-kante.unten{stroke:var(--koralle);stroke-width:2.2;stroke-dasharray:4 5}
+.hb-kante.aus{stroke:var(--warn);stroke-width:2.2;stroke-dasharray:1 4;stroke-opacity:.9}
+.hb-chip{position:absolute;z-index:2;transform:translate(-50%,-50%);display:flex;align-items:center;gap:5px;
+  padding:4px 7px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink);
+  font:600 var(--fs-1)/1.1 var(--mono);letter-spacing:.02em;white-space:nowrap;cursor:pointer;
+  transition:border-color var(--dauer) var(--ease-standard),transform var(--dauer) var(--ease-standard)}
+.hb-chip:hover{border-color:var(--line-2);transform:translate(-50%,-52%)}
+.hb-chip-sym{width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:var(--fs-1);
+  background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.hb-chip.typ-internet .hb-chip-sym{background:color-mix(in srgb,var(--iris) 12%,transparent);color:var(--iris)}
+.hb-chip.typ-router .hb-chip-sym, .hb-chip.typ-firewall .hb-chip-sym{background:color-mix(in srgb,var(--amber) 12%,transparent);color:var(--amber)}
+.hb-chip-mehr{background:transparent;border-style:dashed;color:var(--faint)}
+.hb-lage-fuss{position:absolute;left:16px;right:16px;bottom:9px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hb-lage-fuss .hb-legende{position:static;display:flex;gap:12px;color:var(--faint);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.hb-lage-tipp{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+.hb-lage-leer{display:flex;flex-direction:column;gap:8px;padding:16px;justify-content:center}
+.hb-lage-leer .hb-panel-titel{position:static;margin:0}
+.hb-lage-hinweis{color:var(--muted);font-size:var(--fs-3);margin:0}
+.hb-lage-leer .knopf{align-self:flex-start}
+@media (max-width:720px){ .hb-lage{min-height:250px} .hb-lage-tipp{display:none} }
+
+.hb-chip.ohne-link{border-color:color-mix(in srgb,var(--koralle) 45%,transparent);border-style:dashed}
 
 </style>
 </head>
@@ -3265,7 +3284,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "b476a879";
+const LABOR_BAU = "5b619e79";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -29577,6 +29596,105 @@ UI.hub = (() => {
     return zu;
   }
 
+  /* ---------- Lagebild: echte Mini-Topologie (Entwurf „lagebild", SPEC.md) ---------- */
+  const TYP_SYM = {internet: "◎", router: "⌂", firewall: "⛨", switch: "⇄", server: "▤", nas: "▥"};
+  const typSym = g => TYP_SYM[g.typ] || "▭";
+  const schicht = g => g.typ === "internet" ? 0 : (g.typ === "router" || g.typ === "firewall") ? 1 : g.typ === "switch" ? 2 : 3;
+  const Y_SCHICHT = [12, 36, 60, 84];        /* Prozent der Panelhöhe */
+
+  /* Kante „oben" nur, wenn beide Ports oben sind (wie editor.js kabelZustand). */
+  function kabelStatus(netz, k){
+    try {
+      const a = Modell.portStatus(netz, k.a.geraet, k.a.port), b = Modell.portStatus(netz, k.b.geraet, k.b.port);
+      if (a.status === "oben" && b.status === "oben") return "oben";
+      return (a.status === "aus" || b.status === "aus") ? "aus" : "unten";
+    } catch (e) { return "unten"; }
+  }
+  function lagePanel(){
+    const titel = "// LAGEBILD" + (UI.ebenen?.aktuell ? " · EBENE " + String(UI.ebenen.aktuell).toUpperCase() : "");
+    const netz = UI.labor?.netz;
+    if (!netz?.geraete) {
+      return h("section", {class: "hb-panel hb-lage hb-lage-leer"},
+        h("div", {class: "hb-panel-titel"}, titel),
+        h("p", {class: "hb-lage-hinweis"}, "Kein Netz geladen — öffne das Labor oder einen Auftrag."),
+        h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("labor")}, "Labor öffnen"));
+    }
+    const geraete = Object.values(netz.geraete);
+    const kabel = Array.isArray(netz.kabel) ? netz.kabel : [];
+    const nachId = new Map(geraete.map(g => [g.id, g]));
+    const schichten = [[], [], [], []];
+    for (const g of geraete) schichten[schicht(g)].push(g);
+
+    const pos = new Map();
+    const setze = (liste, yProz) => {
+      const n = liste.length;
+      liste.forEach((g, i) => pos.set(g.id, {x: n === 1 ? 50 : 15 + (70 * i) / (n - 1), y: yProz}));
+    };
+    setze(schichten[0], Y_SCHICHT[0]);
+    setze(schichten[1], Y_SCHICHT[1]);
+    setze(schichten[2], Y_SCHICHT[2]);
+
+    /* Hosts unter „ihrem" Switch: Kabel zum Switch suchen; ohne Kabel gleichmäßig verteilen. */
+    const hosts = schichten[3];
+    const switchIndex = new Map(schichten[2].map((g, i) => [g.id, i]));
+    const gruppen = new Map();
+    const ohneSwitch = [];
+    for (const g of hosts) {
+      const k = kabel.find(k => (k.a.geraet === g.id && switchIndex.has(k.b.geraet)) || (k.b.geraet === g.id && switchIndex.has(k.a.geraet)));
+      const sw = k ? (k.a.geraet === g.id ? k.b.geraet : k.a.geraet) : null;
+      if (sw) { if (!gruppen.has(sw)) gruppen.set(sw, []); gruppen.get(sw).push(g); } else ohneSwitch.push(g);
+    }
+    const sichtbar = hosts.slice(0, 6);
+    const versteckt = hosts.length - sichtbar.length;
+    for (const [swId, liste] of gruppen) {
+      const basis = pos.get(swId)?.x ?? 50, n = liste.length;
+      liste.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: Math.max(8, Math.min(92, basis + (i - (n - 1) / 2) * 11)), y: Y_SCHICHT[3]}); });
+    }
+    ohneSwitch.forEach((g, i) => { if (sichtbar.includes(g)) pos.set(g.id, {x: 12 + i * 10, y: Y_SCHICHT[3]}); });
+
+    const kanten = kabel.map(k => ({k, s: kabelStatus(netz, k)})).filter(x => pos.has(x.k.a?.geraet) && pos.has(x.k.b?.geraet));
+    const verbunden = kanten.filter(x => x.s === "oben").length;
+    const offen = kanten.filter(x => x.s !== "oben").length;
+    const mitLink = new Set();
+    for (const {k, s} of kanten) if (s === "oben") { mitLink.add(k.a.geraet); mitLink.add(k.b.geraet); }
+    const ohneLink = geraete.filter(g => !mitLink.has(g.id)).length;
+
+    const svg = sv("svg", {class: "hb-lage-svg", viewBox: "0 0 100 100", preserveAspectRatio: "none", "aria-hidden": "true"});
+    svg.innerHTML = kanten.map(({k, s}) => {
+      const a = pos.get(k.a.geraet), b = pos.get(k.b.geraet);
+      const my = (a.y + b.y) / 2;
+      const d = Math.abs(a.x - b.x) < 0.5
+        ? `M${a.x} ${a.y} V${b.y}`
+        : `M${a.x} ${a.y} C${a.x} ${my} ${b.x} ${my} ${b.x} ${b.y}`;
+      const klasse = s === "oben" ? "ok" : s === "aus" ? "aus" : "unten";
+      return `<path class="hb-kante ${klasse}" d="${d}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
+    }).join("");
+
+    const chip = g => {
+      const p = pos.get(g.id);
+      const adr = UI.ebenen.adresse(netz, g);
+      const ip = adr?.ip || "";
+      return h("button", {type: "button", class: "hb-chip typ-" + g.typ + (mitLink.has(g.id) ? "" : " ohne-link"), style: {"left": p.x + "%", "top": p.y + "%"},
+        title: `${g.name}${ip ? " · " + ip : ""} — im Labor zeigen`,
+        onclick: () => { UI.app.ansicht("labor"); requestAnimationFrame(() => { try { UI.labor.auswaehlen?.(g.id); UI.labor.zentrieren?.(g.id); } catch (e) { console.error(e); } }); }},
+        h("span", {class: "hb-chip-sym", "aria-hidden": "true"}, typSym(g)),
+        h("b", {}, String(g.name).replace(/^PC-/i, "")));
+    };
+    const zaehler = `${geraete.length} Geräte · ${verbunden} verbunden` +
+      (ohneLink ? ` · ${ohneLink} ohne Link` : "") + (offen ? ` · ${offen} Link${offen === 1 ? "" : "s"} unten` : "");
+
+    return h("section", {class: "hb-panel hb-lage"},
+      h("div", {class: "hb-lage-kopf"},
+        h("span", {class: "hb-lage-titel"}, titel),
+        h("span", {class: "hb-lage-zaehler" + (offen || ohneLink ? " bad" : " ok")}, zaehler)),
+      svg,
+      ...geraete.filter(g => pos.has(g.id)).map(chip),
+      versteckt > 0 ? h("button", {type: "button", class: "hb-chip hb-chip-mehr", style: {"left": "88%", "top": Y_SCHICHT[3] + "%"},
+        title: `${versteckt} weitere Geräte — im Labor zeigen`, onclick: () => UI.app.ansicht("labor")}, "+" + versteckt) : null,
+      h("div", {class: "hb-lage-fuss"},
+        h("span", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")),
+        h("span", {class: "hb-lage-tipp"}, "Klick auf einen Knoten → Labor")));
+  }
   /* ---------- Startseite ---------- */
   function zeigen(c){
     wurzel = c;
@@ -29649,23 +29767,8 @@ UI.hub = (() => {
         h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("mitarbeit")}, "Auftragscode")),
       h("small", {class: "hb-klasse-hinweis"}, "Kein Server, kein Login – Code mündlich weitergeben."));
 
-    /* Lagebild (ruhige Vorschau wie im Mockup) */
-    const lage = h("section", {class: "hb-panel hb-lage"},
-      h("div", {class: "hb-panel-titel"}, "// LAGEBILD · EBENE " + String((UI.ebenen && UI.ebenen.aktuell) || "ip").toUpperCase()),
-      (() => { const el = sv("svg", {class: "hb-lage-svg", viewBox: "0 0 900 236", preserveAspectRatio: "none", "aria-hidden": "true"}); el.innerHTML =
-        `<circle cx="330" cy="120" r="54" fill="url(#hbglut)"/>
-         <path d="M212 120 C 226 120, 234 120, 248 120" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
-         <path d="M320 96 C 320 66, 406 82, 470 82" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
-         <path d="M320 144 C 320 174, 406 158, 470 158" fill="none" stroke="#FF8A7A" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 8"/>
-         <path d="M548 82 C 578 82, 600 82, 626 82" fill="none" stroke="url(#hblinie)" stroke-width="2" stroke-linecap="round"/>
-         <defs><linearGradient id="hblinie" x1="0" x2="1"><stop offset="0" stop-color="#7DF3C0"/><stop offset="1" stop-color="#9C8CFF"/></linearGradient>
-         <radialGradient id="hbglut"><stop offset="0" stop-color="#7DF3C0" stop-opacity=".16"/><stop offset="1" stop-color="#7DF3C0" stop-opacity="0"/></radialGradient></defs>`; return el; })(),
-      h("div", {class: "hb-knoten k-router"}, h("span", {}, "⌂"), h("b", {}, "R-SALON"), h("small", {}, "192.168.10.1")),
-      h("div", {class: "hb-knoten k-inet"}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
-      h("div", {class: "hb-knoten k-kasse"}, h("span", {}, "▭"), h("b", {}, "PC-KASSE"), h("small", {}, "192.168.10.50")),
-      h("div", {class: "hb-knoten k-sw"}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
-      h("div", {class: "hb-knoten k-buero"}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
-      h("div", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")));
+    /* Lagebild: echte Mini-Topologie des geladenen Netzes (Knoten + Kanten mit Linkstatus) */
+    const lage = lagePanel();
 
     /* Signal */
     const signal = h("section", {class: "hb-panel hb-signal"},
