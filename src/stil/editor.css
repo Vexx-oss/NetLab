@@ -17,7 +17,7 @@
    (20), damit das Fach (z-index:40 im eigenen Kontext) nicht unter der Werkzeugleiste liegt;
    weiterhin weit unter Menü (50), Dialog (56) und Overlay (80). */
 .lb-geraete{position:relative; z-index:30; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
-.lb-geraete-titel{font:700 var(--fs-1)/1 var(--body); letter-spacing:.1em; text-transform:uppercase; color:var(--faint); padding:8px 0}
+.lb-geraete-titel{font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; color:var(--faint); padding:8px 0}
 
 /* ---- Geräte-Fächer (editor-fach.js, Präfix pa-) ---- */
 .pa-kat{display:flex; flex-direction:column; align-items:center; gap:0px; width:66px; min-height:62px; padding:4px 0px 4px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--muted);
@@ -41,7 +41,7 @@
 /* 44×44: die Fingerregel gilt auch hier (menueprobe: „Fach schließen" war 30×30) */
 .pa-zu{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted)}
 .pa-zuletzt{display:flex; flex-direction:column; gap:4px; padding:0 0px 4px; border-bottom:1px solid var(--line)}
-.pa-zuletzt small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase; padding:0 4px}
+.pa-zuletzt small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; padding:0 4px}
 .pa-zuletzt-reihe{display:flex; gap:4px}
 .pa-liste{display:flex; flex-direction:column; gap:4px}
 .pa-teil{display:flex; align-items:center; gap:8px; width:100%; min-height:48px; padding:4px 8px 4px 4px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--ink);
@@ -107,7 +107,7 @@
 .lb-ansicht{display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 8px 0 12px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); white-space:nowrap}
 .lb-ansicht-text, .lb-fern-kunde b{color:var(--ink)}
 .lb-hinweis{position:absolute; left:12px; bottom:44px; max-width:calc(100% - 440px); padding:8px 12px; border-radius:var(--radius-s); background:var(--glas); border:1px solid var(--line); color:var(--muted);
-  font-family:var(--mono); font-weight:600; font-size:calc(var(--fs-1) * .82); line-height:1.5; letter-spacing:.04em; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+  font-family:var(--mono); font-weight:600; font-size:var(--fs-2); line-height:1.5; letter-spacing:.04em; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 @media (max-width:1100px){ .lb-hinweis{display:none} }
 /* Auch wenn die Fläche selbst schmal ist (z. B. breite Konsole im Inspektor): Hinweis weg statt schmaler Säule */
 @container (max-width:760px){ .lb-hinweis{display:none} }
@@ -155,7 +155,7 @@
 /* TOPO-2: SVG-Beschriftung nie unter --fs-1 (11 px); Adressen und Portnamen in Monospace,
    damit die Ziffern untereinander stehen. Farbe über die Lagebild-Tokens (Fallback = POLARIS). */
 /* Beschriftung mit Halo: Kabel/Leitungen dürfen hinter dem Text liegen, ohne ihn unlesbar zu machen. */
-.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; fill:var(--lage-name, var(--ink));
+.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; fill:var(--lage-name, var(--ink));
   paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3.5px; stroke-linejoin:round}
 .ger-rolle{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-rolle, var(--muted));
   paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3px; stroke-linejoin:round}
@@ -345,22 +345,19 @@
 /* Legende (.lb-legende/.lg-*) und Minimap-Feinschliff: zz-lagebild.css (Lagebild 2.0 § 3.5). */
 
 /* A: leerer Inspektor sagt, was zu tun ist, statt weisse Flaeche */
-#labor-inspektor:empty::before{content:"// INSPEKTOR · GERÄT WÄHLEN"; display:block; padding:16px;
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; color:var(--faint)}
+#labor-inspektor:empty::before{content:"Gerät wählen"; display:block; padding:16px;
+  font:700 var(--fs-2)/1 var(--body); letter-spacing:.02em; color:var(--muted)}
 /* A: Auftragsband – Titel gross, Rest leise */
 .lb-auftrag :is(h1,h2){font:800 var(--fs-5)/1.15 var(--display)}
 
 /* A: Auftragsband als Kommandozeile – Mono-Kicker, grosser Titel, Zielstriche */
-.lb-auftrag::before{content:"// AUFTRAG"; display:block; font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.12em; color:var(--faint); margin-bottom:4px}
+.lb-auftrag::before{content:""; display:block; width:24px; height:2px; background:var(--accent); margin-bottom:8px}
 .lb-auftrag :is(h1,h2,.am-titel,strong){letter-spacing:-.01em}
 .lb-auftrag .am-name, .lb-auftrag .sp-titel{font:800 var(--fs-6)/1.05 var(--display)}
-.lb-auftrag .sp-leise, .lb-auftrag small{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
-
+.lb-auftrag .sp-leise, .lb-auftrag small, 
 /* A: Auftragszeile – Titel gross, Kunde/Ziele als Mono-Chips, Kunde-Symbol als Kachel */
 .lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.01em}
-.lb-auftrag .am-kunde{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
-.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--muted);
   border:1px solid var(--line); padding:8px 12px; border-radius:999px}
 .lb-auftrag .sp-auftrag{border-left:2px solid var(--k, var(--accent)); padding-left:12px}
 .lb-auftrag .sp-kunde-sym{width:40px; height:40px; border-radius:var(--radius); display:inline-flex; align-items:center; justify-content:center;

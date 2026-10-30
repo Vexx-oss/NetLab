@@ -329,8 +329,8 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-postfach .sp-pf-kopf > div:first-child{min-width:0}
 .sp-postfach .sp-pf-kopf h2{font:600 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em;margin:0}
 .sp-postfach .sp-pf-kopf h2::before{
-  content:"// POSTFACH · AUFTRAGSEINGANG";display:block;margin-bottom:8px;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)
+  content:"POSTFACH · AUFTRAGSEINGANG";display:block;margin-bottom:8px;
+  font:600 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--faint)
 }
 /* Status-Kachel: vorhandener Zaehlertext (Auftraege · Stufe · erledigt) */
 .sp-postfach .sp-pf-kopf .sp-leise{
@@ -371,7 +371,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   content:"";position:absolute;top:0;height:32px;z-index:10;
   display:block;padding:0 12px;background:var(--panel-2);
   border-bottom:1px solid var(--line);
-  font:600 var(--fs-1)/32px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  font:600 var(--fs-2)/32px var(--body);letter-spacing:0;text-transform:none;color:var(--faint);
   white-space:nowrap;overflow:hidden
 }
 .sp-postfach .sp-pf-liste::before{content:"Auftrag · Kunde";left:0;right:50%}
@@ -464,7 +464,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 /* Kacheln: Symptom / Uebt / Dauer / Form / Lohn + Ziele ueber alle Spalten */
 .sp-postfach .sp-brief-info{
   display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4, minmax(0,1fr));gap:8px;
-  border:0;padding:0;align-items:stretch
+  border:0;padding:0;align-items:stretch;flex:1 1 auto;grid-template-rows:minmax(0,1fr) auto
 }
 .sp-postfach .sp-brief-info > div{
   display:flex;flex-direction:column;gap:4px;min-width:0;

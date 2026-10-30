@@ -415,76 +415,37 @@ UI.labor.fernFertig()                               // Sitzungsfenster in den Zu
 st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stufe früher offen
 st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
 
-## 20 · Lagebild 3.0 — Piktogramme, gerade Kabel, klare Zonen, Interaktion (30.10.2026) — verbindlicher Vertrag
+## 21 · Runde 3b — Audit-Umsetzung, Ambient und lebende Zonen (30.10.2026) — verbindlicher Vertrag
 
-**Auftrag des Nutzers (wörtlich, 18:12/18:05):** „Die Piktogramme sind sehr schön und gefallen mir",
-„eckige Kabel find ich nicht gut", „Kabel soll nicht einfach durchhängen, es soll gerade sein aber sich
-auch um Ecken ziehen lassen", „die Zonen … einfach klar und verständlich anzeigen, wie die Zone zu
-welchem Gerät verläuft", „keine Dauerbeschallung an Effekten, nur bei Interaktion … ruhige, schöne und
-fließende Animationen", „ambient Effekte dürfen sein, es soll atmosphärisch und immersiv sein, nur eben
-kein Feuer an ablenkenden Stimuli", „Das Postfach … modern und professionell wie das Dashboard".
-Vorgänger: § 19 (Lagebild 2.0). Konzeptbretter und Messungen dieser Runde liegen (nicht
-versioniert) unter Nachweise/Prototypen-Runde3/.
+**Auftrag (Nutzer, wörtlich).** „dann fixe diese doch, warum hast du das nicht gleich gemacht?"
+(bezogen auf die 13 Audit-Signale), „Wenn ein PC aus der Zone geschoben wird muss die zone sich mit ihm
+verschieben", „es fehlen noch so die ganzen ambient, atmenden, pulsierenden effekte".
+Beleg: Nachweise/Prototypen-Runde3/audit/NOTIZ.md (13 Signale mit Messwerten) und audit-umsetzung/NOTIZ.md.
 
-**Geltung.** Ersetzt für die Labor-Fläche die Knoten-, Kabel- und Zonenregeln aus § 19.2/19.3.
-Darstellung bleibt theme-übergreifend gleich; Material kommt aus den Theme-Dateien.
+**Umsetzung (Dateien, je ein Schreiber).**
+- hub.css / karriere.css / spiel.css: Heute-Datenflächen 10 → 2 (Rahmen gesamt 12 → 7, Rest = Buttons),
+  Typo-Hierarchie statt 11-px-Monokultur (Anteil &lt;= 12,5 px: 87 % → 77 %, &gt;= 14 px: 12 → 22 Knoten),
+  Messing-Versalien 41 → 0; Lernstand 119 → 79 Rahmen, Kompetenzbereich kartenlos; Shop von 4 auf 2
+  Rahmen, Regal zweispaltig, Akzentwand weg; Einstellungen als eine Segmentfläche; Postfach-Neon-Reste
+  (Kundenkante, Icon-Platte, Pillen) entfernt, Kacheln gestreckt, Aktionsleiste 44 px unten.
+- zz-polaris.css / editor.css / inspektor.css / basis.css: die Doppel-Schrägstrich-Labels aus allen
+  UI-Beschriftungen entfernt (Ersatz: 2-px-Akzentlinie oder Satzlabel); Labor-Kopf Kunde unter dem Titel
+  (gemessen: POLARIS 1440 Titel 253 x 39 / Kunde 103 x 18, Abstand 4 px, kein Overlap; Messing 231 x 36 /
+  101 x 16); Versalien reduziert, Sperrsatz &lt;= .06em; neue Tokens --dauer-atmen 5000 ms,
+  --dauer-licht 6000 ms, --dauer-lauflicht 700 ms.
+- Theme-Dateien: Ambient sichtbar (Fläche atmet: Messing 9 s, Pulsar 7 s + Sternenpunkte, Keramik 12 s,
+  Nordlicht Aurora, Papier Papierkorn; Deckkraft .12–.20), Interaktion: Dock-Knopf atmet, Primärknopf-
+  Schein, Auswahlring pulsiert 320 ms, Live-Kabel mit laufendem Lichtpunkt; „Bewegung aus" = Standbild
+  (basis.css zentral). Heute-Kontrastblock für alle Themes (Messing 8,38:1, Pulsar 12,29:1, Keramik 5,93:1,
+  Nordlicht 14,18:1, Papier 6,83:1; alle &gt;= 4,5:1); Ursache der schwarzen Messing-Knöpfe war eine
+  Ambient-Sheen-Regel, die die Primärfläche überschrieb — behoben (Schein animiert nur box-shadow).
+- editor.js: Zonen wandern live — geraetBewegt() ruft zonenNeu(); Hülle und Chip werden während des
+  Ziehens pro Frame neu berechnet, die Zone folgt dem Gerät bzw. wächst mit.
+- Leisten-Labels (Runde 3a) und Umlaute bleiben unverändert gültig.
 
-### 20.1 Knoten: Piktogramm + Beschriftung, keine Karte
-
-Geräteposition = **Zentrum des Piktogramms**. Piktogrammgröße in Bildschirm-pixeln: Infrastruktur
-(Internet/Router/Firewall/Switch) **40**, Server/NAS **32**, Endgeräte **28**. Beschriftung **mittig
-unter** dem Piktogramm: Name 12,5 px (700, Versalien, Sperrsatz), Rolle 11 px, Adresse 11 px; die drei
-Zeilen liegen bei y = +18/+31/+44 (relativ zur Icon-Mitte). Die Beschriftung hat einen Halo
-(paint-order:stroke, Flächenfarbe, 3–3,5 px), damit Kabel dahinter den Text nicht unlesbar machen.
-Knoten-Box für Kollisionen/Hüllen: x = ±max(iconHalb+6, 58), y = −(iconHalb+4) … +(iconHalb+48),
-skaliert mit s = min(2,6; max(1; 1/k)) — der ganze Block (Piktogramm + Labels) wird gemeinsam
-gegenskaliert; .ger-treffer deckt diesen Block. Kein .ger-karte-Rahmen mehr (bleibt nur als
-unsichtbare Struktur im Markup). Piktogramme: **Gerätereihe** (11 Zeichen, 24er-Raster, Standlinie
-20,5, Strich 2 px bei 24 / 2,5 px bei 40), erzeugt von UI.geraetebild(typ, skin, {px}); keine Platte,
-keine Kachel. Füllungen (Ports/Punkte) als .gb-tupfer.
-
-### 20.2 Kabel: gerade, mit EINEM weichen Knick
-
-Standard ist die **direkte Gerade** von Port zu Port (Ray-Box-Anker auf dem Piktogramm-Rand,
-Port-LED auf dem Rand). Nur wenn diese Gerade eine **fremde** Piktogramm-Box schneidet, entsteht
-**ein** Ausweichpunkt mit weicher Rundung (Radius 12, diagonal erlaubt, deterministisch gesucht in
-drei Abständen × zwei Seiten). Kein Durchhang, keine S-Kurve, kein H+V-Raster. Trunk = zwei parallele
-Linien; Paket-/Ping-Animation läuft auf derselben Route (Längenparametrisierung, gemessen &lt; 1 px
-Abweichung). Portnamen nur ab Zoom ≥ 0,9 oder bei Hover/Auswahl und nur, wenn sie weder Knoten-Box
-noch andere Portnamen treffen; Name/Adresse des Knotens haben Vorrang.
-
-### 20.3 Zonen: klare, glatte Hülle mit Chip außerhalb
-
-Hülle über die **Knoten-Boxen** der Mitglieder + 12 px Rand, glatt gerundeter Polygonzug (Ecken 24 px,
-keine Asymmetrie, kein Wobble). Router/Firewall bleiben **Anker** (nicht Teil der Form, mit „GW ip"
-im Chip). Netze mit ≤ 2 Mitgliedern bleiben Kapsel. Chip (CIDR + GW) sitzt **außerhalb** der Hülle
-(unten links → unten rechts → oben → seitlich, 10 px Abstand, an den Canvas-Rand geklemmt) und wird
-nie weggelassen; so liegt er nie auf einer Beschriftung. Mitglieder liegen immer innerhalb der Hülle.
-
-### 20.4 Effekte: Interaktion + eine ruhige Atmosphäre je Theme
-
-Keine Dauerbewegung von Knoten, Kabeln oder Labels. **Ambient** ist erlaubt als genau EIN sehr ruhiger
-Hintergrund-Layer pro Fläche (Token --dauer-ambient: 36000 ms; Nordlicht Aurora-Drift, Pulsar
-Nebel/Sternen, Messing warmes Licht, Papier Papierkorn, Keramik Tageslicht, POLARIS leise Lichtbewegung).
-**Interaktion** nur bei Hover/Auswahl/Klick/Prozess (Lift, Halo, Akzentring, Druck, fließender Punkt).
-„Bewegung aus" schaltet alles zentral ab (basis.css). Dekorative Lichtbögen/Strahlen sind entfernt
-(Kopfzeilen-Akzentlinie, lb-auftrag-Lichtbogen, Dock-Kopf-Gradient).
-
-### 20.5 Postfach: Bento-Datenpanel
-
-Das Postfach ist eine **Datentafel** im Stil der Heute-Ansicht: Kopf mit Overline und Datenmarken,
-dichte Auftragsliste als Zeilenraster (Status-Punkt, Kunde, Titel, Form/Dauer/Lohn als Textmarken;
-keine Karten pro Zeile, keine Emoji, keine Neon-Pillen), Detail als Panel mit Kacheln (Symptom, Übt,
-Dauer, Form, Lohn, Ziele), Brieftext in Lesebreite und ruhiger Aktionsleiste. Umsetzung CSS-only in
-spiel.css; im DOM ergänzt: Kacheln Dauer/Form und Ziele (spiel.js leserZeilen). Unter 900 px bleibt
-die Blatt-Ansicht.
-
-### 20.6 Leiste und Umlaute (Nebenkorrekturen)
-
-Leisten-Labels wurden abgeschnitten (POSTFACH/LERNSTAND): Knopfbreite 56 → 80 px, Leiste 84 → 88 px,
-Label mit Ellipsen-Schutz; unter 900 px nur Symbole (gemessen 0 Überläufe in allen 6 Themes).
-Umlaute: 8 Quelltext-Stellen korrigiert, 27 line-height-Deklarationen auf Headroom ≥ 1,15 gezogen
-(abgeschnittene Ö-Punkte bei Versalien-Überschriften), neues Werkzeug tools/umlaute.py.
+**Gates (letzte Messung).** 873/873 Tests, ethos GRÜN (R4 169, R6 7, R9 58, R10 40 — besser als Stand),
+klassen 0, umlaute GRÜN, Rauchtest 45/45 (letzter Lauf), starttest GRÜN. R12 nicht gemessen (--dom).
+Ambient im Build per CDP-Frames belegt (16,5 % Pixel sichtbar verändert; „Bewegung aus" = 0 Animationen).
 </code></pre>
 </main>
 <footer class="dk-fuss">

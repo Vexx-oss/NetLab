@@ -463,61 +463,29 @@ Verwandt: [[Plan – Ausbau 1.2]] · [[Konzept – Netzwerk-Labor]] · [[Archite
 
 **Auftrag (wörtlich):** „nutze ein team um die Lab funktion zu optimieren. Es ist hässloch blockig und
 
-## 37 · Runde 3 — Weltgefühl: Piktogramme, gerade Kabel, Bento-Postfach, Effekte (30.10.2026)
+## 38 · Runde 3b — „nicht mehr nach Vorlage": Audit, Ambiente, lebende Zonen (30.10.2026)
 
-**Auftrag (wörtlich, mehrere Nachrichten).** „Der Vibe gefällt mir mittlerweile seeehr gut …
-vielleicht noch etwas zu klinisch und sagt zu sehr aus made by ai"; „mit links klick muss man das
-canvas verschieben können und nicht automatisch mehrfachauswahl betätigen"; „ab gewissen Zoomstufen
-fällt der text raus"; „die ganze darstellung der End- und Einzelgeräte nochmal überdenken"; „mir gefällt
-der Icon in einem Textfield nicht"; „die Kästen sehen scheiße aus"; „die Piktogramme sind sehr schön";
-„eckige Kabel find ich nicht gut"; „kein Durchhang, einfach natürlich"; „die Zonen … klar und
-verständlich"; „keine Dauerbeschallung an Effekten, nur bei Interaktion … ambient Effekte dürfen sein";
-„das Postfach … modern und professionell wie das Dashboard"; „Deutsch hat Ö, Ä und Ü — sowas will ich
-nirgends sonst mehr sehen"; „die linke Leiste schneidet POSTFACH ab".
+**Was der Nutzer bemängelte.** „dann fixe diese doch" (13 Audit-Signale), „Wenn ein PC aus der Zone
+geschoben wird muss die Zone sich mit ihm verschieben", „es fehlen noch die ganzen ambient, atmenden,
+pulsierenden Effekte".
 
-**Vorgehen.** Konzept-Phase mit **neun Agenten** (vier Teammitglieder, fünf Subagenten) parallel:
-Knoten-Sprachen A/B/C, unabhängige V-D/V-E, Icon-Familie, organisches Kabel/Zonen-Brett, Flair-Boards
-für POLARIS/Nordlicht/Papier und Messing/Pulsar/Keramik, zwei Postfach-Richtungen, Anti-KI-Audit,
-Umlaut-Agent. Jede Abgabe als Bild mit read_image-Prüfung; danach Umsetzung in
-getrennten Schreibbereichen, Integration und Abnahme durch die Leitung.
+**Was jetzt anders ist.**
+- Heute: nur noch zwei gerahmte Datenflächen statt zehn; offene Typo-Flächen für Hero und Kennzahlen;
+  Satzlabels statt Doppel-Schrägstrich; echte Hierarchie (Titel 28–34 px, Fließtext 14–15 px, Metadaten
+  11–12,5 px, maximal 3 Versalien pro Ansicht). Gemessen: Anteil <= 12,5 px 87 → 77 %, >= 14 px 12 → 22.
+- Lernstand/Shop/Einstellungen: weniger Karten (119 → 79 bzw. 4 → 2), keine leeren Balkenlücken,
+  Shop-Regal zweispaltig ohne Akzentwand, Einstellungen eine Segmentfläche mit 44-px-Zielen.
+- Postfach: letzte Neon-Reste (Kundenkante, Icon-Platte, Pillen) entfernt, Kacheln gestreckt.
+- Sprache: Doppel-Schrägstrich aus allen UI-Labels entfernt (nur noch CLI/Code); Ersatz ist eine
+  2-px-Akzentlinie oder ein Satzlabel. Titel/Kunde kollidieren nicht mehr (Kunde unter dem Titel,
+  gemessen 4 px Abstand).
+- Ambiente: je Theme atmet die Fläche (Messing 9 s warmes Licht, Pulsar 7 s Nebel + Sternenpunkte,
+  Keramik 12 s Tageslicht, Nordlicht Aurora, Papier Papierkorn), dazu Dock-Knopf-Atmen, Primärknopf-
+  Schein, pulsierender Auswahlring und Lauflicht auf Live-Kabeln. Alles nur bei Bewegung „an"; „aus" ist
+  ein Standbild. Im Build per zwei CDP-Frames belegt (mittlere RGB-Differenz 1,2–2,2, 16,5 % Pixel).
+- Lebende Zonen: beim Ziehen eines Geräts werden Hülle und Chip pro Frame neu berechnet — die Zone
+  verschiebt sich mit dem Gerät und wächst mit.
 
-**Entschieden (Nutzer).** Piktogramme als Knotensprache, **keine Karten**; Kabel **gerade**, bei
-Bedarf EIN weicher Knick (kein Durchhang, kein S); Zonen **schlicht und klar** (glatte Hülle, Chip
-außerhalb); Effekte **nur Interaktion + eine ruhige Ambient-Schicht**; Postfach als **Bento-Datenpanel**;
-dekorative Strahlen und alte Symbole raus; Bento-Sprache des Dashboards als Ziel.
-
-**Umgesetzt.**
-- Knoten: Piktogramm 40/32/28 px, Beschriftung mittig darunter (Name/Rolle/IP), Halo gegen Kabel,
-  Block gegenskaliert s = min(2,6; max(1; 1/k)); keine Karte, keine Platte; Auswahl als Ring.
-- Gerätereihe: 11 neue SVG-Zeichen (24er-Raster, Standlinie, Strich 2/2,5 px), UI.geraetebild(typ,
-  skin, {px}); .gb-kachel entfällt, .gb-tupfer für Ports.
-- Kabel: direkte Gerade, bei Blockade EIN Elbow (Radius 12); Paket/Ping folgt der Route; Trunk doppelt.
-- Zonen: glatte Hülle über Knoten-Boxen + 12 px, Anker für Router, /30-Kapsel; Chip außerhalb, an den
-  Rand geklemmt; nie auf einer Beschriftung.
-- Effekte: Ambient-Layer je Theme (--dauer-ambient 36 s: Aurora, Nebel, Licht, Papierkorn, Tageslicht),
-  Interaktion nur bei Hover/Klick/Auswahl/Prozess; „Bewegung aus" zentral.
-- Postfach: Bento-Datenpanel (Kopf-Datenmarken, dichtes Zeilenraster mit Status-Punkt, Detail mit
-  Kacheln Symptom/Übt/Dauer/Form/Lohn/Ziele), CSS-only in spiel.css; im DOM wurden Dauer/Form und Ziele
-  ergänzt; Emoji/Pillen/Neon entfernt.
-- Leiste: Knopf 56 → 80 px, Leiste 84 → 88 px, Ellipsen-Schutz; < 900 px nur Symbole; 0 Überläufe.
-- Umlaute: 8 Quelltextstellen, 27 line-height-Headroom-Regeln, neues Werkzeug tools/umlaute.py.
-
-**Messpunkte (selbst gemessen).**
-| Prüfung | Nachher |
-|---|---|
-| Leisten-Überlauf (6 Themes, 1466/1200 px) | **0** (vorher 3 Labels/Theme) |
-| Labor 1440×900 | Einpasszoom 95 %, 3 Zonen-Chips, 10 Port-LEDs, 0 JS-Fehler |
-| Kabel | 5/5 gerade; Elbow-Probe: ein Knick Radius 12; Paket max. 0,32 px neben der Route |
-| Zonen | 3 Hüllen, 0 Überlappung (Praxis), Mitglieder innerhalb, Chip außerhalb |
-| Texte | Knotentexte 12,5/11/11 px bei jedem Zoom (gegenskaliert), Halo |
-| Postfach | Kacheln 5-spaltig + Ziele; Listenzeile 52 px, Knöpfe 44 px; min. Schrift 11 px |
-| Umlaute | 873/873 Tests, 5761 sichtbare Texte geprüft, 0 Befunde |
-| Icons | Strich 2,01 px bei 24 px / 2,55 px bei 40 px; Kontrast 5,56–15,05 : 1 |
-
-**Was NICHT geprüft ist — ehrlich.**
-- Kein 60-fps-/Paint-Test der Ambient-Layer; nur Standbild und CSS-Regeln.
-- Hover/Auswahl-Prozess-Timing nicht im DOM gemessen; die Boards sind statisch.
-- 720-px-Breite des Labors: Labels bleiben lesbar, aber Rollen fallen bei engem Platz weg
-  (bewusste Regel: Name+Adresse haben Vorrang).
-- Salon-Netz hat engere Geräteabstände; im Bild geprüft, aber nicht mit der Messsonde.
-- Postfach: Kennzahlenleiste zeigt nur Werte, die im DOM vorhanden sind (keine erfundenen KPIs).
+**Ehrlich offen.** R12 (ethos --dom) nicht gemessen; Ambient nicht auf 60 fps/Paint geprüft; die
+Heute-Ansicht in Messing/Papier wurde über Kontrastpaare geprüft (8,38/6,83 : 1), nicht per
+Bildschirmfoto aus der laufenden .exe (Desktop war durch eine parallele Sitzung belegt).

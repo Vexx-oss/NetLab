@@ -34,7 +34,7 @@
 .in-abschnitt{display:flex; flex-direction:column; gap:8px; min-width:0}
 /* Ruhige Zeilen-Trenner zwischen den Abschnitten eines Reiters */
 .in-abschnitt + .in-abschnitt{border-top:1px solid var(--line); padding-top:12px}
-.in-abschnitt h4{font:700 var(--fs-1)/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.in-abschnitt h4{font:700 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 .in-abschnitt h5{font:700 var(--fs-2)/1.2 var(--body); color:var(--muted); margin:8px 0 0}
 .in-hinweis{color:var(--muted); font-size:var(--fs-2); line-height:1.45}
 .in-hinweis.klein{font-size:var(--fs-2)}
@@ -134,12 +134,12 @@
 
 .in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 8px; display:flex; flex-direction:column; gap:4px; animation:in-rein var(--dauer) ease-out}
 @keyframes in-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
-.in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+.in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; color:var(--faint)}
 .in-ent-code{margin:0; padding:8px 8px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 var(--fs-2)/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
 
 /* Lease-Tabelle im DHCP-Abschnitt (Architektur 10.6): eine Zeile je Lease, Zustand farbig ueber Tokens */
 .in-lease-tabelle{width:100%; border-collapse:collapse; margin-top:4px; font:500 var(--fs-2)/1.35 var(--body)}
-.in-lease-tabelle th{text-align:left; padding:4px 8px; color:var(--faint); font:700 var(--fs-1)/1 var(--body); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--line)}
+.in-lease-tabelle th{text-align:left; padding:4px 8px; color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; border-bottom:1px solid var(--line)}
 .in-lease-tabelle td{padding:4px 8px; border-bottom:1px solid var(--line-2)}
 .in-lease-tabelle tr:last-child td{border-bottom:none}
 .in-lease-aktiv{color:var(--ok)}
@@ -151,9 +151,9 @@
 .lb-insp-leer{display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:16px; text-align:left}
 .lb-insp-leer p{max-width:32ch}
 .lb-insp-leer-sym{display:none}
-.lb-insp-leer strong{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
-.lb-insp-leer strong::before{content:"// "}
-.lb-insp-leer p, .lb-insp-leer small{font:500 var(--fs-1)/1.5 var(--mono); color:var(--faint); text-align:left}
+.lb-insp-leer strong{font:700 var(--fs-2)/1.3 var(--body); letter-spacing:.02em; color:var(--muted)}
+.lb-insp-leer strong::before{content:""; display:block; width:24px; height:2px; background:var(--accent); margin:0 0 8px}
+.lb-insp-leer p, .lb-insp-leer small{font:400 var(--fs-3)/1.5 var(--body); color:var(--muted); text-align:left}
 /* Tastenzeilen des Leerzustands: leise, gesperrt, ohne Aufzählungszeichen (= editor.css .lb-tipps) */
 .lb-insp-leer .lb-tipps{display:flex; flex-direction:column; gap:8px; margin:8px 0 0; padding:0; list-style:none;
   font:500 var(--fs-1)/1.6 var(--mono); color:var(--faint)}

@@ -9,6 +9,28 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.3.0 — Runde 3b: Audit-Umsetzung, Ambiente, lebende Zonen (30.10.2026, dritte Nachbesserung)
+
+**Warum.** Nutzer: „dann fixe diese doch, warum hast du das nicht gleich gemacht?" (13 Audit-Signale),
+„Wenn ein PC aus der Zone geschoben wird muss die zone sich mit ihm verschieben", „es fehlen noch so die
+ganzen ambient, atmenden, pulsierenden effekte". Vertrag: Architektur § 21, Design § 38.
+
+**Umfang.**
+- Heute: Datenflächen 10 → 2 (Rahmen 12 → 7), Typo-Hierarchie (Anteil <= 12,5 px 87 → 77 %, >= 14 px
+  12 → 22), Satzlabels statt Doppel-Schrägstrich; Lernstand 119 → 79 Rahmen; Shop 4 → 2 Rahmen,
+  Regal zweispaltig; Einstellungen eine Segmentfläche; Postfach-Neon-Reste entfernt.
+- Doppel-Schrägstrich aus allen UI-Labels entfernt (Labor/Dock/Inspektor/Hub/Theme-Inhalte);
+  Titel/Kunde-Kollision behoben (Kunde unter dem Titel, 4 px Abstand, gemessen).
+- Ambiente je Theme (Fläche atmet 7-12 s, Dock-Knopf atmet, Primärknopf-Schein, Auswahlring-Puls 320 ms,
+  Lauflicht auf Live-Kabeln; „Bewegung aus" = Standbild). Heute-Kontrast in allen Themes >= 4,5:1
+  (Messing 8,38 · Pulsar 12,29 · Keramik 5,93 · Nordlicht 14,18 · Papier 6,83).
+- Zonen wandern live beim Ziehen (editor.js: geraetBewegt -> zonenNeu).
+- Auslieferungs-Exe ersetzt: Programm/Netzwerk-Labor.exe = neuer Bau (8.876.544 B), alte Fassung als
+  Programm/Netzwerk-Labor-vor-Runde3.exe gesichert; Integrität Medium.
+
+**Handwerk.** Zeilenenden LF; Tests 873/873, ethos GRÜN (R9 58, R10 40 — besser als Stand), klassen 0,
+umlaute GRÜN. Kein Push, keine Fassungserhöhung.
+
 ## 2.3.0 — Lagebild 3.0: Piktogramme, gerade Kabel, Bento-Postfach (30.10.2026, zweite Nachbesserung)
 
 **Warum.** Nutzerkritik nach Lagebild 2.0: „Icon in einem Textfield", „Kästen sehen scheiße aus",
@@ -684,21 +706,3 @@ Vertrag: [`Architektur.md`](Architektur.md) § 12 (Spezifikation) · § 12.1 (En
 - **Ergebnis-Code `E-XXXX-XXX`** — 25 Bit Nutzlast (Sitzung 5 · Platz 5 · halbe Sterne 4 · Fehlversuche 2 ·
   Dauer 9 in 10-s-Einheiten) plus 2 Prüfzeichen. Er trägt das Ergebnis, nicht die Person: kein Name, keine
   Kennung, kein Gerät.
-- **Netzkennwert (Klassenraum-Abdruck)** — **6 Zeichen**, FNV-1a über die kanonisch sortierte Abbildung von
-  `{v, geraete, kabel}` **ohne** `netz.zustand`. Er zeigt, wie ähnlich zwei Netze sind; dass alle denselben
-  Auftrag haben, beweist **nicht** er, sondern der Vergleich über `def.id` (Entscheidung E8).
-- **Kanonisierung statt Zufall.** Zu einem Code sucht der Bau höchstens **64 Seeds** je Variante
-  (`KANON_FENSTER`) und nimmt den ersten, der wirklich einen spielbaren Auftrag ergibt — derselbe Code
-  ergibt deshalb auf jedem Gerät denselben Auftrag, auch bei generierten Fällen.
-- **Eingefrorene Tabellen: 58 Aufträge, 27 Fertigkeiten** — **alle 27 tauglich**; die frühere Angabe
-  „24 von 27" ist seit den drei neuen Injektoren überholt (der Prüfer hat **27** nachgemessen, Review § 3;
-  zwei Kommentare im Produktivcode sagen sie noch — Befund **K1**). Die **Länge gehört zum Format**: ein Code mit Auftragsindex 58…63 oder Fertigkeitsindex 27…63 wird als `fassung`-Fehler
-  **abgelehnt**, statt still etwas anderes zu bauen. Neue Aufträge dürfen nur **angehängt** werden, damit
-  alte Codes ihre Bedeutung behalten.
-- **`Spiel.klassenraum`** — die Rechen- und Verwaltungsfläche: `erzeugen`, `ausCode`, `sitzung`,
-  `ergebnisCode`, `ergebnisLesen`, `ergebnisEintragen`, `exportieren`, `importieren`, `netzkennwert`,
-  `tauglicheFertigkeiten`, `platz`/`platzSetzen`, `plaetze`/`plaetzeSetzen`, `abnehmen`, `tabellen`
-  (**16 Namen** = die elf der Vertragstabelle § 12 + `plaetze`/`plaetzeSetzen` nach L6 + das vorhandene
-  `abnehmen` + die Prüffläche `tabellen()`; seit 09.10.2026 steht diese Zählung so auch in § 12.2).
-- **Eigener Store-Schlüssel `klassenraum`** — der **fünfte** Schlüssel neben `lern`, `labor`, `einst` und
-  `sandbox`, mit `fassung: 1` und einem eigenen Exportformat

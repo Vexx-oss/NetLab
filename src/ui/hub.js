@@ -35,7 +35,7 @@ UI.hub = (() => {
     } catch (e) { return "unten"; }
   }
   function lagePanel(){
-    const titel = "// LAGEBILD" + (UI.ebenen?.aktuell ? " · EBENE " + String(UI.ebenen.aktuell).toUpperCase() : "");
+    const titel = "Lagebild" + (UI.ebenen?.aktuell ? " · EBENE " + String(UI.ebenen.aktuell).toUpperCase() : "");
     const netz = UI.labor?.netz;
     if (!netz?.geraete) {
       return h("section", {class: "hb-panel hb-lage hb-lage-leer"},
@@ -132,7 +132,7 @@ UI.hub = (() => {
 
     /* Hero: Auftrag (oder Feierabend) wie im Mockup – Kicker, Kunde, grosser Titel, Fliesstext, Chips, Aktionen */
     const hero = fa
-      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "// HEUTE · FEIERABEND"),
+      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "Heute · Feierabend"),
           h("div", {class: "hb-hero-kunde"}, h("h3", {}, UI.symbol("feierabend", 18), " Feierabend")),
           h("h1", {}, "Geschafft für heute"), h("p", {class: "hb-hero-lead"}, fa.ausblick),
           h("div", {class: "hb-hero-meta"}, h("span", {}, `${fa.bilanz.tickets} Aufträge`), h("span", {}, `Ø ${zahl(fa.bilanz.sterne)} ★`), h("span", {}, `+${eur(fa.bilanz.euro)} €`)),
@@ -140,11 +140,11 @@ UI.hub = (() => {
             h("button", {type: "button", class: "knopf primaer hb-annehmen", onclick: () => UI.modus("leiste")}, "Zur Leiste"),
             h("button", {type: "button", class: "knopf geist", onclick: weiterFn}, "Noch einen Auftrag")))
       : n.art === "leer"
-      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "// HEUTE · " + datumText().toUpperCase()),
+      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "Heute · " + datumText().toUpperCase()),
           h("h1", {}, "Alles erledigt"), h("p", {class: "hb-hero-lead"}, "Kein offener Auftrag im Postfach. Neue Kunden melden sich laufend."),
           h("div", {class: "hb-aktionen"}, h("button", {type: "button", class: "knopf primaer hb-annehmen", onclick: weiterFn}, "Neuen Auftrag holen ▸")))
       : h("section", {class: "hb-hero hb-panel" + (n.klingelt ? " klingelt" : ""), style: {"--k": `var(${n.farbe || "--accent"})`}},
-          h("div", {class: "hb-kicker"}, "// AUFTRAG · " + (n.art === "weiter" ? "WEITER" : "EINSTIEG") + " · " + String(n.kunde || "").toUpperCase()),
+          h("div", {class: "hb-kicker"}, "Auftrag · " + (n.art === "weiter" ? "WEITER" : "EINSTIEG") + " · " + String(n.kunde || "").toUpperCase()),
           h("div", {class: "hb-hero-kunde"}, UI.symbol("auftrag", 16), " " + (n.klingelt ? n.kontakt + " ruft an" : n.kunde)),
           h("h1", {}, n.titel),
           h("p", {class: "hb-hero-lead"}, `${form.titel} · ~${n.minuten} min · ${eur(n.euro)} €`),
@@ -171,21 +171,21 @@ UI.hub = (() => {
     const ziel = h("section", {class: "hb-panel hb-ziel-karte"},
       h("div", {class: "hb-ring", style: {"--anteil": Math.round(anteil * 100) + "%"}}, h("b", {}, `${s.tagesziel.erledigt}/${s.tagesziel.ziel}`)),
       h("div", {class: "hb-ziel-liste"},
-        h("div", {class: "hb-panel-titel"}, "// TAGESZIEL"),
+        h("div", {class: "hb-panel-titel"}, "Tagesziel"),
         kachel(UI.symbol("kaffee", 22), "Aufwärmen", `${s.aufwaermen.erledigt}/${s.aufwaermen.ziel} Karten`, aufwaermen, s.aufwaermen.erledigt >= s.aufwaermen.ziel),
         kachel(UI.symbol("raetsel", 22), `Tagesrätsel #${s.raetsel.nr}`, s.raetsel.geloest ? "gelöst" : (Spiel.NIVEAU_NAME[s.raetsel.niveau] || s.raetsel.niveau), raetsel, s.raetsel.geloest),
         kachel(UI.symbol("dex", 22), "Fehlerdex", `${s.dex.verstanden}/${s.dex.gesamt}`, () => s.post.ungelesen ? UI.app.ansicht("postfach") : dexOeffnen(), s.dex.verstanden >= s.dex.gesamt)));
 
   /* Letzte Sitzung: Zustand von heute als ruhige Zeilen */
     const sitzung = h("section", {class: "hb-panel hb-sitzung"},
-      h("div", {class: "hb-panel-titel"}, "// LETZTE SITZUNG"),
+      h("div", {class: "hb-panel-titel"}, "Letzte Sitzung"),
       h("div", {class: "hb-sz"}, h("time", {}, "HEUTE"), h("div", {}, h("b", {}, n.art === "leer" ? "Kein offener Auftrag" : `Auftrag: ${n.titel}`), h("small", {}, n.art === "leer" ? "Postfach leer" : n.kunde)), h("em", {}, n.klingelt ? "ANRUF" : "OFFEN")),
       h("div", {class: "hb-sz"}, h("time", {}, "SERIE"), h("div", {}, h("b", {}, `${serie} ${serie === 1 ? "Tag" : "Tage"} in Folge`), h("small", {}, "Tagesziel zählt weiter")), h("em", {}, serie ? "+1" : "0")),
       h("div", {class: "hb-sz"}, h("time", {}, "POST"), h("div", {}, h("b", {}, "Postfach"), h("small", {}, `${s.post.ungelesen} ungelesen`)), h("em", {}, String(s.post.ungelesen))));
 
     /* Klassenraum */
     const klasse = h("section", {class: "hb-panel hb-klasse"},
-      h("div", {class: "hb-panel-titel"}, "// KLASSENRAUM"),
+      h("div", {class: "hb-panel-titel"}, "Klassenraum"),
       h("div", {class: "hb-klasse-zeile"},
         h("button", {type: "button", class: "knopf primaer", onclick: () => UI.app.ansicht("klassenraum")}, "Klassenraum öffnen"),
         h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("mitarbeit")}, "Auftragscode")),
@@ -196,7 +196,7 @@ UI.hub = (() => {
 
     /* Signal */
     const signal = h("section", {class: "hb-panel hb-signal"},
-      h("div", {class: "hb-panel-titel"}, "// SIGNAL"),
+      h("div", {class: "hb-panel-titel"}, "Signal"),
       (() => { const el = sv("svg", {class: "hb-signal-svg", viewBox: "0 0 300 64", preserveAspectRatio: "none", "aria-hidden": "true"}); el.innerHTML =
         `<path d="M0 44 C 30 44, 34 26, 60 26 S 96 46, 120 40 156 18, 180 24 216 44, 240 36 276 20, 300 24" fill="none" stroke="url(#hbw)" stroke-width="1.6"/>
          <path d="M0 50 C 30 50, 34 34, 60 34 S 96 52, 120 46 156 26, 180 32 216 50, 240 42 276 28, 300 32" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>

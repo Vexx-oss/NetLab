@@ -187,14 +187,14 @@ html[data-theme="nordlicht"] .marke-sym circle{
 
 html[data-theme="nordlicht"] .marke-name{
   font:700 var(--fs-2)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--ink);
 }
 
 html[data-theme="nordlicht"] .marke-version{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -246,7 +246,7 @@ html[data-theme="nordlicht"] .kopf-knopf:hover{
 
 html[data-theme="nordlicht"] .kopf .sp-leise{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -292,8 +292,8 @@ html[data-theme="nordlicht"] .dock-knopf.an::before{
 
 html[data-theme="nordlicht"] .dock-text{
   font:600 var(--fs-1)/1.2 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .dock-knopf.an .dock-text{
@@ -319,13 +319,13 @@ html[data-theme="nordlicht"] .fuss{
   border-top:1px solid var(--line);
   color:var(--muted);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .fuss-live{
   color:var(--accent);
-  letter-spacing:.22em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="nordlicht"] .fuss-punkt{
@@ -377,8 +377,8 @@ html[data-theme="nordlicht"] .ansicht .hb-panel-titel{
   gap:12px;
   margin:0 0 12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -429,8 +429,8 @@ html[data-theme="nordlicht"] .ansicht .hb-hero .hb-kicker{
   align-items:center;
   gap:12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--accent) 60%, var(--muted));
 }
 
@@ -455,22 +455,22 @@ html[data-theme="nordlicht"] .ansicht .hb-hero h1{
 html[data-theme="nordlicht"] .ansicht .hb-hero-lead{
   margin:4px 0 8px;
   font:600 var(--fs-1)/1.7 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-hero-kunde{
   gap:8px;
   font:600 var(--fs-2)/1.4 var(--mono);
-  letter-spacing:.08em;
+  letter-spacing:.06em;
   color:var(--muted);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-hero-meta span{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -533,13 +533,13 @@ html[data-theme="nordlicht"] .ansicht .hb-kd > b{
 
 html[data-theme="nordlicht"] .ansicht .hb-kd .lab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-kd small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -623,7 +623,7 @@ html[data-theme="nordlicht"] .ansicht .hb-zeile b{
 
 html[data-theme="nordlicht"] .ansicht .hb-zeile small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -635,8 +635,8 @@ html[data-theme="nordlicht"] .ansicht .hb-sz{
 
 html[data-theme="nordlicht"] .ansicht .hb-sz time{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   font-variant-numeric:tabular-nums;
 }
@@ -654,7 +654,7 @@ html[data-theme="nordlicht"] .ansicht .hb-sz small{
 html[data-theme="nordlicht"] .ansicht .hb-sz em{
   font:600 var(--fs-1)/1 var(--mono);
   font-style:normal;
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--accent);
 }
 
@@ -694,15 +694,15 @@ html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-lage{
 
 html[data-theme="nordlicht"] .ansicht .hb-lage-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-lage-zaehler{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-chip{
@@ -712,7 +712,7 @@ html[data-theme="nordlicht"] .ansicht .hb-chip{
   background:color-mix(in srgb, var(--panel-2) 80%, transparent);
   color:var(--ink);
   font:600 var(--fs-1)/1.1 var(--mono);
-  letter-spacing:.08em;
+  letter-spacing:.06em;
   box-shadow:0 12px 28px -20px color-mix(in srgb, var(--bg) 94%, transparent);
 }
 
@@ -729,8 +729,8 @@ html[data-theme="nordlicht"] .ansicht .hb-chip .hb-chip-sym{
 html[data-theme="nordlicht"] .ansicht .hb-lage .hb-legende,
 html[data-theme="nordlicht"] .ansicht .hb-lage-tipp{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -754,7 +754,7 @@ html[data-theme="nordlicht"] .ansicht .hb-signal-svg path:last-of-type{
 
 html[data-theme="nordlicht"] .ansicht .hb-stat{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -764,21 +764,21 @@ html[data-theme="nordlicht"] .ansicht .hb-stat i{
 
 html[data-theme="nordlicht"] .ansicht .hb-stat b{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--ink);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-ziel{
   font:600 var(--fs-1)/1.5 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-woche-knopf{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border-bottom:1px solid var(--line);
 }
@@ -804,7 +804,7 @@ html[data-theme="nordlicht"] .labor .lb-auftrag{
 
 html[data-theme="nordlicht"] .labor :is(.lb-auftrag::before, .lb-leinwand::before, .lb-inspektor::before){
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -820,15 +820,15 @@ html[data-theme="nordlicht"] .labor .am-titel{
 
 html[data-theme="nordlicht"] .labor .am-kunde{
   font:600 var(--fs-1)/1.5 var(--mono);
-  letter-spacing:.22em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .labor .am-ziele{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -881,8 +881,8 @@ html[data-theme="nordlicht"] .labor .wk-leiste{
 
 html[data-theme="nordlicht"] .labor :is(.wk-titel, .lb-geraete-titel){
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -895,7 +895,7 @@ html[data-theme="nordlicht"] .labor .wk-suche{
 
 html[data-theme="nordlicht"] .labor .wk-kennwerte{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.12em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -929,21 +929,27 @@ html[data-theme="nordlicht"] .labor .lb-leinwand::after{
     left bottom, left bottom,
     right bottom, right bottom;
   opacity:.6;
+  /* Ambient: die Eckenmarken atmen mit der Aurora (36 s, sehr leise) */
+  animation:nordlicht-atmen var(--dauer-ambient) ease-in-out infinite alternate;
+}
+@keyframes nordlicht-atmen{
+  from{opacity:.32}
+  to{opacity:.8}
 }
 
 html[data-theme="nordlicht"] .labor .lb-svg{
   background-color:var(--lage-flaeche);
   background-image:
-    radial-gradient(1200px 460px at 50% -18%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 66%),
-    radial-gradient(800px 420px at 88% 108%, color-mix(in srgb, var(--iris) 7%, transparent), transparent 60%);
-  background-size:140% 140%, 120% 120%;
+    radial-gradient(1200px 460px at 50% -18%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 66%),
+    radial-gradient(800px 420px at 88% 108%, color-mix(in srgb, var(--iris) 9%, transparent), transparent 60%);
+  background-size:200% 200%, 170% 170%;
   background-position:50% 0, 88% 108%;
   /* Ambient: EINE sehr ruhige Aurora-Drift; Reduced-Motion/Bewegung-aus schaltet sie zentral ab */
   animation:nordlicht-aurora var(--dauer-ambient) ease-in-out infinite alternate;
 }
 @keyframes nordlicht-aurora{
   from{background-position:50% 0, 88% 108%}
-  to{background-position:50% 16%, 76% 96%}
+  to{background-position:50% 26%, 70% 88%}
 }
 
 html[data-theme="nordlicht"] .labor .lb-raster-punkt{
@@ -1054,7 +1060,7 @@ html[data-theme="nordlicht"] .labor .lb-legende{
   border:1px solid var(--lage-chip-rand);
   border-radius:var(--lage-radius);
   background:var(--lage-chip-bg);
-  letter-spacing:.20em;
+  letter-spacing:.06em;
   color:var(--lage-chip-text);
 }
 
@@ -1075,7 +1081,7 @@ html[data-theme="nordlicht"] .labor .wk-mini-svg{
 }
 
 html[data-theme="nordlicht"] .labor .wk-mini-titel{
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -1146,8 +1152,8 @@ html[data-theme="nordlicht"] .labor :is(.lb-dock-reiter, .in-reiter){
 
 html[data-theme="nordlicht"] .labor .lb-dock-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   border-radius:var(--radius-xs) var(--radius-xs) 0 0;
 }
@@ -1172,8 +1178,8 @@ html[data-theme="nordlicht"] .labor .in-kopf-text h3{
 
 html[data-theme="nordlicht"] .labor .in-kopf-text span{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1182,8 +1188,8 @@ html[data-theme="nordlicht"] .labor .in-chip{
   border-radius:var(--radius-xs);
   background:color-mix(in srgb, var(--panel-3) 62%, transparent);
   font:600 var(--fs-1)/1.6 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
 }
 
@@ -1212,8 +1218,8 @@ html[data-theme="nordlicht"] .labor .in-tab{
   background:none;
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .labor .in-tab.an{
@@ -1232,8 +1238,8 @@ html[data-theme="nordlicht"] .labor .in-abschnitt h4{
   align-items:center;
   gap:12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1250,8 +1256,8 @@ html[data-theme="nordlicht"] .labor .in-abschnitt + .in-abschnitt{
 
 html[data-theme="nordlicht"] .labor .in-feld-titel{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1342,16 +1348,16 @@ html[data-theme="nordlicht"] .labor .lb-insp-leer{
 }
 
 html[data-theme="nordlicht"] .labor .lb-insp-leer::before{
-  content:"// NICHTS AUSGEWÄHLT";
+  content:"Nichts ausgewählt";
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .labor .lb-insp-leer .lb-tipps{
   font:500 var(--fs-1)/1.7 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1363,4 +1369,84 @@ html[data-theme="nordlicht"] .labor .lb-insp-leer .lb-tipps{
   html[data-theme="nordlicht"] .labor .lb-leinwand::after{
     inset:8px;
   }
+}
+
+/* ============================================================================
+   Audit 02/11 (30.10.2026): Typo-Hierarchie statt Versalien-Monokultur.
+   Nur Typografie – Farben/Material bleiben Theme-Charakter. Sperrsatz <= .06em,
+   Saetze in Satzschreibung, Panel-Titel 12,5 px Body; // in Theme-Inhalten entfernt.
+   ============================================================================ */
+html[data-theme="nordlicht"] :is(.dock,.kopf,.fuss,.lb-legende,.wk-mini,.sp-postfach,.ansicht) :is(span,small,em,strong,time,label,button,th,td){
+  text-transform:none;
+  letter-spacing:.04em;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel-titel{
+  font:600 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .ansicht :is(.hb-kicker,.hb-serie,.hb-sz time,.hb-sz em){
+  text-transform:none;
+  letter-spacing:.04em;
+  font-family:var(--body);
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.lb-insp-leer::before){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.03em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .labor :is(.in-feld-titel,.lb-dock-titel){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-legende,.wk-mini-titel){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-auftrag .am-kunde){
+  font:500 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3,.sp-brief-info small,.sp-brief-ziele strong,.sp-chip){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="nordlicht"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
+  text-transform:none;
+  letter-spacing:.03em;
+  font-family:var(--body);
+}
+
+/* ============================================================================
+   Heute-Kontrast nach offenen Flaechen (hub.css 19:16): Text/Knoepfe >= 4,5:1.
+   Kein Layout, nur Farbe/Flaeche; Theme-Charakter bleibt.
+   ============================================================================ */
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-hero, .hb-panel, .hb-karte){
+  color:var(--ink);
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-hero h1, .hb-karte h3, .hb-panel-titel, .hb-kicker){
+  color:var(--ink);
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-hero-lead, .hb-hero-kunde, .hb-hero-meta, .hb-hero-meta span){
+  color:var(--muted);
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.primaer, .knopf-haupt, .knopf.primaer .knopf){
+  background:var(--accent);
+  background-image:none;
+  color:var(--accent-ink);
+  border-color:color-mix(in srgb, var(--accent) 78%, var(--line));
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.geist, .knopf:not(.primaer):not(.knopf-haupt)){
+  color:var(--ink);
+  border-color:var(--line-2);
 }

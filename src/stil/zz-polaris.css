@@ -35,9 +35,9 @@
 .kopf{gap:12px;padding:0 16px;background:var(--panel)}
 .kopf::after{height:1px;background:var(--line);opacity:1}
 .kopf-marke{gap:8px;padding-right:12px;border-right:1px solid var(--line)}
-.marke-name{font:800 var(--fs-3)/1 var(--display);letter-spacing:.16em;text-transform:uppercase}
-.marke-version{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;color:var(--faint);border-radius:var(--radius-xs);padding:4px 8px}
-.wert{height:36px;border-radius:var(--radius-s);background:var(--panel-2);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.08em}
+.marke-name{font:800 var(--fs-3)/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.marke-version{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);border-radius:var(--radius-xs);padding:4px 8px}
+.wert{height:36px;border-radius:var(--radius-s);background:var(--panel-2);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 .wert .sym{opacity:.9}
 .kopf-knoepfe{border-left:1px solid var(--line);padding-left:8px}
 .kopf-knopf{height:40px;min-width:40px;border-radius:var(--radius-s);transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard)}
@@ -48,21 +48,26 @@
 .dock-knopf{width:80px;min-height:56px;padding:8px 0;border-radius:var(--radius-s);
   transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard),transform var(--dauer) var(--ease-standard)}
 .dock-knopf:hover{background:var(--panel-2)}
-.dock-knopf.an{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.dock-knopf.an{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);
+  animation:dock-atmen var(--dauer-atmen) ease-in-out infinite alternate}
+@keyframes dock-atmen{
+  from{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent), 0 0 18px -6px color-mix(in srgb, var(--accent) 42%, transparent)}
+}
 .dock-knopf.an::before{width:2px;border-radius:var(--radius-xs);background:var(--accent)}
-.dock-text{font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.12em;color:var(--muted);max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.dock-text{font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.06em;color:var(--muted);max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
 .dock-knopf.an .dock-text{color:var(--accent)}
 .dock-zahl{background:var(--accent);color:var(--accent-ink);border-radius:999px;font:700 var(--fs-1)/18px var(--mono)}
-.fuss{background:var(--bg);border-top:1px solid var(--line);padding:0 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.fuss{background:var(--bg);border-top:1px solid var(--line);padding:0 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .fuss-trenner{opacity:.6}
 .fuss-live{display:inline-flex;align-items:center;gap:8px;color:var(--accent)}
 .fuss-punkt{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px color-mix(in srgb,var(--accent) 60%,transparent)}
 .fuss-ebene{color:var(--muted)}
 .lb-auftrag {padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);padding:0 16px 12px}
-.lb-auftrag::before{content:"// AUFTRAG";display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;color:var(--faint);margin:0 0 8px}
+.lb-auftrag::before{content:"";display:block;width:24px;height:2px;background:var(--accent);margin:0 0 8px}
 .lb-auftrag :is(h1,h2){font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.03em;margin:0}
 .lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.02em}
-.lb-auftrag .am-kunde, .lb-auftrag .am-ziele{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.lb-auftrag .am-kunde, .lb-auftrag .am-ziele{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .lb-auftrag .am-ziele{border:1px solid var(--line);border-radius:999px;padding:4px 8px}
 .lb-gruppe{border-radius:var(--radius-s);background:color-mix(in srgb,var(--panel) 86%,transparent);backdrop-filter:blur(12px) saturate(130%);
   box-shadow:0 18px 44px -34px color-mix(in srgb,var(--bg) 85%,transparent)}
@@ -74,8 +79,8 @@
    Die alten Karten-/Kabel-Regeln (168×112-Annahmen, .kabel-stecker) sind entfallen. */
 .hb-seite {max-width:1120px;margin:0 auto;padding:32px 24px;gap:16px;gap:16px;padding:32px 24px}
 .hb-kopf h2{font:800 var(--fs-8)/1.15 var(--display);letter-spacing:-.04em;max-width:16ch}
-.hb-kopf .hb-serie{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
-.hb-ziel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;color:var(--faint)}
+.hb-kopf .hb-serie, .hb-kicker, .hb-kd .lab, .hb-kd small, .hb-sz time, .hb-lage-titel, .hb-lage-tipp{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
+.hb-ziel, .hb-kachel small, .in-feld-titel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-auftrag{position:relative;border:1px solid var(--line);border-radius:var(--radius);padding:24px;
   background:
     radial-gradient(90% 130% at 96% -30%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 58%),
@@ -91,9 +96,8 @@
 .hb-kachel:hover{transform:translateY(-2px);border-color:var(--line-2);background:var(--panel-2)}
 .hb-kachel-sym{width:44px;height:44px;border-radius:var(--radius-s);background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
 .hb-kachel b{font:700 var(--fs-3)/1.2 var(--body)}
-.hb-kachel small{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .hb-feierabend{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:24px}
-.hb-woche-knopf{border:1px solid var(--line);border-radius:999px;background:var(--panel-2);padding:8px 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em}
+.hb-woche-knopf{border:1px solid var(--line);border-radius:999px;background:var(--panel-2);padding:8px 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 
 /* ===== Bewegung: ruhig, nur transform (Pointer bleiben erreichbar) ===== */
 @keyframes pol-auf{from{transform:translateY(6px)}to{transform:none}}
@@ -118,39 +122,39 @@
 .lb-auftrag .am-zeile{display:grid;grid-template-columns:48px minmax(0,1fr) auto auto;align-items:center;gap:16px}
 .lb-auftrag .sp-kunde-sym{width:48px;height:48px;border-radius:var(--radius-s);display:grid;place-items:center;
   background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);font-size:var(--fs-5)}
-.lb-auftrag .am-kunde{display:block;margin-top:2px}
+.lb-auftrag .am-kunde{display:block;margin-top:2px;max-width:30ch;white-space:normal;overflow:visible;text-overflow:clip;font:500 var(--fs-2)/1.4 var(--body);letter-spacing:.02em;color:var(--muted)}
 .lb-auftrag .am-ziele{align-self:start}
 .lb-auftrag .am-knoepfe{display:flex;gap:8px;align-items:center}
 .lb-auftrag .sp-abnahme{height:40px;border-radius:var(--radius-s)}
 .lb-auftrag .am-lesen{height:40px;border-radius:var(--radius-s)}
 .lb-dock {background:var(--panel);border-left:1px solid var(--line);box-shadow:-24px 0 48px -40px color-mix(in srgb,var(--bg) 90%,transparent);border-left:1px solid var(--line);background:var(--panel)}
 .lb-dock-reiter{gap:4px;padding:10px 12px;border-bottom:1px solid var(--line)}
-.lb-dock-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:8px 10px;border-radius:var(--radius-s);color:var(--faint)}
+.lb-dock-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;padding:8px 10px;border-radius:var(--radius-s);color:var(--faint)}
 .lb-dock-tab.an{color:var(--ink);background:var(--panel-2)}
 .lb-inspektor{padding:0}
 .in-kopf{padding:16px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}
 .in-kopf-zeile{gap:12px;align-items:center}
 .in-kopf-text h3{font:800 var(--fs-5)/1.15 var(--display);letter-spacing:-.02em}
-.in-kopf-text span{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.in-kopf-text span{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .in-reiter{display:flex;gap:2px;padding:10px 12px 0;border-bottom:1px solid var(--line)}
-.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:8px 10px;border-radius:var(--radius-s) var(--radius-s) 0 0}
+.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);padding:8px 10px;border-radius:var(--radius-s) var(--radius-s) 0 0}
 .in-tab.an{color:var(--ink);background:var(--panel-2);box-shadow:inset 0 -2px 0 var(--accent)}
 .in-abschnitt{padding:14px 18px;border-bottom:1px solid color-mix(in srgb,var(--ink) 6%,transparent)}
-.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);margin:0 0 8px}
 .in-hinweis{font-size:var(--fs-3);color:var(--muted)}
 .lb-insp-leer{padding:24px 18px;gap:8px;align-items:flex-start;text-align:left}
 .lb-insp-leer h2,.lb-insp-leer h3{font:800 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em}
-.lb-insp-leer .lb-tipps{display:flex;flex-direction:column;gap:6px;font:600 var(--fs-1)/1.5 var(--mono);color:var(--faint);letter-spacing:.1em;text-transform:uppercase;list-style:none;padding:0;margin:8px 0 0}
+.lb-insp-leer .lb-tipps{display:flex;flex-direction:column;gap:6px;font:600 var(--fs-1)/1.5 var(--mono);color:var(--faint);letter-spacing:.06em;list-style:none;padding:0;margin:8px 0 0}
 
 /* Lagebild-Kopf über der Fläche */
-.lb-leinwand::before{content:"// LAGEBILD";position:absolute;left:16px;top:12px;z-index:19;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint);pointer-events:none}
+.lb-leinwand::before{content:"Lagebild";position:absolute;left:16px;top:12px;z-index:19;
+  font:500 var(--fs-2)/1 var(--body);letter-spacing:.02em;color:var(--faint);pointer-events:none}
 .lb-leiste-oben{top:34px}
 
 
 /* Inspektor-Kopf + kompakte Begrüßung (POLARIS: ruhiges Band statt Riesenkarte) */
-.lb-inspektor::before{content:"// INSPEKTOR";display:block;padding:12px 18px 0;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint)}
+.lb-inspektor::before{content:"Inspektor";display:block;padding:12px 18px 0;
+  font:700 var(--fs-2)/1 var(--body);letter-spacing:.02em;color:var(--muted)}
 .sp-einstieg{padding:12px 16px;gap:8px}
 .sp-einstieg-text{font-size:var(--fs-3);line-height:1.45;max-width:78ch}
 .sp-stufe{gap:4px;padding-top:4px}
@@ -202,8 +206,7 @@
 .lb-auftrag .sp-kunde-sym{width:56px;height:56px;border-radius:var(--radius);font-size:var(--fs-6);
   background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
 .lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font:800 var(--fs-8)/1.15 var(--display);letter-spacing:-.04em}
-.lb-auftrag .am-kunde{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
-.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;border:1px solid var(--line);border-radius:999px;padding:6px 10px}
 .lb-auftrag .am-knoepfe{gap:8px}
 .lb-auftrag .am-lesen{height:44px;border-radius:var(--radius-s);border:1px solid var(--line);background:transparent;color:var(--muted)}
 .lb-auftrag .sp-abnahme{height:44px;border-radius:var(--radius-s);background:var(--accent);color:var(--accent-ink);border:0}
@@ -213,19 +216,16 @@
 
 .in-kopf{padding:18px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
 .in-kopf-text h3{font:800 var(--fs-5)/1.15 var(--display);letter-spacing:-.03em}
-.in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+.in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .in-reiter{display:flex;gap:2px;padding:8px 14px 0;border-bottom:1px solid var(--line)}
-.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);
   padding:10px 10px;border-radius:0;border:0;border-bottom:2px solid transparent;background:none}
 .in-tab.an{color:var(--ink);border-bottom-color:var(--accent);background:none}
 .in-abschnitt{padding:14px 20px;border-bottom:1px solid var(--line)}
-.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
-.in-feld-titel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .in-eingabe,.in-auswahl{height:34px;border-radius:var(--radius-xs);background:var(--panel-2);border:1px solid var(--line);font:500 var(--fs-2)/1 var(--mono)}
 .in-hinweis{font-size:var(--fs-3);color:var(--muted)}
 .lb-insp-leer{padding:20px}
-.lb-insp-leer::before{content:"// NICHTS AUSGEWÄHLT";display:block;margin-bottom:8px;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint)}
+.lb-insp-leer::before{content:"";display:block;width:24px;height:2px;background:var(--accent);margin-bottom:8px}
 
 .hb-kopf h2{font-size:clamp(var(--fs-7),4.6vw,var(--fs-8))}
 .hb-auftrag{padding:24px;border-radius:var(--radius);border-left:2px solid var(--k,var(--accent))}
@@ -236,8 +236,8 @@
 
 
 /* Band: Titel darf nicht abschneiden, Begrüßung als ruhige Zeile */
-.lb-auftrag .am-titel{min-width:0}
-.lb-auftrag .am-titel strong{white-space:nowrap;overflow:visible}
+.lb-auftrag .am-titel{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;max-width:30ch;white-space:normal;overflow:visible}
+.lb-auftrag .am-titel strong{display:block;max-width:30ch;white-space:normal;overflow:visible;text-overflow:clip}
 .lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font-size:clamp(var(--fs-6),2.6vw,var(--fs-7))}
 .lb-auftrag .sp-einstieg{background:none;border:0;padding:8px 0 0;gap:4px}
 .lb-auftrag .sp-einstieg-text{font-size:var(--fs-2);line-height:1.4;max-width:72ch;color:var(--muted)}
@@ -248,7 +248,7 @@
 
 /* ===== Mockup-Shell: horizontale Navigation, App-Zutaten weichen ===== */
 .kopf-nav{display:flex;align-items:center;gap:2px;margin-left:8px;min-width:0;overflow:hidden}
-.kopf-nav-knopf{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+.kopf-nav-knopf{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);
   padding:8px 12px;border:1px solid transparent;border-radius:999px;background:none}
 .kopf-nav-knopf:hover{color:var(--muted);background:var(--panel-2)}
 .kopf-nav-knopf.an{color:var(--ink);background:var(--panel-2);border-color:var(--line)}
@@ -267,16 +267,15 @@
 .hb-seite{max-width:1180px;margin:0 auto;padding:24px 24px 12px;display:flex;flex-direction:column;gap:16px;align-items:stretch}
 .hb-raster{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;grid-template-rows:auto auto auto;width:100%;align-items:stretch}
 .hb-panel{position:relative;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:18px;min-width:0}
-.hb-panel-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.hb-panel-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);margin-bottom:10px}
 .hb-hero{grid-column:1/8;grid-row:1;display:flex;flex-direction:column;gap:6px;
   background:radial-gradient(90% 130% at 96% -30%,color-mix(in srgb,var(--k,var(--accent)) 10%,transparent),transparent 58%),
     linear-gradient(158deg,color-mix(in srgb,var(--ink) 3%,transparent),transparent 60%),var(--panel)}
-.hb-kicker{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
 .hb-hero-kunde{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:var(--fs-3);margin-top:8px}
 .hb-hero h1{font:800 var(--fs-7)/1.15 var(--display);letter-spacing:-.04em;margin:2px 0 6px;max-width:20ch}
 .hb-hero-lead{color:var(--muted);max-width:60ch;margin:0 0 6px;font-size:var(--fs-3)}
 .hb-hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.hb-hero-meta span{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;color:var(--muted);
+.hb-hero-meta span{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--muted);
   border:1px solid var(--line);border-radius:999px;padding:6px 10px}
 .hb-hero-meta .warn{color:var(--koralle);border-color:color-mix(in srgb,var(--koralle) 40%,transparent)}
 .hb-aktionen{display:flex;align-items:center;gap:10px;margin-top:16px}
@@ -286,9 +285,8 @@
 .hb-kd{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
 .hb-kd:last-child{border-bottom:0}
 .hb-kd > i{width:8px;height:8px;border-radius:50%;background:var(--c)}
-.hb-kd .lab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;color:var(--faint)}
 .hb-kd > b{font:800 var(--fs-6)/1 var(--display);letter-spacing:-.03em;display:flex;align-items:baseline;gap:6px}
-.hb-kd small{font:600 var(--fs-1)/1 var(--mono);color:var(--faint);letter-spacing:.16em}
+.hb-kd small{font:600 var(--fs-1)/1 var(--mono);color:var(--faint);letter-spacing:.06em}
 .hb-spark{display:flex;align-items:flex-end;gap:3px;height:34px}
 .hb-spark i{width:3px;border-radius:2px;background:color-mix(in srgb,var(--c) 35%,transparent)}
 .hb-spark i.spitze{background:var(--c)}
@@ -304,19 +302,18 @@
 .hb-zeile.fertig i{background:var(--accent);box-shadow:none}
 .hb-zeile.fertig{color:var(--ink)}
 .hb-zeile b{font:700 var(--fs-2)/1.3 var(--body)}
-.hb-zeile small{margin-left:auto;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;color:var(--faint)}
+.hb-zeile small{margin-left:auto;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-sitzung{grid-column:5/9;grid-row:2;display:flex;flex-direction:column}
 .hb-sz{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--ink) 6%,transparent)}
 .hb-sz:first-of-type{border-top:0}
-.hb-sz time{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;color:var(--faint)}
 .hb-sz b{font:700 var(--fs-2)/1.3 var(--body)}
 .hb-sz small{display:block;color:var(--faint);font-size:var(--fs-2)}
-.hb-sz em{font:600 var(--fs-1)/1 var(--mono);font-style:normal;letter-spacing:.14em;color:var(--accent)}
+.hb-sz em{font:600 var(--fs-1)/1 var(--mono);font-style:normal;letter-spacing:.06em;color:var(--accent)}
 .hb-klasse{grid-column:9/13;grid-row:2;display:flex;flex-direction:column;gap:10px}
 .hb-klasse-zeile{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .hb-klasse-zeile .knopf{height:40px;border-radius:var(--radius-s)}
 .hb-klasse-zeile small{color:var(--faint);font-size:var(--fs-2)}
-.hb-pill{font:600 var(--fs-2)/1 var(--mono);letter-spacing:.24em;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--radius-s);padding:10px 12px}
+.hb-pill{font:600 var(--fs-2)/1 var(--mono);letter-spacing:.06em;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--radius-s);padding:10px 12px}
 .hb-lage{grid-column:1/9;grid-row:3;position:relative;min-height:210px;padding:0;overflow:hidden}
 .hb-lage .hb-panel-titel{position:absolute;left:20px;top:16px;z-index:2}
 
@@ -324,12 +321,12 @@
   background:var(--panel-2);box-shadow:inset 0 0 0 1px var(--line)}
 .hb-knoten span{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;color:var(--accent);
   background:color-mix(in srgb,var(--accent) 10%,transparent);font-size:var(--fs-2)}
-.hb-knoten b{display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em}
+.hb-knoten b{display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 .hb-knoten small{display:block;font:500 var(--fs-1)/1.5 var(--mono);color:var(--faint)}
-.hb-legende{position:absolute;left:20px;bottom:12px;display:flex;gap:16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;color:var(--faint)}
+.hb-legende{position:absolute;left:20px;bottom:12px;display:flex;gap:16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-signal{grid-column:9/13;grid-row:3;display:flex;flex-direction:column;gap:8px}
 .hb-signal-svg{width:100%;height:56px;flex:0 0 auto;margin-bottom:4px}
-.hb-stat{display:flex;align-items:center;gap:8px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;color:var(--faint)}
+.hb-stat{display:flex;align-items:center;gap:8px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-stat i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .hb-stat b{margin-left:auto;color:var(--ink);font-weight:600}
 .hb-ziel{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
@@ -344,7 +341,7 @@
   .kopf{gap:8px;padding:0 12px}
   .kopf-knopf.mit-text span{display:none}
   .kopf-knoepfe{padding-left:8px;gap:2px}
-  .marke-name{font-size:var(--fs-2);letter-spacing:.08em}
+  .marke-name{font-size:var(--fs-2);letter-spacing:.06em}
   .marke-version{display:none}
   .wert{height:32px;padding:0 8px;font-size:var(--fs-1)}
   .dock{width:64px}
@@ -391,7 +388,7 @@
   .kopf{gap:8px;padding:0 12px}
   .kopf-knopf.mit-text span{display:none}
   .kopf-knoepfe{padding-left:8px;gap:2px}
-  .marke-name{font-size:var(--fs-2);letter-spacing:.08em}
+  .marke-name{font-size:var(--fs-2);letter-spacing:.06em}
   .marke-version{display:none}
   .wert{height:32px;padding:0 8px;font-size:var(--fs-1)}
   .kopf-werte .wert-ruf{display:none}
@@ -421,10 +418,10 @@
 
 /* Kopfzeile: Platz schaffen, ohne Inhalte zu verlieren */
 .kopf-nav{flex:0 0 auto;overflow:visible}
-.kopf .sp-leise{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;color:var(--faint);white-space:nowrap}
+.kopf .sp-leise{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);white-space:nowrap}
 @media (max-width:1150px){ .kopf-werte .wert-stufe{display:none} }
 @media (max-width:1600px){
-  .kopf-nav-knopf{padding:8px 9px;letter-spacing:.1em}
+  .kopf-nav-knopf{padding:8px 9px;letter-spacing:.06em}
   .kopf-knoepfe .kopf-knopf.mit-text span{display:none}
   .kopf .sp-leise{display:none}
 }
@@ -510,8 +507,7 @@
 /* ===== Lagebild v3 (SPEC): Kopf mit Zählern, Knoten auf Schichten, Kanten orthogonal ===== */
 .hb-lage{position:relative;min-height:250px;padding:0;overflow:hidden;display:block}
 .hb-lage-kopf{position:absolute;left:16px;right:16px;top:12px;z-index:3;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.hb-lage-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
-.hb-lage-zaehler{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.hb-lage-zaehler{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;white-space:nowrap}
 .hb-lage-zaehler.ok{color:var(--accent)}
 .hb-lage-zaehler.bad{color:var(--koralle)}
 
@@ -529,8 +525,7 @@
 .hb-chip.typ-router .hb-chip-sym, .hb-chip.typ-firewall .hb-chip-sym{background:color-mix(in srgb,var(--amber) 12%,transparent);color:var(--amber)}
 .hb-chip-mehr{background:transparent;border-style:dashed;color:var(--faint)}
 .hb-lage-fuss{position:absolute;left:16px;right:16px;bottom:9px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hb-lage-fuss .hb-legende{position:static;display:flex;gap:12px;color:var(--faint);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase}
-.hb-lage-tipp{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+.hb-lage-fuss .hb-legende{position:static;display:flex;gap:12px;color:var(--faint);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 .hb-lage-leer{display:flex;flex-direction:column;gap:8px;padding:16px;justify-content:center}
 .hb-lage-leer .hb-panel-titel{position:static;margin:0}
 .hb-lage-hinweis{color:var(--muted);font-size:var(--fs-3);margin:0}
@@ -563,29 +558,42 @@ body{background-image:
 body > .kopf{background:color-mix(in srgb, var(--panel) 92%, var(--panel-2)); border-bottom:1px solid var(--line)}
 body > .ansicht .dock{background:color-mix(in srgb, var(--panel) 88%, var(--panel-2))}
 /* Fokusflächen bleiben klar, aber nicht grell */
-.knopf.primaer{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 55%, transparent)}
+.knopf.primaer{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 55%, transparent);
+  animation:primaer-licht var(--dauer-licht) ease-in-out infinite alternate}
+@keyframes primaer-licht{
+  from{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 40%, transparent)}
+  to{box-shadow:0 10px 30px -14px color-mix(in srgb, var(--accent) 75%, transparent), 0 0 14px -2px color-mix(in srgb, var(--accent) 25%, transparent)}
+}
 .hb-lage-svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none}
 
 
 /* ===== Themen mit größeren Displayschriften (Messing, Papier): Band darf nicht kappen ===== */
 body .lb-auftrag .am-zeile{grid-template-columns:56px minmax(0,1fr) auto auto}
-body .lb-auftrag .am-titel{min-width:0;overflow:hidden}
-body .lb-auftrag .am-titel strong{display:block;max-width:100%;overflow-wrap:anywhere}
-body .lb-auftrag .am-kunde{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body .lb-auftrag .am-titel{min-width:0;max-width:30ch;overflow:visible}
+body .lb-auftrag .am-titel strong{display:block;max-width:30ch;overflow-wrap:anywhere;white-space:normal}
+body .lb-auftrag .am-kunde{display:block;max-width:30ch;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere}
 .lb-auftrag .am-mehr{flex:0 0 auto}
 
 
 /* ===== Ambient Runde 3 (POLARIS): EINE sehr ruhige Lichtbewegung auf der Fläche =====
-   Kein Dauerfeuer: ein einzelner, 36-s-Lichtschleier; Hover/Auswahl bleiben Interaktion.
+   Eigener Pseudo-Layer über der Zeichenfläche (pointer-events:none, z-index 10 unter den
+   Leisten mit 20), damit kein Theme-Hintergrund ihn überdeckt. Kein Dauerfeuer:
+   ein einzelner Lichtschleier, 36 s; Hover/Auswahl/Prozess bleiben die Interaktion.
    Reduced-Motion und „Bewegung aus" schalten zentral in basis.css ab. */
-.lb-svg{
-  background-color:var(--lage-flaeche, var(--bg));
-  background-image:radial-gradient(1100px 520px at 30% 0%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 62%);
-  background-size:150% 150%;
-  background-position:30% 0;
+.lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:10;
+  background-image:
+    radial-gradient(70% 55% at 30% 20%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 70%),
+    radial-gradient(60% 45% at 78% 88%, color-mix(in srgb, var(--iris) 10%, transparent), transparent 72%);
+  background-size:180% 180%, 170% 170%;
+  background-position:30% 20%, 78% 88%;
   animation:polaris-licht var(--dauer-ambient) ease-in-out infinite alternate;
 }
 @keyframes polaris-licht{
-  from{background-position:30% 0}
-  to{background-position:30% 14%}
+  from{background-position:20% 10%, 88% 96%; opacity:.55}
+  to{background-position:44% 34%, 64% 76%; opacity:1}
 }

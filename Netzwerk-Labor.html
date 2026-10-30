@@ -184,6 +184,9 @@
   /* Ambient (Runde 3): EINE sehr ruhige Hintergrundbewegung je Theme; der zentrale
      Reduced-Motion-/Bewegung-aus-Block weiter unten schaltet sie mit ab. */
   --dauer-ambient:36000ms;
+  --dauer-atmen:5000ms;      /* aktiver Leistenknopf atmet einmal */
+  --dauer-licht:6000ms;      /* langsamer Lichtschein des Primaerknopfs */
+  --dauer-lauflicht:700ms;   /* ein Umlauf des Lichtpunkts auf Live-Kabeln */
   --ease-standard:cubic-bezier(.2,.7,.3,1); --ease-out:cubic-bezier(.16,.84,.44,1); --ease-pop:cubic-bezier(.3,1.6,.5,1);
   --fs-1:11px; --fs-2:12.5px; --fs-3:14px; --fs-4:16px; --fs-5:20px; --fs-6:28px; --fs-7:34px; --fs-8:44px;
   --typ-router:#7FD4F5; --typ-switch:#6FE0D4; --typ-firewall:#FFA08A; --typ-host:#C9D2E0; --typ-server:#B0A0FF; --typ-nas:#7FB6F5; --typ-internet:#8FD8F0;
@@ -356,7 +359,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
    (20), damit das Fach (z-index:40 im eigenen Kontext) nicht unter der Werkzeugleiste liegt;
    weiterhin weit unter Menü (50), Dialog (56) und Overlay (80). */
 .lb-geraete{position:relative; z-index:30; display:flex; flex-direction:column; align-items:center; gap:4px; width:78px; padding:8px 0 12px; background:var(--panel); border-right:1px solid var(--line)}
-.lb-geraete-titel{font:700 var(--fs-1)/1 var(--body); letter-spacing:.1em; text-transform:uppercase; color:var(--faint); padding:8px 0}
+.lb-geraete-titel{font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; color:var(--faint); padding:8px 0}
 
 /* ---- Geräte-Fächer (editor-fach.js, Präfix pa-) ---- */
 .pa-kat{display:flex; flex-direction:column; align-items:center; gap:0px; width:66px; min-height:62px; padding:4px 0px 4px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--muted);
@@ -380,7 +383,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 /* 44×44: die Fingerregel gilt auch hier (menueprobe: „Fach schließen" war 30×30) */
 .pa-zu{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted)}
 .pa-zuletzt{display:flex; flex-direction:column; gap:4px; padding:0 0px 4px; border-bottom:1px solid var(--line)}
-.pa-zuletzt small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase; padding:0 4px}
+.pa-zuletzt small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; padding:0 4px}
 .pa-zuletzt-reihe{display:flex; gap:4px}
 .pa-liste{display:flex; flex-direction:column; gap:4px}
 .pa-teil{display:flex; align-items:center; gap:8px; width:100%; min-height:48px; padding:4px 8px 4px 4px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--ink);
@@ -446,7 +449,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-ansicht{display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 8px 0 12px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); white-space:nowrap}
 .lb-ansicht-text, .lb-fern-kunde b{color:var(--ink)}
 .lb-hinweis{position:absolute; left:12px; bottom:44px; max-width:calc(100% - 440px); padding:8px 12px; border-radius:var(--radius-s); background:var(--glas); border:1px solid var(--line); color:var(--muted);
-  font-family:var(--mono); font-weight:600; font-size:calc(var(--fs-1) * .82); line-height:1.5; letter-spacing:.04em; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+  font-family:var(--mono); font-weight:600; font-size:var(--fs-2); line-height:1.5; letter-spacing:.04em; pointer-events:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 @media (max-width:1100px){ .lb-hinweis{display:none} }
 /* Auch wenn die Fläche selbst schmal ist (z. B. breite Konsole im Inspektor): Hinweis weg statt schmaler Säule */
 @container (max-width:760px){ .lb-hinweis{display:none} }
@@ -494,7 +497,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 /* TOPO-2: SVG-Beschriftung nie unter --fs-1 (11 px); Adressen und Portnamen in Monospace,
    damit die Ziffern untereinander stehen. Farbe über die Lagebild-Tokens (Fallback = POLARIS). */
 /* Beschriftung mit Halo: Kabel/Leitungen dürfen hinter dem Text liegen, ohne ihn unlesbar zu machen. */
-.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; fill:var(--lage-name, var(--ink));
+.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; fill:var(--lage-name, var(--ink));
   paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3.5px; stroke-linejoin:round}
 .ger-rolle{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-rolle, var(--muted));
   paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3px; stroke-linejoin:round}
@@ -684,22 +687,19 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 /* Legende (.lb-legende/.lg-*) und Minimap-Feinschliff: zz-lagebild.css (Lagebild 2.0 § 3.5). */
 
 /* A: leerer Inspektor sagt, was zu tun ist, statt weisse Flaeche */
-#labor-inspektor:empty::before{content:"// INSPEKTOR · GERÄT WÄHLEN"; display:block; padding:16px;
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; color:var(--faint)}
+#labor-inspektor:empty::before{content:"Gerät wählen"; display:block; padding:16px;
+  font:700 var(--fs-2)/1 var(--body); letter-spacing:.02em; color:var(--muted)}
 /* A: Auftragsband – Titel gross, Rest leise */
 .lb-auftrag :is(h1,h2){font:800 var(--fs-5)/1.15 var(--display)}
 
 /* A: Auftragsband als Kommandozeile – Mono-Kicker, grosser Titel, Zielstriche */
-.lb-auftrag::before{content:"// AUFTRAG"; display:block; font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.12em; color:var(--faint); margin-bottom:4px}
+.lb-auftrag::before{content:""; display:block; width:24px; height:2px; background:var(--accent); margin-bottom:8px}
 .lb-auftrag :is(h1,h2,.am-titel,strong){letter-spacing:-.01em}
 .lb-auftrag .am-name, .lb-auftrag .sp-titel{font:800 var(--fs-6)/1.05 var(--display)}
-.lb-auftrag .sp-leise, .lb-auftrag small{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
-
+.lb-auftrag .sp-leise, .lb-auftrag small, 
 /* A: Auftragszeile – Titel gross, Kunde/Ziele als Mono-Chips, Kunde-Symbol als Kachel */
 .lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.01em}
-.lb-auftrag .am-kunde{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
-.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--muted);
   border:1px solid var(--line); padding:8px 12px; border-radius:999px}
 .lb-auftrag .sp-auftrag{border-left:2px solid var(--k, var(--accent)); padding-left:12px}
 .lb-auftrag .sp-kunde-sym{width:40px; height:40px; border-radius:var(--radius); display:inline-flex; align-items:center; justify-content:center;
@@ -909,9 +909,9 @@ button.dx-karte:hover{border-color:var(--accent)}
    (eine Klasse mehr, ohne !important). Maße nur aus Tokens/Skala, Licht nur
    über color-mix(). Keine eigenen @keyframes (Bewegung: juice.css).
    ============================================================ */
-.ansicht .hb-seite{max-width:1120px; margin:0 auto; padding:32px 24px; gap:24px}
+.ansicht .hb-seite{max-width:1120px; margin:0 auto; padding:12px 24px 4px; gap:8px}
 .ansicht .hb-kopf{display:flex; flex-direction:column; align-items:flex-start; gap:8px}
-.ansicht .hb-kopf::before{content:"// HEUTE"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; text-transform:uppercase; color:var(--faint)}
+.ansicht .hb-kopf::before{content:""; display:block; width:32px; height:2px; border-radius:0; background:var(--accent); margin-bottom:8px}
 .ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 4.6vw, var(--fs-8)); line-height:1.15; letter-spacing:-.045em; max-width:20ch}
 .ansicht .hb-kopf .hb-serie{display:flex; align-items:center; gap:8px; color:var(--muted); letter-spacing:.2em}
 
@@ -957,6 +957,76 @@ button.dx-karte:hover{border-color:var(--accent)}
   .ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 9vw, var(--fs-8))}
 }
 
+/* ============================================================
+   Audit-Nachzug (Umsetzung 30.10.2026, design-lagebild):
+   „Heute" als offene Typo-Fläche – nur Lagebild und Signal gerahmt,
+   randloser Hero, ungleiche Spalten, Typo-Hierarchie statt Mono-Monokultur.
+   ============================================================ */
+.ansicht .hb-seite .hb-raster{gap:8px;align-items:stretch;align-content:start}
+.ansicht .hb-seite .hb-raster > .hb-panel{box-shadow:none;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-hero,
+.ansicht .hb-seite .hb-raster > .hb-kenndaten,
+.ansicht .hb-seite .hb-raster > .hb-ziel-karte,
+.ansicht .hb-seite .hb-raster > .hb-sitzung,
+.ansicht .hb-seite .hb-raster > .hb-klasse{padding:0;border:0;border-radius:0;background:none;box-shadow:none;min-height:0}
+.ansicht .hb-seite .hb-raster > .hb-lage,
+.ansicht .hb-seite .hb-raster > .hb-signal{border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel);padding:12px;min-height:0;box-shadow:none}
+.ansicht .hb-seite .hb-raster > .hb-hero{grid-column:1/-1;grid-row:1;min-width:0;color:var(--ink)}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten{
+  grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)
+}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd{border:0;border-left:1px solid var(--line);padding:4px 16px;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd:first-child{border-left:0;padding-left:0}
+.ansicht .hb-seite .hb-raster > .hb-ziel-karte{grid-column:1/6;grid-row:3;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-sitzung{grid-column:6/10;grid-row:3;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-klasse{grid-column:10/13;grid-row:3;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-lage{grid-column:1/9;grid-row:4;padding:0}
+.ansicht .hb-seite .hb-raster > .hb-signal{grid-column:9/13;grid-row:4;min-width:0}
+.ansicht .hb-seite .hb-raster .hb-aktionen{margin-top:4px;gap:8px}
+.ansicht .hb-seite .hb-ziel{margin:0;padding-top:0}
+.ansicht .hb-seite .hb-raster .hb-signal-svg{height:40px;width:100%}
+.ansicht .hb-seite .hb-raster .hb-kicker{font:600 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-bottom:4px}
+.ansicht .hb-seite .hb-raster .hb-hero h1{font:700 var(--fs-6)/1.1 var(--display);letter-spacing:-.02em;margin:4px 0;max-width:30ch;color:var(--ink)}
+.ansicht .hb-seite .hb-raster .hb-hero-lead{font-size:var(--fs-3);line-height:1.5;max-width:64ch;margin:0;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-hero-meta{margin:4px 0;gap:0}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span{font:500 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;border:0;padding:0 12px;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span:first-child{padding-left:0}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span + span{border-left:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster :is(.hb-panel-titel,.hb-zeile b,.hb-sz b){font:600 var(--fs-3)/1.3 var(--body);color:var(--ink)}
+.ansicht .hb-seite .hb-raster .hb-panel-titel{letter-spacing:0;text-transform:none;margin-bottom:8px}
+.ansicht .hb-seite .hb-raster .hb-kd .lab{font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-kd > b{font:700 var(--fs-5)/1 var(--display);letter-spacing:-.02em}
+.ansicht .hb-seite .hb-raster :is(.hb-kd small,.hb-zeile small){font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;color:var(--faint)}
+.ansicht .hb-seite .hb-raster .hb-spark{display:none;pointer-events:none}
+.ansicht .hb-seite .hb-raster .hb-zeile{padding:4px 0;color:var(--ink);border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-sz{padding:4px 0;border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-sz time{font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--faint)}
+.ansicht .hb-seite .hb-raster :is(.hb-sz small,.hb-klasse-zeile small){font-size:var(--fs-2);line-height:1.3;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-sz em{font:600 var(--fs-2)/1 var(--mono);letter-spacing:0}
+.ansicht .hb-seite .hb-raster .hb-ring{width:64px;height:64px}
+.ansicht .hb-seite .hb-raster .hb-ring::after{inset:6px}
+.ansicht .hb-seite .hb-raster .hb-ring b{font:700 var(--fs-4)/1 var(--display)}
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf{height:44px;border-radius:var(--radius-xs)}
+.ansicht .hb-seite .hb-raster :is(.hb-stat,.hb-legende){font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none}
+/* Theme-Festigkeit: Flaechen bleiben offen, aber Text und Knoepfe tragen
+   ihre Tokens selbst — sonst kippen Theme-Regeln (Messing) auf dunkel/dunkel. */
+.ansicht .hb-seite .hb-raster .hb-hero-kunde{color:var(--muted);font-size:var(--fs-3)}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.primaer{
+  height:44px;padding:0 16px;border-radius:var(--radius-xs);
+  background:var(--accent);border:1px solid var(--accent);color:var(--accent-ink);box-shadow:none
+}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer:hover,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.primaer:hover{filter:none;transform:none;border-color:var(--accent)}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.geist,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.geist{
+  height:44px;padding:0 16px;border-radius:var(--radius-xs);
+  background:transparent;border:1px solid var(--line-2);color:var(--ink)
+}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.geist:hover,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.geist:hover{background:var(--panel-2);border-color:var(--ink)}
+
 /* ---- inspektor.css ---- */
 /* ---------- Inspektor (ui/inspektor.js) – nur Tokens aus basis.css ---------- */
 /* BEHOBEN (10.10.2026, task-51): Diese Datei trug 12 einzelne CR (Muster `CR CR LF`, in den letzten zehn
@@ -994,7 +1064,7 @@ button.dx-karte:hover{border-color:var(--accent)}
 .in-abschnitt{display:flex; flex-direction:column; gap:8px; min-width:0}
 /* Ruhige Zeilen-Trenner zwischen den Abschnitten eines Reiters */
 .in-abschnitt + .in-abschnitt{border-top:1px solid var(--line); padding-top:12px}
-.in-abschnitt h4{font:700 var(--fs-1)/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.in-abschnitt h4{font:700 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 .in-abschnitt h5{font:700 var(--fs-2)/1.2 var(--body); color:var(--muted); margin:8px 0 0}
 .in-hinweis{color:var(--muted); font-size:var(--fs-2); line-height:1.45}
 .in-hinweis.klein{font-size:var(--fs-2)}
@@ -1094,12 +1164,12 @@ button.dx-karte:hover{border-color:var(--accent)}
 
 .in-entspricht{flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel-2); padding:8px 12px 8px; display:flex; flex-direction:column; gap:4px; animation:in-rein var(--dauer) ease-out}
 @keyframes in-rein{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
-.in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 var(--fs-1)/1 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+.in-ent-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; color:var(--faint)}
 .in-ent-code{margin:0; padding:8px 8px; border-radius:var(--radius-s); background:var(--bg); color:var(--ok); font:500 var(--fs-2)/1.45 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:120px; overflow:auto}
 
 /* Lease-Tabelle im DHCP-Abschnitt (Architektur 10.6): eine Zeile je Lease, Zustand farbig ueber Tokens */
 .in-lease-tabelle{width:100%; border-collapse:collapse; margin-top:4px; font:500 var(--fs-2)/1.35 var(--body)}
-.in-lease-tabelle th{text-align:left; padding:4px 8px; color:var(--faint); font:700 var(--fs-1)/1 var(--body); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--line)}
+.in-lease-tabelle th{text-align:left; padding:4px 8px; color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.06em; border-bottom:1px solid var(--line)}
 .in-lease-tabelle td{padding:4px 8px; border-bottom:1px solid var(--line-2)}
 .in-lease-tabelle tr:last-child td{border-bottom:none}
 .in-lease-aktiv{color:var(--ok)}
@@ -1111,9 +1181,9 @@ button.dx-karte:hover{border-color:var(--accent)}
 .lb-insp-leer{display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:16px; text-align:left}
 .lb-insp-leer p{max-width:32ch}
 .lb-insp-leer-sym{display:none}
-.lb-insp-leer strong{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
-.lb-insp-leer strong::before{content:"// "}
-.lb-insp-leer p, .lb-insp-leer small{font:500 var(--fs-1)/1.5 var(--mono); color:var(--faint); text-align:left}
+.lb-insp-leer strong{font:700 var(--fs-2)/1.3 var(--body); letter-spacing:.02em; color:var(--muted)}
+.lb-insp-leer strong::before{content:""; display:block; width:24px; height:2px; background:var(--accent); margin:0 0 8px}
+.lb-insp-leer p, .lb-insp-leer small{font:400 var(--fs-3)/1.5 var(--body); color:var(--muted); text-align:left}
 /* Tastenzeilen des Leerzustands: leise, gesperrt, ohne Aufzählungszeichen (= editor.css .lb-tipps) */
 .lb-insp-leer .lb-tipps{display:flex; flex-direction:column; gap:8px; margin:8px 0 0; padding:0; list-style:none;
   font:500 var(--fs-1)/1.6 var(--mono); color:var(--faint)}
@@ -1286,7 +1356,7 @@ html[data-bewegung="reduziert"] .dock-knopf:hover:not(:active){transition:none; 
 .kr-punkte{display:flex; align-items:baseline; gap:8px}
 .kr-punkte b{font:800 calc(var(--fs-6) * 1.57)/1 var(--display); color:var(--accent)}
 .kr-tag{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:var(--fs-2); color:var(--muted)}
-.kr-einst{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:4px 0; font-size:var(--fs-3)}
+.kr-einst{display:grid; align-items:center; justify-content:space-between; gap:12px 24px; padding:8px 0; font-size:var(--fs-3); grid-template-columns:minmax(0,1fr) auto; border-top:1px solid var(--line)}
 .kr-einst span{display:flex; flex-direction:column}
 .kr-einst small{color:var(--faint); font-size:var(--fs-2)}
 .kr-einst.aus, .mk-knopf.gewaehlt{opacity:.6}
@@ -1356,6 +1426,70 @@ html[data-bewegung="reduziert"] .dock-knopf:hover:not(:active){transition:none; 
 .kr-abz-stand{display:flex; align-items:center; gap:8px; margin-top:2px}
 .kr-abz-stand .kr-bar{flex:1; height:6px}
 .kr-abz-stand .kr-bar i{background:var(--accent)}
+
+/* ============================================================
+   Audit-Nachzug (Umsetzung 30.10.2026, design-lagebild):
+   Shop als offenes Regal, Lernstand als gewichtete Karte,
+   Einstellungen ruhiger (Trefferflächen bleiben 44 px).
+   ============================================================ */
+.ansicht[data-ansicht="shop"] .kr-seite{padding:16px 24px;gap:12px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-content:start}
+.ansicht[data-ansicht="shop"] .kr-kopf{grid-column:1/-1}
+.ansicht[data-ansicht="shop"] .kr-kopf h2{font:700 var(--fs-6)/1.05 var(--display)}
+.ansicht[data-ansicht="shop"] .kr-kopf .sp-leise{font:400 var(--fs-3)/1.5 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);max-width:72ch}
+.ansicht[data-ansicht="shop"] .kr-gruppe h3{font:600 var(--fs-4)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--ink);margin:0 0 8px}
+.ansicht[data-ansicht="shop"] .kr-raster.klein{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ansicht[data-ansicht="shop"] .kr-ware{padding:12px 0;border:0;border-top:1px solid var(--line);border-radius:0;background:none;gap:8px}
+.ansicht[data-ansicht="shop"] .kr-ware b{font:600 var(--fs-3)/1.3 var(--body);color:var(--ink)}
+.ansicht[data-ansicht="shop"] .kr-ware p{font:400 var(--fs-2)/1.5 var(--body);color:var(--muted);max-width:60ch}
+.ansicht[data-ansicht="shop"] .kr-ware-fuss{gap:12px;align-items:center}
+.ansicht[data-ansicht="shop"] .kr-preis{font:700 var(--fs-5)/1 var(--display);color:var(--geld)}
+.ansicht[data-ansicht="shop"] .kr-ware-fuss .knopf{min-height:44px;border-radius:var(--radius-xs)}
+.ansicht[data-ansicht="shop"] .kr-seite > .kr-gruppe:nth-of-type(1){grid-column:1;grid-row:2}
+.ansicht[data-ansicht="shop"] .kr-seite > .kr-gruppe:nth-of-type(2){grid-column:2;grid-row:2/span 2}
+.ansicht[data-ansicht="shop"] .kr-seite > .kr-wiki-punkt{grid-column:1;grid-row:3;min-height:44px}
+.ansicht[data-ansicht="shop"] .kr-seite > .kr-fuss{grid-column:1/-1;grid-row:4}
+.ansicht[data-ansicht="shop"] .sp-leise,
+.ansicht[data-ansicht="shop"] .kr-fuss{font:400 var(--fs-2)/1.5 var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+
+.ansicht[data-ansicht="lernstand"] .kr-seite{padding:16px 24px;gap:12px}
+.ansicht[data-ansicht="lernstand"] .kr-karriere,
+.ansicht[data-ansicht="lernstand"] .kr-abzeichen,
+.ansicht[data-ansicht="lernstand"] .kr-pruefung,
+.ansicht[data-ansicht="lernstand"] .kr-stufe{border:0;border-radius:0;background:none;padding:0}
+.ansicht[data-ansicht="lernstand"] .kr-karriere{border-bottom:1px solid var(--line);padding-bottom:12px}
+.ansicht[data-ansicht="lernstand"] :is(.kr-karriere h3,.kr-abzeichen h3){font:600 var(--fs-5)/1.2 var(--display);margin:0}
+.ansicht[data-ansicht="lernstand"] .kr-balken{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.ansicht[data-ansicht="lernstand"] .kr-balken label{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;font-size:var(--fs-2);color:var(--muted)}
+.ansicht[data-ansicht="lernstand"] .kr-bar{
+  height:20px;border-radius:var(--radius-xs);background:var(--panel-2);border:1px solid var(--line);
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(20% - 1px),var(--line-2) calc(20% - 1px) 20%)
+}
+.ansicht[data-ansicht="lernstand"] .kr-bar i{border-radius:0;background:var(--accent)}
+.ansicht[data-ansicht="lernstand"] .kr-fehlt,
+.ansicht[data-ansicht="lernstand"] .kr-fehlerheft{font-size:var(--fs-3);color:var(--muted)}
+.ansicht[data-ansicht="lernstand"] .sp-leise{font:400 var(--fs-2)/1.5 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);max-width:72ch}
+.ansicht[data-ansicht="lernstand"] .kk-karte{border:0;background:none;padding:0;gap:12px}
+.ansicht[data-ansicht="lernstand"] .kk-kopf h3{font:600 var(--fs-5)/1.2 var(--display)}
+.ansicht[data-ansicht="lernstand"] .kk-regionen{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+.ansicht[data-ansicht="lernstand"] .kk-region{border:0;border-top:1px solid var(--line);border-radius:0;background:none;padding:12px 0}
+.ansicht[data-ansicht="lernstand"] .kk-region:first-child,
+.ansicht[data-ansicht="lernstand"] .kk-region:nth-child(6){grid-column:1/-1;min-width:0}
+.ansicht[data-ansicht="lernstand"] .kk-region h4{font:600 var(--fs-3)/1.3 var(--body);margin:0 0 8px}
+.ansicht[data-ansicht="lernstand"] .kk-region .kk-felder{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0 24px;align-items:start}
+.ansicht[data-ansicht="lernstand"] .kk-feld{border:0;border-radius:0;background:none;min-width:0;flex:0 0 auto;padding:4px 0}
+.ansicht[data-ansicht="lernstand"] .kk-feld:not(.kk-nebel){border-top:1px solid var(--line);padding-top:4px}
+.ansicht[data-ansicht="lernstand"] .kk-nebel{background:none;border:0;color:var(--faint);opacity:.6}
+.ansicht[data-ansicht="lernstand"] :is(.kk-name,.kk-region .kk-feld .kk-name){font:600 var(--fs-3)/1.3 var(--body);text-align:left}
+.ansicht[data-ansicht="lernstand"] .kk-stufe{font:500 var(--fs-2)/1.3 var(--body);color:var(--muted)}
+.ansicht[data-ansicht="lernstand"] .kk-feld.kk-sicher,
+.ansicht[data-ansicht="lernstand"] .kk-feld.kk-gemeistert{background:var(--panel-2);border-radius:var(--radius-xs)}
+
+.dialog-einst .einst-zeile{padding:8px 0;border-top:1px solid var(--line);gap:24px}
+.dialog-einst .einst-text strong{font:600 var(--fs-3)/1.3 var(--body)}
+.dialog-einst .einst-text span{font:400 var(--fs-2)/1.5 var(--body);color:var(--muted)}
+.dialog-einst .wahl{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel-2)}
+.dialog-einst .wahl .wahl-knopf{min-height:44px;min-width:44px;border:0;border-radius:var(--radius-xs);background:none;color:var(--muted);box-shadow:none}
+.dialog-einst .wahl .wahl-knopf.an{background:var(--panel);color:var(--ink);box-shadow:none}
 
 /* ---- klassenraum.css ---- */
 /* ---------- Klassenraum: Lehrkräfte-Ansicht und Mitarbeit (kl- · B § 2, § 4) ----------
@@ -2447,8 +2581,8 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-postfach .sp-pf-kopf > div:first-child{min-width:0}
 .sp-postfach .sp-pf-kopf h2{font:600 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em;margin:0}
 .sp-postfach .sp-pf-kopf h2::before{
-  content:"// POSTFACH · AUFTRAGSEINGANG";display:block;margin-bottom:8px;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)
+  content:"POSTFACH · AUFTRAGSEINGANG";display:block;margin-bottom:8px;
+  font:600 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--faint)
 }
 /* Status-Kachel: vorhandener Zaehlertext (Auftraege · Stufe · erledigt) */
 .sp-postfach .sp-pf-kopf .sp-leise{
@@ -2489,7 +2623,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   content:"";position:absolute;top:0;height:32px;z-index:10;
   display:block;padding:0 12px;background:var(--panel-2);
   border-bottom:1px solid var(--line);
-  font:600 var(--fs-1)/32px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  font:600 var(--fs-2)/32px var(--body);letter-spacing:0;text-transform:none;color:var(--faint);
   white-space:nowrap;overflow:hidden
 }
 .sp-postfach .sp-pf-liste::before{content:"Auftrag · Kunde";left:0;right:50%}
@@ -2582,7 +2716,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 /* Kacheln: Symptom / Uebt / Dauer / Form / Lohn + Ziele ueber alle Spalten */
 .sp-postfach .sp-brief-info{
   display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4, minmax(0,1fr));gap:8px;
-  border:0;padding:0;align-items:stretch
+  border:0;padding:0;align-items:stretch;flex:1 1 auto;grid-template-rows:minmax(0,1fr) auto
 }
 .sp-postfach .sp-brief-info > div{
   display:flex;flex-direction:column;gap:4px;min-width:0;
@@ -2964,7 +3098,11 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 /* Auswahl: feiner Akzentring um das Piktogramm (Geometrie setzt der Renderer) */
 .ger-auswahl{fill:none; stroke:var(--accent); stroke-width:1.5; stroke-dasharray:none; opacity:0;
   transition:opacity var(--dauer) var(--ease-standard)}
-.ger.gewaehlt .ger-auswahl{opacity:1}
+.ger.gewaehlt .ger-auswahl{opacity:1; animation:ring-puls var(--dauer-lang) ease-out 1}
+@keyframes ring-puls{
+  from{stroke-width:4; opacity:.35}
+  to{stroke-width:1.5; opacity:1}
+}
 /* Zustand „ohne Link": feiner gestrichelter Koralle-Ring, kein Fehlerbild */
 .ger.ohne-ip .ger-auswahl{opacity:1; stroke:var(--bad); stroke-dasharray:4 3}
 .ger.aus .ger-bild{opacity:.42}
@@ -2984,6 +3122,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 /* Hülle = Flächenfarbe: trennt Kabel von Raster und Zonenwäsche */
 .kabel-huelle{fill:none; stroke:var(--lage-kante-huelle, var(--lage-flaeche, var(--bg)));
   stroke-width:4; stroke-linecap:round; vector-effect:non-scaling-stroke}
+/* Live-Kabel (nur Bewegung an): die flächenfarbene Hülle bekommt Lücken, durch die die
+   Leitung als laufender Lichtpunkt sichtbar wird – sehr ruhig. */
+.kabel.k-oben .kabel-huelle{stroke-dasharray:2 34; animation:kabel-lauf var(--dauer-lauflicht) linear infinite}
+@keyframes kabel-lauf{from{stroke-dashoffset:0} to{stroke-dashoffset:-36}}
 .kabel-linie{fill:none; stroke:var(--kf); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round;
   vector-effect:non-scaling-stroke; transition:stroke-width var(--dauer) var(--ease-standard)}
 .k-unten .kabel-linie, .k-unten .kabel-trunk-aussen, .k-unten .kabel-trunk-innen{stroke-dasharray:5 4}
@@ -3075,9 +3217,9 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .kopf{gap:12px;padding:0 16px;background:var(--panel)}
 .kopf::after{height:1px;background:var(--line);opacity:1}
 .kopf-marke{gap:8px;padding-right:12px;border-right:1px solid var(--line)}
-.marke-name{font:800 var(--fs-3)/1 var(--display);letter-spacing:.16em;text-transform:uppercase}
-.marke-version{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;color:var(--faint);border-radius:var(--radius-xs);padding:4px 8px}
-.wert{height:36px;border-radius:var(--radius-s);background:var(--panel-2);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.08em}
+.marke-name{font:800 var(--fs-3)/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.marke-version{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);border-radius:var(--radius-xs);padding:4px 8px}
+.wert{height:36px;border-radius:var(--radius-s);background:var(--panel-2);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 .wert .sym{opacity:.9}
 .kopf-knoepfe{border-left:1px solid var(--line);padding-left:8px}
 .kopf-knopf{height:40px;min-width:40px;border-radius:var(--radius-s);transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard)}
@@ -3088,21 +3230,26 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .dock-knopf{width:80px;min-height:56px;padding:8px 0;border-radius:var(--radius-s);
   transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard),transform var(--dauer) var(--ease-standard)}
 .dock-knopf:hover{background:var(--panel-2)}
-.dock-knopf.an{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.dock-knopf.an{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);
+  animation:dock-atmen var(--dauer-atmen) ease-in-out infinite alternate}
+@keyframes dock-atmen{
+  from{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent), 0 0 18px -6px color-mix(in srgb, var(--accent) 42%, transparent)}
+}
 .dock-knopf.an::before{width:2px;border-radius:var(--radius-xs);background:var(--accent)}
-.dock-text{font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.12em;color:var(--muted);max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.dock-text{font:600 var(--fs-1)/1.2 var(--mono);letter-spacing:.06em;color:var(--muted);max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
 .dock-knopf.an .dock-text{color:var(--accent)}
 .dock-zahl{background:var(--accent);color:var(--accent-ink);border-radius:999px;font:700 var(--fs-1)/18px var(--mono)}
-.fuss{background:var(--bg);border-top:1px solid var(--line);padding:0 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.fuss{background:var(--bg);border-top:1px solid var(--line);padding:0 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .fuss-trenner{opacity:.6}
 .fuss-live{display:inline-flex;align-items:center;gap:8px;color:var(--accent)}
 .fuss-punkt{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px color-mix(in srgb,var(--accent) 60%,transparent)}
 .fuss-ebene{color:var(--muted)}
 .lb-auftrag {padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line);padding:0 16px 12px}
-.lb-auftrag::before{content:"// AUFTRAG";display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;color:var(--faint);margin:0 0 8px}
+.lb-auftrag::before{content:"";display:block;width:24px;height:2px;background:var(--accent);margin:0 0 8px}
 .lb-auftrag :is(h1,h2){font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.03em;margin:0}
 .lb-auftrag .am-titel strong{font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.02em}
-.lb-auftrag .am-kunde, .lb-auftrag .am-ziele{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.lb-auftrag .am-kunde, .lb-auftrag .am-ziele{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .lb-auftrag .am-ziele{border:1px solid var(--line);border-radius:999px;padding:4px 8px}
 .lb-gruppe{border-radius:var(--radius-s);background:color-mix(in srgb,var(--panel) 86%,transparent);backdrop-filter:blur(12px) saturate(130%);
   box-shadow:0 18px 44px -34px color-mix(in srgb,var(--bg) 85%,transparent)}
@@ -3114,8 +3261,8 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
    Die alten Karten-/Kabel-Regeln (168×112-Annahmen, .kabel-stecker) sind entfallen. */
 .hb-seite {max-width:1120px;margin:0 auto;padding:32px 24px;gap:16px;gap:16px;padding:32px 24px}
 .hb-kopf h2{font:800 var(--fs-8)/1.15 var(--display);letter-spacing:-.04em;max-width:16ch}
-.hb-kopf .hb-serie{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
-.hb-ziel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;color:var(--faint)}
+.hb-kopf .hb-serie, .hb-kicker, .hb-kd .lab, .hb-kd small, .hb-sz time, .hb-lage-titel, .hb-lage-tipp{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
+.hb-ziel, .hb-kachel small, .in-feld-titel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-auftrag{position:relative;border:1px solid var(--line);border-radius:var(--radius);padding:24px;
   background:
     radial-gradient(90% 130% at 96% -30%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 58%),
@@ -3131,9 +3278,8 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .hb-kachel:hover{transform:translateY(-2px);border-color:var(--line-2);background:var(--panel-2)}
 .hb-kachel-sym{width:44px;height:44px;border-radius:var(--radius-s);background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
 .hb-kachel b{font:700 var(--fs-3)/1.2 var(--body)}
-.hb-kachel small{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .hb-feierabend{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:24px}
-.hb-woche-knopf{border:1px solid var(--line);border-radius:999px;background:var(--panel-2);padding:8px 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em}
+.hb-woche-knopf{border:1px solid var(--line);border-radius:999px;background:var(--panel-2);padding:8px 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 
 /* ===== Bewegung: ruhig, nur transform (Pointer bleiben erreichbar) ===== */
 @keyframes pol-auf{from{transform:translateY(6px)}to{transform:none}}
@@ -3158,39 +3304,39 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .lb-auftrag .am-zeile{display:grid;grid-template-columns:48px minmax(0,1fr) auto auto;align-items:center;gap:16px}
 .lb-auftrag .sp-kunde-sym{width:48px;height:48px;border-radius:var(--radius-s);display:grid;place-items:center;
   background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);font-size:var(--fs-5)}
-.lb-auftrag .am-kunde{display:block;margin-top:2px}
+.lb-auftrag .am-kunde{display:block;margin-top:2px;max-width:30ch;white-space:normal;overflow:visible;text-overflow:clip;font:500 var(--fs-2)/1.4 var(--body);letter-spacing:.02em;color:var(--muted)}
 .lb-auftrag .am-ziele{align-self:start}
 .lb-auftrag .am-knoepfe{display:flex;gap:8px;align-items:center}
 .lb-auftrag .sp-abnahme{height:40px;border-radius:var(--radius-s)}
 .lb-auftrag .am-lesen{height:40px;border-radius:var(--radius-s)}
 .lb-dock {background:var(--panel);border-left:1px solid var(--line);box-shadow:-24px 0 48px -40px color-mix(in srgb,var(--bg) 90%,transparent);border-left:1px solid var(--line);background:var(--panel)}
 .lb-dock-reiter{gap:4px;padding:10px 12px;border-bottom:1px solid var(--line)}
-.lb-dock-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:8px 10px;border-radius:var(--radius-s);color:var(--faint)}
+.lb-dock-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;padding:8px 10px;border-radius:var(--radius-s);color:var(--faint)}
 .lb-dock-tab.an{color:var(--ink);background:var(--panel-2)}
 .lb-inspektor{padding:0}
 .in-kopf{padding:16px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}
 .in-kopf-zeile{gap:12px;align-items:center}
 .in-kopf-text h3{font:800 var(--fs-5)/1.15 var(--display);letter-spacing:-.02em}
-.in-kopf-text span{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.in-kopf-text span{font:600 var(--fs-1)/1.3 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .in-reiter{display:flex;gap:2px;padding:10px 12px 0;border-bottom:1px solid var(--line)}
-.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:8px 10px;border-radius:var(--radius-s) var(--radius-s) 0 0}
+.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);padding:8px 10px;border-radius:var(--radius-s) var(--radius-s) 0 0}
 .in-tab.an{color:var(--ink);background:var(--panel-2);box-shadow:inset 0 -2px 0 var(--accent)}
 .in-abschnitt{padding:14px 18px;border-bottom:1px solid color-mix(in srgb,var(--ink) 6%,transparent)}
-.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);margin:0 0 8px}
 .in-hinweis{font-size:var(--fs-3);color:var(--muted)}
 .lb-insp-leer{padding:24px 18px;gap:8px;align-items:flex-start;text-align:left}
 .lb-insp-leer h2,.lb-insp-leer h3{font:800 var(--fs-5)/1.1 var(--display);letter-spacing:-.02em}
-.lb-insp-leer .lb-tipps{display:flex;flex-direction:column;gap:6px;font:600 var(--fs-1)/1.5 var(--mono);color:var(--faint);letter-spacing:.1em;text-transform:uppercase;list-style:none;padding:0;margin:8px 0 0}
+.lb-insp-leer .lb-tipps{display:flex;flex-direction:column;gap:6px;font:600 var(--fs-1)/1.5 var(--mono);color:var(--faint);letter-spacing:.06em;list-style:none;padding:0;margin:8px 0 0}
 
 /* Lagebild-Kopf über der Fläche */
-.lb-leinwand::before{content:"// LAGEBILD";position:absolute;left:16px;top:12px;z-index:19;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint);pointer-events:none}
+.lb-leinwand::before{content:"Lagebild";position:absolute;left:16px;top:12px;z-index:19;
+  font:500 var(--fs-2)/1 var(--body);letter-spacing:.02em;color:var(--faint);pointer-events:none}
 .lb-leiste-oben{top:34px}
 
 
 /* Inspektor-Kopf + kompakte Begrüßung (POLARIS: ruhiges Band statt Riesenkarte) */
-.lb-inspektor::before{content:"// INSPEKTOR";display:block;padding:12px 18px 0;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint)}
+.lb-inspektor::before{content:"Inspektor";display:block;padding:12px 18px 0;
+  font:700 var(--fs-2)/1 var(--body);letter-spacing:.02em;color:var(--muted)}
 .sp-einstieg{padding:12px 16px;gap:8px}
 .sp-einstieg-text{font-size:var(--fs-3);line-height:1.45;max-width:78ch}
 .sp-stufe{gap:4px;padding-top:4px}
@@ -3242,8 +3388,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .lb-auftrag .sp-kunde-sym{width:56px;height:56px;border-radius:var(--radius);font-size:var(--fs-6);
   background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
 .lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font:800 var(--fs-8)/1.15 var(--display);letter-spacing:-.04em}
-.lb-auftrag .am-kunde{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
-.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;border:1px solid var(--line);border-radius:999px;padding:6px 10px}
 .lb-auftrag .am-knoepfe{gap:8px}
 .lb-auftrag .am-lesen{height:44px;border-radius:var(--radius-s);border:1px solid var(--line);background:transparent;color:var(--muted)}
 .lb-auftrag .sp-abnahme{height:44px;border-radius:var(--radius-s);background:var(--accent);color:var(--accent-ink);border:0}
@@ -3253,19 +3398,16 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 
 .in-kopf{padding:18px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
 .in-kopf-text h3{font:800 var(--fs-5)/1.15 var(--display);letter-spacing:-.03em}
-.in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+.in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .in-reiter{display:flex;gap:2px;padding:8px 14px 0;border-bottom:1px solid var(--line)}
-.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);
   padding:10px 10px;border-radius:0;border:0;border-bottom:2px solid transparent;background:none}
 .in-tab.an{color:var(--ink);border-bottom-color:var(--accent);background:none}
 .in-abschnitt{padding:14px 20px;border-bottom:1px solid var(--line)}
-.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
-.in-feld-titel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .in-eingabe,.in-auswahl{height:34px;border-radius:var(--radius-xs);background:var(--panel-2);border:1px solid var(--line);font:500 var(--fs-2)/1 var(--mono)}
 .in-hinweis{font-size:var(--fs-3);color:var(--muted)}
 .lb-insp-leer{padding:20px}
-.lb-insp-leer::before{content:"// NICHTS AUSGEWÄHLT";display:block;margin-bottom:8px;
-  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint)}
+.lb-insp-leer::before{content:"";display:block;width:24px;height:2px;background:var(--accent);margin-bottom:8px}
 
 .hb-kopf h2{font-size:clamp(var(--fs-7),4.6vw,var(--fs-8))}
 .hb-auftrag{padding:24px;border-radius:var(--radius);border-left:2px solid var(--k,var(--accent))}
@@ -3276,8 +3418,8 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 
 
 /* Band: Titel darf nicht abschneiden, Begrüßung als ruhige Zeile */
-.lb-auftrag .am-titel{min-width:0}
-.lb-auftrag .am-titel strong{white-space:nowrap;overflow:visible}
+.lb-auftrag .am-titel{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;max-width:30ch;white-space:normal;overflow:visible}
+.lb-auftrag .am-titel strong{display:block;max-width:30ch;white-space:normal;overflow:visible;text-overflow:clip}
 .lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font-size:clamp(var(--fs-6),2.6vw,var(--fs-7))}
 .lb-auftrag .sp-einstieg{background:none;border:0;padding:8px 0 0;gap:4px}
 .lb-auftrag .sp-einstieg-text{font-size:var(--fs-2);line-height:1.4;max-width:72ch;color:var(--muted)}
@@ -3288,7 +3430,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 
 /* ===== Mockup-Shell: horizontale Navigation, App-Zutaten weichen ===== */
 .kopf-nav{display:flex;align-items:center;gap:2px;margin-left:8px;min-width:0;overflow:hidden}
-.kopf-nav-knopf{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+.kopf-nav-knopf{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);
   padding:8px 12px;border:1px solid transparent;border-radius:999px;background:none}
 .kopf-nav-knopf:hover{color:var(--muted);background:var(--panel-2)}
 .kopf-nav-knopf.an{color:var(--ink);background:var(--panel-2);border-color:var(--line)}
@@ -3307,16 +3449,15 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .hb-seite{max-width:1180px;margin:0 auto;padding:24px 24px 12px;display:flex;flex-direction:column;gap:16px;align-items:stretch}
 .hb-raster{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;grid-template-rows:auto auto auto;width:100%;align-items:stretch}
 .hb-panel{position:relative;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:18px;min-width:0}
-.hb-panel-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.hb-panel-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);margin-bottom:10px}
 .hb-hero{grid-column:1/8;grid-row:1;display:flex;flex-direction:column;gap:6px;
   background:radial-gradient(90% 130% at 96% -30%,color-mix(in srgb,var(--k,var(--accent)) 10%,transparent),transparent 58%),
     linear-gradient(158deg,color-mix(in srgb,var(--ink) 3%,transparent),transparent 60%),var(--panel)}
-.hb-kicker{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
 .hb-hero-kunde{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:var(--fs-3);margin-top:8px}
 .hb-hero h1{font:800 var(--fs-7)/1.15 var(--display);letter-spacing:-.04em;margin:2px 0 6px;max-width:20ch}
 .hb-hero-lead{color:var(--muted);max-width:60ch;margin:0 0 6px;font-size:var(--fs-3)}
 .hb-hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.hb-hero-meta span{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;color:var(--muted);
+.hb-hero-meta span{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--muted);
   border:1px solid var(--line);border-radius:999px;padding:6px 10px}
 .hb-hero-meta .warn{color:var(--koralle);border-color:color-mix(in srgb,var(--koralle) 40%,transparent)}
 .hb-aktionen{display:flex;align-items:center;gap:10px;margin-top:16px}
@@ -3326,9 +3467,8 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .hb-kd{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
 .hb-kd:last-child{border-bottom:0}
 .hb-kd > i{width:8px;height:8px;border-radius:50%;background:var(--c)}
-.hb-kd .lab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;color:var(--faint)}
 .hb-kd > b{font:800 var(--fs-6)/1 var(--display);letter-spacing:-.03em;display:flex;align-items:baseline;gap:6px}
-.hb-kd small{font:600 var(--fs-1)/1 var(--mono);color:var(--faint);letter-spacing:.16em}
+.hb-kd small{font:600 var(--fs-1)/1 var(--mono);color:var(--faint);letter-spacing:.06em}
 .hb-spark{display:flex;align-items:flex-end;gap:3px;height:34px}
 .hb-spark i{width:3px;border-radius:2px;background:color-mix(in srgb,var(--c) 35%,transparent)}
 .hb-spark i.spitze{background:var(--c)}
@@ -3344,19 +3484,18 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .hb-zeile.fertig i{background:var(--accent);box-shadow:none}
 .hb-zeile.fertig{color:var(--ink)}
 .hb-zeile b{font:700 var(--fs-2)/1.3 var(--body)}
-.hb-zeile small{margin-left:auto;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;color:var(--faint)}
+.hb-zeile small{margin-left:auto;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-sitzung{grid-column:5/9;grid-row:2;display:flex;flex-direction:column}
 .hb-sz{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--ink) 6%,transparent)}
 .hb-sz:first-of-type{border-top:0}
-.hb-sz time{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;color:var(--faint)}
 .hb-sz b{font:700 var(--fs-2)/1.3 var(--body)}
 .hb-sz small{display:block;color:var(--faint);font-size:var(--fs-2)}
-.hb-sz em{font:600 var(--fs-1)/1 var(--mono);font-style:normal;letter-spacing:.14em;color:var(--accent)}
+.hb-sz em{font:600 var(--fs-1)/1 var(--mono);font-style:normal;letter-spacing:.06em;color:var(--accent)}
 .hb-klasse{grid-column:9/13;grid-row:2;display:flex;flex-direction:column;gap:10px}
 .hb-klasse-zeile{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .hb-klasse-zeile .knopf{height:40px;border-radius:var(--radius-s)}
 .hb-klasse-zeile small{color:var(--faint);font-size:var(--fs-2)}
-.hb-pill{font:600 var(--fs-2)/1 var(--mono);letter-spacing:.24em;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--radius-s);padding:10px 12px}
+.hb-pill{font:600 var(--fs-2)/1 var(--mono);letter-spacing:.06em;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--radius-s);padding:10px 12px}
 .hb-lage{grid-column:1/9;grid-row:3;position:relative;min-height:210px;padding:0;overflow:hidden}
 .hb-lage .hb-panel-titel{position:absolute;left:20px;top:16px;z-index:2}
 
@@ -3364,12 +3503,12 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   background:var(--panel-2);box-shadow:inset 0 0 0 1px var(--line)}
 .hb-knoten span{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;color:var(--accent);
   background:color-mix(in srgb,var(--accent) 10%,transparent);font-size:var(--fs-2)}
-.hb-knoten b{display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em}
+.hb-knoten b{display:block;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 .hb-knoten small{display:block;font:500 var(--fs-1)/1.5 var(--mono);color:var(--faint)}
-.hb-legende{position:absolute;left:20px;bottom:12px;display:flex;gap:16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;color:var(--faint)}
+.hb-legende{position:absolute;left:20px;bottom:12px;display:flex;gap:16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-signal{grid-column:9/13;grid-row:3;display:flex;flex-direction:column;gap:8px}
 .hb-signal-svg{width:100%;height:56px;flex:0 0 auto;margin-bottom:4px}
-.hb-stat{display:flex;align-items:center;gap:8px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;color:var(--faint)}
+.hb-stat{display:flex;align-items:center;gap:8px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint)}
 .hb-stat i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .hb-stat b{margin-left:auto;color:var(--ink);font-weight:600}
 .hb-ziel{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
@@ -3384,7 +3523,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   .kopf{gap:8px;padding:0 12px}
   .kopf-knopf.mit-text span{display:none}
   .kopf-knoepfe{padding-left:8px;gap:2px}
-  .marke-name{font-size:var(--fs-2);letter-spacing:.08em}
+  .marke-name{font-size:var(--fs-2);letter-spacing:.06em}
   .marke-version{display:none}
   .wert{height:32px;padding:0 8px;font-size:var(--fs-1)}
   .dock{width:64px}
@@ -3431,7 +3570,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   .kopf{gap:8px;padding:0 12px}
   .kopf-knopf.mit-text span{display:none}
   .kopf-knoepfe{padding-left:8px;gap:2px}
-  .marke-name{font-size:var(--fs-2);letter-spacing:.08em}
+  .marke-name{font-size:var(--fs-2);letter-spacing:.06em}
   .marke-version{display:none}
   .wert{height:32px;padding:0 8px;font-size:var(--fs-1)}
   .kopf-werte .wert-ruf{display:none}
@@ -3461,10 +3600,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 
 /* Kopfzeile: Platz schaffen, ohne Inhalte zu verlieren */
 .kopf-nav{flex:0 0 auto;overflow:visible}
-.kopf .sp-leise{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;color:var(--faint);white-space:nowrap}
+.kopf .sp-leise{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;color:var(--faint);white-space:nowrap}
 @media (max-width:1150px){ .kopf-werte .wert-stufe{display:none} }
 @media (max-width:1600px){
-  .kopf-nav-knopf{padding:8px 9px;letter-spacing:.1em}
+  .kopf-nav-knopf{padding:8px 9px;letter-spacing:.06em}
   .kopf-knoepfe .kopf-knopf.mit-text span{display:none}
   .kopf .sp-leise{display:none}
 }
@@ -3550,8 +3689,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 /* ===== Lagebild v3 (SPEC): Kopf mit Zählern, Knoten auf Schichten, Kanten orthogonal ===== */
 .hb-lage{position:relative;min-height:250px;padding:0;overflow:hidden;display:block}
 .hb-lage-kopf{position:absolute;left:16px;right:16px;top:12px;z-index:3;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.hb-lage-titel{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
-.hb-lage-zaehler{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.hb-lage-zaehler{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em;white-space:nowrap}
 .hb-lage-zaehler.ok{color:var(--accent)}
 .hb-lage-zaehler.bad{color:var(--koralle)}
 
@@ -3569,8 +3707,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .hb-chip.typ-router .hb-chip-sym, .hb-chip.typ-firewall .hb-chip-sym{background:color-mix(in srgb,var(--amber) 12%,transparent);color:var(--amber)}
 .hb-chip-mehr{background:transparent;border-style:dashed;color:var(--faint)}
 .hb-lage-fuss{position:absolute;left:16px;right:16px;bottom:9px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hb-lage-fuss .hb-legende{position:static;display:flex;gap:12px;color:var(--faint);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase}
-.hb-lage-tipp{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+.hb-lage-fuss .hb-legende{position:static;display:flex;gap:12px;color:var(--faint);font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
 .hb-lage-leer{display:flex;flex-direction:column;gap:8px;padding:16px;justify-content:center}
 .hb-lage-leer .hb-panel-titel{position:static;margin:0}
 .hb-lage-hinweis{color:var(--muted);font-size:var(--fs-3);margin:0}
@@ -3603,31 +3740,44 @@ body{background-image:
 body > .kopf{background:color-mix(in srgb, var(--panel) 92%, var(--panel-2)); border-bottom:1px solid var(--line)}
 body > .ansicht .dock{background:color-mix(in srgb, var(--panel) 88%, var(--panel-2))}
 /* Fokusflächen bleiben klar, aber nicht grell */
-.knopf.primaer{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 55%, transparent)}
+.knopf.primaer{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 55%, transparent);
+  animation:primaer-licht var(--dauer-licht) ease-in-out infinite alternate}
+@keyframes primaer-licht{
+  from{box-shadow:0 10px 26px -16px color-mix(in srgb, var(--accent) 40%, transparent)}
+  to{box-shadow:0 10px 30px -14px color-mix(in srgb, var(--accent) 75%, transparent), 0 0 14px -2px color-mix(in srgb, var(--accent) 25%, transparent)}
+}
 .hb-lage-svg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none}
 
 
 /* ===== Themen mit größeren Displayschriften (Messing, Papier): Band darf nicht kappen ===== */
 body .lb-auftrag .am-zeile{grid-template-columns:56px minmax(0,1fr) auto auto}
-body .lb-auftrag .am-titel{min-width:0;overflow:hidden}
-body .lb-auftrag .am-titel strong{display:block;max-width:100%;overflow-wrap:anywhere}
-body .lb-auftrag .am-kunde{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body .lb-auftrag .am-titel{min-width:0;max-width:30ch;overflow:visible}
+body .lb-auftrag .am-titel strong{display:block;max-width:30ch;overflow-wrap:anywhere;white-space:normal}
+body .lb-auftrag .am-kunde{display:block;max-width:30ch;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere}
 .lb-auftrag .am-mehr{flex:0 0 auto}
 
 
 /* ===== Ambient Runde 3 (POLARIS): EINE sehr ruhige Lichtbewegung auf der Fläche =====
-   Kein Dauerfeuer: ein einzelner, 36-s-Lichtschleier; Hover/Auswahl bleiben Interaktion.
+   Eigener Pseudo-Layer über der Zeichenfläche (pointer-events:none, z-index 10 unter den
+   Leisten mit 20), damit kein Theme-Hintergrund ihn überdeckt. Kein Dauerfeuer:
+   ein einzelner Lichtschleier, 36 s; Hover/Auswahl/Prozess bleiben die Interaktion.
    Reduced-Motion und „Bewegung aus" schalten zentral in basis.css ab. */
-.lb-svg{
-  background-color:var(--lage-flaeche, var(--bg));
-  background-image:radial-gradient(1100px 520px at 30% 0%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 62%);
-  background-size:150% 150%;
-  background-position:30% 0;
+.lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:10;
+  background-image:
+    radial-gradient(70% 55% at 30% 20%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 70%),
+    radial-gradient(60% 45% at 78% 88%, color-mix(in srgb, var(--iris) 10%, transparent), transparent 72%);
+  background-size:180% 180%, 170% 170%;
+  background-position:30% 20%, 78% 88%;
   animation:polaris-licht var(--dauer-ambient) ease-in-out infinite alternate;
 }
 @keyframes polaris-licht{
-  from{background-position:30% 0}
-  to{background-position:30% 14%}
+  from{background-position:20% 10%, 88% 96%; opacity:.55}
+  to{background-position:44% 34%, 64% 76%; opacity:1}
 }
 
 /* ---- zzz-thema-keramik.css ---- */
@@ -3689,7 +3839,7 @@ body .lb-auftrag .am-kunde{display:block;max-width:100%;overflow:hidden;text-ove
   --keramik-panel-pad:22px;
   --keramik-gap:20px;
   --keramik-tracking:-.018em;
-  --keramik-label-tracking:.16em;
+  --keramik-label-tracking:.06em;
   --keramik-gewicht:600;
   --keramik-karte:inset 0 1px 0 rgba(255,252,245,.85), 0 18px 40px -36px rgba(58,44,30,.45);
   --keramik-knopf:inset 0 1px 0 rgba(255,252,245,.65), 0 10px 22px -22px rgba(58,44,30,.38);
@@ -3912,8 +4062,8 @@ html[data-theme="keramik"] .labor .lb-legende{
   border-radius:var(--radius-s);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   gap:16px;
   box-shadow:none;
   -webkit-backdrop-filter:none;
@@ -3950,8 +4100,8 @@ html[data-theme="keramik"] .labor .wk-mini{
 
 html[data-theme="keramik"] .labor .wk-mini-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -4001,6 +4151,161 @@ html[data-theme="keramik"] :is(.hb-kopf h2,.hb-hero h1,.ansicht .hb-auftrag h3,.
 }
 html[data-theme="keramik"] :is(.hb-panel-titel,.hb-kicker,.hb-kopf::before,.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.hb-serie,.hb-lage-titel){
   letter-spacing:var(--keramik-label-tracking);
+}
+
+/* ============================================================================
+   Audit 02/11 (30.10.2026): Typo-Hierarchie statt Versalien-Monokultur.
+   Nur Typografie – Farben/Material bleiben Theme-Charakter. Sperrsatz <= .06em,
+   Saetze in Satzschreibung, Panel-Titel 12,5 px Body; // in Theme-Inhalten entfernt.
+   ============================================================================ */
+html[data-theme="keramik"] :is(.dock,.kopf,.fuss,.lb-legende,.wk-mini,.sp-postfach,.ansicht) :is(span,small,em,strong,time,label,button,th,td){
+  text-transform:none;
+  letter-spacing:.04em;
+}
+
+html[data-theme="keramik"] .ansicht .hb-panel-titel{
+  font:600 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="keramik"] .ansicht :is(.hb-kicker,.hb-serie,.hb-sz time,.hb-sz em){
+  text-transform:none;
+  letter-spacing:.04em;
+  font-family:var(--body);
+}
+
+html[data-theme="keramik"] .labor :is(.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.lb-insp-leer::before){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.03em;
+  text-transform:none;
+}
+
+html[data-theme="keramik"] .labor :is(.in-feld-titel,.lb-dock-titel){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+html[data-theme="keramik"] .labor :is(.lb-legende,.wk-mini-titel){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="keramik"] .labor :is(.lb-auftrag .am-kunde){
+  font:500 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="keramik"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3,.sp-brief-info small,.sp-brief-ziele strong,.sp-chip){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="keramik"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
+  text-transform:none;
+  letter-spacing:.03em;
+  font-family:var(--body);
+}
+
+/* ============================================================================
+   Ambient sichtbar (Runde 3, 19:12): Atmendes Licht + ruhige UI-Impulse.
+   Dauern ausschließlich über Theme-Token; "Bewegung aus" schaltet basis.css zentral ab.
+   ============================================================================ */
+:root[data-theme="keramik"]{
+  --lage-atmen:12s;
+  --lage-nebel:16s;
+  --lage-puls:6s;
+  --lage-schein:8s;
+  --lage-lauf:4s;
+}
+
+/* 1 · Atmendes Hintergrund-Licht */
+html[data-theme="keramik"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:-6%;
+  pointer-events:none;
+  z-index:2;
+  background-image:
+    linear-gradient(118deg, color-mix(in srgb, var(--ink) 16%, transparent), transparent 55%),
+    radial-gradient(50% 44% at 30% 18%, color-mix(in srgb, var(--accent) 36%, transparent), transparent 72%);
+  opacity:.12;
+  animation:keramik-atmen var(--lage-atmen) ease-in-out infinite alternate;
+}
+@keyframes keramik-atmen{
+  from{opacity:.13; transform:scale(1)}
+  to{opacity:.20; transform:scale(1.035) translate(-.8%, .8%)}
+}
+
+/* 2 · Pulsieren im UI */
+html[data-theme="keramik"] .dock-knopf.an{
+  animation:keramik-dock var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes keramik-dock{
+  from{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 46%, transparent), 0 0 12px -4px color-mix(in srgb, var(--accent) 36%, transparent)}
+}
+
+html[data-theme="keramik"] .ansicht .hb-panel{
+  animation:keramik-karte var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes keramik-karte{
+  from{border-color:var(--line)}
+  to{border-color:color-mix(in srgb, var(--accent) 24%, var(--line))}
+}
+
+html[data-theme="keramik"] :is(.knopf.primaer, .knopf-haupt){
+  animation:keramik-schein var(--lage-schein) ease-in-out infinite alternate;
+}
+@keyframes keramik-schein{
+  from{box-shadow:inset 0 0 0 1px transparent, 0 10px 26px -18px color-mix(in srgb, var(--accent) 26%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent), 0 10px 30px -16px color-mix(in srgb, var(--accent) 46%, transparent)}
+}
+
+/* Auswahlring: einmaliger 320-ms-Puls (danach Basis-Ring) */
+html[data-theme="keramik"] .labor :is(.ger.gewaehlt, .ger.zielt) .ger-auswahl{
+  animation:keramik-ring var(--dauer-lang) var(--ease-out) 1;
+}
+@keyframes keramik-ring{
+  0%{stroke-opacity:.25; stroke-width:1}
+  55%{stroke-opacity:1; stroke-width:1.8}
+  100%{stroke-opacity:.85; stroke-width:1.5}
+}
+
+/* Live-Kabel: langsam laufender Lichtpunkt (nur k-oben und trunk) */
+html[data-theme="keramik"] .labor :is(.kabel.k-oben, .kabel.trunk) .kabel-huelle{
+  stroke:color-mix(in srgb, var(--lage-kante) 58%, transparent);
+  stroke-dasharray:2 22;
+  animation:keramik-lauf var(--lage-lauf) linear infinite;
+}
+@keyframes keramik-lauf{
+  to{stroke-dashoffset:-24}
+}
+
+/* ============================================================================
+   Heute-Kontrast nach offenen Flaechen (hub.css 19:16): Text/Knoepfe >= 4,5:1.
+   Kein Layout, nur Farbe/Flaeche; Theme-Charakter bleibt.
+   ============================================================================ */
+html[data-theme="keramik"] .ansicht .hb-seite :is(.hb-hero, .hb-panel, .hb-karte){
+  color:var(--ink);
+}
+html[data-theme="keramik"] .ansicht .hb-seite :is(.hb-hero h1, .hb-karte h3, .hb-panel-titel, .hb-kicker){
+  color:var(--ink);
+}
+html[data-theme="keramik"] .ansicht .hb-seite :is(.hb-hero-lead, .hb-hero-kunde, .hb-hero-meta, .hb-hero-meta span){
+  color:var(--muted);
+}
+html[data-theme="keramik"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.primaer, .knopf-haupt, .knopf.primaer .knopf){
+  background:var(--accent);
+  background-image:none;
+  color:var(--accent-ink);
+  border-color:color-mix(in srgb, var(--accent) 78%, var(--line));
+}
+html[data-theme="keramik"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.geist, .knopf:not(.primaer):not(.knopf-haupt)){
+  color:var(--ink);
+  border-color:var(--line-2);
 }
 
 /* ---- zzz-thema-messing.css ---- */
@@ -4215,14 +4520,14 @@ html[data-theme="messing"] .marke-sym circle{
 
 html[data-theme="messing"] .marke-name{
   font:700 var(--fs-4)/1 var(--display);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--ink);
 }
 
 html[data-theme="messing"] .marke-version{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -4232,8 +4537,8 @@ html[data-theme="messing"] .marke-version{
 
 html[data-theme="messing"] .kopf .sp-leise{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -4333,8 +4638,8 @@ html[data-theme="messing"] .dock-knopf.an::before{
 
 html[data-theme="messing"] .dock-text{
   font:600 var(--fs-1)/1.2 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .dock-knopf.an .dock-text{
@@ -4360,13 +4665,13 @@ html[data-theme="messing"] .fuss{
   border-top:1px solid var(--line);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .fuss-live{
   color:var(--accent);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="messing"] .fuss-punkt{
@@ -4451,14 +4756,14 @@ html[data-theme="messing"] .ansicht .hb-seite{
 
 /* Randnotiz am Satzspiegel â€” die Signatur des Ateliers */
 html[data-theme="messing"] .ansicht .hb-seite::after{
-  content:"ATELIER MESSING · HAUS 12";
+  content:"Atelier Messing · Haus 12";
   position:absolute;
   top:16px;
   right:4px;
   writing-mode:vertical-rl;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.34em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--faint) 62%, transparent);
   pointer-events:none;
 }
@@ -4512,8 +4817,8 @@ html[data-theme="messing"] .ansicht .hb-panel-titel{
   gap:12px;
   margin:0 0 12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -4553,8 +4858,8 @@ html[data-theme="messing"] .ansicht .hb-kicker{
   align-items:center;
   gap:12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--accent) 78%, var(--faint));
 }
 
@@ -4567,8 +4872,8 @@ html[data-theme="messing"] .ansicht .hb-kicker::before{
 
 html[data-theme="messing"] .ansicht .hb-hero-kunde{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   gap:8px;
   margin-top:8px;
@@ -4596,8 +4901,8 @@ html[data-theme="messing"] .ansicht .hb-hero-meta{
 
 html[data-theme="messing"] .ansicht .hb-hero-meta span{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -4621,8 +4926,8 @@ html[data-theme="messing"] .ansicht .hb-aktionen .knopf{
   border-radius:var(--radius-xs);
   padding:0 24px;
   font:700 var(--fs-2)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 /* ---- Kenndaten: Zahlen als Plakate ---- */
@@ -4642,7 +4947,7 @@ html[data-theme="messing"] .ansicht .hb-kd{
 
 html[data-theme="messing"] .ansicht .hb-kd .lab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -4654,7 +4959,7 @@ html[data-theme="messing"] .ansicht .hb-kd > b{
 
 html[data-theme="messing"] .ansicht .hb-kd small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -4713,7 +5018,7 @@ html[data-theme="messing"] .ansicht .hb-zeile b{
 
 html[data-theme="messing"] .ansicht .hb-zeile small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -4726,8 +5031,8 @@ html[data-theme="messing"] .ansicht .hb-sz{
 
 html[data-theme="messing"] .ansicht .hb-sz time{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -4743,7 +5048,7 @@ html[data-theme="messing"] .ansicht .hb-sz small{
 
 html[data-theme="messing"] .ansicht .hb-sz em{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   font-style:normal;
   color:color-mix(in srgb, var(--accent) 85%, var(--faint));
 }
@@ -4771,13 +5076,13 @@ html[data-theme="messing"] .ansicht .hb-lage{
 
 html[data-theme="messing"] .ansicht .hb-lage-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .ansicht .hb-lage-zaehler{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="messing"] .ansicht .hb-lage-zaehler.ok{
@@ -4829,7 +5134,7 @@ html[data-theme="messing"] .ansicht .hb-chip.hb-chip-mehr{
 html[data-theme="messing"] .ansicht .hb-lage-fuss .hb-legende,
 html[data-theme="messing"] .ansicht .hb-lage-tipp{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -4845,8 +5150,8 @@ html[data-theme="messing"] .ansicht .hb-signal-svg path:last-of-type{
 
 html[data-theme="messing"] .ansicht .hb-stat{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -4863,8 +5168,8 @@ html[data-theme="messing"] .ansicht .hb-ziel{
 
 html[data-theme="messing"] .ansicht .hb-woche-knopf{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border-bottom:1px dashed color-mix(in srgb, var(--line-2) 70%, transparent);
   padding:4px 0;
@@ -4904,8 +5209,8 @@ html[data-theme="messing"] .labor .lb-auftrag::before{
   display:block;
   margin:0 0 12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--accent) 72%, var(--faint));
 }
 
@@ -4928,14 +5233,14 @@ html[data-theme="messing"] .labor .lb-auftrag .am-titel strong{
 
 html[data-theme="messing"] .labor .lb-auftrag .am-kunde{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.20em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .labor .lb-auftrag .am-ziele{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -4958,8 +5263,8 @@ html[data-theme="messing"] .labor .lb-auftrag .sp-abnahme{
   border:1px solid color-mix(in srgb, var(--accent) 72%, var(--line));
   border-radius:var(--radius-xs);
   font:700 var(--fs-2)/1 var(--mono);
-  letter-spacing:.12em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   box-shadow:0 12px 26px -18px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
@@ -4969,8 +5274,8 @@ html[data-theme="messing"] .labor .lb-auftrag .am-lesen{
   border-radius:var(--radius-xs);
   color:var(--muted);
   font:600 var(--fs-2)/1 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .labor .lb-auftrag .am-lesen:hover{
@@ -4994,7 +5299,7 @@ html[data-theme="messing"] .labor .lb-leinwand{
 
 html[data-theme="messing"] .labor .lb-leinwand::before{
   color:color-mix(in srgb, var(--accent) 58%, var(--faint));
-  letter-spacing:.30em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="messing"] .labor .lb-svg{
@@ -5055,7 +5360,7 @@ html[data-theme="messing"] .labor .ger-name{
 html[data-theme="messing"] .labor .ger-rolle{
   font:600 var(--fs-1)/1.25 var(--mono);
   letter-spacing:.03em;
-  text-transform:uppercase;
+  text-transform:none;
   fill:var(--lage-rolle);
 }
 
@@ -5125,7 +5430,7 @@ html[data-theme="messing"] .labor .zone-label{
 
 html[data-theme="messing"] .labor .zone-text{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.08em;
+  letter-spacing:.06em;
   fill:var(--lage-chip-text);
 }
 
@@ -5196,8 +5501,8 @@ html[data-theme="messing"] .labor .lb-legende{
   border-radius:var(--radius-xs);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   gap:16px;
   box-shadow:none;
   -webkit-backdrop-filter:blur(8px);
@@ -5234,8 +5539,8 @@ html[data-theme="messing"] .labor .wk-mini{
 
 html[data-theme="messing"] .labor .wk-mini-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.22em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -5275,7 +5580,7 @@ html[data-theme="messing"] .labor .wk-mini-knopf{
 
 html[data-theme="messing"] .labor .wk-mini-zoomtext{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.12em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -5297,8 +5602,8 @@ html[data-theme="messing"] .labor .lb-geraete{
 
 html[data-theme="messing"] .labor .lb-geraete-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -5337,8 +5642,8 @@ html[data-theme="messing"] .labor .lb-dock-reiter{
 
 html[data-theme="messing"] .labor .lb-dock-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   border-radius:var(--radius-xs);
 }
@@ -5351,7 +5656,7 @@ html[data-theme="messing"] .labor .lb-dock-tab.an{
 
 html[data-theme="messing"] .labor .lb-inspektor::before{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -5369,8 +5674,8 @@ html[data-theme="messing"] .labor .in-kopf-text h3{
 
 html[data-theme="messing"] .labor .in-kopf-text span{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -5379,8 +5684,8 @@ html[data-theme="messing"] .labor .in-chip{
   border-radius:var(--radius-xs);
   background:color-mix(in srgb, var(--panel-3) 56%, transparent);
   font:600 var(--fs-1)/1.6 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
 }
 
@@ -5416,8 +5721,8 @@ html[data-theme="messing"] .labor .in-reiter{
 
 html[data-theme="messing"] .labor .in-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   padding:8px 8px;
   border:0;
@@ -5439,15 +5744,15 @@ html[data-theme="messing"] .labor .in-abschnitt{
 
 html[data-theme="messing"] .labor .in-abschnitt h4{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .labor .in-feld-titel{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -5488,8 +5793,8 @@ html[data-theme="messing"] .labor .in-knopf{
   background:color-mix(in srgb, var(--panel-2) 66%, transparent);
   color:var(--ink);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .labor .in-knopf:hover{
@@ -5524,14 +5829,14 @@ html[data-theme="messing"] .labor .in-hinweis{
 
 html[data-theme="messing"] .labor .lb-insp-leer::before{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.32em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
   font:500 var(--fs-1)/1.7 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -5553,7 +5858,7 @@ html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
 
   html[data-theme="messing"] .marke-name{
     font-size:var(--fs-2);
-    letter-spacing:.12em;
+    letter-spacing:.06em;
   }
 
   html[data-theme="messing"] .ansicht .hb-seite{
@@ -5583,7 +5888,7 @@ html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
   }
 
   html[data-theme="messing"] .ansicht .hb-kicker{
-    letter-spacing:.20em;
+    letter-spacing:.06em;
   }
 
   html[data-theme="messing"] .labor .lb-mitte{
@@ -5602,6 +5907,163 @@ html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
     font-size:var(--fs-5);
     letter-spacing:0;
   }
+}
+
+/* ============================================================================
+   Audit 02/11 (30.10.2026): Typo-Hierarchie statt Versalien-Monokultur.
+   Nur Typografie – Farben/Material bleiben Theme-Charakter. Sperrsatz <= .06em,
+   Saetze in Satzschreibung, Panel-Titel 12,5 px Body; // in Theme-Inhalten entfernt.
+   ============================================================================ */
+html[data-theme="messing"] :is(.dock,.kopf,.fuss,.lb-legende,.wk-mini,.sp-postfach,.ansicht) :is(span,small,em,strong,time,label,button,th,td){
+  text-transform:none;
+  letter-spacing:.04em;
+}
+
+html[data-theme="messing"] .ansicht .hb-panel-titel{
+  font:600 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .ansicht :is(.hb-kicker,.hb-serie,.hb-sz time,.hb-sz em){
+  text-transform:none;
+  letter-spacing:.04em;
+  font-family:var(--body);
+}
+
+html[data-theme="messing"] .labor :is(.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.lb-insp-leer::before){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.03em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .labor :is(.in-feld-titel,.lb-dock-titel){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .labor :is(.lb-legende,.wk-mini-titel){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="messing"] .labor :is(.lb-auftrag .am-kunde){
+  font:500 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3,.sp-brief-info small,.sp-brief-ziele strong,.sp-chip){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="messing"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
+  text-transform:none;
+  letter-spacing:.03em;
+  font-family:var(--body);
+}
+
+/* ============================================================================
+   Ambient sichtbar (Runde 3, 19:12): Atmendes Licht + ruhige UI-Impulse.
+   Dauern ausschließlich über Theme-Token; "Bewegung aus" schaltet basis.css zentral ab.
+   ============================================================================ */
+:root[data-theme="messing"]{
+  --lage-atmen:9s;
+  --lage-nebel:14s;
+  --lage-puls:5s;
+  --lage-schein:7s;
+  --lage-lauf:4s;
+}
+
+/* 1 · Atmendes Hintergrund-Licht */
+html[data-theme="messing"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:-6%;
+  pointer-events:none;
+  z-index:2;
+  background-image:
+    radial-gradient(46% 42% at 28% 18%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%),
+    radial-gradient(40% 36% at 78% 84%, color-mix(in srgb, var(--amber) 32%, transparent), transparent 72%);
+  opacity:.12;
+  animation:messing-atmen var(--lage-atmen) ease-in-out infinite alternate;
+}
+@keyframes messing-atmen{
+  0%{opacity:.12; transform:scale(1) translate(0, 0)}
+  45%{opacity:.17; transform:scale(1.02) translate(.8%, -.6%)}
+  70%{opacity:.14; transform:scale(1.03) translate(1%, -.8%)}
+  100%{opacity:.20; transform:scale(1.05) translate(1.5%, -1%)}
+}
+
+/* 2 · Pulsieren im UI */
+html[data-theme="messing"] .dock-knopf.an{
+  animation:messing-dock var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes messing-dock{
+  from{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 46%, transparent), 0 0 12px -4px color-mix(in srgb, var(--accent) 36%, transparent)}
+}
+
+html[data-theme="messing"] .ansicht .hb-panel{
+  animation:messing-karte var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes messing-karte{
+  from{border-color:var(--line)}
+  to{border-color:color-mix(in srgb, var(--accent) 24%, var(--line))}
+}
+
+html[data-theme="messing"] :is(.knopf.primaer, .knopf-haupt){
+  animation:messing-schein var(--lage-schein) ease-in-out infinite alternate;
+}
+@keyframes messing-schein{
+  from{box-shadow:inset 0 0 0 1px transparent, 0 10px 26px -18px color-mix(in srgb, var(--accent) 30%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent), 0 10px 30px -14px color-mix(in srgb, var(--accent) 55%, transparent)}
+}
+
+/* Auswahlring: einmaliger 320-ms-Puls (danach Basis-Ring) */
+html[data-theme="messing"] .labor :is(.ger.gewaehlt, .ger.zielt) .ger-auswahl{
+  animation:messing-ring var(--dauer-lang) var(--ease-out) 1;
+}
+@keyframes messing-ring{
+  0%{stroke-opacity:.25; stroke-width:1}
+  55%{stroke-opacity:1; stroke-width:1.8}
+  100%{stroke-opacity:.85; stroke-width:1.5}
+}
+
+/* Live-Kabel: langsam laufender Lichtpunkt (nur k-oben und trunk) */
+html[data-theme="messing"] .labor :is(.kabel.k-oben, .kabel.trunk) .kabel-huelle{
+  stroke:color-mix(in srgb, var(--lage-kante) 58%, transparent);
+  stroke-dasharray:2 22;
+  animation:messing-lauf var(--lage-lauf) linear infinite;
+}
+@keyframes messing-lauf{
+  to{stroke-dashoffset:-24}
+}
+
+/* ============================================================================
+   Heute-Kontrast nach offenen Flaechen (hub.css 19:16): Text/Knoepfe >= 4,5:1.
+   Kein Layout, nur Farbe/Flaeche; Theme-Charakter bleibt.
+   ============================================================================ */
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-hero, .hb-panel, .hb-karte){
+  color:var(--ink);
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-hero h1, .hb-karte h3, .hb-panel-titel, .hb-kicker){
+  color:var(--ink);
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-hero-lead, .hb-hero-kunde, .hb-hero-meta, .hb-hero-meta span){
+  color:var(--muted);
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.primaer, .knopf-haupt, .knopf.primaer .knopf){
+  background:var(--accent);
+  background-image:none;
+  color:var(--accent-ink);
+  border-color:color-mix(in srgb, var(--accent) 78%, var(--line));
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.geist, .knopf:not(.primaer):not(.knopf-haupt)){
+  color:var(--ink);
+  border-color:var(--line-2);
 }
 
 /* ---- zzz-thema-nordlicht.css ---- */
@@ -5794,14 +6256,14 @@ html[data-theme="nordlicht"] .marke-sym circle{
 
 html[data-theme="nordlicht"] .marke-name{
   font:700 var(--fs-2)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--ink);
 }
 
 html[data-theme="nordlicht"] .marke-version{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -5853,7 +6315,7 @@ html[data-theme="nordlicht"] .kopf-knopf:hover{
 
 html[data-theme="nordlicht"] .kopf .sp-leise{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -5899,8 +6361,8 @@ html[data-theme="nordlicht"] .dock-knopf.an::before{
 
 html[data-theme="nordlicht"] .dock-text{
   font:600 var(--fs-1)/1.2 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .dock-knopf.an .dock-text{
@@ -5926,13 +6388,13 @@ html[data-theme="nordlicht"] .fuss{
   border-top:1px solid var(--line);
   color:var(--muted);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .fuss-live{
   color:var(--accent);
-  letter-spacing:.22em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="nordlicht"] .fuss-punkt{
@@ -5984,8 +6446,8 @@ html[data-theme="nordlicht"] .ansicht .hb-panel-titel{
   gap:12px;
   margin:0 0 12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -6036,8 +6498,8 @@ html[data-theme="nordlicht"] .ansicht .hb-hero .hb-kicker{
   align-items:center;
   gap:12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--accent) 60%, var(--muted));
 }
 
@@ -6062,22 +6524,22 @@ html[data-theme="nordlicht"] .ansicht .hb-hero h1{
 html[data-theme="nordlicht"] .ansicht .hb-hero-lead{
   margin:4px 0 8px;
   font:600 var(--fs-1)/1.7 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-hero-kunde{
   gap:8px;
   font:600 var(--fs-2)/1.4 var(--mono);
-  letter-spacing:.08em;
+  letter-spacing:.06em;
   color:var(--muted);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-hero-meta span{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -6140,13 +6602,13 @@ html[data-theme="nordlicht"] .ansicht .hb-kd > b{
 
 html[data-theme="nordlicht"] .ansicht .hb-kd .lab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-kd small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -6230,7 +6692,7 @@ html[data-theme="nordlicht"] .ansicht .hb-zeile b{
 
 html[data-theme="nordlicht"] .ansicht .hb-zeile small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -6242,8 +6704,8 @@ html[data-theme="nordlicht"] .ansicht .hb-sz{
 
 html[data-theme="nordlicht"] .ansicht .hb-sz time{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   font-variant-numeric:tabular-nums;
 }
@@ -6261,7 +6723,7 @@ html[data-theme="nordlicht"] .ansicht .hb-sz small{
 html[data-theme="nordlicht"] .ansicht .hb-sz em{
   font:600 var(--fs-1)/1 var(--mono);
   font-style:normal;
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--accent);
 }
 
@@ -6301,15 +6763,15 @@ html[data-theme="nordlicht"] .ansicht .hb-raster > .hb-lage{
 
 html[data-theme="nordlicht"] .ansicht .hb-lage-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-lage-zaehler{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-chip{
@@ -6319,7 +6781,7 @@ html[data-theme="nordlicht"] .ansicht .hb-chip{
   background:color-mix(in srgb, var(--panel-2) 80%, transparent);
   color:var(--ink);
   font:600 var(--fs-1)/1.1 var(--mono);
-  letter-spacing:.08em;
+  letter-spacing:.06em;
   box-shadow:0 12px 28px -20px color-mix(in srgb, var(--bg) 94%, transparent);
 }
 
@@ -6336,8 +6798,8 @@ html[data-theme="nordlicht"] .ansicht .hb-chip .hb-chip-sym{
 html[data-theme="nordlicht"] .ansicht .hb-lage .hb-legende,
 html[data-theme="nordlicht"] .ansicht .hb-lage-tipp{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -6361,7 +6823,7 @@ html[data-theme="nordlicht"] .ansicht .hb-signal-svg path:last-of-type{
 
 html[data-theme="nordlicht"] .ansicht .hb-stat{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -6371,21 +6833,21 @@ html[data-theme="nordlicht"] .ansicht .hb-stat i{
 
 html[data-theme="nordlicht"] .ansicht .hb-stat b{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--ink);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-ziel{
   font:600 var(--fs-1)/1.5 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .ansicht .hb-woche-knopf{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border-bottom:1px solid var(--line);
 }
@@ -6411,7 +6873,7 @@ html[data-theme="nordlicht"] .labor .lb-auftrag{
 
 html[data-theme="nordlicht"] .labor :is(.lb-auftrag::before, .lb-leinwand::before, .lb-inspektor::before){
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -6427,15 +6889,15 @@ html[data-theme="nordlicht"] .labor .am-titel{
 
 html[data-theme="nordlicht"] .labor .am-kunde{
   font:600 var(--fs-1)/1.5 var(--mono);
-  letter-spacing:.22em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .labor .am-ziele{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -6488,8 +6950,8 @@ html[data-theme="nordlicht"] .labor .wk-leiste{
 
 html[data-theme="nordlicht"] .labor :is(.wk-titel, .lb-geraete-titel){
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -6502,7 +6964,7 @@ html[data-theme="nordlicht"] .labor .wk-suche{
 
 html[data-theme="nordlicht"] .labor .wk-kennwerte{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.12em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -6536,21 +6998,27 @@ html[data-theme="nordlicht"] .labor .lb-leinwand::after{
     left bottom, left bottom,
     right bottom, right bottom;
   opacity:.6;
+  /* Ambient: die Eckenmarken atmen mit der Aurora (36 s, sehr leise) */
+  animation:nordlicht-atmen var(--dauer-ambient) ease-in-out infinite alternate;
+}
+@keyframes nordlicht-atmen{
+  from{opacity:.32}
+  to{opacity:.8}
 }
 
 html[data-theme="nordlicht"] .labor .lb-svg{
   background-color:var(--lage-flaeche);
   background-image:
-    radial-gradient(1200px 460px at 50% -18%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 66%),
-    radial-gradient(800px 420px at 88% 108%, color-mix(in srgb, var(--iris) 7%, transparent), transparent 60%);
-  background-size:140% 140%, 120% 120%;
+    radial-gradient(1200px 460px at 50% -18%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 66%),
+    radial-gradient(800px 420px at 88% 108%, color-mix(in srgb, var(--iris) 9%, transparent), transparent 60%);
+  background-size:200% 200%, 170% 170%;
   background-position:50% 0, 88% 108%;
   /* Ambient: EINE sehr ruhige Aurora-Drift; Reduced-Motion/Bewegung-aus schaltet sie zentral ab */
   animation:nordlicht-aurora var(--dauer-ambient) ease-in-out infinite alternate;
 }
 @keyframes nordlicht-aurora{
   from{background-position:50% 0, 88% 108%}
-  to{background-position:50% 16%, 76% 96%}
+  to{background-position:50% 26%, 70% 88%}
 }
 
 html[data-theme="nordlicht"] .labor .lb-raster-punkt{
@@ -6661,7 +7129,7 @@ html[data-theme="nordlicht"] .labor .lb-legende{
   border:1px solid var(--lage-chip-rand);
   border-radius:var(--lage-radius);
   background:var(--lage-chip-bg);
-  letter-spacing:.20em;
+  letter-spacing:.06em;
   color:var(--lage-chip-text);
 }
 
@@ -6682,7 +7150,7 @@ html[data-theme="nordlicht"] .labor .wk-mini-svg{
 }
 
 html[data-theme="nordlicht"] .labor .wk-mini-titel{
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -6753,8 +7221,8 @@ html[data-theme="nordlicht"] .labor :is(.lb-dock-reiter, .in-reiter){
 
 html[data-theme="nordlicht"] .labor .lb-dock-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   border-radius:var(--radius-xs) var(--radius-xs) 0 0;
 }
@@ -6779,8 +7247,8 @@ html[data-theme="nordlicht"] .labor .in-kopf-text h3{
 
 html[data-theme="nordlicht"] .labor .in-kopf-text span{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -6789,8 +7257,8 @@ html[data-theme="nordlicht"] .labor .in-chip{
   border-radius:var(--radius-xs);
   background:color-mix(in srgb, var(--panel-3) 62%, transparent);
   font:600 var(--fs-1)/1.6 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
 }
 
@@ -6819,8 +7287,8 @@ html[data-theme="nordlicht"] .labor .in-tab{
   background:none;
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="nordlicht"] .labor .in-tab.an{
@@ -6839,8 +7307,8 @@ html[data-theme="nordlicht"] .labor .in-abschnitt h4{
   align-items:center;
   gap:12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -6857,8 +7325,8 @@ html[data-theme="nordlicht"] .labor .in-abschnitt + .in-abschnitt{
 
 html[data-theme="nordlicht"] .labor .in-feld-titel{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -6949,16 +7417,16 @@ html[data-theme="nordlicht"] .labor .lb-insp-leer{
 }
 
 html[data-theme="nordlicht"] .labor .lb-insp-leer::before{
-  content:"// NICHTS AUSGEWÄHLT";
+  content:"Nichts ausgewählt";
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="nordlicht"] .labor .lb-insp-leer .lb-tipps{
   font:500 var(--fs-1)/1.7 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -6970,6 +7438,86 @@ html[data-theme="nordlicht"] .labor .lb-insp-leer .lb-tipps{
   html[data-theme="nordlicht"] .labor .lb-leinwand::after{
     inset:8px;
   }
+}
+
+/* ============================================================================
+   Audit 02/11 (30.10.2026): Typo-Hierarchie statt Versalien-Monokultur.
+   Nur Typografie – Farben/Material bleiben Theme-Charakter. Sperrsatz <= .06em,
+   Saetze in Satzschreibung, Panel-Titel 12,5 px Body; // in Theme-Inhalten entfernt.
+   ============================================================================ */
+html[data-theme="nordlicht"] :is(.dock,.kopf,.fuss,.lb-legende,.wk-mini,.sp-postfach,.ansicht) :is(span,small,em,strong,time,label,button,th,td){
+  text-transform:none;
+  letter-spacing:.04em;
+}
+
+html[data-theme="nordlicht"] .ansicht .hb-panel-titel{
+  font:600 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .ansicht :is(.hb-kicker,.hb-serie,.hb-sz time,.hb-sz em){
+  text-transform:none;
+  letter-spacing:.04em;
+  font-family:var(--body);
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.lb-insp-leer::before){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.03em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .labor :is(.in-feld-titel,.lb-dock-titel){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-legende,.wk-mini-titel){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="nordlicht"] .labor :is(.lb-auftrag .am-kunde){
+  font:500 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="nordlicht"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3,.sp-brief-info small,.sp-brief-ziele strong,.sp-chip){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="nordlicht"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
+  text-transform:none;
+  letter-spacing:.03em;
+  font-family:var(--body);
+}
+
+/* ============================================================================
+   Heute-Kontrast nach offenen Flaechen (hub.css 19:16): Text/Knoepfe >= 4,5:1.
+   Kein Layout, nur Farbe/Flaeche; Theme-Charakter bleibt.
+   ============================================================================ */
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-hero, .hb-panel, .hb-karte){
+  color:var(--ink);
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-hero h1, .hb-karte h3, .hb-panel-titel, .hb-kicker){
+  color:var(--ink);
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-hero-lead, .hb-hero-kunde, .hb-hero-meta, .hb-hero-meta span){
+  color:var(--muted);
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.primaer, .knopf-haupt, .knopf.primaer .knopf){
+  background:var(--accent);
+  background-image:none;
+  color:var(--accent-ink);
+  border-color:color-mix(in srgb, var(--accent) 78%, var(--line));
+}
+html[data-theme="nordlicht"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.geist, .knopf:not(.primaer):not(.knopf-haupt)){
+  color:var(--ink);
+  border-color:var(--line-2);
 }
 
 /* ---- zzz-thema-papier.css ---- */
@@ -7119,9 +7667,9 @@ html[data-theme="papier"] .kopf-marke{gap:10px; padding-right:14px; border-right
 html[data-theme="papier"] .marke-sym rect{fill:var(--ink); stroke:var(--ink); stroke-width:1}
 html[data-theme="papier"] .marke-sym path{stroke:var(--bg); stroke-width:2.2; fill:none}
 html[data-theme="papier"] .marke-sym circle{fill:var(--accent)}
-html[data-theme="papier"] .marke-name{font:800 var(--fs-4)/1 var(--display); letter-spacing:.18em}
+html[data-theme="papier"] .marke-name{font:800 var(--fs-4)/1 var(--display); letter-spacing:.06em}
 html[data-theme="papier"] .marke-version{
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.1em; color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint);
   border:1px solid var(--line-2); border-radius:var(--radius); padding:4px 6px;
 }
 
@@ -7139,7 +7687,7 @@ html[data-theme="papier"] .wert.mit-fortschritt::after{height:2px; background:va
 html[data-theme="papier"] .kopf-knoepfe{gap:2px; padding-left:10px; border-left:1px solid var(--line)}
 html[data-theme="papier"] .kopf-knopf{border-radius:var(--radius-s); color:var(--muted)}
 html[data-theme="papier"] .kopf-knopf:hover{background:var(--ink); color:var(--bg); border-color:var(--ink)}
-html[data-theme="papier"] .kopf-knopf.mit-text span{font:600 var(--fs-2)/1 var(--mono); letter-spacing:.1em; text-transform:uppercase}
+html[data-theme="papier"] .kopf-knopf.mit-text span{font:600 var(--fs-2)/1 var(--mono); letter-spacing:.06em; text-transform:none}
 
 html[data-theme="papier"] .dock{
   gap:2px; padding:6px 0; background:var(--bg); border-right:2px solid var(--ink);
@@ -7148,7 +7696,7 @@ html[data-theme="papier"] .dock-knopf{color:var(--muted); border-radius:var(--ra
 html[data-theme="papier"] .dock-knopf:hover{background:var(--panel-2); color:var(--ink)}
 html[data-theme="papier"] .dock-knopf.an{background:var(--ink); color:var(--bg)}
 html[data-theme="papier"] .dock-knopf.an::before{width:4px; top:0; bottom:0; border-radius:var(--radius); background:var(--accent)}
-html[data-theme="papier"] .dock-text{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.14em; color:var(--muted)}
+html[data-theme="papier"] .dock-text{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; color:var(--muted)}
 html[data-theme="papier"] .dock-knopf.an .dock-text{color:var(--bg)}
 html[data-theme="papier"] .dock-zahl{
   border-radius:var(--radius-xs); background:var(--accent); color:var(--accent-ink);
@@ -7159,7 +7707,7 @@ html[data-theme="papier"] .dock-knopf.spaeter{opacity:.6}
 
 html[data-theme="papier"] .fuss{
   padding:0 14px; background:var(--panel); border-top:2px solid var(--ink);
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; text-transform:uppercase; color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:none; color:var(--faint);
 }
 html[data-theme="papier"] .fuss-live{color:var(--accent)}
 html[data-theme="papier"] .fuss-punkt{
@@ -7204,7 +7752,7 @@ html[data-theme="papier"] .hb-panel{
   box-shadow:var(--schatten);
 }
 html[data-theme="papier"] .hb-panel-titel{
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint);
 }
 html[data-theme="papier"] .hb-panel-titel::before{
   content:""; display:inline-block; width:7px; height:7px; margin-right:8px;
@@ -7219,11 +7767,11 @@ html[data-theme="papier"] .hb-hero::before{
   content:""; position:absolute; inset:7px; border:1px solid var(--line); pointer-events:none;
 }
 html[data-theme="papier"] .hb-kicker{
-  color:var(--accent); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.26em;
+  color:var(--accent); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em;
 }
 html[data-theme="papier"] .hb-hero-kunde{
-  margin-top:14px; font:600 var(--fs-2)/1.3 var(--mono); letter-spacing:.16em;
-  text-transform:uppercase; color:var(--muted);
+  margin-top:14px; font:600 var(--fs-2)/1.3 var(--mono); letter-spacing:.06em;
+  text-transform:none; color:var(--muted);
 }
 html[data-theme="papier"] .hb-hero h1{
   font:800 clamp(var(--fs-7),3.3vw,var(--fs-9))/1.15 var(--display);
@@ -7235,8 +7783,8 @@ html[data-theme="papier"] .hb-hero-lead{
 html[data-theme="papier"] .hb-hero-meta{gap:6px; margin-bottom:6px}
 html[data-theme="papier"] .hb-hero-meta span{
   border:1px solid var(--line-2); border-radius:var(--radius); background:transparent;
-  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em;
-  text-transform:uppercase; padding:7px 8px;
+  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em;
+  text-transform:none; padding:7px 8px;
 }
 html[data-theme="papier"] .hb-hero-meta .warn{
   color:var(--accent); border-color:var(--accent); background:var(--accent-soft);
@@ -7246,11 +7794,11 @@ html[data-theme="papier"] .hb-aktionen{margin-top:18px; gap:10px}
 /* Kenndaten: Ziffern wie gesetzte Seitenzahlen */
 html[data-theme="papier"] .hb-kd{padding:15px 18px; border-bottom:1px solid var(--line)}
 html[data-theme="papier"] .hb-kd > i{width:9px; height:9px; border-radius:var(--radius)}
-html[data-theme="papier"] .hb-kd .lab{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint)}
+html[data-theme="papier"] .hb-kd .lab{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .hb-kd > b{
   font:800 var(--fs-7)/.9 var(--display); letter-spacing:-.045em;
 }
-html[data-theme="papier"] .hb-kd small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .hb-kd small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .hb-spark{gap:4px; height:30px}
 html[data-theme="papier"] .hb-spark i{width:4px; border-radius:var(--radius)}
 html[data-theme="papier"] .hb-spark i.spitze{background:var(--c)}
@@ -7269,12 +7817,12 @@ html[data-theme="papier"] .hb-zeile i{width:9px; height:9px; border-radius:var(-
 html[data-theme="papier"] .hb-zeile.fertig i{background:var(--ink); box-shadow:none}
 html[data-theme="papier"] .hb-zeile.fertig{color:var(--ink)}
 html[data-theme="papier"] .hb-zeile b{font:700 var(--fs-3)/1.3 var(--body)}
-html[data-theme="papier"] .hb-zeile small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--faint)}
+html[data-theme="papier"] .hb-zeile small{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .hb-sz{border-top:1px solid var(--line); padding:9px 0}
-html[data-theme="papier"] .hb-sz time{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .hb-sz time{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .hb-sz b{font:700 var(--fs-3)/1.3 var(--body)}
 html[data-theme="papier"] .hb-sz small{font-size:var(--fs-2)}
-html[data-theme="papier"] .hb-sz em{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; color:var(--accent)}
+html[data-theme="papier"] .hb-sz em{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--accent)}
 html[data-theme="papier"] .hb-klasse{gap:12px}
 html[data-theme="papier"] .hb-klasse-zeile .knopf{height:42px}
 html[data-theme="papier"] .hb-klasse-zeile small{color:var(--faint); font-size:var(--fs-2)}
@@ -7283,8 +7831,8 @@ html[data-theme="papier"] .hb-klasse-zeile small{color:var(--faint); font-size:v
 html[data-theme="papier"] .hb-lage{background:var(--panel)}
 html[data-theme="papier"] .hb-signal-svg path:first-of-type{stroke:var(--ink)}
 html[data-theme="papier"] .hb-signal-svg path:last-of-type{stroke:color-mix(in srgb,var(--ink) 18%,transparent)}
-html[data-theme="papier"] .hb-lage-titel{letter-spacing:.24em; color:var(--faint)}
-html[data-theme="papier"] .hb-lage-zaehler{letter-spacing:.16em; color:var(--muted)}
+html[data-theme="papier"] .hb-lage-titel{letter-spacing:.06em; color:var(--faint)}
+html[data-theme="papier"] .hb-lage-zaehler{letter-spacing:.06em; color:var(--muted)}
 html[data-theme="papier"] .hb-lage-zaehler.ok{color:var(--ok)}
 html[data-theme="papier"] .hb-lage-zaehler.bad{color:var(--accent)}
 html[data-theme="papier"] .hb-kante.ok{stroke:var(--ok); stroke-opacity:.85}
@@ -7300,11 +7848,11 @@ html[data-theme="papier"] .hb-chip-sym{
   border-radius:var(--radius-xs); background:var(--accent-soft); color:var(--accent);
 }
 html[data-theme="papier"] .hb-chip-mehr{border-style:dashed; border-color:var(--line-2); background:transparent; box-shadow:none}
-html[data-theme="papier"] .hb-lage-fuss .hb-legende{letter-spacing:.16em; color:var(--faint)}
-html[data-theme="papier"] .hb-lage-tipp{letter-spacing:.14em; color:var(--faint)}
+html[data-theme="papier"] .hb-lage-fuss .hb-legende{letter-spacing:.06em; color:var(--faint)}
+html[data-theme="papier"] .hb-lage-tipp{letter-spacing:.06em; color:var(--faint)}
 
 /* Signal */
-html[data-theme="papier"] .hb-stat{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.18em; color:var(--faint)}
+html[data-theme="papier"] .hb-stat{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .hb-stat i{width:7px; height:7px; border-radius:var(--radius); background:var(--accent)}
 html[data-theme="papier"] .hb-stat b{color:var(--ink)}
 
@@ -7328,7 +7876,7 @@ html[data-theme="papier"] .lb-auftrag{
   background:var(--panel); box-shadow:var(--schatten);
 }
 html[data-theme="papier"] .lb-auftrag::before{
-  content:"// AUFTRAG"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em;
+  content:"Auftrag"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em;
   color:var(--accent); margin:0 0 10px;
 }
 html[data-theme="papier"] .lb-auftrag :is(h1,h2),
@@ -7336,11 +7884,11 @@ html[data-theme="papier"] .lb-auftrag .am-titel strong{
   font:800 clamp(var(--fs-6),2.5vw,var(--fs-7))/1.15 var(--display); letter-spacing:-.05em;
 }
 html[data-theme="papier"] .lb-auftrag .am-kunde{
-  font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.2em; color:var(--faint); margin-top:4px;
+  font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.06em; color:var(--faint); margin-top:4px;
 }
 html[data-theme="papier"] .lb-auftrag .am-ziele{
   border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel-2);
-  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; padding:7px 9px;
+  color:var(--ink); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; padding:7px 9px;
   box-shadow:var(--schatten-flach);
 }
 html[data-theme="papier"] .lb-auftrag .am-lesen{
@@ -7354,7 +7902,7 @@ html[data-theme="papier"] .lb-auftrag .sp-kunde-sym{
 html[data-theme="papier"] .lb-auftrag .sp-einstieg{background:none; border:0}
 html[data-theme="papier"] .lb-auftrag .sp-einstieg-text{font:italic 400 var(--fs-3)/1.4 var(--serif); color:var(--muted)}
 html[data-theme="papier"] .lb-auftrag .sp-einstieg-start{border:1px solid var(--accent); background:var(--accent-soft); padding:8px 12px}
-html[data-theme="papier"] .sp-stufe-knopf{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.1em; border-radius:var(--radius-s)}
+html[data-theme="papier"] .sp-stufe-knopf{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; border-radius:var(--radius-s)}
 html[data-theme="papier"] .sp-stufe-knopf.an{background:var(--ink); color:var(--bg); border-color:var(--ink)}
 
 /* Zeichenfläche: die Druckplatte */
@@ -7366,9 +7914,9 @@ html[data-theme="papier"] .lb-svg{
   background-color:var(--lage-flaeche);
   /* Ambient: sehr ruhiges Papierkorn (kein Flackern, keine Dauer-Action) */
   background-image:
-    radial-gradient(1px 1px at 24% 18%, color-mix(in srgb, var(--ink) 7%, transparent), transparent 70%),
-    radial-gradient(1px 1px at 72% 62%, color-mix(in srgb, var(--ink) 5%, transparent), transparent 70%);
-  background-size:180px 140px, 220px 170px;
+    radial-gradient(1.6px 1.6px at 24% 18%, color-mix(in srgb, var(--ink) 11%, transparent), transparent 70%),
+    radial-gradient(1.4px 1.4px at 72% 62%, color-mix(in srgb, var(--ink) 8%, transparent), transparent 70%);
+  background-size:200px 160px, 240px 190px;
   background-position:0 0, 60px 40px;
   animation:papier-korn var(--dauer-ambient) ease-in-out infinite alternate;
 }
@@ -7378,7 +7926,7 @@ html[data-theme="papier"] .lb-svg{
 }
 html[data-theme="papier"] .lb-raster-punkt{fill:var(--lage-raster)}
 html[data-theme="papier"] .lb-leinwand::before{
-  content:"// LAGEBILD"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--faint);
+  content:"Lagebild"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint);
 }
 html[data-theme="papier"] .lb-leiste-oben{top:32px}
 html[data-theme="papier"] .lb-leinwand::after{
@@ -7451,7 +7999,7 @@ html[data-theme="papier"] .lb-hinweis{
 }
 html[data-theme="papier"] .labor .lb-legende{
   border:1.5px solid var(--ink); border-radius:var(--lage-radius); background:var(--panel);
-  padding:5px 10px; box-shadow:var(--schatten-flach); letter-spacing:.16em; color:var(--faint);
+  padding:5px 10px; box-shadow:var(--schatten-flach); letter-spacing:.06em; color:var(--faint);
 }
 /* Minimap */
 html[data-theme="papier"] .labor .wk-mini{
@@ -7459,13 +8007,13 @@ html[data-theme="papier"] .labor .wk-mini{
   box-shadow:var(--schatten-flach);
 }
 html[data-theme="papier"] .labor .wk-mini-kopf{border-bottom:1px solid var(--line)}
-html[data-theme="papier"] .labor .wk-mini-titel{letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .labor .wk-mini-titel{letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .labor .wk-mini-fuss{border-top:1px solid var(--line)}
 html[data-theme="papier"] .labor .wk-mini-svg{border:1px solid var(--lage-mini-rand); background:var(--lage-flaeche)}
 
 /* Kleine Geräteleiste links */
 html[data-theme="papier"] .lb-geraete{background:var(--bg); border-right:2px solid var(--ink)}
-html[data-theme="papier"] .lb-geraete-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--faint)}
+html[data-theme="papier"] .lb-geraete-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .pa-kat{border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
 
 /* ==========================================================================
@@ -7474,33 +8022,33 @@ html[data-theme="papier"] .pa-kat{border:1px solid var(--line); border-radius:va
 html[data-theme="papier"] .lb-dock{background:var(--bg); border-left:2px solid var(--ink)}
 html[data-theme="papier"] .lb-dock-reiter{padding:6px 8px 0; border-bottom:1px solid var(--line)}
 html[data-theme="papier"] .lb-dock-tab{
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint);
   border-radius:var(--radius-s) var(--radius-s) var(--radius) var(--radius);
 }
 html[data-theme="papier"] .lb-dock-tab.an{background:var(--panel); border-color:var(--ink); color:var(--ink)}
 html[data-theme="papier"] .lb-inspektor::before{
-  content:"// INSPEKTOR"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--accent);
+  content:"Inspektor"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--accent);
 }
 html[data-theme="papier"] .in-kopf{
   background:var(--panel); border-bottom:2px solid var(--ink); padding:14px 16px 10px;
 }
 html[data-theme="papier"] .in-kopf-text h3{font:800 var(--fs-6)/1 var(--display); letter-spacing:-.04em}
-html[data-theme="papier"] .in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .in-reiter{padding:8px 12px 0; border-bottom:1px solid var(--line)}
 html[data-theme="papier"] .in-tab{
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; border-bottom-width:2px;
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; border-bottom-width:2px;
 }
 html[data-theme="papier"] .in-tab.an{color:var(--accent); border-bottom-color:var(--accent); background:none; font-weight:700}
 html[data-theme="papier"] .in-inhalt{padding:0; gap:0}
 html[data-theme="papier"] .in-abschnitt{padding:14px 16px; border-bottom:1px solid var(--line)}
 html[data-theme="papier"] .in-abschnitt + .in-abschnitt{border-top:0; padding-top:14px}
-html[data-theme="papier"] .in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; color:var(--faint); margin:0 0 10px}
+html[data-theme="papier"] .in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint); margin:0 0 10px}
 html[data-theme="papier"] .in-abschnitt h4::before{
   content:""; display:inline-block; width:6px; height:6px; margin-right:7px;
   background:var(--ink); vertical-align:1px;
 }
 html[data-theme="papier"] .in-hinweis{font-size:var(--fs-3); color:var(--muted); line-height:1.5}
-html[data-theme="papier"] .in-feld-titel{font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.16em; color:var(--faint)}
+html[data-theme="papier"] .in-feld-titel{font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.06em; color:var(--faint)}
 html[data-theme="papier"] .in-eingabe,
 html[data-theme="papier"] .in-auswahl{
   border:1.5px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel);
@@ -7542,7 +8090,7 @@ html[data-theme="papier"] .in-port-name{font:700 var(--fs-2)/1 var(--mono); colo
 html[data-theme="papier"] .in-regeln li{background:var(--panel); border-left:3px solid var(--ink); border-radius:var(--radius)}
 html[data-theme="papier"] .in-regeln li::before{color:var(--accent); font-family:var(--mono)}
 html[data-theme="papier"] .lb-insp-leer{background:var(--panel)}
-html[data-theme="papier"] .lb-insp-leer::before{content:"// NICHTS AUSGEWÄHLT"; color:var(--accent); letter-spacing:.24em}
+html[data-theme="papier"] .lb-insp-leer::before{content:"Nichts ausgewählt"; color:var(--accent); letter-spacing:.06em}
 html[data-theme="papier"] .lb-tipps{font-family:var(--mono); color:var(--faint)}
 html[data-theme="papier"] .in-kopf .in-speichern{border:1px solid var(--warn); background:var(--warn-soft)}
 
@@ -7558,7 +8106,7 @@ html[data-theme="papier"] .menue{
   border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
   box-shadow:var(--schatten);
 }
-html[data-theme="papier"] .menue-titel{border-bottom:1px solid var(--line); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.16em; text-transform:uppercase}
+html[data-theme="papier"] .menue-titel{border-bottom:1px solid var(--line); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:none}
 html[data-theme="papier"] .menue-punkt{border-radius:var(--radius-s); font-weight:600}
 html[data-theme="papier"] .menue-punkt:hover:not([disabled]){background:var(--panel-2)}
 html[data-theme="papier"] .dialog,
@@ -7580,7 +8128,7 @@ html[data-theme="papier"] .schalter.an{background:var(--ink); border-color:var(-
 html[data-theme="papier"] .schalter.an span{background:var(--accent)}
 html[data-theme="papier"] .einst-abschnitt{border-bottom:1px solid var(--line)}
 html[data-theme="papier"] .einst-abschnitt h3,
-html[data-theme="papier"] .kuerzel h3{color:var(--accent); font-family:var(--mono); letter-spacing:.16em}
+html[data-theme="papier"] .kuerzel h3{color:var(--accent); font-family:var(--mono); letter-spacing:.06em}
 html[data-theme="papier"] .platzhalter{border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel); box-shadow:var(--schatten)}
 html[data-theme="papier"] .ph-sym{border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--accent-soft); color:var(--accent)}
 
@@ -7603,6 +8151,86 @@ html[data-theme="papier"] .ph-sym{border:1.5px solid var(--ink); border-radius:v
 }
 @media (prefers-reduced-motion: reduce){
   html[data-theme="papier"] .knopf.primaer:hover{transform:none}
+}
+
+/* ============================================================================
+   Audit 02/11 (30.10.2026): Typo-Hierarchie statt Versalien-Monokultur.
+   Nur Typografie – Farben/Material bleiben Theme-Charakter. Sperrsatz <= .06em,
+   Saetze in Satzschreibung, Panel-Titel 12,5 px Body; // in Theme-Inhalten entfernt.
+   ============================================================================ */
+html[data-theme="papier"] :is(.dock,.kopf,.fuss,.lb-legende,.wk-mini,.sp-postfach,.ansicht) :is(span,small,em,strong,time,label,button,th,td){
+  text-transform:none;
+  letter-spacing:.04em;
+}
+
+html[data-theme="papier"] .ansicht .hb-panel-titel{
+  font:600 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="papier"] .ansicht :is(.hb-kicker,.hb-serie,.hb-sz time,.hb-sz em){
+  text-transform:none;
+  letter-spacing:.04em;
+  font-family:var(--body);
+}
+
+html[data-theme="papier"] .labor :is(.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.lb-insp-leer::before){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.03em;
+  text-transform:none;
+}
+
+html[data-theme="papier"] .labor :is(.in-feld-titel,.lb-dock-titel){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+html[data-theme="papier"] .labor :is(.lb-legende,.wk-mini-titel){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="papier"] .labor :is(.lb-auftrag .am-kunde){
+  font:500 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="papier"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3,.sp-brief-info small,.sp-brief-ziele strong,.sp-chip){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="papier"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
+  text-transform:none;
+  letter-spacing:.03em;
+  font-family:var(--body);
+}
+
+/* ============================================================================
+   Heute-Kontrast nach offenen Flaechen (hub.css 19:16): Text/Knoepfe >= 4,5:1.
+   Kein Layout, nur Farbe/Flaeche; Theme-Charakter bleibt.
+   ============================================================================ */
+html[data-theme="papier"] .ansicht .hb-seite :is(.hb-hero, .hb-panel, .hb-karte){
+  color:var(--ink);
+}
+html[data-theme="papier"] .ansicht .hb-seite :is(.hb-hero h1, .hb-karte h3, .hb-panel-titel, .hb-kicker){
+  color:var(--ink);
+}
+html[data-theme="papier"] .ansicht .hb-seite :is(.hb-hero-lead, .hb-hero-kunde, .hb-hero-meta, .hb-hero-meta span){
+  color:var(--muted);
+}
+html[data-theme="papier"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.primaer, .knopf-haupt, .knopf.primaer .knopf){
+  background:var(--accent);
+  background-image:none;
+  color:var(--accent-ink);
+  border-color:color-mix(in srgb, var(--accent) 78%, var(--line));
+}
+html[data-theme="papier"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.geist, .knopf:not(.primaer):not(.knopf-haupt)){
+  color:var(--ink);
+  border-color:var(--line-2);
 }
 
 /* ---- zzz-thema-pulsar.css ---- */
@@ -7807,15 +8435,15 @@ html[data-theme="pulsar"] .marke-sym circle{
 html[data-theme="pulsar"] .marke-name{
   font-family:var(--display);
   font-weight:700;
-  letter-spacing:.22em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--ink);
 }
 
 html[data-theme="pulsar"] .marke-version{
   font-family:var(--mono);
   font-weight:600;
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
@@ -7825,7 +8453,7 @@ html[data-theme="pulsar"] .marke-version{
 
 html[data-theme="pulsar"] .sp-leise{
   font-family:var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -7833,7 +8461,7 @@ html[data-theme="pulsar"] .wert{
   background:color-mix(in srgb, var(--panel-2) 72%, transparent);
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
-  letter-spacing:.1em;
+  letter-spacing:.06em;
   color:var(--muted);
   transition:background var(--dauer) var(--ease-standard), border-color var(--dauer) var(--ease-standard), color var(--dauer) var(--ease-standard);
 }
@@ -7869,7 +8497,7 @@ html[data-theme="pulsar"] .kopf-knopf:hover{
 
 html[data-theme="pulsar"] .kopf-knopf.mit-text span{
   font-family:var(--mono);
-  letter-spacing:.12em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -7912,7 +8540,7 @@ html[data-theme="pulsar"] .dock-knopf.an::before{
 
 html[data-theme="pulsar"] .dock-text{
   font-family:var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -7938,7 +8566,7 @@ html[data-theme="pulsar"] .fuss{
   position:relative;
   background:linear-gradient(90deg, var(--panel), color-mix(in srgb, var(--bg) 88%, var(--panel)) 60%);
   border-top:var(--hud-linie) solid var(--line);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8021,7 +8649,7 @@ html[data-theme="pulsar"] .hb-panel::after{
 
 html[data-theme="pulsar"] .hb-panel-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
   display:flex;
   align-items:center;
@@ -8050,7 +8678,7 @@ html[data-theme="pulsar"] .hb-kachel-sym{
 
 html[data-theme="pulsar"] .hb-pill{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--accent);
   border:var(--hud-linie) solid color-mix(in srgb, var(--accent) 32%, transparent);
   border-radius:var(--radius-xs);
@@ -8100,7 +8728,7 @@ html[data-theme="pulsar"] .hb-hero::after{
 
 html[data-theme="pulsar"] .hb-kicker{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
+  letter-spacing:.06em;
   color:var(--faint);
   display:flex;
   align-items:center;
@@ -8120,8 +8748,8 @@ html[data-theme="pulsar"] .hb-hero-kunde{
   color:var(--muted);
   font-family:var(--mono);
   font-size:var(--fs-2);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="pulsar"] .hb-hero h1{
@@ -8129,7 +8757,7 @@ html[data-theme="pulsar"] .hb-hero h1{
   font-weight:700;
   letter-spacing:.02em;
   line-height:1.15;
-  text-transform:uppercase;
+  text-transform:none;
   background:linear-gradient(180deg, var(--ink) 34%, color-mix(in srgb, var(--ink) 78%, var(--accent)));
   -webkit-background-clip:text;
   background-clip:text;
@@ -8147,7 +8775,7 @@ html[data-theme="pulsar"] .hb-hero-meta{
 
 html[data-theme="pulsar"] .hb-hero-meta span{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--muted);
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
@@ -8219,7 +8847,7 @@ html[data-theme="pulsar"] .hb-kd > i{
 
 html[data-theme="pulsar"] .hb-kd .lab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8232,7 +8860,7 @@ html[data-theme="pulsar"] .hb-kd > b{
 }
 
 html[data-theme="pulsar"] .hb-kd small{
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8307,7 +8935,7 @@ html[data-theme="pulsar"] .hb-zeile.fertig{
 }
 
 html[data-theme="pulsar"] .hb-zeile small{
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8328,7 +8956,7 @@ html[data-theme="pulsar"] .hb-sz:first-of-type{
 
 html[data-theme="pulsar"] .hb-sz time{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8344,7 +8972,7 @@ html[data-theme="pulsar"] .hb-sz small{
 html[data-theme="pulsar"] .hb-sz em{
   font:600 var(--fs-1)/1 var(--mono);
   font-style:normal;
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--accent);
 }
 
@@ -8374,13 +9002,13 @@ html[data-theme="pulsar"] .hb-lage-kopf{
 
 html[data-theme="pulsar"] .hb-lage-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="pulsar"] .hb-lage-zaehler{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="pulsar"] .hb-lage-zaehler.ok{
@@ -8441,13 +9069,13 @@ html[data-theme="pulsar"] .hb-chip.ohne-link{
 
 html[data-theme="pulsar"] .hb-lage-fuss .hb-legende{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="pulsar"] .hb-lage-tipp{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.12em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8471,7 +9099,7 @@ html[data-theme="pulsar"] .hb-signal-svg path + path{
 
 html[data-theme="pulsar"] .hb-stat{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
   padding:var(--p-2) 0;
   border-top:var(--hud-linie) solid color-mix(in srgb, var(--line) 70%, transparent);
@@ -8487,7 +9115,7 @@ html[data-theme="pulsar"] .hb-stat i{
 html[data-theme="pulsar"] .hb-stat b{
   color:var(--ink);
   font-weight:600;
-  letter-spacing:.08em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="pulsar"] .hb-ziel{
@@ -8496,7 +9124,7 @@ html[data-theme="pulsar"] .hb-ziel{
 
 html[data-theme="pulsar"] .hb-woche-knopf{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--muted);
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
@@ -8520,7 +9148,7 @@ html[data-theme="pulsar"] .lb-geraete{
 
 html[data-theme="pulsar"] .lb-geraete-titel{
   font-family:var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8547,7 +9175,7 @@ html[data-theme="pulsar"] .wk-leiste{
 
 html[data-theme="pulsar"] .wk-titel{
   font-family:var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8577,7 +9205,7 @@ html[data-theme="pulsar"] .wk-knopf{
 
 html[data-theme="pulsar"] .wk-kennwerte{
   font-family:var(--mono);
-  letter-spacing:.1em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -8596,7 +9224,7 @@ html[data-theme="pulsar"] .lb-auftrag{
 
 html[data-theme="pulsar"] .lb-auftrag::before{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
+  letter-spacing:.06em;
   color:color-mix(in srgb, var(--accent) 62%, var(--faint));
 }
 
@@ -8620,7 +9248,7 @@ html[data-theme="pulsar"] .lb-auftrag .am-titel strong{
   font-weight:700;
   letter-spacing:.015em;
   line-height:1.15;
-  text-transform:uppercase;
+  text-transform:none;
   color:var(--ink);
   white-space:normal;
   overflow:visible;
@@ -8628,14 +9256,14 @@ html[data-theme="pulsar"] .lb-auftrag .am-titel strong{
 
 html[data-theme="pulsar"] .lb-auftrag .am-kunde{
   font:600 var(--fs-1)/1.2 var(--mono);
-  letter-spacing:.2em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="pulsar"] .lb-auftrag .am-ziele{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--muted);
   border:var(--hud-linie) solid var(--line-2);
   border-radius:var(--radius-xs);
@@ -8693,7 +9321,7 @@ html[data-theme="pulsar"] .labor .lb-leinwand{
 
 html[data-theme="pulsar"] .labor .lb-leinwand::before{
   color:color-mix(in srgb, var(--accent) 55%, var(--faint));
-  letter-spacing:.28em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="pulsar"] .labor .lb-svg{
@@ -8764,7 +9392,7 @@ html[data-theme="pulsar"] .lb-ansicht{
   border-radius:var(--radius-xs);
   color:var(--muted);
   font-family:var(--mono);
-  letter-spacing:.08em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="pulsar"] .lb-ansicht-text{
@@ -8795,8 +9423,8 @@ html[data-theme="pulsar"] .labor .lb-legende{
   background:var(--lage-mini-bg);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   gap:16px;
   box-shadow:none;
   -webkit-backdrop-filter:blur(14px) saturate(130%);
@@ -8852,8 +9480,8 @@ html[data-theme="pulsar"] .labor .ger-auswahl{
 
 html[data-theme="pulsar"] .labor .ger-name{
   font:700 var(--fs-2)/1.15 var(--mono);
-  letter-spacing:.08em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   fill:var(--lage-name);
 }
 
@@ -8941,7 +9569,7 @@ html[data-theme="pulsar"] .labor .zone-label{
 
 html[data-theme="pulsar"] .labor .zone-text{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.10em;
+  letter-spacing:.06em;
   fill:var(--lage-chip-text);
 }
 
@@ -8969,8 +9597,8 @@ html[data-theme="pulsar"] .labor .wk-mini{
 
 html[data-theme="pulsar"] .labor .wk-mini-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -9029,7 +9657,7 @@ html[data-theme="pulsar"] .lb-dock-reiter{
 
 html[data-theme="pulsar"] .lb-dock-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
   border-radius:var(--radius-xs) var(--radius-xs) 0 0;
 }
@@ -9048,7 +9676,7 @@ html[data-theme="pulsar"] .lb-dock-einklappen{
 
 html[data-theme="pulsar"] .lb-inspektor::before{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -9065,13 +9693,13 @@ html[data-theme="pulsar"] .in-kopf-text h3{
   font-family:var(--display);
   font-weight:700;
   letter-spacing:.06em;
-  text-transform:uppercase;
+  text-transform:none;
 }
 
 html[data-theme="pulsar"] .in-kopf-text span{
   font:600 var(--fs-1)/1.3 var(--mono);
-  letter-spacing:.2em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -9079,7 +9707,7 @@ html[data-theme="pulsar"] .in-chip{
   border-radius:var(--radius-xs);
   font-family:var(--mono);
   font-size:var(--fs-1);
-  letter-spacing:.1em;
+  letter-spacing:.06em;
   border:var(--hud-linie) solid transparent;
 }
 
@@ -9114,7 +9742,7 @@ html[data-theme="pulsar"] .in-reiter{
 
 html[data-theme="pulsar"] .in-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
   border-radius:0;
   border-bottom:2px solid transparent;
@@ -9137,7 +9765,7 @@ html[data-theme="pulsar"] .in-abschnitt{
 
 html[data-theme="pulsar"] .in-abschnitt h4{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
   display:flex;
   align-items:center;
@@ -9154,7 +9782,7 @@ html[data-theme="pulsar"] .in-abschnitt h4::before{
 
 html[data-theme="pulsar"] .in-feld-titel{
   font:600 var(--fs-1)/1.2 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -9269,7 +9897,7 @@ html[data-theme="pulsar"] .kl-start{
 
 html[data-theme="pulsar"] .kl-start-etikett{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -9307,7 +9935,7 @@ html[data-theme="pulsar"] .kl-start-knopf{
     box-shadow:none;
   }
   html[data-theme="pulsar"] .marke-name{
-    letter-spacing:.14em;
+    letter-spacing:.06em;
   }
   html[data-theme="pulsar"] .dock{
     width:72px;
@@ -9347,6 +9975,168 @@ html[data-theme="pulsar"] .kl-start-knopf{
   }
 }
 
+/* ============================================================================
+   Audit 02/11 (30.10.2026): Typo-Hierarchie statt Versalien-Monokultur.
+   Nur Typografie – Farben/Material bleiben Theme-Charakter. Sperrsatz <= .06em,
+   Saetze in Satzschreibung, Panel-Titel 12,5 px Body; // in Theme-Inhalten entfernt.
+   ============================================================================ */
+html[data-theme="pulsar"] :is(.dock,.kopf,.fuss,.lb-legende,.wk-mini,.sp-postfach,.ansicht) :is(span,small,em,strong,time,label,button,th,td){
+  text-transform:none;
+  letter-spacing:.04em;
+}
+
+html[data-theme="pulsar"] .ansicht .hb-panel-titel{
+  font:600 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="pulsar"] .ansicht :is(.hb-kicker,.hb-serie,.hb-sz time,.hb-sz em){
+  text-transform:none;
+  letter-spacing:.04em;
+  font-family:var(--body);
+}
+
+html[data-theme="pulsar"] .labor :is(.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.lb-insp-leer::before){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.03em;
+  text-transform:none;
+}
+
+html[data-theme="pulsar"] .labor :is(.in-feld-titel,.lb-dock-titel){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+html[data-theme="pulsar"] .labor :is(.lb-legende,.wk-mini-titel){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="pulsar"] .labor :is(.lb-auftrag .am-kunde){
+  font:500 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="pulsar"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3,.sp-brief-info small,.sp-brief-ziele strong,.sp-chip){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="pulsar"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
+  text-transform:none;
+  letter-spacing:.03em;
+  font-family:var(--body);
+}
+
+/* ============================================================================
+   Ambient sichtbar (Runde 3, 19:12): Atmendes Licht + ruhige UI-Impulse.
+   Dauern ausschließlich über Theme-Token; "Bewegung aus" schaltet basis.css zentral ab.
+   ============================================================================ */
+:root[data-theme="pulsar"]{
+  --lage-atmen:7s;
+  --lage-nebel:9s;
+  --lage-puls:4.5s;
+  --lage-schein:6s;
+  --lage-lauf:3.2s;
+}
+
+/* 1 · Atmendes Hintergrund-Licht */
+html[data-theme="pulsar"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:-6%;
+  pointer-events:none;
+  z-index:2;
+  background-image:
+    radial-gradient(44% 40% at 66% 24%, color-mix(in srgb, var(--iris) 46%, transparent), transparent 72%),
+    radial-gradient(circle at 20% 30%, color-mix(in srgb, var(--ink) 72%, transparent) 1.2px, transparent 2.2px),
+    radial-gradient(circle at 72% 64%, color-mix(in srgb, var(--accent) 60%, transparent) 1.3px, transparent 2.4px);
+  background-size:auto, 120px 90px, 170px 130px;
+  background-position:50% 50%, 0 0, 0 0;
+  opacity:.12;
+  animation:pulsar-atmen var(--lage-atmen) ease-in-out infinite alternate,
+            pulsar-sterne var(--lage-nebel) linear infinite alternate;
+}
+@keyframes pulsar-atmen{
+  from{opacity:.12} to{opacity:.20}
+}
+@keyframes pulsar-sterne{
+  from{background-position:50% 50%, 0 0, 0 0}
+  to{background-position:50% 58%, 26px 16px, -20px 12px}
+}
+
+/* 2 · Pulsieren im UI */
+html[data-theme="pulsar"] .dock-knopf.an{
+  animation:pulsar-dock var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes pulsar-dock{
+  from{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 46%, transparent), 0 0 12px -4px color-mix(in srgb, var(--accent) 36%, transparent)}
+}
+
+html[data-theme="pulsar"] .ansicht .hb-panel{
+  animation:pulsar-karte var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes pulsar-karte{
+  from{border-color:var(--line)}
+  to{border-color:color-mix(in srgb, var(--accent) 24%, var(--line))}
+}
+
+html[data-theme="pulsar"] :is(.knopf.primaer, .knopf-haupt){
+  animation:pulsar-schein var(--lage-schein) ease-in-out infinite alternate;
+}
+@keyframes pulsar-schein{
+  from{box-shadow:inset 0 0 0 1px transparent, 0 10px 26px -18px color-mix(in srgb, var(--accent) 30%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 10px 30px -14px color-mix(in srgb, var(--accent) 60%, transparent)}
+}
+
+/* Auswahlring: einmaliger 320-ms-Puls (danach Basis-Ring) */
+html[data-theme="pulsar"] .labor :is(.ger.gewaehlt, .ger.zielt) .ger-auswahl{
+  animation:pulsar-ring var(--dauer-lang) var(--ease-out) 1;
+}
+@keyframes pulsar-ring{
+  0%{stroke-opacity:.25; stroke-width:1}
+  55%{stroke-opacity:1; stroke-width:1.8}
+  100%{stroke-opacity:.85; stroke-width:1.5}
+}
+
+/* Live-Kabel: langsam laufender Lichtpunkt (nur k-oben und trunk) */
+html[data-theme="pulsar"] .labor :is(.kabel.k-oben, .kabel.trunk) .kabel-huelle{
+  stroke:color-mix(in srgb, var(--lage-kante) 58%, transparent);
+  stroke-dasharray:2 22;
+  animation:pulsar-lauf var(--lage-lauf) linear infinite;
+}
+@keyframes pulsar-lauf{
+  to{stroke-dashoffset:-24}
+}
+
+/* ============================================================================
+   Heute-Kontrast nach offenen Flaechen (hub.css 19:16): Text/Knoepfe >= 4,5:1.
+   Kein Layout, nur Farbe/Flaeche; Theme-Charakter bleibt.
+   ============================================================================ */
+html[data-theme="pulsar"] .ansicht .hb-seite :is(.hb-hero, .hb-panel, .hb-karte){
+  color:var(--ink);
+}
+html[data-theme="pulsar"] .ansicht .hb-seite :is(.hb-hero h1, .hb-karte h3, .hb-panel-titel, .hb-kicker){
+  color:var(--ink);
+}
+html[data-theme="pulsar"] .ansicht .hb-seite :is(.hb-hero-lead, .hb-hero-kunde, .hb-hero-meta, .hb-hero-meta span){
+  color:var(--muted);
+}
+html[data-theme="pulsar"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.primaer, .knopf-haupt, .knopf.primaer .knopf){
+  background:var(--accent);
+  background-image:none;
+  color:var(--accent-ink);
+  border-color:color-mix(in srgb, var(--accent) 78%, var(--line));
+}
+html[data-theme="pulsar"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.geist, .knopf:not(.primaer):not(.knopf-haupt)){
+  color:var(--ink);
+  border-color:var(--line-2);
+}
+
 </style>
 </head>
 <body>
@@ -9354,7 +10144,7 @@ html[data-theme="pulsar"] .kl-start-knopf{
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "d6c594df";
+const LABOR_BAU = "5760d310";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -35101,6 +35891,9 @@ UI.labor = (() => {
     if (Z.karten.size) UI.ebenen.platzieren(Z.karten, pos, id);
     kabelEndenBauen();                 /* LED/Portnamen sitzen auf dem Rahmen und wandern mit */
     beschriftungenSkalieren();         /* Kollisions-/Hover-Regel folgt der Bewegung */
+    /* Zonen wandern LIVE mit (Nutzerwunsch 30.10.2026: „Wenn ein PC aus der Zone geschoben wird, muss
+       die Zone sich mit ihm verschieben"): Hülle/Chip während des Ziehens per rAF neu zeichnen. */
+    zonenNeu();
     F.hoverZeichnen?.(true);
   }
   /* Fussabdruck eines Geräts (Welt, relativ zur Mitte) für die Zonen-Hülle: das Piktogramm selbst.
@@ -36232,7 +37025,7 @@ UI.hub = (() => {
     } catch (e) { return "unten"; }
   }
   function lagePanel(){
-    const titel = "// LAGEBILD" + (UI.ebenen?.aktuell ? " · EBENE " + String(UI.ebenen.aktuell).toUpperCase() : "");
+    const titel = "Lagebild" + (UI.ebenen?.aktuell ? " · EBENE " + String(UI.ebenen.aktuell).toUpperCase() : "");
     const netz = UI.labor?.netz;
     if (!netz?.geraete) {
       return h("section", {class: "hb-panel hb-lage hb-lage-leer"},
@@ -36329,7 +37122,7 @@ UI.hub = (() => {
 
     /* Hero: Auftrag (oder Feierabend) wie im Mockup – Kicker, Kunde, grosser Titel, Fliesstext, Chips, Aktionen */
     const hero = fa
-      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "// HEUTE · FEIERABEND"),
+      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "Heute · Feierabend"),
           h("div", {class: "hb-hero-kunde"}, h("h3", {}, UI.symbol("feierabend", 18), " Feierabend")),
           h("h1", {}, "Geschafft für heute"), h("p", {class: "hb-hero-lead"}, fa.ausblick),
           h("div", {class: "hb-hero-meta"}, h("span", {}, `${fa.bilanz.tickets} Aufträge`), h("span", {}, `Ø ${zahl(fa.bilanz.sterne)} ★`), h("span", {}, `+${eur(fa.bilanz.euro)} €`)),
@@ -36337,11 +37130,11 @@ UI.hub = (() => {
             h("button", {type: "button", class: "knopf primaer hb-annehmen", onclick: () => UI.modus("leiste")}, "Zur Leiste"),
             h("button", {type: "button", class: "knopf geist", onclick: weiterFn}, "Noch einen Auftrag")))
       : n.art === "leer"
-      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "// HEUTE · " + datumText().toUpperCase()),
+      ? h("section", {class: "hb-hero hb-panel"}, h("div", {class: "hb-kicker"}, "Heute · " + datumText().toUpperCase()),
           h("h1", {}, "Alles erledigt"), h("p", {class: "hb-hero-lead"}, "Kein offener Auftrag im Postfach. Neue Kunden melden sich laufend."),
           h("div", {class: "hb-aktionen"}, h("button", {type: "button", class: "knopf primaer hb-annehmen", onclick: weiterFn}, "Neuen Auftrag holen ▸")))
       : h("section", {class: "hb-hero hb-panel" + (n.klingelt ? " klingelt" : ""), style: {"--k": `var(${n.farbe || "--accent"})`}},
-          h("div", {class: "hb-kicker"}, "// AUFTRAG · " + (n.art === "weiter" ? "WEITER" : "EINSTIEG") + " · " + String(n.kunde || "").toUpperCase()),
+          h("div", {class: "hb-kicker"}, "Auftrag · " + (n.art === "weiter" ? "WEITER" : "EINSTIEG") + " · " + String(n.kunde || "").toUpperCase()),
           h("div", {class: "hb-hero-kunde"}, UI.symbol("auftrag", 16), " " + (n.klingelt ? n.kontakt + " ruft an" : n.kunde)),
           h("h1", {}, n.titel),
           h("p", {class: "hb-hero-lead"}, `${form.titel} · ~${n.minuten} min · ${eur(n.euro)} €`),
@@ -36368,21 +37161,21 @@ UI.hub = (() => {
     const ziel = h("section", {class: "hb-panel hb-ziel-karte"},
       h("div", {class: "hb-ring", style: {"--anteil": Math.round(anteil * 100) + "%"}}, h("b", {}, `${s.tagesziel.erledigt}/${s.tagesziel.ziel}`)),
       h("div", {class: "hb-ziel-liste"},
-        h("div", {class: "hb-panel-titel"}, "// TAGESZIEL"),
+        h("div", {class: "hb-panel-titel"}, "Tagesziel"),
         kachel(UI.symbol("kaffee", 22), "Aufwärmen", `${s.aufwaermen.erledigt}/${s.aufwaermen.ziel} Karten`, aufwaermen, s.aufwaermen.erledigt >= s.aufwaermen.ziel),
         kachel(UI.symbol("raetsel", 22), `Tagesrätsel #${s.raetsel.nr}`, s.raetsel.geloest ? "gelöst" : (Spiel.NIVEAU_NAME[s.raetsel.niveau] || s.raetsel.niveau), raetsel, s.raetsel.geloest),
         kachel(UI.symbol("dex", 22), "Fehlerdex", `${s.dex.verstanden}/${s.dex.gesamt}`, () => s.post.ungelesen ? UI.app.ansicht("postfach") : dexOeffnen(), s.dex.verstanden >= s.dex.gesamt)));
 
   /* Letzte Sitzung: Zustand von heute als ruhige Zeilen */
     const sitzung = h("section", {class: "hb-panel hb-sitzung"},
-      h("div", {class: "hb-panel-titel"}, "// LETZTE SITZUNG"),
+      h("div", {class: "hb-panel-titel"}, "Letzte Sitzung"),
       h("div", {class: "hb-sz"}, h("time", {}, "HEUTE"), h("div", {}, h("b", {}, n.art === "leer" ? "Kein offener Auftrag" : `Auftrag: ${n.titel}`), h("small", {}, n.art === "leer" ? "Postfach leer" : n.kunde)), h("em", {}, n.klingelt ? "ANRUF" : "OFFEN")),
       h("div", {class: "hb-sz"}, h("time", {}, "SERIE"), h("div", {}, h("b", {}, `${serie} ${serie === 1 ? "Tag" : "Tage"} in Folge`), h("small", {}, "Tagesziel zählt weiter")), h("em", {}, serie ? "+1" : "0")),
       h("div", {class: "hb-sz"}, h("time", {}, "POST"), h("div", {}, h("b", {}, "Postfach"), h("small", {}, `${s.post.ungelesen} ungelesen`)), h("em", {}, String(s.post.ungelesen))));
 
     /* Klassenraum */
     const klasse = h("section", {class: "hb-panel hb-klasse"},
-      h("div", {class: "hb-panel-titel"}, "// KLASSENRAUM"),
+      h("div", {class: "hb-panel-titel"}, "Klassenraum"),
       h("div", {class: "hb-klasse-zeile"},
         h("button", {type: "button", class: "knopf primaer", onclick: () => UI.app.ansicht("klassenraum")}, "Klassenraum öffnen"),
         h("button", {type: "button", class: "knopf geist", onclick: () => UI.app.ansicht("mitarbeit")}, "Auftragscode")),
@@ -36393,7 +37186,7 @@ UI.hub = (() => {
 
     /* Signal */
     const signal = h("section", {class: "hb-panel hb-signal"},
-      h("div", {class: "hb-panel-titel"}, "// SIGNAL"),
+      h("div", {class: "hb-panel-titel"}, "Signal"),
       (() => { const el = sv("svg", {class: "hb-signal-svg", viewBox: "0 0 300 64", preserveAspectRatio: "none", "aria-hidden": "true"}); el.innerHTML =
         `<path d="M0 44 C 30 44, 34 26, 60 26 S 96 46, 120 40 156 18, 180 24 216 44, 240 36 276 20, 300 24" fill="none" stroke="url(#hbw)" stroke-width="1.6"/>
          <path d="M0 50 C 30 50, 34 34, 60 34 S 96 52, 120 46 156 26, 180 32 216 50, 240 42 276 28, 300 32" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>

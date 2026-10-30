@@ -916,6 +916,9 @@ UI.labor = (() => {
     if (Z.karten.size) UI.ebenen.platzieren(Z.karten, pos, id);
     kabelEndenBauen();                 /* LED/Portnamen sitzen auf dem Rahmen und wandern mit */
     beschriftungenSkalieren();         /* Kollisions-/Hover-Regel folgt der Bewegung */
+    /* Zonen wandern LIVE mit (Nutzerwunsch 30.10.2026: „Wenn ein PC aus der Zone geschoben wird, muss
+       die Zone sich mit ihm verschieben"): Hülle/Chip während des Ziehens per rAF neu zeichnen. */
+    zonenNeu();
     F.hoverZeichnen?.(true);
   }
   /* Fussabdruck eines Geräts (Welt, relativ zur Mitte) für die Zonen-Hülle: das Piktogramm selbst.

@@ -93,9 +93,9 @@ button.dx-karte:hover{border-color:var(--accent)}
    (eine Klasse mehr, ohne !important). Maße nur aus Tokens/Skala, Licht nur
    über color-mix(). Keine eigenen @keyframes (Bewegung: juice.css).
    ============================================================ */
-.ansicht .hb-seite{max-width:1120px; margin:0 auto; padding:32px 24px; gap:24px}
+.ansicht .hb-seite{max-width:1120px; margin:0 auto; padding:12px 24px 4px; gap:8px}
 .ansicht .hb-kopf{display:flex; flex-direction:column; align-items:flex-start; gap:8px}
-.ansicht .hb-kopf::before{content:"// HEUTE"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.24em; text-transform:uppercase; color:var(--faint)}
+.ansicht .hb-kopf::before{content:""; display:block; width:32px; height:2px; border-radius:0; background:var(--accent); margin-bottom:8px}
 .ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 4.6vw, var(--fs-8)); line-height:1.15; letter-spacing:-.045em; max-width:20ch}
 .ansicht .hb-kopf .hb-serie{display:flex; align-items:center; gap:8px; color:var(--muted); letter-spacing:.2em}
 
@@ -140,3 +140,73 @@ button.dx-karte:hover{border-color:var(--accent)}
 @media (max-width:720px){
   .ansicht .hb-kopf h2{font-size:clamp(var(--fs-7), 9vw, var(--fs-8))}
 }
+
+/* ============================================================
+   Audit-Nachzug (Umsetzung 30.10.2026, design-lagebild):
+   „Heute" als offene Typo-Fläche – nur Lagebild und Signal gerahmt,
+   randloser Hero, ungleiche Spalten, Typo-Hierarchie statt Mono-Monokultur.
+   ============================================================ */
+.ansicht .hb-seite .hb-raster{gap:8px;align-items:stretch;align-content:start}
+.ansicht .hb-seite .hb-raster > .hb-panel{box-shadow:none;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-hero,
+.ansicht .hb-seite .hb-raster > .hb-kenndaten,
+.ansicht .hb-seite .hb-raster > .hb-ziel-karte,
+.ansicht .hb-seite .hb-raster > .hb-sitzung,
+.ansicht .hb-seite .hb-raster > .hb-klasse{padding:0;border:0;border-radius:0;background:none;box-shadow:none;min-height:0}
+.ansicht .hb-seite .hb-raster > .hb-lage,
+.ansicht .hb-seite .hb-raster > .hb-signal{border:1px solid var(--line);border-radius:var(--radius-xs);background:var(--panel);padding:12px;min-height:0;box-shadow:none}
+.ansicht .hb-seite .hb-raster > .hb-hero{grid-column:1/-1;grid-row:1;min-width:0;color:var(--ink)}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten{
+  grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)
+}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd{border:0;border-left:1px solid var(--line);padding:4px 16px;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-kenndaten .hb-kd:first-child{border-left:0;padding-left:0}
+.ansicht .hb-seite .hb-raster > .hb-ziel-karte{grid-column:1/6;grid-row:3;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-sitzung{grid-column:6/10;grid-row:3;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-klasse{grid-column:10/13;grid-row:3;min-width:0}
+.ansicht .hb-seite .hb-raster > .hb-lage{grid-column:1/9;grid-row:4;padding:0}
+.ansicht .hb-seite .hb-raster > .hb-signal{grid-column:9/13;grid-row:4;min-width:0}
+.ansicht .hb-seite .hb-raster .hb-aktionen{margin-top:4px;gap:8px}
+.ansicht .hb-seite .hb-ziel{margin:0;padding-top:0}
+.ansicht .hb-seite .hb-raster .hb-signal-svg{height:40px;width:100%}
+.ansicht .hb-seite .hb-raster .hb-kicker{font:600 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-bottom:4px}
+.ansicht .hb-seite .hb-raster .hb-hero h1{font:700 var(--fs-6)/1.1 var(--display);letter-spacing:-.02em;margin:4px 0;max-width:30ch;color:var(--ink)}
+.ansicht .hb-seite .hb-raster .hb-hero-lead{font-size:var(--fs-3);line-height:1.5;max-width:64ch;margin:0;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-hero-meta{margin:4px 0;gap:0}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span{font:500 var(--fs-2)/1.3 var(--body);letter-spacing:0;text-transform:none;border:0;padding:0 12px;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span:first-child{padding-left:0}
+.ansicht .hb-seite .hb-raster .hb-hero-meta span + span{border-left:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster :is(.hb-panel-titel,.hb-zeile b,.hb-sz b){font:600 var(--fs-3)/1.3 var(--body);color:var(--ink)}
+.ansicht .hb-seite .hb-raster .hb-panel-titel{letter-spacing:0;text-transform:none;margin-bottom:8px}
+.ansicht .hb-seite .hb-raster .hb-kd .lab{font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-kd > b{font:700 var(--fs-5)/1 var(--display);letter-spacing:-.02em}
+.ansicht .hb-seite .hb-raster :is(.hb-kd small,.hb-zeile small){font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;color:var(--faint)}
+.ansicht .hb-seite .hb-raster .hb-spark{display:none;pointer-events:none}
+.ansicht .hb-seite .hb-raster .hb-zeile{padding:4px 0;color:var(--ink);border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-sz{padding:4px 0;border-top:1px solid var(--line)}
+.ansicht .hb-seite .hb-raster .hb-sz time{font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--faint)}
+.ansicht .hb-seite .hb-raster :is(.hb-sz small,.hb-klasse-zeile small){font-size:var(--fs-2);line-height:1.3;color:var(--muted)}
+.ansicht .hb-seite .hb-raster .hb-sz em{font:600 var(--fs-2)/1 var(--mono);letter-spacing:0}
+.ansicht .hb-seite .hb-raster .hb-ring{width:64px;height:64px}
+.ansicht .hb-seite .hb-raster .hb-ring::after{inset:6px}
+.ansicht .hb-seite .hb-raster .hb-ring b{font:700 var(--fs-4)/1 var(--display)}
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf{height:44px;border-radius:var(--radius-xs)}
+.ansicht .hb-seite .hb-raster :is(.hb-stat,.hb-legende){font:500 var(--fs-2)/1.2 var(--body);letter-spacing:0;text-transform:none}
+/* Theme-Festigkeit: Flaechen bleiben offen, aber Text und Knoepfe tragen
+   ihre Tokens selbst — sonst kippen Theme-Regeln (Messing) auf dunkel/dunkel. */
+.ansicht .hb-seite .hb-raster .hb-hero-kunde{color:var(--muted);font-size:var(--fs-3)}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.primaer{
+  height:44px;padding:0 16px;border-radius:var(--radius-xs);
+  background:var(--accent);border:1px solid var(--accent);color:var(--accent-ink);box-shadow:none
+}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.primaer:hover,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.primaer:hover{filter:none;transform:none;border-color:var(--accent)}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.geist,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.geist{
+  height:44px;padding:0 16px;border-radius:var(--radius-xs);
+  background:transparent;border:1px solid var(--line-2);color:var(--ink)
+}
+.ansicht .hb-seite .hb-raster .hb-aktionen .knopf.geist:hover,
+.ansicht .hb-seite .hb-raster .hb-klasse-zeile .knopf.geist:hover{background:var(--panel-2);border-color:var(--ink)}

@@ -209,14 +209,14 @@ html[data-theme="messing"] .marke-sym circle{
 
 html[data-theme="messing"] .marke-name{
   font:700 var(--fs-4)/1 var(--display);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--ink);
 }
 
 html[data-theme="messing"] .marke-version{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -226,8 +226,8 @@ html[data-theme="messing"] .marke-version{
 
 html[data-theme="messing"] .kopf .sp-leise{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -327,8 +327,8 @@ html[data-theme="messing"] .dock-knopf.an::before{
 
 html[data-theme="messing"] .dock-text{
   font:600 var(--fs-1)/1.2 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .dock-knopf.an .dock-text{
@@ -354,13 +354,13 @@ html[data-theme="messing"] .fuss{
   border-top:1px solid var(--line);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .fuss-live{
   color:var(--accent);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="messing"] .fuss-punkt{
@@ -445,14 +445,14 @@ html[data-theme="messing"] .ansicht .hb-seite{
 
 /* Randnotiz am Satzspiegel â€” die Signatur des Ateliers */
 html[data-theme="messing"] .ansicht .hb-seite::after{
-  content:"ATELIER MESSING · HAUS 12";
+  content:"Atelier Messing · Haus 12";
   position:absolute;
   top:16px;
   right:4px;
   writing-mode:vertical-rl;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.34em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--faint) 62%, transparent);
   pointer-events:none;
 }
@@ -506,8 +506,8 @@ html[data-theme="messing"] .ansicht .hb-panel-titel{
   gap:12px;
   margin:0 0 12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.28em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -547,8 +547,8 @@ html[data-theme="messing"] .ansicht .hb-kicker{
   align-items:center;
   gap:12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--accent) 78%, var(--faint));
 }
 
@@ -561,8 +561,8 @@ html[data-theme="messing"] .ansicht .hb-kicker::before{
 
 html[data-theme="messing"] .ansicht .hb-hero-kunde{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   gap:8px;
   margin-top:8px;
@@ -590,8 +590,8 @@ html[data-theme="messing"] .ansicht .hb-hero-meta{
 
 html[data-theme="messing"] .ansicht .hb-hero-meta span{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -615,8 +615,8 @@ html[data-theme="messing"] .ansicht .hb-aktionen .knopf{
   border-radius:var(--radius-xs);
   padding:0 24px;
   font:700 var(--fs-2)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 /* ---- Kenndaten: Zahlen als Plakate ---- */
@@ -636,7 +636,7 @@ html[data-theme="messing"] .ansicht .hb-kd{
 
 html[data-theme="messing"] .ansicht .hb-kd .lab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -648,7 +648,7 @@ html[data-theme="messing"] .ansicht .hb-kd > b{
 
 html[data-theme="messing"] .ansicht .hb-kd small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -707,7 +707,7 @@ html[data-theme="messing"] .ansicht .hb-zeile b{
 
 html[data-theme="messing"] .ansicht .hb-zeile small{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -720,8 +720,8 @@ html[data-theme="messing"] .ansicht .hb-sz{
 
 html[data-theme="messing"] .ansicht .hb-sz time{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -737,7 +737,7 @@ html[data-theme="messing"] .ansicht .hb-sz small{
 
 html[data-theme="messing"] .ansicht .hb-sz em{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   font-style:normal;
   color:color-mix(in srgb, var(--accent) 85%, var(--faint));
 }
@@ -765,13 +765,13 @@ html[data-theme="messing"] .ansicht .hb-lage{
 
 html[data-theme="messing"] .ansicht .hb-lage-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .ansicht .hb-lage-zaehler{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="messing"] .ansicht .hb-lage-zaehler.ok{
@@ -823,7 +823,7 @@ html[data-theme="messing"] .ansicht .hb-chip.hb-chip-mehr{
 html[data-theme="messing"] .ansicht .hb-lage-fuss .hb-legende,
 html[data-theme="messing"] .ansicht .hb-lage-tipp{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -839,8 +839,8 @@ html[data-theme="messing"] .ansicht .hb-signal-svg path:last-of-type{
 
 html[data-theme="messing"] .ansicht .hb-stat{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -857,8 +857,8 @@ html[data-theme="messing"] .ansicht .hb-ziel{
 
 html[data-theme="messing"] .ansicht .hb-woche-knopf{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border-bottom:1px dashed color-mix(in srgb, var(--line-2) 70%, transparent);
   padding:4px 0;
@@ -898,8 +898,8 @@ html[data-theme="messing"] .labor .lb-auftrag::before{
   display:block;
   margin:0 0 12px;
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:color-mix(in srgb, var(--accent) 72%, var(--faint));
 }
 
@@ -922,14 +922,14 @@ html[data-theme="messing"] .labor .lb-auftrag .am-titel strong{
 
 html[data-theme="messing"] .labor .lb-auftrag .am-kunde{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.20em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .labor .lb-auftrag .am-ziele{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
@@ -952,8 +952,8 @@ html[data-theme="messing"] .labor .lb-auftrag .sp-abnahme{
   border:1px solid color-mix(in srgb, var(--accent) 72%, var(--line));
   border-radius:var(--radius-xs);
   font:700 var(--fs-2)/1 var(--mono);
-  letter-spacing:.12em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   box-shadow:0 12px 26px -18px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
@@ -963,8 +963,8 @@ html[data-theme="messing"] .labor .lb-auftrag .am-lesen{
   border-radius:var(--radius-xs);
   color:var(--muted);
   font:600 var(--fs-2)/1 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .labor .lb-auftrag .am-lesen:hover{
@@ -988,7 +988,7 @@ html[data-theme="messing"] .labor .lb-leinwand{
 
 html[data-theme="messing"] .labor .lb-leinwand::before{
   color:color-mix(in srgb, var(--accent) 58%, var(--faint));
-  letter-spacing:.30em;
+  letter-spacing:.06em;
 }
 
 html[data-theme="messing"] .labor .lb-svg{
@@ -1049,7 +1049,7 @@ html[data-theme="messing"] .labor .ger-name{
 html[data-theme="messing"] .labor .ger-rolle{
   font:600 var(--fs-1)/1.25 var(--mono);
   letter-spacing:.03em;
-  text-transform:uppercase;
+  text-transform:none;
   fill:var(--lage-rolle);
 }
 
@@ -1119,7 +1119,7 @@ html[data-theme="messing"] .labor .zone-label{
 
 html[data-theme="messing"] .labor .zone-text{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.08em;
+  letter-spacing:.06em;
   fill:var(--lage-chip-text);
 }
 
@@ -1190,8 +1190,8 @@ html[data-theme="messing"] .labor .lb-legende{
   border-radius:var(--radius-xs);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   gap:16px;
   box-shadow:none;
   -webkit-backdrop-filter:blur(8px);
@@ -1228,8 +1228,8 @@ html[data-theme="messing"] .labor .wk-mini{
 
 html[data-theme="messing"] .labor .wk-mini-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.22em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1269,7 +1269,7 @@ html[data-theme="messing"] .labor .wk-mini-knopf{
 
 html[data-theme="messing"] .labor .wk-mini-zoomtext{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.12em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -1291,8 +1291,8 @@ html[data-theme="messing"] .labor .lb-geraete{
 
 html[data-theme="messing"] .labor .lb-geraete-titel{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.24em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1331,8 +1331,8 @@ html[data-theme="messing"] .labor .lb-dock-reiter{
 
 html[data-theme="messing"] .labor .lb-dock-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.16em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   border-radius:var(--radius-xs);
 }
@@ -1345,7 +1345,7 @@ html[data-theme="messing"] .labor .lb-dock-tab.an{
 
 html[data-theme="messing"] .labor .lb-inspektor::before{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.30em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
@@ -1363,8 +1363,8 @@ html[data-theme="messing"] .labor .in-kopf-text h3{
 
 html[data-theme="messing"] .labor .in-kopf-text span{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.20em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1373,8 +1373,8 @@ html[data-theme="messing"] .labor .in-chip{
   border-radius:var(--radius-xs);
   background:color-mix(in srgb, var(--panel-3) 56%, transparent);
   font:600 var(--fs-1)/1.6 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--muted);
 }
 
@@ -1410,8 +1410,8 @@ html[data-theme="messing"] .labor .in-reiter{
 
 html[data-theme="messing"] .labor .in-tab{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
   padding:8px 8px;
   border:0;
@@ -1433,15 +1433,15 @@ html[data-theme="messing"] .labor .in-abschnitt{
 
 html[data-theme="messing"] .labor .in-abschnitt h4{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.26em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .labor .in-feld-titel{
   font:600 var(--fs-1)/1.4 var(--mono);
-  letter-spacing:.18em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1482,8 +1482,8 @@ html[data-theme="messing"] .labor .in-knopf{
   background:color-mix(in srgb, var(--panel-2) 66%, transparent);
   color:var(--ink);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
 }
 
 html[data-theme="messing"] .labor .in-knopf:hover{
@@ -1518,14 +1518,14 @@ html[data-theme="messing"] .labor .in-hinweis{
 
 html[data-theme="messing"] .labor .lb-insp-leer::before{
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.32em;
+  letter-spacing:.06em;
   color:var(--faint);
 }
 
 html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
   font:500 var(--fs-1)/1.7 var(--mono);
-  letter-spacing:.10em;
-  text-transform:uppercase;
+  letter-spacing:.06em;
+  text-transform:none;
   color:var(--faint);
 }
 
@@ -1547,7 +1547,7 @@ html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
 
   html[data-theme="messing"] .marke-name{
     font-size:var(--fs-2);
-    letter-spacing:.12em;
+    letter-spacing:.06em;
   }
 
   html[data-theme="messing"] .ansicht .hb-seite{
@@ -1577,7 +1577,7 @@ html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
   }
 
   html[data-theme="messing"] .ansicht .hb-kicker{
-    letter-spacing:.20em;
+    letter-spacing:.06em;
   }
 
   html[data-theme="messing"] .labor .lb-mitte{
@@ -1596,4 +1596,161 @@ html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
     font-size:var(--fs-5);
     letter-spacing:0;
   }
+}
+
+/* ============================================================================
+   Audit 02/11 (30.10.2026): Typo-Hierarchie statt Versalien-Monokultur.
+   Nur Typografie – Farben/Material bleiben Theme-Charakter. Sperrsatz <= .06em,
+   Saetze in Satzschreibung, Panel-Titel 12,5 px Body; // in Theme-Inhalten entfernt.
+   ============================================================================ */
+html[data-theme="messing"] :is(.dock,.kopf,.fuss,.lb-legende,.wk-mini,.sp-postfach,.ansicht) :is(span,small,em,strong,time,label,button,th,td){
+  text-transform:none;
+  letter-spacing:.04em;
+}
+
+html[data-theme="messing"] .ansicht .hb-panel-titel{
+  font:600 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .ansicht :is(.hb-kicker,.hb-serie,.hb-sz time,.hb-sz em){
+  text-transform:none;
+  letter-spacing:.04em;
+  font-family:var(--body);
+}
+
+html[data-theme="messing"] .labor :is(.lb-auftrag::before,.lb-leinwand::before,.lb-inspektor::before,.lb-insp-leer::before){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.03em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .labor :is(.in-feld-titel,.lb-dock-titel){
+  font:600 var(--fs-2)/1.2 var(--body);
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .labor :is(.lb-legende,.wk-mini-titel){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="messing"] .labor :is(.lb-auftrag .am-kunde){
+  font:500 var(--fs-2)/1.3 var(--body);
+  letter-spacing:.01em;
+  text-transform:none;
+}
+
+html[data-theme="messing"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3,.sp-brief-info small,.sp-brief-ziele strong,.sp-chip){
+  text-transform:none;
+  letter-spacing:.03em;
+}
+
+html[data-theme="messing"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
+  text-transform:none;
+  letter-spacing:.03em;
+  font-family:var(--body);
+}
+
+/* ============================================================================
+   Ambient sichtbar (Runde 3, 19:12): Atmendes Licht + ruhige UI-Impulse.
+   Dauern ausschließlich über Theme-Token; "Bewegung aus" schaltet basis.css zentral ab.
+   ============================================================================ */
+:root[data-theme="messing"]{
+  --lage-atmen:9s;
+  --lage-nebel:14s;
+  --lage-puls:5s;
+  --lage-schein:7s;
+  --lage-lauf:4s;
+}
+
+/* 1 · Atmendes Hintergrund-Licht */
+html[data-theme="messing"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:-6%;
+  pointer-events:none;
+  z-index:2;
+  background-image:
+    radial-gradient(46% 42% at 28% 18%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%),
+    radial-gradient(40% 36% at 78% 84%, color-mix(in srgb, var(--amber) 32%, transparent), transparent 72%);
+  opacity:.12;
+  animation:messing-atmen var(--lage-atmen) ease-in-out infinite alternate;
+}
+@keyframes messing-atmen{
+  0%{opacity:.12; transform:scale(1) translate(0, 0)}
+  45%{opacity:.17; transform:scale(1.02) translate(.8%, -.6%)}
+  70%{opacity:.14; transform:scale(1.03) translate(1%, -.8%)}
+  100%{opacity:.20; transform:scale(1.05) translate(1.5%, -1%)}
+}
+
+/* 2 · Pulsieren im UI */
+html[data-theme="messing"] .dock-knopf.an{
+  animation:messing-dock var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes messing-dock{
+  from{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 46%, transparent), 0 0 12px -4px color-mix(in srgb, var(--accent) 36%, transparent)}
+}
+
+html[data-theme="messing"] .ansicht .hb-panel{
+  animation:messing-karte var(--lage-puls) ease-in-out infinite alternate;
+}
+@keyframes messing-karte{
+  from{border-color:var(--line)}
+  to{border-color:color-mix(in srgb, var(--accent) 24%, var(--line))}
+}
+
+html[data-theme="messing"] :is(.knopf.primaer, .knopf-haupt){
+  animation:messing-schein var(--lage-schein) ease-in-out infinite alternate;
+}
+@keyframes messing-schein{
+  from{box-shadow:inset 0 0 0 1px transparent, 0 10px 26px -18px color-mix(in srgb, var(--accent) 30%, transparent)}
+  to{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent), 0 10px 30px -14px color-mix(in srgb, var(--accent) 55%, transparent)}
+}
+
+/* Auswahlring: einmaliger 320-ms-Puls (danach Basis-Ring) */
+html[data-theme="messing"] .labor :is(.ger.gewaehlt, .ger.zielt) .ger-auswahl{
+  animation:messing-ring var(--dauer-lang) var(--ease-out) 1;
+}
+@keyframes messing-ring{
+  0%{stroke-opacity:.25; stroke-width:1}
+  55%{stroke-opacity:1; stroke-width:1.8}
+  100%{stroke-opacity:.85; stroke-width:1.5}
+}
+
+/* Live-Kabel: langsam laufender Lichtpunkt (nur k-oben und trunk) */
+html[data-theme="messing"] .labor :is(.kabel.k-oben, .kabel.trunk) .kabel-huelle{
+  stroke:color-mix(in srgb, var(--lage-kante) 58%, transparent);
+  stroke-dasharray:2 22;
+  animation:messing-lauf var(--lage-lauf) linear infinite;
+}
+@keyframes messing-lauf{
+  to{stroke-dashoffset:-24}
+}
+
+/* ============================================================================
+   Heute-Kontrast nach offenen Flaechen (hub.css 19:16): Text/Knoepfe >= 4,5:1.
+   Kein Layout, nur Farbe/Flaeche; Theme-Charakter bleibt.
+   ============================================================================ */
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-hero, .hb-panel, .hb-karte){
+  color:var(--ink);
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-hero h1, .hb-karte h3, .hb-panel-titel, .hb-kicker){
+  color:var(--ink);
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-hero-lead, .hb-hero-kunde, .hb-hero-meta, .hb-hero-meta span){
+  color:var(--muted);
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.primaer, .knopf-haupt, .knopf.primaer .knopf){
+  background:var(--accent);
+  background-image:none;
+  color:var(--accent-ink);
+  border-color:color-mix(in srgb, var(--accent) 78%, var(--line));
+}
+html[data-theme="messing"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile) :is(.knopf.geist, .knopf:not(.primaer):not(.knopf-haupt)){
+  color:var(--ink);
+  border-color:var(--line-2);
 }
