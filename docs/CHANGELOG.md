@@ -9,6 +9,25 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.5.1 — Die Leiste klappt nach 1 s zusammen (31.10.2026)
+
+**Warum.** Nutzer: „das mini fenster klappt zu langsam zusammen, lass es nach einer sekunde
+zusammenfallen wenn der cursor es verlässt". Bisher zog sich die aufgeklappte Leiste erst
+5 Sekunden nach dem Verlassen des Cursors zusammen.
+
+**Umgesetzt.** `src/ui/leiste.js`: Der `pointerleave`-Timer steht auf **1000 ms** (vorher
+5000 ms); der Aufklapp-Verzug (280 ms), die Maße 300 × 56 / 320 × 300, die Statuszeile und
+alle Testhaken bleiben unverändert. Der Kopfkommentar der Datei nennt jetzt 1 s statt 5 s.
+
+**Gemessen (Edge headless, `web/index.html` 2.5.1, Leiste im Browser-Modus):** pointerleave
+setzt den Timer; nach **600 ms** ist die Karte noch offen, nach **1,1 s** zu (Klasse `auf`
+weg), 0 JS-Fehler. Gates dieser Fassung: `node tests/run.js` **878/878 grün**, Rauchtest
+**45/45**, `klassen.py` 0, `ethos.py` GRÜN, `umlaute.py` GRÜN, Simulation unverändert,
+`seite.py --pruefen` und `stand.py --pruefen` grün. Fassung **2.5.1** gezogen
+(`VERSION_CODE 20502`), Einzeldatei und `.exe` neu gebaut, als Patch-Release veröffentlicht.
+
+---
+
 ## 2.5.0 — Bento 2.5: Postfach, Kunden, Dashboard, Training und Leiste (30.10.2026)
 
 **Was diese Fassung ist.** Ein Gestaltungs- und Sprachumbau der fünf Arbeitsflächen, kein

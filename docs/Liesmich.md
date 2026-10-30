@@ -2,7 +2,7 @@
 tags: [FISI, Lernspiel, Netzwerk]
 erstellt: 2026-09-30
 aktualisiert: 2026-10-26
-status: Version 2.5.0 (Browser-Einzeldatei; Doku als HTML unter /doku/; Windows-.exe und Android-APK nur selbst gebaut, nicht im Release) – wird ausgebaut
+status: Version 2.5.1 (Browser-Einzeldatei; Doku als HTML unter /doku/; Windows-.exe und Android-APK nur selbst gebaut, nicht im Release) – wird ausgebaut
 ---
 
 # 🖧 Netzwerk-Labor
@@ -50,7 +50,7 @@ Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Man
 - [[Konzept – Netzwerk-Labor]] (Spezifikation) · [[Architektur]] (Vertrag zwischen den Bausteinen) · [[Opus-Auftrag – Netzwerk-Labor]] (ursprünglicher Bauauftrag) · [[Befund – Programm startet wieder]] (05.10.2026: WebView2-Ausfall und Reparatur)
 - **Ausbau 1.2 (läuft):** [[Plan – Ausbau 1.2]] (Phasen, Stand) · [[Design – Spielspaß 2.0]] (Befunde, 12 Hebel, Scorecard, Startblöcke für Opus) · [[Klassenraum – Umsetzungsreife Spezifikation]] (Vertrag; Stufen A+B seit 2.0.0 gebaut, C/D offen)
 - `src/` Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · `shell/src-tauri/` Rust-Hülle · `tests/` (`sh tools/test.sh`; Zahl: `docs/STAND.md`) · `tools/` (bauen, testen, messen, ausliefern) · `Programm/` fertige Programme · `docs/` die Website-Fassung (erzeugt) samt `docs/doku/` (die Doku als durchsuchbare Seite, `python tools/seite.py`) · `fremd/` fremder Bestand (Lernmotor aus der Spielhalle)
-- Versionen: Git im Projektordner, 13 Tags von `endversion-1.0` über `v1.1`, `v1.2.0`–`v1.2.4` bis `v2.0.0`–`v2.5.0` (gemessen 26.10.2026 mit `git tag --list`); die Endversion 1.0 liegt zusätzlich unter `Programm/Endversion-1.0/`.
+- Versionen: Git im Projektordner, 13 Tags von `endversion-1.0` über `v1.1`, `v1.2.0`–`v1.2.4` bis `v2.0.0`–`v2.5.1` (gemessen 26.10.2026 mit `git tag --list`); die Endversion 1.0 liegt zusätzlich unter `Programm/Endversion-1.0/`.
 
 ## Ehrliche Grenzen
 - Arbeitsspeicher im Leerlauf rund 0,5 GB (WebView2), CPU praktisch null.

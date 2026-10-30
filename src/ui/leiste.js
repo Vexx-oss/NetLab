@@ -5,7 +5,7 @@
    UI.leiste.miniBereich   DOM-Element für ein Mini-Ticket (Inhalt kommt vom Spiel; bleibt über Umbauten erhalten)
    UI.leiste.miniHilfe     DOM-Element für Denkhilfe und Lernanker des Mini-Tickets (Vertrag § 5)
    Regeln: nur Maus, keine Tastatur, kein Ton, kein Fokusklau. 55 % deckend ohne Maus (einstellbar), voll deckend mit Maus,
-   klappt bei Maus darüber auf (320×300) und 5 s nach dem Verlassen wieder zu (300×56). Ziehbar über die Griffleiste.
+   klappt bei Maus darüber auf (320×300) und 1 s nach dem Verlassen wieder zu (300×56). Ziehbar über die Griffleiste.
    Zugeklappt dieselbe Statuszeile wie bisher, jetzt mit gelabelten Werten (7 €/h · Ruf 14 · 3 offen).
    Aufgeklappt unter derselben Zeile ein Bento: „Jetzt dran" (eine Zeile, Kunde · Titel · Aktion),
    das vorhandene Mini-Ticket (UI.karriere.miniZeichnen liefert den Inhalt; größter Bereich) und
@@ -245,7 +245,10 @@ UI.leiste = (() => {
       karte.classList.remove("hover");
       clearTimeout(aufTimer); aufTimer = null;
       clearTimeout(zuTimer);
-      zuTimer = setTimeout(zuklappen, 5000);
+      /* 31.10.2026: von 5 s auf 1 s verkürzt (Nutzerwunsch: „lass es nach einer Sekunde
+         zusammenfallen, wenn der Cursor es verlässt"). Eine Sekunde reicht, um von der
+         Statuszeile in den aufgeklappten Bereich zu wechseln; danach fällt die Karte zu. */
+      zuTimer = setTimeout(zuklappen, 1000);
     });
     container.replaceChildren(root);
     auf = false;

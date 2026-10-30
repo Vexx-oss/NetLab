@@ -64,6 +64,7 @@ img{max-width:100%;height:auto}
 <nav class="dk-toc" aria-label="Inhalt">
 <p>Inhalt</p>
 <ul>
+<li><a href="#2-5-1-die-leiste-klappt-nach-1-s-zusammen-31-10-2026">2.5.1 — Die Leiste klappt nach 1 s zusammen (31.10.2026)</a></li>
 <li><a href="#2-5-0-bento-2-5-postfach-kunden-dashboard-training-und-leiste-30-10-2026">2.5.0 — Bento 2.5: Postfach, Kunden, Dashboard, Training und Leiste (30.10.2026)</a></li>
 <li><a href="#2-4-0-remaster-30-10-2026">2.4.0 — ReMASTER (30.10.2026)</a></li>
 <li><a href="#2-4-0-remaster-audit-umsetzung-ambiente-lebende-zonen-30-10-2026">2.4.0 — ReMASTER: Audit-Umsetzung, Ambiente, lebende Zonen (30.10.2026)</a></li>
@@ -108,6 +109,11 @@ img{max-width:100%;height:auto}
 </nav><h1 id="anderungsverlauf">Änderungsverlauf</h1>
 <p>Der Verlauf ist aus der echten Commit-Historie abgeleitet, nicht aus Erinnerung. Die ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in <a href="entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html"><code>Design – Spielspaß 2.0.md</code></a> und <a href="entwicklung/Plan%20%E2%80%93%20Ausbau%201.2.html"><code>Plan – Ausbau 1.2.md</code></a>.</p>
 <p>Zweig: <code>ausbau-1.2</code> (Standardzweig). Tags: <code>endversion-1.0</code>, <code>v1.1</code>, <code>v1.2.0</code>, <code>v1.2.1</code>, <code>v1.2.2</code>, <code>v1.2.3</code>, <code>v1.2.4</code>, <code>v2.0.0</code>, <code>v2.0.1</code>, <code>v2.0.2</code>, <code>v2.0.3</code>, <code>v2.0.4</code>, <strong><code>v2.0.5</code></strong> — <strong>13 Tags</strong>, am 26.10.2026 mit <code>git tag --list</code> nachgezählt.</p>
+<hr>
+<h2 id="2-5-1-die-leiste-klappt-nach-1-s-zusammen-31-10-2026">2.5.1 — Die Leiste klappt nach 1 s zusammen (31.10.2026)</h2>
+<p><strong>Warum.</strong> Nutzer: „das mini fenster klappt zu langsam zusammen, lass es nach einer sekunde zusammenfallen wenn der cursor es verlässt". Bisher zog sich die aufgeklappte Leiste erst 5 Sekunden nach dem Verlassen des Cursors zusammen.</p>
+<p><strong>Umgesetzt.</strong> <code>src/ui/leiste.js</code>: Der <code>pointerleave</code>-Timer steht auf <strong>1000 ms</strong> (vorher 5000 ms); der Aufklapp-Verzug (280 ms), die Maße 300 × 56 / 320 × 300, die Statuszeile und alle Testhaken bleiben unverändert. Der Kopfkommentar der Datei nennt jetzt 1 s statt 5 s.</p>
+<p><strong>Gemessen (Edge headless, <code>web/index.html</code> 2.5.1, Leiste im Browser-Modus):</strong> pointerleave setzt den Timer; nach <strong>600 ms</strong> ist die Karte noch offen, nach <strong>1,1 s</strong> zu (Klasse <code>auf</code> weg), 0 JS-Fehler. Gates dieser Fassung: <code>node tests/run.js</code> <strong>878/878 grün</strong>, Rauchtest <strong>45/45</strong>, <code>klassen.py</code> 0, <code>ethos.py</code> GRÜN, <code>umlaute.py</code> GRÜN, Simulation unverändert, <code>seite.py --pruefen</code> und <code>stand.py --pruefen</code> grün. Fassung <strong>2.5.1</strong> gezogen (<code>VERSION_CODE 20502</code>), Einzeldatei und <code>.exe</code> neu gebaut, als Patch-Release veröffentlicht.</p>
 <hr>
 <h2 id="2-5-0-bento-2-5-postfach-kunden-dashboard-training-und-leiste-30-10-2026">2.5.0 — Bento 2.5: Postfach, Kunden, Dashboard, Training und Leiste (30.10.2026)</h2>
 <p><strong>Was diese Fassung ist.</strong> Ein Gestaltungs- und Sprachumbau der fünf Arbeitsflächen, kein Feature-Sprung. Postfach und Hilfeleiter, Kundenbereich und Kundenakte, Dashboard „Heute", Training und die minimierte Leiste folgen jetzt einer gemeinsamen Bento-Sprache: 12-Spalten-Raster, Kacheln mit Kante und Radius, Mikrolabels, Monogramme statt Emoji, echte Daten statt Dekoration, eine Hauptaktion je Kachel. Neue gemeinsame Bausteine: <code>src/stil/bento.css</code> (Raster, Kachel, Chips, Monogramm) und <code>src/ui/bento.js</code> (<code>UI.bento.monogramm/kachel/kopf</code>); neues Werkzeug <code>tools/vorschau.py</code> für private Vorschau-Bauten der Bereichsteams. Datenformate, Simulation, Codec, Ansichten und Bedienwege sind unverändert.</p>

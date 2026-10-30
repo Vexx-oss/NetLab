@@ -127,3 +127,24 @@ Ursache und Reparatur sind im Bericht des Postfach-Teams belegt (horizontale Üb
   ausgelesen); die lokal gebaute `.exe` ist mit `tools/q-echt.py` abgenommen. Android-APK
   nicht gebaut.
 
+## 8 · Patch 2.5.1 — Leiste klappt nach 1 s zusammen (31.10.2026)
+
+**Auftrag.** Nutzer: „das mini fenster klappt zu langsam zusammen, lass es nach einer sekunde
+zusammenfallen wenn der cursor es verlässt."
+
+**Umsetzung.** `src/ui/leiste.js`: Der Zuklapp-Timer nach `pointerleave` steht auf **1000 ms**
+(vorher 5000 ms); Aufklapp-Verzug (280 ms), Maße 300 × 56 / 320 × 300, Statuszeile und
+Testhaken unverändert. Kommentar in der Datei und CHANGELOG nachgezogen.
+
+**Gemessen (Edge headless, `web/index.html` 2.5.1, Leiste im Browser-Modus):** pointerleave →
+nach **600 ms** Karte noch offen, nach **1,1 s** geschlossen (`auf`-Klasse weg), 0 JS-Fehler.
+**Gates:** `node tests/run.js` **878/878 grün**, Rauchtest **45/45**, `klassen.py` 0,
+`ethos.py` GRÜN, `umlaute.py` GRÜN, Simulation unverändert, `seite.py --pruefen` und
+`stand.py --pruefen` grün.
+
+**Erzeugnisse 2.5.1:** Einzeldatei **3.581.472 B**, SHA256
+`9DA8261C…CE57E77A`, 0 Außenverweise, `docs/index.html` und `Netzwerk-Labor.html`
+byte-gleich; Windows-`.exe` **13.905.408 B**, ProductVersion **2.5.1**, SHA256
+`B5DBBF93…F59F0E9`, `tools/q-echt.py` **0 Fehler**. Fassung und Release werden mit
+ausdrücklicher Nutzerfreigabe als Patch `v2.5.1` veröffentlicht.
+

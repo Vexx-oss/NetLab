@@ -209,8 +209,8 @@ Sobald ein Versions-Tag gepusht wird, prüft er den Stand, baut das Auslieferung
 legt das Release mit den Anhängen an.
 
 ```bash
-git tag -a v2.5.0 -m "Netzwerk-Labor 2.5.0"
-git push origin v2.5.0
+git tag -a v2.5.1 -m "Netzwerk-Labor 2.5.1"
+git push origin v2.5.1
 ```
 
 Nach etwa einer Minute steht das Release unter
@@ -282,7 +282,7 @@ Größe der aktuellen APK **nicht geprüft**, weil keine gebaut wurde).
 Nötig sind ein Android-SDK mit **build-tools ≥ 35** und ein JDK 17+.
 
 **Zwei Versionszahlen, zwei Bedeutungen:** `versionName` ist die Spielversion aus
-`bauen.py` (`VERSION`, derzeit **2.5.0**). `versionCode` ist die Bauzählung und steht als
+`bauen.py` (`VERSION`, derzeit **2.5.1**). `versionCode` ist die Bauzählung und steht als
 eigene Zahl in `android/bauen.py` (`VERSION_CODE = 20006`, gemessen 26.10.2026). Aus 2.0.5
 abgeleitet ergäbe sie 20005, also genau einen Code unter der schon gebauten APK. Android
 verweigert die Installation über eine alte Fassung, wenn der Code
@@ -321,7 +321,7 @@ ist:
 
 **Historische Momentaufnahme:** gemessen an der eingefrorenen APK vom 06.10.2026 (980.508 Bytes,
 SHA256 `46c90213…`, Seite darin `a2bba5cf…`). Die Zeilen unten sind der damals abgelesene
-`aapt`-Ausschnitt und **nicht** der heutige Stand — heute gilt `VERSION` = 2.5.0 und
+`aapt`-Ausschnitt und **nicht** der heutige Stand — heute gilt `VERSION` = 2.5.1 und
 `VERSION_CODE = 20006` (siehe [STAND.md](STAND.md), gemessen 29.10.2026):
 
 ```
