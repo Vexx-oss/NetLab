@@ -9,13 +9,14 @@ Die Android-Fassung des Netzwerk-Labors: eine WebView-Hülle um **dieselbe**
 Browser-Fassung, die auch die `.exe` und die Seite im Netz benutzen. Eine Quelle,
 kein zweiter Stand — es wird nichts nachgebaut und nichts gepflegt, was es doppelt gibt.
 
-**Fertige App — in dieser Sitzung NICHT gebaut.** In dieser Sitzung wurde **keine APK**
-erzeugt (kein Android-SDK, kein Build nachgewiesen), und im Ordner `Programm/` liegt
-keine. Wer sie baut, erhält `Programm/Netzwerk-Labor-2.3.0-Android.apk`: versionName 2.3.0,
-versionCode **20101** (aus `android/bauen.py`, gemessen 29.10.2026). Die Hülle fordert
-**keine Berechtigung** an (Manifest) und dreht frei (`screenOrientation="unspecified"`,
-`configChanges`); ob eine gebaute APK signiert ist und auf einem Gerät läuft, ist für
-2.1.0 **nicht geprüft**.
+**Fertige App — 30.10.2026 gebaut und geprüft.** Die APK liegt als
+`Programm/Netzwerk-Labor-2.4.0-Android.apk` vor: versionName 2.4.0, versionCode **20400**
+(aus `android/bauen.py`), **1.336.860 Bytes**, SHA256
+`0a661919fafd23c9e97fb9bdbac5e60aef7e523f4cbc27f526033e1db75ad18d`. Der Bau endete mit
+`GRUEN: Signatur gültig, Kennwerte stimmen, keine Rechte, Assets vollständig`; das
+`assets/index.html` (3.557.179 Bytes) ist byte-gleich zum Web-Bau. Die Hülle fordert **keine
+Berechtigung** an (Manifest) und dreht frei (`screenOrientation="unspecified"`, `configChanges`).
+Ob die APK auf einem **echten Gerät** startet, ist gemessen **nicht** geprüft.
 
 **Altnachweis 2.0.x (06.10.2026) — ausdrücklich historisch, keine Aussage über 2.1.0.**
 Damals wurde eine APK mit der Bauzählung **10202** gebaut: die Seite darin
@@ -23,8 +24,8 @@ Damals wurde eine APK mit der Bauzählung **10202** gebaut: die Seite darin
 `d58254c7875a8646cd8543c1ab6e652a0204eb408322289edac23961f25cc659`; die End-APK
 (06.10.2026, 16:19:40) hatte 960.028 Bytes, SHA256
 `88c16df1ea1f8bc9cb5e91d834d48cd7027408c45f1923d07f01205e41c016f7`.
-Diese Zahlen gelten **nur** für jenen Bau: die Einzeldatei von 2.1.0 ist
-**3.159.586 Bytes** groß (SHA256 `53c71182…f33d98d`, siehe [STAND](../docs/STAND.md)).
+Diese Zahlen gelten **nur** für jenen Bau: die Einzeldatei von 2.4.0 ist
+**3.513.631 Bytes** groß (SHA256 `ec871754…2d16a43`, siehe [STAND](../docs/STAND.md)).
 
 **Die APK-Größe ist als Kennung wertlos.** `apksigner` hängt einen Signaturblock von
 genau 4.096 Bytes an und füllt davor auf eine 4.096er-Grenze auf (Hinweis von

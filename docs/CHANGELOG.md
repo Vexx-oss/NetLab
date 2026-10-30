@@ -9,7 +9,18 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
-## 2.3.0 — Runde 3b: Audit-Umsetzung, Ambiente, lebende Zonen (30.10.2026, dritte Nachbesserung)
+## 2.4.0 — ReMASTER (30.10.2026)
+
+**Was diese Fassung ist.** Eine Darstellungs- und Sprachrunde, kein Feature-Sprung: Labor-Fläche
+(Lagebild 2.0 → 3.0: Piktogramme, gerade Kabel mit weichem Knick, klare Zonen, Labels immer sichtbar),
+Bento-Postfach, Heute/Lernstand/Shop/Einstellungen nach Audit (weniger Rahmen, echte Typo-Hierarchie,
+Doppel-Schrägstrich aus allen UI-Labels entfernt, Titel/Kunde-Kollision behoben), sichtbare Ambient-Schicht
+je Theme (Fläche atmet, Dock-Knopf atmet, Primärknopf-Schein, Auswahlring-Puls, Lauflicht auf Live-Kabeln),
+lebende Zonen beim Ziehen, Leisten-Label-Fix, Umlaut-Korrekturen samt Werkzeug. Datenformate, Simulation,
+Codec, Ansichten und Bedienwege sind unverändert; R12 (--dom) bleibt ungemessen, Ambient ist nicht auf
+60 fps geprüft. Details in den drei folgenden Abschnitten, Vertrag: Architektur § 21, Design § 38.
+
+## 2.4.0 — ReMASTER: Audit-Umsetzung, Ambiente, lebende Zonen (30.10.2026)
 
 **Warum.** Nutzer: „dann fixe diese doch, warum hast du das nicht gleich gemacht?" (13 Audit-Signale),
 „Wenn ein PC aus der Zone geschoben wird muss die zone sich mit ihm verschieben", „es fehlen noch so die
@@ -31,7 +42,7 @@ ganzen ambient, atmenden, pulsierenden effekte". Vertrag: Architektur § 21, Des
 **Handwerk.** Zeilenenden LF; Tests 873/873, ethos GRÜN (R9 58, R10 40 — besser als Stand), klassen 0,
 umlaute GRÜN. Kein Push, keine Fassungserhöhung.
 
-## 2.3.0 — Lagebild 3.0: Piktogramme, gerade Kabel, Bento-Postfach (30.10.2026, zweite Nachbesserung)
+## 2.4.0 — ReMASTER: Lagebild 3.0, Piktogramme, gerade Kabel, Bento-Postfach (30.10.2026)
 
 **Warum.** Nutzerkritik nach Lagebild 2.0: „Icon in einem Textfield", „Kästen sehen scheiße aus",
 „eckige Kabel find ich nicht gut", „kein Durchhang, einfach natürlich", „Zonen klar und verständlich",
@@ -57,7 +68,7 @@ fehlen", „POSTFACH wird abgeschnitten". Vertrag: Architektur § 20, Design § 
 Nachweise/Prototypen-Runde3/. Tests 873/873, Klassengleichheit 0, ethos GRUEN nach R9-Bereinigung.
 Kein Push, keine Fassungserhöhung.
 
-## 2.3.0 — Lagebild 2.0: die Labor-Fläche neu gezeichnet (30.10.2026)
+## 2.4.0 — ReMASTER: die Labor-Fläche neu gezeichnet (30.10.2026)
 
 **Warum.** Nutzerbefund: „Es ist hässloch blockig und die daten werden fehlerhaft dargestellt." Drei
 harte Datenfehler zuerst belegt (Zonen-CIDR war per CSS immer ausgeblendet, Portnamen ebenfalls, und
@@ -680,29 +691,3 @@ Zusammenschluss, nur zwei Selektoren verschwanden (beide aus dem gelöschten R8-
 - **Grenzbefunde des 20-Geräte-Laufs** (als Anforderung ins [Konzept 3.0](<entwicklung/Konzept – 3.0.md>) übernommen):
   `platz` > 31 wird **still auf 31 geklemmt** (harte Obergrenze je Sitzung), ein **doppelter Platz** lässt den
   ersten Eintrag gewinnen, und **zwei Sitzungen gleichzeitig gehen nicht** (`sitzung` ist ein Einzelfeld —
-  nur Export/Import holt die alte zurück).
-- **Erzeugnisse:** APK neu gebaut **1.164.828 B** — **die Größe ist stabil, der SHA256 nicht:** derselbe
-  Quellstand ergibt bei jedem Bau **einen anderen Hash** (gemessen: `2208C08A…` → `CF5F2905…`), die APK wird
-  deshalb **ohne feste Prüfsumme** zitiert. Einzeldatei unverändert **2.829.477 B**, `C3C51EDA…828E` — sie
-  **ist** reproduzierbar, ebenso die `.exe` —, und die **Live-Seite ist byte-gleich** dazu (selbst
-  nachgemessen).
----
-
-## 2.0.0 — Klassenraum Stufe A+B (09.10.2026)
-
-**Der Öffnungsweg: die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst** — ohne
-Konto, ohne Server, ohne Netz. Das ist die zweite Hälfte der Fassung 2.0.0; die erste (Übergabe, Ergebnis,
-Karriereumleitung, Denkhilfen, Wiki, Wiederholungssperre, nächster Schritt, Fragen-Generator) steht im
-Abschnitt „2.0.0 — Production Release: das 2.0-Fundament" weiter unten.
-
-Vertrag: [`Architektur.md`](Architektur.md) § 12 (Spezifikation) · § 12.1 (Entscheidungen E1–E8) ·
-§ 12.2 (Bau-Entscheidungen L1–L5).
-
-### Neu
-
-- **Auftragscode `NL-XXXX-XX`** — immer 10 Zeichen, 30 Bit Nutzlast (Sitzung 5 · Art 1 · Index 6 ·
-  Variante 8) plus 2 Prüfzeichen (mod 31 / mod 32). Das Alphabet hat 32 Zeichen und lässt `I`, `O`, `0`
-  und `1` weg — verwechselbare Zeichen kommen nicht vor.
-- **Ergebnis-Code `E-XXXX-XXX`** — 25 Bit Nutzlast (Sitzung 5 · Platz 5 · halbe Sterne 4 · Fehlversuche 2 ·
-  Dauer 9 in 10-s-Einheiten) plus 2 Prüfzeichen. Er trägt das Ergebnis, nicht die Person: kein Name, keine
-  Kennung, kein Gerät.
