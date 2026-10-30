@@ -13,7 +13,7 @@
 .wert .sym{opacity:.9}
 .kopf-knoepfe{border-left:1px solid var(--line);padding-left:8px}
 .kopf-knopf{height:40px;min-width:40px;border-radius:var(--radius-s);transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard)}
-.dock{width:var(--leiste-w);padding:8px 0;gap:4px;background:var(--panel)}
+.dock{width:84px;padding:8px 0;gap:4px;background:var(--panel)}
 .dock-knopf{width:56px;min-height:56px;padding:8px 0;border-radius:var(--radius-s);
   transition:background var(--dauer) var(--ease-standard),color var(--dauer) var(--ease-standard),transform var(--dauer) var(--ease-standard)}
 .dock-knopf:hover{background:var(--panel-2)}
@@ -481,7 +481,6 @@
 
 
 /* Rail zeigt nur Symbole, solange die Kopf-Navigation die Ansichten benennt */
-@media (min-width:1101px){ .dock-text{display:none} .dock-knopf{min-height:52px} }
 .hb-klasse-hinweis{color:var(--faint);font-size:var(--fs-2)}
 
 

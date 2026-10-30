@@ -112,9 +112,6 @@ UI.app = (() => {
       if (a.name === aktiv) b.setAttribute("aria-current", "page");
       return b;
     }));
-    const NAV = ["heute", "labor", "postfach", "wiki", "kunden", "lernstand"];
-    if (el.kopfNav) el.kopfNav.replaceChildren(...liste().filter(a => !a.platzhalter && NAV.includes(a.name)).map(a =>
-      h("button", {type: "button", class: "kopf-nav-knopf" + (a.name === aktiv ? " an" : ""), "data-ansicht": a.name, title: a.titel, onclick: () => ansicht(a.name)}, a.titel)));
     aktualisieren();
   }
   function aktualisieren(){
@@ -210,7 +207,6 @@ UI.app = (() => {
     };
     el.thema = knopf("sonne", "Hell/Dunkel", themaUmschalten);
     el.stand = h("span", {class: "sp-leise", "aria-live": "polite", role: "status"});
-    el.kopfNav = h("nav", {class: "kopf-nav", "aria-label": "Ansichten"});
     const kopf = h("header", {class: "kopf"},
       h("div", {class: "kopf-marke"},
         sv("svg", {viewBox: "0 0 32 32", width: 28, height: 28, class: "marke-sym", "aria-hidden": "true"},
@@ -219,7 +215,6 @@ UI.app = (() => {
         h("span", {class: "marke-name"}, "Netzwerk-Labor"),
         h("span", {class: "marke-version", title: typeof LABOR_BAU !== "undefined" ? "Baukennung " + LABOR_BAU + " (aus dem Inhalt der Bausteine)" : ""}, "v" + (typeof LABOR_VERSION !== "undefined" ? LABOR_VERSION : "dev")),
       ),
-      el.kopfNav,
       el.stand,
       h("div", {class: "kopf-werte"}, el.werte.euro.b, el.werte.ruf.b, el.werte.stufe.b, el.werte.offen.b),
       h("div", {class: "kopf-knoepfe"},
