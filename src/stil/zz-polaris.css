@@ -427,7 +427,7 @@
   .lb-auftrag .am-knoepfe{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
 }
 /* Knoten im Lagebild: INTERNET weiter rechts, damit R-SALON frei bleibt */
-.hb-knoten:nth-of-type(5){left:72% !important}
+.hb-knoten:nth-of-type(5){left:76% !important}
 
 
 /* Tablett: Band in zwei Zeilen, Minimap weicht (überdeckte Geräte) */
@@ -476,3 +476,5 @@
 @media (max-width:900px){
   .lb-auftrag .am-ziele{display:inline-flex;grid-column:2;justify-self:start;padding:4px 8px}
 }
+
+.hb-knoten:nth-of-type(3){left:34% !important}
