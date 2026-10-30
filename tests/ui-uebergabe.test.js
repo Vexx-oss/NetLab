@@ -250,6 +250,58 @@ gruppe("UI: Übergabe" + UEB_ZUSATZ, () => {
     erwarte.wahr(s.toasts.some(t => t[1] === "fehler"), "als Fehler, nicht als Erfolg");
   }));
 
+  /* ---------- Eigener Spielstand: „Von 0 anfangen" (30.10.2026) ---------- */
+  pruefe("Der Einstellungs-Abschnitt „Neu anfangen“ steht da, mit Knopf", uebKapsel(() => {
+    const s = uebStand();
+    const e = s.abschnitte.find(a => a[0] === "Neu anfangen");
+    erwarte.wahr(!!e, "Abschnitt angemeldet");
+    erwarte.gleich(uebKnoepfe(e[1]), ["Von 0 anfangen …"], "genau ein Knopf im Abschnitt");
+    erwarte.passt(e[1].textContent, /Spielstand zurücksetzen/, "sagt, was der Knopf tut");
+  }));
+
+  pruefe("Klick öffnet den Bestätigungsdialog – mit Folgen, Sichern und Abbrechen", uebKapsel(() => {
+    const s = uebStand();
+    uebFinde(s.abschnitte.find(a => a[0] === "Neu anfangen")[1], "button")[0].click();
+    const dialoge = uebFinde(s.behaelter, ".sp-overlay");
+    erwarte.gleich(dialoge.length, 1, "ein Overlay");
+    const knoepfe = uebKnoepfe(s.behaelter).join(" | ");
+    erwarte.enthaelt(knoepfe, "Ja, alles zurücksetzen", "Bestätigen");
+    erwarte.enthaelt(knoepfe, "Abbrechen", "Abbrechen");
+    erwarte.enthaelt(knoepfe, "Erst sichern", "Sichern davor");
+    erwarte.passt(s.behaelter.textContent, /Geht verloren.*Lernstand/s, "sagt, dass auch der Lernstand geht");
+    erwarte.passt(s.behaelter.textContent, /Bleibt.*Einstellungen/s, "sagt, was bleibt");
+    erwarte.enthaelt(s.behaelter.textContent, "Von 0 anfangen?", "eigener Titel");
+  }));
+
+  pruefe("„Ja, alles zurücksetzen“ setzt auf 0 (auch Lernstand) und lädt neu", uebKapsel(() => {
+    const s = uebStand();
+    uebFinde(s.abschnitte.find(a => a[0] === "Neu anfangen")[1], "button")[0].click();
+    uebFinde(s.behaelter, "button").find(b => uebText(b).includes("Ja, alles zurücksetzen")).click();
+    erwarte.gleich(s.uebergaben.length, 1, "genau ein Aufruf");
+    erwarte.gleich(s.uebergaben[0].lernstandBehalten, false, "Lernstand wird gelöscht");
+    erwarte.gleich(s.reloads(), 1, "die Seite lädt neu");
+  }));
+
+  pruefe("Abbrechen im „Neu anfangen“-Dialog setzt nichts zurück", uebKapsel(() => {
+    const s = uebStand();
+    uebFinde(s.abschnitte.find(a => a[0] === "Neu anfangen")[1], "button")[0].click();
+    uebFinde(s.behaelter, "button").find(b => uebText(b).includes("Abbrechen")).click();
+    erwarte.gleich(s.uebergaben.length, 0, "kein Aufruf");
+    erwarte.gleich(s.reloads(), 0, "kein Neuladen");
+  }));
+
+  pruefe("„Erst sichern“ im „Neu anfangen“-Dialog schreibt die Datei und setzt noch nicht zurück", uebKapsel(() => {
+    const s = uebStand();
+    Spiel.st.euro = 42;
+    store.set("labor", Spiel.st);
+    uebFinde(s.abschnitte.find(a => a[0] === "Neu anfangen")[1], "button")[0].click();
+    uebFinde(s.behaelter, "button").find(b => uebText(b).includes("Erst sichern")).click();
+    erwarte.gleich(s.exporte.length, 1, "eine Datei geschrieben");
+    erwarte.gleich(JSON.parse(s.exporte[0][1]).speicher.labor.euro, 42, "der Stand steht in der Datei");
+    erwarte.gleich(s.uebergaben.length, 0, "noch nicht zurückgesetzt");
+    erwarte.gleich(s.reloads(), 0, "noch nicht neu geladen");
+  }));
+
   /* Der Beweis, dass dieser Prüfstand die Welt für die folgenden Dateien NICHT verändert (Befund
      `wiki-2`, 10.10.2026). Er läuft absichtlich als LETZTER Fall der Gruppe: danach hat jeder
      andere Fall den geteilten Zustand schon angefasst. */

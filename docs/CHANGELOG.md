@@ -57,19 +57,29 @@ Hilfeleiter-Slogan aus dem Labor. Vertrag: [`Architektur § 22`](Architektur.md)
   „Jetzt dran" (aktives Ticket → Fortsetzen), Mini-Ticket (Frage/Antwort/Denkhilfe/Anker) und
   Status & Verträge (Ampel, €/h, offene Tickets, Serie) plus fester Fußzeile (Postfach mit Zähler,
   Labor); nur Maus, `tabindex="-1"`, kein Fokusklau.
+- **Eigener Spielstand: „Von 0 anfangen":** neuer Einstellungs-Abschnitt „Neu anfangen" – setzt
+  nach Bestätigung den Spielstand dieses Rechners zurück (Geld, Ruf, Stufe, Kunden, Aufträge,
+  erledigte Tickets, Fehlerdex, Trainings- und Lernstand); die Einstellungen bleiben, vorher lässt
+  sich der Stand als Datei sichern. Der Weg benutzt `Spiel.uebergabe({lernstandBehalten:false})`;
+  fünf neue UI-Testfälle (`tests/ui-uebergabe.test.js`) prüfen Abschnitt, Dialog, Bestätigen,
+  Abbrechen und Sichern. Beim Neuladen wartet die Oberfläche zwei Frames, damit der leere Stand
+  vorher geschrieben ist — vorher kam nach dem Reload der alte Stand zurück (gemessen 30.10.2026).
 
-**Handwerk.** Zeilenenden LF erhalten; gemeinsame Gates: `node tests/run.js` **873/873 grün**
+**Handwerk.** Zeilenenden LF erhalten; gemeinsame Gates: `node tests/run.js` **878/878 grün**
 (103 Testdateien, 95 Module, 0 übersprungen) · `sh tools/test.sh --rauch` **45/45** ·
 `python tools/klassen.py` **0** ·
 `python tools/ethos.py` **GRÜN** und besser als der eingefrorene Stand (R2 20→19, R4 169→153,
 R9 62→58, R10 42→39) · `python tools/umlaute.py` **GRÜN** · `python tools/seite.py --pruefen`
-**GRÜN** (54 Dokumente). Einzeldatei **3.576.420 B**, SHA256 `C5CD676F…162B683`,
+**GRÜN** (54 Dokumente). Einzeldatei **3.581.197 B**, SHA256 `09647D34…94572`,
 **0 Außenverweise**, `docs/index.html` und `Netzwerk-Labor.html` byte-gleich; README-/Doku-Bilder
-(8 Aufnahmen) aus dem neuen Bau erneuert (`docs/bilder/HERKUNFT.md`). Sichtprüfung je Bereich bei
-1440/960/720 mit Vorher-/Nachher-Bildern (`Nachweise/bento/`, nicht versioniert), unabhängige
-Design- und Theme-Prüfung (7 Themes × 7 Ansichten ohne harten Kontrastbruch). R12 (`ethos --dom`)
-ist wie zuvor **nicht gemessen**; die fünf Themes wurden visuell geprüft, nicht im echten
-Tauri-Fenster. Kein Push, keine Fassungserhöhung, kein Release.
+(8 Aufnahmen) aus dem neuen Bau erneuert (`docs/bilder/HERKUNFT.md`). **Programm:** Release-Bau
+`Programm/Netzwerk-Labor.exe` **13.905.408 B**, ProductVersion 2.4.0, SHA256 `0AF8B38C…FEB1B7`,
+`tools/q-echt.py` **0 Fehler** (erster Auftrag mit echter Maus, 5 ★); „Von 0 anfangen" im echten
+Programm per CDP nachgemessen (danach Stufe 1, 0 €, Lernstand 0, Datei 359 KB → 99 KB).
+Sichtprüfung je Bereich bei 1440/960/720 mit Vorher-/Nachher-Bildern (`Nachweise/bento/`, nicht
+versioniert), unabhängige Design- und Theme-Prüfung (7 Themes × 7 Ansichten ohne harten
+Kontrastbruch). R12 (`ethos --dom`) ist wie zuvor **nicht gemessen**; die fünf Themes wurden
+visuell geprüft. Kein Push, keine Fassungserhöhung, kein Release.
 
 ---
 

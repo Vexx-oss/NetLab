@@ -30,11 +30,12 @@ Agenten-Ausnahme (Schreib-Owner begrenzt, ein Schreiber je Datei, Leitung integr
 | Dashboard „Heute" | `src/ui/hub.js`, `src/stil/hub.css` | 12-Spalten-Bento: Hero + Kennzahlen; drei gleich hohe, gleich gekleidete Kacheln Tagesziel/Letzte Sitzung/Klassenraum; Lagebild + „Heute dran" mit echten Werten (Wiederholungen, Bereitschaft, Übungen, Wochenziel); erfundene Signal-Werte entfernt; Klassenraum-Code in der Kachel |
 | Training | `src/ui/training.js`, `src/stil/training.css` | Trainingsarena mit Kennzahlen (Ring, Durchgänge, Bildungsstand), funktionaler Filterleiste, Weiterlernen-Kachel, sieben Lernpfaden mit klebenden Köpfen; je Pfad eine Karte „Nächster Schritt" (nur die primär); Quelle zweizeilig, Ergebnis-/Fehlerkarte ruhiger |
 | Minimierte Leiste | `src/ui/leiste.js`, `src/stil/leiste.css` | „Nebenbei-Cockpit": zugeklappt unveränderte 300 × 56-Statuszeile mit €/h, Ruf, offenen Tickets, Mini-Signal, Hilfe, Öffnen; aufgeklappt 320 × 300 mit „Jetzt dran", vollständig bedienbarem Mini-Ticket und Status & Verträgen plus Fußzeile (Postfach-Zähler, Labor) |
+| Eigener Spielstand | `src/ui/uebergabe.js`, `tests/ui-uebergabe.test.js` | Neuer Abschnitt „Neu anfangen" in den Einstellungen: setzt nach Bestätigung den Spielstand dieses Rechners auf 0 zurück (Geld, Ruf, Stufe, Kunden, Aufträge, Fehlerdex, Trainings- und Lernstand), Einstellungen bleiben; Sichern als Datei und Abbrechen im Dialog; im Tauri-Programm wird die Oberfläche im laufenden Prozess neu aufgebaut, weil ein Seiten-Reload die beim Start eingelesenen Altdaten zurückbrächte (gemessen) |
 | Grundlage/Integration | `src/stil/bento.css`, `src/ui/bento.js`, `tools/vorschau.py`, `docs/Architektur.md` § 22, `docs/entwicklung/Entwurf – Bento 2.5 (Arbeitsplatz).md` | 12-Spalten-Raster, Kachel, Chips, Monogramm; private Vorschau-Bauten für parallele Teams; Gestaltungsvertrag |
 
 ## 3 · Gemessene Abnahme (in dieser Sitzung)
 
-- `node tests/run.js` bzw. `sh tools/test.sh`: **873/873 grün**, 0 übersprungen.
+- `node tests/run.js` bzw. `sh tools/test.sh`: **878/878 grün**, 0 übersprungen.
 - `sh tools/test.sh --rauch`: **45/45 grün** (der erste Lauf war 44/45; einziger Befund
   „Postfach, 960 px: `.sp-leser` scrollt seitlich (+8 px)" — behoben, danach wiederholt, siehe § 5).
 - `python tools/klassen.py`: **0 Klassen ohne CSS-Regel**.
@@ -43,9 +44,20 @@ Agenten-Ausnahme (Schreib-Owner begrenzt, ein Schreiber je Datei, Leitung integr
 - `python tools/umlaute.py`: **GRÜN**, 0 offene Befunde.
 - `node tools/sim-stand.js`: **Simulation unverändert** gegenüber dem Referenzstand.
 - `python tools/seite.py --pruefen`: **GRÜN**, 54 Dokumente, 0 tote Verweise.
-- `python tools/einfach.py` / `--ziel Netzwerk-Labor.html`: **3.576.420 B**, SHA256
-  `C5CD676F…162B683`, **0 Außenverweise**, beide byte-gleich; README-/Doku-Bilder (8 Aufnahmen)
-  auf den neuen Stand gebracht (`docs/bilder/HERKUNFT.md`).
+- `python tools/einfach.py` / `--ziel Netzwerk-Labor.html`: **3.581.197 B**, SHA256
+  `09647D34…94572`, **0 Außenverweise**, beide byte-gleich; README-/Doku-Bilder (8 Aufnahmen)
+  aus dem neuen Bau erneuert (`docs/bilder/HERKUNFT.md`).
+- **Programm gebaut und gestartet:** `Programm/Netzwerk-Labor.exe`, Release-Bau
+  **13.905.408 B**, ProductVersion **2.4.0**, SHA256 `0AF8B38C…FEB1B7`, Integritätsstufe
+  „Mittel"; `python tools/q-echt.py` auf diesem Bau **0 Fehler** (erster Auftrag mit echter Maus
+  gelöst, **5 ★**, Fernwartungs-Schild sichtbar, 5 Bildschirmfotos); das Programm läuft aktuell
+  mit dem echten Spielstand. Alter Bau gesichert unter `Programm/Netzwerk-Labor-vor-Reset.exe`
+  (und `…-vor-Bento.exe`).
+- **„Von 0 anfangen" im echten Programm nachgemessen:** Der E2E-Lauf über CDP auf einer Kopie
+  des echten Spielstands drückte „Neu anfangen" → danach im Speicher **Stufe 1, 0 €, 0 Ruf,
+  Postfach 2, 0 erledigte Tickets, Lernstand 0**, Ansicht „Heute"; die Datei
+  `spielstand.json` schrumpfte von 359 KB auf 99 KB (frischer Stand). Der echte Spielstand
+  unter `%APPDATA%\de.fisi.netzwerklabor` wurde dabei **nicht** angefasst (nur kopiert).
 - Sichtprüfung: `Nachweise/bento/final/` (nicht versioniert) mit je 1440/960/720 für Heute,
   Postfach, Kunden, Kundenakte, Training, Hilfe und Leiste (zugeklappt/aufgeklappt), dazu
   Vorher-Bilder unter `Nachweise/bento/vorher/`.
@@ -57,14 +69,15 @@ Agenten-Ausnahme (Schreib-Owner begrenzt, ein Schreiber je Datei, Leitung integr
 
 ## 4 · Was bewusst nicht passiert ist
 
-- **Kein `git push`, kein Tag, kein Release, keine Fassungserhöhung** — nur ein lokaler Commit.
-- **Keine `.exe`/APK gebaut**; kein Lauf im echten Tauri-Fenster oder Android. Die Optik ist in
-  Edge headless bei 1440/960/720 und in sieben Theme-Zuständen geprüft, nicht im Tauri-WebView.
+- **Kein `git push`, kein Tag, kein Release, keine Fassungserhöhung** — nur lokale Commits.
+- **Keine Android-APK gebaut** (Android-SDK fehlt auf diesem Rechner, siehe 29.10.). Die Optik ist
+  in Edge headless bei 1440/960/720 und in sieben Theme-Zuständen geprüft; der **Release-Bau der
+  `.exe`** ist gebaut, mit `tools/q-echt.py` echt bedient und gestartet (siehe § 3).
 - **R12** (`ethos --dom`, „max. 6 Bedienelemente je Ansicht") bleibt ungemessen; das neue Training
   hat designgemäß mehr Bedienelemente (7 Filter + Kartenknöpfe). Die Entscheidung „einfrieren oder
   Oberfläche reduzieren" steht weiterhin beim Nutzer.
-- **README-/Doku-Bilder** zeigen noch den Stand 2.4.0 vor diesem Umbau (die Bilder sind bewusst
-  versioniert und werden nur mit Browser neu erzeugt; in dieser Sitzung nicht erneuert).
+- **README-/Doku-Bilder** wurden in dieser Sitzung erneuert (8 Aufnahmen, `docs/bilder/HERKUNFT.md`);
+  sie zeigen den Bento-2.5-Bau.
 - Hover-/Tastaturzustände und „Bewegung aus" wurden nicht flächendeckend durchgeklickt.
 
 ## 5 · Der eine Rauch-Befund und seine Behebung
@@ -82,7 +95,7 @@ Ursache und Reparatur sind im Bericht des Postfach-Teams belegt (horizontale Üb
 ## 6 · Nächster Schritt
 
 1. Diesen Stand lokal committen (auf `ausbau-1.2`, kein Push).
-2. Nutzer entscheidet über: Fassung (Vorschlag 2.5.0), Push/Tag/Release, `.exe`/APK-Bau,
-   README-Bilder neu erzeugen, R12 einfrieren oder Oberfläche reduzieren.
-3. Wer die Bilder erneuern will: `Nachweise/2.4-Bilder/foto.py` an den neuen Stand anpassen,
-   `python tools/bilder.py`, dann Cache-Buster in `README.md` erhöhen.
+2. Nutzer entscheidet über: Fassung (Vorschlag 2.5.0), Push/Tag/Release, Android-APK,
+   R12 einfrieren oder Oberfläche reduzieren.
+3. Danach ggf. README-Bilder erneut ziehen, sobald die Fassung steht
+   (`python tools/bilder.py` + Cache-Buster in `README.md`).

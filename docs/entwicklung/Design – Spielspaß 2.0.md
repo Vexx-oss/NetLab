@@ -528,7 +528,7 @@ Bausteine: `src/stil/bento.css` und `src/ui/bento.js`.
   320 × 300 mit „Jetzt dran", Mini-Ticket (Frage/Antwort/Denkhilfe/Anker) und Status & Verträgen
   plus Fußzeile mit Postfach-Zähler und Labor. Nur Maus, kein Fokusklau.
 
-**Was gemessen ist.** 873/873 Tests grün, 0 übersprungen; `klassen.py` 0; `ethos.py` GRÜN und besser
+**Was gemessen ist.** 878/878 Tests grün, 0 übersprungen; `klassen.py` 0; `ethos.py` GRÜN und besser
 als der eingefrorene Stand (R2 19, R4 153, R9 58, R10 39); `umlaute.py` GRÜN; `seite.py --pruefen`
 GRÜN (54 Dokumente). Sichtprüfung je Bereich bei 1440/960/720 (Vorher/Nachher unter
 `Nachweise/bento/`); unabhängige Design- und Theme-Prüfung: 7 Zustände × 7 Ansichten ohne harten
