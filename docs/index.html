@@ -2811,9 +2811,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .kabel:hover .kabel-linie{stroke-width:3.2}
 .kabel.gewaehlt .kabel-huelle{stroke:color-mix(in srgb,var(--accent) 18%,transparent)}
 @keyframes kabel-fliessen{to{stroke-dashoffset:-40}}
-
-/* ===== Hub ===== */
-.hb-seite{max-width:1120px;margin:0 auto;padding:32px 24px;gap:16px}
+.hb-seite {max-width:1120px;margin:0 auto;padding:32px 24px;gap:16px;gap:16px;padding:32px 24px}
 .hb-kopf h2{font:800 var(--fs-8)/1.02 var(--display);letter-spacing:-.04em;max-width:16ch}
 .hb-kopf .hb-serie{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
 .hb-ziel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;color:var(--faint)}
@@ -2866,9 +2864,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .lb-auftrag .am-knoepfe{display:flex;gap:8px;align-items:center}
 .lb-auftrag .sp-abnahme{height:40px;border-radius:var(--radius-s)}
 .lb-auftrag .am-lesen{height:40px;border-radius:var(--radius-s)}
-
-/* Inspektor: eigenes Paneel mit Kopf und Reitern */
-.lb-dock{background:var(--panel);border-left:1px solid var(--line);box-shadow:-24px 0 48px -40px color-mix(in srgb,var(--bg) 90%,transparent)}
+.lb-dock {background:var(--panel);border-left:1px solid var(--line);box-shadow:-24px 0 48px -40px color-mix(in srgb,var(--bg) 90%,transparent);border-left:1px solid var(--line);background:var(--panel)}
 .lb-dock-reiter{gap:4px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .lb-dock-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:8px 10px;border-radius:var(--radius-s);color:var(--faint)}
 .lb-dock-tab.an{color:var(--ink);background:var(--panel-2)}
@@ -2936,6 +2932,63 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   .sp-auftrag{gap:4px}
 }
 
+
+/* ===== Mockup-Genauigkeit (labor.html / hub.html aus Nachweise/Prototypen-Neu/polaris) ===== */
+/* Fläche: 20/24 Rand, 16 Abstand, Paneele als Karten mit Radius 14 */
+.lb-mitte{display:flex;flex-direction:column;gap:16px;padding:16px 20px 16px;min-height:0}
+.lb-auftrag{margin:0;padding:20px 24px;border:1px solid var(--line);border-radius:var(--radius);
+  background:radial-gradient(120% 150% at 100% 0%,color-mix(in srgb,var(--k,var(--accent)) 10%,transparent),transparent 60%),
+    linear-gradient(160deg,color-mix(in srgb,var(--ink) 4%,var(--panel)),var(--panel) 60%);
+  flex:0 0 auto}
+.lb-auftrag::before{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.24em;color:var(--faint);margin:0 0 8px}
+.lb-auftrag .sp-auftrag{padding:0;margin:0;border:0;background:none;box-shadow:none}
+.lb-auftrag .am-zeile{display:grid;grid-template-columns:56px minmax(0,1fr) auto auto;align-items:center;gap:20px}
+.lb-auftrag .sp-kunde-sym{width:56px;height:56px;border-radius:var(--radius);font-size:var(--fs-6);
+  background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font:800 var(--fs-8)/1.02 var(--display);letter-spacing:-.04em}
+.lb-auftrag .am-kunde{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+.lb-auftrag .am-ziele{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.16em;border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.lb-auftrag .am-knoepfe{gap:8px}
+.lb-auftrag .am-lesen{height:44px;border-radius:var(--radius-s);border:1px solid var(--line);background:transparent;color:var(--muted)}
+.lb-auftrag .sp-abnahme{height:44px;border-radius:var(--radius-s);background:var(--accent);color:var(--accent-ink);border:0}
+.lb-leinwand{flex:1 1 auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden}
+.lb-leinwand::before{left:20px;top:16px}
+.lb-leiste-oben{top:36px}
+
+.in-kopf{padding:18px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+.in-kopf-text h3{font:800 var(--fs-5)/1.1 var(--display);letter-spacing:-.03em}
+.in-kopf-text span{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+.in-reiter{display:flex;gap:2px;padding:8px 14px 0;border-bottom:1px solid var(--line)}
+.in-tab{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  padding:10px 10px;border-radius:0;border:0;border-bottom:2px solid transparent;background:none}
+.in-tab.an{color:var(--ink);border-bottom-color:var(--accent);background:none}
+.in-abschnitt{padding:14px 20px;border-bottom:1px solid var(--line)}
+.in-abschnitt h4{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+.in-feld-titel{font:600 var(--fs-1)/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.in-eingabe,.in-auswahl{height:34px;border-radius:var(--radius-xs);background:var(--panel-2);border:1px solid var(--line);font:500 var(--fs-2)/1 var(--mono)}
+.in-hinweis{font-size:var(--fs-3);color:var(--muted)}
+.lb-insp-leer{padding:20px}
+.lb-insp-leer::before{content:"// NICHTS AUSGEWÄHLT";display:block;margin-bottom:8px;
+  font:600 var(--fs-1)/1 var(--mono);letter-spacing:.22em;color:var(--faint)}
+
+.hb-kopf h2{font-size:clamp(var(--fs-7),4.6vw,var(--fs-8))}
+.hb-auftrag{padding:24px;border-radius:var(--radius);border-left:2px solid var(--k,var(--accent))}
+.hb-auftrag h3{font:800 var(--fs-6)/1.06 var(--display);letter-spacing:-.03em}
+.hb-kachel{padding:16px;gap:16px;border-radius:var(--radius);background:var(--panel)}
+.hb-kachel-sym{width:44px;height:44px;border-radius:var(--radius-s)}
+.hb-kacheln{gap:16px}
+
+
+/* Band: Titel darf nicht abschneiden, Begrüßung als ruhige Zeile */
+.lb-auftrag .am-titel{min-width:0}
+.lb-auftrag .am-titel strong{white-space:nowrap;overflow:visible}
+.lb-auftrag :is(h1,h2), .lb-auftrag .am-titel strong{font-size:clamp(var(--fs-6),2.6vw,var(--fs-7))}
+.lb-auftrag .sp-einstieg{background:none;border:0;padding:8px 0 0;gap:4px}
+.lb-auftrag .sp-einstieg-text{font-size:var(--fs-2);line-height:1.4;max-width:72ch;color:var(--muted)}
+.lb-auftrag .sp-einstieg-knoepfe{gap:8px}
+.lb-auftrag .sp-stufe{gap:4px;padding-top:4px}
+.lb-auftrag .sp-einstieg .knopf{height:36px;border-radius:var(--radius-s)}
+
 </style>
 </head>
 <body>
@@ -2943,7 +2996,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "2f4d2bb6";
+const LABOR_BAU = "4d1f97ae";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
