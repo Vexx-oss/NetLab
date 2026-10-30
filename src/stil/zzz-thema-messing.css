@@ -92,6 +92,27 @@
   --ease-standard:cubic-bezier(.2,.7,.3,1);
   --ease-out:cubic-bezier(.16,.84,.44,1);
   --ease-pop:cubic-bezier(.3,1.6,.5,1);
+
+  /* ---- Lagebild 2.0: Materialsprache Messing (nur hier Literale) ---- */
+  --lage-flaeche:#16100B;
+  --lage-raster:rgba(212,176,106,.075);
+  --lage-knoten-bg:#221B14;
+  --lage-knoten-rand:rgba(214,178,106,.46);
+  --lage-knoten-schatten:drop-shadow(0 12px 22px rgba(0,0,0,.55));
+  --lage-name:#F4ECDE;
+  --lage-rolle:#B8A88F;
+  --lage-ip:#D9B577;
+  --lage-platte:#2B231B;
+  --lage-platte-rand:rgba(224,190,120,.38);
+  --lage-kante:#D2A85F;
+  --lage-kante-huelle:rgba(18,14,10,.88);
+  --lage-chip-bg:#241D16;
+  --lage-chip-rand:rgba(214,178,106,.34);
+  --lage-chip-text:#F4ECDE;
+  --lage-mini-bg:rgba(25,21,18,.92);
+  --lage-mini-rand:rgba(214,178,106,.28);
+  --lage-radius:4px;
+  --lage-glow:0 0 0 1px rgba(210,168,95,.30), 0 24px 56px -28px rgba(210,168,95,.28);
 }
 
 /* ============================================================================
@@ -957,17 +978,27 @@ html[data-theme="messing"] .labor .lb-auftrag .am-mehr{
   color:var(--faint);
 }
 
-/* ---- ZeichenflÃ¤che: warmes Papier unter einer tiefen Lampe ---- */
+/* ---- Lagebild 2.0: Messingplakette auf Espresso, Haarlinien-Relief ---- */
 
 html[data-theme="messing"] .labor .lb-leinwand{
   border:1px solid var(--line);
   border-radius:var(--radius);
-  background-color:var(--bg);
+  background-color:var(--lage-flaeche);
   background-image:
-    radial-gradient(120% 100% at 50% -20%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 56%),
-    radial-gradient(90% 70% at 50% 120%, color-mix(in srgb, var(--bg) 85%, transparent), transparent 60%),
-    linear-gradient(180deg, color-mix(in srgb, var(--panel) 86%, var(--bg)), var(--bg) 72%);
+    radial-gradient(120% 92% at 50% -18%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 58%),
+    radial-gradient(90% 70% at 50% 118%, color-mix(in srgb, var(--bg) 68%, transparent), transparent 64%);
   box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+/* Passepartout: eine zweite Haarlinie im Blattrand (Atelier-Signatur) */
+html[data-theme="messing"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  pointer-events:none;
+  z-index:10;
 }
 
 html[data-theme="messing"] .labor .lb-leinwand::before{
@@ -976,58 +1007,177 @@ html[data-theme="messing"] .labor .lb-leinwand::before{
   color:color-mix(in srgb, var(--accent) 58%, var(--faint));
 }
 
-html[data-theme="messing"] .labor .lb-raster-punkt{
-  fill:color-mix(in srgb, var(--accent) 30%, transparent);
+html[data-theme="messing"] .labor .lb-svg{
+  background-color:transparent;
+  background-image:none;
 }
 
-/* ---- GerÃ¤te: Karten mit Messingkante ---- */
+html[data-theme="messing"] .labor .lb-raster-punkt{
+  fill:var(--lage-raster);
+}
+
+html[data-theme="messing"] .labor .lb-raster{
+  opacity:1;
+}
+
+/* ---- Knoten: Messing-Plakette, Haarlinien-Doppelrahmen, Serif-Name ---- */
 
 html[data-theme="messing"] .labor .ger-karte{
-  rx:var(--radius-xs);
-  fill:var(--panel-2);
-  stroke:var(--line);
+  fill:var(--lage-knoten-bg);
+  stroke:var(--lage-knoten-rand);
   stroke-width:1;
+  rx:var(--lage-radius);
+  filter:drop-shadow(0 2px 0 var(--lage-platte-rand)) drop-shadow(0 -1px 0 color-mix(in srgb, var(--ink) 9%, transparent)) var(--lage-knoten-schatten);
+  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard), filter var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="messing"] .labor .ger-auswahl{
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:none;
+  rx:var(--radius-s);
 }
 
 html[data-theme="messing"] .labor .ger.hover .ger-karte{
-  fill:var(--panel-3);
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 82%, var(--panel-3));
   stroke:var(--line-2);
 }
 
 html[data-theme="messing"] .labor .ger.gewaehlt .ger-karte,
 html[data-theme="messing"] .labor .ger.zielt .ger-karte{
   stroke:var(--accent);
-  stroke-width:1.6;
+  stroke-width:1.4;
+  filter:drop-shadow(0 0 0 1px var(--accent)) drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 30%, transparent)) var(--lage-knoten-schatten);
+}
+
+html[data-theme="messing"] .labor .ger.gewaehlt .ger-auswahl,
+html[data-theme="messing"] .labor .ger.zielt .ger-auswahl{
+  opacity:.5;
+}
+
+html[data-theme="messing"] .labor .ger.ohne-ip .ger-karte{
+  stroke:var(--bad);
+  stroke-dasharray:4 4;
+}
+
+html[data-theme="messing"] .labor .ger.ohne-ip .ger-name{
+  fill:color-mix(in srgb, var(--lage-name) 72%, var(--faint));
+}
+
+html[data-theme="messing"] .labor .ger.aus .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 70%, var(--bg));
+  stroke:color-mix(in srgb, var(--lage-knoten-rand) 55%, transparent);
+}
+
+html[data-theme="messing"] .labor .ger.aus .ger-name{
+  fill:var(--faint);
+}
+
+html[data-theme="messing"] .labor .ger.aus .ger-bild{
+  opacity:.42;
+}
+
+html[data-theme="messing"] .labor .ger .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
+  stroke:var(--lage-platte-rand);
+  stroke-width:1;
+}
+
+html[data-theme="messing"] .labor .ger.hover .gb-kachel,
+html[data-theme="messing"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="messing"] .labor .ger.zielt .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
+  stroke:var(--accent);
 }
 
 html[data-theme="messing"] .labor .ger-name{
-  font:600 var(--fs-1)/1 var(--display);
-  letter-spacing:.14em;
-  fill:var(--ink);
+  font:700 var(--fs-2)/1 var(--display);
+  letter-spacing:.02em;
+  fill:var(--lage-name);
+}
+
+html[data-theme="messing"] .labor .ger-rolle{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  fill:var(--lage-rolle);
 }
 
 html[data-theme="messing"] .labor .ger-ip{
   font:500 var(--fs-1)/1 var(--mono);
-  fill:color-mix(in srgb, var(--accent) 62%, var(--muted));
+  letter-spacing:.02em;
+  fill:var(--lage-ip);
 }
 
-html[data-theme="messing"] .labor .kabel-linie{
-  stroke-width:2.4;
-  stroke-opacity:.85;
+html[data-theme="messing"] .labor .ger-mehr{
+  fill:var(--lage-rolle);
+  font-weight:500;
+}
+
+/* ---- Kanten: Messing-Haarlinie, Ziegel bei Störung (Farbe über --kf) ---- */
+
+html[data-theme="messing"] .labor .kabel{
+  --kf:var(--lage-kante);
+}
+
+html[data-theme="messing"] .labor .kabel.k-unten{
+  --kf:var(--bad);
+}
+
+html[data-theme="messing"] .labor .kabel.k-aus{
+  --kf:var(--warn);
+}
+
+html[data-theme="messing"] .labor .kabel.vlan-trunk{
+  --kf:var(--ink);
 }
 
 html[data-theme="messing"] .labor .kabel-huelle{
-  stroke:color-mix(in srgb, var(--ink) 18%, transparent);
-  stroke-width:7;
+  stroke:var(--lage-kante-huelle);
+}
+
+html[data-theme="messing"] .labor .kabel:hover .kabel-linie,
+html[data-theme="messing"] .labor .kabel.gewaehlt .kabel-linie{
+  stroke:var(--accent);
 }
 
 html[data-theme="messing"] .labor .kabel-port{
-  fill:color-mix(in srgb, var(--faint) 88%, transparent);
+  fill:var(--lage-rolle);
+  letter-spacing:.06em;
 }
 
-html[data-theme="messing"] .labor .ps-grund{
-  fill:var(--panel-2);
-  stroke:var(--line-2);
+/* ---- Zonen: Sepia-Wäsche mit Kupferrand, Chip als Schild ---- */
+
+html[data-theme="messing"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg);
+  stroke:var(--lage-chip-rand);
+  stroke-width:1;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="messing"] .labor .zone-label{
+  filter:drop-shadow(0 6px 14px color-mix(in srgb, var(--bg) 55%, transparent));
+}
+
+html[data-theme="messing"] .labor .zone-text{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.08em;
+  fill:var(--lage-chip-text);
+}
+
+html[data-theme="messing"] .labor .zone-gw{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.04em;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="messing"] .labor .zone-punkt{
+  stroke:var(--lage-chip-bg);
+  stroke-width:1;
+}
+
+@media (max-width:900px){
+  html[data-theme="messing"] .labor .lb-leinwand::after{display:none}
 }
 
 /* ---- Schwebende Werkzeuge: Milchglas Ã¼ber warmem Grund ---- */
@@ -1074,21 +1224,48 @@ html[data-theme="messing"] .labor .lb-hinweis{
   backdrop-filter:blur(8px);
 }
 
+/* ---- Legende: redaktionelle Zeile mit drei echten Linienmustern ---- */
+
 html[data-theme="messing"] .labor .lb-legende{
+  background:color-mix(in srgb, var(--bg) 78%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.20em;
   text-transform:uppercase;
   gap:16px;
+  box-shadow:none;
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
 }
 
-/* ---- Minimap: kleine Werkstattkarte ---- */
+html[data-theme="messing"] .labor .lb-legende .lg::before{
+  width:20px;
+  height:2px;
+  border-radius:999px;
+  background:var(--lage-kante);
+  border:0;
+}
+
+html[data-theme="messing"] .labor .lb-legende .lg-getrennt::before{
+  background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px);
+}
+
+html[data-theme="messing"] .labor .lb-legende .lg-kein::before{
+  height:1px;
+  background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px);
+}
+
+/* ---- Minimap: kleine Werkstattkarte aus Milchglas ---- */
 
 html[data-theme="messing"] .labor .wk-mini{
-  background:color-mix(in srgb, var(--glas) 90%, transparent);
-  border:1px solid var(--line);
+  background:var(--lage-mini-bg);
+  border:1px solid var(--lage-mini-rand);
   border-radius:var(--radius-s);
   box-shadow:var(--schatten);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
 }
 
 html[data-theme="messing"] .labor .wk-mini-titel{
@@ -1099,22 +1276,30 @@ html[data-theme="messing"] .labor .wk-mini-titel{
 }
 
 html[data-theme="messing"] .labor .wk-mini-svg{
-  background-color:var(--bg);
+  background-color:color-mix(in srgb, var(--bg) 55%, transparent);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
 }
 
 html[data-theme="messing"] .labor .wk-mini-kabel-linie{
-  stroke:color-mix(in srgb, var(--accent) 30%, transparent);
+  stroke:color-mix(in srgb, var(--lage-kante) 45%, transparent);
 }
 
 html[data-theme="messing"] .labor .wk-mini-punkt{
+  fill:var(--lage-rolle);
   stroke:var(--bg);
 }
 
 html[data-theme="messing"] .labor .wk-mini-punkt.an{
   fill:var(--accent);
   stroke:var(--bg);
+}
+
+html[data-theme="messing"] .labor .wk-mini-rahmen{
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:4 3;
 }
 
 html[data-theme="messing"] .labor .wk-mini-knopf{

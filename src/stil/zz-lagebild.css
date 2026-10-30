@@ -1,0 +1,114 @@
+/* ============================================================================
+   LAGEBILD 2.0 — Basis-Gestaltung der Labor-Fläche (.lb-leinwand / .lb-svg)
+   ----------------------------------------------------------------------------
+   Vertrag: docs/entwicklung/Entwurf – Lagebild 2.0 (Gestaltungsvertrag).md,
+   Abschnitte 3.1–3.5 (Knoten, Kanten, Zonen, Zoom, Legende/Minimap) und 3.6
+   (Theme-Tokens). Die Datei trägt die BASIS; die Materialsprache je Theme kommt
+   aus den Tokens (zz-polaris.css :root = POLARIS-Default, zzz-thema-<id>.css =
+   Theme) plus wenigen html[data-theme="…"]-Regeln in den Theme-Dateien.
+
+   Regeln dieser Datei (Ethos R1–R3): jede Farbe/jeder Radius/jede Schrift
+   ausschließlich über var(--lage-…, var(--fallback)) — kein Literal. Abstände
+   aus {0,4,8,12,16,24,32}; Dauer nur var(--dauer); Schatten nur var(--lage-…).
+   Schichtenfolge (editor.js): .lb-s-zonen < .lb-s-kabel < .lb-s-geraete <
+   .lb-s-karten < .lb-s-ueber < .lb-s-pakete < .lb-s-band.
+   Token-Form: --lage-knoten-schatten ist ein FILTER-Wert (none | drop-shadow(…)),
+   --lage-glow ein box-shadow-Wert (none | 0 0 …).
+   ============================================================================ */
+
+/* ---- Fläche und Raster ------------------------------------------------ */
+.lb-svg{background:var(--lage-flaeche, var(--bg))}
+.lb-raster-punkt{fill:var(--lage-raster, var(--bg-raster))}
+.lb-raster.fein{opacity:.35}
+
+/* ---- Knoten: Beschriftungsträger, kein Leerraum-Kasten -----------------
+   Geometrie (140×76 / 110×64, Text linksbündig ab x=-KW/2+48) setzt
+   src/ui/editor.js. CSS: Haarlinien-Rahmen, Typ-Platte, Auswahlring. */
+.ger{cursor:grab}
+.ger-treffer{fill:transparent}
+.ger-karte{fill:var(--lage-knoten-bg, var(--panel)); stroke:var(--lage-knoten-rand, var(--line)); stroke-width:1;
+  rx:var(--lage-radius, var(--radius-s)); filter:var(--lage-knoten-schatten, none);
+  transition:stroke var(--dauer) var(--ease-standard), fill var(--dauer) var(--ease-standard)}
+.ger.hover .ger-karte{stroke:var(--line-2)}
+.ger.gewaehlt .ger-karte, .ger.zielt .ger-karte{stroke:var(--accent); stroke-width:1.5}
+.ger-auswahl{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4; opacity:0;
+  transition:opacity var(--dauer) var(--ease-standard)}
+.ger.gewaehlt .ger-auswahl{opacity:1}
+/* „ohne Link" ist ein Zustand, kein Fehlerbild: gestrichelter Koralle-Rahmen */
+.ger.ohne-ip .ger-karte{stroke:var(--bad); stroke-dasharray:4 3;
+  fill:color-mix(in srgb, var(--bad) 6%, var(--lage-knoten-bg, var(--panel)))}
+.ger.aus .ger-karte{stroke:var(--faint); stroke-dasharray:2 3}
+.ger.aus .ger-bild{opacity:.5}
+/* Icon-Platte: 28×28 links (Skalierung des Gerätebilds macht editor.js) */
+.ger .gb-kachel{fill:color-mix(in srgb, var(--g, var(--accent)) 12%, var(--lage-platte, var(--panel-2)));
+  stroke:var(--lage-platte-rand, var(--line))}
+.ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent)}
+.ger .gb-glyph path{stroke:var(--g, var(--ink))}
+/* Zoom-Stufen (Vertrag 3.4): wenig-text (< 0,9) nimmt die Rolle, klein (< 0,6) zusätzlich die
+   Adresse, sehr-klein (< 0,4) zuletzt den Namen. Zonen-Chips (.zone-text/.zone-gw) fallen in
+   KEINER Stufe weg — die CIDR bleibt immer lesbar (Befund B1). */
+.lb-svg.wenig-text .ger-rolle, .lb-svg.klein .ger-ip, .lb-svg.klein .ger-mehr, .lb-svg.sehr-klein .ger-name, .kabel-ende.ohne-name .kabel-port{display:none}
+
+/* ---- Kanten: Verbindungen, kein Gekritzel ------------------------------
+   Endpunkte an der Knotenkante, orthogonal gerundet und Port-LED zeichnet
+   editor.js. Hier: Farbe/Zustand. --kf trägt die Kantenfarbe. */
+.kabel{--kf:var(--lage-kante, var(--mint))}
+.kabel.k-unten{--kf:var(--bad)}
+.kabel.k-aus{--kf:var(--warn)}
+.kabel.vlan-trunk{--kf:var(--ink)}
+.kabel-treffer{fill:none; stroke:transparent; stroke-width:14; cursor:pointer}
+/* Hülle = Flächenfarbe: trennt Kabel von Raster und Zonenwäsche */
+.kabel-huelle{fill:none; stroke:var(--lage-kante-huelle, var(--lage-flaeche, var(--bg)));
+  stroke-width:4; stroke-linecap:round; vector-effect:non-scaling-stroke}
+.kabel-linie{fill:none; stroke:var(--kf); stroke-width:1.5; stroke-linecap:round;
+  vector-effect:non-scaling-stroke; transition:stroke-width var(--dauer) var(--ease-standard)}
+.k-unten .kabel-linie, .k-unten .kabel-trunk-aussen, .k-unten .kabel-trunk-innen{stroke-dasharray:5 4}
+.k-aus .kabel-linie, .k-aus .kabel-trunk-aussen, .k-aus .kabel-trunk-innen{stroke-dasharray:1 5}
+.kabel.gewaehlt .kabel-linie, .kabel:hover .kabel-linie{stroke-width:2.5}
+.kabel:hover .kabel-treffer{stroke:color-mix(in srgb, var(--panel-3) 70%, transparent)}
+.kabel.gewaehlt .kabel-treffer{stroke:var(--accent-soft)}
+/* Trunk: zwei parallele Haarlinien (4,5 breit, 2,5 ausgespart) statt Doppellinie */
+.kabel-trunk-aussen{fill:none; stroke:var(--kf); stroke-width:4.5; stroke-linecap:round; vector-effect:non-scaling-stroke}
+.kabel-trunk-innen{fill:none; stroke:var(--lage-kante-huelle, var(--lage-flaeche, var(--bg)));
+  stroke-width:2.5; stroke-linecap:round}
+.kabel.trunk .kabel-huelle{stroke-width:6}
+/* Port-LED exakt auf der Rahmenlinie (r=2,6 setzt editor.js) */
+.port-led{stroke:var(--lage-flaeche, var(--bg)); stroke-width:1; pointer-events:none; vector-effect:non-scaling-stroke}
+/* Kabel-Enden (LED + Portname) liegen im Layer .lb-s-ueber über den Karten; welche Enden
+   sichtbar sind (Zoom, Hover, Auswahl, Kollision), entscheidet der Renderer über .an. */
+.kabel-ende{display:none; pointer-events:none}
+.kabel-ende.an{display:inline}
+
+/* ---- Zonen: Flächen mit Namen, keine Vielecke -------------------------- */
+.zone, .ger-text{pointer-events:none}
+.zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
+.zone-d{--zf:var(--zone-d); --zl:var(--zone-d-linie)} .zone-e{--zf:var(--zone-e); --zl:var(--zone-e-linie)}
+.zone-flaeche{fill:var(--zf, transparent); stroke:var(--zl, var(--line)); stroke-width:1; stroke-dasharray:6 5;
+  stroke-linejoin:round; vector-effect:non-scaling-stroke}
+/* Chip: Rahmen + Punkt + CIDR; wird in KEINER Zoomstufe ausgeblendet (B1) */
+.zone-label rect{fill:var(--lage-chip-bg, var(--panel)); stroke:var(--lage-chip-rand, var(--line));
+  stroke-width:1; rx:var(--radius-xs)}
+.zone-punkt{fill:var(--zl, var(--accent)); stroke:none}
+
+/* ---- Legende: Farben exakt wie die Kanten ----------------------------- */
+.lb-legende{position:absolute; left:16px; bottom:12px; display:flex; align-items:center; gap:12px;
+  padding:4px 8px; border:1px solid var(--lage-chip-rand, var(--line)); border-radius:var(--lage-radius, var(--radius-s));
+  background:var(--lage-chip-bg, var(--glas)); box-shadow:var(--lage-glow, none); pointer-events:none;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--lage-chip-text, var(--faint));
+  text-transform:uppercase}
+.lb-legende .lg{display:inline-flex; align-items:center; gap:8px}
+.lb-legende .lg::before{content:""; width:20px; height:2px; border-radius:999px; background:var(--lage-kante, var(--mint))}
+.lb-legende .lg-getrennt::before{background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px)}
+.lb-legende .lg-kein::before{background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px)}
+
+/* ---- Minimap: kleine Seekarte statt Punktewolke ------------------------ */
+.wk-mini{background:var(--lage-mini-bg, var(--panel-2)); border:1px solid var(--lage-mini-rand, var(--line));
+  border-radius:var(--lage-radius, var(--radius))}
+.wk-mini-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.22em; color:var(--faint); text-transform:uppercase}
+.wk-mini-svg{background:var(--lage-flaeche, var(--bg)); border:1px solid var(--lage-mini-rand, var(--line))}
+.wk-mini-kabel-linie{stroke:var(--lage-mini-rand, var(--line-2)); stroke-width:1; vector-effect:non-scaling-stroke}
+.wk-mini-punkt{fill:var(--g, var(--muted)); stroke:var(--lage-flaeche, var(--bg)); stroke-width:1}
+.wk-mini-punkt.an{fill:var(--accent)}
+.wk-mini-rahmen{fill:none; stroke:var(--accent); stroke-width:1.25; stroke-dasharray:6 4; vector-effect:non-scaling-stroke}
+.wk-mini-zoomtext{font:600 var(--fs-1)/1 var(--mono); color:var(--faint)}

@@ -14,8 +14,11 @@ from pathlib import Path
 
 HIER = Path(__file__).resolve().parent.parent
 SRC = HIER / "src"
+# vector-effect und non-scaling-stroke sind SVG-ATTRIBUTE, keine Klassen: hub.js baut ein
+# <path>-Tag als Template-String, klassen.py liest die Attributwerte dort als "Klassen" (Fehltreffer,
+# am 30.10.2026 belegt: beide Wörter kommen nur in diesem String vor). Sie werden ausgenommen.
 AUSNAHMEN = re.compile(r"^(aria-|data-|stroke-|font-|text-|line-|letter-|white-|pointer-|touch-|user-|object-|z-|tab-|line-height|"
-                       r"bg-|sans-|mono-|no-|on-|is-|has-)")
+                       r"bg-|sans-|mono-|no-|on-|is-|has-|vector-|non-scaling-)")
 ZEILE = re.compile(r"class(?:List|Name)?\b|closest\(|querySelector|\$\$?\(")
 OHNE = re.compile(r"""\bid:\s*("[^"]*"|'[^']*'|`[^`]*`)|url\(#[^)]*\)|Bus\.(?:an|aus|senden)\(\s*"[^"]*" """.strip())
 MARKEN = {

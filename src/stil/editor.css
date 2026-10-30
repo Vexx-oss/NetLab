@@ -31,7 +31,9 @@
   padding:8px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein var(--dauer) ease-out}
 /* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
    deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.wenig-text .zone-schild, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .lb-svg.klein .zone-schild, .lb-s-zonen .zone-schild, .lb-s-zonen .zone-text, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+/* Welche Textzeilen die Zoom-Stufen ausblenden, steht in zz-lagebild.css (Lagebild 2.0, Vertrag 3.4) —
+   dort bei den Knoten, damit tests/ui-typografie.test.js hier die erste .ger-name{…}-Regel als Font-Regel liest. */
 .pa-fach.zieht{opacity:.35; pointer-events:none}
 @keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
 .pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:0 0 4px 4px}
@@ -69,13 +71,11 @@
 .as-text span{color:var(--muted); font-size:var(--fs-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
 .lb-leinwand{position:relative; flex:1 1 auto; min-height:120px; overflow:hidden; container-type:inline-size}
-.lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--bg); touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
+.lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
 .lb-svg:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .lb-svg.greift, .lb-svg.zieht, .lb-svg.zieht .ger{cursor:grabbing}
 .labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg, .griff{cursor:crosshair}
 .labor[data-werkzeug="platzieren"] .lb-svg{cursor:copy}
-.lb-raster-punkt{fill:var(--line)}
-.lb-raster.fein{opacity:.35}
 
 /* schwebende Werkzeugleisten
    z-index:20 ist kein Schmuck: `.lb-auftrag` (z-index:10) trägt die Auftragsmappe, und
@@ -148,30 +148,24 @@
 .lb-leer strong{display:block; font:800 var(--fs-5)/1.2 var(--display); color:var(--ink); margin-bottom:8px}
 
 /* ---- Geräte ---- */
-.ger{cursor:grab}
-.ger-treffer{fill:transparent}
-/* § 18.8: Gerät als ruhige Karte auf dem Punktraster (A) */
-.ger-karte{fill:var(--panel); stroke:var(--line); stroke-width:1}
-.ger.hover .ger-karte, .gw-schild rect{fill:var(--panel-2); stroke:var(--line-2)}
-.ger.gewaehlt .ger-karte, .ger.zielt .ger-karte{stroke:var(--accent); stroke-width:2}
-.ger-auswahl{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4; opacity:0; transition:opacity var(--dauer)}
-.ger.gewaehlt .ger-auswahl, .lb-sim:hover .lb-sim-griff::after{opacity:1}
-.ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.4}
-.ger.hover .gb-kachel{fill:var(--panel-3); stroke:var(--g)}
-/* TOPO-2: Beschriftungen der Fläche lesbar machen – keine Schrift unter 12 px.
-   Adressen und Portnamen in Monospace (Ziffern stehen untereinander), Kontur-Schatten gegen den Untergrund. */
-.ger-name{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; fill:var(--ink); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
-.ger-ip{font:500 var(--fs-2)/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
-.ger-ip.schwach{fill:var(--faint); font-style:italic}
-.ger.aus .gb{opacity:.38}
-.ger.aus .ger-name{fill:var(--muted)}
-.labor[data-ebene="ip"] .ger.ohne-ip .gb-kachel{stroke:var(--faint); stroke-dasharray:4 3; fill:var(--panel)}
-.labor[data-ebene="ip"] .ger.ohne-ip .gb-glyph path{stroke:var(--faint)}
+/* Knoten-Karte, Auswahlring und Icon-Platte stehen in zz-lagebild.css (Lagebild 2.0).
+   Hier bleiben die Textzeilen (tests/ui-typografie.test.js liest sie in dieser Datei) und Effekte. */
+.gw-schild rect{fill:var(--panel-2); stroke:var(--line-2)}
+.lb-sim:hover .lb-sim-griff::after{opacity:1}
+/* TOPO-2: SVG-Beschriftung nie unter --fs-1 (11 px); Adressen und Portnamen in Monospace,
+   damit die Ziffern untereinander stehen. Farbe über die Lagebild-Tokens (Fallback = POLARIS). */
+.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; fill:var(--lage-name, var(--ink))}
+.ger-rolle{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-rolle, var(--muted))}
+.ger-ip{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-ip, var(--faint))}
+.ger-mehr{font:500 var(--fs-1)/1 var(--mono); fill:var(--faint)}
+/* Zonen-Chip (Lagebild 2.0 § 3.3): CIDR in Mono, Gateway-Zusatz leise. */
+.zone-text{font:600 var(--fs-1)/1 var(--mono); fill:var(--lage-chip-text, var(--ink)); paint-order:stroke; stroke:var(--lage-chip-bg, var(--panel)); stroke-width:3px; stroke-linejoin:round}
+.zone-gw{font:500 var(--fs-1)/1 var(--mono); fill:var(--muted)}
 .ger.blitz-ok .gb-kachel{stroke:var(--ok); stroke-width:3; fill:var(--ok-soft)}
 .ger.blitz-fehler .gb-kachel{stroke:var(--bad); stroke-width:3; fill:var(--bad-soft)}
 .ger.blitz-fehler .gb{animation:wackeln var(--dauer-lang) ease-in-out}
 @keyframes wackeln{20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)}}
-.badge, .ps{cursor:help}
+.badge{cursor:help}
 .badge-warn circle{fill:var(--warn); stroke:var(--bg); stroke-width:2}
 .badge-warn path{stroke:var(--accent-ink); stroke-width:2.4; stroke-linecap:round; fill:none}
 .badge-ungespeichert circle{fill:var(--info); stroke:var(--bg); stroke-width:2}
@@ -179,26 +173,13 @@
 .badge-aus text{font:700 var(--fs-1)/1 var(--body); fill:var(--muted); letter-spacing:.05em}
 
 /* ---- Kabel ---- */
-.kabel{--kf:var(--ok)}
-.kabel.k-aus{--kf:var(--warn)}
-.kabel.k-unten{--kf:var(--bad)}
-.kabel.vlan-trunk{--kf:var(--ink)}
-.kabel-treffer{stroke:transparent; stroke-width:14; cursor:pointer}
-.kabel-linie{stroke:var(--kf); stroke-width:2.6; stroke-linecap:round; stroke-opacity:.9}
-.kabel-trunk-aussen{stroke:var(--kf); stroke-width:7.5; stroke-linecap:round; stroke-opacity:.9}
-.kabel-trunk-innen{stroke:var(--bg); stroke-width:2.6; stroke-linecap:round}
-.k-unten .kabel-linie, .k-unten .kabel-trunk-aussen{stroke-dasharray:8 6}
-.k-aus .kabel-linie, .k-aus .kabel-trunk-aussen{stroke-dasharray:2 6}
-.kabel:hover .kabel-treffer{stroke:var(--panel-3); stroke-opacity:.7}
-.kabel.gewaehlt .kabel-treffer{stroke:var(--accent-soft); stroke-opacity:1}
-.kabel.gewaehlt .kabel-linie{stroke-width:3.4}
-.ps-grund{fill:var(--panel-2); stroke:var(--line-2); stroke-width:1.2}
-/* Statusfarben EINMAL (vorher drei Blöcke je Farbe, ethos R10): Netzkabel, Port-Punkte, Splitter, Schild */
-.ps-oben path, .pd-oben{fill:var(--ok)}
-.ps-unten path, .pd-unten, .splitter{fill:var(--bad)}
-.ps-aus rect, .pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
-.kabel-port{display:none; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
-   /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
+/* Linie, Hülle, Trunk und Port-LED stehen in zz-lagebild.css (Lagebild 2.0 § 3.2).
+   Hier bleibt die Portnummer als SVG-Text (tests/ui-typografie.test.js prüft sie) und die
+   Statusfarben der Port-Punkte. */
+.pd-oben{fill:var(--ok)}
+.pd-unten, .splitter{fill:var(--bad)}
+.pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
+.kabel-port{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--lage-ip, var(--muted)); paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3px; stroke-linejoin:round; pointer-events:none}
 .ger-ip.kopierbar{cursor:pointer; pointer-events:auto}
 .ger-ip.kopierbar:hover, .ger-ip.kopierbar:focus-visible{fill:var(--accent); text-decoration:underline}
 .ger-ip.kopierbar:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
@@ -206,16 +187,12 @@
 .vlan-schild text{font:700 var(--fs-1)/1 var(--mono); fill:var(--accent-ink)}
 .vlan-schild.trunk rect{fill:var(--panel-2); stroke:var(--ink)}
 .vlan-schild.trunk text{fill:var(--ink)}
-.vlan-schild, .zone, .karte, .gw-schild, .lb-s-band, .lb-s-pakete, .paket{pointer-events:none}
+.vlan-schild, .karte, .gw-schild, .lb-s-band, .lb-s-pakete, .paket{pointer-events:none}
 
 /* ---- Zonen (Ebene IP-Netze) ---- */
-.zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
-.zone-d{--zf:var(--zone-d); --zl:var(--zone-d-linie)} .zone-e{--zf:var(--zone-e); --zl:var(--zone-e-linie)}
-.zone-flaeche{fill:var(--zf); stroke:var(--zl); stroke-width:1.5; stroke-linejoin:round}
-.zone-schild{fill:var(--panel); stroke:var(--zl); stroke-width:1.5}
-/* Zonenbeschriftung liegt auf dem Zonenschild (.zone-schild, fill:var(--panel)) – Kontur deshalb in --panel,
-   damit der Halo in hell und dunkel mit dem eigenen Untergrund verschmilzt statt als Naht zu erscheinen. */
-.zone-text{font:700 var(--fs-2)/1 var(--mono); fill:var(--ink); paint-order:stroke; stroke:var(--panel); stroke-width:2.5px; stroke-linejoin:round}
+/* Fläche, Chip-Rahmen und Punkt stehen in zz-lagebild.css (Lagebild 2.0 § 3.3); .zone-text/.zone-gw
+   sind SVG-Text und bleiben oben bei den Textzeilen. Die frühere Regel .lb-s-zonen .zone-flaeche
+   {stroke:none} ist entfallen — Islands tragen jetzt eine gestrichelte Kante. */
 
 /* ---- Kärtchen (MAC/ARP/Routen) ---- */
 .karte-rahmen{fill:var(--panel); stroke:var(--line-2); stroke-width:1}
@@ -361,15 +338,7 @@
   .lb-zoomtext{height:44px; min-width:68px}
 }
 
-/* § 18: Szenen-Legende unten links – Glas-Panel mit Mono-Mikrolabels wie im Prototyp.
-   Der Hinweis darüber (`.lb-hinweis`, bottom:44px) überdeckt sie so nicht mehr. */
-.lb-legende{position:absolute; left:16px; bottom:12px; display:flex; align-items:center; gap:12px; padding:4px 8px; border-radius:var(--radius-s); background:var(--glas);
-  border:1px solid var(--line); box-shadow:0 4px 14px color-mix(in srgb, var(--bg) 60%, transparent); pointer-events:none;
-  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; color:var(--faint)}
-.lb-legende .lg{display:inline-flex; align-items:center; gap:8px}
-.lb-legende .lg::before{content:""; width:20px; height:1px; background:var(--line-2)}
-.lb-legende .lg-verbunden::before{background:var(--accent)}
-.lb-legende .lg-kein::before{background:var(--warn); height:0; border-top:1px dashed var(--warn)}
+/* Legende (.lb-legende/.lg-*) und Minimap-Feinschliff: zz-lagebild.css (Lagebild 2.0 § 3.5). */
 
 /* A: leerer Inspektor sagt, was zu tun ist, statt weisse Flaeche */
 #labor-inspektor:empty::before{content:"// INSPEKTOR · GERÄT WÄHLEN"; display:block; padding:16px;
@@ -403,28 +372,8 @@
   .lb-auftrag .am-ziele{padding:4px 8px}
 }
 
-/* ---- POLARIS-Feinschliff der Fläche (29.10.2026) ----
-   Bewusst höhere Spezifität als zz-polaris.css (lädt zuletzt): die Grundwerte dort bleiben,
-   hier gewinnt nur der Feinschliff. Alle Farben/Dauern aus basis.css (§ 18), keine Literale.
-   Trefferflächen bleiben unangetastet: .ger-treffer 116×80, .kabel-treffer stroke-width 14. */
-/* Karten: Schatten nur bei Hover/Auswahl (vorher dauerhaft), weich überblendet */
-.lb-svg .ger-karte{filter:drop-shadow(0 0 0 transparent); transition:stroke var(--dauer) var(--ease-standard), filter var(--dauer) var(--ease-standard)}
-.lb-svg .ger.hover .ger-karte{filter:drop-shadow(0 8px 16px color-mix(in srgb, var(--bg) 70%, transparent))}
-.lb-svg .ger.gewaehlt .ger-karte, .lb-svg .ger.zielt .ger-karte{filter:drop-shadow(0 10px 20px color-mix(in srgb, var(--bg) 62%, transparent))}
-/* Symbol-Platte: Gerätebild sitzt dezent abgehoben auf der Karte */
-.ger-bild{opacity:.94; filter:drop-shadow(0 6px 10px color-mix(in srgb, var(--bg) 55%, transparent))}
-.ger.hover .ger-bild, .ger.gewaehlt .ger-bild{opacity:1; transition:opacity var(--dauer) var(--ease-standard)}
-/* Name/IP: Name kräftig, Adresse in der Lesegröße der Skala */
-.lb-svg .ger-name{font-weight:700; letter-spacing:.08em; fill:var(--ink)}
-.lb-svg .ger-ip{font-size:var(--fs-2); fill:var(--muted)}
-/* Stecker: Gehäuse in Leiterfarbe (--kf), Kontakt als dunkler Schlitz */
-.kabel .kabel-stecker .stk-gehaeuse{fill:var(--panel-3); stroke:var(--line-2); stroke-width:1.2}
-.kabel .kabel-stecker .stk-kontakt{stroke:var(--line-2); opacity:1}
-/* Status-Punkte kompakt: skalieren um den eigenen Mittelpunkt (wie juice.css an .ps-oben path) */
-.ps{transform-box:fill-box; transform-origin:center; transform:scale(.88); opacity:.82}
+/* ---- Fläche: Gestaltung komplett in zz-lagebild.css (Lagebild 2.0) ----
+   Karten, Auswahlring, Symbol-Platte, Linien, Hüllen, Trunk, Zonen, Legende und Minimap
+   stehen dort; die alten 168×112-Annahmen, .kabel-stecker und .ps-Statussymbole sind
+   ersatzlos entfallen (der Renderer erzeugt sie nicht mehr, Vertrag § 3.1–3.3). */
 
-
-/* Portnamen erscheinen nur beim Überfahren des Kabels (Inspektor listet sie ohnehin);
-   Zonen sind Hintergrund-Wäsche, keine Kästchen und keine Labels – so bleibt die Fläche ruhig. */
-.kabel:hover .kabel-port, .kabel.gewaehlt .kabel-port{display:inline}
-.lb-s-zonen .zone-flaeche{stroke:none}

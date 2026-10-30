@@ -65,6 +65,27 @@
 
   /* Glas/Leisten in warmem Schimmer statt kühlem Schwarz */
   --glas:rgba(250,246,238,.86); --leiste-bg:rgba(250,246,238,.94);
+
+  /* Lagebild 2.0: Materialsprache Keramik (nur hier Literale) */
+  --lage-flaeche:#E9E1D2;
+  --lage-raster:rgba(58,48,36,.10);
+  --lage-knoten-bg:#FAF6EE;
+  --lage-knoten-rand:rgba(58,48,36,.30);
+  --lage-knoten-schatten:drop-shadow(0 12px 24px rgba(58,44,30,.16));
+  --lage-name:#26201A;
+  --lage-rolle:#554C40;
+  --lage-ip:#4B6650;
+  --lage-platte:#E3E9DB;
+  --lage-platte-rand:rgba(75,102,80,.34);
+  --lage-kante:#4B6650;
+  --lage-kante-huelle:rgba(233,225,210,.92);
+  --lage-chip-bg:#FAF6EE;
+  --lage-chip-rand:rgba(58,48,36,.24);
+  --lage-chip-text:#26201A;
+  --lage-mini-bg:#F3EDE2;
+  --lage-mini-rand:rgba(58,48,36,.18);
+  --lage-radius:14px;
+  --lage-glow:0 0 0 1px rgba(75,102,80,.22), 0 12px 28px -24px rgba(75,102,80,.30);
 }
 
 /* ---- Papier statt Farbnebel: nur das feine Punktraster bleibt ---- */
@@ -89,7 +110,182 @@ html[data-theme="keramik"] .hb-panel:not(.hb-lage){
 html[data-theme="keramik"] .hb-lage{border-radius:var(--radius);box-shadow:var(--keramik-karte)}
 html[data-theme="keramik"] .hb-raster{gap:var(--keramik-gap)}
 html[data-theme="keramik"] .ansicht .hb-kachel{box-shadow:none;border-radius:var(--radius)}
-html[data-theme="keramik"] .lb-leinwand{background:var(--panel-3);border-radius:var(--radius)}
+/* ---- Lagebild 2.0: Steinplatte auf Ton, weiche Formen, matte Tiefe ---- */
+
+html[data-theme="keramik"] .labor .lb-leinwand{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--lage-flaeche);
+  background-image:none;
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="keramik"] .labor .lb-leinwand::before{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:var(--keramik-label-tracking);
+  color:var(--faint);
+}
+
+html[data-theme="keramik"] .labor .lb-svg{
+  background-color:transparent;
+  background-image:none;
+}
+
+html[data-theme="keramik"] .labor .lb-raster-punkt{
+  fill:var(--lage-raster);
+}
+
+/* ---- Knoten: Steinplatte, grosse weiche Radien, matter Schatten ---- */
+
+html[data-theme="keramik"] .labor .ger-karte{
+  fill:var(--lage-knoten-bg);
+  stroke:var(--lage-knoten-rand);
+  stroke-width:1;
+  rx:var(--lage-radius);
+  filter:var(--lage-knoten-schatten);
+  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="keramik"] .labor .ger-auswahl{
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:none;
+  rx:var(--radius-s);
+}
+
+html[data-theme="keramik"] .labor .ger.hover .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 70%, var(--panel-3));
+  stroke:var(--line-2);
+}
+
+html[data-theme="keramik"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="keramik"] .labor .ger.zielt .ger-karte{
+  fill:color-mix(in srgb, var(--accent-soft) 70%, var(--lage-knoten-bg));
+  stroke:var(--accent);
+  stroke-width:1.4;
+}
+
+html[data-theme="keramik"] .labor .ger.gewaehlt .ger-auswahl,
+html[data-theme="keramik"] .labor .ger.zielt .ger-auswahl{
+  opacity:.5;
+}
+
+html[data-theme="keramik"] .labor .ger.ohne-ip .ger-karte{
+  stroke:var(--bad);
+  stroke-dasharray:4 4;
+}
+
+html[data-theme="keramik"] .labor .ger.aus .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 62%, var(--panel-3));
+  stroke:color-mix(in srgb, var(--lage-knoten-rand) 60%, transparent);
+}
+
+html[data-theme="keramik"] .labor .ger.aus .ger-name{
+  fill:var(--faint);
+}
+
+html[data-theme="keramik"] .labor .ger.aus .ger-bild{
+  opacity:.4;
+}
+
+html[data-theme="keramik"] .labor .ger .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
+  stroke:var(--lage-platte-rand);
+  stroke-width:1;
+}
+
+html[data-theme="keramik"] .labor .ger.hover .gb-kachel,
+html[data-theme="keramik"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="keramik"] .labor .ger.zielt .gb-kachel{
+  stroke:var(--accent);
+  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
+}
+
+html[data-theme="keramik"] .labor .ger-name{
+  font:600 var(--fs-2)/1 var(--display);
+  letter-spacing:var(--keramik-tracking);
+  fill:var(--lage-name);
+}
+
+html[data-theme="keramik"] .labor .ger-rolle{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="keramik"] .labor .ger-ip{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.03em;
+  fill:var(--lage-ip);
+}
+
+html[data-theme="keramik"] .labor .ger-mehr{
+  fill:var(--lage-rolle);
+  font-weight:500;
+}
+
+/* ---- Kanten: Salbei-Linie, Terrakotta bei Störung (Farbe über --kf) ---- */
+
+html[data-theme="keramik"] .labor .kabel{
+  --kf:var(--lage-kante);
+}
+
+html[data-theme="keramik"] .labor .kabel.k-unten{
+  --kf:var(--bad);
+}
+
+html[data-theme="keramik"] .labor .kabel.k-aus{
+  --kf:var(--warn);
+}
+
+html[data-theme="keramik"] .labor .kabel.vlan-trunk{
+  --kf:var(--ink);
+}
+
+html[data-theme="keramik"] .labor .kabel-huelle{
+  stroke:var(--lage-kante-huelle);
+}
+
+html[data-theme="keramik"] .labor .kabel:hover .kabel-linie,
+html[data-theme="keramik"] .labor .kabel.gewaehlt .kabel-linie{
+  stroke:var(--accent);
+}
+
+html[data-theme="keramik"] .labor .kabel-port{
+  fill:var(--lage-rolle);
+  letter-spacing:.06em;
+}
+
+/* ---- Zonen: Mineral-Schleier, Chip wie ein Preisschild ---- */
+
+html[data-theme="keramik"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg);
+  stroke:var(--lage-chip-rand);
+  stroke-width:1;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="keramik"] .labor .zone-label{
+  filter:drop-shadow(0 6px 12px color-mix(in srgb, var(--ink) 8%, transparent));
+}
+
+html[data-theme="keramik"] .labor .zone-text{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.06em;
+  fill:var(--lage-chip-text);
+}
+
+html[data-theme="keramik"] .labor .zone-gw{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.03em;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="keramik"] .labor .zone-punkt{
+  stroke:var(--lage-chip-bg);
+  stroke-width:1;
+}
 
 /* ---- Knöpfe: weich, matt, ohne Leuchtspur ---- */
 html[data-theme="keramik"] .knopf{border-radius:var(--radius-s);box-shadow:var(--keramik-knopf)}
@@ -97,8 +293,92 @@ html[data-theme="keramik"] .knopf.primaer, html[data-theme="keramik"] .knopf.pri
 html[data-theme="keramik"] .dock-knopf.an{background:var(--accent-soft);color:var(--accent)}
 
 /* ---- Legende und Ring: matte Tafel, ruhiger Fortschritt ---- */
-html[data-theme="keramik"] .lb-legende{
-  background:var(--panel-2); box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none;
+html[data-theme="keramik"] .labor .lb-legende{
+  background:var(--lage-mini-bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  gap:16px;
+  box-shadow:none;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+
+html[data-theme="keramik"] .labor .lb-legende .lg::before{
+  width:20px;
+  height:2px;
+  border-radius:999px;
+  background:var(--lage-kante);
+  border:0;
+}
+
+html[data-theme="keramik"] .labor .lb-legende .lg-getrennt::before{
+  background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px);
+}
+
+html[data-theme="keramik"] .labor .lb-legende .lg-kein::before{
+  height:1px;
+  background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px);
+}
+
+/* ---- Minimap: Papierkarte auf der Werkbank ---- */
+
+html[data-theme="keramik"] .labor .wk-mini{
+  background:var(--lage-mini-bg);
+  border:1px solid var(--lage-mini-rand);
+  border-radius:var(--radius-s);
+  box-shadow:var(--schatten);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+
+html[data-theme="keramik"] .labor .wk-mini-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-svg{
+  background-color:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--lage-kante) 42%, transparent);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-punkt{
+  fill:var(--lage-rolle);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-punkt.an{
+  fill:var(--accent);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-rahmen{
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:4 3;
+}
+
+html[data-theme="keramik"] .labor .wk-mini-knopf{
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-zoomtext{
+  font:600 var(--fs-1)/1 var(--mono);
+  color:var(--faint);
 }
 html[data-theme="keramik"] .hb-ring{background:var(--keramik-ring)}
 

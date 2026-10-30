@@ -66,6 +66,28 @@
   --typ-router:#2F4DA8; --typ-switch:#3A2A6E; --typ-firewall:#A22A12;
   --typ-host:#1B1710; --typ-server:#233A96; --typ-nas:#923312; --typ-internet:#8A3313;
 
+  /* ---- Lagebild 2.0 (§ 3.6): warmes Papier, Tinte, Zinnober = Störung, Riso-Spot-Wäsche.
+     Knoten tragen einen harten 2-px-Tintenrahmen mit Versatz-Schatten (Druck, kein Weichzeichner). ---- */
+  --lage-flaeche:var(--panel);
+  --lage-raster:color-mix(in srgb, var(--ink) 14%, transparent);
+  --lage-knoten-bg:var(--panel);
+  --lage-knoten-rand:var(--ink);
+  --lage-knoten-schatten:drop-shadow(3px 3px 0 color-mix(in srgb, var(--ink) 18%, transparent));
+  --lage-name:var(--ink);
+  --lage-rolle:var(--muted);
+  --lage-ip:var(--faint);
+  --lage-platte:var(--panel-2);
+  --lage-platte-rand:var(--line-2);
+  --lage-kante:var(--ink);
+  --lage-kante-huelle:var(--panel);
+  --lage-chip-bg:var(--panel-2);
+  --lage-chip-rand:var(--ink);
+  --lage-chip-text:var(--ink);
+  --lage-mini-bg:var(--panel);
+  --lage-mini-rand:var(--ink);
+  --lage-radius:0px;
+  --lage-glow:var(--schatten-flach);
+
   /* ---- Form: gedruckt, nicht gerundet ---- */
   --radius:0px;
   --radius-s:2px;
@@ -362,11 +384,11 @@ html[data-theme="papier"] .sp-stufe-knopf.an{background:var(--ink); color:var(--
 
 /* Zeichenfläche: die Druckplatte */
 html[data-theme="papier"] .lb-leinwand{
-  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  border:2px solid var(--ink); border-radius:var(--lage-radius); background:var(--lage-flaeche);
   box-shadow:var(--schatten); overflow:hidden;
 }
-html[data-theme="papier"] .lb-svg{background:var(--panel)}
-html[data-theme="papier"] .lb-raster-punkt{fill:color-mix(in srgb,var(--ink) 14%,transparent)}
+html[data-theme="papier"] .lb-svg{background:var(--lage-flaeche)}
+html[data-theme="papier"] .lb-raster-punkt{fill:var(--lage-raster)}
 html[data-theme="papier"] .lb-leinwand::before{
   content:"// LAGEBILD"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--faint);
 }
@@ -380,39 +402,39 @@ html[data-theme="papier"] .lb-hinweis,
 html[data-theme="papier"] .lb-legende,
 html[data-theme="papier"] .wk-mini{z-index:20}
 
-/* Geräte: Papierkarten mit Tintenkante */
-html[data-theme="papier"] .ger-karte{
-  fill:var(--panel); stroke:var(--ink); stroke-width:1.5; rx:1px;
-  filter:drop-shadow(3px 3px 0 color-mix(in srgb,var(--ink) 18%,transparent));
+/* Knoten: Papierkarten mit hartem Tintenrahmen und Versatz-Schatten */
+html[data-theme="papier"] .labor .ger-karte{
+  fill:var(--lage-knoten-bg); stroke:var(--lage-knoten-rand); stroke-width:2;
+  filter:var(--lage-knoten-schatten);
 }
-html[data-theme="papier"] .ger.hover .ger-karte{
+html[data-theme="papier"] .labor .ger.hover .ger-karte{
   fill:var(--panel-2); stroke:var(--ink); stroke-width:2;
-  filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--ink) 24%,transparent));
 }
-html[data-theme="papier"] .ger.gewaehlt .ger-karte,
-html[data-theme="papier"] .ger.zielt .ger-karte{
+html[data-theme="papier"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="papier"] .labor .ger.zielt .ger-karte{
   stroke:var(--accent); stroke-width:2.2;
   filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--accent) 26%,transparent));
 }
-html[data-theme="papier"] .ger-name{font-weight:700; letter-spacing:.14em; stroke-width:5px}
-html[data-theme="papier"] .ger-ip{font-weight:600; letter-spacing:.02em; stroke-width:5px}
-html[data-theme="papier"] .ger-auswahl{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 4}
+html[data-theme="papier"] .labor .ger-auswahl{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 4}
 /* Gerätepiktogramm: harte Papierfläche statt Farbmischung */
-html[data-theme="papier"] .gb-kachel{fill:var(--panel); stroke:var(--line-2); stroke-width:1.2}
-html[data-theme="papier"] .ger .gb-kachel{fill:var(--panel-2); stroke:var(--line-2)}
-html[data-theme="papier"] .gb-glyph path{stroke:var(--ink); stroke-width:2}
-html[data-theme="papier"] .ger.gewaehlt .gb-kachel,
-html[data-theme="papier"] .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.2; fill:var(--accent-soft)}
-html[data-theme="papier"] .ger.hover .gb-kachel{stroke:var(--ink); fill:var(--panel-3)}
+html[data-theme="papier"] .labor .ger .gb-kachel{fill:var(--lage-platte); stroke:var(--lage-platte-rand); stroke-width:1.2}
+html[data-theme="papier"] .labor .gb-glyph path{stroke:var(--ink); stroke-width:2}
+html[data-theme="papier"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="papier"] .labor .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.2; fill:var(--accent-soft)}
 
-/* Kabel: Ultramarin ist die Leitung, Zinnober der Fehler */
-html[data-theme="papier"] .kabel-huelle{stroke:color-mix(in srgb,var(--ink) 12%,transparent); stroke-width:7}
-html[data-theme="papier"] .kabel-linie{stroke-width:2.4; stroke-opacity:1}
-html[data-theme="papier"] .kabel.k-unten .kabel-linie{stroke-dasharray:1 6; stroke-width:2.6}
-html[data-theme="papier"] .kabel.k-aus .kabel-linie{stroke-dasharray:2 7}
-html[data-theme="papier"] .kabel.gewaehlt .kabel-linie{stroke-width:3.6}
-html[data-theme="papier"] .kabel-port{font-weight:600; letter-spacing:.06em; stroke-width:5px}
-html[data-theme="papier"] .kabel-stecker .stk-gehaeuse{fill:var(--panel); stroke:var(--ink); stroke-width:1.4}
+/* Kanten: Tintenstrich, Zinnober = Störung */
+html[data-theme="papier"] .labor .kabel-huelle{stroke:var(--lage-kante-huelle); stroke-width:6}
+html[data-theme="papier"] .labor .kabel-linie{stroke-width:2}
+html[data-theme="papier"] .labor .kabel.k-unten .kabel-linie{stroke-width:2.2}
+html[data-theme="papier"] .labor .kabel.k-aus .kabel-linie{stroke-width:2.2}
+html[data-theme="papier"] .labor .kabel.gewaehlt .kabel-linie{stroke-width:2.8}
+html[data-theme="papier"] .labor .port-led{stroke-width:1.5}
+
+/* Zonen: Riso-Spot-Wäsche, Chip wie ein aufgeklebter Notizzettel */
+html[data-theme="papier"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg); stroke:var(--lage-chip-rand); stroke-width:1.5;
+  filter:drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 16%, transparent));
+}
 
 /* Werkzeugleisten: Papierstempel mit harter Kante */
 html[data-theme="papier"] .lb-gruppe{
@@ -439,23 +461,19 @@ html[data-theme="papier"] .lb-hinweis{
   border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel-2);
   color:var(--muted); font:600 var(--fs-1)/1.5 var(--mono); letter-spacing:.06em;
 }
-html[data-theme="papier"] .lb-legende{
-  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
-  padding:5px 10px; box-shadow:var(--schatten-flach);
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint);
+html[data-theme="papier"] .labor .lb-legende{
+  border:1.5px solid var(--ink); border-radius:var(--lage-radius); background:var(--panel);
+  padding:5px 10px; box-shadow:var(--schatten-flach); letter-spacing:.16em; color:var(--faint);
 }
-html[data-theme="papier"] .lb-legende .lg-verbunden::before{background:var(--ok); height:2px}
-html[data-theme="papier"] .lb-legende .lg-getrennt::before{background:var(--accent); height:2px}
-html[data-theme="papier"] .lb-legende .lg-kein::before{border-top:1px dashed var(--warn); background:transparent}
-
 /* Minimap */
-html[data-theme="papier"] .wk-mini{
-  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+html[data-theme="papier"] .labor .wk-mini{
+  border:1.5px solid var(--ink); border-radius:var(--lage-radius); background:var(--lage-mini-bg);
   box-shadow:var(--schatten-flach);
 }
-html[data-theme="papier"] .wk-mini-kopf{border-bottom:1px solid var(--line)}
-html[data-theme="papier"] .wk-mini-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
-html[data-theme="papier"] .wk-mini-fuss{border-top:1px solid var(--line)}
+html[data-theme="papier"] .labor .wk-mini-kopf{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .labor .wk-mini-titel{letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .labor .wk-mini-fuss{border-top:1px solid var(--line)}
+html[data-theme="papier"] .labor .wk-mini-svg{border:1px solid var(--lage-mini-rand); background:var(--lage-flaeche)}
 
 /* Kleine Geräteleiste links */
 html[data-theme="papier"] .lb-geraete{background:var(--bg); border-right:2px solid var(--ink)}

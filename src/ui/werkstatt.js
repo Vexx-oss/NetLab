@@ -25,7 +25,7 @@ UI.werkstatt = (() => {
   let laborEl = null, leisteEl = null, miniEl = null, miniSvg = null, miniKabel = null, miniGeraete = null, miniRahmen = null;
   let suchFeld = null, suchListe = null, vorlagenKnopf = null, kennwertEl = null;
   let zoomFeld = null, stufeWahl = null;
-  let sandbox = false, suchTreffer = [], suchIdx = 0, rahmenDaten = null;
+  let sandbox = false, suchTreffer = [], suchIdx = 0, rahmenDaten = null, miniWelt = null, miniGross = false;
 
   const sym = (name, groesse) => (typeof UI.symbol === "function" ? UI.symbol(name, groesse) : null);
 
@@ -216,24 +216,50 @@ UI.werkstatt = (() => {
     if (e.preventDefault) e.preventDefault();
     UI.labor.mitteAufWelt(rahmenDaten.x1 + fx * (rahmenDaten.x2 - rahmenDaten.x1), rahmenDaten.y1 + fy * (rahmenDaten.y2 - rahmenDaten.y1));
   }
+  /* Sichtbarer Weltausschnitt des Labors (nur wenn die Ansicht messbar ist). */
+  function sichtbereichMini(){
+    try { return UI.labor && UI.labor.sichtbereich ? UI.labor.sichtbereich() : null; } catch (e) { return null; }
+  }
+  function rahmenVereinigen(a, b){
+    if (!a) return b || null;
+    if (!b) return a;
+    return {x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2)};
+  }
   function minimapAktualisieren(){
     if (!miniEl || !miniSvg) return false;
     const netz = UI.labor ? UI.labor.netz : null;
     const ids = UI.labor && UI.labor.auswahlMehr ? UI.labor.auswahlMehr() : [];
     const d = minimapDaten(netz, ids);
-    rahmenDaten = d.rahmen;
     if (!d.rahmen) {
+      rahmenDaten = null; miniWelt = null; miniGross = false;
       miniSvg.setAttribute("viewBox", "0 0 100 100");
       miniKabel.replaceChildren(); miniGeraete.replaceChildren();
       miniRahmen.setAttribute("visibility", "hidden");
       kennwerteZeigen();
       return true;
     }
-    const b = d.rahmen;
-    miniSvg.setAttribute("viewBox", b.x1 + " " + b.y1 + " " + (b.x2 - b.x1) + " " + (b.y2 - b.y1));
-    const r = Math.max(6, Math.hypot(b.x2 - b.x1, b.y2 - b.y1) / 42);
+    /* Sichtrahmen mit einbeziehen (Befund B10): Zeigt die Ansicht alles, ist der sichtbare Ausschnitt
+       größer als der Geräte-Rahmen. Dann bleibt der Geräte-Rahmen der Maßstab (sonst schrumpfte das
+       Netz in eine Ecke) und der Sichtrahmen läuft als gestrichelte Kante am Minimap-Rand – statt
+       „hidden" zu sein. Nur wenn die Ansicht weiter hinausgeht als das Netz, wächst der Ausschnitt mit. */
+    const sicht = sichtbereichMini();
+    miniWelt = d.rahmen;
+    const enthaelt = sicht && d.rahmen && sicht.x1 <= d.rahmen.x1 && sicht.y1 <= d.rahmen.y1 && sicht.x2 >= d.rahmen.x2 && sicht.y2 >= d.rahmen.y2;
+    miniGross = !!enthaelt;
+    const b = enthaelt ? d.rahmen : (rahmenVereinigen(d.rahmen, sicht) || d.rahmen);
+    const pad = Math.max(6, Math.hypot(b.x2 - b.x1, b.y2 - b.y1) * 0.04);
+    const vb = {x1: b.x1 - pad, y1: b.y1 - pad, x2: b.x2 + pad, y2: b.y2 + pad};
+    rahmenDaten = vb;
+    miniSvg.setAttribute("viewBox", vb.x1 + " " + vb.y1 + " " + (vb.x2 - vb.x1) + " " + (vb.y2 - vb.y1));
+    /* Punktgröße in Bildschirm-Pixeln statt Welt-Einheiten: 2,2 px, gewählt 3,2 px (Vertrag § 3.5).
+       Dafür den Maßstab aus der Anzeigebreite der Minimap schätzen; ohne plausible Messung (DOM-Ersatz
+       der Tests: 900x600) gilt die Breite aus werkstatt.css. */
+    let pixelBreite = 182;
+    try { const r = miniSvg.getBoundingClientRect(); if (r && r.width > 20 && r.width < 400) pixelBreite = r.width; } catch (e) { /* dann 182 */ }
+    const skala = (vb.x2 - vb.x1) / pixelBreite;
+    const rNormal = Math.max(2.2, 2.2 * skala), rWahl = Math.max(3.2, 3.2 * skala);
     miniKabel.replaceChildren(...d.kabel.map(k => sv("line", {class: "wk-mini-kabel-linie", x1: k.a.x, y1: k.a.y, x2: k.b.x, y2: k.b.y})));
-    miniGeraete.replaceChildren(...d.geraete.map(g => sv("circle", {class: "wk-mini-punkt typ-" + g.typ + (g.gewaehlt ? " an" : ""), cx: g.x, cy: g.y, r})));
+    miniGeraete.replaceChildren(...d.geraete.map(g => sv("circle", {class: "wk-mini-punkt typ-" + g.typ + (g.gewaehlt ? " an" : ""), cx: g.x, cy: g.y, r: g.gewaehlt ? rWahl : rNormal})));
     miniRahmen.setAttribute("visibility", "visible");
     sichtrahmenZeichnen();
     kennwerteZeigen();
@@ -242,13 +268,17 @@ UI.werkstatt = (() => {
   /* Sichtrahmen: welcher Weltausschnitt ist gerade auf der Fläche zu sehen? (UI.labor.sichtbereich) */
   function sichtrahmenZeichnen(){
     if (!miniRahmen || !miniSvg) return;
-    let s = null;
-    try { s = UI.labor && UI.labor.sichtbereich ? UI.labor.sichtbereich() : null; } catch (e) { s = null; }
+    const s = sichtbereichMini();
     if (!s || !rahmenDaten) { miniRahmen.setAttribute("visibility", "hidden"); return; }
-    miniRahmen.setAttribute("x", String(s.x1));
-    miniRahmen.setAttribute("y", String(s.y1));
-    miniRahmen.setAttribute("width", String(s.x2 - s.x1));
-    miniRahmen.setAttribute("height", String(s.y2 - s.y1));
+    /* Auf den Minimap-Ausschnitt begrenzen: Zeigt die Ansicht alles, ist der Sichtrahmen der Rand der
+       Minimap selbst (dann bleibt der Strich vollständig sichtbar statt halb abgeschnitten zu werden). */
+    const x1 = Math.max(s.x1, rahmenDaten.x1), y1 = Math.max(s.y1, rahmenDaten.y1);
+    const x2 = Math.min(s.x2, rahmenDaten.x2), y2 = Math.min(s.y2, rahmenDaten.y2);
+    if (x2 <= x1 || y2 <= y1) { miniRahmen.setAttribute("visibility", "hidden"); return; }
+    miniRahmen.setAttribute("x", String(x1));
+    miniRahmen.setAttribute("y", String(y1));
+    miniRahmen.setAttribute("width", String(x2 - x1));
+    miniRahmen.setAttribute("height", String(y2 - y1));
     miniRahmen.setAttribute("visibility", "visible");
   }
   function zahlenText(kw){
@@ -292,7 +322,13 @@ UI.werkstatt = (() => {
     const p = UI.labor && UI.labor.zoomProzent ? Math.round(UI.labor.zoomProzent()) : 100;
     if (zoomFeld && document.activeElement !== zoomFeld) zoomFeld.value = p + " %";
     if (stufeWahl) stufeWahl.value = String(p);
-    sichtrahmenZeichnen();
+    /* Wächst der sichtbare Ausschnitt über den Minimap-Rahmen hinaus, muss der Ausschnitt nachziehen;
+       zoomt man wieder hinein, kehrt die Minimap zum Geräte-Rahmen zurück (sonst bliebe sie klein).
+       Sonst nur den Sichtrahmen verschieben – kein Flackern bei jedem Rädchen. */
+    const s = sichtbereichMini();
+    const gross = s && miniWelt && s.x1 <= miniWelt.x1 && s.y1 <= miniWelt.y1 && s.x2 >= miniWelt.x2 && s.y2 >= miniWelt.y2;
+    const raus = s && rahmenDaten && (s.x1 < rahmenDaten.x1 + 1 || s.y1 < rahmenDaten.y1 + 1 || s.x2 > rahmenDaten.x2 - 1 || s.y2 > rahmenDaten.y2 - 1);
+    if (!!gross !== miniGross || (!gross && raus)) minimapAktualisieren(); else sichtrahmenZeichnen();
   }
   function netzGeaendert(){ minimapAktualisieren(); }
   function auswahlGeaendert(){ minimapAktualisieren(); }

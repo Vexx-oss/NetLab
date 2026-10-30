@@ -367,7 +367,9 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
   padding:8px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein var(--dauer) ease-out}
 /* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
    deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .lb-svg.wenig-text .kabel-port, .lb-svg.wenig-text .zone-text, .lb-svg.wenig-text .zone-schild, .lb-svg.klein .kabel-port, .lb-svg.klein .ger-ip, .lb-svg.klein .zone-schild, .lb-s-zonen .zone-schild, .lb-s-zonen .zone-text, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+/* Welche Textzeilen die Zoom-Stufen ausblenden, steht in zz-lagebild.css (Lagebild 2.0, Vertrag 3.4) —
+   dort bei den Knoten, damit tests/ui-typografie.test.js hier die erste .ger-name{…}-Regel als Font-Regel liest. */
 .pa-fach.zieht{opacity:.35; pointer-events:none}
 @keyframes pa-rein{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
 .pa-kopf{display:flex; align-items:center; justify-content:space-between; padding:0 0 4px 4px}
@@ -405,13 +407,11 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .as-text span{color:var(--muted); font-size:var(--fs-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
 .lb-leinwand{position:relative; flex:1 1 auto; min-height:120px; overflow:hidden; container-type:inline-size}
-.lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--bg); touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
+.lb-svg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; user-select:none; -webkit-user-select:none; outline:none; cursor:default}
 .lb-svg:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .lb-svg.greift, .lb-svg.zieht, .lb-svg.zieht .ger{cursor:grabbing}
 .labor[data-werkzeug="ping"] .lb-svg, .labor[data-werkzeug="kabel"] .lb-svg, .griff{cursor:crosshair}
 .labor[data-werkzeug="platzieren"] .lb-svg{cursor:copy}
-.lb-raster-punkt{fill:var(--line)}
-.lb-raster.fein{opacity:.35}
 
 /* schwebende Werkzeugleisten
    z-index:20 ist kein Schmuck: `.lb-auftrag` (z-index:10) trägt die Auftragsmappe, und
@@ -484,30 +484,24 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-leer strong{display:block; font:800 var(--fs-5)/1.2 var(--display); color:var(--ink); margin-bottom:8px}
 
 /* ---- Geräte ---- */
-.ger{cursor:grab}
-.ger-treffer{fill:transparent}
-/* § 18.8: Gerät als ruhige Karte auf dem Punktraster (A) */
-.ger-karte{fill:var(--panel); stroke:var(--line); stroke-width:1}
-.ger.hover .ger-karte, .gw-schild rect{fill:var(--panel-2); stroke:var(--line-2)}
-.ger.gewaehlt .ger-karte, .ger.zielt .ger-karte{stroke:var(--accent); stroke-width:2}
-.ger-auswahl{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4; opacity:0; transition:opacity var(--dauer)}
-.ger.gewaehlt .ger-auswahl, .lb-sim:hover .lb-sim-griff::after{opacity:1}
-.ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.4}
-.ger.hover .gb-kachel{fill:var(--panel-3); stroke:var(--g)}
-/* TOPO-2: Beschriftungen der Fläche lesbar machen – keine Schrift unter 12 px.
-   Adressen und Portnamen in Monospace (Ziffern stehen untereinander), Kontur-Schatten gegen den Untergrund. */
-.ger-name{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; fill:var(--ink); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
-.ger-ip{font:500 var(--fs-2)/1 var(--mono); fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round}
-.ger-ip.schwach{fill:var(--faint); font-style:italic}
-.ger.aus .gb{opacity:.38}
-.ger.aus .ger-name{fill:var(--muted)}
-.labor[data-ebene="ip"] .ger.ohne-ip .gb-kachel{stroke:var(--faint); stroke-dasharray:4 3; fill:var(--panel)}
-.labor[data-ebene="ip"] .ger.ohne-ip .gb-glyph path{stroke:var(--faint)}
+/* Knoten-Karte, Auswahlring und Icon-Platte stehen in zz-lagebild.css (Lagebild 2.0).
+   Hier bleiben die Textzeilen (tests/ui-typografie.test.js liest sie in dieser Datei) und Effekte. */
+.gw-schild rect{fill:var(--panel-2); stroke:var(--line-2)}
+.lb-sim:hover .lb-sim-griff::after{opacity:1}
+/* TOPO-2: SVG-Beschriftung nie unter --fs-1 (11 px); Adressen und Portnamen in Monospace,
+   damit die Ziffern untereinander stehen. Farbe über die Lagebild-Tokens (Fallback = POLARIS). */
+.ger-name{font:700 var(--fs-2)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; fill:var(--lage-name, var(--ink))}
+.ger-rolle{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-rolle, var(--muted))}
+.ger-ip{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-ip, var(--faint))}
+.ger-mehr{font:500 var(--fs-1)/1 var(--mono); fill:var(--faint)}
+/* Zonen-Chip (Lagebild 2.0 § 3.3): CIDR in Mono, Gateway-Zusatz leise. */
+.zone-text{font:600 var(--fs-1)/1 var(--mono); fill:var(--lage-chip-text, var(--ink)); paint-order:stroke; stroke:var(--lage-chip-bg, var(--panel)); stroke-width:3px; stroke-linejoin:round}
+.zone-gw{font:500 var(--fs-1)/1 var(--mono); fill:var(--muted)}
 .ger.blitz-ok .gb-kachel{stroke:var(--ok); stroke-width:3; fill:var(--ok-soft)}
 .ger.blitz-fehler .gb-kachel{stroke:var(--bad); stroke-width:3; fill:var(--bad-soft)}
 .ger.blitz-fehler .gb{animation:wackeln var(--dauer-lang) ease-in-out}
 @keyframes wackeln{20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)}}
-.badge, .ps{cursor:help}
+.badge{cursor:help}
 .badge-warn circle{fill:var(--warn); stroke:var(--bg); stroke-width:2}
 .badge-warn path{stroke:var(--accent-ink); stroke-width:2.4; stroke-linecap:round; fill:none}
 .badge-ungespeichert circle{fill:var(--info); stroke:var(--bg); stroke-width:2}
@@ -515,26 +509,13 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .badge-aus text{font:700 var(--fs-1)/1 var(--body); fill:var(--muted); letter-spacing:.05em}
 
 /* ---- Kabel ---- */
-.kabel{--kf:var(--ok)}
-.kabel.k-aus{--kf:var(--warn)}
-.kabel.k-unten{--kf:var(--bad)}
-.kabel.vlan-trunk{--kf:var(--ink)}
-.kabel-treffer{stroke:transparent; stroke-width:14; cursor:pointer}
-.kabel-linie{stroke:var(--kf); stroke-width:2.6; stroke-linecap:round; stroke-opacity:.9}
-.kabel-trunk-aussen{stroke:var(--kf); stroke-width:7.5; stroke-linecap:round; stroke-opacity:.9}
-.kabel-trunk-innen{stroke:var(--bg); stroke-width:2.6; stroke-linecap:round}
-.k-unten .kabel-linie, .k-unten .kabel-trunk-aussen{stroke-dasharray:8 6}
-.k-aus .kabel-linie, .k-aus .kabel-trunk-aussen{stroke-dasharray:2 6}
-.kabel:hover .kabel-treffer{stroke:var(--panel-3); stroke-opacity:.7}
-.kabel.gewaehlt .kabel-treffer{stroke:var(--accent-soft); stroke-opacity:1}
-.kabel.gewaehlt .kabel-linie{stroke-width:3.4}
-.ps-grund{fill:var(--panel-2); stroke:var(--line-2); stroke-width:1.2}
-/* Statusfarben EINMAL (vorher drei Blöcke je Farbe, ethos R10): Netzkabel, Port-Punkte, Splitter, Schild */
-.ps-oben path, .pd-oben{fill:var(--ok)}
-.ps-unten path, .pd-unten, .splitter{fill:var(--bad)}
-.ps-aus rect, .pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
-.kabel-port{display:none; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--muted); paint-order:stroke; stroke:var(--bg); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
-   /* zwischen 60 % und 95 %: nur Geraetename und -adresse, damit nichts unter 12 px faellt */
+/* Linie, Hülle, Trunk und Port-LED stehen in zz-lagebild.css (Lagebild 2.0 § 3.2).
+   Hier bleibt die Portnummer als SVG-Text (tests/ui-typografie.test.js prüft sie) und die
+   Statusfarben der Port-Punkte. */
+.pd-oben{fill:var(--ok)}
+.pd-unten, .splitter{fill:var(--bad)}
+.pd-aus, .gw-schild.fehlt text{fill:var(--warn)}
+.kabel-port{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; fill:var(--lage-ip, var(--muted)); paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3px; stroke-linejoin:round; pointer-events:none}
 .ger-ip.kopierbar{cursor:pointer; pointer-events:auto}
 .ger-ip.kopierbar:hover, .ger-ip.kopierbar:focus-visible{fill:var(--accent); text-decoration:underline}
 .ger-ip.kopierbar:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
@@ -542,16 +523,12 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .vlan-schild text{font:700 var(--fs-1)/1 var(--mono); fill:var(--accent-ink)}
 .vlan-schild.trunk rect{fill:var(--panel-2); stroke:var(--ink)}
 .vlan-schild.trunk text{fill:var(--ink)}
-.vlan-schild, .zone, .karte, .gw-schild, .lb-s-band, .lb-s-pakete, .paket{pointer-events:none}
+.vlan-schild, .karte, .gw-schild, .lb-s-band, .lb-s-pakete, .paket{pointer-events:none}
 
 /* ---- Zonen (Ebene IP-Netze) ---- */
-.zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
-.zone-d{--zf:var(--zone-d); --zl:var(--zone-d-linie)} .zone-e{--zf:var(--zone-e); --zl:var(--zone-e-linie)}
-.zone-flaeche{fill:var(--zf); stroke:var(--zl); stroke-width:1.5; stroke-linejoin:round}
-.zone-schild{fill:var(--panel); stroke:var(--zl); stroke-width:1.5}
-/* Zonenbeschriftung liegt auf dem Zonenschild (.zone-schild, fill:var(--panel)) – Kontur deshalb in --panel,
-   damit der Halo in hell und dunkel mit dem eigenen Untergrund verschmilzt statt als Naht zu erscheinen. */
-.zone-text{font:700 var(--fs-2)/1 var(--mono); fill:var(--ink); paint-order:stroke; stroke:var(--panel); stroke-width:2.5px; stroke-linejoin:round}
+/* Fläche, Chip-Rahmen und Punkt stehen in zz-lagebild.css (Lagebild 2.0 § 3.3); .zone-text/.zone-gw
+   sind SVG-Text und bleiben oben bei den Textzeilen. Die frühere Regel .lb-s-zonen .zone-flaeche
+   {stroke:none} ist entfallen — Islands tragen jetzt eine gestrichelte Kante. */
 
 /* ---- Kärtchen (MAC/ARP/Routen) ---- */
 .karte-rahmen{fill:var(--panel); stroke:var(--line-2); stroke-width:1}
@@ -697,15 +674,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
   .lb-zoomtext{height:44px; min-width:68px}
 }
 
-/* § 18: Szenen-Legende unten links – Glas-Panel mit Mono-Mikrolabels wie im Prototyp.
-   Der Hinweis darüber (`.lb-hinweis`, bottom:44px) überdeckt sie so nicht mehr. */
-.lb-legende{position:absolute; left:16px; bottom:12px; display:flex; align-items:center; gap:12px; padding:4px 8px; border-radius:var(--radius-s); background:var(--glas);
-  border:1px solid var(--line); box-shadow:0 4px 14px color-mix(in srgb, var(--bg) 60%, transparent); pointer-events:none;
-  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; color:var(--faint)}
-.lb-legende .lg{display:inline-flex; align-items:center; gap:8px}
-.lb-legende .lg::before{content:""; width:20px; height:1px; background:var(--line-2)}
-.lb-legende .lg-verbunden::before{background:var(--accent)}
-.lb-legende .lg-kein::before{background:var(--warn); height:0; border-top:1px dashed var(--warn)}
+/* Legende (.lb-legende/.lg-*) und Minimap-Feinschliff: zz-lagebild.css (Lagebild 2.0 § 3.5). */
 
 /* A: leerer Inspektor sagt, was zu tun ist, statt weisse Flaeche */
 #labor-inspektor:empty::before{content:"// INSPEKTOR · GERÄT WÄHLEN"; display:block; padding:16px;
@@ -739,31 +708,11 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
   .lb-auftrag .am-ziele{padding:4px 8px}
 }
 
-/* ---- POLARIS-Feinschliff der Fläche (29.10.2026) ----
-   Bewusst höhere Spezifität als zz-polaris.css (lädt zuletzt): die Grundwerte dort bleiben,
-   hier gewinnt nur der Feinschliff. Alle Farben/Dauern aus basis.css (§ 18), keine Literale.
-   Trefferflächen bleiben unangetastet: .ger-treffer 116×80, .kabel-treffer stroke-width 14. */
-/* Karten: Schatten nur bei Hover/Auswahl (vorher dauerhaft), weich überblendet */
-.lb-svg .ger-karte{filter:drop-shadow(0 0 0 transparent); transition:stroke var(--dauer) var(--ease-standard), filter var(--dauer) var(--ease-standard)}
-.lb-svg .ger.hover .ger-karte{filter:drop-shadow(0 8px 16px color-mix(in srgb, var(--bg) 70%, transparent))}
-.lb-svg .ger.gewaehlt .ger-karte, .lb-svg .ger.zielt .ger-karte{filter:drop-shadow(0 10px 20px color-mix(in srgb, var(--bg) 62%, transparent))}
-/* Symbol-Platte: Gerätebild sitzt dezent abgehoben auf der Karte */
-.ger-bild{opacity:.94; filter:drop-shadow(0 6px 10px color-mix(in srgb, var(--bg) 55%, transparent))}
-.ger.hover .ger-bild, .ger.gewaehlt .ger-bild{opacity:1; transition:opacity var(--dauer) var(--ease-standard)}
-/* Name/IP: Name kräftig, Adresse in der Lesegröße der Skala */
-.lb-svg .ger-name{font-weight:700; letter-spacing:.08em; fill:var(--ink)}
-.lb-svg .ger-ip{font-size:var(--fs-2); fill:var(--muted)}
-/* Stecker: Gehäuse in Leiterfarbe (--kf), Kontakt als dunkler Schlitz */
-.kabel .kabel-stecker .stk-gehaeuse{fill:var(--panel-3); stroke:var(--line-2); stroke-width:1.2}
-.kabel .kabel-stecker .stk-kontakt{stroke:var(--line-2); opacity:1}
-/* Status-Punkte kompakt: skalieren um den eigenen Mittelpunkt (wie juice.css an .ps-oben path) */
-.ps{transform-box:fill-box; transform-origin:center; transform:scale(.88); opacity:.82}
+/* ---- Fläche: Gestaltung komplett in zz-lagebild.css (Lagebild 2.0) ----
+   Karten, Auswahlring, Symbol-Platte, Linien, Hüllen, Trunk, Zonen, Legende und Minimap
+   stehen dort; die alten 168×112-Annahmen, .kabel-stecker und .ps-Statussymbole sind
+   ersatzlos entfallen (der Renderer erzeugt sie nicht mehr, Vertrag § 3.1–3.3). */
 
-
-/* Portnamen erscheinen nur beim Überfahren des Kabels (Inspektor listet sie ohnehin);
-   Zonen sind Hintergrund-Wäsche, keine Kästchen und keine Labels – so bleibt die Fläche ruhig. */
-.kabel:hover .kabel-port, .kabel.gewaehlt .kabel-port{display:inline}
-.lb-s-zonen .zone-flaeche{stroke:none}
 
 /* ---- ereignisse.css ---- */
 /* Ereignisse (E1): Karte oben über der Fläche – Toasts stehen unten, die Karte stört sie nicht. Präfix ev-.
@@ -2739,10 +2688,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .wk-nichts{padding:8px; color:var(--faint); font:600 var(--fs-2)/1.3 var(--body)}
 
 /* ---- Minimap: reine Ansicht, unten rechts auf der Fläche (keine Datenform, kein Speicher) ---- */
-.wk-mini{position:absolute; right:10px; bottom:10px; z-index:20; display:flex; flex-direction:column; gap:4px; padding:8px; border-radius:var(--radius); background:var(--glas); border:1px solid var(--line); box-shadow:var(--schatten)}
+.wk-mini{position:absolute; right:10px; bottom:10px; z-index:20; display:flex; flex-direction:column; gap:4px; padding:4px; border-radius:var(--radius); background:var(--glas); border:1px solid var(--line); box-shadow:var(--schatten)}
 .wk-mini-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px}
 .wk-mini-knopf{display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--muted); transition:background var(--dauer), color var(--dauer)}
-.wk-mini-svg{display:block; width:184px; height:112px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--bg); cursor:pointer; touch-action:none}
+.wk-mini-svg{display:block; width:148px; height:92px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--bg); cursor:pointer; touch-action:none}
 .wk-mini-kabel, .wk-mini-geraete{pointer-events:none}
 .wk-mini-kabel-linie{stroke:var(--line-2); stroke-width:2; vector-effect:non-scaling-stroke}
 .wk-mini-punkt{fill:var(--g, var(--muted)); stroke:var(--bg); stroke-width:1; vector-effect:non-scaling-stroke}
@@ -2755,11 +2704,155 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .wk-stufe{height:28px; padding:0 4px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:600 var(--fs-1)/1 var(--body)}
 @media (max-width: 900px){ .wk-mini{display:none} }
 
+/* ---- zz-lagebild.css ---- */
+/* ============================================================================
+   LAGEBILD 2.0 — Basis-Gestaltung der Labor-Fläche (.lb-leinwand / .lb-svg)
+   ----------------------------------------------------------------------------
+   Vertrag: docs/entwicklung/Entwurf – Lagebild 2.0 (Gestaltungsvertrag).md,
+   Abschnitte 3.1–3.5 (Knoten, Kanten, Zonen, Zoom, Legende/Minimap) und 3.6
+   (Theme-Tokens). Die Datei trägt die BASIS; die Materialsprache je Theme kommt
+   aus den Tokens (zz-polaris.css :root = POLARIS-Default, zzz-thema-<id>.css =
+   Theme) plus wenigen html[data-theme="…"]-Regeln in den Theme-Dateien.
+
+   Regeln dieser Datei (Ethos R1–R3): jede Farbe/jeder Radius/jede Schrift
+   ausschließlich über var(--lage-…, var(--fallback)) — kein Literal. Abstände
+   aus {0,4,8,12,16,24,32}; Dauer nur var(--dauer); Schatten nur var(--lage-…).
+   Schichtenfolge (editor.js): .lb-s-zonen < .lb-s-kabel < .lb-s-geraete <
+   .lb-s-karten < .lb-s-ueber < .lb-s-pakete < .lb-s-band.
+   Token-Form: --lage-knoten-schatten ist ein FILTER-Wert (none | drop-shadow(…)),
+   --lage-glow ein box-shadow-Wert (none | 0 0 …).
+   ============================================================================ */
+
+/* ---- Fläche und Raster ------------------------------------------------ */
+.lb-svg{background:var(--lage-flaeche, var(--bg))}
+.lb-raster-punkt{fill:var(--lage-raster, var(--bg-raster))}
+.lb-raster.fein{opacity:.35}
+
+/* ---- Knoten: Beschriftungsträger, kein Leerraum-Kasten -----------------
+   Geometrie (140×76 / 110×64, Text linksbündig ab x=-KW/2+48) setzt
+   src/ui/editor.js. CSS: Haarlinien-Rahmen, Typ-Platte, Auswahlring. */
+.ger{cursor:grab}
+.ger-treffer{fill:transparent}
+.ger-karte{fill:var(--lage-knoten-bg, var(--panel)); stroke:var(--lage-knoten-rand, var(--line)); stroke-width:1;
+  rx:var(--lage-radius, var(--radius-s)); filter:var(--lage-knoten-schatten, none);
+  transition:stroke var(--dauer) var(--ease-standard), fill var(--dauer) var(--ease-standard)}
+.ger.hover .ger-karte{stroke:var(--line-2)}
+.ger.gewaehlt .ger-karte, .ger.zielt .ger-karte{stroke:var(--accent); stroke-width:1.5}
+.ger-auswahl{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:5 4; opacity:0;
+  transition:opacity var(--dauer) var(--ease-standard)}
+.ger.gewaehlt .ger-auswahl{opacity:1}
+/* „ohne Link" ist ein Zustand, kein Fehlerbild: gestrichelter Koralle-Rahmen */
+.ger.ohne-ip .ger-karte{stroke:var(--bad); stroke-dasharray:4 3;
+  fill:color-mix(in srgb, var(--bad) 6%, var(--lage-knoten-bg, var(--panel)))}
+.ger.aus .ger-karte{stroke:var(--faint); stroke-dasharray:2 3}
+.ger.aus .ger-bild{opacity:.5}
+/* Icon-Platte: 28×28 links (Skalierung des Gerätebilds macht editor.js) */
+.ger .gb-kachel{fill:color-mix(in srgb, var(--g, var(--accent)) 12%, var(--lage-platte, var(--panel-2)));
+  stroke:var(--lage-platte-rand, var(--line))}
+.ger.gewaehlt .gb-kachel, .ger.zielt .gb-kachel{stroke:var(--accent)}
+.ger .gb-glyph path{stroke:var(--g, var(--ink))}
+/* Zoom-Stufen (Vertrag 3.4): wenig-text (< 0,9) nimmt die Rolle, klein (< 0,6) zusätzlich die
+   Adresse, sehr-klein (< 0,4) zuletzt den Namen. Zonen-Chips (.zone-text/.zone-gw) fallen in
+   KEINER Stufe weg — die CIDR bleibt immer lesbar (Befund B1). */
+.lb-svg.wenig-text .ger-rolle, .lb-svg.klein .ger-ip, .lb-svg.klein .ger-mehr, .lb-svg.sehr-klein .ger-name, .kabel-ende.ohne-name .kabel-port{display:none}
+
+/* ---- Kanten: Verbindungen, kein Gekritzel ------------------------------
+   Endpunkte an der Knotenkante, orthogonal gerundet und Port-LED zeichnet
+   editor.js. Hier: Farbe/Zustand. --kf trägt die Kantenfarbe. */
+.kabel{--kf:var(--lage-kante, var(--mint))}
+.kabel.k-unten{--kf:var(--bad)}
+.kabel.k-aus{--kf:var(--warn)}
+.kabel.vlan-trunk{--kf:var(--ink)}
+.kabel-treffer{fill:none; stroke:transparent; stroke-width:14; cursor:pointer}
+/* Hülle = Flächenfarbe: trennt Kabel von Raster und Zonenwäsche */
+.kabel-huelle{fill:none; stroke:var(--lage-kante-huelle, var(--lage-flaeche, var(--bg)));
+  stroke-width:4; stroke-linecap:round; vector-effect:non-scaling-stroke}
+.kabel-linie{fill:none; stroke:var(--kf); stroke-width:1.5; stroke-linecap:round;
+  vector-effect:non-scaling-stroke; transition:stroke-width var(--dauer) var(--ease-standard)}
+.k-unten .kabel-linie, .k-unten .kabel-trunk-aussen, .k-unten .kabel-trunk-innen{stroke-dasharray:5 4}
+.k-aus .kabel-linie, .k-aus .kabel-trunk-aussen, .k-aus .kabel-trunk-innen{stroke-dasharray:1 5}
+.kabel.gewaehlt .kabel-linie, .kabel:hover .kabel-linie{stroke-width:2.5}
+.kabel:hover .kabel-treffer{stroke:color-mix(in srgb, var(--panel-3) 70%, transparent)}
+.kabel.gewaehlt .kabel-treffer{stroke:var(--accent-soft)}
+/* Trunk: zwei parallele Haarlinien (4,5 breit, 2,5 ausgespart) statt Doppellinie */
+.kabel-trunk-aussen{fill:none; stroke:var(--kf); stroke-width:4.5; stroke-linecap:round; vector-effect:non-scaling-stroke}
+.kabel-trunk-innen{fill:none; stroke:var(--lage-kante-huelle, var(--lage-flaeche, var(--bg)));
+  stroke-width:2.5; stroke-linecap:round}
+.kabel.trunk .kabel-huelle{stroke-width:6}
+/* Port-LED exakt auf der Rahmenlinie (r=2,6 setzt editor.js) */
+.port-led{stroke:var(--lage-flaeche, var(--bg)); stroke-width:1; pointer-events:none; vector-effect:non-scaling-stroke}
+/* Kabel-Enden (LED + Portname) liegen im Layer .lb-s-ueber über den Karten; welche Enden
+   sichtbar sind (Zoom, Hover, Auswahl, Kollision), entscheidet der Renderer über .an. */
+.kabel-ende{display:none; pointer-events:none}
+.kabel-ende.an{display:inline}
+
+/* ---- Zonen: Flächen mit Namen, keine Vielecke -------------------------- */
+.zone, .ger-text{pointer-events:none}
+.zone-a{--zf:var(--zone-a); --zl:var(--zone-a-linie)} .zone-b{--zf:var(--zone-b); --zl:var(--zone-b-linie)} .zone-c{--zf:var(--zone-c); --zl:var(--zone-c-linie)}
+.zone-d{--zf:var(--zone-d); --zl:var(--zone-d-linie)} .zone-e{--zf:var(--zone-e); --zl:var(--zone-e-linie)}
+.zone-flaeche{fill:var(--zf, transparent); stroke:var(--zl, var(--line)); stroke-width:1; stroke-dasharray:6 5;
+  stroke-linejoin:round; vector-effect:non-scaling-stroke}
+/* Chip: Rahmen + Punkt + CIDR; wird in KEINER Zoomstufe ausgeblendet (B1) */
+.zone-label rect{fill:var(--lage-chip-bg, var(--panel)); stroke:var(--lage-chip-rand, var(--line));
+  stroke-width:1; rx:var(--radius-xs)}
+.zone-punkt{fill:var(--zl, var(--accent)); stroke:none}
+
+/* ---- Legende: Farben exakt wie die Kanten ----------------------------- */
+.lb-legende{position:absolute; left:16px; bottom:12px; display:flex; align-items:center; gap:12px;
+  padding:4px 8px; border:1px solid var(--lage-chip-rand, var(--line)); border-radius:var(--lage-radius, var(--radius-s));
+  background:var(--lage-chip-bg, var(--glas)); box-shadow:var(--lage-glow, none); pointer-events:none;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.14em; color:var(--lage-chip-text, var(--faint));
+  text-transform:uppercase}
+.lb-legende .lg{display:inline-flex; align-items:center; gap:8px}
+.lb-legende .lg::before{content:""; width:20px; height:2px; border-radius:999px; background:var(--lage-kante, var(--mint))}
+.lb-legende .lg-getrennt::before{background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px)}
+.lb-legende .lg-kein::before{background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px)}
+
+/* ---- Minimap: kleine Seekarte statt Punktewolke ------------------------ */
+.wk-mini{background:var(--lage-mini-bg, var(--panel-2)); border:1px solid var(--lage-mini-rand, var(--line));
+  border-radius:var(--lage-radius, var(--radius))}
+.wk-mini-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.22em; color:var(--faint); text-transform:uppercase}
+.wk-mini-svg{background:var(--lage-flaeche, var(--bg)); border:1px solid var(--lage-mini-rand, var(--line))}
+.wk-mini-kabel-linie{stroke:var(--lage-mini-rand, var(--line-2)); stroke-width:1; vector-effect:non-scaling-stroke}
+.wk-mini-punkt{fill:var(--g, var(--muted)); stroke:var(--lage-flaeche, var(--bg)); stroke-width:1}
+.wk-mini-punkt.an{fill:var(--accent)}
+.wk-mini-rahmen{fill:none; stroke:var(--accent); stroke-width:1.25; stroke-dasharray:6 4; vector-effect:non-scaling-stroke}
+.wk-mini-zoomtext{font:600 var(--fs-1)/1 var(--mono); color:var(--faint)}
+
 /* ---- zz-polaris.css ---- */
 /* ---------- POLARIS v4: Feinschliff über allen Stildateien (lädt zuletzt) ----------
    Trägt die Gestaltung aus dem Prototyp in die App: geschichtete Paneele, weiche Tiefe,
    semantische Farben (Minze = Handlung, Iris = Wissen, Amber = Geld, Koralle = Störung),
    ruhige Bewegung. Nur Tokens, Skala und color-mix (§ 18.2/18.5/18.6/18.9). */
+
+/* ===== Lagebild 2.0: Default-Tokens der Labor-Fläche (POLARIS) =====
+   Vertrag: docs/entwicklung/Entwurf – Lagebild 2.0 (Gestaltungsvertrag).md § 3.6.
+   Themes überschreiben diese Werte in ihrem eigenen :root[data-theme="<id>"]-Block;
+   zz-lagebild.css nutzt IMMER var(--lage-…, var(--fallback)), bricht also ohne Theme nicht.
+   --lage-knoten-schatten ist ein filter-Wert (none | drop-shadow(…)),
+   --lage-glow ein box-shadow-Wert (none | 0 …). */
+:root{
+  --lage-flaeche:var(--bg);
+  --lage-raster:var(--bg-raster);
+  --lage-knoten-bg:var(--panel);
+  --lage-knoten-rand:var(--line);
+  --lage-knoten-schatten:none;
+  --lage-name:var(--ink);
+  --lage-rolle:var(--muted);
+  --lage-ip:var(--faint);
+  --lage-platte:var(--panel-2);
+  --lage-platte-rand:var(--line-2);
+  --lage-kante:var(--mint);
+  --lage-kante-huelle:var(--bg);
+  --lage-chip-bg:var(--panel);
+  --lage-chip-rand:var(--line);
+  --lage-chip-text:var(--ink);
+  --lage-mini-bg:var(--panel-2);
+  --lage-mini-rand:var(--line);
+  --lage-radius:12px;
+  --lage-glow:none;
+}
 
 /* ===== Shell ===== */
 .kopf{gap:12px;padding:0 16px;background:var(--panel)}
@@ -2795,30 +2888,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   box-shadow:0 18px 44px -34px color-mix(in srgb,var(--bg) 85%,transparent)}
 .lb-hinweis{border-radius:var(--radius-s);background:color-mix(in srgb,var(--panel) 90%,transparent);backdrop-filter:blur(12px)}
 .lb-dock, .lb-inspektor{background:var(--panel);border-left:1px solid var(--line)}
-.lb-legende{bottom:16px;left:16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
-.lb-legende .lg::before{width:16px}
-.lb-legende .lg-getrennt::before{background:var(--line-2)}
-
-/* ===== Geräte-Karten ===== */
-.ger-karte{rx:10px;fill:var(--panel);stroke:var(--line)}
-.ger.hover .ger-karte{fill:var(--panel-2);stroke:var(--line-2)}
-.ger.gewaehlt .ger-karte, .ger.zielt .ger-karte{stroke:var(--accent);stroke-width:1.6}
-.ger-name{letter-spacing:.1em}
-.ger-ip{font:500 var(--fs-1)/1 var(--mono);letter-spacing:.02em}
-
-/* ===== Kabel: Mantel, Seele, Stecker ===== */
-.kabel-huelle{fill:none;stroke:color-mix(in srgb,var(--ink) 16%,transparent);stroke-width:8;stroke-linecap:round}
-.kabel-linie{fill:none;stroke-width:3.2;stroke-linecap:round;transition:stroke-width var(--dauer) var(--ease-standard)}
-.kabel.k-unten .kabel-linie{stroke-dasharray:1 7;animation:kabel-fliessen var(--dauer-zaehler) linear infinite}
-.kabel.k-aus .kabel-linie{stroke-dasharray:2 8}
-.kabel-trunk-aussen{fill:none;stroke-width:6.4;stroke-linecap:round}
-.kabel-trunk-innen{fill:none;stroke-width:2.2;stroke-linecap:round}
-.kabel-stecker .stk-gehaeuse{fill:var(--panel-3);stroke:var(--kf,var(--accent));stroke-width:1.4}
-.kabel-stecker .stk-kontakt{fill:none;stroke:var(--kf,var(--accent));stroke-width:1;opacity:.55}
-.kabel-stecker .stk-clip{fill:var(--panel);stroke:none}
-.kabel:hover .kabel-linie{stroke-width:3.2}
-.kabel.gewaehlt .kabel-huelle{stroke:color-mix(in srgb,var(--accent) 18%,transparent)}
-@keyframes kabel-fliessen{to{stroke-dashoffset:-40}}
+/* ===== Lagebild 2.0 =====
+   Knoten, Kanten, Zonen, Legende und Minimap der Labor-Fläche stehen vollständig in
+   zz-lagebild.css; POLARIS bringt nur die Default-Tokens (oben im :root-Block) mit.
+   Die alten Karten-/Kabel-Regeln (168×112-Annahmen, .kabel-stecker) sind entfallen. */
 .hb-seite {max-width:1120px;margin:0 auto;padding:32px 24px;gap:16px;gap:16px;padding:32px 24px}
 .hb-kopf h2{font:800 var(--fs-8)/1.02 var(--display);letter-spacing:-.04em;max-width:16ch}
 .hb-kopf .hb-serie{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
@@ -2959,7 +3032,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .lb-auftrag .am-knoepfe{gap:8px}
 .lb-auftrag .am-lesen{height:44px;border-radius:var(--radius-s);border:1px solid var(--line);background:transparent;color:var(--muted)}
 .lb-auftrag .sp-abnahme{height:44px;border-radius:var(--radius-s);background:var(--accent);color:var(--accent-ink);border:0}
-.lb-leinwand{flex:1 1 auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden}
+.lb-leinwand{flex:1 1 auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--lage-flaeche,var(--panel));overflow:hidden}
 .lb-leinwand::before{left:20px;top:16px}
 .lb-leiste-oben{top:36px}
 
@@ -3295,7 +3368,7 @@ body{background-image:
 .hb-panel, .hb-hero, .lb-auftrag, .lb-leinwand, .in-panel, .kr-seite, .ansicht{
   box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent)}
 /* Editor-Fläche etwas heller als der Rahmen, damit Geräte und Kabel ruhiger liegen */
-.lb-leinwand{background-color:color-mix(in srgb, var(--panel) 72%, var(--panel-2))}
+.lb-leinwand{background-color:var(--lage-flaeche,color-mix(in srgb, var(--panel) 72%, var(--panel-2)))}
 
 
 /* ===== Farbe ins Dunkel: sehr leise Flächen-Tints, damit Bereiche unterscheidbar bleiben ===== */
@@ -3388,6 +3461,27 @@ body .lb-auftrag .am-kunde{display:block;max-width:100%;overflow:hidden;text-ove
 
   /* Glas/Leisten in warmem Schimmer statt kühlem Schwarz */
   --glas:rgba(250,246,238,.86); --leiste-bg:rgba(250,246,238,.94);
+
+  /* Lagebild 2.0: Materialsprache Keramik (nur hier Literale) */
+  --lage-flaeche:#E9E1D2;
+  --lage-raster:rgba(58,48,36,.10);
+  --lage-knoten-bg:#FAF6EE;
+  --lage-knoten-rand:rgba(58,48,36,.30);
+  --lage-knoten-schatten:drop-shadow(0 12px 24px rgba(58,44,30,.16));
+  --lage-name:#26201A;
+  --lage-rolle:#554C40;
+  --lage-ip:#4B6650;
+  --lage-platte:#E3E9DB;
+  --lage-platte-rand:rgba(75,102,80,.34);
+  --lage-kante:#4B6650;
+  --lage-kante-huelle:rgba(233,225,210,.92);
+  --lage-chip-bg:#FAF6EE;
+  --lage-chip-rand:rgba(58,48,36,.24);
+  --lage-chip-text:#26201A;
+  --lage-mini-bg:#F3EDE2;
+  --lage-mini-rand:rgba(58,48,36,.18);
+  --lage-radius:14px;
+  --lage-glow:0 0 0 1px rgba(75,102,80,.22), 0 12px 28px -24px rgba(75,102,80,.30);
 }
 
 /* ---- Papier statt Farbnebel: nur das feine Punktraster bleibt ---- */
@@ -3412,7 +3506,182 @@ html[data-theme="keramik"] .hb-panel:not(.hb-lage){
 html[data-theme="keramik"] .hb-lage{border-radius:var(--radius);box-shadow:var(--keramik-karte)}
 html[data-theme="keramik"] .hb-raster{gap:var(--keramik-gap)}
 html[data-theme="keramik"] .ansicht .hb-kachel{box-shadow:none;border-radius:var(--radius)}
-html[data-theme="keramik"] .lb-leinwand{background:var(--panel-3);border-radius:var(--radius)}
+/* ---- Lagebild 2.0: Steinplatte auf Ton, weiche Formen, matte Tiefe ---- */
+
+html[data-theme="keramik"] .labor .lb-leinwand{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--lage-flaeche);
+  background-image:none;
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+html[data-theme="keramik"] .labor .lb-leinwand::before{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:var(--keramik-label-tracking);
+  color:var(--faint);
+}
+
+html[data-theme="keramik"] .labor .lb-svg{
+  background-color:transparent;
+  background-image:none;
+}
+
+html[data-theme="keramik"] .labor .lb-raster-punkt{
+  fill:var(--lage-raster);
+}
+
+/* ---- Knoten: Steinplatte, grosse weiche Radien, matter Schatten ---- */
+
+html[data-theme="keramik"] .labor .ger-karte{
+  fill:var(--lage-knoten-bg);
+  stroke:var(--lage-knoten-rand);
+  stroke-width:1;
+  rx:var(--lage-radius);
+  filter:var(--lage-knoten-schatten);
+  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="keramik"] .labor .ger-auswahl{
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:none;
+  rx:var(--radius-s);
+}
+
+html[data-theme="keramik"] .labor .ger.hover .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 70%, var(--panel-3));
+  stroke:var(--line-2);
+}
+
+html[data-theme="keramik"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="keramik"] .labor .ger.zielt .ger-karte{
+  fill:color-mix(in srgb, var(--accent-soft) 70%, var(--lage-knoten-bg));
+  stroke:var(--accent);
+  stroke-width:1.4;
+}
+
+html[data-theme="keramik"] .labor .ger.gewaehlt .ger-auswahl,
+html[data-theme="keramik"] .labor .ger.zielt .ger-auswahl{
+  opacity:.5;
+}
+
+html[data-theme="keramik"] .labor .ger.ohne-ip .ger-karte{
+  stroke:var(--bad);
+  stroke-dasharray:4 4;
+}
+
+html[data-theme="keramik"] .labor .ger.aus .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 62%, var(--panel-3));
+  stroke:color-mix(in srgb, var(--lage-knoten-rand) 60%, transparent);
+}
+
+html[data-theme="keramik"] .labor .ger.aus .ger-name{
+  fill:var(--faint);
+}
+
+html[data-theme="keramik"] .labor .ger.aus .ger-bild{
+  opacity:.4;
+}
+
+html[data-theme="keramik"] .labor .ger .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
+  stroke:var(--lage-platte-rand);
+  stroke-width:1;
+}
+
+html[data-theme="keramik"] .labor .ger.hover .gb-kachel,
+html[data-theme="keramik"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="keramik"] .labor .ger.zielt .gb-kachel{
+  stroke:var(--accent);
+  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
+}
+
+html[data-theme="keramik"] .labor .ger-name{
+  font:600 var(--fs-2)/1 var(--display);
+  letter-spacing:var(--keramik-tracking);
+  fill:var(--lage-name);
+}
+
+html[data-theme="keramik"] .labor .ger-rolle{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="keramik"] .labor .ger-ip{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.03em;
+  fill:var(--lage-ip);
+}
+
+html[data-theme="keramik"] .labor .ger-mehr{
+  fill:var(--lage-rolle);
+  font-weight:500;
+}
+
+/* ---- Kanten: Salbei-Linie, Terrakotta bei Störung (Farbe über --kf) ---- */
+
+html[data-theme="keramik"] .labor .kabel{
+  --kf:var(--lage-kante);
+}
+
+html[data-theme="keramik"] .labor .kabel.k-unten{
+  --kf:var(--bad);
+}
+
+html[data-theme="keramik"] .labor .kabel.k-aus{
+  --kf:var(--warn);
+}
+
+html[data-theme="keramik"] .labor .kabel.vlan-trunk{
+  --kf:var(--ink);
+}
+
+html[data-theme="keramik"] .labor .kabel-huelle{
+  stroke:var(--lage-kante-huelle);
+}
+
+html[data-theme="keramik"] .labor .kabel:hover .kabel-linie,
+html[data-theme="keramik"] .labor .kabel.gewaehlt .kabel-linie{
+  stroke:var(--accent);
+}
+
+html[data-theme="keramik"] .labor .kabel-port{
+  fill:var(--lage-rolle);
+  letter-spacing:.06em;
+}
+
+/* ---- Zonen: Mineral-Schleier, Chip wie ein Preisschild ---- */
+
+html[data-theme="keramik"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg);
+  stroke:var(--lage-chip-rand);
+  stroke-width:1;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="keramik"] .labor .zone-label{
+  filter:drop-shadow(0 6px 12px color-mix(in srgb, var(--ink) 8%, transparent));
+}
+
+html[data-theme="keramik"] .labor .zone-text{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.06em;
+  fill:var(--lage-chip-text);
+}
+
+html[data-theme="keramik"] .labor .zone-gw{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.03em;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="keramik"] .labor .zone-punkt{
+  stroke:var(--lage-chip-bg);
+  stroke-width:1;
+}
 
 /* ---- Knöpfe: weich, matt, ohne Leuchtspur ---- */
 html[data-theme="keramik"] .knopf{border-radius:var(--radius-s);box-shadow:var(--keramik-knopf)}
@@ -3420,8 +3689,92 @@ html[data-theme="keramik"] .knopf.primaer, html[data-theme="keramik"] .knopf.pri
 html[data-theme="keramik"] .dock-knopf.an{background:var(--accent-soft);color:var(--accent)}
 
 /* ---- Legende und Ring: matte Tafel, ruhiger Fortschritt ---- */
-html[data-theme="keramik"] .lb-legende{
-  background:var(--panel-2); box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none;
+html[data-theme="keramik"] .labor .lb-legende{
+  background:var(--lage-mini-bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-s);
+  color:var(--faint);
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  gap:16px;
+  box-shadow:none;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+
+html[data-theme="keramik"] .labor .lb-legende .lg::before{
+  width:20px;
+  height:2px;
+  border-radius:999px;
+  background:var(--lage-kante);
+  border:0;
+}
+
+html[data-theme="keramik"] .labor .lb-legende .lg-getrennt::before{
+  background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px);
+}
+
+html[data-theme="keramik"] .labor .lb-legende .lg-kein::before{
+  height:1px;
+  background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px);
+}
+
+/* ---- Minimap: Papierkarte auf der Werkbank ---- */
+
+html[data-theme="keramik"] .labor .wk-mini{
+  background:var(--lage-mini-bg);
+  border:1px solid var(--lage-mini-rand);
+  border-radius:var(--radius-s);
+  box-shadow:var(--schatten);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+
+html[data-theme="keramik"] .labor .wk-mini-titel{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-svg{
+  background-color:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--lage-kante) 42%, transparent);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-punkt{
+  fill:var(--lage-rolle);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-punkt.an{
+  fill:var(--accent);
+  stroke:var(--panel-2);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-rahmen{
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:4 3;
+}
+
+html[data-theme="keramik"] .labor .wk-mini-knopf{
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  color:var(--muted);
+}
+
+html[data-theme="keramik"] .labor .wk-mini-zoomtext{
+  font:600 var(--fs-1)/1 var(--mono);
+  color:var(--faint);
 }
 html[data-theme="keramik"] .hb-ring{background:var(--keramik-ring)}
 
@@ -3528,6 +3881,27 @@ html[data-theme="keramik"] :is(.hb-panel-titel,.hb-kicker,.hb-kopf::before,.lb-a
   --ease-standard:cubic-bezier(.2,.7,.3,1);
   --ease-out:cubic-bezier(.16,.84,.44,1);
   --ease-pop:cubic-bezier(.3,1.6,.5,1);
+
+  /* ---- Lagebild 2.0: Materialsprache Messing (nur hier Literale) ---- */
+  --lage-flaeche:#16100B;
+  --lage-raster:rgba(212,176,106,.075);
+  --lage-knoten-bg:#221B14;
+  --lage-knoten-rand:rgba(214,178,106,.46);
+  --lage-knoten-schatten:drop-shadow(0 12px 22px rgba(0,0,0,.55));
+  --lage-name:#F4ECDE;
+  --lage-rolle:#B8A88F;
+  --lage-ip:#D9B577;
+  --lage-platte:#2B231B;
+  --lage-platte-rand:rgba(224,190,120,.38);
+  --lage-kante:#D2A85F;
+  --lage-kante-huelle:rgba(18,14,10,.88);
+  --lage-chip-bg:#241D16;
+  --lage-chip-rand:rgba(214,178,106,.34);
+  --lage-chip-text:#F4ECDE;
+  --lage-mini-bg:rgba(25,21,18,.92);
+  --lage-mini-rand:rgba(214,178,106,.28);
+  --lage-radius:4px;
+  --lage-glow:0 0 0 1px rgba(210,168,95,.30), 0 24px 56px -28px rgba(210,168,95,.28);
 }
 
 /* ============================================================================
@@ -4393,17 +4767,27 @@ html[data-theme="messing"] .labor .lb-auftrag .am-mehr{
   color:var(--faint);
 }
 
-/* ---- ZeichenflÃ¤che: warmes Papier unter einer tiefen Lampe ---- */
+/* ---- Lagebild 2.0: Messingplakette auf Espresso, Haarlinien-Relief ---- */
 
 html[data-theme="messing"] .labor .lb-leinwand{
   border:1px solid var(--line);
   border-radius:var(--radius);
-  background-color:var(--bg);
+  background-color:var(--lage-flaeche);
   background-image:
-    radial-gradient(120% 100% at 50% -20%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 56%),
-    radial-gradient(90% 70% at 50% 120%, color-mix(in srgb, var(--bg) 85%, transparent), transparent 60%),
-    linear-gradient(180deg, color-mix(in srgb, var(--panel) 86%, var(--bg)), var(--bg) 72%);
+    radial-gradient(120% 92% at 50% -18%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 58%),
+    radial-gradient(90% 70% at 50% 118%, color-mix(in srgb, var(--bg) 68%, transparent), transparent 64%);
   box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+/* Passepartout: eine zweite Haarlinie im Blattrand (Atelier-Signatur) */
+html[data-theme="messing"] .labor .lb-leinwand::after{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
+  pointer-events:none;
+  z-index:10;
 }
 
 html[data-theme="messing"] .labor .lb-leinwand::before{
@@ -4412,58 +4796,177 @@ html[data-theme="messing"] .labor .lb-leinwand::before{
   color:color-mix(in srgb, var(--accent) 58%, var(--faint));
 }
 
-html[data-theme="messing"] .labor .lb-raster-punkt{
-  fill:color-mix(in srgb, var(--accent) 30%, transparent);
+html[data-theme="messing"] .labor .lb-svg{
+  background-color:transparent;
+  background-image:none;
 }
 
-/* ---- GerÃ¤te: Karten mit Messingkante ---- */
+html[data-theme="messing"] .labor .lb-raster-punkt{
+  fill:var(--lage-raster);
+}
+
+html[data-theme="messing"] .labor .lb-raster{
+  opacity:1;
+}
+
+/* ---- Knoten: Messing-Plakette, Haarlinien-Doppelrahmen, Serif-Name ---- */
 
 html[data-theme="messing"] .labor .ger-karte{
-  rx:var(--radius-xs);
-  fill:var(--panel-2);
-  stroke:var(--line);
+  fill:var(--lage-knoten-bg);
+  stroke:var(--lage-knoten-rand);
   stroke-width:1;
+  rx:var(--lage-radius);
+  filter:drop-shadow(0 2px 0 var(--lage-platte-rand)) drop-shadow(0 -1px 0 color-mix(in srgb, var(--ink) 9%, transparent)) var(--lage-knoten-schatten);
+  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard), filter var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="messing"] .labor .ger-auswahl{
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:none;
+  rx:var(--radius-s);
 }
 
 html[data-theme="messing"] .labor .ger.hover .ger-karte{
-  fill:var(--panel-3);
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 82%, var(--panel-3));
   stroke:var(--line-2);
 }
 
 html[data-theme="messing"] .labor .ger.gewaehlt .ger-karte,
 html[data-theme="messing"] .labor .ger.zielt .ger-karte{
   stroke:var(--accent);
-  stroke-width:1.6;
+  stroke-width:1.4;
+  filter:drop-shadow(0 0 0 1px var(--accent)) drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 30%, transparent)) var(--lage-knoten-schatten);
+}
+
+html[data-theme="messing"] .labor .ger.gewaehlt .ger-auswahl,
+html[data-theme="messing"] .labor .ger.zielt .ger-auswahl{
+  opacity:.5;
+}
+
+html[data-theme="messing"] .labor .ger.ohne-ip .ger-karte{
+  stroke:var(--bad);
+  stroke-dasharray:4 4;
+}
+
+html[data-theme="messing"] .labor .ger.ohne-ip .ger-name{
+  fill:color-mix(in srgb, var(--lage-name) 72%, var(--faint));
+}
+
+html[data-theme="messing"] .labor .ger.aus .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 70%, var(--bg));
+  stroke:color-mix(in srgb, var(--lage-knoten-rand) 55%, transparent);
+}
+
+html[data-theme="messing"] .labor .ger.aus .ger-name{
+  fill:var(--faint);
+}
+
+html[data-theme="messing"] .labor .ger.aus .ger-bild{
+  opacity:.42;
+}
+
+html[data-theme="messing"] .labor .ger .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
+  stroke:var(--lage-platte-rand);
+  stroke-width:1;
+}
+
+html[data-theme="messing"] .labor .ger.hover .gb-kachel,
+html[data-theme="messing"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="messing"] .labor .ger.zielt .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
+  stroke:var(--accent);
 }
 
 html[data-theme="messing"] .labor .ger-name{
-  font:600 var(--fs-1)/1 var(--display);
-  letter-spacing:.14em;
-  fill:var(--ink);
+  font:700 var(--fs-2)/1 var(--display);
+  letter-spacing:.02em;
+  fill:var(--lage-name);
+}
+
+html[data-theme="messing"] .labor .ger-rolle{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  fill:var(--lage-rolle);
 }
 
 html[data-theme="messing"] .labor .ger-ip{
   font:500 var(--fs-1)/1 var(--mono);
-  fill:color-mix(in srgb, var(--accent) 62%, var(--muted));
+  letter-spacing:.02em;
+  fill:var(--lage-ip);
 }
 
-html[data-theme="messing"] .labor .kabel-linie{
-  stroke-width:2.4;
-  stroke-opacity:.85;
+html[data-theme="messing"] .labor .ger-mehr{
+  fill:var(--lage-rolle);
+  font-weight:500;
+}
+
+/* ---- Kanten: Messing-Haarlinie, Ziegel bei Störung (Farbe über --kf) ---- */
+
+html[data-theme="messing"] .labor .kabel{
+  --kf:var(--lage-kante);
+}
+
+html[data-theme="messing"] .labor .kabel.k-unten{
+  --kf:var(--bad);
+}
+
+html[data-theme="messing"] .labor .kabel.k-aus{
+  --kf:var(--warn);
+}
+
+html[data-theme="messing"] .labor .kabel.vlan-trunk{
+  --kf:var(--ink);
 }
 
 html[data-theme="messing"] .labor .kabel-huelle{
-  stroke:color-mix(in srgb, var(--ink) 18%, transparent);
-  stroke-width:7;
+  stroke:var(--lage-kante-huelle);
+}
+
+html[data-theme="messing"] .labor .kabel:hover .kabel-linie,
+html[data-theme="messing"] .labor .kabel.gewaehlt .kabel-linie{
+  stroke:var(--accent);
 }
 
 html[data-theme="messing"] .labor .kabel-port{
-  fill:color-mix(in srgb, var(--faint) 88%, transparent);
+  fill:var(--lage-rolle);
+  letter-spacing:.06em;
 }
 
-html[data-theme="messing"] .labor .ps-grund{
-  fill:var(--panel-2);
-  stroke:var(--line-2);
+/* ---- Zonen: Sepia-Wäsche mit Kupferrand, Chip als Schild ---- */
+
+html[data-theme="messing"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg);
+  stroke:var(--lage-chip-rand);
+  stroke-width:1;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="messing"] .labor .zone-label{
+  filter:drop-shadow(0 6px 14px color-mix(in srgb, var(--bg) 55%, transparent));
+}
+
+html[data-theme="messing"] .labor .zone-text{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.08em;
+  fill:var(--lage-chip-text);
+}
+
+html[data-theme="messing"] .labor .zone-gw{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.04em;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="messing"] .labor .zone-punkt{
+  stroke:var(--lage-chip-bg);
+  stroke-width:1;
+}
+
+@media (max-width:900px){
+  html[data-theme="messing"] .labor .lb-leinwand::after{display:none}
 }
 
 /* ---- Schwebende Werkzeuge: Milchglas Ã¼ber warmem Grund ---- */
@@ -4510,21 +5013,48 @@ html[data-theme="messing"] .labor .lb-hinweis{
   backdrop-filter:blur(8px);
 }
 
+/* ---- Legende: redaktionelle Zeile mit drei echten Linienmustern ---- */
+
 html[data-theme="messing"] .labor .lb-legende{
+  background:color-mix(in srgb, var(--bg) 78%, transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xs);
   color:var(--faint);
   font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.18em;
+  letter-spacing:.20em;
   text-transform:uppercase;
   gap:16px;
+  box-shadow:none;
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
 }
 
-/* ---- Minimap: kleine Werkstattkarte ---- */
+html[data-theme="messing"] .labor .lb-legende .lg::before{
+  width:20px;
+  height:2px;
+  border-radius:999px;
+  background:var(--lage-kante);
+  border:0;
+}
+
+html[data-theme="messing"] .labor .lb-legende .lg-getrennt::before{
+  background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px);
+}
+
+html[data-theme="messing"] .labor .lb-legende .lg-kein::before{
+  height:1px;
+  background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px);
+}
+
+/* ---- Minimap: kleine Werkstattkarte aus Milchglas ---- */
 
 html[data-theme="messing"] .labor .wk-mini{
-  background:color-mix(in srgb, var(--glas) 90%, transparent);
-  border:1px solid var(--line);
+  background:var(--lage-mini-bg);
+  border:1px solid var(--lage-mini-rand);
   border-radius:var(--radius-s);
   box-shadow:var(--schatten);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
 }
 
 html[data-theme="messing"] .labor .wk-mini-titel{
@@ -4535,22 +5065,30 @@ html[data-theme="messing"] .labor .wk-mini-titel{
 }
 
 html[data-theme="messing"] .labor .wk-mini-svg{
-  background-color:var(--bg);
+  background-color:color-mix(in srgb, var(--bg) 55%, transparent);
   border:1px solid var(--line);
   border-radius:var(--radius-xs);
 }
 
 html[data-theme="messing"] .labor .wk-mini-kabel-linie{
-  stroke:color-mix(in srgb, var(--accent) 30%, transparent);
+  stroke:color-mix(in srgb, var(--lage-kante) 45%, transparent);
 }
 
 html[data-theme="messing"] .labor .wk-mini-punkt{
+  fill:var(--lage-rolle);
   stroke:var(--bg);
 }
 
 html[data-theme="messing"] .labor .wk-mini-punkt.an{
   fill:var(--accent);
   stroke:var(--bg);
+}
+
+html[data-theme="messing"] .labor .wk-mini-rahmen{
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:4 3;
 }
 
 html[data-theme="messing"] .labor .wk-mini-knopf{
@@ -4954,6 +5492,28 @@ html[data-theme="messing"] .labor .lb-insp-leer .lb-tipps{
 
   /* ---- Gerätetypen ---- */
   --typ-router:#9BE8F2; --typ-switch:#86E0D6; --typ-firewall:#F2A292; --typ-host:#CBD6D6; --typ-server:#B7ACF2; --typ-nas:#8FB8E8; --typ-internet:#9BE8F2;
+
+  /* ---- Lagebild 2.0 (§ 3.6): Polarnacht-Schiefer, Eisplatten, Eishaarlinien.
+     Aurora erscheint nur bei Aktion (Auswahl/Ziel), nie als Dekoration. ---- */
+  --lage-flaeche:var(--bg);
+  --lage-raster:color-mix(in srgb, var(--ink) 10%, transparent);
+  --lage-knoten-bg:color-mix(in srgb, var(--panel-2) 82%, transparent);
+  --lage-knoten-rand:color-mix(in srgb, var(--ink) 16%, transparent);
+  --lage-knoten-schatten:none;
+  --lage-name:var(--ink);
+  --lage-rolle:var(--muted);
+  --lage-ip:var(--faint);
+  --lage-platte:var(--panel-3);
+  --lage-platte-rand:color-mix(in srgb, var(--ink) 12%, transparent);
+  --lage-kante:color-mix(in srgb, var(--accent) 78%, var(--p-icmp));
+  --lage-kante-huelle:var(--bg);
+  --lage-chip-bg:color-mix(in srgb, var(--panel) 78%, transparent);
+  --lage-chip-rand:var(--line);
+  --lage-chip-text:var(--ink);
+  --lage-mini-bg:color-mix(in srgb, var(--panel) 72%, transparent);
+  --lage-mini-rand:var(--line);
+  --lage-radius:var(--radius-s);
+  --lage-glow:none;
 
   /* ---- Tiefe & Licht ---- */
   --schatten:0 36px 84px -56px rgba(0,0,0,.94);
@@ -5774,8 +6334,8 @@ html[data-theme="nordlicht"] .labor .wk-kennwerte{
 /* ---- Zeichenfläche: tiefes Eis mit Raster und Horizontlicht ---- */
 html[data-theme="nordlicht"] .labor .lb-leinwand{
   border:1px solid var(--line);
-  border-radius:var(--radius);
-  background-color:var(--bg);
+  border-radius:var(--lage-radius);
+  background-color:var(--lage-flaeche);
   box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
@@ -5804,68 +6364,59 @@ html[data-theme="nordlicht"] .labor .lb-leinwand::after{
 }
 
 html[data-theme="nordlicht"] .labor .lb-svg{
-  background-color:var(--bg);
+  background-color:var(--lage-flaeche);
   background-image:
     radial-gradient(1200px 460px at 50% -18%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 66%),
     radial-gradient(800px 420px at 88% 108%, color-mix(in srgb, var(--iris) 7%, transparent), transparent 60%);
 }
 
 html[data-theme="nordlicht"] .labor .lb-raster-punkt{
-  fill:color-mix(in srgb, var(--ink) 20%, transparent);
+  fill:var(--lage-raster);
 }
 
 html[data-theme="nordlicht"] .labor .lb-raster.fein{
   opacity:.42;
 }
 
-/* ---- Geräte: Eispaneele mit kaltem Licht obenauf ---- */
+/* ---- Knoten: Eisplatten, 1-px-Kante, Aurora nur bei Aktion ---- */
 html[data-theme="nordlicht"] .labor .ger-karte{
-  fill:var(--panel-2);
-  stroke:color-mix(in srgb, var(--ink) 14%, transparent);
+  fill:var(--lage-knoten-bg);
+  stroke:var(--lage-knoten-rand);
 }
 
 html[data-theme="nordlicht"] .labor .ger.hover .ger-karte{
-  fill:var(--panel-3);
   stroke:color-mix(in srgb, var(--accent) 45%, var(--line-2));
 }
 
 html[data-theme="nordlicht"] .labor .ger.gewaehlt .ger-karte,
 html[data-theme="nordlicht"] .labor .ger.zielt .ger-karte{
-  fill:color-mix(in srgb, var(--accent) 7%, var(--panel-2));
   stroke:var(--accent);
-  stroke-width:1.6;
+  filter:drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 34%, transparent));
 }
 
-html[data-theme="nordlicht"] .labor .ger-name{
-  font:600 var(--fs-1)/1 var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  fill:var(--ink);
-  stroke:var(--panel-2);
+html[data-theme="nordlicht"] .labor .ger .gb-kachel{
+  fill:color-mix(in srgb, var(--g) 8%, var(--lage-platte));
+  stroke:var(--lage-platte-rand);
 }
 
-html[data-theme="nordlicht"] .labor .ger-ip{
-  font:500 var(--fs-2)/1 var(--mono);
-  fill:var(--muted);
-  stroke:var(--panel-2);
+html[data-theme="nordlicht"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="nordlicht"] .labor .ger.zielt .gb-kachel{
+  stroke:var(--accent);
 }
 
-html[data-theme="nordlicht"] .labor .gb-kachel{
-  stroke:color-mix(in srgb, var(--ink) 12%, transparent);
+/* ---- Zonen-Chip: Koordinatenmarke mit leiser Aurora-Kante ---- */
+html[data-theme="nordlicht"] .labor .zone-label rect{
+  fill:color-mix(in srgb, var(--accent) 7%, var(--lage-chip-bg));
+  stroke:color-mix(in srgb, var(--accent) 34%, var(--lage-chip-rand));
 }
 
-/* ---- Kabel: Nordlichtadern ---- */
+/* ---- Kanten: feine Eishaarlinien, leiser Schimmer nur am Licht ---- */
 html[data-theme="nordlicht"] .labor .kabel-huelle{
-  stroke:color-mix(in srgb, var(--ink) 18%, transparent);
+  stroke:var(--lage-kante-huelle);
 }
 
 html[data-theme="nordlicht"] .labor .kabel-linie{
   filter:drop-shadow(0 0 3px color-mix(in srgb, var(--kf) 26%, transparent));
-}
-
-html[data-theme="nordlicht"] .labor .kabel-stecker .stk-gehaeuse{
-  fill:var(--panel-3);
-  stroke:color-mix(in srgb, var(--kf) 80%, var(--ink));
 }
 
 /* ---- Schwebende Werkzeuge: Milchglas, Aurora als aktives Werkzeug ---- */
@@ -5927,36 +6478,31 @@ html[data-theme="nordlicht"] .labor .lb-hinweis{
 }
 
 html[data-theme="nordlicht"] .labor .lb-legende{
-  border:1px solid var(--line);
-  border-radius:var(--radius-s);
-  background:color-mix(in srgb, var(--panel) 62%, transparent);
-  font:600 var(--fs-1)/1 var(--mono);
+  border:1px solid var(--lage-chip-rand);
+  border-radius:var(--lage-radius);
+  background:var(--lage-chip-bg);
   letter-spacing:.20em;
-  color:var(--faint);
+  color:var(--lage-chip-text);
 }
 
 html[data-theme="nordlicht"] .labor .lb-legende .lg-verbunden::before{
-  background:var(--accent);
   box-shadow:0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 /* ---- Minimap: kleine Seekarte ---- */
 html[data-theme="nordlicht"] .labor .wk-mini{
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  background:color-mix(in srgb, var(--panel) 72%, transparent);
+  border:1px solid var(--lage-mini-rand);
+  border-radius:var(--lage-radius);
+  background:var(--lage-mini-bg);
 }
 
 html[data-theme="nordlicht"] .labor .wk-mini-svg{
-  border:1px solid var(--line);
-  border-radius:var(--radius-s);
-  background-color:var(--bg);
+  border:1px solid var(--lage-mini-rand);
+  background-color:var(--lage-flaeche);
 }
 
 html[data-theme="nordlicht"] .labor .wk-mini-titel{
-  font:600 var(--fs-1)/1 var(--mono);
   letter-spacing:.24em;
-  text-transform:uppercase;
   color:var(--faint);
 }
 
@@ -6315,6 +6861,28 @@ html[data-theme="nordlicht"] .labor .lb-insp-leer .lb-tipps{
   --typ-router:#2F4DA8; --typ-switch:#3A2A6E; --typ-firewall:#A22A12;
   --typ-host:#1B1710; --typ-server:#233A96; --typ-nas:#923312; --typ-internet:#8A3313;
 
+  /* ---- Lagebild 2.0 (§ 3.6): warmes Papier, Tinte, Zinnober = Störung, Riso-Spot-Wäsche.
+     Knoten tragen einen harten 2-px-Tintenrahmen mit Versatz-Schatten (Druck, kein Weichzeichner). ---- */
+  --lage-flaeche:var(--panel);
+  --lage-raster:color-mix(in srgb, var(--ink) 14%, transparent);
+  --lage-knoten-bg:var(--panel);
+  --lage-knoten-rand:var(--ink);
+  --lage-knoten-schatten:drop-shadow(3px 3px 0 color-mix(in srgb, var(--ink) 18%, transparent));
+  --lage-name:var(--ink);
+  --lage-rolle:var(--muted);
+  --lage-ip:var(--faint);
+  --lage-platte:var(--panel-2);
+  --lage-platte-rand:var(--line-2);
+  --lage-kante:var(--ink);
+  --lage-kante-huelle:var(--panel);
+  --lage-chip-bg:var(--panel-2);
+  --lage-chip-rand:var(--ink);
+  --lage-chip-text:var(--ink);
+  --lage-mini-bg:var(--panel);
+  --lage-mini-rand:var(--ink);
+  --lage-radius:0px;
+  --lage-glow:var(--schatten-flach);
+
   /* ---- Form: gedruckt, nicht gerundet ---- */
   --radius:0px;
   --radius-s:2px;
@@ -6611,11 +7179,11 @@ html[data-theme="papier"] .sp-stufe-knopf.an{background:var(--ink); color:var(--
 
 /* Zeichenfläche: die Druckplatte */
 html[data-theme="papier"] .lb-leinwand{
-  border:2px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+  border:2px solid var(--ink); border-radius:var(--lage-radius); background:var(--lage-flaeche);
   box-shadow:var(--schatten); overflow:hidden;
 }
-html[data-theme="papier"] .lb-svg{background:var(--panel)}
-html[data-theme="papier"] .lb-raster-punkt{fill:color-mix(in srgb,var(--ink) 14%,transparent)}
+html[data-theme="papier"] .lb-svg{background:var(--lage-flaeche)}
+html[data-theme="papier"] .lb-raster-punkt{fill:var(--lage-raster)}
 html[data-theme="papier"] .lb-leinwand::before{
   content:"// LAGEBILD"; font:600 var(--fs-1)/1 var(--mono); letter-spacing:.28em; color:var(--faint);
 }
@@ -6629,39 +7197,39 @@ html[data-theme="papier"] .lb-hinweis,
 html[data-theme="papier"] .lb-legende,
 html[data-theme="papier"] .wk-mini{z-index:20}
 
-/* Geräte: Papierkarten mit Tintenkante */
-html[data-theme="papier"] .ger-karte{
-  fill:var(--panel); stroke:var(--ink); stroke-width:1.5; rx:1px;
-  filter:drop-shadow(3px 3px 0 color-mix(in srgb,var(--ink) 18%,transparent));
+/* Knoten: Papierkarten mit hartem Tintenrahmen und Versatz-Schatten */
+html[data-theme="papier"] .labor .ger-karte{
+  fill:var(--lage-knoten-bg); stroke:var(--lage-knoten-rand); stroke-width:2;
+  filter:var(--lage-knoten-schatten);
 }
-html[data-theme="papier"] .ger.hover .ger-karte{
+html[data-theme="papier"] .labor .ger.hover .ger-karte{
   fill:var(--panel-2); stroke:var(--ink); stroke-width:2;
-  filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--ink) 24%,transparent));
 }
-html[data-theme="papier"] .ger.gewaehlt .ger-karte,
-html[data-theme="papier"] .ger.zielt .ger-karte{
+html[data-theme="papier"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="papier"] .labor .ger.zielt .ger-karte{
   stroke:var(--accent); stroke-width:2.2;
   filter:drop-shadow(4px 4px 0 color-mix(in srgb,var(--accent) 26%,transparent));
 }
-html[data-theme="papier"] .ger-name{font-weight:700; letter-spacing:.14em; stroke-width:5px}
-html[data-theme="papier"] .ger-ip{font-weight:600; letter-spacing:.02em; stroke-width:5px}
-html[data-theme="papier"] .ger-auswahl{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 4}
+html[data-theme="papier"] .labor .ger-auswahl{stroke:var(--accent); stroke-width:1.5; stroke-dasharray:2 4}
 /* Gerätepiktogramm: harte Papierfläche statt Farbmischung */
-html[data-theme="papier"] .gb-kachel{fill:var(--panel); stroke:var(--line-2); stroke-width:1.2}
-html[data-theme="papier"] .ger .gb-kachel{fill:var(--panel-2); stroke:var(--line-2)}
-html[data-theme="papier"] .gb-glyph path{stroke:var(--ink); stroke-width:2}
-html[data-theme="papier"] .ger.gewaehlt .gb-kachel,
-html[data-theme="papier"] .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.2; fill:var(--accent-soft)}
-html[data-theme="papier"] .ger.hover .gb-kachel{stroke:var(--ink); fill:var(--panel-3)}
+html[data-theme="papier"] .labor .ger .gb-kachel{fill:var(--lage-platte); stroke:var(--lage-platte-rand); stroke-width:1.2}
+html[data-theme="papier"] .labor .gb-glyph path{stroke:var(--ink); stroke-width:2}
+html[data-theme="papier"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="papier"] .labor .ger.zielt .gb-kachel{stroke:var(--accent); stroke-width:2.2; fill:var(--accent-soft)}
 
-/* Kabel: Ultramarin ist die Leitung, Zinnober der Fehler */
-html[data-theme="papier"] .kabel-huelle{stroke:color-mix(in srgb,var(--ink) 12%,transparent); stroke-width:7}
-html[data-theme="papier"] .kabel-linie{stroke-width:2.4; stroke-opacity:1}
-html[data-theme="papier"] .kabel.k-unten .kabel-linie{stroke-dasharray:1 6; stroke-width:2.6}
-html[data-theme="papier"] .kabel.k-aus .kabel-linie{stroke-dasharray:2 7}
-html[data-theme="papier"] .kabel.gewaehlt .kabel-linie{stroke-width:3.6}
-html[data-theme="papier"] .kabel-port{font-weight:600; letter-spacing:.06em; stroke-width:5px}
-html[data-theme="papier"] .kabel-stecker .stk-gehaeuse{fill:var(--panel); stroke:var(--ink); stroke-width:1.4}
+/* Kanten: Tintenstrich, Zinnober = Störung */
+html[data-theme="papier"] .labor .kabel-huelle{stroke:var(--lage-kante-huelle); stroke-width:6}
+html[data-theme="papier"] .labor .kabel-linie{stroke-width:2}
+html[data-theme="papier"] .labor .kabel.k-unten .kabel-linie{stroke-width:2.2}
+html[data-theme="papier"] .labor .kabel.k-aus .kabel-linie{stroke-width:2.2}
+html[data-theme="papier"] .labor .kabel.gewaehlt .kabel-linie{stroke-width:2.8}
+html[data-theme="papier"] .labor .port-led{stroke-width:1.5}
+
+/* Zonen: Riso-Spot-Wäsche, Chip wie ein aufgeklebter Notizzettel */
+html[data-theme="papier"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg); stroke:var(--lage-chip-rand); stroke-width:1.5;
+  filter:drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 16%, transparent));
+}
 
 /* Werkzeugleisten: Papierstempel mit harter Kante */
 html[data-theme="papier"] .lb-gruppe{
@@ -6688,23 +7256,19 @@ html[data-theme="papier"] .lb-hinweis{
   border:1px solid var(--line-2); border-radius:var(--radius); background:var(--panel-2);
   color:var(--muted); font:600 var(--fs-1)/1.5 var(--mono); letter-spacing:.06em;
 }
-html[data-theme="papier"] .lb-legende{
-  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
-  padding:5px 10px; box-shadow:var(--schatten-flach);
-  font:600 var(--fs-1)/1 var(--mono); letter-spacing:.16em; color:var(--faint);
+html[data-theme="papier"] .labor .lb-legende{
+  border:1.5px solid var(--ink); border-radius:var(--lage-radius); background:var(--panel);
+  padding:5px 10px; box-shadow:var(--schatten-flach); letter-spacing:.16em; color:var(--faint);
 }
-html[data-theme="papier"] .lb-legende .lg-verbunden::before{background:var(--ok); height:2px}
-html[data-theme="papier"] .lb-legende .lg-getrennt::before{background:var(--accent); height:2px}
-html[data-theme="papier"] .lb-legende .lg-kein::before{border-top:1px dashed var(--warn); background:transparent}
-
 /* Minimap */
-html[data-theme="papier"] .wk-mini{
-  border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--panel);
+html[data-theme="papier"] .labor .wk-mini{
+  border:1.5px solid var(--ink); border-radius:var(--lage-radius); background:var(--lage-mini-bg);
   box-shadow:var(--schatten-flach);
 }
-html[data-theme="papier"] .wk-mini-kopf{border-bottom:1px solid var(--line)}
-html[data-theme="papier"] .wk-mini-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.2em; color:var(--faint)}
-html[data-theme="papier"] .wk-mini-fuss{border-top:1px solid var(--line)}
+html[data-theme="papier"] .labor .wk-mini-kopf{border-bottom:1px solid var(--line)}
+html[data-theme="papier"] .labor .wk-mini-titel{letter-spacing:.2em; color:var(--faint)}
+html[data-theme="papier"] .labor .wk-mini-fuss{border-top:1px solid var(--line)}
+html[data-theme="papier"] .labor .wk-mini-svg{border:1px solid var(--lage-mini-rand); background:var(--lage-flaeche)}
 
 /* Kleine Geräteleiste links */
 html[data-theme="papier"] .lb-geraete{background:var(--bg); border-right:2px solid var(--ink)}
@@ -6944,6 +7508,27 @@ html[data-theme="papier"] .ph-sym{border:1.5px solid var(--ink); border-radius:v
   --ease-standard:cubic-bezier(.2,.7,.3,1);
   --ease-out:cubic-bezier(.16,.84,.44,1);
   --ease-pop:cubic-bezier(.3,1.6,.5,1);
+
+  /* ---- Lagebild 2.0: Materialsprache Pulsar (nur hier Literale) ---- */
+  --lage-flaeche:#070C17;
+  --lage-raster:rgba(59,225,255,.075);
+  --lage-knoten-bg:rgba(10,17,32,.88);
+  --lage-knoten-rand:rgba(126,224,255,.26);
+  --lage-knoten-schatten:drop-shadow(0 14px 26px rgba(0,0,0,.62));
+  --lage-name:#E8F2FB;
+  --lage-rolle:#A6BACD;
+  --lage-ip:#8FE9FF;
+  --lage-platte:rgba(59,225,255,.09);
+  --lage-platte-rand:rgba(59,225,255,.34);
+  --lage-kante:#66F5CE;
+  --lage-kante-huelle:rgba(5,8,16,.86);
+  --lage-chip-bg:rgba(10,17,32,.90);
+  --lage-chip-rand:rgba(59,225,255,.30);
+  --lage-chip-text:#D9FBFF;
+  --lage-mini-bg:rgba(5,8,16,.84);
+  --lage-mini-rand:rgba(126,224,255,.22);
+  --lage-radius:2px;
+  --lage-glow:0 0 0 1px rgba(59,225,255,.28), 0 20px 52px -30px rgba(59,225,255,.36);
 }
 
 /* ============================================================================
@@ -7904,13 +8489,16 @@ html[data-theme="pulsar"] .lb-auftrag .sp-einstieg-text{
 }
 
 /* ============================================================================
-   14 · Leinwand: Messfeld, Geräte, Kabel, Werkzeuge
+   14 · Lagebild 2.0: Messfeld mit Glasplatten und Neonkante
    ============================================================================ */
 
 html[data-theme="pulsar"] .lb-leinwand{
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius);
-  background:var(--panel);
+  background-color:var(--lage-flaeche);
+  background-image:
+    radial-gradient(64% 72% at 68% 20%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 72%),
+    radial-gradient(90% 80% at 8% 104%, color-mix(in srgb, var(--iris) 5%, transparent), transparent 66%);
 }
 
 html[data-theme="pulsar"] .lb-leinwand::before{
@@ -7935,18 +8523,19 @@ html[data-theme="pulsar"] .lb-leinwand::after{
 }
 
 html[data-theme="pulsar"] .lb-svg{
-  background-color:color-mix(in srgb, var(--bg) 86%, var(--panel));
+  background-color:transparent;
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(to right, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
-    radial-gradient(70% 80% at 68% 22%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%);
-  background-size:var(--raster) var(--raster), var(--raster) var(--raster), calc(var(--raster) * 4) calc(var(--raster) * 4), calc(var(--raster) * 4) calc(var(--raster) * 4), auto;
+    linear-gradient(to right, color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px);
+  background-size:calc(var(--raster) * 4) calc(var(--raster) * 4);
+}
+
+html[data-theme="pulsar"] .lb-raster-punkt{
+  fill:var(--lage-raster);
 }
 
 html[data-theme="pulsar"] .lb-raster{
-  opacity:0;
+  opacity:.9;
 }
 
 html[data-theme="pulsar"] .lb-leiste-oben{
@@ -8021,126 +8610,264 @@ html[data-theme="pulsar"] .lb-hinweis{
   font-size:var(--fs-2);
 }
 
-html[data-theme="pulsar"] .lb-legende{
+/* ---- Legende: HUD-Streifen mit drei echten Linienmustern ---- */
+
+html[data-theme="pulsar"] .labor .lb-legende{
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
-  background:var(--glas);
+  background:var(--lage-mini-bg);
   color:var(--faint);
-  font-family:var(--mono);
+  font:600 var(--fs-1)/1 var(--mono);
   letter-spacing:.14em;
+  text-transform:uppercase;
+  gap:16px;
+  box-shadow:none;
+  -webkit-backdrop-filter:blur(14px) saturate(130%);
+  backdrop-filter:blur(14px) saturate(130%);
 }
 
-html[data-theme="pulsar"] .lb-legende .lg-verbunden::before{
-  background:var(--mint);
+html[data-theme="pulsar"] .labor .lb-legende .lg::before{
+  width:20px;
+  height:2px;
+  border-radius:999px;
+  background:var(--lage-kante);
+  border:0;
 }
 
-html[data-theme="pulsar"] .lb-legende .lg-getrennt::before{
-  background:var(--line-2);
+html[data-theme="pulsar"] .labor .lb-legende .lg-getrennt::before{
+  background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px);
 }
 
-html[data-theme="pulsar"] .lb-legende .lg-kein::before{
-  border-top:1px dashed var(--amber);
+html[data-theme="pulsar"] .labor .lb-legende .lg-kein::before{
+  height:1px;
+  background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px);
 }
 
-html[data-theme="pulsar"] .ger-karte{
-  fill:color-mix(in srgb, var(--panel) 82%, var(--bg));
-  stroke:var(--line-2);
+/* ---- Knoten: Glasplatte, Glow nur bei Auswahl/Handlung ---- */
+
+html[data-theme="pulsar"] .labor .ger-karte{
+  fill:var(--lage-knoten-bg);
+  stroke:var(--lage-knoten-rand);
+  stroke-width:1;
+  rx:var(--lage-radius);
+  filter:var(--lage-knoten-schatten);
+  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard), filter var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="pulsar"] .labor .ger-auswahl{
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:none;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="pulsar"] .labor .ger.hover .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 80%, var(--accent));
+  stroke:color-mix(in srgb, var(--accent) 45%, var(--lage-knoten-rand));
+}
+
+html[data-theme="pulsar"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="pulsar"] .labor .ger.zielt .ger-karte{
+  fill:color-mix(in srgb, var(--accent) 10%, var(--lage-knoten-bg));
+  stroke:var(--accent);
+  stroke-width:1.4;
+  filter:drop-shadow(0 0 0 1px var(--accent)) drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 44%, transparent)) var(--lage-knoten-schatten);
+}
+
+html[data-theme="pulsar"] .labor .ger.gewaehlt .ger-auswahl,
+html[data-theme="pulsar"] .labor .ger.zielt .ger-auswahl{
+  opacity:.6;
+}
+
+html[data-theme="pulsar"] .labor .ger.ohne-ip .ger-karte{
+  stroke:var(--bad);
+  stroke-dasharray:4 4;
+}
+
+html[data-theme="pulsar"] .labor .ger.aus .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 68%, var(--bg));
+  stroke:color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+html[data-theme="pulsar"] .labor .ger.aus .ger-name{
+  fill:var(--faint);
+}
+
+html[data-theme="pulsar"] .labor .ger.aus .ger-bild{
+  opacity:.4;
+}
+
+html[data-theme="pulsar"] .labor .ger .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
+  stroke:var(--lage-platte-rand);
   stroke-width:1;
 }
 
-html[data-theme="pulsar"] .ger.hover .ger-karte{
-  fill:var(--panel-2);
-  stroke:color-mix(in srgb, var(--accent) 45%, var(--line-2));
-}
-
-html[data-theme="pulsar"] .ger.gewaehlt .ger-karte,
-html[data-theme="pulsar"] .ger.zielt .ger-karte{
-  fill:color-mix(in srgb, var(--accent) 8%, var(--panel));
+html[data-theme="pulsar"] .labor .ger.hover .gb-kachel{
   stroke:var(--accent);
-  stroke-width:1.6;
 }
 
-html[data-theme="pulsar"] .ger-name{
-  fill:var(--ink);
-  font-family:var(--mono);
-  letter-spacing:.12em;
+html[data-theme="pulsar"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="pulsar"] .labor .ger.zielt .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
+  stroke:var(--accent);
+}
+
+html[data-theme="pulsar"] .labor .ger-name{
+  font:600 var(--fs-2)/1 var(--mono);
+  letter-spacing:.04em;
   text-transform:uppercase;
+  fill:var(--lage-name);
 }
 
-html[data-theme="pulsar"] .ger-ip{
-  fill:var(--muted);
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .ger-rolle{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  fill:var(--lage-rolle);
 }
 
-html[data-theme="pulsar"] .ger-ip.schwach{
-  fill:var(--faint);
+html[data-theme="pulsar"] .labor .ger-ip{
+  font:500 var(--fs-1)/1 var(--mono);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;
+  fill:var(--lage-ip);
 }
 
-html[data-theme="pulsar"] .ger.aus .ger-name{
-  fill:var(--faint);
+html[data-theme="pulsar"] .labor .ger-mehr{
+  fill:var(--lage-rolle);
+  font-weight:500;
 }
 
-html[data-theme="pulsar"] .kabel-huelle{
-  stroke:color-mix(in srgb, var(--ink) 12%, transparent);
+/* ---- Kanten: Neon-Mint mit leiser Glow-Kante, Koralle bei Störung ---- */
+
+html[data-theme="pulsar"] .labor .kabel{
+  --kf:var(--lage-kante);
 }
 
-html[data-theme="pulsar"] .kabel-stecker .stk-gehaeuse{
-  fill:var(--panel-3);
-  stroke:var(--kf, var(--accent));
+html[data-theme="pulsar"] .labor .kabel.k-unten{
+  --kf:var(--bad);
 }
 
-html[data-theme="pulsar"] .kabel-stecker .stk-clip{
-  fill:var(--panel);
+html[data-theme="pulsar"] .labor .kabel.k-aus{
+  --kf:var(--warn);
 }
 
-html[data-theme="pulsar"] .kabel-port{
-  fill:var(--muted);
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .kabel.vlan-trunk{
+  --kf:var(--ink);
 }
 
-html[data-theme="pulsar"] .wk-mini{
-  border:var(--hud-linie) solid var(--line);
+html[data-theme="pulsar"] .labor .kabel-linie{
+  filter:drop-shadow(0 0 2px color-mix(in srgb, var(--lage-kante) 28%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .kabel.k-unten .kabel-linie{
+  filter:drop-shadow(0 0 2px color-mix(in srgb, var(--bad) 30%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .kabel.k-aus .kabel-linie{
+  filter:none;
+}
+
+html[data-theme="pulsar"] .labor .kabel-huelle{
+  stroke:var(--lage-kante-huelle);
+}
+
+html[data-theme="pulsar"] .labor .kabel:hover .kabel-linie,
+html[data-theme="pulsar"] .labor .kabel.gewaehlt .kabel-linie{
+  stroke:var(--accent);
+  filter:drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 42%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .kabel-port{
+  fill:var(--lage-rolle);
+  letter-spacing:.06em;
+}
+
+/* ---- Zonen: Neon-Kontur, Chip als HUD-Element ---- */
+
+html[data-theme="pulsar"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg);
+  stroke:var(--lage-chip-rand);
+  stroke-width:1;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="pulsar"] .labor .zone-label{
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 18%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .zone-text{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.10em;
+  fill:var(--lage-chip-text);
+}
+
+html[data-theme="pulsar"] .labor .zone-gw{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.06em;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="pulsar"] .labor .zone-punkt{
+  stroke:var(--lage-chip-bg);
+  stroke-width:1;
+}
+
+/* ---- Minimap: Glasdisplay mit Sichtrahmen ---- */
+
+html[data-theme="pulsar"] .labor .wk-mini{
+  border:var(--hud-linie) solid var(--lage-mini-rand);
   border-radius:var(--radius-xs);
-  background:var(--glas);
+  background:var(--lage-mini-bg);
   -webkit-backdrop-filter:blur(14px) saturate(130%);
   backdrop-filter:blur(14px) saturate(130%);
   box-shadow:0 20px 50px -36px color-mix(in srgb, var(--bg) 94%, transparent);
 }
 
-html[data-theme="pulsar"] .wk-mini-titel{
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .wk-mini-titel{
+  font:600 var(--fs-1)/1 var(--mono);
   letter-spacing:.16em;
+  text-transform:uppercase;
   color:var(--faint);
 }
 
-html[data-theme="pulsar"] .wk-mini-svg{
+html[data-theme="pulsar"] .labor .wk-mini-svg{
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
   background:color-mix(in srgb, var(--bg) 72%, var(--panel));
 }
 
-html[data-theme="pulsar"] .wk-mini-kabel-linie{
-  stroke:color-mix(in srgb, var(--accent) 34%, transparent);
+html[data-theme="pulsar"] .labor .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--lage-kante) 45%, transparent);
 }
 
-html[data-theme="pulsar"] .wk-mini-punkt{
-  fill:var(--muted);
+html[data-theme="pulsar"] .labor .wk-mini-punkt{
+  fill:var(--lage-rolle);
   stroke:var(--bg);
 }
 
-html[data-theme="pulsar"] .wk-mini-punkt.an{
+html[data-theme="pulsar"] .labor .wk-mini-punkt.an{
   fill:var(--accent);
+  stroke:var(--bg);
 }
 
-html[data-theme="pulsar"] .wk-mini-knopf{
-  border-radius:var(--radius-xs);
+html[data-theme="pulsar"] .labor .wk-mini-rahmen{
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:4 3;
+}
+
+html[data-theme="pulsar"] .labor .wk-mini-knopf{
   border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
   background:var(--panel-2);
   color:var(--muted);
 }
 
-html[data-theme="pulsar"] .wk-mini-zoomtext{
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .wk-mini-zoomtext{
+  font:600 var(--fs-1)/1 var(--mono);
   color:var(--faint);
 }
 
@@ -8485,7 +9212,7 @@ html[data-theme="pulsar"] .kl-start-knopf{
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "794857d2";
+const LABOR_BAU = "c7ef4e5f";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -31958,7 +32685,9 @@ UI.blatt = (() => {
    UI.ebenen.setzen(id, {merken}) umschalten (merkt sich die Wahl, außer merken:false – Ticket-Vorgabe), zeichnet neu, Bus „ebene“
    UI.ebenen.gemerkt()          zuletzt selbst gewählte Ebene (Freies Labor)
    UI.ebenen.fuerSkills(skills) Standardansicht eines Tickets (Skill → Ebene)
-   UI.ebenen.zonen(netz)        → {zonen:[{cidr, netz, praefix, ids, farbe, apipa}], ohne:Set(ids ohne gültige Adresse)}
+   UI.ebenen.zonen(netz)        → {zonen:[{cidr, netz, praefix, ids, anker, gw, farbe, apipa}], ohne:Set(ids ohne gültige Adresse)}
+     ids = Mitglieder (Geräte mit GENAU einer gültigen Adresse im Netz); anker = Router/Firewall mit
+     mehreren Adressen [{id, ip, port}], gw = erste passende Anker-Adresse („GW <ip>" im Chip, § 3.3).
    UI.ebenen.adresse(netz, g)   → {ip, maske, text, gueltig, quelle}  erste Adresse für Beschriftung und Ping
    UI.ebenen.vlanPort(netz, id, port) → {art:"access", vlan} | {art:"trunk", erlaubt, nativ} | null
    UI.ebenen.zeichneZonen(schicht, netz, pos)      pos(id) → {x, y}
@@ -32038,18 +32767,35 @@ UI.ebenen = (() => {
     for (const g of Object.values(netz.geraete)) {
       const liste = alleAdressen(netz, g);
       if (!liste.length && g.typ !== "switch" && g.typ !== "internet") ohne.add(g.id);
+      if (!liste.length) continue;
+      /* Mitglied ist, wer GENAU EINE gültige Adresse in diesem Netz hat. Geräte mit >= 2 Adressen
+         (Router/Firewall) sind Anker: Sie kommen NICHT in die Form, ihre erste passende Adresse steht
+         als „GW <ip>" am Chip. Vorher lag der Router in jeder Zone und die Hüllen zogen sich über die
+         ganze Fläche (Befund B3). */
+      const proNetz = new Map();
       for (const a of liste) {
         const c = IP.cidr(a.ip, a.maske); if (!c) continue;
-        if (!m.has(c)) m.set(c, {cidr: c, netz: IP.netz(a.ip, a.maske), praefix: IP.praefix(a.maske), ids: [], apipa: IP.apipa(a.ip)});
-        const z = m.get(c); if (!z.ids.includes(g.id)) z.ids.push(g.id);
+        if (!proNetz.has(c)) proNetz.set(c, []);
+        proNetz.get(c).push(a);
+      }
+      for (const [c, adressen] of proNetz) {
+        const erste = adressen[0];
+        if (!m.has(c)) m.set(c, {cidr: c, netz: IP.netz(erste.ip, erste.maske), praefix: IP.praefix(erste.maske), ids: [], anker: [], gw: null, apipa: IP.apipa(erste.ip)});
+        const z = m.get(c);
+        if (liste.length === 1) { if (!z.ids.includes(g.id)) z.ids.push(g.id); }
+        else if (!z.anker.some(a => a.id === g.id)) z.anker.push({id: g.id, ip: erste.ip, port: erste.port});
       }
     }
     const liste = [...m.values()].sort((a, b) => IP.vergleich(a.netz, b.netz) || a.praefix - b.praefix);
+    for (const z of liste) {
+      z.anker.sort((a, b) => a.id.localeCompare(b.id));
+      if (z.gw == null && z.anker.length) z.gw = z.anker[0].ip;      /* erste passende Adresse = Gateway */
+    }
     liste.forEach((z, i) => { z.farbe = ZONEN[i % ZONEN.length]; });
     return {zonen: liste, ohne};
   }
 
-  /* ---------- Hülle (konvexe Hülle um Kreise je Gerät) ---------- */
+  /* ---------- Konvexe Hülle (Andrew-Monotone-Chain) über Punkte ---------- */
   function huelle(punkte){
     const p = punkte.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     if (p.length < 3) return p;
@@ -32060,53 +32806,175 @@ UI.ebenen = (() => {
     oben.pop(); unten.pop();
     return unten.concat(oben);
   }
-  function zonenPfad(mitten, r){
-    const pts = [];
-    for (const c of mitten) for (let i = 0; i < 20; i++) { const w = i / 20 * Math.PI * 2; pts.push([c.x + Math.cos(w) * r, c.y + Math.sin(w) * r]); }
-    const hl = huelle(pts);
-    return {d: "M" + hl.map(q => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L") + "Z", obenLinks: hl.reduce((m, q) => q[0] + q[1] < m[0] + m[1] ? q : m, hl[0])};
+  /* ---------- Kartenmaße (müssen zu editor.js geraetGruppe passen, Vertrag § 3.1) ----------
+     160x76 auf breiten, 118x64 auf schmalen Fenstern. Hier eigenständig, weil ebenen.js nicht in den
+     Editor hineinschaut; die Zahlen stehen in beiden Dateien mit demselben Kommentar. */
+  function kartenMasse(){
+    const breit = !(typeof innerWidth === "number" && innerWidth < 900);
+    return breit ? {kw: 160, kh: 76} : {kw: 118, kh: 64};
   }
-  /* Fläche der Gerätetrefferfläche (editor.js `ger-treffer`: 68x64 um den Mittelpunkt) plus 2 px Luft */
-  const GER_B = 36, GER_H = 34;
-  /* Freie Stelle für ein Schild der Breite b und Höhe h suchen. belegt sind Rechtecke {x1,y1,x2,y2}
-     von Geräten UND schon gesetzten Schildern. Feste Reihenfolge unten · rechts · links · oben,
-     je Richtung einen Schildschritt weiter – die erste Stelle ohne Überdeckung gewinnt.
-     Bleibt keine frei, gewinnt die Stelle mit der GERINGSTEN Überdeckung (Schild nie weglassen). */
-  function schildStelle(belegt, x0, y0, b, h){
+  /* Ray-Box wie in editor.js: Schnittpunkt mit dem Kartenrahmen (für die /30-Kapsel). */
+  function randPunkt(p, q, m){
+    const dx = q.x - p.x, dy = q.y - p.y;
+    if (!dx && !dy) return null;
+    const hw = m.kw / 2, hh = m.kh / 2;
+    let t = Infinity;
+    if (dx) t = Math.min(t, hw / Math.abs(dx));
+    if (dy) t = Math.min(t, hh / Math.abs(dy));
+    return Number.isFinite(t) ? {x: p.x + dx * t, y: p.y + dy * t} : null;
+  }
+  /* Weiche Insel (Vertrag § 3.3, Befund B2): konvexe Hülle über die KARTEN-RECHTECKE der Mitglieder,
+     aufgeblasen um dx/dy. Die Aufblasung schiebt jeden Hüllpunkt vom Hüllen-Schwerpunkt nach außen –
+     bei achsenparallelen Hüllen (der Normalfall) ist das die exakte Rechteck-Erweiterung. */
+  function huelleAufgeblasen(punkte, dx, dy){
+    const eindeutig = [];
+    for (const q of punkte) if (!eindeutig.some(p => Math.abs(p[0] - q[0]) < 0.01 && Math.abs(p[1] - q[1]) < 0.01)) eindeutig.push(q);
+    const hl = huelle(eindeutig);
+    if (hl.length < 3) return hl;
+    const cx = hl.reduce((s, q) => s + q[0], 0) / hl.length, cy = hl.reduce((s, q) => s + q[1], 0) / hl.length;
+    return hl.map(q => [q[0] + (q[0] >= cx ? dx : -dx), q[1] + (q[1] >= cy ? dy : -dy)]);
+  }
+  /* Gerundetes Vieleck: Ecken mit Radius r als kurze Quadratik, gerade Kanten bleiben gerade.
+     (Der Vertrag nennt „Catmull-Rom o. ä."; Catmull-Rom schwingt bei den aufgeblasenen Rechteck-
+     ecken nach außen und erzeugte so Überlappungen benachbarter Inseln — gemessen 604 px².) */
+  function gerundeterPfad(p, r){
+    const n = p.length;
+    if (n < 3) return "";
+    const abstand = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+    let d = "M" + p[0][0].toFixed(1) + " " + p[0][1].toFixed(1);
+    for (let i = 0; i < n; i++) {
+      const vor = p[(i - 1 + n) % n], eck = p[i], nach = p[(i + 1) % n];
+      const l1 = abstand(vor, eck), l2 = abstand(eck, nach);
+      const rr = Math.min(r, l1 / 2, l2 / 2);
+      if (rr < 0.5) { d += " L" + eck[0].toFixed(1) + " " + eck[1].toFixed(1); continue; }
+      const s1x = (eck[0] - vor[0]) / l1, s1y = (eck[1] - vor[1]) / l1;
+      const s2x = (nach[0] - eck[0]) / l2, s2y = (nach[1] - eck[1]) / l2;
+      d += " L" + (eck[0] - s1x * rr).toFixed(1) + " " + (eck[1] - s1y * rr).toFixed(1) +
+           " Q" + eck[0].toFixed(1) + " " + eck[1].toFixed(1) + " " + (eck[0] + s2x * rr).toFixed(1) + " " + (eck[1] + s2y * rr).toFixed(1);
+    }
+    return d + " Z";
+  }
+  /* Freie Stelle für den Zonen-Chip (Vorgabe der Leitung 30.10.2026): Kandidaten unten-links →
+     unten-rechts → oben-links → oben-rechts, je 18 px nach außen versetzt; Kapsel-Chip mittig darüber,
+     dann darüber/darunter/seitlich weiter. Geprüft wird gegen Karten UND schon gesetzte Chips, mit
+     6 px Mindestabstand. Bleibt nichts frei, gewinnt die Stelle mit der geringsten Überdeckung –
+     der Chip wird NIE weggelassen (Befund B1). */
+  const CHIP_ABSTAND = 6;
+  function chipStelle(belegt, form, b, h){
+    /* Der Mindestabstand von 6 px gilt zwischen CHIPS (beide bekommen 3 px Rand). Karten gegenueber
+       genuegt Beruehrung: sonst rutschte der Kapsel-Chip 26 px von der Kapsel weg (gemessen), weil zwei
+       Kandidaten wegen der 6-px-Zugabe als Ueberdeckung galten. */
     const ueber = (x, y) => belegt.reduce((s, q) => {
-      const dx = Math.min(x + b, q.x2) - Math.max(x, q.x1), dy = Math.min(y + h, q.y2) - Math.max(y, q.y1);
+      const pad = q.istChip ? CHIP_ABSTAND / 2 : 0;
+      const x1 = x - pad, y1 = y - pad, x2 = x + b + pad, y2 = y + h + pad;
+      const dx = Math.min(x2, q.x2) - Math.max(x1, q.x1), dy = Math.min(y2, q.y2) - Math.max(y1, q.y1);
       return s + (dx > 0 && dy > 0 ? dx * dy : 0);
     }, 0);
-    const richtungen = [[0, h + 4], [b + 12, 0], [-(b + 12), 0], [0, -(h + 4)]];
-    let wahl = [x0, y0], beste = ueber(x0, y0);
-    for (let n = 1; n <= 12 && beste > 0; n++) for (const [dx, dy] of richtungen) {
-      const u = ueber(x0 + dx * n, y0 + dy * n);
-      if (u < beste) { beste = u; wahl = [x0 + dx * n, y0 + dy * n]; }
-      if (!beste) break;
+    const kand = [];
+    if (form.art === "kapsel") {
+      /* Erster Kandidat: mittig ueber der Kapselmitte (Vorgabe der Leitung). Erst wenn dort eine Karte
+         liegt, geht es in 18-px-Schritten weiter nach oben, dann unten/seitlich. */
+      for (let n = 0; n < 10; n++) {
+        kand.push([form.mx - b / 2, form.my - 17 - h - 10 - n * 18]);
+        kand.push([form.mx - b / 2, form.my + 17 + 10 + n * 18]);
+        kand.push([form.maxX + 18 + n * 18, form.my - h / 2]);
+        kand.push([form.minX - b - 18 - n * 18, form.my - h / 2]);
+      }
+    } else {
+      for (let n = 0; n < 10; n++) {
+        const ab = (n + 1) * 18;
+        kand.push([form.minX + 14, form.maxY + ab]);
+        kand.push([form.maxX - b - 14, form.maxY + ab]);
+        kand.push([form.minX + 14, form.minY - h - ab]);
+        kand.push([form.maxX - b - 14, form.minY - h - ab]);
+      }
+    }
+    let wahl = kand[0], beste = ueber(wahl[0], wahl[1]);
+    for (const q of kand) {
+      if (beste <= 0) break;
+      const u = ueber(q[0], q[1]);
+      if (u < beste) { beste = u; wahl = q; }
     }
     return wahl;
   }
+  /* Reine Verbindungsnetze (<= 2 Mitglieder, Kante vorhanden, z. B. WAN /30) werden eine Kapsel um die
+     Sichtstrecke: Rechteck r=999 (Stadion), nicht die Hülle (Vertrag § 3.3). */
+  function kapselForm(z, netz, pos, m){
+    if (z.ids.length > 2) return null;
+    const beteiligt = new Set([...z.ids, ...z.anker.map(a => a.id)]);
+    const kanten = netz.kabel.filter(k => beteiligt.has(k.a.geraet) && beteiligt.has(k.b.geraet) && k.a.geraet !== k.b.geraet);
+    if (!kanten.length) return null;
+    const k = kanten.find(x => z.ids.includes(x.a.geraet) || z.ids.includes(x.b.geraet)) || kanten[0];
+    const A = pos(k.a.geraet), B = pos(k.b.geraet);
+    if (!A || !B) return null;
+    const p1 = randPunkt(A, B, m) || A, p2 = randPunkt(B, A, m) || B;
+    const dx = p2.x - p1.x, dy = p2.y - p1.y, lang = Math.hypot(dx, dy);
+    if (lang < 4) return null;
+    return {p1, p2, lang, winkel: Math.atan2(dy, dx) * 180 / Math.PI, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2};
+  }
   function zeichneZonen(schicht, netz, pos){
     const {zonen: zl} = zonen(netz);
-    /* Vorbelegung: die Geräterechtecke. Ohne sie blieb ein Schild auf dem Router liegen
-       (Befund 05.10.2026: „192.168.30.0/24“ mitten auf r1). */
+    const m = kartenMasse();
+    /* Vorbelegung: alle Karten randgenau. Chips dürfen weder auf Geräten noch auf anderen Chips liegen –
+       sonst verschwänden sie unter der Geräte-Ebene. */
     const belegt = [];
     for (const g of Object.values(netz.geraete)) {
       const p = pos(g.id); if (!p) continue;
-      belegt.push({x1: p.x - GER_B, y1: p.y - GER_H, x2: p.x + GER_B, y2: p.y + GER_H});
+      belegt.push({x1: p.x - m.kw / 2, y1: p.y - m.kh / 2, x2: p.x + m.kw / 2, y2: p.y + m.kh / 2, istChip: false});
     }
     for (const z of zl) {
-      const mitten = z.ids.map(pos).filter(Boolean);
-      if (!mitten.length) continue;
-      const {d, obenLinks} = zonenPfad(mitten, 54);
-      const g = sv("g", {class: `zone zone-${z.farbe}`, "data-cidr": z.cidr});
-      g.append(sv("path", {class: "zone-flaeche", d}));
-      const text = z.cidr + (z.apipa ? " · APIPA" : "");
-      const b = text.length * 6.6 + 16, h = 20;
-      const [x, y] = schildStelle(belegt, obenLinks[0] - 14, obenLinks[1] - 22, b, h);
-      belegt.push({x1: x, y1: y, x2: x + b, y2: y + h});
-      g.append(sv("rect", {class: "zone-schild", x, y, width: b, height: h, rx: 10}));
-      g.append(sv("text", {class: "zone-text", x: x + b / 2, y: y + 14, "text-anchor": "middle", text}));
+      const mitglieder = z.ids.map(pos).filter(Boolean);
+      const kapsel = z.ids.length <= 2 ? kapselForm(z, netz, pos, m) : null;
+      let form = null;
+      if (kapsel) form = {art: "kapsel", ...kapsel, minX: Math.min(kapsel.p1.x, kapsel.p2.x), maxX: Math.max(kapsel.p1.x, kapsel.p2.x)};
+      else if (mitglieder.length) {
+        /* Aufblasung 20/20 (Leitung 30.10.2026 wollte 22/20): Bei 22 bleiben rechnerisch 4 Welt-px
+           Ueberlappung (2*(80+22) gegen 200 Kartenabstand, exakt gemessen 604 px²); mit 20/20 beruehren
+           sich die Inseln hoechstens. 30/26 liess sie ~20 px ineinanderschneiden. Ein einzelnes
+           Mitglied bekommt ein Ei (Ellipse) – die Huelle eines Punktes waere nur ein Rechteck. */
+        if (mitglieder.length === 1) {
+          const p = mitglieder[0], rx = m.kw / 2 + 20, ry = m.kh / 2 + 20;
+          const d = "M" + (p.x - rx).toFixed(1) + " " + p.y.toFixed(1) +
+            " A" + rx.toFixed(1) + " " + ry.toFixed(1) + " 0 1 0 " + (p.x + rx).toFixed(1) + " " + p.y.toFixed(1) +
+            " A" + rx.toFixed(1) + " " + ry.toFixed(1) + " 0 1 0 " + (p.x - rx).toFixed(1) + " " + p.y.toFixed(1) + " Z";
+          form = {art: "insel", d, minX: p.x - rx, maxX: p.x + rx, minY: p.y - ry, maxY: p.y + ry};
+        } else {
+          const ecken = [];
+          for (const p of mitglieder) ecken.push([p.x - m.kw / 2, p.y - m.kh / 2], [p.x + m.kw / 2, p.y - m.kh / 2], [p.x - m.kw / 2, p.y + m.kh / 2], [p.x + m.kw / 2, p.y + m.kh / 2]);
+          const aufgeblasen = huelleAufgeblasen(ecken, 20, 20);
+          const xs = aufgeblasen.map(q => q[0]), ys = aufgeblasen.map(q => q[1]);
+          form = {art: "insel", d: gerundeterPfad(aufgeblasen, 26), minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys)};
+        }
+      }
+      if (!form) continue;
+      const g = sv("g", {class: "zone zone-" + z.farbe, "data-cidr": z.cidr});
+      if (form.art === "kapsel") {
+        /* Randgenau: Kapsel von Kartenrand zu Kartenrand (Vorgabe der Leitung 30.10.2026). Vorher griffen
+           die runden Enden 17 px unter die Karten – sichtbar blieben nur zwei Boegen "()" neben der
+           Strecke. Jetzt liegt die ganze Kapsel sichtbar zwischen den beiden Karten. */
+        g.append(sv("rect", {class: "zone-flaeche", x: -form.lang / 2, y: -17, width: form.lang, height: 34, rx: 999,
+          transform: "translate(" + form.mx.toFixed(1) + " " + form.my.toFixed(1) + ") rotate(" + form.winkel.toFixed(1) + ")"}));
+      } else {
+        g.append(sv("path", {class: "zone-flaeche", d: form.d}));
+      }
+      /* Chip: CIDR immer sichtbar, „GW <ip>" als zweite Zeile, wenn ein Anker im Netz liegt (Befund B1).
+         Insel: unten links am Inselrand; Kapsel: mittig darüber (Vorgabe der Leitung). */
+      const zeile1 = z.cidr + (z.apipa ? " · APIPA" : "");
+      const zeile2 = z.gw ? "GW " + z.gw : "";
+      const b = Math.max(zeile1.length, zeile2.length) * 6.05 + 28;
+      const h = zeile2 ? 34 : 22;
+      const [x, y] = chipStelle(belegt, form, b, h);
+      belegt.push({x1: x, y1: y, x2: x + b, y2: y + h, istChip: true});
+      const lg = sv("g", {class: "zone-label"});
+      lg.setAttribute("data-x", x.toFixed(1));
+      lg.setAttribute("data-y", y.toFixed(1));
+      lg.setAttribute("transform", "translate(" + x.toFixed(1) + " " + y.toFixed(1) + ")");
+      lg.append(sv("rect", {x: 0, y: 0, width: b.toFixed(1), height: h, rx: 7}));
+      lg.append(sv("circle", {class: "zone-punkt", cx: 10, cy: h / 2, r: 3}));
+      const tx = sv("text", {class: "zone-text", x: 20, y: zeile2 ? 14 : 15, "text-anchor": "start"}, zeile1);
+      if (zeile2) tx.append(sv("tspan", {class: "zone-gw", x: 20, y: 28, text: zeile2}));
+      lg.append(tx);
+      g.append(lg);
       schicht.append(g);
     }
   }
@@ -33164,6 +34032,8 @@ UI.labor = (() => {
     warn: new Map(), ohne: new Set(),
     pos: new Map(),              /* id → {x, y} während Ziehen/Animation (überschreibt das Modell nur optisch) */
     hover: null, geplant: false, einpassenAusstehend: true,
+    ende: [],                    /* Port-LEDs und Portnamen in Z.s.ueber; Aufbau in kabelEndenBauen() */
+    kabelHover: null, geraeteHover: null,
   };
   const F = {};                  /* interne Helfer für editor-werkzeuge.js / editor-pakete.js */
   function bereit(){ if (!F.animiere && UI.laborPakete) UI.laborPakete.einrichten(Z, F); return F; }
@@ -33202,6 +34072,9 @@ UI.labor = (() => {
       const r = Z.svg.getBoundingClientRect(), jetzt = Math.round(r.width) + "x" + Math.round(r.height);
       if (jetzt === letzteGroesse || !Z.netz || !r.width || !r.height) return;
       letzteGroesse = jetzt;
+      /* Wechselt das Fenster über die 900-px-Grenze, aendern sich die Knotenmaße (160x76 / 118x64).
+         Ohne Neuzeichnen behielten die alten Karten ihre Maße und der Kanten-Anker passte nicht mehr. */
+      if (Z.gemaltKw && Z.gemaltKw !== kartenMasse().kw) { neuZeichnen(); }
       einpassen(false);
     });
     beobachter.observe(Z.svg);
@@ -33213,6 +34086,11 @@ UI.labor = (() => {
     Z.raster = sv("rect", {class: "lb-raster", x: 0, y: 0, width: "100%", height: "100%", fill: "url(#lb-raster)"});
     Z.welt = sv("g", {class: "lb-welt"});
     for (const n of ["zonen", "kabel", "geraete", "karten", "ueber", "pakete", "band"]) Z.welt.append(Z.s[n] = sv("g", {class: "lb-s-" + n}));
+    /* Port-LED und Portname gehören ÜBER die Karten (Befund B4: sie lagen unter der Karte und blieben
+       unsichtbar). Eigene Untergruppe in Z.s.ueber; editor-werkzeuge.js hängt seine Hover-Ports später
+       an, sie liegen damit weiter oben. */
+    Z.el.kabelEnden = sv("g", {});
+    Z.s.ueber.append(Z.el.kabelEnden);
     Z.svg.append(defs, Z.raster, Z.welt);
 
     Z.el.ansicht = h("button", {type: "button", class: "lb-ansicht", "aria-haspopup": "menu", title: "Ansicht: welche Ebene die Fläche zeigt (Umschalt+1 … 5)",
@@ -33374,13 +34252,37 @@ UI.labor = (() => {
     pat?.setAttribute("patternTransform", `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${k.toFixed(4)})`);
     Z.raster?.classList.toggle("fein", k < 0.5);
     if (Z.el.zoomText) Z.el.zoomText.textContent = Math.round(k * 100) + " %";
-    /* Beschriftungen mit dem Zoom staffeln statt alles oder nichts (Befund 05.10.2026):
-       Unter 100 % skaliert `scale(k)` die Schrift mit, sie fällt dann unter die Lesbarkeitsgrenze.
-       Deshalb: ab 0,95 nur noch Gerätename und -adresse (das Wesentliche), ab 0,6 gar nichts mehr.
-       So bleibt bei jedem Zoom etwas Lesbares stehen, statt zu schrumpfen oder zu verschwinden. */
-    Z.svg?.classList.toggle("wenig-text", k < 0.95);
-    Z.svg?.classList.toggle("klein", k < 0.6);
+    /* Lesbarkeit mit dem Zoom (Vertrag Lagebild 2.0 § 3.4, Befund B1/B6): Statt bei jedem Zoom zu
+       schrumpfen, werden die Beschriftungen gegenskaliert (s = min(1,6; max(1; 1/k))). Die drei
+       Stufen am <svg> blenden danach nur, was nicht mehr in die Karte passt; sichtbar bleiben immer
+       der Name und die Zonen-Chips – deren Container wird NIE per CSS versteckt. */
+    Z.svg?.classList.toggle("wenig-text", k < 0.8);
+    Z.svg?.classList.toggle("klein", k < 0.7);
+    Z.svg?.classList.toggle("sehr-klein", k < 0.4);
+    beschriftungenSkalieren();
+    kabelEndenAktualisieren();
     UI.werkstatt?.ansichtGeaendert?.();
+  }
+  /* Gegenskalierung der Beschriftungen: s = min(1,6; max(1; 1/k)). Skaliert wird um den Textanker
+     (x0, yOff) bzw. um den Chip-Anker – so bleibt die linke obere Ecke stehen. Der Vertrag notiert die
+     Formel mit x=0; ohne den x0-Anteil wanderte die Textkante beim Zoomen waagerecht weg. */
+  /* Obergrenze 1,12 (Vorgabe der Leitung 30.10.2026): Bei 1,6 sprengte der Textblock die Karte
+     (gemessen: k=0,65 -> s=1,54 -> Unterkante +57 Welt statt +38). Mit 1,12 bleibt der Block bei
+     jeder Zoomstufe innerhalb des Rahmens; unter k=0,8 fällt die Rolle weg, unter 0,7 die Adresse. */
+  function skalaFuerZoom(pk){ return Math.min(1.12, Math.max(1, 1 / (pk || 1))); }
+  function beschriftungenSkalieren(){
+    if (!Z.netz) return;
+    const s = skalaFuerZoom(Z.view.k), sTxt = s.toFixed(3);
+    for (const el of Z.gEl.values()) {
+      const t = el.querySelector ? el.querySelector(".ger-text") : null;
+      if (!t) continue;
+      const x0 = Number(t.getAttribute("data-x")) || 0, yOff = Number(t.getAttribute("data-y")) || 0;
+      t.setAttribute("transform", `translate(${x0.toFixed(1)} ${yOff.toFixed(1)}) scale(${sTxt}) translate(${(-x0).toFixed(1)} ${(-yOff).toFixed(1)})`);
+    }
+    for (const el of Z.s.zonen.querySelectorAll(".zone-label")) {
+      const x = Number(el.getAttribute("data-x")) || 0, y = Number(el.getAttribute("data-y")) || 0;
+      el.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${sTxt})`);
+    }
   }
   function weltPunkt(clientX, clientY){
     const r = Z.svg.getBoundingClientRect();
@@ -33421,21 +34323,47 @@ UI.labor = (() => {
     if (!liste.length) return null;
     let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
     for (const p of liste) { x1 = Math.min(x1, p.x); y1 = Math.min(y1, p.y); x2 = Math.max(x2, p.x); y2 = Math.max(y2, p.y); }
+    /* Rand um die Geräte: Karten sind 160x76, Zonen-Inseln +30/+26, Portnamen +12. Die alten
+       Werte (-112/+112, -96/+122) waren zu großzügig und drückten den Einpasszoom (gemessen 65 %). */
     const extra = UI.ebenen.aktuell === "mac" || UI.ebenen.aktuell === "routen" ? 190 : 0;
-    return {x1: x1 - 112, y1: y1 - 96, x2: x2 + 112 + extra, y2: y2 + 122};
+    return {x1: x1 - 96, y1: y1 - 84, x2: x2 + 104 + extra, y2: y2 + 104};
+  }
+  /* Die Minimap schwebt unten rechts auf der Fläche (werkstatt.js). Ohne Reservierung lag sie im Bild
+     über Geräten (Befund der Leitung, 30.10.2026). Sie wird nicht entfernt – das Einpassen rechnet
+     ihren Platz frei, solange sie sichtbar im DOM hängt. Gemessen wird nur, wenn die Werte plausibel
+     sind; der DOM-Ersatz der Tests liefert für jedes Element 900x600, dann gelten die Maße aus
+     werkstatt.css (184x112). */
+  function minimapRand(){
+    const mini = UI.werkstatt?.mini;
+    if (!mini || !mini.isConnected) return {rechts: 0, schieb: 0};
+    try { const cs = typeof getComputedStyle === "function" ? getComputedStyle(mini) : null; if (cs && (cs.display === "none" || cs.visibility === "hidden")) return {rechts: 0, schieb: 0}; } catch (e) { /* dann reservieren */ }
+    let b = null; try { b = mini.getBoundingClientRect ? mini.getBoundingClientRect() : null; } catch (e) { b = null; }
+    /* Die Minimap ist 148x92 (werkstatt.css) plus Rahmen/Padding (gemessen 162x192 inkl. Fußzeile).
+       Reserviert wird nur die BREITE; die Höhe NICHT voll abziehen, sonst schrumpfte das Netz auf
+       65 % (gemessen 30.10.2026). Stattdessen schiebt ein 40-px-Versatz das Netz nach oben – die
+       Minimap sitzt unten rechts, dort ist dann frei. */
+    const breit = b && b.width > 0 && b.width < 400 ? Math.ceil(b.width) : 164;
+    return {rechts: breit + 16, schieb: 40};
   }
   function einpassen(animiert = true, ids = null){
     if (!Z.svg) return;
     const r = Z.svg.getBoundingClientRect(), b = grenzen(ids && ids.length ? ids : undefined);
     if (!r.width || !r.height) { Z.einpassenAusstehend = true; return; }
+    const mini = minimapRand();
     let ziel;
     if (!b) ziel = {k: 1, tx: r.width / 2 - 400, ty: r.height / 2 - 260};
     else {
       /* Ränder für die schwebenden Leisten oben/unten – auf niedriger Fläche (Hilfe/Simulation offen) anteilig kleiner */
       const randOben = Math.min(64, Math.round(r.height * 0.13)), randUnten = Math.min(84, Math.round(r.height * 0.15));
-      const bw = b.x2 - b.x1, bh = b.y2 - b.y1, hNutz = Math.max(100, r.height - randOben - randUnten);
-      const k = klemme(Math.min((r.width - 40) / bw, hNutz / bh), 0.25, 1.1);
-      ziel = {k, tx: (r.width - bw * k) / 2 - b.x1 * k, ty: randOben + (hNutz - bh * k) / 2 - b.y1 * k};
+      const randRechts = Math.max(20, mini.rechts);
+      const bw = b.x2 - b.x1, bh = b.y2 - b.y1, hNutz = Math.max(100, r.height - randOben - randUnten), bNutz = Math.max(140, r.width - 20 - randRechts);
+      const k = klemme(Math.min(bNutz / bw, hNutz / bh), 0.25, 1.1);
+      /* Der Sichtrahmen soll das Minimum-Maß des Netzes treffen, nicht die Kartenmitte: links 20 px,
+         oben randOben, restliche Breite/Höhe zentriert. Der Minimap-Versatz schiebt nach oben. */
+      let ty = randOben + (hNutz - bh * k) / 2 - b.y1 * k - (mini.schieb || 0);
+      const minTy = 8 - b.y1 * k;                    /* nicht unter die obere Leiste schieben */
+      if (ty < minTy) ty = minTy;
+      ziel = {k, tx: 20 + (bNutz - bw * k) / 2 - b.x1 * k, ty};
     }
     ansichtAnimieren(ziel, animiert ? 320 : 0);
     Z.eingepasst = true;
@@ -33468,8 +34396,11 @@ UI.labor = (() => {
   function zeichnen(){
     if (!Z.svg || !Z.netz || !Z.root?.isConnected) return;
     const netz = Z.netz, ebene = UI.ebenen.aktuell;
-    /* ZUERST leeren: ab hier steht keine alte Topologie mehr auf der Fläche. */
+    /* ZUERST leeren: ab hier steht keine alte Topologie mehr auf der Fläche. Auch die Port-Ebene
+       (Z.s.ueber) muss leer – sonst blieben bei einem Zeichenfehler alte LEDs und Portnamen stehen. */
     for (const n of ["zonen", "kabel", "geraete", "karten"]) Z.s[n].replaceChildren();
+    if (Z.el.kabelEnden) Z.el.kabelEnden.replaceChildren();
+    Z.ende = [];
     Z.gEl.clear(); Z.kEl.clear();
     try {
       Z.root.dataset.ebene = ebene;
@@ -33484,8 +34415,15 @@ UI.labor = (() => {
       for (const k of netz.kabel) { const el = kabelGruppe(k); Z.kEl.set(k.id, el); Z.s.kabel.append(el); }
       for (const g of Object.values(netz.geraete)) { const el = geraetGruppe(g); Z.gEl.set(g.id, el); Z.s.geraete.append(el); }
       Z.karten = UI.ebenen.zeichneKarten(Z.s.karten, netz, pos, ebene);
+      /* Port-LED/Portnamen liegen über den Karten (eigene Ebene) und werden nach den Geräten gebaut;
+         Beschriftungen bekommen sofort die Gegenskalierung des aktuellen Zooms (§ 3.4). */
+      kabelEndenBauen();
+      beschriftungenSkalieren();
+      Z.gemaltKw = kartenMasse().kw;         /* für den Größenwechsel beim Fenster-Resize */
       Z.el.leer.hidden = Object.keys(netz.geraete).length > 0;
       if (Z.hover && !netz.geraete[Z.hover]) Z.hover = null;
+      if (Z.kabelHover && !netz.kabel.some(k => k.id === Z.kabelHover)) Z.kabelHover = null;
+      if (Z.geraeteHover && !netz.geraete[Z.geraeteHover]) Z.geraeteHover = null;
       F.hoverZeichnen?.();
       knoepfeAktualisieren();
       if (Z.zeichenFehlerAktiv && Z.el.hinweis) { Z.el.hinweis.textContent = ""; Z.zeichenFehlerAktiv = false; }
@@ -33530,35 +34468,71 @@ UI.labor = (() => {
       Z.versatz.set(k.id, (i - (liste.length - 1) / 2) * 12 * richtung);
     });
   }
+  /* Kartenmaße des Knotens (Vertrag § 3.1, Geometrie der Leitung vom 30.10.2026): 160x76 auf breiten,
+     118x64 auf schmalen Fenstern. Dieselben Maße braucht der Kanten-Anker – deshalb EINE Funktion. */
+  function kartenMasse(){
+    const breit = !(typeof innerWidth === "number" && innerWidth < 900);
+    return breit ? {kw: 160, kh: 76} : {kw: 118, kh: 64};
+  }
+  /* Schnittpunkt des Strahls p→q mit dem Kartenrechteck um p (Ray-Box, Vertrag § 3.2).
+     seite "h" = linke/rechte Rahmenlinie (waagerechter Austritt), "v" = obere/untere. */
+  function randPunkt(p, q, m){
+    const dx = q.x - p.x, dy = q.y - p.y;
+    if (!dx && !dy) return null;
+    const hw = (m.kw || 140) / 2, hh = (m.kh || 76) / 2;
+    let t = Infinity, seite = "h";
+    if (dx) { const tx = hw / Math.abs(dx); if (tx < t) { t = tx; seite = "h"; } }
+    if (dy) { const ty = hh / Math.abs(dy); if (ty < t) { t = ty; seite = "v"; } }
+    if (!Number.isFinite(t)) return null;
+    return {x: p.x + dx * t, y: p.y + dy * t, seite};
+  }
   function kabelGeo(k){
     const A = pos(k.a.geraet), B = pos(k.b.geraet); if (!A || !B) return null;
     const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
     const off = Z.versatz.get(k.id) || 0;
-    return {ax: A.x + nx * off, ay: A.y + ny * off, bx: B.x + nx * off, by: B.y + ny * off, ux, uy, nx, ny, len};
+    /* Mehrfachkabel: der Versatz verschiebt den STRAHL, nicht den Gerätepunkt – die Enden bleiben auf
+       dem Rahmen des eigenen Geräts (vorher ein Punkt 12 px neben der Mitte, oft unter der Karte). */
+    const a2 = {x: A.x + nx * off, y: A.y + ny * off}, b2 = {x: B.x + nx * off, y: B.y + ny * off};
+    const m = kartenMasse();
+    const ea = randPunkt(a2, b2, m) || {x: A.x, y: A.y, seite: "h"};
+    const eb = randPunkt(b2, a2, m) || {x: B.x, y: B.y, seite: "h"};
+    return {ax: ea.x, ay: ea.y, bx: eb.x, by: eb.y, seiteA: ea.seite, seiteB: eb.seite, ux, uy, nx, ny, len};
+  }
+  /* Polylinie mit 6-px-Rundungen: gerade Strecken bleiben gerade, Ecken laufen als kurze Quadratik um
+     (Vertrag § 3.2). Der Radius wird auf die halbe Segmentlänge begrenzt, damit kurze Stücke nicht
+     überschwingen. Doppelte Punkte fliegen raus – sonst entstünde ein Naht-Knick. */
+  function pfadMitRundung(punkte, r = 6){
+    const p = [];
+    for (const q of punkte) { const l = p[p.length - 1]; if (!l || Math.abs(q[0] - l[0]) > 0.01 || Math.abs(q[1] - l[1]) > 0.01) p.push(q); }
+    if (p.length < 2) return "";
+    let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+    for (let i = 1; i < p.length - 1; i++) {
+      const a = p[i - 1], b = p[i], c = p[i + 1];
+      const l1 = Math.hypot(b[0] - a[0], b[1] - a[1]), l2 = Math.hypot(c[0] - b[0], c[1] - b[1]);
+      const gerade = Math.abs((b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0])) < 0.01;
+      if (gerade || !l1 || !l2) { d += ` L${b[0].toFixed(1)} ${b[1].toFixed(1)}`; continue; }
+      const rr = Math.min(r, l1 / 2, l2 / 2);
+      const s1x = (b[0] - a[0]) / l1, s1y = (b[1] - a[1]) / l1, s2x = (c[0] - b[0]) / l2, s2y = (c[1] - b[1]) / l2;
+      d += ` L${(b[0] - s1x * rr).toFixed(1)} ${(b[1] - s1y * rr).toFixed(1)} Q${b[0].toFixed(1)} ${b[1].toFixed(1)} ${(b[0] + s2x * rr).toFixed(1)} ${(b[1] + s2y * rr).toFixed(1)}`;
+    }
+    const e = p[p.length - 1];
+    return d + ` L${e[0].toFixed(1)} ${e[1].toFixed(1)}`;
   }
   function kabelPfad(geo){
-    /* Patchkabel: leichter Durchhang quer zur Verbindung, keine starre Gerade */
-    const {ax, ay, bx, by, nx, ny, len} = geo;
-    const bogen = Math.min(20, len * 0.08);
-    const mx = (ax + bx) / 2 + nx * bogen, my = (ay + by) / 2 + ny * bogen;
-    return `M${ax.toFixed(1)} ${ay.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${bx.toFixed(1)} ${by.toFixed(1)}`;
+    const {ax, ay, bx, by, seiteA, seiteB} = geo;
+    const waagerecht = Math.abs(ay - by) < 0.6, senkrecht = Math.abs(ax - bx) < 0.6;
+    let punkte;
+    if (waagerecht && seiteA === "h" && seiteB === "h") punkte = [[ax, ay], [bx, by]];
+    else if (senkrecht && seiteA === "v" && seiteB === "v") punkte = [[ax, ay], [bx, by]];
+    else if (seiteA === "h" && seiteB === "h") { const mx = (ax + bx) / 2; punkte = [[ax, ay], [mx, ay], [mx, by], [bx, by]]; }
+    else if (seiteA === "v" && seiteB === "v") { const my = (ay + by) / 2; punkte = [[ax, ay], [ax, my], [bx, my], [bx, by]]; }
+    else if (seiteA === "h") punkte = [[ax, ay], [bx, ay], [bx, by]];
+    else punkte = [[ax, ay], [ax, by], [bx, by]];
+    return pfadMitRundung(punkte);
   }
-  function steckerZeichen(x, y, ux, uy){
-    const winkel = Math.atan2(uy, ux) * 180 / Math.PI;
-    return sv("g", {class: "kabel-stecker", transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${winkel.toFixed(1)})`},
-      sv("rect", {class: "stk-gehaeuse", x: -9, y: -5, width: 18, height: 10, rx: 3}),
-      sv("rect", {class: "stk-kontakt", x: -6, y: -3, width: 12, height: 6, rx: 1}),
-      sv("rect", {class: "stk-clip", x: 6, y: -2, width: 4, height: 4, rx: 1}));
-  }
-  function statusSymbol(x, y, status, titel){
-    const g = sv("g", {class: "ps ps-" + status});
-    g.append(sv("circle", {class: "ps-grund", cx: x, cy: y, r: 7.5}));
-    if (status === "oben") g.append(sv("path", {d: `M${x - 4.5} ${y + 3.5}L${x} ${y - 4.5}L${x + 4.5} ${y + 3.5}Z`}));
-    else if (status === "unten") g.append(sv("path", {d: `M${x - 4.5} ${y - 3.5}L${x} ${y + 4.5}L${x + 4.5} ${y - 3.5}Z`}));
-    else g.append(sv("rect", {x: x - 3.6, y: y - 3.6, width: 7.2, height: 7.2, rx: 1}));
-    g.append(sv("title", {text: titel}));
-    return g;
-  }
+  /* Statusglyphen (.ps) und Steckerplastik (.kabel-stecker) sind entfallen: Die Port-LED übernimmt den
+     Status als Farbe (Vertrag § 3.2), das Kabel endet exakt auf dem Kartenrahmen statt im Freiraum
+     (Befund B5). Damit gibt es auch die „Gekritzel“-Statussymbole unter den Karten nicht mehr (B4/B8). */
   const STATUS_TEXT = {oben: "Link oben", unten: "Link unten", aus: "Port abgeschaltet", frei: "kein Kabel"};
   function grundText(code){
     if (!code) return "";
@@ -33595,51 +34569,34 @@ UI.labor = (() => {
       if (acc && !trunk) { g.style.setProperty("--kf", UI.ebenen.vlanFarbe(acc.vlan)); g.classList.add("vlan-farbe"); }
       else if (trunk) g.classList.add("vlan-trunk");
     }
-    const {ax, ay, bx, by, ux, uy, nx, ny, len} = geo;
+    const {ax, ay, bx, by} = geo;
     const na = netz.geraete[k.a.geraet]?.name || k.a.geraet, nb = netz.geraete[k.b.geraet]?.name || k.b.geraet;
     const grund = (sa.status !== "oben" ? sa : sb).grund;
     const titel = `${na} ${k.a.port} ↔ ${nb} ${k.b.port}\n${klasse === "oben" ? "Link oben" : (klasse === "aus" ? "Port abgeschaltet" : "Link unten") + (grund ? ": " + grundText(grund) : "")}` +
       (trunk ? `\nTrunk (802.1Q), erlaubt: ${UI.ebenen.erlaubtText((va?.art === "trunk" ? va : vb).erlaubt)}` : "");
     const d = kabelPfad(geo);
-    const abstand = Math.min(78, Math.max(66, len * 0.34));
-    g.append(sv("line", {class: "kabel-treffer", x1: ax, y1: ay, x2: bx, y2: by}, sv("title", {text: titel + "\nKlicken zum Auswählen, Entf trennt."})));
+    if (!d) return g;
+    /* Die Trefferlinie folgt dem sichtbaren Pfad – vorher lag sie Mitte→Mitte unter den Karten. */
+    g.append(sv("path", {class: "kabel-treffer", d, fill: "none"}, sv("title", {text: titel + "\nKlicken zum Auswählen, Entf trennt."})));
     g.append(sv("path", {class: "kabel-huelle", d}));
     if (trunk) {
       g.append(sv("path", {class: "kabel-trunk-aussen", d}));
       g.append(sv("path", {class: "kabel-trunk-innen", d}));
     } else g.append(sv("path", {class: "kabel-linie", d}));
-    g.append(steckerZeichen(ax + ux * abstand, ay + uy * abstand, ux, uy));
-    g.append(steckerZeichen(bx - ux * abstand, by - uy * abstand, -ux, -uy));
-    /* Enden: Statussymbol + Portname. Verlässt das Kabel das Gerät nach unten, beginnt es unter der Beschriftung. */
-    const ende = (x, y, s, richtung, port, titelPort) => {
-      const abwaerts = uy * richtung > 0.45;
-      const basis = abwaerts ? 48 : 28;
-      const dSym = Math.min(basis + 8, len * 0.36), dTxt = Math.min(basis + 24, len * 0.46);
-      g.append(statusSymbol(x + ux * dSym * richtung, y + uy * dSym * richtung, s.status, `${titelPort}: ${STATUS_TEXT[s.status] || s.status}${s.grund && s.status !== "oben" ? " – " + grundText(s.grund) : ""}`));
-      const ox = nx * 9, oy = ny * 9, senkrecht = Math.abs(ux) < 0.55;
-      const tx = x + ux * dTxt * richtung + ox, ty = y + uy * dTxt * richtung + oy + 3.5;
-      /* Qualitätskontrolle: Portname nur zeichnen, wenn er ganz in die Fläche passt – sonst
-         blieb am Rand ein abgeschnittenes Kürzel („i0/1") stehen. */
-      const sicht = sichtbereich();
-      if (sicht){
-        /* Textbreite mitrechnen und je nach Anker links/rechts/mittig begrenzen – sonst
-           stand am Rand ein abgeschnittenes Kürzel („i0/1"). */
-        const tw = port.length * 6.6, rand = 14;
-        const anker = senkrecht ? (ox >= 0 ? "start" : "end") : "middle";
-        const links = anker === "start" ? tx : anker === "end" ? tx - tw : tx - tw / 2;
-        const rechts = anker === "start" ? tx + tw : anker === "end" ? tx : tx + tw / 2;
-        if (links < sicht.x1 + rand || rechts > sicht.x2 - rand || ty < sicht.y1 + 14 || ty > sicht.y2 - 14) return;
-      }
-      g.append(sv("text", {class: "kabel-port", x: tx.toFixed(1), y: ty.toFixed(1), "text-anchor": senkrecht ? (ox >= 0 ? "start" : "end") : "middle", text: port}));
-    };
-    ende(ax, ay, sa, 1, k.a.port, `${na} ${k.a.port}`);
-    ende(bx, by, sb, -1, k.b.port, `${nb} ${k.b.port}`);
+    /* Port-LED und Portname stehen NICHT hier, sondern in Z.s.ueber (kabelEndenBauen) – sonst lägen sie
+       wie bisher unter der Karte (Befund B4). Hover am Kabel zeigt seine Namen auch unter 90 % Zoom;
+       das geht nur über Ereignisse, weil die Namen außerhalb dieser Gruppe hängen. */
+    if (typeof g.addEventListener === "function") {
+      g.addEventListener("pointerenter", () => { Z.kabelHover = k.id; kabelEndenAktualisieren(); });
+      g.addEventListener("pointerleave", () => { if (Z.kabelHover === k.id) Z.kabelHover = null; kabelEndenAktualisieren(); });
+    }
     /* VLAN-Schilder an Switch-Ports */
     if (ebene === "vlan") {
       const beide = !!(va && vb);
       const schild = (x, y, v, richtung) => {
         if (!v) return;
-        const d = len * (beide ? 0.34 : 0.5), cx = x + ux * d * richtung, cy = y + uy * d * richtung;
+        /* auf der Sichtstrecke zwischen den Rahmenpunkten, nicht zwischen den Mittelpunkten */
+        const f = (beide ? 0.34 : 0.5) * richtung, cx = x + (bx - ax) * f, cy = y + (by - ay) * f;
         const text = v.art === "trunk" ? `Trunk ${UI.ebenen.erlaubtText(v.erlaubt)}` : `VLAN ${v.vlan}`;
         const b = text.length * 6.4 + 12;
         const s = sv("g", {class: "vlan-schild" + (v.art === "trunk" ? " trunk" : "")});
@@ -33651,32 +34608,164 @@ UI.labor = (() => {
     }
     return g;
   }
+  /* ---------- Port-LED und Portname (in Z.s.ueber, ÜBER den Karten) ----------
+     Befund B4: Namen und Statussymbole lagen 28–78 px von der Gerätemitte und verschwanden unter der
+     Karte. Jetzt sitzt die LED (r 2,6) exakt auf der Rahmenlinie, der Name 12 px außerhalb. Beides wird
+     nur gezeigt, wenn der Zoom >= 0,9 ist oder Gerät/Kabel gewählt/gehovert sind (Vertrag § 3.2); der
+     Name zusätzlich nur, wenn er nirgends aufliegt (einfache, deterministische Kollisionsliste). Die
+     alten Statussymbole entfallen: Die Farbe der LED trägt den Zustand. */
+  const PORT_ZEICHEN = 6.5;      /* 11-px-Mono + Sperrsatz .04em, in Edge gemessen: 6,49 px/Zeichen */
+  function portNameOrt(led, o, seite){
+    /* 12 px außerhalb des Rahmens, Richtung = NORMALEDER RAHMENKANTE (nicht die Verbindungsrichtung):
+       So liegt der Name nie halb auf der eigenen Karte. Waagerechte Kante: Name neben der LED;
+       obere/untere Kante: darüber/darunter, mittig. */
+    const waagerecht = seite === "h";
+    if (waagerecht) { const r = o.x >= 0 ? 1 : -1; return {x: led.x + r * 14, y: led.y + 4, anker: r > 0 ? "start" : "end"}; }
+    const unten = o.y > 0;
+    return {x: led.x, y: led.y + (unten ? 18 : -10), anker: "middle"};
+  }
+  function textKasten(ort, breite){
+    const x = ort.anker === "start" ? ort.x : ort.anker === "end" ? ort.x - breite : ort.x - breite / 2;
+    return {x1: x, y1: ort.y - 10, x2: x + breite, y2: ort.y + 3};
+  }
+  function kabelEndenBauen(){
+    const schicht = Z.el.kabelEnden;
+    if (!schicht) return;
+    schicht.replaceChildren();
+    Z.ende = [];
+    if (!Z.netz) return;
+    for (const k of Z.netz.kabel) {
+      const geo = kabelGeo(k); if (!geo) continue;
+      const zustand = kabelZustand(k);
+      const liste = [
+        {geraet: k.a.geraet, port: k.a.port, x: geo.ax, y: geo.ay, o: {x: geo.ux, y: geo.uy}, seite: geo.seiteA, z: zustand.sa},
+        {geraet: k.b.geraet, port: k.b.port, x: geo.bx, y: geo.by, o: {x: -geo.ux, y: -geo.uy}, seite: geo.seiteB, z: zustand.sb},
+      ];
+      for (const l of liste) {
+        if (!Z.netz.geraete[l.geraet]) continue;
+        /* R1 wie am Kabel: Wo das Niveau keine Ursachen zeigt, sieht die LED nur Link/kein Link. */
+        const status = !warnungenAn() && l.z.status === "aus" ? "unten" : l.z.status;
+        const grund = warnungenAn() ? l.z.grund : null;
+        const ort = portNameOrt({x: l.x, y: l.y}, l.o, l.seite);
+        const el = sv("g", {class: "kabel-ende", "data-kabel": k.id, "data-geraet": l.geraet});
+        el.append(sv("circle", {class: "port-led pd-" + status, cx: l.x.toFixed(1), cy: l.y.toFixed(1), r: 2.6},
+          sv("title", {text: `${l.port} – ${STATUS_TEXT[status] || status}${grund && status !== "oben" ? " – " + grundText(grund) : ""}`})));
+        el.append(sv("text", {class: "kabel-port", x: ort.x.toFixed(1), y: ort.y.toFixed(1), "text-anchor": ort.anker, text: l.port}));
+        schicht.append(el);
+        Z.ende.push({el, kabel: k.id, geraet: l.geraet, ort, breite: l.port.length * PORT_ZEICHEN});
+      }
+    }
+    kabelEndenAktualisieren();
+  }
+  function kabelEndenAktualisieren(){
+    if (!Z.el.kabelEnden || !Z.netz) return;
+    const k = Z.view.k || 1, grundSichtbar = k >= 0.9;
+    const m = kartenMasse(), karten = [];
+    for (const g of Object.values(Z.netz.geraete)) {
+      const p = pos(g.id); if (!p) continue;
+      karten.push({x1: p.x - m.kw / 2 - 4, y1: p.y - m.kh / 2 - 4, x2: p.x + m.kw / 2 + 4, y2: p.y + m.kh / 2 + 4});
+    }
+    const namen = [];
+    const ueber = (a, b) => a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1;
+    for (const e of Z.ende) {
+      const an = grundSichtbar || e.geraet === Z.hover || e.geraet === Z.geraeteHover || Z.auswahlSet.has(e.geraet) ||
+        Z.kabelWahl === e.kabel || Z.kabelHover === e.kabel;
+      e.el.classList.toggle("an", an);
+      if (!an) { e.el.classList.remove("ohne-name"); continue; }
+      const b = textKasten(e.ort, e.breite);
+      if (karten.some(q => ueber(b, q)) || namen.some(q => ueber(b, q))) e.el.classList.add("ohne-name");
+      else { e.el.classList.remove("ohne-name"); namen.push(b); }
+    }
+  }
+  /* Kurze Rolle aus Typ + Zusatz (Vertrag § 3.1) – nie leer (Befund B7: „Switch ohne IP" zeigte nichts). */
+  function rollenText(netz, g, art){
+    const titel = (art && art.titel) || g.typ;
+    let zusatz = "";
+    if (g.typ === "internet") zusatz = "Provider";
+    else if (g.typ === "switch") {
+      const vlans = Object.keys(g.flash?.vlans || {}).filter(n => /^\d+$/.test(n) && String(+n) !== "1").sort((x, y) => +x - +y);
+      zusatz = vlans.length ? "VLAN " + vlans.slice(0, 3).join(",") + (vlans.length > 3 ? ",…" : "") : "L2";
+    } else if (g.typ === "router" || g.typ === "firewall") {
+      const netze = new Set();
+      for (const x of UI.ebenen.alleAdressen(netz, g)) { const c = IP.cidr(x.ip, x.maske); if (c) netze.add(c); }
+      zusatz = netze.size ? netze.size + (netze.size === 1 ? " Netz" : " Netze") : "keine Adresse";
+    } else if (Modell.HOST[g.typ]) {
+      const a = UI.ebenen.adresse(netz, g), kabel = Modell.ports(g).some(p => Modell.kabelAn(netz, g.id, p));
+      if (a.quelle === "dhcp") zusatz = a.ip ? "DHCP" : "DHCP – keine Adresse";
+      else if (!a.ip) zusatz = kabel ? "keine Adresse" : "kein Link";
+      else if (g.skin === "drucker") {
+        const dienst = Object.entries(g.running?.dienste || {}).find(([d, w]) => w && w.an && Modell.DIENSTPORTS && Modell.DIENSTPORTS[d]);
+        if (dienst) zusatz = "Dienst " + Modell.DIENSTPORTS[dienst[0]].port;
+      }
+    }
+    return zusatz ? titel + " · " + zusatz : titel;
+  }
+
   function geraetGruppe(g){
     const p = pos(g.id), netz = Z.netz;
     const klassen = ["ger", "typ-" + g.typ];
     if (!g.an) klassen.push("aus");
     if (Z.auswahl?.geraet === g.id) klassen.push("gewaehlt");
-    if (UI.ebenen.aktuell === "ip" && Z.ohne.has(g.id)) klassen.push("ohne-ip");
+    /* ohne-ip gilt in JEDER Ebene: Der gestrichelte Koralle-Rahmen ist die ruhige Erklärung „hier fehlt
+       eine Adresse" (Befund B7), kein Fehlerbild der IP-Ebene. */
+    if (Z.ohne.has(g.id)) klassen.push("ohne-ip");
     const el = sv("g", {class: klassen.join(" "), "data-id": g.id, transform: `translate(${p.x} ${p.y})`});
     const art = UI.geraeteArt(g.typ, g.skin);
-    /* Große Karten auf breiten Flächen, kompakte auf schmalen – sonst passt das Netz dort nicht. */
-    const BREIT = !(typeof innerWidth === "number" && innerWidth < 900);
-    const KW = BREIT ? 168 : 116, KH = BREIT ? 112 : 80;
-    el.append(sv("rect", {class: "ger-treffer", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: 10}));
-    el.append(sv("rect", {class: "ger-auswahl", x: -KW / 2 - 6, y: -KH / 2 - 6, width: KW + 12, height: KH + 12, rx: 12}));
-    el.append(sv("rect", {class: "ger-karte", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: 10}));
-    el.append(sv("g", {class: "ger-bild", transform: BREIT ? "translate(-54 -22) scale(.9)" : "translate(-34 -6) scale(.72)"}, UI.geraetebild(g.typ, g.skin)));
+    /* Knotenmaße nach Vertrag § 3.1: 140x76 (breit) / 110x64 (schmal). Die Karte ist nur noch
+       Haarlinien-Rahmen; die Typfarbe steckt in der kleinen Platte links. */
+    const {kw: KW, kh: KH} = kartenMasse();
+    const radius = KW >= 120 ? 12 : 10;
+    el.append(sv("rect", {class: "ger-treffer", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: radius}));
+    el.append(sv("rect", {class: "ger-auswahl", x: -KW / 2 - 6, y: -KH / 2 - 6, width: KW + 12, height: KH + 12, rx: radius + 2}));
+    el.append(sv("rect", {class: "ger-karte", x: -KW / 2, y: -KH / 2, width: KW, height: KH, rx: radius}));
+    /* Icon-Platte 28x28 links: UI.geraetebild zeichnet 52x52, 0,538 ergibt 28. Keine neue Platten-Klasse –
+       die vorhandene .gb-kachel wird nur skaliert und von der CSS-Hälfte gestylt. */
+    el.append(sv("g", {class: "ger-bild", transform: "translate(" + (-KW / 2 + 24) + " 0) scale(.538)"}, UI.geraetebild(g.typ, g.skin)));
     const a = UI.ebenen.adresse(netz, g);
-    /* Name und Adresse mit Luft: bei 12-13 px Schrift berührten sich die beiden Zeilen (Abstand 0 gemessen,
-       Befund 05.10.2026) – das wirkt gedrängt, auch wenn sich die Kästen formal nicht schneiden. */
-    el.append(sv("text", {class: "ger-name", x: BREIT ? -20 : -8, y: BREIT ? -8 : -4, "text-anchor": "start", text: g.name}));
-    /* Auf der Fläche steht bewusst NUR die erste Adresse (Kurzform „… +2“ bei mehreren Schnittstellen).
-       Alle Adressen mit Schnittstelle stehen im Tooltip. Begründung: Mit allen drei Adressen untereinander
-       füllte der Router den Bereich unter sich voll und stieß an die Portnamen – dieselbe Dichte, die der
-       Kunde bemängelt hat (Versuch und Messung 05.10.2026). Die Subnetz-Schilder sagen bereits, welche
-       Netze es gibt; welcher Router-Port in welchem Netz liegt, verrät der Tooltip und der Inspektor. */
-    if (a.text) {
-      const adr = sv("text", {class: "ger-ip" + (a.gueltig || !a.ip && g.typ === "switch" ? "" : " schwach"), x: BREIT ? -20 : -8, y: BREIT ? 16 : 14, "text-anchor": "start", text: a.text});
+    /* Beschriftung als eigener Block: wird mit dem Zoom gegenskaliert (§ 3.4). Die Breiten werden VOR
+       dem Setzen deterministisch aus der Zeichenzahl geschätzt (Faktor unten, im Browser gemessen), damit
+       nie Text über den Rahmen läuft (Befund B6); nur sehr lange Texte enden mit „…".
+       Textfläche: x0 bis KW/2 - 8 = 104 px (breit) bzw. 62 px (schmal). Gemessen in Edge mit der
+       Mono-Ersatzschrift (Consolas): 11 px = 6,05 px/Zeichen; Name 12,5 px + Sperrsatz .04em = 7,37 px
+       (gerechnet wird mit 7,7 als Sicherheitszuschlag, damit nichts über den Rahmen läuft). */
+    const x0 = -KW / 2 + 48, yOff = -KH / 2 + 14;
+    const maxB = KW / 2 - 8 - x0;                       /* 104 px breit, 62 px schmal */
+    /* Schmal (KW<140) rechnet die Leitung mit 6,05 px/Zeichen fuer den Namen (Vorgabe 30.10.2026):
+       dann passen "PC-Empfang" (10) und knapp "Gast-Laptop" eher in die 62-px-Textflaeche. Auf breiten
+       Karten bleibt 7,7 (12,5 px + Sperrsatz) als Sicherheitszuschlag. */
+    /* Schmal (KW<140): 7,7 statt 6,05 (Vorgabe der Leitung war 6,05). GEMESSEN: 12,5-px-Monospace
+       ist real 7,37 px/Zeichen; mit 6,05 blieben "PC-Empfang"/"Gast-Laptop" ungekuerzt und liefen bei
+       k=0,73 durch die Gegenskalierung (s=1,12) 9,2 Bildschirm-px ueber den Kartenrahmen. Mit 7,7
+       bleiben sie gekuerzt, aber im Rahmen (gemessen 0 Ueberlauf). */
+    const ZEICHEN_11 = 6.05, ZEICHEN_NAME = KW < 140 ? 7.7 : 7.7;
+    const kuerze = (text, faktor, max) => {
+      const t = String(text == null ? "" : text);
+      if (!t || t.length * faktor <= max) return t;
+      const platz = Math.max(1, Math.floor(max / faktor) - 1);
+      return t.slice(0, platz) + "…";
+    };
+    const t = sv("g", {class: "ger-text"});
+    t.setAttribute("data-x", x0.toFixed(1));
+    t.setAttribute("data-y", yOff.toFixed(1));
+    t.append(sv("text", {class: "ger-name", x: x0, y: -10, "text-anchor": "start", text: kuerze(g.name, ZEICHEN_NAME, maxB)}));
+    /* Die Rolle erklärt den Zustand und ist NIE leer (Befund B7: „Switch ohne IP" zeigte nichts). Bei
+       Überlauf erst der Zusatz ohne Typ („VLAN 10,20,30" statt „Switch · VLAN 10,20,30"), dann „…". */
+    let rolle = rollenText(netz, g, art);
+    if (rolle.length * ZEICHEN_11 > maxB) {
+      const zusatz = rolle.includes(" · ") ? rolle.slice(rolle.indexOf(" · ") + 3) : rolle;
+      rolle = zusatz.length * ZEICHEN_11 <= maxB ? zusatz : kuerze(rolle, ZEICHEN_11, maxB);
+    }
+    t.append(sv("text", {class: "ger-rolle", x: x0, y: 4, "text-anchor": "start", text: rolle}));
+    /* Auf der Fläche steht NUR die erste gültige Adresse (Kurzform „+N" als eigener gedämpfter Zusatz);
+       alle Adressen mit Schnittstelle stehen im Tooltip. Ohne Adresse gibt es KEIN .ger-ip-Element –
+       die Rolle sagt stattdessen „keine Adresse" / „kein Link" / „DHCP – keine Adresse" (Befund B6/B7). */
+    const alleAdr = UI.ebenen.alleAdressen(netz, g) || [];
+    let ipText = a.ip ? String(a.ip) : "";
+    if (ipText && IP.maskeGueltig(a.maske)) ipText += "/" + IP.praefix(a.maske);
+    /* „+N" bekommt eine eigene Ecke oben rechts, damit das Präfix am Knoten bleiben kann (Lehrinhalt). */
+    const mehr = alleAdr.length > 1 ? "+" + (alleAdr.length - 1) : "";
+    if (ipText) {
+      const adr = sv("text", {class: "ger-ip" + (a.gueltig ? "" : " schwach"), x: x0, y: 18, "text-anchor": "start"}, kuerze(ipText, ZEICHEN_11, maxB));
       /* Adresse anklicken = in die Zwischenablage (Wunsch 05.10.2026: „für easy von hand routing").
          Kopiert wird NUR die Adresse ohne Präfix und ohne „+2" – genau das, was man in eine Route tippt.
 
@@ -33701,8 +34790,12 @@ UI.labor = (() => {
         adr.addEventListener("pointerdown", kopieren);
         adr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") kopieren(e); });
       }
-      el.append(adr);
+      t.append(adr);
     }
+    /* Eigene Ecke oben rechts; mit den neuen Zeilen (Name y=-10) vier Pixel hoeher als zuerst
+       geplant, sonst ueberlappt der Zusatz den Namen. */
+    if (mehr) t.append(sv("text", {class: "ger-mehr", x: KW / 2 - 16, y: -KH / 2 + 16, "text-anchor": "end", text: mehr}));
+    el.append(t);
     /* Alle Adressen in den Tooltip: Auf der Fläche steht nur die erste (sonst wird es unleserlich) – hier muss
        vollständig stehen, welche Adresse zu welcher Schnittstelle gehört. Sonst findet der Spieler die Adressen
        der übrigen Subnetze nirgends (Befund 05.10.2026: Router zeigte nur „192.168.10.1/24 +2“). */
@@ -33729,6 +34822,11 @@ UI.labor = (() => {
       b.append(sv("rect", {x: -16, y: -9, width: 32, height: 18, rx: 9}), sv("text", {x: 0, y: 4, "text-anchor": "middle", text: "aus"}));
       el.append(b);
     }
+    /* Hover am Gerät zeigt seine Portnamen auch unter 90 % Zoom (Vertrag § 3.2). */
+    if (typeof el.addEventListener === "function") {
+      el.addEventListener("pointerenter", () => { Z.geraeteHover = g.id; kabelEndenAktualisieren(); });
+      el.addEventListener("pointerleave", () => { if (Z.geraeteHover === g.id) Z.geraeteHover = null; kabelEndenAktualisieren(); });
+    }
     return el;
   }
   /* nur ein Gerät + seine Kabel + Kärtchen neu setzen (Ziehen, Animation) */
@@ -33741,13 +34839,14 @@ UI.labor = (() => {
       Z.kEl.set(k.id, neu);
     }
     if (Z.karten.size) UI.ebenen.platzieren(Z.karten, pos, id);
+    kabelEndenBauen();                 /* LED/Portnamen sitzen auf dem Rahmen und wandern mit */
     F.hoverZeichnen?.(true);
   }
   let zonenGeplant = false;
   function zonenNeu(){
     if (UI.ebenen.aktuell !== "ip" || zonenGeplant) return;
     zonenGeplant = true;
-    requestAnimationFrame(() => { zonenGeplant = false; Z.s.zonen.replaceChildren(); UI.ebenen.zeichneZonen(Z.s.zonen, Z.netz, pos); });
+    requestAnimationFrame(() => { zonenGeplant = false; Z.s.zonen.replaceChildren(); UI.ebenen.zeichneZonen(Z.s.zonen, Z.netz, pos); beschriftungenSkalieren(); });
   }
 
   /* ---------- Auswahl, Inspektor ----------
@@ -33773,6 +34872,7 @@ UI.labor = (() => {
       el.classList.toggle("primaer", an && el.dataset.id === primaer);
     }
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
+    kabelEndenAktualisieren();          /* gewählte Geräte zeigen ihre Portnamen auch unter 90 % Zoom */
     const geaendert = vorher !== [...Z.auswahlSet].sort().join("|");
     if (!geaendert) return gueltig;
     Bus.senden("auswahl", {geraet: primaer || null, port: Z.auswahl?.port || null, geraete: gueltig.slice(), mehr: gueltig.length});
@@ -33875,6 +34975,7 @@ UI.labor = (() => {
     Z.kabelWahl = kid || null;
     if (kid && Z.auswahlSet.size) auswahlSetzen([]);
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
+    kabelEndenAktualisieren();
   }
   function inspektorZeigen(){
     const c = Z.el.inspektor; if (!c || !Z.netz) return;
@@ -34111,6 +35212,7 @@ UI.labor = (() => {
       for (const k of netz.kabel) { const neu = kabelGruppe(k), altEl = Z.kEl.get(k.id); if (altEl) altEl.replaceWith(neu); Z.kEl.set(k.id, neu); }
       if (Z.karten.size) UI.ebenen.platzieren(Z.karten, pos);
       zonenNeu();
+      kabelEndenBauen();
       if (p < 1) requestAnimationFrame(schritt); else fertig();
     };
     requestAnimationFrame(schritt);
@@ -34143,6 +35245,7 @@ UI.labor = (() => {
     Z.titel = opt.titel || "Labor";
     Z.opt = opt;
     Z.auswahl = null; Z.auswahlSet = new Set(); Z.kabelWahl = null; Z.pos.clear(); Z.hover = null; Z.pingVon = null;
+    Z.ende = []; Z.kabelHover = null; Z.geraeteHover = null;
     if (Z.werkzeug !== "auswahl") Z.werkzeug = "auswahl";
     Z.einpassenAusstehend = true;
     Z.inspWartet = typeof innerWidth === "number" && innerWidth < 1100; Z.simWartet = true; Z.simZu = true;  /* A: Inspektor bleibt sichtbar (breit) */
@@ -40646,7 +41749,7 @@ UI.werkstatt = (() => {
   let laborEl = null, leisteEl = null, miniEl = null, miniSvg = null, miniKabel = null, miniGeraete = null, miniRahmen = null;
   let suchFeld = null, suchListe = null, vorlagenKnopf = null, kennwertEl = null;
   let zoomFeld = null, stufeWahl = null;
-  let sandbox = false, suchTreffer = [], suchIdx = 0, rahmenDaten = null;
+  let sandbox = false, suchTreffer = [], suchIdx = 0, rahmenDaten = null, miniWelt = null, miniGross = false;
 
   const sym = (name, groesse) => (typeof UI.symbol === "function" ? UI.symbol(name, groesse) : null);
 
@@ -40837,24 +41940,50 @@ UI.werkstatt = (() => {
     if (e.preventDefault) e.preventDefault();
     UI.labor.mitteAufWelt(rahmenDaten.x1 + fx * (rahmenDaten.x2 - rahmenDaten.x1), rahmenDaten.y1 + fy * (rahmenDaten.y2 - rahmenDaten.y1));
   }
+  /* Sichtbarer Weltausschnitt des Labors (nur wenn die Ansicht messbar ist). */
+  function sichtbereichMini(){
+    try { return UI.labor && UI.labor.sichtbereich ? UI.labor.sichtbereich() : null; } catch (e) { return null; }
+  }
+  function rahmenVereinigen(a, b){
+    if (!a) return b || null;
+    if (!b) return a;
+    return {x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2)};
+  }
   function minimapAktualisieren(){
     if (!miniEl || !miniSvg) return false;
     const netz = UI.labor ? UI.labor.netz : null;
     const ids = UI.labor && UI.labor.auswahlMehr ? UI.labor.auswahlMehr() : [];
     const d = minimapDaten(netz, ids);
-    rahmenDaten = d.rahmen;
     if (!d.rahmen) {
+      rahmenDaten = null; miniWelt = null; miniGross = false;
       miniSvg.setAttribute("viewBox", "0 0 100 100");
       miniKabel.replaceChildren(); miniGeraete.replaceChildren();
       miniRahmen.setAttribute("visibility", "hidden");
       kennwerteZeigen();
       return true;
     }
-    const b = d.rahmen;
-    miniSvg.setAttribute("viewBox", b.x1 + " " + b.y1 + " " + (b.x2 - b.x1) + " " + (b.y2 - b.y1));
-    const r = Math.max(6, Math.hypot(b.x2 - b.x1, b.y2 - b.y1) / 42);
+    /* Sichtrahmen mit einbeziehen (Befund B10): Zeigt die Ansicht alles, ist der sichtbare Ausschnitt
+       größer als der Geräte-Rahmen. Dann bleibt der Geräte-Rahmen der Maßstab (sonst schrumpfte das
+       Netz in eine Ecke) und der Sichtrahmen läuft als gestrichelte Kante am Minimap-Rand – statt
+       „hidden" zu sein. Nur wenn die Ansicht weiter hinausgeht als das Netz, wächst der Ausschnitt mit. */
+    const sicht = sichtbereichMini();
+    miniWelt = d.rahmen;
+    const enthaelt = sicht && d.rahmen && sicht.x1 <= d.rahmen.x1 && sicht.y1 <= d.rahmen.y1 && sicht.x2 >= d.rahmen.x2 && sicht.y2 >= d.rahmen.y2;
+    miniGross = !!enthaelt;
+    const b = enthaelt ? d.rahmen : (rahmenVereinigen(d.rahmen, sicht) || d.rahmen);
+    const pad = Math.max(6, Math.hypot(b.x2 - b.x1, b.y2 - b.y1) * 0.04);
+    const vb = {x1: b.x1 - pad, y1: b.y1 - pad, x2: b.x2 + pad, y2: b.y2 + pad};
+    rahmenDaten = vb;
+    miniSvg.setAttribute("viewBox", vb.x1 + " " + vb.y1 + " " + (vb.x2 - vb.x1) + " " + (vb.y2 - vb.y1));
+    /* Punktgröße in Bildschirm-Pixeln statt Welt-Einheiten: 2,2 px, gewählt 3,2 px (Vertrag § 3.5).
+       Dafür den Maßstab aus der Anzeigebreite der Minimap schätzen; ohne plausible Messung (DOM-Ersatz
+       der Tests: 900x600) gilt die Breite aus werkstatt.css. */
+    let pixelBreite = 182;
+    try { const r = miniSvg.getBoundingClientRect(); if (r && r.width > 20 && r.width < 400) pixelBreite = r.width; } catch (e) { /* dann 182 */ }
+    const skala = (vb.x2 - vb.x1) / pixelBreite;
+    const rNormal = Math.max(2.2, 2.2 * skala), rWahl = Math.max(3.2, 3.2 * skala);
     miniKabel.replaceChildren(...d.kabel.map(k => sv("line", {class: "wk-mini-kabel-linie", x1: k.a.x, y1: k.a.y, x2: k.b.x, y2: k.b.y})));
-    miniGeraete.replaceChildren(...d.geraete.map(g => sv("circle", {class: "wk-mini-punkt typ-" + g.typ + (g.gewaehlt ? " an" : ""), cx: g.x, cy: g.y, r})));
+    miniGeraete.replaceChildren(...d.geraete.map(g => sv("circle", {class: "wk-mini-punkt typ-" + g.typ + (g.gewaehlt ? " an" : ""), cx: g.x, cy: g.y, r: g.gewaehlt ? rWahl : rNormal})));
     miniRahmen.setAttribute("visibility", "visible");
     sichtrahmenZeichnen();
     kennwerteZeigen();
@@ -40863,13 +41992,17 @@ UI.werkstatt = (() => {
   /* Sichtrahmen: welcher Weltausschnitt ist gerade auf der Fläche zu sehen? (UI.labor.sichtbereich) */
   function sichtrahmenZeichnen(){
     if (!miniRahmen || !miniSvg) return;
-    let s = null;
-    try { s = UI.labor && UI.labor.sichtbereich ? UI.labor.sichtbereich() : null; } catch (e) { s = null; }
+    const s = sichtbereichMini();
     if (!s || !rahmenDaten) { miniRahmen.setAttribute("visibility", "hidden"); return; }
-    miniRahmen.setAttribute("x", String(s.x1));
-    miniRahmen.setAttribute("y", String(s.y1));
-    miniRahmen.setAttribute("width", String(s.x2 - s.x1));
-    miniRahmen.setAttribute("height", String(s.y2 - s.y1));
+    /* Auf den Minimap-Ausschnitt begrenzen: Zeigt die Ansicht alles, ist der Sichtrahmen der Rand der
+       Minimap selbst (dann bleibt der Strich vollständig sichtbar statt halb abgeschnitten zu werden). */
+    const x1 = Math.max(s.x1, rahmenDaten.x1), y1 = Math.max(s.y1, rahmenDaten.y1);
+    const x2 = Math.min(s.x2, rahmenDaten.x2), y2 = Math.min(s.y2, rahmenDaten.y2);
+    if (x2 <= x1 || y2 <= y1) { miniRahmen.setAttribute("visibility", "hidden"); return; }
+    miniRahmen.setAttribute("x", String(x1));
+    miniRahmen.setAttribute("y", String(y1));
+    miniRahmen.setAttribute("width", String(x2 - x1));
+    miniRahmen.setAttribute("height", String(y2 - y1));
     miniRahmen.setAttribute("visibility", "visible");
   }
   function zahlenText(kw){
@@ -40913,7 +42046,13 @@ UI.werkstatt = (() => {
     const p = UI.labor && UI.labor.zoomProzent ? Math.round(UI.labor.zoomProzent()) : 100;
     if (zoomFeld && document.activeElement !== zoomFeld) zoomFeld.value = p + " %";
     if (stufeWahl) stufeWahl.value = String(p);
-    sichtrahmenZeichnen();
+    /* Wächst der sichtbare Ausschnitt über den Minimap-Rahmen hinaus, muss der Ausschnitt nachziehen;
+       zoomt man wieder hinein, kehrt die Minimap zum Geräte-Rahmen zurück (sonst bliebe sie klein).
+       Sonst nur den Sichtrahmen verschieben – kein Flackern bei jedem Rädchen. */
+    const s = sichtbereichMini();
+    const gross = s && miniWelt && s.x1 <= miniWelt.x1 && s.y1 <= miniWelt.y1 && s.x2 >= miniWelt.x2 && s.y2 >= miniWelt.y2;
+    const raus = s && rahmenDaten && (s.x1 < rahmenDaten.x1 + 1 || s.y1 < rahmenDaten.y1 + 1 || s.x2 > rahmenDaten.x2 - 1 || s.y2 > rahmenDaten.y2 - 1);
+    if (!!gross !== miniGross || (!gross && raus)) minimapAktualisieren(); else sichtrahmenZeichnen();
   }
   function netzGeaendert(){ minimapAktualisieren(); }
   function auswahlGeaendert(){ minimapAktualisieren(); }

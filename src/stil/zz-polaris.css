@@ -3,6 +3,34 @@
    semantische Farben (Minze = Handlung, Iris = Wissen, Amber = Geld, Koralle = Störung),
    ruhige Bewegung. Nur Tokens, Skala und color-mix (§ 18.2/18.5/18.6/18.9). */
 
+/* ===== Lagebild 2.0: Default-Tokens der Labor-Fläche (POLARIS) =====
+   Vertrag: docs/entwicklung/Entwurf – Lagebild 2.0 (Gestaltungsvertrag).md § 3.6.
+   Themes überschreiben diese Werte in ihrem eigenen :root[data-theme="<id>"]-Block;
+   zz-lagebild.css nutzt IMMER var(--lage-…, var(--fallback)), bricht also ohne Theme nicht.
+   --lage-knoten-schatten ist ein filter-Wert (none | drop-shadow(…)),
+   --lage-glow ein box-shadow-Wert (none | 0 …). */
+:root{
+  --lage-flaeche:var(--bg);
+  --lage-raster:var(--bg-raster);
+  --lage-knoten-bg:var(--panel);
+  --lage-knoten-rand:var(--line);
+  --lage-knoten-schatten:none;
+  --lage-name:var(--ink);
+  --lage-rolle:var(--muted);
+  --lage-ip:var(--faint);
+  --lage-platte:var(--panel-2);
+  --lage-platte-rand:var(--line-2);
+  --lage-kante:var(--mint);
+  --lage-kante-huelle:var(--bg);
+  --lage-chip-bg:var(--panel);
+  --lage-chip-rand:var(--line);
+  --lage-chip-text:var(--ink);
+  --lage-mini-bg:var(--panel-2);
+  --lage-mini-rand:var(--line);
+  --lage-radius:12px;
+  --lage-glow:none;
+}
+
 /* ===== Shell ===== */
 .kopf{gap:12px;padding:0 16px;background:var(--panel)}
 .kopf::after{height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 30%,transparent) 35%,transparent 75%);opacity:.6}
@@ -37,30 +65,10 @@
   box-shadow:0 18px 44px -34px color-mix(in srgb,var(--bg) 85%,transparent)}
 .lb-hinweis{border-radius:var(--radius-s);background:color-mix(in srgb,var(--panel) 90%,transparent);backdrop-filter:blur(12px)}
 .lb-dock, .lb-inspektor{background:var(--panel);border-left:1px solid var(--line)}
-.lb-legende{bottom:16px;left:16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
-.lb-legende .lg::before{width:16px}
-.lb-legende .lg-getrennt::before{background:var(--line-2)}
-
-/* ===== Geräte-Karten ===== */
-.ger-karte{rx:10px;fill:var(--panel);stroke:var(--line)}
-.ger.hover .ger-karte{fill:var(--panel-2);stroke:var(--line-2)}
-.ger.gewaehlt .ger-karte, .ger.zielt .ger-karte{stroke:var(--accent);stroke-width:1.6}
-.ger-name{letter-spacing:.1em}
-.ger-ip{font:500 var(--fs-1)/1 var(--mono);letter-spacing:.02em}
-
-/* ===== Kabel: Mantel, Seele, Stecker ===== */
-.kabel-huelle{fill:none;stroke:color-mix(in srgb,var(--ink) 16%,transparent);stroke-width:8;stroke-linecap:round}
-.kabel-linie{fill:none;stroke-width:3.2;stroke-linecap:round;transition:stroke-width var(--dauer) var(--ease-standard)}
-.kabel.k-unten .kabel-linie{stroke-dasharray:1 7;animation:kabel-fliessen var(--dauer-zaehler) linear infinite}
-.kabel.k-aus .kabel-linie{stroke-dasharray:2 8}
-.kabel-trunk-aussen{fill:none;stroke-width:6.4;stroke-linecap:round}
-.kabel-trunk-innen{fill:none;stroke-width:2.2;stroke-linecap:round}
-.kabel-stecker .stk-gehaeuse{fill:var(--panel-3);stroke:var(--kf,var(--accent));stroke-width:1.4}
-.kabel-stecker .stk-kontakt{fill:none;stroke:var(--kf,var(--accent));stroke-width:1;opacity:.55}
-.kabel-stecker .stk-clip{fill:var(--panel);stroke:none}
-.kabel:hover .kabel-linie{stroke-width:3.2}
-.kabel.gewaehlt .kabel-huelle{stroke:color-mix(in srgb,var(--accent) 18%,transparent)}
-@keyframes kabel-fliessen{to{stroke-dashoffset:-40}}
+/* ===== Lagebild 2.0 =====
+   Knoten, Kanten, Zonen, Legende und Minimap der Labor-Fläche stehen vollständig in
+   zz-lagebild.css; POLARIS bringt nur die Default-Tokens (oben im :root-Block) mit.
+   Die alten Karten-/Kabel-Regeln (168×112-Annahmen, .kabel-stecker) sind entfallen. */
 .hb-seite {max-width:1120px;margin:0 auto;padding:32px 24px;gap:16px;gap:16px;padding:32px 24px}
 .hb-kopf h2{font:800 var(--fs-8)/1.02 var(--display);letter-spacing:-.04em;max-width:16ch}
 .hb-kopf .hb-serie{font:600 var(--fs-1)/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
@@ -201,7 +209,7 @@
 .lb-auftrag .am-knoepfe{gap:8px}
 .lb-auftrag .am-lesen{height:44px;border-radius:var(--radius-s);border:1px solid var(--line);background:transparent;color:var(--muted)}
 .lb-auftrag .sp-abnahme{height:44px;border-radius:var(--radius-s);background:var(--accent);color:var(--accent-ink);border:0}
-.lb-leinwand{flex:1 1 auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden}
+.lb-leinwand{flex:1 1 auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--lage-flaeche,var(--panel));overflow:hidden}
 .lb-leinwand::before{left:20px;top:16px}
 .lb-leiste-oben{top:36px}
 
@@ -537,7 +545,7 @@ body{background-image:
 .hb-panel, .hb-hero, .lb-auftrag, .lb-leinwand, .in-panel, .kr-seite, .ansicht{
   box-shadow:inset 0 1px 0 color-mix(in srgb, var(--ink) 5%, transparent)}
 /* Editor-Fläche etwas heller als der Rahmen, damit Geräte und Kabel ruhiger liegen */
-.lb-leinwand{background-color:color-mix(in srgb, var(--panel) 72%, var(--panel-2))}
+.lb-leinwand{background-color:var(--lage-flaeche,color-mix(in srgb, var(--panel) 72%, var(--panel-2)))}
 
 
 /* ===== Farbe ins Dunkel: sehr leise Flächen-Tints, damit Bereiche unterscheidbar bleiben ===== */

@@ -93,6 +93,27 @@
   --ease-standard:cubic-bezier(.2,.7,.3,1);
   --ease-out:cubic-bezier(.16,.84,.44,1);
   --ease-pop:cubic-bezier(.3,1.6,.5,1);
+
+  /* ---- Lagebild 2.0: Materialsprache Pulsar (nur hier Literale) ---- */
+  --lage-flaeche:#070C17;
+  --lage-raster:rgba(59,225,255,.075);
+  --lage-knoten-bg:rgba(10,17,32,.88);
+  --lage-knoten-rand:rgba(126,224,255,.26);
+  --lage-knoten-schatten:drop-shadow(0 14px 26px rgba(0,0,0,.62));
+  --lage-name:#E8F2FB;
+  --lage-rolle:#A6BACD;
+  --lage-ip:#8FE9FF;
+  --lage-platte:rgba(59,225,255,.09);
+  --lage-platte-rand:rgba(59,225,255,.34);
+  --lage-kante:#66F5CE;
+  --lage-kante-huelle:rgba(5,8,16,.86);
+  --lage-chip-bg:rgba(10,17,32,.90);
+  --lage-chip-rand:rgba(59,225,255,.30);
+  --lage-chip-text:#D9FBFF;
+  --lage-mini-bg:rgba(5,8,16,.84);
+  --lage-mini-rand:rgba(126,224,255,.22);
+  --lage-radius:2px;
+  --lage-glow:0 0 0 1px rgba(59,225,255,.28), 0 20px 52px -30px rgba(59,225,255,.36);
 }
 
 /* ============================================================================
@@ -1053,13 +1074,16 @@ html[data-theme="pulsar"] .lb-auftrag .sp-einstieg-text{
 }
 
 /* ============================================================================
-   14 · Leinwand: Messfeld, Geräte, Kabel, Werkzeuge
+   14 · Lagebild 2.0: Messfeld mit Glasplatten und Neonkante
    ============================================================================ */
 
 html[data-theme="pulsar"] .lb-leinwand{
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius);
-  background:var(--panel);
+  background-color:var(--lage-flaeche);
+  background-image:
+    radial-gradient(64% 72% at 68% 20%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 72%),
+    radial-gradient(90% 80% at 8% 104%, color-mix(in srgb, var(--iris) 5%, transparent), transparent 66%);
 }
 
 html[data-theme="pulsar"] .lb-leinwand::before{
@@ -1084,18 +1108,19 @@ html[data-theme="pulsar"] .lb-leinwand::after{
 }
 
 html[data-theme="pulsar"] .lb-svg{
-  background-color:color-mix(in srgb, var(--bg) 86%, var(--panel));
+  background-color:transparent;
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(to right, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px),
-    radial-gradient(70% 80% at 68% 22%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 70%);
-  background-size:var(--raster) var(--raster), var(--raster) var(--raster), calc(var(--raster) * 4) calc(var(--raster) * 4), calc(var(--raster) * 4) calc(var(--raster) * 4), auto;
+    linear-gradient(to right, color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 60%, transparent) 1px, transparent 1px);
+  background-size:calc(var(--raster) * 4) calc(var(--raster) * 4);
+}
+
+html[data-theme="pulsar"] .lb-raster-punkt{
+  fill:var(--lage-raster);
 }
 
 html[data-theme="pulsar"] .lb-raster{
-  opacity:0;
+  opacity:.9;
 }
 
 html[data-theme="pulsar"] .lb-leiste-oben{
@@ -1170,126 +1195,264 @@ html[data-theme="pulsar"] .lb-hinweis{
   font-size:var(--fs-2);
 }
 
-html[data-theme="pulsar"] .lb-legende{
+/* ---- Legende: HUD-Streifen mit drei echten Linienmustern ---- */
+
+html[data-theme="pulsar"] .labor .lb-legende{
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
-  background:var(--glas);
+  background:var(--lage-mini-bg);
   color:var(--faint);
-  font-family:var(--mono);
+  font:600 var(--fs-1)/1 var(--mono);
   letter-spacing:.14em;
+  text-transform:uppercase;
+  gap:16px;
+  box-shadow:none;
+  -webkit-backdrop-filter:blur(14px) saturate(130%);
+  backdrop-filter:blur(14px) saturate(130%);
 }
 
-html[data-theme="pulsar"] .lb-legende .lg-verbunden::before{
-  background:var(--mint);
+html[data-theme="pulsar"] .labor .lb-legende .lg::before{
+  width:20px;
+  height:2px;
+  border-radius:999px;
+  background:var(--lage-kante);
+  border:0;
 }
 
-html[data-theme="pulsar"] .lb-legende .lg-getrennt::before{
-  background:var(--line-2);
+html[data-theme="pulsar"] .labor .lb-legende .lg-getrennt::before{
+  background:repeating-linear-gradient(90deg, var(--bad) 0 5px, transparent 5px 9px);
 }
 
-html[data-theme="pulsar"] .lb-legende .lg-kein::before{
-  border-top:1px dashed var(--amber);
+html[data-theme="pulsar"] .labor .lb-legende .lg-kein::before{
+  height:1px;
+  background:repeating-linear-gradient(90deg, var(--warn) 0 1px, transparent 1px 6px);
 }
 
-html[data-theme="pulsar"] .ger-karte{
-  fill:color-mix(in srgb, var(--panel) 82%, var(--bg));
-  stroke:var(--line-2);
+/* ---- Knoten: Glasplatte, Glow nur bei Auswahl/Handlung ---- */
+
+html[data-theme="pulsar"] .labor .ger-karte{
+  fill:var(--lage-knoten-bg);
+  stroke:var(--lage-knoten-rand);
+  stroke-width:1;
+  rx:var(--lage-radius);
+  filter:var(--lage-knoten-schatten);
+  transition:fill var(--dauer) var(--ease-standard), stroke var(--dauer) var(--ease-standard), filter var(--dauer) var(--ease-standard);
+}
+
+html[data-theme="pulsar"] .labor .ger-auswahl{
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:none;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="pulsar"] .labor .ger.hover .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 80%, var(--accent));
+  stroke:color-mix(in srgb, var(--accent) 45%, var(--lage-knoten-rand));
+}
+
+html[data-theme="pulsar"] .labor .ger.gewaehlt .ger-karte,
+html[data-theme="pulsar"] .labor .ger.zielt .ger-karte{
+  fill:color-mix(in srgb, var(--accent) 10%, var(--lage-knoten-bg));
+  stroke:var(--accent);
+  stroke-width:1.4;
+  filter:drop-shadow(0 0 0 1px var(--accent)) drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 44%, transparent)) var(--lage-knoten-schatten);
+}
+
+html[data-theme="pulsar"] .labor .ger.gewaehlt .ger-auswahl,
+html[data-theme="pulsar"] .labor .ger.zielt .ger-auswahl{
+  opacity:.6;
+}
+
+html[data-theme="pulsar"] .labor .ger.ohne-ip .ger-karte{
+  stroke:var(--bad);
+  stroke-dasharray:4 4;
+}
+
+html[data-theme="pulsar"] .labor .ger.aus .ger-karte{
+  fill:color-mix(in srgb, var(--lage-knoten-bg) 68%, var(--bg));
+  stroke:color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+html[data-theme="pulsar"] .labor .ger.aus .ger-name{
+  fill:var(--faint);
+}
+
+html[data-theme="pulsar"] .labor .ger.aus .ger-bild{
+  opacity:.4;
+}
+
+html[data-theme="pulsar"] .labor .ger .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 14%, var(--lage-platte));
+  stroke:var(--lage-platte-rand);
   stroke-width:1;
 }
 
-html[data-theme="pulsar"] .ger.hover .ger-karte{
-  fill:var(--panel-2);
-  stroke:color-mix(in srgb, var(--accent) 45%, var(--line-2));
-}
-
-html[data-theme="pulsar"] .ger.gewaehlt .ger-karte,
-html[data-theme="pulsar"] .ger.zielt .ger-karte{
-  fill:color-mix(in srgb, var(--accent) 8%, var(--panel));
+html[data-theme="pulsar"] .labor .ger.hover .gb-kachel{
   stroke:var(--accent);
-  stroke-width:1.6;
 }
 
-html[data-theme="pulsar"] .ger-name{
-  fill:var(--ink);
-  font-family:var(--mono);
-  letter-spacing:.12em;
+html[data-theme="pulsar"] .labor .ger.gewaehlt .gb-kachel,
+html[data-theme="pulsar"] .labor .ger.zielt .gb-kachel{
+  fill:color-mix(in srgb, var(--g, var(--accent)) 20%, var(--lage-platte));
+  stroke:var(--accent);
+}
+
+html[data-theme="pulsar"] .labor .ger-name{
+  font:600 var(--fs-2)/1 var(--mono);
+  letter-spacing:.04em;
   text-transform:uppercase;
+  fill:var(--lage-name);
 }
 
-html[data-theme="pulsar"] .ger-ip{
-  fill:var(--muted);
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .ger-rolle{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  fill:var(--lage-rolle);
 }
 
-html[data-theme="pulsar"] .ger-ip.schwach{
-  fill:var(--faint);
+html[data-theme="pulsar"] .labor .ger-ip{
+  font:500 var(--fs-1)/1 var(--mono);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;
+  fill:var(--lage-ip);
 }
 
-html[data-theme="pulsar"] .ger.aus .ger-name{
-  fill:var(--faint);
+html[data-theme="pulsar"] .labor .ger-mehr{
+  fill:var(--lage-rolle);
+  font-weight:500;
 }
 
-html[data-theme="pulsar"] .kabel-huelle{
-  stroke:color-mix(in srgb, var(--ink) 12%, transparent);
+/* ---- Kanten: Neon-Mint mit leiser Glow-Kante, Koralle bei Störung ---- */
+
+html[data-theme="pulsar"] .labor .kabel{
+  --kf:var(--lage-kante);
 }
 
-html[data-theme="pulsar"] .kabel-stecker .stk-gehaeuse{
-  fill:var(--panel-3);
-  stroke:var(--kf, var(--accent));
+html[data-theme="pulsar"] .labor .kabel.k-unten{
+  --kf:var(--bad);
 }
 
-html[data-theme="pulsar"] .kabel-stecker .stk-clip{
-  fill:var(--panel);
+html[data-theme="pulsar"] .labor .kabel.k-aus{
+  --kf:var(--warn);
 }
 
-html[data-theme="pulsar"] .kabel-port{
-  fill:var(--muted);
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .kabel.vlan-trunk{
+  --kf:var(--ink);
 }
 
-html[data-theme="pulsar"] .wk-mini{
-  border:var(--hud-linie) solid var(--line);
+html[data-theme="pulsar"] .labor .kabel-linie{
+  filter:drop-shadow(0 0 2px color-mix(in srgb, var(--lage-kante) 28%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .kabel.k-unten .kabel-linie{
+  filter:drop-shadow(0 0 2px color-mix(in srgb, var(--bad) 30%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .kabel.k-aus .kabel-linie{
+  filter:none;
+}
+
+html[data-theme="pulsar"] .labor .kabel-huelle{
+  stroke:var(--lage-kante-huelle);
+}
+
+html[data-theme="pulsar"] .labor .kabel:hover .kabel-linie,
+html[data-theme="pulsar"] .labor .kabel.gewaehlt .kabel-linie{
+  stroke:var(--accent);
+  filter:drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 42%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .kabel-port{
+  fill:var(--lage-rolle);
+  letter-spacing:.06em;
+}
+
+/* ---- Zonen: Neon-Kontur, Chip als HUD-Element ---- */
+
+html[data-theme="pulsar"] .labor .zone-label rect{
+  fill:var(--lage-chip-bg);
+  stroke:var(--lage-chip-rand);
+  stroke-width:1;
+  rx:var(--radius-xs);
+}
+
+html[data-theme="pulsar"] .labor .zone-label{
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 18%, transparent));
+}
+
+html[data-theme="pulsar"] .labor .zone-text{
+  font:600 var(--fs-1)/1 var(--mono);
+  letter-spacing:.10em;
+  fill:var(--lage-chip-text);
+}
+
+html[data-theme="pulsar"] .labor .zone-gw{
+  font:500 var(--fs-1)/1 var(--mono);
+  letter-spacing:.06em;
+  fill:var(--lage-rolle);
+}
+
+html[data-theme="pulsar"] .labor .zone-punkt{
+  stroke:var(--lage-chip-bg);
+  stroke-width:1;
+}
+
+/* ---- Minimap: Glasdisplay mit Sichtrahmen ---- */
+
+html[data-theme="pulsar"] .labor .wk-mini{
+  border:var(--hud-linie) solid var(--lage-mini-rand);
   border-radius:var(--radius-xs);
-  background:var(--glas);
+  background:var(--lage-mini-bg);
   -webkit-backdrop-filter:blur(14px) saturate(130%);
   backdrop-filter:blur(14px) saturate(130%);
   box-shadow:0 20px 50px -36px color-mix(in srgb, var(--bg) 94%, transparent);
 }
 
-html[data-theme="pulsar"] .wk-mini-titel{
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .wk-mini-titel{
+  font:600 var(--fs-1)/1 var(--mono);
   letter-spacing:.16em;
+  text-transform:uppercase;
   color:var(--faint);
 }
 
-html[data-theme="pulsar"] .wk-mini-svg{
+html[data-theme="pulsar"] .labor .wk-mini-svg{
   border:var(--hud-linie) solid var(--line);
   border-radius:var(--radius-xs);
   background:color-mix(in srgb, var(--bg) 72%, var(--panel));
 }
 
-html[data-theme="pulsar"] .wk-mini-kabel-linie{
-  stroke:color-mix(in srgb, var(--accent) 34%, transparent);
+html[data-theme="pulsar"] .labor .wk-mini-kabel-linie{
+  stroke:color-mix(in srgb, var(--lage-kante) 45%, transparent);
 }
 
-html[data-theme="pulsar"] .wk-mini-punkt{
-  fill:var(--muted);
+html[data-theme="pulsar"] .labor .wk-mini-punkt{
+  fill:var(--lage-rolle);
   stroke:var(--bg);
 }
 
-html[data-theme="pulsar"] .wk-mini-punkt.an{
+html[data-theme="pulsar"] .labor .wk-mini-punkt.an{
   fill:var(--accent);
+  stroke:var(--bg);
 }
 
-html[data-theme="pulsar"] .wk-mini-knopf{
-  border-radius:var(--radius-xs);
+html[data-theme="pulsar"] .labor .wk-mini-rahmen{
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:1;
+  stroke-dasharray:4 3;
+}
+
+html[data-theme="pulsar"] .labor .wk-mini-knopf{
   border:var(--hud-linie) solid var(--line);
+  border-radius:var(--radius-xs);
   background:var(--panel-2);
   color:var(--muted);
 }
 
-html[data-theme="pulsar"] .wk-mini-zoomtext{
-  font-family:var(--mono);
+html[data-theme="pulsar"] .labor .wk-mini-zoomtext{
+  font:600 var(--fs-1)/1 var(--mono);
   color:var(--faint);
 }
 

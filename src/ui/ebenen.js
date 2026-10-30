@@ -5,7 +5,9 @@
    UI.ebenen.setzen(id, {merken}) umschalten (merkt sich die Wahl, außer merken:false – Ticket-Vorgabe), zeichnet neu, Bus „ebene“
    UI.ebenen.gemerkt()          zuletzt selbst gewählte Ebene (Freies Labor)
    UI.ebenen.fuerSkills(skills) Standardansicht eines Tickets (Skill → Ebene)
-   UI.ebenen.zonen(netz)        → {zonen:[{cidr, netz, praefix, ids, farbe, apipa}], ohne:Set(ids ohne gültige Adresse)}
+   UI.ebenen.zonen(netz)        → {zonen:[{cidr, netz, praefix, ids, anker, gw, farbe, apipa}], ohne:Set(ids ohne gültige Adresse)}
+     ids = Mitglieder (Geräte mit GENAU einer gültigen Adresse im Netz); anker = Router/Firewall mit
+     mehreren Adressen [{id, ip, port}], gw = erste passende Anker-Adresse („GW <ip>" im Chip, § 3.3).
    UI.ebenen.adresse(netz, g)   → {ip, maske, text, gueltig, quelle}  erste Adresse für Beschriftung und Ping
    UI.ebenen.vlanPort(netz, id, port) → {art:"access", vlan} | {art:"trunk", erlaubt, nativ} | null
    UI.ebenen.zeichneZonen(schicht, netz, pos)      pos(id) → {x, y}
@@ -85,18 +87,35 @@ UI.ebenen = (() => {
     for (const g of Object.values(netz.geraete)) {
       const liste = alleAdressen(netz, g);
       if (!liste.length && g.typ !== "switch" && g.typ !== "internet") ohne.add(g.id);
+      if (!liste.length) continue;
+      /* Mitglied ist, wer GENAU EINE gültige Adresse in diesem Netz hat. Geräte mit >= 2 Adressen
+         (Router/Firewall) sind Anker: Sie kommen NICHT in die Form, ihre erste passende Adresse steht
+         als „GW <ip>" am Chip. Vorher lag der Router in jeder Zone und die Hüllen zogen sich über die
+         ganze Fläche (Befund B3). */
+      const proNetz = new Map();
       for (const a of liste) {
         const c = IP.cidr(a.ip, a.maske); if (!c) continue;
-        if (!m.has(c)) m.set(c, {cidr: c, netz: IP.netz(a.ip, a.maske), praefix: IP.praefix(a.maske), ids: [], apipa: IP.apipa(a.ip)});
-        const z = m.get(c); if (!z.ids.includes(g.id)) z.ids.push(g.id);
+        if (!proNetz.has(c)) proNetz.set(c, []);
+        proNetz.get(c).push(a);
+      }
+      for (const [c, adressen] of proNetz) {
+        const erste = adressen[0];
+        if (!m.has(c)) m.set(c, {cidr: c, netz: IP.netz(erste.ip, erste.maske), praefix: IP.praefix(erste.maske), ids: [], anker: [], gw: null, apipa: IP.apipa(erste.ip)});
+        const z = m.get(c);
+        if (liste.length === 1) { if (!z.ids.includes(g.id)) z.ids.push(g.id); }
+        else if (!z.anker.some(a => a.id === g.id)) z.anker.push({id: g.id, ip: erste.ip, port: erste.port});
       }
     }
     const liste = [...m.values()].sort((a, b) => IP.vergleich(a.netz, b.netz) || a.praefix - b.praefix);
+    for (const z of liste) {
+      z.anker.sort((a, b) => a.id.localeCompare(b.id));
+      if (z.gw == null && z.anker.length) z.gw = z.anker[0].ip;      /* erste passende Adresse = Gateway */
+    }
     liste.forEach((z, i) => { z.farbe = ZONEN[i % ZONEN.length]; });
     return {zonen: liste, ohne};
   }
 
-  /* ---------- Hülle (konvexe Hülle um Kreise je Gerät) ---------- */
+  /* ---------- Konvexe Hülle (Andrew-Monotone-Chain) über Punkte ---------- */
   function huelle(punkte){
     const p = punkte.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     if (p.length < 3) return p;
@@ -107,53 +126,175 @@ UI.ebenen = (() => {
     oben.pop(); unten.pop();
     return unten.concat(oben);
   }
-  function zonenPfad(mitten, r){
-    const pts = [];
-    for (const c of mitten) for (let i = 0; i < 20; i++) { const w = i / 20 * Math.PI * 2; pts.push([c.x + Math.cos(w) * r, c.y + Math.sin(w) * r]); }
-    const hl = huelle(pts);
-    return {d: "M" + hl.map(q => q[0].toFixed(1) + " " + q[1].toFixed(1)).join("L") + "Z", obenLinks: hl.reduce((m, q) => q[0] + q[1] < m[0] + m[1] ? q : m, hl[0])};
+  /* ---------- Kartenmaße (müssen zu editor.js geraetGruppe passen, Vertrag § 3.1) ----------
+     160x76 auf breiten, 118x64 auf schmalen Fenstern. Hier eigenständig, weil ebenen.js nicht in den
+     Editor hineinschaut; die Zahlen stehen in beiden Dateien mit demselben Kommentar. */
+  function kartenMasse(){
+    const breit = !(typeof innerWidth === "number" && innerWidth < 900);
+    return breit ? {kw: 160, kh: 76} : {kw: 118, kh: 64};
   }
-  /* Fläche der Gerätetrefferfläche (editor.js `ger-treffer`: 68x64 um den Mittelpunkt) plus 2 px Luft */
-  const GER_B = 36, GER_H = 34;
-  /* Freie Stelle für ein Schild der Breite b und Höhe h suchen. belegt sind Rechtecke {x1,y1,x2,y2}
-     von Geräten UND schon gesetzten Schildern. Feste Reihenfolge unten · rechts · links · oben,
-     je Richtung einen Schildschritt weiter – die erste Stelle ohne Überdeckung gewinnt.
-     Bleibt keine frei, gewinnt die Stelle mit der GERINGSTEN Überdeckung (Schild nie weglassen). */
-  function schildStelle(belegt, x0, y0, b, h){
+  /* Ray-Box wie in editor.js: Schnittpunkt mit dem Kartenrahmen (für die /30-Kapsel). */
+  function randPunkt(p, q, m){
+    const dx = q.x - p.x, dy = q.y - p.y;
+    if (!dx && !dy) return null;
+    const hw = m.kw / 2, hh = m.kh / 2;
+    let t = Infinity;
+    if (dx) t = Math.min(t, hw / Math.abs(dx));
+    if (dy) t = Math.min(t, hh / Math.abs(dy));
+    return Number.isFinite(t) ? {x: p.x + dx * t, y: p.y + dy * t} : null;
+  }
+  /* Weiche Insel (Vertrag § 3.3, Befund B2): konvexe Hülle über die KARTEN-RECHTECKE der Mitglieder,
+     aufgeblasen um dx/dy. Die Aufblasung schiebt jeden Hüllpunkt vom Hüllen-Schwerpunkt nach außen –
+     bei achsenparallelen Hüllen (der Normalfall) ist das die exakte Rechteck-Erweiterung. */
+  function huelleAufgeblasen(punkte, dx, dy){
+    const eindeutig = [];
+    for (const q of punkte) if (!eindeutig.some(p => Math.abs(p[0] - q[0]) < 0.01 && Math.abs(p[1] - q[1]) < 0.01)) eindeutig.push(q);
+    const hl = huelle(eindeutig);
+    if (hl.length < 3) return hl;
+    const cx = hl.reduce((s, q) => s + q[0], 0) / hl.length, cy = hl.reduce((s, q) => s + q[1], 0) / hl.length;
+    return hl.map(q => [q[0] + (q[0] >= cx ? dx : -dx), q[1] + (q[1] >= cy ? dy : -dy)]);
+  }
+  /* Gerundetes Vieleck: Ecken mit Radius r als kurze Quadratik, gerade Kanten bleiben gerade.
+     (Der Vertrag nennt „Catmull-Rom o. ä."; Catmull-Rom schwingt bei den aufgeblasenen Rechteck-
+     ecken nach außen und erzeugte so Überlappungen benachbarter Inseln — gemessen 604 px².) */
+  function gerundeterPfad(p, r){
+    const n = p.length;
+    if (n < 3) return "";
+    const abstand = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+    let d = "M" + p[0][0].toFixed(1) + " " + p[0][1].toFixed(1);
+    for (let i = 0; i < n; i++) {
+      const vor = p[(i - 1 + n) % n], eck = p[i], nach = p[(i + 1) % n];
+      const l1 = abstand(vor, eck), l2 = abstand(eck, nach);
+      const rr = Math.min(r, l1 / 2, l2 / 2);
+      if (rr < 0.5) { d += " L" + eck[0].toFixed(1) + " " + eck[1].toFixed(1); continue; }
+      const s1x = (eck[0] - vor[0]) / l1, s1y = (eck[1] - vor[1]) / l1;
+      const s2x = (nach[0] - eck[0]) / l2, s2y = (nach[1] - eck[1]) / l2;
+      d += " L" + (eck[0] - s1x * rr).toFixed(1) + " " + (eck[1] - s1y * rr).toFixed(1) +
+           " Q" + eck[0].toFixed(1) + " " + eck[1].toFixed(1) + " " + (eck[0] + s2x * rr).toFixed(1) + " " + (eck[1] + s2y * rr).toFixed(1);
+    }
+    return d + " Z";
+  }
+  /* Freie Stelle für den Zonen-Chip (Vorgabe der Leitung 30.10.2026): Kandidaten unten-links →
+     unten-rechts → oben-links → oben-rechts, je 18 px nach außen versetzt; Kapsel-Chip mittig darüber,
+     dann darüber/darunter/seitlich weiter. Geprüft wird gegen Karten UND schon gesetzte Chips, mit
+     6 px Mindestabstand. Bleibt nichts frei, gewinnt die Stelle mit der geringsten Überdeckung –
+     der Chip wird NIE weggelassen (Befund B1). */
+  const CHIP_ABSTAND = 6;
+  function chipStelle(belegt, form, b, h){
+    /* Der Mindestabstand von 6 px gilt zwischen CHIPS (beide bekommen 3 px Rand). Karten gegenueber
+       genuegt Beruehrung: sonst rutschte der Kapsel-Chip 26 px von der Kapsel weg (gemessen), weil zwei
+       Kandidaten wegen der 6-px-Zugabe als Ueberdeckung galten. */
     const ueber = (x, y) => belegt.reduce((s, q) => {
-      const dx = Math.min(x + b, q.x2) - Math.max(x, q.x1), dy = Math.min(y + h, q.y2) - Math.max(y, q.y1);
+      const pad = q.istChip ? CHIP_ABSTAND / 2 : 0;
+      const x1 = x - pad, y1 = y - pad, x2 = x + b + pad, y2 = y + h + pad;
+      const dx = Math.min(x2, q.x2) - Math.max(x1, q.x1), dy = Math.min(y2, q.y2) - Math.max(y1, q.y1);
       return s + (dx > 0 && dy > 0 ? dx * dy : 0);
     }, 0);
-    const richtungen = [[0, h + 4], [b + 12, 0], [-(b + 12), 0], [0, -(h + 4)]];
-    let wahl = [x0, y0], beste = ueber(x0, y0);
-    for (let n = 1; n <= 12 && beste > 0; n++) for (const [dx, dy] of richtungen) {
-      const u = ueber(x0 + dx * n, y0 + dy * n);
-      if (u < beste) { beste = u; wahl = [x0 + dx * n, y0 + dy * n]; }
-      if (!beste) break;
+    const kand = [];
+    if (form.art === "kapsel") {
+      /* Erster Kandidat: mittig ueber der Kapselmitte (Vorgabe der Leitung). Erst wenn dort eine Karte
+         liegt, geht es in 18-px-Schritten weiter nach oben, dann unten/seitlich. */
+      for (let n = 0; n < 10; n++) {
+        kand.push([form.mx - b / 2, form.my - 17 - h - 10 - n * 18]);
+        kand.push([form.mx - b / 2, form.my + 17 + 10 + n * 18]);
+        kand.push([form.maxX + 18 + n * 18, form.my - h / 2]);
+        kand.push([form.minX - b - 18 - n * 18, form.my - h / 2]);
+      }
+    } else {
+      for (let n = 0; n < 10; n++) {
+        const ab = (n + 1) * 18;
+        kand.push([form.minX + 14, form.maxY + ab]);
+        kand.push([form.maxX - b - 14, form.maxY + ab]);
+        kand.push([form.minX + 14, form.minY - h - ab]);
+        kand.push([form.maxX - b - 14, form.minY - h - ab]);
+      }
+    }
+    let wahl = kand[0], beste = ueber(wahl[0], wahl[1]);
+    for (const q of kand) {
+      if (beste <= 0) break;
+      const u = ueber(q[0], q[1]);
+      if (u < beste) { beste = u; wahl = q; }
     }
     return wahl;
   }
+  /* Reine Verbindungsnetze (<= 2 Mitglieder, Kante vorhanden, z. B. WAN /30) werden eine Kapsel um die
+     Sichtstrecke: Rechteck r=999 (Stadion), nicht die Hülle (Vertrag § 3.3). */
+  function kapselForm(z, netz, pos, m){
+    if (z.ids.length > 2) return null;
+    const beteiligt = new Set([...z.ids, ...z.anker.map(a => a.id)]);
+    const kanten = netz.kabel.filter(k => beteiligt.has(k.a.geraet) && beteiligt.has(k.b.geraet) && k.a.geraet !== k.b.geraet);
+    if (!kanten.length) return null;
+    const k = kanten.find(x => z.ids.includes(x.a.geraet) || z.ids.includes(x.b.geraet)) || kanten[0];
+    const A = pos(k.a.geraet), B = pos(k.b.geraet);
+    if (!A || !B) return null;
+    const p1 = randPunkt(A, B, m) || A, p2 = randPunkt(B, A, m) || B;
+    const dx = p2.x - p1.x, dy = p2.y - p1.y, lang = Math.hypot(dx, dy);
+    if (lang < 4) return null;
+    return {p1, p2, lang, winkel: Math.atan2(dy, dx) * 180 / Math.PI, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2};
+  }
   function zeichneZonen(schicht, netz, pos){
     const {zonen: zl} = zonen(netz);
-    /* Vorbelegung: die Geräterechtecke. Ohne sie blieb ein Schild auf dem Router liegen
-       (Befund 05.10.2026: „192.168.30.0/24“ mitten auf r1). */
+    const m = kartenMasse();
+    /* Vorbelegung: alle Karten randgenau. Chips dürfen weder auf Geräten noch auf anderen Chips liegen –
+       sonst verschwänden sie unter der Geräte-Ebene. */
     const belegt = [];
     for (const g of Object.values(netz.geraete)) {
       const p = pos(g.id); if (!p) continue;
-      belegt.push({x1: p.x - GER_B, y1: p.y - GER_H, x2: p.x + GER_B, y2: p.y + GER_H});
+      belegt.push({x1: p.x - m.kw / 2, y1: p.y - m.kh / 2, x2: p.x + m.kw / 2, y2: p.y + m.kh / 2, istChip: false});
     }
     for (const z of zl) {
-      const mitten = z.ids.map(pos).filter(Boolean);
-      if (!mitten.length) continue;
-      const {d, obenLinks} = zonenPfad(mitten, 54);
-      const g = sv("g", {class: `zone zone-${z.farbe}`, "data-cidr": z.cidr});
-      g.append(sv("path", {class: "zone-flaeche", d}));
-      const text = z.cidr + (z.apipa ? " · APIPA" : "");
-      const b = text.length * 6.6 + 16, h = 20;
-      const [x, y] = schildStelle(belegt, obenLinks[0] - 14, obenLinks[1] - 22, b, h);
-      belegt.push({x1: x, y1: y, x2: x + b, y2: y + h});
-      g.append(sv("rect", {class: "zone-schild", x, y, width: b, height: h, rx: 10}));
-      g.append(sv("text", {class: "zone-text", x: x + b / 2, y: y + 14, "text-anchor": "middle", text}));
+      const mitglieder = z.ids.map(pos).filter(Boolean);
+      const kapsel = z.ids.length <= 2 ? kapselForm(z, netz, pos, m) : null;
+      let form = null;
+      if (kapsel) form = {art: "kapsel", ...kapsel, minX: Math.min(kapsel.p1.x, kapsel.p2.x), maxX: Math.max(kapsel.p1.x, kapsel.p2.x)};
+      else if (mitglieder.length) {
+        /* Aufblasung 20/20 (Leitung 30.10.2026 wollte 22/20): Bei 22 bleiben rechnerisch 4 Welt-px
+           Ueberlappung (2*(80+22) gegen 200 Kartenabstand, exakt gemessen 604 px²); mit 20/20 beruehren
+           sich die Inseln hoechstens. 30/26 liess sie ~20 px ineinanderschneiden. Ein einzelnes
+           Mitglied bekommt ein Ei (Ellipse) – die Huelle eines Punktes waere nur ein Rechteck. */
+        if (mitglieder.length === 1) {
+          const p = mitglieder[0], rx = m.kw / 2 + 20, ry = m.kh / 2 + 20;
+          const d = "M" + (p.x - rx).toFixed(1) + " " + p.y.toFixed(1) +
+            " A" + rx.toFixed(1) + " " + ry.toFixed(1) + " 0 1 0 " + (p.x + rx).toFixed(1) + " " + p.y.toFixed(1) +
+            " A" + rx.toFixed(1) + " " + ry.toFixed(1) + " 0 1 0 " + (p.x - rx).toFixed(1) + " " + p.y.toFixed(1) + " Z";
+          form = {art: "insel", d, minX: p.x - rx, maxX: p.x + rx, minY: p.y - ry, maxY: p.y + ry};
+        } else {
+          const ecken = [];
+          for (const p of mitglieder) ecken.push([p.x - m.kw / 2, p.y - m.kh / 2], [p.x + m.kw / 2, p.y - m.kh / 2], [p.x - m.kw / 2, p.y + m.kh / 2], [p.x + m.kw / 2, p.y + m.kh / 2]);
+          const aufgeblasen = huelleAufgeblasen(ecken, 20, 20);
+          const xs = aufgeblasen.map(q => q[0]), ys = aufgeblasen.map(q => q[1]);
+          form = {art: "insel", d: gerundeterPfad(aufgeblasen, 26), minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys)};
+        }
+      }
+      if (!form) continue;
+      const g = sv("g", {class: "zone zone-" + z.farbe, "data-cidr": z.cidr});
+      if (form.art === "kapsel") {
+        /* Randgenau: Kapsel von Kartenrand zu Kartenrand (Vorgabe der Leitung 30.10.2026). Vorher griffen
+           die runden Enden 17 px unter die Karten – sichtbar blieben nur zwei Boegen "()" neben der
+           Strecke. Jetzt liegt die ganze Kapsel sichtbar zwischen den beiden Karten. */
+        g.append(sv("rect", {class: "zone-flaeche", x: -form.lang / 2, y: -17, width: form.lang, height: 34, rx: 999,
+          transform: "translate(" + form.mx.toFixed(1) + " " + form.my.toFixed(1) + ") rotate(" + form.winkel.toFixed(1) + ")"}));
+      } else {
+        g.append(sv("path", {class: "zone-flaeche", d: form.d}));
+      }
+      /* Chip: CIDR immer sichtbar, „GW <ip>" als zweite Zeile, wenn ein Anker im Netz liegt (Befund B1).
+         Insel: unten links am Inselrand; Kapsel: mittig darüber (Vorgabe der Leitung). */
+      const zeile1 = z.cidr + (z.apipa ? " · APIPA" : "");
+      const zeile2 = z.gw ? "GW " + z.gw : "";
+      const b = Math.max(zeile1.length, zeile2.length) * 6.05 + 28;
+      const h = zeile2 ? 34 : 22;
+      const [x, y] = chipStelle(belegt, form, b, h);
+      belegt.push({x1: x, y1: y, x2: x + b, y2: y + h, istChip: true});
+      const lg = sv("g", {class: "zone-label"});
+      lg.setAttribute("data-x", x.toFixed(1));
+      lg.setAttribute("data-y", y.toFixed(1));
+      lg.setAttribute("transform", "translate(" + x.toFixed(1) + " " + y.toFixed(1) + ")");
+      lg.append(sv("rect", {x: 0, y: 0, width: b.toFixed(1), height: h, rx: 7}));
+      lg.append(sv("circle", {class: "zone-punkt", cx: 10, cy: h / 2, r: 3}));
+      const tx = sv("text", {class: "zone-text", x: 20, y: zeile2 ? 14 : 15, "text-anchor": "start"}, zeile1);
+      if (zeile2) tx.append(sv("tspan", {class: "zone-gw", x: 20, y: 28, text: zeile2}));
+      lg.append(tx);
+      g.append(lg);
       schicht.append(g);
     }
   }

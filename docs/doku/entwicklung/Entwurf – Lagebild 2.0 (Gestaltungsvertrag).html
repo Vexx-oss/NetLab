@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lagebild 2.0 — Gestaltungs- und Umsetzungsvertrag (Arbeitsstand, 30.10.2026) · Netzwerk-Labor</title>
+<meta name="description" content="Reichweite: Labor-Fläche (.lb-leinwand / .lb-svg) inkl.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Lagebild 2.0 — Gestaltungs- und Umsetzungsvertrag (Arbeitsstand, 30.10.2026)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#0-auftrag-des-nutzers-wortlich">0 · Auftrag des Nutzers (wörtlich)</a></li>
+<li><a href="#1-befunde-am-30-10-2026-gemessen-belege-in-nachweise-1-2-topo">1 · Befunde (am 30.10.2026 gemessen, Belege in Nachweise/1.2-Topo/)</a></li>
+<li><a href="#2-gestaltungsziel">2 · Gestaltungsziel</a></li>
+<li><a href="#3-technischer-vertrag-verbindlich-fur-code-und-css">3 · Technischer Vertrag (verbindlich für Code und CSS)</a></li>
+<li style="margin-left:16px"><a href="#3-1-knoten-src-ui-editor-js-geraetgruppe">3.1 Knoten (src/ui/editor.js: geraetGruppe)</a></li>
+<li style="margin-left:16px"><a href="#3-2-kanten-kabelgruppe">3.2 Kanten (kabelGruppe)</a></li>
+<li style="margin-left:16px"><a href="#3-3-zonen-src-ui-ebenen-js-zonen-zeichnezonen">3.3 Zonen (src/ui/ebenen.js: zonen / zeichneZonen)</a></li>
+<li style="margin-left:16px"><a href="#3-4-zoom-und-lesbarkeit-ansichtsetzen">3.4 Zoom und Lesbarkeit (ansichtSetzen)</a></li>
+<li style="margin-left:16px"><a href="#3-5-legende-und-minimap">3.5 Legende und Minimap</a></li>
+<li style="margin-left:16px"><a href="#3-6-theme-tokens-neu-default-in-zz-polaris-css-root-je-theme-uberschrieben">3.6 Theme-Tokens (neu; Default in zz-polaris.css :root, je Theme überschrieben)</a></li>
+<li><a href="#4-materialsprache-je-theme-vorgabe-der-designer-darf-verfeinern">4 · Materialsprache je Theme (Vorgabe; der Designer darf verfeinern)</a></li>
+<li><a href="#5-pruf-gates-jede-abgabe">5 · Prüf-Gates (jede Abgabe)</a></li>
+<li><a href="#6-bericht-an-die-leitung-per-send-message">6 · Bericht (an die Leitung per send_message)</a></li>
+<li><a href="#7-fallen-aus-dem-testbestand-am-30-10-2026-gelesen-verbindlich">7 · Fallen aus dem Testbestand (am 30.10.2026 gelesen, verbindlich)</a></li>
+</ul>
+</nav><h1 id="lagebild-2-0-gestaltungs-und-umsetzungsvertrag-arbeitsstand-30-10-2026">Lagebild 2.0 — Gestaltungs- und Umsetzungsvertrag (Arbeitsstand, 30.10.2026)</h1>
+<blockquote>
+<p>Zweck: verbindliche Zwischenfassung für die Sitzung „Lab-Fläche schön und richtig". Wird bei der Abnahme als Abschnitt in docs/Architektur.md übernommen (Projektregel „Vertrag zuerst"). Gilt für alle Teammitglieder; wer abweichen will, fragt die Leitung.</p>
+</blockquote>
+<h2 id="0-auftrag-des-nutzers-wortlich">0 · Auftrag des Nutzers (wörtlich)</h2>
+<blockquote>
+<p>„nutze ein team um die Lab funktion zu optimieren. Es ist hässloch blockig und die daten werden fehlerhaft dargestellt. Überlege dir eine schöne alternative passend zu jedem Theme welche professionell und von profis designed aussieht"</p>
+</blockquote>
+<p>Reichweite: Labor-Fläche (.lb-leinwand / .lb-svg) inkl. Knoten, Kanten, Zonen, Legende und Minimap — in allen fünf Themes (Nordlicht, Messing, Papier, Pulsar, Keramik) und im POLARIS-Standard. Nicht im Auftrag: Hub-Panel „Lagebild" (hb-lage), Interaktionslogik, Inspektor, Dock, Simulation, Datenformate, Speicherung.</p>
+<h2 id="1-befunde-am-30-10-2026-gemessen-belege-in-nachweise-1-2-topo">1 · Befunde (am 30.10.2026 gemessen, Belege in Nachweise/1.2-Topo/)</h2>
+<p>Belege: Nachweise/1.2-Topo/lagebild-vorher-salon.png und -praxis.png (1736x964, Edge headless über python tools/topo-foto.py), Code in src/ui/editor.js (zeichnen / kabelGruppe / geraetGruppe), src/ui/ebenen.js (adresse / zonen / zeichneZonen), src/stil/editor.css Zeile 34, src/stil/zz-polaris.css Zeile 45-63, Theme-Bilder Nachweise/themes/galerie/*-labor.png.</p>
+<div class="dk-tabelle"><table><thead><tr><th>#</th><th>Befund</th><th>Beleg</th></tr></thead><tbody><tr><td>B1</td><td>Zonen-Beschriftung nie sichtbar: Regel .lb-s-zonen .zone-schild, .lb-s-zonen .zone-text {display:none} — die Subnetz-CIDR wird gezeichnet, aber immer ausgeblendet. In der Ebene „IP-Netze" sieht man farbige Flächen ohne Bedeutung.</td><td>editor.css:34</td></tr><tr><td>B2</td><td>Zonenform blockig: konvexe Hülle um Gerätemittelpunkte + Radius 54 → harte Vieleckkanten; bei mehreren Subnetzen überlappen die Hüllen zu einer großen unlesbaren Fläche (Praxis: 3 LAN + WAN).</td><td>ebenen.js:99-159, Bild praxis</td></tr><tr><td>B3</td><td>Router in jeder Zone: alleAdressen liefert alle Interfaces; der Router steckt in drei LAN-Zonen und der WAN-Zone → Hüllen ziehen sich über die ganze Fläche.</td><td>ebenen.js:71-97</td></tr><tr><td>B4</td><td>Portname + Linkstatus unsichtbar: Statussymbole (.ps) und Portnamen (.kabel-port) werden 28-78 px von der Gerätemitte gezeichnet — die 168x112-Karte (Ebene geraete über kabel) liegt darüber. Sichtbar bleibt nur ein „Gekritzel" auf kurzen Strecken.</td><td>editor.js:414-497</td></tr><tr><td>B5</td><td>Kabel enden im Nichts: Pfad Gerätemitte→Gerätemitte, unter der Karte versteckt; Steckerplastik (.kabel-stecker) schwimmt im Freiraum.</td><td>editor.js:436-514, Bilder</td></tr><tr><td>B6</td><td>Textüberlauf: „192.168.10.1/24 +2" läuft über die Kartenkante (kein Messen, kein Kürzen); „DHCP – noch keine Adresse" ist breiter als die Karte.</td><td>editor.js:530-566, Bilder</td></tr><tr><td>B7</td><td>Leere zweite Zeile: Switch ohne IP zeigt unter dem Namen nichts; „PC1 / keine IP" wirkt kaputt (kursiv, blass) statt erklärt.</td><td>Bilder</td></tr><tr><td>B8</td><td>Legende lügt: sie verspricht VERBUNDEN/GETRENNT/KEIN LINK, aber GETRENNT/KEIN LINK sind optisch nicht auffindbar (Statussymbole verdeckt, s. B4).</td><td>editor.js:103-106, Bilder</td></tr><tr><td>B9</td><td>Karten sind blockig: 168x112-Rahmen mit viel Leerraum; Icon links oben, zwei Textzeilen — Wireframe, kein technisches Lagebild.</td><td>Bilder, zz-polaris.css:45-50</td></tr><tr><td>B10</td><td>Minimap ohne Aussage: „ÜBERSICHT" zeigt Punkte/Linien ohne Rahmen; Sichtrahmen unsichtbar, solange die Ansicht alles zeigt.</td><td>werkstatt.js:174-252, Bilder</td></tr></tbody></table></div>
+<h2 id="2-gestaltungsziel">2 · Gestaltungsziel</h2>
+<p>Ein technisches Lagebild auf Netzplan-Niveau (Draw.io / Lucidchart / NetBox):</p>
+<ol><li>Knoten sind Beschriftungsträger, nicht Karten: Icon-Platte (Typfarbe), Name, Rolle, Adresse. Rahmen nur als Haarlinie, Auswahl als Akzentring, kein Leerraum-Kasten.</li><li>Kanten sind Verbindungen: Anfang und Ende an der Knotenkante (nicht im Zentrum), orthogonal mit 6-px-Rundungen, an beiden Enden ein Port-LED-Punkt; Portnamen nur bei Platz (Hover/Auswahl/Zoom &gt;= 0,9).</li><li>Zonen sind Flächen mit Namen: weiche gerundete Inseln statt Vielecke, 1-px-Randlinie gestrichelt, CIDR immer sichtbar im Chip an der Insel. Router/Firewalls sind Anker, keine Zonenmitglieder. Reine Verbindungsnetze (/30) als schmale Kapsel auf der Strecke.</li><li>Zustand ruhig kodiert: Link oben durchgezogen, Link unten gestrichelt (Koralle), Port aus gepunktet; „ohne Link" am Knoten = gestrichelter Koralle-Rahmen, nicht „kaputt".</li><li>Schrift bleibt lesbar: Beschriftungen werden mit dem Zoom gegenskaliert (konstante Bildschirmgröße) statt ausgeblendet. Bei kleinem Zoom fällt zuerst die Rolle weg, dann die Adresse; Name und Zonen-CIDR bleiben immer.</li><li>Jedes Theme erzählt dasselbe Lagebild in seiner Materialsprache (§ 4); Geometrie und Informationshierarchie sind identisch.</li></ol>
+<h2 id="3-technischer-vertrag-verbindlich-fur-code-und-css">3 · Technischer Vertrag (verbindlich für Code und CSS)</h2>
+<h3 id="3-1-knoten-src-ui-editor-js-geraetgruppe">3.1 Knoten (src/ui/editor.js: geraetGruppe)</h3>
+<p>Weltmaße: breit (Fenster &gt;= 900 px) KW=140, KH=76; schmal KW=110, KH=64; Mittelpunkt = Geräteposition. Markup (Klassen stabil halten, Tests/Klassenprüfer kennen sie):</p>
+<pre><code>&lt;g class="ger typ-router [aus] [gewaehlt] [ohne-ip] [zielt]" data-id="r1" transform="translate(x y)"&gt;
+  &lt;rect class="ger-treffer"/&gt;          Trefferfläche, unsichtbar, &gt;= 44x44 px bei Einpasszoom
+  &lt;rect class="ger-auswahl"/&gt;          Auswahlring (CSS blendet standardmäßig aus)
+  &lt;rect class="ger-karte"/&gt;            Haarlinien-Rahmen, rx 12 (schmal 10)
+  &lt;g class="ger-bild"&gt;…&lt;/g&gt;            UI.geraetebild, Platte 28x28 links, Glyph ~0.5
+  &lt;g class="ger-text"&gt;                 wird gegenskaliert (3.4)
+    &lt;text class="ger-name"&gt;R-SALON&lt;/text&gt;
+    &lt;text class="ger-rolle"&gt;Router · 2 Netze&lt;/text&gt;
+    &lt;text class="ger-ip"&gt;192.168.20.1/24 &lt;tspan class="ger-mehr"&gt;+1&lt;/tspan&gt;&lt;/text&gt;
+  &lt;/g&gt;
+  &lt;g class="badge …"&gt;…&lt;/g&gt;             bestehende Badges (Warnung/aus/ungespeichert)
+&lt;/g&gt;</code></pre>
+<p>Regeln:</p>
+<ul><li>Texte linksbündig ab x = -KW/2 + 48; Zeilen: Name y=-6, Rolle y=11, Adresse y=28. Icon-Platte 28x28 bei x = -KW/2+10 bis -KW/2+38, vertikal mittig.</li><li>.ger-rolle: kurze Rolle aus UI.geraeteArt(typ, skin).titel plus Zusatz, z. B. „Router · 2 Netze", „Switch · VLAN 10,20,30", „PC · DHCP", „Drucker · Dienst 9100", „Internet · Provider", „Switch · L2". Nie leer.</li><li>.ger-ip: erste gültige Adresse; bei mehreren Adressen „+N" als eigener gedämpfter Zusatz (tspan.ger-mehr), gemessen und INNERHALB der Karte gekürzt, nie über den Rahmen. Ohne Adresse kein .ger-ip-Element; stattdessen Rolle „keine Adresse" / „DHCP – keine Adresse".</li><li>„PC ohne IP" ist kein Fehlerbild: .ohne-ip bekommt gestrichelten Koralle-Rahmen und Rolle „kein Link" (ohne Kabel) bzw. „keine Adresse".</li><li>ger-treffer deckt die ganze Karte (tools/rauch.py prüft elementFromPoint).</li></ul>
+<h3 id="3-2-kanten-kabelgruppe">3.2 Kanten (kabelGruppe)</h3>
+<ul><li>Endpunkte: Schnittpunkt der Gerade Mitte A → Mitte B mit dem Kartenrechteck (Ray-Box). Dort Port-LED (circle.port-led, r=2,6) exakt auf der Rahmenlinie.</li><li>Pfad orthogonal mit 6-px-Radius (M … H … V …), bei gerader Strecke gerade; Z.versatz (Mehrfachkabel) weiter berücksichtigen.</li><li>.kabel-huelle (4 px, Flächenfarbe) bleibt als Trennstrich über Raster/Zonen.</li><li>.kabel-linie: 1,5 px (non-scaling), Statusklassen k-oben / k-unten / k-aus bleiben; k-unten gestrichelt 5 4, k-aus gepunktet 1 5; trunk = zwei parallele Haarlinien im Abstand 2,5 px statt dicker Doppellinie.</li><li>Stecker entfallen: .kabel-stecker nicht mehr erzeugen, CSS-Regeln entfernen.</li><li>Portnamen (.kabel-port): nur bei Zoom &gt;= 0,9 UND ohne Überlappen mit Karte/Kollegen (einfache Kollisionsliste), 12 px außerhalb des Rahmens, Anker je nach Richtung; bei Auswahl/Hover des Geräts oder Kabels immer, sofern Platz.</li><li>Kabel-Layer bleibt UNTER den Geräten; LED und Portname liegen in der Gruppe Z.s.ueber (über den Geräten), damit sie nie verdeckt werden.</li><li>Tooltip-Text bleibt vollständig (Geräte, Ports, Linkstatus, Grund, Trunk).</li></ul>
+<h3 id="3-3-zonen-src-ui-ebenen-js-zonen-zeichnezonen">3.3 Zonen (src/ui/ebenen.js: zonen / zeichneZonen)</h3>
+<ul><li>Mitglied einer Zone: Gerät mit genau EINER gültigen Adresse in diesem Netz. Geräte mit &gt;= 2 Adressen (Router/Firewall) sind Anker: nicht Teil der Form, aber im Zonen-Chip als „GW &lt;ip&gt;" geführt (erste passende Adresse).</li><li>Zonen mit &lt;= 2 Mitgliedern und mindestens einer Kante zwischen ihnen (z. B. WAN /30): Kapsel um die Strecke (Rechteck r=999, Breite 34) statt Hülle.</li><li>Sonst weiche Insel: konvexe Hülle der Mittelpunkte, um 70 Welt-Einheiten aufgeblasen, als geschlossener Catmull-Rom→Bézier-Pfad (keine harten Ecken). Füllung var(--zone-x), Rand 1 px gestrichelt 6 5 in var(--zone-x-linie), non-scaling.</li><li>Chip (.zone-label) am linken oberen Rand der Insel: rect (r 7, Füllung var(--panel), Rand var(--line)) + circle.zone-punkt (r 3, var(--zone-x-linie)) + text.zone-text „192.168.10.0/24" (mono, 11 px, var(--ink)); optionale zweite Zeile „GW 192.168.10.1" (tspan.zone-gw, 10,5 px, var(--muted)). Bei APIPA Zusatz „· APIPA".</li><li>Chips kollidieren nicht mit Geräten/Karten/Chips (Kollisionsliste wie schildStelle, größere Schritte, Reihenfolge unten→rechts→links→oben).</li><li>Chips werden NIE per CSS ausgeblendet (B1 beheben). Klassen zone, zone-flaeche, zone-label, zone-punkt, zone-text, zone-gw, zone-a … zone-e bleiben/kommen in CSS vor.</li></ul>
+<h3 id="3-4-zoom-und-lesbarkeit-ansichtsetzen">3.4 Zoom und Lesbarkeit (ansichtSetzen)</h3>
+<ul><li>k = Zoomfaktor (0,25 … 1,1 beim Einpassen). s = min(1,6; max(1; 1/k)).</li><li>Je Knoten: g.ger-text bekommt transform translate(0 yOff) scale(s) translate(0 -yOff) mit yOff = -KH/2 + 12 (Skalierung um den Textanker, linke obere Ecke bleibt stehen). Zonen-Chips analog um ihren Ankerpunkt.</li><li>JS setzt Klassen am svg: wenig-text (k &lt; 0,9) blendet .ger-rolle und .kabel-port aus; klein (k &lt; 0,6) zusätzlich .ger-ip und .ger-mehr; sehr-klein (k &lt; 0,4) zusätzlich .ger-name (Icons bleiben). .zone-label wird in KEINER Klasse ausgeblendet.</li></ul>
+<h3 id="3-5-legende-und-minimap">3.5 Legende und Minimap</h3>
+<ul><li>.lb-legende: drei Einträge — durchgezogene 2-px-Linie + VERBUNDEN, gestrichelt 5 4 + GETRENNT, gepunktet 1 5 + KEIN LINK; mono 10 px, Sperrsatz, Flächen-Pille mit var(--glas); Farben exakt wie die Kanten.</li><li>Minimap .wk-mini: Struktur/Klassen unverändert (Tests zählen .wk-mini-kabel-linie), nur Optik: Fläche var(--panel-2), Rand var(--line), Titel ÜBERSICHT in mono 10 px, Punkte r 2,2 (gewählt 3,2), Sichtrahmen gestrichelt var(--accent) 1,25 px, Zoom-Pille wie .lb-zoomtext.</li><li>Optional, wenn ohne Überlauf machbar: Zähler-Chip oben rechts auf der Fläche („6 Geräte · 5 verbunden · 1 ohne Link"), gleiche Optik wie Zonen-Chip, keine neue Interaktion.</li></ul>
+<h3 id="3-6-theme-tokens-neu-default-in-zz-polaris-css-root-je-theme-uberschrieben">3.6 Theme-Tokens (neu; Default in zz-polaris.css :root, je Theme überschrieben)</h3>
+<p>--lage-flaeche --lage-raster --lage-knoten-bg --lage-knoten-rand --lage-knoten-schatten --lage-name --lage-rolle --lage-ip --lage-platte --lage-platte-rand --lage-kante --lage-kante-huelle --lage-chip-bg --lage-chip-rand --lage-chip-text --lage-mini-bg --lage-mini-rand --lage-radius --lage-glow</p>
+<p>Basis-CSS nutzt IMMER Fallbacks: var(--lage-knoten-bg, var(--panel)) usw., damit ein Theme ohne Token nicht bricht. Neue Regeln außerhalb der Token-Blöcke nur mit var(--…)-Farben, Radien und Schriften (Themes-Vertrag, Ethos R1-R3).</p>
+<h2 id="4-materialsprache-je-theme-vorgabe-der-designer-darf-verfeinern">4 · Materialsprache je Theme (Vorgabe; der Designer darf verfeinern)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Theme</th><th>Fläche</th><th>Knoten</th><th>Kanten</th><th>Zonen</th><th>Schrift</th></tr></thead><tbody><tr><td>POLARIS (Standard)</td><td>bg + Punktraster</td><td>Haarlinien-Rahmen, Platte Typfarbe 12 %, Auswahlring</td><td>1,5 px, Mint/Koralle, ruhig</td><td>blasse Fläche + Chip</td><td>Mono, Sperrsatz</td></tr><tr><td>Nordlicht</td><td>Polarnacht-Schiefer, feines Raster</td><td>Eisplatte, 1-px-Kante, kaltes Oberlicht</td><td>feine Eishaarlinien, Aurora nur bei Aktion</td><td>Aurora-Schleier, Chip wie Koordinatenmarke</td><td>Mono, weiter Sperrsatz</td></tr><tr><td>Messing</td><td>Espresso-Graphit, warmes Raster</td><td>Messing-Plakette, Haarlinien-Doppelrahmen, Elfenbein-Name</td><td>Messing-Haarlinie, Patina bei Störung</td><td>Sepia-Wäsche, gestrichelter Kupferrand</td><td>Serif-Zahlen, Mono-Labels</td></tr><tr><td>Papier</td><td>warmes Papier, Punktraster</td><td>Tinten-Symbol, harter 2-px-Rahmen, Versatz-Schatten</td><td>Tintenstrich, Zinnober = Störung</td><td>Riso-Spot-Wäsche, Chip wie Notizzettel</td><td>Mono-Labels gegen Display</td></tr><tr><td>Pulsar</td><td>tiefes All, Sternenraster</td><td>Glasplatte mit Glow nur bei Auswahl</td><td>Neon-Mint/Cyan, leiser Glow</td><td>Neon-Kontur, Chip als HUD-Element</td><td>Mono, tabellarisch</td></tr><tr><td>Keramik</td><td>Kalkstein, weiches Raster</td><td>Steinplatte, große weiche Radien, matter Schatten</td><td>Salbei-Linie, Terrakotta = Störung</td><td>Mineral-Schleier, Chip wie Preisschild</td><td>humanistische Sans + Mono</td></tr></tbody></table></div>
+<h2 id="5-pruf-gates-jede-abgabe">5 · Prüf-Gates (jede Abgabe)</h2>
+<ol><li>python tools/klassen.py → 0 Klassen ohne CSS-Regel</li><li>python tools/ethos.py → GRUEN gegen tests/stil-stand.json</li><li>node tests/run.js ui- (betroffene Filter) → grün</li><li>Sichtprüfung: Screenshot 1440x900, Ebene „IP-Netze" mit Salon (zwei Zonen) und Praxis (drei Zonen), plus eine Störung (Gerät aus oder Port shutdown), immer per read_image selbst angesehen</li><li>Keine JS-Fehler im Browser (window.__nlFehler leer, Mechanik aus tools/starttest.py)</li></ol>
+<h2 id="6-bericht-an-die-leitung-per-send-message">6 · Bericht (an die Leitung per send_message)</h2>
+<p>Kurz und mit Messzahlen: Dateien + was geändert; Befehle + Ergebnis; was selbst am Bild geprüft wurde; was NICHT geprüft ist. Keine Behauptung ohne Messung.</p>
+<h2 id="7-fallen-aus-dem-testbestand-am-30-10-2026-gelesen-verbindlich">7 · Fallen aus dem Testbestand (am 30.10.2026 gelesen, verbindlich)</h2>
+<ol><li><strong>tests/ui-typografie.test.js liest die SVG-Textregeln aus src/stil/editor.css</strong> — nicht aus zz-lagebild.css. Die Regeln .pd-name, .lb-wz-taste, .lb-geraete-titel, .badge-aus text, .vlan-schild text, .karte-zeile, .gw-schild text, .band-text, .paket-text, .ger-name, .ger-ip, .kabel-port müssen dort stehen bleiben und eine Typo-Stufe var(--fs-1..6) nutzen (kein px). Neue SVG-Textklassen (.ger-rolle, .ger-mehr, .zone-text, .zone-gw, .port-led) ebenfalls dort anlegen, mit var(--fs-…). Außerhalb basis.css ist font-size/font in px verboten.</li><li><strong>tests/ui-editor-flaeche.test.js fährt den echten editor.js gegen einen DOM-Ersatz.</strong> Der Ersatz kennt KEIN getBBox(), KEIN getComputedTextLength(), KEIN getTotalLength(), KEIN getCTM() und KEIN innerHTML an SVG-Knoten. Textbreiten deterministisch schätzen (Zeichenzahl × Mono-Breite), Messungen an echten SVG-Knoten nur hinter typeof-Prüfung (z. B. if (el.getBBox)). Der Test greift auf UI.labor._ (Zustand), UI.labor.<em>f (Helfer), UI.labor.</em>.s.geraete, UI.labor.<em>.el.hinweis, UI.labor.</em>.netz zu — diese Zugänge nicht umbenennen. data-id bleibt am Geräte-&lt;g&gt;. Zeichnen darf nicht werfen, wenn UI.ebenen.zonen ersetzt wird (die Ausnahme muss weiterhin gefangen und als Hinweis auf der Fläche gezeigt werden, Zeile 272-279 des Tests).</li><li><strong>tests/ui-werkstatt.test.js</strong>: Minimap behält .wk-mini-punkt (Anzahl = Geräte), .wk-mini-kabel-linie (Anzahl = Kabel), .wk-mini-svg, .wk-mini-rahmen; Klick zentriert. minimapDaten bleibt reine Datenquelle (kein DOM).</li><li><strong>tools/rauch.py</strong>: elementFromPoint in der Mitte jedes sichtbaren Geräts muss das Gerät selbst treffen (ger-treffer deckt die Kartenmitte), keine leeren sichtbaren Flächen ab 24x12 px, kein waagerechter Überlauf.</li><li><strong>tools/klassen.py</strong>: jede in src/ui/*.js als class:-Wert oder classList-Eintrag verwendete Klasse (mit Bindestrich) braucht eine CSS-Regel in src/stil/*.css. Neue Klassen also immer beidseitig anlegen (JS + CSS), sonst rot.</li><li><strong>tools/ethos.py</strong>: Farben/Radien/Schriftgrößen nur über Tokens; Schrift nur aus {11, 12.5, 13, 14, 15, 16, 20, 28, 34, 44} px bzw. var(--fs-1..6); Abstand {0,4,8,12,16,24,32}; Radius nur var(--radius-xs/-s/–), 999px, 50%; Schatten nur var(--schatten); Dauer 1/160/320ms; z-index nur 10..80. Werkzeug: python tools/ethos.py (GRÜN gegen tests/stil-stand.json).</li><li><strong>Kein Build durch Teammitglieder</strong> (bauen.py schreibt web/index.html und docs/doku). Die Leitung baut, macht die Bilder und schickt Befunde zurück.</li></ol>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>
