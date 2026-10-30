@@ -4,9 +4,9 @@
   "kennzahlen": {
     "dateien": 31,
     "zeilen": 3020,
-    "deklarationen": 7419,
-    "bloecke": 2144,
-    "selektoren": 2036
+    "deklarationen": 7418,
+    "bloecke": 2143,
+    "selektoren": 2035
   },
   "regeln": {
     "R1": 24,
@@ -15,7 +15,7 @@
     "R4": 167,
     "R5": 0,
     "R6": 3,
-    "R7": 1,
+    "R7": 0,
     "R8": 0,
     "R9": 60,
     "R10": 38,

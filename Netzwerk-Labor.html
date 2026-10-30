@@ -3177,7 +3177,6 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   .lb-auftrag .am-knoepfe{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
 }
 /* Knoten im Lagebild: INTERNET weiter rechts, damit R-SALON frei bleibt */
-.hb-knoten:nth-of-type(5){left:76% !important}
 
 
 /* Tablett: Band in zwei Zeilen, Minimap weicht (überdeckte Geräte) */
@@ -3227,7 +3226,6 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
   .lb-auftrag .am-ziele{display:inline-flex;grid-column:2;justify-self:start;padding:4px 8px}
 }
 
-.hb-knoten:nth-of-type(3){left:34% !important}
 
 </style>
 </head>
@@ -3236,7 +3234,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 <script>
 "use strict";
 const LABOR_VERSION = "2.3.0";
-const LABOR_BAU = "89159cfc";
+const LABOR_BAU = "7cba6706";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -29632,10 +29630,10 @@ UI.hub = (() => {
          <defs><linearGradient id="hblinie" x1="0" x2="1"><stop offset="0" stop-color="#7DF3C0"/><stop offset="1" stop-color="#9C8CFF"/></linearGradient>
          <radialGradient id="hbglut"><stop offset="0" stop-color="#7DF3C0" stop-opacity=".16"/><stop offset="1" stop-color="#7DF3C0" stop-opacity="0"/></radialGradient></defs>`; return el; })(),
       h("div", {class: "hb-knoten", style: {"left": "2%", "top": "46%"}}, h("span", {}, "▭"), h("b", {}, "PC-KASSE"), h("small", {}, "192.168.10.50")),
-      h("div", {class: "hb-knoten", style: {"left": "32%", "top": "46%"}}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
+      h("div", {class: "hb-knoten", style: {"left": "30%", "top": "46%"}}, h("span", {}, "⇄"), h("b", {}, "SW-SALON"), h("small", {}, "192.168.10.2")),
       h("div", {class: "hb-knoten", style: {"left": "44%", "top": "12%"}}, h("span", {}, "⌂"), h("b", {}, "R-SALON"), h("small", {}, "192.168.10.1")),
-      h("div", {class: "hb-knoten", style: {"left": "42%", "top": "68%"}}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
-      h("div", {class: "hb-knoten", style: {"left": "68%", "top": "8%"}}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
+      h("div", {class: "hb-knoten", style: {"left": "40%", "top": "68%"}}, h("span", {}, "▯"), h("b", {}, "PC-BÜRO"), h("small", {}, "192.168.10.12")),
+      h("div", {class: "hb-knoten", style: {"left": "72%", "top": "8%"}}, h("span", {}, "◎"), h("b", {}, "INTERNET"), h("small", {}, "203.0.113.57")),
       h("div", {class: "hb-legende"}, h("span", {}, "—— VERBUNDEN"), h("span", {}, "┄ KEIN LINK")));
 
     /* Signal */
