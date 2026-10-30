@@ -3,22 +3,22 @@
   "hinweis": "Eingefrorener Ist-Stand. ethos.py meldet ROT nur, wenn eine Zahl STEIGT. Verbesserungen gehören mit --neu hier hinein.",
   "kennzahlen": {
     "dateien": 31,
-    "zeilen": 2799,
-    "deklarationen": 6989,
-    "bloecke": 1996,
-    "selektoren": 1916
+    "zeilen": 2871,
+    "deklarationen": 7257,
+    "bloecke": 2059,
+    "selektoren": 1977
   },
   "regeln": {
-    "R1": 22,
-    "R2": 15,
+    "R1": 23,
+    "R2": 18,
     "R3": 4,
-    "R4": 138,
+    "R4": 162,
     "R5": 0,
-    "R6": 1,
+    "R6": 2,
     "R7": 0,
     "R8": 0,
-    "R9": 32,
-    "R10": 14,
+    "R9": 34,
+    "R10": 17,
     "R11": 0,
     "R12": 0
   }
