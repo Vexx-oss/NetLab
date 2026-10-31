@@ -99,9 +99,10 @@ Anhängen das überwiegende Ende der Datei übernimmt. Ein Editor, der beim Spei
   Trace-Format). Danach der Code.
 - **Selbst und nacheinander.** Keine Agentenschwärme: Ein Schwarm riss zweimal das Limit, und drei von vier
   Teammitgliedern brachen am 05.10.2026 mitten in der Arbeit ab, ohne etwas zu hinterlassen.
-  *Ausnahme 3.0-Session (26.10.2026, ausdrückliche Nutzerfreigabe):* Agenten-Schwarm erlaubt —
-  max. 5 Schreib-Owner, ein Schreiber je Datei, Staging + Integrator, keine halbfertigen Beiträge;
-  alle übrigen Verbote bleiben.
+  *Ausnahme 3.0-Session (26.10.2026, ausdrückliche Nutzerfreigabe; fortgeschrieben 31.10.2026):*
+  Agenten-Schwarm erlaubt — **10 Schreib-Owner mit disjunkten Globs**, ein Schreiber je Datei,
+  Staging + Integrator, keine halbfertigen Beiträge; alle übrigen Verbote bleiben. Die drei
+  datierten Ausnahmen **A1–A3** stehen unten in „Ausnahmen 3.0.0 (31.10.2026)".
 - **Nach jedem Commit den Stand nachziehen.** `docs/entwicklung/Design – Spielspaß 2.0.md` (neuer Abschnitt) und
   `docs/Architektur.md` (Stand-Tabelle) müssen den echten Zustand zeigen. Kein Commit ohne Stand.
 - **Tests statt Augenschein, wo es geht.** Nach jeder Änderung an `src/sim/` oder `src/modell/` zusätzlich
@@ -120,3 +121,22 @@ beides gegen die Messung. Historische CHANGELOG-Abschnitte bleiben unangetastet.
 - `tests/` – Tests (`sh tools/test.sh`), dazu die versionierte Simulations-Referenz `tests/sim-stand.json`
 - `tools/` – Bau-, Mess- und Prüfwerkzeuge
 - `Programm/` – gebaute Programme · `Nachweise/` – Bildschirmfotos und Messdateien (**beide nicht im Git**)
+
+## Ausnahmen 3.0.0 (31.10.2026, ausdrückliche Nutzerfreigabe)
+
+Diese drei Ausnahmen gelten **nur** für die Sitzung, die Fassung **3.0.0** baut (31.10.2026), und nur
+solange der Nutzer sie nicht zurückzieht. Sie stehen mit Datum hier, weil sie die Verbotsliste oben
+berühren; alles nicht Genannte bleibt unverändert verbindlich.
+
+- **A1 Write-Owner (31.10.2026).** Statt „max. 5 Schreib-Owner" gilt: **10 Write-Owner mit disjunkten
+  Globs** (kern/sim/cli/spiel/inhalt/ui/stil/tests/doku/bau), ein Schreiber je Datei; Staging und
+  Commits macht nur der Integrator. Kein Owner schreibt in einem fremden Glob.
+- **A2 Prüfkopie (31.10.2026).** Ausnahme von „keine Dateien außerhalb des Projektordners": Messfenster
+  dürfen eine **temporäre read-only Prüfkopie unter `%TEMP%\netlab-3.0-pruefkopie`** halten. Dort wird
+  nicht versioniert und nichts davon zurückkopiert.
+- **A3 Commit-Monopol (31.10.2026).** Commits macht nur der Integrator. Fremde Programm-Instanzen werden
+  **nie** beendet (Regel 1 gilt unverändert), sondern durch einen Prüfbau mit eigener App-Kennung ersetzt.
+
+Unverändert: Regel 1 (keine fremden Prozesse beenden), Regel 2 (kein `git push`) und Regel 4 (keine
+Installationen). Push, Tag und Release legt die Sitzung dem Nutzer **einzeln** vor; ohne Zustimmung
+bleibt alles lokal.

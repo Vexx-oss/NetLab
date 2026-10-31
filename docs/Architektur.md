@@ -261,7 +261,7 @@ Bus-Ereignisse: `netz-geaendert`, `ticket-neu`, `ticket-geloest`, `zustand-geaen
 
 | Punkt | Vertrag |
 |---|---|
-| Schlüssel | `labor` (Spielstand), `einst` (Einstellungen), `sandbox` (freies Labor), `labor-sicherung` (rollierende Zweitsicherung), **`klassenraum`** (Klassenraum-Sitzung, `fassung: 1` — Nachtrag 09.10.2026, § 12.2). Geschrieben wird der **ganze** Speicher als ein JSON unter dem einen Schlüssel `netzwerk-labor` — im Browser und in der Android-Fassung in `localStorage`, im Desktop-Programm über Tauri in `spielstand.json`. Neue Schlüssel brauchen **keine** Änderung an `kern/basis.js` — die Speicher-Map ist frei |
+| Schlüssel | `labor` (Spielstand), `einst` (Einstellungen), `sandbox` (freies Labor), `labor-sicherung` (rollierende Zweitsicherung), **`klassenraum`** (Klassenraum-Sitzungen, `fassung: 2` seit 3.0.0 — Nachtrag 09.10.2026, § 12.1). Geschrieben wird der **ganze** Speicher als ein JSON unter dem einen Schlüssel `netzwerk-labor` — im Browser und in der Android-Fassung in `localStorage`, im Desktop-Programm über Tauri in `spielstand.json`. Neue Schlüssel brauchen **keine** Änderung an `kern/basis.js` — die Speicher-Map ist frei |
 | Entprellung | **genau eine**: `SPEICHER.entprellung = 1500 ms` (`kern/basis.js`). `Spiel.speichern()` markiert nur „schmutzig"; geschrieben wird 1500 ms nach der **letzten** Änderung. `Spiel.AUTOSPEICHERN_MS = 0` — die frühere zweite Schicht (400 ms in `spiel/ticket.js`) ist entfallen |
 | Sofort schreiben | `store.sofort()`; im Spiel `Spiel.sofortSpeichern()` (Rückgabe immer erfüllt — ein Fehler ist bereits gemeldet). Aufrufer: Auftragsabschluss `spiel/abnahme.js` (bestanden **und** nicht bestanden), Ticket öffnen `spiel/ticket.js`, Käufe `spiel/wirtschaft.js` · `spiel/werkzeuge.js` · `spiel/playbooks.js`, Meilensteine `spiel/karriere.js` (Aufstieg, Fest gesehen), App in den Hintergrund `ui/start.js` (`pagehide`, `beforeunload`, `visibilitychange` → `hidden`) |
 | Kennzeichen | `store.stand()` → `{art:"schreibt"\|"gesichert"\|"fehler", fehler, zeit}`. Der Bus meldet jede echte Änderung als `speicher-stand`, ein Fehler zusätzlich als `speicher-fehler`. Die Kopfzeile zeigt daraus „… sichert / ✓ gesichert / ⚠ nicht gesichert" (`ui/app.js`, `role="status"`, kein Klickziel, keine Animation; unter 380 px Breite Kurzform) |
@@ -532,6 +532,178 @@ Spiel.VERTRAUEN_LOHN = {empfehlung:3, rabatt:4, rabattAnteil:0.2}
 st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stufe früher offen
 st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
 ```
+
+## 12 · Klassenraum (Lehrer/Schüler, Hobby-Ebene) — Vertrag
+
+*Stand 2.9.0, fortgeschrieben 31.10.2026 für 3.0.0.* Dieses Kapitel ersetzt den am 30.10.2026 mit
+Commit `9716b08` gelöschten Abschnitt § 12 und führt ihn auf den gemessenen Code-Stand fort. Quellen:
+`docs/entwicklung/Klassenraum/` A–D, historischer Stand `32cf209`, `src/spiel/klassenraum.js`,
+`src/spiel/klassenraum-codec.js`, `src/ui/klassenraum.js`, `src/spiel/abnahme.js`,
+`tests/klassenraum*.test.js`, `tests/ui-klassenraum*.test.js`.
+
+**Kern in drei Sätzen.** Die Lehrkraft sagt einen kurzen **Auftragscode** an; jedes Gerät baut daraus
+**denselben** Auftrag, weil Aufträge deterministisch aus einem Seed entstehen. Es gibt **keine
+Bewertung**: der Ergebnis-Code trägt Sterne, Fehlversuche und Dauer für den Lernstand des Einzelnen,
+keine Note, keine Rangfolge, keinen Vergleich. Ohne Konto, ohne Server, ohne Netz — Stufe A (Codec und
+Determinismus) und B (Oberfläche, Ampel, Export/Import) tragen den Unterricht vollständig; C (lokaler
+Server) und D (QR) sind **nicht gebaut** und bleiben 3.1 (§ 12.6/§ 12.7).
+
+| Gegenstand | Festlegung |
+|---|---|
+| Auftragscode | `NL-XXXX-XX` — 10 Zeichen, 30 Bit Nutzteil + 2 Prüfzeichen (mod 31 / mod 32), Alphabet ohne I, O, 0, 1 |
+| Ergebnis-Code | `E-XXXX-XXX` — 9 Zeichen, 25 Bit (Sitzung 5 · Platz 5 · halbe Sterne 4 · Fehlversuche 2 · Dauer 9) + 2 Prüfzeichen |
+| Hilfecode | `H-XXXX-XX` — 9 Zeichen, 20 Bit (Sitzung 5 · Platz 5 · erfüllte Ziele 5 · offene Ziele 5) + 2 Prüfzeichen (§ 12.5) |
+| Speicher | eigener Schlüssel **`klassenraum`** neben `labor`, `einst`, `sandbox`, `labor-sicherung`; `fassung: 2` seit 3.0.0 (§ 12.1) |
+| Öffnungsweg | `Spiel.klassenraum.ausCode(code)` → `Spiel.instanzErstellen({…, quelle:"klassenraum", ohneFlow:true})` → `inst.klassenraum = {sitzung, platz, code}` → `Spiel.oeffnen(iid)` |
+| Abnahme | `Spiel.klassenraum.abnehmen(inst)` (delegiert an `Spiel.abnahme`), Ergebnis-Code nur bei bestanden; die Instanz wird danach entfernt, Geld/Ruf/Karriere bleiben unberührt (`src/spiel/abnahme.js`) |
+| Bewertung | **keine** — ausdrücklich Nutzerentscheidung 09.10.2026; wer später bewerten will, ändert einen Vertrag, nicht eine Einstellung |
+
+### 12.1 Datenform — `store "klassenraum"`, `fassung: 2`
+
+Die Sitzung liegt **nicht** im Spielstand (`store "labor"`), sondern unter einem eigenen Schlüssel: ein
+Schulrechner braucht sie unabhängig vom Spieler-Fortschritt. Geschrieben wird entprellt (1500 ms,
+`src/kern/basis.js`); `erzeugen` und `ergebnisEintragen` rufen zusätzlich `store.sofort()`.
+
+```js
+/* store "klassenraum" — Wurzel. Ab 3.0.0: mehrere Sitzungen, eine aktive (KLR-01a). */
+Speicher = {
+  fassung: 2,                     // Schemaversion dieses Teils; 1 = Altstand (eine sitzung)
+  programm: "<LABOR_VERSION>",
+  platz: null,                    // eigener Platz dieses Geräts, 0..31, null = keiner
+  zuletzt: 1759706400000,         // ms, jetzt()
+  sitzungen: [Sitzung, …],        // alle Sitzungen dieses Geräts, Reihenfolge = Anlage
+  aktiv: 7,                       // id der aktiven Sitzung | null
+  letzte: null,                   // zuletzt gelesener Code/Ergebnis (Anzeige)
+  zaehler: 3                      // monoton, speist Sitzungskennung und Wunsch-Variante
+}
+/* Jede Sitzung hat genau diese 15 Felder: */
+Sitzung = {
+  id: 7,                          // Sitzungskennung 1..31 (5 Bit im Auftragscode)
+  titel: "Klassenraum-Auftrag",
+  art: "hand",                    // "hand" | "generiert"
+  ticketId: "salon-01",           // genau eines von ticketId | (skill + seed)
+  skill: null,                    // Fertigkeit aus DATEN.skills, wenn generiert
+  index: 0,                       // Index in TABELLE_AUFTRAEGE bzw. TABELLE_SKILLS
+  variante: 42,                   // 8 Bit; seed = variante + 1
+  seed: 43,                       // 1..256
+  eigene: true,                   // Kanonisierung: eigene Fassung ja/nein
+  schritte: 5,                    // Lösungsschritte aus der Kanonisierung (additives Feld)
+  code: "NL-BAAA-BB",             // gedruckter Auftragscode
+  dauerMin: 10,                   // geschätzte Dauer in Minuten
+  plaetze: 20,                    // Klassengröße, 0 = nicht eingestellt, sonst 1..31
+  erstellt: 1759706400000,        // ms, jetzt()
+  ergebnisse: {}                  // Abbildung platz → {platz, sterne, dauerS, versuche, code, zeit, quelle}
+}
+```
+
+**Migration `fassung: 1 → 2` (3.0.0, verbindlich).** Ein Altstand mit `sitzung: Sitzung | null` wird
+beim Lesen verlustfrei übernommen: `sitzungen = sitzung ? [sitzung] : []`, `aktiv = sitzung ? sitzung.id : null`;
+alle übrigen Felder bleiben. Ein fehlendes oder unbekanntes `fassung` wird wie 1 behandelt. Ein **zu
+neuer** Stand (`fassung > 2`) wird abgewiesen, nicht umgeschrieben.
+
+**Export/Import** als Datei: `{"format":"netzwerk-labor/klassenraum","fassung":2,"programm":…,"zeit":…,
+"sitzungen":[Sitzung,…],"aktiv":id}`. Der Import nimmt auch `fassung: 1` (`{…,"sitzung":…}`) an und
+migriert; unbekannte Felder bleiben erhalten (verlustfrei, `Object.assign`-Verhalten aus 2.9.0).
+Beide Richtungen **werfen nie** — fremdes/beschädigtes JSON ergibt `{fehler:"format", grund}`.
+
+### 12.2 API — `Spiel.klassenraum`
+
+**18 Namen (Stand 2.9.0, gemessen an der Rückgabe von `src/spiel/klassenraum.js:448-450`):**
+`erzeugen` · `ausCode` · `sitzung` · `ergebnisCode` · `ergebnisLesen` · `ergebnisEintragen` ·
+`hilfeCode` · `hilfeLesen` · `exportieren` · `importieren` · `netzkennwert` · `tauglicheFertigkeiten` ·
+`platz` · `platzSetzen` · `plaetze` · `plaetzeSetzen` · `abnehmen` · `tabellen`.
+
+| Aufruf | Rückgabe | Zusicherung |
+|---|---|---|
+| `erzeugen({ticketId?, skill?, seed?, dauerMin?, titel?, plaetze?, bestaetigen?})` | `sitzung` \| `{warnung, sitzung?}` | legt eine Sitzung an und schreibt sofort; fehlender Seed wird gezogen und steht im Code; hat die **aktive** Sitzung bereits Ergebnisse, wird sie **ohne `bestaetigen: true` nicht ersetzt** — Rückgabe `{warnung:"sitzung-hat-ergebnisse"}` (3.0.0) |
+| `ausCode(code)` | `{ticketId, seed, art, sitzung, index, variante, skill, eigene, schritte, …}` \| `{fehler, grund}` \| `null` | wirft nie; `null` nur bei leerer Eingabe; normalisiert Groß-/Kleinschreibung und Trennstriche |
+| `sitzung()` | aktive `Sitzung` \| `null` | liest nur `store "klassenraum"`, nie den Spielstand |
+| `sitzungen()` | `[{id, titel, art, code, erstellt, plaetze, ergebnisse, aktiv}]` | **neu 3.0.0 (KLR-01a):** Übersicht aller Sitzungen, Kopien, keine Innenreferenzen |
+| `sitzungWaehlen(id)` | `{ok, sitzung}` \| `{fehler:"sitzung", grund}` | **neu 3.0.0:** setzt `aktiv`; unbekannte id ist ein Fehler, kein stilles Ersetzen |
+| `ergebnisCode(inst, abnahme)` | `"E-…"` \| `{fehler, grund}` | trägt Sitzung, Platz, halbe Sterne, Fehlversuche, Dauer und Prüfsumme; nur bei bestandener Abnahme |
+| `ergebnisLesen(code)` | `{ok, sitzung, platz, sterne, dauerS, versuche, code}` \| `{fehler, grund}` | wirft nie; prüft Prüfsumme und Codewert |
+| `ergebnisEintragen(code)` | `{ok, neu, platz, sterne}` \| `{fehler, grund}` | **idempotent** (derselbe Code ändert nichts, `neu:false`); fremde Sitzung ist ein Fehler |
+| `hilfeCode(inst)` · `hilfeLesen(code)` | `"H-…"` \| `{fehler, grund}` · `{ok, sitzung, platz, schritt, offen, code}` | siehe § 12.5; wirft nie |
+| `exportieren()` · `importieren(text)` | JSON-String · `{ok, sitzungen, aktiv}` \| `{fehler, grund}` | verlustfrei, überstehen Neustart; 3.0.0: **alle** Sitzungen (§ 12.1) |
+| `netzkennwert(netz)` | 6 Zeichen \| `""` | siehe § 12.4; keine Ausnahme |
+| `tauglicheFertigkeiten()` | `[{skill, index, ersterSeed}]` | nur Fertigkeiten, für die hier wirklich ein Auftrag baubar ist |
+| `platz()` · `platzSetzen(z)` · `plaetze()` · `plaetzeSetzen(z)` | `0..31` · `{ok}` \| `{fehler:"wahl"}` | eigener Platz · Klassengröße der aktiven Sitzung (0 = nicht eingestellt) |
+| `abnehmen(inst)` | `{ok, klassenraum, bestanden, sterne, abnahme, lernen, def, inst, …}` | Spiel erhält kein Geld/keinen Ruf; `lernen` läuft über den normalen Lernmotor |
+| `tabellen()` | `{auftraege, skills, …}` | Prüffläche; eingefrorene Tabellen (§ 12.8) |
+
+**Öffnungsweg (verbindlich).** Ein neuer Auftrag entsteht **nur** über
+`Spiel.instanzErstellen({ticketId | gen:{skill, seed}, seed, quelle:"klassenraum", ohneFlow:true})` —
+vorher prüfen, denn der Aufruf wirft bei unbekanntem Ticket. `ohneFlow: true` ist Pflicht, sonst macht
+der lokale Flow-Regler denselben Code auf zwei Geräten verschieden. Eine Klassenraum-Instanz belegt
+**keinen** Postfach-Platz und ist im Postfach **unsichtbar** (Entscheidung E1).
+
+### 12.3 Fehlerformen
+
+Alle Fehler sind **Daten**, keine Ausnahmen: `{fehler:<Klasse>, grund:<Satz>}`. Verbindliche Klassen
+(Stand 2.9.0, gemessen im Code): `länge` · `zeichen` · `prüfziffer` · `auftrag` · `fassung` · `sitzung` ·
+`wahl` · `format` · `abnahme` · `bereich`. `null` **nur** aus `ausCode`/`ergebnisLesen`, wenn gar nichts
+eingegeben wurde. Der Satz ist Anzeigetext und gehört der Oberfläche; wörtlich vorgegeben ist nur
+„Prüfziffer stimmt nicht — hast du ein O statt 0 getippt?".
+
+### 12.4 Der Netzkennwert (Messform)
+
+Der Determinismus wird **gemessen, nicht behauptet**: `Spiel.klassenraum.netzkennwert(netz)` liefert
+**6 Zeichen** aus dem Alphabet, FNV-1a-32 über das **kanonische** Netz (`geraete` und `kabel` sortiert,
+`netz.zustand` bleibt draußen), höchstwertige 5 Bit zuerst. Gleicher Abdruck = derselbe Auftrag;
+ungleicher Abdruck = Alarm, dann ist der Seed nicht vollständig im Code gelandet. Geprüft in
+`tests/klassenraum-determinismus.test.js` (zwei getrennte Prozesse, zeichengleich).
+
+### 12.5 Hilfecode `H-XXXX-XX`
+
+Der Azubi kann der Lehrkraft sagen, **wo** er hängt, ohne Server, Konto oder Bewertung. Form: 9 Zeichen —
+`H` + Bindestrich + **4** Nutzzeichen + Bindestrich + **2** Prüfzeichen; dasselbe 32-Zeichen-Alphabet und
+dieselben Prüfzeichen wie oben. Nutzteil **20 Bit**: `sitzung` 5 (1..31) · `platz` 5 (0..31) ·
+`schritt` 5 (erfüllte Ziele) · `offen` 5 (offene Ziele). Ungültige Bitlage: `sitzung = 0` (erzeugt der
+Encoder nie). Die Lehrkraft tippt den Code in ihr **bestehendes** Feld „Ergebnis-Codes" (mehrere Codes
+passen hinein) — **kein neues Bedienelement**, R12 bleibt bei sechs sichtbaren Elementen (Leitungs­entscheidung O1).
+Der Hilfecode ist **kein** Bewertungssignal; er beschreibt nur Ziele, die schon erfüllt bzw. offen sind.
+
+### 12.6 Lokaler Server (Stufe C) — **3.1**, im Produkt nicht gebaut
+
+Ehrlicher Stand 2.9.0: `shell/src-tauri` enthält **keinen** Server, `src/` enthält **keinen** QR; der
+Schalter „Klassenraum-Server" in den Einstellungen hat deshalb **keine Wirkung** und wird in 3.0
+entweder entfernt oder als „nicht in dieser Fassung" umtextet (VIS-04). Die **Bauform** der Stufe C
+steht fest und ist belegt: C1 in der Desktop-`.exe` (Rust), C2 als eigenständiges Binary in
+`tools/klassenraum` (eigenes Cargo-Projekt, `cargo build --release`, `cargo test` 10/10,
+`pwsh -File tools\klassenraum-probe\C-http-probe.ps1` 20/20 — selbst gemessen am 31.10.2026 laut
+`docs/STAND.md`/AGENTS.md). Beide Endpunkte, **nur lokal**, keine Klarnamen, Standard **aus**:
+
+- `GET /liste?auftrag=<Auftragscode>` → `200` + `{"format":"klassenraum-liste","v":1,"sitzung":…,"anzahl":…,"sitzungen":[…],"ergebnisse":[…]}`
+- `POST /ergebnis` → `201` (neu) / `200` (idempotent) + `{"format":"klassenraum-ergebnis","v":1,"ok":…,"neu":…,"anzahl":…,"platz":…,"sitzung":…,"lagerVoll":…}`
+- Fehler → `400`/`409`/`413`/`415` + `{"format":"klassenraum-fehler","v":1,"fehler":…,"feld":…}`
+
+Der Einbau von C1 ist **nicht** 3.0-Bestandteil: er braucht eine gemessene 2-Rechner-Umgebung
+(KLR-06 → 3.1). Ohne Server bleibt die Klasse arbeitsfähig (Codes eintippen).
+
+### 12.7 QR-Code (Stufe D) — **3.1**, im Produkt nicht gebaut
+
+Inhalt wäre **genau** der Auftragscode — kein Link, keine Adresse, kein Konto, damit jeder handelsübliche
+Scanner funktioniert; die Desktop-Fassung würde das Bild in Rust erzeugen und als Data-URI an die
+Oberfläche reichen. In der Browser-Fassung bleibt Abtippen der Normalfall. Der Wiki-Text darf keinen
+gebauten QR behaupten (VIS-04); die UI folgt erst nach dem JS-Port (KLR-07 → 3.1).
+
+### 12.8 Grenzen (bewusst) und 3.0/3.1-Schnitt
+
+| Grenze | Festlegung | Wo belegt |
+|---|---|---|
+| Adressierbare Aufträge | **58** von 76 Handtickets — der Auftragscode hat 6 Bit (0..63); die 2.1-Tickets sind nicht klassenraum-adressierbar, der Formatwechsel kommt erst **3.1** mit Migrationsweg | `src/spiel/klassenraum.js` TABELLE_AUFTRAEGE, `docs/STAND.md` Ausnahme „Klassenraum-Codec" |
+| Fertigkeiten | 30 in `DATEN.skills`, davon 28 mit Injektor; `lab.ipv6`/`lab.wlan` stehen ehrlich auf `tauglich:false` (inhaltlich geübt, nicht paketweise simuliert) | TABELLE_SKILLS, § 17.1 |
+| Sitzungen (3.0.0) | mehrere Sitzungen je Gerät, **eine aktiv**; keine still ersetzte Sitzung mit Ergebnissen (KLR-01a/b); Sitzungskennung 1..31, Plätze 0..31 | dieser Abschnitt, § 12.1/§ 12.2 |
+| Kein Schutz gegen Abschreiben | wer den Code hat, hat den Auftrag — gewollt | — |
+| Keine Identität, keine Zeit-/Sperrlogik, keine Serverpflicht, kein QR im Browser, keine Auswertung über die Ampel hinaus | 2.x/3.0 | D § 8 |
+| 3.1 | C1-Server, QR-UI, Codec-Formatwechsel mit Migration, Diagnose bleibt anonym (§ KLR-05 in `docs/entwicklung/Konzept – 3.0.md`) | Konzept 3.0 §5 |
+
+**Abgrenzung zu älteren Dokumenten.** `docs/entwicklung/Klassenraum/` A–D bleiben Protokolle; wo sie sich
+widersprechen, gilt dieser Abschnitt (Leitungsentscheidungen L1–L7 und O1 vom 09.10.2026). Insbesondere:
+E1 (unsichtbar im Postfach), keine Bewertung, `plaetze` gehört zur Sitzung, R12 misst je Ansicht und wird
+für die Klassenraum-Ansichten nicht aufgeweicht.
+
+---
 
 ## 21 · Runde 3b — Audit-Umsetzung, Ambient und lebende Zonen (30.10.2026) — verbindlicher Vertrag
 
