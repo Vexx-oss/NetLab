@@ -60,8 +60,9 @@
 /* ---- Mitte: Auftrag, Fläche, Simulation ---- */
 .lb-mitte{display:flex; flex-direction:column; min-width:0; min-height:0}
 /* z-index:10 = unterste Sprosse der Leiter: über der Zeichenfläche, unter den Werkzeugleisten (20),
-   dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80). Trägt die Auftragsmappe (spiel.css, am-),
-   deren eigene Ebene (30) INNERHALB dieses Kontexts liegt — die Leisten darüber bleiben erreichbar. */
+   dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80). Trägt die Auftragsmappe (spiel.css, am-).
+   Solange die Mappe offen ist, hebt `.labor.mappe-an .lb-auftrag` diesen Bereich auf die Sprosse 30
+   und die Werkzeugleisten ruhen (Regel unten bei den Leisten) – kein zweiter Kopf über dem Blatt. */
 .lb-auftrag{position:relative; z-index:10; flex:0 0 auto; padding:8px 16px; border-bottom:1px solid var(--line); background:var(--panel)}
 .lb-auftrag-standard{display:flex; align-items:center; min-height:44px; padding:0 16px; font:700 var(--fs-4)/1 var(--display)}
 .auftrag-sandbox{display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 12px 8px 12px; background:linear-gradient(90deg, var(--accent-soft), transparent 55%)}
@@ -85,10 +86,19 @@
    vier Knöpfe der oberen Leiste auf `div.am-reiter` / `button.am-tab`, ein Klick auf
    „Ansicht“ öffnete nichts (`.menue` 0 → 0); nach „×“ derselbe Klick → Menü
    [307,171,220,237]. 20 ist die zweite Sprosse der benannten z-index-Leiter (tools/ethos.py, R6),
-   über der 10 des Auftrags und unter dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80) —
-   der Stapel bleibt also unverändert, nur die beiden Leisten kommen über die Mappe. */
+   über der 10 des Auftrags und unter dem Fach (30/40), Menü (50), Dialog (56) und Overlay (80).
+   Runde 5 (§ 2 A) löst den Konflikt anders als über den Stapel: solange die Mappe offen ist, ruhen
+   die Leisten (.mappe-an, Regel darunter), der Auftragsbereich steigt auf 30. */
 .lb-leiste-oben{position:absolute; z-index:20; top:10px; left:10px; right:10px; display:flex; align-items:flex-start; gap:8px; pointer-events:none; flex-wrap:wrap}
 .lb-leiste-unten{position:absolute; z-index:20; right:10px; bottom:10px; display:flex; gap:8px; pointer-events:none}
+/* Runde 5, § 2 A: Solange die Auftragsmappe offen ist (.mappe-an am .labor, gesetzt von UI.spiel in
+   spiel.js), ruht die Fläche – kein zweiter Kopf über dem Blatt. Werkzeugleiste und Flächentitel
+   (.lb-leinwand::before, z. B. „Lagebild") werden ausgeblendet statt von der Mappe überdeckt; sie
+   behalten ihren Platz, damit beim Schließen nichts springt. Der Auftragsbereich steigt dafür auf
+   die Sprosse 30 der z-index-Leiter, damit das Blatt auch über der Minimap (20) liegt. */
+/* Runde 5 (Leitung, Prüfer-1-Befund blockierend): der Dock liegt bei z-index 45 (zz-polaris.css:477).
+   Das Blatt steigt deshalb auf 50, sonst lägen X und Fußknopf bei 960/720 unter dem offenen Inspektor. */
+.labor.mappe-an .lb-auftrag{z-index:50}
 .lb-luecke{flex:1 1 auto}
 .lb-gruppe{display:flex; align-items:center; gap:0px; padding:4px; border-radius:var(--radius); background:var(--glas); border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); pointer-events:auto}
@@ -112,7 +122,8 @@
 /* Auch wenn die Fläche selbst schmal ist (z. B. breite Konsole im Inspektor): Hinweis weg statt schmaler Säule */
 @container (max-width:760px){ .lb-hinweis{display:none} }
 /* Fernwartung (E1): Fläche, Werkzeuge und Geräteleiste verdeckt */
-.labor.lb-fern .lb-svg, .labor.lb-fern .lb-leiste-oben, .labor.lb-fern .lb-leiste-unten, .labor.lb-fern .lb-geraete > *{visibility:hidden}
+.labor.lb-fern .lb-svg, .labor.lb-fern .lb-leiste-oben, .labor.lb-fern .lb-leiste-unten, .labor.lb-fern .lb-geraete > *,
+.labor.mappe-an .lb-leiste-oben, .labor.mappe-an .lb-leiste-unten, .labor.mappe-an .lb-leinwand::before{visibility:hidden}
 .lb-fern-schild{position:absolute; left:50%; top:47%; transform:translate(-50%, -50%); width:min(400px, calc(100% - 32px)); display:flex; flex-direction:column; gap:12px;
   padding:12px 16px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); color:var(--muted)}
 .lb-fern-kopf, .lb-fern-geraet{display:flex; align-items:center; gap:8px}
@@ -162,6 +173,10 @@
 .ger-ip{font:500 var(--fs-1)/1 var(--mono); fill:var(--lage-ip, var(--faint));
   paint-order:stroke; stroke:var(--lage-flaeche, var(--bg)); stroke-width:3px; stroke-linejoin:round}
 .ger-mehr{font:500 var(--fs-1)/1 var(--mono); fill:var(--faint)}
+/* Runde 5, § 2 D: ruhige Knoten-Beschriftung. Die drei Zeilen stehen in eigenen SVG-Texten –
+   den Abstand macht editor.js (Baselines 18/33/48 px, also 15 px Zeilenabstand); diese Regel hält
+   die Zusage line-height ≥ 1,15 auch in Themes, die keine eigene Label-Regel mitbringen. */
+.ger-text .ger-name, .ger-text .ger-rolle, .ger-text .ger-ip{line-height:1.15}
 /* Zonen-Chip (Lagebild 2.0 § 3.3): CIDR in Mono, Gateway-Zusatz leise. */
 .zone-text{font:600 var(--fs-1)/1 var(--mono); fill:var(--lage-chip-text, var(--ink)); paint-order:stroke; stroke:var(--lage-chip-bg, var(--panel)); stroke-width:3px; stroke-linejoin:round}
 .zone-gw{font:500 var(--fs-1)/1 var(--mono); fill:var(--muted)}

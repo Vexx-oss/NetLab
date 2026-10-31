@@ -42,33 +42,42 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-ziele.fertig, .sp-chip.niv-E, .sp-chip.wdh, .sp-chip.klingelt{background:var(--ok-soft); color:var(--ok)}
 .am-ziele.frisch, .sp-ziele li.frisch .sp-haken{animation:sp-hop var(--dauer-lang) var(--ease-pop)}   /* Treffer-Rückmeldung: der Haken hüpft — 320 ms statt 0,5 s (R5) */
 .am-knoepfe, .sp-auftrag-knoepfe{display:flex; gap:4px; flex:0 0 auto; margin-left:auto}
+/* Runde 5 (Leitung): Der OFFENE Zustand des Knopfs „Auftrag lesen" muss auch gegen die Theme-Regeln
+   sichtbar bleiben. Die Themen setzen .lb-auftrag .am-lesen (0,2,0) und laden NACH spiel.css; eine
+   gleich starke Regel hier verlöre. Deshalb diese eine Stufe spezifischer (.lb-auftrag … .an, 0,3,0) —
+   keine Theme-Datei wird angefasst. Befund aus Strang W1 (31.10.2026). */
+.lb-auftrag .am-lesen.an,
 .am-lesen.an{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
 .am-mehr{min-width:40px; padding:0 8px; font-size:var(--fs-5); letter-spacing:.05em}
 .lb-auftrag{container-type:inline-size}
 @container (max-width:700px){ .am-kunde{display:none} .am-lesen{font-size:0; gap:0; padding:0 11px} .am-lesen .sym{margin:0} }
 @container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .bn-marke{width:32px; height:32px; font-size:var(--fs-2)} }
-/* `--am-kopfraum` ist der Kopfraum unter der Werkzeugleiste der Fläche (`--leiste-h`, gemessen in
-   src/ui/editor.js). Ohne ihn liegt der Reiter „Brief/Ziele/Plan" exakt unter der schwebenden
-   Leiste (gemessen 09.10.2026: Mappen-Reiter y=120–164, Leiste y=121–169) – und durch deren
-   Lücken schien der Text durch („Tools überlappen Text", Rückmeldung des Nutzers). Die Mappe
-   bleibt dabei an der Auftragsleiste hängen; nur ihr Inhalt beginnt unter der Leiste.
-   Rechnung mit den gemessenen Zahlen: Leistenoberkante 10 px + Höhe `--leiste-h` + 8 px Luft
-   (der sichtbare Abstand – er steht auf der Abstandsskala) minus 5 px, die die Mappe schon unter
-   der Auftragsleiste sitzt = `--leiste-h` + 13 px. Die Rechnung steht als eigene Größe, weil
-   `padding` nach der Hausregel R4 nur Skalenwerte tragen darf; die 48 px sind der Rückfall für
-   den Augenblick vor dem ersten Messen. */
-.am-mappe{--am-kopfraum:calc(var(--leiste-h, 48px) + 13px);
-  position:absolute; top:100%; left:12px; z-index:30; width:min(560px, calc(100% - 24px)); max-height:min(70vh, 520px); display:flex; flex-direction:column;
-  padding-top:var(--am-kopfraum);
-  margin-top:4px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); border-top:4px solid var(--k, var(--accent)); box-shadow:var(--schatten, 0 16px 40px rgba(0,0,0,.4))}
+/* ---- Auftragsmappe als eigenes Blatt (Runde 5, § 2 A) ----
+   Die Mappe sitzt unter der Auftragsleiste über der Karte und hat einen EIGENEN Kopf. Solange sie
+   offen ist, setzt UI.spiel die Klasse .mappe-an am .labor; editor.css blendet dann Werkzeugleiste
+   und Flächentitel aus (der frühere Kopfraum-Hack --am-kopfraum entfällt – es gibt keinen zweiten
+   Kopf mehr, der um Platz bettelt). Die Höhe folgt dem Inhalt, höchstens min(70vh, 560px); darin
+   scrollt NUR der Inhalt, der Kopf und der Fuß stehen fest. */
+.am-mappe{position:absolute; top:100%; left:var(--am-links, 16px); z-index:30; width:min(560px, calc(100% - 32px)); max-height:var(--am-max, min(70vh, 560px)); display:flex; flex-direction:column; overflow:hidden;
+  margin-top:4px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); border-top:2px solid var(--k, var(--accent)); box-shadow:var(--schatten, 0 16px 40px rgba(0,0,0,.4))}
+.am-mappe:focus{outline:none}
+.am-mappe:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .am-mappe.rein{animation:am-rein var(--dauer) ease-out}
 @keyframes am-rein{from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:none}}
-.am-reiter{display:flex; align-items:center; gap:0px; padding:4px 8px 0 8px; border-bottom:1px solid var(--line)}
-.am-tab{border:0; background:none; color:var(--muted); font:700 var(--fs-3)/1 var(--body); padding:8px 12px 12px; border-bottom:2px solid transparent; border-radius:var(--radius-s) 0 0 0}
+/* Kopf: Kicker AUFTRAG · Kunde, Titel, Meta Ziele · Niveau – der eine Kopf des Blattes. */
+.am-kopf{display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); flex:0 0 auto}
+.am-kopf-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:4px; align-items:flex-start}
+.am-kicker{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin:0; color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.am-kopf-titel{margin:0; color:var(--ink); font:700 var(--fs-5)/1.15 var(--display); letter-spacing:-.01em; overflow-wrap:anywhere}
+.am-meta{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0; color:var(--muted); font:600 var(--fs-2)/1.2 var(--mono)}
+.am-trenner{color:var(--line-2)}
+.am-zu{flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted)}
+.am-reiter{display:flex; align-items:center; gap:0px; padding:4px 12px 0; border-bottom:1px solid var(--line); flex:0 0 auto}
+.am-tab{display:inline-flex; align-items:center; min-height:44px; padding:0 12px; border:0; border-bottom:2px solid transparent; border-radius:var(--radius-s) 0 0 0; background:none; color:var(--muted); font:700 var(--fs-3)/1 var(--body)}
 .am-tab:hover{color:var(--ink); background:var(--panel-2)}
 .am-tab.an{color:var(--accent); border-bottom-color:var(--accent)}
-.am-zu{margin-left:auto; display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted)}
-.am-inhalt{flex:1 1 auto; min-height:0; overflow:auto; padding:14px 18px 6px}
+/* Inhalt: die einzige scrollende Fläche der Mappe – mit unterem Rand, damit die letzte Zeile nie klebt. */
+.am-inhalt{flex:0 1 auto; min-height:0; overflow:auto; padding:16px; scroll-padding-bottom:8px}
 .am-brief{display:flex; flex-direction:column; gap:10px}
 .am-absender{display:flex; align-items:center; gap:8px; color:var(--muted); font-size:var(--fs-2)}
 .am-absender .bn-marke{width:32px; height:32px; font-size:var(--fs-2)}
@@ -77,15 +86,28 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-text p, .sp-brief-text p{margin:0}
 .am-symptom{margin:0px 0 0; padding:8px 8px; border-radius:var(--radius); background:var(--panel-2); font-size:var(--fs-3)}
 .am-symptom b, .sp-symptom b{color:var(--muted); font-weight:600}
-.am-ziele-liste{display:flex; flex-direction:column; gap:8px; padding-bottom:6px}
+/* Ziele-Reiter: die Liste folgt ihrem Inhalt (keine 320-px-Hülle, keine 515-px-Mappe bei EINEM Ziel). */
+.am-ziele-liste{display:flex; flex-direction:column; gap:8px; min-width:0; padding-bottom:8px}
+.am-ziele-liste .sp-ziele{flex:0 1 auto}
 .am-ziele-liste .sp-ziele li{font-size:var(--fs-3)}
+/* Runde 5 (Leitung, Prüfer-2-Befund A1): im Mappen-Reiter „Plan" steigen Umschalter,
+   Nächster-Schritt und „Neben das Labor heften" über die vorhandene 44-px-Regel unten mit. */
 .am-ziel-text{flex:1 1 auto; min-width:0}
 .am-antwort-zeile{display:flex; gap:4px; margin-top:4px; align-items:center}
 .am-antwort{flex:1 1 140px; max-width:220px; min-width:0; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3) var(--mono)}
 .am-antwort:focus{outline:2px solid var(--accent); outline-offset:1px}
 .am-terminal{flex:none; align-self:center; font-family:var(--mono)}
 .am-grund{display:block; margin-top:0px; color:var(--warn); font-size:var(--fs-2); font-weight:600}   /* Einstieg: warum das Ziel noch offen ist */
-.am-fuss{display:flex; justify-content:flex-end; gap:8px; padding:8px 12px 12px; border-top:1px solid var(--line)}
+/* Fuß: genau EINE Hauptaktion, höchstens eine ruhige Sekundäraktion (Runde 5, § 2 A). */
+.am-fuss{display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:12px 16px; border-top:1px solid var(--line); background:var(--panel); flex:0 0 auto}
+/* ≤ 900 px: Die Mappe ist ein Blatt von unten über die volle Breite – unten verankert, kein
+   Überlauf; X/Esc und die Fußaktion bleiben erreichbar. */
+@media (max-width:900px){
+  .am-mappe{position:fixed; inset:auto 0 0 0; left:0; width:100%; max-width:none; max-height:min(88vh, 640px); margin:0; border-radius:var(--radius) var(--radius) 0 0; border-left:0; border-right:0; border-bottom:0}
+  .am-mappe.rein{animation:am-rein-blatt var(--dauer) ease-out}
+  .am-kopf{padding:12px 16px 8px}
+}
+@keyframes am-rein-blatt{from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:none}}
 
 /* ---- Auftragsleiste (Prüfungstag) ---- */
 .sp-auftrag{display:flex; flex-direction:column; gap:8px; padding:8px 12px 8px 12px; border-left:4px solid var(--k, var(--accent));
@@ -297,7 +319,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-weg-chips li.nicht{border-color:var(--warn)}
 /* Flow-Regler (§ 20 F6): Gerüst-Tipp in der Auftragsmappe */
 .am-geruest{margin:0; padding:8px 12px; border-radius:var(--radius); background:var(--info-soft); color:var(--ink); font-size:var(--fs-3); line-height:1.45}
-.am-geruest small{display:block; margin-top:4px; color:var(--muted); font-size:var(--fs-2)}
+.am-geruest-hinweis{display:block; margin-top:4px; color:var(--muted); font-size:var(--fs-2)}
+/* Ruhige Meta-Zeile in der Mappe (Klassenraum-Zeile, AP2-Hinweis, Hotline-Bewertung). Eigene Klasse,
+   weil editor.css den Hack .lb-auftrag .sp-leise auf 28 px/800 stellt (Befund 44-px-Grünslogan). */
+.am-hinweis{margin:0; color:var(--muted); font:400 var(--fs-2)/1.5 var(--body)}
 .sp-chip.form{background:var(--panel-3); color:var(--text)}
 .sp-chip.form-terminal, .sp-chip.form-forensik{font-family:var(--mono)}
 .sp-chip.form-projekt{background:color-mix(in srgb, var(--ruf) 20%, var(--panel)); color:var(--ruf)}
@@ -320,7 +345,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-brief-kontextzeile span{min-width:0; overflow-wrap:anywhere}
 .sp-brief-ziele .sp-haken{width:16px; height:16px; flex:0 0 auto; margin-top:0; transform:none; background:none; border:1px solid var(--line-2); color:var(--faint); font-size:var(--fs-2)}
 .sp-brief > .sp-knoepfe{margin-top:auto; padding-top:8px; gap:8px}
-.sp-brief > .sp-knoepfe .knopf{min-height:44px; padding:0 16px}
+.sp-brief > .sp-knoepfe .knopf, .am-fuss .knopf, .am-mappe .np-wahl button, .am-mappe .np-fuss .knopf{min-height:44px; padding:0 16px}
 /* Hauptaktion bleibt ohne Scrollen erreichbar (Rauchtest § 22: „Auftrag annehmen“ bei 960 × 700). */
 .sp-pf-teile > .sp-leser .sp-brief > .sp-knoepfe{position:sticky; bottom:0; z-index:10; margin:auto -24px 0; padding:12px 24px; border-top:1px solid var(--line); background:var(--panel)}
 /* Schmal (< 900 px): Leser als Blatt von unten – Verhalten und Klassen unverändert. */
@@ -375,7 +400,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .am-variante-frage{margin:0 0 6px}
 .am-variante-karten{display:grid; grid-template-columns:1fr 1fr; gap:8px}
 .am-variante-karte{all:unset; cursor:pointer; display:flex; flex-direction:column; gap:4px; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); font-size:var(--fs-3)}
-.am-variante-karte small{color:var(--muted); font-size:var(--fs-2); line-height:1.35}
+.am-variante-text{color:var(--muted); font-size:var(--fs-2); line-height:1.35}
 .am-variante-karte:hover, .am-variante-karte:focus-visible, .am-variante-karte.an{border-color:var(--accent); background:var(--accent-soft); outline:none}
 .am-notiz{display:block; width:100%; margin-top:4px; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel); color:var(--text); font:var(--fs-3)/1.4 var(--body); resize:vertical}
 .sp-schuld{margin:8px 0 0; font-size:var(--fs-3); color:var(--warn)}

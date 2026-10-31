@@ -595,3 +595,51 @@ Android-APK bleibt aus (kein SDK); das echte Tauri-Fenster wurde über einen Pr�
 App-Kennung bedient, weil eine fremde Programm-Instanz lief (Regel 1: keine fremden Prozesse
 beenden); die restlichen Themes wurden stichprobenweise statt flächendeckend fotografiert; der
 Puls am Dock-Reiter (Anfänger-Hilfe) ist im Code, aber nicht im Foto festgehalten.
+
+## 41 · Runde 5 — Der Auftragsbogen, die ruhige Karte und die Leiste als Begleiter (31.10.2026)
+
+**Was der Nutzer bemängelte.** Drei Fotos aus dem laufenden Programm: überlappende Elemente in der
+Auftragsmappe (Werkzeugleiste und „Lagebild" schienen durch die Mappe), unausgerichtete Felder im
+Inspektor (gequetschte Portzeilen, angeschnitten), eine ausgewaschene Minileiste ohne erkennbaren
+Nutzen, ein hartes Zusammenfallen — und die Erkenntnis, dass man einen Netzwerk-Auftrag im
+320-px-Fenster nicht lösen kann: „Das Konzept muss umgedacht werden."
+
+**Die Antworten (eigene Motive, kein Kartenwald).**
+- **Auftragsmappe = Auftragsbogen.** Ein Blatt mit eigenem Kopf: Kicker „AUFTRAG · <Kunde>",
+  Auftragstitel als Display-Titel, Meta „Ziele 0/1 · Einstieg", Register Brief / Ziele / Plan, ein X
+  und ein Fuß mit „Ziele ansehen" plus genau einer Hauptaktion. Solange das Blatt offen ist, ruht
+  die Karte: Werkzeugleiste und Flächentitel verschwinden (kein zweiter Kopf, keine Überlappung);
+  der frühere Kopfraum-Hack war die Ursache des Streifens und ist entfallen. Die Höhe folgt dem
+  Inhalt — ein Ziel ergibt 315 px statt 515 px, der Leerraum sinkt von ~300 auf 16 px; drei Ziele
+  brauchen 426 px und scrollen erst dann. Auf schmalen Fenstern kommt das Blatt von unten.
+- **Karte = ruhige Fläche.** Die Knoten-Beschriftung atmet: 15 px Zeilenabstand statt 13, und die
+  Adresszeile steht nur noch dort, wo sie gebraucht wird (Hover/Auswahl oder Zoom ≥ 85 %); das
+  Decluttering greift auch für IP-Zeilen. Neun gemessene Überlappungspaare → null, in allen
+  Breiten, Zoomstufen und Themes.
+- **Inspektor = Steckbrief mit Luft.** Der Kopf schrumpft von 135 auf 102 px und fasst seine
+  Kennzahlen in EINE ruhige Zeile. Die Portzeile ist keine gequetschte Vierspalten-Tabelle mehr,
+  sondern ein zweizeiliger Block: Portname + Link-Chip + Modus-Chip, darunter zwei gleich breite
+  Felder „Modus" und „VLAN" mit je einer Beschriftung (44 px hoch, 141/136 px breit statt 62–73).
+  Die Liste scrollt in sich und rundet ihre Höhe auf ganze Zeilen — keine angeschnittene Portzeile
+  mehr. Die Verwaltungsadresse (SVI) zieht als Karte in den VLAN-Reiter, wo sie fachlich hingehört.
+- **Minileiste = Begleiter (Konzeptwechsel).** Die Leiste versucht nicht mehr, einen Auftrag zu
+  lösen: Sie zeigt im zugeklappten Zustand Stufe · Rolle und drei Werte in einer Zeile, bei 92 %
+  Deckkraft statt ausgewaschener 55 %. Aufgeklappt begleitet sie den laufenden Auftrag: „Jetzt dran"
+  nennt Kunde · Auftrag und **den nächsten Schritt in einem Satz** (aus echten Daten, nie die
+  Lösung), führt per „Im Labor fortsetzen" an den Arbeitsplatz und per „Auftrag lesen" in den Bogen;
+  die „Kurzübung (freiwillig)" stellt die bekannte Mini-Frage, aber mit einer Kontextzeile aus dem
+  aktiven Auftrag; „Lage" fasst Verträge, Serie und offene Tickets zusammen. Aufklappen:
+  320 ms mit sanfter Kurve, Inhalt gleitet gestaffelt herein; Zuklappen blendet erst den Inhalt aus,
+  dann fällt die Karte zusammen, erst danach schrumpft das Fenster. „Bewegung aus" ist ein Standbild.
+
+**Was gemessen ist.** `node tests/run.js` **932/932 grün**, 0 übersprungen; Rauchtest **45/45**;
+`klassen.py` 0; `ethos.py` GRÜN (R1 23, R2 17, R3 4, R4 169→135, R9 62→58, R10 42);
+`umlaute.py` GRÜN; Simulation unverändert. Sichtprüfung je Fläche 1440/960/720, fünf Themes +
+Hell und „Bewegung aus" stichprobenweise; zwei unabhängige Prüfungen (Design; Theme/Struktur/A11y)
+haben gegengelesen. Der Überlappungstest wurde auf die neue Mechanik umgestellt, nicht abgeschwächt.
+
+**Ehrlich offen.** R12 (`ethos --dom`) wie in den Vorrunden ungemessen; die echte Maus im
+Tauri-Fenster nur über den Prüfbau (fremde Instanz, Regel 1); einzelnen Theme-Regeln schlucken den
+Fokusring am Inspektor-Feld (im Bericht der Prüfer genannt, Lead-Datei); 720 px mit eingeschalteter
+Anfänger-Hilfe zeigt die Zeitachse kleiner (Hilfe ist abschaltbar); die Leisten-Kapselknöpfe sind
+44 px hoch, aber 40 px breit (rein mausbedient, bewusste Verdichtung im 300-px-Vertrag).

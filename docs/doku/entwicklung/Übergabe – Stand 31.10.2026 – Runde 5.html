@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übergabe — Stand 31.10.2026 (Runde 5 „Leiste &amp;amp; Auftragsmappe&quot;) · Netzwerk-Labor</title>
+<meta name="description" content="Der Nutzer hat nach der 2.6.0-Abnahme drei Bildschirmfotos aus dem laufenden Programm geschickt und.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Übergabe — Stand 31.10.2026 (Runde 5 „Leiste &amp;amp; Auftragsmappe&quot;)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-auftrag-und-vorgehen">1 · Auftrag und Vorgehen</a></li>
+<li><a href="#2-was-jetzt-da-ist">2 · Was jetzt da ist</a></li>
+<li><a href="#3-gemessene-abnahme-in-dieser-sitzung">3 · Gemessene Abnahme (in dieser Sitzung)</a></li>
+<li><a href="#4-was-bewusst-nicht-passiert-ist-offene-punkte">4 · Was bewusst nicht passiert ist / offene Punkte</a></li>
+<li><a href="#5-prufungen-und-fix-runde">5 · Prüfungen und Fix-Runde</a></li>
+<li><a href="#6-veroffentlichung-2-7-0">6 · Veröffentlichung 2.7.0</a></li>
+<li><a href="#7-nachweis-2-7-0-nach-dem-deploy-gemessen">7 · Nachweis 2.7.0 (nach dem Deploy gemessen)</a></li>
+<li><a href="#8-fur-die-nachste-sitzung">8 · Für die nächste Sitzung</a></li>
+</ul>
+</nav><h1 id="ubergabe-stand-31-10-2026-runde-5-leiste-amp-auftragsmappe">Übergabe — Stand 31.10.2026 (Runde 5 „Leiste &amp; Auftragsmappe")</h1>
+<h2 id="1-auftrag-und-vorgehen">1 · Auftrag und Vorgehen</h2>
+<p>Der Nutzer hat nach der 2.6.0-Abnahme drei Bildschirmfotos aus dem laufenden Programm geschickt und dazu geschrieben: „unordentlich überlappende Elemente", „manche Elemente sind nicht richtig ausgerichtet", die Minileiste „vermittelt visuell nicht ihren Nutzen, sondern overwhelmed den Nutzer", „das Zusammenfallen muss schöner animiert werden von der Leiste" und „die Aufträge zu simulieren im Minimodus funktioniert nicht richtig, da viel zu wenig Kontext herrscht … das Konzept muss umgedacht werden". Ausdrücklich: <strong>Full Skill Usage und Agenten-Schwärme</strong>.</p>
+<p>Umgesetzt mit dem Projekt-Prozess <code>netzwerk-labor-redesign</code> (Vertrag → Welle → Abnahme → Doku/Stand/Fassung), dem Skill <code>workflows</code> (Schwarm) und <code>computer-use</code> (Abnahme am echten Fenster). Drei Schreib-Owner (ein Schreiber je Datei), zwei unabhängige Prüfungen, Leitung integriert. Vertrag: <a href="../entwicklung/Entwurf%20%E2%80%93%20Runde%205%20%28Leiste%20%26%20Auftragsmappe%29.html">Entwurf – Runde 5</a>, <a href="../Architektur.html">Architektur § 24</a>, <a href="../entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html">Design § 41</a>.</p>
+<p><strong>Vorher gemessen (Audit, CDP, Prüfbau 2.6.0):</strong> Mappe 560×515 px mit Leisten-Überlappung und 326 px leerer Zielliste; Inspektor-Kopf 135 px, gequetschte 4-Spalten-Portzeilen (62–73 px Felder), scrollH 615 / clientH 429 mit angeschnittener Zeile; Leiste 300×56 bei 55 % Deckkraft, Werte zweizeilig, harte 160-ms-Animation; Karte mit 9 überlappenden Label-Paaren. Belege: <code>Nachweise/runde5/audit/</code>.</p>
+<h2 id="2-was-jetzt-da-ist">2 · Was jetzt da ist</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Fläche</th><th>Dateien</th><th>Was neu ist</th></tr></thead><tbody><tr><td>Auftragsbogen + Karte</td><td><code>src/ui/spiel.js</code>, <code>src/stil/spiel.css</code>, <code>src/ui/editor.js</code>, <code>src/stil/editor.css</code></td><td>Mappe als Blatt mit Kopf (AUFTRAG · Kunde, Titel, Ziele/Niveau, Reiter, X, Fuß mit „Ziele ansehen" + einer Hauptaktion); Klasse <code>mappe-an</code> lässt Werkzeugleiste/Flächentitel ruhen, Auftragsbereich auf z-index 30; Höhe folgt Inhalt (315 px bei einem Ziel, 426 px bei drei, max. <code>min(70vh,560px)</code>), ≤900 px Blatt von unten; Fokus rein/raus, Esc; Karte: 15-px-Labelzeilen, IP nur bei Hover/Auswahl/≥85 % Zoom, Decluttering für IP</td></tr><tr><td>Inspektor</td><td><code>src/ui/inspektor.js</code>, <code>src/stil/inspektor.css</code></td><td>Kopf 135→102 px mit einer Kennzahlenzeile; Ports als 2-zeiliger Block (Name + Link- + Modus-Chip; Modus/VLAN-Felder 44 px, 141/136 px breit, je eine Beschriftung); eigene scrollende Portliste mit ganzem Zeilenraster (keine angeschnittene Zeile, sichtbarer Scrollbalken); SVI-Karte im VLAN-Reiter</td></tr><tr><td>Mini-Leiste</td><td><code>src/ui/leiste.js</code>, <code>src/stil/leiste.css</code>, <code>src/ui/app.js</code> (Deckkraft)</td><td>Konzept „Begleiter": löst keine Aufträge mehr; zugeklappt Stufe·Rolle + drei Werte in einer Zeile, Deckkraft 0,92 (Regler 60–100 %); aufgeklappt „Jetzt dran" mit nächstem Schritt (echte Daten) + „Im Labor fortsetzen"/„Auftrag lesen", „Kurzübung (freiwillig)" mit Kontextzeile, „Lage", Schnellaktionen; Animation 320 ms mit gestaffeltem Inhalt, Zuklappen Inhalt→Karte→Fenster; „Bewegung aus" sofort; Maße 300×56/320×300 und <code>.lk-*</code>-Haken unverändert</td></tr><tr><td>Grundlage</td><td><code>tests/ui-leiste-ueberlappung.test.js</code>, <code>src/stil/spiel.css</code> (Fokusregel „Auftrag lesen")</td><td>Test auf die neue Mechanik umgestellt (6 statt 4 Fälle); der offene Zustand von „Auftrag lesen" bleibt auch gegen Theme-Regeln sichtbar</td></tr></tbody></table></div>
+<h2 id="3-gemessene-abnahme-in-dieser-sitzung">3 · Gemessene Abnahme (in dieser Sitzung)</h2>
+<ul><li><code>node tests/run.js</code> bzw. <code>sh tools/test.sh</code>: <strong>932/932 grün</strong>, 0 übersprungen (109 Testdateien, 95 headless Module) — +2 Fälle durch den umgestellten Überlappungstest.</li><li><code>sh tools/test.sh --rauch</code>: <strong>45/45</strong>.</li><li><code>python tools/klassen.py</code>: <strong>0</strong> · <code>python tools/ethos.py</code>: <strong>GRÜN</strong> (R1 23, R2 17, R3 4, R4 169→<strong>135</strong>, R9 62→58, R10 42 = Stand; R12 nicht gemessen) · <code>python tools/umlaute.py</code>: <strong>GRÜN</strong> · <code>node tools/sim-stand.js</code>: <strong>Simulation unverändert</strong>.</li><li>Bau: <strong>138 Module</strong> (95 headless) — unverändert, der Umbau blieb in den vorhandenen Dateien.</li><li>Messungen nach dem Umbau: Mappe 315 px bei einem Ziel (Leerraum 16 px, vorher ~300), keine sichtbare Werkzeugleiste/Flächentitel bei offener Mappe, Karte <strong>0</strong> überlappende Label-Paare (1440/960/720, fit/100 %/25 %, 7 Themes), Inspektor-Kopf 102 px und 141/136-px-Portfelder ohne angeschnittene Zeile, Leiste 300×56 / 320×300 ohne Überlauf, Werte einzeilig, Animation 320 ms <code>cubic-bezier(.22,1,.36,1)</code>, Zuklapp-Reihenfolge Inhalt→Karte→Fenster belegt, „Bewegung aus" ohne Animation, Kontrast der Leistenwerte ≥4,5:1 in allen Themes (min. 4,71 im Hell-Schema).</li><li>Sichtprüfung: je Fläche 1440/960/720 + Themes/Hell/Bewegung aus; Belege unter <code>Nachweise/runde5/{auftragsbogen,w2,leiste}/</code> und <code>Nachweise/bento/w2/</code>.</li><li><strong>Echte Windows-<code>.exe</code>:</strong> <strong>8.956.928 B</strong>, ProductVersion <strong>2.7.0</strong>, SHA256 <code>593597c7…e7c5c0e2</code>, Integritätsstufe „Mittel", liegt als <code>Programm/Netzwerk-Labor.exe</code> (Sicherung <code>Programm/Netzwerk-Labor-vor-2.7.0.exe</code>). Die Abnahme mit <code>tools/q-echt.py</code> (echte Maus, erster Auftrag, Kabel-Ziehen, Funktionsprobe) lief **auf der ausgelieferten Datei selbst<strong>: </strong>0 Fehler<strong>, Kabel Kasse→Switch 4 → 5, Abnahme </strong>5 ★**, Fernwartungs-Schild 400 × 350, 5 Bildschirmfotos. Die Nachher-Messung (Mappe/Inspektor/Leiste) lief auf einem Prüfbau mit eigener App-Kennung (dort sind Fenstergrößen messbar); es ist derselbe Code.</li></ul>
+<h2 id="4-was-bewusst-nicht-passiert-ist-offene-punkte">4 · Was bewusst nicht passiert ist / offene Punkte</h2>
+<ul><li><strong>Keine Änderung an</strong> <code>src/sim/</code>, <code>src/modell/</code>, <code>src/kern/</code>, <code>src/cli/</code>; keine neuen Spielzustände oder Datenformen; Themes (<code>zzz-thema-*.css</code>) unangetastet; Kiosk-Dateien der parallelen Sitzung unberührt; kein <code>git add -A</code>.</li><li><strong>SVI im VLAN-Reiter</strong> statt im Ports-Reiter (fachlich richtig und Platzgewinn; Rückbau auf Zuruf klein).</li><li><strong>Leisten-Kapselknöpfe</strong> sind 44 px hoch, aber 40 px breit (300-px-Vertrag, rein mausbedient, <code>tabindex="-1"</code>) — bewusste Verdichtung.</li><li><strong>Theme-Regeln schlucken</strong> an Inspektor-Feldern den globalen Fokusring (<code>outline:none</code> in einzelnen Theme-Dateien) — gemeldet, nicht in dieser Runde geändert (Lead-Dateien).</li><li><strong>R12</strong> (<code>ethos --dom</code>) bleibt ungemessen; <strong>Android-APK</strong> fehlt (kein SDK); <strong>Screenreader</strong> nicht geprüft; 720 px mit Anfänger-Hilfe zeigt die Zeitachse kleiner (Hilfe abschaltbar).</li></ul>
+<h2 id="5-prufungen-und-fix-runde">5 · Prüfungen und Fix-Runde</h2>
+<p>Zwei unabhängige Prüfer (read-only) haben nach der Umsetzung gegengelesen: <strong>Bento-Design</strong> (Originalität, Klarheit, Professionalität, Animation) und <strong>Theme/Struktur/A11y</strong> (5 Themes + hell/dunkel, Fokus, 44 px, reduced motion, Tokens, Haken). Berichte: <code>Nachweise/runde5/review-design.md</code>, <code>Nachweise/runde5/review-theme-a11y.md</code>.</p>
+<p><strong>Design-Urteile:</strong> W1 Auftragsbogen/Karte „nachbessern", W2 Inspektor „annehmbar", W3 Leiste „nachbessern". Eingearbeitet:</p>
+<ul><li><strong>blockierend (W1):</strong> Bei 960/720 lag der Auftragsbogen unter dem offenen Inspektor-Dock (z-index 45), X und „Zurück ins Labor" waren verdeckt. Fix: <code>.labor.mappe-an .lb-auftrag</code> steigt von 30 auf <strong>50</strong>; der Test prüft die Sprosse jetzt gegen den gemessenen Dock-z-index (nicht mehr gegen eine feste 30).</li><li><strong>W3:</strong> Antwort-Zustand der Kurzübung war abgeschnitten (Karte wächst jetzt auf 320×480, feste Aktionszeile außerhalb des Scrollbereichs), Dichte gesenkt (Kurzübung startet als einzeilige Einladung, öffnet auf Klick, Karte 320→420; drei Antworten à 32 px sichtbar).</li><li><strong>W2:</strong> doppeltes „Inspektor" (Theme-Pseudotitel + Kicker) → Kicker heißt jetzt „GERÄT · &lt;Typ&gt;".</li><li><strong>kann:</strong> Mappen-Oberkante von 4 px auf 2 px (Bento-Rail); Portzahl-Dopplung und Access-Portliste als bekannte Punkte dokumentiert.</li></ul>
+<p><strong>A11y-Urteile:</strong> kein Release-Blocker; ein mittlerer Befund und fünf niedrige. Eingearbeitet:</p>
+<ul><li><strong>mittel (B1):</strong> Papier-Theme schluckte den Fokusring am Feld (<code>outline:none</code>) — entfernt, der zentrale <code>:focus-visible</code>-Ring steht jetzt auch dort (2 px Akzent, Offset 2 px).</li><li><strong>niedrig:</strong> Plan-Reiter-Bedienelemente der Mappe ≥ 44 px (über die vorhandene 44-px-Regel); „Mini"-Badge und Postfach-Zähler im Hell-Schema von <code>--accent</code> auf <code>--ink</code> (Kontrast ≥ 4,5:1); der scrollbare Mini-Bereich ist per <code>tabindex="-1"</code> nicht mehr in der Tab-Reihenfolge; Vertragstext auf die gemessenen 320 ms (Token <code>--dauer-lang</code>) korrigiert.</li><li><strong>nicht geändert:</strong> übrige Inspektor-Felder 30–34 px (Altstand), Leisten-Kapselknöpfe 40 px breit (300-px-Vertrag, rein mausbedient), alle Themes in jedem Einzelstrang.</li></ul>
+<h2 id="6-veroffentlichung-2-7-0">6 · Veröffentlichung 2.7.0</h2>
+<ol><li>Fassung <strong>2.7.0</strong> gezogen (<code>tools/fassung-ziehen.py --neu 2.7.0 --setzen</code>), <code>VERSION_CODE</code> in <code>android/bauen.py</code> von Hand auf <strong>20701</strong>.</li><li>Erzeugnisse gebaut: <code>python bauen.py</code>, <code>python tools/einfach.py</code> (beide Ziele byte-gleich), <code>cargo tauri build --no-bundle</code>, <code>python tools/seite.py</code>, <code>python tools/stand.py</code>; Prüfmodi grün.</li><li>Commit auf <code>ausbau-1.2</code>, Push des Zweigs, Tag <code>v2.7.0</code>, Push des Tags — stehende Freigabe des Nutzers für Push, Tag und Release (30.10.2026). Danach messen: Live-Seite gegen <code>docs/index.html</code> hashen, Release-Anhänge, Größen, ProductVersion und <code>Content-Disposition</code> prüfen (Abschnitt 7).</li></ol>
+<h2 id="7-nachweis-2-7-0-nach-dem-deploy-gemessen">7 · Nachweis 2.7.0 (nach dem Deploy gemessen)</h2>
+<p><em>(wird ergänzt)</em></p>
+<h2 id="8-fur-die-nachste-sitzung">8 · Für die nächste Sitzung</h2>
+<ul><li><strong>R12</strong> ist die offene Messung (<code>python tools/ethos.py --dom</code> bei laufendem Programm).</li><li>Ein echtes Tauri-Fenster ohne fremde Instanz: <code>python tools/q-echt.py</code> ist der normale Weg.</li><li>Die Prozess-/Skill-Nutzung (netzwerk-labor-redesign, workflows, computer-use) hat sich bewährt: Vertrag vor Code, ein Schreiber je Datei, zwei unabhängige Lesungen, Gates vor dem Release.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

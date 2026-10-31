@@ -97,34 +97,30 @@ UI.inspektor = (() => {
     zeichnen(K);
   }
 
-  /* ---------- Steckbrief (Strang D): Identität und Live-Teile im Kopf ----------
-     Alle Werte kommen aus Modell/UI.ebenen – nichts wird geschätzt. */
-  function steckbrief(K, g){
-    const n = K.netz, art = UI.geraeteArt ? UI.geraeteArt(g.typ, g.skin) : {titel: g.typ};
+  /* ---------- Kennzahlen im Kopf (Vertrag Runde 5 § 2 B) ----------
+     EINE ruhige Zeile statt der vierspaltigen Etiketten-Reihe. Jeder Wert kommt aus
+     Modell/UI.ebenen – nichts wird geschätzt, nichts doppelt (Rolle steht im Mikrolabel,
+     Zustand in der Rollenzeile). */
+  function kennzahlen(g, n){
     const ports = Modell.ports(g), belegt = ports.filter(p => Modell.kabelAn(n, g.id, p)).length;
     const a = UI.ebenen && UI.ebenen.adresse ? UI.ebenen.adresse(n, g) : null;
-    const werte = [
-      ["Rolle", art.titel + (g.typ === "internet" ? " · Kulisse" : "")],
-      ["Zustand", g.an ? "an" : "aus"],
-      ["Ports", belegt + " von " + ports.length + " belegt"],
-    ];
-    if (g.typ === "switch") {
-      const vl = Object.keys(g.flash?.vlans || {}).filter(v => /^\d+$/.test(v) && +v !== 1);
-      werte.push(["VLANs", vl.length ? String(vl.length) : "nur VLAN 1"]);
-    } else if (g.typ === "router" || g.typ === "firewall") {
-      const addr = UI.ebenen && UI.ebenen.alleAdressen ? (UI.ebenen.alleAdressen(n, g) || []).length : 0;
-      werte.push(["Adressen", addr ? String(addr) : "keine"]);
-    } else if (Modell.HOST[g.typ]) {
-      werte.push(["Adresse", a && a.text ? a.text : "—"]);
-      werte.push(["Link", ports.some(p => Modell.kabelAn(n, g.id, p)) ? "verbunden" : "kein Kabel"]);
+    const teile = [];
+    if (Modell.HOST[g.typ]) {
+      teile.push("Adresse " + (a && a.text ? a.text : "—"));
+      teile.push("Link " + (ports.some(p => Modell.kabelAn(n, g.id, p)) ? "verbunden" : "kein Kabel"));
     } else {
-      werte.push(["Adresse", a && a.text ? a.text : "—"]);
+      teile.push("Ports " + belegt + " von " + ports.length + " belegt");
+      if (g.typ === "switch") {
+        const vl = Object.keys(g.flash?.vlans || {}).filter(v => /^\d+$/.test(v) && +v !== 1);
+        teile.push("VLANs " + (vl.length ? String(vl.length) : "nur VLAN 1"));
+      } else if (g.typ === "router" || g.typ === "firewall") {
+        const addr = UI.ebenen && UI.ebenen.alleAdressen ? (UI.ebenen.alleAdressen(n, g) || []).length : 0;
+        teile.push("Adressen " + (addr ? String(addr) : "keine"));
+      } else {
+        teile.push("Adresse " + (a && a.text ? a.text : "—"));
+      }
     }
-    const marke = (UI.bento && typeof UI.bento.monogramm === "function") ? UI.bento.monogramm(g.name, {klein: true}) : null;
-    return h("div", {class: "in-steckbrief"},
-      marke,
-      werte.map(([name, wert]) => h("div", {class: "in-wert"},
-        h("span", {class: "in-wert-name"}, name), h("span", {class: "in-wert-text"}, wert))));
+    return h("span", {class: "in-kopf-meta"}, teile.join(" · "));
   }
   /* Gewählter Port (Einzelklick auf einen Port): ruhige Zeile über dem Reiter-Inhalt. */
   function wahlKarte(K, g){
@@ -246,7 +242,9 @@ UI.inspektor = (() => {
     const reiterEl = h("div", {class: "in-reiter", role: "tablist"}, reiterListe(g).map(([name, titel]) =>
       h("button", {type: "button", role: "tab", class: "in-tab" + (K.reiter === name ? " an" : ""), "aria-selected": String(K.reiter === name),
         onclick: () => { K.reiter = name; K.eingabe = null; zeichnen(K); }}, titel)));
-    const inhalt = h("div", {class: "in-inhalt"});
+    /* Ports-Reiter: der Reiter-Körper scrollt nicht, die Portliste scrollt in sich
+       (Vertrag Runde 5 § 2 B: "Ab 4 Ports scrollt die Liste mit unterem Rand"). */
+    const inhalt = h("div", {class: "in-inhalt" + (K.reiter === "ports" ? " in-ports" : "")});
     c.replaceChildren(K.kopfEl, reiterEl, inhalt);
     kopfNeu(K);
     if (K.reiter === "konsole") {
@@ -274,13 +272,14 @@ UI.inspektor = (() => {
     }
   }
 
-  /* Kopf: Symbol, Name, Typ, Zustand, Warnungen, Speichern-Hinweis */
+  /* Kopf: Symbol, Mikrolabel, Name, Rollenzeile, EINE ruhige Kennzahlen-Zeile, Warnungen,
+     Terminal, Speichern-Hinweis (Vertrag Runde 5 § 2 B: kompakt, keine vierspaltige Label-Reihe;
+     der Zustand steht farbig in der Rollenzeile statt doppelt als Chip). */
   function kopfNeu(K){
     const g = K.netz.geraete[K.id]; if (!g || !K.kopfEl) return;
     const art = UI.geraeteArt ? UI.geraeteArt(g.typ, g.skin) : {titel: g.typ};
     const bild = sv("svg", {viewBox: "-34 -30 68 60", width: 40, height: 36, class: "typ-" + g.typ, "aria-hidden": "true"}, UI.geraetebild ? UI.geraetebild(g.typ, g.skin) : null);
     const chips = [];
-    chips.push(g.an ? h("span", {class: "in-chip ok"}, "● an") : h("span", {class: "in-chip aus"}, "○ aus"));
     const warn = warnAn() ? Modell.pruefen(K.netz).filter(w => w.geraet === g.id) : [];
     if (warn.length) chips.push(h("span", {class: "in-chip warn", title: warn.map(w => w.text).join("\n")}, `▲ ${warn.length} Hinweis${warn.length > 1 ? "e" : ""}`));
     const ungespeichert = IOS(g) && Modell.ungespeichert(g);
@@ -291,11 +290,11 @@ UI.inspektor = (() => {
     K.kopfEl.replaceChildren(...[
       h("div", {class: "in-kopf-zeile"}, bild,
         h("div", {class: "in-kopf-text"},
-          h("span", {class: "bn-kicker"}, "INSPEKTOR · " + art.titel + (g.typ === "internet" ? " · Kulisse" : "")),
+          h("span", {class: "bn-kicker"}, "GERÄT · " + art.titel + (g.typ === "internet" ? " · Kulisse" : "")),
           h("h3", {}, g.name),
-          h("span", {class: "in-kopf-rolle"}, g.an ? "eingeschaltet" : "ausgeschaltet")),
+          h("span", {class: "in-kopf-rolle " + (g.an ? "an" : "aus")}, g.an ? "eingeschaltet" : "ausgeschaltet")),
         h("div", {class: "in-chips"}, chips, term)),
-      steckbrief(K, g),
+      kennzahlen(g, K.netz),
       ungespeichert ? h("div", {class: "in-speichern"},
         h("span", {}, h("b", {}, "Nicht gespeichert. "), "Die Änderungen stehen nur in der running-config (RAM). Nach einem Neustart wären sie weg."),
         h("button", {type: "button", class: "in-knopf klein warn", onclick: () => speichern(K)}, "Speichern")) : null].filter(Boolean));
@@ -375,7 +374,8 @@ UI.inspektor = (() => {
     return t.join(",");
   }
 
-  /* Textfeld mit Live-Prüfung. o: {key, titel, wert, art, pflicht, platz, umwandeln, uebernehmen(wert, text), modellPfad, breit, mono, klein} */
+  /* Textfeld mit Live-Prüfung. o: {key, titel, wert, art, pflicht, platz, umwandeln, uebernehmen(wert, text), modellPfad, breit, mono, klein, klasse}
+     klasse: zusätzliche Klasse am Feld-Rahmen (z. B. "in-port-feld" für die 44-px-Trefferfläche der Portzeile). */
   function feld(K, o){
     const g = K.netz.geraete[K.id];
     const start = o.wert == null ? "" : String(o.wert);
@@ -411,7 +411,7 @@ UI.inspektor = (() => {
     });
     inp.addEventListener("blur", uebernehmen);
     pruefen();
-    return h("label", {class: "in-feld" + (o.breit ? " breit" : "") + (o.klein ? " klein" : "")},
+    return h("label", {class: "in-feld" + (o.breit ? " breit" : "") + (o.klein ? " klein" : "") + (o.klasse ? " " + o.klasse : "")},
       h("span", {class: "in-feld-titel"}, o.titel, o.art === "maske" ? h("small", {}, " (auch /24)") : null), inp, meldung);
   }
   /* Schalter (Checkbox) */
@@ -425,7 +425,7 @@ UI.inspektor = (() => {
     const sel = h("select", {class: "in-auswahl", "data-key": o.key, "aria-label": o.titel,
       onchange: e => o.aendern(e.target.value)},
       o.optionen.map(([w, t]) => h("option", {value: w, selected: String(w) === String(o.wert ?? "")}, t)));
-    return h("label", {class: "in-feld" + (o.klein ? " klein" : "")}, h("span", {class: "in-feld-titel"}, o.titel), sel);
+    return h("label", {class: "in-feld" + (o.klein ? " klein" : "") + (o.klasse ? " " + o.klasse : "")}, h("span", {class: "in-feld-titel"}, o.titel), sel);
   }
   const knopf = (text, onclick, art = "", titel) => h("button", {type: "button", class: "in-knopf " + art, onclick, title: titel || null}, text);
   const statusChip = st => {
@@ -618,40 +618,91 @@ UI.inspektor = (() => {
     return zeile;
   }
 
-  /* ---------- Switch: Ports ---------- */
+  /* ---------- Switch: Ports ----------
+     Vertrag Runde 5 § 2 B: je Port ein 2-zeiliger Block statt der gequetschten Vierspalten-Tabelle.
+     Zeile 1: Portname (Mono) + Link-Chip + Modus-Chip. Zeile 2: zwei gleich breite Felder
+     "Modus" (Auswahl) und "VLAN" (Eingabe) mit Beschriftung über dem Feld. Die Verwaltung (SVI)
+     steht im Reiter VLAN – dort gehört die Verwaltungsadresse hin, und hier bleibt Platz, damit
+     die Liste erst ab vier Ports scrollt. */
   function ports(K, g, el){
     const k = g.running, vlans = g.flash?.vlans || {};
-    const svi1 = Object.entries(k.svi || {});
-    el.append(abschnitt("Verwaltung (SVI)",
-      ...svi1.map(([v, s]) => h("div", {class: "in-karte"},
-        h("div", {class: "in-zeile zwischen"}, h("b", {class: "mono"}, "interface vlan " + v),
-          schalter(K, {key: `svi.${v}.an`, titel: "an", an: !s.shutdown, klein: true, aendern: an => setzen(K, `svi.${v}.shutdown`, !an, `Vlan${v} ${an ? "no shutdown" : "shutdown"}`)})),
-        h("div", {class: "in-raster"},
-          feld(K, {key: `svi.${v}.ip`, titel: "IP-Adresse", wert: s.ip, art: "ip", pfad: `svi.${v}.ip`}),
-          feld(K, {key: `svi.${v}.maske`, titel: "Maske", wert: s.maske, art: "maske", pfad: `svi.${v}.maske`})))),
-      h("div", {class: "in-raster"}, feld(K, {key: "dgw", titel: "ip default-gateway", wert: k.defaultGateway, art: "ip", pfad: "defaultGateway"})),
-      hinweis("Die Verwaltungsadresse braucht der Switch nur, um selbst erreichbar zu sein (Ping, SSH). Für das Weiterleiten der Frames spielt sie keine Rolle.", "klein")));
     const alle = Modell.ports(g), belegt = alle.filter(p => Modell.kabelAn(K.netz, g.id, p) || k.ports[p].modus === "trunk" || k.ports[p].accessVlan !== 1 || k.ports[p].shutdown);
     const liste = K.filterAlle ? alle : belegt;
-    const tabelle = h("div", {class: "in-portliste"}, liste.map(p => portZeile(K, g, p, vlans)));
-    el.append(abschnitt(`Ports (${K.filterAlle ? "alle " + alle.length : belegt.length + " belegt oder eingestellt"})`,
-      liste.length ? tabelle : hinweis("Noch keine Ports belegt."),
-      knopf(K.filterAlle ? "Nur belegte zeigen" : `Alle ${alle.length} Ports zeigen`, () => { K.filterAlle = !K.filterAlle; zeichnen(K); }, "klein geist")));
+    const sek = abschnitt(`Ports (${K.filterAlle ? "alle " + alle.length : belegt.length + " belegt oder eingestellt"})`,
+      liste.length ? h("div", {class: "in-portliste"}, liste.map(p => portZeile(K, g, p, vlans))) : hinweis("Noch keine Ports belegt."),
+      knopf(K.filterAlle ? "Nur belegte zeigen" : `Alle ${alle.length} Ports zeigen`, () => { K.filterAlle = !K.filterAlle; zeichnen(K); }, "klein geist"));
+    sek.classList.add("in-portsektion");
+    el.append(sek);
+    /* Nach dem Einhängen die Höhe der Liste auf ganze Portzeilen runden: am unteren Rand
+       steht nie eine angeschnittene Portzeile (Vertrag Runde 5 § 2 B). */
+    rundenAnmelden(el);
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(() => zeilenRunden(el));
+  }
+  /* Höhe der Portliste auf ganze Zeilen runden (gemessen, nicht geschätzt). */
+  function zeilenRunden(inhalt){
+    const liste = inhalt && inhalt.querySelector ? inhalt.querySelector(".in-portliste") : null;
+    if (!liste || !liste.isConnected) return;
+    liste.style.maxHeight = "";
+    const erste = liste.firstElementChild;
+    if (!erste) return;
+    const st = getComputedStyle(liste);
+    const luecke = parseFloat(st.rowGap) || parseFloat(st.gap) || 0;
+    const pt = parseFloat(st.paddingTop) || 0, pb = parseFloat(st.paddingBottom) || 0;
+    const zeile = erste.getBoundingClientRect().height;
+    if (!zeile) return;
+    const nutzbar = liste.clientHeight - pt - pb;
+    const passen = Math.floor((nutzbar + luecke) / (zeile + luecke));
+    if (passen < 1) return;                                /* zu klein: die Liste scrollt */
+    const ganz = Math.round(passen * zeile + (passen - 1) * luecke + pt + pb);
+    if (ganz < liste.clientHeight - 1) liste.style.maxHeight = ganz + "px";
+  }
+  /* Neu runden, sobald der Reiter-Inhalt seine Größe ändert (Fenstergröße, Dock auf/zu).
+     Ein ResizeObserver auf dem Inhalt genügt; der Resize-Haken bleibt für Umgebungen ohne ihn. */
+  let rundenHaken = false, rundenBeobachter = null, rundenZiel = null;
+  function rundenAnmelden(inhalt){
+    if (!inhalt) return;
+    if (typeof ResizeObserver !== "undefined") {
+      if (!rundenBeobachter) rundenBeobachter = new ResizeObserver(eintraege => { for (const e of eintraege) zeilenRunden(e.target); });
+      if (rundenZiel && rundenZiel !== inhalt) { try { rundenBeobachter.unobserve(rundenZiel); } catch (e) { /* Beobachter */ } }
+      rundenZiel = inhalt;
+      rundenBeobachter.observe(inhalt);
+    }
+    if (rundenHaken || typeof addEventListener !== "function") return;
+    rundenHaken = true;
+    let geplant = false;
+    addEventListener("resize", () => {
+      if (geplant || typeof requestAnimationFrame !== "function") return;
+      geplant = true;
+      requestAnimationFrame(() => {
+        geplant = false;
+        for (const c of OFFEN) {
+          if (!c || !c.isConnected) continue;
+          const i = c.querySelector(".in-inhalt.in-ports");
+          if (i) zeilenRunden(i);
+        }
+      });
+    });
   }
   function portZeile(K, g, p, vlans){
     const cfg = g.running.ports[p], pf = `ports.${p}`, auf = K.offen.has(p);
     const st = Modell.portStatus(K.netz, g.id, p);
-    const vlanFarbe = v => `var(--vlan-${((+v - 1) % 8 + 8) % 8 + 1})`;
+    /* Zeile 1: Portname (Mono) + Link-Chip + Modus-Chip – der Zustand auf einen Blick.
+       Zeile 2: zwei gleich breite Felder, Beschriftung über dem Feld, keine Trennstriche. */
     const kopf = h("div", {class: "in-port-kopf" + (auf ? " auf" : "") + (K.wahlPort === p ? " gewaehlt" : "")},
-      K.wahlPort === p ? h("span", {class: "in-wahl-marke"}, "gewählt") : null,
-      h("button", {type: "button", class: "in-port-name mono", "aria-expanded": String(auf), onclick: () => { auf ? K.offen.delete(p) : K.offen.add(p); zeichnen(K); }}, (auf ? "▾ " : "▸ ") + p),
-      statusChip(st),
-      wahl(K, {key: pf + ".modus", titel: "Modus", wert: cfg.modus, klein: true, optionen: [["access", "access"], ["trunk", "trunk"]],
-        aendern: v => setzen(K, pf + ".modus", v, `${p}: switchport mode ${v}`)}),
-      cfg.modus === "access"
-        ? h("span", {class: "in-vlan-chip", style: {"--v": vlanFarbe(cfg.accessVlan)}}, feld(K, {key: pf + ".accessVlan", titel: "VLAN", wert: cfg.accessVlan, art: "zahl", min: 1, max: 4094, pfad: pf + ".accessVlan", klein: true,
-            zusatz: w => vlans[w] ? null : {art: "warn", text: `VLAN ${w} gibt es in der VLAN-Datenbank noch nicht – der Port wäre inaktiv. Leg es im Reiter VLAN an.`}}))
-        : h("span", {class: "in-chip info"}, "802.1Q · " + vlanText(cfg.trunkErlaubt)));
+      h("div", {class: "in-port-zeile"},
+        K.wahlPort === p ? h("span", {class: "in-wahl-marke"}, "gewählt") : null,
+        h("button", {type: "button", class: "in-port-name mono", "aria-expanded": String(auf), onclick: () => { auf ? K.offen.delete(p) : K.offen.add(p); zeichnen(K); }}, (auf ? "▾ " : "▸ ") + p),
+        statusChip(st),
+        h("span", {class: "in-chip info"}, cfg.modus),
+        cfg.modus === "trunk" ? h("span", {class: "in-chip frei"}, "802.1Q · " + vlanText(cfg.trunkErlaubt)) : null),
+      h("div", {class: "in-port-felder"},
+        wahl(K, {key: pf + ".modus", titel: "Modus", wert: cfg.modus, klasse: "in-port-feld", optionen: [["access", "access"], ["trunk", "trunk"]],
+          aendern: v => setzen(K, pf + ".modus", v, `${p}: switchport mode ${v}`)}),
+        cfg.modus === "access"
+          ? feld(K, {key: pf + ".accessVlan", titel: "VLAN", wert: cfg.accessVlan, art: "zahl", min: 1, max: 4094, pfad: pf + ".accessVlan", klasse: "in-port-feld",
+              zusatz: w => vlans[w] ? null : {art: "warn", text: `VLAN ${w} gibt es in der VLAN-Datenbank noch nicht – der Port wäre inaktiv. Leg es im Reiter VLAN an.`}})
+          : feld(K, {key: pf + ".trunkErlaubt", titel: "VLAN (erlaubt)", wert: vlanText(cfg.trunkErlaubt), art: "vlanliste", platz: "all oder 1,10,20", klasse: "in-port-feld",
+              uebernehmen: (w, t) => setzen(K, pf + ".trunkErlaubt", /^(all|alle)$/i.test(t) ? "all" : vlanListe(t), `${p}: switchport trunk allowed vlan ${t}`)})));
     const teile = [kopf];
     if (auf) {
       const gegen = gegenstelle(K, p);
@@ -661,9 +712,7 @@ UI.inspektor = (() => {
         schalter(K, {key: pf + ".an", titel: "Port eingeschaltet (no shutdown)", an: !cfg.shutdown, klein: true, aendern: an => setzen(K, pf + ".shutdown", !an, `${p}: ${an ? "no shutdown" : "shutdown"}`)}),
         feld(K, {key: pf + ".beschreibung", titel: "Beschreibung", wert: cfg.beschreibung, mono: false, pfad: pf + ".beschreibung", breit: true}),
         cfg.modus === "trunk" ? h("div", {class: "in-raster"},
-          feld(K, {key: pf + ".trunkErlaubt", titel: "Erlaubte VLANs", wert: vlanText(cfg.trunkErlaubt), art: "vlanliste", platz: "all oder 1,10,20",
-            uebernehmen: (w, t) => setzen(K, pf + ".trunkErlaubt", /^(all|alle)$/i.test(t) ? "all" : vlanListe(t), `${p}: switchport trunk allowed vlan ${t}`)}),
-          feld(K, {key: pf + ".nativeVlan", titel: "Native VLAN", wert: cfg.nativeVlan, art: "zahl", min: 1, max: 4094, pfad: pf + ".nativeVlan",
+          feld(K, {key: pf + ".nativeVlan", titel: "Native VLAN", wert: cfg.nativeVlan, art: "zahl", min: 1, max: 4094, pfad: pf + ".nativeVlan", breit: true,
             zusatz: () => ({art: "warn", text: "Beide Enden eines Trunks brauchen dasselbe Native VLAN – sonst landen ungetaggte Frames im falschen VLAN."})})) : null,
         schalter(K, {key: pf + ".ps", titel: "Port-Security", an: !!cfg.portSecurity, klein: true, hilfe: "Nur bekannte MAC-Adressen dürfen senden",
           aendern: an => setzen(K, pf + ".portSecurity", an ? {max: 1, verstoss: "shutdown", macs: []} : null, `${p}: port-security ${an ? "an" : "aus"}`)}),
@@ -677,9 +726,36 @@ UI.inspektor = (() => {
     return h("div", {class: "in-port" + (auf ? " auf" : "") + (K.wahlPort === p ? " gewaehlt" : "")}, teile);
   }
 
+  /* ---------- Switch: Verwaltung (SVI) ----------
+     Eine Karte: Titel "interface vlan N" mit dem Schalter rechts oben, darunter ein
+     zweispaltiges Raster mit gleichen Feldbreiten (IP-Adresse · Maske (auch /24)) und das
+     Gateway über die volle Breite; Hilfetext leise, höchstens zwei Zeilen (Vertrag § 2 B).
+     Die SVI-Karte steht im Reiter VLAN: sie ist die Verwaltungsadresse eines VLANs, und der
+     Reiter Ports bleibt so frei für die Portliste. */
+  function sviAbschnitt(K, g, svi){
+    const k = g.running;
+    const sek = h("section", {class: "in-abschnitt"}, h("h4", {}, "Verwaltung (SVI)"));
+    svi.forEach(([v, s], i) => {
+      sek.append(h("div", {class: "in-karte in-svi"},
+        h("div", {class: "in-svi-kopf"},
+          h("span", {class: "in-svi-name mono"}, "interface vlan " + v),
+          schalter(K, {key: `svi.${v}.an`, titel: "eingeschaltet", an: !s.shutdown,
+            aendern: an => setzen(K, `svi.${v}.shutdown`, !an, `Vlan${v} ${an ? "no shutdown" : "shutdown"}`)})),
+        h("div", {class: "in-raster"},
+          feld(K, {key: `svi.${v}.ip`, titel: "IP-Adresse", wert: s.ip, art: "ip", pfad: `svi.${v}.ip`}),
+          feld(K, {key: `svi.${v}.maske`, titel: "Maske", wert: s.maske, art: "maske", pfad: `svi.${v}.maske`}),
+          /* Das Gateway gilt für den ganzen Switch (ip default-gateway) – es steht einmal,
+             in der ersten Karte, über die volle Breite. */
+          i === 0 ? feld(K, {key: "dgw", titel: "Gateway (ip default-gateway)", wert: k.defaultGateway, art: "ip", pfad: "defaultGateway", breit: true}) : null),
+        i === 0 ? hinweis("Nur für Erreichbarkeit (Ping, SSH) – Frames leitet er auch ohne sie.", "klein") : null));
+    });
+    return sek;
+  }
   /* ---------- Switch: VLAN-Datenbank ---------- */
   function vlan(K, g, el){
     const vlans = g.flash?.vlans || {}, k = g.running;
+    const svi = Object.entries(k.svi || {});
+    if (svi.length) el.append(sviAbschnitt(K, g, svi));
     const mitglieder = v => Modell.ports(g).filter(p => k.ports[p].modus === "access" && String(k.ports[p].accessVlan) === String(v));
     const trunks = Modell.ports(g).filter(p => k.ports[p].modus === "trunk");
     el.append(abschnitt("VLAN-Datenbank",

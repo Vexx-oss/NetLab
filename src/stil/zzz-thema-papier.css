@@ -531,8 +531,10 @@ html[data-theme="papier"] .in-auswahl{
   border:1.5px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel);
   font:600 var(--fs-2)/1 var(--mono); box-shadow:inset 2px 2px 0 color-mix(in srgb,var(--ink) 6%,transparent);
 }
+/* Runde 5 (Leitung, Prüfer-2-Befund B1): kein outline:none mehr — der zentrale :focus-visible-Ring
+   aus basis.css bleibt das sichtbare Fokussignal; die Papiermaterial-Sprache liefert nur den Rand. */
 html[data-theme="papier"] .in-eingabe:focus,
-html[data-theme="papier"] .in-auswahl:focus{border-color:var(--accent); outline:none}
+html[data-theme="papier"] .in-auswahl:focus{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:2px}
 html[data-theme="papier"] .in-chip{
   border:1px solid var(--line-2); border-radius:var(--radius); font:600 var(--fs-1)/1.4 var(--mono);
   letter-spacing:.06em; background:var(--panel-2); color:var(--muted);

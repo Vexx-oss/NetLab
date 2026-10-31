@@ -676,3 +676,56 @@ Theme/Struktur/A11y), Leitung integriert, committet und veröffentlicht. **Nicht
 (`--dom`), Android-APK, echte Maus im ausgelieferten Tauri-Fenster (Prüfbau mit eigener Kennung,
 weil eine fremde Instanz lief). Einzelheiten:
 [`Übergabe – Stand 31.10.2026 – Runde 4`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 4.md>).
+
+## 24 · Runde 5 — Auftragsbogen, Inspektor, Leiste als Begleiter (31.10.2026) — verbindlicher Vertrag
+
+**Auftrag (Nutzer, sinngemäß).** Nach 2.6.0 meldet der Nutzer drei Bildschirmfotos zurück:
+„unordentlich überlappende Elemente", „manche Elemente sind nicht richtig ausgerichtet", die
+Minileiste „vermittelt visuell nicht ihren Nutzen, sondern overwhelmed", das Zusammenfallen der
+Leiste müsse „schöner animiert" werden, und „die Aufträge zu simulieren im Minimodus funktioniert
+nicht richtig, da viel zu wenig Kontext herrscht … das Konzept muss umgedacht werden". Verlangt:
+Full Skill Usage und Agenten-Schwärme. Vollfassung:
+[`Entwurf – Runde 5 (Leiste & Auftragsmappe)`](<entwicklung/Entwurf – Runde 5 (Leiste & Auftragsmappe).md>).
+
+**Auftragsbogen (A).**
+- `UI.spiel.mappeAuf(reiter="brief", erstes=false, mitFokus=true)` — optionaler dritter Parameter;
+  `mappeZu()` unverändert. Fokus geht in die Mappe und beim Schließen zurück zum Auslöser.
+- Zustand: solange die Mappe offen ist, trägt `.labor` die Klasse `mappe-an`; `editor.css`
+  blendet `.lb-leiste-oben`, `lb-leiste-unten` und `.lb-leinwand::before` aus
+  (`visibility:hidden`, Platz bleibt) und hebt `.lb-auftrag` auf `z-index:30`.
+  Die Klasse wird bei jedem Neuzeichnen gesetzt/entfernt (Schließen, Ticketende, Ansichtswechsel).
+- Die Mappe bleibt Kind von `#labor-auftrag` (Testhaken unverändert); Höchsthöhe
+  `max-height:var(--am-max, min(70vh,560px))` (spiel.js setzt `--am-max` aus dem freien Platz),
+  `--am-links` richtet die Blattkante an der Auftragszeile aus; ≤900 px als Blatt von unten.
+- Der frühere Kopfraum-Hack (`--am-kopfraum`/`padding-top`) ist entfallen; die
+  `--leiste-h`-Messung in editor.js bleibt.
+
+**Karte (D).** Knoten-Labels: Baselines Name/Rolle/IP bei `ikonH+18/33/48` (15 px), Box bis
+`+62`, `line-height:1.15`; Decluttering (`labelUeber`) gilt auch für `.ger-ip`; die
+Adresse erscheint nur bei Hover/Auswahl oder Zoom `≥ IP_ZOOM (0,85)`.
+
+**Inspektor (B).** Kopf kompakt (Mikrolabel · Name · Rollenzeile · eine Kennzahlenzeile). Ports:
+2-zeiliger Block je Port (Zeile 1 Name + Link-Chip + Modus-Chip; Zeile 2 zwei gleich breite Felder
+`Modus`/`VLAN` mit je einer Beschriftung, ≥44 px); die Portliste scrollt in sich, ihre Höhe
+wird auf ganze Portzeilen gerundet (rAF + ResizeObserver) — keine angeschnittene Zeile. Die
+SVI-Verwaltungskarte liegt im VLAN-Reiter.
+
+**Mini-Leiste (C) — Konzept „Begleiter".** Die Leiste löst keine Aufträge; sie begleitet:
+- zugeklappt 300×56: Stufe · Rolle vollständig, drei Werte in einer Zeile (`€/h · Ruf · offen`),
+  Deckkraft Standard `0.92` (`store "einst".leiste.deckkraft`, geklemmt 0,6–1; Regler in app.js
+  60–100 %), Hover 1;
+- aufgeklappt 320×300: „Jetzt dran" (Kunde · Auftrag + nächster Schritt aus `Spiel.naechsterOrt`/
+  `Spiel.naechsteDiagnose`, Primär „Im Labor fortsetzen", Sekundär „Auftrag lesen" über
+  `UI.spiel.mappeAuf`), „Kurzübung (freiwillig)" (bestehende Mini-Frage mit Kontextzeile aus dem
+  aktiven Auftrag), „Lage" (Verträge/Serie/offen), Schnellaktionen;
+- Animation: 320 ms `cubic-bezier(.22,1,.36,1)` für Höhe/Breite, Inhalt gestaffelt 40/80/120 ms;
+  Zuklappen Inhalt zuerst, Karte danach, Fenstergröße (`Plattform.fenster.groesse`) erst nach der
+  Karten-Animation; „Bewegung aus" = sofort. Maße und `.lk-*`-Haken bleiben Testvertrag.
+
+**Gates (gemessen 31.10.2026).** `node tests/run.js` **932/932 grün**, 0 übersprungen ·
+Rauchtest **45/45** · `klassen.py` **0** · `ethos.py` **GRÜN** (R1 23, R2 17, R3 4, R4 135,
+R9 58, R10 42; R12 nicht gemessen) · `umlaute.py` **GRÜN** · Simulation unverändert · 138 Module.
+Ein Test wurde umgestellt (nicht abgeschwächt): `tests/ui-leiste-ueberlappung.test.js` prüft die
+neue Mechanik (`mappe-an`/`visibility:hidden` statt Kopfraum) mit 6 statt 4 Fällen.
+**Nicht gemessen:** R12 (`--dom`), Android-APK, echte Maus im ausgelieferten Tauri-Fenster
+(nur Prüfbau), Screenreader.

@@ -9,6 +9,63 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.7.0 — Runde 5: Auftragsbogen, entzerrter Inspektor, Leiste als Begleiter (31.10.2026)
+
+**Was diese Fassung ist.** Ein UX- und Konzeptzug nach 2.6.0, ausgelöst durch drei Bildschirmfotos
+des Nutzers aus dem laufenden Programm: „unordentlich überlappende Elemente", „manche Elemente sind
+nicht richtig ausgerichtet", „Minileiste … vermittelt visuell nicht ihren Nutzen, sondern overwhelmed
+den Nutzer", „das Zusammenfallen muss schöner animiert werden" und „die Aufträge zu simulieren im
+Minimodus funktioniert nicht richtig … das Konzept muss umgedacht werden".
+
+**Was anders ist.**
+- **Auftragsmappe → Auftragsbogen.** Die Mappe ist ein eigenes Blatt mit Kopf (Kicker AUFTRAG ·
+  Kunde, Titel, Ziele/Niveau, Reiter Brief/Ziele/Plan, X, Fuß mit „Ziele ansehen" und genau einer
+  Hauptaktion). Solange sie offen ist, ruht die Karte: die Werkzeugleiste und der Flächentitel
+  werden ausgeblendet (`mappe-an` am `.labor`) — der alte Kopfraum-Hack
+  (`--am-kopfraum`) ist ersatzlos entfallen, weil er den überlappenden Streifen erzeugte.
+  Die Höhe folgt dem Inhalt (Ziele-Reiter mit einem Ziel: 515 → **315 px**, Leerraum ~300 → **16 px**;
+  bei drei Zielen 426 px ohne Leerraum), Höchsthöhe `min(70vh, 560px)` mit innerem Scrollen,
+  ≤ 900 px als Blatt von unten. Fokus geht in die Mappe und beim Schließen zurück zum Auslöser.
+- **Karte ruhiger.** Knoten-Labels mit 15-px-Zeilenabstand statt 13 px (neun gemessene
+  Überlappungspaare → **0** in 1440/960/720, fit/100 %/25 %, allen Themes); die Adresszeile steht
+  nur bei Hover/Auswahl oder Zoom ≥ 0,85 auf der Fläche (sonst Tooltip/Inspektor), Decluttering
+  greift jetzt auch für die IP-Zeile.
+- **Inspektor entzerrt.** Kopf 135 → **102 px**, eine ruhige Kennzahlenzeile statt vierspaltiger
+  Steckbrief-Reihe; Ports als zwei Zeilen (Portname + Link-Chip + Modus-Chip; darunter gleich
+  breite Felder Modus/VLAN mit je einer Beschriftung, 44 px hoch, 141/136 px breit statt 62–73 px).
+  Die Portliste scrollt in sich mit ganzem Zeilenraster (keine angeschnittene Zeile mehr, sichtbarer
+  Scrollbalken); die SVI-Verwaltungskarte liegt jetzt im VLAN-Reiter.
+- **Mini-Leiste = Begleiter (Konzeptwechsel).** Die Leiste **löst keine Aufträge mehr** — sie
+  begleitet den laufenden Auftrag: zugeklappt Stufe · Rolle und drei Werte in einer Zeile
+  (`7 €/h · Ruf 14 · ● 5 offen`), Deckkraft **0,92** statt 0,55 (Regler 60–100 %); aufgeklappt
+  „Jetzt dran" mit Kunde · Auftrag **und dem nächsten Schritt in einem Satz** (echte Daten, nie die
+  Lösung), „Im Labor fortsetzen"/„Auftrag lesen"; „Kurzübung (freiwillig)" mit Kontextzeile aus dem
+  aktiven Auftrag; „Lage"-Zeile; Schnellaktionen. Animation: 320 ms `cubic-bezier(.22,1,.36,1)`
+  für Höhe/Breite, Inhalt mit 8 px Versatz und 40/80/120 ms gestaffelt; Zuklappen blendet den Inhalt
+  zuerst aus (160 ms), die Karte folgt (240 ms), die Fenstergröße zieht danach nach. „Bewegung aus"
+  und reduzierte Bewegung: sofortiger Wechsel.
+- **QoL/A11y:** sichtbarer Fokus (auch der OFFENE Zustand von „Auftrag lesen" gegen die
+  Theme-Regeln), Fokus-Rückgabe nach Esc, 44-px-Ziele, keine angeschnittenen Texte, Testhaken
+  erhalten. Der Test `tests/ui-leiste-ueberlappung.test.js` wurde auf die neue Mechanik
+  umgestellt (6 statt 4 Fälle).
+
+**Gemessen (31.10.2026, in dieser Sitzung).** `node tests/run.js` **932/932 grün**
+(109 Testdateien, 95 headless Module, **0 übersprungen**) · `sh tools/test.sh --rauch` **45/45** ·
+`python tools/klassen.py` **0** · `python tools/ethos.py` **GRÜN** (R1 23, R2 17, R3 4,
+R4 169→**135**, R9 62→58, R10 42 = Stand; R12 wie vereinbart nicht gemessen) ·
+`python tools/umlaute.py` **GRÜN** · `node tools/sim-stand.js` **Simulation unverändert** ·
+Bau **138 Module** (95 headless).
+
+**Erzeugnisse.** Fassung **2.7.0**; Einzeldatei und `docs/index.html` byte-gleich,
+**3.751.197 B**, SHA256 `42560b5e…6168a2`, 0 Außenverweise; Windows-`.exe` **8.956.928 B**,
+ProductVersion **2.7.0**, SHA256 `593597c7…e7c5c0e2`. Einzelheiten:
+[`Übergabe – Stand 31.10.2026 – Runde 5`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 5.md>).
+
+**Nicht geprüft.** R12 (`ethos --dom`), Android-APK (kein SDK), echte Maus im Tauri-Fenster
+nur über den Prüfbau, Themes stichprobenweise, Screenreader.
+
+---
+
 ## 2.6.0 — Runde 4: Einsatzakte, Ausbildungs-Cockpit, Flugschreiber, Werkstattregal, eigenes Fenster (31.10.2026)
 
 **Was diese Fassung ist.** Der zweite Gestaltungszug nach Bento 2.5. Sieben Stränge, die noch vor

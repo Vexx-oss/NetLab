@@ -5,7 +5,7 @@
    Die Logik liegt in spiel/*.js; hier nur Anzeige und Bedienung. Start über Bus „ui-bereit“ (ui/start.js). */
 UI.spiel = (() => {
   const S = {inst: null, live: null, liveTimer: null, hilfeOffen: false, hilfeAnsicht: null, demo: null, seniorTimer: null, coach: null, vorhersageGefragt: new Set(),
-    mappe: {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false},
+    mappe: {offen: false, reiter: "brief", mehr: false, erstes: false, rein: false, ausloeser: null, fokusReiter: false},
     weg: {iid: null, liste: []}, probe: false};
   const kunde = id => (Spiel.kundenDaten ? Spiel.kundenDaten(id) : (DATEN.kunden || {})[id]) || {name: id || "Kunde", symbol: "✉", farbe: "--accent", ansprechpartner: {name: ""}};
   const NIV = {E: "Einstieg", AP1: "AP1", AP2: "AP2"};
@@ -66,7 +66,7 @@ UI.spiel = (() => {
        `S.einstiegStart` zählt dabei wie der Coach: Die Begrüßungskarte erklärt den Auftrag – eine
        zusätzlich aufklappende Mappe läge über der Zeichenfläche und verdeckte die Geräte
        (gemessen: `tools/rauch.py` meldete „sw1 unter div.am-brief“). */
-    if (erstesMal && !coach && !S.einstiegStart && r.inst.quelle !== "pruefung") mappeAuf(r.def.hotline ? "anruf" : briefGelesen ? "ziele" : "brief", true);
+    if (erstesMal && !coach && !S.einstiegStart && r.inst.quelle !== "pruefung") mappeAuf(r.def.hotline ? "anruf" : briefGelesen ? "ziele" : "brief", true, false);
     status();
   }
   /* Fernwartung (F2): Was zeigt der Bildschirm des Kunden? Das Ziel, das gerade nicht geht – als Symbol mit Namen. */
@@ -84,6 +84,7 @@ UI.spiel = (() => {
   }
   function ticketVerlassen(){
     S.inst = null; S.demo = null; S.coach = null;
+    S.mappe.offen = false; S.mappe.erstes = false; S.mappe.ausloeser = null; mappeUmgebung();
     clearInterval(S.seniorTimer); S.seniorTimer = null;
     UI.sandbox?.laden?.();
   }
@@ -93,6 +94,7 @@ UI.spiel = (() => {
      Genau ein Hauptknopf: die Abnahme – außer ein offenes Feld (Mappe, Hilfeleiter) hat einen eigenen. */
   function auftrag(el){
     const inst = S.inst;
+    mappeUmgebung();
     if (!inst || !Spiel.instanz(inst.iid)) {
       /* gerade abgenommen (Funktionsprobe läuft): Titel bleibt stehen, mit Haken */
       const f = S.fertig;
@@ -125,26 +127,88 @@ UI.spiel = (() => {
         niveau === "AP2" ? " – die Abnahme startet die Geräte neu!" : " – nach einem Neustart wäre die Änderung weg.") : null,
       S.coach ? coachLeiste() : null,
       S.hilfeOffen ? hilfePanel(inst, def, naechste) : null));
-    if (S.mappe.offen) el.append(mappe(def, k, stand, live, regel.liveGrund));
+    if (S.mappe.offen) { const mm = mappe(def, k, stand, live, regel.liveGrund); el.append(mm); mappeLinksSetzen(mm, el); }
     if (el.querySelectorAll(".primaer").length > 1) abnahme.classList.remove("primaer");
     S.mappe.rein = false;
+    /* Reiterwechsel zeichnet die Mappe neu – der Fokus bleibt auf dem gewählten Reiter (Runde 5). */
+    if (S.mappe.fokusReiter) { S.mappe.fokusReiter = false; fokusSetzen(document.querySelector(".am-tab.an")); }
   }
-  function mappeAuf(reiter = "brief", erstes = false){
+  /* Fokus erst im nächsten Frame setzen: die Mappe wird gerade neu gezeichnet, das alte Element
+     ist weg. Ohne requestAnimationFrame (schmale Testumgebung) sofort – und nie mit Fehler. */
+  function fokusSetzen(el){
+    if (!el || typeof el.focus !== "function") return;
+    const tun = () => { try { el.focus({preventScroll: true}); } catch (e) { try { el.focus(); } catch (e2) { /* ohne DOM */ } } };
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(tun); else tun();
+  }
+  /* Die Mappe ist ein eigenes Blatt über der Karte (Runde 5, § 2 A): solange sie offen ist, ruht die
+     Werkzeugleiste der Fläche. Die Klasse .mappe-an steht am .labor; die Regeln (Leisten und
+     Flächentitel ausblenden) liegen in editor.css neben den Werkzeugleisten. Sie wird bei JEDEM
+     Neuzeichnen gesetzt – damit fällt sie auch beim Schließen, beim Ticketende und beim
+     Ansichtswechsel wieder weg und die Karte bekommt ihre Werkzeuge zurück. */
+  function mappeUmgebung(){
+    try {
+      const labor = document.querySelector(".labor");
+      if (labor) labor.classList.toggle("mappe-an", !!S.mappe.offen && !!S.inst && UI.app.aktuell === "labor");
+    } catch (e) { /* ohne DOM (Tests) */ }
+  }
+  /* Die Mappe beginnt an derselben Innenkante wie die Auftragszeile: der Rahmen .lb-auftrag ist je
+     Theme und Media unterschiedlich gepolstert (16–24 px) – gemessen statt geschätzt, als CSS-Variable.
+     Ohne getComputedStyle (schmale Testumgebung) bleibt der Rückfall aus spiel.css (16 px). */
+  function mappeLinksSetzen(mm, el){
+    try {
+      const pl = parseFloat(getComputedStyle(el).paddingLeft) || 0;
+      if (pl) mm.style.setProperty("--am-links", pl + "px");
+    } catch (e) { /* ohne DOM */ }
+    mappeHoeheKlemmen(mm);
+  }
+  /* Die Mappe hängt unter dem Auftragsband. Auf niedrigen Fenstern reichen 70 vh nicht bis zum Fuß:
+     dann deckelt die Höhe der freie Platz bis zum Fensterrand (8 px Luft), damit Fußaktion und X immer
+     erreichbar bleiben. Gemessen statt geschätzt; CSS-Rückfall bleibt min(70vh, 560px). */
+  function mappeHoeheKlemmen(mm){
+    try {
+      const r = mm.getBoundingClientRect();
+      const platz = Math.floor((window.innerHeight || 0) - r.top - 8);
+      const max = Math.min(Math.round((window.innerHeight || 0) * 0.7), 560, platz);
+      if (max > 160) mm.style.setProperty("--am-max", max + "px");
+    } catch (e) { /* ohne DOM */ }
+  }
+  function mappeAuf(reiter = "brief", erstes = false, mitFokus = true){
+    const z = mitFokus && typeof document !== "undefined" ? document.activeElement : null;
+    S.mappe.ausloeser = z && z !== document.body ? z : null;
     Object.assign(S.mappe, {offen: true, reiter, erstes, rein: true});
     UI.labor.auftragNeu();
+    if (mitFokus) fokusSetzen(document.querySelector(".am-mappe"));
   }
   function mappeZu(){
     if (!S.mappe.offen) return;
-    S.mappe.offen = false; S.mappe.erstes = false;
+    const zurueck = S.mappe.ausloeser;
+    S.mappe.offen = false; S.mappe.erstes = false; S.mappe.ausloeser = null;
     UI.labor.auftragNeu();
+    mappeUmgebung();
+    /* Fokus zurück zum Auslöser (Runde 5, § 2 A); ohne brauchbaren Auslöser zum Knopf „Auftrag lesen“. */
+    const ziel = zurueck && zurueck.isConnected && !zurueck.hidden ? zurueck : document.querySelector(".am-lesen");
+    fokusSetzen(ziel);
   }
+  /* Reiterwechsel: Mappe neu zeichnen, Fokus danach auf den gewählten Reiter. */
+  function reiterWechsel(id){ S.mappe.reiter = id; S.mappe.fokusReiter = true; UI.labor.auftragNeu(); }
   function mappe(def, k, stand, live, mitGrund){
-    const m = S.mappe, n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length;
-    const reiter = h("div", {class: "am-reiter", role: "tablist"},
-      [def.hotline ? ["anruf", "Anruf"] : ["brief", "Brief"], ["ziele", live ? `Ziele ${erfuellt}/${n}` : "Ziele"], def.fernwartung || def.blatt ? null : ["plan", "Plan"]].filter(Boolean).map(([id, titel]) =>
+    const m = S.mappe, inst = S.inst, n = stand.status.length, erfuellt = stand.status.filter(s => s.ok).length;
+    const niveau = inst ? Spiel.niveauVon(inst) : null;
+    const titelId = "am-mappe-titel";            /* eine Kennung, zwei Stellen (h2 + aria-labelledby) */
+    const zielText = live ? `Ziele ${erfuellt}/${n}` : `${n} ${n === 1 ? "Ziel" : "Ziele"}`;
+    const reiter = h("div", {class: "am-reiter", role: "tablist", "aria-label": "Auftragsmappe"},
+      [def.hotline ? ["anruf", "Anruf"] : ["brief", "Brief"], ["ziele", "Ziele"], def.fernwartung || def.blatt ? null : ["plan", "Plan"]].filter(Boolean).map(([id, titel]) =>
         h("button", {type: "button", role: "tab", class: "am-tab" + (m.reiter === id ? " an" : ""), "aria-selected": String(m.reiter === id),
-          onclick: () => { m.reiter = id; UI.labor.auftragNeu(); }}, titel)),
-      h("button", {type: "button", class: "am-zu", title: "Schließen (Esc)", "aria-label": "Mappe schließen", onclick: () => mappeZu()}, UI.symbol("schliessen", 15)));
+          onclick: () => reiterWechsel(id)}, titel)));
+    /* Kopf des Blattes (Runde 5, § 2 A): Kicker AUFTRAG · Kunde, Titel = Auftrag, Meta = Ziele/Niveau.
+       Kein zweiter Kopf: Werkzeugleiste und Flächentitel ruhen, solange die Mappe offen ist. */
+    const kopf = h("header", {class: "am-kopf"},
+      h("div", {class: "am-kopf-text"},
+        h("p", {class: "am-kicker"}, "AUFTRAG", h("span", {class: "am-trenner", "aria-hidden": "true"}, "·"), k.name),
+        h("h2", {class: "am-kopf-titel", id: titelId}, def.titel),
+        h("p", {class: "am-meta", title: live ? null : "AP2: Ob die Ziele erreicht sind, prüfst du selbst."},
+          h("span", {}, zielText), h("span", {class: "am-trenner", "aria-hidden": "true"}, "·"), h("span", {}, NIV[niveau] || niveau || "Auftrag"))),
+      h("button", {type: "button", class: "am-zu", title: "Schließen (Esc)", "aria-label": "Mappe schließen", onclick: () => mappeZu()}, UI.symbol("schliessen", 17)));
     let inhalt;
     if (def.hotline && m.reiter === "brief") m.reiter = "anruf";
     if (m.reiter === "anruf" && def.hotline) inhalt = anrufAnsicht(def, k);
@@ -158,12 +222,12 @@ UI.spiel = (() => {
         h("ul", {class: "sp-ziele"}, stand.status.map((s, i) => h("li", {class: live ? (s.ok ? "ok" : s.ok === false ? "offen" : "") : "neutral", "data-i": i},
           h("span", {class: "sp-haken", "aria-hidden": "true"}, live ? (s.ok ? "✓" : "○") : "•"),
           h("span", {class: "am-ziel-text"}, s.ziel.typ === "antwort" ? s.ziel.frage : s.ziel.text || s.ziel.typ,
-            mitGrund && s.ok === false && s.grund ? h("small", {class: "am-grund"}, Spiel.grundTitel(s.grund)) : null,
+            mitGrund && s.ok === false && s.grund ? h("span", {class: "am-grund"}, Spiel.grundTitel(s.grund)) : null,
             s.ziel.typ === "antwort" ? antwortFeld(s.ziel) : null, s.ziel.typ === "notiz" ? notizFeld(s.ziel) : null),
-          s.ziel.typ === "blockiert" ? h("small", {class: "sp-blockiert"}, " darf nicht gehen") : null,
+          s.ziel.typ === "blockiert" ? h("span", {class: "sp-blockiert"}, " darf nicht gehen") : null,
           s.ziel.typ === "befehl" && !s.ok ? h("button", {type: "button", class: "knopf geist klein am-terminal", title: "Terminal dieses Geräts öffnen (Doppelklick auf das Gerät geht auch)",
             onclick: () => { mappeZu(); UI.terminal.oeffnen(s.ziel.geraet); }}, "Terminal ▸") : null))),
-        live ? null : h("p", {class: "sp-leise"}, "AP2: Ob die Ziele erreicht sind, prüfst du selbst – die Abnahme sagt, ob es reicht."));
+        live ? null : h("p", {class: "am-hinweis"}, "AP2: Ob die Ziele erreicht sind, prüfst du selbst – die Abnahme sagt, ob es reicht."));
     } else {
       /* höchstens ~60 Wörter sichtbar, der Rest auf „mehr“ */
       const text = String(def.briefing || ""), woerter = text.split(/\s+/).filter(Boolean);
@@ -181,9 +245,15 @@ UI.spiel = (() => {
         geruestTipp(def),
         variantenWahl(def));
     }
+    /* Fuß: genau EINE Hauptaktion; beim ersten Öffnen zusätzlich die ruhige Sekundäraktion
+       „Ziele ansehen“ (Runde 5, § 2 A). */
     const fuss = h("div", {class: "am-fuss"},
-      h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s ▸" : "Zurück ins Labor"));
-    return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-label": "Auftragsmappe"}, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
+      m.erstes && m.reiter !== "ziele"
+        ? h("button", {type: "button", class: "knopf geist", onclick: () => reiterWechsel("ziele")}, "Ziele ansehen")
+        : null,
+      h("button", {type: "button", class: "knopf primaer", onclick: () => mappeZu()}, m.erstes ? "Los geht’s" : "Zurück ins Labor"));
+    return h("section", {class: "am-mappe" + (m.rein ? " rein" : ""), role: "dialog", "aria-labelledby": titelId, tabindex: "-1",
+      style: {"--k": `var(${k.farbe || "--accent"})`}}, kopf, reiter, h("div", {class: "am-inhalt"}, inhalt), fuss);
   }
   /* Flow-Regler (§ 20 F6): Gerüst – die Frage des Seniors steht gleich da (frei), in Brief und Zielen */
   /* Klassenraum am geöffneten Auftrag (B § 3.3: „B und C messen denselben Abdruck"): Der Azubi muss
@@ -203,12 +273,12 @@ UI.spiel = (() => {
        `UI.klassenraum.hilfeKnopf()` (öffentliche Fläche, dort auch geprüft); diese Datei hängt ihn
        nur ein. Fehlt der Baustein in einer schmalen Fassung, bleibt die Zeile reiner Text. */
     const knopf = typeof UI.klassenraum?.hilfeKnopf === "function" ? UI.klassenraum.hilfeKnopf() : null;
-    return h("p", {class: "sp-leise"}, teile, knopf ? " " : null, knopf);
+    return h("p", {class: "am-hinweis"}, teile, knopf ? " " : null, knopf);
   }
   function geruestTipp(def){
     const frage = S.inst && S.inst.flow === "geruest" ? (def.hilfen?.frage || [])[0] : null;
     return frage ? h("p", {class: "am-geruest"}, h("span", {"aria-hidden": "true"}, UI.symbol("trace", 15)), " ", h("b", {}, "Der Senior: "), `„${frage}“`,
-      h("small", {}, "Diesmal mit Gerüst: Haken und Warnungen sind an, ein zweiter Versuch kostet nichts.")) : null;
+      h("span", {class: "am-geruest-hinweis"}, "Diesmal mit Gerüst: Haken und Warnungen sind an, ein zweiter Versuch kostet nichts.")) : null;
   }
   /* E2 Kundenakte im Ergebnis: Atlas erschlossen, Vertrauen gestiegen, neues Kapitel – eine Zeile im Block „Dein Weg“ */
   function akteZeile(erg){
@@ -229,11 +299,11 @@ UI.spiel = (() => {
     if (!v || !inst) return null;
     const gewaehlt = inst.variante && Spiel.VARIANTE[inst.variante], aenderbar = !(inst.abnahmen > 0);
     const waehlen = id => { Spiel.varianten.waehlen(inst, id); liveJetzt(); };
-    if (gewaehlt && !S.mappe.wahlOffen) return h("div", {class: "am-variante gewaehlt"}, h("span", {}, `${gewaehlt.sym} ${gewaehlt.titel}: `, h("small", {}, gewaehlt.text)),
+    if (gewaehlt && !S.mappe.wahlOffen) return h("div", {class: "am-variante gewaehlt"}, h("span", {}, `${gewaehlt.sym} ${gewaehlt.titel}: `, h("span", {class: "am-variante-text"}, gewaehlt.text)),
       aenderbar ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { S.mappe.wahlOffen = true; UI.labor.auftragNeu(); }}, "ändern") : null);
     return h("div", {class: "am-variante"}, h("p", {class: "am-variante-frage"}, h("b", {}, "Wie gehst du vor?")),
       h("div", {class: "am-variante-karten"}, v.map(x => h("button", {type: "button", class: "am-variante-karte" + (inst.variante === x.id ? " an" : ""),
-        onclick: () => { S.mappe.wahlOffen = false; waehlen(x.id); }}, h("b", {}, `${x.sym} ${x.titel}`), h("small", {}, x.text)))));
+        onclick: () => { S.mappe.wahlOffen = false; waehlen(x.id); }}, h("b", {}, `${x.sym} ${x.titel}`), h("span", {class: "am-variante-text"}, x.text)))));
   }
   /* Änderungsnotiz (Zielart „notiz“, Variante „sauber“) */
   function notizFeld(ziel){
@@ -254,7 +324,7 @@ UI.spiel = (() => {
       h("button", {type: "button", class: "knopf geist klein", onclick: () => { Spiel.hotline.auflegen(inst); neu(); }}, "Auflegen – ich schau selbst nach"));
     const b = st.fertig ? Spiel.hotline.bewertung(inst) : null;
     return h("div", {class: "ht-anruf"}, h("div", {class: "ht-verlauf"}, ...verlauf), fragen,
-      b ? h("div", {class: "ht-bewertung"}, h("p", {}, h("b", {}, "☎ " + b.text)), ...b.hinweise.map(t => h("p", {class: "sp-leise"}, t))) : null);
+      b ? h("div", {class: "ht-bewertung"}, h("p", {}, h("b", {}, "☎ " + b.text)), ...b.hinweise.map(t => h("p", {class: "am-hinweis"}, t))) : null);
   }
   /* Zielart „antwort“ (C4): Wert aus der Terminal-Ausgabe eintragen; geprüft wird gegen das Netz (Haken nur, wo das Niveau ihn zeigt) */
   function antwortFeld(ziel){
@@ -478,6 +548,7 @@ UI.spiel = (() => {
   function ticketFertig(){
     clearInterval(S.seniorTimer); S.seniorTimer = null;
     S.inst = null; S.demo = null; S.live = null;
+    S.mappe.offen = false; S.mappe.erstes = false; S.mappe.ausloeser = null; mappeUmgebung();
   }
   function overlay(inhalt, klasse = "", {aussenZu = false} = {}){
     const o = h("div", {class: "sp-overlay " + klasse, role: "dialog", "aria-modal": "true"}, h("div", {class: "sp-karte"}, inhalt));
@@ -981,6 +1052,15 @@ UI.spiel = (() => {
   }, true);
 
   /* ---------- Bus ---------- */
+  /* Fenster verkleinert/vergrößert: die Höhen-Klemme der offenen Mappe nachziehen (Runde 5). */
+  if (typeof window !== "undefined" && window.addEventListener) window.addEventListener("resize", () => {
+    if (!S.mappe.offen) return;
+    const mm = document.querySelector(".am-mappe");
+    if (mm) mappeHoeheKlemmen(mm);
+  });
+  /* Ansichtswechsel: die Mappe gehört zum Labor – beim Verlassen schließen, damit die Klasse
+     .mappe-an (Werkzeugleiste ruht) nie auf einer anderen Ansicht hängen bleibt (Leitung, 31.10.2026). */
+  Bus.an("ansicht", name => { if (name !== "labor" && S.mappe.offen) mappeZu(); });
   Bus.an("netz-geaendert", d => {
     if (S.inst && d && d.netz === S.inst.netz) livePlanen();
     if (S.mess && S.mess.ersteHandlung == null) S.mess.ersteHandlung = Math.round(performance.now());

@@ -456,11 +456,13 @@ UI.app = (() => {
       zeile("Wie ausführlich sollen Konsole und Simulation erklären?", "Einstieg erklärt jeden Schritt, AP1 knapp, AP2 zeigt nur, was ein echtes Gerät melden würde.",
         wahl("Erklärtiefe", [["E", "Einstieg"], ["AP1", "AP1"], ["AP2", "AP2"]], e.niveau || "E", v => { einstSetzen({niveau: v}); Bus.senden("niveau", v); })))});
     l.push({titel: "Leiste", fn: c => {
-      const le = Object.assign({deckkraft: 0.55, ecke: "ur"}, e.leiste);
-      const setzeLeiste = teil => { const x = einst(); x.leiste = Object.assign({deckkraft: 0.55, ecke: "ur"}, x.leiste, teil); store.set("einst", x); UI.leiste?.darstellen?.(); };
+      /* Runde 5 (Leitung): Standard 0,92 statt 0,55 — die Leiste wirkte ausgewaschen und beliebig
+         (Befund des Nutzers: „vermittelt visuell nicht ihren Nutzen"). Regelbar bleibt 60–100 %. */
+      const le = Object.assign({deckkraft: 0.92, ecke: "ur"}, e.leiste);
+      const setzeLeiste = teil => { const x = einst(); x.leiste = Object.assign({deckkraft: 0.92, ecke: "ur"}, x.leiste, teil); store.set("einst", x); UI.leiste?.darstellen?.(); };
       const kannL = Plattform.kann("leiste");
       const prozent = h("output", {class: "einst-wert"}, Math.round(le.deckkraft * 100) + " %");
-      const regler = h("input", {type: "range", min: "30", max: "100", step: "5", value: String(Math.round(le.deckkraft * 100)), "aria-label": "Deckkraft der Leiste ohne Maus",
+      const regler = h("input", {type: "range", min: "60", max: "100", step: "5", value: String(Math.round(le.deckkraft * 100)), "aria-label": "Deckkraft der Leiste ohne Maus",
         oninput: ev => { prozent.textContent = ev.target.value + " %"; setzeLeiste({deckkraft: +ev.target.value / 100}); }});
       c.append(zeile("Deckkraft ohne Maus", "Mit der Maus darüber ist die Leiste immer voll deckend.", h("div", {class: "regler"}, regler, prozent), kannL));
       c.append(zeile("Position", Plattform.name === "browser" ? "Im Browser: Ecke der kleinen Karte." : "Ecke des Bildschirms, an der die Leiste sitzt.",

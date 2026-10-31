@@ -188,15 +188,12 @@ UI.labor = (() => {
     Z.root.append(leiste, mitte, Z.el.dock);
     container.replaceChildren(Z.root);
 
-    /* Die Auftragsmappe hängt als Overlay unter der Auftragsleiste und überdeckt damit den
-       oberen Rand der Fläche – genau dort schwebt die Werkzeugleiste (`top:10px`, z-index 20).
-       Die Mappe liegt in `.lb-auftrag` (z-index 10) und kommt aus diesem Stapelkontext nicht
-       heraus; ihre 30 helfen ihr nicht. Gemessen am 09.10.2026 (1200x760): Werkzeugleiste
-       y=121–169, Mappen-Reiter y=120–164 – der Text lag exakt darunter und die Lücken der
-       Leiste ließen ihn durchscheinen („Tools überlappen Text", Rückmeldung des Nutzers).
-       Deshalb misst ein Beobachter die Höhe der Leiste und stellt sie als `--leiste-h` bereit;
-       `spiel.css` gibt der Mappe damit genau so viel Kopfraum, dass ihr Inhalt darunter beginnt.
-       Gemessen statt geschätzt: die Leiste ist bei grober Zeigereingabe 44 px hoch, sonst 48. */
+    /* Runde 5: Seit die Auftragsmappe ein eigenes Blatt mit Kopf ist, ruhen Werkzeugleiste und
+       Flächentitel, solange sie offen ist (Klasse .mappe-an am .labor, CSS in editor.css bei den
+       Leisten) – der frühere Kopfraum-Hack (`--am-kopfraum`) ist damit entfallen. Die gemessene
+       Leistenhöhe bleibt als `--leiste-h` erhalten: sie ist die eine Zahl für die schwebende
+       Werkzeugleiste (44 px bei grober Zeigereingabe, sonst 48) und wird von der Überlappungs-
+       Messung gelesen; ohne Messen wäre sie wieder geschätzt. */
     const setzeLeisteHoehe = () => {
       const hh = oben.offsetHeight;
       if (hh) Z.root.style.setProperty("--leiste-h", hh + "px");
@@ -325,9 +322,13 @@ UI.labor = (() => {
   function blockSkala(k){ return Math.min(2.6, Math.max(1, 1 / (k || 1))); }
   function labelUeber(a, b){ return a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1; }
   const LABEL_HALB = 58;                /* halbe Reservierungsbreite für die Beschriftung (px bei s=1) */
+  /* Ab dieser Zoomstufe stehen die Adressen ruhig auf der Fläche (Runde 5, § 2 D). Auswahl und
+     Hover zeigen die Adresse immer; das Einpassen landet je nach Netz bei 0,55–0,8 – dort bleibt
+     die Karte ohne Zahlenregen lesbar, die Adressen stehen im Tooltip und im Inspektor. */
+  const IP_ZOOM = 0.85;
   function nodeBoxWelt(g, p, k){
     const s = blockSkala(k), h = ikonPx(g) / 2, halb = Math.max(h + 6, LABEL_HALB);
-    return {x1: p.x - halb * s, y1: p.y - (h + 4) * s, x2: p.x + halb * s, y2: p.y + (h + 48) * s};
+    return {x1: p.x - halb * s, y1: p.y - (h + 4) * s, x2: p.x + halb * s, y2: p.y + (h + 62) * s};
   }
   function raumWelt(){
     let breite = 900, hoehe = 600;
@@ -348,10 +349,19 @@ UI.labor = (() => {
     }
     for (const n of knoten) {
       const rolle = n.el.querySelector ? n.el.querySelector(".ger-rolle") : null;
-      if (!rolle) continue;
+      const adresse = n.el.querySelector ? n.el.querySelector(".ger-ip") : null;
+      if (!rolle && !adresse) continue;
       let stoert = false;
       for (const o of knoten) if (o.id !== n.id && labelUeber(n.box, o.box)) { stoert = true; break; }
-      rolle.setAttribute("visibility", stoert ? "hidden" : "visible");
+      if (rolle) rolle.setAttribute("visibility", stoert ? "hidden" : "visible");
+      /* Runde 5 (§ 2 D): Die Adresszeile ist ein Zahlenregen, solange sie überall steht. Sie
+         erscheint bei Auswahl/Hover (dann ist sie anklickbar und kopiert) und sonst erst ab
+         genügender Zoomstufe; in dichten Lagen fällt sie wie die Rolle dem Decluttering zum Opfer.
+         Der Name bleibt immer stehen – er ist die Orientierung. */
+      if (adresse) {
+        const an = n.id === Z.hover || n.id === Z.geraeteHover || Z.auswahlSet.has(n.id);
+        adresse.setAttribute("visibility", an || (k >= IP_ZOOM && !stoert) ? "visible" : "hidden");
+      }
     }
     Z.nodeBoxen = knoten.map(n => n.box);
     /* Portnamen haben NACHrang: erst nach dem Setzen der Node-Boxen neu prüfen, sonst lagen sie
@@ -873,7 +883,9 @@ UI.labor = (() => {
     /* Beschriftung UNTER dem Piktogramm, zentriert (Nutzerentscheidung 30.10.2026: keine Kästen,
        klare Leserichtung). Breite = LABEL_HALB*2, damit „R-SALON"/„PC-BEHANDLUNG" sicher passen. */
     const boxL = -Math.max(ikonH + 6, LABEL_HALB), boxR = Math.max(ikonH + 6, LABEL_HALB);
-    const boxO = -ikonH - 4, boxU = ikonH + 48, radius = 12;
+    /* boxU trägt seit Runde 5 die dritte Zeile (Adresse) mit Luft: Baselines 18/33/48 unter der
+       Piktogramm-Mitte, unten 14 px Reserve für Unterlängen. */
+    const boxO = -ikonH - 4, boxU = ikonH + 62, radius = 12;
     const inhalt = sv("g", {});
     inhalt.setAttribute("data-inhalt", "1");
     inhalt.append(sv("rect", {class: "ger-treffer", x: boxL, y: boxO, width: boxR - boxL, height: boxU - boxO, rx: radius}));
@@ -881,8 +893,10 @@ UI.labor = (() => {
     inhalt.append(sv("rect", {class: "ger-karte", x: boxL, y: boxO, width: boxR - boxL, height: boxU - boxO, rx: radius}));
     inhalt.append(sv("g", {class: "ger-bild"}, UI.geraetebild(g.typ, g.skin, {px: ikonPx(g)})));
     const a = UI.ebenen.adresse(netz, g);
-    /* Label-Block mittig unter dem Piktogramm: Name (12,5), Rolle (11), Adresse (11). */
-    const x0 = 0, yName = ikonH + 18, yRolle = ikonH + 31, yIP = ikonH + 44;
+    /* Label-Block mittig unter dem Piktogramm: Name (12,5), Rolle (11), Adresse (11).
+       Runde 5 (§ 2 D): Zeilenabstand 15 px statt 13 – die Zeilenkästen überlappten sich sonst um
+       2–3 px (gemessen im Audit 31.10.2026, neun Paare). line-height 1,15 steht in editor.css. */
+    const x0 = 0, yName = ikonH + 18, yRolle = ikonH + 33, yIP = ikonH + 48;
     const t = sv("g", {class: "ger-text"});
     t.append(sv("text", {class: "ger-name", x: x0, y: yName, "text-anchor": "middle", text: g.name}));
     /* Die Rolle erklärt den Zustand und ist NIE leer (Befund B7); sie weicht, wenn Node-Boxen kollidieren. */

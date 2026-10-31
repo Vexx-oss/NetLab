@@ -7,6 +7,16 @@
    ganze Datei um und erzeugt einen Scheindiff ueber alle Zeilen. */
 .lb-inspektor.in{display:flex; flex-direction:column; overflow:hidden}
 .in-kopf{flex:0 0 auto; padding:12px 12px 8px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px; background:var(--panel-2)}
+/* Kopf kompakt (Vertrag Runde 5 § 2 B): Mikrolabel + Name + Rollenzeile + EINE ruhige Kennzahlen-Zeile.
+   Der Innenabstand gehört dem Inspektor; Farbe/Kante kommen weiter aus dem Basis-Layer. */
+.lb-inspektor .in-kopf{padding:8px 12px 12px}
+.in-kopf-meta{display:block; min-width:0; font-size:var(--fs-2); line-height:1.35; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+/* In den Port- und SVI-Feldern trägt die Kante keine Bedeutung (kein Fokus, kein Mono-Akzent):
+   zwei gleich aussehende Felder je Zeile statt eines hervorgehobenen (Audit: "unruhig"). */
+.in-port-feld .in-eingabe.mono, .in-svi .in-eingabe.mono{border-color:var(--line-2)}
+.in-port-feld .in-eingabe:focus, .in-svi .in-eingabe:focus{border-color:var(--accent)}
+.in-kopf-rolle.an{color:var(--ok); font-weight:600; letter-spacing:.02em}
+.in-kopf-rolle.aus{color:var(--bad); font-weight:600; letter-spacing:.02em}
 .in-kopf-zeile{display:flex; align-items:center; gap:8px; min-width:0}
 .in-kopf-zeile > svg, .in-speichern .in-knopf{flex:0 0 auto}
 .in-kopf-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
@@ -28,7 +38,18 @@
 .in-tab:hover{color:var(--ink); background:var(--panel-2)}
 .in-tab.an{color:var(--accent); border-bottom-color:var(--accent); background:var(--panel-2); font-weight:700}
 
-.in-inhalt{flex:1 1 auto; min-height:0; overflow:auto; padding:12px 12px 16px; display:flex; flex-direction:column; gap:12px; scrollbar-width:thin}
+.in-inhalt{flex:1 1 auto; min-height:0; overflow:auto; padding:12px 12px 16px; display:flex; flex-direction:column; gap:12px; scrollbar-width:thin;
+  /* Sichtbarer Scrollbalken mit Tokenfarbe – im Dunkelmodus war der Standardbalken unsichtbar (Audit Runde 5) */
+  scrollbar-color:color-mix(in srgb, var(--ink) 30%, transparent) transparent}
+/* Reiter Ports: nur die Liste scrollt, Kopf und Aktion bleiben stehen (Vertrag § 2 B) */
+.in-inhalt.in-ports{overflow-y:auto; overflow-x:hidden; gap:0; padding:8px 12px 8px}
+.in-portsektion{flex:1 1 auto; min-height:0}
+/* Rahmen des Port-Reiters enger als der Standard-Abschnitt: der Platz gehört der Portliste.
+   Doppelklasse, weil der Basis-Layer (zz-polaris.css) .in-abschnitt{padding:14px 20px} später setzt. */
+.in-inhalt.in-ports .in-portsektion{padding:4px 20px 4px}
+.in-portsektion > h4{margin:0}
+.in-inhalt.in-ports .in-portliste{flex:0 1 auto; min-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px; padding-bottom:4px;
+  scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--ink) 30%, transparent) transparent}
 .in-inhalt-konsole{padding:0; gap:0; overflow:hidden}
 .in-konsole{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .in-abschnitt{display:flex; flex-direction:column; gap:8px; min-width:0}
@@ -104,14 +125,26 @@
 .in-tabelle.mono{font-family:var(--mono); font-size:var(--fs-2)}
 .in-code-C{color:var(--ok); font-weight:700} .in-code-S{color:var(--accent); font-weight:700}
 
-.in-portliste{display:flex; flex-direction:column; gap:4px}
-.in-port-kopf{display:grid; grid-template-columns:78px auto 1fr 1fr; align-items:end; gap:4px; padding:4px 4px; border-radius:var(--radius-s)}
-.in-port-kopf .in-chip{align-self:center}
-.in-port-kopf .in-feld-titel{font-size:var(--fs-1)}   /* U02: war 10.5px – funktionale Beschriftung nie unter 11 */
-.in-port-name{border:0; background:none; color:var(--ink); font:700 var(--fs-2)/1 var(--mono); text-align:left; padding:8px 0; cursor:pointer; align-self:center}
-.in-vlan-chip{display:block; border-left:3px solid var(--v); padding-left:8px}
-.in-port-details{display:flex; flex-direction:column; gap:8px; padding:8px 8px 12px 12px; border-left:2px solid var(--line-2); margin:0 0 6px 10px}
+.in-portliste{display:flex; flex-direction:column; gap:4px; padding:0 0 4px}
+/* Portzeile als 2-zeiliger Block (Vertrag § 2 B): Zeile 1 Name + Link-Chip + Modus-Chip,
+   Zeile 2 zwei gleich breite Felder mit Beschriftung über dem Feld. Keine Trennstriche. */
+.in-port{display:flex; flex-direction:column; gap:4px}
+.in-port-kopf{display:flex; flex-direction:column; gap:4px; padding:4px 8px; border-radius:var(--radius-s)}
+.in-port-zeile{display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-width:0}
+.in-port-felder{display:grid; grid-template-columns:repeat(2, 1fr); gap:8px 12px}
+.in-port-feld{min-width:0}
+.in-port-feld .in-feld-titel{line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.in-port-name{display:inline-flex; align-items:center; min-height:44px; border:0; background:none; color:var(--ink); font:700 var(--fs-3)/1.2 var(--mono); letter-spacing:.02em; text-align:left; padding:8px 0; cursor:pointer}
+.in-port-details{display:flex; flex-direction:column; gap:8px; padding:8px 8px 8px 16px; margin:0}
 .in-vlanliste, .in-vlan-nr{color:var(--v, var(--ink))}
+/* Trefferflächen ≥44 px in Port- und SVI-Feldern (min-height lässt Theme-Höhen unangetastet) */
+.in-port-feld .in-eingabe, .in-port-feld .in-auswahl, .in-svi .in-eingabe{min-height:44px}
+/* Verwaltung (SVI) im Reiter VLAN: Titel + Schalter rechts oben, gleiche Feldbreiten im Raster */
+.in-svi-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; flex-wrap:wrap}
+.in-svi-name{min-width:0; font:700 var(--fs-2)/1.2 var(--mono); letter-spacing:.02em; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.in-svi .in-schalter{min-height:44px; align-items:center; gap:4px}
+.in-svi .in-schalter-text{font-size:var(--fs-2); line-height:1.3}
+.in-svi .in-hinweis{color:var(--faint); font-size:var(--fs-2); line-height:1.45}
 
 .in-regeln{list-style:none; counter-reset:regel; margin:0; padding:0; display:flex; flex-direction:column; gap:3px}
 .in-regeln li{counter-increment:regel; display:flex; align-items:center; justify-content:space-between; gap:4px; padding:4px 4px 4px 8px; border-radius:var(--radius-xs); background:var(--panel); border-left:3px solid var(--line-2); font-size:var(--fs-2)}
@@ -160,10 +193,7 @@
 /* ---------- Strang D: Steckbrief, Auswahl-Rail, Kabel- und Zonen-Infos ----------
    Der Inspektor ist ein Steckbrief: Identität oben, Live-Werte darunter, Auswahl als Rahmen
    UND Rail (nicht nur Farbe). Alle Werte kommen aus Modell/UI.ebenen; Tokens aus basis.css. */
-.in-steckbrief{display:flex; flex-wrap:wrap; align-items:flex-start; gap:8px 12px; padding-top:4px}
-.in-wert{display:flex; flex-direction:column; gap:0; min-width:0}
-.in-wert-name{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
-.in-wert-text{max-width:16em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); font:500 var(--fs-2)/1.35 var(--body)}
+
 /* Auswahl sichtbar machen: Rail links am Kopf, zusätzlich zum Ring auf der Fläche. */
 .lb-inspektor.in-geraet .in-kopf{border-left:3px solid var(--accent)}
 .lb-inspektor.in-kabel .in-kopf{border-left:3px solid var(--info)}
