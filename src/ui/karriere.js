@@ -371,6 +371,10 @@ UI.karriere = (() => {
   function miniDialog(){
     const ziel = h("div", {class: "mk-dialog"});
     const zu = overlay(h("div", {}, h("h2", {}, "Mini-Ticket"),
+      /* Runde 6 (Leitung): Das Mini-Ticket ist eine KOPFÜBUNG aus dem allgemeinen Pool – es gehört
+         nicht zum laufenden Auftrag. Das steht jetzt hier, damit niemand eine Lösung des Auftrags
+         dahinter erwartet (Nutzerbefund: Fragen ohne Auftragskontext wirkten unlösbar). Die
+         auftragsgebundene Kurzübung mit echtem Netz-Kontext lebt in der Minileiste. */
       h("p", {class: "mk-einordnung sp-leise"}, "Kopfübung · unabhängig vom laufenden Auftrag. Sie prüft Grundwissen; die Lösung des Auftrags entsteht im Labor."),
       ziel, h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Schließen"))));
     miniZeichnen(ziel, {gross: true, schliessen: zu});

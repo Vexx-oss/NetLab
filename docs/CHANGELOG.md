@@ -9,6 +9,73 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.9.0 — Runde 8: Abteilung „Subnetting" mit visuellen Werkzeugen, Übungen und Lernspielen (31.10.2026)
+
+**Was diese Fassung ist.** Die in der Vorrunde begonnene Linie „Lernen braucht einen eigenen Ort"
+führt zu einer neuen Abteilung: **Subnetting und VLAN intensiv lernen** — mit visuellen Hilfen,
+generierten Übungen, sechs Werkzeugen und drei Lernspielen. Sie ist eine eigene Ansicht im Dock
+(nach „Labor"), kein Anbau an Training oder Wiki. Die Fassung 2.8.0 (Kurzübung mit Kontext,
+Flugschreiber) bleibt als eigener Commit davor.
+
+**Die Abteilung (neu: `src/ui/subnetz.js`, `src/stil/subnetz.css`).** Vier Register: Lehrpfad
+(8 Module in 3 Stufen mit Lektion, geführtem Beispiel, Übungs- und Prüfrunde), Werkzeuge,
+Üben & Spielen, Formelsammlung. Kopf mit Stufenwahl (Voreinstellung aus den Einstellungen),
+Fortschrittsring „sicher/8" und „Nächster Schritt". Der Zustand bleibt beim Wiederbetreten
+erhalten; Esc führt eine Ebene zurück; fehlende Bausteine zeigen eine ruhige Hinweiskarte statt
+eines Absturzes. Dock-Kurzform „Subnetz" (gegen den Wortumbruch in 76 px), voller Titel
+„Subnetting".
+
+**Rechenkern und Aufgabenmotor (neu: `src/spiel/subnetz.js`).** `Spiel.subnetz` rechnet
+oktettweise (keine 32-Bit-Dezimalzahlen im Rechenweg), prüft formatttolerant und erzeugt
+deterministisch Aufgaben: 11 Typen (Netz-ID, Broadcast, nutzbare Hosts, Maske↔Präfix, Blockgröße,
+Netze schneiden, VLSM, Zusammenfassen, VLAN am Port, Gleiches VLAN?, Trunk/Tagging) in 23
+art×Stufe-Kombinationen, je Stufe mindestens drei Varianten. Eigener Speicher `store "subnetz"`
+v:1 (Module neu < gelesen < geuebt < sicher; Fehler senkt nie unter „gelesen"); Lernverbuchung
+ausschließlich über `L.ueben`/`L.fehler`, Werkzeug-Lösungen mit `{hilfe:true}`. Der Spielstand
+(v:3) bleibt unverändert.
+
+**Lehrplan und Inhalte (neu: `src/daten/subnetz-lehrplan.js`).** Acht Module mit Kern,
+genau einem Merksatz, geführtem Beispiel und Quellenangaben; Formelsammlung mit
+Präfix-/Masken-/Host-Tabelle, Fünf-Schritte-Rechenweg, Blockgrößen, VLAN/Trunk/802.1Q und
+Fehlerfallen. Dazu die Doku [`Subnetting – Lernstufen-Matrix`](<entwicklung/Subnetting – Lernstufen-Matrix.md>)
+mit der Stufenmatrix (E/AP1/AP2) und den sieben optimierten Bestandsaufgaben.
+
+**Werkzeuge und Spiele (neu: `src/ui/subnetz-werkzeuge.js`, `src/stil/subnetz-werkzeuge.css`).**
+Sechs Werkzeuge: 32-Bit-Labor (Bits klickbar, Maske überlagert), Masken-Schieber, Blocklineal
+(mit Einrasten), Rechenweg-Assistent (schrittweise, Selbstrechnen), Adressplaner (VLSM mit
+Reserve), VLAN-Werkzeug (8 Ports, Access/Trunk, Frames mit Tag, Erreichbarkeitsmatrix). Drei
+Lernspiele: Präfix-Blitz (60 s), Netz-Sortierer, VLAN-Patcher. Alle Werte kommen aus
+`Spiel.subnetz.*`; Spiele buchen genau eine Runde über `{spiel:{id,punkte}}`.
+
+**Optimierte Bestandsaufgaben (jede mit Testbeleg).** `vlan-netzgroesse` lehrt jetzt
+Hosts je VLAN → Präfix statt „/24 auf n VLANs"; `mini-sub-1`/`mini-sub-3` Stufen getauscht
+(Netzadresse /26 = AP2, Hosts /28 = E, Stufen-Multiset unverändert); `mini-trunk-5` mit
+ausdrücklichem Native-Kontext; fehlende Denkhilfen für `mini-vlan-6`, `mini-trunk-5`,
+`mini-rostick-4` ergänzt; doppelte Trainings unterscheidbar (`tr-trunk-erlauben`/
+`tr-trunk-allowed`, `tr-netz-maske`/`tr-netz-nachbar`); `tr-subnetz-plan` auf E-Niveau gestützt.
+
+**Integration und Messwerkzeug.** `src/ui/app.js`: Dock-Reihenfolge und optionales `kurz`-Label;
+`src/ui/geraetebilder.js`: Glyph `subnetz`; `src/ui/training.js`/`training.css`: Querverweis
+„Zur Abteilung Subnetting"; `tools/rauch.py`: ein Fall „Subnetting" (48 Fälle) und eine
+Messhygiene (Auftragsbogen/transiente Toasts vor der Hauptaktions-Prüfung schließen — die sieben
+720-px-Fälle waren auf HEAD 2.7.0 mit 38/45 identisch rot, also vorbestehend, keine Regression
+dieser Runde).
+
+**Abnahme.**
+
+- `node tests/run.js`: **1049/1049 grün**, 0 übersprungen (118 Testdateien, 98 headless Module, Exit 0).
+- Rauchtest (`tools/rauch.py`): **48/48** (15 Fälle + Erstabnahme, je drei Breiten).
+- `klassen.py` **0** · `ethos.py` **GRÜN** (R1 23, R2 17, R3 4, R4 134, R5 0, R6 7, R7 0, R8 0, R9 58, R10 41, R11 0; R12 nicht gemessen) · `umlaute.py` **GRÜN** · `sim-stand.js` **unverändert**.
+- Bau **143 Module** (98 headless); Einzeldatei **4.080.274 B**, SHA256 `49FC2FA5746A23334DE6F41FC954D687AB4607D555ACF4B61EE96A9E9E56D89E`, `docs/index.html` und
+  `Netzwerk-Labor.html` byte-gleich, 0 Außenverweise.
+- Doku: 65 Dokumente erzeugt, 0 tote Verweise, `--pruefen` GRÜN; `stand.py --pruefen`: 0 Abweichung.
+- Sichtprüfung im Browser: 39 Zustandsmessungen in 1440/960/720: 0 seitlich scrollende Seiten, 0 JS-Fehler, 3 abgeschnittene Textknoten nur in der VLSM-Balkenbeschriftung kleiner Blöcke (die Legende nennt den vollen Namen); Kontrast 14 Textpaare × 7 Theme-Zustände = 0 Verstöße; „Bewegung aus“ = 0 Animationen; 56 Rohziele unter 44 px sind ausschließlich die Bit-Zellen (begründete Ausnahme für ein 32-Bit-Direktmanipulationsraster). Belege: `Nachweise/runde7/abnahme/`.
+- Die ausgelieferte `.exe` baut der Release-Ablauf aus dem Tag; lokal: die ausgelieferte `.exe` baut der Release-Ablauf aus dem Tag (Windows-Läufer); ein lokaler Bau mit ProductVersion 2.9.0 wurde geprüft, konnte aber nicht auf `Programm/Netzwerk-Labor.exe` gelegt werden, weil dort eine fremde, laufende 2.7.0-Instanz lag (Prozess nicht angefasst).
+- **Nicht gemessen:** R12 (`--dom`), Android-APK (kein SDK), Screenreader.
+
+**Nicht gemessen:** R12 (`--dom`), Android-APK (kein SDK), Screenreader, echte Maus im
+ausgelieferten Tauri-Fenster (nur Prüfbau).
+
 ## 2.8.0 — Runde 6/7: Kurzübung mit Auftragskontext, Flugschreiber mit Aufmerksamkeitsführung (31.10.2026)
 
 **Was diese Fassung ist.** Zwei Nachbesserungen nach 2.7.0, ausgelöst durch zwei Bildschirmfotos des

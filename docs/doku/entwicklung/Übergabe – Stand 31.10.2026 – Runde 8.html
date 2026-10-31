@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übergabe — Stand 31.10.2026 (Runde 8 „Abteilung Subnetting&quot;) · Netzwerk-Labor</title>
+<meta name="description" content="Der Nutzer schrieb (wörtlich): „NetLab braucht ein Subnetting abteil wo das intensiv beigebracht,.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Übergabe — Stand 31.10.2026 (Runde 8 „Abteilung Subnetting&quot;)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-auftrag-und-vorgehen">1 · Auftrag und Vorgehen</a></li>
+<li><a href="#2-was-jetzt-da-ist">2 · Was jetzt da ist</a></li>
+<li style="margin-left:16px"><a href="#2-1-die-abteilung-neue-ansicht-subnetz">2.1 Die Abteilung (neue Ansicht subnetz)</a></li>
+<li style="margin-left:16px"><a href="#2-2-rechenkern-und-aufgabengenerator">2.2 Rechenkern und Aufgabengenerator</a></li>
+<li style="margin-left:16px"><a href="#2-3-inhaltlich-und-in-der-lernschwierigkeit-optimierte-bestandsaufgaben">2.3 Inhaltlich und in der Lernschwierigkeit optimierte Bestandsaufgaben</a></li>
+<li style="margin-left:16px"><a href="#2-4-einfugung-in-die-themes-und-die-navigation">2.4 Einfügung in die Themes und die Navigation</a></li>
+<li><a href="#3-gemessene-abnahme">3 · Gemessene Abnahme</a></li>
+<li><a href="#4-was-bewusst-nicht-passiert-ist-offene-punkte">4 · Was bewusst nicht passiert ist / offene Punkte</a></li>
+<li><a href="#5-prufungen">5 · Prüfungen</a></li>
+<li><a href="#6-veroffentlichung-2-9-0">6 · Veröffentlichung 2.9.0</a></li>
+<li><a href="#7-nachweis-nach-dem-deploy-gemessen">7 · Nachweis (nach dem Deploy gemessen)</a></li>
+<li><a href="#8-fur-die-nachste-sitzung">8 · Für die nächste Sitzung</a></li>
+</ul>
+</nav><h1 id="ubergabe-stand-31-10-2026-runde-8-abteilung-subnetting">Übergabe — Stand 31.10.2026 (Runde 8 „Abteilung Subnetting")</h1>
+<h2 id="1-auftrag-und-vorgehen">1 · Auftrag und Vorgehen</h2>
+<p>Der Nutzer schrieb (wörtlich): „NetLab braucht ein Subnetting abteil wo das intensiv beigebracht, gelehrt mit visuellen Hilfselementen und Übungsaufgaben und tools / spielchen sind nur zum lernen von subnetting und vLAN. Analysiere mit einem Experten Team zum coden und designen wie das am besten in die bestehenden themes integriert wird und auch wo, ich denke ein eigenes abteil wird dem gerecht. Generell sollen alle Aufgaben Inhaltlich und vom Lernschwierigkeitsgrad optimiert werden. Mache das vollständig fertig und melde dich wenn der build und deploy fertig ist."</p>
+<p>Umgesetzt mit dem Projekt-Prozess <code>netzwerk-labor-redesign</code> (Vertrag → Umsetzung → Abnahme → Doku/Stand/Fassung), dem Skill <code>workflows</code> und einem Agenten-Team aus vier Schreib-Ownern (W1 Rechenkern, W2 Lehrplan/Inhalte, W3 Oberfläche, W4 Werkzeuge/Spiele), zwei unabhängigen Lesungen (Design/Theme/A11y und Didaktik/Code), Leitung integriert und veröffentlicht. Vertrag: <a href="../entwicklung/Entwurf%20%E2%80%93%20Runde%208%20%28Abteilung%20Subnetting%29.html"><code>Entwurf – Runde 8 (Abteilung Subnetting)</code></a>, <a href="../Architektur.html"><code>Architektur</code></a> § 26, <a href="../entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html"><code>Design – Spielspaß 2.0</code></a> § 43, Lernstufen: <a href="../entwicklung/Subnetting%20%E2%80%93%20Lernstufen-Matrix.html"><code>Subnetting – Lernstufen-Matrix</code></a>.</p>
+<p><strong>Vorher gemessen (read-only Bestandsaufnahme, Belege <code>Nachweise/runde7/befund.md</code>):</strong> <code>lab.subnetz</code> hatte zwei Trainings (beide nur „falsche Maske reparieren"), sechs Mini-Tickets, eine Fragen-Vorlage auf E-Niveau und ein Wiki-Rezept, das nur im letzten Oktett funktioniert; VLSM, Bit-Sicht, Blockgröße und Adressplan-Übungen fehlten; VLAN/Trunk hatten keine Planungs- und Tagging-Übungen und keine Native-VLAN-Sicht. Sieben Bestandsaufgaben mit schiefer Stufe oder fehlendem Kontext sind in § 2.3 belegt und behoben.</p>
+<h2 id="2-was-jetzt-da-ist">2 · Was jetzt da ist</h2>
+<h3 id="2-1-die-abteilung-neue-ansicht-subnetz">2.1 Die Abteilung (neue Ansicht <code>subnetz</code>)</h3>
+<p>Eigene Ansicht „Subnetting" im Dock direkt nach „Labor" (Dock-Kurzform „Subnetz", voller Titel „Subnetting"), automatisch in der Befehlspalette und mit sechs Palettenbefehlen „Subnetting: Werkzeug …". Vier Register:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Register</th><th>Inhalt</th></tr></thead><tbody><tr><td><strong>Lehrpfad</strong></td><td>8 Modulkarten in 3 Stufen (Bits · Maske · Blockgröße · Netz-ID/Broadcast/Hosts · Netze schneiden · VLSM · VLAN · Prüfungsfälle) mit Status, Dauer und „nächster Schritt"; Klick öffnet die Lektion mit Kern, genau einem Merksatz, visueller Hilfe, geführtem Beispiel (Schritt für Schritt aufdeckbar), Übungs- und Prüfrunde („sicher" nur nach bestandener Prüfrunde) und Verweisen zu Wiki/Labor/Training/Werkzeug</td></tr><tr><td><strong>Werkzeuge</strong></td><td>6 interaktive Werkzeuge: 32-Bit-Labor (Bits klickbar, Maske überlagert Netz-/Hostbits), Masken-Schieber (0–32, Maske/Maske binär/Blockgröße/Hosts), Blocklineal (Adressleiste, Blockgrenzen, Einrasten), Rechenweg-Assistent (schrittweise, Selbstrechnen), Adressplaner (VLSM mit Reserve), VLAN-Werkzeug (8 Ports, Access/Trunk, Frames mit Tag, Erreichbarkeitsmatrix) — jedes mit Lernziel, Ergebnisanzeige und „Aufgabe dazu"</td></tr><tr><td><strong>Üben &amp; Spielen</strong></td><td>Generator (Thema × Stufe × 4/6/8 Aufgaben) mit Lage-Block, Eingabe, Prüfen, Rückmeldung mit Rechenweg und Erklärung, Punkten und Auswertung; 3 Lernspiele: Präfix-Blitz (60 s, Präfix↔Maske↔Hosts), Netz-Sortierer (Adressen in Netze), VLAN-Patcher (Ports konfigurieren, Differenz anzeigen)</td></tr><tr><td><strong>Formelsammlung</strong></td><td>5 Merkblätter: Präfix-/Masken-/Host-Tabelle, Rechenweg in fünf Schritten, Blockgrößen, VLAN/Trunk/802.1Q, typische Fehlerfallen</td></tr></tbody></table></div>
+<h3 id="2-2-rechenkern-und-aufgabengenerator">2.2 Rechenkern und Aufgabengenerator</h3>
+<p><code>Spiel.subnetz</code> (headless, <code>src/spiel/subnetz.js</code>, ~1.430 Zeilen): <code>rechnen</code>, <code>maskeZuPraefix</code>, <code>praefixZuMaske</code>, <code>gleichesNetz</code>, <code>plan</code> (VLSM), <code>zusammenfassen</code>, <code>aufgabe</code>, <code>satz</code>, <code>pruefen</code>, <code>antwort</code>, <code>fortschritt</code>, <code>modulSetzen</code>, <code>zuruecksetzen</code>; 11 Aufgabentypen, 23 art×Stufe-Kombinationen, deterministisch (eigener gesäter Generator, kein <code>Math.random</code>/keine Uhr), Rechenweg oktettweise (keine 32-Bit-Dezimalzahlen), genau eine richtige Antwort, plausible typische Denkfehler. Fortschritt in <code>store "subnetz"</code> v:1 (Module neu &lt; gelesen &lt; geuebt &lt; sicher; Fehler senkt nie unter „gelesen"); Lernverbuchung ausschließlich über <code>L.ueben</code>/<code>L.fehler</code>, Werkzeug-Lösungen mit <code>{hilfe:true}</code>. Kein Geld, kein Ruf, kein Feld im Spielstand (v:3 bleibt unverändert).</p>
+<h3 id="2-3-inhaltlich-und-in-der-lernschwierigkeit-optimierte-bestandsaufgaben">2.3 Inhaltlich und in der Lernschwierigkeit optimierte Bestandsaufgaben</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Aufgabe</th><th>vorher</th><th>jetzt (belegt, Tests grün)</th></tr></thead><tbody><tr><td><code>vlan-netzgroesse</code> (AP2)</td><td>„/24 auf n VLANs ⇒ welche Maske" (falsches Planungsmodell)</td><td>Hosts je VLAN ⇒ Präfix (VLSM-Denken), <code>GEGEN</code>-Rechnung im Test nachgezogen</td></tr><tr><td><code>mini-sub-1</code> (E) / <code>mini-sub-3</code> (AP2)</td><td>Schwierigkeit invertiert (Netzadresse /26 als E, Hosts /28 als AP2)</td><td>Stufen getauscht: Netzadresse /26 = AP2, Hosts /28 = E; Stufen-Multiset unverändert</td></tr><tr><td><code>mini-trunk-5</code> (AP2)</td><td>„Im Native VLAN" vs. „Immer in VLAN 1" ohne Native-Angabe doppeldeutig</td><td>Schnappschuss nennt Native VLAN 20; genau eine Option richtig</td></tr><tr><td>Denkhilfen</td><td>fehlten für <code>mini-vlan-6</code>, <code>mini-trunk-5</code>, <code>mini-rostick-4</code></td><td>ergänzt (eigener Text statt Fertigkeitssatz)</td></tr><tr><td><code>tr-trunk-erlauben</code>/<code>tr-trunk-allowed</code>, <code>tr-netz-maske</code>/<code>tr-netz-nachbar</code></td><td>gleicher Titel/kein Unterschied</td><td>unterscheidbar gemacht, keine vorgetäuschte Progression</td></tr><tr><td><code>tr-subnetz-plan</code> (E-Format, AP1-Inhalt)</td><td>verlangte vier /26 in einem Durchgang</td><td>Teiltabelle vorgegeben, Beschreibung auf E-Niveau gestützt (Formatregel <code>niveau = f(art)</code> bleibt)</td></tr></tbody></table></div>
+<p>Nicht geändert (begründet in der Lernstufen-Matrix): keine neuen <code>DATEN.skills</code> (30 — Codec- und Dichte-Tests eingefroren), keine neuen Tickets, keine Änderung an Injektoren, Mini-Mechanik oder Lernmotor.</p>
+<h3 id="2-4-einfugung-in-die-themes-und-die-navigation">2.4 Einfügung in die Themes und die Navigation</h3>
+<p>Nur Tokens aus <code>basis.css</code> und Bento-Bausteine (<code>.bn-*</code>); eigene Klassen <code>sn-*</code> (Abteilung), <code>sw-*</code> (Werkzeuge), <code>sg-*</code> (Spiele). Keine Farb-/Radius-/Schrift-/Abstands-/Dauer-Literale, kein <code>!important</code>, kein eigener Reduced-Motion-Block, Fokusring nicht überschrieben, 44-px-Ziele gescopt. Geprüft in 5 Zusatz-Themes + hell/dunkel + „Bewegung aus" bei 1440/960/720. Navigation: Dock-Eintrag, Befehlspalette, Querverweis am Ende der Trainingsliste („Zur Abteilung Subnetting"), interne Verweise zu Wiki/Labor/Training; ein Fall im Rauchtest öffnet die Ansicht mit echter Maus.</p>
+<h2 id="3-gemessene-abnahme">3 · Gemessene Abnahme</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Prüfung</th><th>Ergebnis</th></tr></thead><tbody><tr><td>Tests (headless)</td><td><strong>1049/1049 grün</strong>, 0 übersprungen (118 Testdateien, 98 Module, Exit 0)</td></tr><tr><td>Rauchtest (echte Maus, Edge)</td><td><strong>48/48</strong> (15 Fälle + Erstabnahme, je drei Breiten: 1440/960/720)</td></tr><tr><td>Klassen ↔ CSS / Umlaute</td><td><code>klassen.py</code> <strong>0</strong> · <code>umlaute.py</code> <strong>GRÜN</strong></td></tr><tr><td>Regelwerk</td><td><code>ethos.py</code> <strong>GRÜN</strong> (R1 23, R2 17, R3 4, R4 134, R5 0, R6 7, R7 0, R8 0, R9 58, R10 41, R11 0; R12 nicht gemessen)</td></tr><tr><td>Simulation</td><td><strong>unverändert</strong></td></tr><tr><td>Bau</td><td><strong>143 Module</strong> (98 headless)</td></tr><tr><td>Einzeldatei</td><td><strong>4.080.274 B</strong> · SHA256 <code>49FC2FA5746A23334DE6F41FC954D687AB4607D555ACF4B61EE96A9E9E56D89E</code> · beide byte-gleich · 0 Außenverweise</td></tr><tr><td>Doku / Stand</td><td>65 Dokumente erzeugt, 0 tote Verweise, <code>seite.py --pruefen</code> GRÜN · <code>stand.py --pruefen</code> 0 Abweichung</td></tr><tr><td>Sichtprüfung</td><td>39 Zustandsmessungen in 1440/960/720: 0 seitlich scrollende Seiten, 0 JS-Fehler, 3 abgeschnittene Textknoten nur in der VLSM-Balkenbeschriftung kleiner Blöcke (die Legende nennt den vollen Namen); Kontrast 14 Textpaare × 7 Theme-Zustände = 0 Verstöße; „Bewegung aus" = 0 Animationen; 56 Rohziele unter 44 px sind ausschließlich die Bit-Zellen (begründete Ausnahme)</td></tr><tr><td>Echte <code>.exe</code></td><td>Die ausgelieferte <code>.exe</code> baut der Release-Ablauf aus dem Tag (Windows-Läufer). Ein lokaler Bau mit ProductVersion 2.9.0 wurde geprüft; auf <code>Programm/Netzwerk-Labor.exe</code> konnte er nicht gelegt werden, weil dort eine fremde, laufende 2.7.0-Instanz lag (Prozess nicht angefasst — AGENTS.md Regel 1).</td></tr><tr><td>Android-APK</td><td><strong>nicht gebaut</strong> (kein Android-SDK auf diesem Rechner)</td></tr></tbody></table></div>
+<p>Belege: <code>Nachweise/runde7/abnahme/</code> (39 Zustandsmessungen + Bilder je Theme), <code>Nachweise/runde7/review-design.md</code>, <code>Nachweise/runde7/review-didaktik.md</code>, <code>Nachweise/runde7/w3-messung-*.json</code>.</p>
+<h2 id="4-was-bewusst-nicht-passiert-ist-offene-punkte">4 · Was bewusst nicht passiert ist / offene Punkte</h2>
+<ul><li><strong>Kein Hub-Umbau</strong>: Das „Heute"-Raster hat eine feste 12-Spalten-Belegung (Zeilen 1–3 vollständig); eine zusätzliche Kachel hätte die gemessene Bento-Ordnung gebrochen. Die Auffindbarkeit leisten Dock, Befehlspalette und der Querverweis am Ende der Trainingsliste. (Im Vertrag § 2.5 als „nur wenn messbar Platz frei" vorgesehen.)</li><li><strong>R12</strong> (max. 6 sichtbare Bedienelemente) ist ohne <code>--dom</code> nicht gemessen; die Abteilung ist bewusst ruhig (Register + Kopf), die Werkzeugflächen haben je Werkzeug mehrere Bedienelemente.</li><li><strong>Keine Änderung an</strong> <code>src/sim/</code>, <code>src/modell/</code>, <code>src/kern/</code>, <code>src/cli/</code>, an <code>spiel/injektoren.js</code>, an der Mini-Mechanik, am Lernmotor, an den fünf Theme-Dateien <code>zzz-thema-*.css</code>, an der Parallel-Sitzung (Kurzübung/Flugschreiber).</li><li><strong>Nicht geprüft</strong>: Screenreader, echte Maus im ausgelieferten Tauri-Fenster (nur Prüfbau), Android-APK (kein SDK), Verhalten auf echten Schülergeräten.</li></ul>
+<h2 id="5-prufungen">5 · Prüfungen</h2>
+<p>Zwei unabhängige Lesungen (read-only) haben gegengelesen; Berichte: <code>Nachweise/runde7/review-design.md</code> (Design/Theme/Barrierefreiheit; Befunde B1–B3, S1–S12) und <code>Nachweise/runde7/review-didaktik.md</code> (Fachlichkeit/Didaktik/Code; Blockierend 1–5).</p>
+<p><strong>Eingearbeitet (blockierend):</strong> Lektion/visuelle Hilfe bei 960 px (volle Breite, Bit-Reihe bricht containerabhängig um statt 2-px-Zellen); Tastaturfokus nach jedem Neuzeichnen (Fokusziel je Aktion, <code>NodeList.find</code>-Fehler behoben); Netz-Sortierer tastaturbedienbar; <code>/31</code> ohne Netz-ID/Broadcast (RFC 3021) in Generator und Werkzeugen; VLSM-Reserve rechnet über die API (144 frei statt „überbucht"); Trunk-Optionen semantisch eindeutig; Prüfrunde setzt „sicher" nur ohne Hilfe; Zusammenfassen-Erklärung dynamisch korrekt; Schrittzahl der Stufenmatrix als additives Feld <code>loesungsschritte</code> (E 1, AP1 2–3, AP2 3–5; der angezeigte Rechenweg bleibt 3–6).</p>
+<p><strong>Eingearbeitet (sollte):</strong> doppelter Kartenrahmen, sichtbare Meldung bei leerer Eingabe, Tab-ARIA/Fokus, 44-px-Ziele (Bit-Zellen: begründete Ausnahme, dichtes Direktmanipulations-Raster), Werkzeug-Ergebnisraster, Blocklineal über volle Breite, aria-live für Rechenweg, Präfix-Blitz mit „Weiter" und stehender Erklärung, Presets aus Lektion/Formelsammlung, Filiale-Szenario, <code>color-scheme</code> der beiden hellen Wege, Lernstand-Text im Spielabschluss, Lehrplan-Korrekturen (Modul 6/8, /31-Ausnahmen, Formelsammlung).</p>
+<p><strong>Bewusst offen (mit Begründung):</strong> <code>--faint</code> auf <code>--panel-3</code> liegt bei 4,45:1 (dunkel) bzw. 4,38:1 (hell) — das ist ein Alt-Token der fünf Theme-Dateien, die diese Runde nicht anfasst; im Kontext (VLSM-Reserve-Label) ist der Text zusätzlich durch Position und Balken getragen. R12 (<code>--dom</code>) nicht gemessen, Android-APK fehlt (kein SDK), Screenreader nicht geprüft.</p>
+<h2 id="6-veroffentlichung-2-9-0">6 · Veröffentlichung 2.9.0</h2>
+<p>Fassung <strong>2.9.0</strong>, <code>VERSION_CODE</code> 20901, Commit auf <code>ausbau-1.2</code>, Tag <code>v2.9.0</code> — stehende Nutzerfreigabe für Push/Tag/Release (30.10.2026) gilt weiter. Die Fassung 2.8.0 der Parallel-Sitzung (Kurzübung/Flugschreiber) ist als eigener Commit davor; diese Runde zählt nur die Abteilung Subnetting. Der Nachweis nach dem Deploy (Live-SHA256, Release-Anhänge, CI-Läufe) steht in § 7.</p>
+<h2 id="7-nachweis-nach-dem-deploy-gemessen">7 · Nachweis (nach dem Deploy gemessen)</h2>
+<p>Platzhalter — Live-URL, Release-URL, Prüfsummen, Anhänge, CI-Ergebnisse und die ehrliche Liste „nicht geprüft" werden hier nach der Veröffentlichung eingetragen.</p>
+<h2 id="8-fur-die-nachste-sitzung">8 · Für die nächste Sitzung</h2>
+<ul><li>R12 mit <code>python tools/ethos.py --dom</code> bei laufendem Programm messen (Subnetting-Ansicht).</li><li>Die Abteilung im Tauri-Fenster und mit echten Schülern erproben (Verständlichkeit der Blockgrößen-Module, Tempo der Prüfungsfälle).</li><li><code>tools/rauch.py</code> hat seit dieser Runde eine Messhygiene (Auftragsbogen/Toasts vor der Hauptaktions-Prüfung schließen); die sieben 720-px-Fälle waren auf HEAD 2.7.0 identisch rot (38/45), sind also vorbestehend und keine Runde-8-Regression.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

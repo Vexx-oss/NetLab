@@ -157,16 +157,25 @@ gruppe("Fragen-Generator", () => {
       richtig: p => String(p.n - p.k),
       falsch: p => [String(p.n), String(p.n - p.k + 1), String(p.n - p.k - 1)],
     },
+    /* Runde 7 (§ 10 Nr. 1): NICHT mehr „/24 auf n VLANs ⇒ Maske" (falsches Planungsmodell),
+       sondern Hosts je VLAN ⇒ kleinster reichender Präfix. Der Test rechnet den Präfix aus dem
+       Bedarf nach: 2 hoch (32 − p) − 2 ≥ hosts und p so groß wie möglich. */
     "vlan-netzgroesse": {
       p: p => {
-        const f = [], q = 24 + Math.round(Math.log(p.n) / Math.log(2));
-        if (p.p !== q) f.push(`praefix ${p.p} ≠ ${q} für ${p.n} VLANs`);
-        if (p.block !== 256 / p.n) f.push(`block ${p.block} ≠ ${256 / p.n}`);
-        if (p.maske !== maskeAus(q)) f.push(`maske ${p.maske} ≠ ${maskeAus(q)}`);
+        const f = [], q = 32 - Math.ceil(Math.log2(p.hosts + 2));
+        if (!Number.isInteger(p.hosts) || p.hosts < 1 || p.hosts > 4000) f.push(`hosts ${p.hosts} unbrauchbar`);
+        if (q < 0 || q > 32) f.push(`hosts ${p.hosts} ergibt keinen gültigen Präfix (${q})`);
+        if (p.p !== q) f.push(`praefix ${p.p} ≠ ${q} für ${p.hosts} Hosts – nicht der kleinste reichende Präfix`);
+        if (p.maske !== maskeAus(p.p)) f.push(`maske ${p.maske} ≠ ${maskeAus(p.p)}`);
+        if (p.block !== gross(p.p)) f.push(`block ${p.block} ≠ ${gross(p.p)}`);
+        if (!Number.isInteger(p.vlan) || p.vlan < 1 || p.vlan > 4094) f.push(`vlan ${p.vlan}`);
+        /* Die drei Ablenker müssen verschiedene, gültige Masken sein. */
+        const d = [maskeAus(24), maskeAus(p.p + 1), maskeAus(p.p + 2)];
+        if (new Set(d).size !== 3) f.push(`die drei Ablenker sind nicht verschieden: ${d.join(", ")}`);
         return f;
       },
-      richtig: p => maskeAus(24 + Math.round(Math.log(p.n) / Math.log(2))),
-      falsch: p => { const q = 24 + Math.round(Math.log(p.n) / Math.log(2)); return [maskeAus(24), maskeAus(q - 1), maskeAus(q + 1), maskeAus(q + 2)]; },
+      richtig: p => maskeAus(p.p),
+      falsch: p => [maskeAus(24), maskeAus(p.p + 1), maskeAus(p.p + 2)],
     },
 
     /* ---------- Welle 2 · S5: neun neue Vorlagen (Architektur § 17.4) ---------- */

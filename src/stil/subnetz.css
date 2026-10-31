@@ -1,0 +1,164 @@
+/* ---------- Abteilung „Subnetting" (ui/subnetz.js): Bento-Arbeitsfläche ----------
+   Entwurf Runde 7 § 3: nur Tokens aus basis.css, Abstände {0,4,8,12,16,24,32}px,
+   Schrift nur var(--fs-*), Radien nur Tokens, keine Farb-/Dauer-Literale, kein !important,
+   kein eigener Reduced-Motion-Block. Die Flächen selbst kommen aus bento.css (.bn-k, .bn-raster):
+   gleiche Kanten, gleicher Innenabstand, gleiches Aufbrechen bei ≤900 px.
+   Eigene Klassen tragen das Präfix sn- (eine CSS-Regel je Klasse). */
+
+/* Seite und Kopf */
+.sn-seite{height:100%; overflow:auto; padding:0 24px 32px; display:flex; flex-direction:column; gap:16px; background:var(--bg); scrollbar-width:thin}
+.sn-kopf{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-top:16px}
+.sn-kopf-rechts{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.sn-titel{font:800 var(--fs-6)/1.15 var(--display); color:var(--ink)}
+.sn-zweck{max-width:76ch; font-size:var(--fs-3); line-height:1.5; color:var(--muted)}
+.sn-stufe{display:flex; align-items:center; gap:8px}
+.sn-stufe-wahl{min-height:44px; padding:0 12px; border-radius:var(--radius-s); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body)}
+.sn-kopf-text, .sn-feldbereich{display:flex; flex-direction:column; gap:4px; min-width:0}
+
+/* Fortschrittsring (sicher/8) und „Nächster Schritt" */
+.sn-ring{position:relative; width:56px; height:56px; flex:none; border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--sn-p, 0) * 1%), var(--panel-3) 0)}
+.sn-ring::before{content:""; position:absolute; inset:8px; border-radius:50%; background:var(--panel)}
+.sn-ring-wert{position:relative; font:700 var(--fs-2)/1 var(--mono); color:var(--ink); font-variant-numeric:tabular-nums}
+.sn-naechster{display:flex; flex-direction:column; gap:4px; padding:8px 16px; border:1px solid var(--line);
+  border-left:2px solid var(--accent); border-radius:var(--radius-s); background:var(--panel-2)}
+.sn-naechster-text{font-size:var(--fs-3); line-height:1.4; color:var(--ink)}
+
+/* Registerleiste: vier Reiter, je 44 px hoch */
+.sn-register{display:flex; align-items:center; flex-wrap:wrap; gap:4px; padding:4px;
+  border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
+.sn-register-knopf{min-height:44px; padding:0 16px; border:0; border-radius:var(--radius-s); background:transparent;
+  color:var(--muted); font:600 var(--fs-2)/1 var(--body)}
+.sn-register-knopf:hover{color:var(--ink)}
+.sn-register-knopf[aria-selected="true"]{background:var(--accent-soft); color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, var(--line))}
+
+/* Inhalt der Register */
+.sn-panel{display:flex; flex-direction:column; gap:12px; min-width:0}
+.sn-leer, .sn-generator, .sn-formel{gap:8px}
+.sn-knoepfe{display:flex; align-items:center; flex-wrap:wrap; gap:8px}
+.sn-seite .knopf{min-height:44px}
+/* Ansage für Screenreader: sichtbar bleibt die Rückmeldung an der Aufgabe, hier die kurze Meldung. */
+.sn-live{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+
+/* Lehrpfad: Modulkarten (Bento-Kacheln als ganze Schaltfläche) */
+.sn-modul, .sn-werkzeug{text-align:left; align-items:flex-start; min-height:44px; transition:border-color var(--dauer)}
+.sn-modul:hover, .sn-werkzeug:hover, .sn-spiel:hover{border-color:var(--line-2)}
+.sn-modul[data-status="sicher"]{border-color:color-mix(in srgb, var(--ok) 30%, var(--line))}
+.sn-modul-kopf{display:flex; align-items:center; gap:4px; flex-wrap:wrap; width:100%}
+.sn-modul-nr{font:700 var(--fs-1)/1 var(--mono); letter-spacing:.08em; color:var(--faint)}
+.sn-modul-titel{display:block; font:700 var(--fs-4)/1.25 var(--display); color:var(--ink); text-align:left}
+.sn-modul-lead{display:block; font-size:var(--fs-2); line-height:1.45; color:var(--muted); text-align:left}
+.sn-modul-fuss{display:flex; align-items:center; gap:8px; width:100%; margin-top:auto; padding-top:8px; border-top:1px solid var(--line)}
+.sn-modul-dauer{margin-left:auto; font:600 var(--fs-1)/1 var(--mono); color:var(--faint)}
+.sn-modul-weg{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; color:var(--accent)}
+
+/* Lektion: Kern und visuelle Hilfe teilen sich die Breite; bei ≤1100 px steht jede Karte in einer
+   eigenen Zeile, damit das Werkzeug mindestens ~580 px bekommt (B1). */
+.sn-lektion{display:flex; flex-direction:column; gap:16px; min-width:0}
+.sn-lektion .bn-raster{align-items:start}
+.sn-zurueck{align-self:flex-start}
+.sn-lektion-kopf{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.sn-lektion-titel{font:700 var(--fs-5)/1.2 var(--display); color:var(--ink)}
+.sn-kern{display:flex; flex-direction:column; gap:8px; max-width:70ch; font-size:var(--fs-3); line-height:1.55; color:var(--ink)}
+.sn-merksatz{padding:12px 16px; border-left:2px solid var(--accent); border-radius:var(--radius-s);
+  background:var(--accent-soft); color:var(--ink); font-size:var(--fs-3); line-height:1.5}
+.sn-visual{display:flex; flex-direction:column; gap:8px; min-width:0}
+/* 32 Bit in einem Band wären 1 408 px breit – physisch keine 44-px-Ziele. Deshalb zwei Oktette pro
+   Zeile (16 Bit je Reihe) und mindestens 22 px je Bit: eine begründete Ausnahme, aber nie 2 px (B1).
+   Die Werkzeug-CSS legt .sw-bits als umbrechende Flex-Reihe an; die Oktettbreite setzt hier die
+   Zweier-Aufteilung, unabhängig von der Viewport-Breite (die Fläche ist hier schmaler als das Fenster). */
+.sn-visual .sw-bits{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sn-visual .sw-oktett{flex:1 1 calc(50% - 8px)}
+.sn-visual .sw-bit{min-width:22px}
+.sn-verweise{display:flex; flex-wrap:wrap; gap:8px; padding-top:8px; border-top:1px solid var(--line)}
+
+/* Geführtes Beispiel: Schritte werden nacheinander aufgedeckt */
+.sn-beispiel, .sn-beispiel-schritte, .sn-ergebnis, .sn-spiel-ergebnis, .sn-spiele{display:flex; flex-direction:column; gap:8px}
+.sn-beispiel-schritt{display:flex; flex-direction:column; gap:4px; padding:8px 12px; border:1px solid var(--line);
+  border-radius:var(--radius-s); background:var(--panel-2); font-size:var(--fs-3); line-height:1.45; color:var(--ink)}
+.sn-beispiel-schritt-titel{font:700 var(--fs-2)/1.2 var(--display); color:var(--ink)}
+.sn-beispiel-aufgabe{font:600 var(--fs-3)/1.45 var(--body); color:var(--ink)}
+.sn-beispiel-ergebnis{font:600 var(--fs-3)/1.4 var(--mono); color:var(--accent)}
+.sn-beispiel-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
+
+/* Übungs- und Prüfrunde */
+.sn-runde{display:flex; flex-direction:column; gap:12px}
+.sn-runde-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.sn-punkte{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.sn-punkte-wert{color:var(--ink); font-variant-numeric:tabular-nums}
+.sn-aufgabe{display:flex; flex-direction:column; gap:12px; align-items:stretch}
+.sn-lage{display:flex; flex-direction:column; gap:4px; padding:8px 12px; border:1px solid var(--line);
+  border-radius:var(--radius-s); background:var(--panel-2)}
+.sn-lage-zeile{display:flex; align-items:baseline; gap:8px; min-width:0}
+.sn-lage-label{font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
+.sn-lage-wert{margin-left:auto; font:600 var(--fs-2)/1.35 var(--mono); color:var(--ink); overflow-wrap:anywhere; text-align:right}
+.sn-frage{font:600 var(--fs-4)/1.35 var(--body); color:var(--ink)}
+.sn-feld{min-height:44px; width:100%; max-width:320px; padding:0 12px; border-radius:var(--radius-s);
+  border:1px solid var(--line-2); background:var(--panel); color:var(--ink); font:600 var(--fs-3)/1 var(--mono)}
+.sn-auswahl{display:flex; flex-direction:column; gap:8px; align-items:stretch}
+.sn-auswahl-knopf{min-height:44px; padding:8px 12px; text-align:left; border:1px solid var(--line);
+  border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1.35 var(--body)}
+.sn-auswahl-knopf[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.sn-hinweis{padding:8px 12px; border-radius:var(--radius-s); border:1px solid color-mix(in srgb, var(--warn) 40%, var(--line));
+  background:var(--warn-soft); color:var(--ink); font-size:var(--fs-2); line-height:1.45}
+.sn-rueckmeldung{display:flex; flex-direction:column; gap:8px; padding:12px 16px; border:1px solid var(--line);
+  border-left:2px solid var(--ok); border-radius:var(--radius-s); background:var(--ok-soft)}
+.sn-rueckmeldung.sn-falsch{border-left-color:var(--bad); background:var(--bad-soft)}
+.sn-rueckmeldung-text{font:700 var(--fs-4)/1.3 var(--display); color:var(--ink)}
+.sn-soll{font-size:var(--fs-2); line-height:1.5; color:var(--muted)}
+.sn-rechenweg{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); line-height:1.45; color:var(--ink)}
+.sn-rechenweg-schritt{padding-left:4px; list-style:decimal}
+.sn-erklaerung{padding-top:8px; border-top:1px solid var(--line); font-size:var(--fs-2); line-height:1.5; color:var(--muted)}
+
+/* Ergebnis einer Runde oder eines Spiels */
+.sn-ergebnis-wert{font:700 var(--fs-5)/1.15 var(--display); color:var(--ink)}
+.sn-ergebnis-liste{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); color:var(--muted)}
+.sn-ergebnis-zeile{display:flex; align-items:baseline; gap:8px; padding-top:4px; border-top:1px solid var(--line)}
+.sn-ergebnis-zeile b{color:var(--ink); font:600 var(--fs-2)/1.3 var(--body)}
+.sn-ergebnis-zeile small{margin-left:auto; color:var(--faint); white-space:nowrap}
+
+/* Werkzeuge: Karten und eingehängte Fläche */
+.sn-werkzeug-titel{display:block; font:700 var(--fs-4)/1.25 var(--display); color:var(--ink)}
+.sn-werkzeug-lead{display:block; font-size:var(--fs-2); line-height:1.45; color:var(--muted)}
+.sn-werkzeug-seite{display:flex; flex-direction:column; gap:16px; min-width:0; align-items:stretch}
+.sn-flaeche{display:flex; flex-direction:column; gap:12px; min-width:0; align-items:stretch}
+
+/* Üben & Spielen: Generator und Lernspiele */
+.sn-generator-felder{display:flex; align-items:flex-end; flex-wrap:wrap; gap:12px}
+.sn-spiel{display:flex; flex-direction:column; align-items:flex-start; gap:4px; width:100%; min-height:44px;
+  padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2);
+  color:var(--ink); text-align:left; transition:border-color var(--dauer)}
+.sn-spiel-titel{font:600 var(--fs-3)/1.3 var(--display); color:var(--ink)}
+.sn-spiel-lead{font-size:var(--fs-2); line-height:1.45; color:var(--muted)}
+.sn-spiel-dauer{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
+
+/* Formelsammlung */
+.sn-formel-titel{font:700 var(--fs-4)/1.25 var(--display); color:var(--ink)}
+.sn-formel-saetze{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; font-size:var(--fs-2); line-height:1.45; color:var(--muted)}
+.sn-tabelle{width:100%; border-collapse:collapse; font-size:var(--fs-2); color:var(--ink)}
+.sn-tabelle th{text-align:left; padding:4px 8px; border-bottom:1px solid var(--line-2);
+  font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
+.sn-tabelle td{padding:4px 8px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:var(--fs-2); color:var(--muted)}
+
+/* Schmalere Fenster: Bento-Raster bricht bei ≤900 px selbst auf eine Spalte; hier nur die Feinheiten. */
+@media (max-width:1100px){
+  .sn-kopf-rechts{width:100%}
+  .sn-ring{width:48px; height:48px}
+  .sn-feld{max-width:100%}
+  /* Lektion: jede Karte in eigener Zeile → Werkzeug bekommt die volle Breite (B1). */
+  .sn-lektion .bn-raster .bn-s6{grid-column:span 12}
+}
+@media (max-width:900px){
+  /* Ein-Spalten-Raster: die 12er-Spanne aus dem Block oben darf hier nicht mehr gelten. */
+  .sn-lektion .bn-raster .bn-s6{grid-column:span 1}
+}
+@media (max-width:720px){
+  .sn-seite{padding:0 16px 16px; gap:12px}
+  .sn-kopf{align-items:flex-start}
+  .sn-register-knopf{padding:0 8px; font-size:var(--fs-1)}
+}
+@media (max-width:600px){
+  /* Ganz schmal: ein Oktett pro Zeile, damit die 22-px-Bits nicht überlaufen. */
+  .sn-visual .sw-oktett{flex-basis:100%}
+}

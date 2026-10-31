@@ -1,0 +1,243 @@
+/* ---------- Subnetting-Werkzeuge (sw-*) und Lernspiele (sg-*) – Runde 7, W4 ----------
+   Vertrag: docs/entwicklung/Entwurf – Runde 7 (Abteilung Subnetting).md § 2.4, § 3, § 7, § 8.
+   Regeln: nur Tokens aus basis.css, Schrift nur var(--fs-*), Abstand nur {0,4,8,12,16,24,32}px,
+   Radius nur Tokens, keine Farb-/Dauer-Literale, kein !important, kein eigener Reduced-Motion-Block.
+   Bento-Bausteine (.bn-*) stehen im Markup; hier nur, was Bento nicht hat. Ziele ≥ 44 px sind
+   auf die beiden Wurzeln .sw/.sg gescopt, damit sie nicht in fremde Ansichten strahlen. */
+
+/* ---------- gemeinsames Grundgerüst ---------- */
+.sw, .sg{display:flex; flex-direction:column; gap:16px; min-width:0; padding:16px;
+  border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); color:var(--ink)}
+.sw-kompakt, .sg-kompakt{gap:12px; padding:12px}
+.sw-eingebettet{border:0; border-radius:0; background:transparent; padding:0; gap:12px}
+.sw-kopf-mikro{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px}
+.sw .knopf, .sg .knopf, .sw-taste, .sw-aufgabe, .sw-zurueck, .sw-plan-knopf, .sw-weiter,
+.sw-selbst-pruefen, .sw-zeile-weg, .sw-modus, .sw-vlan-knopf, .sg-pruefen, .sg-abgeben,
+.sg-beenden, .sg-modus, .sg-vlan-knopf, .sg-adresse-zugeordnet, .sg-weiter, .sg-netz-wahl{min-height:44px}
+.sw-kopf, .sg-kopf, .sw-feld, .sg-feld, .sw-oktett, .sg-netz-zone{display:flex; flex-direction:column; gap:4px; min-width:0}
+.sw-kicker, .sg-kicker{margin:0; font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em;
+  text-transform:uppercase; color:var(--faint)}
+.sw-titel, .sg-titel, .sg-ergebnis-titel{margin:0; font:700 var(--fs-5)/1.2 var(--display); color:var(--ink)}
+.sw-lernziel, .sg-lead{margin:0; max-width:76ch; font:400 var(--fs-2)/1.5 var(--body); color:var(--muted)}
+.sw-buehne, .sg-buehne{display:flex; flex-direction:column; gap:12px; min-width:0}
+.sw-hinweis, .sg-hinweis, .sw-schritt-text{margin:0; font:400 var(--fs-2)/1.45 var(--body); color:var(--muted)}
+.sw-feld-label, .sg-feld-label{margin:0; font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.05em;
+  text-transform:uppercase; color:var(--faint)}
+.sw-steuer{display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 12px; min-width:0}
+.sw-tasten, .sg-tasten{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
+.sw-fuss, .sg-fuss{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding-top:8px;
+  border-top:1px solid var(--line)}
+.sw-fuss .sw-hinweis{flex:1 1 200px}
+.sw-ergebnis, .sg-ergebnis{display:flex; flex-direction:column; gap:8px; padding:12px;
+  border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.sw-werte, .sg-werte{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:8px}
+.sw-wert, .sg-wert{display:flex; flex-direction:column; gap:0px; min-width:0}
+.sw-wert-label, .sg-wert-label{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.04em;
+  text-transform:uppercase; color:var(--faint)}
+.sw-wert-zahl, .sg-wert-zahl{font:700 var(--fs-4)/1.2 var(--mono); color:var(--ink); overflow-wrap:anywhere}
+.sw-rueckmeldung, .sg-rueckmeldung{margin:0; min-height:24px; font:600 var(--fs-2)/1.45 var(--body);
+  color:var(--muted)}
+.sw-ok, .sg-ok, .sw-ja{color:var(--ok)}
+.sw-bad, .sg-bad{color:var(--bad)}
+.sw-fortschritt, .sg-fortschritt{margin:0; font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.04em;
+  color:var(--faint)}
+.sw-leer{padding:24px}
+.sw-tabelle{width:100%; border-collapse:collapse; font:400 var(--fs-3)/1.35 var(--body)}
+.sw-tabelle th{width:38%; padding:4px 8px; border-bottom:1px solid var(--line); text-align:left;
+  color:var(--muted); font-weight:600}
+.sw-tabelle td{padding:4px 8px; border-bottom:1px solid var(--line); color:var(--ink)}
+.sw-tabelle thead th{font-size:var(--fs-2); text-transform:uppercase; letter-spacing:.04em}
+.sw-wahl{min-height:44px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-s);
+  background:var(--panel-2); color:var(--ink); font:600 var(--fs-3)/1 var(--body)}
+.sw-regler{flex:1 1 160px; min-height:44px; accent-color:var(--accent); background:transparent}
+.sw-regler-wert{min-width:44px; text-align:center; font:700 var(--fs-3)/1 var(--mono); color:var(--ink)}
+.sw-ip-feld, .sw-name-feld, .sw-hosts-feld{min-height:44px; min-width:0; padding:0 8px;
+  border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2);
+  color:var(--ink); font:500 var(--fs-3)/1 var(--mono)}
+.sw-adressleiste{width:100%; min-height:44px; accent-color:var(--accent)}
+.sw-taste:hover, .sw-zeile-weg:hover{filter:brightness(1.08)}
+
+/* ---------- 1 · Bitlabor ---------- */
+.sw-bits{display:flex; flex-wrap:wrap; gap:8px}
+.sw-ports, .sg-ports{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px}
+.sw-oktett-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:4px}
+.sw-oktett{flex:1 1 180px}
+.sw-oktett-name{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.05em; text-transform:uppercase;
+  color:var(--faint)}
+.sw-oktett-wert{font:700 var(--fs-3)/1 var(--mono); color:var(--ink)}
+.sw-bit{flex:1 1 20px; min-width:20px; min-height:44px; padding:0; border:1px solid var(--line-2);
+  border-radius:var(--radius-xs); background:var(--panel-2); color:var(--muted);
+  font:700 var(--fs-3)/1 var(--mono); transition:background var(--dauer), border-color var(--dauer)}
+.sw-bit-netz, .sw-adresse-oktett[aria-pressed="true"], .sw-modus[aria-pressed="true"],
+.sg-modus[aria-pressed="true"], .sw-vlan-knopf[aria-pressed="true"],
+.sg-vlan-knopf[aria-pressed="true"], .sg-adresse-gewaehlt{background:var(--accent-soft);
+  border-color:var(--accent); color:var(--accent)}
+.sw-bit-host{background:var(--panel-2); border-color:var(--line-2); color:var(--muted)}
+.sw-legende{display:flex; align-items:center; gap:8px; font:400 var(--fs-2)/1.3 var(--body); color:var(--muted)}
+.sw-legende-punkt{display:inline-block; flex:0 0 auto; width:16px; height:16px; border-radius:var(--radius-xs)}
+.sw-legende-text{margin:0}
+
+/* ---------- 2 · Masken-Schieber ---------- */
+.sw-binarmaske{display:flex; flex-wrap:wrap; gap:4px; padding:8px; border:1px solid var(--line);
+  border-radius:var(--radius-s); background:var(--panel-2)}
+.sw-mbit{display:inline-flex; align-items:center; justify-content:center; width:16px; height:24px;
+  border-radius:var(--radius-xs); font:700 var(--fs-1)/1 var(--mono)}
+.sw-mbit-netz{background:var(--accent); color:var(--accent-ink)}
+.sw-mbit-host{background:var(--panel-3); color:var(--muted)}
+.sw-maske{align-self:flex-start; margin:0; padding:4px 8px; border-radius:var(--radius-s);
+  background:var(--accent-soft); color:var(--accent); font:700 var(--fs-4)/1.2 var(--mono)}
+.sw-binarlabel{margin:0; font:500 var(--fs-2)/1.3 var(--mono); color:var(--muted); overflow-wrap:anywhere}
+
+/* ---------- 3 · Blocklineal ---------- */
+.sw-adresse{display:flex; align-items:center; gap:4px; flex-wrap:wrap; min-width:0}
+.sw-adresse-oktett{min-width:44px; min-height:44px; padding:0 8px; border:1px solid var(--line-2);
+  border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink);
+  font:700 var(--fs-3)/1 var(--mono)}
+.sw-adresse-punkt{color:var(--faint); font:700 var(--fs-4)/1 var(--mono)}
+.sw-lineal{position:relative; display:block; width:100%; height:64px; border:1px solid var(--line);
+  border-radius:var(--radius-s); background:var(--bg); overflow:hidden}
+.sw-block{position:absolute; top:10px; height:24px; border-right:1px solid var(--line);
+  border-radius:var(--radius-xs); background:var(--panel-2)}
+.sw-block-alt{background:var(--panel-3)}
+.sw-block-aktiv{background:var(--accent-soft); border-color:var(--accent)}
+.sw-grenze{position:absolute; top:8px; width:1px; height:30px; background:var(--line-2)}
+.sw-marker{position:absolute; top:4px; width:2px; height:36px; background:var(--accent)}
+.sw-marker-label{position:absolute; top:0px; transform:translateX(-50%); white-space:nowrap;
+  font:700 var(--fs-1) var(--mono); color:var(--accent)}
+.sw-label{position:absolute; top:40px; transform:translateX(-50%); white-space:nowrap;
+  font:500 var(--fs-1) var(--mono); color:var(--muted)}
+
+/* ---------- 4 · Rechenweg-Assistent ---------- */
+.sw-schritte, .sw-bedarf{display:flex; flex-direction:column; gap:8px}
+.sw-schritt{display:flex; flex-direction:column; gap:4px; padding:12px; border:1px solid var(--line);
+  border-radius:var(--radius-s); background:var(--panel-2)}
+.sw-schritt-kopf, .sg-lage-zeile{display:flex; align-items:baseline; gap:8px}
+.sw-schritt-nr{display:inline-grid; place-items:center; min-width:24px; min-height:24px;
+  border-radius:999px; background:var(--accent); color:var(--accent-ink);
+  font:700 var(--fs-1)/1 var(--mono)}
+.sw-schritt-titel, .sw-port-panel-kopf strong, .sg-port-panel-kopf strong, .sw-mikro-titel{font:700 var(--fs-3)/1.2 var(--display); color:var(--ink)}
+.sw-schritt-ergebnis{margin:0; font:600 var(--fs-3)/1.3 var(--mono); color:var(--accent)}
+.sw-selbst{display:flex; flex-direction:column; gap:8px; padding:12px; border:1px dashed var(--line-2);
+  border-radius:var(--radius-s)}
+.sw-selbst-pruefen, .sg-weiter{align-self:flex-start}
+
+/* ---------- 5 · Adressplaner (VLSM) ---------- */
+.sw-bedarf-zeile{display:grid; grid-template-columns:minmax(0,1fr) 120px auto; gap:8px;
+  align-items:center}
+.sw-hosts-feld{font-family:var(--mono)}
+.sw-plan, .sw-frames, .sg-lage, .sg-rechenweg-liste, .sg-diff{display:flex; flex-direction:column; gap:4px}
+.sw-plan-balken{display:flex; min-height:32px; border:1px solid var(--line); border-radius:var(--radius-s);
+  overflow:hidden; background:var(--panel-2)}
+.sw-plan-teil{display:flex; align-items:center; justify-content:center; flex:1 1 0; min-width:0;
+  overflow:hidden; padding:0 4px; border-right:1px solid var(--line); background:var(--accent-soft);
+  color:var(--accent); font:700 var(--fs-1)/1 var(--mono); white-space:nowrap}
+.sw-plan-teil:nth-child(even){background:var(--info-soft); color:var(--info)}
+.sw-plan-reserve{display:flex; align-items:center; justify-content:center; flex:1 1 0; min-width:0;
+  overflow:hidden; padding:0 4px; background:var(--panel-3); color:var(--faint);
+  font:700 var(--fs-1)/1 var(--mono); white-space:nowrap}
+.sw-plan-label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.sw-plan-legende{display:flex; align-items:center; gap:16px; font:400 var(--fs-1)/1.3 var(--body);
+  color:var(--faint)}
+.sw-plan-legende-punkt::before{content:""; display:inline-block; width:12px; height:12px;
+  margin-right:4px; border-radius:var(--radius-xs); background:var(--accent-soft);
+  border:1px solid var(--accent); vertical-align:middle}
+.sw-plan-legende-reserve::before{content:""; display:inline-block; width:12px; height:12px;
+  margin-right:4px; border-radius:var(--radius-xs); background:var(--panel-3);
+  border:1px solid var(--line-2); vertical-align:middle}
+.sw-plan-tabelle{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-s)}
+.sw-plan-tabelle .sw-tabelle{min-width:560px}
+
+/* ---------- 6 · VLAN-Werkzeug ---------- */
+.sw-switch{display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid var(--line);
+  border-radius:var(--radius); background:var(--panel-2)}
+.sw-switch-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.sw-switch-titel{font:700 var(--fs-4)/1.2 var(--display); color:var(--ink)}
+.sw-port, .sg-port{display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-height:44px;
+  padding:8px; border:1px solid var(--line-2); border-left:4px solid var(--sw-vlan, var(--accent));
+  border-radius:var(--radius-s); background:var(--panel); color:var(--ink); text-align:left;
+  transition:background var(--dauer), border-color var(--dauer)}
+.sw-port[aria-pressed="true"], .sg-port[aria-pressed="true"]{border-color:var(--accent);
+  background:var(--panel-2); box-shadow:var(--glow)}
+.sw-port-name, .sg-port-name{font:700 var(--fs-4)/1 var(--display)}
+.sw-port-modus, .sg-port-modus{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em;
+  text-transform:uppercase; color:var(--faint)}
+.sw-tag, .sg-tag{display:inline-flex; align-items:center; gap:4px; min-height:24px; padding:0 8px;
+  border-radius:999px; border:1px solid color-mix(in srgb, var(--sw-vlan, var(--line-2)) 50%, var(--line));
+  background:color-mix(in srgb, var(--sw-vlan, var(--panel-3)) 18%, var(--panel-2)); color:var(--ink);
+  font:600 var(--fs-1)/1 var(--mono)}
+.sw-port-panel, .sg-port-panel{display:flex; flex-direction:column; gap:8px; padding:12px;
+  border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
+.sw-port-panel-kopf, .sg-port-panel-kopf{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+.sw-vlan-knoepfe, .sg-vlan-knoepfe, .sg-adressen, .sw-bit-reihe{display:flex; flex-wrap:wrap; gap:4px}
+.sw-vlan-knopf, .sg-vlan-knopf{border-left:4px solid var(--sw-vlan, var(--line-2))}
+.sw-frame{display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding:8px;
+  border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.sw-frame-text{font:500 var(--fs-2)/1.3 var(--mono); color:var(--ink)}
+.sw-frame-status{margin-left:auto; font:700 var(--fs-2)/1 var(--body)}
+.sw-matrix-rahmen{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-s);
+  background:var(--panel-2)}
+.sw-matrix{width:100%; border-collapse:collapse; font:600 var(--fs-1)/1.2 var(--mono)}
+.sw-matrix-kopf th{padding:4px 8px; color:var(--faint); text-transform:uppercase; letter-spacing:.04em}
+.sw-matrix-zeile th{padding:4px 8px; color:var(--muted); text-align:left}
+.sw-matrix-zelle{padding:4px 8px; border-top:1px solid var(--line); text-align:center}
+.sw-nein{color:var(--faint)}
+
+/* ---------- Lernspiele: Rahmen, Status, Karten ---------- */
+.sg-status{display:flex; flex-wrap:wrap; align-items:center; gap:8px 24px; padding:8px 12px;
+  border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.sg-zeit{font:700 var(--fs-4)/1 var(--mono); color:var(--accent); font-variant-numeric:tabular-nums}
+.sg-punkte, .sg-bestwert{font:600 var(--fs-2)/1.2 var(--body); color:var(--muted)}
+.sg-fragebereich{display:flex; flex-direction:column; gap:8px; min-width:0}
+.sg-frage{margin:0; font:700 var(--fs-4)/1.3 var(--display); color:var(--ink)}
+.sg-lage-label{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.05em; text-transform:uppercase;
+  color:var(--faint)}
+.sg-lage-wert{font:700 var(--fs-3)/1.2 var(--mono); color:var(--ink)}
+.sg-optionen{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+.sg-option{justify-content:flex-start; min-height:44px; text-align:left}
+.sg-option-richtig{border-color:var(--ok); background:var(--ok-soft); color:var(--ink)}
+.sg-option-falsch{border-color:var(--bad); background:var(--bad-soft); color:var(--ink)}
+.sg-rechenweg, .sg-auswertung-weg{margin:0; font:400 var(--fs-2)/1.4 var(--body); color:var(--muted)}
+.sg-auswertung{display:flex; flex-direction:column; gap:8px; padding-top:8px;
+  border-top:1px solid var(--line)}
+.sg-auswertung-titel{margin:0; font:700 var(--fs-2)/1.2 var(--display); color:var(--ink)}
+.sg-auswertung-zeile{display:flex; flex-direction:column; gap:4px; padding:8px;
+  border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
+.sg-auswertung-frage{margin:0; font:600 var(--fs-2)/1.35 var(--body); color:var(--ink)}
+.sg-auswertung-soll{margin:0; font:600 var(--fs-2)/1.35 var(--mono); color:var(--accent)}
+
+/* ---------- Netz-Sortierer ---------- */
+.sg-regel{margin:0; padding:8px; border-left:3px solid var(--accent); border-radius:var(--radius-s);
+  background:var(--panel-2); font:500 var(--fs-2)/1.4 var(--mono); color:var(--ink)}
+.sg-netz-spalten{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; align-items:stretch}
+.sg-netz{display:flex; flex-direction:column; gap:4px; min-height:112px; min-width:0; padding:8px;
+  border:1px dashed var(--line-2); border-radius:var(--radius-s); background:var(--panel-2); cursor:pointer}
+.sg-netz:hover{border-color:var(--line-2)}
+.sg-netz-wahl{align-self:stretch; justify-content:center; margin-top:4px; text-align:center;
+  font-size:var(--fs-2)}
+.sg-netz-wahl:disabled{opacity:.55; cursor:default}
+.sg-netz-name{margin:0; font:700 var(--fs-3)/1.2 var(--mono); color:var(--ink)}
+.sg-netz-hinweis{margin:0; font:400 var(--fs-1)/1.3 var(--body); color:var(--faint)}
+.sg-adresse{flex-direction:column; align-items:flex-start; gap:0px; min-height:44px; padding:4px 8px}
+.sg-adresse-name{font:600 var(--fs-2)/1.2 var(--mono)}
+.sg-adresse-hinweis{font:500 var(--fs-1)/1.2 var(--body); color:var(--faint)}
+
+/* ---------- VLAN-Patcher ---------- */
+.sg-auftrag{display:flex; flex-direction:column; gap:4px; padding:8px 12px;
+  border-left:3px solid var(--info); border-radius:var(--radius-s); background:var(--info-soft)}
+.sg-auftrag-titel{margin:0; font:700 var(--fs-3)/1.2 var(--display); color:var(--ink)}
+.sg-auftrag-text{margin:0; font:400 var(--fs-2)/1.4 var(--body); color:var(--ink)}
+.sg-anforderung{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px}
+.sg-anforderung-zeile{margin:0; font:500 var(--fs-2)/1.35 var(--mono); color:var(--muted)}
+.sg-diff-zeile{margin:0; font:600 var(--fs-2)/1.35 var(--body); color:var(--bad)}
+
+/* ---------- schmale Fenster ---------- */
+@media (max-width:900px){
+  .sw-ports, .sg-ports{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sg-netz-spalten{grid-template-columns:1fr}
+  .sw-bedarf-zeile{grid-template-columns:minmax(0,1fr) 96px auto}
+}
+@media (max-width:720px){
+  .sw, .sg{padding:12px; gap:12px}
+  .sg-optionen, .sg-anforderung{grid-template-columns:1fr}
+  .sw-oktett-name{display:none}
+}

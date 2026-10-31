@@ -253,20 +253,31 @@ DATEN.fragenVorlagen = (() => {
     ],
     erklaerung: p => `Jeder Router zieht 1 ab, bevor er weiterschickt: ${p.n} − ${p.k} = ${p.n - p.k}. Bei 0 wird das Paket verworfen und der Absender bekommt eine Meldung – die TTL ist ein Lebenszähler, keine Uhr.`});
 
-  /* ---------- Netzgröße je VLAN ---------- */
-  neu({id: "vlan-netzgroesse", titel: "Netzgröße je VLAN", skill: "lab.vlan", stufe: "AP2", quelle: "VLAN – Lernfassung",
-    platzhalter: ["basis", "n"],
-    zahlen: z => { const n = z.wahl([2, 4, 8, 16]); const p = 24 + Math.round(Math.log(n) / Math.log(2)); return {basis: netzBasis(z), n, block: 256 / n, p, maske: IP.maske(p)}; },
-    frage: p => `Das Netz ${p.basis}/24 wird auf ${p.n} VLANs aufgeteilt, jedes gleich groß. Welche Subnetzmaske bekommt jedes VLAN?`,
+  /* ---------- Netzgröße je VLAN: Hosts je VLAN bestimmen den Präfix (VLSM-Denken) ----------
+     Befund § 10 Nr. 1 (Runde 7): Die alte Frage „/24 auf n VLANs, jedes gleich groß" lehrte das
+     falsche Planungsmodell – in Wirklichkeit hat jedes VLAN einen eigenen Bedarf und bekommt den
+     KLEINSTEN Präfix, der ihn deckt. Der Denkfehler wird hier zum Ablenker: das ungeteilte /24
+     „reicht ja auch", ist aber nicht die kleinste Maske. */
+  neu({id: "vlan-netzgroesse", titel: "Netzgröße je VLAN", skill: "lab.vlan", stufe: "AP2",
+    quelle: "VLAN – Lernfassung · Network – Lernfassung (§ 8 Subnetting) · RFC 4632",
+    platzhalter: ["vlan", "hosts"],
+    zahlen: z => {
+      const hosts = z.wahl([10, 20, 25, 30, 40, 50, 60, 100]);
+      const p = 32 - Math.ceil(Math.log2(hosts + 2));
+      return {vlan: z.zwischen(10, 99), hosts, p, maske: IP.maske(p), block: Math.pow(2, 32 - p)};
+    },
+    frage: p => `Im VLAN ${p.vlan} brauchen ${p.hosts} Hosts eine Adresse. Welche Maske ist die kleinste, die reicht?`,
     loesung: p => IP.maske(p.p),
-    pruefe: (p, t) => { const s = String(t).trim(); return IP.maskeGueltig(s) && IP.praefix(s) === 24 + Math.round(Math.log(p.n) / Math.log(2)); },
+    pruefe: (p, t) => {
+      const s = String(t).trim();
+      return IP.maskeGueltig(s) && IP.praefix(s) === 32 - Math.ceil(Math.log2(p.hosts + 2));
+    },
     ablenker: p => [
-      {text: IP.maske(24), art: "ungeteiltes-netz"},
-      {text: IP.maske(p.p - 1), art: "falscher-praefix"},
-      {text: IP.maske(p.p + 1), art: "falscher-praefix"},
-      {text: IP.maske(p.p + 2), art: "falscher-praefix"},   /* Ersatz, wenn p − 1 auf /24 fällt (zwei VLANs) */
+      {text: IP.maske(24), art: "ungeteiltes-netz"},          /* ein /24 je VLAN: reicht, ist aber nicht die kleinste */
+      {text: IP.maske(p.p + 1), art: "falscher-praefix"},    /* ein Präfix zu groß: zu wenige Hosts */
+      {text: IP.maske(p.p + 2), art: "falscher-praefix"},    /* zwei Präfixe zu groß */
     ],
-    erklaerung: p => `256 Adressen im /24 geteilt durch ${p.n} VLANs sind ${p.block} Adressen je VLAN. ${p.block} Adressen entsprechen ${p.p} Präfixbits, also ${IP.maske(p.p)}.`});
+    erklaerung: p => `Nutzbar sind 2 hoch Hostbits minus 2 Adressen. ${p.hosts} Hosts brauchen den Block mit ${p.block} Adressen: Bei /${p.p} bleiben ${p.block - 2} nutzbare Hosts, bei /${p.p + 1} wären es nur ${Math.pow(2, 31 - p.p) - 2}, das reicht nicht. Das ungeteilte /24 hätte ${Math.pow(2, 32 - 24) - 2} Hosts und verschenkte Platz. Die kleinste Maske, die reicht, ist ${IP.maske(p.p)}.`});
 
 
   /* ---------- Welle 2 · S5: neun Vorlagen (Architektur § 17.4, 20 Vorlagen / 17 Fertigkeiten) ----------

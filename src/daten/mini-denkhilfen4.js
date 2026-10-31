@@ -4,6 +4,8 @@
 
    WARUM DIESE DATEI. Teil 1–3 bleiben unangetastet. Hier stehen die Denkanstöße zu den 20 Minis
    der am 29.10.2026 angehängten Fertigkeiten lab.ipv6 (6), lab.betrieb (6) und lab.wlan (8).
+   Runde 7 (§ 10 Nr. 4) ergänzt hier die drei Transferaufgaben mini-vlan-6, mini-trunk-5 und
+   mini-rostick-4, die vorher auf den Fertigkeitssatz zurückfielen.
    Angehängt wird IDEMPOTENT und reihenfolge-unabhängig wie in Teil 2/3:
      DATEN.miniDenkhilfen = Object.assign(DATEN.miniDenkhilfen || {}, { … });
    Der Name sortiert hinter „mini-denkhilfen3.js" ('3' 0x33 < '4' 0x34) und vor „mini.js";
@@ -70,5 +72,13 @@
       "Anmeldekette"),
     "mini-wlan-8": D("Ein Trunk trägt getaggte und ungetaggte Frames. Welche Einstellung bestimmt, wohin die ungetaggten gehören – und was passiert bei ungleichen Enden?",
       "Uplink-Tag"),
+
+    /* ---- Runde 7 (§ 10 Nr. 4): Transferaufgaben mit eigenem Denkanstoß statt Fertigkeitssatz ---- */
+    "mini-vlan-6": D("Zwei Anschlüsse, ein Switch, zwei getrennte IP-Netze: Der Switch verteilt Frames nur innerhalb eines VLANs. Welches Gerät überschreitet eine Netzgrenze?",
+      "Netzgrenze"),
+    "mini-trunk-5": D("Der Port behandelt ungetaggte Frames nach einer Einstellung, die im Schnappschuss steht. Welche VLAN-Nummer nennt die Zeile „Native vlan“?",
+      "ungetaggtes Frame-Ziel", "Ein Frame kommt ungetaggt am Trunk-Port an"),
+    "mini-rostick-4": D("Jedes VLAN braucht am Router eine eigene logische Schnittstelle mit eigener IP-Adresse. Zähl die VLANs aus der Frage und ordne jedem genau eine zu.",
+      "logische Schnittstelle", "Wie viele Subinterfaces braucht der Router"),
   });
 })();

@@ -1,4 +1,4 @@
-"""Netzwerk-Labor bauen: Module aus src/ -> web/index.html (für das Desktop-Programm).
+﻿"""Netzwerk-Labor bauen: Module aus src/ -> web/index.html (für das Desktop-Programm).
 
 Reihenfolge der Skripte: Schicht für Schicht (SCHICHTEN). Innerhalb einer Schicht zuerst die
 genannten Kopfdateien, dann alle übrigen *.js alphabetisch, zuletzt die genannten Schlussdateien.
@@ -31,7 +31,7 @@ WEB = HIER / "web"
 LERNMOTOR_KOPIE = HIER / "fremd" / "lernmotor.js"
 # … und die Quelle daneben, falls die Spielhalle mit ausgecheckt ist (hat Vorrang).
 LERNMOTOR_QUELLE = HIER.parent / "FISI-Spielhalle" / "src" / "lernmotor.js"
-VERSION = "2.8.0"
+VERSION = "2.9.0"
 
 # (Ordner, Kopfdateien, Schlussdateien, headless)
 SCHICHTEN = [

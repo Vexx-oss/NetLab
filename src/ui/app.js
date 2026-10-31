@@ -49,8 +49,10 @@ UI.fenster = (() => {
 
 UI.app = (() => {
   /* Reihenfolge der Andock-Knöpfe. „training" steht seit der Hilfestellung (07.10.2026) vor „lernstand":
-     der Trainingsbereich ist der Ort, an dem ein Azubi ohne Auftragsdruck übt (Vertrag § 6). */
-  const REIHE = ["heute", "postfach", "labor", "training", "kunden", "wiki", "lernstand", "shop"];
+     der Trainingsbereich ist der Ort, an dem ein Azubi ohne Auftragsdruck übt (Vertrag § 6).
+     Runde 7 (31.10.2026): „subnetz" steht direkt nach „labor" — verstehen und üben (Abteilung
+     Subnetting) vor dem Training ganzer Fälle; unbekannte Namen überspringt liste() ohnehin. */
+  const REIHE = ["heute", "postfach", "labor", "subnetz", "training", "kunden", "wiki", "lernstand", "shop"];
   const PLATZ = {
     postfach:  {titel: "Postfach",  symbol: "postfach",  text: "Hier landen die Aufträge deiner Kunden: Störungen, Projekte, Wartung.", mehr: "Das Postfach öffnet, sobald die Karriere eingebaut ist."},
     kunden:    {titel: "Kunden",    symbol: "kunden",    text: "Deine Kunden mit Vertrag, Ampel und Bewertungen.", mehr: "Die Kundenliste kommt mit der Karriere."},
@@ -83,7 +85,15 @@ UI.app = (() => {
     const eigen = eigenesTheme(t);
     if (t === "hell") d.dataset.theme = "light"; else if (t === "dunkel") d.dataset.theme = "dark";
     else if (t === "system") delete d.dataset.theme; else if (eigen) d.dataset.theme = eigen.id; else delete d.dataset.theme;
-    d.style.colorScheme = (eigen ? eigen.dunkel : t !== "hell") ? "dark" : "light";
+    /* `color-scheme` muss zum tatsächlich gezeichneten Schema passen (native Dropdowns, Range,
+       Scrollbars). Vorher stand bei „system" mit hellem Betriebssystemwunsch „dark" — die Seite
+       war hell, die Controls blieben dunkel (Befund der Design-Prüfung Runde 8). Drei Fälle:
+       eigenes Theme → dessen dunkel-Flag; hell/dunkel → fest; system → Betriebssystemwunsch. */
+    const dunkelSchema = eigen ? eigen.dunkel
+      : t === "hell" ? false
+      : t === "dunkel" ? true
+      : !(typeof matchMedia !== "undefined" && matchMedia("(prefers-color-scheme: light)").matches);
+    d.style.colorScheme = dunkelSchema ? "dark" : "light";
     /* Aussehen aus dem Shop (Akzentfarbe, Leistenstil) – vorher wurde es gekauft, aber nie angewendet */
     const a = typeof Spiel !== "undefined" && Spiel._st && Spiel.karriere ? Spiel.karriere.daten().aussehen : null;
     if (a && a.akzent && a.akzent !== "cyan") d.dataset.akzent = a.akzent; else delete d.dataset.akzent;
@@ -125,7 +135,10 @@ UI.app = (() => {
   }
   function liste(){
     const namen = [...REIHE.filter(n => ansichten.has(n)), ...[...ansichten.keys()].filter(n => !REIHE.includes(n))];
-    return namen.map(n => { const a = ansichten.get(n); return {name: n, titel: a.titel, symbol: a.symbol, platzhalter: !!a.platzhalter}; });
+    /* `kurz` ist die Beschriftung im Dock: die Spalte ist 76 px breit, lange Titel („Subnetting")
+       brechen dort mitten im Wort um (gemessen 31.10.2026). Der volle Titel bleibt Titel, Tooltip
+       und Statusfuß; im Dock steht die kurze Form. Fehlt sie, gilt wie bisher der Titel. */
+    return namen.map(n => { const a = ansichten.get(n); return {name: n, titel: a.titel, kurz: a.kurz, symbol: a.symbol, platzhalter: !!a.platzhalter}; });
   }
   function ansicht(name){
     if (!ansichten.has(name)) return;
@@ -153,7 +166,7 @@ UI.app = (() => {
     el.dock.replaceChildren(...liste().map(a => {
       const z = h("span", {class: "dock-zahl", hidden: true});
       const b = h("button", {type: "button", class: "dock-knopf" + (a.name === aktiv ? " an" : "") + (a.platzhalter ? " spaeter" : ""), "data-ansicht": a.name, title: a.titel,
-        onclick: () => ansicht(a.name)}, typeof a.symbol === "string" ? UI.symbol(a.symbol, 22) : a.symbol, h("span", {class: "dock-text"}, a.titel), z);
+        onclick: () => ansicht(a.name)}, typeof a.symbol === "string" ? UI.symbol(a.symbol, 22) : a.symbol, h("span", {class: "dock-text"}, a.kurz || a.titel), z);
       if (a.name === aktiv) b.setAttribute("aria-current", "page");
       return b;
     }));

@@ -267,9 +267,22 @@ UI.training = (() => {
       filterleiste(liste),
       letztes ? ergebnisKarte() : null,
       laufend.length ? weiterKachel(laufend) : null,
-      h("div", {class: "tr-liste"}, pfadeBauen(liste).map(pfad)));
+      h("div", {class: "tr-liste"}, pfadeBauen(liste).map(pfad)),
+      querZeile());
     filterAnwenden();
     return wurzel;
+  }
+
+  /* Querverweis zur Abteilung „Subnetting" (Runde 8): Sie ist der Ort, an dem Subnetting/VLAN
+     verstanden und in eigenen Runden geübt werden. Der Verweis steht bewusst AM ENDE der Liste:
+     oben würde er die erste Trainingskarte um eine Zeile nach unten schieben (gemessen im
+     Rauchtest bei 720 px: „Hauptaktion außerhalb"). Ruhige Zeile, eine Hauptaktion, kein
+     eigener Zustand. */
+  function querZeile(){
+    return h("div", {class: "tr-quer"},
+      h("button", {type: "button", class: "knopf tr-quer-knopf", onclick: () => UI.app.ansicht("subnetz")},
+        "Zur Abteilung Subnetting"),
+      h("span", {class: "tr-quer-text"}, "Subnetting und VLAN: vom Bit bis zum Adressplan — verstehen, ausprobieren, in eigenen Runden sichern."));
   }
 
   /* Fehlschläge JE FERTIGKEIT: `Spiel.fehlschlaege` liefert {skill, text} – die kurze Aufzählung von

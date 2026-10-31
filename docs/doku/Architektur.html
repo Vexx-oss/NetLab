@@ -89,6 +89,12 @@ img{max-width:100%;height:auto}
 <li style="margin-left:16px"><a href="#9-6-welle-3-e1-formen-wahl-ereignisse-provisorium">9.6 Welle 3, E1 „Formen, Wahl, Ereignisse, Provisorium“</a></li>
 <li style="margin-left:16px"><a href="#9-7-welle-3-e2-kundenakte-und-kompetenzkarte">9.7 Welle 3, E2 „Kundenakte und Kompetenzkarte“</a></li>
 <li style="margin-left:16px"><a href="#9-8-auftrag-p-politur-und-bindung-design-spielspa-2-0-20-21">9.8 Auftrag P „Politur und Bindung“ (Design – Spielspaß 2.0, § 20/§ 21)</a></li>
+<li><a href="#21-runde-3b-audit-umsetzung-ambient-und-lebende-zonen-30-10-2026-verbindlicher-vertrag">21 · Runde 3b — Audit-Umsetzung, Ambient und lebende Zonen (30.10.2026) — verbindlicher Vertrag</a></li>
+<li><a href="#22-bento-2-5-arbeitsplatz-30-10-2026-verbindlicher-gestaltungsvertrag">22 · Bento 2.5 „Arbeitsplatz" (30.10.2026) — verbindlicher Gestaltungsvertrag</a></li>
+<li><a href="#23-runde-4-jobdoku-flugschreiber-fenster-31-10-2026-verbindlicher-vertrag">23 · Runde 4 — Jobdoku, Flugschreiber, Fenster (31.10.2026) — verbindlicher Vertrag</a></li>
+<li><a href="#24-runde-5-auftragsbogen-inspektor-leiste-als-begleiter-31-10-2026-verbindlicher-vertrag">24 · Runde 5 — Auftragsbogen, Inspektor, Leiste als Begleiter (31.10.2026) — verbindlicher Vertrag</a></li>
+<li><a href="#25-runde-6-7-kurzubung-mit-kontext-und-flugschreiber-aufmerksamkeit-31-10-2026">25 · Runde 6/7 — Kurzübung mit Kontext und Flugschreiber-Aufmerksamkeit (31.10.2026)</a></li>
+<li><a href="#26-runde-8-abteilung-subnetting-31-10-2026-verbindlicher-vertrag">26 · Runde 8 — Abteilung „Subnetting" (31.10.2026) — verbindlicher Vertrag</a></li>
 </ul>
 </nav><h1 id="architektur-netzwerk-labor">🧱 Architektur – Netzwerk-Labor</h1>
 <p>⬆️ <a href="Liesmich.html">Netzwerk-Labor</a> · Spezifikation: <a href="entwicklung/Konzept%20%E2%80%93%20Netzwerk-Labor.html">Konzept – Netzwerk-Labor</a></p>
@@ -413,231 +419,51 @@ UI.labor.fernFertig()                               // Sitzungsfenster in den Zu
 <p><strong>Vertrauen zahlt aus</strong> (<code>spiel/kundenakte.js</code>, § 20 F5 – R4 „jede Belohnung öffnet etwas“):</p>
 <pre><code class="sprache-js">Spiel.VERTRAUEN_LOHN = {empfehlung:3, rabatt:4, rabattAnteil:0.2}
 st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stufe früher offen
-st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
-
-## 21 · Runde 3b — Audit-Umsetzung, Ambient und lebende Zonen (30.10.2026) — verbindlicher Vertrag
-
-**Auftrag (Nutzer, wörtlich).** „dann fixe diese doch, warum hast du das nicht gleich gemacht?"
-(bezogen auf die 13 Audit-Signale), „Wenn ein PC aus der Zone geschoben wird muss die zone sich mit ihm
-verschieben", „es fehlen noch so die ganzen ambient, atmenden, pulsierenden effekte".
-Beleg: Nachweise/Prototypen-Runde3/audit/NOTIZ.md (13 Signale mit Messwerten) und audit-umsetzung/NOTIZ.md.
-
-**Umsetzung (Dateien, je ein Schreiber).**
-- hub.css / karriere.css / spiel.css: Heute-Datenflächen 10 → 2 (Rahmen gesamt 12 → 7, Rest = Buttons),
-  Typo-Hierarchie statt 11-px-Monokultur (Anteil &lt;= 12,5 px: 87 % → 77 %, &gt;= 14 px: 12 → 22 Knoten),
-  Messing-Versalien 41 → 0; Lernstand 119 → 79 Rahmen, Kompetenzbereich kartenlos; Shop von 4 auf 2
-  Rahmen, Regal zweispaltig, Akzentwand weg; Einstellungen als eine Segmentfläche; Postfach-Neon-Reste
-  (Kundenkante, Icon-Platte, Pillen) entfernt, Kacheln gestreckt, Aktionsleiste 44 px unten.
-- zz-polaris.css / editor.css / inspektor.css / basis.css: die Doppel-Schrägstrich-Labels aus allen
-  UI-Beschriftungen entfernt (Ersatz: 2-px-Akzentlinie oder Satzlabel); Labor-Kopf Kunde unter dem Titel
-  (gemessen: POLARIS 1440 Titel 253 x 39 / Kunde 103 x 18, Abstand 4 px, kein Overlap; Messing 231 x 36 /
-  101 x 16); Versalien reduziert, Sperrsatz &lt;= .06em; neue Tokens --dauer-atmen 5000 ms,
-  --dauer-licht 6000 ms, --dauer-lauflicht 700 ms.
-- Theme-Dateien: Ambient sichtbar (Fläche atmet: Messing 9 s, Pulsar 7 s + Sternenpunkte, Keramik 12 s,
-  Nordlicht Aurora, Papier Papierkorn; Deckkraft .12–.20), Interaktion: Dock-Knopf atmet, Primärknopf-
-  Schein, Auswahlring pulsiert 320 ms, Live-Kabel mit laufendem Lichtpunkt; „Bewegung aus" = Standbild
-  (basis.css zentral). Heute-Kontrastblock für alle Themes (Messing 8,38:1, Pulsar 12,29:1, Keramik 5,93:1,
-  Nordlicht 14,18:1, Papier 6,83:1; alle &gt;= 4,5:1); Ursache der schwarzen Messing-Knöpfe war eine
-  Ambient-Sheen-Regel, die die Primärfläche überschrieb — behoben (Schein animiert nur box-shadow).
-- editor.js: Zonen wandern live — geraetBewegt() ruft zonenNeu(); Hülle und Chip werden während des
-  Ziehens pro Frame neu berechnet, die Zone folgt dem Gerät bzw. wächst mit.
-- Leisten-Labels (Runde 3a) und Umlaute bleiben unverändert gültig.
-
-**Gates (letzte Messung).** 873/873 Tests, ethos GRÜN (R4 169, R6 7, R9 58, R10 40 — besser als Stand),
-klassen 0, umlaute GRÜN, Rauchtest 45/45 (letzter Lauf), starttest GRÜN. R12 nicht gemessen (--dom).
-Ambient im Build per CDP-Frames belegt (16,5 % Pixel sichtbar verändert; „Bewegung aus" = 0 Animationen).
-
-## 22 · Bento 2.5 „Arbeitsplatz" (30.10.2026) — verbindlicher Gestaltungsvertrag
-
-**Auftrag (Nutzer, sinngemäß).** Postfach „lieblos und unpersönlich", Kunden „zu kindlich statt
-Job-Simulation mit Kundenprofil", Dashboard „einzelnes unordentliches Objekt" (Ziele, Sitzung,
-Klassenraum), Training „Kaskade an Einheiten" und „altes Design", minimierte Leiste „komplett
-überarbeiten: viel interaktiver, bessere und innovativere Inhalte"; dazu der Hilfeleiter-Slogan aus
-dem ersten Screenshot. Ziel: eine ruhige, dichte Arbeitsoberfläche eines IT-Dienstleisters in
-Bento-Form — echte Hierarchie, glaubwürdige Daten, wenig Farbe, keine Emoji-Deko, keine
-Riesen-Slogans in Funktionsflächen.
-
-**Vertrag.** Vollfassung: [`Entwurf – Bento 2.5 (Arbeitsplatz).md`](&lt;entwicklung/Entwurf – Bento 2.5 (Arbeitsplatz).md&gt;).
-Die Leitsätze:
-
-1. **Bedienlogik, Datenwege und Spielzustand bleiben unverändert.** Keine Änderung an
-   `src/sim/`, `src/modell/`, `src/kern/`, `src/cli/`; Ansichten rufen dieselben `Spiel.*`-Wege.
-2. **Test-Haken bleiben** (Klassen und Bedeutung): `.sp-postfach/.sp-pf-liste/.sp-leser/.sp-mail/
-   .sp-brief/.sp-knoepfe/.sp-blatt/.sp-hilfe/.sp-leiter`, `.hb-seite`, `.kr-seite/.kr-kopf/
-   .kr-raster/.kr-kunde/.ka-block`, `.tr-seite/.tr-liste/.tr-karte/.tr-geruest/.tr-quelle/
-   .tr-ergebnis/.tr-offen/.tr-grund/.tr-lernen/.tr-fehler*`, Leisten-Haken siehe Test
-   `spiel-leiste-hilfe.test.js` (`.lk-zeile` mit exakter Kindfolge, `.lk-auf`, `.lk-mini`,
-   `.lk-mini-hilfe`, `Mini`-Zeichen, Hilfe-Knopf).
-3. **Nur Tokens.** Neue Flächen nutzen ausschließlich `basis.css`-Tokens. Schrift nur
-   `var(--fs-*)`, Abstand nur {0,4,8,12,16,24,32}px, Radius nur Tokens, keine Farb-Literale,
-   kein `!important` außerhalb `basis.css` (Gates: `tools/ethos.py`, `tools/klassen.py`,
-   `ui-typografie`, `ui-symbole`). Die fünf Theme-Dateien `zzz-thema-*.css` bleiben unangetastet;
-   bestehende Klassennamen bleiben, damit ihre Regeln weiter greifen.
-4. **Keine erfundenen Zahlen, keine Emoji in der UI-Chrome.** Anzeige nur aus `Spiel.*`/`DATEN`;
-   Kunden-Emoji (`DATEN.kunden[*].symbol`) wird in den Kundenflächen durch Monogramme ersetzt.
-5. **Gemeinsame Bausteine der Leitung:** `src/stil/bento.css` (12-Spalten-Raster `.bn-raster`,
-   Kachel `.bn-k` mit Varianten `flach|akzent|iris|geld`, `.bn-kopf/.bn-kicker/.bn-titel/.bn-lead/
-   .bn-meta/.bn-fuss/.bn-zeile/.bn-wert/.bn-chips/.bn-chip/.bn-marke/.bn-trenner/.bn-leer`,
-   Spalten `.bn-s3…s12`) und `src/ui/bento.js` (`UI.bento.monogramm/initialen/kachel/kopf`).
-6. **Ein Schreiber je Datei.** Postfach: `spiel.js` + `spiel.css`; Kunden: `karriere.js` (nur
-   Kunden/Kundenakte) + `karriere.css` + `kundenakte.css`; Dashboard: `hub.js` + `hub.css`;
-   Training: `training.js` + `training.css`; Leiste: `leiste.js` + `leiste.css`; Grundlage und
-   Integration: Leitung (`bento.*`, Doku, Werkzeuge, Nachweise).
-7. **Abnahme je Bereich:** private Vorschau `python tools/vorschau.py --name &lt;bereich&gt;` +
-   `python Nachweise/bento/foto.py --html vorschau-&lt;bereich&gt;.html --marke &lt;bereich&gt;` (Bilder
-   1440/960/720), Sichtprüfung, mindestens zwei Iterationen; `node tests/run.js` grün,
-   `klassen.py` 0, `ethos.py` GRÜN (R4/R9/R10 dürfen nicht steigen), `umlaute.py` GRÜN.
-8. **Nicht Teil des Umbaus:** neue Ansichten, Änderungen an Simulation/Netz/Codec/Spielstand,
-   Themes, Fassung, Push/Release. Die Leitung committet, zieht Doku/Stand nach und legt die
-   Abnahme vor.
-
-**Stand (30.10.2026).** Umgesetzt von fünf parallelen Bereichsteams (ein Schreiber je Datei), danach
-von der Leitung integriert und von zwei unabhängigen Prüfungen (Design; Theme/Struktur) gegengelesen.
-Gates: `node tests/run.js` **878/878 grün**, 0 übersprungen · `sh tools/test.sh --rauch` **45/45** ·
-`python tools/klassen.py` **0** · `python tools/ethos.py` **GRÜN** (R2 20→19, R4 169→153, R9 62→58,
-R10 42→39) · `python tools/umlaute.py` **GRÜN** · `node tools/sim-stand.js` **unverändert** ·
-`python tools/seite.py --pruefen` **GRÜN** (54 Dokumente). Sichtprüfung je Bereich bei 1440/960/720,
-Theme-Prüfung 7 Zustände × 7 Ansichten ohne harten Kontrastbruch, 0 Emoji in `src/ui/**`/`src/stil/**`.
-**Nicht gemessen:** R12 (`--dom`), Lauf in Android, Hover-/Tastaturzustände im Vollbild. Die
-Windows-`.exe` wurde dagegen gebaut, mit `tools/q-echt.py` echt bedient und gestartet. Fassung
-**2.5.0** ist gezogen; Zweig `ausbau-1.2`, Tag `v2.5.0` und GitHub-Release wurden am 30.10.2026
-mit ausdrücklicher Nutzerfreigabe veröffentlicht. **Patch 2.5.1** (31.10.2026) verkürzt den
-Zuklapp-Timer der Leiste von 5 s auf 1 s. Einzelheiten:
-[`Übergabe – Stand 30.10.2026 – Bento 2.5`](&lt;entwicklung/Übergabe – Stand 30.10.2026 – Bento 2.5.md&gt;).
-## 23 · Runde 4 — Jobdoku, Flugschreiber, Fenster (31.10.2026) — verbindlicher Vertrag
-
-**Auftrag (Nutzer, sinngemäß).** Die noch alten Flächen (Verdacht/Akte, Lernstand, Simulator,
-Inspektor, Shop, Fenster, Interaktion) sollen eine eigenständige Bento-2.5-Sprache bekommen und zu
-einer glaubwürdigen Job-Simulation mit didaktischer Hilfe professionalisiert werden — kreativ neu
-gedacht, nicht poliert; ausgeliefert als Fassung 2.6.0 inklusive Push, Tag, Release und Live-Seite.
-Vollfassung: [`Entwurf – Runde 4 (Jobdoku &amp; QoL)`](&lt;entwicklung/Entwurf – Runde 4 (Jobdoku &amp; QoL).md&gt;).
-
-**Neue und getrennte Oberflächen-Dateien (Phase 0, Verhalten unverändert).**
-- `src/ui/lernstand.js` (`UI.lernstand`: Ansicht, Kompetenzkarte, Prüfungstag, Training) und
-  `src/ui/shop.js` (`UI.shop`: Werkstattregal, Kauf) sind aus `src/ui/karriere.js`
-  ausgelagert; `src/stil/lernstand.css` und `src/stil/shop.css` aus `karriere.css`.
-- `UI.karriere._helfer` stellt `overlay` bereit (für die ausgelagerten Ansichten).
-  `UI.karriere.lernstandAnsicht/shopAnsicht/training/pruefungUebersicht/pruefungAbgeben` bleiben
-  als Alias erhalten. Ansicht-IDs (`lernstand`, `shop`) und `UI.startHaken` unverändert.
-- `src/ui/naechster.js` (`UI.naechster`) und `src/ui/fehlerziel.js` (`UI.fehlerziel`) neu.
-
-**Datenformen und Schnittstellen (nur additiv).**
-- `Spiel.akte`: `Spiel.akte.schichten(inst) → [{n, name, text, karten}]`,
-  `Spiel.akte.fundort(karte, inst) → ziel|null`, `Spiel.akte.fortschritt(inst) → {…}`,
-  `Spiel.akte.bericht(inst) → Text (ohne Lösung)`; `Spiel.akte.FORTSCHRITT` = die sechs Stufen
-  (beobachten · messen · eingrenzen · Hypothese · handeln · dokumentieren).
-- `UI.fehlerziel.springen(ziel) → {ok, schritte, grund, ort}` mit
-  `ziel = {art:"geraet"|"port"|"kabel"|"frame"|"ebene"|"zone", geraet, port, kabel:{a,b}|id, frame, ebene, werkzeug, dock, leise, ms, zentrieren}`:
-  EIN Resolver für Akte, Simulations-Panel und Inspektor; öffnet Labor, wechselt Ebene, wählt
-  Gerät/Port/Kabel, zeigt den Inspektor, zentriert und hebt hervor. Er wirft nie, ruft kein
-  `focus()`, respektiert `UI.bewegung()`. Hilfen: `zielAusEreignis`, `kabelEnden`,
-  `ortText`, `istProblem`.
-- `einst.anfaengerHilfe: bool` (store `"einst"`). Fehlt der Wert, gilt Standard **an** bei
-  Karrierestufe ≤ 2, sonst aus. Lese-/Schreib-API: `UI.simpanel.anfaengerHilfe()` und
-  `UI.simpanel.anfaengerHilfeSetzen(bool)`; Bedienung im Panel-Kopf und in den Einstellungen
-  (`src/ui/karriere.js`, Abschnitt „Lernen").
-- `Spiel.hilfe.anfaengerSchritte(inst)` und `Spiel.naechsterOrt(inst)`: additive
-  Anzeigehilfen (keine Änderung an Schwellen, Vorrat oder Bezahlwegen).
-
-**Oberfläche (Präfixe bleiben, Testhaken bleiben).**
-- Einsatzakte `ak-` (Reiter `akte` im Dock; `.ak-karten/.ak-karte/.ak-verdacht/.ak-chip`
-  bleiben), Ausbildungs-Cockpit `lern-`/`nst-`/`kk-` (`.kr-kopf`/`.kr-seite` bleiben),
-  Flugschreiber `si-` (`.si-kopf`, `.si-warn`, `.si-hilfe` neu; `.si-zeile` bleibt),
-  Inspektor `in-` (Steckbriefe; `[data-reiter]` bleibt), Fensterkopf `fenster-knopf` in
-  `src/stil/rahmen.css` (nur `Plattform.name === "tauri"`), Werkstattregal `wr-`/`kr-ware`.
-- Fenster: `shell/src-tauri/src/fenster.rs` schaltet im Modus „voll" `set_decorations(false)`
-  (Leiste/Tray unverändert) und bietet den Befehl `fenster_knopf("minimieren"|"maximieren"|"schliessen")`;
-  `src/ui/app.js` baut die Kopfzeile mit `data-tauri-drag-region="deep"` und drei 44-px-Knöpfen.
-- `src/stil/bento.css`: `.bn-s12`/`.bn-k.breit` fallen im ≤-900-px-Raster auf eine Spalte
-  zurück (Reparatur des 720-px-Befunds aus Strang B).
-
-**Gates (gemessen 31.10.2026).** `node tests/run.js` **930/930 grün**, 0 übersprungen ·
-`sh tools/test.sh --rauch` **45/45** · `klassen.py` **0** · `ethos.py` **GRÜN**
-(R1 23, R2 17, R4 140, R9 58, R10 42) · `umlaute.py` **GRÜN** · `sim-stand.js` unverändert ·
-Bau 138 Module. Sichtprüfung/Rollen: fünf Bereichs-Owner, zwei unabhängige Prüfungen (Design;
-Theme/Struktur/A11y), Leitung integriert, committet und veröffentlicht. **Nicht gemessen:** R12
-(`--dom`), Android-APK, echte Maus im ausgelieferten Tauri-Fenster (Prüfbau mit eigener Kennung,
-weil eine fremde Instanz lief). Einzelheiten:
-[`Übergabe – Stand 31.10.2026 – Runde 4`](&lt;entwicklung/Übergabe – Stand 31.10.2026 – Runde 4.md&gt;).
-
-## 24 · Runde 5 — Auftragsbogen, Inspektor, Leiste als Begleiter (31.10.2026) — verbindlicher Vertrag
-
-**Auftrag (Nutzer, sinngemäß).** Nach 2.6.0 meldet der Nutzer drei Bildschirmfotos zurück:
-„unordentlich überlappende Elemente", „manche Elemente sind nicht richtig ausgerichtet", die
-Minileiste „vermittelt visuell nicht ihren Nutzen, sondern overwhelmed", das Zusammenfallen der
-Leiste müsse „schöner animiert" werden, und „die Aufträge zu simulieren im Minimodus funktioniert
-nicht richtig, da viel zu wenig Kontext herrscht … das Konzept muss umgedacht werden". Verlangt:
-Full Skill Usage und Agenten-Schwärme. Vollfassung:
-[`Entwurf – Runde 5 (Leiste &amp; Auftragsmappe)`](&lt;entwicklung/Entwurf – Runde 5 (Leiste &amp; Auftragsmappe).md&gt;).
-
-**Auftragsbogen (A).**
-- `UI.spiel.mappeAuf(reiter="brief", erstes=false, mitFokus=true)` — optionaler dritter Parameter;
-  `mappeZu()` unverändert. Fokus geht in die Mappe und beim Schließen zurück zum Auslöser.
-- Zustand: solange die Mappe offen ist, trägt `.labor` die Klasse `mappe-an`; `editor.css`
-  blendet `.lb-leiste-oben`, `lb-leiste-unten` und `.lb-leinwand::before` aus
-  (`visibility:hidden`, Platz bleibt) und hebt `.lb-auftrag` auf `z-index:30`.
-  Die Klasse wird bei jedem Neuzeichnen gesetzt/entfernt (Schließen, Ticketende, Ansichtswechsel).
-- Die Mappe bleibt Kind von `#labor-auftrag` (Testhaken unverändert); Höchsthöhe
-  `max-height:var(--am-max, min(70vh,560px))` (spiel.js setzt `--am-max` aus dem freien Platz),
-  `--am-links` richtet die Blattkante an der Auftragszeile aus; ≤900 px als Blatt von unten.
-- Der frühere Kopfraum-Hack (`--am-kopfraum`/`padding-top`) ist entfallen; die
-  `--leiste-h`-Messung in editor.js bleibt.
-
-**Karte (D).** Knoten-Labels: Baselines Name/Rolle/IP bei `ikonH+18/33/48` (15 px), Box bis
-`+62`, `line-height:1.15`; Decluttering (`labelUeber`) gilt auch für `.ger-ip`; die
-Adresse erscheint nur bei Hover/Auswahl oder Zoom `≥ IP_ZOOM (0,85)`.
-
-**Inspektor (B).** Kopf kompakt (Mikrolabel · Name · Rollenzeile · eine Kennzahlenzeile). Ports:
-2-zeiliger Block je Port (Zeile 1 Name + Link-Chip + Modus-Chip; Zeile 2 zwei gleich breite Felder
-`Modus`/`VLAN` mit je einer Beschriftung, ≥44 px); die Portliste scrollt in sich, ihre Höhe
-wird auf ganze Portzeilen gerundet (rAF + ResizeObserver) — keine angeschnittene Zeile. Die
-SVI-Verwaltungskarte liegt im VLAN-Reiter.
-
-**Mini-Leiste (C) — Konzept „Begleiter".** Die Leiste löst keine Aufträge; sie begleitet:
-- zugeklappt 300×56: Stufe · Rolle vollständig, drei Werte in einer Zeile (`€/h · Ruf · offen`),
-  Deckkraft Standard `0.92` (`store "einst".leiste.deckkraft`, geklemmt 0,6–1; Regler in app.js
-  60–100 %), Hover 1;
-- aufgeklappt 320×300: „Jetzt dran" (Kunde · Auftrag + nächster Schritt aus `Spiel.naechsterOrt`/
-  `Spiel.naechsteDiagnose`, Primär „Im Labor fortsetzen", Sekundär „Auftrag lesen" über
-  `UI.spiel.mappeAuf`), „Kurzübung (freiwillig)" (bestehende Mini-Frage mit Kontextzeile aus dem
-  aktiven Auftrag), „Lage" (Verträge/Serie/offen), Schnellaktionen;
-- Animation: 320 ms `cubic-bezier(.22,1,.36,1)` für Höhe/Breite, Inhalt gestaffelt 40/80/120 ms;
-  Zuklappen Inhalt zuerst, Karte danach, Fenstergröße (`Plattform.fenster.groesse`) erst nach der
-  Karten-Animation; „Bewegung aus" = sofort. Maße und `.lk-*`-Haken bleiben Testvertrag.
-
-**Gates (gemessen 31.10.2026).** `node tests/run.js` **932/932 grün**, 0 übersprungen ·
-Rauchtest **45/45** · `klassen.py` **0** · `ethos.py` **GRÜN** (R1 23, R2 17, R3 4, R4 135,
-R9 58, R10 42; R12 nicht gemessen) · `umlaute.py` **GRÜN** · Simulation unverändert · 138 Module.
-Ein Test wurde umgestellt (nicht abgeschwächt): `tests/ui-leiste-ueberlappung.test.js` prüft die
-neue Mechanik (`mappe-an`/`visibility:hidden` statt Kopfraum) mit 6 statt 4 Fällen.
-**Nicht gemessen:** R12 (`--dom`), Android-APK, echte Maus im ausgelieferten Tauri-Fenster
-(nur Prüfbau), Screenreader.
-## 25 · Runde 6/7 — Kurzübung mit Kontext und Flugschreiber-Aufmerksamkeit (31.10.2026)
-
-**Runde 6 (Kurzübung).** Neues Modul `src/spiel/kurzfrage.js`:
-`Spiel.kurzfrage.fuer(inst, {niveau}) → {id,titel,frage,lage:[{label,wert}],optionen:[{text,richtig}],
-erklaerung,ort} | null`. Fünf Vorlagen (netz/maske/gateway/portmodus/zustand) aus `inst.netz`,
-`Modell.adressen`, `Sim.adresse`, `IP.*`, `g.running.ports/.if`, Kabeln und `g.an`;
-deterministisch aus `inst.iid` (Zufall ohne Uhr); genau eine richtige Option; Niveau E/AP1/AP2;
-Lage 2–4 Zeilen; kein Lösungstext (Fehlerstellen nach `Spiel.plan.diff` ausgeklammert). Die
-Leiste (`src/ui/leiste.js`, `leiste.css`) rendert bei offenem Auftrag diese Frage mit
-Lage-Block; ohne verwertbares Netz zeigt sie keine Frage, sondern den Weg ins Labor. Das generische
-Mini-Ticket bleibt als Kopfübung im Dialog (karriere.js/mk-einordnung).
-
-**Runde 7 (Flugschreiber).** `src/ui/simpanel.js` + `simulation.css`: eine Lesespalte mit drei
-Ebenen — Ergebnis (Urteil 28 px, eine Zahlenzeile, Segmentleiste), Befund (erster Fehler als
-2-px-Rail-Zeile, ein Erklärungssatz, leiser Weg „Zum Fundort →"), nächster Schritt (numerierte
-Hilfe, hängender Einzug, leiser Verweis „Gerät zeigen →"). Höchstens EIN gefüllter Hauptweg je
-Zustand, alle übrigen Ghost 32 px; sichtbare 44-px-Trefferflächen für Transport/Filter bleiben
-unsichtbar erhalten. Hilfe an/aus als Ghost-Schalter, Format als Textsegment. Testhaken `.si-*`,
-Transport, Zeitachse, `UI.simpanel.anfaengerHilfe` und PDU unverändert.
-
-**Messung (31.10.2026).** Runde 6: 950/950 Tests in der abgetrennten Prüfkopie; 228/228 Fragen über
-76 Handtickets × 3 Niveaus; Lösungstext-Scan 0 Treffer. Runde 7: Dock 380 px, laute Knöpfe 11→2,
-primäre 3→0 (Fehler+Hilfe an), Flächen 4→1; 10→2/3→0/3→1 (Hilfe aus); 6→2/4→1/2→0 (Ergebnis);
-Überlauf 0; Mikrolabel 6,08:1. Im gemeinsamen Arbeitsbaum 1033/1033 grün (dieser Commit enthält nur
-Runde-6/7-Dateien). R12 nicht gemessen.
-</code></pre>
+st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen</code></pre>
+<h2 id="21-runde-3b-audit-umsetzung-ambient-und-lebende-zonen-30-10-2026-verbindlicher-vertrag">21 · Runde 3b — Audit-Umsetzung, Ambient und lebende Zonen (30.10.2026) — verbindlicher Vertrag</h2>
+<p><strong>Auftrag (Nutzer, wörtlich).</strong> „dann fixe diese doch, warum hast du das nicht gleich gemacht?" (bezogen auf die 13 Audit-Signale), „Wenn ein PC aus der Zone geschoben wird muss die zone sich mit ihm verschieben", „es fehlen noch so die ganzen ambient, atmenden, pulsierenden effekte". Beleg: Nachweise/Prototypen-Runde3/audit/NOTIZ.md (13 Signale mit Messwerten) und audit-umsetzung/NOTIZ.md.</p>
+<p><strong>Umsetzung (Dateien, je ein Schreiber).</strong></p>
+<ul><li>hub.css / karriere.css / spiel.css: Heute-Datenflächen 10 → 2 (Rahmen gesamt 12 → 7, Rest = Buttons), Typo-Hierarchie statt 11-px-Monokultur (Anteil &lt;= 12,5 px: 87 % → 77 %, &gt;= 14 px: 12 → 22 Knoten), Messing-Versalien 41 → 0; Lernstand 119 → 79 Rahmen, Kompetenzbereich kartenlos; Shop von 4 auf 2 Rahmen, Regal zweispaltig, Akzentwand weg; Einstellungen als eine Segmentfläche; Postfach-Neon-Reste (Kundenkante, Icon-Platte, Pillen) entfernt, Kacheln gestreckt, Aktionsleiste 44 px unten.</li><li>zz-polaris.css / editor.css / inspektor.css / basis.css: die Doppel-Schrägstrich-Labels aus allen UI-Beschriftungen entfernt (Ersatz: 2-px-Akzentlinie oder Satzlabel); Labor-Kopf Kunde unter dem Titel (gemessen: POLARIS 1440 Titel 253 x 39 / Kunde 103 x 18, Abstand 4 px, kein Overlap; Messing 231 x 36 / 101 x 16); Versalien reduziert, Sperrsatz &lt;= .06em; neue Tokens --dauer-atmen 5000 ms, --dauer-licht 6000 ms, --dauer-lauflicht 700 ms.</li><li>Theme-Dateien: Ambient sichtbar (Fläche atmet: Messing 9 s, Pulsar 7 s + Sternenpunkte, Keramik 12 s, Nordlicht Aurora, Papier Papierkorn; Deckkraft .12–.20), Interaktion: Dock-Knopf atmet, Primärknopf- Schein, Auswahlring pulsiert 320 ms, Live-Kabel mit laufendem Lichtpunkt; „Bewegung aus" = Standbild (basis.css zentral). Heute-Kontrastblock für alle Themes (Messing 8,38:1, Pulsar 12,29:1, Keramik 5,93:1, Nordlicht 14,18:1, Papier 6,83:1; alle &gt;= 4,5:1); Ursache der schwarzen Messing-Knöpfe war eine Ambient-Sheen-Regel, die die Primärfläche überschrieb — behoben (Schein animiert nur box-shadow).</li><li>editor.js: Zonen wandern live — geraetBewegt() ruft zonenNeu(); Hülle und Chip werden während des Ziehens pro Frame neu berechnet, die Zone folgt dem Gerät bzw. wächst mit.</li><li>Leisten-Labels (Runde 3a) und Umlaute bleiben unverändert gültig.</li></ul>
+<p><strong>Gates (letzte Messung).</strong> 873/873 Tests, ethos GRÜN (R4 169, R6 7, R9 58, R10 40 — besser als Stand), klassen 0, umlaute GRÜN, Rauchtest 45/45 (letzter Lauf), starttest GRÜN. R12 nicht gemessen (--dom). Ambient im Build per CDP-Frames belegt (16,5 % Pixel sichtbar verändert; „Bewegung aus" = 0 Animationen).</p>
+<h2 id="22-bento-2-5-arbeitsplatz-30-10-2026-verbindlicher-gestaltungsvertrag">22 · Bento 2.5 „Arbeitsplatz" (30.10.2026) — verbindlicher Gestaltungsvertrag</h2>
+<p><strong>Auftrag (Nutzer, sinngemäß).</strong> Postfach „lieblos und unpersönlich", Kunden „zu kindlich statt Job-Simulation mit Kundenprofil", Dashboard „einzelnes unordentliches Objekt" (Ziele, Sitzung, Klassenraum), Training „Kaskade an Einheiten" und „altes Design", minimierte Leiste „komplett überarbeiten: viel interaktiver, bessere und innovativere Inhalte"; dazu der Hilfeleiter-Slogan aus dem ersten Screenshot. Ziel: eine ruhige, dichte Arbeitsoberfläche eines IT-Dienstleisters in Bento-Form — echte Hierarchie, glaubwürdige Daten, wenig Farbe, keine Emoji-Deko, keine Riesen-Slogans in Funktionsflächen.</p>
+<p><strong>Vertrag.</strong> Vollfassung: <a href="entwicklung/Entwurf%20%E2%80%93%20Bento%202.5%20%28Arbeitsplatz%29.html"><code>Entwurf – Bento 2.5 (Arbeitsplatz).md</code></a>. Die Leitsätze:</p>
+<ol><li><strong>Bedienlogik, Datenwege und Spielzustand bleiben unverändert.</strong> Keine Änderung an <code>src/sim/</code>, <code>src/modell/</code>, <code>src/kern/</code>, <code>src/cli/</code>; Ansichten rufen dieselben <code>Spiel.*</code>-Wege.</li><li><strong>Test-Haken bleiben</strong> (Klassen und Bedeutung): `.sp-postfach/.sp-pf-liste/.sp-leser/.sp-mail/ .sp-brief/.sp-knoepfe/.sp-blatt/.sp-hilfe/.sp-leiter<code>,</code>.hb-seite<code>,</code>.kr-seite/.kr-kopf/ .kr-raster/.kr-kunde/.ka-block<code>,</code>.tr-seite/.tr-liste/.tr-karte/.tr-geruest/.tr-quelle/ .tr-ergebnis/.tr-offen/.tr-grund/.tr-lernen/.tr-fehler*`, Leisten-Haken siehe Test <code>spiel-leiste-hilfe.test.js</code> (<code>.lk-zeile</code> mit exakter Kindfolge, <code>.lk-auf</code>, <code>.lk-mini</code>, <code>.lk-mini-hilfe</code>, <code>Mini</code>-Zeichen, Hilfe-Knopf).</li><li><strong>Nur Tokens.</strong> Neue Flächen nutzen ausschließlich <code>basis.css</code>-Tokens. Schrift nur <code>var(--fs-*)</code>, Abstand nur {0,4,8,12,16,24,32}px, Radius nur Tokens, keine Farb-Literale, kein <code>!important</code> außerhalb <code>basis.css</code> (Gates: <code>tools/ethos.py</code>, <code>tools/klassen.py</code>, <code>ui-typografie</code>, <code>ui-symbole</code>). Die fünf Theme-Dateien <code>zzz-thema-*.css</code> bleiben unangetastet; bestehende Klassennamen bleiben, damit ihre Regeln weiter greifen.</li><li><strong>Keine erfundenen Zahlen, keine Emoji in der UI-Chrome.</strong> Anzeige nur aus <code>Spiel.*</code>/<code>DATEN</code>; Kunden-Emoji (<code>DATEN.kunden[*].symbol</code>) wird in den Kundenflächen durch Monogramme ersetzt.</li><li><strong>Gemeinsame Bausteine der Leitung:</strong> <code>src/stil/bento.css</code> (12-Spalten-Raster <code>.bn-raster</code>, Kachel <code>.bn-k</code> mit Varianten <code>flach|akzent|iris|geld</code>, `.bn-kopf/.bn-kicker/.bn-titel/.bn-lead/ .bn-meta/.bn-fuss/.bn-zeile/.bn-wert/.bn-chips/.bn-chip/.bn-marke/.bn-trenner/.bn-leer`, Spalten <code>.bn-s3…s12</code>) und <code>src/ui/bento.js</code> (<code>UI.bento.monogramm/initialen/kachel/kopf</code>).</li><li><strong>Ein Schreiber je Datei.</strong> Postfach: <code>spiel.js</code> + <code>spiel.css</code>; Kunden: <code>karriere.js</code> (nur Kunden/Kundenakte) + <code>karriere.css</code> + <code>kundenakte.css</code>; Dashboard: <code>hub.js</code> + <code>hub.css</code>; Training: <code>training.js</code> + <code>training.css</code>; Leiste: <code>leiste.js</code> + <code>leiste.css</code>; Grundlage und Integration: Leitung (<code>bento.*</code>, Doku, Werkzeuge, Nachweise).</li><li><strong>Abnahme je Bereich:</strong> private Vorschau <code>python tools/vorschau.py --name &lt;bereich&gt;</code> + <code>python Nachweise/bento/foto.py --html vorschau-&lt;bereich&gt;.html --marke &lt;bereich&gt;</code> (Bilder 1440/960/720), Sichtprüfung, mindestens zwei Iterationen; <code>node tests/run.js</code> grün, <code>klassen.py</code> 0, <code>ethos.py</code> GRÜN (R4/R9/R10 dürfen nicht steigen), <code>umlaute.py</code> GRÜN.</li><li><strong>Nicht Teil des Umbaus:</strong> neue Ansichten, Änderungen an Simulation/Netz/Codec/Spielstand, Themes, Fassung, Push/Release. Die Leitung committet, zieht Doku/Stand nach und legt die Abnahme vor.</li></ol>
+<p><strong>Stand (30.10.2026).</strong> Umgesetzt von fünf parallelen Bereichsteams (ein Schreiber je Datei), danach von der Leitung integriert und von zwei unabhängigen Prüfungen (Design; Theme/Struktur) gegengelesen. Gates: <code>node tests/run.js</code> <strong>878/878 grün</strong>, 0 übersprungen · <code>sh tools/test.sh --rauch</code> <strong>45/45</strong> · <code>python tools/klassen.py</code> <strong>0</strong> · <code>python tools/ethos.py</code> <strong>GRÜN</strong> (R2 20→19, R4 169→153, R9 62→58, R10 42→39) · <code>python tools/umlaute.py</code> <strong>GRÜN</strong> · <code>node tools/sim-stand.js</code> <strong>unverändert</strong> · <code>python tools/seite.py --pruefen</code> <strong>GRÜN</strong> (54 Dokumente). Sichtprüfung je Bereich bei 1440/960/720, Theme-Prüfung 7 Zustände × 7 Ansichten ohne harten Kontrastbruch, 0 Emoji in <code>src/ui/**</code>/<code>src/stil/**</code>. <strong>Nicht gemessen:</strong> R12 (<code>--dom</code>), Lauf in Android, Hover-/Tastaturzustände im Vollbild. Die Windows-<code>.exe</code> wurde dagegen gebaut, mit <code>tools/q-echt.py</code> echt bedient und gestartet. Fassung <strong>2.5.0</strong> ist gezogen; Zweig <code>ausbau-1.2</code>, Tag <code>v2.5.0</code> und GitHub-Release wurden am 30.10.2026 mit ausdrücklicher Nutzerfreigabe veröffentlicht. <strong>Patch 2.5.1</strong> (31.10.2026) verkürzt den Zuklapp-Timer der Leiste von 5 s auf 1 s. Einzelheiten: <a href="entwicklung/%C3%9Cbergabe%20%E2%80%93%20Stand%2030.10.2026%20%E2%80%93%20Bento%202.5.html"><code>Übergabe – Stand 30.10.2026 – Bento 2.5</code></a>.</p>
+<h2 id="23-runde-4-jobdoku-flugschreiber-fenster-31-10-2026-verbindlicher-vertrag">23 · Runde 4 — Jobdoku, Flugschreiber, Fenster (31.10.2026) — verbindlicher Vertrag</h2>
+<p><strong>Auftrag (Nutzer, sinngemäß).</strong> Die noch alten Flächen (Verdacht/Akte, Lernstand, Simulator, Inspektor, Shop, Fenster, Interaktion) sollen eine eigenständige Bento-2.5-Sprache bekommen und zu einer glaubwürdigen Job-Simulation mit didaktischer Hilfe professionalisiert werden — kreativ neu gedacht, nicht poliert; ausgeliefert als Fassung 2.6.0 inklusive Push, Tag, Release und Live-Seite. Vollfassung: <a href="entwicklung/Entwurf%20%E2%80%93%20Runde%204%20%28Jobdoku%20%26%20QoL%29.html"><code>Entwurf – Runde 4 (Jobdoku &amp; QoL)</code></a>.</p>
+<p><strong>Neue und getrennte Oberflächen-Dateien (Phase 0, Verhalten unverändert).</strong></p>
+<ul><li><code>src/ui/lernstand.js</code> (<code>UI.lernstand</code>: Ansicht, Kompetenzkarte, Prüfungstag, Training) und <code>src/ui/shop.js</code> (<code>UI.shop</code>: Werkstattregal, Kauf) sind aus <code>src/ui/karriere.js</code> ausgelagert; <code>src/stil/lernstand.css</code> und <code>src/stil/shop.css</code> aus <code>karriere.css</code>.</li><li><code>UI.karriere._helfer</code> stellt <code>overlay</code> bereit (für die ausgelagerten Ansichten). <code>UI.karriere.lernstandAnsicht/shopAnsicht/training/pruefungUebersicht/pruefungAbgeben</code> bleiben als Alias erhalten. Ansicht-IDs (<code>lernstand</code>, <code>shop</code>) und <code>UI.startHaken</code> unverändert.</li><li><code>src/ui/naechster.js</code> (<code>UI.naechster</code>) und <code>src/ui/fehlerziel.js</code> (<code>UI.fehlerziel</code>) neu.</li></ul>
+<p><strong>Datenformen und Schnittstellen (nur additiv).</strong></p>
+<ul><li><code>Spiel.akte</code>: <code>Spiel.akte.schichten(inst) → [{n, name, text, karten}]</code>, <code>Spiel.akte.fundort(karte, inst) → ziel|null</code>, <code>Spiel.akte.fortschritt(inst) → {…}</code>, <code>Spiel.akte.bericht(inst) → Text (ohne Lösung)</code>; <code>Spiel.akte.FORTSCHRITT</code> = die sechs Stufen (beobachten · messen · eingrenzen · Hypothese · handeln · dokumentieren).</li><li><code>UI.fehlerziel.springen(ziel) → {ok, schritte, grund, ort}</code> mit <code>ziel = {art:"geraet"|"port"|"kabel"|"frame"|"ebene"|"zone", geraet, port, kabel:{a,b}|id, frame, ebene, werkzeug, dock, leise, ms, zentrieren}</code>: EIN Resolver für Akte, Simulations-Panel und Inspektor; öffnet Labor, wechselt Ebene, wählt Gerät/Port/Kabel, zeigt den Inspektor, zentriert und hebt hervor. Er wirft nie, ruft kein <code>focus()</code>, respektiert <code>UI.bewegung()</code>. Hilfen: <code>zielAusEreignis</code>, <code>kabelEnden</code>, <code>ortText</code>, <code>istProblem</code>.</li><li><code>einst.anfaengerHilfe: bool</code> (store <code>"einst"</code>). Fehlt der Wert, gilt Standard <strong>an</strong> bei Karrierestufe ≤ 2, sonst aus. Lese-/Schreib-API: <code>UI.simpanel.anfaengerHilfe()</code> und <code>UI.simpanel.anfaengerHilfeSetzen(bool)</code>; Bedienung im Panel-Kopf und in den Einstellungen (<code>src/ui/karriere.js</code>, Abschnitt „Lernen").</li><li><code>Spiel.hilfe.anfaengerSchritte(inst)</code> und <code>Spiel.naechsterOrt(inst)</code>: additive Anzeigehilfen (keine Änderung an Schwellen, Vorrat oder Bezahlwegen).</li></ul>
+<p><strong>Oberfläche (Präfixe bleiben, Testhaken bleiben).</strong></p>
+<ul><li>Einsatzakte <code>ak-</code> (Reiter <code>akte</code> im Dock; <code>.ak-karten/.ak-karte/.ak-verdacht/.ak-chip</code> bleiben), Ausbildungs-Cockpit <code>lern-</code>/<code>nst-</code>/<code>kk-</code> (<code>.kr-kopf</code>/<code>.kr-seite</code> bleiben), Flugschreiber <code>si-</code> (<code>.si-kopf</code>, <code>.si-warn</code>, <code>.si-hilfe</code> neu; <code>.si-zeile</code> bleibt), Inspektor <code>in-</code> (Steckbriefe; <code>[data-reiter]</code> bleibt), Fensterkopf <code>fenster-knopf</code> in <code>src/stil/rahmen.css</code> (nur <code>Plattform.name === "tauri"</code>), Werkstattregal <code>wr-</code>/<code>kr-ware</code>.</li><li>Fenster: <code>shell/src-tauri/src/fenster.rs</code> schaltet im Modus „voll" <code>set_decorations(false)</code> (Leiste/Tray unverändert) und bietet den Befehl <code>fenster_knopf("minimieren"|"maximieren"|"schliessen")</code>; <code>src/ui/app.js</code> baut die Kopfzeile mit <code>data-tauri-drag-region="deep"</code> und drei 44-px-Knöpfen.</li><li><code>src/stil/bento.css</code>: <code>.bn-s12</code>/<code>.bn-k.breit</code> fallen im ≤-900-px-Raster auf eine Spalte zurück (Reparatur des 720-px-Befunds aus Strang B).</li></ul>
+<p><strong>Gates (gemessen 31.10.2026).</strong> <code>node tests/run.js</code> <strong>930/930 grün</strong>, 0 übersprungen · <code>sh tools/test.sh --rauch</code> <strong>45/45</strong> · <code>klassen.py</code> <strong>0</strong> · <code>ethos.py</code> <strong>GRÜN</strong> (R1 23, R2 17, R4 140, R9 58, R10 42) · <code>umlaute.py</code> <strong>GRÜN</strong> · <code>sim-stand.js</code> unverändert · Bau 138 Module. Sichtprüfung/Rollen: fünf Bereichs-Owner, zwei unabhängige Prüfungen (Design; Theme/Struktur/A11y), Leitung integriert, committet und veröffentlicht. <strong>Nicht gemessen:</strong> R12 (<code>--dom</code>), Android-APK, echte Maus im ausgelieferten Tauri-Fenster (Prüfbau mit eigener Kennung, weil eine fremde Instanz lief). Einzelheiten: <a href="entwicklung/%C3%9Cbergabe%20%E2%80%93%20Stand%2031.10.2026%20%E2%80%93%20Runde%204.html"><code>Übergabe – Stand 31.10.2026 – Runde 4</code></a>.</p>
+<h2 id="24-runde-5-auftragsbogen-inspektor-leiste-als-begleiter-31-10-2026-verbindlicher-vertrag">24 · Runde 5 — Auftragsbogen, Inspektor, Leiste als Begleiter (31.10.2026) — verbindlicher Vertrag</h2>
+<p><strong>Auftrag (Nutzer, sinngemäß).</strong> Nach 2.6.0 meldet der Nutzer drei Bildschirmfotos zurück: „unordentlich überlappende Elemente", „manche Elemente sind nicht richtig ausgerichtet", die Minileiste „vermittelt visuell nicht ihren Nutzen, sondern overwhelmed", das Zusammenfallen der Leiste müsse „schöner animiert" werden, und „die Aufträge zu simulieren im Minimodus funktioniert nicht richtig, da viel zu wenig Kontext herrscht … das Konzept muss umgedacht werden". Verlangt: Full Skill Usage und Agenten-Schwärme. Vollfassung: <a href="entwicklung/Entwurf%20%E2%80%93%20Runde%205%20%28Leiste%20%26%20Auftragsmappe%29.html"><code>Entwurf – Runde 5 (Leiste &amp; Auftragsmappe)</code></a>.</p>
+<p><strong>Auftragsbogen (A).</strong></p>
+<ul><li><code>UI.spiel.mappeAuf(reiter="brief", erstes=false, mitFokus=true)</code> — optionaler dritter Parameter; <code>mappeZu()</code> unverändert. Fokus geht in die Mappe und beim Schließen zurück zum Auslöser.</li><li>Zustand: solange die Mappe offen ist, trägt <code>.labor</code> die Klasse <code>mappe-an</code>; <code>editor.css</code> blendet <code>.lb-leiste-oben</code>, <code>lb-leiste-unten</code> und <code>.lb-leinwand::before</code> aus (<code>visibility:hidden</code>, Platz bleibt) und hebt <code>.lb-auftrag</code> auf <code>z-index:30</code>. Die Klasse wird bei jedem Neuzeichnen gesetzt/entfernt (Schließen, Ticketende, Ansichtswechsel).</li><li>Die Mappe bleibt Kind von <code>#labor-auftrag</code> (Testhaken unverändert); Höchsthöhe <code>max-height:var(--am-max, min(70vh,560px))</code> (spiel.js setzt <code>--am-max</code> aus dem freien Platz), <code>--am-links</code> richtet die Blattkante an der Auftragszeile aus; ≤900 px als Blatt von unten.</li><li>Der frühere Kopfraum-Hack (<code>--am-kopfraum</code>/<code>padding-top</code>) ist entfallen; die <code>--leiste-h</code>-Messung in editor.js bleibt.</li></ul>
+<p><strong>Karte (D).</strong> Knoten-Labels: Baselines Name/Rolle/IP bei <code>ikonH+18/33/48</code> (15 px), Box bis <code>+62</code>, <code>line-height:1.15</code>; Decluttering (<code>labelUeber</code>) gilt auch für <code>.ger-ip</code>; die Adresse erscheint nur bei Hover/Auswahl oder Zoom <code>≥ IP_ZOOM (0,85)</code>.</p>
+<p><strong>Inspektor (B).</strong> Kopf kompakt (Mikrolabel · Name · Rollenzeile · eine Kennzahlenzeile). Ports: 2-zeiliger Block je Port (Zeile 1 Name + Link-Chip + Modus-Chip; Zeile 2 zwei gleich breite Felder <code>Modus</code>/<code>VLAN</code> mit je einer Beschriftung, ≥44 px); die Portliste scrollt in sich, ihre Höhe wird auf ganze Portzeilen gerundet (rAF + ResizeObserver) — keine angeschnittene Zeile. Die SVI-Verwaltungskarte liegt im VLAN-Reiter.</p>
+<p><strong>Mini-Leiste (C) — Konzept „Begleiter".</strong> Die Leiste löst keine Aufträge; sie begleitet:</p>
+<ul><li>zugeklappt 300×56: Stufe · Rolle vollständig, drei Werte in einer Zeile (<code>€/h · Ruf · offen</code>), Deckkraft Standard <code>0.92</code> (<code>store "einst".leiste.deckkraft</code>, geklemmt 0,6–1; Regler in app.js 60–100 %), Hover 1;</li><li>aufgeklappt 320×300: „Jetzt dran" (Kunde · Auftrag + nächster Schritt aus <code>Spiel.naechsterOrt</code>/ <code>Spiel.naechsteDiagnose</code>, Primär „Im Labor fortsetzen", Sekundär „Auftrag lesen" über <code>UI.spiel.mappeAuf</code>), „Kurzübung (freiwillig)" (bestehende Mini-Frage mit Kontextzeile aus dem aktiven Auftrag), „Lage" (Verträge/Serie/offen), Schnellaktionen;</li><li>Animation: 320 ms <code>cubic-bezier(.22,1,.36,1)</code> für Höhe/Breite, Inhalt gestaffelt 40/80/120 ms; Zuklappen Inhalt zuerst, Karte danach, Fenstergröße (<code>Plattform.fenster.groesse</code>) erst nach der Karten-Animation; „Bewegung aus" = sofort. Maße und <code>.lk-*</code>-Haken bleiben Testvertrag.</li></ul>
+<p><strong>Gates (gemessen 31.10.2026).</strong> <code>node tests/run.js</code> <strong>932/932 grün</strong>, 0 übersprungen · Rauchtest <strong>45/45</strong> · <code>klassen.py</code> <strong>0</strong> · <code>ethos.py</code> <strong>GRÜN</strong> (R1 23, R2 17, R3 4, R4 135, R9 58, R10 42; R12 nicht gemessen) · <code>umlaute.py</code> <strong>GRÜN</strong> · Simulation unverändert · 138 Module. Ein Test wurde umgestellt (nicht abgeschwächt): <code>tests/ui-leiste-ueberlappung.test.js</code> prüft die neue Mechanik (<code>mappe-an</code>/<code>visibility:hidden</code> statt Kopfraum) mit 6 statt 4 Fällen. <strong>Nicht gemessen:</strong> R12 (<code>--dom</code>), Android-APK, echte Maus im ausgelieferten Tauri-Fenster (nur Prüfbau), Screenreader.</p>
+<h2 id="25-runde-6-7-kurzubung-mit-kontext-und-flugschreiber-aufmerksamkeit-31-10-2026">25 · Runde 6/7 — Kurzübung mit Kontext und Flugschreiber-Aufmerksamkeit (31.10.2026)</h2>
+<p><strong>Runde 6 (Kurzübung).</strong> Neues Modul <code>src/spiel/kurzfrage.js</code>: <code>Spiel.kurzfrage.fuer(inst, {niveau}) → {id,titel,frage,lage:[{label,wert}],optionen:[{text,richtig}], erklaerung,ort} | null</code>. Fünf Vorlagen (netz/maske/gateway/portmodus/zustand) aus <code>inst.netz</code>, <code>Modell.adressen</code>, <code>Sim.adresse</code>, <code>IP.*</code>, <code>g.running.ports/.if</code>, Kabeln und <code>g.an</code>; deterministisch aus <code>inst.iid</code> (Zufall ohne Uhr); genau eine richtige Option; Niveau E/AP1/AP2; Lage 2–4 Zeilen; kein Lösungstext (Fehlerstellen nach <code>Spiel.plan.diff</code> ausgeklammert). Die Leiste (<code>src/ui/leiste.js</code>, <code>leiste.css</code>) rendert bei offenem Auftrag diese Frage mit Lage-Block; ohne verwertbares Netz zeigt sie keine Frage, sondern den Weg ins Labor. Das generische Mini-Ticket bleibt als Kopfübung im Dialog (karriere.js/mk-einordnung).</p>
+<p><strong>Runde 7 (Flugschreiber).</strong> <code>src/ui/simpanel.js</code> + <code>simulation.css</code>: eine Lesespalte mit drei Ebenen — Ergebnis (Urteil 28 px, eine Zahlenzeile, Segmentleiste), Befund (erster Fehler als 2-px-Rail-Zeile, ein Erklärungssatz, leiser Weg „Zum Fundort →"), nächster Schritt (numerierte Hilfe, hängender Einzug, leiser Verweis „Gerät zeigen →"). Höchstens EIN gefüllter Hauptweg je Zustand, alle übrigen Ghost 32 px; sichtbare 44-px-Trefferflächen für Transport/Filter bleiben unsichtbar erhalten. Hilfe an/aus als Ghost-Schalter, Format als Textsegment. Testhaken <code>.si-*</code>, Transport, Zeitachse, <code>UI.simpanel.anfaengerHilfe</code> und PDU unverändert.</p>
+<p><strong>Messung (31.10.2026).</strong> Runde 6: 950/950 Tests in der abgetrennten Prüfkopie; 228/228 Fragen über 76 Handtickets × 3 Niveaus; Lösungstext-Scan 0 Treffer. Runde 7: Dock 380 px, laute Knöpfe 11→2, primäre 3→0 (Fehler+Hilfe an), Flächen 4→1; 10→2/3→0/3→1 (Hilfe aus); 6→2/4→1/2→0 (Ergebnis); Überlauf 0; Mikrolabel 6,08:1. Im gemeinsamen Arbeitsbaum 1033/1033 grün (dieser Commit enthält nur Runde-6/7-Dateien). R12 nicht gemessen.</p>
+<h2 id="26-runde-8-abteilung-subnetting-31-10-2026-verbindlicher-vertrag">26 · Runde 8 — Abteilung „Subnetting" (31.10.2026) — verbindlicher Vertrag</h2>
+<p><strong>Auftrag (Nutzer, wörtlich).</strong> „NetLab braucht ein Subnetting abteil wo das intensiv beigebracht, gelehrt mit visuellen Hilfselementen und Übungsaufgaben und tools / spielchen sind nur zum lernen von subnetting und vLAN. … wie das am besten in die bestehenden themes integriert wird und auch wo, ich denke ein eigenes abteil wird dem gerecht. Generell sollen alle Aufgaben Inhaltlich und vom Lernschwierigkeitsgrad optimiert werden. Mache das vollständig fertig und melde dich wenn der build und deploy fertig ist." Vollfassung: <a href="entwicklung/Entwurf%20%E2%80%93%20Runde%208%20%28Abteilung%20Subnetting%29.html"><code>Entwurf – Runde 7 (Abteilung Subnetting)</code></a>.</p>
+<p><strong>Neue Ansicht <code>subnetz</code> („Subnetting").</strong> Eigene Registrierung über <code>UI.startHaken</code> + <code>UI.app.registrieren("subnetz", …)</code>; Dock-Reihenfolge in <code>app.js</code> <code>REIHE</code> direkt nach „labor" (<code>UI.app.liste()</code> überspringt unbekannte Namen, der Eintrag ist damit auch ohne Ansicht unschädlich). Vier Register: Lehrpfad (8 Module), Werkzeuge (6), Üben &amp; Spielen (Generator + 3 Lernspiele), Formelsammlung. Kein Geld, kein Ruf, kein Spielstand-Feld.</p>
+<p><strong>Datenformen (nur additiv, headless).</strong></p>
+<ul><li><code>Spiel.subnetz</code> (<code>src/spiel/subnetz.js</code>): <code>VERSION</code>, <code>STUFEN</code> (<code>E|AP1|AP2</code>), <code>ARTEN</code> (11 Typen: `netzid, broadcast, hosts, maske, block, subnetze, vlsm, zusammenfassen, vlan-port, vlan-erreichbar, trunk<code>),</code>rechnen(ip, praefix)<code>,</code>maskeZuPraefix<code>,</code>praefixZuMaske`, <code>gleichesNetz</code>, <code>plan(basis, bedarf)</code>, <code>zusammenfassen(netze)</code>, <code>aufgabe({art, niveau, seed})</code>, <code>satz({arten?, niveau, anzahl, seed})</code>, <code>pruefen(aufgabe, antwort)</code>, <code>antwort(aufgabe, richtig, {hilfe?, spiel?})</code>, <code>fortschritt()</code>, <code>modulSetzen(id, status)</code>, <code>zuruecksetzen()</code>. Deterministisch über einen gesäten Generator; <strong>kein</strong> <code>Math.random</code>, keine Uhr, kein Datum.</li><li>Aufgabe: `{id, art, niveau, skill, titel, frage, lage[], eingabe{art, optionen?}, loesung{wert, text}, rechenweg[{n, titel, text, ergebnis}], erklaerung, hinweis, visual{art, preset}, quelle}`. <code>rechenweg</code> endet in <code>loesung.wert</code>; genau eine richtige Antwort; alle Angaben in <code>lage</code>.</li><li><code>DATEN.subnetzLehrplan</code> (<code>src/daten/subnetz-lehrplan.js</code>): <code>version</code>, <code>formelsammlung[]</code>, <code>module[8]</code> (feste Reihenfolge <code>bits, maske, block, netzid, schneiden, vlsm, vlan, pruefung</code>) mit `stufe, titel, kicker, lead, kern[], merksatz, visuell{art, preset}, beispiel[{titel, aufgabe, schritte[], ergebnis}], uebung{arten, niveau, anzahl}, pruefung{arten, niveau, anzahl, bestehen}, verweise{wiki, werkzeug, training}, dauerMin, quelle`.</li><li><code>UI.subnetzwerkzeuge</code> (<code>src/ui/subnetz-werkzeuge.js</code>): <code>liste()</code> (6 Werkzeuge), `zeichnen(container, id, opts)<code>→</code>{zerstoeren()}<code>,</code>spiele.liste()<code>(3 Spiele),</code>spiele.starten(container, id, opts)`. Werkzeuge: <code>bitlabor, maskenleiste, blocklineal, rechner, vlsm, vlan</code>. Spiele: `praefix-blitz, netz-sortierer, vlan-patcher`.</li><li>Eigener Speicher <code>store "subnetz"</code> <strong>v:1</strong>, ausschließlich über die API: `{v:1, module:{[id]:{status:"neu"|"gelesen"|"geuebt"|"sicher", richtig, falsch, serie}}, spiele:{[id]:{bestwert, runden}}, gesamt:{richtig, falsch, serie}}<code>.</code>Spiel.st` (v:3) bleibt unverändert — keine Migration, alte Stände bleiben gültig.</li></ul>
+<p><strong>Lernen und Verbuchung.</strong> Ausschließlich über <code>L.ueben(skill, ok, {hilfe})</code> / <code>L.fehler("labor-subnetz", skill, text)</code>; Werkzeuge, die die Lösung zeigen, verbuchen <code>{hilfe:true}</code> (Karte steigt nicht). Module: <code>neu &lt; gelesen &lt; geuebt &lt; sicher</code>; „sicher" = Prüfrunde bestanden (≥4 von 5, ohne Hilfe); ein Fehler senkt „sicher" auf „geuebt", nie unter „gelesen". Kein Geld/Ruf.</p>
+<p><strong>Lernstufen (verbindlich, Prüfmaßstab).</strong> E: /24–/28, letztes Oktett, 1 Schritt, <code>hinweis</code> immer; AP1: /20–/30, 2–3 Schritte; AP2: /16–/31, 3–5 Schritte, optional Zeitdruck. VLSM: E –, AP1 2–3 Netze, AP2 4–5 Netze inkl. Reserve. VLAN: E ein Access-Port, AP1 zwei Ports/Erreichbarkeit, AP2 Trunk/Tagging/ Native/allowed. Formulierungsregeln und die Vorher/Nachher-Liste der optimierten Bestandsaufgaben: <a href="entwicklung/Subnetting%20%E2%80%93%20Lernstufen-Matrix.html"><code>Subnetting – Lernstufen-Matrix</code></a> und Entwurf § 10.</p>
+<p><strong>Optimierte Bestandsaufgaben (belegt, Tests grün).</strong> <code>vlan-netzgroesse</code> lehrt jetzt Hosts je VLAN → Präfix statt „/24 auf n VLANs"; <code>mini-sub-1</code>/<code>mini-sub-3</code> Stufen getauscht (Netzadresse /26 = AP1, Hosts /28 = E; Stufen-Multiset unverändert); <code>mini-trunk-5</code> mit ausdrücklichem Native-Kontext; Denkhilfen für <code>mini-vlan-6</code>, <code>mini-trunk-5</code>, <code>mini-rostick-4</code>; doppelte Trainings unterscheidbar (<code>tr-trunk-erlauben</code>/<code>tr-trunk-allowed</code>, <code>tr-netz-maske</code>/<code>tr-netz-nachbar</code>); <code>tr-subnetz-plan</code> auf E-Niveau gestützt (Teiltabelle) ohne die Format-Regel <code>niveau = f(art)</code> zu brechen.</p>
+<p><strong>Einfügung in die Themes.</strong> Nur Tokens aus <code>basis.css</code> und Bausteine <code>bento.css</code> (<code>.bn-raster/.bn-k/…</code>); eigene Klassen <code>sn-*</code> (Abteilung), <code>sw-*</code> (Werkzeuge), <code>sg-*</code> (Spiele). Alle 5 Zusatz-Themes + hell/dunkel/system bei 1440/960/720 geprüft; VLAN-Farben <code>--vlan-1…8</code> nur mit Nummer; 44-px-Ziele scopen (global <code>.knopf</code> = 40 px); Fokusring zentral, kein eigener Reduced-Motion-Block; keine Emoji.</p>
+<p><strong>Einfügung in die Navigation.</strong> Dock (<code>REIHE</code>, Kurzform „Subnetz" gegen den Wortumbruch bei 76 px), Befehlspalette (automatisch über <code>UI.app.liste()</code>, dazu sechs Befehle „Subnetting: Werkzeug …"), <code>tools/rauch.py</code> (ein Fall „Subnetting" → <strong>48/48</strong>), Querverweis am Ende der Trainingsliste („Zur Abteilung Subnetting") und interne Verweise zu Wiki (<code>UI.wiki.oeffnen</code>), Labor und Training. <strong>Kein Hub-Umbau:</strong> das „Heute"-Raster hat eine feste 12-Spalten-Belegung; eine zusätzliche Kachel hätte die gemessene Bento-Ordnung gebrochen (im Entwurf § 2.5 als „nur wenn messbar Platz frei" vorgesehen, hier bewusst verworfen).</p>
+<p><strong>Nicht Teil der Runde:</strong> neue <code>DATEN.skills</code> (30 — Codec- und Dichte-Tests eingefroren), neue Tickets, Änderungen an <code>spiel/injektoren.js</code>/<code>spiel/mini.js</code>-Mechanik/Lernmotor, <code>src/sim|modell|kern|cli</code>.</p>
+<p><strong>Stand (gemessen am 31.10.2026).</strong> <code>node tests/run.js</code> <strong>1049/1049 grün</strong>, 0 übersprungen (118 Testdateien, 98 headless Module) · Rauchtest <strong>48/48</strong> · <code>klassen.py</code> <strong>0</strong> · <code>ethos.py</code> <strong>GRÜN</strong> (R1 23, R2 17, R3 4, R4 134, R5 0, R6 7, R7 0, R8 0, R9 58, R10 41, R11 0; R12 nicht gemessen) · <code>umlaute.py</code> <strong>GRÜN</strong> · Simulation unverändert · Bau <strong>143 Module</strong> (98 headless) · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49fc2fa5…</code>, <code>docs/index.html</code> und <code>Netzwerk-Labor.html</code> byte-gleich · Doku 65 Dokumente, 0 tote Verweise, <code>seite.py</code>/<code>stand.py --pruefen</code> grün · Sichtprüfung 1440/960/720 × 7 Theme-Zustände: 0 seitlich scrollende Seiten, 0 JS-Fehler, 0 Kontrastverstöße, „Bewegung aus" = 0 Animationen (3 abgeschnittene Textknoten nur in der VLSM-Balkenbeschriftung kleiner Blöcke — die Legende nennt den vollen Namen; Bit-Zellen sind die begründete Ausnahme der 44-px-Regel). Fassung <strong>2.9.0</strong> (<code>VERSION_CODE</code> 20901), veröffentlicht mit Tag <code>v2.9.0</code>. Einzelheiten: <a href="STAND.html"><code>docs/STAND.md</code></a>, <a href="CHANGELOG.html"><code>CHANGELOG</code></a>, <a href="entwicklung/%C3%9Cbergabe%20%E2%80%93%20Stand%2031.10.2026%20%E2%80%93%20Runde%208.html"><code>Übergabe – Stand 31.10.2026 – Runde 8</code></a> und <a href="entwicklung/Subnetting%20%E2%80%93%20Lernstufen-Matrix.html"><code>Subnetting – Lernstufen-Matrix</code></a>. <strong>Nicht gemessen:</strong> R12 (<code>--dom</code>), Android-APK, Screenreader, echte Maus im ausgelieferten Tauri-Fenster.</p>
 </main>
 <footer class="dk-fuss">
 <span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>

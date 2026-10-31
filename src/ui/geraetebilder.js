@@ -180,6 +180,7 @@ UI.symbol = (() => {
     rechner:   ["M5 3h14v18H5z", "M8 7h8", "M8 12h8", "M8 16h8"],
     serie:     ["M12 3c3 4 4.5 6.5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2 1-3.5 2.5-5 .3 1.5 1 2.5 2 2.5C13 8 12.5 5.5 12 3z"],
     blitz:     ["M13 3L5 14h6l-1 7 8-11h-6z"],
+    subnetz:   ["M4 5h7v4H4z", "M13 5h7v4h-7z", "M4 10h7v4H4z", "M13 10h7v4h-7z", "M4 15h7v4H4z", "M13 15h7v4h-7z"],
   };
   return function symbol(name, groesse = 20){
     const el = sv("svg", {viewBox: "0 0 24 24", width: groesse, height: groesse, class: "sym", "aria-hidden": "true", fill: "none",

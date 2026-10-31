@@ -11,6 +11,10 @@
 .tr-kopf-text, .tr-kennzahl-text, .tr-weiter-text{display:flex; flex-direction:column; gap:4px; min-width:0}
 .tr-kopf h2{font:800 var(--fs-6)/1.15 var(--display); color:var(--ink)}
 .tr-kontext{max-width:76ch; font-size:var(--fs-3); line-height:1.5; color:var(--muted)}
+/* Querverweis zur Abteilung Subnetting (Runde 7): eine ruhige Zeile über der Liste, eine Hauptaktion. */
+.tr-quer{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line)}
+.tr-quer-knopf{flex:none; min-height:44px}
+.tr-quer-text{min-width:0; font:400 var(--fs-2)/1.45 var(--body); color:var(--muted)}
 .tr-kennzahlen{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; flex:0 1 540px}
 .tr-kennzahl{flex-direction:row; align-items:center; gap:12px; padding:12px}
 .tr-kennzahl-wert{font:700 var(--fs-5)/1.1 var(--display); color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap}

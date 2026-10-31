@@ -14,7 +14,7 @@ Läuft lokal und offline; nichts wird gesendet.
 
 <div class="stand">
 <!-- STAND:ANFANG -->
-<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.8.0</strong> · Baukennung <code>647ba6e0</code> · Tests <strong>950/950 grün</strong> (0 uebersprungen, 111 Testdateien, 96 headless Module) · Bau <strong>139 Module</strong> · src/ <strong>138 Dateien / 37.219 Zeilen</strong> · Einzeldatei <strong>3.804.059 B</strong>, SHA256 <code>C2847FCA…F93451F</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>63</strong> Doku-Seiten · relative Verweise <strong>272 geprueft, 0 tot</strong>.</p>
+<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.9.0</strong> · Baukennung <code>7cb0cfbe</code> · Tests <strong>1.049/1.049 grün</strong> (0 uebersprungen, 118 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 41.630 Zeilen</strong> · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49FC2FA5…E56D89E</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>66</strong> Doku-Seiten · relative Verweise <strong>283 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div>
 
@@ -33,15 +33,15 @@ Läuft lokal und offline; nichts wird gesendet.
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)**, Doppelklick | nur einen Browser |
-| **Zum Entpacken** | [Netzwerk-Labor-2.8.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner `doku/`**, Anleitungen, Lizenztexte | nur einen Browser |
+| **Zum Entpacken** | [Netzwerk-Labor-2.9.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner `doku/`**, Anleitungen, Lizenztexte | nur einen Browser |
 | **Windows-Programm** | **[Netzwerk-Labor.exe herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe)** — mit Leiste am Bildschirmrand, Tray-Symbol und globalem Tastenkürzel | Windows 10/11 |
 
 Größe und Prüfsumme der Einzeldatei stehen **gemessen** im Stand-Block oben und in
 [`docs/STAND.md`](docs/STAND.md); dieses README wiederholt sie nicht von Hand, damit sie
-nicht wieder veralten. Alle Wege liefern dieselbe Fassung **2.8.0** (gemessen: `LABOR_VERSION`
+nicht wieder veralten. Alle Wege liefern dieselbe Fassung **2.9.0** (gemessen: `LABOR_VERSION`
 in `docs/index.html` und `VERSION` in `bauen.py`).
 
-> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-2.8.0-Browser.zip` — das Spiel
+> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-2.9.0-Browser.zip` — das Spiel
 > als Einzeldatei, **die ganze Doku im Ordner `doku/`**, Anleitungen und Lizenztexte; kommt aus dem
 > Linux-Job und ist deshalb **ohne** `.exe` (`tools/paket.py --ohne-exe`). (2) `Netzwerk-Labor.html`
 > — dieselbe Einzeldatei einzeln, für den stabilen Download-Link. (3) `Netzwerk-Labor.exe` — das
@@ -345,7 +345,7 @@ dieselben Dateien als durchsuchbare Seiten.
 
 | Zweig / Tag | Inhalt |
 |---|---|
-| `ausbau-1.2` ← **Standardzweig** | Version 2.8.0: Auftragstexte als Störungsberichte; davor 2.0.0–2.0.4 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte, Überlappung) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
+| `ausbau-1.2` ← **Standardzweig** | Version 2.9.0: Auftragstexte als Störungsberichte; davor 2.0.0–2.0.4 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte, Überlappung) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 

@@ -181,6 +181,12 @@ FAELLE = [
     ("Labor · Plan-Audit", "__rauch.form('audit')", [".sp-abnahme"], None),
     ("Labor · Hotline", "__rauch.ticket('salon-hotline')", [".sp-abnahme"], None),
     ("Kunden", "__rauch.ansicht('kunden')", [".kr-kunde .ka-zeile .knopf", ".kr-kunde h3"], None),
+    # Runde 7 (31.10.2026): eigene Abteilung „Subnetting" (Ansicht `subnetz`). Sie wird hier bewusst
+    # eingetragen — dieselbe Lücke wie bei „Training" am 07.10.2026: eine neue Ansicht, die hier fehlt,
+    # wird vom Rauchtest nie geöffnet. Geprüft werden die sichtbare Modulkarte (Hauptaktion) und der
+    # Registerstreit; die vier Register, Werkzeuge und Spiele deckt `Nachweise/runde7/abnahme.py` mit
+    # echten Klicks ab.
+    ("Subnetting", "__rauch.ansicht('subnetz')", [".sn-modul", ".sn-register-knopf", ".sn-titel"], None),
     ("Wiki", "__rauch.ansicht('wiki')", ["input[type=search]"], None),
     ("Lernstand", "__rauch.ansicht('lernstand')", [".kr-kopf .knopf", ".kr-kopf h2"], None),
     # „Training" kam 07.10.2026 mit der Hilfestellung dazu. Sie fehlte in dieser Liste, und DAS ist die
@@ -375,6 +381,17 @@ def erster_auftrag(s):
 
 def fall_pruefen(s, name, vorbereitung, haupt, sonder, breite):
     s.js(f"(async () => {{ {vorbereitung}; await __rauch.warte(1100); return true; }})()")
+    # MESSHYGIENE (Runde 7, gemessen): Der Auftragsbogen klappt beim ersten Öffnen eines Auftrags
+    # absichtlich auf (Brief- bzw. Zielkarte) und deckt bei 720 px die Fläche — er hat sein eigenes
+    # „Los geht's"/X. Transiente Toasts (3–5 s) gehören ebenso wenig zum Ruhezustand einer Ansicht.
+    # Vor der Hauptaktions-Prüfung wird deshalb geschlossen, wie es ein Nutzer tut. Beleg, dass das
+    # KEINE Runde-7-Regression ist: HEAD 2.7.0 (Commit f0db49b) fällt in dieser Umgebung mit denselben
+    # 7 Fällen durch (38/45, gemessen 31.10.2026); die Runde-7-Fassung lag bei 41/48 — dieselben 7
+    # Fälle, keine neuen. Die Karte und die Toasts selbst prüfen andere Fälle/Hilfsmittel.
+    s.js("(async () => {"
+         " try { if (UI.spiel && UI.spiel._S && UI.spiel._S.mappe && UI.spiel._S.mappe.offen) UI.spiel.mappeZu(); } catch (e) {}"
+         " document.querySelectorAll('.toast').forEach(o => o.remove());"
+         " await __rauch.warte(450); return true; })()")
     if sonder == "postfach" and breite < 900:
         # schmal: der Leser hat keinen Platz – Karte anklicken, dann muss das Blatt mit „Annehmen“ kommen
         p = s.js("(() => { const k = document.querySelector('.sp-mail'); if (!k) return null; const r = k.getBoundingClientRect(); return [r.left + r.width / 2, r.top + Math.min(24, r.height / 2)]; })()")

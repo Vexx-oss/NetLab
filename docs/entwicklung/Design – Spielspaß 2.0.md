@@ -662,3 +662,55 @@ das aktive Segment reserviert; sonst tragen Größe, Gewicht und Abstand die Hie
 laute Knöpfe 11 → 2, Flächen 4 → 1, ein Hauptweg statt drei.
 
 Beides zusammen ist die Regel dieser Fassung: **Kontext vor Frage, Information vor Knopf.**
+
+## 43 · Runde 8 — Die Abteilung „Subnetting": ein eigener Ort für ein eigenes Denken (31.10.2026)
+
+**Auftrag.** Der Nutzer wollte ein eigenes „Subnetting abteil", in dem Subnetting und VLAN
+**intensiv** gelehrt werden — mit visuellen Hilfen, Übungen, Werkzeugen und Lernspielen, die nur
+dem Lernen dieser beiden Themen dienen —, und fragte ausdrücklich, **wie und wo** das in die
+bestehenden Themes integriert wird. Die Antwort dieser Runde ist eine eigene Ansicht `subnetz`,
+kein Anbau an eine bestehende Fläche: Subnetting ist kein Fall, den man im Labor „mal eben"
+repariert, sondern eine Rechen- und Denkweise, die ihren eigenen Übungsort braucht.
+
+**Gestaltungsidee — „Werkbank statt Klassenzimmer".** Die Abteilung ist eine ruhige Werkbank in
+derselben Bento-Sprache wie Training und Lernstand: ein Kopf mit Stufe, Fortschrittsring und
+„Nächster Schritt", darunter vier Register (Lehrpfad · Werkzeuge · Üben & Spielen ·
+Formelsammlung). Die visuelle Sprache kommt aus dem Gegenstand selbst: **Bits als Zellen**, die
+Maske als Schablone darüber, Blockgrenzen als Rail auf einem Lineal, VLANs als farbige
+Ports mit Nummer (nie Farbe allein), Frames mit Tag. Das 32-Bit-Labor ist das Herzstück: man
+klickt Bits, sieht den Oktett-Dezimalwert und die Maske gleichzeitig — das ist die Brücke
+zwischen „binär" und „192.168.10.0/26", die im Bestand fehlte.
+
+**Was bewusst so ist.**
+
+- **Vier Register, nicht vier Ansichten.** Alles bleibt in einer Fläche; der Zustand (Register,
+  offene Lektion, laufende Runde) bleibt beim Wiederbetreten erhalten. Esc führt eine Ebene
+  zurück. Kein Fenstersystem, keine neuen Dialoge.
+- **Eine Hauptaktion je Zustand.** Lektion: „Übung starten"; Runde: „Prüfen"; Ergebnis: „Neue
+  Runde" — die übrigen Wege sind leise (Ghost). Das ist dieselbe Regel wie im Auftragsbogen
+  (Runde 5), hier auf Lernflächen übertragen.
+- **Kein Geld, kein Ruf, keine Karriere.** Lernen ist freiwillig und kostenlos; die Abteilung
+  verbucht nur Lernstand (`L.ueben`), Werkzeug-Lösungen mit `{hilfe:true}`.
+- **Der Dock-Titel braucht eine Kurzform.** „SUBNETTING" bricht in der 76-px-Spalte mitten im
+  Wort um (im Browser gemessen). Dock-Beschriftung ist deshalb „Subnetz"; Titel, Tooltip,
+  Statusfuß und Befehlspalette behalten „Subnetting". `UI.app.liste()` kennt dafür das optionale
+  Feld `kurz` (Rückfall: Titel).
+- **Wo sie andockt:** Dock direkt nach „Labor" (verstehen/üben vor dem Training ganzer Fälle),
+  Befehlspalette (automatisch + sechs Werkzeugbefehle), Querverweis am Ende der Trainingsliste, interne
+  Verweise zu Wiki/Labor/Training. **Keine Hub-Kachel:** das „Heute"-Raster ist mit einer festen
+  12-Spalten-Belegung voll; eine Kachel hätte die gemessene Ordnung gebrochen. Die Auffindbarkeit
+  leisten Dock, Palette und Training — messbar ohne Umbau einer Kernfläche.
+
+**Messung (31.10.2026, headless Edge, 1440/960/720).** 39 Zustandsmessungen über Lehrpfad,
+Lektion, sechs Werkzeuge, Übungsrunde, Ergebnis und Formelsammlung: **0 abgeschnittene Texte,
+0 seitlich scrollende Seiten, 0 JS-Fehler**. Kontrast von 14 Textpaaren (Titel, Lead, Mikrolabel,
+Merksatz, Frage, Rückmeldung, Formeltitel …) in **7 Theme-Zuständen** (Nordlicht, Messing, Papier,
+Pulsar, Keramik, Hell, Dunkel): **0 Verstöße** (Fließtext ≥ 4,5:1, große Schrift ≥ 3:1).
+„Bewegung aus" ergibt **0 Animationen**. Belege: `Nachweise/runde7/abnahme/`.
+Bewusste Beobachtung: die 32 Bit-Zellen des Bitlabors sind bei 960/720 kleiner als 44 px (direkte
+Manipulation auf einer dichten Fläche); alle Schaltflächen und Felder der Abteilung halten die
+44-px-Regel.
+
+**Was diese Runde nicht ist.** Kein zweites Wiki, kein Ersatz für das Training, keine
+Simulationsänderung. Der Bestand bleibt: Training = ganze Fälle, Labor = anwenden, Abteilung
+Subnetting = verstehen, ausprobieren, sichern.

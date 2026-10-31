@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf – Runde 8 „Abteilung Subnetting&quot; (31.10.2026) · Netzwerk-Labor</title>
+<meta name="description" content="Auftrag des Nutzers (sinngemäß, wörtlich zitiert): „NetLab braucht ein Subnetting abteil wo das.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Entwurf – Runde 8 „Abteilung Subnetting&quot; (31.10.2026)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-zielbild-und-ort">1 · Zielbild und Ort</a></li>
+<li><a href="#2-schnittstellen-verbindlich-additiv-headless">2 · Schnittstellen (verbindlich, additiv, headless)</a></li>
+<li style="margin-left:16px"><a href="#2-1-rechenkern-und-aufgabenmotor-src-spiel-subnetz-js-owner-w1">2.1 Rechenkern und Aufgabenmotor — src/spiel/subnetz.js (Owner W1)</a></li>
+<li style="margin-left:16px"><a href="#2-2-lehrplan-und-texte-src-daten-subnetz-lehrplan-js-owner-w2">2.2 Lehrplan und Texte — src/daten/subnetz-lehrplan.js (Owner W2)</a></li>
+<li style="margin-left:16px"><a href="#2-3-abteilungs-oberflache-src-ui-subnetz-js-src-stil-subnetz-css-owner-w3">2.3 Abteilungs-Oberfläche — src/ui/subnetz.js + src/stil/subnetz.css (Owner W3)</a></li>
+<li style="margin-left:16px"><a href="#2-4-werkzeuge-und-spiele-src-ui-subnetz-werkzeuge-js-src-stil-subnetz-werkzeuge-css-owner-w4">2.4 Werkzeuge und Spiele — src/ui/subnetz-werkzeuge.js + src/stil/subnetz-werkzeuge.css (Owner W4)</a></li>
+<li style="margin-left:16px"><a href="#2-5-integration-owner-leitung">2.5 Integration (Owner Leitung)</a></li>
+<li><a href="#3-gestaltung-einfugung-in-die-bestehenden-themes">3 · Gestaltung — Einfügung in die bestehenden Themes</a></li>
+<li><a href="#4-speicher-und-fortschritt-ein-ort">4 · Speicher und Fortschritt (ein Ort)</a></li>
+<li><a href="#5-lernstufen-matrix-inhalt-und-schwierigkeit-verbindlich">5 · Lernstufen-Matrix (Inhalt und Schwierigkeit — verbindlich)</a></li>
+<li><a href="#6-aufgabentypen-genau-diese-11">6 · Aufgabentypen (genau diese 11)</a></li>
+<li><a href="#7-werkzeuge-genau-diese-6">7 · Werkzeuge (genau diese 6)</a></li>
+<li><a href="#8-lernspiele-genau-diese-3">8 · Lernspiele (genau diese 3)</a></li>
+<li><a href="#9-schreibrechte-ein-schreiber-je-datei-leitung-integriert">9 · Schreibrechte (ein Schreiber je Datei; Leitung integriert)</a></li>
+<li><a href="#10-optimierung-der-vorhandenen-subnetting-vlan-aufgaben-belegt">10 · Optimierung der vorhandenen Subnetting-/VLAN-Aufgaben (belegt)</a></li>
+<li><a href="#11-abnahme-und-fassung">11 · Abnahme und Fassung</a></li>
+<li><a href="#12-risiken-und-gegenma-nahmen">12 · Risiken und Gegenmaßnahmen</a></li>
+</ul>
+</nav><h1 id="entwurf-runde-8-abteilung-subnetting-31-10-2026">Entwurf – Runde 8 „Abteilung Subnetting" (31.10.2026)</h1>
+<p><strong>Auftrag des Nutzers (sinngemäß, wörtlich zitiert):</strong> „NetLab braucht ein Subnetting abteil wo das intensiv beigebracht, gelehrt mit visuellen Hilfselementen und Übungsaufgaben und tools / spielchen sind nur zum lernen von subnetting und vLAN. Analysiere mit einem Experten Team zum coden und designen wie das am besten in die bestehenden themes integriert wird und auch wo, ich denke ein eigenes abteil wird dem gerecht. Generell sollen alle Aufgaben Inhaltlich und vom Lernschwierigkeitsgrad optimiert werden. Mache das vollständig fertig und melde dich wenn der build und deploy fertig ist."</p>
+<p><strong>Daraus verbindlich:</strong></p>
+<ol><li><strong>Eine eigene Abteilung</strong> „Subnetting" (Ansicht <code>subnetz</code>) — kein Anbau an eine bestehende Ansicht.</li><li><strong>Intensiv lehren</strong>: geführter Lehrpfad mit kurzen Erklärungen, Rechenweg, Merksätzen.</li><li><strong>Visuelle Hilfen</strong>: interaktive Bit-/Block-/Masken-/VLAN-Darstellungen (keine Standbilder).</li><li><strong>Übungen</strong>: generierte Aufgaben mit sofortiger Rückmeldung, Rechenweg und Lernstandsverbuchung.</li><li><strong>Werkzeuge und Lernspiele</strong> ausschließlich zum Lernen von Subnetting und VLAN — kein Ablenkungsspiel.</li><li><strong>Integration in die bestehenden Themes</strong>: alle 5 Zusatz-Themes + hell/dunkel, nur Tokens.</li><li><strong>Alle Aufgaben inhaltlich und im Lernschwierigkeitsgrad optimiert</strong> — im neuen Bereich <em>und</em> an den vorhandenen Subnetting-/VLAN-Aufgaben, die dafür nachweislich schief liegen (§ 10).</li><li><strong>Vollständig fertig</strong>: Code, Tests, Doku, Stand, Fassung, Build, Commit, Push, Tag, Release, Deploy.</li></ol>
+<p><strong>Befund (gemessen in dieser Sitzung, read-only):</strong> Subnetting/VLAN sind breit, aber flach verankert: <code>lab.subnetz</code> hat 2 Trainings (beide nur „falsche Maske reparieren"), 6 Mini-Tickets, 1 Fragen-Vorlage auf E-Niveau und 2 Wiki-Rezepte, die <strong>nur im letzten Oktett</strong> funktionieren; VLSM, Bit-Sicht, Blockgröße und Adressplan-Übungen fehlen. VLAN/Trunk sind solide, aber ohne Planungs- und Tagging-Übungen und ohne Native-VLAN-Sicht. Detailbelege: <code>Nachweise/runde7/befund.md</code> und § 10.</p>
+<hr>
+<h2 id="1-zielbild-und-ort">1 · Zielbild und Ort</h2>
+<p><strong>Ansicht <code>subnetz</code>, Titel „Subnetting", Dock-Reihenfolge direkt nach „labor"</strong> (Lernweg: Labor = anwenden, Subnetting = verstehen und üben, Training = ganze Fälle). Der Eintrag bekommt ein eigenes Symbol <code>subnetz</code> (Bit-Raster) und erscheint automatisch in Befehlspalette und Statusfuß.</p>
+<p><strong>Vier Register</strong> (eine sichtbare Registerleiste, je 44 px hoch):</p>
+<div class="dk-tabelle"><table><thead><tr><th>Register</th><th>Inhalt</th></tr></thead><tbody><tr><td><strong>Lehrpfad</strong></td><td>8 Module in 3 Stufen; Karte → Lektion (Text · visuelle Hilfe · geführtes Beispiel · Übungsrunde · Prüfrunde)</td></tr><tr><td><strong>Werkzeuge</strong></td><td>6 interaktive Werkzeuge (§ 7), je mit „Aufgabe dazu"-Weg</td></tr><tr><td><strong>Üben &amp; Spielen</strong></td><td>Übungsgenerator (Thema × Stufe × Anzahl) + 3 Lernspiele (§ 8)</td></tr><tr><td><strong>Formelsammlung</strong></td><td>Präfix-/Masken-/Host-Tabelle, Rechenweg in 5 Schritten, VLAN-/Trunk-Merkblatt, Fehlerfallen</td></tr></tbody></table></div>
+<p>Zusätzlich im Kopf der Abteilung: <strong>Stufenwahl</strong> (E · AP1 · AP2, Voreinstellung aus <code>Spiel.einst.niveau</code>), <strong>Fortschrittsring</strong> (8 Module) und eine Zeile „Nächster Schritt" (aus dem eigenen Fortschritt). Kein Geld, kein Ruf, keine Karrierebelohnung — Lernen ist freiwillig und kostet nichts (Abgrenzung zu Training/Aufträgen).</p>
+<p><strong>Abgrenzung (bewusst nicht):</strong> keine neuen Fertigkeiten (<code>DATEN.skills</code> bleibt 30 — Codec- und Dichte-Tests sind eingefroren), keine Änderung an <code>src/sim/</code>, <code>src/modell/</code>, <code>src/kern/</code>, <code>src/cli/</code>, keine neuen Tickets, keine Änderung an <code>src/ui/leiste.js</code>, <code>src/ui/karriere.js</code>, <code>src/stil/leiste.css</code>, <code>src/stil/karriere.css</code>, <code>src/spiel/kurzfrage.js</code> (Parallel-Sitzung Runde 6).</p>
+<hr>
+<h2 id="2-schnittstellen-verbindlich-additiv-headless">2 · Schnittstellen (verbindlich, additiv, headless)</h2>
+<h3 id="2-1-rechenkern-und-aufgabenmotor-src-spiel-subnetz-js-owner-w1">2.1 Rechenkern und Aufgabenmotor — <code>src/spiel/subnetz.js</code> (Owner W1)</h3>
+<pre><code class="sprache-js">Spiel.subnetz.VERSION = 1;
+Spiel.subnetz.STUFEN = ["E", "AP1", "AP2"];
+Spiel.subnetz.ARTEN = [ {id, titel, skills:[…], stufen:[…]}, … ]   // § 6, genau diese Reihenfolge
+
+Spiel.subnetz.rechnen(ip, praefix) → {
+  ip, praefix, maske,                                    // "192.168.10.70", 26, "255.255.255.192"
+  netz, broadcast, ersterHost, letzterHost, hosts,       // IP-Strings bzw. Anzahl
+  blockGroesse, oktett, hostBits, netzBits,              // Zahlen
+  schritte: [{n, titel, text, ergebnis}, …]              // 4–6 Schritte, immer vollständig
+}
+Spiel.subnetz.maskeZuPraefix("255.255.255.192") → 26 | null
+Spiel.subnetz.praefixZuMaske(26) → "255.255.255.192"
+Spiel.subnetz.gleichesNetz(ipA, ipB, praefix) → bool
+Spiel.subnetz.plan(basis, [{name, hosts}]) → {ok, fehler?, zeilen:[{name, hosts, praefix, netz,
+  maske, broadcast, ersterHost, letzterHost}], karte:[{name, von, bis, praefix}]}
+Spiel.subnetz.zusammenfassen(netze) → {ok, praefix, netz, grund}
+
+Spiel.subnetz.aufgabe({art, niveau, seed}) → aufgabe | null       // deterministisch aus seed
+Spiel.subnetz.satz({arten?, niveau, anzahl, seed}) → [aufgabe]    // gemischt, ohne Doppelte
+Spiel.subnetz.pruefen(aufgabe, antwort) → {richtig, soll, angenommen, rechenweg, erklaerung, hinweis}
+Spiel.subnetz.antwort(aufgabe, richtig, {hilfe=false}) → {lern:{vorher,nachher}|null, fortschritt,
+  neuereModule:[…]}                                              // einziger Schreibweg in L.* und Store
+Spiel.subnetz.fortschritt() → {module:{[id]:{status,richtig,falsch,serie}}, spiele:{[id]:{bestwert,runden}}, gesamt:{richtig,falsch,serie}}
+Spiel.subnetz.modulSetzen(id, status) → {…}                       // status: "neu"|"gelesen"|"geuebt"|"sicher"
+Spiel.subnetz.zuruecksetzen() → {ok:true}                         // nur eigener Store-Schlüssel</code></pre>
+<p><strong>Aufgabe (Form, von W3/W4 verarbeitet):</strong></p>
+<pre><code class="sprache-js">{
+  id: "netzid-AP1-0007", art: "netzid", niveau: "AP1", skill: "lab.subnetz",
+  titel: "Netz-ID bestimmen", frage: "In welchem Netz liegt 192.168.10.70/26?",
+  lage: [{label:"Adresse", wert:"192.168.10.70/26"}, …],          // 1–4 Zeilen, alle Angaben der Aufgabe
+  eingabe: {art:"ip"|"zahl"|"auswahl"|"maske", optionen?:[{text}], platzhalter?:"…"},
+  loesung: {wert, text},                                          // wert: kanonisch, text: Anzeige
+  rechenweg: [{n, titel, text, ergebnis}, …],                     // 3–6 Schritte
+  erklaerung: "…",  hinweis: "…",                                 // hinweis = Hilfe vor dem Antworten
+  visual: {art:"bitlabor"|"blocklineal"|"vlan"|"maske", preset:{…}} | null,
+  quelle: "RFC 4632 · Network – Lernfassung (§ 8)"
+}</code></pre>
+<p><strong>Regeln für den Motor (prüfbar):</strong></p>
+<ul><li><strong>Determinismus</strong>: Zufall nur über einen eigenen gesäten Generator (z. B. mulberry32 aus <code>seed</code>); kein <code>Math.random</code>, kein <code>Date</code>, keine Uhr. Zweimal <code>aufgabe({…, seed:7})</code> ist byte-gleich.</li><li><strong>Genau eine richtige Antwort</strong>; jede Option ist nur mit den Angaben in <code>lage</code> und elementarem Netzwerk-Wissen entscheidbar (keine Fangfrage, kein Leserätsel).</li><li><strong>Der Rechenweg rechnet nach</strong>, nicht vor: <code>rechenweg</code> endet mit <code>loesung.wert</code>; <code>pruefen</code> wirft nie.</li><li><strong>Formattoleranz</strong>: IP mit Leerzeichen getrimmt, Maske als <code>/26</code> oder <code>255.255.255.192</code> akzeptiert; Zahlen als <code>4</code>, <code>4 Hosts</code>, <code>2^2</code>? (nur <code>4</code>) — im Zweifel <code>soll</code> und <code>angenommen</code> zurückgeben.</li><li><strong>Verbuchung nur über <code>L.*</code></strong> (nie direkt <code>store "lern"</code>): richtig → <code>L.ueben(skill, true, {hilfe})</code>; falsch → <code>L.ueben(skill, false)</code> und <code>L.fehler("labor-subnetz", skill, text)</code>; danach <code>Spiel.geaendert("subnetz")</code> + <code>Spiel.melden("subnetz-antwort", …)</code>. <code>Spiel._trocken</code> beachten.</li><li><strong>Eigener Speicher</strong> <code>store "subnetz"</code> (v:1) — nur über die API oben; Inhalt: <code>{v:1, module:{[id]:{status,richtig,falsch,serie,zuletzt}}, spiele:{[id]:{bestwert,runden}}, gesamt:{richtig,falsch,serie}}</code>. Kein Feld in <code>Spiel.st</code> (Spielstand v:3 bleibt unverändert — keine Migration).</li><li><strong>Modul „sicher"</strong> = Prüfrunde bestanden (≥ 4 von 5 richtig, ohne Hilfe); danach senkt ein Fehler den Status auf „geuebt" zurück, nie unter „gelesen".</li></ul>
+<h3 id="2-2-lehrplan-und-texte-src-daten-subnetz-lehrplan-js-owner-w2">2.2 Lehrplan und Texte — <code>src/daten/subnetz-lehrplan.js</code> (Owner W2)</h3>
+<pre><code class="sprache-js">DATEN.subnetzLehrplan = {
+  version: 1,
+  formelsammlung: [{titel, saetze:[…], tabelle?:{spalten, zeilen}, merksatz?, visual?}],
+  module: [{
+    id:"bits", nr:1, stufe:"E", titel:"Bits und Oktette", kicker:"…", lead:"…",
+    kern:[…], merksatz:"…",
+    visuell:{art:"bitlabor", preset:{ip:"192.168.10.0", praefix:26}},
+    beispiel:[{titel, aufgabe, schritte:[{text, ergebnis}], ergebnis}],
+    uebung:{arten:["maske","hosts"], niveau:"E", anzahl:4},
+    pruefung:{arten:["…"], niveau:"E", anzahl:4, bestehen:3},
+    verweise:{wiki:"lab.subnetz", werkzeug:"rechner", training:"tr-subnetz-plan"},
+    dauerMin:8
+  }, …]
+}</code></pre>
+<p><strong>8 Module, feste Reihenfolge (Inhalte dürfen geschärft, die Reihenfolge nicht gebrochen werden):</strong></p>
+<div class="dk-tabelle"><table><thead><tr><th>Nr</th><th>id</th><th>Stufe</th><th>Titel</th><th>Kern</th><th>Visuell</th><th>Übung</th></tr></thead><tbody><tr><td>1</td><td><code>bits</code></td><td>E</td><td>Bits und Oktette</td><td>8 Bit = 255; Stellenwerte 128…1</td><td>bitlabor</td><td>maske, hosts</td></tr><tr><td>2</td><td><code>maske</code></td><td>E</td><td>Netzanteil und Hostanteil</td><td>Maske als Schablone; /p = p Einsen</td><td>maske</td><td>maske, netzid(E)</td></tr><tr><td>3</td><td><code>block</code></td><td>E</td><td>Blockgröße</td><td>2^(32−p), 256−Maskenoktett</td><td>blocklineal</td><td>hosts, block</td></tr><tr><td>4</td><td><code>netzid</code></td><td>E</td><td>Netz-ID, Broadcast, Hosts</td><td>erste/letzte Adresse, nutzbare Hosts</td><td>blocklineal</td><td>netzid, broadcast</td></tr><tr><td>5</td><td><code>schneiden</code></td><td>AP1</td><td>Netze schneiden</td><td>ein /24 → 4/8/16 Netze; Netz-ID zu beliebiger Adresse</td><td>blocklineal</td><td>netzid, broadcast, subnetze</td></tr><tr><td>6</td><td><code>vlsm</code></td><td>AP1</td><td>Adressplan (VLSM)</td><td>vom größten zum kleinsten; Reserve</td><td>rechner</td><td>vlsm, hosts</td></tr><tr><td>7</td><td><code>vlan</code></td><td>AP1</td><td>VLAN und Subnetz</td><td>VLAN = Broadcast-Domäne = eigenes Netz; Access</td><td>vlan</td><td>vlan-port, vlan-erreichbar</td></tr><tr><td>8</td><td><code>pruefung</code></td><td>AP2</td><td>Prüfungsfälle</td><td>/30, /31, Zusammenfassen, Trunk/Native, typische Fehler</td><td>vlan + blocklineal</td><td>gemischt (§ 6)</td></tr></tbody></table></div>
+<p><strong>Regeln:</strong> Jede Lektion hat <code>kern</code> (3–6 Sätze), <strong>genau einen</strong> <code>merksatz</code>, <strong>mindestens ein</strong> geführtes <code>beispiel</code> mit Schritten, <code>uebung</code> und <code>pruefung</code>; jede Textlänge bleibt in der Bildschirmfläche (kein Scroll-Roman); Quellen werden als <code>quelle</code> in den Lektionen genannt (RFC 4632 CIDR, RFC 1918, RFC 3021 /31, IEEE 802.1Q, <code>Network – Lernfassung</code>, <code>04-AP1-Netzwerk</code>, <code>Fragen – Subnetting</code>, <code>07-Uebungen-Subnetting-Szenarien</code>). Sprache: Deutsch, Du-Form, gleiche Stimme wie der Trainingsbereich; keine Emoji; keine erfundenen Zahlen.</p>
+<h3 id="2-3-abteilungs-oberflache-src-ui-subnetz-js-src-stil-subnetz-css-owner-w3">2.3 Abteilungs-Oberfläche — <code>src/ui/subnetz.js</code> + <code>src/stil/subnetz.css</code> (Owner W3)</h3>
+<pre><code class="sprache-js">UI.subnetz = { zeichnen(container), wieder(container), verlassen(), register() }</code></pre>
+<ul><li>Registrierung über <code>(UI.startHaken ||= []).push(...)</code> + `UI.app.registrieren("subnetz", {titel:"Subnetting", symbol:"subnetz", zeigen, wieder, verlassen})`.</li><li>Präfixe: HTML-Klassen <code>sn-*</code>; eine CSS-Regel je Klasse (<code>tools/klassen.py</code> = 0).</li><li>Kein Top-Level-Zugriff auf andere UI-Module (Ladereihenfolge: <code>subnetz.js</code> lädt vor <code>geraetebilder.js</code>/<code>bento.js</code>); alles in Funktionen.</li><li>Nutzt <code>UI.subnetzwerkzeuge</code> (2.4) für visuelle Flächen; eigene Werkzeug-Duplikate sind verboten.</li><li>Fortschritt/Speicherung ausschließlich über <code>Spiel.subnetz.*</code> (2.1), nie über <code>store</code> direkt.</li><li>Der Kopf zeigt Stufenwahl und „Nächster Schritt"; Register wechseln ohne Ansichtswechsel.</li></ul>
+<h3 id="2-4-werkzeuge-und-spiele-src-ui-subnetz-werkzeuge-js-src-stil-subnetz-werkzeuge-css-owner-w4">2.4 Werkzeuge und Spiele — <code>src/ui/subnetz-werkzeuge.js</code> + <code>src/stil/subnetz-werkzeuge.css</code> (Owner W4)</h3>
+<pre><code class="sprache-js">UI.subnetzwerkzeuge = {
+  liste() → [{id, titel, kicker, lead, skill, stufe}],        // § 7, genau 6 Einträge
+  zeichnen(container, id, opts = {}) → {zerstoeren()},
+    // opts: {ip?, praefix?, niveau?, kompakt?, onErgebnis?(ereignis)}
+    // ereignis: {art:"werkzeug", id, skill, geloest:bool, hilfe:bool}
+  spiele: {
+    liste() → [{id, titel, kicker, lead, skill, stufe, dauerText}],     // § 8, genau 3 Einträge
+    starten(container, id, opts = {}) → {zerstoeren()},
+    // opts: {niveau?, onEnde?(ergebnis), onErgebnis?(ereignis)}
+    // ergebnis: {id, punkte, richtig, falsch, serie, dauerSek, aufgaben:[{frage, richtig, soll}]}
+  }
+}</code></pre>
+<ul><li>Präfixe <code>sw-*</code> (Werkzeuge) bzw. <code>sg-*</code> (Spiele); eine CSS-Regel je Klasse.</li><li>Werkzeuge sind <strong>visuell und bedienbar</strong>, nicht nur Text: Bits klickbar, Regler/Slider, Adressbalken, Ports klickbar. Tastaturbedienbar, Ziele ≥ 44 px, <code>aria-live</code> für berechnete Werte.</li><li>Jede Berechnung kommt aus <code>Spiel.subnetz.*</code> (keine zweite Rechenquelle im UI).</li><li>Ein Spiel endet mit einem <strong>Lern-Ergebnis</strong> (was saß, was nicht) und verbucht über <code>Spiel.subnetz.antwort(...)</code>; kein Arcade-Effekt ohne Lernbezug, kein Zufall ohne Seed.</li><li><code>onErgebnis</code> meldet an W3, damit die Abteilung den Fortschritt nachziehen kann.</li></ul>
+<h3 id="2-5-integration-owner-leitung">2.5 Integration (Owner Leitung)</h3>
+<div class="dk-tabelle"><table><thead><tr><th>Ort</th><th>Änderung</th></tr></thead><tbody><tr><td><code>src/ui/app.js</code></td><td><code>REIHE = ["heute","postfach","labor","subnetz","training",…]</code></td></tr><tr><td><code>src/ui/geraetebilder.js</code></td><td>ein Glyph <code>subnetz</code> (Bit-Raster) in der Symboltabelle (W3 liefert)</td></tr><tr><td><code>tools/rauch.py</code></td><td>ein Fall „Subnetting" (Register sichtbar, Werkzeug öffnet, Übungsrunde startet) → 48/48</td></tr><tr><td><code>src/ui/hub.js</code></td><td><strong>eine</strong> Zeile/Kachel im Lernbereich „Weiterlernen: Subnetting" mit Fortschritt (nur wenn Platz messbar frei ist, sonst Befehlspalette + Dock)</td></tr><tr><td>Befehlspalette</td><td>automatisch über <code>UI.app.liste()</code>; zusätzlich Befehl „Subnetting: Werkzeug &lt;name&gt;" (W3 registriert über <code>UI.palette.befehl</code>)</td></tr><tr><td>Abteilung intern</td><td>Verweise zu Wiki (<code>UI.wiki.oeffnen</code>), Labor, Training (Knöpfe, die die Ansicht wechseln)</td></tr></tbody></table></div>
+<hr>
+<h2 id="3-gestaltung-einfugung-in-die-bestehenden-themes">3 · Gestaltung — Einfügung in die bestehenden Themes</h2>
+<p>Verbindlich ist der Gestaltungsvertrag § 22 (Bento 2.5) und der Themes-Vertrag:</p>
+<ul><li><strong>Nur Tokens</strong> aus <code>basis.css</code> (Farben, Typo <code>--fs-*</code>, Abstände {0,4,8,12,16,24,32}, Radien, <code>--dauer-*</code>). Keine Farb-/Radius-/Schrift-/Abstands-/Dauer-Literale, kein <code>!important</code>, kein eigener Reduced-Motion-Block, keine doppelten Selektoren.</li><li><strong>Bausteine der Leitung nutzen</strong>: <code>.bn-raster</code>, <code>.bn-k</code>, <code>.bn-kopf</code>, <code>.bn-kicker</code>, <code>.bn-titel</code>, <code>.bn-lead</code>, <code>.bn-meta</code>, <code>.bn-fuss</code>, <code>.bn-zeile</code>, <code>.bn-wert</code>, <code>.bn-chips</code>, <code>.bn-chip</code>, <code>.bn-leer</code>, <code>.bn-s3…s12</code>; keine Kopie dieser Bausteine. Eigene Klassen nur, wo Bento nichts hat.</li><li><strong>Themes</strong>: alle 5 Zusatz-Themes + dunkel/hell/system, geprüft bei 1440, 960 und 720 px; Fließtext ≥ 7:1, <code>--muted/--faint</code> ≥ 4,5:1 auf <code>--bg</code>/<code>--panel</code>; Akzente nur als Paar mit <code>--accent-ink</code>. <strong>Hell-Falle beachten</strong>: zwei helle Wege (<code>prefers-color-scheme</code>-Block und <code>[data-theme="light"]</code>); bei „system" setzt <code>app.js</code> kein <code>data-theme</code>.</li><li><strong>Semantik der Signalfarben</strong>: <code>--mint</code> Handlung/richtig, <code>--iris</code> Wissen/Struktur, <code>--amber</code> Zeit/Hinweis, <code>--koralle</code> Fehler. VLAN-Farben <code>--vlan-1…8</code> <strong>nur mit Nummer/Beschriftung</strong>. Subnetz-Bits: Netzanteil <code>--accent</code>, Hostanteil <code>--panel-3</code>/<code>--muted</code>, Rueckmeldung ok/bad.</li><li><strong>Ziele und Bedienung</strong>: Bedienelemente ≥ 44 px (global <code>.knopf</code> ist 40 px → scopen), Fokusring aus <code>basis.css</code> nicht überschreiben, <code>Esc</code>/Tab sauber, <code>aria-live</code> für Ergebnisse, Bewegung nur über Tokens und mit <code>UI.bewegung()</code>-Rücksicht.</li><li><strong>Typografie</strong>: Deutsch mit echten Umlauten; Mikrolabels in <code>--mono</code> klein, Titel in <code>--display</code>; keine Emoji in der Bedienoberfläche; keine erfundenen Kennzahlen.</li></ul>
+<hr>
+<h2 id="4-speicher-und-fortschritt-ein-ort">4 · Speicher und Fortschritt (ein Ort)</h2>
+<ul><li>Eigener Schlüssel <code>store "subnetz"</code>, <code>v:1</code> (2.1). Kein Feld im Spielstand (<code>Spiel.st</code>, v:3) — dessen Migration bleibt unangetastet, alte Stände sind kompatibel.</li><li><strong>Lernstands-Verbuchung nur über <code>L.ueben</code>/<code>L.fehler</code></strong> (Wache: <code>tests/lernmotor-wache.test.js</code>). Werkzeug zeigt Lösung → <code>{hilfe:true}</code>; Spiel/Übung ohne Hilfe → <code>{hilfe:false}</code>.</li><li>Kein Geld/Ruf; die Abteilung ist freiwillig und kostenlos.</li><li>Fortschritt in der Abteilung: Module (8) × Status; Kopf zeigt <code>sicher/8</code>; „Nächster Schritt" aus erstem Modul mit Status &lt; „sicher" in Stufenreihenfolge (E → AP1 → AP2).</li><li><code>Spiel.subnetz.zuruecksetzen()</code> löscht nur <code>store "subnetz"</code> (nicht den Lernstand).</li></ul>
+<hr>
+<h2 id="5-lernstufen-matrix-inhalt-und-schwierigkeit-verbindlich">5 · Lernstufen-Matrix (Inhalt und Schwierigkeit — verbindlich)</h2>
+<p>Drei Stufen, an die vorhandene Achse <code>niveau</code> (E/AP1/AP2) angeschlossen. Jede generierte Aufgabe trägt genau eine Stufe; die Stufe bestimmt Zahlenraum, Schrittzahl und Hilfen:</p>
+<div class="dk-tabelle"><table><thead><tr><th>Merkmal</th><th>E</th><th>AP1</th><th>AP2</th></tr></thead><tbody><tr><td>Präfixe</td><td>/24–/28</td><td>/20–/30</td><td>/16–/31 (inkl. /30, /31)</td></tr><tr><td>Schritte bis zur Lösung</td><td>1</td><td>2–3</td><td>3–5</td></tr><tr><td>Oktett-Lage</td><td>letztes Oktett, Blockgröße ≤ 128</td><td>letztes oder vorletztes Oktett</td><td>beliebiges Oktett</td></tr><tr><td>Hilfen in der Aufgabe</td><td><code>hinweis</code> immer gesetzt, Rechenweg anforderbar</td><td><code>hinweis</code> optional</td><td>kein <code>hinweis</code></td></tr><tr><td>VLSM</td><td>–</td><td>2–3 Netze, ein Schritt</td><td>4–5 Netze, Reihenfolge + Reserve</td></tr><tr><td>VLAN</td><td>ein Access-Port</td><td>zwei Ports/VLAN, Erreichbarkeit</td><td>Trunk, Tagging, Native, allowed-Liste</td></tr><tr><td>Zeitdruck</td><td>keiner</td><td>keiner</td><td>optional (Spiel „Präfix-Blitz" nur AP1/AP2)</td></tr><tr><td>Formulierung</td><td>„Wie lautet …" ohne Zusatzbedingung</td><td>eine Bedingung</td><td>Bedingung + Gegenprobe/Falle benannt</td></tr></tbody></table></div>
+<p><strong>Wortregeln (testbar):</strong> Frage ≤ 140 Zeichen wie bei Minis? Nein — Abteilungsaufgaben dürfen länger sein (bis 220), aber <code>lage</code> trägt alle Angaben; <strong>keine</strong> unbestimmten Wörter („irgendwie", „vielleicht"), keine Abkürzung ohne Auflösung beim ersten Vorkommen, keine negativen Fangfragen auf E, genau eine richtige Option, Distraktoren sind typische Denkfehler (nicht offensichtlich falsch), jede Erklärung nennt den Rechenweg in Worten.</p>
+<p><strong>Optimierung der vorhandenen Aufgaben (§ 10)</strong> — jede Änderung wird belegt und getestet.</p>
+<hr>
+<h2 id="6-aufgabentypen-genau-diese-11">6 · Aufgabentypen (genau diese 11)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>id</th><th>Titel</th><th>skill</th><th>Stufen</th><th>Eingabe</th><th>Kern</th></tr></thead><tbody><tr><td><code>netzid</code></td><td>Netz-ID bestimmen</td><td>lab.subnetz</td><td>E/AP1/AP2</td><td>ip</td><td>Netz-ID zu Adresse/Präfix</td></tr><tr><td><code>broadcast</code></td><td>Broadcast bestimmen</td><td>lab.subnetz</td><td>E/AP1/AP2</td><td>ip</td><td>letzte Adresse des Blocks</td></tr><tr><td><code>hosts</code></td><td>Nutzbare Hosts</td><td>lab.subnetz</td><td>E/AP1</td><td>zahl</td><td>2^Hostbits − 2 (bei /31 Hinweis)</td></tr><tr><td><code>maske</code></td><td>Maske ↔ Präfix</td><td>lab.subnetz</td><td>E/AP1</td><td>maske</td><td>beide Richtungen</td></tr><tr><td><code>block</code></td><td>Blockgröße und Raster</td><td>lab.subnetz</td><td>E/AP1/AP2</td><td>zahl</td><td>2^(32−p), Raster im Oktett</td></tr><tr><td><code>subnetze</code></td><td>Netze schneiden/zählen</td><td>lab.subnetz</td><td>AP1/AP2</td><td>zahl</td><td>Anzahl Netze einer Teilung</td></tr><tr><td><code>vlsm</code></td><td>Adressplan-Schritt (VLSM)</td><td>lab.subnetz</td><td>AP1/AP2</td><td>auswahl</td><td>nächster Block/Maske im Plan</td></tr><tr><td><code>zusammenfassen</code></td><td>Zusammenfassen (Route)</td><td>lab.subnetz</td><td>AP2</td><td>auswahl</td><td>Supernetz zu n Netzen</td></tr><tr><td><code>vlan-port</code></td><td>VLAN am Port</td><td>lab.vlan</td><td>E/AP1</td><td>auswahl</td><td>Access-Port → VLAN</td></tr><tr><td><code>vlan-erreichbar</code></td><td>Gleiches VLAN?</td><td>lab.vlan</td><td>AP1/AP2</td><td>auswahl</td><td>Broadcast-Domäne/Erreichbarkeit</td></tr><tr><td><code>trunk</code></td><td>Trunk und Tagging</td><td>lab.trunk</td><td>AP2</td><td>auswahl</td><td>Tag/Native/allowed</td></tr></tbody></table></div>
+<p>Jeder Typ hat Vorlagen für alle genannten Stufen, mindestens 3 Varianten je Stufe, und liefert <code>rechenweg</code>, <code>erklaerung</code>, <code>hinweis</code> gemäß § 5.</p>
+<hr>
+<h2 id="7-werkzeuge-genau-diese-6">7 · Werkzeuge (genau diese 6)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>id</th><th>Werkzeug</th><th>Lernen</th><th>Bedienung</th></tr></thead><tbody><tr><td><code>bitlabor</code></td><td>32-Bit-Labor</td><td>Bit-Sicht, Oktette, Maskenschablone</td><td>Bits klickbar/umschaltbar, Oktett-Dezimalwert live, Maske überlagert (Netz-/Hostbits), Ergebnis Netz-ID/Broadcast/Hosts</td></tr><tr><td><code>maskenleiste</code></td><td>Masken-Schieber</td><td>Präfix ↔ Maske ↔ Block ↔ Hosts</td><td>Regler 0–32, Anzeige Dotted + Binär + Tabelle</td></tr><tr><td><code>blocklineal</code></td><td>Blocklineal</td><td>Blockgrenzen, Netz-ID im Raster</td><td>Präfixwahl, Adressleiste 0–255 (bzw. Oktettwahl), Marker, „einrasten"</td></tr><tr><td><code>rechner</code></td><td>Rechenweg-Assistent</td><td>Rechenweg sicher anwenden</td><td>IP + Präfix eingeben; „Schritt zeigen"; optional Selbstrechnen mit Schrittprüfung</td></tr><tr><td><code>vlsm</code></td><td>Adressplaner</td><td>VLSM planen</td><td>Basisnetz + Bedarfszeilen; Plan erzeugen; Balken zeigt Auslastung/Reserve</td></tr><tr><td><code>vlan</code></td><td>VLAN-Werkzeug</td><td>Access/Trunk, Broadcast-Domäne, Tagging</td><td>8-Port-Switch, Ports klickbar (Access/Trunk, VLAN), Frames mit Tag, Erreichbarkeitsmatrix</td></tr></tbody></table></div>
+<p>Jedes Werkzeug: Titel, Mikrolabel, 1 Satz Lernziel, Bedienung, Ergebnisanzeige, Knopf „Aufgabe dazu" (führt in eine passende Übungsrunde) und „Zurück" — alles über <code>UI.subnetzwerkzeuge</code>.</p>
+<h2 id="8-lernspiele-genau-diese-3">8 · Lernspiele (genau diese 3)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>id</th><th>Spiel</th><th>Lernen</th><th>Ablauf</th></tr></thead><tbody><tr><td><code>praefix-blitz</code></td><td>Präfix-Blitz</td><td>Fluency Präfix↔Maske↔Hosts</td><td>60 s, Karten mit 4 Antworten, Serie + Bestwert, am Ende Fehlerauswertung (AP1/AP2)</td></tr><tr><td><code>netz-sortierer</code></td><td>Netz-Sortierer</td><td>Adressen sicher einem Netz zuordnen</td><td>8 Adressen auf 3 Netze ziehen/klicken, Auflösung mit Rechenweg (E/AP1)</td></tr><tr><td><code>vlan-patcher</code></td><td>VLAN-Patcher</td><td>Ports, Access/Trunk, Erreichbarkeit</td><td>Szenario mit Anforderung, Ports konfigurieren, „Prüfen" zeigt Differenz (AP1/AP2)</td></tr></tbody></table></div>
+<p>Alle Spiele: deterministischer Aufgaben-Seed, Ergebnisverbuchung über <code>Spiel.subnetz.antwort</code>, Bestwert in <code>store "subnetz"</code>, klare Lernziele, kein Spiel ohne Subnetting/VLAN-Bezug, kein Punktesystem, das Fehler belohnt.</p>
+<hr>
+<h2 id="9-schreibrechte-ein-schreiber-je-datei-leitung-integriert">9 · Schreibrechte (ein Schreiber je Datei; Leitung integriert)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Owner</th><th>Dateien (neu → <strong>fett</strong>)</th></tr></thead><tbody><tr><td><strong>W1 Rechenkern</strong></td><td><strong><code>src/spiel/subnetz.js</code></strong>, <strong><code>tests/subnetz-kern.test.js</code></strong>, <strong><code>tests/subnetz-aufgaben.test.js</code></strong></td></tr><tr><td><strong>W2 Lehrplan/Inhalte</strong></td><td><strong><code>src/daten/subnetz-lehrplan.js</code></strong>, <strong><code>tests/subnetz-lehrplan.test.js</code></strong>, <strong><code>tests/subnetz-inhalte.test.js</code></strong>, <strong><code>docs/entwicklung/Subnetting – Lernstufen-Matrix.md</code></strong>; Änderungen: <code>src/daten/trainings.js</code>, <code>src/daten/mini.js</code>, <code>src/daten/fragen-vorlagen.js</code>, <code>src/daten/mini-denkhilfen*.js</code> (nur § 10); <code>tests/fragen-generator.test.js</code> nur für den <code>GEGEN</code>-Eintrag der geänderten Vorlage. Zwingt eine Änderung einen weiteren bestehenden Test, wird <strong>nur die betroffene Erwartung fachlich begründet</strong> nachgezogen (nie abgeschwächt), im Bericht genannt.</td></tr><tr><td><strong>W3 Oberfläche</strong></td><td><strong><code>src/ui/subnetz.js</code></strong>, <strong><code>src/stil/subnetz.css</code></strong>, <strong><code>tests/ui-subnetz.test.js</code></strong>; Änderung: <code>src/ui/geraetebilder.js</code> (ein Symbol <code>subnetz</code>, ans Ende der Tabelle)</td></tr><tr><td><strong>W4 Werkzeuge/Spiele</strong></td><td><strong><code>src/ui/subnetz-werkzeuge.js</code></strong>, <strong><code>src/stil/subnetz-werkzeuge.css</code></strong>, <strong><code>tests/ui-subnetz-werkzeuge.test.js</code></strong>, <strong><code>tests/subnetz-spiele.test.js</code></strong></td></tr><tr><td><strong>Leitung</strong></td><td><code>src/ui/app.js</code>, <code>src/ui/hub.js</code>, <code>tools/rauch.py</code>, <code>docs/**</code>, <code>README.md</code>, <code>AGENTS.md</code>, <code>bauen.py</code>-Fassung, <code>android/bauen.py</code>, <code>android/bauen.py VERSION_CODE</code>, <code>src/seite.html</code> nur falls nötig, Build, Commit, Push, Tag, Release</td></tr></tbody></table></div>
+<p><strong>Regeln:</strong> kein <code>git add/Push</code> für Owner; keine fremden Dateien; Zeilenenden bewahren (<code>git ls-files --eol</code>), neue Dateien LF; keine Tests abschwächen (nur fachlich begründet nachziehen); keine neue Fertigkeit; keine Änderung an Parallel-Sitzungs-Dateien; keine Software installieren; Antworten auf Deutsch.</p>
+<p><strong>Abnahme-Gates (Leitung, am Ende):</strong> <code>node tests/run.js</code> grün, 0 übersprungen · <code>sh tools/test.sh --rauch</code> <strong>48/48</strong> · <code>python tools/klassen.py</code> <strong>0</strong> · <code>python tools/ethos.py</code> <strong>GRÜN</strong> (R4/R9/R10 nicht schlechter) · <code>python tools/umlaute.py</code> GRÜN · <code>node tools/sim-stand.js</code> unverändert · <code>python tools/seite.py --pruefen</code> GRÜN · <code>python tools/stand.py --pruefen</code> 0 · <code>python tools/einfach.py</code> beide byte-gleich · Sichtprüfung 1440/960/720 × 7 Theme-Zustände × Bewegung aus, Belege unter <code>Nachweise/runde7/</code>.</p>
+<hr>
+<h2 id="10-optimierung-der-vorhandenen-subnetting-vlan-aufgaben-belegt">10 · Optimierung der vorhandenen Subnetting-/VLAN-Aufgaben (belegt)</h2>
+<p>Diese Befunde stammen aus der read-only-Analyse; W2 setzt die fachlich sicheren um, jede Änderung mit Testbeleg. Was nicht umgesetzt wird, steht begründet im Bericht.</p>
+<ol><li><strong><code>vlan-netzgroesse</code> (AP2, <code>fragen-vorlagen.js</code>)</strong> — fragt „/24 auf n VLANs ⇒ welche Maske" und lehrt damit das falsche Planungsmodell. Ersetzen durch <strong>Hosts je VLAN ⇒ Präfix</strong> (VLSM-Denken) und <code>GEGEN</code>-Rechnung im Test nachziehen.</li><li><strong><code>mini-sub-1</code> (E) / <code>mini-sub-3</code> (AP2)</strong> — Schwierigkeit invertiert: Netzadresse /26 ist AP1-Stoff, „Hosts in /28" ist E. <strong>Stufen tauschen</strong> (Multiset bleibt gleich, Testbilanz unverändert).</li><li><strong><code>mini-trunk-5</code> (AP2)</strong> — „Im Native VLAN" gegen „Immer in VLAN 1" ist ohne Native-Angabe doppeldeutig. Kontext ins Ticket/Schnappschuss (Native VLAN ausdrücklich nennen), genau eine richtige Antwort.</li><li><strong>Fehlende Denkhilfen</strong> für <code>mini-vlan-6</code>, <code>mini-trunk-5</code>, <code>mini-rostick-4</code> ergänzen (Fallback auf Fertigkeitssatz ist für Transferaufgaben zu schwach).</li><li><strong>Doppelte Trainings</strong> <code>tr-trunk-erlauben</code>/<code>tr-trunk-allowed</code> und gleicher Titel <code>tr-netz-maske</code>/<code>tr-netz-nachbar</code> — Titel/Beschreibung unterscheidbar machen (keine Progression vortäuschen).</li><li><strong><code>tr-subnetz-plan</code> (E-Format, AP1-Inhalt)</strong> — Beschreibung/Schritte auf E-Niveau stützen (Teiltabelle vorgeben, ein Schritt), ohne das Trainingsformat (<code>art</code>) zu ändern (Testregel <code>niveau = f(art)</code> bleibt).</li><li><strong>VLSM/Blockgröße im Wiki</strong> — der Rechenweg gilt nur im letzten Oktett; im Lehrplan (§ 2.2) wird die Bit-/Block-Brücke für alle Präfixe gelehrt (Wiki bleibt unangetastet: <code>wiki.js</code> gehört der Leitung, Änderung dort nur bei Bedarf in dieser Runde).</li></ol>
+<p><strong>Nicht Teil dieser Runde</strong> (begründet): neue <code>DATEN.skills</code> (Codec-/Dichte-Tests eingefroren), neue Tickets, Änderungen an <code>spiel/injektoren.js</code>, <code>spiel/mini.js</code>-Mechanik, Lernmotor.</p>
+<hr>
+<h2 id="11-abnahme-und-fassung">11 · Abnahme und Fassung</h2>
+<ul><li>Fassung <strong>2.9.0</strong> (neue Abteilung = Feature auf 2.8.0; die Fassung 2.8.0 der Parallel-Sitzung mit Kurzübung und Flugschreiber bleibt als eigener Commit davor). <code>VERSION_CODE = 20901</code> in <code>android/bauen.py</code>.</li><li>Doku: dieser Entwurf; <code>docs/Architektur.md</code> § 26; <code>docs/entwicklung/Design – Spielspaß 2.0.md</code> § 43; <code>docs/CHANGELOG.md</code>; <code>docs/STAND.md</code>/<code>README.md</code> über <code>tools/stand.py</code>; Doku-Seite über <code>tools/seite.py</code>; <code>Übergabe – Stand 31.10.2026 – Runde 8.md</code>.</li><li>Build: <code>python bauen.py</code>, <code>python tools/einfach.py</code> (beide Ziele), <code>cargo tauri build --no-bundle</code> (echte <code>.exe</code>), <code>python tools/seite.py</code>, <code>python tools/stand.py</code>.</li><li>Deploy: Commit auf <code>ausbau-1.2</code>, Push des Zweigs, Tag <code>v2.9.0</code>, Push des Tags — stehende Nutzerfreigabe für Push/Tag/Release (30.10.2026, gilt weiter). Danach <strong>messen</strong>: Live-Seite SHA256 gegen <code>docs/index.html</code>, Release-Anhänge, ProductVersion, CI-Läufe. Der Bericht nennt Live-URL, Release-URL, Prüfsummen und alles, was nicht geprüft wurde.</li></ul>
+<h2 id="12-risiken-und-gegenma-nahmen">12 · Risiken und Gegenmaßnahmen</h2>
+<ul><li><strong>Parallel-Sitzung (Runde 6)</strong> arbeitet im selben Arbeitsbaum (<code>leiste.js</code>, <code>leiste.css</code>, <code>karriere.js</code>, <code>kurzfrage.js</code>, deren Tests). Diese Dateien sind tabu; vor Commit/Push wird geprüft, dass die Parallel-Arbeit committet ist (sonst nicht bauen/veröffentlichen).</li><li><strong>Testlaufdauer</strong>: <code>node tests/run.js</code> führt immer alle Testdateien aus. Für die Entwicklung <code>node Nachweise/runde7/schnelltest.js tests/&lt;datei&gt;.test.js</code> (nur eine Datei, gleiche Module); Gesamtlauf bleibt das Abnahme-Gate.</li><li><strong>Dock-Breite</strong>: 76 px, bei 720 px schmaler; Titel „Subnetting" wird geprüft, notfalls im Dock „Subnetz" und Titel „Subnetting" (Messung, keine Annahme).</li><li><strong>R12</strong> (max. 6 Bedienelemente) ist ohne <code>--dom</code> nicht gemessen; die Abteilung bleibt ruhig (Register + Kopf, keine Knopfwüste).</li><li><strong>Kein Bau/Release, solange die Parallel-Sitzung uncommittet arbeitet</strong> (sonst enthielte der Einzeldatei-Bau fremden, unfertigen Code).</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

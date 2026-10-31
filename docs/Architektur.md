@@ -531,6 +531,7 @@ UI.labor.fernFertig()                               // Sitzungsfenster in den Zu
 Spiel.VERTRAUEN_LOHN = {empfehlung:3, rabatt:4, rabattAnteil:0.2}
 st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stufe früher offen
 st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
+```
 
 ## 21 · Runde 3b — Audit-Umsetzung, Ambient und lebende Zonen (30.10.2026) — verbindlicher Vertrag
 
@@ -729,6 +730,7 @@ Ein Test wurde umgestellt (nicht abgeschwächt): `tests/ui-leiste-ueberlappung.t
 neue Mechanik (`mappe-an`/`visibility:hidden` statt Kopfraum) mit 6 statt 4 Fällen.
 **Nicht gemessen:** R12 (`--dom`), Android-APK, echte Maus im ausgelieferten Tauri-Fenster
 (nur Prüfbau), Screenreader.
+
 ## 25 · Runde 6/7 — Kurzübung mit Kontext und Flugschreiber-Aufmerksamkeit (31.10.2026)
 
 **Runde 6 (Kurzübung).** Neues Modul `src/spiel/kurzfrage.js`:
@@ -754,3 +756,97 @@ Transport, Zeitachse, `UI.simpanel.anfaengerHilfe` und PDU unverändert.
 primäre 3→0 (Fehler+Hilfe an), Flächen 4→1; 10→2/3→0/3→1 (Hilfe aus); 6→2/4→1/2→0 (Ergebnis);
 Überlauf 0; Mikrolabel 6,08:1. Im gemeinsamen Arbeitsbaum 1033/1033 grün (dieser Commit enthält nur
 Runde-6/7-Dateien). R12 nicht gemessen.
+
+## 26 · Runde 8 — Abteilung „Subnetting" (31.10.2026) — verbindlicher Vertrag
+
+**Auftrag (Nutzer, wörtlich).** „NetLab braucht ein Subnetting abteil wo das intensiv beigebracht,
+gelehrt mit visuellen Hilfselementen und Übungsaufgaben und tools / spielchen sind nur zum lernen von
+subnetting und vLAN. … wie das am besten in die bestehenden themes integriert wird und auch wo, ich
+denke ein eigenes abteil wird dem gerecht. Generell sollen alle Aufgaben Inhaltlich und vom
+Lernschwierigkeitsgrad optimiert werden. Mache das vollständig fertig und melde dich wenn der build und
+deploy fertig ist." Vollfassung:
+[`Entwurf – Runde 7 (Abteilung Subnetting)`](<entwicklung/Entwurf – Runde 8 (Abteilung Subnetting).md>).
+
+**Neue Ansicht `subnetz` („Subnetting").** Eigene Registrierung über `UI.startHaken` +
+`UI.app.registrieren("subnetz", …)`; Dock-Reihenfolge in `app.js` `REIHE` direkt nach „labor"
+(`UI.app.liste()` überspringt unbekannte Namen, der Eintrag ist damit auch ohne Ansicht unschädlich).
+Vier Register: Lehrpfad (8 Module), Werkzeuge (6), Üben & Spielen (Generator + 3 Lernspiele),
+Formelsammlung. Kein Geld, kein Ruf, kein Spielstand-Feld.
+
+**Datenformen (nur additiv, headless).**
+
+- `Spiel.subnetz` (`src/spiel/subnetz.js`): `VERSION`, `STUFEN` (`E|AP1|AP2`), `ARTEN` (11 Typen:
+  `netzid, broadcast, hosts, maske, block, subnetze, vlsm, zusammenfassen, vlan-port,
+  vlan-erreichbar, trunk`), `rechnen(ip, praefix)`, `maskeZuPraefix`, `praefixZuMaske`,
+  `gleichesNetz`, `plan(basis, bedarf)`, `zusammenfassen(netze)`, `aufgabe({art, niveau, seed})`,
+  `satz({arten?, niveau, anzahl, seed})`, `pruefen(aufgabe, antwort)`,
+  `antwort(aufgabe, richtig, {hilfe?, spiel?})`, `fortschritt()`, `modulSetzen(id, status)`,
+  `zuruecksetzen()`. Deterministisch über einen gesäten Generator; **kein** `Math.random`, keine
+  Uhr, kein Datum.
+- Aufgabe: `{id, art, niveau, skill, titel, frage, lage[], eingabe{art, optionen?}, loesung{wert, text},
+  rechenweg[{n, titel, text, ergebnis}], erklaerung, hinweis, visual{art, preset}, quelle}`.
+  `rechenweg` endet in `loesung.wert`; genau eine richtige Antwort; alle Angaben in `lage`.
+- `DATEN.subnetzLehrplan` (`src/daten/subnetz-lehrplan.js`): `version`, `formelsammlung[]`,
+  `module[8]` (feste Reihenfolge `bits, maske, block, netzid, schneiden, vlsm, vlan, pruefung`) mit
+  `stufe, titel, kicker, lead, kern[], merksatz, visuell{art, preset}, beispiel[{titel, aufgabe,
+  schritte[], ergebnis}], uebung{arten, niveau, anzahl}, pruefung{arten, niveau, anzahl, bestehen},
+  verweise{wiki, werkzeug, training}, dauerMin, quelle`.
+- `UI.subnetzwerkzeuge` (`src/ui/subnetz-werkzeuge.js`): `liste()` (6 Werkzeuge), `zeichnen(container,
+  id, opts)` → `{zerstoeren()}`, `spiele.liste()` (3 Spiele), `spiele.starten(container, id, opts)`.
+  Werkzeuge: `bitlabor, maskenleiste, blocklineal, rechner, vlsm, vlan`. Spiele: `praefix-blitz,
+  netz-sortierer, vlan-patcher`.
+- Eigener Speicher `store "subnetz"` **v:1**, ausschließlich über die API:
+  `{v:1, module:{[id]:{status:"neu"|"gelesen"|"geuebt"|"sicher", richtig, falsch, serie}},
+  spiele:{[id]:{bestwert, runden}}, gesamt:{richtig, falsch, serie}}`. `Spiel.st` (v:3) bleibt
+  unverändert — keine Migration, alte Stände bleiben gültig.
+
+**Lernen und Verbuchung.** Ausschließlich über `L.ueben(skill, ok, {hilfe})` / `L.fehler("labor-subnetz",
+skill, text)`; Werkzeuge, die die Lösung zeigen, verbuchen `{hilfe:true}` (Karte steigt nicht).
+Module: `neu < gelesen < geuebt < sicher`; „sicher" = Prüfrunde bestanden (≥4 von 5, ohne Hilfe);
+ein Fehler senkt „sicher" auf „geuebt", nie unter „gelesen". Kein Geld/Ruf.
+
+**Lernstufen (verbindlich, Prüfmaßstab).** E: /24–/28, letztes Oktett, 1 Schritt, `hinweis` immer;
+AP1: /20–/30, 2–3 Schritte; AP2: /16–/31, 3–5 Schritte, optional Zeitdruck. VLSM: E –, AP1 2–3 Netze,
+AP2 4–5 Netze inkl. Reserve. VLAN: E ein Access-Port, AP1 zwei Ports/Erreichbarkeit, AP2 Trunk/Tagging/
+Native/allowed. Formulierungsregeln und die Vorher/Nachher-Liste der optimierten Bestandsaufgaben:
+[`Subnetting – Lernstufen-Matrix`](<entwicklung/Subnetting – Lernstufen-Matrix.md>) und Entwurf § 10.
+
+**Optimierte Bestandsaufgaben (belegt, Tests grün).** `vlan-netzgroesse` lehrt jetzt Hosts je VLAN →
+Präfix statt „/24 auf n VLANs"; `mini-sub-1`/`mini-sub-3` Stufen getauscht (Netzadresse /26 = AP1,
+Hosts /28 = E; Stufen-Multiset unverändert); `mini-trunk-5` mit ausdrücklichem Native-Kontext;
+Denkhilfen für `mini-vlan-6`, `mini-trunk-5`, `mini-rostick-4`; doppelte Trainings unterscheidbar
+(`tr-trunk-erlauben`/`tr-trunk-allowed`, `tr-netz-maske`/`tr-netz-nachbar`); `tr-subnetz-plan` auf
+E-Niveau gestützt (Teiltabelle) ohne die Format-Regel `niveau = f(art)` zu brechen.
+
+**Einfügung in die Themes.** Nur Tokens aus `basis.css` und Bausteine `bento.css`
+(`.bn-raster/.bn-k/…`); eigene Klassen `sn-*` (Abteilung), `sw-*` (Werkzeuge), `sg-*` (Spiele).
+Alle 5 Zusatz-Themes + hell/dunkel/system bei 1440/960/720 geprüft; VLAN-Farben `--vlan-1…8` nur mit
+Nummer; 44-px-Ziele scopen (global `.knopf` = 40 px); Fokusring zentral, kein eigener
+Reduced-Motion-Block; keine Emoji.
+
+**Einfügung in die Navigation.** Dock (`REIHE`, Kurzform „Subnetz" gegen den Wortumbruch bei 76 px),
+Befehlspalette (automatisch über `UI.app.liste()`, dazu sechs Befehle „Subnetting: Werkzeug …"),
+`tools/rauch.py` (ein Fall „Subnetting" → **48/48**), Querverweis am Ende der Trainingsliste
+(„Zur Abteilung Subnetting") und interne Verweise zu Wiki (`UI.wiki.oeffnen`), Labor und Training.
+**Kein Hub-Umbau:** das „Heute"-Raster hat eine feste 12-Spalten-Belegung; eine zusätzliche Kachel
+hätte die gemessene Bento-Ordnung gebrochen (im Entwurf § 2.5 als „nur wenn messbar Platz frei"
+vorgesehen, hier bewusst verworfen).
+
+**Nicht Teil der Runde:** neue `DATEN.skills` (30 — Codec- und Dichte-Tests eingefroren), neue
+Tickets, Änderungen an `spiel/injektoren.js`/`spiel/mini.js`-Mechanik/Lernmotor, `src/sim|modell|kern|cli`.
+
+**Stand (gemessen am 31.10.2026).** `node tests/run.js` **1049/1049 grün**, 0 übersprungen
+(118 Testdateien, 98 headless Module) · Rauchtest **48/48** · `klassen.py` **0** · `ethos.py` **GRÜN**
+(R1 23, R2 17, R3 4, R4 134, R5 0, R6 7, R7 0, R8 0, R9 58, R10 41, R11 0; R12 nicht gemessen) ·
+`umlaute.py` **GRÜN** · Simulation unverändert · Bau **143 Module** (98 headless) · Einzeldatei
+**4.080.274 B**, SHA256 `49fc2fa5…`, `docs/index.html` und `Netzwerk-Labor.html` byte-gleich ·
+Doku 65 Dokumente, 0 tote Verweise, `seite.py`/`stand.py --pruefen` grün · Sichtprüfung
+1440/960/720 × 7 Theme-Zustände: 0 seitlich scrollende Seiten, 0 JS-Fehler, 0 Kontrastverstöße,
+„Bewegung aus" = 0 Animationen (3 abgeschnittene Textknoten nur in der VLSM-Balkenbeschriftung
+kleiner Blöcke — die Legende nennt den vollen Namen; Bit-Zellen sind die begründete Ausnahme der
+44-px-Regel). Fassung **2.9.0** (`VERSION_CODE` 20901), veröffentlicht mit Tag `v2.9.0`.
+Einzelheiten: [`docs/STAND.md`](STAND.md), [`CHANGELOG`](CHANGELOG.md),
+[`Übergabe – Stand 31.10.2026 – Runde 8`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 8.md>)
+und [`Subnetting – Lernstufen-Matrix`](<entwicklung/Subnetting – Lernstufen-Matrix.md>).
+**Nicht gemessen:** R12 (`--dom`), Android-APK, Screenreader, echte Maus im ausgelieferten
+Tauri-Fenster.
