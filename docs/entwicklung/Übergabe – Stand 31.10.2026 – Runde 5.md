@@ -116,9 +116,27 @@ hell/dunkel, Fokus, 44 px, reduced motion, Tokens, Haken). Berichte:
    `docs/index.html` hashen, Release-Anhänge, Größen, ProductVersion und `Content-Disposition`
    prüfen (Abschnitt 7).
 
-## 7 · Nachweis 2.7.0 (nach dem Deploy gemessen)
+## 7 · Nachweis 2.7.0 (nach dem Deploy gemessen, 31.10.2026)
 
-*(wird ergänzt)*
+- **Release:** [`v2.7.0 — Netzwerk-Labor 2.7.0`](https://github.com/Vexx-oss/NetLab/releases/tag/v2.7.0),
+  veröffentlicht **2026-10-31 12:54:46 UTC**, kein Vorab-Release, kein Entwurf.
+- **Anhänge (3):** `Netzwerk-Labor.html` **3.751.197 B** · `Netzwerk-Labor-2.7.0-Browser.zip`
+  **2.101.435 B** (69 Einträge unter `Netzwerk-Labor-2.7.0/`: Spiel, **60** Doku-Seiten, Lizenzen,
+  LIESMICH; entpackt ohne Fehler) · `Netzwerk-Labor.exe` **8.940.544 B**, ProductVersion **2.7.0**,
+  SHA256 `6fbf0bec…e8434e34`, Antwort mit `Content-Disposition: attachment`. Eine Android-APK ist
+  **nicht** angehängt (Android-Schlüssel-Secrets fehlen, wie in den Vorrunden).
+- **Live-Seite:** <https://vexx-oss.github.io/NetLab/index.html> — **3.751.197 B**, SHA256
+  `42560B5E9EE01DF70B3EB22BCF42062912AF706DBD24EAC0EA3A0F1C556168A2`, **byte-gleich** mit
+  `docs/index.html` und dem Release-Anhang `Netzwerk-Labor.html`; die neue Doku-Seite
+  („Runde 5") antwortet online mit 200.
+- **GitHub-Abläufe auf `cdb5db2`:** „Prüfen" **success**, „Spiel veröffentlichen" **success**,
+  „Release anlegen" **success** (Jobs „Release bauen und anlegen", „Windows-Programm bauen und
+  anhaengen" grün; Android-Job überspringt das Anhängen wie zuvor).
+- **Lokal:** `Programm/Netzwerk-Labor.exe` **8.956.928 B**, ProductVersion **2.7.0**, SHA256
+  `593597c7…e7c5c0e2`, Integritätsstufe „Mittel" — läuft seit 13:46 als eigenes Fenster
+  (PID 17428). Ein lokaler Bau unterscheidet sich in Bytes vom CI-Bau; beide tragen 2.7.0.
+- **Nicht geprüft:** die CI-gebaute `.exe` wurde nicht gestartet (nur Größe, ProductVersion,
+  Content-Disposition ausgelesen); Android-APK nicht gebaut.
 
 ## 8 · Für die nächste Sitzung
 

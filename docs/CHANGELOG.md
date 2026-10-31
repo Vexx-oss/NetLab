@@ -58,7 +58,10 @@ Bau **138 Module** (95 headless).
 
 **Erzeugnisse.** Fassung **2.7.0**; Einzeldatei und `docs/index.html` byte-gleich,
 **3.751.197 B**, SHA256 `42560b5e…6168a2`, 0 Außenverweise; Windows-`.exe` **8.956.928 B**,
-ProductVersion **2.7.0**, SHA256 `593597c7…e7c5c0e2`. Einzelheiten:
+ProductVersion **2.7.0**, SHA256 `593597c7…e7c5c0e2` (lokal; der CI-Bau ist
+`6fbf0bec…e8434e34`). Release [v2.7.0](https://github.com/Vexx-oss/NetLab/releases/tag/v2.7.0)
+mit drei Anhängen veröffentlicht (Browser-ZIP 2.101.435 B, Einzeldatei 3.751.197 B, EXE 8.940.544 B);
+Live-Seite byte-gleich mit `docs/index.html` (SHA256 `42560B5E…6168A2`). Einzelheiten:
 [`Übergabe – Stand 31.10.2026 – Runde 5`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 5.md>).
 
 **Nicht geprüft.** R12 (`ethos --dom`), Android-APK (kein SDK), echte Maus im Tauri-Fenster
