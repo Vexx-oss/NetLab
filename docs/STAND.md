@@ -10,19 +10,19 @@ Diese Seite ist die **einzige Zahlenquelle** des Projekts (Vertrag: [`Architektu
 
 | Groesse | Wert | Gemessen mit |
 |---|---|---|
-| Fassung (Quelle) | **2.5.1** | `bauen.py`, Zeile `VERSION = ...` (Regex) |
-| Android-Bauzaehlung | `VERSION_CODE = 20502` | `android/bauen.py` (Regex) |
-| Baukennung | **`e2cade20`** (gebaut aus Fassung `2.5.1`) | `docs/index.html`, `LABOR_BAU` (Regex) |
-| Tests | **878/878 grün** | echter Lauf `node tests/run.js`, Bilanzzeile |
+| Fassung (Quelle) | **2.6.0** | `bauen.py`, Zeile `VERSION = ...` (Regex) |
+| Android-Bauzaehlung | `VERSION_CODE = 20601` | `android/bauen.py` (Regex) |
+| Baukennung | **`1a0ba1cf`** (gebaut aus Fassung `2.6.0`) | `docs/index.html`, `LABOR_BAU` (Regex) |
+| Tests | **930/930 grün** | echter Lauf `node tests/run.js`, Bilanzzeile |
 | davon uebersprungen | **0** | Zeile „davon N uebersprungen“ (`tests/harness.js`: Test mit 0 Zusicherungen) |
 | Exit-Code des Testlaufs | **0** | Rueckgabewert desselben Laufs |
-| Testdateien | 103 | dieselbe Bilanzzeile |
+| Testdateien | 109 | dieselbe Bilanzzeile |
 | headless Module (Testlauf) | 95 | dieselbe Bilanzzeile |
-| Bau-Module | 134 (davon 95 headless) | `python bauen.py --liste` (JSON, gezaehlt) |
-| src/ | 133 JS-Dateien, 34.175 Zeilen | alle `src/**/*.js`, Zeilen = Summe `str.splitlines()` je Datei (inkl. Leerzeilen, CRLF = ein Umbruch) |
+| Bau-Module | 138 (davon 95 headless) | `python bauen.py --liste` (JSON, gezaehlt) |
+| src/ | 137 JS-Dateien, 35.976 Zeilen | alle `src/**/*.js`, Zeilen = Summe `str.splitlines()` je Datei (inkl. Leerzeilen, CRLF = ein Umbruch) |
 | Einzeldatei `Netzwerk-Labor.html` | **3.581.472 B** · SHA256 `9DA8261CE6C72BC3200E58F0B713C2F554BAD376C31DEC33F638E430CE57E77A` | Bytes zaehlen, `hashlib.sha256` ueber die Bytes |
-| Einzeldatei `docs/index.html` | **3.581.472 B** · SHA256 `9DA8261CE6C72BC3200E58F0B713C2F554BAD376C31DEC33F638E430CE57E77A` | Bytes zaehlen, `hashlib.sha256` ueber die Bytes |
-| Einzeldateien byte-gleich | **ja** | gleicher SHA256 |
+| Einzeldatei `docs/index.html` | **3.714.938 B** · SHA256 `B3C58EDE2CADD91262D3D8675615F01E528444D43B4E7594BA18322768506D2E` | Bytes zaehlen, `hashlib.sha256` ueber die Bytes |
+| Einzeldateien byte-gleich | **NEIN** | gleicher SHA256 |
 | Tickets | 76 | `DATEN.tickets` (headless Module geladen wie `tests/run.js`) |
 | Kunden | 7 | `Object.keys(DATEN.kunden)` (headless Module geladen wie `tests/run.js`) |
 | Karrierestufen | 6 | `Spiel.KARRIERE_STUFEN` (headless Module geladen wie `tests/run.js`) |
@@ -35,10 +35,10 @@ Diese Seite ist die **einzige Zahlenquelle** des Projekts (Vertrag: [`Architektu
 | Fertigkeiten | 30 | `DATEN.skills` (headless Module geladen wie `tests/run.js`) |
 | Abzeichen | 17 | `Spiel.ABZEICHEN` (headless Module geladen wie `tests/run.js`) |
 | Fehlertexte | 82 | `Object.keys(DATEN.fehlertexte)` (headless Module geladen wie `tests/run.js`) |
-| Doku-Seiten docs/doku | 56 HTML-Dateien (inkl. Uebersicht) | HTML-Dateien zaehlen |
-| Doku-Quellen | 55 Markdown-Dokumente | was `tools/seite.py` veroeffentlicht: `README.md` + `AGENTS.md` + `docs/**/*.md` |
-| Markdown-Dateien | 91 | `git ls-files` auf `*.md` + unversionierte `*.md` |
-| Relative Verweise | 253 geprueft, **0 tot** | wie `tools/repo-verweise-flicken.py` |
+| Doku-Seiten docs/doku | 58 HTML-Dateien (inkl. Uebersicht) | HTML-Dateien zaehlen |
+| Doku-Quellen | 57 Markdown-Dokumente | was `tools/seite.py` veroeffentlicht: `README.md` + `AGENTS.md` + `docs/**/*.md` |
+| Markdown-Dateien | 93 | `git ls-files` auf `*.md` + unversionierte `*.md` |
+| Relative Verweise | 264 geprueft, **0 tot** | wie `tools/repo-verweise-flicken.py` |
 
 ## Bekannte, begruendete Ausnahmen
 
@@ -76,10 +76,11 @@ Nach einer Aenderung an den Dokumenten ist die Reihenfolge: `python tools/stand.
 
 ## Abweichungen und ehrliche Grenzen
 
+- **Die beiden Einzeldateien sind NICHT byte-gleich.** Einer der beiden Wege liefert einen anderen Bau; tools/einfach.py baut beide aus derselben Quelle.
 - **Browser, Android und die Windows-Datei werden hier nicht gemessen.** Ob die Live-Seite, ein Browser oder die .exe laufen, kann dieses Werkzeug ohne Browser und ohne die nicht im Git liegenden Nachweise nicht pruefen; solche Aussagen stehen in den Dokumenten ausdruecklich als nicht geprueft.
 - **Der Testlauf misst den Arbeitsbaum im Moment des Laufs.** Aendert ein anderer Bearbeiter gleichzeitig src/ oder tests/, beschreibt der Stand genau diesen Moment — deshalb wird er nach jeder Aenderung neu erzeugt und in der CI geprueft.
 - **Kein Datum, keine Uhr:** siehe oben; der Pruefmodus vergleicht Text gegen Messung, nicht Zeitstempel.
 
 <div hidden>
-<!-- STAND:ZAHLEN {"android_code": "20502", "bau": {"gesamt": 134, "headless": 95}, "codec": {"auftraege": 58}, "doku": {"quellen": 55, "seiten": 56}, "einzeldatei": {"dateien": [{"bau": "e2cade20", "bytes": 3581472, "fassung": "2.5.1", "pfad": "Netzwerk-Labor.html", "sha256": "9da8261ce6c72bc3200e58f0b713c2f554bad376c31dec33f638e430ce57e77a"}, {"bau": "e2cade20", "bytes": 3581472, "fassung": "2.5.1", "pfad": "docs/index.html", "sha256": "9da8261ce6c72bc3200e58f0b713c2f554bad376c31dec33f638e430ce57e77a"}], "gleich": true}, "fassung": "2.5.1", "inhalte": {"abzeichen": 17, "fehlertexte": 82, "fertigkeiten": 30, "injektoren": 55, "karrierestufen": 6, "kunden": 7, "minis": 150, "netzvorlagen": 5, "projekte": 4, "tickets": 76, "trainings": 52, "trainingsSkills": ["lab.link", "lab.link", "lab.ip", "lab.ip", "lab.netz", "lab.gateway", "lab.gateway", "lab.arp", "lab.ping", "lab.switch", "lab.subnetz", "lab.subnetz", "lab.dhcp", "lab.dns", "lab.ports", "lab.tcp", "lab.cli", "lab.speichern", "lab.vlan", "lab.vlan", "lab.trunk", "lab.rostick", "lab.acl", "lab.acl", "lab.route", "lab.route", "lab.ttl", "lab.nat", "lab.portfwd", "lab.fw", "lab.dmz", "lab.portsec", "lab.stp", "lab.storage", "lab.link", "lab.dhcp", "lab.dhcp", "lab.dhcp", "lab.route", "lab.dns", "lab.betrieb", "lab.netz", "lab.arp", "lab.ports", "lab.tcp", "lab.speichern", "lab.trunk", "lab.rostick", "lab.ttl", "lab.portfwd", "lab.fw", "lab.dmz"], "wikiSeiten": 37}, "src": {"dateien": 133, "zeilen": 34175}, "tests": {"exit": 0, "gesamt": 878, "gruen": 878, "headless": 95, "rot": 0, "testdateien": 103, "uebersprungen": 0}, "verweise": {"geprueft": 253, "md": 91, "tot": []}} -->
+<!-- STAND:ZAHLEN {"android_code": "20601", "bau": {"gesamt": 138, "headless": 95}, "codec": {"auftraege": 58}, "doku": {"quellen": 57, "seiten": 58}, "einzeldatei": {"dateien": [{"bau": "e2cade20", "bytes": 3581472, "fassung": "2.5.1", "pfad": "Netzwerk-Labor.html", "sha256": "9da8261ce6c72bc3200e58f0b713c2f554bad376c31dec33f638e430ce57e77a"}, {"bau": "1a0ba1cf", "bytes": 3714938, "fassung": "2.6.0", "pfad": "docs/index.html", "sha256": "b3c58ede2cadd91262d3d8675615f01e528444d43b4e7594ba18322768506d2e"}], "gleich": false}, "fassung": "2.6.0", "inhalte": {"abzeichen": 17, "fehlertexte": 82, "fertigkeiten": 30, "injektoren": 55, "karrierestufen": 6, "kunden": 7, "minis": 150, "netzvorlagen": 5, "projekte": 4, "tickets": 76, "trainings": 52, "trainingsSkills": ["lab.link", "lab.link", "lab.ip", "lab.ip", "lab.netz", "lab.gateway", "lab.gateway", "lab.arp", "lab.ping", "lab.switch", "lab.subnetz", "lab.subnetz", "lab.dhcp", "lab.dns", "lab.ports", "lab.tcp", "lab.cli", "lab.speichern", "lab.vlan", "lab.vlan", "lab.trunk", "lab.rostick", "lab.acl", "lab.acl", "lab.route", "lab.route", "lab.ttl", "lab.nat", "lab.portfwd", "lab.fw", "lab.dmz", "lab.portsec", "lab.stp", "lab.storage", "lab.link", "lab.dhcp", "lab.dhcp", "lab.dhcp", "lab.route", "lab.dns", "lab.betrieb", "lab.netz", "lab.arp", "lab.ports", "lab.tcp", "lab.speichern", "lab.trunk", "lab.rostick", "lab.ttl", "lab.portfwd", "lab.fw", "lab.dmz"], "wikiSeiten": 37}, "src": {"dateien": 137, "zeilen": 35976}, "tests": {"exit": 0, "gesamt": 930, "gruen": 930, "headless": 95, "rot": 0, "testdateien": 109, "uebersprungen": 0}, "verweise": {"geprueft": 264, "md": 93, "tot": []}} -->
 </div>

@@ -17,6 +17,36 @@ UI.bewegung = function(){
   return "voll";
 };
 
+/* ---------- Desktop-Fenster (Tauri): Kopfzeile als Fensterleiste (Runde 4, Strang E) ----------
+   In der Vollansicht gibt es keine native Windows-Titelleiste mehr (shell/src-tauri/src/fenster.rs:
+   modus "voll" schaltet set_decorations(false)). Diese Datei liefert die Ersatz-Kopfzeile:
+     · sie ist Zieh-Fläche über `data-tauri-drag-region="deep"` – Tauris Ziehskript startet damit das
+       System-Fensterziehen (Snap an Bildschirmkanten bleibt Windows-Sache) und maximiert per
+       Doppelklick über `internal_toggle_maximize`; eigenes JS braucht es dafür nicht,
+     · rechts stehen die drei Fensterknöpfe Minimieren/Maximieren/Schließen (44 px, aria-label,
+       Tastatur, Fokusring aus basis.css). Sie rufen den eigenen Hüllen-Befehl `fenster_knopf`.
+   NUR im Tauri-Modus (`Plattform.name === "tauri"`): die Browser-Fassung behält ihre Kopfzeile
+   ohne Knöpfe und ohne Zieh-Fläche. Zustand zum Beschriften (Maximieren/Wiederherstellen) kommt
+   aus `fenster_zustand` – nach Knopfdruck und nach dem Größeändern. */
+UI.fenster = (() => {
+  const da = () => typeof Plattform !== "undefined" && Plattform.name === "tauri";
+  const ruf = (befehl, args) => {
+    try {
+      const t = typeof window !== "undefined" ? window.__TAURI__ : null;
+      if (!t || !t.core || typeof t.core.invoke !== "function") return Promise.resolve(null);
+      return Promise.resolve(t.core.invoke(befehl, args || {})).catch(e => { console.warn("Fenster", befehl, e); return null; });
+    } catch (e) { console.warn("Fenster", befehl, e); return Promise.resolve(null); }
+  };
+  /* Eigene Inline-SVGs – UI.symbol kennt keine Fensterglyphen. Strichfarbe aus dem Knopf (currentColor). */
+  const strich = (d, extra) => sv("svg", Object.assign({viewBox: "0 0 16 16", width: 16, height: 16, "aria-hidden": "true",
+    fill: "none", stroke: "currentColor", "stroke-width": "1.6", "stroke-linecap": "round", "stroke-linejoin": "round"}, extra || {}), sv("path", {d}));
+  const symbol = art => art === "minimieren" ? strich("M3.5 8h9")
+    : art === "maximieren" ? strich("M3.5 3.5h9v9h-9z")
+    : art === "wiederherstellen" ? strich("M5.5 5.5V4h7v7H11M3.5 5.5H11v7H3.5z")
+    : strich("M4 4l8 8M12 4l-8 8");
+  return {da, ruf, symbol};
+})();
+
 UI.app = (() => {
   /* Reihenfolge der Andock-Knöpfe. „training" steht seit der Hilfestellung (07.10.2026) vor „lernstand":
      der Trainingsbereich ist der Ort, an dem ein Azubi ohne Auftragsdruck übt (Vertrag § 6). */
@@ -31,7 +61,7 @@ UI.app = (() => {
   const ansichten = new Map();
   const abschnitte = [];
   let root = null, el = {}, aktiv = null, gebaut = new Map(), wert = {euro: null, ruf: null, stufe: null, offen: null}, dialog = null;
-  let modus = null, tastenAn = false;
+  let modus = null, tastenAn = false, fensterHorer = null;
 
   /* ---------- Thema ---------- */
   const einst = () => store.get("einst", {}) || {};
@@ -209,6 +239,39 @@ UI.app = (() => {
     requestAnimationFrame(s);
   }
 
+  /* ---------- Fensterknöpfe der Kopfzeile (nur Tauri-Modus, Strang E) ----------
+     Die Kopfzeile ist im Tauri-Modus zugleich Titelleiste: Ziehen/Doppelklick übernimmt Tauris
+     Ziehskript (Attribut data-tauri-drag-region, in fenster.rs dokumentiert). Hier entstehen die drei
+     Knöpfe; alle 44 px, mit aria-label und Fokusring, im Browser gar nicht. */
+  function fensterKopf(kopf){
+    kopf.classList.add("mit-fenster");
+    kopf.setAttribute("data-tauri-drag-region", "deep");
+    const stand = {max: false};
+    /* Beschriftung/Icon folgen dem echten Fensterzustand (auch nach Doppelklick oder Ziehen am Rand). */
+    function merkmal(z){
+      if (!z || typeof z.maximiert !== "boolean" || stand.max === z.maximiert) return;
+      stand.max = z.maximiert;
+      const titel = stand.max ? "Wiederherstellen" : "Maximieren";
+      maximieren.setAttribute("aria-label", titel);
+      maximieren.title = titel;
+      maximieren.replaceChildren(UI.fenster.symbol(stand.max ? "wiederherstellen" : "maximieren"));
+    }
+    const knopf = (art, titel, fn) => h("button", {type: "button", class: "fenster-knopf" + (art === "schliessen" ? " schliessen" : ""),
+      "data-fenster": art, title: titel, "aria-label": titel, onclick: fn}, UI.fenster.symbol(art));
+    const minimieren = knopf("minimieren", "Minimieren", () => UI.fenster.ruf("fenster_knopf", {aktion: "minimieren"}));
+    const maximieren = h("button", {type: "button", class: "fenster-knopf", "data-fenster": "maximieren", title: "Maximieren", "aria-label": "Maximieren",
+      onclick: () => UI.fenster.ruf("fenster_knopf", {aktion: "maximieren"}).then(merkmal)}, UI.fenster.symbol("maximieren"));
+    const schliessen = knopf("schliessen", "Schließen", () => UI.fenster.ruf("fenster_knopf", {aktion: "schliessen"}));
+    kopf.append(h("div", {class: "fenster-knoepfe", role: "group", "aria-label": "Fenster"}, minimieren, maximieren, schliessen));
+    UI.fenster.ruf("fenster_zustand").then(merkmal);            /* Grundzustand: läuft maximiert? */
+    if (typeof window !== "undefined" && window.addEventListener && window.removeEventListener) {
+      let uhr = 0;
+      const nachmessen = () => { clearTimeout(uhr); uhr = setTimeout(() => UI.fenster.ruf("fenster_zustand").then(merkmal), 160); };
+      window.addEventListener("resize", nachmessen);              /* nach Ziehen am Rand: Knopf-Beschriftung nachziehen */
+      fensterHorer = () => { window.removeEventListener("resize", nachmessen); clearTimeout(uhr); };
+    }
+  }
+
   /* ---------- Aufbau der Vollansicht ---------- */
   function aufbauen(container){
     grundAusstattung();
@@ -254,6 +317,7 @@ UI.app = (() => {
       const EBENEN_NAME = {physik: "Physik", vlan: "VLAN", ip: "IP-Netze", mac: "MAC-Tabellen", routen: "Routen"};
       Bus.an("ebene", id => { if (el.fussEbene) el.fussEbene.textContent = "Ebene " + (EBENEN_NAME[id] || id); });
     } catch (e) { console.error(e); }
+    if (UI.fenster.da()) fensterKopf(kopf);
     root.append(kopf, el.dock, el.flaeche, el.fuss);
     container.replaceChildren(root);
     gebaut = new Map();
@@ -269,6 +333,7 @@ UI.app = (() => {
   }
   function abbauen(){
     dialogZu();
+    if (fensterHorer) { try { fensterHorer(); } catch (e) { console.error(e); } fensterHorer = null; }
     for (const [n] of gebaut) { try { ansichten.get(n)?.verlassen?.(); } catch (e) { console.error(e); } }
     gebaut = new Map();
     root?.remove(); root = null; el = {};

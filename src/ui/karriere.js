@@ -1,9 +1,11 @@
 "use strict";
-/* ---------- Karriere-Oberfläche: Kunden, Shop, Lernstand (mit Prüfungstag), Wiki, Leiste, Einstellungen ----------
+/* ---------- Karriere-Oberfläche: Kunden + Kundenakte, Wiki, Mini-Tickets, Leiste, Einstellungen ----------
+   Seit Runde 4 getrennt: Lernstand (mit Prüfungstag) → src/ui/lernstand.js, Shop → src/ui/shop.js.
+   Gemeinsame Helfer für die ausgelagerten Ansichten: UI.karriere._helfer (overlay).
    Logik in spiel/karriere.js, wirtschaft.js, wartung.js, playbooks.js, offline.js, mini.js, tag.js, pruefung.js.
    Takt: Spiel.tick alle 60 s und beim Sichtbarwerden (Zeit über Zeitstempel, nicht über Ticks). */
 UI.karriere = (() => {
-  const K = {wikiWahl: null, wikiSuche: "", shopOffen: {playbooks: false, aussehen: false}, mini: {antwort: null, ergebnis: null, auswahl: [], links: null, hilfe: null}};
+  const K = {wikiWahl: null, wikiSuche: "", mini: {antwort: null, ergebnis: null, auswahl: [], links: null, hilfe: null}};
   const kd = id => Spiel.karriere.kunde(id);
   const AMPEL = {gruen: ["ok", "●", "läuft"], gelb: ["warn", "▲", "Frist überschritten"], rot: ["bad", "■", "steht – kein Geld"]};
   const NIV = {E: "Einstieg", AP1: "AP1", AP2: "AP2"};
@@ -54,7 +56,7 @@ UI.karriere = (() => {
       /* EINE Hauptaktion je Bild: nur die Hauptkachel trägt den Primärknopf */
       h("button", {type: "button", class: "knopf" + (weit ? " primaer" : ""), onclick: () => akteAnsicht(c, id)}, "Akte öffnen"),
       shopEintrag ? h("button", {type: "button", class: "knopf klein geist", disabled: shopEintrag.zustand !== "kaufbar", title: shopEintrag.grund || "",
-        onclick: () => kaufen(shopEintrag.id, () => kundenAnsicht(c))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null,
+        onclick: () => UI.shop.kaufen(shopEintrag.id, () => kundenAnsicht(c))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null,
     ];
   }
   function zuletztZeile(id){
@@ -201,7 +203,7 @@ UI.karriere = (() => {
           vertrag ? h("p", {class: "bn-wert"}, eur(k.euroProStunde), h("small", {}, "€/h")) : h("p", {class: "bn-lead"}, "Ohne Vertrag fließt kein passives €/h."),
           vertrag ? ampelChip(id, false) :
             shopEintrag ? h("button", {type: "button", class: "knopf klein" + (shopEintrag.zustand === "kaufbar" ? " primaer" : ""), disabled: shopEintrag.zustand !== "kaufbar", title: shopEintrag.grund || "",
-              onclick: () => kaufen(shopEintrag.id, () => akteAnsicht(c, id))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null,
+              onclick: () => UI.shop.kaufen(shopEintrag.id, () => akteAnsicht(c, id))}, `Wartungsvertrag anbieten · ${eur(shopEintrag.preis)} €`) : null,
           !vertrag && shopEintrag && shopEintrag.grund ? h("p", {class: "bn-meta"}, shopEintrag.grund) : null),
         h("section", {class: "ka-block bn-s3"},
           UI.bento.kopf("Leistung", "Aufträge"),
@@ -236,189 +238,6 @@ UI.karriere = (() => {
       h("p", {class: "ka-senior"}, h("span", {class: "sp-senior-sym", "aria-hidden": "true"}, UI.symbol("senior", 28)), h("span", {}, g.senior, h("small", {}, " — der Senior"))),
       h("p", {class: "ka-frage"}, h("b", {}, g.frage.text)), fragen, ergebnis), "ka-dialog");
     if (danach) danach();                                           /* Akte dahinter frisch: Kapitel ist jetzt gelesen */
-  }
-  function kaufen(id, danach){
-    const r = Spiel.shop.kaufen(id);
-    if (r && r.ok) UI.toast(r.satz ? `„${r.satz}“` : "Gekauft.", "ok", {titel: "Erledigt"});
-    else UI.toast((r && r.grund) || "Das ging nicht.", "warn");
-    danach && danach();
-  }
-
-  /* ---------- Shop (P5b: zwei Gruppen, vier Bedienelemente, eine Bildschirmhöhe) ----------
-     Verkauft werden Werkzeuge (Lerninhalt: Kabeltester, Netzprüfer) und die Automatisierung als Liste.
-     Wartungsverträge stehen in der Kundenakte, die Prüfungsanmeldung im Lernstand – der Preis kommt aus
-     Spiel.PRUEFUNG.GEBUEHR, der einen Quelle. Farben und Leisten liegen hinter EINER Zeile (Kauf hier,
-     Auswahl in den Einstellungen „Darstellung“). */
-  function shopAnsicht(c){
-    const st = Spiel.st, liste = Spiel.shop.liste();
-    const inGruppe = g => liste.filter(e => e.gruppe === g);
-    const ZUSTAND = {kaufbar: "", "zu-teuer": "teuer", gekauft: "gekauft", aktiv: "gekauft", veraltet: "veraltet", gesperrt: "gesperrt", "kein-slot": "gesperrt"};
-    const kurz = t => String(t).replace(/^Playbook: /, "");
-    const auf = K.shopOffen ||= {playbooks: false, aussehen: false};
-    const werkzeuge = inGruppe("Werkzeuge"), auto = inGruppe("Automatisierung"), aussehen = inGruppe("Aussehen");
-    const slot = auto.find(e => e.art === "slot");
-    const spiele = auto.filter(e => e.art === "playbook");
-    const offen = spiele.filter(e => e.zustand !== "gesperrt"), gesperrt = spiele.length - offen.length;
-    const kaufbar = spiele.filter(e => e.zustand === "kaufbar").length;
-    /* Kachel nur noch für die zwei Werkzeuge (Lerninhalt) und – aufgeklappt – für das Aussehen */
-    const karte = e => h("article", {class: "kr-ware " + (ZUSTAND[e.zustand] ?? "")},
-      h("b", {}, e.farbe ? h("span", {class: "kr-tupfer", style: {"--tupfer": e.farbe}}) : null, kurz(e.titel)), h("p", {}, e.text || ""),
-      h("div", {class: "kr-ware-fuss"},
-        e.preis != null && e.zustand !== "gekauft" && e.zustand !== "aktiv" ? h("span", {class: "kr-preis"}, eur(e.preis) + " €") : h("span", {}),
-        e.zustand === "kaufbar" ? h("button", {type: "button", class: "knopf klein primaer", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Kaufen") :
-        e.zustand === "veraltet" ? h("button", {type: "button", class: "knopf klein", onclick: () => training(e.skill)}, "Wiederholung jetzt") :
-        e.zustand === "gekauft" && e.art === "aussehen" ? h("button", {type: "button", class: "knopf klein", onclick: () => kaufen(e.id, () => shopAnsicht(c))}, "Auswählen") :
-        e.zustand === "aktiv" && e.art === "aussehen" ? h("span", {class: "kr-status"}, "✓ ausgewählt") :
-        e.zustand === "gekauft" ? h("span", {class: "kr-status"}, "✓ gekauft") :
-        e.zustand === "aktiv" ? h("span", {class: "kr-status"}, "✓ läuft") :
-        /* Ausgrauung statt Statuszeile: der Grund steht im Tooltip und gesammelt unter der Gruppe */
-        h("button", {type: "button", class: "knopf klein", disabled: true, title: e.grund || "gesperrt"}, "Kaufen")));
-    /* EIN Sammelhinweis je Gruppe statt einer Statuszeile je Artikel */
-    const sammel = es => {
-      const b = es.filter(e => e.zustand === "zu-teuer" || e.zustand === "gesperrt" || e.zustand === "kein-slot");
-      return b.length ? h("p", {class: "sp-leise kr-fuss"}, "Noch nicht kaufbar: " + b.map(e => `${kurz(e.titel)} – ${String(e.grund || "gesperrt").replace(/\.$/, "")}`).join(" · ")) : null;
-    };
-    /* Zeile: klickbar nur, wenn es etwas zu tun gibt – sonst ausgegraut (disabled) mit dem Grund im Tooltip.
-       Für die Ausgrauung gehört eine Zeile in karriere.css: .kr-wiki-punkt[disabled]{opacity:.6; cursor:default}
-       (src/stil gehört dem Ethos-Auftrag, darum hier nur die Klasse, keine eigene Regel). */
-    const zeile = (e, text, info) => {
-      const tun = e.zustand === "kaufbar" ? () => kaufen(e.id, () => shopAnsicht(c)) : e.zustand === "veraltet" ? () => training(e.skill) : null;
-      return h("button", {type: "button", class: "kr-wiki-punkt", disabled: !tun, title: e.grund || "", onclick: tun || undefined},
-        h("span", {}, text), h("small", {}, info));
-    };
-    const spielZeile = e => zeile(e, kurz(e.titel),
-      e.zustand === "kaufbar" ? `${eur(e.preis)} €` : e.zustand === "aktiv" ? "✓ läuft" : e.zustand === "veraltet" ? "veraltet – jetzt wiederholen"
-        : e.zustand === "zu-teuer" ? `Dir fehlen ${eur(e.preis - st.euro)} €` : e.zustand === "kein-slot" ? "kein Slot frei" : "gesperrt");
-    const klappe = (schluessel, titel, info) => h("button", {type: "button", class: "kr-wiki-punkt", "aria-expanded": String(!!auf[schluessel]),
-      onclick: () => { auf[schluessel] = !auf[schluessel]; shopAnsicht(c); }}, h("span", {}, titel), h("small", {}, `${info} ${auf[schluessel] ? "▾" : "▸"}`));
-    c.replaceChildren(h("div", {class: "kr-seite"},
-      h("header", {class: "kr-kopf"}, h("h2", {}, "Shop"),
-        h("p", {class: "sp-leise"}, `Du hast ${eur(Spiel.st.euro)} €. Simulation, Inspektor, Hilfe und Wiki sind immer frei.`)),
-      h("section", {class: "kr-gruppe"}, h("h3", {}, "Werkzeuge"),
-        h("div", {class: "kr-raster klein"}, werkzeuge.map(karte)), sammel(werkzeuge)),
-      h("section", {class: "kr-gruppe"}, h("h3", {}, "Automatisierung"),
-        klappe("playbooks", "Playbooks und Slots", `${kaufbar} kaufbar · ${st.playbooks.aktiv.length}/${st.playbooks.slots} belegt`),
-        auf.playbooks ? h("div", {}, slot ? zeile(slot, "Playbook-Slot", slot.zustand === "kaufbar" ? `${eur(slot.preis)} €` : slot.zustand === "gekauft" ? "✓ alle Slots gekauft" : `Dir fehlen ${eur(slot.preis - st.euro)} €`) : null,
-          offen.map(spielZeile)) : null,
-        gesperrt ? h("p", {class: "sp-leise kr-fuss"}, UI.symbol("schloss", 13), ` ${gesperrt} weitere ${gesperrt === 1 ? "Fertigkeit wird" : "Fertigkeiten werden"} ab „sicher“ kaufbar – üben kannst du sie in der Kompetenzkarte.`) : null,
-        h("p", {class: "sp-leise kr-fuss"}, "Playbooks lösen Wartungs-Tickets ihrer Fertigkeit automatisch (60 % Ertrag, ohne Lernwirkung). Ist die Fertigkeit fällig, pausiert das Playbook, bis du die Wiederholung gemacht hast.")),
-      klappe("aussehen", "Aussehen", `${aussehen.length} Artikel`),
-      auf.aussehen ? h("div", {class: "kr-raster klein"}, aussehen.map(karte)) : null,
-      h("p", {class: "sp-leise kr-fuss"}, "Wartungsverträge schließt du in der Kundenakte ab. Die Prüfungsanmeldung steht im Lernstand – AP1 ",
-        eur(Spiel.PRUEFUNG.GEBUEHR.AP1), " €, AP2 ", eur(Spiel.PRUEFUNG.GEBUEHR.AP2), " €, die erste Prüfung ist gebührenfrei.")));
-  }
-  function training(skill){
-    const r = Spiel.karriere.training(skill);
-    if (r.art === "mini") { UI.toast("Ein Mini-Ticket wartet in der Leiste – oder direkt hier.", "info", {aktion: {text: "Jetzt lösen", fn: () => miniDialog()}}); }
-    else if (r.art === "ticket") { UI.spiel.oeffnen(r.inst.iid); }
-    else UI.toast(r.grund, "info");
-  }
-
-  /* ---------- Kompetenzkarte (E2, Hebel 11a; Präfix kk-) ----------
-     27 Fertigkeiten in sechs Regionen; Nebel über allem, was weder freigeschaltet noch neben Geübtem liegt.
-     Klick: Üben (Mini-Übung oder Auftrag) oder Nachschlagen. */
-  const KK_KLASSE = {nebel: "kk-nebel", offen: "kk-offen", angefangen: "kk-angefangen", gesehen: "kk-gesehen", "geübt": "kk-geuebt", sicher: "kk-sicher", gemeistert: "kk-gemeistert", "gemeistert ★": "kk-gemeistert kk-stern"};
-  function kompetenzkarte(){
-    const k = Spiel.kompetenz.karte(), st = Spiel.st;
-    const faellig = id => typeof L !== "undefined" && L.istFaellig(id);
-    return h("section", {class: "kk-karte"},
-      h("div", {class: "kk-kopf"}, h("h3", {}, "Kompetenzkarte"),
-        h("small", {class: "sp-leise"}, `${k.sichtbar} von ${k.gesamt} Feldern sichtbar – der Nebel lichtet sich durch Üben und neue Stufen.`)),
-      h("div", {class: "kk-regionen"}, k.regionen.map(r => h("div", {class: "kk-region"},
-        h("h4", {}, `${r.sym} ${r.titel}`),
-        h("div", {class: "kk-felder"}, r.felder.map(f => h("button", {type: "button", class: "kk-feld " + (KK_KLASSE[f.zustand] || "kk-offen") + (faellig(f.id) ? " kk-faellig" : ""), "data-skill": f.id,
-            title: f.zustand === "nebel" ? "Noch im Nebel – übe ein Nachbarfeld oder steig eine Stufe auf." : `${f.name}: ${f.zustand === "offen" ? "noch nicht geübt" : f.zustand}${faellig(f.id) ? " – fällig" : ""}`,
-            onclick: e => feldMenue(e, f, st)},
-            h("span", {class: "kk-name"}, f.zustand === "nebel" ? "?" : f.name),
-            f.zustand === "nebel" ? null : h("small", {class: "kk-stufe"}, faellig(f.id) ? "fällig" : f.zustand === "offen" ? "neu" : f.zustand))))))),
-      h("p", {class: "kk-legende sp-leise"}, "neu → angefangen → gesehen → geübt → sicher → gemeistert"));
-  }
-  function feldMenue(e, f, st){
-    if (f.zustand === "nebel") { UI.toast("Noch im Nebel – übe ein Nachbarfeld oder steig eine Stufe auf.", "info", {dauer: 2800}); return; }
-    const r = e.currentTarget.getBoundingClientRect(), frei = f.stufe <= st.stufe;
-    UI.menue(r.left, r.bottom + 4, [
-      {text: "Üben", sym: "labor", info: frei ? "Mini-Übung oder Auftrag" : `Aufträge ab Stufe ${f.stufe}`, fn: () => frei ? training(f.id) : UI.toast(`Aufträge dazu gibt es ab Stufe ${f.stufe} – nachschlagen geht schon.`, "info", {dauer: 3000})},
-      {text: "Nachschlagen", sym: "wiki", fn: () => UI.wiki.oeffnen(f.id)},
-    ], {titel: f.name});
-  }
-
-  /* ---------- Lernstand ---------- */
-  function lernstandAnsicht(c){
-    const info = Spiel.stufeInfo(), st = Spiel.st;
-    const fehler = typeof L !== "undefined" ? L.st.fehler.filter(f => String(f.spiel).startsWith("labor")).slice(0, 8) : [];
-    const beh = typeof L !== "undefined" ? L.behalten() : null;
-    const quote = k => beh && beh[k][1] ? `${Math.round(100 * beh[k][0] / beh[k][1])} %` : "–";
-    const p = Spiel.pruefung.aktiv();
-    Spiel.abzeichen.pruefen();
-    const abz = Spiel.abzeichen.liste(), abzHat = abz.filter(a => a.erhalten).length;
-    const abzeichen = h("section", {class: "kr-abzeichen"},
-      h("h3", {}, "Abzeichen ", h("small", {}, `${abzHat} von ${abz.length}`)),
-      h("p", {class: "sp-leise"}, "Jedes Abzeichen steht für eine Arbeitsweise, die im Beruf zählt. Fahr mit der Maus darüber, um zu sehen, welche."),
-      h("div", {class: "kr-abz-raster"}, abz.map(a => h("div", {class: "kr-abz" + (a.erhalten ? " hat" : ""), title: a.lehrt},
-        h("span", {class: "kr-abz-sym", "aria-hidden": "true"}, a.sym),
-        h("div", {class: "kr-abz-text"}, h("b", {}, a.titel), h("small", {}, a.text),
-          a.erhalten ? h("small", {class: "kr-abz-datum"}, "✓ erhalten am " + datumDe(heute(new Date(a.erhalten))))
-            : a.soll === 1 ? h("small", {class: "kr-abz-offen"}, "noch offen")   /* erreicht oder nicht – ein halber Balken wäre gelogen */
-            : h("span", {class: "kr-abz-stand"}, h("span", {class: "kr-bar"}, h("i", {style: {width: Math.round(100 * a.ist / a.soll) + "%"}})), h("small", {}, `${zahlDe(a.ist)} / ${zahlDe(a.soll)}`)))))));
-    c.replaceChildren(h("div", {class: "kr-seite"},
-      h("header", {class: "kr-kopf"}, h("h2", {}, "Lernstand"), h("p", {class: "sp-leise"}, (n => `Serie: ${n} ${n === 1 ? "Tag" : "Tage"}`)(typeof L !== "undefined" ? L.serie() : 0) + (n => ` · heute ${n} ${n === 1 ? "Übung" : "Übungen"}`)(typeof L !== "undefined" ? L.heuteZahl() : 0),
-        " ", h("button", {type: "button", class: "knopf klein geist", title: "Spieltagebuch: kurze Auswertung zum Einfügen in einen Chat", onclick: () => UI.hub.tagebuchKopieren()}, UI.symbol("auswertung", 16), " Auswertung kopieren"))),
-      h("section", {class: "kr-karriere"},
-        h("div", {}, h("small", {}, "Karriere"), h("h3", {}, `Stufe ${info.stufe} · ${info.name}`)),
-        info.naechste ? h("div", {class: "kr-balken"},
-          h("label", {}, `Ruf ${info.ruf.ist} / ${info.ruf.soll}`, h("span", {class: "kr-bar"}, h("i", {style: {width: Math.min(100, 100 * info.ruf.ist / Math.max(1, info.ruf.soll)) + "%"}}))),
-          h("label", {}, `Können Stufe ${info.stufe}: ${info.koennen.summe} / ${info.koennen.sollSumme}`, h("span", {class: "kr-bar koennen"}, h("i", {style: {width: Math.min(100, 100 * info.koennen.summe / Math.max(1, info.koennen.sollSumme)) + "%"}})))) : h("p", {}, "Höchste Stufe erreicht."),
-        info.fehlt.length ? h("ul", {class: "kr-fehlt"}, info.fehlt.map(f => h("li", {}, f))) : info.naechste ? h("p", {class: "sp-ok"}, "Bereit für den Aufstieg!") : null,
-        h("p", {class: "sp-leise"}, info.hinweis)),
-      kompetenzkarte(),
-      UI.hub ? UI.hub.dexAbschnitt() : null,
-      abzeichen,
-      h("section", {class: "kr-pruefung"}, h("h3", {}, "Zertifizierung (Prüfungstag)"),
-        h("p", {class: "sp-leise"}, `3 Aufgaben, ${Spiel.PRUEFUNG.MINUTEN} Minuten, keine Hilfe – Note nach IHK-Punkteschlüssel. Die erste Prüfung ist gebührenfrei.`),
-        p ? h("button", {type: "button", class: "knopf primaer", onclick: () => pruefungUebersicht()}, `Laufende Prüfung ${p.art} öffnen`) :
-          h("div", {class: "sp-knoepfe"}, ["AP1", "AP2"].map(art => h("button", {type: "button", class: "knopf", onclick: () => pruefungStarten(art)}, `Prüfung ${art} starten (${Spiel.PRUEFUNG.GEBUEHR[art]} €)`))),
-        (st.zertifikate || []).length ? h("div", {class: "kr-zert"}, st.zertifikate.map(z => h("span", {class: "kr-zertifikat"}, UI.symbol("urkunde", 14), ` ${z.art} · Note ${z.note} · ${datumDe(z.tag)}`))) : null,
-        (st.pruefungen || []).length ? h("p", {class: "sp-leise"}, "Bisher: " + st.pruefungen.slice(-5).map(x => `${x.art} ${x.punkte} P. (Note ${x.note})`).join(" · ")) : null),
-      h("section", {class: "kr-zwei"},
-        h("div", {}, h("h3", {}, "Fehlerheft"), fehler.length ? h("ul", {class: "kr-fehlerheft"}, fehler.map(f => h("li", {}, h("b", {}, Spiel.karriere.skillName(f.unit) + ": "), f.text))) : h("p", {class: "sp-leise"}, "Noch leer.")),
-        h("div", {}, h("h3", {}, "Behalten"), h("p", {class: "sp-leise"}, "Trefferquote bei fälligen Wiederholungen – die ehrliche Messung, ob es hängen bleibt."),
-          h("dl", {class: "kr-behalten"}, h("dt", {}, "nach 1–2 Tagen"), h("dd", {}, quote("1")), h("dt", {}, "nach 3–6 Tagen"), h("dd", {}, quote("3")), h("dt", {}, "nach 7+ Tagen"), h("dd", {}, quote("7")))))));
-  }
-
-  /* ---------- Prüfungstag ---------- */
-  function pruefungStarten(art){
-    const r = Spiel.pruefung.starten(art);
-    if (!r.ok) { UI.toast(r.grund, "warn"); return; }
-    if (r.gebuehrErlassen) UI.toast("Die erste Prüfung ist gebührenfrei. Viel Erfolg!", "info");
-    pruefungUebersicht();
-  }
-  let pruefZu = null;
-  function pruefungUebersicht(){
-    const p = Spiel.pruefung.aktiv(); if (!p) return;
-    pruefZu?.();
-    const rest = Spiel.pruefung.restMs(p), mm = Math.floor(rest / 60000), ss = String(Math.floor(rest / 1000) % 60).padStart(2, "0");
-    const karte = h("div", {class: "sp-ergebnis"},
-      h("h2", {}, `Prüfung ${p.art}`), h("p", {class: "sp-leise"}, `Restzeit ${mm}:${ss} · Keine Hilfe, keine Live-Ziele. Löse die Aufgaben in beliebiger Reihenfolge.`),
-      h("ol", {class: "kr-aufgaben"}, p.aufgaben.map((iid, i) => { const inst = Spiel.instanz(iid); const def = inst && Spiel.defVon(inst);
-        const kd = Spiel.karriere.kunde(inst.kunde || def.kunde), ziele = (def.ziele || []).length;
-        return def ? h("li", {}, h("div", {}, h("b", {}, def.titel), h("p", {class: "sp-leise"}, `${kd ? kd.name : "Kunde"} · ${ziele} ${ziele === 1 ? "Ziel" : "Ziele"} · etwa ${def.minuten || 5} min`)),
-          h("button", {type: "button", class: "knopf klein", onclick: () => { pruefZu?.(); UI.spiel.oeffnen(iid); }}, `Aufgabe ${i + 1} öffnen`)) : null; })),
-      h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer", onclick: () => { pruefZu?.(); pruefungAbgeben(); }}, "Prüfung abgeben"),
-        h("button", {type: "button", class: "knopf geist", onclick: () => pruefZu?.()}, "Weiterarbeiten")));
-    pruefZu = overlay(karte);
-  }
-  function pruefungAbgeben(){
-    const e = Spiel.pruefung.abgeben(); if (!e) return;
-    const satz = Spiel.karriere.seniorSatz(e.bestanden ? "pruefungBestanden" : "pruefungNichtBestanden");
-    UI.sandbox?.laden?.();
-    const zu = overlay(h("div", {class: "sp-ergebnis"},
-      h("h2", {}, e.bestanden ? `Bestanden – Note ${e.note} (${Spiel.pruefung.NOTEN[e.note]})` : `Nicht bestanden – Note ${e.note}`),
-      h("div", {class: "kr-punkte"}, h("b", {}, e.punkte), h("span", {}, "von 100 Punkten")),
-      h("ul", {class: "sp-pruefliste"}, e.teile.map(t => h("li", {class: t.anteil >= 1 ? "ok" : "offen"}, h("span", {}, t.anteil >= 1 ? "✓" : "✗"),
-        h("div", {}, h("b", {}, t.titel), h("p", {}, `${Math.round(t.anteil * 100)} % · ${t.gruende.map(g => Spiel.grundTitel(g)).join(", ") || "alles erfüllt"}`))))),
-      h("blockquote", {class: "sp-dank"}, "„" + satz + "“", h("cite", {}, "— der Senior")),
-      e.schwach.length ? h("div", {}, h("h3", {}, "Schwachstellen – direkt trainieren"), h("div", {class: "sp-knoepfe"}, e.schwach.map(s => h("button", {type: "button", class: "knopf klein", onclick: () => { zu(); training(s); }}, Spiel.karriere.skillName(s))))) : null,
-      h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); UI.app.ansicht("lernstand"); }}, "Zum Lernstand")))) ;
   }
   function overlay(inhalt){
     const o = h("div", {class: "sp-overlay", role: "dialog", "aria-modal": "true"}, h("div", {class: "sp-karte"}, inhalt));
@@ -582,7 +401,14 @@ UI.karriere = (() => {
         wahl("Prüfungsstrenge je Ticket", "wahl", [["auto", "Automatisch (passt sich an)"], ["E", "Einstieg – erklärt alles"], ["AP1", "AP1 – Prüfungsform"], ["AP2", "AP2 – ohne Live-Ziele, Neustart-Test"]]),
         wahl("Heute im Unterricht", "unterricht", [["", "– kein Thema –"], ...(DATEN.skills || []).filter(s => s.stufe <= 5).map(s => [s.id, s.name])]),
         schalter("Vorhersage vor dem Ping", "vorhersage", "Erst raten, dann sehen (Einstieg/AP1)"),
-        schalter("Coach-Hinweise", "coach", "Tipps beim ersten Ticket"));
+        schalter("Coach-Hinweise", "coach", "Tipps beim ersten Ticket"),
+        /* Anfänger-Hilfe (Runde 4, Strang C): Standard an bei Karrierestufe ≤ 2, sonst aus;
+           gespeichert wird nur, was der Spieler ausdrücklich umstellt (store "einst".anfaengerHilfe).
+           Der Flugschreiber liest denselben Wert (UI.simpanel.anfaengerHilfe). */
+        h("label", {class: "kr-einst"},
+          h("span", {}, "Anfänger-Hilfe", h("small", {}, "Hinweise, Highlight des nötigen Werkzeugs und Schritt für Schritt im Flugschreiber")),
+          h("input", {type: "checkbox", checked: typeof UI.simpanel?.anfaengerHilfe === "function" ? UI.simpanel.anfaengerHilfe() : e.anfaengerHilfe !== false,
+            onchange: ev => { if (typeof UI.simpanel?.anfaengerHilfeSetzen === "function") UI.simpanel.anfaengerHilfeSetzen(!!ev.target.checked); else Spiel.einstSetzen("anfaengerHilfe", !!ev.target.checked); }})));
     });
     UI.app.einstellungAbschnitt("Desktop", el => {
       const zeile = (titel, f, an, fn) => { const k = Plattform.kann(f); return h("label", {class: "kr-einst" + (k.ja ? "" : " aus")}, h("span", {}, titel, k.ja ? null : h("small", {}, k.grund)),
@@ -675,9 +501,7 @@ UI.karriere = (() => {
   (UI.startHaken ||= []).push(() => {
     UI.app.registrieren("kunden", {titel: "Kunden", symbol: "kunden", zeigen: kundenAnsicht, wieder: kundenAnsicht});
     UI.app.registrieren("wiki", {titel: "Wiki", symbol: "wiki", zeigen: wikiAnsicht, wieder: wikiAnsicht});
-    UI.app.registrieren("lernstand", {titel: "Lernstand", symbol: "lernstand", zeigen: lernstandAnsicht, wieder: lernstandAnsicht,
-      zaehler: () => typeof L !== "undefined" ? L.faelligeIds(id => String(id).startsWith("lab.")).length : 0});
-    UI.app.registrieren("shop", {titel: "Shop", symbol: "euro", zeigen: shopAnsicht, wieder: shopAnsicht});
+    /* Lernstand meldet src/ui/lernstand.js an, Shop src/ui/shop.js (Runde 4, ein Schreiber je Datei). */
     abschnitte();
   });
   Bus.an("ui-bereit", () => {
@@ -695,7 +519,13 @@ UI.karriere = (() => {
   Bus.an("aufstieg", () => festPlanen(1200));
   Bus.an("mini", () => { if (!K.mini.ergebnis) leisteMini(); });
 
-  return {kundenAnsicht, shopAnsicht, lernstandAnsicht, wikiAnsicht, wikiOeffnen, miniZeichnen, miniDialog, pruefungUebersicht, pruefungAbgeben, leisteStatus, tagKarte, training};
+  /* Rückwärtskompatibel: die ausgelagerten Ansichten bleiben unter UI.karriere erreichbar
+     (Tests und lernstand-hilfe.js nutzen diese Namen). Die Helfer teilen sich die neuen Dateien. */
+  return {kundenAnsicht, wikiAnsicht, wikiOeffnen, miniZeichnen, miniDialog, leisteStatus, tagKarte,
+    _helfer: {overlay},
+    shopAnsicht: c => UI.shop.ansicht(c), kaufen: (id, danach) => UI.shop.kaufen(id, danach),
+    lernstandAnsicht: c => UI.lernstand.ansicht(c), training: s => UI.lernstand.training(s),
+    pruefungUebersicht: () => UI.lernstand.pruefungUebersicht(), pruefungAbgeben: () => UI.lernstand.pruefungAbgeben()};
 })();
 UI.wiki = {oeffnen: skill => UI.karriere.wikiOeffnen(skill)};
 UI.tag = {karte: () => UI.karriere.tagKarte()};

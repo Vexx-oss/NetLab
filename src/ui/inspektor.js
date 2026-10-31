@@ -1,6 +1,10 @@
 "use strict";
 /* ---------- Inspektor (Konzept § 7 „Inspektor“, Architektur § 9) ----------
-   UI.inspektor.zeigen(container, netz, geraetId, verlauf)   Gerät einstellen (Reiter je Gerätetyp)
+   UI.inspektor.zeigen(container, netz, geraetId, verlauf, optionen)
+                                                              Gerät einstellen (Reiter je Gerätetyp);
+                                                              optionen = {port} – gewählter Port wird gezeigt (Strang D)
+   UI.inspektor.kabel(container, netz, kabelId)                Kabel-Steckbrief (beide Enden, Linkzustand)
+   UI.inspektor.zone(container, netz, cidr)                    Zonen-Steckbrief (Mitglieder, Gateway, Anker)
    UI.inspektor.leeren(container)                             nichts ausgewählt
    UI.inspektor.reiter(container, name, {eingabe})            Reiter wechseln (z. B. "konsole" mit Befehlsvorschlag)
    Ausbau 1.2 (A3): Standardreiter „Übersicht“; Terminal/Konsole ist kein Reiter mehr, sondern ein Knopf im Kopf.
@@ -33,25 +37,48 @@ UI.inspektor = (() => {
   const terminalName = () => "Terminal";
 
   /* ---------- Öffentliche Aufrufe ---------- */
-  function zeigen(container, netz, id, verlauf){
+  function zeigen(container, netz, id, verlauf, optionen){
     if (!container) return;
     let K = ST.get(container);
-    const neu = !K || K.netz !== netz || K.id !== id;
+    const neu = !K || K.art !== "geraet" || K.netz !== netz || K.id !== id;
     if (!K) { K = {container, offen: new Set(), filterAlle: false}; ST.set(container, K); }
+    K.art = "geraet";
     K.netz = netz; K.id = id; K.verlauf = verlauf || UI.labor?.verlauf || null;
     const g = netz?.geraete[id];
     if (neu) {
       K.letzte = null; K.offen = new Set(); K.eingabe = null;
       const liste = reiterListe(g).map(r => r[0]);
       K.reiter = liste.includes(LETZTER_REITER[g?.typ]) ? LETZTER_REITER[g.typ] : liste[0];   /* liste[0] = Übersicht */
+      K.wahlPort = null;
     }
+    K.wahlPort = (optionen && typeof optionen === "object" && optionen.port) ? optionen.port : null;
+    if (K.wahlPort && reiterListe(g).some(r => r[0] === "ports")) K.reiter = "ports";   /* Port-Klick zeigt direkt die Ports */
+    OFFEN.add(container);
+    zeichnen(K);
+  }
+  /* Kabel-Steckbrief: beide Enden, Portstatus und Linkzustand – aufgerufen vom Einzelklick (Strang D)
+     und vom zentralen Resolver UI.fehlerziel. */
+  function kabel(container, netz, kabelId){
+    if (!container) return;
+    let K = ST.get(container);
+    if (!K) { K = {container, offen: new Set(), filterAlle: false}; ST.set(container, K); }
+    K.art = "kabel"; K.netz = netz; K.id = null; K.kabelId = kabelId; K.verlauf = UI.labor?.verlauf || null;
+    OFFEN.add(container);
+    zeichnen(K);
+  }
+  /* Zonen-Steckbrief: CIDR, Mitglieder, Gateway/Anker – aufgerufen vom Einzelklick (Strang D). */
+  function zone(container, netz, cidr){
+    if (!container) return;
+    let K = ST.get(container);
+    if (!K) { K = {container, offen: new Set(), filterAlle: false}; ST.set(container, K); }
+    K.art = "zone"; K.netz = netz; K.id = null; K.cidr = cidr; K.verlauf = UI.labor?.verlauf || null;
     OFFEN.add(container);
     zeichnen(K);
   }
   function leeren(container){
     if (!container) return;
     ST.delete(container); OFFEN.delete(container);
-    container.classList.remove("in");
+    container.classList.remove("in", "in-geraet", "in-kabel", "in-zone");
     container.replaceChildren(h("div", {class: "lb-insp-leer"},
       h("div", {class: "lb-insp-leer-sym"}, UI.symbol("inspektor", 28)),
       h("strong", {}, "Nichts ausgewählt"),
@@ -70,6 +97,111 @@ UI.inspektor = (() => {
     zeichnen(K);
   }
 
+  /* ---------- Steckbrief (Strang D): Identität und Live-Teile im Kopf ----------
+     Alle Werte kommen aus Modell/UI.ebenen – nichts wird geschätzt. */
+  function steckbrief(K, g){
+    const n = K.netz, art = UI.geraeteArt ? UI.geraeteArt(g.typ, g.skin) : {titel: g.typ};
+    const ports = Modell.ports(g), belegt = ports.filter(p => Modell.kabelAn(n, g.id, p)).length;
+    const a = UI.ebenen && UI.ebenen.adresse ? UI.ebenen.adresse(n, g) : null;
+    const werte = [
+      ["Rolle", art.titel + (g.typ === "internet" ? " · Kulisse" : "")],
+      ["Zustand", g.an ? "an" : "aus"],
+      ["Ports", belegt + " von " + ports.length + " belegt"],
+    ];
+    if (g.typ === "switch") {
+      const vl = Object.keys(g.flash?.vlans || {}).filter(v => /^\d+$/.test(v) && +v !== 1);
+      werte.push(["VLANs", vl.length ? String(vl.length) : "nur VLAN 1"]);
+    } else if (g.typ === "router" || g.typ === "firewall") {
+      const addr = UI.ebenen && UI.ebenen.alleAdressen ? (UI.ebenen.alleAdressen(n, g) || []).length : 0;
+      werte.push(["Adressen", addr ? String(addr) : "keine"]);
+    } else if (Modell.HOST[g.typ]) {
+      werte.push(["Adresse", a && a.text ? a.text : "—"]);
+      werte.push(["Link", ports.some(p => Modell.kabelAn(n, g.id, p)) ? "verbunden" : "kein Kabel"]);
+    } else {
+      werte.push(["Adresse", a && a.text ? a.text : "—"]);
+    }
+    const marke = (UI.bento && typeof UI.bento.monogramm === "function") ? UI.bento.monogramm(g.name, {klein: true}) : null;
+    return h("div", {class: "in-steckbrief"},
+      marke,
+      werte.map(([name, wert]) => h("div", {class: "in-wert"},
+        h("span", {class: "in-wert-name"}, name), h("span", {class: "in-wert-text"}, wert))));
+  }
+  /* Gewählter Port (Einzelklick auf einen Port): ruhige Zeile über dem Reiter-Inhalt. */
+  function wahlKarte(K, g){
+    if (!K.wahlPort) return null;
+    const p = K.wahlPort, st = Modell.portStatus(K.netz, g.id, p), ka = Modell.kabelAn(K.netz, g.id, p);
+    const gg = ka ? K.netz.geraete[ka.gegen.geraet] : null;
+    return h("div", {class: "in-wahl", role: "status", "aria-label": "Gewählter Port " + p},
+      h("div", {class: "in-wahl-kopf"},
+        h("span", {class: "in-wahl-marke mono"}, p),
+        statusChip(st),
+        knopf("Auswahl aufheben", () => waehle(K, null), "klein geist")),
+      h("p", {class: "in-wahl-weg"}, ka
+        ? "Kabel zu " + (gg ? gg.name : ka.gegen.geraet) + " " + ka.gegen.port
+        : "Kein Kabel angeschlossen."));
+  }
+  function waehle(K, port){ K.wahlPort = port || null; zeichnen(K); }
+
+  /* ---------- Kabel-Steckbrief (Strang D): beide Enden und der Linkzustand ---------- */
+  function kabelZeichnen(K, erhalten){
+    const c = K.container, k = (K.netz.kabel || []).find(x => x.id === K.kabelId);
+    if (!k) return leeren(c);
+    c.classList.add("in", "in-kabel");
+    c.classList.remove("in-geraet", "in-zone");
+    const l = Modell.linkOben(K.netz, k), g = id => K.netz.geraete[id];
+    const grund = l.grund && typeof Sim !== "undefined" && Sim.GRUENDE && Sim.GRUENDE[l.grund] ? Sim.GRUENDE[l.grund].titel : l.grund || null;
+    K.kopfEl = h("div", {class: "in-kopf in-kabel-kopf"},
+      h("div", {class: "in-kopf-zeile"},
+        h("div", {class: "in-kopf-text"},
+          h("span", {class: "bn-kicker"}, "INSPEKTOR · KABEL"),
+          h("h3", {}, "Kabel " + k.id),
+          h("span", {class: "in-kopf-rolle"}, "Schicht 1 · Verbindung")),
+        h("div", {class: "in-chips"}, h("span", {class: "in-chip " + (l.oben ? "ok" : "bad")}, l.oben ? "● Link oben" : "○ kein Link"))));
+    const inhalt = h("div", {class: "in-inhalt"});
+    c.replaceChildren(K.kopfEl, inhalt);
+    inhalt.append(abschnitt("Enden",
+      h("div", {class: "in-kabel-enden"}, [k.a, k.b].map(e => {
+        const ger = g(e.geraet) || {id: e.geraet, name: e.geraet};
+        const st = Modell.portStatus(K.netz, e.geraet, e.port);
+        return h("div", {class: "in-karte in-ende"},
+          h("div", {class: "in-zeile zwischen"}, h("b", {}, ger.name || e.geraet), statusChip(st)),
+          h("p", {class: "in-ende-port mono"}, e.port || "—"),
+          h("div", {class: "in-zeile"}, knopf("Gerät öffnen", () => { try { UI.labor?.auswaehlen?.(e.geraet, e.port || undefined); } catch (x) { /* Anzeige */ } }, "klein")));
+      }))));
+    inhalt.append(abschnitt("Linkzustand",
+      hinweis(l.oben ? "Beide Ports sind eingeschaltet und das Kabel steckt: Der Link steht."
+        : "Der Link steht nicht." + (grund ? " Grund: <b>" + esc(grund) + "</b>." : ""), l.oben ? "klein" : "klein bad")));
+    void erhalten;
+  }
+  /* ---------- Zonen-Steckbrief (Strang D): CIDR, Mitglieder, Gateway/Anker ---------- */
+  function zoneZeichnen(K, erhalten){
+    const c = K.container;
+    const liste = (UI.ebenen && typeof UI.ebenen.zonen === "function") ? (UI.ebenen.zonen(K.netz) || {zonen: []}).zonen : [];
+    const z = liste.find(x => x.cidr === K.cidr);
+    if (!z) return leeren(c);
+    c.classList.add("in", "in-zone");
+    c.classList.remove("in-geraet", "in-kabel");
+    const geraete = (z.ids || []).map(id => K.netz.geraete[id]).filter(Boolean);
+    K.kopfEl = h("div", {class: "in-kopf in-zone-kopf"},
+      h("div", {class: "in-kopf-zeile"},
+        h("div", {class: "in-kopf-text"},
+          h("span", {class: "bn-kicker"}, "INSPEKTOR · IP-NETZ"),
+          h("h3", {}, z.cidr),
+          h("span", {class: "in-kopf-rolle"}, "IP-Netz · " + geraete.length + " Geräte")),
+        h("div", {class: "in-chips"}, geraete.length <= 1 ? h("span", {class: "in-chip warn"}, "▲ kleines Netz") : h("span", {class: "in-chip ok"}, "● " + geraete.length + " Mitglieder"))));
+    const inhalt = h("div", {class: "in-inhalt"});
+    c.replaceChildren(K.kopfEl, inhalt);
+    inhalt.append(abschnitt("Mitglieder",
+      geraete.length ? h("table", {class: "in-tabelle"}, h("tbody", {}, geraete.map(ger => h("tr", {class: "klickbar", onclick: () => { try { UI.labor?.auswaehlen?.(ger.id); } catch (x) { /* Anzeige */ } }},
+        h("td", {}, ger.name || ger.id),
+        h("td", {class: "mono"}, UI.ebenen && UI.ebenen.adresse ? String((UI.ebenen.adresse(K.netz, ger) || {}).text || "—") : "—"),
+        h("td", {class: "in-gegen"}, "öffnen"))))) : hinweis("Keine Geräte mit gültiger Adresse in diesem Netz.")));
+    if (z.gw) inhalt.append(abschnitt("Gateway", hinweis("Anker über <b class=\"mono\">" + esc(String(z.gw)) + "</b> – von hier geht der Weg in andere Netze.", "klein")));
+    if (z.anker && z.anker.length) inhalt.append(abschnitt("Anker (Router/Firewall)", h("table", {class: "in-tabelle"}, h("tbody", {}, z.anker.map(a => h("tr", {},
+      h("td", {}, (K.netz.geraete[a.id] || {}).name || a.id), h("td", {class: "mono"}, a.ip || "—"), h("td", {}, a.port || "")))))));
+    void erhalten;
+  }
+
   /* ---------- Neu zeichnen nach Änderungen (Fokus und Scroll bleiben) ---------- */
   let geplant = null;
   Bus.an("netz-geaendert", d => {
@@ -80,6 +212,11 @@ UI.inspektor = (() => {
         const K = ST.get(c);
         if (!c.isConnected || !K) { OFFEN.delete(c); continue; }
         if (d && d.netz && d.netz !== K.netz) continue;
+        if (K.art === "kabel") {
+          if (!(K.netz.kabel || []).some(k => k.id === K.kabelId)) { leeren(c); continue; }
+          zeichnen(K, true); continue;
+        }
+        if (K.art === "zone") { zeichnen(K, true); continue; }
         if (!K.netz.geraete[K.id]) { leeren(c); continue; }
         if (K.reiter === "konsole") { kopfNeu(K); continue; }      /* Konsole aktualisiert sich selbst */
         zeichnen(K, true);
@@ -88,7 +225,10 @@ UI.inspektor = (() => {
   });
 
   function zeichnen(K, erhalten){
-    const c = K.container, g = K.netz.geraete[K.id];
+    const c = K.container;
+    if (K.art === "kabel") return kabelZeichnen(K, erhalten);
+    if (K.art === "zone") return zoneZeichnen(K, erhalten);
+    const g = K.netz.geraete[K.id];
     if (!g) return leeren(c);
     let fokus = null, auswahlStart = null, auswahlEnde = null, scroll = 0;
     const inhaltAlt = c.querySelector(".in-inhalt");
@@ -99,6 +239,8 @@ UI.inspektor = (() => {
     }
     if (K.reiter !== "konsole") LETZTER_REITER[g.typ] = K.reiter;
     c.classList.add("in");
+    c.classList.remove("in-kabel", "in-zone");
+    c.classList.add("in-geraet");
     K.kopfEl = h("div", {class: "in-kopf"});
     if (K.reiter === "konsole" && g.typ === "internet") K.reiter = "uebersicht";
     const reiterEl = h("div", {class: "in-reiter", role: "tablist"}, reiterListe(g).map(([name, titel]) =>
@@ -116,6 +258,8 @@ UI.inspektor = (() => {
       K.eingabe = null;
       return;
     }
+    const wahl = wahlKarte(K, g);
+    if (wahl) inhalt.append(wahl);
     const baue = {uebersicht, adresse, dienste, ports, vlan, schnitt, routing, acl, dienste_router: dienste, regeln, fwnat}[K.reiter === "dienste" && g.typ === "router" ? "dienste_router" : K.reiter] || uebersicht;
     try { baue(K, g, inhalt); }
     catch (e) { console.error("Inspektor", e); inhalt.append(h("p", {class: "in-fehler"}, "Dieser Bereich konnte nicht angezeigt werden: " + e.message)); }
@@ -146,8 +290,12 @@ UI.inspektor = (() => {
       UI.symbol("konsole", 15), terminalName(g));
     K.kopfEl.replaceChildren(...[
       h("div", {class: "in-kopf-zeile"}, bild,
-        h("div", {class: "in-kopf-text"}, h("h3", {}, g.name), h("span", {}, art.titel + (g.typ === "internet" ? " · Kulisse" : ""))),
+        h("div", {class: "in-kopf-text"},
+          h("span", {class: "bn-kicker"}, "INSPEKTOR · " + art.titel + (g.typ === "internet" ? " · Kulisse" : "")),
+          h("h3", {}, g.name),
+          h("span", {class: "in-kopf-rolle"}, g.an ? "eingeschaltet" : "ausgeschaltet")),
         h("div", {class: "in-chips"}, chips, term)),
+      steckbrief(K, g),
       ungespeichert ? h("div", {class: "in-speichern"},
         h("span", {}, h("b", {}, "Nicht gespeichert. "), "Die Änderungen stehen nur in der running-config (RAM). Nach einem Neustart wären sie weg."),
         h("button", {type: "button", class: "in-knopf klein warn", onclick: () => speichern(K)}, "Speichern")) : null].filter(Boolean));
@@ -322,7 +470,7 @@ UI.inspektor = (() => {
     const ports = Modell.ports(g), belegt = ports.filter(p => Modell.kabelAn(K.netz, g.id, p));
     const zeigen = g.typ === "switch" ? belegt : ports;
     el.append(abschnitt(`Anschlüsse (${belegt.length} von ${ports.length} belegt)`,
-      zeigen.length ? h("table", {class: "in-tabelle"}, h("tbody", {}, zeigen.map(p => h("tr", {class: "klickbar", onclick: () => UI.labor?.hervorheben?.([{geraet: g.id, port: p}], 1600)},
+      zeigen.length ? h("table", {class: "in-tabelle"}, h("tbody", {}, zeigen.map(p => h("tr", {class: "klickbar" + (K.wahlPort === p ? " gewaehlt" : ""), onclick: () => { UI.labor?.hervorheben?.([{geraet: g.id, port: p}], 1600); waehle(K, K.wahlPort === p ? null : p); }},
         h("td", {class: "mono"}, p), h("td", {}, statusChip(Modell.portStatus(K.netz, g.id, p))), h("td", {class: "in-gegen"}, gegenstelle(K, p) || "—"))))) :
         hinweis("Noch kein Kabel. Zieh auf der Fläche vom Gerät zu einem anderen, um es zu verbinden.")));
     if (IOS(g)) el.append(abschnitt("Konfiguration",
@@ -494,7 +642,8 @@ UI.inspektor = (() => {
     const cfg = g.running.ports[p], pf = `ports.${p}`, auf = K.offen.has(p);
     const st = Modell.portStatus(K.netz, g.id, p);
     const vlanFarbe = v => `var(--vlan-${((+v - 1) % 8 + 8) % 8 + 1})`;
-    const kopf = h("div", {class: "in-port-kopf" + (auf ? " auf" : "")},
+    const kopf = h("div", {class: "in-port-kopf" + (auf ? " auf" : "") + (K.wahlPort === p ? " gewaehlt" : "")},
+      K.wahlPort === p ? h("span", {class: "in-wahl-marke"}, "gewählt") : null,
       h("button", {type: "button", class: "in-port-name mono", "aria-expanded": String(auf), onclick: () => { auf ? K.offen.delete(p) : K.offen.add(p); zeichnen(K); }}, (auf ? "▾ " : "▸ ") + p),
       statusChip(st),
       wahl(K, {key: pf + ".modus", titel: "Modus", wert: cfg.modus, klein: true, optionen: [["access", "access"], ["trunk", "trunk"]],
@@ -507,6 +656,7 @@ UI.inspektor = (() => {
     if (auf) {
       const gegen = gegenstelle(K, p);
       teile.push(h("div", {class: "in-port-details"},
+        h("div", {class: "in-zeile"}, knopf(K.wahlPort === p ? "Port abwählen" : "Port im Inspektor zeigen", () => waehle(K, K.wahlPort === p ? null : p), "klein" + (K.wahlPort === p ? " primaer" : ""))),
         gegen ? hinweis(`Kabel zu <b>${esc(gegen)}</b>`, "klein") : hinweis("Kein Kabel angeschlossen.", "klein"),
         schalter(K, {key: pf + ".an", titel: "Port eingeschaltet (no shutdown)", an: !cfg.shutdown, klein: true, aendern: an => setzen(K, pf + ".shutdown", !an, `${p}: ${an ? "no shutdown" : "shutdown"}`)}),
         feld(K, {key: pf + ".beschreibung", titel: "Beschreibung", wert: cfg.beschreibung, mono: false, pfad: pf + ".beschreibung", breit: true}),
@@ -524,7 +674,7 @@ UI.inspektor = (() => {
         K.netz.zustand?.[g.id]?.errdisabled?.[p] ? h("div", {class: "in-zeile"}, hinweis("Der Port ist <b>err-disabled</b> (Verstoß gegen Port-Security).", "bad"),
           knopf("Port zurücksetzen", () => aendern(K, `${p}: err-disabled aufgehoben`, n => { delete n.zustand[g.id].errdisabled[p]; }, {text: `interface ${p}\n shutdown\n no shutdown`}), "klein")) : null));
     }
-    return h("div", {class: "in-port" + (auf ? " auf" : "")}, teile);
+    return h("div", {class: "in-port" + (auf ? " auf" : "") + (K.wahlPort === p ? " gewaehlt" : "")}, teile);
   }
 
   /* ---------- Switch: VLAN-Datenbank ---------- */
@@ -804,5 +954,5 @@ UI.inspektor = (() => {
           w => neu(Object.assign({}, nat, {weiterleitung: [...(nat.weiterleitung || []), {proto: "tcp", aussenPort: +w.aussenPort, ziel: w.ziel, zielPort: +w.zielPort}]})), "Anlegen")));
   }
 
-  return {zeigen, leeren, reiter, _intern: {adrLesen, adrText, regelText, vlanListe, pruefeWert}};
+  return {zeigen, leeren, reiter, kabel, zone, _intern: {adrLesen, adrText, regelText, vlanListe, pruefeWert}};
 })();

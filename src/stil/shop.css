@@ -1,0 +1,79 @@
+/* ---------- Shop (ui/shop.js): Werkstattregal — Warengruppen, Zustände, Vorschau ----------
+   Runde 4, Strang F (Gestaltungsvertrag § 3 F, Bento 2.5). Alle Werte aus basis.css/bento.css:
+   nur Tokens, Schrift nur var(--fs-*), Abstände nur {0,4,8,12,16,24,32} px, Radius nur Tokens.
+   Das Regal ist ein 12-Spalten-Bento: Werkzeuge (7) + Automatisierung (5),
+   Aussehen (6) + Wartungsverträge (6). Die Kacheln selbst kommen aus bento.css (.bn-k/.bn-chip). */
+
+/* --- Kopf: Mikrolabel, Titel, Kontextsatz; rechts das echte Konto als ruhige Kachel --- */
+.ansicht[data-ansicht="shop"] .kr-kopf{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 24px; align-items:start}
+.ansicht[data-ansicht="shop"] .wr-kopf-text{min-width:0; display:flex; flex-direction:column; gap:4px}
+.ansicht[data-ansicht="shop"] .kr-kopf .bn-lead{max-width:78ch}
+.ansicht[data-ansicht="shop"] .wr-konto{display:flex; flex-direction:column; gap:4px; min-width:0; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel)}
+.ansicht[data-ansicht="shop"] .wr-konto-wert{font:700 var(--fs-5)/1.1 var(--display); color:var(--geld); font-variant-numeric:tabular-nums}
+.ansicht[data-ansicht="shop"] .wr-konto-text{max-width:32ch; font:400 var(--fs-2)/1.4 var(--body); color:var(--faint)}
+@media (max-width:900px){ .ansicht[data-ansicht="shop"] .kr-kopf{grid-template-columns:minmax(0,1fr)} }
+
+/* --- Warengruppen: Kopf mit Titel, echtem Zähler und einem Satz --- */
+.ansicht[data-ansicht="shop"] .wr-bereich{min-width:0}
+.ansicht[data-ansicht="shop"] .wr-gruppe-kopf{display:flex; flex-direction:column; gap:4px; margin-bottom:12px}
+.ansicht[data-ansicht="shop"] .wr-gruppe-titelzeile{display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0}
+.ansicht[data-ansicht="shop"] .kr-gruppe h3{margin:0; font:700 var(--fs-5)/1.2 var(--display); letter-spacing:-.01em; text-transform:none; color:var(--ink)}
+.ansicht[data-ansicht="shop"] .wr-gruppe-zahl, .ansicht[data-ansicht="shop"] .wr-chip{text-transform:none; letter-spacing:.02em}
+.ansicht[data-ansicht="shop"] .wr-gruppe-text{max-width:66ch}
+
+/* --- Regal: eine Spalte; die zwei Werkzeuge stehen nebeneinander --- */
+.ansicht[data-ansicht="shop"] .wr-regal{display:grid; grid-template-columns:minmax(0,1fr); gap:12px; align-content:start}
+.ansicht[data-ansicht="shop"] .wr-regal-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:1100px){ .ansicht[data-ansicht="shop"] .wr-bereich{grid-column:span 12} }
+@media (max-width:720px){ .ansicht[data-ansicht="shop"] .wr-regal-2{grid-template-columns:minmax(0,1fr)} }
+
+/* --- Artikelkachel: Zustands-Chip, Name, ein Satz Nutzen, Preis, genau eine Aktion --- */
+.ansicht[data-ansicht="shop"] .wr-artikel, .ansicht[data-ansicht="shop"] .wr-verweis{gap:8px}
+.ansicht[data-ansicht="shop"] .kr-ware{min-width:0}
+.ansicht[data-ansicht="shop"] .wr-artikel:hover{border-color:var(--line-2)}
+.ansicht[data-ansicht="shop"] .wr-artikel:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.ansicht[data-ansicht="shop"] .wr-artikel-kopf, .ansicht[data-ansicht="shop"] .wr-look-kopf{display:flex; align-items:center; gap:4px; flex-wrap:wrap; min-width:0}
+.ansicht[data-ansicht="shop"] .wr-artikel-name{margin:0; font:700 var(--fs-4)/1.25 var(--display); color:var(--ink); overflow-wrap:anywhere}
+.ansicht[data-ansicht="shop"] .wr-artikel-text{max-width:60ch; font:400 var(--fs-3)/1.5 var(--body); color:var(--muted)}
+.ansicht[data-ansicht="shop"] .wr-grund{font:400 var(--fs-2)/1.45 var(--body); color:var(--faint)}
+.ansicht[data-ansicht="shop"] .wr-ruhe{margin-left:auto; text-align:right; font:400 var(--fs-2)/1.4 var(--body); color:var(--faint)}
+.ansicht[data-ansicht="shop"] .wr-artikel-fuss{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:8px}
+.ansicht[data-ansicht="shop"] .wr-preis{font:700 var(--fs-5)/1 var(--display); color:var(--geld); white-space:nowrap; font-variant-numeric:tabular-nums}
+.ansicht[data-ansicht="shop"] .wr-artikel-fuss .knopf, .ansicht[data-ansicht="shop"] .wr-verweis .knopf{min-height:44px; border-radius:var(--radius-s)}
+.ansicht[data-ansicht="shop"] .wr-artikel-fuss .knopf[disabled]{opacity:.6; cursor:default}
+.ansicht[data-ansicht="shop"] .wr-aktion{flex:0 0 auto}
+.ansicht[data-ansicht="shop"] .wr-empfehlung{margin-left:auto; gap:4px}
+
+/* --- Aussehen: Vorschau als Token-Probe — Akzentfarbe als Linie/Punkt, Leistenstil als Mini-Skizze --- */
+.ansicht[data-ansicht="shop"] .wr-looks{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px}
+.ansicht[data-ansicht="shop"] .wr-look{gap:8px; padding:12px}
+.ansicht[data-ansicht="shop"] .wr-look .wr-artikel-name{font:700 var(--fs-3)/1.3 var(--display)}
+.ansicht[data-ansicht="shop"] .wr-look .wr-artikel-text{font-size:var(--fs-2)}
+.ansicht[data-ansicht="shop"] .wr-look .wr-artikel-fuss{flex-direction:column; align-items:stretch; gap:8px}
+.ansicht[data-ansicht="shop"] .wr-look .wr-aktion{width:100%}
+.ansicht[data-ansicht="shop"] .wr-probe{display:flex; flex-direction:column; justify-content:center; gap:4px; min-height:40px; padding:8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.ansicht[data-ansicht="shop"] .wr-probe-tupfer{display:block; height:8px; border-radius:999px; background:var(--wr-farbe, var(--accent))}
+.ansicht[data-ansicht="shop"] .wr-probe-rail{display:block; width:60%; height:4px; border-radius:999px; background:color-mix(in srgb, var(--wr-farbe, var(--accent)) 45%, var(--panel-3))}
+.ansicht[data-ansicht="shop"] .wr-probe-punkt{display:block; width:8px; height:8px; border-radius:50%; background:var(--wr-farbe, var(--accent))}
+.ansicht[data-ansicht="shop"] .wr-probe-leiste{display:flex; align-items:center; gap:4px; height:16px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel)}
+.ansicht[data-ansicht="shop"] .wr-probe-leiste i{display:block; width:8px; height:8px; border-radius:50%; background:var(--line-2)}
+.ansicht[data-ansicht="shop"] .wr-probe[data-stil="glas"] .wr-probe-leiste{background:color-mix(in srgb, var(--panel) 72%, transparent); border-color:var(--line)}
+.ansicht[data-ansicht="shop"] .wr-probe[data-stil="schiene"] .wr-probe-leiste{border-color:var(--accent); background:var(--panel-2)}
+.ansicht[data-ansicht="shop"] .wr-probe[data-stil="schiene"] .wr-probe-leiste i{background:var(--accent)}
+.ansicht[data-ansicht="shop"] .wr-probe[data-stil="raster"] .wr-probe-leiste{background-image:radial-gradient(circle at 1px 1px, var(--line-2) 1px, transparent 0); background-size:8px 8px}
+
+/* --- Wartungsverträge (Verweis) und die zwei Hinweiszeilen --- */
+.ansicht[data-ansicht="shop"] .wr-zahlen{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; margin:0}
+.ansicht[data-ansicht="shop"] .wr-mehr{display:flex; align-items:flex-start; gap:4px; flex-wrap:wrap; font:400 var(--fs-2)/1.5 var(--body); color:var(--muted)}
+.ansicht[data-ansicht="shop"] .wr-hinweis{max-width:70ch; font:400 var(--fs-2)/1.5 var(--body); color:var(--faint)}
+.ansicht[data-ansicht="shop"] .wr-zahlen dt, .wr-kauf-werte dt{font:400 var(--fs-2)/1.4 var(--body); color:var(--muted)}
+.ansicht[data-ansicht="shop"] .wr-zahlen dd, .wr-kauf-werte dd{margin:0; font:700 var(--fs-3)/1.3 var(--mono); color:var(--ink); font-variant-numeric:tabular-nums; text-align:right}
+
+/* --- Kaufbestätigung: Hausdialog aus app.js (Esc/Fokus), nur der Inhalt ist eigene Gestaltung --- */
+.dialog.wr-dialog{width:min(460px,100%)}
+.wr-kauf{display:flex; flex-direction:column; gap:12px}
+.wr-kauf-name{margin:0; font:700 var(--fs-5)/1.25 var(--display); color:var(--ink)}
+.wr-kauf-werte{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 16px; margin:0; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2)}
+.wr-kauf-knoepfe{display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap}
+.wr-kauf-knoepfe .knopf{min-height:44px}
+.wr-kauf-knoepfe .knopf.geist{border-color:var(--line-2); background:var(--panel-2); color:var(--ink)}

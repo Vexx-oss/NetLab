@@ -1,11 +1,11 @@
-/* ---------- Karriere-Oberfläche (ui/karriere.js): Kunden, Shop, Lernstand, Wiki, Mini-Tickets ---------- */
+/* ---------- Karriere-Oberfläche (ui/karriere.js): Kunden + Kundenakte, Wiki, Mini-Tickets ------
+   Seit Runde 4 getrennt: Shop → shop.css (ui/shop.js), Lernstand → lernstand.css (ui/lernstand.js).------ */
 .kr-seite{height:100%; overflow:auto; padding:16px 24px 24px; display:flex; flex-direction:column; gap:16px; background:var(--bg); scrollbar-width:thin}
 .kr-kopf h2, .kr-wiki-liste h2{font:800 var(--fs-6)/1 var(--display)}
 .kr-kopf p{margin-top:6px}
 /* Kundenportfolio (Bento 2.5, Vertrag § 3.2): Profilkacheln mit Monogramm statt Regenbogenkarten.
    Die Kundenfarbe (--k) wirkt nur als Monogramm-Tint und 2-px-Rail, nie als Vollfläche. */
 .kr-raster{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
-.kr-raster.klein{grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:10px}
 @media (max-width:1100px){ .kr-raster{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:720px){ .kr-raster{grid-template-columns:minmax(0,1fr)} }
 .kr-kunde{position:relative; display:flex; flex-direction:column; gap:12px; min-width:0; padding:16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line)}
@@ -43,13 +43,6 @@
 /* Feste Chip-Zone (zwei Zeilen) in den Profilkacheln: Vertrauen, Zuletzt und Fuß stehen dadurch bündig */
 @media (min-width:721px){ .kr-kunde:not(.kr-kunde-weit) .bn-chips{min-height:52px; align-content:flex-start} }
 .kr-gruppe h3{font:700 var(--fs-2)/1 var(--body); letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin:0 0 10px}
-.kr-ware{display:flex; flex-direction:column; gap:4px; padding:12px 12px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line)}
-.kr-ware b, .kr-ware p{margin:0; color:var(--muted); font-size:var(--fs-2); line-height:1.45}
-.kr-ware.gekauft{border-color:var(--ok)}
-.kr-ware.gesperrt, .kr-ware.teuer{opacity:.7}
-.kr-ware-fuss{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
-.kr-preis{font:800 var(--fs-4)/1 var(--display); color:var(--geld); white-space:nowrap; flex:0 0 auto}
-.kr-status{color:var(--muted); font-size:var(--fs-2); text-align:right}
 .kr-fuss{max-width:70ch}
 .kr-karriere, .kr-abzeichen, .kr-pruefung, .kr-stufe, .kr-zwei > div{padding:16px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px}
 .kr-karriere small{color:var(--faint); font:700 var(--fs-1)/1 var(--body); letter-spacing:.09em; text-transform:uppercase}
@@ -66,7 +59,7 @@
 .kr-skill{display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; column-gap:8px; align-items:center; text-align:left; padding:8px 8px; border-radius:var(--radius); border:1px solid transparent; background:var(--panel-2); color:var(--ink)}
 .kr-skill .sp-ring{grid-row:1 / 3}
 .kr-skill-name{font-size:var(--fs-2); font-weight:600; line-height:1.25}
-.kr-skill small, .kr-ware.veraltet, .kr-skill.faellig{border-color:var(--warn)}
+.kr-skill small, .kr-skill.faellig{border-color:var(--warn)}
 .kr-skill.faellig small{color:var(--warn); font-weight:700}
 .kr-balken, .kr-zwei{display:grid; grid-template-columns:1fr 1fr; gap:14px}
 .kr-fehlerheft{margin:0; padding-left:16px; font-size:var(--fs-2); display:flex; flex-direction:column; gap:4px; color:var(--muted)}
@@ -137,78 +130,11 @@
 .mk-dialog{min-height:120px}
 .sp-auftrag.pruefung{border-left-color:var(--geld); background:linear-gradient(90deg, color-mix(in srgb, var(--geld) 10%, var(--panel)), var(--panel) 60%)}
 
-/* Abzeichen im Lernstand */
-.kr-abzeichen h3 small{font:600 var(--fs-2)/1 var(--body); color:var(--muted); margin-left:6px}
-.kr-abz-raster{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:10px}
-.kr-abz{display:flex; gap:12px; align-items:flex-start; padding:8px 12px; border-radius:var(--radius); border:1px dashed var(--line-2); background:var(--panel-2)}
-.kr-abz .kr-abz-sym{font-size:var(--fs-6); line-height:1; filter:grayscale(1); opacity:.45}
-.kr-abz.hat{border-style:solid; border-color:color-mix(in srgb, var(--geld) 50%, var(--line)); background:color-mix(in srgb, var(--geld) 7%, var(--panel))}
-.kr-abz.hat .kr-abz-sym{filter:none; opacity:1}
-.kr-abz-text{display:flex; flex-direction:column; gap:4px; min-width:0; flex:1}
-.kr-abz-text small{color:var(--muted); font-size:var(--fs-2); line-height:1.35}
-.kr-abz-text .kr-abz-datum{color:var(--ok); font-weight:700}
-.kr-abz-offen{font-style:italic}
-.kr-abz-stand{display:flex; align-items:center; gap:8px; margin-top:2px}
-.kr-abz-stand .kr-bar{flex:1; height:6px}
-.kr-abz-stand .kr-bar i{background:var(--accent)}
-
 /* ============================================================
    Audit-Nachzug (Umsetzung 30.10.2026, design-lagebild):
    Shop als offenes Regal, Lernstand als gewichtete Karte,
    Einstellungen ruhiger (Trefferflächen bleiben 44 px).
    ============================================================ */
-.ansicht[data-ansicht="shop"] .kr-seite{padding:16px 24px;gap:12px;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-content:start}
-.ansicht[data-ansicht="shop"] .kr-kopf{grid-column:1/-1}
-.ansicht[data-ansicht="shop"] .kr-kopf h2{font:700 var(--fs-6)/1.05 var(--display)}
-.ansicht[data-ansicht="shop"] .kr-kopf .sp-leise{font:400 var(--fs-3)/1.5 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);max-width:72ch}
-.ansicht[data-ansicht="shop"] .kr-gruppe h3{font:600 var(--fs-4)/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--ink);margin:0 0 8px}
-.ansicht[data-ansicht="shop"] .kr-raster.klein{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.ansicht[data-ansicht="shop"] .kr-ware{padding:12px 0;border:0;border-top:1px solid var(--line);border-radius:0;background:none;gap:8px}
-.ansicht[data-ansicht="shop"] .kr-ware b{font:600 var(--fs-3)/1.3 var(--body);color:var(--ink)}
-.ansicht[data-ansicht="shop"] .kr-ware p{font:400 var(--fs-2)/1.5 var(--body);color:var(--muted);max-width:60ch}
-.ansicht[data-ansicht="shop"] .kr-ware-fuss{gap:12px;align-items:center}
-.ansicht[data-ansicht="shop"] .kr-preis{font:700 var(--fs-5)/1 var(--display);color:var(--geld)}
-.ansicht[data-ansicht="shop"] .kr-ware-fuss .knopf{min-height:44px;border-radius:var(--radius-xs)}
-.ansicht[data-ansicht="shop"] .kr-seite > .kr-gruppe:nth-of-type(1){grid-column:1;grid-row:2}
-.ansicht[data-ansicht="shop"] .kr-seite > .kr-gruppe:nth-of-type(2){grid-column:2;grid-row:2/span 2}
-.ansicht[data-ansicht="shop"] .kr-seite > .kr-wiki-punkt{grid-column:1;grid-row:3;min-height:44px}
-.ansicht[data-ansicht="shop"] .kr-seite > .kr-fuss{grid-column:1/-1;grid-row:4}
-.ansicht[data-ansicht="shop"] .sp-leise,
-.ansicht[data-ansicht="shop"] .kr-fuss{font:400 var(--fs-2)/1.5 var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
-
-.ansicht[data-ansicht="lernstand"] .kr-seite{padding:16px 24px;gap:12px}
-.ansicht[data-ansicht="lernstand"] .kr-karriere,
-.ansicht[data-ansicht="lernstand"] .kr-abzeichen,
-.ansicht[data-ansicht="lernstand"] .kr-pruefung,
-.ansicht[data-ansicht="lernstand"] .kr-stufe{border:0;border-radius:0;background:none;padding:0}
-.ansicht[data-ansicht="lernstand"] .kr-karriere{border-bottom:1px solid var(--line);padding-bottom:12px}
-.ansicht[data-ansicht="lernstand"] :is(.kr-karriere h3,.kr-abzeichen h3){font:600 var(--fs-5)/1.2 var(--display);margin:0}
-.ansicht[data-ansicht="lernstand"] .kr-balken{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
-.ansicht[data-ansicht="lernstand"] .kr-balken label{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;font-size:var(--fs-2);color:var(--muted)}
-.ansicht[data-ansicht="lernstand"] .kr-bar{
-  height:20px;border-radius:var(--radius-xs);background:var(--panel-2);border:1px solid var(--line);
-  background-image:repeating-linear-gradient(90deg,transparent 0 calc(20% - 1px),var(--line-2) calc(20% - 1px) 20%)
-}
-.ansicht[data-ansicht="lernstand"] .kr-bar i{border-radius:0;background:var(--accent)}
-.ansicht[data-ansicht="lernstand"] .kr-fehlt,
-.ansicht[data-ansicht="lernstand"] .kr-fehlerheft{font-size:var(--fs-3);color:var(--muted)}
-.ansicht[data-ansicht="lernstand"] .sp-leise{font:400 var(--fs-2)/1.5 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);max-width:72ch}
-.ansicht[data-ansicht="lernstand"] .kk-karte{border:0;background:none;padding:0;gap:12px}
-.ansicht[data-ansicht="lernstand"] .kk-kopf h3{font:600 var(--fs-5)/1.2 var(--display)}
-.ansicht[data-ansicht="lernstand"] .kk-regionen{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
-.ansicht[data-ansicht="lernstand"] .kk-region{border:0;border-top:1px solid var(--line);border-radius:0;background:none;padding:12px 0}
-.ansicht[data-ansicht="lernstand"] .kk-region:first-child,
-.ansicht[data-ansicht="lernstand"] .kk-region:nth-child(6){grid-column:1/-1;min-width:0}
-.ansicht[data-ansicht="lernstand"] .kk-region h4{font:600 var(--fs-3)/1.3 var(--body);margin:0 0 8px}
-.ansicht[data-ansicht="lernstand"] .kk-region .kk-felder{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0 24px;align-items:start}
-.ansicht[data-ansicht="lernstand"] .kk-feld{border:0;border-radius:0;background:none;min-width:0;flex:0 0 auto;padding:4px 0}
-.ansicht[data-ansicht="lernstand"] .kk-feld:not(.kk-nebel){border-top:1px solid var(--line);padding-top:4px}
-.ansicht[data-ansicht="lernstand"] .kk-nebel{background:none;border:0;color:var(--faint);opacity:.6}
-.ansicht[data-ansicht="lernstand"] :is(.kk-name,.kk-region .kk-feld .kk-name){font:600 var(--fs-3)/1.3 var(--body);text-align:left}
-.ansicht[data-ansicht="lernstand"] .kk-stufe{font:500 var(--fs-2)/1.3 var(--body);color:var(--muted)}
-.ansicht[data-ansicht="lernstand"] .kk-feld.kk-sicher,
-.ansicht[data-ansicht="lernstand"] .kk-feld.kk-gemeistert{background:var(--panel-2);border-radius:var(--radius-xs)}
-
 .dialog-einst .einst-zeile{padding:8px 0;border-top:1px solid var(--line);gap:24px}
 .dialog-einst .einst-text strong{font:600 var(--fs-3)/1.3 var(--body)}
 .dialog-einst .einst-text span{font:400 var(--fs-2)/1.5 var(--body);color:var(--muted)}

@@ -1,12 +1,18 @@
 "use strict";
-/* ---------- Simulations-Panel (Konzept § 7 „Simulation“, § 4 Diagnosetiefe, § 5.4) ----------
+/* ---------- Simulations-Panel „Flugschreiber" (Runde 4, Strang C) ----------
    UI.simpanel.zeigen(container, trace)
      Spielt eine Trace (Architektur § 5.2) ab – es rechnet nichts nach, es zeigt nur, was die Simulation
-     aufgezeichnet hat. Oben die Zusammenfassung mit großem ✓/✗, darunter wahlweise
-       „Ergebnis“            nur Ergebnis und die Stelle, an der es hängt (wie Echtzeit in Packet Tracer)
-       „Schritt für Schritt“ Ereignisliste mit Filter, Play/Pause, Schritt, Tempo, PDU-Inspektor daneben.
-     Klick auf eine Zeile lässt das Gerät aufleuchten (UI.labor.hervorheben) und zeigt den Frame (UI.pdu).
-     Die Wiedergabe ruft UI.labor.animiere(ereignis) für „senden“-Ereignisse.
+     aufgezeichnet hat. Der Kopf nennt Kunde (aus dem offenen Auftrag), Ergebnis groß und „Was/Wo";
+     darunter der Warnbanner mit dem ERSTEN echten Fehler und „Zum Fundort" (zentraler Resolver
+     UI.fehlerziel.springen), die Transportleiste (Play/Pause, Schritt, Tempo – alle ≥ 44 px), der
+     Format-Umschalter Ergebnis / Schritt für Schritt und die Zeitachse mit Schichtbändern.
+     JEDE Fehler-/Warnmeldung ist anklickbar und springt über denselben Resolver ins Ziel
+     (Gerät, Port, Kabel, Ebene) – kein Fokusklau, „Bewegung aus" respektiert.
+   Anfänger-Hilfe (store „einst".anfaengerHilfe, Standard an bei Karrierestufe ≤ 2):
+     an  = Hinweise, Highlight des benötigten Interaktionselements und Schritt für Schritt aus
+           Spiel.naechsteDiagnose / Spiel.hilfe.anfaengerSchritte (nur vorhandene Daten, keine Lösung);
+     aus = ruhige Profi-Sicht. Der Umschalter sitzt im Panel-Kopf; die Einstellungen spiegeln ihn.
+   Die Anzeige ruft UI.labor.animiere(ereignis) für „senden"-Ereignisse und UI.pdu.zeigen für den Rahmen.
    Erklärtiefe je Niveau: DATEN.lehrtexte[code][niveau] (E erklärt, AP1 knapp, AP2 nur Gerätemeldung),
    sonst Sim.GRUENDE[code].titel, sonst der Code. */
 UI.simpanel = (() => {
@@ -20,7 +26,29 @@ UI.simpanel = (() => {
   const sim = () => typeof Sim !== "undefined" ? Sim : null;
   const labor = () => UI.labor || null;
   const geraetName = id => { const g = labor()?.netz?.geraete?.[id]; return g ? g.name : (id || "?"); };
-  const zeit = t => t == null ? "" : `${Number(t).toLocaleString("de-DE", {maximumFractionDigits: 1})} ms`;
+  const zeit = t => t == null ? "" : Number(t).toLocaleString("de-DE", {maximumFractionDigits: 1}) + " ms";
+
+  /* ---------- Anfänger-Hilfe (Strang C): gespeicherte Wahl, Standard nach Karrierestufe ---------- */
+  const einst = () => (store.get("einst", {}) || {});
+  function karriereStufe(){ try { return +(Spiel && Spiel.st && Spiel.st.stufe) || 1; } catch (e) { return 1; } }
+  function standardHilfe(){ try { return karriereStufe() <= 2; } catch (e) { return true; } }
+  function anfaengerHilfe(){ const e = einst(); return typeof e.anfaengerHilfe === "boolean" ? e.anfaengerHilfe : standardHilfe(); }
+  function anfaengerHilfeSetzen(an){ const e = einst(); e.anfaengerHilfe = !!an; store.set("einst", e); }
+  function instanz(){ try { return (typeof Spiel !== "undefined" && UI.spiel && UI.spiel.inst) || null; } catch (e) { return null; } }
+  function kundeName(){
+    try {
+      const I = instanz();
+      if (!I) return null;
+      const def = typeof Spiel.defVon === "function" ? Spiel.defVon(I) : null;
+      const kid = I.kunde || (def && def.kunde) || null;
+      if (!kid) return null;
+      const k = (typeof Spiel.kundenDaten === "function" ? Spiel.kundenDaten(kid) : null) || (typeof DATEN !== "undefined" && DATEN.kunden ? DATEN.kunden[kid] : null);
+      return k && k.name ? String(k.name) : null;
+    } catch (e) { return null; }
+  }
+  const sym = (name, px) => (typeof UI.symbol === "function" ? UI.symbol(name, px)
+    : sv("svg", {viewBox: "0 0 24 24", width: px, height: px, "aria-hidden": "true"},
+      sv("path", {d: "M4 12h16M12 4v16", fill: "none", stroke: "currentColor", "stroke-width": "1.6"})));
 
   const ART = {
     senden:       {text: "sendet",        d: "M2 8h10M8 4l4 4-4 4"},
@@ -44,6 +72,20 @@ UI.simpanel = (() => {
   };
   const icon = n => sv("svg", {viewBox: "0 0 16 16", width: 16, height: 16, "aria-hidden": "true"}, sv("path", {d: ICON[n]}));
 
+  /* ---------- Schichtbänder (Zeitachse, Strang C) ---------- */
+  const SCHICHT = {
+    2: {name: "Sicherung", kurz: "L2"}, 3: {name: "Vermittlung", kurz: "L3"},
+    4: {name: "Transport", kurz: "L4"}, 7: {name: "Anwendung", kurz: "L7"},
+  };
+  function schichtVon(e){
+    const f = (e && e.frame) || {};
+    if (f.app) return 7;
+    if (f.tcp || f.udp) return 4;
+    if (f.icmp || f.ip) return 3;
+    if (f.arp || f.eth) return 2;
+    return 2;
+  }
+
   /* --- Auswertung der Trace (nur lesen) --- */
   function erfolg(t){
     if (typeof t.ok === "boolean") return t.ok;
@@ -54,8 +96,6 @@ UI.simpanel = (() => {
     return !(t.ereignisse || []).some(e => e.art === "verwerfen" && e.grund);
   }
   const istMeldung = e => { const c = e.frame?.icmp; return !!c && (c.typ === "unreachable" || c.typ === "time-exceeded") && (e.art === "senden" || e.art === "antworten"); };
-  /* Verwerfen ohne Grund-Code ist normales Verhalten (Host ignoriert fremden Broadcast, Router verwirft das erste
-     Paket während ARP). Echte Probleme tragen einen Grund. Gibt es keine mit Grund, zählen alle Verwerfungen. */
   const mitGrund = ev => ev.some(e => e.art === "verwerfen" && e.grund);
   const istProblem = (z, e) => z.hatGrund ? ((e.art === "verwerfen" && !!e.grund) || istMeldung(e)) : e.art === "verwerfen";
   /* Meldet jemand den Verlust (ICMP-Fehler), oder wird still verworfen? */
@@ -81,6 +121,39 @@ UI.simpanel = (() => {
     for (let j = i - 1; j >= 0; j--) if (liste[j].frame && UI.pdu.paket(liste[j].frame) === k) return liste[j];
     return null;
   }
+  /* Erster echter Fehler der Trace – nie erfunden; ohne ihn gibt es keinen Warnbanner. */
+  function erstesProblem(z){
+    if (z.trace && z.trace.abbruch === "STORM") return {e: null, grund: "STORM"};
+    const ev = z.ereignisse;
+    for (let i = 0; i < ev.length; i++) if (ev[i].art === "verwerfen" && ev[i].grund) return {e: ev[i], i};
+    for (let i = 0; i < ev.length; i++) if (istMeldung(ev[i])) return {e: ev[i], i};
+    return null;
+  }
+  /* Eine Zeile „Was/Wo" – nur aus der Trace abgeleitet. */
+  function wasWo(z, ok){
+    const ev = z.ereignisse, teile = [];
+    const send = ev.find(e => e.art === "senden" && e.geraet);
+    if (send) teile.push("von " + geraetName(send.geraet));
+    const zielIp = send && send.frame && send.frame.ip ? send.frame.ip.dst : null;
+    if (zielIp) teile.push("nach " + zielIp);
+    const drop = !ok && z.hatGrund ? ev.find(e => e.art === "verwerfen" && e.grund) : null;
+    if (drop) teile.push("hängt bei " + geraetName(drop.geraet) + (drop.port ? " " + drop.port : ""));
+    else { const letzt = [...ev].reverse().find(e => e.geraet); if (letzt && send && letzt.geraet !== send.geraet) teile.push("bis " + geraetName(letzt.geraet)); }
+    return teile.join(" · ");
+  }
+
+  /* Zentraler Sprung zum Fundort. Der Resolver entscheidet; fehlt er, bleibt die ruhige Auswahl. */
+  function springe(e){
+    const ziel = (typeof UI.fehlerziel !== "undefined" && UI.fehlerziel && typeof UI.fehlerziel.zielAusEreignis === "function") ? UI.fehlerziel.zielAusEreignis(e) : null;
+    try {
+      if (ziel && typeof UI.fehlerziel.springen === "function") {
+        const r = UI.fehlerziel.springen(ziel);
+        if (r && r.ok) return true;
+      }
+      if (e && e.geraet) { labor()?.auswaehlen?.(e.geraet, e.port || undefined); labor()?.zentrieren?.(e.geraet); return true; }
+    } catch (x) { console.error("Fehlerziel", x); }
+    return false;
+  }
 
   /* --- Zustand je Container --- */
   function zeigen(container, trace){
@@ -105,7 +178,7 @@ UI.simpanel = (() => {
     z.filter = new Set(); z.nurProbleme = false; z.pos = -1; z.gewaehlt = null; z.spielt = false; z.veraltet = false;
     z.hatGrund = mitGrund(z.ereignisse);
     z.modus = modusMerk;
-    container.classList.add("si");   /* eigenes Präfix si- (sp- gehört dem Spiel: .sp-ergebnis, .sp-erklaerung …) */
+    container.classList.add("si");
     container.dataset.breite = container.clientWidth && container.clientWidth < 720 ? "schmal" : "breit";
     bauen(z);
   }
@@ -115,62 +188,152 @@ UI.simpanel = (() => {
     return z.ereignisse.filter(e => (!f.size || f.has(e.proto)) && (!z.nurProbleme || istProblem(z, e)));
   }
 
+  function hilfeKnopf(z){
+    const an = anfaengerHilfe();
+    return h("button", {type: "button", class: "si-hilfe-knopf" + (an ? " an" : ""), "aria-pressed": String(an),
+      title: an ? "Anfänger-Hilfe ausschalten – ruhige Profi-Sicht" : "Anfänger-Hilfe einschalten: Hinweise, Schritt für Schritt und ein Weg zum Fundort",
+      onclick: () => { anfaengerHilfeSetzen(!anfaengerHilfe()); anhalten(z); bauen(z); }},
+      sym("hilfe", 15), h("span", {}, an ? "Hilfe an" : "Hilfe aus"));
+  }
   function bauen(z){
     const c = z.container;
     c.replaceChildren();
     if (!z.trace) {
       c.append(h("div", {class: "si-leer"},
+        h("div", {class: "si-kopf-oben"}, h("span", {class: "si-kicker"}, "FLUGSCHREIBER"), hilfeKnopf(z)),
         h("strong", {}, "Noch keine Aufzeichnung."),
-        h("p", {}, "Starte einen Ping oder eine Prüfung. Hier siehst du dann jedes Paket: wer sendet, wer weiterleitet, wo etwas verworfen wird – und warum.")));
+        h("p", {}, "Starte einen Ping oder eine Prüfung. Hier siehst du dann jedes Paket: wer sendet, wer weiterleitet, wo etwas verworfen wird – und warum."),
+        anfaengerHilfe() ? h("p", {class: "si-leer-tipp"}, "Anfänger-Hilfe ist an: Sobald ein Auftrag offen ist, nennt sie den nächsten Schritt und das benötigte Werkzeug.") : null));
       return;
     }
     const ok = erfolg(z.trace), ev = z.ereignisse;
+    c.classList.toggle("si-hilfe-an", anfaengerHilfe());
     c.append(h("p", {class: "si-veraltet", hidden: !z.veraltet, role: "status"},
       h("span", {class: "si-sym", "aria-hidden": "true"}, "!"), "Das Netz wurde seitdem geändert – diese Aufzeichnung zeigt den Stand davor. Starte die Prüfung neu."));
-    c.append(kopf(z, ok));
+    const p = erstesProblem(z);
+    c.append(kopf(z, ok, !!p));
+    if (p) c.append(warnBanner(z, p));
+    if (anfaengerHilfe()) c.append(hilfeBox(z));
     if (z.modus === "ergebnis") { c.append(ergebnisAnsicht(z, ok)); return; }
     z.liste = sichtbar(z);
-    c.append(h("div", {class: "si-leiste"}, steuerung(z), filterLeiste(z)));   /* eine Zeile: Platz für die Liste */
+    c.append(h("div", {class: "si-leiste"}, steuerung(z), filterLeiste(z)));
     const liste = h("div", {class: "si-liste", role: "listbox", tabindex: "0", "aria-label": "Ereignisliste der Simulation"});
     z.listeEl = liste;
     const zeig = z.liste.slice(0, MAX_ZEILEN);
     zeig.forEach((e, i) => liste.append(zeile(z, e, i)));
-    if (z.liste.length > MAX_ZEILEN) liste.append(h("p", {class: "si-hinweis"}, `… ${zahlDe(z.liste.length - MAX_ZEILEN)} weitere Ereignisse nicht angezeigt (Filter eingrenzen).`));
+    if (z.liste.length > MAX_ZEILEN) liste.append(h("p", {class: "si-hinweis"}, "… " + zahlDe(z.liste.length - MAX_ZEILEN) + " weitere Ereignisse nicht angezeigt (Filter eingrenzen)."));
     if (!z.liste.length) liste.append(h("p", {class: "si-hinweis"}, ev.length ? "Kein Ereignis passt zum Filter." : "Die Aufzeichnung ist leer."));
     liste.addEventListener("keydown", e => listenTaste(z, e));
-    z.pduEl = h("div", {class: "si-pdu", "aria-label": "PDU-Inspektor"});
+    z.pduEl = h("div", {class: "si-pdu", tabindex: "0", "aria-label": "PDU-Inspektor"});
     c.append(h("div", {class: "si-haupt"}, liste, z.pduEl));
     UI.pdu.zeigen(z.pduEl, null, null);
     c.onkeydown = e => panelTaste(z, e);
     if (z.pos >= 0) markieren(z, z.pos, {leise: true});
   }
 
-  function kopf(z, ok){
+  /* Kopf: Mikrolabel mit Kunde, Ergebnis groß, Was/Wo und der Format-Umschalter. */
+  function kopf(z, ok, mitBanner){
     const t = z.trace, ev = z.ereignisse;
-    const zeile2 = [];
+    const kunde = kundeName();
     const meldung = ev.find(istMeldung), drops = ev.filter(e => e.art === "verwerfen");
-    if (t.abbruch === "STORM") zeile2.push(h("span", {class: "si-kennung bad"}, "Broadcast-Sturm: nach ", zahlDe(ev.length), " Ereignissen abgebrochen"));
-    else if (meldung) zeile2.push(h("span", {class: "si-kennung gemeldet"}, h("span", {"aria-hidden": "true"}, "↩ "),
-      `Gemeldet: ${ICMPTEXT[meldung.frame.icmp.typ]} von ${geraetName(meldung.geraet)}`));
-    else if (!ok && drops.length) zeile2.push(h("span", {class: "si-kennung still"}, h("span", {"aria-hidden": "true"}, "… "),
-      "Still verworfen: keine Fehlermeldung zurück – der Absender wartet vergeblich (Timeout)"));
+    const zeile2 = [];
+    /* Steht der Warnbanner darüber (erster echter Fehler), genügt er als Kennung – keine zweite, gekürzte Zeile. */
+    if (!mitBanner) {
+      if (t.abbruch === "STORM") zeile2.push(h("span", {class: "si-kennung bad"}, "Broadcast-Sturm: nach " + zahlDe(ev.length) + " Ereignissen abgebrochen"));
+      else if (meldung) zeile2.push(h("span", {class: "si-kennung gemeldet"}, h("span", {"aria-hidden": "true"}, "↩ "),
+        "Gemeldet: " + ICMPTEXT[meldung.frame.icmp.typ] + " von " + geraetName(meldung.geraet)));
+      else if (!ok && drops.length) zeile2.push(h("span", {class: "si-kennung still"}, h("span", {"aria-hidden": "true"}, "… "),
+        "Still verworfen: keine Fehlermeldung zurück – der Absender wartet vergeblich (Timeout)"));
+    }
     const dauer = ev.length ? (ev[ev.length - 1].t ?? 0) - (ev[0].t ?? 0) : 0;
     const geraete = new Set(ev.map(e => e.geraet)).size;
+    const ww = wasWo(z, ok);
     return h("div", {class: "si-kopf " + (ok ? "ok" : "bad")},
-      h("div", {class: "si-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
-      h("div", {class: "si-zus"},
-        h("strong", {}, ok ? "Hat geklappt" : "Hat nicht geklappt"),
-        h("p", {}, t.zusammenfassung || (ok ? "Die Pakete sind angekommen." : "Unterwegs ist etwas verworfen worden.")),
-        zeile2.length ? h("p", {class: "si-zeile2"}, zeile2) : null,
-        h("p", {class: "si-statistik"}, `${zahlDe(ev.length)} Ereignisse · ${geraete} Geräte · ${zeit(dauer)} virtuelle Zeit`)),
-      h("div", {class: "si-modus", role: "radiogroup", "aria-label": "Ansicht"},
-        modusKnopf(z, "ergebnis", "Ergebnis"), modusKnopf(z, "schritt", "Schritt für Schritt")));
+      h("div", {class: "si-kopf-oben"},
+        h("span", {class: "si-kicker"}, "FLUGSCHREIBER" + (kunde ? " · " + kunde : "")),
+        hilfeKnopf(z)),
+      h("div", {class: "si-kopf-zeile"},
+        h("div", {class: "si-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
+        h("div", {class: "si-zus"},
+          h("strong", {}, ok ? "Hat geklappt" : "Hat nicht geklappt"),
+          h("p", {}, t.zusammenfassung || (ok ? "Die Pakete sind angekommen." : "Unterwegs ist etwas verworfen worden.")),
+          ww ? h("p", {class: "si-waswo"}, ww) : null,
+          zeile2.length ? h("p", {class: "si-zeile2"}, zeile2) : null,
+          h("p", {class: "si-statistik"}, zahlDe(ev.length) + " " + (ev.length === 1 ? "Ereignis" : "Ereignisse") + " · " + geraete + (geraete === 1 ? " Gerät · " : " Geräte · ") + zeit(dauer) + " virtuelle Zeit")),
+        ),
+      h("div", {class: "si-kopf-unten"},
+        h("div", {class: "si-modus", role: "radiogroup", "aria-label": "Ansicht"},
+          modusKnopf(z, "ergebnis", "Ergebnis"), modusKnopf(z, "schritt", "Schritt für Schritt"))));
   }
   function modusKnopf(z, m, text){
     const an = z.modus === m;
     return h("button", {type: "button", role: "radio", "aria-checked": String(an), class: an ? "an" : "", tabindex: an ? "0" : "-1",
-      onclick: () => { if (z.modus === m) return; anhalten(z); z.modus = modusMerk = m; bauen(z); $(`.si-modus [aria-checked="true"]`, z.container)?.focus(); },
-      onkeydown: e => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const n = m === "ergebnis" ? "schritt" : "ergebnis"; anhalten(z); z.modus = modusMerk = n; bauen(z); $(`.si-modus [aria-checked="true"]`, z.container)?.focus(); } }}, text);
+      onclick: () => { if (z.modus === m) return; anhalten(z); z.modus = modusMerk = m; bauen(z); $(".si-modus [aria-checked=\"true\"]", z.container)?.focus(); },
+      onkeydown: e => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const n = m === "ergebnis" ? "schritt" : "ergebnis"; anhalten(z); z.modus = modusMerk = n; bauen(z); $(".si-modus [aria-checked=\"true\"]", z.container)?.focus(); } }}, text);
+  }
+  /* Warnbanner: erster echter Fehler der Trace, mit dem Weg zum Fundort (zentraler Resolver). */
+  function warnBanner(z, p){
+    const e = p.e;
+    const ort = e ? geraetName(e.geraet) + (e.port ? " " + e.port : "") : "Aufzeichnung abgebrochen";
+    const kurzOrt = e ? geraetName(e.geraet) : "Aufzeichnung abgebrochen";
+    const grund = e && e.grund ? erklaerung(e.grund) : "Die Simulation hat das Ereignis-Budget überschritten.";
+    return h("div", {class: "si-warn", role: "status"},
+      h("div", {class: "si-warn-kopf"},
+        h("span", {class: "si-sym bad", "aria-hidden": "true"}, "!"),
+        h("strong", {}, e ? "Erster Fehler · " + kurzOrt : "Abbruch"),
+        e && e.grund && niveau() !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null,
+        e && e.geraet ? h("button", {type: "button", class: "si-knopf haupt si-zumfundort",
+          title: "Springt zum Fundort: Gerät auswählen, Inspektor zeigen, hervorheben",
+          onclick: ev => { ev.stopPropagation(); springe(e); }}, "Zum Fundort") : null),
+      h("p", {class: "si-warn-text"}, (e && e.port ? geraetName(e.geraet) + " " + e.port + " – " : "") + grund));
+  }
+
+  /* Anfänger-Hilfe: nur vorhandene Daten (naechsteDiagnose, naechster, handlungsHinweise), keine Lösung. */
+  function hilfeDaten(){
+    const I = instanz();
+    if (!I) return {schritte: [], ort: null};
+    const schritte = [];
+    try {
+      const d = typeof Spiel.naechsteDiagnose === "function" ? Spiel.naechsteDiagnose(I) : null;
+      if (d) schritte.push({art: "diagnose", titel: "Nächste Diagnose", text: d});
+    } catch (e) { /* Anzeige */ }
+    try {
+      if (Spiel.hilfe && typeof Spiel.hilfe.anfaengerSchritte === "function") {
+        for (const s of Spiel.hilfe.anfaengerSchritte(I) || []) {
+          const text = String(s.text || "");
+          if (text && !schritte.some(x => x.text === text)) schritte.push({art: s.art, titel: s.art === "leiter" ? "Prüfen" : "Schritt", text});
+        }
+      }
+    } catch (e) { /* Anzeige */ }
+    let ort = null;
+    try { if (typeof Spiel.naechsterOrt === "function") ort = Spiel.naechsterOrt(I); } catch (e) { /* Anzeige */ }
+    return {schritte: schritte.slice(0, 2), ort};
+  }
+  const DOCK_NAME = {terminal: "Terminal", plan: "Plan", postfach: "Postfach", inspektor: "Inspektor"};
+  function hilfeBox(z){
+    const {schritte, ort} = hilfeDaten();
+    const aktionen = [];
+    if (ort && ort.geraet) aktionen.push(h("button", {type: "button", class: "si-knopf",
+      onclick: () => { try { labor()?.hervorheben?.([{geraet: ort.geraet}], 2200); labor()?.auswaehlen?.(ort.geraet); } catch (e) { /* Anzeige */ } }}, "Gerät zeigen"));
+    if (ort && ort.dock) aktionen.push(h("button", {type: "button", class: "si-knopf",
+      onclick: () => { try { labor()?.dock?.(ort.dock); } catch (e) { /* Anzeige */ } }}, "Zum " + (DOCK_NAME[ort.dock] || ort.dock)));
+    /* Benötigtes Interaktionselement hervorheben (kein Fokusklau): Dock-Reiter pulsieren lassen. */
+    if (ort && ort.dock && typeof document !== "undefined" && document.querySelector) {
+      try {
+        const tab = document.querySelector(".lb-dock-tab[data-reiter=\"" + ort.dock + "\"]");
+        if (tab && tab.classList) { tab.classList.add("si-hilfe-puls"); setTimeout(() => tab.classList.remove("si-hilfe-puls"), 3600); }
+      } catch (e) { /* Anzeige */ }
+    }
+    return h("section", {class: "si-hilfe", "aria-label": "Anfänger-Hilfe"},
+      h("div", {class: "si-hilfe-kopf"},
+        h("strong", {}, "Anfänger-Hilfe"),
+        h("span", {class: "si-hilfe-meta"}, "Nur Hinweise – keine Lösung")),
+      schritte.length
+        ? h("ul", {class: "si-hilfe-liste"}, schritte.map(s => h("li", {class: "si-hilfe-schritt", title: s.text},
+            h("b", {class: "si-hilfe-titel"}, s.titel + ": "), h("span", {}, s.text))))
+        : h("p", {class: "si-hilfe-leer"}, instanz() ? "Gerade ist alles erledigt – kein offener Schritt." : "Öffne einen Auftrag: Dann zeigt die Hilfe den nächsten Schritt."),
+      ort && ort.text ? h("p", {class: "si-hilfe-ort", title: ort.text}, ort.text) : null,
+      aktionen.length ? h("div", {class: "si-hilfe-aktionen"}, aktionen) : null);
   }
 
   function ergebnisAnsicht(z, ok){
@@ -179,10 +342,10 @@ UI.simpanel = (() => {
     const drops = z.hatGrund ? alle.filter(x => x.e.grund) : ok ? [] : alle;
     if (z.trace.abbruch === "STORM") box.append(problem(z, {art: "verwerfen", grund: "STORM", geraet: null, text: "Die Simulation hat das Ereignis-Budget überschritten."}, null));
     if (drops.length) {
-      box.append(h("h4", {}, drops.length === 1 ? "Hier hängt es" : `Hier hängt es (${drops.length} Stellen)`));
+      box.append(h("h4", {}, drops.length === 1 ? "Hier hängt es" : "Hier hängt es (" + drops.length + " Stellen)"));
       for (const {e, i} of drops.slice(0, 4)) box.append(problem(z, e, meldungZu(ev, i)));
-      if (drops.length > 4) box.append(h("p", {class: "si-hinweis"}, `… und ${drops.length - 4} weitere. Alle stehen in der Schritt-für-Schritt-Ansicht.`));
-    } else if (ok && alle.length) box.append(h("p", {class: "si-hinweis"}, `Das Ziel wurde erreicht. Unterwegs wurden ${alle.length} Rahmen verworfen, ohne dass etwas kaputt ist: Geräte ignorieren Rahmen, die nicht für sie bestimmt sind (z. B. fremde ARP- und DHCP-Broadcasts), und ein Router verwirft das erste Paket, solange er per ARP nachfragt.`));
+      if (drops.length > 4) box.append(h("p", {class: "si-hinweis"}, "… und " + (drops.length - 4) + " weitere. Alle stehen in der Schritt-für-Schritt-Ansicht."));
+    } else if (ok && alle.length) box.append(h("p", {class: "si-hinweis"}, "Das Ziel wurde erreicht. Unterwegs wurden " + alle.length + " Rahmen verworfen, ohne dass etwas kaputt ist: Geräte ignorieren Rahmen, die nicht für sie bestimmt sind (z. B. fremde ARP- und DHCP-Broadcasts), und ein Router verwirft das erste Paket, solange er per ARP nachfragt."));
     else if (ok) box.append(h("p", {class: "si-hinweis"}, "Kein Paket wurde verworfen. In der Schritt-für-Schritt-Ansicht siehst du den Weg jedes einzelnen Rahmens."));
     box.append(h("button", {type: "button", class: "si-knopf haupt", onclick: () => { z.modus = modusMerk = "schritt"; bauen(z); }}, "Schritt für Schritt ansehen"));
     return box;
@@ -192,26 +355,28 @@ UI.simpanel = (() => {
     const karte = h("div", {class: "si-problem"},
       h("div", {class: "si-problem-kopf"},
         h("span", {class: "si-sym bad", "aria-hidden": "true"}, "✕"),
-        h("strong", {}, e.geraet ? `${geraetName(e.geraet)}${e.port ? " " + e.port : ""} verwirft` : "Abbruch"),
+        h("strong", {}, e.geraet ? geraetName(e.geraet) + (e.port ? " " + e.port : "") + " verwirft" : "Abbruch"),
         e.proto ? UI.pdu.chip(e.proto) : null,
         e.grund && nv !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null),
       e.text ? h("p", {}, e.text) : null,
       e.grund ? h("p", {class: "si-erklaerung"}, erklaerung(e.grund)) : null,
       e.geraet ? h("p", {class: meldung ? "si-kennung gemeldet" : "si-kennung still"}, meldung
-        ? `${geraetName(meldung.geraet)} meldet es zurück: ${ICMPTEXT[meldung.frame.icmp.typ]}`
+        ? geraetName(meldung.geraet) + " meldet es zurück: " + ICMPTEXT[meldung.frame.icmp.typ]
         : "Still verworfen – niemand schickt eine Fehlermeldung zurück.") : null);
-    if (e.geraet) karte.append(h("button", {type: "button", class: "si-knopf", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen"));
+    if (e.geraet) karte.append(h("div", {class: "si-zeile-knoepfe"},
+      h("button", {type: "button", class: "si-knopf", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen"),
+      h("button", {type: "button", class: "si-knopf haupt si-zumfundort", onclick: () => springe(e)}, "Zum Fundort")));
     return karte;
   }
 
   function steuerung(z){
-    const k = (name, label, fn, taste) => h("button", {type: "button", class: "si-steuer-knopf", "aria-label": label, title: `${label}${taste ? " (" + taste + ")" : ""}`, onclick: fn}, icon(name));
+    const k = (name, label, fn, taste) => h("button", {type: "button", class: "si-steuer-knopf", "aria-label": label, title: label + (taste ? " (" + taste + ")" : ""), onclick: fn}, icon(name));
     z.playEl = k(z.spielt ? "pause" : "play", z.spielt ? "Pause" : "Abspielen", () => umschalten(z), "Leertaste");
     z.posEl = h("span", {class: "si-pos", "aria-live": "off"});
     const tempo = h("div", {class: "si-tempo", role: "radiogroup", "aria-label": "Tempo"},
       TEMPI.map(t => h("button", {type: "button", role: "radio", "aria-checked": String(tempoMerk === t), class: tempoMerk === t ? "an" : "",
         onclick: ev => { tempoMerk = t; for (const b of $$("button", ev.currentTarget.parentNode)) { const an = b === ev.currentTarget; b.classList.toggle("an", an); b.setAttribute("aria-checked", String(an)); } if (z.spielt) { anhalten(z, true); planen(z); } }},
-        `${String(t).replace(".", ",")}×`)));
+        String(t).replace(".", ",") + "×")));
     const leiste = h("div", {class: "si-steuer"},
       k("anfang", "An den Anfang", () => { anhalten(z); z.pos = -1; markieren(z, -1); }, "Pos1"),
       k("zurueck", "Schritt zurück", () => { anhalten(z); schritt(z, -1); }, "←"),
@@ -228,8 +393,8 @@ UI.simpanel = (() => {
     const leiste = h("div", {class: "si-filter", role: "group", "aria-label": "Filter"},
       h("span", {class: "si-filter-titel"}, "Filter:"),
       protos.map(p => {
-        const an = !z.filter.size || z.filter.has(p);
-        const b = h("button", {type: "button", class: "si-filter-knopf" + (an ? " an" : ""), "aria-pressed": String(z.filter.has(p)), title: `Nur ${p} zeigen (mehrere wählbar)`,
+        const an = z.filter.size > 0 && z.filter.has(p);
+        const b = h("button", {type: "button", class: "si-filter-knopf" + (an ? " an" : ""), "aria-pressed": String(z.filter.has(p)), title: "Nur " + p + " zeigen (mehrere wählbar)",
           onclick: () => { anhalten(z); if (z.filter.has(p)) z.filter.delete(p); else z.filter.add(p); if (z.filter.size === protos.length) z.filter.clear(); z.pos = -1; bauen(z); }},
           UI.pdu.chip(p), h("span", {class: "si-anzahl"}, String(anzahl(p))));
         return b;
@@ -237,35 +402,43 @@ UI.simpanel = (() => {
       z.filter.size ? h("button", {type: "button", class: "si-filter-knopf", onclick: () => { z.filter.clear(); z.pos = -1; bauen(z); }}, "alle") : null,
       drops ? h("button", {type: "button", class: "si-filter-knopf" + (z.hatGrund ? " probleme" : "") + (z.nurProbleme ? " an" : ""), "aria-pressed": String(z.nurProbleme),
         onclick: () => { anhalten(z); z.nurProbleme = !z.nurProbleme; z.pos = -1; bauen(z); }},
-        z.hatGrund ? h("span", {class: "si-sym bad", "aria-hidden": "true"}, "✕") : null, z.hatGrund ? `nur Probleme (${drops})` : `nur verworfene (${drops})`) : null);
+        z.hatGrund ? h("span", {class: "si-sym bad", "aria-hidden": "true"}, "✕") : null, z.hatGrund ? "nur Probleme (" + drops + ")" : "nur verworfene (" + drops + ")") : null);
     return leiste;
   }
 
+  /* Eine Zeile der Zeitachse: Schichtband, Nr., Zeit, Gerät/Port, Art, Protokoll, Kurztext.
+     Fehler-/Warnmeldungen tragen einen „Zum Fundort"-Knopf (zentraler Resolver) – der Zeilenklick
+     wählt und hebt weiterhin nur hervor. */
   function zeile(z, e, i){
     const nv = niveau();
-    const drop = e.art === "verwerfen" && istProblem(z, e);       /* normales Ignorieren ist kein „Drop“ im Sinne eines Fehlers */
+    const drop = e.art === "verwerfen" && istProblem(z, e);
     const ignoriert = e.art === "verwerfen" && !drop;
-    const el = h("div", {class: `si-zeile art-${e.art}${drop ? " drop" : ""}${ignoriert || e.art === "lernen" || e.art === "info" ? " leise" : ""}`,
-      role: "option", id: `sp-${zid(z)}-${i}`, "aria-selected": "false", "data-i": i,
-      onclick: () => { anhalten(z); markieren(z, i, {klick: true}); }},
+    const schicht = schichtVon(e), sInfo = SCHICHT[schicht] || SCHICHT[2];
+    const meld = istMeldung(e);
+    const zielzeile = drop || meld;
+    const el = h("div", {class: "si-zeile art-" + e.art + (drop ? " drop" : "") + (ignoriert || e.art === "lernen" || e.art === "info" ? " leise" : ""),
+      role: "option", id: "sp-" + zid(z) + "-" + i, "aria-selected": "false", "data-i": i, "data-schicht": String(schicht),
+      title: zielzeile ? "Klick: Zum Fundort springen" : null,
+      onclick: () => { anhalten(z); markieren(z, i, {klick: true}); if (zielzeile) springe(e); }},
+      h("span", {class: "si-band", "aria-hidden": "true"}),
       h("span", {class: "si-n"}, String(e.n ?? i + 1)),
       h("span", {class: "si-t"}, zeit(e.t)),
       h("span", {class: "si-g"}, geraetName(e.geraet), e.port ? h("span", {class: "si-port"}, " " + e.port) : null),
       artSymbol(e.art),
-      h("span", {class: "si-p"}, e.proto ? UI.pdu.chip(e.proto) : null),
+      h("span", {class: "si-p"}, e.proto ? UI.pdu.chip(e.proto) : null, h("span", {class: "si-schicht", title: "Schicht " + schicht + " · " + sInfo.name}, sInfo.kurz)),
       h("span", {class: "si-x"}, e.text || ""));
-    if (drop || (e.grund && e.art !== "lernen")) {
+    if (drop || meld || (e.grund && e.art !== "lernen")) {
       const m = drop ? meldungZu(z.ereignisse, z.idx.get(e)) : null;
       const sk = nv === "E" ? skillName(e.grund) : null;
       const lt = typeof DATEN !== "undefined" ? DATEN.lehrtexte?.[e.grund] : null;
-      /* Textdiät (A4): Einstieg/AP1 sehen den Titel, der Lehrtext kommt erst auf „Erklär mir das“; AP2 sieht die Gerätemeldung */
       const ex = nv !== "AP2" && lt ? UI.erklaeren?.(e.grund, nv) : null;
       el.append(h("div", {class: "si-grundzeile"},
         e.grund && nv !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null,
         h("span", {class: "si-erklaerung"}, ex ? (sim()?.GRUENDE?.[e.grund]?.titel || e.grund) : erklaerung(e.grund) || ""),
-        drop ? h("span", {class: m ? "si-kennung gemeldet" : "si-kennung still"}, m ? `↩ gemeldet von ${geraetName(m.geraet)}` : "still verworfen") : null,
-        sk ? h("span", {class: "si-skill"}, `Fertigkeit: ${sk}`) : null,
-        ex || (lt?.quelle && nv !== "AP2" ? h("span", {class: "si-quelle"}, `Quelle: ${lt.quelle}`) : null)));
+        drop ? h("span", {class: m ? "si-kennung gemeldet" : "si-kennung still"}, m ? "↩ gemeldet von " + geraetName(m.geraet) : "still verworfen") : null,
+        meld ? h("span", {class: "si-kennung gemeldet"}, "↩ ICMP-Fehlermeldung") : null,
+        sk ? h("span", {class: "si-skill"}, "Fertigkeit: " + sk) : null,
+        ex || (lt?.quelle && nv !== "AP2" ? h("span", {class: "si-quelle"}, "Quelle: " + lt.quelle) : null)));
     }
     return el;
   }
@@ -274,7 +447,7 @@ UI.simpanel = (() => {
 
   function posText(z){
     if (!z.posEl) return;
-    z.posEl.textContent = `${z.pos < 0 ? "–" : z.pos + 1} / ${z.liste ? z.liste.length : 0}`;
+    z.posEl.textContent = (z.pos < 0 ? "–" : String(z.pos + 1)) + " / " + (z.liste ? z.liste.length : 0);
   }
   function markieren(z, i, o = {}){
     const liste = z.liste || [];
@@ -282,7 +455,7 @@ UI.simpanel = (() => {
     posText(z);
     if (z.listeEl) {
       for (const el of $$(".si-zeile.aktuell", z.listeEl)) { el.classList.remove("aktuell"); el.setAttribute("aria-selected", "false"); }
-      const el = z.pos >= 0 ? $(`[data-i="${z.pos}"]`, z.listeEl) : null;
+      const el = z.pos >= 0 ? $("[data-i=\"" + z.pos + "\"]", z.listeEl) : null;
       if (el) {
         el.classList.add("aktuell"); el.setAttribute("aria-selected", "true");
         z.listeEl.setAttribute("aria-activedescendant", el.id);
@@ -345,5 +518,5 @@ UI.simpanel = (() => {
     else if (e.key === "ArrowLeft" && tag !== "BUTTON") { e.preventDefault(); e.stopPropagation(); anhalten(z); schritt(z, -1); }
   }
 
-  return {zeigen, erfolg};
+  return {zeigen, erfolg, anfaengerHilfe, anfaengerHilfeSetzen};
 })();

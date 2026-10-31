@@ -465,3 +465,26 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
     return null;
   };
 })();
+
+/* ---------------------------------------------------------------------------------------------------
+   ANZEIGEHILFE „Anfänger-Hilfe" (Runde 4, Strang C)
+   Die Oberfläche (Simulations-Panel) zeigt sie nur an, wenn die Anfänger-Hilfe eingeschaltet ist.
+   Quellen sind ausschließlich vorhandene Daten: Spiel.naechsteDiagnose (akte.js), Spiel.handlungsHinweise
+   (oben in dieser Datei) und Spiel.LEITER. Kein neuer Zustand, keine Bewertung, keine Lösung –
+   bestehende Schwellen und Signaturen bleiben unverändert. */
+Spiel.hilfe.anfaengerSchritte = function(inst){
+  if (!inst || !inst.netz) return [];
+  const schritte = [];
+  try {
+    const d = typeof Spiel.naechsteDiagnose === "function" ? Spiel.naechsteDiagnose(inst) : null;
+    if (d) schritte.push({art: "diagnose", text: String(d)});
+  } catch (e) { /* nur Anzeige */ }
+  try {
+    const hinweise = typeof Spiel.handlungsHinweise === "function" ? (Spiel.handlungsHinweise(inst) || []) : [];
+    for (const x of hinweise) {
+      const text = String(x == null ? "" : x).trim();
+      if (text && !schritte.some(s => s.text === text)) schritte.push({art: "leiter", text});
+    }
+  } catch (e) { /* nur Anzeige */ }
+  return schritte.slice(0, 3);
+};

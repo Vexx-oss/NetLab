@@ -1,0 +1,100 @@
+/* ---------- Lernstand (ui/lernstand.js): Ausbildungs-Cockpit ----------
+   Runde 4, Strang B. Flächen und Kanten kommen von .bn-k (bento.css), der Kopf von .kr-kopf
+   (karriere.css), die Kompetenzkarte von kompetenz.css, der Nächste Schritt von naechster.css.
+   Diese Datei liefert das Cockpit-Raster und die Register (Fehlerheft, Behalten, Training,
+   Prüfungstag, Abzeichen, Fehlerdex).
+   Nur Tokens aus basis.css, Schrift nur var(--fs-*), Abstände nur {0,4,8,12,16,24,32}px,
+   Radius nur Tokens, kein !important, keine Farb-Literale. */
+
+/* Die Ansicht scrollt als GANZES: der Hilfe-Abschnitt (lh-*) steht unter dem Raster, nicht in
+   einem zweiten Scrollbereich. Deshalb hebt .lern-seite die Höhenregel der gemeinsamen .kr-seite auf. */
+.ansicht[data-ansicht="lernstand"] .lern-seite{height:auto; min-height:100%; overflow:visible}
+.ansicht[data-ansicht="lernstand"] .knopf{min-height:44px}
+.ansicht[data-ansicht="lernstand"] > .lh-abschnitt{margin:0 24px 24px}
+
+/* Kopf: Text links, Prüfungsreife-Kachel rechts – die eine große Fläche der Ansicht sitzt oben. */
+.lern-kopf{display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,380px); gap:24px; align-items:start}
+.lern-kopf-text, .lern-fehler-text, .lern-abz-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.lern-kopf-aktionen{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px}
+.lern-kontext{max-width:72ch}
+.lern-raster{align-content:start}
+/* Volle Breite ohne .bn-s12: das bricht bei ≤900 px auf, weil dort die Rasterspalten auf eine
+   reduziert werden, .bn-s12 aber weiter 12 Spalten überspannt (bento.css setzt nur s3–s8 zurück).
+   grid-column:1/-1 trägt in beiden Rastern. */
+.lern-voll{grid-column:1 / -1}
+
+/* Prüfungsreife: Status als Text, drei echte Zeilen (Ruf, Können, Prüfungstag), ein Geist-Knopf. */
+.lern-reife{gap:8px}
+.lern-reife-wert{margin:0; font:700 var(--fs-5)/1.2 var(--display); color:var(--ink)}
+.lern-reife-wert.warn{color:var(--warn)}
+.lern-reife-wert.ok, .lern-reife-stand.ok, .lern-abz.hat .lern-abz-stand{color:var(--ok)}
+.lern-reife-zeilen{display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 12px; margin:4px 0 0}
+.lern-reife-label{font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
+.lern-reife-stand{margin:0; font:600 var(--fs-2)/1.4 var(--body); color:var(--muted); text-align:right; font-variant-numeric:tabular-nums}
+.lern-reife-hinweis{max-width:48ch}
+.lern-reife-fuss, .lern-kachel-fuss{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:8px}
+
+/* Kachelkopf: Mikrolabel links, echte Kennzahl rechts – gleicher Kopf in allen Registern. */
+.lern-kachel-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap; min-width:0}
+.lern-zahl{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint); white-space:nowrap}
+.lern-training, .lern-fehler, .lern-behalten, .lern-pruefung, .lern-abzeichen{min-width:0}
+
+/* Fehlerheft: Register mit echtem Fehlertext, Datum und Üben-Knopf. */
+.lern-fehler-liste, .lern-empfehlungen{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.lern-fehler-zeile{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px solid var(--line)}
+.lern-fehler-name{font:700 var(--fs-3)/1.35 var(--body); color:var(--ink)}
+.lern-fehler-was{font:400 var(--fs-3)/1.45 var(--body); color:var(--muted); overflow-wrap:anywhere}
+.lern-fehler-meta, .lern-empfehlung-grund{font:400 var(--fs-2)/1.3 var(--body); color:var(--faint)}
+.lern-fehler-ueben, .lern-empfehlung-ueben, .lern-kopieren, .lern-pruefung-oeffnen, .lern-pruefung-start, .lern-pruefung-start2, .lern-training-oeffnen{flex:0 0 auto}
+.lern-fehler-leer, .lern-training-leer, .lern-abz-leer{margin:0}
+
+/* Behalten: ehrliche Messkachel – Wert, echte Anzahl, Balken nur wo gemessen. */
+.lern-quote-liste{display:flex; flex-direction:column}
+.lern-quote{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:4px 12px; padding:8px 0; border-top:1px solid var(--line)}
+.lern-quote-label{font:400 var(--fs-3)/1.35 var(--body); color:var(--muted)}
+.lern-quote-wert{grid-column:2; grid-row:1; font:700 var(--fs-5)/1.1 var(--display); color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap}
+.lern-quote-meta{grid-column:1; font:400 var(--fs-2)/1.3 var(--body); color:var(--faint)}
+.lern-quote-bar{grid-column:1 / -1; display:block; height:4px; border-radius:999px; background:var(--panel-3); overflow:hidden}
+.lern-quote-bar i{display:block; height:100%; background:var(--accent)}
+
+/* Training „Danach": je Zeile der bestehende Übungsweg, eine ruhige Fußzeile in den Trainingsbereich. */
+.lern-empfehlung{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px solid var(--line)}
+.lern-empfehlung-text{display:flex; flex-direction:column; gap:0; min-width:0}
+.lern-empfehlung-text b{font:600 var(--fs-3)/1.35 var(--body); color:var(--ink)}
+
+/* Prüfungstag: eine ruhige Kachel mit den echten Terminen und Gebühren. */
+.lern-pruefung-knoepfe{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.lern-pruefung-verlauf{color:var(--faint)}
+
+/* Abzeichen: ruhig integriert – erhaltene als Chips, das vollständige Register zugeklappt.
+   Zustand als Form (Marke) + Text, kein Emoji aus den Daten. */
+.lern-abz-chips{display:flex; flex-wrap:wrap; gap:4px}
+.lern-abz-chip{display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:999px; background:var(--ok-soft); border:1px solid color-mix(in srgb, var(--ok) 40%, var(--line)); color:var(--ok); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; white-space:nowrap}
+.lern-abz-mehr, .lern-abz-mehr[open] .lern-abz-liste{margin-top:8px}
+.lern-abz-summary{display:flex; align-items:center; gap:8px; min-height:44px; font:600 var(--fs-2)/1.4 var(--body); color:var(--muted); cursor:pointer}
+/* Eigene Klappe statt des ::marker-Dreiecks (display:flex unterdrückt es) – die Affordanz bleibt. */
+.lern-abz-summary::after{content:"▸"; display:inline-block; margin-left:auto; color:var(--faint)}
+.lern-abz-mehr[open] .lern-abz-summary::after{content:"▾"}
+.lern-abz-liste{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px}
+.lern-abz{display:grid; grid-template-columns:12px minmax(0,1fr); gap:0 8px; padding:8px; border:1px dashed var(--line-2); border-radius:var(--radius-s); background:var(--panel-2); min-width:0}
+.lern-abz.hat{border-style:solid; border-color:color-mix(in srgb, var(--ok) 40%, var(--line)); background:var(--ok-soft)}
+.lern-abz-mark{display:grid; place-items:center; width:12px; height:12px; border-radius:var(--radius-xs); border:1px solid var(--line-2); color:var(--bg); font:700 var(--fs-1)/1 var(--body)}
+.lern-abz.hat .lern-abz-mark{background:var(--ok); border-color:var(--ok)}
+.lern-abz-text b{font:700 var(--fs-2)/1.3 var(--body); color:var(--ink)}
+.lern-abz-text small{font:400 var(--fs-2)/1.35 var(--body); color:var(--muted)}
+.lern-abz-stand{font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.04em; color:var(--faint)}
+
+/* Fehlerdex (Baustein des Hubs) sitzt in einer eigenen Bento-Kachel. */
+.lern-dex .dx-dex h3{font:700 var(--fs-5)/1.2 var(--display); margin:0 0 4px}
+
+/* Register-Zeilen: die erste Zeile braucht keine Trennlinie (ein Block für alle drei Listen). */
+.lern-fehler-zeile:first-child, .lern-quote:first-child, .lern-empfehlung:first-child{border-top:0; padding-top:0}
+
+@media (max-width:1100px){
+  .lern-kopf{grid-template-columns:minmax(0,1fr); gap:16px}
+}
+@media (max-width:760px){
+  .ansicht[data-ansicht="lernstand"] > .lh-abschnitt{margin:0 16px 16px}
+  .lern-fehler-zeile{flex-wrap:wrap}
+  .lern-abz-liste{grid-template-columns:minmax(0,1fr)}
+}

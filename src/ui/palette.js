@@ -2,7 +2,18 @@
 /* ---------- Befehlspalette (Strg+K) ----------
    UI.palette.oeffnen(text?)   UI.palette.schliessen()
    UI.palette.befehl({name, text, aktion, stichworte?, gruppe?, taste?})   erweitert die Palette (name = eindeutiger Schlüssel)
-   Eingebaut: Gerät springen, „ping A B“ (B = Gerät, IP oder Name), Ebene, Ansicht, Werkzeuge, Rückgängig, Einstellungen … */
+   Eingebaut: Gerät springen, „ping A B“ (B = Gerät, IP oder Name), Ebene, Ansicht, Werkzeuge, Rückgängig, Einstellungen …
+
+   QoL (Runde 4, Strang E):
+   · Fokus sichtbar: die geöffnete Palette trägt einen Akzentring (rahmen.css: .pal-huelle:focus-within
+     .pal-kasten); die mit ↑/↓ gewählte Zeile bekommt Tinte + 2-px-Rail, nicht nur eine Fläche.
+   · Esc schließt immer, Enter führt die gewählte Zeile aus, die Auswahl bleibt beim Öffnen am ersten
+     Treffer und scrollt mit.
+   · KEINE Falle: es gibt einen sichtbaren Schließen-Knopf (44 px, im Tab-Kreis Eingabe ↔ Knopf);
+     Klick auf den Schleier schließt; der Fokus geht beim Schließen zum Auslöser zurück.
+     Tab bleibt bewusst IM Kasten (Combobox-Muster; der bestehende Test ui-escape hält das fest) –
+     verlassen kann man die Palette jederzeit mit Esc oder dem Knopf.
+   · Trefferzeilen sind 44 px hoch, Maus und Tastatur wählen dieselbe Zeile. */
 UI.palette = (() => {
   const eigene = new Map();
   let offen = null;
@@ -92,18 +103,21 @@ UI.palette = (() => {
     UI.menue?.zu?.();
     const vorher = document.activeElement;
     const eingabe = h("input", {class: "pal-eingabe", type: "text", placeholder: "Gerät, Befehl oder „ping kasse drucker“ …", "aria-label": "Befehl suchen",
-      autocomplete: "off", spellcheck: "false", role: "combobox", "aria-expanded": "true", "aria-controls": "pal-liste", value: start});
-    const liste = h("div", {class: "pal-liste", id: "pal-liste", role: "listbox"});
+      autocomplete: "off", spellcheck: "false", role: "combobox", "aria-expanded": "true", "aria-controls": "pal-liste",
+      "aria-autocomplete": "list", value: start});
+    const liste = h("div", {class: "pal-liste", id: "pal-liste", role: "listbox", "aria-label": "Befehle"});
+    const zu = h("button", {type: "button", class: "pal-zu", title: "Schließen (Esc)", "aria-label": "Befehlspalette schließen", onclick: () => schliessen()}, UI.symbol("schliessen", 18));
     const kasten = h("div", {class: "pal-kasten", role: "dialog", "aria-label": "Befehlspalette"},
-      h("div", {class: "pal-kopf"}, UI.symbol("suche", 18), eingabe, h("kbd", {}, "Esc")), liste,
-      h("div", {class: "pal-fuss"}, h("span", {}, h("kbd", {}, "↑"), h("kbd", {}, "↓"), " wählen"), h("span", {}, h("kbd", {}, "Enter"), " ausführen")));
+      h("div", {class: "pal-kopf"}, UI.symbol("suche", 18), eingabe, h("kbd", {}, "Esc"), zu), liste,
+      h("div", {class: "pal-fuss"}, h("span", {}, h("kbd", {}, "↑"), h("kbd", {}, "↓"), " wählen"), h("span", {}, h("kbd", {}, "Enter"), " ausführen"),
+        h("span", {}, h("kbd", {}, "Tab"), " zum Schließen-Knopf")));
     const huelle = h("div", {class: "pal-huelle", onpointerdown: e => { if (e.target === huelle) schliessen(); }}, kasten);
     document.body.append(huelle);
     let treffer = [], idx = 0;
     const zeichnen = () => {
       treffer = filtern(eingabe.value);
       idx = Math.max(0, treffer.findIndex(t => !t.aus));
-      liste.replaceChildren(...treffer.map((t, i) => h("div", {class: "pal-punkt" + (t.aus ? " aus" : "") + (t.tipp ? " tipp" : ""), role: "option", id: "pal-" + i, "data-i": i,
+      liste.replaceChildren(...treffer.map((t, i) => h("div", {class: "pal-punkt" + (t.aus ? " aus" : "") + (t.tipp ? " tipp" : ""), role: "option", id: "pal-" + i, "data-i": i, "aria-selected": "false",
         onpointerdown: e => { e.preventDefault(); if (!t.aus) ausfuehren(t); }, onpointermove: () => { if (!t.aus && idx !== i) { idx = i; markieren(); } }},
         h("span", {class: "pal-sym"}, t.sym ? (t.sym.nodeType ? t.sym : UI.symbol(t.sym, 16)) : null),
         h("span", {class: "pal-text"}, t.text), t.info ? h("span", {class: "pal-info"}, t.info) : null,
@@ -112,7 +126,7 @@ UI.palette = (() => {
       markieren();
     };
     const markieren = () => {
-      for (const el of liste.children) el.classList.toggle("an", +el.dataset.i === idx);
+      for (const el of liste.children) { const an = +el.dataset.i === idx; el.classList.toggle("an", an); el.setAttribute("aria-selected", String(an)); }
       const el = liste.querySelector(`[data-i="${idx}"]`);
       if (el) { el.scrollIntoView({block: "nearest"}); eingabe.setAttribute("aria-activedescendant", el.id); }
     };
@@ -123,9 +137,18 @@ UI.palette = (() => {
       const wander = d => { for (let s = 0; s < n; s++) { idx = (idx + d + n) % n; if (!treffer[idx].aus) break; } markieren(); };
       if (e.key === "ArrowDown") { e.preventDefault(); if (n) wander(1); }
       else if (e.key === "ArrowUp") { e.preventDefault(); if (n) wander(-1); }
+      else if (e.key === "Home") { e.preventDefault(); if (n) { idx = -1; wander(1); } }
+      else if (e.key === "End") { e.preventDefault(); if (n) { idx = 0; wander(-1); } }
       else if (e.key === "Enter") { e.preventDefault(); const t = treffer[idx]; if (t && !t.aus) ausfuehren(t); }
       else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); schliessen(); }
-      else if (e.key === "Tab") { e.preventDefault(); }
+      else if (e.key === "Tab") { e.preventDefault(); zu.focus({preventScroll: true}); }   /* Tab-Kreis: Eingabe ↔ Schließen */
+    });
+    zu.addEventListener("keydown", e => {
+      if (e.key === "Tab" || e.key === "Escape" || e.key === "Enter") {
+        e.preventDefault(); e.stopPropagation();
+        if (e.key === "Tab") eingabe.focus({preventScroll: true});
+        else if (e.key === "Escape" || e.key === "Enter") schliessen();
+      }
     });
     offen = {huelle, eingabe, vorher};
     zeichnen();

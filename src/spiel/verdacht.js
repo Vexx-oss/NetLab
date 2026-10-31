@@ -78,3 +78,107 @@ Spiel.verdacht.bewerten = function(inst){
     : `Du hattest Schicht ${v.schicht || "?"} vermutet (${vTitel}). Tatsächlich: ${inj.titel}${ort} (Schicht ${r.schichten[0]}). Woran man es erkennt: ${erkennen}.`;
   return {treffer, gesetzt: true, vorEingriff: !!v.vorEingriff, richtig, text};
 };
+
+/* ---------- Einsatzakte (Runde 4, Strang A): Anzeigehilfen für das Dossier ----------
+   Additiv: die Bewertung oben bleibt unverändert. Gelesen werden ausschließlich echte
+   Vorgangsdaten – Beweiskarten (Spiel.akte.liste), die Hypothese, die Änderungen im Netz
+   (Spiel.geaenderteGeraete) und die Notiz (inst.notiz). Nichts wird geraten. */
+
+/* Schichtentreppe: je Schicht die Zahl der stützenden Beweise. Karten ohne Schicht
+   (z. B. eine Kundenaussage am Telefon) zählen als „ohne“ – die Summe ist immer die Kartenzahl. */
+Spiel.akte.schichten = function(inst){
+  const karten = Spiel.akte.liste(inst);
+  const bekannt = new Set(Spiel.VERDACHT.SCHICHTEN.map(s => s[0]));
+  const schichten = Spiel.VERDACHT.SCHICHTEN.map(s => ({n: s[0], name: s[1], text: s[2],
+    zahl: karten.filter(k => k.schicht === s[0]).length}));
+  return {schichten, ohne: karten.filter(k => !bekannt.has(k.schicht)).length, gesamt: karten.length};
+};
+
+/* Fundort einer Beweiskarte für den zentralen Resolver (Strang C, UI.fehlerziel.springen):
+   Kabelkarte → die zwei Kabelenden; Ping/Diagnose → das genannte Gerät; Kundenaussage → kein Ziel.
+   Es wird nie ein Gerät erfunden: was nicht im Netz der Instanz steht, ergibt null. */
+Spiel.akte.fundort = function(inst, karte){
+  const netz = inst && inst.netz;
+  if (!karte || !netz) return null;
+  const teil = wert => {
+    const teile = String(wert || "").split(":");
+    const geraet = teile[0], port = teile[1] || null;
+    return geraet && netz.geraete[geraet] ? {geraet, port} : null;
+  };
+  if (karte.art === "kabel") {
+    const a = teil(karte.von), b = teil(karte.nach);
+    if (a && b) return {art: "kabel", kabel: {a, b}};
+    const g = a || b;
+    return g ? {art: "port", geraet: g.geraet, port: g.port} : null;
+  }
+  if (karte.art === "ping") {
+    /* Das Ziel, das nicht antwortet, ist der Fundort; sonst die messende Seite. */
+    const ziel = netz.geraete[karte.nach] ? karte.nach : netz.geraete[karte.von] ? karte.von : null;
+    return ziel ? {art: "geraet", geraet: ziel} : null;
+  }
+  const g = teil(karte.von);          /* Terminalbefehl: von = Gerät; Hotline: von = Kunde ohne Gerät */
+  return g ? {art: "geraet", geraet: g.geraet} : null;
+};
+
+/* Didaktische Leiter: sechs Sprossen, jede aus einem echten Merkmal der Instanz. */
+Spiel.akte.FORTSCHRITT = [
+  {id: "beobachten", titel: "Beobachten", satz: "Auftrag gelesen und den Betrieb angesehen"},
+  {id: "messen", titel: "Messen", satz: "Eine echte Messung liegt als Beweis vor"},
+  {id: "eingrenzen", titel: "Eingrenzen", satz: "Eine Messung schlug fehl und grenzt den Fehler ein"},
+  {id: "hypothese", titel: "Hypothese", satz: "Verdacht aus Schicht, Ursache und Gerät festgehalten"},
+  {id: "handeln", titel: "Handeln", satz: "Im Labor wurde etwas geändert"},
+  {id: "dokumentieren", titel: "Dokumentieren", satz: "Einsatzbericht kopiert oder Notiz geschrieben"},
+];
+Spiel.akte.fortschritt = function(inst, {kopiert = false} = {}){
+  const karten = Spiel.akte.liste(inst);
+  const geaendert = typeof Spiel.geaenderteGeraete === "function" ? Spiel.geaenderteGeraete(inst) : [];
+  const werte = {
+    beobachten: !!inst.gelesen,
+    messen: karten.length > 0,
+    eingrenzen: karten.some(k => k.ok === false),
+    hypothese: !!inst.verdacht,
+    handeln: geaendert.length > 0,
+    dokumentieren: !!String(inst.notiz || "").trim() || !!kopiert,
+  };
+  const offen = Spiel.akte.FORTSCHRITT.find(s => !werte[s.id]);
+  return Spiel.akte.FORTSCHRITT.map(s => ({id: s.id, titel: s.titel, satz: s.satz,
+    erledigt: !!werte[s.id], naechster: !!offen && offen.id === s.id}));
+};
+
+/* Einsatzbericht zum Kopieren: nur, was der Spieler selbst sieht oder angelegt hat.
+   Kein innerer Grund, keine richtige Schicht und keine Lösung – auch im Einstieg nicht,
+   denn der Bericht wird weitergegeben. Die Zeile „Ergebnis der Hypothese“ erscheint nur,
+   wenn die Bewertung bereits feststeht (inst.verdacht.treffer, gesetzt von Spiel.verdacht.bewerten). */
+Spiel.akte.bericht = function(inst){
+  const def = Spiel.defVon(inst);
+  if (!def) return "";
+  const niveau = Spiel.niveauVon(inst);
+  const kunde = Spiel.kundenDaten(inst.kunde || def.kunde);
+  const karten = Spiel.akte.liste(inst).slice().sort((a, b) => (a.t || 0) - (b.t || 0));
+  const name = id => (inst.netz.geraete[id] && inst.netz.geraete[id].name) || id;
+  const zz = n => (n < 10 ? "0" : "") + n;
+  const uhr = ms => {
+    const n = Number(ms);
+    if (!Number.isFinite(n)) return "–";
+    const d = new Date(n);
+    return zz(d.getHours()) + ":" + zz(d.getMinutes());
+  };
+  const treffer = {voll: "Volltreffer", ursache: "Ursache stimmt", schicht: "Schicht stimmt"};
+  const zeilen = ["Einsatzakte · " + kunde.name,
+    "Vorgang: " + (inst.ticketId || "–") + " · Niveau: " + (Spiel.NIVEAU_NAME[niveau] || niveau) + " · Beginn: " + uhr(inst.start),
+    "Auftrag: " + (def.titel || "–"), ""];
+  zeilen.push(karten.length ? "Beweise (" + karten.length + "):" : "Beweise: noch keine Messung erfasst.");
+  for (const k of karten) zeilen.push("- " + uhr(k.t) + " " + (k.titel || k.art) + (k.anzahl > 1 ? " (" + k.anzahl + "×)" : "") + " · " + k.befund);
+  zeilen.push("");
+  const v = inst.verdacht;
+  if (v) {
+    const o = Spiel.verdacht.optionen(inst);
+    const uz = o && o.ursachen.find(x => x.id === v.ursache), gz = o && o.geraete.find(x => x.id === v.geraet);
+    zeilen.push("Deine Hypothese: Schicht " + (v.schicht || "–") + " · " + (uz ? uz.titel : "–") + " · " + (gz ? gz.name : "–") + " (" + (v.vorEingriff ? "vor" : "nach") + " dem ersten Eingriff festgehalten)");
+  } else zeilen.push("Deine Hypothese: noch keine festgehalten.");
+  if (v && typeof v.treffer === "string" && treffer[v.treffer]) zeilen.push("Ergebnis der Hypothese: " + treffer[v.treffer]);
+  const geaendert = typeof Spiel.geaenderteGeraete === "function" ? Spiel.geaenderteGeraete(inst) : [];
+  zeilen.push("Geänderte Geräte: " + (geaendert.length ? geaendert.map(name).join(", ") : "noch keine"));
+  if (String(inst.notiz || "").trim()) zeilen.push("Notiz: " + String(inst.notiz).trim());
+  return zeilen.join("\n");
+};

@@ -1,25 +1,55 @@
-/* Kompetenzkarte im Lernstand (E2, Hebel 11a) – Präfix kk- */
-.kk-karte{padding:16px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px}
-.kk-kopf{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
-.kk-kopf h3{font:800 var(--fs-5)/1.2 var(--display); margin:0}
-.kk-regionen{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px}
-.kk-region{padding:8px 12px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line)}
-.kk-region h4{margin:0 0 8px; font:700 var(--fs-3)/1.2 var(--display); color:var(--ink)}
-.kk-felder{display:flex; flex-wrap:wrap; gap:6px}
-.kk-feld{all:unset; cursor:pointer; box-sizing:border-box; display:flex; flex-direction:column; gap:0px; min-width:120px; max-width:100%; flex:1 1 120px; padding:8px 8px;
-  border-radius:var(--radius); border:1px solid var(--line); background:var(--panel); font-size:var(--fs-2); line-height:1.25}
-.kk-feld:hover, .kk-feld:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
-.kk-name{font-weight:700; color:var(--ink)}
-.kk-stufe{color:var(--muted); font-size:var(--fs-2)}
-.kk-nebel{border-style:dashed; background:repeating-linear-gradient(135deg, var(--panel-2) 0 6px, var(--panel-3) 6px 12px); color:var(--faint)}
-.kk-nebel .kk-name{color:var(--faint); text-align:center}
-.kk-offen{background:var(--panel)}
-.kk-angefangen, .kk-gesehen{background:color-mix(in srgb, var(--accent-soft) 55%, var(--panel)); border-color:color-mix(in srgb, var(--accent) 35%, var(--line))}
-.kk-geuebt{background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent) 60%, var(--line))}
-.kk-sicher{background:var(--ok-soft); border-color:var(--ok)}
-.kk-gemeistert{background:var(--ok); border-color:var(--ok)}
-.kk-gemeistert .kk-name, .kk-gemeistert .kk-stufe{color:var(--bg)}
-.kk-stern .kk-stufe::after{content:" ✦"}
-.kk-faellig{box-shadow:inset 3px 0 0 var(--warn)}
+/* ---------- Kompetenzkarte im Lernstand (E2, Hebel 11a) – Präfix kk- ----------
+   Runde 4, Strang B: Register über die sechs Regionen statt Kachelfeld.
+   Der Zustand steht als TEXT (kk-stufe) und als FORM (kk-form) – der Text allein reicht,
+   die Farbe bestätigt nur. Fläche und Kante der Karte kommen von .bn-k (bento.css);
+   diese Datei liefert das Innere. Nur Tokens aus basis.css, Schrift nur var(--fs-*),
+   Abstände nur {0,4,8,12,16,24,32}px, Radius nur Tokens. */
+.kk-karte{gap:12px}
+.kk-kopf{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; min-width:0}
+.kk-kopf h3{margin:4px 0 0; font:700 var(--fs-5)/1.2 var(--display); color:var(--ink)}
+.kk-stand{max-width:64ch}
+.kk-regionen{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 24px}
+.kk-region{display:flex; flex-direction:column; gap:8px; min-width:0; padding-top:12px; border-top:1px solid var(--line)}
+.kk-region-kopf{display:flex; align-items:baseline; gap:8px; min-width:0; flex-wrap:wrap}
+.kk-region-nr{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; color:var(--faint)}
+.kk-region h4{margin:0; font:700 var(--fs-4)/1.25 var(--display); color:var(--ink); min-width:0}
+.kk-region-stand{margin-left:auto; font:400 var(--fs-2)/1.3 var(--body); color:var(--faint); white-space:nowrap}
+.kk-felder{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:0 16px}
+
+/* Ein Feld = eine Zeile: Form links, Name und Zustand rechts. Trefferfläche 44 px hoch. */
+.kk-feld{display:grid; grid-template-columns:10px minmax(0,1fr); align-items:center; gap:0 8px;
+  min-height:44px; padding:4px 0; border:0; border-top:1px solid var(--line); border-radius:0; background:none;
+  text-align:left; cursor:pointer; color:var(--ink); font:inherit}
+.kk-feld:hover .kk-name{color:var(--accent)}
+.kk-form{grid-row:1 / span 2; display:block; width:10px; height:10px; border-radius:var(--radius-xs);
+  border:1px solid var(--line-2); background:var(--panel-3)}
+.kk-name{font:600 var(--fs-3)/1.3 var(--body); color:var(--ink); min-width:0; overflow-wrap:anywhere}
+.kk-stufe{font:400 var(--fs-2)/1.3 var(--body); color:var(--muted)}
+
+/* Zustandsformen: gestrichelt = offen/nebelt, gefüllt = geübt, voll = sicher/gemeistert,
+   Warnkante links = fällig. Der Text daneben sagt dasselbe (Farbe trägt keine Information allein). */
+.kk-offen .kk-form{border-style:dashed}
+.kk-angefangen .kk-form{border-style:dotted; background:var(--accent-soft); border-color:var(--accent)}
+.kk-gesehen .kk-form{background:var(--accent-soft); border-color:var(--accent)}
+.kk-geuebt .kk-form{background:var(--accent-soft); border-color:var(--accent); box-shadow:inset 0 0 0 2px var(--panel)}
+.kk-sicher .kk-form{background:var(--ok-soft); border-color:var(--ok); box-shadow:inset 0 0 0 2px var(--panel)}
+.kk-gemeistert .kk-form{background:var(--ok); border-color:var(--ok)}
+.kk-nebel .kk-form{background:none; border-style:dotted; border-color:var(--faint); opacity:.6}
+.kk-faellig .kk-form{border-color:var(--warn); border-left-width:4px; background:var(--warn-soft)}
 .kk-faellig .kk-stufe{color:var(--warn); font-weight:700}
-.kk-legende{margin:0}
+.kk-nebel{color:var(--faint)}
+.kk-nebel .kk-name{color:var(--faint); font-style:italic}
+
+/* Legende: dieselben Formen einmal mit Namen – sie ist Teil des Registers, kein Beiwerk. */
+.kk-legende{display:flex; align-items:center; flex-wrap:wrap; gap:4px 12px; padding-top:12px; border-top:1px solid var(--line)}
+.kk-legende-titel{font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+.kk-legende-punkt{display:inline-flex; align-items:center; gap:4px; font:400 var(--fs-2)/1.2 var(--body); color:var(--muted)}
+.kk-legende-punkt .kk-form{width:8px; height:8px}
+
+@media (max-width:1100px){
+  .kk-regionen{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:760px){
+  .kk-felder{grid-template-columns:minmax(0,1fr)}
+  .kk-region-stand{margin-left:0; white-space:normal}
+}

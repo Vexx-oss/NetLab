@@ -78,7 +78,9 @@
 }
 @media (max-width:900px){
   .bn-raster{grid-template-columns:minmax(0,1fr); gap:var(--bn-gap-l)}
-  .bn-s3,.bn-s4,.bn-s5,.bn-s6,.bn-s7,.bn-s8{grid-column:span 1}
+  /* Auch die volle Breite muss hier auf "eine Spalte" zurück: ohne .bn-s12/.breit in dieser
+     Regel entstünden 12 implizite Spalten und die Ansicht zerfiele (Befund Strang B, 31.10.2026). */
+  .bn-s3,.bn-s4,.bn-s5,.bn-s6,.bn-s7,.bn-s8,.bn-s12,.bn-k.breit{grid-column:span 1}
 }
 @media (max-width:720px){
   .bn-k{padding:12px}

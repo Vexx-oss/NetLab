@@ -10,6 +10,9 @@
    UI.labor.dock(id|null) zeigt einen Reiter (oder klappt ein), UI.labor.dockReiter(id, verfuegbar) gibt Plan/Akte frei.
    Ruhe beim Start (Ausbau 1.2, A3): Inspektor erscheint erst mit der ersten Auswahl, die Simulation erst mit der ersten
    Aufzeichnung (und klappt dann einmal auf). laden(netz, {ebene, ansichtMenue:false}) – das Ticket legt die Ebene fest.
+   Einzelklick (Strang D): Klick ohne Ziehen auf Gerät, Port, Kabel oder Zone zeigt die Infos rechts
+   (UI.inspektor) und öffnet den Dock-Reiter „Inspektor" – der Werkzeugmodus bleibt unverändert.
+   Kabel/Zone: UI.labor.zeigeKabel(id) · UI.labor.zeigeZone(cidr) (auch der Resolver UI.fehlerziel nutzt sie).
    Geräte-Fächer: editor-fach.js (UI.laborFach).
    Änderungen laufen nur über verlauf.aendern(); gezeichnet wird nach Bus „netz-geaendert“ (gebündelt per rAF).
    Werkzeuge/Zeiger: editor-werkzeuge.js (UI.laborWerkzeuge), Pakete/Ping: editor-pakete.js (UI.laborPakete). */
@@ -27,6 +30,7 @@ UI.labor = (() => {
     hover: null, geplant: false, einpassenAusstehend: true,
     ende: [],                    /* Port-LEDs und Portnamen in Z.s.ueber; Aufbau in kabelEndenBauen() */
     kabelHover: null, geraeteHover: null,
+    info: null,                  /* {art:"kabel", kid} | {art:"zone", cidr} – Infos rechts (Strang D) */
   };
   const F = {};                  /* interne Helfer für editor-werkzeuge.js / editor-pakete.js */
   function bereit(){ if (!F.animiere && UI.laborPakete) UI.laborPakete.einrichten(Z, F); return F; }
@@ -37,6 +41,56 @@ UI.labor = (() => {
   /* „!“-Warnungen der Live-Prüfung (Modell.pruefen): Stufenregeln entscheiden je Ticket (laden-Option warnungen) */
   const warnungenAn = () => { const w = Z.opt && Z.opt.warnungen; return typeof w === "function" ? !!w() : w !== false; };
   function einstLabor(teil){ const e = einst(); e.labor = Object.assign({}, e.labor, teil); store.set("einst", e); }
+
+  /* ---------- Einzelklick (Strang D): Klick ohne Ziehen zeigt IMMER die Infos rechts ----------
+     Der Klick auf Gerät, Port, Kabel, Zone oder Gerätelabel öffnet unabhängig vom aktiven
+     Werkzeug den Inspektor – der Werkzeugmodus bleibt unverändert. Der Pfad hängt am pointerup
+     des SVGs (nicht am click): die Fläche setzt beim pointerdown den Pointer-Capture, danach
+     ginge „click" ans SVG. Ein Ziehen (mehr als 5 px) ist kein Klick. Kein Fokusklau: es wird
+     nichts fokussiert, nur ausgewählt und der Dock-Reiter geöffnet. */
+  let klickStart = null;
+  function klickZiel(el){
+    if (!el || typeof el.closest !== "function") return null;
+    const kab = el.closest("[data-kabel]");
+    if (kab && Z.svg && Z.svg.contains(kab)) return {art: "kabel", kid: kab.dataset.kabel};
+    const zone = el.closest(".zone");
+    if (zone && Z.svg && Z.svg.contains(zone) && zone.dataset && zone.dataset.cidr) return {art: "zone", cidr: zone.dataset.cidr};
+    const port = el.closest("[data-port]");
+    if (port && Z.svg && Z.svg.contains(port)) {
+      const ger = port.closest("[data-id]");
+      return {art: "port", id: ger && ger.dataset ? ger.dataset.id : null, port: port.dataset ? port.dataset.port : null};
+    }
+    const ger = el.closest("[data-id]");
+    if (ger && Z.svg && Z.svg.contains(ger) && ger.dataset) return {art: "geraet", id: ger.dataset.id};
+    return null;
+  }
+  function klickAuswerten(ziel){
+    if (!ziel || !Z.netz) return false;
+    if (ziel.art === "kabel" && ziel.kid) { dockZeigen("inspektor"); zeigeKabel(ziel.kid); return true; }
+    if (ziel.art === "zone" && ziel.cidr) { dockZeigen("inspektor"); zeigeZone(ziel.cidr); return true; }
+    if (ziel.art === "port" && ziel.id && Z.netz.geraete[ziel.id]) {
+      auswaehlen(ziel.id, ziel.port || undefined); dockZeigen("inspektor"); inspektorZeigen(); return true;
+    }
+    if (ziel.art === "geraet" && ziel.id && Z.netz.geraete[ziel.id]) {
+      auswaehlen(ziel.id); dockZeigen("inspektor"); inspektorZeigen(); return true;
+    }
+    return false;
+  }
+  function klickpfadEinrichten(){
+    if (!Z.svg || typeof Z.svg.addEventListener !== "function") return;
+    Z.svg.addEventListener("pointerdown", e => {
+      if (e.button !== 0) { klickStart = null; return; }
+      klickStart = {x: e.clientX, y: e.clientY, pid: e.pointerId, ziel: e.target};
+    });
+    Z.svg.addEventListener("pointerup", e => {
+      const s = klickStart; klickStart = null;
+      if (!s || e.pointerId !== s.pid) return;
+      const dx = (typeof e.clientX === "number" ? e.clientX : s.x) - s.x, dy = (typeof e.clientY === "number" ? e.clientY : s.y) - s.y;
+      if (Math.hypot(dx, dy) > 5) return;                       /* Ziehen, kein Klick */
+      klickAuswerten(klickZiel(e.target) || klickZiel(s.ziel));
+    });
+    Z.svg.addEventListener("pointercancel", () => { klickStart = null; });
+  }
 
   /* ---------- Aufbau ---------- */
   function zeigen(container){
@@ -165,6 +219,7 @@ UI.labor = (() => {
     }
     UI.laborFach?.einrichten(Z, F);
     UI.laborWerkzeuge?.einrichten(Z, F);
+    klickpfadEinrichten();
     bereit();
     layoutAnwenden();
     auftragZeichnen();
@@ -947,13 +1002,13 @@ UI.labor = (() => {
   }
   /* Kern aller Auswahlwege: setzt die Menge, zeichnet die Ringe, meldet den Bus, öffnet den Inspektor. */
   function auswahlSetzen(ids, o = {}){
-    const vorher = [...Z.auswahlSet].sort().join("|");
+    const vorher = [...Z.auswahlSet].sort().join("|") + "|" + (Z.auswahl?.geraet || "") + ":" + (Z.auswahl?.port || "");
     const gueltig = [];
     for (const id of ids || []) if (Z.netz?.geraete[id] && !gueltig.includes(id)) gueltig.push(id);
     Z.auswahlSet = new Set(gueltig);
     const primaer = o.primaer && Z.auswahlSet.has(o.primaer) ? o.primaer : gueltig[gueltig.length - 1] || null;
     Z.auswahl = primaer ? {geraet: primaer, port: o.port || null} : null;
-    if (gueltig.length) Z.kabelWahl = null;
+    if (gueltig.length) { Z.kabelWahl = null; Z.info = null; }
     for (const el of Z.gEl.values()) {
       const an = Z.auswahlSet.has(el.dataset.id);
       el.classList.toggle("gewaehlt", an);
@@ -962,7 +1017,7 @@ UI.labor = (() => {
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
     kabelEndenAktualisieren();          /* gewählte Geräte zeigen ihre Portnamen auch unter 90 % Zoom */
     beschriftungenSkalieren();          /* Auswahl hebt Labels hervor (Klasse „vorn") */
-    const geaendert = vorher !== [...Z.auswahlSet].sort().join("|");
+    const geaendert = vorher !== [...Z.auswahlSet].sort().join("|") + "|" + (Z.auswahl?.geraet || "") + ":" + (Z.auswahl?.port || "");
     if (!geaendert) return gueltig;
     Bus.senden("auswahl", {geraet: primaer || null, port: Z.auswahl?.port || null, geraete: gueltig.slice(), mehr: gueltig.length});
     /* Auswahl zeigt den Inspektor – außer Plan oder Akte sind gerade offen (dort gehört die Auswahl zum Vergleich) */
@@ -1063,17 +1118,22 @@ UI.labor = (() => {
   function kabelWaehlen(kid){
     Z.kabelWahl = kid || null;
     if (kid && Z.auswahlSet.size) auswahlSetzen([]);
+    if (kid) Z.info = {art: "kabel", kid};
+    else Z.info = null;                       /* leerer Klick schließt auch den Zonen-Steckbrief */
     for (const el of Z.kEl.values()) el.classList.toggle("gewaehlt", el.dataset.kabel === Z.kabelWahl);
     kabelEndenAktualisieren();
+    if (Z.root) inspektorZeigen();          /* Kabel-Infos rechts (Strang D), ohne den Werkzeugmodus zu ändern */
   }
   function inspektorZeigen(){
     const c = Z.el.inspektor; if (!c || !Z.netz) return;
     const id = Z.auswahl?.geraet;
     try {
       if (id) {
-        if (typeof UI.inspektor?.zeigen === "function") return UI.inspektor.zeigen(c, Z.netz, id, Z.verlauf);
+        if (typeof UI.inspektor?.zeigen === "function") return UI.inspektor.zeigen(c, Z.netz, id, Z.verlauf, {port: (Z.auswahl && Z.auswahl.port) || null});
         return platzhalterInspektor(c, Z.netz.geraete[id]);
       }
+      if (Z.info && Z.info.art === "kabel" && typeof UI.inspektor?.kabel === "function") return UI.inspektor.kabel(c, Z.netz, Z.info.kid);
+      if (Z.info && Z.info.art === "zone" && typeof UI.inspektor?.zone === "function") return UI.inspektor.zone(c, Z.netz, Z.info.cidr);
       if (typeof UI.inspektor?.leeren === "function") return UI.inspektor.leeren(c);
     } catch (e) { console.error("Inspektor", e); }
     c.replaceChildren(h("div", {class: "lb-insp-leer"},
@@ -1407,6 +1467,20 @@ UI.labor = (() => {
     else c.replaceChildren(h("p", {class: "lb-sim-platz"}, "Hier erscheint die Aufzeichnung eines Pings: jedes Paket, jede Station, und warum etwas verworfen wird."));
   }
   function zentrieren(id){ if (!Z.netz?.geraete[id]) return; auswaehlen(id); sichtbarMachen(id, true); F.hervorheben?.([{geraet: id}], 1400); }
+  /* Kabel und Zone in den Inspektor holen – von Strang D und vom zentralen Resolver (UI.fehlerziel) genutzt. */
+  function zeigeKabel(kid){
+    if (!Z.netz || !kid) return;
+    kabelWaehlen(kid);
+    dockZeigen("inspektor");
+    inspektorZeigen();
+  }
+  function zeigeZone(cidr){
+    if (!Z.netz || !cidr) return;
+    if (Z.auswahlSet.size || Z.auswahl) auswahlSetzen([]);
+    Z.info = {art: "zone", cidr};
+    dockZeigen("inspektor");
+    inspektorZeigen();
+  }
   function konsole(id){
     const g = Z.netz?.geraete[id]; if (!g) return;
     if (UI.terminal) { auswaehlen(id); UI.terminal.oeffnen(id); return; }          /* Phase C: Terminal im Dock */
@@ -1451,6 +1525,7 @@ UI.labor = (() => {
     get el(){ return {auftrag: Z.el.auftrag || null, inspektor: Z.el.inspektor || null, sim: Z.el.sim || null, plan: Z.el.plan || null, akte: Z.el.akte || null, terminal: Z.el.terminal || null}; },
     get werkzeugName(){ return Z.werkzeug; },
     zeigen, wieder, laden, auswaehlen, neuZeichnen, einpassen, aufraeumen, werkzeug, zentrieren, konsole, einsetzen,
+    zeigeKabel, zeigeZone,
     rueckgaengig, wiederholen, loeschen,
     hervorheben: (liste, ms) => bereit().hervorheben?.(liste, ms),
     animiere: (e, o) => bereit().animiere ? F.animiere(e, o) : Promise.resolve(),

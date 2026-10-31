@@ -1,37 +1,104 @@
-/* ---------- Akte und Verdacht im Dock (ak-, Phase B) ---------- */
-.ak{display:flex; flex-direction:column; gap:12px; padding:12px 14px 16px}
-.ak h3{font:800 var(--fs-4)/1.2 var(--display); margin:0}
-.ak h3 small{color:var(--muted); font:600 var(--fs-2)/1 var(--body)}
-.ak-verdacht{display:flex; flex-direction:column; gap:4px; padding:12px; border-radius:var(--radius); border:1px solid color-mix(in srgb, var(--info) 45%, var(--line)); background:color-mix(in srgb, var(--info) 7%, var(--panel))}
-.ak-verdacht.gesetzt{border-color:color-mix(in srgb, var(--ok) 40%, var(--line)); background:color-mix(in srgb, var(--ok) 6%, var(--panel))}
+/* ---------- Einsatzakte (Runde 4, Strang A): Dossier im Dock – Präfix ak- ----------
+   Vertrag: docs/entwicklung/Entwurf – Runde 4 (Jobdoku & QoL).md § 3 Strang A;
+   Grundregeln: docs/entwicklung/Entwurf – Bento 2.5 (Arbeitsplatz).md § 2.
+   Nur Tokens aus basis.css; Schrift nur var(--fs-*); Abstände aus {0,4,8,12,16,24,32}px;
+   Radius nur Tokens; Fokus kommt aus basis.css (:focus-visible); Bewegung nur var(--dauer). */
+
+.ak{display:flex; flex-direction:column; gap:12px; padding:12px}
+
+/* ---------- Aktenkopf (Deckel des Dossiers) ---------- */
+.ak-kopf-oben{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; min-width:0}
+.ak-kopf-text, .ak-v-kopf > div{display:flex; flex-direction:column; gap:4px; min-width:0}
+.ak-kopf-rechts{display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex:0 0 auto}
+.ak-titel{margin:0; font:700 var(--fs-6)/1.2 var(--display); letter-spacing:-.01em; color:var(--ink); overflow-wrap:anywhere}
+
+/* ---------- Fortschrittsband: sechs Sprossen aus echten Daten ---------- */
+.ak-kopf, .ak-leiter, .ak-karten, .ak-register, .ak-doku, .ak-verdacht, .ak-leer-kachel{gap:8px}
+.ak-sprossen, .ak-chips{display:flex; flex-wrap:wrap; gap:4px}
+.ak-sprosse{display:inline-flex; align-items:center; gap:4px; min-height:28px; padding:4px 8px; border:1px solid var(--line); border-radius:999px;
+  color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.03em; text-transform:uppercase}
+.ak-sprosse.erledigt{color:var(--ink); border-color:color-mix(in srgb, var(--ok) 40%, var(--line)); background:var(--ok-soft)}
+.ak-sprosse.naechster{border-color:var(--accent); color:var(--ink)}
+.ak-punkt{width:6px; height:6px; border-radius:50%; border:1px solid var(--line-2); background:var(--panel-3)}
+
+/* ---------- Hypothese: Stempel oder ruhige Auswahlzeilen ---------- */
+.ak-verdacht.gesetzt, .ak-stempel{border-color:color-mix(in srgb, var(--accent) 38%, var(--line)); background:var(--accent-soft)}
 .ak-verdacht.ruhig{border-style:dashed; background:none}
-.ak-v-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
-.ak-v-kopf small, .ak-v-zeit{color:var(--muted); font-size:var(--fs-2)}
-.ak-v-satz{font-weight:700; margin:0}
-.ak-schritt{margin:4px 0 0; color:var(--muted); font-size:var(--fs-2); font-weight:700; text-transform:uppercase; letter-spacing:.04em}
-.ak-chips{display:flex; flex-wrap:wrap; gap:6px}
-.ak-chip{min-height:30px; padding:4px 8px; border-radius:999px; border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1.2 var(--body); cursor:pointer; text-align:left}
-.ak-chip:hover{border-color:var(--accent)}
-.ak-chip.an{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
-.ak-ursachen .ak-chip{border-radius:var(--radius)}
-.ak-geraet{width:100%}
-.ak-v-fuss{display:flex; justify-content:flex-end; gap:8px; margin-top:6px}
-.ak-karten h3{margin-bottom:6px}
-.ak-liste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
-.ak-karte{display:grid; grid-template-columns:auto minmax(0, 1fr) auto; gap:8px; align-items:start; padding:8px 8px; border-radius:var(--radius); border:1px solid var(--line); background:var(--panel-2); border-left:3px solid var(--line-2)}
-.ak-karte.ok{border-left-color:var(--ok)}
-.ak-karte.nicht{border-left-color:var(--bad)}
-.ak-karte.wichtig{border-color:color-mix(in srgb, var(--geld) 55%, var(--line))}
-.ak-sym{font-size:var(--fs-4); line-height:1.3}
-.ak-text{display:flex; flex-direction:column; gap:0px; min-width:0}
-.ak-text b{font-size:var(--fs-3)}
-.ak-text b small{color:var(--muted); font-weight:600}
-.ak-befund{font-size:var(--fs-2)}
-.ak-grund{color:var(--info); font-size:var(--fs-2)}
-.ak-stern{border:0; background:none; color:var(--faint); font-size:var(--fs-5); line-height:1; cursor:pointer; padding:2px}
-.ak-stern.an, .ak-stern:hover{color:var(--geld)}
-.ak-leer{color:var(--muted); font-size:var(--fs-2); margin:0}
-/* R10: ein Block für die Erfolgsfarbe – Zeit „gut" in der Akte, Verdacht „voll" im Dock */
+.ak-v-kopf{display:flex; align-items:flex-start; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.ak h3, .ak-v-kopf h3{display:flex; align-items:center; gap:4px; margin:0; font:700 var(--fs-4)/1.25 var(--display)}
+.ak h3 small{color:var(--muted); font:600 var(--fs-2)/1.2 var(--body)}
+.ak-v-kopf small{color:var(--muted); font:400 var(--fs-2)/1.4 var(--body)}
+.ak-v-satz{margin:0; font:700 var(--fs-4)/1.35 var(--display); color:var(--ink)}
+.ak-v-zeit{color:var(--muted); font-size:var(--fs-2)}
 .ak-v-zeit.gut, .sp-verdacht.voll{color:var(--ok)}
 .sp-verdacht{margin:8px 0 0; font-size:var(--fs-3); line-height:1.45}
-.ak-karte.aussage{border-left-color:var(--line-2)}   /* Kundenaussage am Telefon (Hotline) */
+.ak-ergebnis{display:flex; align-items:center; gap:4px; margin:0; color:var(--ok); font:700 var(--fs-3)/1.3 var(--body)}
+.ak-schritt{margin:0; color:var(--muted); font:700 var(--fs-2)/1.2 var(--body); text-transform:uppercase; letter-spacing:.04em}
+.ak-chip{display:inline-flex; align-items:center; min-height:44px; padding:0 12px; border:1px solid var(--line-2); border-radius:999px;
+  background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1.3 var(--body); text-align:left}
+.ak-chip:hover{border-color:var(--accent); background:var(--panel-3)}
+.ak-chip.an{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.ak-ursachen .ak-chip, .ak-geraet .ak-chip{border-radius:var(--radius-s)}
+.ak-geraet{width:100%}
+.ak-v-fuss{display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; margin-top:8px}
+.ak .knopf, .ak .knopf.klein{min-height:44px}
+
+/* ---------- Schichtentreppe: Register mit Beweiszahl, Filter nur für den Einstieg ---------- */
+.ak-register-kopf, .ak-karten-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap}
+.ak-register-kopf small{color:var(--faint); font-size:var(--fs-1)}
+.ak-treppe{display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:4px}
+.ak-schicht{display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:44px; padding:4px;
+  border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--muted); font:600 var(--fs-1)/1.2 var(--mono)}
+.ak-schicht:hover:not(:disabled){border-color:var(--line-2); color:var(--ink)}
+.ak-schicht.an{border-color:var(--accent); background:var(--accent-soft); color:var(--ink)}
+.ak-schicht:disabled{opacity:.55; cursor:default}
+.ak-schicht-nr{font:700 var(--fs-5)/1 var(--display); color:var(--ink); font-variant-numeric:tabular-nums}
+.ak-schicht-zahl{font:600 var(--fs-1)/1.2 var(--mono); color:var(--faint)}
+
+/* ---------- Beweistimeline ---------- */
+.ak-liste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.ak-karte{display:grid; grid-template-columns:minmax(0, 1fr) 44px; align-items:start; border:1px solid var(--line);
+  border-left:3px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2)}
+.ak-karte.ok{border-left-color:var(--ok)}
+.ak-karte.nicht{border-left-color:var(--bad)}
+.ak-karte.aussage{border-left-color:var(--line-2)}
+.ak-karte.wichtig{border-color:color-mix(in srgb, var(--geld) 55%, var(--line))}
+.ak-ziel{display:grid; grid-template-columns:auto auto minmax(0, 1fr) auto; gap:8px; align-items:start; width:100%; min-height:44px;
+  padding:8px; border:0; border-radius:var(--radius-s); background:none; color:var(--ink); text-align:left}
+.ak-ziel.statisch{cursor:default}
+.ak-ziel:not(.statisch):hover{background:var(--panel-3)}
+.ak-sym{color:var(--muted); font-size:var(--fs-4); line-height:1.3}
+.ak-zeit{color:var(--faint); font:600 var(--fs-1)/1.6 var(--mono); font-variant-numeric:tabular-nums}
+.ak-text{display:flex; flex-direction:column; gap:0; min-width:0}
+.ak-text b{font:600 var(--fs-3)/1.35 var(--body); overflow-wrap:anywhere}
+.ak-text b small{color:var(--muted); font-weight:600}
+.ak-befund{color:var(--muted); font-size:var(--fs-2); overflow-wrap:anywhere}
+.ak-grund{color:var(--info); font-size:var(--fs-1)}
+.ak-rail{align-self:stretch; display:flex; align-items:center; justify-content:center; min-width:24px;
+  border-left:2px solid var(--line); color:var(--muted); font:700 var(--fs-1)/1 var(--mono)}
+.ak-stern{display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; border:0;
+  border-radius:0 var(--radius-s) var(--radius-s) 0; background:none; color:var(--faint); font-size:var(--fs-5); line-height:1}
+.ak-stern.an, .ak-stern:hover{color:var(--geld); background:var(--panel-3)}
+.ak-leer{color:var(--muted); font-size:var(--fs-2); margin:0}
+
+/* ---------- Dokumentation: aufklappbar, Bericht kopieren ---------- */
+.ak-doku-kopf{display:flex; align-items:center; gap:8px; min-height:44px; list-style:none; cursor:pointer;
+  color:var(--ink); font:600 var(--fs-3)/1.3 var(--display)}
+.ak-doku summary::-webkit-details-marker{display:none}
+.ak-doku-pfeil{display:inline-flex; margin-left:auto; color:var(--faint)}
+.ak-doku details[open] .ak-doku-pfeil{transform:rotate(180deg)}
+.ak-doku-inhalt{display:flex; flex-direction:column; gap:8px; padding-top:8px}
+.ak-doku-zeile{display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:4px 0;
+  border-top:1px solid var(--line); color:var(--muted); font-size:var(--fs-2)}
+.ak-doku-zeile:first-child{border-top:0; padding-top:0}
+.ak-doku-zeile b{color:var(--ink); font-weight:600}
+.ak-doku-zeile span{text-align:right; overflow-wrap:anywhere}
+.ak-kopieren{align-self:flex-start; min-height:44px}
+
+/* ---------- Schmale Dock-Spalte (960 px: 296 px, 720 px: 250 px) ---------- */
+@container (max-width:360px){
+  .ak{gap:8px; padding:8px}
+  .ak-titel{font-size:var(--fs-5)}
+  .ak-sym{display:none}
+  .ak-ziel{grid-template-columns:auto minmax(0, 1fr) auto}
+}

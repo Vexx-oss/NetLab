@@ -250,7 +250,7 @@
     /* ---------- C · karriere.js overlay — die zwei historisch kaputten Fälle ---------- */
     pruefe("C1 · „Prüfung AP1“ (karriere.js:264): Escape schließt — der Befund vom 06.10.2026" + ZUSATZ, () => {
       if (!KANN_LADEN) return;
-      const st = escStand(["karriere.js"], [
+      const st = escStand(["karriere.js", "lernstand.js"], [
         "Spiel.pruefung = Object.assign({}, Spiel.pruefung, {aktiv: () => ({art: 'AP1', aufgaben: []}), restMs: () => 0});",
         "UI.spiel = {oeffnen(){}, status(){}};",
       ]);

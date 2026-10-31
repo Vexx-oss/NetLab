@@ -540,3 +540,58 @@ Verhalten (Testvertrag: exakte Statuszeile, 300 × 56) — die neuen Inhalte ent
 R12 ist mit 7 Filtern und 52 Karten im Training designgemäß über der alten 6-Bedienelemente-Grenze;
 die Entscheidung „einfrieren oder Oberfläche reduzieren" bleibt dem Nutzer, wie in der Übergabe
 vom 29.10.2026 notiert.
+## 40 · Runde 4 — Jobdoku, Flugschreiber, Fenster, Werkstattregal (31.10.2026)
+
+**Was der Nutzer bemängelte.** Die noch alten Flächen — Verdacht/Akte, Lernstand, Simulator,
+Inspektor, Shop, Fenster, Interaktion — passten nicht mehr zu Bento 2.5 und trugen den
+„amateurhaften Fensterstrich" (native Windows-Titelleiste). Verlangt war: eigenständige, originelle
+Bento-Sprache, glaubwürdige Job-Simulation mit didaktischer Hilfe, und das Ganze als Fassung 2.6.0
+veröffentlicht. Vertrag:
+[`Entwurf – Runde 4 (Jobdoku & QoL)`](<Entwurf – Runde 4 (Jobdoku & QoL).md>),
+[`Architektur § 23`](../Architektur.md).
+
+**Die Gestaltungsidee je Fläche (eigene Motive statt einer Kartenwand).**
+- **Verdacht + Jobdoku = Einsatzakte.** Ein Dossier, kein Formular: Aktenkopf mit Vorgang und
+  Beginn, didaktisches Fortschrittsband (beobachten · messen · eingrenzen · Hypothese · handeln ·
+  dokumentieren) aus echten Daten, Hypothesen-Stempel, Schichtentreppe 1·2·3·4·7 als Register mit
+  Beweiszahl je Schicht, Beweistimeline mit Schicht-Rail, ★-Markierung. Jede Evidenzkarte ist ein
+  Weg zum Fundort (Gerät/Port/Kabel) — der Sprung läuft über einen Resolver, der auch dem
+  Flugschreiber und dem Inspektor dient. Dokumentationsblock mit „Einsatzbericht kopieren", der
+  nur Sichtbares enthält.
+- **Lernstand = Ausbildungs-Cockpit.** Sachlich, nicht gamifiziert: Prüfungsreife-Kachel, ein
+  prominenter „Nächster Schritt" mit genau einer Hauptaktion (aus laufender Prüfung, fälliger
+  Wiederholung, wackeliger Fertigkeit, Aufstieg, offenem Feld — in dieser Reihenfolge), Kompetenz-
+  karte als sechs Regionen-Register (Zustand als Text UND Form, Nebel bleibt Nebel), Fehlerheft
+  mit echtem Fehlertext und Üben-Knopf, Behalten mit ehrlichen „–".
+- **Simulator = Flugschreiber.** Kopf mit Kunde und Ergebnis, Was/Wo-Zeile, Format-Umschalter
+  Ergebnis / Schritt für Schritt, Warnbanner „Erster Fehler" mit „Zum Fundort", Zeitachse mit
+  Schichtbändern L2/L3/L4/L7. Jede Fehler-/Warnmeldung ist anklickbar. **Anfänger-Hilfe** als
+  Toggle: Hinweise, Nächster-Schritt-Ort und Highlight des nötigen Geräts/Reiters — ohne Fokusklau,
+  ohne Lösung; aus = ruhige Profi-Sicht.
+- **Inspektor = Steckbrief.** Einzelklick ohne Ziehen auf Gerät, Port, Kabel oder Zone öffnet die
+  Infos rechts, **unabhängig vom aktiven Werkzeug**; das Werkzeug bleibt aktiv. Steckbriefe für
+  Gerät (Rolle, Zustand, Ports, Adresse, VLAN), Port, Kabel (beide Enden, Link) und Zone (CIDR,
+  Mitglieder, Gateway); Reiter ≥ 44 px mit `role="tab"`, Auswahl zusätzlich als Rail (nicht nur Farbe).
+- **Shop = Werkstattregal.** Vier Warengruppen nach Aufgabe (Werkzeuge, Automatisierung, Aussehen
+  mit echter Token-Vorschau, Kunden & Prüfung als Verweis-Kacheln), Zustands-Chips mit Text und
+  Symbol, genau eine Aktion je Artikel, ehrliche Empfehlung nur aus echten Daten. Kaufbestätigung
+  ab 100 € als ruhiger Dialog mit Esc/Enter und Fokus-Rückkehr.
+- **Fenster = eigenes Programm.** Die Vollansicht hat keine native Titelleiste mehr; die
+  Bento-Kopfzeile selbst ist die Titelleiste: Drag-Region, Doppelklick maximiert, drei 44-px-
+  Fensterknöpfe mit `aria-label` und Fokusring, Kennzahlen passen sich 880/960/1440 an. Leiste,
+  Tray, Snap und Resize bleiben unverändert.
+
+**Was gemessen ist.** `node tests/run.js` **930/930 grün**, 0 übersprungen (52 neue Fälle, sechs
+neue Testdateien) · Rauchtest **45/45** · `klassen.py` **0** · `ethos.py` **GRÜN** und besser
+als der eingefrorene Stand (R1 24→23, R2 20→17, R4 169→140, R9 62→58, R10 42 = Stand) ·
+`umlaute.py` GRÜN (0 offene Befunde) · Simulation unverändert. Sichtprüfung jeder Fläche bei
+1440/960/720; Themes/„Bewegung aus" stichprobenweise (Papier, Hell, Keramik, Nordlicht), im
+Aufbau zusätzlich die Token-Regel (keine Farb-/Maß-Literale in neuem CSS). Zwei unabhängige
+Prüfungen (Bento-Design; Theme/Struktur/A11y) haben gegengelesen; die Leitung hat ihre Befunde
+eingearbeitet.
+
+**Ehrlich offen.** R12 (`ethos --dom`) bleibt ungemessen (wie in den Vorrunden); die
+Android-APK bleibt aus (kein SDK); das echte Tauri-Fenster wurde über einen Prüfbau mit eigener
+App-Kennung bedient, weil eine fremde Programm-Instanz lief (Regel 1: keine fremden Prozesse
+beenden); die restlichen Themes wurden stichprobenweise statt flächendeckend fotografiert; der
+Puls am Dock-Reiter (Anfänger-Hilfe) ist im Code, aber nicht im Foto festgehalten.

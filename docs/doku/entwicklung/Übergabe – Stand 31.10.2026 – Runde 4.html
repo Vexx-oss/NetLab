@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übergabe — Stand 31.10.2026 (Runde 4 „Jobdoku &amp;amp; QoL&quot;) · Netzwerk-Labor</title>
+<meta name="description" content="Der Nutzer hat sieben Stränge benannt, die noch vor Bento 2.5 entstanden waren: Verdacht/Jobdoku.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Übergabe — Stand 31.10.2026 (Runde 4 „Jobdoku &amp;amp; QoL&quot;)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-auftrag-und-vorgehen">1 · Auftrag und Vorgehen</a></li>
+<li><a href="#2-was-jetzt-da-ist">2 · Was jetzt da ist</a></li>
+<li><a href="#3-gemessene-abnahme-in-dieser-sitzung">3 · Gemessene Abnahme (in dieser Sitzung)</a></li>
+<li><a href="#4-was-bewusst-nicht-passiert-ist">4 · Was bewusst nicht passiert ist</a></li>
+<li><a href="#5-prufungen-befunde-fix-runde">5 · Prüfungen, Befunde, Fix-Runde</a></li>
+<li><a href="#6-veroffentlichung-2-6-0">6 · Veröffentlichung 2.6.0</a></li>
+<li><a href="#7-nachweis-2-6-0-nach-dem-deploy-gemessen">7 · Nachweis 2.6.0 (nach dem Deploy gemessen)</a></li>
+<li><a href="#8-fur-die-nachste-sitzung">8 · Für die nächste Sitzung</a></li>
+</ul>
+</nav><h1 id="ubergabe-stand-31-10-2026-runde-4-jobdoku-amp-qol">Übergabe — Stand 31.10.2026 (Runde 4 „Jobdoku &amp; QoL")</h1>
+<h2 id="1-auftrag-und-vorgehen">1 · Auftrag und Vorgehen</h2>
+<p>Der Nutzer hat sieben Stränge benannt, die noch vor Bento 2.5 entstanden waren: <strong>Verdacht/Jobdoku</strong> (Einsatzakte), <strong>Lehrlings-/Lernstandbereich</strong> (Ausbildungs-Cockpit), <strong>Simulator + Fehler→Ziel + Beginner-Hilfe</strong> (Flugschreiber), <strong>rechte Sidebar/Inspektor</strong> (Einzelklick zeigt immer Infos), <strong>Fenster/Shell</strong> (eigenständiges Programm statt nativer Titelleiste), <strong>Shop</strong> (Werkstattregal) und einen <strong>QoL-/Barrierefreiheits-Querschnitt</strong>. Verlangt war ausdrücklich: originell neu denken statt polieren, Bento-2.5-Regeln einhalten, echte Daten, keine Emoji, und am Ende <strong>Fassung 2.6.0 inklusive Push, Tag, Release und Live-Seite</strong> (Freigabe des Nutzers vom 30.10.2026).</p>
+<p>Umgesetzt als <strong>fünf Schreib-Owner</strong> (ein Schreiber je Datei, AGENTS-Ausnahme „Schwarm"), davor eine <strong>Phase 0 der Leitung</strong> (Audit, Gestaltungsvertrag, Extraktion), danach <strong>zwei unabhängige Prüfungen</strong> (Bento-Design; Theme/Struktur/A11y), Fix-Runde und Gesamtabnahme durch die Leitung. Verträge: <a href="../entwicklung/Entwurf%20%E2%80%93%20Runde%204%20%28Jobdoku%20%26%20QoL%29.html">Entwurf – Runde 4 (Jobdoku &amp; QoL)</a>, <a href="../Architektur.html">Architektur § 23</a>, <a href="../entwicklung/Design%20%E2%80%93%20Spielspa%C3%9F%202.0.html">Design § 40</a>.</p>
+<h2 id="2-was-jetzt-da-ist">2 · Was jetzt da ist</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Strang</th><th>Dateien</th><th>Was neu ist</th></tr></thead><tbody><tr><td>Phase 0 · Trennung</td><td><code>src/ui/lernstand.js</code>, <code>src/ui/shop.js</code> (neu), <code>src/ui/karriere.js</code> (nur noch Kunden/Wiki/Mini/Einstellungen), <code>src/stil/lernstand.css</code>, <code>src/stil/shop.css</code></td><td>Lernstand und Shop aus der 689-Zeilen-Sammeldatei gezogen; Verhalten und Bilder unverändert (878/878 vor und nach der Extraktion); <code>UI.karriere._helfer</code> + Alias-Namen für Rückwärtskompatibilität</td></tr><tr><td>A · Einsatzakte</td><td><code>src/ui/akte.js</code>, <code>src/stil/akte.css</code>, <code>src/spiel/verdacht.js</code></td><td>Aktenkopf mit Vorgang/Beginn, didaktisches Fortschrittsband, Hypothesen-Stempel, Schichtentreppe 1·2·3·4·7 mit Beweiszahl, Beweistimeline mit ★, Evidenzkarten springen zum Fundort, „Einsatzbericht kopieren" ohne Lösungsverrat; Logik additiv</td></tr><tr><td>B · Ausbildungs-Cockpit</td><td><code>src/ui/lernstand.js</code>, <code>src/ui/naechster.js</code> (neu), <code>src/stil/lernstand.css</code>, <code>src/stil/kompetenz.css</code>, <code>src/stil/naechster.css</code></td><td>Prüfungsreife-Kachel, „Nächster Schritt" mit genau einer Hauptaktion, Kompetenzkarte als Register, Fehlerheft mit Üben-Knopf, Behalten ehrlich „–", Training-Empfehlungen aus dem Lernmotor; Hilfe-Abschnitt unverändert eingehängt</td></tr><tr><td>C+D · Flugschreiber &amp; Inspektor</td><td><code>src/ui/simpanel.js</code>, <code>src/ui/pdu.js</code>, <code>src/ui/fehlerziel.js</code> (neu), <code>src/ui/inspektor.js</code>, <code>src/ui/editor.js</code>, <code>src/stil/simulation.css</code>, <code>src/stil/inspektor.css</code>, <code>src/spiel/hilfe.js</code>, <code>src/spiel/naechster.js</code></td><td>Flugschreiber-Kopf mit Ergebnis/Was-Wo, Warnbanner „Erster Fehler" mit „Zum Fundort", Zeitachse mit Schichtbändern, jede Meldung anklickbar; zentraler Resolver <code>UI.fehlerziel</code>; Anfänger-Hilfe (persistiert, Standard Stufe ≤ 2); Einzelklick öffnet Steckbriefe für Gerät/Port/Kabel/Zone ohne den Werkzeugmodus zu verlassen</td></tr><tr><td>E · Fenster</td><td><code>shell/src-tauri/src/fenster.rs</code>, <code>shell/src-tauri/src/main.rs</code>, <code>src/ui/app.js</code>, <code>src/stil/rahmen.css</code>, <code>src/ui/palette.js</code></td><td>Vollansicht ohne native Titelleiste (<code>set_decorations(false)</code>), integrierte Bento-Kopfzeile mit Drag-Region, Doppelklick maximiert, drei 44-px-Fensterknöpfe über Hüllen-Befehl; Leiste/Tray/Snap unverändert; Palette-QoL (Fokusring, 44 px, Tab-Kreis)</td></tr><tr><td>F · Werkstattregal</td><td><code>src/ui/shop.js</code>, <code>src/stil/shop.css</code>, <code>src/spiel/wirtschaft.js</code> (additiv: <code>BESTAETIGUNG_AB = 100</code>)</td><td>Vier Warengruppen nach Aufgabe, Zustands-Chips mit Text+Symbol, genau eine Aktion je Artikel, echte Token-Vorschau für Aussehen, Kaufbestätigung ab 100 € mit Esc/Enter und Fokus-Rückkehr; Kaufwege unverändert</td></tr><tr><td>G · QoL</td><td>querschnittlich</td><td>Einzelklick statt Umweg, sichtbarer Fokus, Esc/Enter, 44-px-Ziele, „Bewegung aus", Farbe nie allein, ehrliche Leerzustände; <code>bento.css</code>-Raster bei ≤ 900 px auch für <code>.bn-s12</code> repariert</td></tr><tr><td>Grundlage</td><td><code>src/stil/bento.css</code>, <code>tools/cdp.py</code>, <code>Nachweise/runde4/</code></td><td>Raster-Fix; <code>LABOR_EXE</code> für Prüfbauten neben einer fremden Instanz; Belege je Strang (Bilder, Messungen)</td></tr></tbody></table></div>
+<h2 id="3-gemessene-abnahme-in-dieser-sitzung">3 · Gemessene Abnahme (in dieser Sitzung)</h2>
+<ul><li><code>node tests/run.js</code> bzw. <code>sh tools/test.sh</code>: <strong>930/930 grün</strong>, 0 übersprungen (109 Testdateien, 95 headless Module). Vorher 878/878 — <strong>52 neue Fälle</strong> in sechs neuen Testdateien (<code>akte-dossier</code> 5, <code>lernstand-cockpit</code> 15, <code>fehlerziel</code> 6, <code>inspektor-einzelklick</code> 5, <code>fenster-kopf</code> 8, <code>shop-regal</code> 13).</li><li><code>sh tools/test.sh --rauch</code>: <strong>45/45</strong> (erster Auftrag mit echter Maus + 14 Ansichten, je 3 Breiten).</li><li><code>python tools/klassen.py</code>: <strong>0 Klassen ohne CSS-Regel</strong>.</li><li><code>python tools/ethos.py</code>: <strong>GRÜN</strong>, keine Regel schlechter als der eingefrorene Stand; besser: R1 24→23, R2 20→17, R4 169→140, R9 62→58, R10 42 (Stand). <strong>R12 nicht gemessen</strong> (<code>--dom</code>).</li><li><code>python tools/umlaute.py</code>: <strong>GRÜN</strong>, 0 offene Befunde.</li><li><code>node tools/sim-stand.js</code>: <strong>Simulation unverändert</strong> gegenüber dem Referenzstand.</li><li>Bau: <strong>138 Module</strong> (davon 95 headless) — vorher 134. Extraktion und vier neue UI-Dateien (<code>lernstand.js</code>, <code>shop.js</code>, <code>fehlerziel.js</code>, <code>naechster.js</code>).</li><li>Sichtprüfung: je Strang Bilder 1440/960/720 unter <code>Nachweise/runde4/strang-a|b|cd|e|f/</code>, Vorher-Bilder unter <code>Nachweise/bento/vorher4/</code>; dazu Theme-Stichproben (Papier, Hell, Keramik, Nordlicht) und „Bewegung aus".</li><li>Unabhängige Prüfungen: Bento-Design und Theme/Struktur/A11y haben die Flächen gegengelesen; die Befunde sind eingearbeitet (Details im Abschnitt 5).</li><li><strong>Echte Windows-<code>.exe</code>:</strong> <strong>8.948.224 B</strong>, ProductVersion <strong>2.6.0</strong>, SHA256 <code>831da655…f3505e69</code>, Integritätsstufe „Mittel". Die Abnahme mit <code>tools/q-echt.py</code> (echte Maus) lief auf einem <strong>Prüfbau mit eigener App-Kennung</strong> (<code>Nachweise/runde4/pruefbau.config.json</code>; derselbe Code, nur Kennung/Produktname anders), weil eine <strong>fremde</strong> Programm-Instanz (PID 22444, nicht von dieser Sitzung) lief und AGENTS.md Regel 1 das Beenden fremder Prozesse verbietet: <strong>0 Fehler im Ablauf</strong> — erster Auftrag geöffnet, Kabel Kasse→Switch mit echter Maus gezogen (4 → 5 Kabel), Abnahme <strong>5 ★</strong>, Fernwartungs-Schild 400 × 350 sichtbar, 5 Bildschirmfotos. Zusätzlich am laufenden Fenster gemessen: <code>fenster_zustand</code> meldet <code>dekoration:false</code>, <code>modus:"voll"</code>; Außenmaß 1294 × 808 vs. Nutzfläche 1280 × 800 (nur Resize-Rahmen, **keine Titelleistenhöhe**); drei Fensterknöpfe 44 × 44 mit <code>aria-label</code> (Minimieren/Maximieren/Schließen); Maximieren schaltet auf 1920 × 1140 mit <code>maximiert:true</code>, der Knopf heißt dann „Wiederherstellen"; Zurück schaltet auf 1280 × 800. Die ausgelieferte <code>.exe</code> liegt als <code>Programm/Netzwerk-Labor-2.6.0.exe</code> bereit; der feste Pfad <code>Programm/Netzwerk-Labor.exe</code> war <strong>gesperrt</strong>, weil die fremde Instanz genau diese Datei ausführt (Windows lässt eine laufende <code>.exe</code> nicht überschreiben) — sobald sie beendet ist, wird der Pfad wie üblich getauscht.</li></ul>
+<h2 id="4-was-bewusst-nicht-passiert-ist">4 · Was bewusst nicht passiert ist</h2>
+<ul><li><strong>Keine Änderung an</strong> <code>src/sim/</code>, <code>src/modell/</code>, <code>src/kern/</code>, <code>src/cli/</code>; keine neuen Spielzustände, keine neuen Ansichts-IDs, keine Theme-Änderungen (<code>zzz-thema-*.css</code> unangetastet).</li><li><strong>Keine Android-APK</strong> (Android-SDK fehlt auf diesem Rechner, wie in den Vorrunden).</li><li><strong>R12</strong> (<code>ethos --dom</code>) bleibt ungemessen; die Entscheidung „einfrieren oder Oberfläche reduzieren" liegt weiterhin beim Nutzer.</li><li><strong>Keine fremden Dateien angefasst:</strong> die Dateien der parallelen Kiosk-Sitzung (<code>tools/kiosk.py</code>, <code>tools/kiosk/</code>, Vorführfassungs-Doku, <code>Programm/LIESMICH-Demo.txt</code>, <code>.gitignore</code>) sind unverändert; nie <code>git add -A</code>.</li><li>Die laufende fremde Netzwerk-Labor-Instanz wurde <strong>nicht</strong> beendet.</li></ul>
+<h2 id="5-prufungen-befunde-fix-runde">5 · Prüfungen, Befunde, Fix-Runde</h2>
+<p>Zwei unabhängige Prüfer (read-only) haben nach der ersten Runde gegengelesen: <strong>Bento-Design</strong> (Originalität, Konsistenz, Professionalität) und <strong>Theme/Struktur/A11y</strong> (5 Themes + hell/dunkel, 44 px, Fokus, Esc/Enter, reduced motion, Tokens, keine Emoji, Testhaken). Befunde und ihre Behandlung stehen im Abschnitt „Review“ dieser Übergabe (Nachtrag) und in den Belegen unter <code>Nachweise/runde4/review-design.md</code> und <code>Nachweise/runde4/review-theme-a11y.md</code>.</p>
+<h2 id="6-veroffentlichung-2-6-0">6 · Veröffentlichung 2.6.0</h2>
+<ol><li>Fassung <strong>2.6.0</strong> gezogen (<code>tools/fassung-ziehen.py --neu 2.6.0 --setzen</code>, Trockenlauf zuerst); <code>VERSION_CODE</code> in <code>android/bauen.py</code> von Hand auf <strong>20601</strong> (über dem abgeleiteten Wert 20600).</li><li>Alle Erzeugnisse neu gebaut: <code>python bauen.py</code>, <code>python tools/einfach.py</code>, <code>cargo tauri build</code>, <code>python tools/seite.py</code>, <code>python tools/stand.py</code>; Prüfmodi danach grün.</li><li>Commit auf <code>ausbau-1.2</code>, <strong>Push des Zweigs</strong>, Tag <code>v2.6.0</code>, Push des Tags — mit der ausdrücklichen Freigabe des Nutzers vom 30.10.2026. Damit laufen „Prüfen", „Seite" und „Release anlegen" auf GitHub; das Release trägt Browser-ZIP, Einzeldatei und die im CI gebaute Windows-<code>.exe</code> (APK wird wie zuvor übersprungen, weil die Android-Secrets fehlen).</li><li>Nachmessen: Live-Seite gegen <code>docs/index.html</code> hashen; Release-Anhänge, Größen, ProductVersion und <code>Content-Disposition</code> prüfen.</li></ol>
+<h2 id="7-nachweis-2-6-0-nach-dem-deploy-gemessen">7 · Nachweis 2.6.0 (nach dem Deploy gemessen)</h2>
+<p><em>(Dieser Abschnitt wird nach Push/Tag/Release mit den echten Messwerten ergänzt.)</em></p>
+<h2 id="8-fur-die-nachste-sitzung">8 · Für die nächste Sitzung</h2>
+<ul><li><strong>R12</strong> ist die eine offene Messung: <code>python tools/ethos.py --dom</code> bei laufendem Programm.</li><li>Ein <strong>echtes</strong> Tauri-Fenster war in dieser Sitzung nur über den Prüfbau erreichbar; wenn keine fremde Instanz läuft, ist <code>python tools/q-echt.py</code> der normale Weg (er beendet nichts).</li><li>Die <strong>Kiosk-/Vorführfassung</strong> der parallelen Sitzung ist unverändert; wer sie weiterbaut, findet ihre Dateien unverändert vor.</li><li>Neue Stränge möglichst wieder als <strong>ein Schreiber je Datei</strong>; die Bereichs-Verträge (Testhaken, Tokens, keine erfundenen Zahlen) gelten unverändert.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

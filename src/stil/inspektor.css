@@ -10,8 +10,8 @@
 .in-kopf-zeile{display:flex; align-items:center; gap:8px; min-width:0}
 .in-kopf-zeile > svg, .in-speichern .in-knopf{flex:0 0 auto}
 .in-kopf-text{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
-.in-kopf-text h3{font:800 var(--fs-5)/1.15 var(--display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.in-kopf-text span, .in-gegen{color:var(--muted); font-size:var(--fs-2)}
+.in-kopf-text h3{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.in-kopf-text .in-kopf-rolle, .in-gegen{color:var(--muted); font-size:var(--fs-2)}
 .in-chips{display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end}
 .in-chip{display:inline-flex; align-items:center; gap:4px; padding:0px 8px; border-radius:999px; font:600 var(--fs-2)/1.6 var(--body); background:var(--panel-3); color:var(--muted); white-space:nowrap}
 .in-chip.ok{background:var(--ok-soft); color:var(--ok)}
@@ -24,7 +24,7 @@
 .in-speichern b, .in-hinweis.warn, .in-meldung.warn, .in-werte dd.warn{color:var(--warn)}
 
 .in-reiter{flex:0 0 auto; display:flex; flex-wrap:wrap; gap:0px; padding:4px 8px 0; border-bottom:1px solid var(--line)}
-.in-tab{border:0; background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); padding:8px 8px 8px; border-bottom:2px solid transparent; border-radius:var(--radius-s) 0 0 0}
+.in-tab{display:inline-flex; align-items:center; min-height:44px; border:0; background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); padding:0 12px; border-bottom:2px solid transparent; border-radius:var(--radius-s) 0 0 0}
 .in-tab:hover{color:var(--ink); background:var(--panel-2)}
 .in-tab.an{color:var(--accent); border-bottom-color:var(--accent); background:var(--panel-2); font-weight:700}
 
@@ -44,14 +44,14 @@
 .in-hinweis.bad, .in-meldung.bad, .in-fehler, .in-lease-konflikt{color:var(--bad)}
 
 .in-raster{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px 12px}
-.in-zeile{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.in-zeile, .in-wahl-kopf{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
 .in-zeile.zwischen{justify-content:space-between; flex-wrap:nowrap}
 .in-feld{display:flex; flex-direction:column; gap:4px; min-width:0}
 .in-feld.breit{grid-column:1 / -1}
 .in-feld-titel{font:600 var(--fs-2)/1.2 var(--body); color:var(--muted)}
 .in-eingabe, .in-auswahl{width:100%; min-width:0; height:34px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-xs); background:var(--panel-2); color:var(--ink); font:500 var(--fs-3) var(--body);
   transition:border-color var(--dauer), background var(--dauer)}
-.in-eingabe.mono, .in-eingabe:focus, .in-auswahl:focus{border-color:var(--accent); outline:none; background:var(--panel)}
+.in-eingabe.mono, .in-eingabe:focus, .in-auswahl:focus{border-color:var(--accent); background:var(--panel)}
 .in-eingabe.bad{border-color:var(--bad); background:var(--bad-soft)}
 .in-eingabe.warn{border-color:var(--warn)}
 .in-eingabe::placeholder, .in-code-L{color:var(--faint)}
@@ -72,10 +72,10 @@
 .in-schalter-text small{color:var(--faint); font-size:var(--fs-2)}
 .in-schalter.klein .in-schalter-bahn{transform:scale(.88); transform-origin:left center}
 
-.in-knopf{display:inline-flex; align-items:center; justify-content:center; gap:4px; min-height:34px; padding:0 12px; border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body);
+.in-knopf{display:inline-flex; align-items:center; justify-content:center; gap:4px; min-height:44px; padding:0 12px; border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body);
   transition:background var(--dauer), border-color var(--dauer)}
 .in-knopf:hover{background:var(--panel-3); border-color:var(--accent)}
-.in-knopf.klein{min-height:28px; padding:0 8px; font-size:var(--fs-2)}
+.in-knopf.klein{min-height:44px; padding:0 8px; font-size:var(--fs-2)}
 .in-knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
 .in-knopf.primaer:hover, .in-knopf.warn:hover{filter:brightness(1.08)}
 .in-knopf.geist{background:none; border-color:transparent; color:var(--muted)}
@@ -111,8 +111,7 @@
 .in-port-name{border:0; background:none; color:var(--ink); font:700 var(--fs-2)/1 var(--mono); text-align:left; padding:8px 0; cursor:pointer; align-self:center}
 .in-vlan-chip{display:block; border-left:3px solid var(--v); padding-left:8px}
 .in-port-details{display:flex; flex-direction:column; gap:8px; padding:8px 8px 12px 12px; border-left:2px solid var(--line-2); margin:0 0 6px 10px}
-.in-vlanliste{display:flex; flex-direction:column; gap:8px}
-.in-vlan-nr{color:var(--v, var(--ink))}
+.in-vlanliste, .in-vlan-nr{color:var(--v, var(--ink))}
 
 .in-regeln{list-style:none; counter-reset:regel; margin:0; padding:0; display:flex; flex-direction:column; gap:3px}
 .in-regeln li{counter-increment:regel; display:flex; align-items:center; justify-content:space-between; gap:4px; padding:4px 4px 4px 8px; border-radius:var(--radius-xs); background:var(--panel); border-left:3px solid var(--line-2); font-size:var(--fs-2)}
@@ -157,3 +156,29 @@
 /* Tastenzeilen des Leerzustands: leise, gesperrt, ohne Aufzählungszeichen (= editor.css .lb-tipps) */
 .lb-insp-leer .lb-tipps{display:flex; flex-direction:column; gap:8px; margin:8px 0 0; padding:0; list-style:none;
   font:500 var(--fs-1)/1.6 var(--mono); color:var(--faint)}
+
+/* ---------- Strang D: Steckbrief, Auswahl-Rail, Kabel- und Zonen-Infos ----------
+   Der Inspektor ist ein Steckbrief: Identität oben, Live-Werte darunter, Auswahl als Rahmen
+   UND Rail (nicht nur Farbe). Alle Werte kommen aus Modell/UI.ebenen; Tokens aus basis.css. */
+.in-steckbrief{display:flex; flex-wrap:wrap; align-items:flex-start; gap:8px 12px; padding-top:4px}
+.in-wert{display:flex; flex-direction:column; gap:0; min-width:0}
+.in-wert-name{font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
+.in-wert-text{max-width:16em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); font:500 var(--fs-2)/1.35 var(--body)}
+/* Auswahl sichtbar machen: Rail links am Kopf, zusätzlich zum Ring auf der Fläche. */
+.lb-inspektor.in-geraet .in-kopf{border-left:3px solid var(--accent)}
+.lb-inspektor.in-kabel .in-kopf{border-left:3px solid var(--info)}
+.lb-inspektor.in-zone .in-kopf{border-left:3px solid var(--warn)}
+/* Gewählter Port: Rail an der Zeile und leise Fläche in Tabellen. */
+.in-port.gewaehlt, .in-port-kopf.gewaehlt{box-shadow:inset 3px 0 0 var(--accent)}
+.in-tabelle tr.gewaehlt td{background:var(--accent-soft)}
+/* Port-Auswahl-Zeile über dem Reiter-Inhalt */
+.in-wahl{display:flex; flex-direction:column; gap:4px; padding:8px 12px; border:1px solid var(--line-2); border-left:3px solid var(--accent); border-radius:var(--radius-s); background:var(--panel-2)}
+.in-wahl-marke{display:inline-flex; align-items:center; min-height:24px; padding:0 8px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font:700 var(--fs-1)/1 var(--mono); letter-spacing:.04em}
+.in-wahl-weg, /* Kabel-Steckbrief */
+.in-kabel-enden{display:flex; flex-direction:column; gap:8px}
+.in-ende{padding:8px 12px; border-left:3px solid var(--info)}
+.in-ende-port{margin:0; color:var(--muted); font-size:var(--fs-2)}
+/* Zonen-Steckbrief: lesbare Zahlen, ruhige Kanten */
+.in-kopf-text .bn-kicker{display:block; margin-bottom:0}
+.in-zone-kopf .in-kopf-text h3{font-family:var(--mono); font-size:var(--fs-6)}
+.in-kabel-kopf .in-kopf-text h3{font-family:var(--mono)}

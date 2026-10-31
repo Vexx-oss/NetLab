@@ -621,3 +621,58 @@ Windows-`.exe` wurde dagegen gebaut, mit `tools/q-echt.py` echt bedient und gest
 mit ausdrücklicher Nutzerfreigabe veröffentlicht. **Patch 2.5.1** (31.10.2026) verkürzt den
 Zuklapp-Timer der Leiste von 5 s auf 1 s. Einzelheiten:
 [`Übergabe – Stand 30.10.2026 – Bento 2.5`](<entwicklung/Übergabe – Stand 30.10.2026 – Bento 2.5.md>).
+## 23 · Runde 4 — Jobdoku, Flugschreiber, Fenster (31.10.2026) — verbindlicher Vertrag
+
+**Auftrag (Nutzer, sinngemäß).** Die noch alten Flächen (Verdacht/Akte, Lernstand, Simulator,
+Inspektor, Shop, Fenster, Interaktion) sollen eine eigenständige Bento-2.5-Sprache bekommen und zu
+einer glaubwürdigen Job-Simulation mit didaktischer Hilfe professionalisiert werden — kreativ neu
+gedacht, nicht poliert; ausgeliefert als Fassung 2.6.0 inklusive Push, Tag, Release und Live-Seite.
+Vollfassung: [`Entwurf – Runde 4 (Jobdoku & QoL)`](<entwicklung/Entwurf – Runde 4 (Jobdoku & QoL).md>).
+
+**Neue und getrennte Oberflächen-Dateien (Phase 0, Verhalten unverändert).**
+- `src/ui/lernstand.js` (`UI.lernstand`: Ansicht, Kompetenzkarte, Prüfungstag, Training) und
+  `src/ui/shop.js` (`UI.shop`: Werkstattregal, Kauf) sind aus `src/ui/karriere.js`
+  ausgelagert; `src/stil/lernstand.css` und `src/stil/shop.css` aus `karriere.css`.
+- `UI.karriere._helfer` stellt `overlay` bereit (für die ausgelagerten Ansichten).
+  `UI.karriere.lernstandAnsicht/shopAnsicht/training/pruefungUebersicht/pruefungAbgeben` bleiben
+  als Alias erhalten. Ansicht-IDs (`lernstand`, `shop`) und `UI.startHaken` unverändert.
+- `src/ui/naechster.js` (`UI.naechster`) und `src/ui/fehlerziel.js` (`UI.fehlerziel`) neu.
+
+**Datenformen und Schnittstellen (nur additiv).**
+- `Spiel.akte`: `Spiel.akte.schichten(inst) → [{n, name, text, karten}]`,
+  `Spiel.akte.fundort(karte, inst) → ziel|null`, `Spiel.akte.fortschritt(inst) → {…}`,
+  `Spiel.akte.bericht(inst) → Text (ohne Lösung)`; `Spiel.akte.FORTSCHRITT` = die sechs Stufen
+  (beobachten · messen · eingrenzen · Hypothese · handeln · dokumentieren).
+- `UI.fehlerziel.springen(ziel) → {ok, schritte, grund, ort}` mit
+  `ziel = {art:"geraet"|"port"|"kabel"|"frame"|"ebene"|"zone", geraet, port, kabel:{a,b}|id, frame, ebene, werkzeug, dock, leise, ms, zentrieren}`:
+  EIN Resolver für Akte, Simulations-Panel und Inspektor; öffnet Labor, wechselt Ebene, wählt
+  Gerät/Port/Kabel, zeigt den Inspektor, zentriert und hebt hervor. Er wirft nie, ruft kein
+  `focus()`, respektiert `UI.bewegung()`. Hilfen: `zielAusEreignis`, `kabelEnden`,
+  `ortText`, `istProblem`.
+- `einst.anfaengerHilfe: bool` (store `"einst"`). Fehlt der Wert, gilt Standard **an** bei
+  Karrierestufe ≤ 2, sonst aus. Lese-/Schreib-API: `UI.simpanel.anfaengerHilfe()` und
+  `UI.simpanel.anfaengerHilfeSetzen(bool)`; Bedienung im Panel-Kopf und in den Einstellungen
+  (`src/ui/karriere.js`, Abschnitt „Lernen").
+- `Spiel.hilfe.anfaengerSchritte(inst)` und `Spiel.naechsterOrt(inst)`: additive
+  Anzeigehilfen (keine Änderung an Schwellen, Vorrat oder Bezahlwegen).
+
+**Oberfläche (Präfixe bleiben, Testhaken bleiben).**
+- Einsatzakte `ak-` (Reiter `akte` im Dock; `.ak-karten/.ak-karte/.ak-verdacht/.ak-chip`
+  bleiben), Ausbildungs-Cockpit `lern-`/`nst-`/`kk-` (`.kr-kopf`/`.kr-seite` bleiben),
+  Flugschreiber `si-` (`.si-kopf`, `.si-warn`, `.si-hilfe` neu; `.si-zeile` bleibt),
+  Inspektor `in-` (Steckbriefe; `[data-reiter]` bleibt), Fensterkopf `fenster-knopf` in
+  `src/stil/rahmen.css` (nur `Plattform.name === "tauri"`), Werkstattregal `wr-`/`kr-ware`.
+- Fenster: `shell/src-tauri/src/fenster.rs` schaltet im Modus „voll" `set_decorations(false)`
+  (Leiste/Tray unverändert) und bietet den Befehl `fenster_knopf("minimieren"|"maximieren"|"schliessen")`;
+  `src/ui/app.js` baut die Kopfzeile mit `data-tauri-drag-region="deep"` und drei 44-px-Knöpfen.
+- `src/stil/bento.css`: `.bn-s12`/`.bn-k.breit` fallen im ≤-900-px-Raster auf eine Spalte
+  zurück (Reparatur des 720-px-Befunds aus Strang B).
+
+**Gates (gemessen 31.10.2026).** `node tests/run.js` **930/930 grün**, 0 übersprungen ·
+`sh tools/test.sh --rauch` **45/45** · `klassen.py` **0** · `ethos.py` **GRÜN**
+(R1 23, R2 17, R4 140, R9 58, R10 42) · `umlaute.py` **GRÜN** · `sim-stand.js` unverändert ·
+Bau 138 Module. Sichtprüfung/Rollen: fünf Bereichs-Owner, zwei unabhängige Prüfungen (Design;
+Theme/Struktur/A11y), Leitung integriert, committet und veröffentlicht. **Nicht gemessen:** R12
+(`--dom`), Android-APK, echte Maus im ausgelieferten Tauri-Fenster (Prüfbau mit eigener Kennung,
+weil eine fremde Instanz lief). Einzelheiten:
+[`Übergabe – Stand 31.10.2026 – Runde 4`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 4.md>).

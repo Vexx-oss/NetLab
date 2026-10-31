@@ -1,4 +1,6 @@
 //! Netzwerk-Labor – Desktop-Hülle (Tauri 2). Dünn: Fenster (Leiste/Voll), Tray, Speichern, Autostart, Einzelinstanz.
+//! Runde 4, Strang E: Die Vollansicht ist randlos (fenster.rs, modus "voll"); die Fensterknöpfe der
+//! integrierten Kopfzeile rufen `fenster_knopf` hier unten. Eigene Befehle brauchen keine Capability.
 //! Alle Spiellogik liegt im Web-Teil (web/index.html). Konzept § 9, Architektur § 8.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -64,6 +66,11 @@ fn fenster_ecke(app: AppHandle, ecke: String) -> Result<(), String> {
 #[tauri::command]
 fn fenster_zustand(app: AppHandle) -> Value {
     fenster::zustand(&app)
+}
+/// Fensterknöpfe der integrierten Kopfzeile (nur Tauri-Modus): minimieren · maximieren · schliessen.
+#[tauri::command]
+fn fenster_knopf(app: AppHandle, aktion: String) -> Result<Value, String> {
+    fenster::knopf(&app, &aktion)
 }
 #[tauri::command]
 fn immer_oben(app: AppHandle, an: bool) -> bool {
@@ -144,7 +151,7 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new()
             .with_handler(|app, _sc, ev| { if ev.state() == ShortcutState::Pressed { fenster::umschalten(app, "hotkey"); } })
             .build())
-        .invoke_handler(tauri::generate_handler![speichern, fenster_modus, fenster_groesse, fenster_ecke, fenster_zustand, immer_oben, abzeichen,
+        .invoke_handler(tauri::generate_handler![speichern, fenster_modus, fenster_groesse, fenster_ecke, fenster_zustand, fenster_knopf, immer_oben, abzeichen,
             autostart, autostart_status, exportieren, importieren, plattform_info, ruhe, beenden, selbsttest_ergebnis])
         .setup(move |app| {
             let h = app.handle().clone();

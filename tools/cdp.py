@@ -25,7 +25,10 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8")
 HIER = Path(__file__).resolve().parent.parent
 PORT = 9222
-EXE = HIER / "Programm" / "Netzwerk-Labor.exe"
+# Standard ist die ausgelieferte Programmdatei. Fuer Pruefbauten (z. B. eine Fassung mit eigener
+# App-Kennung, die neben einer laufenden fremden Instanz starten darf) laesst sich der Pfad ueber die
+# Umgebungsvariable LABOR_EXE uebersteuern - ohne die Variable bleibt das Verhalten unveraendert.
+EXE = Path(os.environ.get("LABOR_EXE") or (HIER / "Programm" / "Netzwerk-Labor.exe"))
 DATEN = Path(tempfile.gettempdir()) / "netzwerk-labor-test"
 GESTARTET = []  # Popen-Objekte, die DIESER Lauf selbst gestartet hat (AGENTS.md Regel 1: nur eigene PIDs beenden)
 
@@ -126,7 +129,9 @@ def start(exe=None, frisch=False):
     if frisch and DATEN.exists():
         shutil.rmtree(DATEN, ignore_errors=True)
     DATEN.mkdir(parents=True, exist_ok=True)
-    if laeuft_schon():
+    # Nur die AUSGELIEFERTE Programmdatei kollidiert mit dem Einzelinstanz-Plugin. Ein Pruefbau mit
+    # eigenem Dateinamen und eigener App-Kennung (tauri build --config) darf daneben starten.
+    if exe.name == "Netzwerk-Labor.exe" and laeuft_schon():
         raise SystemExit("Es laeuft schon eine Netzwerk-Labor-Instanz. Bitte zuerst beenden (Tray-Symbol -> Beenden); "
                          "dieses Werkzeug beendet aus Prinzip keine fremden Prozesse (AGENTS.md Regel 1).")
     umgebung = dict(os.environ, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=f"--remote-debugging-port={PORT}", LABOR_DATEN=str(DATEN))

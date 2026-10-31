@@ -66,6 +66,20 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
    den die fünf Knöpfe der Kopfzeile brauchen (die Version verschwindet schon bei 1180 px). */
 @media (max-width:760px){ .marke-name{display:none}  }
 
+/* ---- Fensterknöpfe der integrierten Kopfzeile (nur Desktop-Hülle, Runde 4/Strang E) ----
+   Die Seite baut sie ausschließlich im Tauri-Modus (src/ui/app.js: UI.fenster.da()); im Browser bleibt
+   die Kopfzeile ohne Knöpfe. Die Kopfzeile ist im Tauri-Modus zugleich Zieh-Fläche
+   (data-tauri-drag-region, siehe shell/src-tauri/src/fenster.rs) – Klicks auf Knöpfe/Eingaben sind
+   davon ausgenommen, weil das Tauri-Ziehskript Bedienelemente überspringt. */
+.kopf.mit-fenster{padding-right:0}
+.fenster-knoepfe{display:flex; align-items:center; gap:4px; flex:0 0 auto; margin-left:4px; padding:0 4px 0 8px; border-left:1px solid var(--line)}
+.fenster-knopf{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; padding:0; border:1px solid transparent; border-radius:var(--radius-s); background:none; color:var(--muted);
+  transition:background var(--dauer), color var(--dauer), border-color var(--dauer)}
+.fenster-knopf:hover{background:var(--panel-3); color:var(--ink); border-color:var(--line-2)}
+/* Schließen trägt im Hover die Störungsfarbe – Farbe nur als Zustand, keine Fläche. */
+.fenster-knopf.schliessen:hover{color:var(--bad)}
+.fenster-knopf:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.fenster-knopf svg{display:block}
 /* ---- Andock-Leiste ---- */
 .dock{grid-row:2; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0; background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; overflow-x:hidden}
 .dock-knopf{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; width:76px; min-height:64px; padding:4px 0px; border:0; border-radius:var(--radius); background:none; color:var(--muted);
@@ -154,11 +168,15 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 /* ---- Befehlspalette ---- */
 .pal-huelle{position:fixed; inset:0; z-index:50; display:flex; justify-content:center; align-items:flex-start; padding-top:14vh; background:rgba(4,8,14,.45); opacity:0; transition:opacity var(--dauer)}
 .pal-kasten{width:min(620px, calc(100vw - 32px)); border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); overflow:hidden}
+/* QoL: sichtbarer Fokus der Palette - der Ring am Kasten ersetzt den outline der Eingabe. */
+.pal-huelle:focus-within .pal-kasten{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft), var(--schatten)}
 .pal-kopf{display:flex; align-items:center; gap:8px; padding:0 12px; border-bottom:1px solid var(--line); color:var(--muted)}
 .pal-eingabe{flex:1 1 auto; height:54px; border:0; background:none; color:var(--ink); font:500 var(--fs-4)/1 var(--body); outline:none}
 .pal-liste{max-height:min(52vh, 440px); overflow:auto; padding:6px}
 .pal-punkt{display:flex; align-items:center; gap:8px; min-height:44px; padding:0 12px; border-radius:var(--radius-s); cursor:pointer}
-.pal-punkt.an{background:var(--accent-soft)}
+/* Auswahl als Form + Tinte (Rail), nicht nur Fläche; Hover zeigt dieselbe Zeile für die Maus. */
+.pal-punkt:hover:not(.aus):not(.an){background:var(--panel-2)}
+.pal-punkt.an{background:var(--accent-soft); box-shadow:inset 2px 0 0 var(--accent)}
 .pal-punkt.an .pal-text, .wahl-knopf:hover, .ex-knopf:hover{color:var(--ink)}
 .pal-punkt.aus{cursor:default; opacity:.6}
 .pal-punkt.tipp{opacity:.8; font-style:italic}
@@ -167,8 +185,12 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pal-info{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font-size:var(--fs-2)}
 .pal-gruppe{margin-left:auto; flex:0 0 auto; font:600 var(--fs-1)/1 var(--body); color:var(--faint); text-transform:uppercase; letter-spacing:.06em}
 .pal-nichts{padding:16px; color:var(--muted); text-align:center}
-.pal-fuss{display:flex; gap:16px; padding:8px 12px; border-top:1px solid var(--line); color:var(--faint); font-size:var(--fs-2)}
+.pal-fuss{display:flex; flex-wrap:wrap; gap:4px 16px; padding:8px 12px; border-top:1px solid var(--line); color:var(--faint); font-size:var(--fs-2)}
 .pal-fuss kbd{margin-right:2px}
+/* Schließen-Knopf der Palette: 44 px, Tastatur erreichbar (Tab-Kreis), Esc bleibt der Hauptweg. */
+.pal-zu{display:inline-flex; flex:0 0 auto; width:44px; height:44px; align-items:center; justify-content:center; padding:0; border:1px solid transparent; border-radius:var(--radius-s); background:none; color:var(--muted);
+  transition:background var(--dauer), color var(--dauer)}
+.pal-zu:hover{background:var(--panel-3); color:var(--ink); border-color:var(--line)}
 
 /* ---- Dialoge ---- */
 .dialog-huelle{position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(4,8,14,.5); opacity:0; transition:opacity var(--dauer)}

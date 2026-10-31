@@ -4,6 +4,8 @@
      Zeigt den Frame eines Trace-Ereignisses (Architektur § 5.2) Schicht für Schicht, aufklappbar.
      Felder, die sich gegenüber der vorigen Etappe DESSELBEN Pakets geändert haben, sind markiert und
      kurz begründet (MAC wechselt am Router, IP nicht, TTL −1, 802.1Q-Tag auf dem Trunk, NAT).
+   Im Kopf sitzt „Zum Fundort": der Sprung läuft über den zentralen Resolver UI.fehlerziel
+   (Runde 4, Strang C) – Gerät/Port auswählen, Inspektor zeigen, Ebene wechseln, hervorheben.
    Nebenbei, auch für das Simulations-Panel:
      UI.pdu.chip(proto)     Protokoll-Chip (Farbe UND Text)
      UI.pdu.paket(frame)    Schlüssel „dasselbe Paket“ (für die Suche nach der vorigen Etappe)
@@ -215,6 +217,16 @@ UI.pdu = (() => {
 
   const ARTTEXT = {senden: "sendet", empfangen: "empfängt", weiterleiten: "leitet weiter", fluten: "flutet", verwerfen: "verwirft", antworten: "antwortet", lernen: "lernt", info: "Hinweis"};
 
+  /* Sprung zum Fundort über den zentralen Resolver (nie ein Wurf; ohne Resolver ruhige Auswahl). */
+  function springe(e){
+    try {
+      const ziel = (typeof UI.fehlerziel !== "undefined" && UI.fehlerziel && typeof UI.fehlerziel.zielAusEreignis === "function") ? UI.fehlerziel.zielAusEreignis(e) : null;
+      if (ziel && typeof UI.fehlerziel.springen === "function") { const r = UI.fehlerziel.springen(ziel); if (r && r.ok) return true; }
+      if (e && e.geraet && UI.labor) { UI.labor.auswaehlen?.(e.geraet, e.port || undefined); UI.labor.zentrieren?.(e.geraet); return true; }
+    } catch (x) { console.error("Fehlerziel", x); }
+    return false;
+  }
+
   function zeigen(container, e, vor){
     if (!container) return;
     zuletzt = {container, e, vor};
@@ -244,6 +256,7 @@ UI.pdu = (() => {
         h("span", {}, ` · ${geraetName(e.geraet)}${e.port ? " " + e.port : ""} ${ARTTEXT[e.art] || e.art || ""}`),
         e.nach ? h("span", {class: "pdu-nach"}, ` → ${geraetName(e.nach.geraet)}${e.nach.port ? " " + e.nach.port : ""}`) : null),
       h("div", {class: "pdu-kopf-rechts"},
+        e.geraet ? h("button", {type: "button", class: "pdu-ziel", title: "Zum Fundort: " + geraetName(e.geraet) + (e.port ? " " + e.port : ""), onclick: () => springe(e)}, "Zum Fundort") : null,
         chip(e.proto),
         h("div", {class: "pdu-format", role: "group", "aria-label": "MAC-Schreibweise"},
           h("button", {type: "button", "aria-pressed": String(macArt === "doppelpunkt"), title: "MAC wie in Linux/Wireshark: 00:1a:2b:…", onclick: () => format("doppelpunkt")}, "00:1a"),

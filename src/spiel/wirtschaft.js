@@ -39,6 +39,10 @@ Spiel.shop = {};
 /* Die Gruppen, die die Shop-Ansicht zeigt – Reihenfolge = Reihenfolge im Bild (Single Source für die Ansicht) */
 Spiel.shop.GRUPPEN = ["Werkzeuge", "Automatisierung"];
 
+/* Ab diesem Preis fragt die Werkstattregal-Ansicht (ui/shop.js) vor dem Kauf nach – eine Zahl für
+   Ansicht und Test. Der eigentliche Kaufweg (Spiel.shop.kaufen) bleibt unverändert. */
+Spiel.shop.BESTAETIGUNG_AB = 100;
+
 Spiel.shop.eintrag = function(e){
   const euro = Spiel.st.euro;
   if (e.zustand === "kaufbar" && e.preis > euro + 1e-9) { e.zustand = "zu-teuer"; e.grund = `Dir fehlen ${eur(e.preis - euro)} €.`; }

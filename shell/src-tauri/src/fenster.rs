@@ -1,5 +1,21 @@
 //! Ein Fenster, zwei Ansichten (Leiste/Voll) plus Tray. Position der Leiste je Monitor, ehrliche Fähigkeiten.
 //! Regel: nie ein Mutex halten, während eine Fenster-Methode läuft (die läuft ggf. über den Haupt-Thread).
+//!
+//! Runde 4, Strang E (Fassung 2.6): Die VOLLANSICHT trägt keine native Windows-Titelleiste mehr –
+//! `modus("voll")` schaltet `set_decorations(false)`. Die Seite zeichnet die Kopfzeile selbst
+//! (src/ui/app.js + src/stil/rahmen.css): App-Monogramm, Kennzahlen, Aktionen wie bisher, dazu
+//! a) eine eigene Zieh-Fläche `data-tauri-drag-region="deep"` auf der Kopfzeile. Das Tauri-Ziehskript
+//!    startet damit das System-Fensterziehen (Snap an Bildschirmkanten bleibt so eine Windows-Sache)
+//!    und maximiert beim Doppelklick über `internal_toggle_maximize` – beide Befehle sind über
+//!    `core:default` bzw. `core:window:allow-start-dragging` (capabilities/main.json) gedeckt.
+//! b) drei Fensterknöpfe Minimieren/Maximieren/Schließen, die den eigenen Befehl `fenster_knopf`
+//!    unten rufen. Eigene Befehle brauchen keine Capability; der native Schließen-Pfad bleibt
+//!    derselbe (Tray bzw. beenden über `schliessen`).
+//! Die Leiste war schon immer randlos, der Tray-Modus ist versteckt – beide bleiben unverändert.
+//! Größe ändern und Snap übernimmt weiter Windows: tao beantwortet WM_NCHITTEST für randlose,
+//! größenveränderbare Fenster und WM_GETMINMAXINFO für die Arbeitsfläche beim Maximieren.
+//! Im Browser bleibt die Kopfzeile OHNE Fensterknöpfe und OHNE Zieh-Fläche; entschieden wird das
+//! auf der Seite über `Plattform.name === "tauri"` (src/ui/app.js).
 
 use crate::Labor;
 use serde::{Deserialize, Serialize};
@@ -244,7 +260,9 @@ pub fn modus(app: &AppHandle, neu: &str, melden: bool) -> Result<(), String> {
                 let _ = w.set_always_on_top(false);
                 let _ = w.set_skip_taskbar(false);
                 let _ = w.set_focusable(true);
-                let _ = w.set_decorations(true);
+                /* Strang E (Runde 4): randlos – die Seite zeichnet die Kopfzeile mit Zieh-Fläche und
+                   Fensterknöpfen selbst (src/ui/app.js). Der native Fensterstrich entfällt. */
+                let _ = w.set_decorations(false);
                 let _ = w.set_shadow(true);
                 let _ = w.set_resizable(true);
                 let _ = w.set_min_size(Some(LogicalSize::new(880.0, 560.0)));
@@ -327,6 +345,33 @@ pub fn schliessen(app: &AppHandle) {
     }
 }
 
+/// Fensterknöpfe der integrierten Kopfzeile (nur im Tauri-Modus; die Seite baut sie in src/ui/app.js).
+/// Aktionen: `minimieren` · `maximieren` (umschalten, wie der Doppelklick im Ziehbereich) ·
+/// `schliessen` (geht denselben Weg wie der native Schließen-Knopf: Tray bzw. beenden).
+/// Liefert den neuen Stand zurück, damit die Kopfzeile „Maximieren“/„Wiederherstellen“ beschriften kann.
+pub fn knopf(app: &AppHandle, aktion: &str) -> Result<Value, String> {
+    let w = haupt(app)?;
+    match aktion {
+        "minimieren" => w.minimize().map_err(|e| e.to_string())?,
+        "maximieren" => {
+            if w.is_maximized().unwrap_or(false) {
+                w.unmaximize().map_err(|e| e.to_string())?;
+            } else {
+                w.maximize().map_err(|e| e.to_string())?;
+            }
+        }
+        "schliessen" => schliessen(app),
+        _ => return Err(format!("Unbekannte Fensteraktion: {aktion}")),
+    }
+    let modus = app.try_state::<Labor>().map(|st| st.modus.lock().unwrap().clone()).unwrap_or_default();
+    Ok(json!({
+        "modus": modus,
+        "maximiert": w.is_maximized().ok(),
+        "minimiert": w.is_minimized().ok(),
+        "sichtbar": w.is_visible().ok(),
+    }))
+}
+
 /// Beenden: erst der Seite Gelegenheit geben, den Speicher zu schreiben (store.sofort), dann spätestens nach 4 s schließen.
 pub fn beenden_anfragen(app: &AppHandle) {
     merker_schreiben(app);
@@ -366,7 +411,7 @@ pub fn zustand(app: &AppHandle) -> Value {
         "modus": *st.modus.lock().unwrap(),
         "sichtbar": w.is_visible().ok(), "minimiert": w.is_minimized().ok(), "fokus": w.is_focused().ok(),
         "vordergrund": vg, "aktiv": aktiv,
-        "immerOben": w.is_always_on_top().ok(), "dekoration": w.is_decorated().ok(),
+        "immerOben": w.is_always_on_top().ok(), "dekoration": w.is_decorated().ok(), "maximiert": w.is_maximized().ok(),
         "x": pos.map(|p| p.x), "y": pos.map(|p| p.y),
         "b": gr.map(|g| (g.width as f64 / s).round()), "h": gr.map(|g| (g.height as f64 / s).round()), "skala": s,
         "monitor": mon.as_ref().map(schluessel), "arbeitsflaeche": mon.as_ref().map(|m| { let f = flaeche(m); [f.0, f.1, f.2, f.3] }),

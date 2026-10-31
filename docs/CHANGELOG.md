@@ -9,6 +9,87 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.6.0 — Runde 4: Einsatzakte, Ausbildungs-Cockpit, Flugschreiber, Werkstattregal, eigenes Fenster (31.10.2026)
+
+**Was diese Fassung ist.** Der zweite Gestaltungszug nach Bento 2.5. Sieben Stränge, die noch vor
+Bento 2.5 entstanden waren, sind **neu gedacht und umgezogen** — nicht poliert: Verdacht und
+Beweise werden zur **Einsatzakte** (Jobdoku), der Lernstand zum **Ausbildungs-Cockpit**, der
+Simulator zum **Flugschreiber** mit anklickbaren Fehlern und Anfänger-Hilfe, die rechte Sidebar zum
+**Steckbrief**, der Shop zum **Werkstattregal**, und die Vollansicht bekommt eine **eigene
+Fensterkopfzeile** statt der nativen Windows-Titelleiste. Dazu ein QoL-Querschnitt
+(Einzelklick, Fokus, Esc/Enter, 44 px, Bewegung aus, Farbe nie allein).
+
+**Warum.** Der Nutzer hat die verbliebenen Flächen als nicht mehr zum neuen Design passend benannt
+und ausdrücklich verlangt, sie kreativ neu zu denken: Job-Simulation mit didaktischer Hilfe,
+originelle Bento-Sprache, professionelles Fenster. Vertrag:
+[`Architektur § 23`](Architektur.md) und
+[`Entwurf – Runde 4 (Jobdoku & QoL)`](<entwicklung/Entwurf – Runde 4 (Jobdoku & QoL).md>).
+
+**Umfang.**
+- **Phase 0 (Leitung, vor dem Schwarm):** `src/ui/karriere.js` (689 Zeilen) getrennt in
+  `src/ui/lernstand.js` und `src/ui/shop.js`, CSS in `src/stil/lernstand.css` und
+  `src/stil/shop.css`; gemeinsame Helfer bleiben als `UI.karriere._helfer`, die alten Namen
+  `UI.karriere.lernstandAnsicht/shopAnsicht` bleiben als Alias. Verhalten und Bilder unverändert
+  (Lernstand-Bild byte-gleich), **878/878** Tests vor und nach der Extraktion. Angepasst wurden nur
+  drei Test-Innenleben (Suchpfad der ausgelagerten Symbole; zwei Testwelten laden `lernstand.js` mit).
+- **A · Einsatzakte (Jobdoku):** Aktenkopf mit Vorgang und Beginn aus dem Auftrag, didaktisches
+  Fortschrittsband (beobachten · messen · eingrenzen · Hypothese · handeln · dokumentieren) aus
+  echten Daten, Hypothesen-Stempel statt Formular, Schichtentreppe 1·2·3·4·7 als Register mit
+  Beweiszahl je Schicht, Beweistimeline mit ★, **jede Evidenzkarte springt zum Fundort**,
+  Dokumentationsblock mit „Einsatzbericht kopieren" (ohne Lösung zu verraten). Logik additiv in
+  `src/spiel/verdacht.js` (Schichtensummen, Fundort, Fortschritt, Bericht).
+- **B · Ausbildungs-Cockpit:** Kopf mit Prüfungsreife-Kachel, **„Nächster Schritt"** mit genau einer
+  Hauptaktion (laufende Prüfung > fällige Wiederholung > wackelige Fertigkeit > Aufstieg > offenes Feld),
+  Kompetenzkarte als 6-Regionen-Register (Zustand als Text + Form), Fehlerheft mit echtem Fehlertext
+  und Üben-Knopf, Behalten mit ehrlichen „–", Training-Empfehlungen aus dem Lernmotor, Abzeichen
+  und Prüfungstag ruhig integriert. Der Hilfe-Abschnitt (`.lh-*`) hängt sich unverändert ein.
+- **C · Flugschreiber:** Kopf `FLUGSCHREIBER · <Kunde>`, Ergebnis groß, Was/Wo-Zeile,
+  Format-Umschalter, **Warnbanner „Erster Fehler" mit „Zum Fundort"**, Zeitachse mit
+  Schichtbändern L2/L3/L4/L7, jede Fehler-/Warnmeldung anklickbar. Neuer zentraler Resolver
+  `src/ui/fehlerziel.js`: `UI.fehlerziel.springen({art:"geraet"|"port"|"kabel"|"frame"|"ebene"|"zone", …})`
+  öffnet Labor, Ebene, Auswahl und Inspektor, zentriert und hebt hervor — kein Fokusklau, wirft nie,
+  respektiert „Bewegung aus". **Anfänger-Hilfe** als Toggle (`einst.anfaengerHilfe`, Standard an
+  bei Karrierestufe ≤ 2): Hinweise aus `Spiel.naechsteDiagnose`, Nächster-Schritt-Ort, Highlight
+  des nötigen Geräts/Dock-Reiters; aus = ruhige Profi-Sicht.
+- **D · Inspektor-Steckbrief:** Einzelklick ohne Ziehen auf Gerät, Port, Kabel oder Zone öffnet
+  **unabhängig vom aktiven Werkzeug** die Infos in der rechten Sidebar; Werkzeug bleibt aktiv.
+  Steckbriefe für Gerät/Port/Kabel/Zone, Auswahl-Rail, Reiter ≥ 44 px mit `role="tab"`.
+- **E · Eigenes Fenster:** In der Vollansicht `set_decorations(false)` (Leiste/Tray unverändert),
+  integrierte Bento-Kopfzeile als Titelleiste mit eigener Drag-Region, Doppelklick maximiert,
+  Fensterknöpfe Minimieren/Maximieren/Schließen (44 px, `aria-label`, Fokusring) über einen
+  Hüllen-Befehl; Quantitätsanzeige passt sich 880/960/1440 an. Palette-QoL (Fokusring, 44 px,
+  Tab-Kreis, Esc/Enter). `tauri.conf.json` und Capabilities bewusst unverändert.
+- **F · Werkstattregal:** Vier Warengruppen nach Aufgabe (Werkzeuge, Automatisierung, Aussehen mit
+  echter Token-Vorschau, Kunden & Prüfung als Verweis-Kacheln), Zustands-Chips mit Text + Symbol,
+  genau eine Aktion je Artikel, ehrliche Empfehlung nur aus echten Daten, **Kaufbestätigung ab 100 €**
+  als Hausdialog (Esc/Enter, Fokus zurück). Kaufwege `Spiel.shop.kaufen` unverändert.
+- **G · QoL/Interaktion:** Einzelklick statt Umweg, sichtbarer Fokus, Esc schließt/Enter bestätigt,
+  44-px-Ziele, „Bewegung aus" als Standbild, Farbe nie allein als Information, ehrliche Leerzustände.
+- **Grundlage:** `bento.css`-Raster bricht bei ≤ 900 px jetzt auch für `.bn-s12`/`.breit`
+  auf eine Spalte (Befund aus Strang B); `tools/cdp.py` kann für Prüfbauten eine eigene
+  Programmdatei über `LABOR_EXE` starten, ohne fremde Instanzen anzufassen.
+
+**Gemessen (31.10.2026, in dieser Sitzung).** `node tests/run.js` **930/930 grün** (109 Testdateien,
+95 headless Module, **0 übersprungen**) — 52 neue Fälle in sechs neuen Testdateien ·
+`sh tools/test.sh --rauch` **45/45** · `tools/klassen.py` **0** · `tools/ethos.py` **GRÜN**
+(R1 23, R2 17, R4 140, R9 58, R10 42 — keine Regel schlechter als der Stand, R12 wie vereinbart nicht
+gemessen) · `tools/umlaute.py` **GRÜN** (0 offene Befunde) · `node tools/sim-stand.js`
+**Simulation unverändert** · Bau **138 Module** (davon 95 headless).
+
+**Erzeugnisse.** Fassung **2.6.0**; Einzeldatei und `docs/index.html` byte-gleich,
+**3.714.938 B**, SHA256 `b3c58ede…8506d2e`, 0 Außenverweise; Windows-`.exe` **8.948.224 B**,
+ProductVersion **2.6.0**, SHA256 `831da655…f3505e69`; die Abnahme mit `tools/q-echt.py` (echte
+Maus, erster Auftrag, Kabel-Ziehen, Funktionsprobe) lief auf einem Prüfbau mit eigener
+App-Kennung, weil eine fremde Programm-Instanz lief (Regel 1: kein fremder Prozess wird beendet).
+Live-Seite <https://vexx-oss.github.io/NetLab/index.html> nach dem Deploy gemessen. Einzelheiten:
+[`Übergabe – Stand 31.10.2026 – Runde 4`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 4.md>).
+
+**Nicht geprüft.** R12 (`ethos --dom`, wie in den Vorrunden), Android-APK (kein SDK), echte
+Maus im Tauri-Fenster nur über den Prüfbau, nicht alle 5 Themes in jedem einzelnen Strang
+fotografiert (Token-Prüfung + Stichproben), Hover-/Tastaturzustände nicht flächendeckend.
+
+---
+
 ## 2.5.1 — Die Leiste klappt nach 1 s zusammen (31.10.2026)
 
 **Warum.** Nutzer: „das mini fenster klappt zu langsam zusammen, lass es nach einer sekunde

@@ -34,6 +34,7 @@
 
    ÖFFENTLICHE FLÄCHE: Spiel.naechster(inst) · Spiel.naechsterBedarf(inst, {…}) ·
    Spiel.naechsterWartezeit(inst, jetztMs) · Spiel.naechsterWann(id?) · Spiel.naechsterStufe() ·
+   Spiel.naechsterOrt(inst) (Anzeigehilfe für die Anfänger-Hilfe, Runde 4) ·
    Spiel.FUEHRUNG_NACH_MS · Spiel.FUEHRUNG_ZEIGEN_MS */
 
 /* Nach dieser Zeit ohne Fortschritt darf die Führung ungefragt kommen. Kürzer als das
@@ -151,4 +152,15 @@ Spiel.naechsterBedarf = function(inst, {jetztMs, angefordert = false, fehler = f
     return {ja: false, grund: `Erst, wenn es hakt (noch ${Math.ceil((Spiel.FUEHRUNG_NACH_MS - wartete) / 1000)} s).`, schritt};
   }
   return {ja: true, grund: "Eine Weile kein Fortschritt.", schritt};
+};
+
+/* ANZEIGEHILFE „Anfänger-Hilfe" (Runde 4, Strang C) – nur für die Oberfläche, kein neuer Spielzustand:
+   Wo muss der Azubi jetzt hin? Reine Ableitung aus Spiel.naechster (Bereich → Dock-Reiter).
+   Rückgabe {geraet, bereich, dock, text} | null; dock ist „terminal" | „plan" | „postfach" | null.
+   Der Text ist derselbe wie in Spiel.naechster – es wird nichts verraten und nichts erfunden. */
+Spiel.naechsterOrt = function(inst){
+  const s = Spiel.naechster(inst);
+  if (!s) return null;
+  const dock = s.bereich === "terminal" ? "terminal" : s.bereich === "plan" ? "plan" : s.bereich === "mappe" ? "postfach" : null;
+  return {geraet: s.geraet || null, bereich: s.bereich, dock, text: s.text};
 };

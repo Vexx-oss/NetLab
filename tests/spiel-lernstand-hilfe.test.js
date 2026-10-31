@@ -520,8 +520,11 @@ gruppe("UI: Lernstand-Hilfe", () => {
     ].join("\n"), bereich);
     vm.runInContext(quelle("app.js"), bereich, {filename: "ui/app.js"});
     /* Baustein C ist fremd: er wird geladen, wenn er sich laden lässt. */
-    let fremdeAnsicht = "karriere.js";
-    try { vm.runInContext(quelle("karriere.js"), bereich, {filename: "ui/karriere.js"}); }
+    let fremdeAnsicht = "karriere.js + lernstand.js";
+    try {
+      vm.runInContext(quelle("karriere.js"), bereich, {filename: "ui/karriere.js"});
+      vm.runInContext(quelle("lernstand.js"), bereich, {filename: "ui/lernstand.js"});
+    }
     catch (e) { fremdeAnsicht = "Ersatz"; }
     if (fremdeAnsicht === "Ersatz") vm.runInContext("UI.karriere = {lernstandAnsicht: c => c.replaceChildren(h('header', {class: 'kr-kopf'}, h('h2', {}, 'Lernstand')))}; UI.wiki = {oeffnen(){}};", bereich);
     vm.runInContext(quelle("lernstand-hilfe.js"), bereich, {filename: "ui/lernstand-hilfe.js"});
@@ -530,7 +533,7 @@ gruppe("UI: Lernstand-Hilfe", () => {
     /* Bekannter Lernstand: genau eine fällige Fertigkeit des Labors. */
     L.st.units = {"lab.ip": {box: 1, due: heute(), r: 1, f: 0, last: heute(), sf: 0}};
     /* Wie UI.starten: erst die Start-Haken (dort melden sich die Ansichten an). */
-    erwarte.gleich((U.startHaken || []).length, 2, "karriere.js und lernstand-hilfe.js melden sich an");
+    erwarte.gleich((U.startHaken || []).length, 3, "karriere.js, lernstand.js und lernstand-hilfe.js melden sich an");
     for (const fn of U.startHaken || []) fn();
     U.modus("voll");                                            /* baut den echten App-Rahmen */
     const reiter = dokument.querySelectorAll(".dock-knopf").filter(b => b.dataset.ansicht === "lernstand");
