@@ -65,10 +65,15 @@ Verträge: [Entwurf – Runde 4 (Jobdoku & QoL)](<Entwurf – Runde 4 (Jobdoku &
   `modus:"voll"`; Außenmaß 1294 × 808 vs. Nutzfläche 1280 × 800 (nur Resize-Rahmen, **keine
   Titelleistenhöhe**); drei Fensterknöpfe 44 × 44 mit `aria-label` (Minimieren/Maximieren/Schließen);
   Maximieren schaltet auf 1920 × 1140 mit `maximiert:true`, der Knopf heißt dann „Wiederherstellen";
-  Zurück schaltet auf 1280 × 800. Die ausgelieferte `.exe` liegt als
-  `Programm/Netzwerk-Labor-2.6.0.exe` bereit; der feste Pfad `Programm/Netzwerk-Labor.exe` war
-  **gesperrt**, weil die fremde Instanz genau diese Datei ausführt (Windows lässt eine laufende
-  `.exe` nicht überschreiben) — sobald sie beendet ist, wird der Pfad wie üblich getauscht.
+  Zurück schaltet auf 1280 × 800.
+  **Nachtrag (31.10.2026, 08:29, Nutzerauftrag „schließe alte Version und starte neue"):** Die
+  fremde Instanz (PID 22444) wurde geschlossen (Fenster-Schließen wirkte nicht — das Programm legt
+  sich planmäßig in den Tray; danach `taskkill /PID 22444`, ausdrücklich nur diese eine PID) und der
+  Hauptpfad getauscht: **`Programm/Netzwerk-Labor.exe` trägt jetzt 2.6.0** (8.948.224 B,
+  SHA256 `831da655…f3505e69`), Sicherung `Programm/Netzwerk-Labor-vor-2.6.0.exe`. Damit lief
+  `tools/q-echt.py` **auf der ausgelieferten Datei selbst**: **0 Fehler**, erster Auftrag, Kabel
+  Kasse→Switch mit echter Maus (4 → 5), Abnahme **5 ★**, Fernwartungs-Schild 400 × 350, 5 Fotos.
+  Das Programm läuft seit 08:29 als Prozess (Fenster „Netzwerk-Labor", PID 2764).
 
 ## 4 · Was bewusst nicht passiert ist
 
@@ -120,8 +125,9 @@ Belegen unter `Nachweise/runde4/review-design.md` und `Nachweise/runde4/review-t
   „Spiel veröffentlichen" **success** (20 s, `41157716821`) · „Release anlegen" **success**
   (423 s, `41157719136`; Jobs „Release bauen und anlegen", „Android-APK bauen und anhaengen",
   „Windows-Programm bauen und anhaengen" alle grün).
-- **Lokal:** `Programm/Netzwerk-Labor-2.6.0.exe` **8.948.224 B**, SHA256 `831da655…f3505e69`
+- **Lokal:** `Programm/Netzwerk-Labor.exe` **8.948.224 B**, SHA256 `831da655…f3505e69`
   (lokaler Bau; die CI-EXE unterscheidet sich erwartungsgemäß in Bytes, gleiche Fassung 2.6.0).
+  Kopie daneben: `Programm/Netzwerk-Labor-2.6.0.exe`.
 - **Nicht geprüft:** die CI-gebaute `.exe` wurde nicht gestartet (nur Größe und ProductVersion
   ausgelesen); die Android-APK wurde nicht gebaut.
 

@@ -78,9 +78,12 @@ gemessen) · `tools/umlaute.py` **GRÜN** (0 offene Befunde) · `node tools/sim-
 
 **Erzeugnisse.** Fassung **2.6.0**; Einzeldatei und `docs/index.html` byte-gleich,
 **3.714.938 B**, SHA256 `b3c58ede…8506d2e`, 0 Außenverweise; Windows-`.exe` **8.948.224 B**,
-ProductVersion **2.6.0**, SHA256 `831da655…f3505e69`; die Abnahme mit `tools/q-echt.py` (echte
-Maus, erster Auftrag, Kabel-Ziehen, Funktionsprobe) lief auf einem Prüfbau mit eigener
-App-Kennung, weil eine fremde Programm-Instanz lief (Regel 1: kein fremder Prozess wird beendet).
+ProductVersion **2.6.0**, SHA256 `831da655…f3505e69`; die Abnahme mit `tools/q-echt.py` (echte Maus, erster Auftrag, Kabel-Ziehen,
+Funktionsprobe) lief zunächst auf einem Prüfbau mit eigener App-Kennung, weil eine fremde
+Programm-Instanz lief (Regel 1: kein fremder Prozess wird beendet). Nach dem ausdrücklichen
+Nutzerauftrag „schließe alte Version und starte neue" wurde jene Instanz (PID 22444) geschlossen,
+`Programm/Netzwerk-Labor.exe` auf 2.6.0 getauscht und dieselbe Abnahme **auf der ausgelieferten
+Datei** wiederholt: **0 Fehler**, 5 ★, Kabel 4 → 5, Fenster ohne Titelleiste.
 Live-Seite <https://vexx-oss.github.io/NetLab/index.html> **byte-gleich** mit `docs/index.html`
 (SHA256 `B3C58EDE…8506D2E`), Release mit drei Anhängen und grünen Abläufen (Prüfen, Seite, Release).
 Einzelheiten:
