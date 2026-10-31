@@ -1,104 +1,95 @@
 /* ---------- Flugschreiber (SIMULATION, Präfix si-) und PDU-Inspektor (Präfix pdu-) ----------
-   Runde 4, Strang C: Der Simulator ist ein „Flugschreiber" – Ergebnis groß, Was/Wo, Warnbanner mit
-   „Zum Fundort", Zeitachse mit Schichtbändern, jede Fehler-/Warnmeldung anklickbar, Format-Umschalter.
-   Das Panel sitzt im Dock rechts; darum kompakt und umbruchfähig. Farben nur über Tokens aus basis.css,
-   Abstände aus {0,4,8,12,16,24,32}px, Schrift nur var(--fs-*), Radius nur Tokens. */
+   Runde 7 „Der Flugschreiber führt das Auge": EINE ruhige Lesespalte, drei Ebenen, ein Hauptweg.
+     Ebene 1 Ergebnis (rahmenlos) · Ebene 2 Befund (Rail-Zeile, keine Fläche) ·
+     Ebene 3 Nächster Schritt (ruhige Liste, hängender Einzug).
+   Knopfregel: höchstens EIN visuell primärer Knopf je Zustand; alles andere ist Ghost (32 px).
+   Die 44-px-Trefferflächen für Transport/Filter/Tempo bleiben unsichtbar erhalten (Test
+   tests/ui-trefferflaechen.test.js) – sichtbar sind es leise Text-/Icon-Zeilen.
+   Farben nur über Tokens aus basis.css, Abstände aus {0,4,8,12,16,24,32}px, Schrift var(--fs-*),
+   Radius nur Tokens, kein !important, kein eigener Reduced-Motion-Block. */
 
 /* ---- Rahmen ---- */
-.si{display:flex; flex-direction:column; overflow:hidden; font-size:var(--fs-2)}
-.si-leer{display:flex; flex-direction:column; gap:8px; padding:12px 16px; color:var(--muted)}
-.si-leer strong{color:var(--ink)}
-.si-leer-tipp{margin:0; color:var(--faint)}
-.si-veraltet{display:flex; align-items:center; gap:8px; margin:0; padding:4px 12px; background:var(--warn-soft); color:var(--ink); font-size:var(--fs-2); border-bottom:1px solid var(--line)}
-/* R10: ein gemeinsamer Block statt vier – „hier ist nichts zu zeigen": Veraltet-Banner, Statistik, schmale PDU-Spalte, Standard-Dreieck */
+.si{display:flex; flex-direction:column; overflow:hidden; font-size:var(--fs-2); color:var(--ink)}
+.si-leer{display:flex; flex-direction:column; gap:8px; padding:16px}
+.si-leer-titel{color:var(--ink); font:800 var(--fs-5)/1.2 var(--display)}
+.si-leer-text{margin:0; max-width:44ch; color:var(--muted); font-size:var(--fs-3); line-height:1.5}
+.si-leer-tipp{margin:0; max-width:44ch; color:var(--faint); font-size:var(--fs-2); line-height:1.45}
+.si-leer-aktionen{margin-top:8px}
+.si-veraltet{display:flex; align-items:center; gap:8px; margin:0 16px 8px; padding:0 0 0 12px; border-left:2px solid var(--warn); color:var(--warn); font-size:var(--fs-2)}
+/* R10: ein gemeinsamer Block statt vier – „hier ist nichts zu zeigen": Veraltet-Zeile, Statistik, schmale PDU-Spalte, Dreieck */
 .si-veraltet[hidden], .si-zus:has(.si-zeile2) .si-statistik, .si[data-breite="schmal"] .si-pdu, .pdu-schicht > summary::-webkit-details-marker{display:none}
-.si-sym{display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; font:800 var(--fs-1)/1 var(--body); background:var(--warn); color:var(--accent-ink); flex:0 0 auto}
-.si-sym.bad{background:var(--bad); color:var(--bad-soft)}
+.si-sym, .si-kennung.still{color:var(--warn)}
+.si-sym{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; font:800 var(--fs-2)/1 var(--body)}
+.si-kennung.bad, .si-sym.bad, .si-kopf.bad .si-gross, .si-warn-kopf .si-kicker{color:var(--bad)}
 
-/* ---- Kopf: Mikrolabel mit Kunde, Ergebnis groß, Was/Wo, Format-Umschalter ---- */
-.si-kopf{display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-bottom:1px solid var(--line); flex:0 0 auto}
+/* ---- Ebene 1 · Ergebnis: Mikrolabel, Urteil, EINE Zahlenzeile, Segment-Leiste (rahmenlos) ---- */
+.si-kopf{display:flex; flex-direction:column; gap:4px; padding:16px 16px 8px; flex:0 0 auto}
 .si-kopf-oben{display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0}
-.si-kicker{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase}
-.si-kopf-zeile{display:flex; align-items:flex-start; gap:12px; min-width:0}
-.si-kopf-unten{display:flex; justify-content:flex-end}
-.si-gross{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; flex:0 0 auto; font:800 var(--fs-4)/1 var(--body)}
-.si-kopf.ok .si-gross{background:var(--ok-soft); color:var(--ok)}
-.si-kopf.bad .si-gross{background:var(--bad-soft); color:var(--bad)}
-.si-zus{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:0}
-.si-zus strong{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.01em}
-.si-kopf.ok .si-zus strong, .si-art[data-art="empfangen"], .si-art[data-art="antworten"]{color:var(--ok)}
-.si-kopf.bad .si-zus strong, .si-filter-knopf.probleme, .si-kennung.bad{color:var(--bad)}
-.si-zus p{margin:0; font-size:var(--fs-2); line-height:1.4}
-.si-zus > p:first-of-type{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-.si-waswo{color:var(--muted); font:500 var(--fs-1)/1.4 var(--mono)}
-.si-statistik, .si-zus .si-statistik, .si-skill, .si-quelle, .pdu-klein{color:var(--faint); font-size:var(--fs-2)}
-.si-zeile2, .si-hilfe-titel, .si-zeile2{display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden}
-.si-zeile.leise, .pdu-nach, .pdu-feld dt, .pdu-vorher s{color:var(--muted)}
+.si-kicker{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--faint); font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.si-kopf-urteil{display:flex; align-items:baseline; gap:8px; min-width:0}
+.si-gross{flex:0 0 auto; color:var(--muted); font:800 var(--fs-5)/1 var(--body)}
+.si-kopf.ok .si-gross{color:var(--ok)}
+.si-zus{min-width:0}
+.si-zus strong{display:block; color:var(--ink); font:800 var(--fs-6)/1.1 var(--display); letter-spacing:-.01em}
+.si-statistik{margin:0; max-width:100%; color:var(--faint); font:500 var(--fs-1)/1.5 var(--mono); font-variant-numeric:tabular-nums}
+.si-zeile2, .si-kennung{font-size:var(--fs-1); line-height:1.4}
+.si-zeile2{margin:0; max-width:100%; color:var(--muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.si-kennung{font-weight:600}
+.si-kopf-unten{display:flex; justify-content:flex-start; margin-top:4px}
+/* Format-Umschalter: Segment-Leiste als leise Textzeile; 44 px Trefferfläche bleibt (U10) */
+.si-modus, .si-tempo, .pdu-format{display:inline-flex; align-items:center; flex:0 0 auto; gap:8px; background:none; border:0}
+.si-modus button, .si-tempo button, .pdu-format button{display:inline-flex; align-items:center; min-height:44px; padding:0; border:0; border-bottom:2px solid transparent; background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; cursor:pointer; white-space:nowrap}
+.si-modus button:hover, .si-tempo button:hover, .pdu-format button:hover, .si-hilfe-knopf:hover, .si-hilfe-knopf.an, .si-filter-knopf:hover{color:var(--ink)}
+.si-modus button.an, .si-tempo button.an, .pdu-format button[aria-pressed="true"], .si-filter-knopf.an{color:var(--ink); border-bottom-color:var(--accent)}
 
-/* Umschalter (Ansicht, Tempo, MAC-Format): Segmentknöpfe, Trefferfläche ≥ 44 */
-.si-modus, .si-tempo, .pdu-format{display:inline-flex; flex:0 0 auto; border-radius:var(--radius-s); background:var(--panel-2); border:1px solid var(--line)}
-.si-modus button, .si-tempo button, .pdu-format button{min-height:44px; padding:0 12px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:700 var(--fs-2)/1 var(--body); cursor:pointer; white-space:nowrap}
-.si-modus button:hover, .si-tempo button:hover, .pdu-format button:hover{color:var(--ink); background:var(--panel-3)}
-.si-modus button.an, .si-tempo button.an, .pdu-format button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
-
-/* ---- Warnbanner: erster echter Fehler mit „Zum Fundort" ---- */
-.si-warn{display:flex; flex-direction:column; gap:4px; padding:8px 12px; background:var(--bad-soft); border-bottom:1px solid var(--line); flex:0 0 auto}
-.si-warn-kopf{display:flex; align-items:center; flex-wrap:wrap; gap:8px}
-.si-problem-kopf{display:flex; align-items:center; flex-wrap:wrap; gap:4px 8px}
+/* ---- Ebene 2 · Befund: Rail-Zeile statt Warnbanner (Farbe nur am 2-px-Balken) ---- */
+.si-warn{display:flex; flex-direction:column; gap:4px; margin:0 16px 8px; padding:0 0 0 12px; border-left:2px solid var(--bad); flex:0 0 auto}
+.si-warn-kopf{display:flex; align-items:baseline; flex-wrap:wrap; gap:0 8px}
+.si-warn-ort{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); font:600 var(--fs-1)/1.5 var(--mono)}
 .si-warn-kopf .si-zumfundort{margin-left:auto}
-.si-warn-text{margin:0; color:var(--ink); font-size:var(--fs-2); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.si-warn-text{margin:0; max-width:44ch; color:var(--ink); font-size:var(--fs-3); line-height:1.45}
 
-/* ---- Anfänger-Hilfe (nur vorhandene Daten, keine Lösung) ---- */
-.si-hilfe{display:flex; flex-direction:column; gap:4px; padding:8px 12px; background:var(--panel-2); border-bottom:1px solid var(--line); flex:0 0 auto; max-height:42%; overflow:auto}
+/* ---- Ebene 3 · Nächster Schritt: ruhige Liste mit hängendem Einzug (kein Kasten) ---- */
+.si-hilfe{display:flex; flex-direction:column; gap:8px; margin:0 16px 12px; padding:0; flex:0 0 auto; max-height:42%; overflow:auto}
 .si-hilfe-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
-.si-hilfe-kopf strong{font:700 var(--fs-2)/1.2 var(--display)}
-.si-hilfe-meta{color:var(--faint); font-size:var(--fs-1)}
-.si-hilfe-liste{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; color:var(--ink); font-size:var(--fs-2); line-height:1.4}
-.si-hilfe-liste .si-hilfe-schritt{min-width:0; overflow-wrap:anywhere}
-.si-hilfe-leer{margin:0; color:var(--muted); font-size:var(--fs-2)}
-.si-hilfe-ort{margin:0; color:var(--faint); font-size:var(--fs-2)}
-.si-hilfe-aktionen{display:flex; flex-wrap:wrap; gap:8px}
-.si-hilfe-aktionen .si-knopf{flex:0 0 auto}
-.si-hilfe-knopf{display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel); color:var(--muted); font:600 var(--fs-1)/1 var(--mono); white-space:nowrap}
-.si-hilfe-knopf.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.si-hilfe-meta{color:var(--faint); font:400 var(--fs-1)/1.3 var(--body)}
+.si-hilfe-liste{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px}
+.si-hilfe-schritt{position:relative; min-width:0; padding-left:16px; overflow-wrap:anywhere; color:var(--ink); font-size:var(--fs-3); line-height:1.45}
+.si-hilfe-nr{position:absolute; left:0; top:0; color:var(--faint); font:600 var(--fs-1)/1.6 var(--mono)}
+.si-hilfe-titel{display:block; color:var(--faint); font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.06em; text-transform:uppercase}
+.si-hilfe-leer{margin:0; max-width:44ch; color:var(--muted); font-size:var(--fs-3); line-height:1.45}
+.si-hilfe-aktionen, .si-zeile-knoepfe{display:flex; flex-wrap:wrap; gap:4px 16px}
+.si-hilfe-punkt{width:6px; height:6px; border-radius:50%; background:var(--faint); flex:0 0 auto}
+.si-hilfe-knopf{display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 4px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; cursor:pointer; white-space:nowrap}
+.si-hilfe-knopf.an .si-hilfe-punkt{background-color:var(--accent)}
 /* Puls am benötigten Interaktionselement (Dock-Reiter) – „Bewegung aus" schaltet die Animation zentral ab */
 @keyframes si-puls{from{box-shadow:inset 0 0 0 2px var(--accent)}to{box-shadow:inset 0 0 0 2px transparent}}
 .si-hilfe-puls{outline:2px solid var(--accent); outline-offset:-2px; animation:si-puls var(--dauer-lang) ease-out 3}
 
-/* Niedrige Fenster (720 hoch): die Kopfzeilen rücken enger zusammen, damit die Zeitachse sichtbar bleibt. */
-@media (max-height:820px){
-  .si-kopf, .si-warn, .si-hilfe{padding:4px 12px}
-  .si-leiste{padding:0 12px}
-  .lb-dock .si{overflow:auto}
-}
-/* ---- Steuerung + Filter (bricht bei Bedarf um) ---- */
-/* MARKER-CD-4: nur Strang C+D schreibt diese Datei (gesetzt im Team-Lauf Runde 4) */
-.si-leiste{display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:4px 12px; border-bottom:1px solid var(--line); flex:0 0 auto}
-.si-steuer, .si-filter{display:flex; align-items:center; gap:4px; flex-wrap:wrap}
-/* U10 (Audit): Trefferfläche 44×44 – das Icon bleibt 16. */
-.si-steuer-knopf{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); cursor:pointer}
-.si-steuer-knopf:hover, .si-knopf:hover, .pdu-ziel:hover{border-color:var(--accent); color:var(--accent)}
+/* ---- Transport + Filter (rahmenlos; 44-px-Trefferflächen bleiben unsichtbar) ---- */
+.si-leiste{display:flex; flex-wrap:wrap; align-items:center; gap:0 16px; padding:0 16px 8px; flex:0 0 auto}
+.si-steuer, .si-filter{display:flex; align-items:center; gap:0 4px; flex-wrap:wrap}
+.si-steuer-knopf{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); cursor:pointer}
+.si-steuer-knopf:hover{color:var(--ink); background:var(--panel-2)}
 .si-steuer-knopf svg path{fill:currentColor; stroke:currentColor; stroke-width:1.4; stroke-linejoin:round}
-.si-pos{min-width:5.5em; color:var(--muted); font:600 var(--fs-2)/1 var(--mono); font-variant-numeric:tabular-nums; padding:0 4px}
-.si-filter-titel{color:var(--muted); font-size:var(--fs-2); font-weight:700}
-.si-filter-knopf{display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 12px; border-radius:var(--radius-s); border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body); cursor:pointer; opacity:.5}
-.si-filter-knopf.an, .si-filter-knopf:hover{opacity:1}
-.si-filter-knopf.probleme.an{border-color:var(--bad); background:var(--bad-soft)}
-.si-anzahl{color:var(--muted); font:600 var(--fs-1)/1 var(--mono)}
+.si-pos{min-width:6em; padding:0 4px; color:var(--faint); font:500 var(--fs-1)/1.3 var(--mono); font-variant-numeric:tabular-nums}
+.si-filter-titel{color:var(--faint); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em}
+.si-filter-knopf{display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 4px; border:0; border-bottom:2px solid transparent; background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); cursor:pointer}
+.si-filter-knopf.probleme.an{border-bottom-color:var(--bad); color:var(--bad)}
+.si-anzahl{color:var(--faint); font:600 var(--fs-1)/1 var(--mono)}
 
 /* ---- Zeitachse + PDU nebeneinander ---- */
-/* Anfänger-Hilfe an: der Rahmen-Inspektor (PDU) tritt zurück, die Zeitachse bekommt seinen Platz.
-   Profi-Sicht (Hilfe aus) zeigt ihn wieder unter der Liste. Spezifität wie editor.css, später geladen. */
+/* Anfänger-Hilfe an: der Rahmen-Inspektor (PDU) tritt zurück, die Zeitachse bekommt seinen Platz. */
 .lb-dock .si.si-hilfe-an .si-haupt{grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(0, 1fr)}
-/* C3 (Prüfer 2): im Dock darf die Ereignisliste nicht unter ~120 px fallen; bei Platznot scrollt das Panel. */
+/* Im Dock scrollt das Panel bei Platznot; die Ereignisliste bleibt mindestens 120 px hoch. */
 .lb-dock .si[data-breite="schmal"] .si-liste{min-height:120px}
 .lb-dock .si.si-hilfe-an .si-pdu, .lb-dock .si.si-hilfe-an .si-haupt > .si-pdu{display:none; border-top:0}
 .si-haupt{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(250px, 1fr)}
 .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr)}
-.si-liste{min-height:0; overflow:auto; padding:4px 4px 8px; outline:none; container-type:inline-size}
+.si-liste{min-height:0; overflow:auto; padding:0 8px 8px; outline:none; container-type:inline-size}
 .si-liste:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
 .si-pdu{min-height:0; overflow:auto; border-left:1px solid var(--line); background:var(--panel); container-type:inline-size}
-/* C1 (Prüfer 2): der fokussierbare PDU-Inspektor braucht einen sichtbaren Fokusring wie basis.css */
+/* C1: der fokussierbare PDU-Inspektor braucht einen sichtbaren Fokusring wie basis.css */
 .si-pdu:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
 .si-hinweis{margin:4px 8px; color:var(--muted); font-size:var(--fs-2)}
 /* Im Dock (schmal): Zeitachse bekommt den Platz, der PDU-Inspektor sitzt darunter und scrollt.
@@ -133,37 +124,40 @@
 .si-art{display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-size:var(--fs-2); color:var(--muted)}
 .si-art svg path{fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
 .si-art[data-art="senden"]{color:var(--accent)}
-.si-art[data-art="fluten"], .si-kennung.still{color:var(--warn)}
+.si-art[data-art="fluten"]{font-weight:700}
 .si-art[data-art="verwerfen"]{color:var(--bad); font-weight:700}
-.si-art[data-art="lernen"], .si-kennung.gemeldet{color:var(--info)}
+.si-art[data-art="lernen"]{font-style:italic}
 .si-grundzeile{grid-column:3 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; padding:0 0 4px; font-size:var(--fs-2); color:var(--ink)}
 .si-grund{font:700 var(--fs-2)/1.6 var(--mono); padding:0 4px; border-radius:var(--radius-xs); background:var(--bad-soft); color:var(--bad)}
 .si-erklaerung{min-width:0; max-width:100%; color:var(--ink); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-.si-kennung{font-size:var(--fs-2); font-weight:700}
+.si-problem-kopf{display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 8px}
+.si-skill, .si-quelle{color:var(--faint); font-size:var(--fs-1)}
+.pdu-klein, .pdu-nach{color:var(--muted)}
 
-/* ---- Ansicht „Ergebnis": wo es hängt ---- */
-.si-ergebnis{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:10px 14px 12px}
-.si-ergebnis h4{margin:0; font:800 var(--fs-2)/1.2 var(--display); color:var(--bad)}
-.si-problem{align-self:stretch; display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-radius:var(--radius); border:1px solid color-mix(in srgb, var(--bad) 40%, var(--line)); background:color-mix(in srgb, var(--bad) 6%, var(--panel))}
-.si-problem p{margin:0}
-.si-zeile-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
-.si-knopf{display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 12px; border-radius:var(--radius-s); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:700 var(--fs-2)/1 var(--body); cursor:pointer}
-.si-knopf.klein{font-size:var(--fs-1); padding:0 8px}
-.si-knopf.haupt{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
-.si-knopf.haupt:hover{filter:brightness(1.08); color:var(--accent-ink)}
+/* ---- Ansicht „Ergebnis": ruhige Rail-Zeilen statt Karten ---- */
+.si-ergebnis{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:8px 16px 16px}
+.si-ergebnis h4{margin:0; color:var(--faint); font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.si-problem{align-self:stretch; display:flex; flex-direction:column; gap:4px; padding:0 0 0 12px; border:0; border-left:2px solid var(--bad); border-radius:0; background:none}
+.si-problem p{margin:0; font-size:var(--fs-3); line-height:1.45}
+/* ---- Knöpfe: EIN Hauptweg je Zustand, sonst Ghost (32 px, keine Füllfläche) ---- */
+.si-knopf{display:inline-flex; align-items:center; justify-content:center; min-height:32px; padding:0 8px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; cursor:pointer; white-space:nowrap}
+.si-knopf:hover, .pdu-ziel:hover{color:var(--ink); text-decoration:underline; text-underline-offset:2px}
+.si-knopf.klein{min-height:32px; padding:0 4px}
+.si-knopf.haupt{min-height:36px; padding:0 16px; border-radius:var(--radius-s); background:var(--accent); color:var(--accent-ink); font:700 var(--fs-2)/1 var(--body)}
+.si-knopf.haupt:hover{background:var(--accent); color:var(--accent-ink); filter:brightness(1.06); text-decoration:none}
 .si-zumfundort{white-space:nowrap}
+.pdu-ziel{display:inline-flex; align-items:center; min-height:44px; padding:0 8px; border:0; background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); white-space:nowrap; cursor:pointer}
 
-/* C2 (Prüfer 2): im hellen Schema trägt der Chip Textfarbe --ink; die Protokollfarbe bleibt Rand/Punkt. */
+/* ---- Protokoll-Chip (Farbe UND Text) ---- */
+/* C2: im hellen Schema trägt der Chip Textfarbe --ink; die Protokollfarbe bleibt Rand/Punkt. */
 :root[data-theme="light"] .pdu-chip{color:var(--ink); background:var(--panel-2); border-color:color-mix(in srgb, var(--c, var(--muted)) 55%, var(--line))}
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]) .pdu-chip{color:var(--ink); background:var(--panel-2); border-color:color-mix(in srgb, var(--c, var(--muted)) 55%, var(--line))}
 }
-
-/* ---- Protokoll-Chip (Farbe UND Text) ---- */
 .pdu-chip{display:inline-flex; align-items:center; padding:0 4px; border-radius:var(--radius-xs); font:700 var(--fs-2)/1.6 var(--mono); letter-spacing:.02em;
   color:var(--c, var(--muted)); background:color-mix(in srgb, var(--c, var(--muted)) 15%, transparent); border:1px solid color-mix(in srgb, var(--c, var(--muted)) 45%, transparent)}
 
-/* ---- PDU-Inspektor ---- */
+/* ---- PDU-Inspektor (pdu.js bleibt unberührt; nur diese Fläche ist hier gestaltet) ---- */
 .pdu{padding:8px 12px 12px; font-size:var(--fs-2)}
 .pdu-leer{padding:8px 4px; color:var(--muted)}
 .pdu-leer p{margin:0 0 4px}
@@ -171,8 +165,7 @@
 .pdu-titel{min-width:0; line-height:1.4}
 .pdu-titel strong{font:800 var(--fs-2)/1.3 var(--display)}
 .pdu-kopf-rechts{display:flex; align-items:center; flex-wrap:wrap; gap:4px; flex:0 0 auto; justify-content:flex-end}
-.pdu-format button{font-family:var(--mono); font-size:var(--fs-2)}
-.pdu-ziel{display:inline-flex; align-items:center; min-height:44px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:700 var(--fs-1)/1 var(--body); white-space:nowrap}
+.pdu-format button{font-family:var(--mono)}
 .pdu-text{margin:0 0 4px; color:var(--muted)}
 .pdu-bilanz{display:block; margin:0 0 4px; padding:4px 8px; border-radius:var(--radius-s); background:var(--warn-soft); font-size:var(--fs-2); line-height:1.45}
 .pdu-bilanz .pdu-sym{margin-right:6px}
@@ -197,3 +190,10 @@
 /* schmale PDU-Spalte: Feldname über dem Wert, damit MAC und IP ungebrochen in eine Zeile passen */
 @container (max-width:400px){ .pdu-feld{grid-template-columns:minmax(0, 1fr); gap:0; padding:3px 6px} .pdu-feld dt{font-size:var(--fs-2)} }
 .pdu-warum{margin:4px 0 0; padding:4px 8px; border-radius:var(--radius-s); background:var(--info-soft); font-size:var(--fs-2); line-height:1.45}
+/* Niedrige Fenster (720 hoch): Kopfzeilen rücken enger zusammen, damit die Zeitachse sichtbar bleibt. */
+@media (max-height:820px){
+  .si-kopf{padding:8px 16px 4px}
+  .si-warn, .si-hilfe{margin-bottom:4px}
+  .si-hilfe, .si-hilfe-liste{gap:4px}
+  .lb-dock .si{overflow:auto}
+}

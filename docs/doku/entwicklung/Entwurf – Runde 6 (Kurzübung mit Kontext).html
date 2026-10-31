@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf – Runde 6 „Kurzübung mit echtem Kontext&quot; (31.10.2026) · Netzwerk-Labor</title>
+<meta name="description" content="Auftrag des Nutzers (wörtlich).">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Entwurf – Runde 6 „Kurzübung mit echtem Kontext&quot; (31.10.2026)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-zielbild">1 · Zielbild</a></li>
+<li><a href="#2-schnittstelle-verbindlich-additiv-headless">2 · Schnittstelle (verbindlich, additiv, headless)</a></li>
+<li><a href="#3-vorlagen-alle-aus-dem-echten-netz">3 · Vorlagen (alle aus dem echten Netz)</a></li>
+<li><a href="#4-oberflache-leiste">4 · Oberfläche (Leiste)</a></li>
+<li><a href="#5-tests">5 · Tests</a></li>
+<li><a href="#6-schreibrechte">6 · Schreibrechte</a></li>
+<li><a href="#7-abnahme-und-fassung">7 · Abnahme und Fassung</a></li>
+<li><a href="#8-ergebnis-31-10-2026-in-einer-sauberen-prufkopie-auf-head-gemessen">8 · Ergebnis (31.10.2026, in einer sauberen Prüfkopie auf HEAD gemessen)</a></li>
+</ul>
+</nav><h1 id="entwurf-runde-6-kurzubung-mit-echtem-kontext-31-10-2026">Entwurf – Runde 6 „Kurzübung mit echtem Kontext" (31.10.2026)</h1>
+<p><strong>Auftrag des Nutzers (wörtlich).</strong> Zum Screenshot der aufgeklappten Minileiste: „schon deutlich besser, aber sowas hier meine ich, wie soll der Schüler das hier lösen? Hier fehlen doch vollkommen die Kontextinfos, woher soll er wissen wie das Netz ist und ob der PC dazugehört? Das ist ein gutes Beispiel für das Problem."</p>
+<p><strong>Befund</strong> (Bild: <code>Nachweise/runde6/befund-kurzuebung-kontextlos.png</code>). Die Leiste zeigt unter „Kurzübung" eine generische Mini-Frage („Antwortet 10.0.0.1 auf einen Ping aus dem LAN?") mit einer Kontextzeile, die nur Kunde und Auftragstitel nennt. Das Netz des Auftrags (Geräte, Adressen, Ports, VLANs) ist nicht sichtbar, die Frage stammt aus einem allgemeinen Pool und ist mit dem gezeigten Wissen nicht lösbar. Genau dieses Muster soll verschwinden.</p>
+<h2 id="1-zielbild">1 · Zielbild</h2>
+<p><strong>Kurzübung = Frage aus dem laufenden Auftrag, mit sichtbarer Lage.</strong> Die Frage wird aus dem echten Netz des offenen Auftrags erzeugt; die Fakten, die zur Antwort nötig sind, stehen als <strong>Lage-Block</strong> (2–4 Zeilen: Gerät · Adresse/Maske, Port · Modus · VLAN, Zustand) direkt über der Frage. Jede Frage ist mit genau diesen Angaben beantwortbar; keine Frage ohne Lage. Passt keine Frage (kein offener Auftrag, kein verwertbares Netz), zeigt die Leiste <strong>keine unlösbare Frage</strong>, sondern einen ruhigen Denkanstoß mit Weg ins Labor.</p>
+<p><strong>Kern:</strong> neues, reines Modul <code>src/spiel/kurzfrage.js</code> erzeugt aus <code>inst</code> ein Frage-Objekt; die Leiste rendert es im Kurzübung-Modul anstelle der generischen Mini-Frage. Die generische Mini-Frage bleibt als „Kopf-/Grundlagenübung" im Mini-Ticket-Dialog erhalten, wird in der Leiste bei offenem Auftrag aber nicht mehr gezeigt.</p>
+<h2 id="2-schnittstelle-verbindlich-additiv-headless">2 · Schnittstelle (verbindlich, additiv, headless)</h2>
+<pre><code class="sprache-js">Spiel.kurzfrage.fuer(inst, {niveau} = {}) → frage | null
+frage = {
+  id:       "netz" | "maske" | "gateway" | "portmodus" | "zustand",
+  titel:    "Gleiches Netz?" | …,
+  frage:    "Können PC-Kasse und Drucker sich ohne Router direkt erreichen?",
+  lage:     [{label: "PC-Kasse", wert: "192.168.110.36 /24"}, …],
+  optionen: [{text: "Ja – beide liegen in 192.168.110.0/24", richtig: true}, …],
+  erklaerung: "…",
+  ort:      {art: "geraet", geraet} | {art: "port", geraet, port} | null
+}</code></pre>
+<p>Regeln: deterministisch (Seed aus <code>inst.iid</code>, kein <code>Math.random</code> ohne Seed, keine Uhr); genau eine richtige Option; jede Option anhand der <code>lage</code> und elementarem Netzwerk-Wissen entscheidbar; nur echte Daten aus <code>inst.netz</code>/<code>Modell</code>/<code>IP</code>/<code>Sim</code>; <strong>niemals die Lösung des Auftrags verraten</strong> (keine Injektor-Art, kein Grund-Code, keine Diagnose); Niveau: E nur <code>netz</code>/<code>zustand</code>, AP1 zusätzlich <code>maske</code>/<code>gateway</code>, AP2 zusätzlich <code>portmodus</code>.</p>
+<h2 id="3-vorlagen-alle-aus-dem-echten-netz">3 · Vorlagen (alle aus dem echten Netz)</h2>
+<ol><li><strong>netz</strong> — zwei Hosts mit gültiger Adresse (bevorzugt Geräte aus den Zielen). Lage: beide Namen</li></ol>
+<ul><li><code>ip / maske</code>. Frage: erreichen sie sich ohne Router? Antwort aus <code>IP.gleichesNetz</code>.</li></ul>
+<ol><li><strong>maske</strong> — ein Host mit <code>ip/maske</code>. Frage: Wie lautet die Netzadresse? Optionen: richtige <code>IP.netz</code>-Adresse + zwei plausible falsche (Broadcast, Nachbarnetz).</li><li><strong>gateway</strong> — Host mit <code>ip/maske/gw</code>. Lage: Adresse, Maske, Gateway. Frage: liegt das Gateway im eigenen Netz? Antwort aus <code>IP.gleichesNetz(ip, gw, maske)</code>.</li><li><strong>portmodus</strong> — Switch-Port mit Kabel zu einem Host. Lage: Port · Modus · VLAN (bzw. Trunk). Frage: Access- oder Trunk-Port / darf ein Frame aus VLAN n über diesen Port? Antwort aus <code>running.ports[port]</code>.</li><li><strong>zustand</strong> — Gerät mit <code>an:false</code> oder Port <code>shutdown</code>/Link unten an einem Ziel. Lage: Gerät, Zustand, ggf. Adresse. Frage: was folgt daraus? Optionen aus dem gezeigten Zustand.</li></ol>
+<p>Keine Vorlage anwendbar → <code>null</code> — die Leiste zeigt dann keinen Quiz, sondern Hinweis + Weg ins Labor.</p>
+<h2 id="4-oberflache-leiste">4 · Oberfläche (Leiste)</h2>
+<ul><li><strong>Zugeklappt (Ruhe 300 px):</strong> eine Zeile <code>KURZÜBUNG · &lt;Art&gt;</code> links, <code>Antworten ▸</code> rechts; darunter die Kontextzeile („Zum Auftrag: &lt;Kunde&gt; · &lt;Titel&gt;"). Keine Frage im Ruhezustand.</li><li><strong>Geöffnet (Karte wächst wie heute):</strong> Kontextzeile, <strong>Lage-Block</strong> (2–4 Zeilen, Mikrolabel „LAGE ZUM AUFTRAG"), Frage (2–3 Zeilen), drei Antwortflächen ≥ 32 px; nach der Antwort Erklärung<ul><li>feste Aktion „Im Labor prüfen" (nutzt <code>ort</code>, sonst Labor öffnen).</li></ul></li><li><strong>Ohne Frage:</strong> statt Quiz der nächste Schritt aus <code>Spiel.naechster</code> bzw. ein ehrlicher Satz und „Im Labor öffnen" — nichts Unlösbares.</li><li>Antwort-Zustand vollständig sichtbar (keine abgeschnittenen Sätze); Karte darf dafür wachsen; prüfen bei 1440/960/720, 5 Themes + hell, Bewegung aus.</li><li>Testhaken bleiben: <code>.lk-zeile</code> mit exakt sechs Kindern, <code>.lk-mini</code>, <code>.lk-mini-hilfe</code>, <code>.lk-hilfe-knopf</code>, <code>.lk-oeffnen</code>, Maße 300×56 / 320×300; das generische Mini-System (<code>UI.karriere.miniZeichnen</code>, <code>UI.leiste.miniBereich</code>) bleibt funktionsfähig (Fallback).</li><li>Die generische Mini-Frage bekommt im Mini-Ticket-Dialog (karriere.js, Leitung) das Mikrolabel „KOPFÜBUNG · unabhängig vom Auftrag" und einen einordnenden Satz.</li></ul>
+<h2 id="5-tests">5 · Tests</h2>
+<ul><li><strong>Neu</strong> <code>tests/kurzfrage.test.js</code> (headless): für die Beispiel-Netze liefert <code>fuer(inst)</code> ein Objekt mit 2–4 Lage-Zeilen, genau einer richtigen Option, Erklärung, deterministisch (zweimal gleich), niveau-abhängig, <code>null</code> ohne Auftrag/Adresse; die richtige Option ist gegen <code>IP</code>/<code>Modell</code>/<code>inst.netz</code> nachgerechnet; kein Lösungstext (kein Injektor-Name/-Grund).</li><li>Bestehende Tests bleiben grün; <code>tests/spiel-leiste-hilfe.test.js</code> (Struktur/Maße) nicht ändern. Neue DOM-Klassen mit <code>.lk-</code>-Präfix, Beleg in <code>tests/ui-kurzfrage.test.js</code> (DOM-Emulation).</li></ul>
+<h2 id="6-schreibrechte">6 · Schreibrechte</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Owner</th><th>Dateien</th></tr></thead><tbody><tr><td><strong>W1 · Kurzfrage</strong></td><td><code>src/spiel/kurzfrage.js</code> (neu), <code>tests/kurzfrage.test.js</code> (neu)</td></tr><tr><td><strong>W2 · Leisten-Modul</strong></td><td><code>src/ui/leiste.js</code>, <code>src/stil/leiste.css</code></td></tr><tr><td><strong>W3 · Mini-Dialog</strong></td><td><code>src/ui/karriere.js</code> (nur <code>miniDialog</code>/<code>leisteMini</code>-Beschriftung)</td></tr><tr><td><strong>Leitung</strong></td><td><code>src/stil/basis.css</code>, Tests, Doku, Fassung, Build, Commit, Release</td></tr><tr><td><strong>Prüfer 1</strong></td><td>read-only: Didaktik/Design (lösbar? Kontext sichtbar? Hierarchie)</td></tr><tr><td><strong>Prüfer 2</strong></td><td>read-only: Theme/A11y/Struktur (Fokus, Ziele ≥ 32/44 px, Themes, Testhaken)</td></tr></tbody></table></div>
+<p>Regeln wie Runde 5: ein Schreiber je Datei; kein Commit/Push; kein <code>git add -A</code>; keine fremden Dateien; Kiosk-Dateien der parallelen Sitzung tabu; private Vorschau/Fotos; keine Tests ändern.</p>
+<h2 id="7-abnahme-und-fassung">7 · Abnahme und Fassung</h2>
+<p>Gates: <code>node tests/run.js</code> grün (0 übersprungen) · Rauchtest 45/45 · <code>klassen.py</code> 0 · <code>ethos.py</code> GRÜN (R4/R9/R10 nicht schlechter) · <code>umlaute.py</code> GRÜN · <code>sim-stand.js</code> unverändert. Sichtprüfung 1440/960/720, 5 Themes + hell, Bewegung aus; Beleg: Screenshot der geöffneten Kurzübung mit sichtbarer Lage und lösbarer Frage. Fassung <strong>2.7.1</strong> (Didaktik-Fix auf 2.7.0), Push/Tag/Release/Live-Nachweis wie in Runde 5 (stehende Freigabe).</p>
+<h2 id="8-ergebnis-31-10-2026-in-einer-sauberen-prufkopie-auf-head-gemessen">8 · Ergebnis (31.10.2026, in einer sauberen Prüfkopie auf HEAD gemessen)</h2>
+<p>Die parallele Sitzung (Runde „Abteilung Subnetting") arbeitet im selben Arbeitsbaum; ihre Testdateien waren zeitweise nicht ladbar. Für die Abnahme wurde deshalb eine <strong>saubere Prüfkopie</strong> aus `HEAD` (f0db49b) mit genau den Runde-6-Dateien gebaut und dort gemessen — das ist der belastbare Stand dieses Strangs:</p>
+<ul><li>`node tests/run.js`: <strong>950/950 grün</strong>, 0 übersprungen, 111 Testdateien, 96 Module (932 → 950: +8 Kurzfrage-Tests, +10 DOM-Tests der Leiste).</li><li>`klassen.py` <strong>0</strong> · `ethos.py` <strong>GRÜN</strong> (R1 23, R2 17, R3 4, R4 135, R9 58, R10 42; R12 nicht gemessen) · `umlaute.py` <strong>GRÜN</strong> · `sim-stand.js` <strong>Simulation unverändert</strong>.</li><li>Erzeugt: <strong>139 Module</strong> (96 headless) — +1 Modul `src/spiel/kurzfrage.js`.</li><li>Belegbilder (Vorschau der sauberen Kopie + Fotos aus der Arbeitskopie): `Nachweise/bento/kurzfrage/kurzuebung-offen-1440.png`, `kurzuebung-antwort-1440.png`, `leiste-auf.png` — geöffnete Kurzübung mit <strong>Lage zum Auftrag</strong> (Gerät, Adresse, Maske, Standardgateway), Frage, drei Antwortflächen, nach der Antwort Erklärung + „Im Labor prüfen".</li><li>Der Befund aus `Nachweise/runde6/befund-kurzuebung-kontextlos.png` (generische 10.0.0.1-Frage ohne Netz) ist damit weg: bei offenem Auftrag zeigt die Leiste die Kontextfrage; ohne verwertbares Netz zeigt sie <strong>keine</strong> Frage, sondern den Weg ins Labor.</li><li>Die generische Mini-Frage bleibt als <strong>Kopfübung</strong> im Mini-Ticket-Dialog und ist dort als „unabhängig vom laufenden Auftrag" eingeordnet (karriere.js, `mk-einordnung`).</li></ul>
+<p><strong>Nicht geprüft:</strong> echte Maus im Tauri-Fenster, R12, Android-APK; die Leisten-Fensterhöhen im Browser gemessen (Karte 616 px geöffnet / 736 px beantwortet), im Tauri-Fenster nicht durchgeklickt.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

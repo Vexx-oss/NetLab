@@ -1675,6 +1675,8 @@ html[data-bewegung="reduziert"] .dock-knopf:hover:not(:active){transition:none; 
 .mk-ergebnis.bad{background:var(--bad-soft)}
 .mk-ergebnis p{margin:4px 0 0; font-size:var(--fs-2)}
 .mk-leer{margin:0; color:var(--muted); font-size:var(--fs-2)}
+/* Runde 6 (Leitung): Einordnung des Mini-Tickets als Kopfübung (karriere.js miniDialog). */
+.mk-einordnung{margin:0 0 8px; color:var(--muted); font:400 var(--fs-2)/1.45 var(--body); max-width:64ch}
 .mk.gross{font-size:var(--fs-4); gap:10px}
 .mk.gross .mk-frage{font-size:var(--fs-4)}
 .mk.gross .mk-schnapp{font-size:var(--fs-2); white-space:pre-wrap}
@@ -1959,9 +1961,14 @@ html[data-bewegung="reduziert"] .dock-knopf:hover:not(:active){transition:none; 
    in EINER Zeile (€/h · Ruf · offen), rechts Mini-Signal, Denkhilfe, „öffnen". Deckkraft 0,92
    (einstellbar 0,6–1 über --leiste-deckkraft), mit der Maus voll deckend.
    Aufgeklappt 320 × 300: „Jetzt dran", „Kurzübung (freiwillig)" als EINZEILIGE Einladung
-   („Kurzübung · Fertigkeit — Antworten ▸"), „Lage" mit Schnellaktionen. Erst der Klick auf
-   „Antworten ▸" öffnet die Frage; die Karte wächst dann auf 420 px und nach der Antwort auf 460 px,
-   damit Erklärung, „Nächstes" und „Im Labor prüfen" vollständig sichtbar sind.
+   („Kurzübung · Art — Antworten ▸") mit Kontextzeile „Zum Auftrag: Kunde · Titel", „Lage" mit
+   Schnellaktionen. Erst der Klick auf „Antworten ▸" öffnet die Übung; die Karte wächst dann
+   (Ruhe 300 → Übung → Antwort) und das Leistenfenster zieht mit.
+   RUNDE 6: Bei offenem Auftrag zeigt die Kurzübung die Kontextfrage aus Spiel.kurzfrage MIT
+   Lage-Block (Geräte/Adressen/Ports/Zustand), Frage und drei Antwortflächen; nach der Antwort
+   Erklärung und die feste Aktion „Im Labor prüfen". Die Karte ist dafür höher (Variablen
+   --lk-hoehe-offen/-fertig, im JS gemessen und nur nach oben korrigiert) – abgeschnitten wird nichts.
+   Ohne verwertbare Frage: ehrlicher Satz und „Im Labor öffnen" statt eines unlösbaren Quiz.
    Kein Fokusklau (tabindex -1 im JS), nur Maus.
    Animation: Aufklappen 320 ms cubic-bezier(.22,1,.36,1) für Höhe/Breite, Inhalt 8 px Versatz und
    gestaffelter Fade (40 ms je Modul); Zuklappen Inhalt zuerst (160 ms), Karte danach (240 ms ab
@@ -1982,8 +1989,8 @@ html[data-modus="leiste"] body{overflow:hidden}
   transition:opacity var(--dauer), height var(--dauer-lang) var(--lk-ease), width var(--dauer-lang) var(--lk-ease), box-shadow var(--dauer)}
 /* Übung geöffnet bzw. beantwortet: die Karte wächst, damit Frage/Antworten bzw. Erklärung und
    Aktionszeile vollständig Platz haben. Die Fensterhöhe zieht das JS mit (Plattform.fenster.groesse). */
-.leiste-karte.auf.uebung-offen{height:420px}
-.leiste-karte.auf.uebung-fertig{height:480px}
+.leiste-karte.auf.uebung-offen{height:var(--lk-hoehe-offen, 420px)}
+.leiste-karte.auf.uebung-fertig{height:var(--lk-hoehe-fertig, 480px)}
 .im-browser .leiste-karte{box-shadow:var(--schatten)}
 .im-browser[data-ecke="ol"] .leiste-karte{left:12px; top:12px}
 .im-browser[data-ecke="or"] .leiste-karte{left:auto; right:12px; top:12px}
@@ -2006,8 +2013,7 @@ html[data-bewegung="reduziert"] .lk-auf > .lk-modul, html[data-bewegung="reduzie
 .lk-griff .sym{pointer-events:none}
 .lk-ampeln{grid-row:1; grid-column:2; display:flex; align-items:flex-end; min-width:0; overflow:hidden;
   font:700 var(--fs-1)/1.2 var(--display); color:var(--muted); white-space:nowrap}
-.lk-ampeln[data-lang="kurz"]{color:var(--faint)}
-/* Die drei Werte in EINER Zeile – nie umgebrochen; Trenner als ruhiger Punkt aus basis-Token. */
+.lk-ampeln[data-lang="kurz"], /* Die drei Werte in EINER Zeile – nie umgebrochen; Trenner als ruhiger Punkt aus basis-Token. */
 .lk-werte{grid-row:2; grid-column:2; display:flex; align-items:center; gap:4px; min-width:0; overflow:hidden;
   white-space:nowrap; font:700 var(--fs-1)/1.1 var(--body); font-variant-numeric:tabular-nums}
 .lk-wert{display:inline-flex; align-items:center; gap:4px; white-space:nowrap}
@@ -2034,7 +2040,8 @@ html[data-bewegung="reduziert"] .lk-auf > .lk-modul, html[data-bewegung="reduzie
    Hilfe-Knopf sie öffnet (die Werte bleiben sichtbar, auch wenn ein Mini wartet), der doppelte
    Mini-Kopf (die Leiste setzt Kicker und Fertigkeit) und bei Platzmangel der Schnappschuss. */
 .lk-oeffnen span, .lk-mini-hilfe, .lk-mini .mk-kopf, .lk-mini.lk-knapp .mk-schnapp, .lk-werte.lk-knapp .lk-offen-wort,
-.lk-uebung.lk-leerstand .lk-mini, .lk-uebung.lk-leerstand .lk-mini-hilfe{display:none}
+.lk-uebung.lk-leerstand .lk-mini, .lk-uebung.lk-leerstand .lk-mini-hilfe,
+.lk-uebung.lk-kurzzweig .lk-mini, .lk-uebung.lk-kurzzweig .lk-mini-hilfe, .lk-uebung.lk-kurzzweig .lk-uebung-fuss{display:none}
 
 /* ---------- Das aufgeklappte Bento: drei Module, der Mini-Bereich nimmt den Rest ----------
    Aufklappen: Inhalt 8 px tiefer und blass, dann gestaffelt einblenden (40 ms je Modul).
@@ -2120,8 +2127,7 @@ html[data-bewegung="reduziert"] .lk-auf > .lk-modul, html[data-bewegung="reduzie
    abgeschnitten aus. Ist der Hilfe-Bereich offen, teilen sich beide den Platz und scrollen getrennt. */
 .leiste-karte.hilfe-an .lk-mini-hilfe{display:flex; flex-direction:column; flex:1 1 0; min-height:0; overflow:auto; border-top:1px solid var(--line); padding-top:4px; -webkit-mask-image:linear-gradient(to bottom, var(--ink) calc(100% - 16px), transparent); mask-image:linear-gradient(to bottom, var(--ink) calc(100% - 16px), transparent)}
 .leiste-karte.hilfe-an .lk-mini{flex:1 1 0; min-height:0}
-.mk-hilfe-bereich{display:flex; flex-direction:column; gap:4px}
-.mk-hilfe{padding:4px 8px; border-radius:var(--radius-s); border-left:2px solid var(--accent); background:var(--panel-3)}
+.mk-hilfe-bereich, .mk-hilfe{padding:4px 8px; border-radius:var(--radius-s); border-left:2px solid var(--accent); background:var(--panel-3)}
 .mk-hilfe.knapp{border-left-color:var(--warn)}
 .mk-hilfe-art, .mk-hilfe-vorrat{display:block; font-size:var(--fs-1); color:var(--muted)}
 .mk-hilfe-text{margin:0; font-size:var(--fs-2); line-height:1.35; white-space:pre-wrap}
@@ -2138,12 +2144,51 @@ html[data-bewegung="reduziert"] .lk-auf > .lk-modul, html[data-bewegung="reduzie
    am Kartenrand liegt. Der Schalter verschwindet, der Zustand bleibt offen (Erklärung bleibt). */
 .lk-uebung:not(.lk-offen){justify-content:center}
 .lk-uebung:not(.lk-offen) .lk-mini, .lk-uebung:not(.lk-offen) .lk-mini-hilfe,
-.lk-uebung:not(.lk-offen) .lk-uebung-fuss,
-.lk-uebung.lk-fertig .lk-link, .lk-uebung.lk-fertig .lk-kontext,
-.lk-uebung.lk-leerstand .lk-link, .lk-uebung.lk-leerstand .lk-kontext,
-.lk-uebung:not(.lk-leerstand) .lk-leer{display:none; min-height:0}
+.lk-uebung:not(.lk-offen) .lk-uebung-fuss, .lk-uebung:not(.lk-offen) .lk-kurz,
+.lk-uebung.lk-fertig .lk-link, .lk-uebung.lk-minizweig.lk-fertig .lk-kontext,
+.lk-uebung.lk-leerstand .lk-link, .lk-uebung.lk-leerstand .lk-kontext, .lk-uebung.lk-leerstand .lk-kurz,
+.lk-uebung:not(.lk-leerstand) .lk-leer, .lk-uebung:not(.lk-leerstand) .lk-uebung-weg{display:none; min-height:0}
 .lk-uebung-fuss{display:none; flex:0 0 auto}
-.lk-uebung.lk-fertig .lk-uebung-fuss{display:flex}
+.lk-uebung.lk-fertig .lk-uebung-fuss, 
+/* ---------- Runde 6: Kontextfrage mit Lage-Block ----------
+   Die Kurzübung zeigt bei offenem Auftrag die Frage ZUM AUFTRAG samt Lage (2–4 Zeilen Fakten:
+   Gerät · Adresse, Port · Modus · VLAN, Zustand). Nur mit diesen Angaben ist die Frage lösbar –
+   genau das fehlte am Befundbild vom 31.10.2026. Drei Antwortflächen (mindestens 32 px hoch,
+   Platz für zwei Zeilen), nach der Antwort die Erklärung und die feste Aktion „Im Labor prüfen".
+   Die Karte ist dafür höher (Variablen --lk-hoehe-offen/-fertig, im JS am DOM gemessen) und
+   schneidet nichts ab. Ohne Frage: ehrlicher Satz und „Im Labor öffnen". */
+.lk-uebung.lk-kurzzweig{flex:0 0 auto; overflow:visible}
+.lk-kurz{display:flex; flex-direction:column; gap:8px; min-height:0}
+/* Der Kopf des Kontext-Zweigs darf zweizeilig werden: „KURZÜBUNG · <Art>" und „Zum Auftrag: …"
+   stehen vollständig da, statt mitten im Wort zu enden (Titel bleibt zusätzlich im title-Attribut). */
+.lk-uebung.lk-kurzzweig .lk-kontext{white-space:normal; overflow:visible; text-overflow:clip}
+.lk-uebung.lk-kurzzweig.lk-offen .lk-kicker{white-space:normal; overflow:visible; text-overflow:clip; line-height:1.25}
+.lk-kurz-lage{display:flex; flex-direction:column; gap:4px; padding:4px 8px;
+  border-radius:var(--radius-s); background:var(--panel-3); border-left:2px solid var(--accent)}
+.lk-kurz-lage .lk-kicker{color:var(--faint)}
+.lk-kurz-lage-zeile{display:flex; align-items:baseline; gap:8px; min-width:0}
+.lk-kurz-lage-label{flex:0 0 auto; font:600 var(--fs-1)/1.2 var(--body); color:var(--muted);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+/* Der Wert ist Mono und darf UM(brechen) – die Lage muss vollständig lesbar sein, sie ist die
+   Begründung der Frage (Befund am Foto: „Port Fa0/2 · kein shutdown · Kabel gesteckt" war gekürzt). */
+.lk-kurz-lage-wert{margin-left:auto; flex:1 1 0; min-width:0; font:500 var(--fs-1)/1.25 var(--mono);
+  color:var(--ink); text-align:right; overflow-wrap:break-word}
+.lk-kurz-frage{margin:0; font:600 var(--fs-2)/1.3 var(--body); color:var(--ink)}
+.lk-kurz-optionen{display:flex; flex-direction:column; gap:4px}
+.lk-kurz-opt{display:flex; align-items:center; min-height:32px; padding:4px 8px; border:1px solid var(--line-2);
+  border-radius:var(--radius-xs); background:var(--panel-2); color:var(--ink); text-align:left;
+  font:600 var(--fs-2)/1.25 var(--body)}
+.lk-kurz-opt:hover:not(:disabled){border-color:var(--accent); background:var(--panel-3)}
+.lk-kurz-opt:disabled{cursor:default; opacity:.7}
+.lk-kurz-opt.richtig{border-color:var(--ok); background:var(--ok-soft); opacity:1}
+.lk-kurz-opt.falsch{border-color:var(--bad); background:var(--bad-soft); opacity:1}
+.lk-kurz-antwort{display:flex; flex-direction:column; gap:8px}
+.lk-kurz-erklaerung{margin:0; padding:4px 8px; border-radius:var(--radius-s); background:var(--panel-3);
+  font:400 var(--fs-2)/1.35 var(--body); color:var(--muted)}
+.lk-kurz-erklaerung b{color:var(--ink); font-weight:700}
+.lk-kurz-fuss .lk-knopf{flex:1 1 auto; justify-content:center}
+.lk-uebung-weg{display:none; margin-top:4px}
+.lk-uebung.lk-leerstand .lk-uebung-weg{display:flex}
 /* ---- lernstand-hilfe.css ---- */
 /* ---------- Lernstand: Abschnitt „Hilfe und Übung" (Baustein H) ----------
    Vertrag: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 2, § 8.
@@ -2706,106 +2751,97 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 
 /* ---- simulation.css ---- */
 /* ---------- Flugschreiber (SIMULATION, Präfix si-) und PDU-Inspektor (Präfix pdu-) ----------
-   Runde 4, Strang C: Der Simulator ist ein „Flugschreiber" – Ergebnis groß, Was/Wo, Warnbanner mit
-   „Zum Fundort", Zeitachse mit Schichtbändern, jede Fehler-/Warnmeldung anklickbar, Format-Umschalter.
-   Das Panel sitzt im Dock rechts; darum kompakt und umbruchfähig. Farben nur über Tokens aus basis.css,
-   Abstände aus {0,4,8,12,16,24,32}px, Schrift nur var(--fs-*), Radius nur Tokens. */
+   Runde 7 „Der Flugschreiber führt das Auge": EINE ruhige Lesespalte, drei Ebenen, ein Hauptweg.
+     Ebene 1 Ergebnis (rahmenlos) · Ebene 2 Befund (Rail-Zeile, keine Fläche) ·
+     Ebene 3 Nächster Schritt (ruhige Liste, hängender Einzug).
+   Knopfregel: höchstens EIN visuell primärer Knopf je Zustand; alles andere ist Ghost (32 px).
+   Die 44-px-Trefferflächen für Transport/Filter/Tempo bleiben unsichtbar erhalten (Test
+   tests/ui-trefferflaechen.test.js) – sichtbar sind es leise Text-/Icon-Zeilen.
+   Farben nur über Tokens aus basis.css, Abstände aus {0,4,8,12,16,24,32}px, Schrift var(--fs-*),
+   Radius nur Tokens, kein !important, kein eigener Reduced-Motion-Block. */
 
 /* ---- Rahmen ---- */
-.si{display:flex; flex-direction:column; overflow:hidden; font-size:var(--fs-2)}
-.si-leer{display:flex; flex-direction:column; gap:8px; padding:12px 16px; color:var(--muted)}
-.si-leer strong{color:var(--ink)}
-.si-leer-tipp{margin:0; color:var(--faint)}
-.si-veraltet{display:flex; align-items:center; gap:8px; margin:0; padding:4px 12px; background:var(--warn-soft); color:var(--ink); font-size:var(--fs-2); border-bottom:1px solid var(--line)}
-/* R10: ein gemeinsamer Block statt vier – „hier ist nichts zu zeigen": Veraltet-Banner, Statistik, schmale PDU-Spalte, Standard-Dreieck */
+.si{display:flex; flex-direction:column; overflow:hidden; font-size:var(--fs-2); color:var(--ink)}
+.si-leer{display:flex; flex-direction:column; gap:8px; padding:16px}
+.si-leer-titel{color:var(--ink); font:800 var(--fs-5)/1.2 var(--display)}
+.si-leer-text{margin:0; max-width:44ch; color:var(--muted); font-size:var(--fs-3); line-height:1.5}
+.si-leer-tipp{margin:0; max-width:44ch; color:var(--faint); font-size:var(--fs-2); line-height:1.45}
+.si-leer-aktionen{margin-top:8px}
+.si-veraltet{display:flex; align-items:center; gap:8px; margin:0 16px 8px; padding:0 0 0 12px; border-left:2px solid var(--warn); color:var(--warn); font-size:var(--fs-2)}
+/* R10: ein gemeinsamer Block statt vier – „hier ist nichts zu zeigen": Veraltet-Zeile, Statistik, schmale PDU-Spalte, Dreieck */
 .si-veraltet[hidden], .si-zus:has(.si-zeile2) .si-statistik, .si[data-breite="schmal"] .si-pdu, .pdu-schicht > summary::-webkit-details-marker{display:none}
-.si-sym{display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; font:800 var(--fs-1)/1 var(--body); background:var(--warn); color:var(--accent-ink); flex:0 0 auto}
-.si-sym.bad{background:var(--bad); color:var(--bad-soft)}
+.si-sym, .si-kennung.still{color:var(--warn)}
+.si-sym{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; font:800 var(--fs-2)/1 var(--body)}
+.si-kennung.bad, .si-sym.bad, .si-kopf.bad .si-gross, .si-warn-kopf .si-kicker{color:var(--bad)}
 
-/* ---- Kopf: Mikrolabel mit Kunde, Ergebnis groß, Was/Wo, Format-Umschalter ---- */
-.si-kopf{display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-bottom:1px solid var(--line); flex:0 0 auto}
+/* ---- Ebene 1 · Ergebnis: Mikrolabel, Urteil, EINE Zahlenzeile, Segment-Leiste (rahmenlos) ---- */
+.si-kopf{display:flex; flex-direction:column; gap:4px; padding:16px 16px 8px; flex:0 0 auto}
 .si-kopf-oben{display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0}
-.si-kicker{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase}
-.si-kopf-zeile{display:flex; align-items:flex-start; gap:12px; min-width:0}
-.si-kopf-unten{display:flex; justify-content:flex-end}
-.si-gross{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; flex:0 0 auto; font:800 var(--fs-4)/1 var(--body)}
-.si-kopf.ok .si-gross{background:var(--ok-soft); color:var(--ok)}
-.si-kopf.bad .si-gross{background:var(--bad-soft); color:var(--bad)}
-.si-zus{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:0}
-.si-zus strong{font:800 var(--fs-6)/1.15 var(--display); letter-spacing:-.01em}
-.si-kopf.ok .si-zus strong, .si-art[data-art="empfangen"], .si-art[data-art="antworten"]{color:var(--ok)}
-.si-kopf.bad .si-zus strong, .si-filter-knopf.probleme, .si-kennung.bad{color:var(--bad)}
-.si-zus p{margin:0; font-size:var(--fs-2); line-height:1.4}
-.si-zus > p:first-of-type{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-.si-waswo{color:var(--muted); font:500 var(--fs-1)/1.4 var(--mono)}
-.si-statistik, .si-zus .si-statistik, .si-skill, .si-quelle, .pdu-klein{color:var(--faint); font-size:var(--fs-2)}
-.si-zeile2, .si-hilfe-titel, .si-zeile2{display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden}
-.si-zeile.leise, .pdu-nach, .pdu-feld dt, .pdu-vorher s{color:var(--muted)}
+.si-kicker{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--faint); font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.si-kopf-urteil{display:flex; align-items:baseline; gap:8px; min-width:0}
+.si-gross{flex:0 0 auto; color:var(--muted); font:800 var(--fs-5)/1 var(--body)}
+.si-kopf.ok .si-gross{color:var(--ok)}
+.si-zus{min-width:0}
+.si-zus strong{display:block; color:var(--ink); font:800 var(--fs-6)/1.1 var(--display); letter-spacing:-.01em}
+.si-statistik{margin:0; max-width:100%; color:var(--faint); font:500 var(--fs-1)/1.5 var(--mono); font-variant-numeric:tabular-nums}
+.si-zeile2, .si-kennung{font-size:var(--fs-1); line-height:1.4}
+.si-zeile2{margin:0; max-width:100%; color:var(--muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.si-kennung{font-weight:600}
+.si-kopf-unten{display:flex; justify-content:flex-start; margin-top:4px}
+/* Format-Umschalter: Segment-Leiste als leise Textzeile; 44 px Trefferfläche bleibt (U10) */
+.si-modus, .si-tempo, .pdu-format{display:inline-flex; align-items:center; flex:0 0 auto; gap:8px; background:none; border:0}
+.si-modus button, .si-tempo button, .pdu-format button{display:inline-flex; align-items:center; min-height:44px; padding:0; border:0; border-bottom:2px solid transparent; background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; cursor:pointer; white-space:nowrap}
+.si-modus button:hover, .si-tempo button:hover, .pdu-format button:hover, .si-hilfe-knopf:hover, .si-hilfe-knopf.an, .si-filter-knopf:hover{color:var(--ink)}
+.si-modus button.an, .si-tempo button.an, .pdu-format button[aria-pressed="true"], .si-filter-knopf.an{color:var(--ink); border-bottom-color:var(--accent)}
 
-/* Umschalter (Ansicht, Tempo, MAC-Format): Segmentknöpfe, Trefferfläche ≥ 44 */
-.si-modus, .si-tempo, .pdu-format{display:inline-flex; flex:0 0 auto; border-radius:var(--radius-s); background:var(--panel-2); border:1px solid var(--line)}
-.si-modus button, .si-tempo button, .pdu-format button{min-height:44px; padding:0 12px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:700 var(--fs-2)/1 var(--body); cursor:pointer; white-space:nowrap}
-.si-modus button:hover, .si-tempo button:hover, .pdu-format button:hover{color:var(--ink); background:var(--panel-3)}
-.si-modus button.an, .si-tempo button.an, .pdu-format button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
-
-/* ---- Warnbanner: erster echter Fehler mit „Zum Fundort" ---- */
-.si-warn{display:flex; flex-direction:column; gap:4px; padding:8px 12px; background:var(--bad-soft); border-bottom:1px solid var(--line); flex:0 0 auto}
-.si-warn-kopf{display:flex; align-items:center; flex-wrap:wrap; gap:8px}
-.si-problem-kopf{display:flex; align-items:center; flex-wrap:wrap; gap:4px 8px}
+/* ---- Ebene 2 · Befund: Rail-Zeile statt Warnbanner (Farbe nur am 2-px-Balken) ---- */
+.si-warn{display:flex; flex-direction:column; gap:4px; margin:0 16px 8px; padding:0 0 0 12px; border-left:2px solid var(--bad); flex:0 0 auto}
+.si-warn-kopf{display:flex; align-items:baseline; flex-wrap:wrap; gap:0 8px}
+.si-warn-ort{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); font:600 var(--fs-1)/1.5 var(--mono)}
 .si-warn-kopf .si-zumfundort{margin-left:auto}
-.si-warn-text{margin:0; color:var(--ink); font-size:var(--fs-2); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.si-warn-text{margin:0; max-width:44ch; color:var(--ink); font-size:var(--fs-3); line-height:1.45}
 
-/* ---- Anfänger-Hilfe (nur vorhandene Daten, keine Lösung) ---- */
-.si-hilfe{display:flex; flex-direction:column; gap:4px; padding:8px 12px; background:var(--panel-2); border-bottom:1px solid var(--line); flex:0 0 auto; max-height:42%; overflow:auto}
+/* ---- Ebene 3 · Nächster Schritt: ruhige Liste mit hängendem Einzug (kein Kasten) ---- */
+.si-hilfe{display:flex; flex-direction:column; gap:8px; margin:0 16px 12px; padding:0; flex:0 0 auto; max-height:42%; overflow:auto}
 .si-hilfe-kopf{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
-.si-hilfe-kopf strong{font:700 var(--fs-2)/1.2 var(--display)}
-.si-hilfe-meta{color:var(--faint); font-size:var(--fs-1)}
-.si-hilfe-liste{margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; color:var(--ink); font-size:var(--fs-2); line-height:1.4}
-.si-hilfe-liste .si-hilfe-schritt{min-width:0; overflow-wrap:anywhere}
-.si-hilfe-leer{margin:0; color:var(--muted); font-size:var(--fs-2)}
-.si-hilfe-ort{margin:0; color:var(--faint); font-size:var(--fs-2)}
-.si-hilfe-aktionen{display:flex; flex-wrap:wrap; gap:8px}
-.si-hilfe-aktionen .si-knopf{flex:0 0 auto}
-.si-hilfe-knopf{display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel); color:var(--muted); font:600 var(--fs-1)/1 var(--mono); white-space:nowrap}
-.si-hilfe-knopf.an{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.si-hilfe-meta{color:var(--faint); font:400 var(--fs-1)/1.3 var(--body)}
+.si-hilfe-liste{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px}
+.si-hilfe-schritt{position:relative; min-width:0; padding-left:16px; overflow-wrap:anywhere; color:var(--ink); font-size:var(--fs-3); line-height:1.45}
+.si-hilfe-nr{position:absolute; left:0; top:0; color:var(--faint); font:600 var(--fs-1)/1.6 var(--mono)}
+.si-hilfe-titel{display:block; color:var(--faint); font:600 var(--fs-1)/1.4 var(--mono); letter-spacing:.06em; text-transform:uppercase}
+.si-hilfe-leer{margin:0; max-width:44ch; color:var(--muted); font-size:var(--fs-3); line-height:1.45}
+.si-hilfe-aktionen, .si-zeile-knoepfe{display:flex; flex-wrap:wrap; gap:4px 16px}
+.si-hilfe-punkt{width:6px; height:6px; border-radius:50%; background:var(--faint); flex:0 0 auto}
+.si-hilfe-knopf{display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 4px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; cursor:pointer; white-space:nowrap}
+.si-hilfe-knopf.an .si-hilfe-punkt{background-color:var(--accent)}
 /* Puls am benötigten Interaktionselement (Dock-Reiter) – „Bewegung aus" schaltet die Animation zentral ab */
 @keyframes si-puls{from{box-shadow:inset 0 0 0 2px var(--accent)}to{box-shadow:inset 0 0 0 2px transparent}}
 .si-hilfe-puls{outline:2px solid var(--accent); outline-offset:-2px; animation:si-puls var(--dauer-lang) ease-out 3}
 
-/* Niedrige Fenster (720 hoch): die Kopfzeilen rücken enger zusammen, damit die Zeitachse sichtbar bleibt. */
-@media (max-height:820px){
-  .si-kopf, .si-warn, .si-hilfe{padding:4px 12px}
-  .si-leiste{padding:0 12px}
-  .lb-dock .si{overflow:auto}
-}
-/* ---- Steuerung + Filter (bricht bei Bedarf um) ---- */
-/* MARKER-CD-4: nur Strang C+D schreibt diese Datei (gesetzt im Team-Lauf Runde 4) */
-.si-leiste{display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:4px 12px; border-bottom:1px solid var(--line); flex:0 0 auto}
-.si-steuer, .si-filter{display:flex; align-items:center; gap:4px; flex-wrap:wrap}
-/* U10 (Audit): Trefferfläche 44×44 – das Icon bleibt 16. */
-.si-steuer-knopf{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); cursor:pointer}
-.si-steuer-knopf:hover, .si-knopf:hover, .pdu-ziel:hover{border-color:var(--accent); color:var(--accent)}
+/* ---- Transport + Filter (rahmenlos; 44-px-Trefferflächen bleiben unsichtbar) ---- */
+.si-leiste{display:flex; flex-wrap:wrap; align-items:center; gap:0 16px; padding:0 16px 8px; flex:0 0 auto}
+.si-steuer, .si-filter{display:flex; align-items:center; gap:0 4px; flex-wrap:wrap}
+.si-steuer-knopf{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); cursor:pointer}
+.si-steuer-knopf:hover{color:var(--ink); background:var(--panel-2)}
 .si-steuer-knopf svg path{fill:currentColor; stroke:currentColor; stroke-width:1.4; stroke-linejoin:round}
-.si-pos{min-width:5.5em; color:var(--muted); font:600 var(--fs-2)/1 var(--mono); font-variant-numeric:tabular-nums; padding:0 4px}
-.si-filter-titel{color:var(--muted); font-size:var(--fs-2); font-weight:700}
-.si-filter-knopf{display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 12px; border-radius:var(--radius-s); border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body); cursor:pointer; opacity:.5}
-.si-filter-knopf.an, .si-filter-knopf:hover{opacity:1}
-.si-filter-knopf.probleme.an{border-color:var(--bad); background:var(--bad-soft)}
-.si-anzahl{color:var(--muted); font:600 var(--fs-1)/1 var(--mono)}
+.si-pos{min-width:6em; padding:0 4px; color:var(--faint); font:500 var(--fs-1)/1.3 var(--mono); font-variant-numeric:tabular-nums}
+.si-filter-titel{color:var(--faint); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.08em}
+.si-filter-knopf{display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 4px; border:0; border-bottom:2px solid transparent; background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); cursor:pointer}
+.si-filter-knopf.probleme.an{border-bottom-color:var(--bad); color:var(--bad)}
+.si-anzahl{color:var(--faint); font:600 var(--fs-1)/1 var(--mono)}
 
 /* ---- Zeitachse + PDU nebeneinander ---- */
-/* Anfänger-Hilfe an: der Rahmen-Inspektor (PDU) tritt zurück, die Zeitachse bekommt seinen Platz.
-   Profi-Sicht (Hilfe aus) zeigt ihn wieder unter der Liste. Spezifität wie editor.css, später geladen. */
+/* Anfänger-Hilfe an: der Rahmen-Inspektor (PDU) tritt zurück, die Zeitachse bekommt seinen Platz. */
 .lb-dock .si.si-hilfe-an .si-haupt{grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(0, 1fr)}
-/* C3 (Prüfer 2): im Dock darf die Ereignisliste nicht unter ~120 px fallen; bei Platznot scrollt das Panel. */
+/* Im Dock scrollt das Panel bei Platznot; die Ereignisliste bleibt mindestens 120 px hoch. */
 .lb-dock .si[data-breite="schmal"] .si-liste{min-height:120px}
 .lb-dock .si.si-hilfe-an .si-pdu, .lb-dock .si.si-hilfe-an .si-haupt > .si-pdu{display:none; border-top:0}
 .si-haupt{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(250px, 1fr)}
 .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr)}
-.si-liste{min-height:0; overflow:auto; padding:4px 4px 8px; outline:none; container-type:inline-size}
+.si-liste{min-height:0; overflow:auto; padding:0 8px 8px; outline:none; container-type:inline-size}
 .si-liste:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
 .si-pdu{min-height:0; overflow:auto; border-left:1px solid var(--line); background:var(--panel); container-type:inline-size}
-/* C1 (Prüfer 2): der fokussierbare PDU-Inspektor braucht einen sichtbaren Fokusring wie basis.css */
+/* C1: der fokussierbare PDU-Inspektor braucht einen sichtbaren Fokusring wie basis.css */
 .si-pdu:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
 .si-hinweis{margin:4px 8px; color:var(--muted); font-size:var(--fs-2)}
 /* Im Dock (schmal): Zeitachse bekommt den Platz, der PDU-Inspektor sitzt darunter und scrollt.
@@ -2840,37 +2876,40 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .si-art{display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-size:var(--fs-2); color:var(--muted)}
 .si-art svg path{fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
 .si-art[data-art="senden"]{color:var(--accent)}
-.si-art[data-art="fluten"], .si-kennung.still{color:var(--warn)}
+.si-art[data-art="fluten"]{font-weight:700}
 .si-art[data-art="verwerfen"]{color:var(--bad); font-weight:700}
-.si-art[data-art="lernen"], .si-kennung.gemeldet{color:var(--info)}
+.si-art[data-art="lernen"]{font-style:italic}
 .si-grundzeile{grid-column:3 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; padding:0 0 4px; font-size:var(--fs-2); color:var(--ink)}
 .si-grund{font:700 var(--fs-2)/1.6 var(--mono); padding:0 4px; border-radius:var(--radius-xs); background:var(--bad-soft); color:var(--bad)}
 .si-erklaerung{min-width:0; max-width:100%; color:var(--ink); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-.si-kennung{font-size:var(--fs-2); font-weight:700}
+.si-problem-kopf{display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 8px}
+.si-skill, .si-quelle{color:var(--faint); font-size:var(--fs-1)}
+.pdu-klein, .pdu-nach{color:var(--muted)}
 
-/* ---- Ansicht „Ergebnis": wo es hängt ---- */
-.si-ergebnis{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:10px 14px 12px}
-.si-ergebnis h4{margin:0; font:800 var(--fs-2)/1.2 var(--display); color:var(--bad)}
-.si-problem{align-self:stretch; display:flex; flex-direction:column; gap:4px; padding:8px 12px; border-radius:var(--radius); border:1px solid color-mix(in srgb, var(--bad) 40%, var(--line)); background:color-mix(in srgb, var(--bad) 6%, var(--panel))}
-.si-problem p{margin:0}
-.si-zeile-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
-.si-knopf{display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 12px; border-radius:var(--radius-s); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:700 var(--fs-2)/1 var(--body); cursor:pointer}
-.si-knopf.klein{font-size:var(--fs-1); padding:0 8px}
-.si-knopf.haupt{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
-.si-knopf.haupt:hover{filter:brightness(1.08); color:var(--accent-ink)}
+/* ---- Ansicht „Ergebnis": ruhige Rail-Zeilen statt Karten ---- */
+.si-ergebnis{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:8px 16px 16px}
+.si-ergebnis h4{margin:0; color:var(--faint); font:600 var(--fs-1)/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.si-problem{align-self:stretch; display:flex; flex-direction:column; gap:4px; padding:0 0 0 12px; border:0; border-left:2px solid var(--bad); border-radius:0; background:none}
+.si-problem p{margin:0; font-size:var(--fs-3); line-height:1.45}
+/* ---- Knöpfe: EIN Hauptweg je Zustand, sonst Ghost (32 px, keine Füllfläche) ---- */
+.si-knopf{display:inline-flex; align-items:center; justify-content:center; min-height:32px; padding:0 8px; border:0; border-radius:var(--radius-xs); background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em; cursor:pointer; white-space:nowrap}
+.si-knopf:hover, .pdu-ziel:hover{color:var(--ink); text-decoration:underline; text-underline-offset:2px}
+.si-knopf.klein{min-height:32px; padding:0 4px}
+.si-knopf.haupt{min-height:36px; padding:0 16px; border-radius:var(--radius-s); background:var(--accent); color:var(--accent-ink); font:700 var(--fs-2)/1 var(--body)}
+.si-knopf.haupt:hover{background:var(--accent); color:var(--accent-ink); filter:brightness(1.06); text-decoration:none}
 .si-zumfundort{white-space:nowrap}
+.pdu-ziel{display:inline-flex; align-items:center; min-height:44px; padding:0 8px; border:0; background:none; color:var(--muted); font:600 var(--fs-1)/1 var(--mono); white-space:nowrap; cursor:pointer}
 
-/* C2 (Prüfer 2): im hellen Schema trägt der Chip Textfarbe --ink; die Protokollfarbe bleibt Rand/Punkt. */
+/* ---- Protokoll-Chip (Farbe UND Text) ---- */
+/* C2: im hellen Schema trägt der Chip Textfarbe --ink; die Protokollfarbe bleibt Rand/Punkt. */
 :root[data-theme="light"] .pdu-chip{color:var(--ink); background:var(--panel-2); border-color:color-mix(in srgb, var(--c, var(--muted)) 55%, var(--line))}
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]) .pdu-chip{color:var(--ink); background:var(--panel-2); border-color:color-mix(in srgb, var(--c, var(--muted)) 55%, var(--line))}
 }
-
-/* ---- Protokoll-Chip (Farbe UND Text) ---- */
 .pdu-chip{display:inline-flex; align-items:center; padding:0 4px; border-radius:var(--radius-xs); font:700 var(--fs-2)/1.6 var(--mono); letter-spacing:.02em;
   color:var(--c, var(--muted)); background:color-mix(in srgb, var(--c, var(--muted)) 15%, transparent); border:1px solid color-mix(in srgb, var(--c, var(--muted)) 45%, transparent)}
 
-/* ---- PDU-Inspektor ---- */
+/* ---- PDU-Inspektor (pdu.js bleibt unberührt; nur diese Fläche ist hier gestaltet) ---- */
 .pdu{padding:8px 12px 12px; font-size:var(--fs-2)}
 .pdu-leer{padding:8px 4px; color:var(--muted)}
 .pdu-leer p{margin:0 0 4px}
@@ -2878,8 +2917,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .pdu-titel{min-width:0; line-height:1.4}
 .pdu-titel strong{font:800 var(--fs-2)/1.3 var(--display)}
 .pdu-kopf-rechts{display:flex; align-items:center; flex-wrap:wrap; gap:4px; flex:0 0 auto; justify-content:flex-end}
-.pdu-format button{font-family:var(--mono); font-size:var(--fs-2)}
-.pdu-ziel{display:inline-flex; align-items:center; min-height:44px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-s); background:var(--panel-2); color:var(--ink); font:700 var(--fs-1)/1 var(--body); white-space:nowrap}
+.pdu-format button{font-family:var(--mono)}
 .pdu-text{margin:0 0 4px; color:var(--muted)}
 .pdu-bilanz{display:block; margin:0 0 4px; padding:4px 8px; border-radius:var(--radius-s); background:var(--warn-soft); font-size:var(--fs-2); line-height:1.45}
 .pdu-bilanz .pdu-sym{margin-right:6px}
@@ -2904,6 +2942,13 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 /* schmale PDU-Spalte: Feldname über dem Wert, damit MAC und IP ungebrochen in eine Zeile passen */
 @container (max-width:400px){ .pdu-feld{grid-template-columns:minmax(0, 1fr); gap:0; padding:3px 6px} .pdu-feld dt{font-size:var(--fs-2)} }
 .pdu-warum{margin:4px 0 0; padding:4px 8px; border-radius:var(--radius-s); background:var(--info-soft); font-size:var(--fs-2); line-height:1.45}
+/* Niedrige Fenster (720 hoch): Kopfzeilen rücken enger zusammen, damit die Zeitachse sichtbar bleibt. */
+@media (max-height:820px){
+  .si-kopf{padding:8px 16px 4px}
+  .si-warn, .si-hilfe{margin-bottom:4px}
+  .si-hilfe, .si-hilfe-liste{gap:4px}
+  .lb-dock .si{overflow:auto}
+}
 
 /* ---- spiel.css ---- */
 /* ---------- Spiel-Oberfläche (ui/spiel.js): Postfach, Auftragsleiste, Hilfe, Ergebnis, Onboarding ---------- */
@@ -10793,8 +10838,8 @@ html[data-theme="pulsar"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile)
 <div id="app" aria-live="off"><div class="lade-huelle" role="status" aria-label="Netzwerk-Labor lädt"><span class="lade-marke">Netzwerk-Labor</span><span class="lade-text">lädt</span><span class="lade-balken" aria-hidden="true"><i></i></span></div></div>
 <script>
 "use strict";
-const LABOR_VERSION = "2.7.0";
-const LABOR_BAU = "dca5aa86";
+const LABOR_VERSION = "2.8.0";
+const LABOR_BAU = "647ba6e0";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -29573,6 +29618,537 @@ Spiel.kundenakte.antworten = function(kunde, nr, i){
 Spiel.kundenakte.baustellen = kunde => (Spiel.varianten ? Spiel.varianten.schulden() : []).filter(s => s.kunde === kunde && !s.erledigt)
   .map(s => Object.assign({}, s, {offen: Math.max(0, s.faellig - Spiel.st.erledigt.length), imPostfach: !!(s.folge && Spiel.instanz(s.folge))}));
 
+/* ---- spiel/kurzfrage.js ---- */
+"use strict";
+/* ---------- Kurzübung mit echtem Kontext (Runde 6, W1; Entwurf „Kurzübung mit Kontext" § 2 und § 3) ----------
+   Spiel.kurzfrage.fuer(inst, {niveau} = {}) → frage | null
+   frage = {id, titel, frage, lage:[{label, wert}], optionen:[{text, richtig}], erklaerung, ort}
+
+   WOZU. Die Leiste zeigte eine generische Mini-Frage ohne Netz („Antwortet 10.0.0.1 auf einen Ping aus
+   dem LAN?"). Sie war mit dem gezeigten Wissen nicht lösbar, weil das Netz des Auftrags unsichtbar blieb.
+   Diese Kurzübung entsteht deshalb aus dem ECHTEN Netz der offenen Instanz: Jede Frage trägt ihre Lage
+   (2–4 Zeilen) selbst mit, und die richtige Antwort ist aus genau diesen Zeilen ableitbar.
+
+   VORLAGEN (Entwurf § 3, alle aus inst.netz):
+     netz      zwei Hosts – müssen ihre Pakete über einen Router?      (IP.gleichesNetz)
+     maske     ein Host – wie lautet seine Netzadresse?                (IP.netz/Broadcast/Praefix)
+     gateway   ein Host – liegt sein Gateway im eigenen Netz?          (IP.gleichesNetz(ip, gw, maske))
+     portmodus Switch-Port – welches VLAN trägt er, was darf darüber?  (running.ports)
+     zustand   Gerät/Port – was folgt aus dem gezeigten Zustand?       (g.an, Kabel, shutdown)
+   Niveau: E nur netz/zustand, AP1 zusätzlich maske/gateway, AP2 zusätzlich portmodus.
+
+   EHRLICH UND UNSCHÄDLICH.
+   · Nur echte Daten: inst.netz, Modell (Kabel, Ports, adressen), IP.*, Sim.adresse, g.an,
+     g.running.ports/.if, Spiel.defVon(inst).ziele, Spiel.niveauVon(inst).
+   · NIE die Lösung des Auftrags: keine Injektor-Art, kein Grund-Code, keine Diagnose. Was nachweislich
+     am Fehler steht (Spiel.plan.diff SOLL ↔ Startnetz, das Muster von Spiel.verdacht), ist kein Subjekt
+     der Frage; betroffene Fragearten (Maske/Gateway) fallen dann aus. Fehlt der Plan, bleiben die
+     Plausibilitätsregeln der Vorlagen (z. B. Gateway nur im eigenen Netz) – nie ein Lösungssatz.
+   · DETERMINISTISCH: Samen aus inst.iid, Zufall ausschließlich über Zufall() (src/kern/basis.js);
+     kein Math.random, keine Uhr. Zweimal gefragt = dieselbe Frage.
+   · Kein verwertbares Netz (kein Auftrag, keine einzige gültige Host-Adresse) → null. Die Leiste zeigt
+     dann keinen Quiz, sondern den Weg ins Labor (Entwurf § 2/§ 4).
+   Reines Modul: kein DOM, keine Seiteneffekte, LF-Zeilenenden. */
+Spiel.kurzfrage = (() => {
+  const K = {};
+  /* Die fünf Vorlagen des Vertrags und die Niveau-Zuordnung (Entwurf § 2/§ 3). */
+  K.VORLAGEN = ["netz", "maske", "gateway", "portmodus", "zustand"];
+  K.NIVEAU = {
+    E: ["netz", "zustand"],
+    AP1: ["netz", "maske", "gateway", "zustand"],
+    AP2: ["netz", "maske", "gateway", "portmodus", "zustand"],
+  };
+  /* Grenzen der Leiste (Entwurf § 4: Frage 2–3 Zeilen, drei Antwortflächen, alles vollständig sichtbar). */
+  K.GRENZEN = {LAGE: [2, 4], FRAGE: 170, OPTION: 120, ERKLAERUNG: 340};
+
+  const text = x => String(x == null ? "" : x).trim();
+  const nummer = x => typeof x === "number" && isFinite(x) ? x : null;
+
+  /* Determinismus: der Samen kommt aus der Instanz-ID (Vertrag § 2), nie aus der Uhr. */
+  function saat(inst){
+    if (inst && inst.iid != null && inst.iid !== "") return "kurzfrage:" + inst.iid;
+    const ticket = inst && inst.ticketId != null ? inst.ticketId : "";
+    const seed = inst && inst.seed != null ? inst.seed : "";
+    return "kurzfrage:" + ticket + ":" + seed;
+  }
+
+  function geraet(netz, id){
+    return netz && netz.geraete && id != null ? netz.geraete[id] || null : null;
+  }
+  function istHost(g){ return !!(g && typeof Modell !== "undefined" && Modell.HOST && Modell.HOST[g.typ]); }
+  function nameVon(g, id){ return g && text(g.name) ? text(g.name) : text(id); }
+  function defVon(inst){
+    try { return typeof Spiel.defVon === "function" ? Spiel.defVon(inst) : null; } catch (e) { return null; }
+  }
+
+  /* ---------- Adressen: nur echte, gültige Host-Adressen ----------
+     Sim.adresse kennt die Laufzeit (DHCP, ungültige Maske); die Konfiguration ist der Rückfall. */
+  function adresse(netz, id){
+    const g = geraet(netz, id);
+    if (!g || !istHost(g)) return null;
+    let a = null;
+    try { if (typeof Sim !== "undefined" && typeof Sim.adresse === "function") a = Sim.adresse(netz, id); } catch (e) { a = null; }
+    if (a && IP.gueltig(a.ip) && IP.maskeGueltig(a.maske)) return {ip: a.ip, maske: a.maske, gw: text(a.gw)};
+    let liste = [];
+    try { liste = typeof Modell !== "undefined" && Modell.adressen ? Modell.adressen(g) : []; } catch (e) { liste = []; }
+    const k = liste.find(x => x && IP.gueltig(x.ip) && IP.maskeGueltig(x.maske));
+    if (!k) return null;
+    const ifc = (g.running && g.running.if && g.running.if[k.port]) || {};
+    return {ip: k.ip, maske: k.maske, gw: text(ifc.gw)};
+  }
+  function hosts(netz){
+    const liste = [];
+    for (const g of Object.values((netz && netz.geraete) || {})) {
+      if (!istHost(g)) continue;
+      const a = adresse(netz, g.id);
+      if (a) liste.push({g, a});
+    }
+    return liste.sort((x, y) => String(x.g.id).localeCompare(String(y.g.id)));
+  }
+  function hatAdresse(netz){
+    for (const g of Object.values((netz && netz.geraete) || {})) if (istHost(g) && adresse(netz, g.id)) return true;
+    return false;
+  }
+
+  /* Ziele des Auftrags (Vertrag § 3: „bevorzugt Ziel-Geräte"). Namen oder IPs, die kein Gerät sind, fallen weg. */
+  function zielSet(inst, netz){
+    const def = defVon(inst), s = new Set();
+    for (const z of (def && Array.isArray(def.ziele) ? def.ziele : [])) {
+      for (const id of [z && z.von, z && z.nach]) if (id && geraet(netz, id)) s.add(id);
+    }
+    return s;
+  }
+
+  /* ---------- Fehlerlage (nur zum AUSKLAMMERN, nie zum Verraten) ----------
+     Spiel.plan.diff(SOLL, Startnetz) zeigt wie Spiel.verdacht, welche Geräte/Ports vom gesunden Netz
+     abweichen. Diese Stellen werden nicht Subjekt einer Frage; wurde die Maske oder das Gateway
+     verbrochen, fällt die betroffene Frageart ganz aus (sie könnte die richtige Zahl zeigen).
+     Ohne Spiel.plan bleibt die Lage leer – dann schützen die Plausibilitätsregeln der Vorlagen. */
+  const FEHLER_CACHE = typeof WeakMap === "function" ? new WeakMap() : null;
+  function leereLage(){ return {adr: new Set(), l1: new Set(), l1Ports: new Set(), portKonfig: new Set(), flags: {gw: false, maske: false}}; }
+  function fehlerLage(inst){
+    if (FEHLER_CACHE && inst && typeof inst === "object" && FEHLER_CACHE.has(inst)) return FEHLER_CACHE.get(inst);
+    const lage = leereLage();
+    try {
+      const P = typeof Spiel !== "undefined" ? Spiel.plan : null;
+      const start = typeof Spiel.startNetzVon === "function" ? Spiel.startNetzVon(inst) : null;
+      if (P && typeof P.sollNetz === "function" && typeof P.diff === "function" && start) {
+        for (const d of (P.diff(P.sollNetz(inst), start) || [])) {
+          if (!d || !d.geraet) continue;
+          /* Kabel fehlt/zuviel: beide Enden sind auf Schicht 1 betroffen. */
+          if (d.kabel) {
+            lage.l1.add(d.geraet);
+            if (d.gegen && d.gegen.geraet) lage.l1.add(d.gegen.geraet);
+            if (d.port) lage.l1Ports.add(d.geraet + ":" + d.port);
+            if (d.gegen && d.gegen.port) lage.l1Ports.add(d.gegen.geraet + ":" + d.gegen.port);
+            continue;
+          }
+          const pfad = text(d.pfad);
+          if (pfad === "an") { lage.l1.add(d.geraet); continue; }
+          const mPort = /^ports\.([^.]+)\.([^.]+)$/.exec(pfad);
+          if (mPort) {
+            const schluessel = d.geraet + ":" + mPort[1];
+            if (mPort[2] === "shutdown") lage.l1Ports.add(schluessel);
+            else lage.portKonfig.add(schluessel);
+            continue;
+          }
+          /* Adressfelder: IP, Maske, Gateway (auch Subinterfaces wie if.Gi0/0.10.gw). */
+          if (/\.ip$/.test(pfad) || /\.maske$/.test(pfad) || /\.gw$/.test(pfad)) lage.adr.add(d.geraet);
+          if (/\.gw$/.test(pfad)) lage.flags.gw = true;
+          if (/\.maske$/.test(pfad)) lage.flags.maske = true;
+        }
+      }
+    } catch (e) { /* Headless ohne Plan: leere Lage, kein Wurf in die Leiste */ }
+    if (FEHLER_CACHE) { try { FEHLER_CACHE.set(inst, lage); } catch (e) { /* eingefrorene Instanz */ } }
+    return lage;
+  }
+
+  /* ---------- Bausteine der Frage ---------- */
+  function optionen(richtig, falsche, z){
+    const liste = [{text: text(richtig), richtig: true}];
+    for (const f of falsche) liste.push({text: text(f), richtig: false});
+    const sauber = liste.every(o => o.text) && new Set(liste.map(o => o.text)).size === liste.length;
+    return sauber ? z.mischen(liste) : null;
+  }
+
+  /* Prüft die Vertragsform und gibt die Frage aus – oder null (eine unfertige Frage ist kein Feature). */
+  function bauen(o){
+    const lage = (o.lage || []).map(z => ({label: text(z && z.label), wert: text(z && z.wert)})).filter(z => z.label && z.wert);
+    const frage = {
+      id: text(o.id), titel: text(o.titel), frage: text(o.frage), lage,
+      optionen: Array.isArray(o.optionen) ? o.optionen : [], erklaerung: text(o.erklaerung), ort: o.ort || null,
+    };
+    if (!K.VORLAGEN.includes(frage.id) || !frage.titel || !frage.frage || !frage.erklaerung) return null;
+    if (lage.length < K.GRENZEN.LAGE[0] || lage.length > K.GRENZEN.LAGE[1]) return null;
+    if (frage.optionen.length !== 3 || frage.optionen.filter(o => o && o.richtig === true).length !== 1) return null;
+    if (frage.optionen.some(o => !o || !text(o.text))) return null;
+    if (new Set(frage.optionen.map(o => text(o.text))).size !== 3) return null;
+    if (frage.frage.length > K.GRENZEN.FRAGE || frage.erklaerung.length > K.GRENZEN.ERKLAERUNG) return null;
+    if (frage.optionen.some(o => text(o.text).length > K.GRENZEN.OPTION)) return null;
+    if (frage.ort) {
+      if (!geraet(o.netz, frage.ort.geraet)) return null;
+      if (frage.ort.art === "port") { if (!text(frage.ort.port)) return null; }
+      else if (frage.ort.art !== "geraet") return null;
+    }
+    return frage;
+  }
+
+  const maskeText = m => IP.maskeGueltig(m) ? m + " (/" + IP.praefix(m) + ")" : text(m);
+  const adrKurz = a => a.ip + " / " + a.maske;
+
+  /* ---------- 1 · netz: zwei Hosts, ein Netz? ---------- */
+  function baueNetz(inst, netz, lage, z){
+    const def = defVon(inst), ziele = zielSet(inst, netz);
+    const kandidaten = hosts(netz).filter(h => !lage.adr.has(h.g.id) && !lage.l1.has(h.g.id));
+    const paare = [];
+    for (let i = 0; i < kandidaten.length; i++) {
+      for (let j = i + 1; j < kandidaten.length; j++) {
+        const A = kandidaten[i], B = kandidaten[j];
+        /* Ungleiche Masken: die Antwort wäre richtungsabhängig – solche Paare bleiben außen vor. */
+        if (A.a.maske !== B.a.maske) continue;
+        if (A.a.ip === B.a.ip) continue;
+        const wert = (ziele.has(A.g.id) ? 2 : 0) + (ziele.has(B.g.id) ? 2 : 0);
+        paare.push({A, B, wert});
+      }
+    }
+    if (!paare.length) return null;
+    const best = Math.max(...paare.map(p => p.wert));
+    const reihe = paare.filter(p => p.wert === best).sort((x, y) =>
+      (x.A.g.id + "|" + x.B.g.id).localeCompare(y.A.g.id + "|" + y.B.g.id));
+    const {A, B} = reihe[z.zahl(reihe.length)];
+    const cidrA = IP.cidr(A.a.ip, A.a.maske), cidrB = IP.cidr(B.a.ip, B.a.maske);
+    if (!cidrA || !cidrB) return null;
+    const gleich = IP.gleichesNetz(A.a.ip, B.a.ip, A.a.maske);
+    const opt = gleich
+      ? optionen("Nein – beide liegen in " + cidrA + ", ein Router ist dafür nicht nötig",
+        ["Ja – der Router ist an jedem Paket zwischen zwei Rechnern beteiligt",
+         "Ja – ohne Standardgateway erreicht kein Rechner den anderen"], z)
+      : optionen("Ja – " + B.g.name + " liegt in " + cidrB + ", also außerhalb von " + cidrA,
+        ["Nein – der Switch verbindet beide Netze direkt miteinander",
+         "Nein – gleiche Maske heißt immer auch gleiches Netz"], z);
+    if (!opt) return null;
+    const erklaerung = gleich
+      ? "Mit der Maske " + A.a.maske + " gehören beide Adressen zu " + cidrA + ". Ein Ziel im eigenen Netz wird direkt per ARP angesprochen – ein Router ist nicht im Weg."
+      : "Die Maske " + A.a.maske + " schneidet " + cidrA + " aus. " + B.g.name + " liegt mit " + B.a.ip + " in " + cidrB + " – dafür braucht der Versand das Standardgateway.";
+    return bauen({
+      id: "netz", titel: "Gleiches Netz?", netz,
+      frage: "Müssen Pakete von " + nameVon(A.g, A.g.id) + " zu " + nameVon(B.g, B.g.id) + " über einen Router laufen?",
+      lage: [
+        {label: nameVon(A.g, A.g.id), wert: adrKurz(A.a)},
+        {label: nameVon(B.g, B.g.id), wert: adrKurz(B.a)},
+      ],
+      optionen: opt, erklaerung, ort: {art: "geraet", geraet: A.g.id},
+    });
+  }
+
+  /* ---------- 2 · maske: Netzadresse eines Hosts ---------- */
+  function baueMaske(inst, netz, lage, z){
+    if (lage.flags.maske) return null;                       /* Fehler an einer Maske: nicht die Maske üben */
+    const kandidaten = hosts(netz).filter(h => !lage.adr.has(h.g.id) && !lage.l1.has(h.g.id) && IP.praefix(h.a.maske) > 0);
+    if (!kandidaten.length) return null;
+    const h = kandidaten[z.zahl(kandidaten.length)];
+    const a = h.a, p = IP.praefix(a.maske);
+    const netzAdr = IP.netz(a.ip, a.maske), broadcast = IP.broadcast(a.ip, a.maske);
+    if (!netzAdr || !broadcast) return null;
+    /* Zwei glaubwürdige falsche Netze: Broadcast und (bei /24+) das Nachbarnetz, sonst das /24-Netz. */
+    let falsch = broadcast;
+    if (p !== 24) {
+      const n24 = IP.netz(a.ip, IP.maske(24));
+      if (n24 && n24 !== netzAdr && n24 !== falsch) falsch = n24;
+    }
+    const nachbar = IP.plus(netzAdr, 256);
+    const zweite = nachbar !== falsch && nachbar !== netzAdr ? nachbar : IP.plus(netzAdr, -256);
+    if (!zweite || zweite === netzAdr || zweite === falsch) return null;
+    const opt = optionen(netzAdr, [falsch, zweite], z);
+    if (!opt) return null;
+    return bauen({
+      id: "maske", titel: "Netzadresse berechnen", netz,
+      frage: "Welche Netzadresse gehört zu " + a.ip + "/" + p + "?",
+      lage: [
+        {label: nameVon(h.g, h.g.id), wert: "Adresse " + a.ip},
+        {label: "Subnetzmaske", wert: maskeText(a.maske)},
+      ],
+      optionen: opt,
+      erklaerung: "Die Netzadresse entsteht aus Adresse UND Maske: Bei " + a.maske + " bleiben die ersten " + p + " Bit der Adresse stehen, der Rest wird 0 – das ergibt " + netzAdr + "/" + p + ". " + broadcast + " ist die Broadcastadresse (alle Host-Bit 1); sie ist für keinen Rechner vergebbar.",
+      ort: {art: "geraet", geraet: h.g.id},
+    });
+  }
+
+  /* ---------- 3 · gateway: liegt das Gateway im eigenen Netz? ---------- */
+  function baueGateway(inst, netz, lage, z){
+    if (lage.flags.gw) return null;                          /* Fehler am Gateway: nicht das Gateway üben */
+    /* Nur Geräte, deren Gateway nachweislich im eigenen Netz liegt: dann ist „Ja" ableitbar und die
+       Frage zeigt nie eine Adresse, die im Auftrag fehlt (Plausibilitätsregel statt Fehlerwissen). */
+    const kandidaten = hosts(netz).filter(h => !lage.adr.has(h.g.id) && !lage.l1.has(h.g.id) &&
+      IP.gueltig(h.a.gw) && h.a.gw !== h.a.ip && IP.gleichesNetz(h.a.ip, h.a.gw, h.a.maske));
+    if (!kandidaten.length) return null;
+    const h = kandidaten[z.zahl(kandidaten.length)];
+    const a = h.a, cidr = IP.cidr(a.ip, a.maske);
+    if (!cidr) return null;
+    const opt = optionen("Ja – " + a.gw + " gehört zu " + cidr + " und ist damit direkt erreichbar",
+      ["Nein – das Standardgateway muss immer außerhalb des eigenen Netzes liegen",
+       "Nur wenn " + a.gw + " zusätzlich als DNS-Server eingetragen ist"], z);
+    if (!opt) return null;
+    return bauen({
+      id: "gateway", titel: "Gateway im eigenen Netz?", netz,
+      frage: "Liegt das Standardgateway von " + nameVon(h.g, h.g.id) + " im eigenen Netz?",
+      lage: [
+        {label: nameVon(h.g, h.g.id), wert: "Adresse " + a.ip},
+        {label: "Subnetzmaske", wert: maskeText(a.maske)},
+        {label: "Standardgateway", wert: a.gw},
+      ],
+      optionen: opt,
+      erklaerung: "Adresse und Maske ergeben " + cidr + ". " + a.gw + " hat dieselben führenden Bit und liegt damit im eigenen Netz: Der Rechner erreicht das Gateway direkt per ARP. Ein Gateway außerhalb des eigenen Netzes könnte er gar nicht direkt ansprechen.",
+      ort: {art: "geraet", geraet: h.g.id},
+    });
+  }
+
+  function kabelAn(netz, id, port){
+    try { return typeof Modell !== "undefined" && Modell.kabelAn ? Modell.kabelAn(netz, id, port) : null; } catch (e) { return null; }
+  }
+  function portStatus(netz, id, port){
+    try {
+      if (typeof Modell !== "undefined" && typeof Modell.portStatus === "function") return Modell.portStatus(netz, id, port);
+    } catch (e) { /* ohne Modell bleibt unten nur der vorsichtige Zweig */ }
+    return null;
+  }
+  function vlanListe(sw){
+    const s = new Set();
+    for (const [p, c] of Object.entries((sw.running && sw.running.ports) || {})) if (c && c.modus !== "trunk") s.add(String(c.accessVlan || 1));
+    for (const v of Object.keys((sw.flash && sw.flash.vlans) || {})) s.add(String(v));
+    return [...s].map(Number).filter(n => Number.isInteger(n) && n > 0).sort((a, b) => a - b);
+  }
+  function erlaubtText(x){
+    if (x === "all") return "alle VLANs";
+    if (Array.isArray(x)) return x.length ? x.map(String).join(", ") : "keine";
+    return "VLAN " + text(x);
+  }
+
+  /* ---------- 4 · portmodus: Modus und VLAN eines Switch-Anschlusses ---------- */
+  function bauePortmodus(inst, netz, lage, z){
+    const kandidaten = [];
+    for (const sw of Object.values(netz.geraete || {})) {
+      if (!sw || sw.typ !== "switch" || lage.l1.has(sw.id)) continue;
+      for (const [port, cfg] of Object.entries((sw.running && sw.running.ports) || {})) {
+        if (!cfg) continue;
+        const schluessel = sw.id + ":" + port;
+        if (lage.l1Ports.has(schluessel) || lage.portKonfig.has(schluessel)) continue;
+        const ka = kabelAn(netz, sw.id, port);
+        if (!ka || !ka.gegen) continue;
+        const gegen = geraet(netz, ka.gegen.geraet);
+        if (!gegen || !istHost(gegen) || lage.l1.has(gegen.id)) continue;
+        const st = portStatus(netz, sw.id, port);
+        if (st && st.status !== "oben") continue;            /* Zustandsfälle gehören zur Vorlage zustand */
+        kandidaten.push({sw, port, cfg, host: gegen, schluessel});
+      }
+    }
+    if (!kandidaten.length) return null;
+    const k = kandidaten[z.zahl(kandidaten.length)];
+    const cfg = k.cfg, vlan = Number(cfg.accessVlan || 1);
+    if (cfg.modus === "trunk") {
+      const erlaubt = cfg.trunkErlaubt;
+      const liste = erlaubt === "all" ? vlanListe(k.sw) : (Array.isArray(erlaubt) ? erlaubt.map(Number) : []);
+      const kandidatenVlan = liste.filter(v => Number.isInteger(v) && v > 0);
+      if (!kandidatenVlan.length) return null;
+      const frageVlan = kandidatenVlan[z.zahl(kandidatenVlan.length)];
+      const erlaubtWert = erlaubt === "all" || (Array.isArray(erlaubt) && erlaubt.map(Number).includes(frageVlan));
+      const native = Number(cfg.nativeVlan || 1);
+      const opt = erlaubtWert
+        ? optionen("Ja – " + (erlaubt === "all" ? "der Trunk erlaubt alle VLANs" : "VLAN " + frageVlan + " steht in der Liste der erlaubten VLANs") + " (getaggt nach 802.1Q)",
+          ["Nein – ein Trunk trägt nur ungetaggte Frames", "Nein – über einen Trunk läuft immer nur das native VLAN " + native], z)
+        : optionen("Nein – VLAN " + frageVlan + " fehlt in der Liste der erlaubten VLANs",
+          ["Ja – ein Trunk trägt jedes VLAN unabhängig von der Liste", "Ja, aber nur ungetaggt"], z);
+      if (!opt) return null;
+      return bauen({
+        id: "portmodus", titel: "Access oder Trunk?", netz,
+        frage: "Darf ein getaggter Frame aus VLAN " + frageVlan + " über Port " + k.port + " laufen?",
+        lage: [
+          {label: nameVon(k.sw, k.sw.id), wert: "Port " + k.port + " · Modus trunk"},
+          {label: "Erlaubte VLANs", wert: erlaubtText(erlaubt)},
+          {label: "Native VLAN", wert: String(native)},
+        ],
+        optionen: opt,
+        erklaerung: "Ein Trunk trägt mehrere VLANs, jedes Frame mit 802.1Q-Tag. „" + erlaubtText(erlaubt) + "“ steht in running-config des Ports – nur diese VLANs dürfen den Uplink passieren; das native VLAN läuft ungetaggt.",
+        ort: {art: "port", geraet: k.sw.id, port: k.port},
+      });
+    }
+    /* Access-Port: er gehört genau einem VLAN. */
+    const alle = vlanListe(k.sw);
+    const andere = alle.filter(v => v !== vlan);
+    const frageVlan = andere.length ? andere[z.zahl(andere.length)] : vlan;
+    const gleich = frageVlan === vlan;
+    const opt = gleich
+      ? optionen("Ja – der Access-Port " + k.port + " gehört zu VLAN " + vlan + " und nimmt dessen Frames an",
+        ["Nein – über einen Access-Port läuft jedes VLAN getaggt", "Nein – Access-Ports tragen nur das native VLAN 1"], z)
+      : optionen("Nein – ein Access-Port trägt nur das VLAN " + vlan + ", nicht VLAN " + frageVlan,
+        ["Ja – der Switch leitet jedes VLAN über jeden Port", "Ja, aber nur getaggt mit 802.1Q"], z);
+    if (!opt) return null;
+    return bauen({
+      id: "portmodus", titel: "Access oder Trunk?", netz,
+      frage: "Darf ein Frame aus VLAN " + frageVlan + " über Port " + k.port + " laufen?",
+      lage: [
+        {label: nameVon(k.sw, k.sw.id), wert: "Port " + k.port + " · Modus access"},
+        {label: "Port-VLAN", wert: "VLAN " + vlan},
+        {label: "Angeschlossen", wert: nameVon(k.host, k.host.id) + (adresse(netz, k.host.id) ? " · " + adresse(netz, k.host.id).ip : "")},
+        {label: "VLANs am Switch", wert: alle.length ? alle.join(", ") : String(vlan)},
+      ],
+      optionen: opt,
+      erklaerung: "Ein Access-Port gehört genau einem VLAN. Frames verlassen ihn ungetaggt; Frames aus einem fremden VLAN gehören zu einer anderen Broadcast-Domäne und werden an diesem Port nicht weitergegeben.",
+      ort: {art: "port", geraet: k.sw.id, port: k.port},
+    });
+  }
+
+  /* ---------- 5 · zustand: was folgt aus Gerät-/Port-Zustand? ---------- */
+  function naechsterSwitch(netz, hostId){
+    const h = geraet(netz, hostId); if (!h || !h.running || !h.running.if) return null;
+    for (const port of Object.keys(h.running.if)) {
+      const ka = kabelAn(netz, hostId, port);
+      if (!ka || !ka.gegen) continue;
+      const sw = geraet(netz, ka.gegen.geraet);
+      if (sw && sw.typ === "switch") return {art: "host", host: h, port, sw, swPort: ka.gegen.port};
+    }
+    for (const id of Object.keys(netz.geraete || {})) {
+      const sw = geraet(netz, id);
+      if (!sw || sw.typ !== "switch") continue;
+      for (const [p, cfg] of Object.entries((sw.running && sw.running.ports) || {})) {
+        const ka = kabelAn(netz, sw.id, p);
+        if (ka && ka.gegen && ka.gegen.geraet === hostId) return {art: "switch", host: h, port: ka.gegen.port, sw, swPort: p};
+      }
+    }
+    return null;
+  }
+  function baueZustand(inst, netz, lage, z){
+    /* A) auffälliger Zustand, der nachweislich NICHT die Fehlerstelle ist (Gerät aus, Port abgeschaltet) */
+    const auffaellig = [];
+    for (const g of Object.values(netz.geraete || {})) {
+      if (!g || lage.l1.has(g.id)) continue;
+      const hatKabel = ["eth0", "Gi0/0", "Gi0/1", "Gi0/2", "Gi0/3", "wan0"].some(p => kabelAn(netz, g.id, p));
+      if (g.an === false && hatKabel) auffaellig.push({art: "geraet", g});
+      if (g.typ === "switch") {
+        for (const [p, c] of Object.entries((g.running && g.running.ports) || {})) {
+          if (!c || !c.shutdown || lage.l1Ports.has(g.id + ":" + p)) continue;
+          auffaellig.push({art: "port", g, port: p, kabel: kabelAn(netz, g.id, p)});
+        }
+      } else if (g.typ === "router" || g.typ === "firewall") {
+        for (const [p, c] of Object.entries((g.running && g.running.if) || {})) {
+          if (!c || !c.shutdown || text(c.ip)) continue;      /* bestückte Schnittstelle: eher Fehlerbild */
+          auffaellig.push({art: "port", g, port: p, kabel: kabelAn(netz, g.id, p)});
+        }
+      }
+    }
+    const mitKabel = auffaellig.filter(x => x.art === "geraet" || x.kabel);
+    if (mitKabel.length) {
+      const c = mitKabel[z.zahl(mitKabel.length)];
+      if (c.art === "geraet") {
+        const ka = ["eth0", "Gi0/0", "Gi0/1", "Gi0/2", "wan0"].map(p => ({p, k: kabelAn(netz, c.g.id, p)})).find(x => x.k);
+        const gegen = ka ? geraet(netz, ka.k.gegen.geraet) : null;
+        const opt = optionen("Kein Link – ein ausgeschaltetes Gerät ist im Netz nicht vorhanden und antwortet auf nichts",
+          ["Der Link bleibt oben – der Switch merkt die Abschaltung nicht",
+           "Das Gerät sendet nur noch Broadcasts, alles andere kommt an"], z);
+        if (!opt) return null;
+        return bauen({
+          id: "zustand", titel: "Zustand lesen", netz,
+          frage: "Was folgt daraus für " + nameVon(c.g, c.g.id) + "?",
+          lage: [
+            {label: nameVon(c.g, c.g.id), wert: "Gerät: ausgeschaltet"},
+            {label: "Kabel", wert: gegen ? "gesteckt · " + nameVon(gegen, gegen.id) + " " + ka.p : "kein Kabel angeschlossen"},
+          ],
+          optionen: opt,
+          erklaerung: "Ohne Strom hat das Gerät keinen Link und ist im Netz nicht vorhanden: Am Switch erlischt die Leitung, Frames kommen nicht an. Deshalb prüft die Fehlersuche zuerst Strom, Kabel und Link – vor allem anderen.",
+          ort: {art: "geraet", geraet: c.g.id},
+        });
+      }
+      const gegen = c.kabel && c.kabel.gegen ? geraet(netz, c.kabel.gegen.geraet) : null;
+      const opt = optionen("Kein Link – der Port ist abgeschaltet, obwohl ein Kabel gesteckt ist",
+        ["Link oben – shutdown betrifft nur Frames aus VLAN 1",
+         "Der Anschluss bleibt nutzbar, der Switch verwirft nur Broadcasts"], z);
+      if (!opt) return null;
+      return bauen({
+        id: "zustand", titel: "Zustand lesen", netz,
+        frage: "Was folgt daraus für den Anschluss " + c.port + "?",
+        lage: [
+          {label: nameVon(c.g, c.g.id), wert: "Port " + c.port + " · administratively down (shutdown)"},
+          {label: "Kabel", wert: gegen ? "gesteckt · Gegenstelle " + nameVon(gegen, gegen.id) : "kein Kabel angeschlossen"},
+        ],
+        optionen: opt,
+        erklaerung: "Ein Port mit shutdown ist administrativ abgeschaltet: Er sendet und empfängt nichts, auch wenn das Kabel steckt. Am Switch zeigt „show ip interface brief“ dann „administratively down“; erst „no shutdown“ gibt dem Port wieder Link.",
+        ort: {art: "port", geraet: c.g.id, port: c.port},
+      });
+    }
+    /* B) gesunder Anschluss eines Ziel-Geräts: Gerät an + Kabel + Port nicht abgeschaltet → Link oben */
+    const ziele = zielSet(inst, netz);
+    const gesund = [];
+    for (const h of hosts(netz)) {
+      if (lage.l1.has(h.g.id) || lage.adr.has(h.g.id)) continue;
+      const g = geraet(netz, h.g.id);
+      if (!g || g.an === false) continue;
+      const anschluss = naechsterSwitch(netz, h.g.id);
+      if (!anschluss) continue;
+      if (lage.l1Ports.has(anschluss.sw.id + ":" + anschluss.swPort) || lage.portKonfig.has(anschluss.sw.id + ":" + anschluss.swPort)) continue;
+      gesund.push({h, g, anschluss, wert: ziele.has(h.g.id) ? 2 : 0});
+    }
+    if (!gesund.length) return null;
+    const best = Math.max(...gesund.map(x => x.wert));
+    const reihe = gesund.filter(x => x.wert === best).sort((x, y) => String(x.h.g.id).localeCompare(String(y.h.g.id)));
+    const s = reihe[z.zahl(reihe.length)];
+    const a = s.h.a;
+    const opt = optionen("Link oben – Gerät an, Kabel gesteckt und Port nicht abgeschaltet: Schicht 1 ist in Ordnung",
+      ["Kein Link – der Port ist administratively down (shutdown)",
+       "Kein Link – am Port steckt kein Kabel"], z);
+    if (!opt) return null;
+    return bauen({
+      id: "zustand", titel: "Zustand lesen", netz,
+      frage: "Ist der Anschluss von " + nameVon(s.g, s.g.id) + " auf Schicht 1 in Ordnung?",
+      lage: [
+        {label: nameVon(s.g, s.g.id), wert: "Gerät: an"},
+        {label: nameVon(s.anschluss.sw, s.anschluss.sw.id), wert: "Port " + s.anschluss.swPort + " · kein shutdown · Kabel gesteckt"},
+        {label: "Adresse", wert: a.ip + " / " + a.maske},
+      ],
+      optionen: opt,
+      erklaerung: "Ein Link entsteht nur, wenn beide Enden Strom haben, das Kabel steckt und kein Port administratively down ist. Hier stimmt alles: Der Port ist oben, und Frames können die Leitung passieren – Fehlersuche auf Schicht 2 und 3 kann anschließen.",
+      ort: {art: "port", geraet: s.anschluss.sw.id, port: s.anschluss.swPort},
+    });
+  }
+
+  /* ---------- Auswahl ---------- */
+  const BAUEN = {netz: baueNetz, maske: baueMaske, gateway: baueGateway, portmodus: bauePortmodus, zustand: baueZustand};
+
+  function niveauWahl(inst, o){
+    const gewaehlt = o && typeof o === "object" ? o.niveau : null;
+    if (gewaehlt != null && K.NIVEAU[gewaehlt]) return gewaehlt;
+    try {
+      const eigen = typeof Spiel.niveauVon === "function" ? Spiel.niveauVon(inst) : null;
+      if (eigen && K.NIVEAU[eigen]) return eigen;
+    } catch (e) { /* ohne Lernmotor gilt E */ }
+    return "E";
+  }
+
+  K.fuer = function(inst, o = {}){
+    try {
+      if (!inst || typeof inst !== "object") return null;
+      const netz = inst.netz;
+      if (!netz || !netz.geraete || typeof netz.geraete !== "object") return null;
+      if (!hatAdresse(netz)) return null;                     /* kein verwertbares Netz → hinsehen statt raten */
+      const niveau = niveauWahl(inst, o);
+      const erlaubt = K.NIVEAU[niveau] || K.NIVEAU.E;
+      const lage = fehlerLage(inst);
+      /* Deterministische Reihenfolge: eine Zahl aus dem Samen wählt den Einstieg, danach wird der
+         erlaubte Kreis abgelaufen, bis eine Vorlage Daten findet. */
+      const zufall = Zufall(saat(inst) + ":wahl");
+      const einstieg = zufall.zahl(erlaubt.length);
+      for (let i = 0; i < erlaubt.length; i++) {
+        const art = erlaubt[(einstieg + i) % erlaubt.length];
+        const z = Zufall(saat(inst) + ":" + art);
+        const frage = BAUEN[art](inst, netz, lage, z);
+        if (frage) return frage;
+      }
+      return null;
+    } catch (e) { return null; }                             /* die Leiste darf nie am Quiz scheitern */
+  };
+
+  return K;
+})();
+
 /* ---- spiel/lernen.js ---- */
 "use strict";
 /* ---------- Spiel: Anbindung an den Lernmotor und Niveau ----------
@@ -40034,7 +40610,9 @@ UI.karriere = (() => {
   }
   function miniDialog(){
     const ziel = h("div", {class: "mk-dialog"});
-    const zu = overlay(h("div", {}, h("h2", {}, "Mini-Ticket"), ziel, h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Schließen"))));
+    const zu = overlay(h("div", {}, h("h2", {}, "Mini-Ticket"),
+      h("p", {class: "mk-einordnung sp-leise"}, "Kopfübung · unabhängig vom laufenden Auftrag. Sie prüft Grundwissen; die Lösung des Auftrags entsteht im Labor."),
+      ziel, h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Schließen"))));
     miniZeichnen(ziel, {gross: true, schliessen: zu});
   }
   /* Der Weg der Leiste: Ticket in UI.leiste.miniBereich, Denkhilfe und Anker in UI.leiste.miniHilfe (§ 5). */
@@ -40193,7 +40771,6 @@ UI.karriere = (() => {
 })();
 UI.wiki = {oeffnen: skill => UI.karriere.wikiOeffnen(skill)};
 UI.tag = {karte: () => UI.karriere.tagKarte()};
-
 /* ---- ui/klang.js ---- */
 "use strict";
 /* ---------- Klang (Design – Spielspaß 2.0, Hebel 6; Architektur § 9.2) ----------
@@ -41165,10 +41742,15 @@ UI.konsole = (() => {
      (€/h · Ruf · offen), rechts „Mini"-Signal, Denkhilfe und „öffnen". Standard-Deckkraft 0,92
      (einstellbar 0,6–1 über store "einst".leiste.deckkraft), mit der Maus voll deckend.
    · Aufgeklappt 320 × 300: „Jetzt dran" (Kunde · Auftrag, nächster Schritt in einem Satz, Primär
-     „Im Labor fortsetzen", Sekundär „Auftrag lesen"), „Kurzübung (freiwillig)" (die vorhandene
-     Mini-Frage aus UI.karriere.miniZeichnen, aber MIT Kontextzeile aus dem aktiven Auftrag und
-     Kicker „Kurzübung · <Fertigkeit>"; sie übt nebenbei und löst den Auftrag nicht) und „Lage"
+     „Im Labor fortsetzen", Sekundär „Auftrag lesen"), „Kurzübung (freiwillig)" und „Lage"
      (Verträge/Serie/offene in einer stillen Zeile, dazu Postfach/Labor/ausblenden).
+   · RUNDE 6 – KURZÜBUNG MIT ECHTEM KONTEXT: Bei offenem Auftrag zeigt die Leiste die von
+     Spiel.kurzfrage (reines Modul) erzeugte Frage ZUM AUFTRAG, mit Lage-Block (Geräte, Adressen,
+     Ports, Zustand) direkt über der Frage; nur mit diesen Angaben ist sie beantwortbar (Nutzerbefund
+     31.10.2026: die generische Mini-Frage war „nicht lösbar"). Die generische Mini-Frage bleibt als
+     KOPFÜBUNG im Mini-Ticket-Dialog und als Rückfall, wenn das Modul fehlt. Ohne verwertbare Frage
+     steht dort ein ehrlicher Satz und „Im Labor öffnen" – nichts Unlösbares. Die Antwort ist lokal
+     (Map je iid, kein Spielzustand) und bleibt beim Neuzeichnen und Wiederöffnen erhalten.
    · Animation: Aufklappen 320 ms cubic-bezier(.22,1,.36,1) für Höhe/Breite, Inhalt mit 8 px Versatz
      und gestaffeltem Fade (40 ms je Modul); Zuklappen blendet den Inhalt zuerst aus (160 ms), dann
      schrumpft die Karte (240 ms ab 80 ms Versatz = 320 ms). Die OS-Fenstergröße zieht beim Zuklappen
@@ -41179,15 +41761,26 @@ UI.konsole = (() => {
    Vertrag: docs/Architektur.md § 22/§ 23 · Entwurf – Runde 5 § 2 C · tests/spiel-leiste-hilfe.test.js */
 UI.leiste = (() => {
   const ZU = [300, 56], AUF = [320, 300];     /* Maße bleiben Vertrag (zugeklappt/aufgeklappt) */
-  /* Höhen der aufgeklappten Karte: Ruhe 300 (Vertrag), Übung geöffnet 420, nach der Antwort 460.
-     Die Kurzübung startet als EINZEILIGE Einladung und wächst erst auf Klick – das nimmt der Karte
-     die Überfrachtung, und im Antwort-Zustand stehen Erklärung, „Nächstes" und „Im Labor prüfen"
-     vollständig da (kein abgeschnittener Satz, keine unsichtbare Aktionszeile). */
-  const HOEHE = {ruhe: 300, uebung: 420, antwort: 480};
+  /* Höhen der aufgeklappten Karte. Ruhe 300 (Vertrag) und der Mini-Zweig wie in Runde 5
+     (Übung geöffnet 420, nach der Antwort 480). Der neue Kontext-Zweig braucht mehr Platz, weil
+     Lage-Block, Frage und drei Antwortflächen zusammen kommen: geöffnet 560, mit Erklärung und
+     fester Aktion 680. Diese Werte sind nur der Fallback – am echten DOM misst kurzAnpassen nach
+     und wächst ausschließlich nach oben, damit im geöffneten und im Antwort-Zustand NICHTS
+     abgeschnitten ist (ohne Layout, im Node-Prüfstand, gelten die Zahlen). */
+  const HOEHE = {ruhe: 300, uebung: 420, antwort: 480, kurz: 560, kurzAntwort: 680};
+  const HOECHST = 900;             /* Obergrenze der Karte (Bildschirmhöhe minus Rand, siehe hoechstHoehe) */
   const zustand = {ampeln: [], euroProStunde: null, ruf: null, offen: 0, text: "", titel: ""};
   let root = null, karte = null, el = {}, auf = false, zuTimer = null, aufTimer = null;
   let groesseMarke = 0, ziehTimer = null, quizTimer = null;
   let uebungOffen = false, uebungFertig = false;
+  let uebungZweig = "leer";        /* „kurz" (Kontextfrage) · „mini" (Rückfall) · „leer" (kein Quiz) */
+  let kurzIid = null;              /* Instanz, zu der die gezeigte Kontextfrage gehört */
+  let kurzFrageKey = "";           /* iid|id|frage – wechselt die Frage, werden die Maße neu gemessen */
+  let gesetzteHoehe = 0;           /* zuletzt gesetzte Fensterhöhe im aufgeklappten Zustand */
+  let kartenZustand = "";          /* offen|fertig|zweig – messen nur bei echter Zustandsänderung */
+  const kurzGemessen = {offen: 0, antwort: 0};        /* am echten DOM gemessene Mindesthöhen */
+  const kurzFragen = new Map();    /* iid → {schluessel, q}: Frage bleibt beim Neuzeichnen stabil */
+  const kurzAntworten = new Map(); /* iid → {qid, i, richtig}: Antwort lokal, kein Spielzustand */
   let mini = null;                 /* erst bei Bedarf anlegen (keine Aufrufe beim Laden) */
   let hilfe = null;
   let beobachter = null;           /* liest mit, wenn Baustein C ein Mini in den Bereich zeichnet */
@@ -41319,6 +41912,69 @@ UI.leiste = (() => {
     }, alsText(skill));
   }
 
+  /* ---------- Runde 6: Kontextfrage aus dem laufenden Auftrag (Spiel.kurzfrage) ----------
+     EIN Generator, der nur liest: Spiel.kurzfrage.fuer(inst, {niveau}) → Frage | null (Vertrag
+     docs/entwicklung/Entwurf – Runde 6 § 2). Die Leiste fragt defensiv an (typeof + try/catch):
+     fehlt das Modul, bleibt der Mini-Rückfall; liefert es null, gibt es keinen Quiz, sondern den
+     ehrlichen Hinweis mit Weg ins Labor. Die Frage wird je Instanz und Zustand des Netzes
+     (Schlüssel: iid + Niveau + Hash der Geräte/Laufzeiten) gemerkt, damit sie beim Neuzeichnen
+     stabil bleibt und nur nach einer echten Netz-Änderung neu entsteht. */
+  function kurzfrageModul(){
+    return sicher(() => {
+      const k = typeof Spiel === "object" && Spiel ? Spiel.kurzfrage : null;
+      return k && typeof k === "object" && typeof k.fuer === "function" ? k : null;
+    }, null);
+  }
+  function niveauVon(inst){
+    return sicher(() => typeof Spiel.niveauVon === "function" ? Spiel.niveauVon(inst) : null, null);
+  }
+  /* Hash über das, was der Generator aus dem Netz liest: Gerätezustand (an) und Laufzeiten
+     (running.ports/if) sowie die Adressen. Ändert der Spieler im Labor etwas, wird das erkannt. */
+  function zustandsHash(inst){
+    return sicher(() => {
+      const n = inst && inst.netz;
+      if (!n || !n.geraete) return "";
+      const teile = [];
+      for (const id of Object.keys(n.geraete).sort()) {
+        const g = n.geraete[id] || {};
+        teile.push([id, g.an === false ? 0 : 1, alsText(g.ip), alsText(g.maske), alsText(g.gw),
+          g.running ? JSON.stringify(g.running) : ""].join(":"));
+      }
+      const s = teile.join("|");
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
+      return String(h);
+    }, "");
+  }
+  function kontextFrage(aktiv){
+    const inst = aktiv && aktiv.inst ? aktiv.inst : null;
+    const modul = kurzfrageModul();
+    if (!inst || !inst.iid || !modul) return null;
+    const niveau = niveauVon(inst);
+    const schluessel = [inst.iid, niveau || "-", zustandsHash(inst)].join("|");
+    const alt = kurzFragen.get(inst.iid);
+    if (alt && alt.schluessel === schluessel) return alt.q;
+    let q = null;
+    try { const roh = modul.fuer(inst, niveau ? {niveau} : {}); q = roh && typeof roh === "object" ? roh : null; }
+    catch (e) { q = null; }
+    kurzFragen.set(inst.iid, {schluessel, q});
+    return q;
+  }
+  /* Die Antwort gilt je Instanz (und Frage); sie liegt NUR hier im Speicher, nicht im Spielstand. */
+  function antwortFuer(iid, q){
+    if (!iid) return null;
+    const e = kurzAntworten.get(iid);
+    if (!e) return null;
+    /* Nur dieselbe Frage: ändert sich Art oder Wortlaut (z. B. nach einer Netz-Änderung), gilt die
+       alte Antwort nicht mehr. Die Antwort liegt bewusst NICHT im Spielstand. */
+    if (q && e.qid && q.id && e.qid !== q.id) return null;
+    if (q && e.qtext && q.frage && e.qtext !== q.frage) return null;
+    return e;
+  }
+  function miniFertig(){
+    return !!(mini && typeof mini.querySelector === "function" && mini.querySelector(".mk-ergebnis"));
+  }
+
   /* ---------- Kleine Bausteine (nur Maus, kein Fokusklau) ---------- */
   const kicker = text => h("span", {class: "lk-kicker"}, text);
   function knopf(klasse, text, titel, fn, ...kinder){
@@ -41331,19 +41987,23 @@ UI.leiste = (() => {
     sicher(() => UI.modus("voll"), null);
     if (danach) sicher(danach, null);
   }
-  /* „Im Labor fortsetzen": in die Vollansicht ans Gerät. Ist der Auftrag schon geladen, genügt der
-     Wechsel; sonst wird er defensiv geöffnet (z. B. nach einem Neustart im Leistenmodus). */
-  function laborFortsetzen(a){
-    if (!a) { zumVoll("postfach"); return; }
-    const iid = a.inst && a.inst.iid;
+  /* „Im Labor fortsetzen" (und „Im Labor prüfen" der Kurzübung): in die Vollansicht ans Gerät.
+     Ist der Auftrag schon geladen, genügt der Wechsel; sonst wird er defensiv geöffnet (z. B. nach
+     einem Neustart oder nach dem Wechsel aus dem Leistenmodus). */
+  function laborMitAuftrag(iid, danach){
     zumVoll("labor", () => {
       sicher(() => UI.spiel.mappeZu(), null);
       sicher(() => {
-        if (!UI.spiel || typeof UI.spiel.oeffnen !== "function") return;
+        if (!UI.spiel || typeof UI.spiel.oeffnen !== "function" || !iid) return;
         const geladen = UI.spiel.inst && UI.spiel.inst.iid;
         if (!geladen || UI.spiel.inst.iid !== iid) UI.spiel.oeffnen(iid);
       }, null);
+      if (typeof danach === "function") sicher(danach, null);
     });
+  }
+  function laborFortsetzen(a){
+    if (!a) { zumVoll("postfach"); return; }
+    laborMitAuftrag(a.inst && a.inst.iid, null);
   }
   /* „Auftrag lesen": Auftragsbogen in der Vollansicht öffnen (UI.spiel.mappeAuf, W1 hält die API stabil). */
   function auftragLesen(a){
@@ -41383,91 +42043,266 @@ UI.leiste = (() => {
           a.aktiv ? "Labor am Gerät öffnen und den Auftrag fortsetzen" : "Diesen Auftrag im Labor öffnen", () => laborFortsetzen(a))));
   }
 
-  /* ---------- Modul 2: „Kurzübung (freiwillig)" ---------- */
-  /* Die Frage selbst zeichnet UI.karriere.miniZeichnen in UI.leiste.miniBereich (bleibt seine Quelle).
-     Die Leiste zeigt zuerst nur EINE Zeile: „Kurzübung · <Fertigkeit>" links, „Antworten ▸" rechts.
-     Erst der Klick öffnet Kontextzeile, Frage und Antworten; die Karte wächst dafür (420 px) und
-     nach der Antwort noch einmal (460 px), damit Erklärung, „Nächstes" und „Im Labor prüfen" ganz
-     sichtbar sind. Nach der Antwort bleibt sie offen – sonst ginge die Erklärung verloren. */
+  /* ---------- Modul 2: „Kurzübung (freiwillig)" · Runde 6 mit echtem Kontext ----------
+     Bei offenem Auftrag rendert die Leiste die von Spiel.kurzfrage erzeugte Frage MIT LAGE-BLOCK –
+     die Fakten, aus denen sich die Antwort ableiten lässt, stehen direkt über der Frage. Die
+     generische Mini-Frage (UI.karriere.miniZeichnen in UI.leiste.miniBereich) bleibt als
+     KOPFÜBUNG im Mini-Ticket-Dialog und als Rückfall, wenn das Modul fehlt. Drei Zweige:
+       · „kurz": Kontextfrage mit Lage, Frage, drei Antwortflächen; nach der Antwort Erklärung +
+         feste Aktion „Im Labor prüfen" (führt über q.ort ans Gerät).
+       · „mini": bisheriger Weg (nur ohne Kurzfragen-Modul, z. B. ältere Fassung).
+       · „leer": nichts Lösbares – ehrlicher Satz und „Im Labor öffnen".
+     Die Antwort ist lokal (kurzAntworten je iid), kein Spielzustand, und bleibt beim Neuzeichnen
+     und beim erneuten Öffnen derselben Instanz erhalten. Die Karte wächst im Kontext-Zweig stärker
+     (HOEHE.kurz/kurzAntwort) und wird am echten DOM nachgemessen (kurzAnpassen) – nichts wird
+     gekürzt, nur die Karte und das Leistenfenster größer. */
   function uebungZeichnen(){
     if (!el.uebung) return;
     const a = naechsterAuftrag();
     const aktiv = a && a.aktiv ? a : null;
-    const m = aktuellesMini();
+    const inst = aktiv && aktiv.inst ? aktiv.inst : null;
+    const iid = inst && inst.iid ? inst.iid : null;
+    const modul = kurzfrageModul();
+    const q = aktiv && modul ? kontextFrage(aktiv) : null;
+    const antwort = q ? antwortFuer(iid, q) : null;
+    /* „kurz" nur mit Frage; ohne Auftrag oder ohne Frage nie ein Quiz (nichts Unlösbares). */
+    const zweig = q ? "kurz" : !aktiv ? "leer" : modul ? "leer" : "mini";
+    /* Anderer Auftrag: Übungszustand dieser Instanz übernehmen (Antwort bleibt, sonst zugeklappt). */
+    if (iid !== kurzIid){
+      kurzIid = iid;
+      merker.kurz = ""; merker.leer = "";
+      uebungOffen = false; uebungFertig = false;
+      kurzGemessen.offen = 0; kurzGemessen.antwort = 0;
+    }
+    uebungZweig = zweig;
+    /* Neue Frage (andere Instanz, andere Art oder neuer Wortlaut): Maße neu messen. */
+    const frageKey = q ? [iid || "", q.id || "", q.frage || ""].join("|") : "";
+    if (frageKey !== kurzFrageKey){ kurzFrageKey = frageKey; kurzGemessen.offen = 0; kurzGemessen.antwort = 0; }
+    if (zweig === "leer"){ uebungOffen = false; uebungFertig = false; }
+    else {
+      uebungFertig = zweig === "mini" ? miniFertig() : !!antwort;
+      if (uebungFertig) uebungOffen = true;
+    }
+    /* Kopf: Kicker und Kontextzeile aus echten Daten des offenen Auftrags. */
+    const m = zweig === "mini" ? aktuellesMini() : null;
     const fertigkeit = skillName(m && m.skill);
-    const kickerText = fertigkeit ? "Kurzübung · " + fertigkeit : "Kurzübung";
-    const kunde = aktiv ? kundeName(aktiv.inst.kunde || aktiv.def.kunde) : "";
+    const kunde = aktiv ? kundeName(inst.kunde || aktiv.def.kunde) : "";
     const ziel = aktiv ? zielSatz(aktiv.def) : "";
-    /* Kontextzeile im 284-px-Raster: „nebenbei üben" + Kunde + Auftrag. Der vollständige Zieltext
-       steht im title (für 11 px ist er länger als die Zeile; abgeschnitten würde er mitten im Satz). */
     const titelAuftrag = aktiv ? alsText(aktiv.def.titel) : "";
-    const kontext = aktiv ? ["Nebenbei üben", kunde, titelAuftrag].filter(Boolean).join(" · ") : "";
-    const kontextVoll = aktiv ? ["Nebenbei üben", kunde, ziel ? "Ziel: " + ziel : ""].filter(Boolean).join(" · ") : "";
-    const schluessel = [kickerText, kontext, !!aktiv].join("|");
+    const kickerText = zweig === "kurz" ? "Kurzübung · " + (alsText(q.titel) || "Frage")
+      : fertigkeit ? "Kurzübung · " + fertigkeit : "Kurzübung";
+    /* Kontextzeile im 284-px-Raster: „Zum Auftrag: Kunde · Titel". Der vollständige Zieltext steht
+       im title (für 11 px ist er länger als die Zeile, abgeschnitten würde er mitten im Satz). */
+    const kontext = aktiv ? ("Zum Auftrag: " + [kunde, titelAuftrag].filter(Boolean).join(" · ")) : "";
+    const kontextVoll = aktiv ? ["Zum Auftrag", kunde, titelAuftrag, ziel ? "Ziel: " + ziel : ""].filter(Boolean).join(" · ") : "";
+    const schluessel = [zweig, kickerText, kontext, iid || "", antwort ? antwort.i + ":" + (antwort.richtig ? "r" : "f") : "-"].join("|");
     if (schluessel !== merker.uebung){
       merker.uebung = schluessel;
       if (el.uebungKicker){ el.uebungKicker.textContent = kickerText; el.uebungKicker.title = kickerText; }
       if (el.uebungKontext){ el.uebungKontext.textContent = kontext; el.uebungKontext.title = kontextVoll || kontext; }
-      if (el.uebung) el.uebung.classList.toggle("lk-leerstand", !aktiv);
     }
-    schalterText();
-    pruefenSignal();
+    if (zweig === "kurz") kurzZeichnen(q, antwort);
+    else if (zweig === "leer") leerZeichnen(aktiv);
+    else if (el.uebungKurz){ merker.kurz = ""; el.uebungKurz.replaceChildren(); }
+    el.uebung.classList.toggle("lk-kurzzweig", zweig === "kurz");
+    el.uebung.classList.toggle("lk-minizweig", zweig === "mini");
+    el.uebung.classList.toggle("lk-leerstand", zweig === "leer");
+    karteAktualisieren();
   }
-  /* Beschriftung des einen Schalters: öffnen, schließen – nach der Antwort verschwindet er
-     (die feste Fußzeile mit „Im Labor prüfen" übernimmt). */
+  /* Beschriftung des einen Schalters: öffnen, schließen – nach der Antwort und ohne Frage
+     verschwindet er (CSS), die feste Aktion übernimmt. */
   function schalterText(){
     if (!el.uebungSchalter) return;
     el.uebungSchalter.textContent = uebungOffen ? "Einklappen ▾" : "Antworten ▸";
-    el.uebungSchalter.title = uebungOffen ? "Kurzübung einklappen" : "Kurzübung öffnen: Frage und Antworten";
+    el.uebungSchalter.title = uebungOffen ? "Kurzübung einklappen" : "Kurzübung öffnen: Lage, Frage und Antworten";
   }
-  /* Öffnen: Fenster/Karte wachsen ZUERST, dann blendet der Inhalt ein (nichts wird abgeschnitten). */
-  function uebungOeffnen(){
-    if (!karte || uebungOffen) return;
-    if (!auf) { aufklappen(); }
+  /* Kontextfrage zeichnen (nur wenn sich Frage oder Antwort geändert haben – sonst bliebe kein
+     Klickziel unter der Maus stabil). Die Optionen sind nur Maus (tabindex -1, kein Fokusklau). */
+  function kurzZeichnen(q, antwort){
+    if (!el.uebungKurz) return;
+    const lage = Array.isArray(q.lage) ? q.lage.slice(0, 4) : [];
+    const optionen = Array.isArray(q.optionen) ? q.optionen.slice(0, 3) : [];
+    const schluessel = [q.id || "", q.frage || "", lage.length, optionen.length,
+      antwort ? antwort.i + ":" + (antwort.richtig ? "r" : "f") : "-"].join("|");
+    if (schluessel === merker.kurz) return;
+    merker.kurz = schluessel;
+    const zeilen = lage.map(z => h("div", {class: "lk-kurz-lage-zeile"},
+      h("span", {class: "lk-kurz-lage-label", title: alsText(z && z.label)}, alsText(z && z.label)),
+      h("span", {class: "lk-kurz-lage-wert", title: alsText(z && z.wert)}, alsText(z && z.wert))));
+    const knoepfe = optionen.map((o, i) => {
+      const richtig = !!(o && o.richtig);
+      const klasse = "lk-kurz-opt" + (antwort ? (richtig ? " richtig" : (i === antwort.i ? " falsch" : "")) : "");
+      return h("button", {type: "button", class: klasse, tabindex: "-1", disabled: !!antwort,
+        onmousedown: e => e.preventDefault(), onclick: () => kurzWaehlen(i)}, alsText(o && o.text));
+    });
+    const antwortTeil = antwort ? h("div", {class: "lk-kurz-antwort"},
+      h("p", {class: "lk-kurz-erklaerung"},
+        h("b", {}, antwort.richtig ? "Richtig. " : "Nicht ganz. "), alsText(q.erklaerung)),
+      h("div", {class: "lk-knoepfe lk-kurz-fuss"},
+        knopf("lk-knopf lk-knopf-primaer", "Im Labor prüfen",
+          "Die Antwort am Gerät im Labor prüfen", () => kurzPruefen()))) : null;
+    /* Kinder als Liste: replaceChildren übernimmt sonst den Text „null" ins DOM (am Bild gemessen). */
+    const kinder = [
+      h("div", {class: "lk-kurz-lage"}, h("span", {class: "lk-kicker"}, "Lage zum Auftrag"), ...zeilen),
+      h("p", {class: "lk-kurz-frage"}, alsText(q.frage)),
+      h("div", {class: "lk-kurz-optionen"}, ...knoepfe),
+    ];
+    if (antwortTeil) kinder.push(antwortTeil);
+    el.uebungKurz.replaceChildren(...kinder);
+  }
+  function leerZeichnen(aktiv){
+    if (!el.uebungLeer) return;
+    const art = aktiv ? "keine" : "ohne";
+    if (merker.leer === art) return;
+    merker.leer = art;
+    if (el.uebungKurz){ merker.kurz = ""; el.uebungKurz.replaceChildren(); }
+    el.uebungLeer.textContent = aktiv
+      ? "Für diesen Auftrag passt gerade keine Kurzfrage – im Labor siehst du das Netz und den nächsten Schritt."
+      : "Ohne laufenden Auftrag gibt es keinen Übungskontext – öffne im Labor einen Auftrag.";
+  }
+  /* Antwort lokal merken (kein Spielzustand), dann Erklärung + Aktion zeichnen. Weitere Versuche
+     sind gesperrt; die richtige Option wird markiert. */
+  function kurzWaehlen(i){
+    const a = naechsterAuftrag();
+    const inst = a && a.aktiv ? a.inst : null;
+    const modul = kurzfrageModul();
+    if (!inst || !inst.iid || !modul) return;
+    const q = kontextFrage(a);
+    if (!q || antwortFuer(inst.iid, q)) return;
+    const optionen = Array.isArray(q.optionen) ? q.optionen : [];
+    if (!optionen[i] || !optionen[i].text) return;
+    kurzAntworten.set(inst.iid, {qid: q.id || "", qtext: q.frage || "", i, richtig: !!optionen[i].richtig});
+    merker.kurz = ""; merker.uebung = "";
     uebungOffen = true;
-    schalterText();
-    if (el.uebung) el.uebung.classList.add("lk-offen");
-    if (!auf) return;
-    groesse([320, uebungFertig ? HOEHE.antwort : HOEHE.uebung]);
-    karte.classList.add("uebung-offen");
-    if (uebungFertig) karte.classList.add("uebung-fertig");
-    /* Nach dem Aufklappen messen: passt die Frage mit allen Antworten, oder muss der Schnappschuss
-       weichen? (Der MutationObserver sieht nur Inhalts-, keine Größenänderungen.) */
+    uebungZeichnen();
+    nachwachsen(kurzAnpassen);
+  }
+  /* „Im Labor prüfen": führt über q.ort ans Gerät (UI.fehlerziel.springen, Runde 4); fehlt der
+     Resolver, wird das Labor geöffnet und das Gerät defensiv ausgewählt. Kein Fokusklau. */
+  function kurzPruefen(){
+    const a = naechsterAuftrag();
+    const inst = a && a.aktiv ? a.inst : null;
+    const iid = inst && inst.iid ? inst.iid : null;
+    const q = inst && kurzfrageModul() ? kontextFrage(a) : null;
+    const ort = q && q.ort && typeof q.ort === "object" ? q.ort : null;
+    const ansGerät = () => {
+      if (!ort) return;
+      if (typeof (UI.fehlerziel && UI.fehlerziel.springen) === "function"){
+        const r = sicher(() => UI.fehlerziel.springen(ort), null);
+        if (r && r.ok) return;
+      }
+      if (ort.geraet) sicher(() => { if (UI.labor && typeof UI.labor.auswaehlen === "function") UI.labor.auswaehlen(ort.geraet, ort.port || undefined); }, null);
+    };
+    laborMitAuftrag(iid, ansGerät);
+  }
+  /* Auftrag offen? Fenster/Karte wachsen ZUERST (sonst schnitte die OS-Grenze den Inhalt ab). */
+  function uebungOeffnen(){
+    if (!karte || uebungOffen || uebungZweig === "leer") return;
+    if (!auf) aufklappen();
+    uebungOffen = true;
+    karteAktualisieren();
     setTimeout(miniVerdichten, zeit("mittel", 240));
     setTimeout(miniVerdichten, zeit("lang", 320));
   }
-  /* Einklappen vor der Antwort: Karte wächst nach der Animation zurück (die Antwort bleibt offen). */
+  /* Einklappen vor der Antwort: Karte und Fenster wachsen erst NACH der Animation zurück. */
   function uebungEinklappen(){
     if (!karte || !uebungOffen || uebungFertig) return;
     uebungOffen = false;
-    schalterText();
-    if (el.uebung) el.uebung.classList.remove("lk-offen");
-    karte.classList.remove("uebung-offen");
-    if (!auf) return;
-    if (ruhig()) { groesse([320, HOEHE.ruhe]); return; }
+    karteAktualisieren();
     clearTimeout(quizTimer);
-    quizTimer = setTimeout(() => { if (karte && !uebungOffen && !uebungFertig) groesse([320, HOEHE.ruhe]); }, zeit("lang", 320));
+    quizTimer = setTimeout(() => { if (karte && auf && !uebungOffen && !uebungFertig) fensterHoehe(HOEHE.ruhe); }, zeit("lang", 320));
   }
-  /* Nach der Antwort: Erklärung + feste Aktionszeile (und karrieres „Nächstes") ganz sichtbar. */
+  /* Nach der Antwort (Mini-Zweig): Erklärung + feste Aktionszeile ganz sichtbar. Der Kontext-Zweig
+     führt seinen Antwort-Zustand selbst (kurzZeichnen/karteAktualisieren). */
   function pruefenSignal(){
-    const fertig = !!(mini && typeof mini.querySelector === "function" && mini.querySelector(".mk-ergebnis"));
-    if (fertig !== uebungFertig){
-      uebungFertig = fertig;
-      if (!el.uebung) return;
-      el.uebung.classList.toggle("lk-fertig", fertig);
-      if (fertig) {
-        uebungOffen = true;
-        el.uebung.classList.add("lk-offen");
-        schalterText();
-        if (auf && karte) { groesse([320, HOEHE.antwort]); karte.classList.add("uebung-offen"); karte.classList.add("uebung-fertig");
-          setTimeout(miniVerdichten, zeit("mittel", 240)); }
-      } else if (auf && karte) {
-        karte.classList.remove("uebung-fertig");
-        if (uebungOffen) groesse([320, HOEHE.uebung]);
-      }
-    }
-    if (el.uebung) el.uebung.classList.toggle("lk-offen", uebungOffen);
+    if (uebungZweig !== "mini") return;
+    const fertig = miniFertig();
+    if (fertig === uebungFertig) return;
+    uebungFertig = fertig;
+    if (fertig) uebungOffen = true;
+    karteAktualisieren();
   }
+  /* Karte und Leistenfenster auf den Zweig und den Antwort-Zustand ziehen. Höhen kommen aus HOEHE
+     und – sobald gemessen – aus kurzGemessen. Zuklappen verkleinert erst nach der Animation. */
+  function karteAktualisieren(){
+    if (!el.uebung) return;
+    if (uebungFertig) uebungOffen = true;
+    if (uebungZweig === "leer") uebungOffen = false;
+    el.uebung.classList.toggle("lk-offen", !!uebungOffen);
+    el.uebung.classList.toggle("lk-fertig", !!uebungFertig);
+    if (!karte) return;
+    const offen = uebungZweig !== "leer" && uebungOffen;
+    karte.classList.toggle("uebung-offen", offen);
+    karte.classList.toggle("uebung-fertig", offen && uebungFertig);
+    hoehenVariablen();
+    schalterText();
+    if (!auf) return;
+    const zustandKey = [offen, uebungFertig, uebungZweig].join("|");
+    const neuerZustand = zustandKey !== kartenZustand;
+    kartenZustand = zustandKey;
+    if (offen){
+      fensterHoehe(zielHoehe());
+      if (neuerZustand){ nachwachsen(kurzAnpassen); wennSchriftenDa(kurzAnpassen); }
+    } else {
+      clearTimeout(quizTimer);
+      quizTimer = setTimeout(() => { if (karte && auf && !uebungOffen) fensterHoehe(HOEHE.ruhe); }, zeit("lang", 320));
+    }
+  }
+  /* Zielhöhe: Zweig + Zustand; nach oben durch den Bildschirm begrenzt (dann scrollt .lk-auf als
+     Notnagel – lieber scrollen als abschneiden). */
+  function zielHoehe(){
+    const basis = uebungZweig === "kurz"
+      ? (uebungFertig ? Math.max(HOEHE.kurzAntwort, kurzGemessen.antwort) : Math.max(HOEHE.kurz, kurzGemessen.offen))
+      : uebungFertig ? HOEHE.antwort : HOEHE.uebung;
+    return Math.min(basis, hoechstHoehe());
+  }
+  function hoechstHoehe(){
+    return sicher(() => {
+      const h = typeof window !== "undefined" && window.screen ? +window.screen.availHeight : 0;
+      return h > 0 ? Math.max(360, Math.min(HOECHST, h - 24)) : HOECHST;
+    }, HOECHST);
+  }
+  function fensterHoehe(hh){
+    if (!auf) return;
+    const ziel = Math.round(hh);
+    if (!Number.isFinite(ziel) || ziel === gesetzteHoehe) return;
+    gesetzteHoehe = ziel;
+    groesse([320, ziel]);
+  }
+  function hoehenVariablen(){
+    if (!karte || !karte.style || typeof karte.style.setProperty !== "function") return;
+    const kurz = uebungZweig === "kurz";
+    const offen = Math.max(kurz ? HOEHE.kurz : HOEHE.uebung, kurz ? kurzGemessen.offen : 0);
+    const antwort = Math.max(kurz ? HOEHE.kurzAntwort : HOEHE.antwort, kurz ? kurzGemessen.antwort : 0);
+    try {
+      karte.style.setProperty("--lk-hoehe-offen", Math.round(offen) + "px");
+      karte.style.setProperty("--lk-hoehe-fertig", Math.round(antwort) + "px");
+    } catch (e) { /* nur Anzeige */ }
+  }
+  /* Am echten DOM nachmessen: reicht die Karte für Lage + Frage + Antworten + Erklärung? Es wird
+     NUR nach oben korrigiert und nur die Karte wächst – nichts wird gekürzt. Ohne Layout (Node-
+     Prüfstand) passiert nichts; dann gelten die HOEHE-Werte. */
+  function kurzAnpassen(){
+    if (!auf || !karte || !el.auf || !el.uebung || uebungZweig !== "kurz" || !uebungOffen) return;
+    if (typeof el.auf.scrollHeight !== "number" || !el.auf.scrollHeight) return;
+    if (typeof karte.clientHeight !== "number" || !karte.clientHeight) return;
+    const kopf = el.zeile && el.zeile.offsetHeight ? el.zeile.offsetHeight : 40;
+    const noetig = Math.round(kopf + el.auf.scrollHeight + 2);
+    const feld = uebungFertig ? "antwort" : "offen";
+    if (noetig <= (kurzGemessen[feld] || 0) + 1) return;
+    kurzGemessen[feld] = noetig;
+    hoehenVariablen();
+    fensterHoehe(zielHoehe());
+    setTimeout(kurzAnpassen, zeit("mittel", 240));   /* nach dem Wachsen gegenprüfen (endet, weil dann nichts mehr fehlt) */
+  }
+  function nachwachsen(fn){ setTimeout(fn, zeit("mittel", 240)); setTimeout(fn, zeit("lang", 320)); }
+  function wennSchriftenDa(fn){
+    sicher(() => {
+      if (typeof document !== "undefined" && document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function")
+        document.fonts.ready.then(() => setTimeout(fn, zeit("kurz", 80)));
+    }, null);
+  }
+
 
   /* ---------- Modul 3: „Lage" (Verträge/Serie/offene in einer stillen Zeile + Schnellaktionen) ---------- */
   function lageZeichnen(){
@@ -41563,18 +42398,26 @@ UI.leiste = (() => {
     /* Die Statuszeile: Reihenfolge und Klassen sind Vertrag (tests/spiel-leiste-hilfe.test.js). */
     const zeile = h("div", {class: "lk-zeile"},
       el.griff, el.ampeln, el.wertes, el.miniWartet, el.hilfeKnopf, oeffnen);
-    /* Das aufgeklappte Bento: drei Module, der Mini-Bereich bleibt der größte. */
+    /* Das aufgeklappte Bento: drei Module. Modul 2 hat seit Runde 6 zwei Innenbereiche:
+       .lk-kurz (Kontextfrage mit Lage) und den bisherigen Mini-Bereich (Rückfall/Kopfübung). */
     el.jetzt = h("section", {class: "lk-modul lk-jetzt", "aria-label": "Jetzt dran"});
     el.uebungKicker = kicker("Kurzübung");
-    el.uebungSchalter = knopf("lk-link lk-link-stark", "Antworten ▸", "Kurzübung öffnen: Frage und Antworten",
+    el.uebungSchalter = knopf("lk-link lk-link-stark", "Antworten ▸", "Kurzübung öffnen: Lage, Frage und Antworten",
       () => (uebungOffen ? uebungEinklappen() : uebungOeffnen()));
     el.uebungPruefen = knopf("lk-knopf lk-knopf-primaer", "Im Labor prüfen", "Antwort im Labor am Gerät prüfen", () => zumVoll("labor"));
     el.uebungFuss = h("div", {class: "lk-knoepfe lk-uebung-fuss"}, el.uebungPruefen);
     el.uebungKontext = h("p", {class: "lk-kontext"});
+    /* Ohne verwertbare Frage: ehrlicher Satz und EIN Weg ins Labor – nichts Unlösbares. */
     el.uebungLeer = h("p", {class: "lk-leer"}, "Ohne laufenden Auftrag gibt es keinen Übungskontext – öffne im Labor einen Auftrag.");
+    el.uebungWeg = h("div", {class: "lk-knoepfe lk-uebung-weg"},
+      knopf("lk-knopf", "Im Labor öffnen", "Das Labor öffnen – dort siehst du das Netz des Auftrags", () => {
+        const a = naechsterAuftrag();
+        if (a && a.aktiv) zumVoll("labor"); else zumVoll("postfach");
+      }));
+    el.uebungKurz = h("div", {class: "lk-kurz"});
     el.uebung = h("section", {class: "lk-modul lk-uebung" + (uebungOffen ? " lk-offen" : ""), "aria-label": "Kurzübung (freiwillig)"},
       h("div", {class: "lk-modul-kopf"}, el.uebungKicker, el.uebungSchalter),
-      el.uebungKontext, el.uebungLeer, miniEl(), hilfeEl(), el.uebungFuss);
+      el.uebungKontext, el.uebungLeer, el.uebungWeg, el.uebungKurz, miniEl(), hilfeEl(), el.uebungFuss);
     el.lagePunkt = h("span", {class: "lk-lage-punkt", "aria-hidden": "true"});
     el.lageText = h("span", {class: "lk-lage-text"});
     el.schnell = h("div", {class: "lk-schnell", "aria-label": "Schnellaktionen"});
@@ -41612,27 +42455,33 @@ UI.leiste = (() => {
     if (mini && mini.parentNode) mini.remove();
     if (hilfe && hilfe.parentNode) hilfe.remove();
     root?.remove(); root = null; karte = null; el = {}; auf = false;
+    gesetzteHoehe = 0; kartenZustand = "";
     for (const k of Object.keys(merker)) delete merker[k];
+    /* kurzFragen und kurzAntworten bleiben: die Antwort einer Instanz überlebt einen Neuaufbau
+       der Leiste (z. B. Wechsel Leiste ↔ Vollansicht) – sie ist bewusst NICHT im Spielstand. */
   }
   function groesse([b, hh]){
     const m = ++groesseMarke;
     try { Promise.resolve(Plattform.fenster.groesse(b, hh)).catch(e => { if (m === groesseMarke) console.warn("Leiste Größe", e); }); } catch (e) { console.warn(e); }
   }
   /* Aufklappen: das Fenster wird ZUERST groß (sonst schnitte die OS-Grenze den Inhalt ab), dann
-     wächst die Karte mit 320 ms; der Inhalt folgt gestaffelt (CSS). */
+     wächst die Karte mit 320 ms; der Inhalt folgt gestaffelt (CSS). Die Höhe hängt am Zweig:
+     Ruhe 300, Mini-Zweig 420/480, Kontext-Zweig 600/720 (und größer, sobald nachgemessen). */
   function aufklappen(){
     if (!karte || auf) return;
     auf = true;
     clearTimeout(zuTimer); zuTimer = null;
-    groesse([320, uebungFertig ? HOEHE.antwort : uebungOffen ? HOEHE.uebung : HOEHE.ruhe]);
+    fensterHoehe(uebungOffen && uebungZweig !== "leer" ? zielHoehe() : HOEHE.ruhe);
     zeichnen();                      /* „Jetzt dran"/Mini/Schnellaktionen mit echtem Stand füllen */
     griffZeichnen();
-    if (ruhig()) { karte.classList.add("auf"); miniVerdichten(); return; }
+    if (ruhig()) { karte.classList.add("auf"); miniVerdichten(); kurzAnpassen(); return; }
     requestAnimationFrame(() => {
       if (!karte || !auf) return;
       karte.classList.add("auf");
       /* Nach der Höhen-Animation messen, ob Frage + Optionen ohne Scrollen passen. */
       setTimeout(miniVerdichten, zeit("mittel", 240));
+      setTimeout(kurzAnpassen, zeit("mittel", 240));
+      setTimeout(kurzAnpassen, zeit("lang", 320));
     });
   }
   /* Zuklappen: der Inhalt blendet zuerst aus (160 ms), dann schrumpft die Karte (240 ms ab 80 ms
@@ -41644,10 +42493,10 @@ UI.leiste = (() => {
     auf = false;
     karte.classList.remove("auf", "hilfe-an");
     griffZeichnen();
-    if (ruhig()) { groesse(ZU); return; }
+    if (ruhig()) { gesetzteHoehe = 0; groesse(ZU); return; }
     const nach = zeit("lang", 320);
     clearTimeout(ziehTimer);
-    const ziehen = () => { if (!auf && karte) groesse(ZU); };
+    const ziehen = () => { if (!auf && karte) { gesetzteHoehe = 0; groesse(ZU); } };
     const ende = ev => {
       if (ev && ev.propertyName && ev.propertyName !== "height" && ev.propertyName !== "width") return;
       clearTimeout(ziehTimer); ziehTimer = null;
@@ -41758,8 +42607,10 @@ UI.leiste = (() => {
   return {aufbauen, abbauen, status, darstellen, aufklappen, zuklappen,
           get miniBereich(){ return typeof document !== "undefined" ? miniEl() : null; },
           get miniHilfe(){ return typeof document !== "undefined" ? hilfeEl() : null; },
-          get aufgebaut(){ return !!root; }, get offenAuf(){ return auf; }, get zustand(){ return {...zustand}; }};
+          get aufgebaut(){ return !!root; }, get offenAuf(){ return auf; },
+          get zustand(){ return {...zustand}; }};
 })();
+
 /* ---- ui/lernstand-hilfe.js ---- */
 "use strict";
 /* ---------- UI: Lernstand-Abschnitt „Hilfe und Übung" (Baustein H) ----------
@@ -43772,7 +44623,19 @@ Object.assign(UI.karriere, {shopAnsicht: UI.shop.ansicht, kaufen: UI.shop.kaufen
 
 /* ---- ui/simpanel.js ---- */
 "use strict";
-/* ---------- Simulations-Panel „Flugschreiber" (Runde 4, Strang C) ----------
+/* ---------- Simulations-Panel „Flugschreiber" (Runde 7: Aufmerksamkeitsführung) ----------
+   RUNDE 7 — eine ruhige Lesespalte, drei Ebenen, ein Hauptweg:
+     Ebene 1 · Ergebnis: Mikrolabel (FLUGSCHREIBER · Kunde), eine große Urteilszeile und EINE ruhige
+               Zahlenzeile; außer dem Format-Umschalter steht hier kein Knopf, keine Fläche.
+     Ebene 2 · Befund: erster echter Fehler als Rail-Zeile (2-px-Balken links), Mikrolabel
+               „ERSTER FEHLER", Gerät · Code, EIN Erklärungssatz, rechts der leise Weg „Zum Fundort →".
+     Ebene 3 · Nächster Schritt: Anfänger-Hilfe als ruhige, numerierte Liste mit hängendem Einzug
+               (Mikrolabels „Nächste Diagnose"/„Prüfen") und einem leisen Verweis „Gerät zeigen →".
+   Knopfregel: höchstens EIN visuell primärer Knopf je Zustand (leer: „Ping-Werkzeug wählen →",
+   Ergebnis-Ansicht: „Schritt für Schritt ansehen →"); alles andere ist Ghost (32 px, keine Füllfläche).
+   Die 44-px-Trefferflächenregel bleibt nur als unsichtbare Trefferfläche für Transport/Filter/Tempo
+   erhalten (Test ui-trefferflaechen) — sichtbar sind es leise Text-/Icon-Zeilen.
+   Testhaken .si-*, Verhalten, Transport, Zeitachse und PDU bleiben unverändert.
    UI.simpanel.zeigen(container, trace)
      Spielt eine Trace (Architektur § 5.2) ab – es rechnet nichts nach, es zeigt nur, was die Simulation
      aufgezeichnet hat. Der Kopf nennt Kunde (aus dem offenen Auftrag), Ergebnis groß und „Was/Wo";
@@ -43800,6 +44663,13 @@ UI.simpanel = (() => {
   const labor = () => UI.labor || null;
   const geraetName = id => { const g = labor()?.netz?.geraete?.[id]; return g ? g.name : (id || "?"); };
   const zeit = t => t == null ? "" : Number(t).toLocaleString("de-DE", {maximumFractionDigits: 1}) + " ms";
+  /* Genau EIN Erklärungssatz für Ebene 2 – nie der ganze Hinweistext. */
+  function ersterSatz(text){
+    const t = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
+    if (!t) return "";
+    const m = t.match(/^.*?[.!?](?=\s|$)/);
+    return m ? m[0] : t;
+  }
 
   /* ---------- Anfänger-Hilfe (Strang C): gespeicherte Wahl, Standard nach Karrierestufe ---------- */
   const einst = () => (store.get("einst", {}) || {});
@@ -43961,12 +44831,13 @@ UI.simpanel = (() => {
     return z.ereignisse.filter(e => (!f.size || f.has(e.proto)) && (!z.nurProbleme || istProblem(z, e)));
   }
 
+  /* Ebene-3-Schalter: kleiner Ghost-Knopf mit Punkt – kein zweiter Hauptknopf. */
   function hilfeKnopf(z){
     const an = anfaengerHilfe();
     return h("button", {type: "button", class: "si-hilfe-knopf" + (an ? " an" : ""), "aria-pressed": String(an),
-      title: an ? "Anfänger-Hilfe ausschalten – ruhige Profi-Sicht" : "Anfänger-Hilfe einschalten: Hinweise, Schritt für Schritt und ein Weg zum Fundort",
+      title: an ? "Anfänger-Hilfe ausschalten – ruhige Profi-Sicht" : "Anfänger-Hilfe einschalten: Hinweise und der nächste Schritt",
       onclick: () => { anfaengerHilfeSetzen(!anfaengerHilfe()); anhalten(z); bauen(z); }},
-      sym("hilfe", 15), h("span", {}, an ? "Hilfe an" : "Hilfe aus"));
+      h("span", {class: "si-hilfe-punkt", "aria-hidden": "true"}), h("span", {}, an ? "Hilfe an" : "Hilfe aus"));
   }
   function bauen(z){
     const c = z.container;
@@ -43974,9 +44845,11 @@ UI.simpanel = (() => {
     if (!z.trace) {
       c.append(h("div", {class: "si-leer"},
         h("div", {class: "si-kopf-oben"}, h("span", {class: "si-kicker"}, "FLUGSCHREIBER"), hilfeKnopf(z)),
-        h("strong", {}, "Noch keine Aufzeichnung."),
-        h("p", {}, "Starte einen Ping oder eine Prüfung. Hier siehst du dann jedes Paket: wer sendet, wer weiterleitet, wo etwas verworfen wird – und warum."),
-        anfaengerHilfe() ? h("p", {class: "si-leer-tipp"}, "Anfänger-Hilfe ist an: Sobald ein Auftrag offen ist, nennt sie den nächsten Schritt und das benötigte Werkzeug.") : null));
+        h("strong", {class: "si-leer-titel"}, "Noch keine Aufzeichnung."),
+        h("p", {class: "si-leer-text"}, "Starte einen Ping oder eine Prüfung. Hier siehst du dann jedes Paket: wer sendet, wer weiterleitet, wo etwas verworfen wird – und warum."),
+        anfaengerHilfe() ? h("p", {class: "si-leer-tipp"}, "Anfänger-Hilfe ist an: Sobald ein Auftrag offen ist, nennt sie den nächsten Schritt.") : null,
+        h("div", {class: "si-leer-aktionen"},
+          h("button", {type: "button", class: "si-knopf haupt", onclick: () => { try { labor()?.werkzeug?.("ping"); } catch (e) { /* Anzeige */ } }}, "Ping-Werkzeug wählen →"))));
       return;
     }
     const ok = erfolg(z.trace), ev = z.ereignisse;
@@ -43984,8 +44857,11 @@ UI.simpanel = (() => {
     c.append(h("p", {class: "si-veraltet", hidden: !z.veraltet, role: "status"},
       h("span", {class: "si-sym", "aria-hidden": "true"}, "!"), "Das Netz wurde seitdem geändert – diese Aufzeichnung zeigt den Stand davor. Starte die Prüfung neu."));
     const p = erstesProblem(z);
-    c.append(kopf(z, ok, !!p));
-    if (p) c.append(warnBanner(z, p));
+    /* Ebene 2 (Befund-Rail) nur in der Schritt-Ansicht: die Ergebnis-Ansicht zeigt ihre Befunde
+       bereits als eigene Rail-Zeilen – keine zweite, gleich laute Zeile. */
+    const rail = !!p && z.modus !== "ergebnis";
+    c.append(kopf(z, ok, rail));
+    if (rail) c.append(warnBanner(z, p));
     if (anfaengerHilfe()) c.append(hilfeBox(z));
     if (z.modus === "ergebnis") { c.append(ergebnisAnsicht(z, ok)); return; }
     z.liste = sichtbar(z);
@@ -44004,36 +44880,37 @@ UI.simpanel = (() => {
     if (z.pos >= 0) markieren(z, z.pos, {leise: true});
   }
 
-  /* Kopf: Mikrolabel mit Kunde, Ergebnis groß, Was/Wo und der Format-Umschalter. */
+  /* Ebene 1 – Ergebnis: Mikrolabel, EINE große Urteilszeile, EINE ruhige Zahlenzeile, Segment-Leiste.
+     Kein Rahmen, keine Fläche, kein zusätzlicher Knopf (Runde 7 § 1). */
   function kopf(z, ok, mitBanner){
     const t = z.trace, ev = z.ereignisse;
     const kunde = kundeName();
     const meldung = ev.find(istMeldung), drops = ev.filter(e => e.art === "verwerfen");
     const zeile2 = [];
-    /* Steht der Warnbanner darüber (erster echter Fehler), genügt er als Kennung – keine zweite, gekürzte Zeile. */
     if (!mitBanner) {
       if (t.abbruch === "STORM") zeile2.push(h("span", {class: "si-kennung bad"}, "Broadcast-Sturm: nach " + zahlDe(ev.length) + " Ereignissen abgebrochen"));
-      else if (meldung) zeile2.push(h("span", {class: "si-kennung gemeldet"}, h("span", {"aria-hidden": "true"}, "↩ "),
-        "Gemeldet: " + ICMPTEXT[meldung.frame.icmp.typ] + " von " + geraetName(meldung.geraet)));
-      else if (!ok && drops.length) zeile2.push(h("span", {class: "si-kennung still"}, h("span", {"aria-hidden": "true"}, "… "),
-        "Still verworfen: keine Fehlermeldung zurück – der Absender wartet vergeblich (Timeout)"));
+      else if (meldung) zeile2.push(h("span", {class: "si-kennung gemeldet"}, "↩ gemeldet: " + ICMPTEXT[meldung.frame.icmp.typ] + " von " + geraetName(meldung.geraet)));
+      else if (!ok && drops.length) zeile2.push(h("span", {class: "si-kennung still"}, "… ohne Fehlermeldung zurück (Timeout)"));
     }
     const dauer = ev.length ? (ev[ev.length - 1].t ?? 0) - (ev[0].t ?? 0) : 0;
     const geraete = new Set(ev.map(e => e.geraet)).size;
+    const zusammen = String(t.zusammenfassung || "").replace(/^[✓✔✗✕×]\s*/, "").trim();
     const ww = wasWo(z, ok);
-    return h("div", {class: "si-kopf " + (ok ? "ok" : "bad")},
+    /* EINE ruhige Zahlenzeile: bei Fehlern nur die harten Zahlen (der Befund darunter trägt den Satz). */
+    const zahlen = [];
+    if (ok) zahlen.push(zusammen || ww || "Die Pakete sind angekommen.");
+    zahlen.push(zahlDe(ev.length) + " " + (ev.length === 1 ? "Ereignis" : "Ereignisse"),
+      geraete + (geraete === 1 ? " Gerät" : " Geräte"),
+      zeit(dauer) + " virtuelle Zeit");
+    return h("header", {class: "si-kopf " + (ok ? "ok" : "bad")},
       h("div", {class: "si-kopf-oben"},
         h("span", {class: "si-kicker"}, "FLUGSCHREIBER" + (kunde ? " · " + kunde : "")),
         hilfeKnopf(z)),
-      h("div", {class: "si-kopf-zeile"},
-        h("div", {class: "si-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
-        h("div", {class: "si-zus"},
-          h("strong", {}, ok ? "Hat geklappt" : "Hat nicht geklappt"),
-          h("p", {}, t.zusammenfassung || (ok ? "Die Pakete sind angekommen." : "Unterwegs ist etwas verworfen worden.")),
-          ww ? h("p", {class: "si-waswo"}, ww) : null,
-          zeile2.length ? h("p", {class: "si-zeile2"}, zeile2) : null,
-          h("p", {class: "si-statistik"}, zahlDe(ev.length) + " " + (ev.length === 1 ? "Ereignis" : "Ereignisse") + " · " + geraete + (geraete === 1 ? " Gerät · " : " Geräte · ") + zeit(dauer) + " virtuelle Zeit")),
-        ),
+      h("div", {class: "si-kopf-urteil"},
+        h("span", {class: "si-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
+        h("div", {class: "si-zus"}, h("strong", {}, ok ? "Hat geklappt" : "Hat nicht geklappt"))),
+      h("p", {class: "si-statistik", title: zahlen.join(" · ")}, zahlen.join(" · ")),
+      zeile2.length ? h("p", {class: "si-zeile2"}, zeile2) : null,
       h("div", {class: "si-kopf-unten"},
         h("div", {class: "si-modus", role: "radiogroup", "aria-label": "Ansicht"},
           modusKnopf(z, "ergebnis", "Ergebnis"), modusKnopf(z, "schritt", "Schritt für Schritt"))));
@@ -44044,21 +44921,24 @@ UI.simpanel = (() => {
       onclick: () => { if (z.modus === m) return; anhalten(z); z.modus = modusMerk = m; bauen(z); $(".si-modus [aria-checked=\"true\"]", z.container)?.focus(); },
       onkeydown: e => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const n = m === "ergebnis" ? "schritt" : "ergebnis"; anhalten(z); z.modus = modusMerk = n; bauen(z); $(".si-modus [aria-checked=\"true\"]", z.container)?.focus(); } }}, text);
   }
-  /* Warnbanner: erster echter Fehler der Trace, mit dem Weg zum Fundort (zentraler Resolver). */
+  /* Ebene 2 – Befund: ruhige Zeile mit 2-px-Rail in der Fehlerfarbe, EIN Erklärungssatz,
+     rechts der leise Sprung. Kein Warnbanner, keine Fläche (Runde 7 § 1). */
   function warnBanner(z, p){
-    const e = p.e;
-    const ort = e ? geraetName(e.geraet) + (e.port ? " " + e.port : "") : "Aufzeichnung abgebrochen";
-    const kurzOrt = e ? geraetName(e.geraet) : "Aufzeichnung abgebrochen";
-    const grund = e && e.grund ? erklaerung(e.grund) : "Die Simulation hat das Ereignis-Budget überschritten.";
-    return h("div", {class: "si-warn", role: "status"},
+    const e = p.e, nv = niveau();
+    const geraet = e && e.geraet ? geraetName(e.geraet) + (e.port ? " " + e.port : "") : null;
+    const code = e && e.grund ? e.grund : null;
+    const voll = e && e.grund ? erklaerung(e.grund) : "Die Simulation hat das Ereignis-Budget überschritten.";
+    const satz = ersterSatz(voll) || voll || "";
+    const ort = geraet ? geraet + (code && nv !== "AP2" ? " · " + code : "") : (code || "Abbruch");
+    return h("section", {class: "si-warn", role: "status", title: voll},
       h("div", {class: "si-warn-kopf"},
-        h("span", {class: "si-sym bad", "aria-hidden": "true"}, "!"),
-        h("strong", {}, e ? "Erster Fehler · " + kurzOrt : "Abbruch"),
-        e && e.grund && niveau() !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null,
-        e && e.geraet ? h("button", {type: "button", class: "si-knopf haupt si-zumfundort",
-          title: "Springt zum Fundort: Gerät auswählen, Inspektor zeigen, hervorheben",
-          onclick: ev => { ev.stopPropagation(); springe(e); }}, "Zum Fundort") : null),
-      h("p", {class: "si-warn-text"}, (e && e.port ? geraetName(e.geraet) + " " + e.port + " – " : "") + grund));
+        h("span", {class: "si-sym bad", "aria-hidden": "true"}, "✕"),
+        h("span", {class: "si-kicker"}, "ERSTER FEHLER"),
+        h("span", {class: "si-warn-ort"}, ort),
+        e && e.geraet ? h("button", {type: "button", class: "si-knopf klein si-zumfundort",
+          title: "Zum Fundort: Gerät auswählen, Inspektor zeigen, hervorheben",
+          onclick: ev => { ev.stopPropagation(); springe(e); }}, "Zum Fundort →") : null),
+      h("p", {class: "si-warn-text"}, satz));
   }
 
   /* Anfänger-Hilfe: nur vorhandene Daten (naechsteDiagnose, naechster, handlungsHinweise), keine Lösung. */
@@ -44086,10 +44966,10 @@ UI.simpanel = (() => {
   function hilfeBox(z){
     const {schritte, ort} = hilfeDaten();
     const aktionen = [];
-    if (ort && ort.geraet) aktionen.push(h("button", {type: "button", class: "si-knopf",
-      onclick: () => { try { labor()?.hervorheben?.([{geraet: ort.geraet}], 2200); labor()?.auswaehlen?.(ort.geraet); } catch (e) { /* Anzeige */ } }}, "Gerät zeigen"));
-    if (ort && ort.dock) aktionen.push(h("button", {type: "button", class: "si-knopf",
-      onclick: () => { try { labor()?.dock?.(ort.dock); } catch (e) { /* Anzeige */ } }}, "Zum " + (DOCK_NAME[ort.dock] || ort.dock)));
+    if (ort && ort.geraet) aktionen.push(h("button", {type: "button", class: "si-knopf klein",
+      onclick: () => { try { labor()?.hervorheben?.([{geraet: ort.geraet}], 2200); labor()?.auswaehlen?.(ort.geraet); } catch (e) { /* Anzeige */ } }}, "Gerät zeigen →"));
+    if (ort && ort.dock) aktionen.push(h("button", {type: "button", class: "si-knopf klein",
+      onclick: () => { try { labor()?.dock?.(ort.dock); } catch (e) { /* Anzeige */ } }}, "Zum " + (DOCK_NAME[ort.dock] || ort.dock) + " →"));
     /* Benötigtes Interaktionselement hervorheben (kein Fokusklau): Dock-Reiter pulsieren lassen. */
     if (ort && ort.dock && typeof document !== "undefined" && document.querySelector) {
       try {
@@ -44099,13 +44979,14 @@ UI.simpanel = (() => {
     }
     return h("section", {class: "si-hilfe", "aria-label": "Anfänger-Hilfe"},
       h("div", {class: "si-hilfe-kopf"},
-        h("strong", {}, "Anfänger-Hilfe"),
-        h("span", {class: "si-hilfe-meta"}, "Nur Hinweise – keine Lösung")),
+        h("span", {class: "si-kicker"}, "NÄCHSTER SCHRITT"),
+        h("span", {class: "si-hilfe-meta"}, "Hinweise, keine Lösung")),
       schritte.length
-        ? h("ul", {class: "si-hilfe-liste"}, schritte.map(s => h("li", {class: "si-hilfe-schritt", title: s.text},
-            h("b", {class: "si-hilfe-titel"}, s.titel + ": "), h("span", {}, s.text))))
+        ? h("ol", {class: "si-hilfe-liste"}, schritte.map((s, i) => h("li", {class: "si-hilfe-schritt", title: s.text},
+            h("span", {class: "si-hilfe-nr", "aria-hidden": "true"}, String(i + 1)),
+            h("span", {class: "si-hilfe-titel"}, s.titel),
+            h("span", {}, s.text))))
         : h("p", {class: "si-hilfe-leer"}, instanz() ? "Gerade ist alles erledigt – kein offener Schritt." : "Öffne einen Auftrag: Dann zeigt die Hilfe den nächsten Schritt."),
-      ort && ort.text ? h("p", {class: "si-hilfe-ort", title: ort.text}, ort.text) : null,
       aktionen.length ? h("div", {class: "si-hilfe-aktionen"}, aktionen) : null);
   }
 
@@ -44137,8 +45018,8 @@ UI.simpanel = (() => {
         ? geraetName(meldung.geraet) + " meldet es zurück: " + ICMPTEXT[meldung.frame.icmp.typ]
         : "Still verworfen – niemand schickt eine Fehlermeldung zurück.") : null);
     if (e.geraet) karte.append(h("div", {class: "si-zeile-knoepfe"},
-      h("button", {type: "button", class: "si-knopf", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen"),
-      h("button", {type: "button", class: "si-knopf haupt si-zumfundort", onclick: () => springe(e)}, "Zum Fundort")));
+      h("button", {type: "button", class: "si-knopf klein", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen →"),
+      h("button", {type: "button", class: "si-knopf klein si-zumfundort", onclick: () => springe(e)}, "Zum Fundort →")));
     return karte;
   }
 
@@ -44164,12 +45045,12 @@ UI.simpanel = (() => {
     const anzahl = p => z.ereignisse.filter(e => e.proto === p).length;
     const drops = z.ereignisse.filter(e => istProblem(z, e)).length;
     const leiste = h("div", {class: "si-filter", role: "group", "aria-label": "Filter"},
-      h("span", {class: "si-filter-titel"}, "Filter:"),
+      h("span", {class: "si-filter-titel"}, "FILTER"),
       protos.map(p => {
         const an = z.filter.size > 0 && z.filter.has(p);
         const b = h("button", {type: "button", class: "si-filter-knopf" + (an ? " an" : ""), "aria-pressed": String(z.filter.has(p)), title: "Nur " + p + " zeigen (mehrere wählbar)",
           onclick: () => { anhalten(z); if (z.filter.has(p)) z.filter.delete(p); else z.filter.add(p); if (z.filter.size === protos.length) z.filter.clear(); z.pos = -1; bauen(z); }},
-          UI.pdu.chip(p), h("span", {class: "si-anzahl"}, String(anzahl(p))));
+          h("span", {}, p), h("span", {class: "si-anzahl"}, String(anzahl(p))));
         return b;
       }),
       z.filter.size ? h("button", {type: "button", class: "si-filter-knopf", onclick: () => { z.filter.clear(); z.pos = -1; bauen(z); }}, "alle") : null,
@@ -44220,7 +45101,8 @@ UI.simpanel = (() => {
 
   function posText(z){
     if (!z.posEl) return;
-    z.posEl.textContent = (z.pos < 0 ? "–" : String(z.pos + 1)) + " / " + (z.liste ? z.liste.length : 0);
+    const n = z.liste ? z.liste.length : 0;
+    z.posEl.textContent = (z.spielt ? "läuft · " : "") + (z.pos < 0 ? "–" : String(z.pos + 1)) + " / " + n;
   }
   function markieren(z, i, o = {}){
     const liste = z.liste || [];
@@ -44267,7 +45149,7 @@ UI.simpanel = (() => {
   function anhalten(z, still){
     if (z.timer) { clearTimeout(z.timer); z.timer = null; }
     if (still) return;
-    z.spielt = false; playKnopf(z);
+    z.spielt = false; playKnopf(z); posText(z);
   }
   function playKnopf(z){
     if (!z.playEl) return;

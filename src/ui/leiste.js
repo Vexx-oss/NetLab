@@ -12,10 +12,15 @@
      (€/h · Ruf · offen), rechts „Mini"-Signal, Denkhilfe und „öffnen". Standard-Deckkraft 0,92
      (einstellbar 0,6–1 über store "einst".leiste.deckkraft), mit der Maus voll deckend.
    · Aufgeklappt 320 × 300: „Jetzt dran" (Kunde · Auftrag, nächster Schritt in einem Satz, Primär
-     „Im Labor fortsetzen", Sekundär „Auftrag lesen"), „Kurzübung (freiwillig)" (die vorhandene
-     Mini-Frage aus UI.karriere.miniZeichnen, aber MIT Kontextzeile aus dem aktiven Auftrag und
-     Kicker „Kurzübung · <Fertigkeit>"; sie übt nebenbei und löst den Auftrag nicht) und „Lage"
+     „Im Labor fortsetzen", Sekundär „Auftrag lesen"), „Kurzübung (freiwillig)" und „Lage"
      (Verträge/Serie/offene in einer stillen Zeile, dazu Postfach/Labor/ausblenden).
+   · RUNDE 6 – KURZÜBUNG MIT ECHTEM KONTEXT: Bei offenem Auftrag zeigt die Leiste die von
+     Spiel.kurzfrage (reines Modul) erzeugte Frage ZUM AUFTRAG, mit Lage-Block (Geräte, Adressen,
+     Ports, Zustand) direkt über der Frage; nur mit diesen Angaben ist sie beantwortbar (Nutzerbefund
+     31.10.2026: die generische Mini-Frage war „nicht lösbar"). Die generische Mini-Frage bleibt als
+     KOPFÜBUNG im Mini-Ticket-Dialog und als Rückfall, wenn das Modul fehlt. Ohne verwertbare Frage
+     steht dort ein ehrlicher Satz und „Im Labor öffnen" – nichts Unlösbares. Die Antwort ist lokal
+     (Map je iid, kein Spielzustand) und bleibt beim Neuzeichnen und Wiederöffnen erhalten.
    · Animation: Aufklappen 320 ms cubic-bezier(.22,1,.36,1) für Höhe/Breite, Inhalt mit 8 px Versatz
      und gestaffeltem Fade (40 ms je Modul); Zuklappen blendet den Inhalt zuerst aus (160 ms), dann
      schrumpft die Karte (240 ms ab 80 ms Versatz = 320 ms). Die OS-Fenstergröße zieht beim Zuklappen
@@ -26,15 +31,26 @@
    Vertrag: docs/Architektur.md § 22/§ 23 · Entwurf – Runde 5 § 2 C · tests/spiel-leiste-hilfe.test.js */
 UI.leiste = (() => {
   const ZU = [300, 56], AUF = [320, 300];     /* Maße bleiben Vertrag (zugeklappt/aufgeklappt) */
-  /* Höhen der aufgeklappten Karte: Ruhe 300 (Vertrag), Übung geöffnet 420, nach der Antwort 460.
-     Die Kurzübung startet als EINZEILIGE Einladung und wächst erst auf Klick – das nimmt der Karte
-     die Überfrachtung, und im Antwort-Zustand stehen Erklärung, „Nächstes" und „Im Labor prüfen"
-     vollständig da (kein abgeschnittener Satz, keine unsichtbare Aktionszeile). */
-  const HOEHE = {ruhe: 300, uebung: 420, antwort: 480};
+  /* Höhen der aufgeklappten Karte. Ruhe 300 (Vertrag) und der Mini-Zweig wie in Runde 5
+     (Übung geöffnet 420, nach der Antwort 480). Der neue Kontext-Zweig braucht mehr Platz, weil
+     Lage-Block, Frage und drei Antwortflächen zusammen kommen: geöffnet 560, mit Erklärung und
+     fester Aktion 680. Diese Werte sind nur der Fallback – am echten DOM misst kurzAnpassen nach
+     und wächst ausschließlich nach oben, damit im geöffneten und im Antwort-Zustand NICHTS
+     abgeschnitten ist (ohne Layout, im Node-Prüfstand, gelten die Zahlen). */
+  const HOEHE = {ruhe: 300, uebung: 420, antwort: 480, kurz: 560, kurzAntwort: 680};
+  const HOECHST = 900;             /* Obergrenze der Karte (Bildschirmhöhe minus Rand, siehe hoechstHoehe) */
   const zustand = {ampeln: [], euroProStunde: null, ruf: null, offen: 0, text: "", titel: ""};
   let root = null, karte = null, el = {}, auf = false, zuTimer = null, aufTimer = null;
   let groesseMarke = 0, ziehTimer = null, quizTimer = null;
   let uebungOffen = false, uebungFertig = false;
+  let uebungZweig = "leer";        /* „kurz" (Kontextfrage) · „mini" (Rückfall) · „leer" (kein Quiz) */
+  let kurzIid = null;              /* Instanz, zu der die gezeigte Kontextfrage gehört */
+  let kurzFrageKey = "";           /* iid|id|frage – wechselt die Frage, werden die Maße neu gemessen */
+  let gesetzteHoehe = 0;           /* zuletzt gesetzte Fensterhöhe im aufgeklappten Zustand */
+  let kartenZustand = "";          /* offen|fertig|zweig – messen nur bei echter Zustandsänderung */
+  const kurzGemessen = {offen: 0, antwort: 0};        /* am echten DOM gemessene Mindesthöhen */
+  const kurzFragen = new Map();    /* iid → {schluessel, q}: Frage bleibt beim Neuzeichnen stabil */
+  const kurzAntworten = new Map(); /* iid → {qid, i, richtig}: Antwort lokal, kein Spielzustand */
   let mini = null;                 /* erst bei Bedarf anlegen (keine Aufrufe beim Laden) */
   let hilfe = null;
   let beobachter = null;           /* liest mit, wenn Baustein C ein Mini in den Bereich zeichnet */
@@ -166,6 +182,69 @@ UI.leiste = (() => {
     }, alsText(skill));
   }
 
+  /* ---------- Runde 6: Kontextfrage aus dem laufenden Auftrag (Spiel.kurzfrage) ----------
+     EIN Generator, der nur liest: Spiel.kurzfrage.fuer(inst, {niveau}) → Frage | null (Vertrag
+     docs/entwicklung/Entwurf – Runde 6 § 2). Die Leiste fragt defensiv an (typeof + try/catch):
+     fehlt das Modul, bleibt der Mini-Rückfall; liefert es null, gibt es keinen Quiz, sondern den
+     ehrlichen Hinweis mit Weg ins Labor. Die Frage wird je Instanz und Zustand des Netzes
+     (Schlüssel: iid + Niveau + Hash der Geräte/Laufzeiten) gemerkt, damit sie beim Neuzeichnen
+     stabil bleibt und nur nach einer echten Netz-Änderung neu entsteht. */
+  function kurzfrageModul(){
+    return sicher(() => {
+      const k = typeof Spiel === "object" && Spiel ? Spiel.kurzfrage : null;
+      return k && typeof k === "object" && typeof k.fuer === "function" ? k : null;
+    }, null);
+  }
+  function niveauVon(inst){
+    return sicher(() => typeof Spiel.niveauVon === "function" ? Spiel.niveauVon(inst) : null, null);
+  }
+  /* Hash über das, was der Generator aus dem Netz liest: Gerätezustand (an) und Laufzeiten
+     (running.ports/if) sowie die Adressen. Ändert der Spieler im Labor etwas, wird das erkannt. */
+  function zustandsHash(inst){
+    return sicher(() => {
+      const n = inst && inst.netz;
+      if (!n || !n.geraete) return "";
+      const teile = [];
+      for (const id of Object.keys(n.geraete).sort()) {
+        const g = n.geraete[id] || {};
+        teile.push([id, g.an === false ? 0 : 1, alsText(g.ip), alsText(g.maske), alsText(g.gw),
+          g.running ? JSON.stringify(g.running) : ""].join(":"));
+      }
+      const s = teile.join("|");
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
+      return String(h);
+    }, "");
+  }
+  function kontextFrage(aktiv){
+    const inst = aktiv && aktiv.inst ? aktiv.inst : null;
+    const modul = kurzfrageModul();
+    if (!inst || !inst.iid || !modul) return null;
+    const niveau = niveauVon(inst);
+    const schluessel = [inst.iid, niveau || "-", zustandsHash(inst)].join("|");
+    const alt = kurzFragen.get(inst.iid);
+    if (alt && alt.schluessel === schluessel) return alt.q;
+    let q = null;
+    try { const roh = modul.fuer(inst, niveau ? {niveau} : {}); q = roh && typeof roh === "object" ? roh : null; }
+    catch (e) { q = null; }
+    kurzFragen.set(inst.iid, {schluessel, q});
+    return q;
+  }
+  /* Die Antwort gilt je Instanz (und Frage); sie liegt NUR hier im Speicher, nicht im Spielstand. */
+  function antwortFuer(iid, q){
+    if (!iid) return null;
+    const e = kurzAntworten.get(iid);
+    if (!e) return null;
+    /* Nur dieselbe Frage: ändert sich Art oder Wortlaut (z. B. nach einer Netz-Änderung), gilt die
+       alte Antwort nicht mehr. Die Antwort liegt bewusst NICHT im Spielstand. */
+    if (q && e.qid && q.id && e.qid !== q.id) return null;
+    if (q && e.qtext && q.frage && e.qtext !== q.frage) return null;
+    return e;
+  }
+  function miniFertig(){
+    return !!(mini && typeof mini.querySelector === "function" && mini.querySelector(".mk-ergebnis"));
+  }
+
   /* ---------- Kleine Bausteine (nur Maus, kein Fokusklau) ---------- */
   const kicker = text => h("span", {class: "lk-kicker"}, text);
   function knopf(klasse, text, titel, fn, ...kinder){
@@ -178,19 +257,23 @@ UI.leiste = (() => {
     sicher(() => UI.modus("voll"), null);
     if (danach) sicher(danach, null);
   }
-  /* „Im Labor fortsetzen": in die Vollansicht ans Gerät. Ist der Auftrag schon geladen, genügt der
-     Wechsel; sonst wird er defensiv geöffnet (z. B. nach einem Neustart im Leistenmodus). */
-  function laborFortsetzen(a){
-    if (!a) { zumVoll("postfach"); return; }
-    const iid = a.inst && a.inst.iid;
+  /* „Im Labor fortsetzen" (und „Im Labor prüfen" der Kurzübung): in die Vollansicht ans Gerät.
+     Ist der Auftrag schon geladen, genügt der Wechsel; sonst wird er defensiv geöffnet (z. B. nach
+     einem Neustart oder nach dem Wechsel aus dem Leistenmodus). */
+  function laborMitAuftrag(iid, danach){
     zumVoll("labor", () => {
       sicher(() => UI.spiel.mappeZu(), null);
       sicher(() => {
-        if (!UI.spiel || typeof UI.spiel.oeffnen !== "function") return;
+        if (!UI.spiel || typeof UI.spiel.oeffnen !== "function" || !iid) return;
         const geladen = UI.spiel.inst && UI.spiel.inst.iid;
         if (!geladen || UI.spiel.inst.iid !== iid) UI.spiel.oeffnen(iid);
       }, null);
+      if (typeof danach === "function") sicher(danach, null);
     });
+  }
+  function laborFortsetzen(a){
+    if (!a) { zumVoll("postfach"); return; }
+    laborMitAuftrag(a.inst && a.inst.iid, null);
   }
   /* „Auftrag lesen": Auftragsbogen in der Vollansicht öffnen (UI.spiel.mappeAuf, W1 hält die API stabil). */
   function auftragLesen(a){
@@ -230,91 +313,266 @@ UI.leiste = (() => {
           a.aktiv ? "Labor am Gerät öffnen und den Auftrag fortsetzen" : "Diesen Auftrag im Labor öffnen", () => laborFortsetzen(a))));
   }
 
-  /* ---------- Modul 2: „Kurzübung (freiwillig)" ---------- */
-  /* Die Frage selbst zeichnet UI.karriere.miniZeichnen in UI.leiste.miniBereich (bleibt seine Quelle).
-     Die Leiste zeigt zuerst nur EINE Zeile: „Kurzübung · <Fertigkeit>" links, „Antworten ▸" rechts.
-     Erst der Klick öffnet Kontextzeile, Frage und Antworten; die Karte wächst dafür (420 px) und
-     nach der Antwort noch einmal (460 px), damit Erklärung, „Nächstes" und „Im Labor prüfen" ganz
-     sichtbar sind. Nach der Antwort bleibt sie offen – sonst ginge die Erklärung verloren. */
+  /* ---------- Modul 2: „Kurzübung (freiwillig)" · Runde 6 mit echtem Kontext ----------
+     Bei offenem Auftrag rendert die Leiste die von Spiel.kurzfrage erzeugte Frage MIT LAGE-BLOCK –
+     die Fakten, aus denen sich die Antwort ableiten lässt, stehen direkt über der Frage. Die
+     generische Mini-Frage (UI.karriere.miniZeichnen in UI.leiste.miniBereich) bleibt als
+     KOPFÜBUNG im Mini-Ticket-Dialog und als Rückfall, wenn das Modul fehlt. Drei Zweige:
+       · „kurz": Kontextfrage mit Lage, Frage, drei Antwortflächen; nach der Antwort Erklärung +
+         feste Aktion „Im Labor prüfen" (führt über q.ort ans Gerät).
+       · „mini": bisheriger Weg (nur ohne Kurzfragen-Modul, z. B. ältere Fassung).
+       · „leer": nichts Lösbares – ehrlicher Satz und „Im Labor öffnen".
+     Die Antwort ist lokal (kurzAntworten je iid), kein Spielzustand, und bleibt beim Neuzeichnen
+     und beim erneuten Öffnen derselben Instanz erhalten. Die Karte wächst im Kontext-Zweig stärker
+     (HOEHE.kurz/kurzAntwort) und wird am echten DOM nachgemessen (kurzAnpassen) – nichts wird
+     gekürzt, nur die Karte und das Leistenfenster größer. */
   function uebungZeichnen(){
     if (!el.uebung) return;
     const a = naechsterAuftrag();
     const aktiv = a && a.aktiv ? a : null;
-    const m = aktuellesMini();
+    const inst = aktiv && aktiv.inst ? aktiv.inst : null;
+    const iid = inst && inst.iid ? inst.iid : null;
+    const modul = kurzfrageModul();
+    const q = aktiv && modul ? kontextFrage(aktiv) : null;
+    const antwort = q ? antwortFuer(iid, q) : null;
+    /* „kurz" nur mit Frage; ohne Auftrag oder ohne Frage nie ein Quiz (nichts Unlösbares). */
+    const zweig = q ? "kurz" : !aktiv ? "leer" : modul ? "leer" : "mini";
+    /* Anderer Auftrag: Übungszustand dieser Instanz übernehmen (Antwort bleibt, sonst zugeklappt). */
+    if (iid !== kurzIid){
+      kurzIid = iid;
+      merker.kurz = ""; merker.leer = "";
+      uebungOffen = false; uebungFertig = false;
+      kurzGemessen.offen = 0; kurzGemessen.antwort = 0;
+    }
+    uebungZweig = zweig;
+    /* Neue Frage (andere Instanz, andere Art oder neuer Wortlaut): Maße neu messen. */
+    const frageKey = q ? [iid || "", q.id || "", q.frage || ""].join("|") : "";
+    if (frageKey !== kurzFrageKey){ kurzFrageKey = frageKey; kurzGemessen.offen = 0; kurzGemessen.antwort = 0; }
+    if (zweig === "leer"){ uebungOffen = false; uebungFertig = false; }
+    else {
+      uebungFertig = zweig === "mini" ? miniFertig() : !!antwort;
+      if (uebungFertig) uebungOffen = true;
+    }
+    /* Kopf: Kicker und Kontextzeile aus echten Daten des offenen Auftrags. */
+    const m = zweig === "mini" ? aktuellesMini() : null;
     const fertigkeit = skillName(m && m.skill);
-    const kickerText = fertigkeit ? "Kurzübung · " + fertigkeit : "Kurzübung";
-    const kunde = aktiv ? kundeName(aktiv.inst.kunde || aktiv.def.kunde) : "";
+    const kunde = aktiv ? kundeName(inst.kunde || aktiv.def.kunde) : "";
     const ziel = aktiv ? zielSatz(aktiv.def) : "";
-    /* Kontextzeile im 284-px-Raster: „nebenbei üben" + Kunde + Auftrag. Der vollständige Zieltext
-       steht im title (für 11 px ist er länger als die Zeile; abgeschnitten würde er mitten im Satz). */
     const titelAuftrag = aktiv ? alsText(aktiv.def.titel) : "";
-    const kontext = aktiv ? ["Nebenbei üben", kunde, titelAuftrag].filter(Boolean).join(" · ") : "";
-    const kontextVoll = aktiv ? ["Nebenbei üben", kunde, ziel ? "Ziel: " + ziel : ""].filter(Boolean).join(" · ") : "";
-    const schluessel = [kickerText, kontext, !!aktiv].join("|");
+    const kickerText = zweig === "kurz" ? "Kurzübung · " + (alsText(q.titel) || "Frage")
+      : fertigkeit ? "Kurzübung · " + fertigkeit : "Kurzübung";
+    /* Kontextzeile im 284-px-Raster: „Zum Auftrag: Kunde · Titel". Der vollständige Zieltext steht
+       im title (für 11 px ist er länger als die Zeile, abgeschnitten würde er mitten im Satz). */
+    const kontext = aktiv ? ("Zum Auftrag: " + [kunde, titelAuftrag].filter(Boolean).join(" · ")) : "";
+    const kontextVoll = aktiv ? ["Zum Auftrag", kunde, titelAuftrag, ziel ? "Ziel: " + ziel : ""].filter(Boolean).join(" · ") : "";
+    const schluessel = [zweig, kickerText, kontext, iid || "", antwort ? antwort.i + ":" + (antwort.richtig ? "r" : "f") : "-"].join("|");
     if (schluessel !== merker.uebung){
       merker.uebung = schluessel;
       if (el.uebungKicker){ el.uebungKicker.textContent = kickerText; el.uebungKicker.title = kickerText; }
       if (el.uebungKontext){ el.uebungKontext.textContent = kontext; el.uebungKontext.title = kontextVoll || kontext; }
-      if (el.uebung) el.uebung.classList.toggle("lk-leerstand", !aktiv);
     }
-    schalterText();
-    pruefenSignal();
+    if (zweig === "kurz") kurzZeichnen(q, antwort);
+    else if (zweig === "leer") leerZeichnen(aktiv);
+    else if (el.uebungKurz){ merker.kurz = ""; el.uebungKurz.replaceChildren(); }
+    el.uebung.classList.toggle("lk-kurzzweig", zweig === "kurz");
+    el.uebung.classList.toggle("lk-minizweig", zweig === "mini");
+    el.uebung.classList.toggle("lk-leerstand", zweig === "leer");
+    karteAktualisieren();
   }
-  /* Beschriftung des einen Schalters: öffnen, schließen – nach der Antwort verschwindet er
-     (die feste Fußzeile mit „Im Labor prüfen" übernimmt). */
+  /* Beschriftung des einen Schalters: öffnen, schließen – nach der Antwort und ohne Frage
+     verschwindet er (CSS), die feste Aktion übernimmt. */
   function schalterText(){
     if (!el.uebungSchalter) return;
     el.uebungSchalter.textContent = uebungOffen ? "Einklappen ▾" : "Antworten ▸";
-    el.uebungSchalter.title = uebungOffen ? "Kurzübung einklappen" : "Kurzübung öffnen: Frage und Antworten";
+    el.uebungSchalter.title = uebungOffen ? "Kurzübung einklappen" : "Kurzübung öffnen: Lage, Frage und Antworten";
   }
-  /* Öffnen: Fenster/Karte wachsen ZUERST, dann blendet der Inhalt ein (nichts wird abgeschnitten). */
-  function uebungOeffnen(){
-    if (!karte || uebungOffen) return;
-    if (!auf) { aufklappen(); }
+  /* Kontextfrage zeichnen (nur wenn sich Frage oder Antwort geändert haben – sonst bliebe kein
+     Klickziel unter der Maus stabil). Die Optionen sind nur Maus (tabindex -1, kein Fokusklau). */
+  function kurzZeichnen(q, antwort){
+    if (!el.uebungKurz) return;
+    const lage = Array.isArray(q.lage) ? q.lage.slice(0, 4) : [];
+    const optionen = Array.isArray(q.optionen) ? q.optionen.slice(0, 3) : [];
+    const schluessel = [q.id || "", q.frage || "", lage.length, optionen.length,
+      antwort ? antwort.i + ":" + (antwort.richtig ? "r" : "f") : "-"].join("|");
+    if (schluessel === merker.kurz) return;
+    merker.kurz = schluessel;
+    const zeilen = lage.map(z => h("div", {class: "lk-kurz-lage-zeile"},
+      h("span", {class: "lk-kurz-lage-label", title: alsText(z && z.label)}, alsText(z && z.label)),
+      h("span", {class: "lk-kurz-lage-wert", title: alsText(z && z.wert)}, alsText(z && z.wert))));
+    const knoepfe = optionen.map((o, i) => {
+      const richtig = !!(o && o.richtig);
+      const klasse = "lk-kurz-opt" + (antwort ? (richtig ? " richtig" : (i === antwort.i ? " falsch" : "")) : "");
+      return h("button", {type: "button", class: klasse, tabindex: "-1", disabled: !!antwort,
+        onmousedown: e => e.preventDefault(), onclick: () => kurzWaehlen(i)}, alsText(o && o.text));
+    });
+    const antwortTeil = antwort ? h("div", {class: "lk-kurz-antwort"},
+      h("p", {class: "lk-kurz-erklaerung"},
+        h("b", {}, antwort.richtig ? "Richtig. " : "Nicht ganz. "), alsText(q.erklaerung)),
+      h("div", {class: "lk-knoepfe lk-kurz-fuss"},
+        knopf("lk-knopf lk-knopf-primaer", "Im Labor prüfen",
+          "Die Antwort am Gerät im Labor prüfen", () => kurzPruefen()))) : null;
+    /* Kinder als Liste: replaceChildren übernimmt sonst den Text „null" ins DOM (am Bild gemessen). */
+    const kinder = [
+      h("div", {class: "lk-kurz-lage"}, h("span", {class: "lk-kicker"}, "Lage zum Auftrag"), ...zeilen),
+      h("p", {class: "lk-kurz-frage"}, alsText(q.frage)),
+      h("div", {class: "lk-kurz-optionen"}, ...knoepfe),
+    ];
+    if (antwortTeil) kinder.push(antwortTeil);
+    el.uebungKurz.replaceChildren(...kinder);
+  }
+  function leerZeichnen(aktiv){
+    if (!el.uebungLeer) return;
+    const art = aktiv ? "keine" : "ohne";
+    if (merker.leer === art) return;
+    merker.leer = art;
+    if (el.uebungKurz){ merker.kurz = ""; el.uebungKurz.replaceChildren(); }
+    el.uebungLeer.textContent = aktiv
+      ? "Für diesen Auftrag passt gerade keine Kurzfrage – im Labor siehst du das Netz und den nächsten Schritt."
+      : "Ohne laufenden Auftrag gibt es keinen Übungskontext – öffne im Labor einen Auftrag.";
+  }
+  /* Antwort lokal merken (kein Spielzustand), dann Erklärung + Aktion zeichnen. Weitere Versuche
+     sind gesperrt; die richtige Option wird markiert. */
+  function kurzWaehlen(i){
+    const a = naechsterAuftrag();
+    const inst = a && a.aktiv ? a.inst : null;
+    const modul = kurzfrageModul();
+    if (!inst || !inst.iid || !modul) return;
+    const q = kontextFrage(a);
+    if (!q || antwortFuer(inst.iid, q)) return;
+    const optionen = Array.isArray(q.optionen) ? q.optionen : [];
+    if (!optionen[i] || !optionen[i].text) return;
+    kurzAntworten.set(inst.iid, {qid: q.id || "", qtext: q.frage || "", i, richtig: !!optionen[i].richtig});
+    merker.kurz = ""; merker.uebung = "";
     uebungOffen = true;
-    schalterText();
-    if (el.uebung) el.uebung.classList.add("lk-offen");
-    if (!auf) return;
-    groesse([320, uebungFertig ? HOEHE.antwort : HOEHE.uebung]);
-    karte.classList.add("uebung-offen");
-    if (uebungFertig) karte.classList.add("uebung-fertig");
-    /* Nach dem Aufklappen messen: passt die Frage mit allen Antworten, oder muss der Schnappschuss
-       weichen? (Der MutationObserver sieht nur Inhalts-, keine Größenänderungen.) */
+    uebungZeichnen();
+    nachwachsen(kurzAnpassen);
+  }
+  /* „Im Labor prüfen": führt über q.ort ans Gerät (UI.fehlerziel.springen, Runde 4); fehlt der
+     Resolver, wird das Labor geöffnet und das Gerät defensiv ausgewählt. Kein Fokusklau. */
+  function kurzPruefen(){
+    const a = naechsterAuftrag();
+    const inst = a && a.aktiv ? a.inst : null;
+    const iid = inst && inst.iid ? inst.iid : null;
+    const q = inst && kurzfrageModul() ? kontextFrage(a) : null;
+    const ort = q && q.ort && typeof q.ort === "object" ? q.ort : null;
+    const ansGerät = () => {
+      if (!ort) return;
+      if (typeof (UI.fehlerziel && UI.fehlerziel.springen) === "function"){
+        const r = sicher(() => UI.fehlerziel.springen(ort), null);
+        if (r && r.ok) return;
+      }
+      if (ort.geraet) sicher(() => { if (UI.labor && typeof UI.labor.auswaehlen === "function") UI.labor.auswaehlen(ort.geraet, ort.port || undefined); }, null);
+    };
+    laborMitAuftrag(iid, ansGerät);
+  }
+  /* Auftrag offen? Fenster/Karte wachsen ZUERST (sonst schnitte die OS-Grenze den Inhalt ab). */
+  function uebungOeffnen(){
+    if (!karte || uebungOffen || uebungZweig === "leer") return;
+    if (!auf) aufklappen();
+    uebungOffen = true;
+    karteAktualisieren();
     setTimeout(miniVerdichten, zeit("mittel", 240));
     setTimeout(miniVerdichten, zeit("lang", 320));
   }
-  /* Einklappen vor der Antwort: Karte wächst nach der Animation zurück (die Antwort bleibt offen). */
+  /* Einklappen vor der Antwort: Karte und Fenster wachsen erst NACH der Animation zurück. */
   function uebungEinklappen(){
     if (!karte || !uebungOffen || uebungFertig) return;
     uebungOffen = false;
-    schalterText();
-    if (el.uebung) el.uebung.classList.remove("lk-offen");
-    karte.classList.remove("uebung-offen");
-    if (!auf) return;
-    if (ruhig()) { groesse([320, HOEHE.ruhe]); return; }
+    karteAktualisieren();
     clearTimeout(quizTimer);
-    quizTimer = setTimeout(() => { if (karte && !uebungOffen && !uebungFertig) groesse([320, HOEHE.ruhe]); }, zeit("lang", 320));
+    quizTimer = setTimeout(() => { if (karte && auf && !uebungOffen && !uebungFertig) fensterHoehe(HOEHE.ruhe); }, zeit("lang", 320));
   }
-  /* Nach der Antwort: Erklärung + feste Aktionszeile (und karrieres „Nächstes") ganz sichtbar. */
+  /* Nach der Antwort (Mini-Zweig): Erklärung + feste Aktionszeile ganz sichtbar. Der Kontext-Zweig
+     führt seinen Antwort-Zustand selbst (kurzZeichnen/karteAktualisieren). */
   function pruefenSignal(){
-    const fertig = !!(mini && typeof mini.querySelector === "function" && mini.querySelector(".mk-ergebnis"));
-    if (fertig !== uebungFertig){
-      uebungFertig = fertig;
-      if (!el.uebung) return;
-      el.uebung.classList.toggle("lk-fertig", fertig);
-      if (fertig) {
-        uebungOffen = true;
-        el.uebung.classList.add("lk-offen");
-        schalterText();
-        if (auf && karte) { groesse([320, HOEHE.antwort]); karte.classList.add("uebung-offen"); karte.classList.add("uebung-fertig");
-          setTimeout(miniVerdichten, zeit("mittel", 240)); }
-      } else if (auf && karte) {
-        karte.classList.remove("uebung-fertig");
-        if (uebungOffen) groesse([320, HOEHE.uebung]);
-      }
-    }
-    if (el.uebung) el.uebung.classList.toggle("lk-offen", uebungOffen);
+    if (uebungZweig !== "mini") return;
+    const fertig = miniFertig();
+    if (fertig === uebungFertig) return;
+    uebungFertig = fertig;
+    if (fertig) uebungOffen = true;
+    karteAktualisieren();
   }
+  /* Karte und Leistenfenster auf den Zweig und den Antwort-Zustand ziehen. Höhen kommen aus HOEHE
+     und – sobald gemessen – aus kurzGemessen. Zuklappen verkleinert erst nach der Animation. */
+  function karteAktualisieren(){
+    if (!el.uebung) return;
+    if (uebungFertig) uebungOffen = true;
+    if (uebungZweig === "leer") uebungOffen = false;
+    el.uebung.classList.toggle("lk-offen", !!uebungOffen);
+    el.uebung.classList.toggle("lk-fertig", !!uebungFertig);
+    if (!karte) return;
+    const offen = uebungZweig !== "leer" && uebungOffen;
+    karte.classList.toggle("uebung-offen", offen);
+    karte.classList.toggle("uebung-fertig", offen && uebungFertig);
+    hoehenVariablen();
+    schalterText();
+    if (!auf) return;
+    const zustandKey = [offen, uebungFertig, uebungZweig].join("|");
+    const neuerZustand = zustandKey !== kartenZustand;
+    kartenZustand = zustandKey;
+    if (offen){
+      fensterHoehe(zielHoehe());
+      if (neuerZustand){ nachwachsen(kurzAnpassen); wennSchriftenDa(kurzAnpassen); }
+    } else {
+      clearTimeout(quizTimer);
+      quizTimer = setTimeout(() => { if (karte && auf && !uebungOffen) fensterHoehe(HOEHE.ruhe); }, zeit("lang", 320));
+    }
+  }
+  /* Zielhöhe: Zweig + Zustand; nach oben durch den Bildschirm begrenzt (dann scrollt .lk-auf als
+     Notnagel – lieber scrollen als abschneiden). */
+  function zielHoehe(){
+    const basis = uebungZweig === "kurz"
+      ? (uebungFertig ? Math.max(HOEHE.kurzAntwort, kurzGemessen.antwort) : Math.max(HOEHE.kurz, kurzGemessen.offen))
+      : uebungFertig ? HOEHE.antwort : HOEHE.uebung;
+    return Math.min(basis, hoechstHoehe());
+  }
+  function hoechstHoehe(){
+    return sicher(() => {
+      const h = typeof window !== "undefined" && window.screen ? +window.screen.availHeight : 0;
+      return h > 0 ? Math.max(360, Math.min(HOECHST, h - 24)) : HOECHST;
+    }, HOECHST);
+  }
+  function fensterHoehe(hh){
+    if (!auf) return;
+    const ziel = Math.round(hh);
+    if (!Number.isFinite(ziel) || ziel === gesetzteHoehe) return;
+    gesetzteHoehe = ziel;
+    groesse([320, ziel]);
+  }
+  function hoehenVariablen(){
+    if (!karte || !karte.style || typeof karte.style.setProperty !== "function") return;
+    const kurz = uebungZweig === "kurz";
+    const offen = Math.max(kurz ? HOEHE.kurz : HOEHE.uebung, kurz ? kurzGemessen.offen : 0);
+    const antwort = Math.max(kurz ? HOEHE.kurzAntwort : HOEHE.antwort, kurz ? kurzGemessen.antwort : 0);
+    try {
+      karte.style.setProperty("--lk-hoehe-offen", Math.round(offen) + "px");
+      karte.style.setProperty("--lk-hoehe-fertig", Math.round(antwort) + "px");
+    } catch (e) { /* nur Anzeige */ }
+  }
+  /* Am echten DOM nachmessen: reicht die Karte für Lage + Frage + Antworten + Erklärung? Es wird
+     NUR nach oben korrigiert und nur die Karte wächst – nichts wird gekürzt. Ohne Layout (Node-
+     Prüfstand) passiert nichts; dann gelten die HOEHE-Werte. */
+  function kurzAnpassen(){
+    if (!auf || !karte || !el.auf || !el.uebung || uebungZweig !== "kurz" || !uebungOffen) return;
+    if (typeof el.auf.scrollHeight !== "number" || !el.auf.scrollHeight) return;
+    if (typeof karte.clientHeight !== "number" || !karte.clientHeight) return;
+    const kopf = el.zeile && el.zeile.offsetHeight ? el.zeile.offsetHeight : 40;
+    const noetig = Math.round(kopf + el.auf.scrollHeight + 2);
+    const feld = uebungFertig ? "antwort" : "offen";
+    if (noetig <= (kurzGemessen[feld] || 0) + 1) return;
+    kurzGemessen[feld] = noetig;
+    hoehenVariablen();
+    fensterHoehe(zielHoehe());
+    setTimeout(kurzAnpassen, zeit("mittel", 240));   /* nach dem Wachsen gegenprüfen (endet, weil dann nichts mehr fehlt) */
+  }
+  function nachwachsen(fn){ setTimeout(fn, zeit("mittel", 240)); setTimeout(fn, zeit("lang", 320)); }
+  function wennSchriftenDa(fn){
+    sicher(() => {
+      if (typeof document !== "undefined" && document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function")
+        document.fonts.ready.then(() => setTimeout(fn, zeit("kurz", 80)));
+    }, null);
+  }
+
 
   /* ---------- Modul 3: „Lage" (Verträge/Serie/offene in einer stillen Zeile + Schnellaktionen) ---------- */
   function lageZeichnen(){
@@ -410,18 +668,26 @@ UI.leiste = (() => {
     /* Die Statuszeile: Reihenfolge und Klassen sind Vertrag (tests/spiel-leiste-hilfe.test.js). */
     const zeile = h("div", {class: "lk-zeile"},
       el.griff, el.ampeln, el.wertes, el.miniWartet, el.hilfeKnopf, oeffnen);
-    /* Das aufgeklappte Bento: drei Module, der Mini-Bereich bleibt der größte. */
+    /* Das aufgeklappte Bento: drei Module. Modul 2 hat seit Runde 6 zwei Innenbereiche:
+       .lk-kurz (Kontextfrage mit Lage) und den bisherigen Mini-Bereich (Rückfall/Kopfübung). */
     el.jetzt = h("section", {class: "lk-modul lk-jetzt", "aria-label": "Jetzt dran"});
     el.uebungKicker = kicker("Kurzübung");
-    el.uebungSchalter = knopf("lk-link lk-link-stark", "Antworten ▸", "Kurzübung öffnen: Frage und Antworten",
+    el.uebungSchalter = knopf("lk-link lk-link-stark", "Antworten ▸", "Kurzübung öffnen: Lage, Frage und Antworten",
       () => (uebungOffen ? uebungEinklappen() : uebungOeffnen()));
     el.uebungPruefen = knopf("lk-knopf lk-knopf-primaer", "Im Labor prüfen", "Antwort im Labor am Gerät prüfen", () => zumVoll("labor"));
     el.uebungFuss = h("div", {class: "lk-knoepfe lk-uebung-fuss"}, el.uebungPruefen);
     el.uebungKontext = h("p", {class: "lk-kontext"});
+    /* Ohne verwertbare Frage: ehrlicher Satz und EIN Weg ins Labor – nichts Unlösbares. */
     el.uebungLeer = h("p", {class: "lk-leer"}, "Ohne laufenden Auftrag gibt es keinen Übungskontext – öffne im Labor einen Auftrag.");
+    el.uebungWeg = h("div", {class: "lk-knoepfe lk-uebung-weg"},
+      knopf("lk-knopf", "Im Labor öffnen", "Das Labor öffnen – dort siehst du das Netz des Auftrags", () => {
+        const a = naechsterAuftrag();
+        if (a && a.aktiv) zumVoll("labor"); else zumVoll("postfach");
+      }));
+    el.uebungKurz = h("div", {class: "lk-kurz"});
     el.uebung = h("section", {class: "lk-modul lk-uebung" + (uebungOffen ? " lk-offen" : ""), "aria-label": "Kurzübung (freiwillig)"},
       h("div", {class: "lk-modul-kopf"}, el.uebungKicker, el.uebungSchalter),
-      el.uebungKontext, el.uebungLeer, miniEl(), hilfeEl(), el.uebungFuss);
+      el.uebungKontext, el.uebungLeer, el.uebungWeg, el.uebungKurz, miniEl(), hilfeEl(), el.uebungFuss);
     el.lagePunkt = h("span", {class: "lk-lage-punkt", "aria-hidden": "true"});
     el.lageText = h("span", {class: "lk-lage-text"});
     el.schnell = h("div", {class: "lk-schnell", "aria-label": "Schnellaktionen"});
@@ -459,27 +725,33 @@ UI.leiste = (() => {
     if (mini && mini.parentNode) mini.remove();
     if (hilfe && hilfe.parentNode) hilfe.remove();
     root?.remove(); root = null; karte = null; el = {}; auf = false;
+    gesetzteHoehe = 0; kartenZustand = "";
     for (const k of Object.keys(merker)) delete merker[k];
+    /* kurzFragen und kurzAntworten bleiben: die Antwort einer Instanz überlebt einen Neuaufbau
+       der Leiste (z. B. Wechsel Leiste ↔ Vollansicht) – sie ist bewusst NICHT im Spielstand. */
   }
   function groesse([b, hh]){
     const m = ++groesseMarke;
     try { Promise.resolve(Plattform.fenster.groesse(b, hh)).catch(e => { if (m === groesseMarke) console.warn("Leiste Größe", e); }); } catch (e) { console.warn(e); }
   }
   /* Aufklappen: das Fenster wird ZUERST groß (sonst schnitte die OS-Grenze den Inhalt ab), dann
-     wächst die Karte mit 320 ms; der Inhalt folgt gestaffelt (CSS). */
+     wächst die Karte mit 320 ms; der Inhalt folgt gestaffelt (CSS). Die Höhe hängt am Zweig:
+     Ruhe 300, Mini-Zweig 420/480, Kontext-Zweig 600/720 (und größer, sobald nachgemessen). */
   function aufklappen(){
     if (!karte || auf) return;
     auf = true;
     clearTimeout(zuTimer); zuTimer = null;
-    groesse([320, uebungFertig ? HOEHE.antwort : uebungOffen ? HOEHE.uebung : HOEHE.ruhe]);
+    fensterHoehe(uebungOffen && uebungZweig !== "leer" ? zielHoehe() : HOEHE.ruhe);
     zeichnen();                      /* „Jetzt dran"/Mini/Schnellaktionen mit echtem Stand füllen */
     griffZeichnen();
-    if (ruhig()) { karte.classList.add("auf"); miniVerdichten(); return; }
+    if (ruhig()) { karte.classList.add("auf"); miniVerdichten(); kurzAnpassen(); return; }
     requestAnimationFrame(() => {
       if (!karte || !auf) return;
       karte.classList.add("auf");
       /* Nach der Höhen-Animation messen, ob Frage + Optionen ohne Scrollen passen. */
       setTimeout(miniVerdichten, zeit("mittel", 240));
+      setTimeout(kurzAnpassen, zeit("mittel", 240));
+      setTimeout(kurzAnpassen, zeit("lang", 320));
     });
   }
   /* Zuklappen: der Inhalt blendet zuerst aus (160 ms), dann schrumpft die Karte (240 ms ab 80 ms
@@ -491,10 +763,10 @@ UI.leiste = (() => {
     auf = false;
     karte.classList.remove("auf", "hilfe-an");
     griffZeichnen();
-    if (ruhig()) { groesse(ZU); return; }
+    if (ruhig()) { gesetzteHoehe = 0; groesse(ZU); return; }
     const nach = zeit("lang", 320);
     clearTimeout(ziehTimer);
-    const ziehen = () => { if (!auf && karte) groesse(ZU); };
+    const ziehen = () => { if (!auf && karte) { gesetzteHoehe = 0; groesse(ZU); } };
     const ende = ev => {
       if (ev && ev.propertyName && ev.propertyName !== "height" && ev.propertyName !== "width") return;
       clearTimeout(ziehTimer); ziehTimer = null;
@@ -605,5 +877,6 @@ UI.leiste = (() => {
   return {aufbauen, abbauen, status, darstellen, aufklappen, zuklappen,
           get miniBereich(){ return typeof document !== "undefined" ? miniEl() : null; },
           get miniHilfe(){ return typeof document !== "undefined" ? hilfeEl() : null; },
-          get aufgebaut(){ return !!root; }, get offenAuf(){ return auf; }, get zustand(){ return {...zustand}; }};
+          get aufgebaut(){ return !!root; }, get offenAuf(){ return auf; },
+          get zustand(){ return {...zustand}; }};
 })();

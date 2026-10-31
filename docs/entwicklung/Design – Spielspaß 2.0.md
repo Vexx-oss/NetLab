@@ -643,3 +643,22 @@ Tauri-Fenster nur über den Prüfbau (fremde Instanz, Regel 1); einzelnen Theme-
 Fokusring am Inspektor-Feld (im Bericht der Prüfer genannt, Lead-Datei); 720 px mit eingeschalteter
 Anfänger-Hilfe zeigt die Zeitachse kleiner (Hilfe ist abschaltbar); die Leisten-Kapselknöpfe sind
 44 px hoch, aber 40 px breit (rein mausbedient, bewusste Verdichtung im 300-px-Vertrag).
+
+## 42 · Runde 6/7 — Kontext vor Frage, Information vor Knopf (31.10.2026)
+
+Zwei Bilder des Nutzers gaben die Richtung. Bild 1: die Kurzübung fragt „Antwortet 10.0.0.1 auf
+einen Ping aus dem LAN?", zeigt aber das Netz des Auftrags nicht — „wie soll der Schüler das hier
+lösen?" Die Antwort ist nicht mehr Quiz, sondern **Kontext**: Die Frage entsteht jetzt aus dem echten
+Netz des offenen Auftrags und trägt ihre Lage mit (Gerät, Adresse/Maske, Gateway, Port-Modus, VLAN,
+Zustand). Die Leiste zeigt erst eine ruhige Einladung, auf Klick Lage und Frage; nach der Antwort
+die Erklärung. Ohne Netz keine Frage — lieber ein ehrlicher Weg ins Labor als eine unlösbare Karte.
+
+Bild 2: der Flugschreiber wirkte wie eine Knopfwand — „warum sind die Buttons so groß? Das Auge
+sollte auf die Infos hingezogen werden." Der Umbau folgt drei Ebenen: Ergebnis, Befund, nächster
+Schritt. Der Fehler ist eine Rail-Zeile statt eines Warnbanners; Hilfe ist eine numerierte Liste
+mit hängendem Einzug; „Zum Fundort" und „Gerät zeigen" sind leise Verweise, der einzige gefüllte
+Knopf ist der nächste Weg (und in der Fehleransicht gar keiner). Farbe bleibt für den Befund und
+das aktive Segment reserviert; sonst tragen Größe, Gewicht und Abstand die Hierarchie. Messbar:
+laute Knöpfe 11 → 2, Flächen 4 → 1, ein Hauptweg statt drei.
+
+Beides zusammen ist die Regel dieser Fassung: **Kontext vor Frage, Information vor Knopf.**

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf – Runde 7 „Der Flugschreiber führt das Auge&quot; (31.10.2026) · Netzwerk-Labor</title>
+<meta name="description" content="Auftrag des Nutzers (wörtlich).">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Entwurf – Runde 7 „Der Flugschreiber führt das Auge&quot; (31.10.2026)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-zielbild-aufmerksamkeitsfuhrung">1 · Zielbild (Aufmerksamkeitsführung)</a></li>
+<li><a href="#2-schreibrechte">2 · Schreibrechte</a></li>
+<li><a href="#3-abnahme">3 · Abnahme</a></li>
+</ul>
+</nav><h1 id="entwurf-runde-7-der-flugschreiber-fuhrt-das-auge-31-10-2026">Entwurf – Runde 7 „Der Flugschreiber führt das Auge" (31.10.2026)</h1>
+<p><strong>Auftrag des Nutzers (wörtlich).</strong> „Der Design ethos ist noch shitty und unübersichtlich, warum sind die Buttons so groß? Das Auge sollte auf die Infos hingezogen werden. Achte auf die Aufmerksamkeitsführung im UI und verbessere es mit." — Bild: <code>Nachweise/runde7/befund-flugschreiber-laut.png</code> (Simulations-Panel im Dock: „Hilfe an", „Ergebnis"/„Schritt für Schritt", „Zum Fundort", „Gerät zeigen" konkurrieren mit dem Inhalt; viele gleich laute Boxen und große Flächen).</p>
+<p><strong>Befund (aus dem Bild abgelesen).</strong></p>
+<ol><li>Vier bis fünf Knöpfe sind optisch gleich laut: „Hilfe an" (groß, outline), „Ergebnis"/„Schritt für Schritt" (zwei große Flächen, eine grün gefüllt), „Zum Fundort" (große gefüllte Fläche im Warnbanner), „Gerät zeigen" (großer Outline-Knopf). Kein Knopf ist erkennbar der Hauptweg.</li><li>Vier Boxen mit Rahmen/Grundflächen direkt untereinander (Ergebnis, Warnbanner, Hilfe, Transport) — das Auge bekommt keine ruhige Lesespalte.</li><li>Der Inhalt ist klein gesetzt und wird von den Flächen erschlagen; Hierarchie entsteht nur über Farbe (rot/grün), nicht über Größe, Gewicht und Abstand.</li><li>Hinweise stehen als Fließtext/Bullets ohne hängenden Einzug; „Erster Fehler · PC-Buero PORT_SHUTDOWN" ist eine Zeile, der eigentliche Satz darunter wirkt wie ein Anhang.</li></ol>
+<h2 id="1-zielbild-aufmerksamkeitsfuhrung">1 · Zielbild (Aufmerksamkeitsführung)</h2>
+<p><strong>Eine Lesespalte, drei Ebenen, ein Hauptweg.</strong></p>
+<ul><li><strong>Ebene 1 – Ergebnis:</strong> Mikrolabel (FLUGSCHREIBER · &lt;Kunde&gt;), eine große Zeile (Urteil, 24–28 px, nicht lauter als heute), darunter EINE ruhige Zeile mit den harten Zahlen (Ereignisse · Geräte · virtuelle Zeit). Kein Knopf auf dieser Ebene außer dem Format-Umschalter.</li><li><strong>Ebene 2 – Befund:</strong> der erste echte Fehler als Anker: Symbol, Mikrolabel „ERSTER FEHLER", Gerät · Code, darunter EIN Erklärungssatz (nicht der ganze Hinweis), rechts daneben der leise Sprung „Zum Fundort →" (Ghost, 32 px). Kein Warnbanner mit eigener Fläche, sondern eine ruhige Zeile mit links einem 2-px-Balken in der Fehlerfarbe (Bento-Rail) — Farbe nur dort.</li><li><strong>Ebene 3 – nächster Schritt:</strong> die Anfänger-Hilfe ist Inhalt, kein Kasten: kleine Schrittliste (1., 2., 3.) mit hängendem Einzug, „Nächste Diagnose"/„Prüfen" als Mikrolabels, darunter EIN leiser Verweis „Gerät zeigen →". „Hilfe an/aus" wird ein kleiner Schalter im Kopf (28–32 px, Ghost mit Punkt), kein zweiter Hauptknopf.</li></ul>
+<p><strong>Regeln (prüfbar):</strong></p>
+<ul><li>Pro Zustand <strong>höchstens EIN</strong> visuell primärer Knopf; alle anderen sind Ghost/Klein (32 px hoch, keine Füllfläche), Trefferfläche bleibt ≥ 32 px (Panel ist Maus; Dock 380 px).</li><li><strong>Keine zwei gleich lauten Flächen untereinander:</strong> Boxen nur noch für (a) Fehler-Rail-Zeile, (b) den Hilfe-Bereich als ruhige Liste — Ergebnis und Transport rahmenlos auf dem Panel.</li><li>Format-Umschalter „Ergebnis | Schritt für Schritt" wird eine <strong>Segment-Leiste</strong> (28 px, Text, aktives Segment über Token-Fläche, nicht grün gefüllt).</li><li>Transport: Icon-Knöpfe 28–32 px, Abspielzustand als Text, Zeitachse bleibt; keine große Fläche.</li><li><strong>Hierarchie nur über Größe/Gewicht/Abstand</strong>, Farbe sparsam (Fehlerrail rot, aktives Segment Akzent, sonst neutral). Mikrolabels in Mono/Versalien wie in den anderen Flächen.</li><li>Lesespalte: 16-px-Raster, hängender Einzug für Listen, max. 2 Schriftgrößen pro Ebene.</li><li>Zustände: „kein Lauf" ruhig mit Weg zum Start; „läuft" mit Fortschritt statt Knopfwand.</li><li>Testhaken und Verhalten unverändert: <code>.si-*</code>-Klassen bleiben (mindestens die, die Tests prüfen), <code>UI.simpanel.anfaengerHilfe</code>, <code>modusKnopf</code>/<code>si-knopf</code>-Verhalten, Transport- Bedienung, Zeitachse, <code>data-*</code>-Hooks. PDU-Inspektor (<code>pdu.js</code>) bleibt unberührt.</li><li>5 Themes + hell/dunkel, 1440/960/720, Bewegung aus: kein Überlauf, keine abgeschnittenen Texte.</li></ul>
+<h2 id="2-schreibrechte">2 · Schreibrechte</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Owner</th><th>Dateien</th></tr></thead><tbody><tr><td><strong>W4 · Flugschreiber</strong></td><td><code>src/ui/simpanel.js</code>, <code>src/stil/simulation.css</code></td></tr><tr><td><strong>Leitung</strong></td><td><code>src/ui/pdu.js</code> nur falls nötig (nicht geplant), Tests, Doku, Fassung, Build/Release</td></tr><tr><td><strong>Prüfer</strong></td><td>read-only: Design/Aufmerksamkeitsführung, Theme/A11y</td></tr></tbody></table></div>
+<p>Regeln wie Runde 5/6: ein Schreiber je Datei, kein Commit/Push, kein <code>git add -A</code>, keine fremden Dateien (besonders nicht die der parallelen Subnetting-Sitzung), keine Tests ändern.</p>
+<h2 id="3-abnahme">3 · Abnahme</h2>
+<p>Sichtprüfung: Vorher/Nachher bei 1440/960/720 in Standard und hell, dazu 380-px-Dockbreite (die echte Fläche), Hilfe an/aus, Ergebnis/Schritt-Modus, Fehler- und Leerlauf-Zustand. Beleg: Vier Bilderpaare unter <code>Nachweise/runde7/</code>. Messung: Knopfhöhen, Anzahl primärer Flächen je Zustand, Zahl der Rahmen-Boxen, Kontrast der Mikrolabels, Überlauf 0. Gates wie immer.</p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

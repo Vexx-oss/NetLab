@@ -122,6 +122,8 @@
 .mk-ergebnis.bad{background:var(--bad-soft)}
 .mk-ergebnis p{margin:4px 0 0; font-size:var(--fs-2)}
 .mk-leer{margin:0; color:var(--muted); font-size:var(--fs-2)}
+/* Runde 6 (Leitung): Einordnung des Mini-Tickets als Kopfübung (karriere.js miniDialog). */
+.mk-einordnung{margin:0 0 8px; color:var(--muted); font:400 var(--fs-2)/1.45 var(--body); max-width:64ch}
 .mk.gross{font-size:var(--fs-4); gap:10px}
 .mk.gross .mk-frage{font-size:var(--fs-4)}
 .mk.gross .mk-schnapp{font-size:var(--fs-2); white-space:pre-wrap}

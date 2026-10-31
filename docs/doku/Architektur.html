@@ -612,6 +612,31 @@ Ein Test wurde umgestellt (nicht abgeschwächt): `tests/ui-leiste-ueberlappung.t
 neue Mechanik (`mappe-an`/`visibility:hidden` statt Kopfraum) mit 6 statt 4 Fällen.
 **Nicht gemessen:** R12 (`--dom`), Android-APK, echte Maus im ausgelieferten Tauri-Fenster
 (nur Prüfbau), Screenreader.
+## 25 · Runde 6/7 — Kurzübung mit Kontext und Flugschreiber-Aufmerksamkeit (31.10.2026)
+
+**Runde 6 (Kurzübung).** Neues Modul `src/spiel/kurzfrage.js`:
+`Spiel.kurzfrage.fuer(inst, {niveau}) → {id,titel,frage,lage:[{label,wert}],optionen:[{text,richtig}],
+erklaerung,ort} | null`. Fünf Vorlagen (netz/maske/gateway/portmodus/zustand) aus `inst.netz`,
+`Modell.adressen`, `Sim.adresse`, `IP.*`, `g.running.ports/.if`, Kabeln und `g.an`;
+deterministisch aus `inst.iid` (Zufall ohne Uhr); genau eine richtige Option; Niveau E/AP1/AP2;
+Lage 2–4 Zeilen; kein Lösungstext (Fehlerstellen nach `Spiel.plan.diff` ausgeklammert). Die
+Leiste (`src/ui/leiste.js`, `leiste.css`) rendert bei offenem Auftrag diese Frage mit
+Lage-Block; ohne verwertbares Netz zeigt sie keine Frage, sondern den Weg ins Labor. Das generische
+Mini-Ticket bleibt als Kopfübung im Dialog (karriere.js/mk-einordnung).
+
+**Runde 7 (Flugschreiber).** `src/ui/simpanel.js` + `simulation.css`: eine Lesespalte mit drei
+Ebenen — Ergebnis (Urteil 28 px, eine Zahlenzeile, Segmentleiste), Befund (erster Fehler als
+2-px-Rail-Zeile, ein Erklärungssatz, leiser Weg „Zum Fundort →"), nächster Schritt (numerierte
+Hilfe, hängender Einzug, leiser Verweis „Gerät zeigen →"). Höchstens EIN gefüllter Hauptweg je
+Zustand, alle übrigen Ghost 32 px; sichtbare 44-px-Trefferflächen für Transport/Filter bleiben
+unsichtbar erhalten. Hilfe an/aus als Ghost-Schalter, Format als Textsegment. Testhaken `.si-*`,
+Transport, Zeitachse, `UI.simpanel.anfaengerHilfe` und PDU unverändert.
+
+**Messung (31.10.2026).** Runde 6: 950/950 Tests in der abgetrennten Prüfkopie; 228/228 Fragen über
+76 Handtickets × 3 Niveaus; Lösungstext-Scan 0 Treffer. Runde 7: Dock 380 px, laute Knöpfe 11→2,
+primäre 3→0 (Fehler+Hilfe an), Flächen 4→1; 10→2/3→0/3→1 (Hilfe aus); 6→2/4→1/2→0 (Ergebnis);
+Überlauf 0; Mikrolabel 6,08:1. Im gemeinsamen Arbeitsbaum 1033/1033 grün (dieser Commit enthält nur
+Runde-6/7-Dateien). R12 nicht gemessen.
 </code></pre>
 </main>
 <footer class="dk-fuss">

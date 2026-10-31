@@ -9,6 +9,54 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `
 
 ---
 
+## 2.8.0 — Runde 6/7: Kurzübung mit Auftragskontext, Flugschreiber mit Aufmerksamkeitsführung (31.10.2026)
+
+**Was diese Fassung ist.** Zwei Nachbesserungen nach 2.7.0, ausgelöst durch zwei Bildschirmfotos des
+Nutzers: die Kurzübung der Minileiste zeigte eine generische Frage ohne Netz-Kontext („wie soll der
+Schüler das hier lösen?"), und das Simulations-Panel „Flugschreiber" war unübersichtlich — „warum
+sind die Buttons so groß? Das Auge sollte auf die Infos hingezogen werden."
+
+**Kurzübung mit echtem Kontext (Runde 6).** Neues, reines Modul `src/spiel/kurzfrage.js` erzeugt
+aus der offenen Instanz eine Frage **aus dem echten Netz des Auftrags**, mit sichtbarem Lage-Block:
+fünf Vorlagen (gleiches Netz? · Netzadresse · Gateway im Netz? · Port-Modus/VLAN · Zustand/Link),
+Niveau E/AP1/AP2, deterministisch aus `inst.iid`, genau eine richtige von drei Optionen. Jede
+Frage ist mit genau den gezeigten Zeilen beantwortbar; die Lösung des Auftrags wird nie verraten
+(Injektor-Titel/Grund-Codes per Test über alle 76 Handtickets und 168 generierte Instanzen = 0
+Treffer). Die Leiste zeigt die Frage erst auf Klick (einzeilige Einladung), dann Lage, Frage,
+Antworten, nach der Antwort die Erklärung + „Im Labor prüfen". Ohne verwertbares Netz zeigt sie
+**keine** unlösbare Frage, sondern den Weg ins Labor. Die generische Mini-Frage bleibt als
+**Kopfübung** im Mini-Ticket-Dialog und ist dort als „unabhängig vom laufenden Auftrag" eingeordnet.
+Messung: 228/228 Fragen über 76 Handtickets × 3 Niveaus; 950/950 Tests in der abgetrennten
+Prüfkopie (+18 Fälle), 96 headless Module.
+
+**Flugschreiber mit Aufmerksamkeitsführung (Runde 7).** Eine ruhige Lesespalte, drei Ebenen:
+Ergebnis (Urteil 28 px + eine Zahlenzeile), Befund (erster Fehler als Rail-Zeile mit EINEM
+Erklärungssatz und leisem „Zum Fundort →"), nächster Schritt (numerierte Hilfe, hängender Einzug,
+leiser Verweis „Gerät zeigen →"). Hilfe an/aus ist ein kleiner Ghost-Schalter, der Format-Umschalter
+eine Textsegment-Leiste; höchstens EIN gefüllter Hauptweg je Zustand. Gemessen im Dock 380 px:
+laute Knöpfe 11 → 2 (Fehler+Hilfe an), 10 → 2 (Fehler+Hilfe aus), 6 → 2 (Ergebnis), Flächen/Boxen
+4 → 1 bzw. 2 → 0, primäre Knöpfe 3/3/4 → 0/0/1, Überlauf 0 in allen Zuständen und Breiten; Mikrolabel
+6,08:1; Trefferflächen bleiben 44 px (unsichtbar). Testhaken `.si-*`, Transport, Zeitachse,
+`UI.simpanel.anfaengerHilfe` und PDU unverändert.
+
+**Gates (gemessen).** In der abgetrennten Prüfkopie für den Commit: `node tests/run.js`
+**950/950 grün** (0 übersprungen, 111 Testdateien, 96 Module) · `klassen.py` **0** ·
+`ethos.py` **GRÜN** (R1 23, R2 17, R4 134, R9 58, R10 41) · `umlaute.py` **GRÜN** ·
+`sim-stand.js` **unverändert**; Flugschreiber-Messung siehe oben. Im gemeinsamen Arbeitsbaum
+(mit der parallel arbeitenden Subnetting-Sitzung) 1033/1033 grün — dieser Commit enthält nur die
+Runde-6/7-Dateien.
+
+**Erzeugnisse.** Fassung **2.8.0**; Einzeldatei und `docs/index.html` byte-gleich,
+**`ZAHL1` B**, SHA256 `HASH1`, 0 Außenverweise; Windows-`.exe` **`ZAHL2` B**,
+ProductVersion **2.8.0**, SHA256 `HASH2`. Einzelheiten:
+[`Übergabe – Stand 31.10.2026 – Runde 6 und 7`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 6 und 7.md>).
+
+**Nicht geprüft.** R12 (`ethos --dom`), Android-APK (kein SDK), echte Maus im Tauri-Fenster,
+Screenreader; Leisten- und Panel-Höhen im Browser gemessen, im Tauri-Fenster nicht durchgeklickt;
+Themes stichprobenweise.
+
+---
+
 ## 2.7.0 — Runde 5: Auftragsbogen, entzerrter Inspektor, Leiste als Begleiter (31.10.2026)
 
 **Was diese Fassung ist.** Ein UX- und Konzeptzug nach 2.6.0, ausgelöst durch drei Bildschirmfotos

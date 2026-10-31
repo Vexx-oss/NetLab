@@ -1,5 +1,17 @@
 "use strict";
-/* ---------- Simulations-Panel „Flugschreiber" (Runde 4, Strang C) ----------
+/* ---------- Simulations-Panel „Flugschreiber" (Runde 7: Aufmerksamkeitsführung) ----------
+   RUNDE 7 — eine ruhige Lesespalte, drei Ebenen, ein Hauptweg:
+     Ebene 1 · Ergebnis: Mikrolabel (FLUGSCHREIBER · Kunde), eine große Urteilszeile und EINE ruhige
+               Zahlenzeile; außer dem Format-Umschalter steht hier kein Knopf, keine Fläche.
+     Ebene 2 · Befund: erster echter Fehler als Rail-Zeile (2-px-Balken links), Mikrolabel
+               „ERSTER FEHLER", Gerät · Code, EIN Erklärungssatz, rechts der leise Weg „Zum Fundort →".
+     Ebene 3 · Nächster Schritt: Anfänger-Hilfe als ruhige, numerierte Liste mit hängendem Einzug
+               (Mikrolabels „Nächste Diagnose"/„Prüfen") und einem leisen Verweis „Gerät zeigen →".
+   Knopfregel: höchstens EIN visuell primärer Knopf je Zustand (leer: „Ping-Werkzeug wählen →",
+   Ergebnis-Ansicht: „Schritt für Schritt ansehen →"); alles andere ist Ghost (32 px, keine Füllfläche).
+   Die 44-px-Trefferflächenregel bleibt nur als unsichtbare Trefferfläche für Transport/Filter/Tempo
+   erhalten (Test ui-trefferflaechen) — sichtbar sind es leise Text-/Icon-Zeilen.
+   Testhaken .si-*, Verhalten, Transport, Zeitachse und PDU bleiben unverändert.
    UI.simpanel.zeigen(container, trace)
      Spielt eine Trace (Architektur § 5.2) ab – es rechnet nichts nach, es zeigt nur, was die Simulation
      aufgezeichnet hat. Der Kopf nennt Kunde (aus dem offenen Auftrag), Ergebnis groß und „Was/Wo";
@@ -27,6 +39,13 @@ UI.simpanel = (() => {
   const labor = () => UI.labor || null;
   const geraetName = id => { const g = labor()?.netz?.geraete?.[id]; return g ? g.name : (id || "?"); };
   const zeit = t => t == null ? "" : Number(t).toLocaleString("de-DE", {maximumFractionDigits: 1}) + " ms";
+  /* Genau EIN Erklärungssatz für Ebene 2 – nie der ganze Hinweistext. */
+  function ersterSatz(text){
+    const t = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
+    if (!t) return "";
+    const m = t.match(/^.*?[.!?](?=\s|$)/);
+    return m ? m[0] : t;
+  }
 
   /* ---------- Anfänger-Hilfe (Strang C): gespeicherte Wahl, Standard nach Karrierestufe ---------- */
   const einst = () => (store.get("einst", {}) || {});
@@ -188,12 +207,13 @@ UI.simpanel = (() => {
     return z.ereignisse.filter(e => (!f.size || f.has(e.proto)) && (!z.nurProbleme || istProblem(z, e)));
   }
 
+  /* Ebene-3-Schalter: kleiner Ghost-Knopf mit Punkt – kein zweiter Hauptknopf. */
   function hilfeKnopf(z){
     const an = anfaengerHilfe();
     return h("button", {type: "button", class: "si-hilfe-knopf" + (an ? " an" : ""), "aria-pressed": String(an),
-      title: an ? "Anfänger-Hilfe ausschalten – ruhige Profi-Sicht" : "Anfänger-Hilfe einschalten: Hinweise, Schritt für Schritt und ein Weg zum Fundort",
+      title: an ? "Anfänger-Hilfe ausschalten – ruhige Profi-Sicht" : "Anfänger-Hilfe einschalten: Hinweise und der nächste Schritt",
       onclick: () => { anfaengerHilfeSetzen(!anfaengerHilfe()); anhalten(z); bauen(z); }},
-      sym("hilfe", 15), h("span", {}, an ? "Hilfe an" : "Hilfe aus"));
+      h("span", {class: "si-hilfe-punkt", "aria-hidden": "true"}), h("span", {}, an ? "Hilfe an" : "Hilfe aus"));
   }
   function bauen(z){
     const c = z.container;
@@ -201,9 +221,11 @@ UI.simpanel = (() => {
     if (!z.trace) {
       c.append(h("div", {class: "si-leer"},
         h("div", {class: "si-kopf-oben"}, h("span", {class: "si-kicker"}, "FLUGSCHREIBER"), hilfeKnopf(z)),
-        h("strong", {}, "Noch keine Aufzeichnung."),
-        h("p", {}, "Starte einen Ping oder eine Prüfung. Hier siehst du dann jedes Paket: wer sendet, wer weiterleitet, wo etwas verworfen wird – und warum."),
-        anfaengerHilfe() ? h("p", {class: "si-leer-tipp"}, "Anfänger-Hilfe ist an: Sobald ein Auftrag offen ist, nennt sie den nächsten Schritt und das benötigte Werkzeug.") : null));
+        h("strong", {class: "si-leer-titel"}, "Noch keine Aufzeichnung."),
+        h("p", {class: "si-leer-text"}, "Starte einen Ping oder eine Prüfung. Hier siehst du dann jedes Paket: wer sendet, wer weiterleitet, wo etwas verworfen wird – und warum."),
+        anfaengerHilfe() ? h("p", {class: "si-leer-tipp"}, "Anfänger-Hilfe ist an: Sobald ein Auftrag offen ist, nennt sie den nächsten Schritt.") : null,
+        h("div", {class: "si-leer-aktionen"},
+          h("button", {type: "button", class: "si-knopf haupt", onclick: () => { try { labor()?.werkzeug?.("ping"); } catch (e) { /* Anzeige */ } }}, "Ping-Werkzeug wählen →"))));
       return;
     }
     const ok = erfolg(z.trace), ev = z.ereignisse;
@@ -211,8 +233,11 @@ UI.simpanel = (() => {
     c.append(h("p", {class: "si-veraltet", hidden: !z.veraltet, role: "status"},
       h("span", {class: "si-sym", "aria-hidden": "true"}, "!"), "Das Netz wurde seitdem geändert – diese Aufzeichnung zeigt den Stand davor. Starte die Prüfung neu."));
     const p = erstesProblem(z);
-    c.append(kopf(z, ok, !!p));
-    if (p) c.append(warnBanner(z, p));
+    /* Ebene 2 (Befund-Rail) nur in der Schritt-Ansicht: die Ergebnis-Ansicht zeigt ihre Befunde
+       bereits als eigene Rail-Zeilen – keine zweite, gleich laute Zeile. */
+    const rail = !!p && z.modus !== "ergebnis";
+    c.append(kopf(z, ok, rail));
+    if (rail) c.append(warnBanner(z, p));
     if (anfaengerHilfe()) c.append(hilfeBox(z));
     if (z.modus === "ergebnis") { c.append(ergebnisAnsicht(z, ok)); return; }
     z.liste = sichtbar(z);
@@ -231,36 +256,37 @@ UI.simpanel = (() => {
     if (z.pos >= 0) markieren(z, z.pos, {leise: true});
   }
 
-  /* Kopf: Mikrolabel mit Kunde, Ergebnis groß, Was/Wo und der Format-Umschalter. */
+  /* Ebene 1 – Ergebnis: Mikrolabel, EINE große Urteilszeile, EINE ruhige Zahlenzeile, Segment-Leiste.
+     Kein Rahmen, keine Fläche, kein zusätzlicher Knopf (Runde 7 § 1). */
   function kopf(z, ok, mitBanner){
     const t = z.trace, ev = z.ereignisse;
     const kunde = kundeName();
     const meldung = ev.find(istMeldung), drops = ev.filter(e => e.art === "verwerfen");
     const zeile2 = [];
-    /* Steht der Warnbanner darüber (erster echter Fehler), genügt er als Kennung – keine zweite, gekürzte Zeile. */
     if (!mitBanner) {
       if (t.abbruch === "STORM") zeile2.push(h("span", {class: "si-kennung bad"}, "Broadcast-Sturm: nach " + zahlDe(ev.length) + " Ereignissen abgebrochen"));
-      else if (meldung) zeile2.push(h("span", {class: "si-kennung gemeldet"}, h("span", {"aria-hidden": "true"}, "↩ "),
-        "Gemeldet: " + ICMPTEXT[meldung.frame.icmp.typ] + " von " + geraetName(meldung.geraet)));
-      else if (!ok && drops.length) zeile2.push(h("span", {class: "si-kennung still"}, h("span", {"aria-hidden": "true"}, "… "),
-        "Still verworfen: keine Fehlermeldung zurück – der Absender wartet vergeblich (Timeout)"));
+      else if (meldung) zeile2.push(h("span", {class: "si-kennung gemeldet"}, "↩ gemeldet: " + ICMPTEXT[meldung.frame.icmp.typ] + " von " + geraetName(meldung.geraet)));
+      else if (!ok && drops.length) zeile2.push(h("span", {class: "si-kennung still"}, "… ohne Fehlermeldung zurück (Timeout)"));
     }
     const dauer = ev.length ? (ev[ev.length - 1].t ?? 0) - (ev[0].t ?? 0) : 0;
     const geraete = new Set(ev.map(e => e.geraet)).size;
+    const zusammen = String(t.zusammenfassung || "").replace(/^[✓✔✗✕×]\s*/, "").trim();
     const ww = wasWo(z, ok);
-    return h("div", {class: "si-kopf " + (ok ? "ok" : "bad")},
+    /* EINE ruhige Zahlenzeile: bei Fehlern nur die harten Zahlen (der Befund darunter trägt den Satz). */
+    const zahlen = [];
+    if (ok) zahlen.push(zusammen || ww || "Die Pakete sind angekommen.");
+    zahlen.push(zahlDe(ev.length) + " " + (ev.length === 1 ? "Ereignis" : "Ereignisse"),
+      geraete + (geraete === 1 ? " Gerät" : " Geräte"),
+      zeit(dauer) + " virtuelle Zeit");
+    return h("header", {class: "si-kopf " + (ok ? "ok" : "bad")},
       h("div", {class: "si-kopf-oben"},
         h("span", {class: "si-kicker"}, "FLUGSCHREIBER" + (kunde ? " · " + kunde : "")),
         hilfeKnopf(z)),
-      h("div", {class: "si-kopf-zeile"},
-        h("div", {class: "si-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
-        h("div", {class: "si-zus"},
-          h("strong", {}, ok ? "Hat geklappt" : "Hat nicht geklappt"),
-          h("p", {}, t.zusammenfassung || (ok ? "Die Pakete sind angekommen." : "Unterwegs ist etwas verworfen worden.")),
-          ww ? h("p", {class: "si-waswo"}, ww) : null,
-          zeile2.length ? h("p", {class: "si-zeile2"}, zeile2) : null,
-          h("p", {class: "si-statistik"}, zahlDe(ev.length) + " " + (ev.length === 1 ? "Ereignis" : "Ereignisse") + " · " + geraete + (geraete === 1 ? " Gerät · " : " Geräte · ") + zeit(dauer) + " virtuelle Zeit")),
-        ),
+      h("div", {class: "si-kopf-urteil"},
+        h("span", {class: "si-gross", "aria-hidden": "true"}, ok ? "✓" : "✗"),
+        h("div", {class: "si-zus"}, h("strong", {}, ok ? "Hat geklappt" : "Hat nicht geklappt"))),
+      h("p", {class: "si-statistik", title: zahlen.join(" · ")}, zahlen.join(" · ")),
+      zeile2.length ? h("p", {class: "si-zeile2"}, zeile2) : null,
       h("div", {class: "si-kopf-unten"},
         h("div", {class: "si-modus", role: "radiogroup", "aria-label": "Ansicht"},
           modusKnopf(z, "ergebnis", "Ergebnis"), modusKnopf(z, "schritt", "Schritt für Schritt"))));
@@ -271,21 +297,24 @@ UI.simpanel = (() => {
       onclick: () => { if (z.modus === m) return; anhalten(z); z.modus = modusMerk = m; bauen(z); $(".si-modus [aria-checked=\"true\"]", z.container)?.focus(); },
       onkeydown: e => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); const n = m === "ergebnis" ? "schritt" : "ergebnis"; anhalten(z); z.modus = modusMerk = n; bauen(z); $(".si-modus [aria-checked=\"true\"]", z.container)?.focus(); } }}, text);
   }
-  /* Warnbanner: erster echter Fehler der Trace, mit dem Weg zum Fundort (zentraler Resolver). */
+  /* Ebene 2 – Befund: ruhige Zeile mit 2-px-Rail in der Fehlerfarbe, EIN Erklärungssatz,
+     rechts der leise Sprung. Kein Warnbanner, keine Fläche (Runde 7 § 1). */
   function warnBanner(z, p){
-    const e = p.e;
-    const ort = e ? geraetName(e.geraet) + (e.port ? " " + e.port : "") : "Aufzeichnung abgebrochen";
-    const kurzOrt = e ? geraetName(e.geraet) : "Aufzeichnung abgebrochen";
-    const grund = e && e.grund ? erklaerung(e.grund) : "Die Simulation hat das Ereignis-Budget überschritten.";
-    return h("div", {class: "si-warn", role: "status"},
+    const e = p.e, nv = niveau();
+    const geraet = e && e.geraet ? geraetName(e.geraet) + (e.port ? " " + e.port : "") : null;
+    const code = e && e.grund ? e.grund : null;
+    const voll = e && e.grund ? erklaerung(e.grund) : "Die Simulation hat das Ereignis-Budget überschritten.";
+    const satz = ersterSatz(voll) || voll || "";
+    const ort = geraet ? geraet + (code && nv !== "AP2" ? " · " + code : "") : (code || "Abbruch");
+    return h("section", {class: "si-warn", role: "status", title: voll},
       h("div", {class: "si-warn-kopf"},
-        h("span", {class: "si-sym bad", "aria-hidden": "true"}, "!"),
-        h("strong", {}, e ? "Erster Fehler · " + kurzOrt : "Abbruch"),
-        e && e.grund && niveau() !== "AP2" ? h("code", {class: "si-grund"}, e.grund) : null,
-        e && e.geraet ? h("button", {type: "button", class: "si-knopf haupt si-zumfundort",
-          title: "Springt zum Fundort: Gerät auswählen, Inspektor zeigen, hervorheben",
-          onclick: ev => { ev.stopPropagation(); springe(e); }}, "Zum Fundort") : null),
-      h("p", {class: "si-warn-text"}, (e && e.port ? geraetName(e.geraet) + " " + e.port + " – " : "") + grund));
+        h("span", {class: "si-sym bad", "aria-hidden": "true"}, "✕"),
+        h("span", {class: "si-kicker"}, "ERSTER FEHLER"),
+        h("span", {class: "si-warn-ort"}, ort),
+        e && e.geraet ? h("button", {type: "button", class: "si-knopf klein si-zumfundort",
+          title: "Zum Fundort: Gerät auswählen, Inspektor zeigen, hervorheben",
+          onclick: ev => { ev.stopPropagation(); springe(e); }}, "Zum Fundort →") : null),
+      h("p", {class: "si-warn-text"}, satz));
   }
 
   /* Anfänger-Hilfe: nur vorhandene Daten (naechsteDiagnose, naechster, handlungsHinweise), keine Lösung. */
@@ -313,10 +342,10 @@ UI.simpanel = (() => {
   function hilfeBox(z){
     const {schritte, ort} = hilfeDaten();
     const aktionen = [];
-    if (ort && ort.geraet) aktionen.push(h("button", {type: "button", class: "si-knopf",
-      onclick: () => { try { labor()?.hervorheben?.([{geraet: ort.geraet}], 2200); labor()?.auswaehlen?.(ort.geraet); } catch (e) { /* Anzeige */ } }}, "Gerät zeigen"));
-    if (ort && ort.dock) aktionen.push(h("button", {type: "button", class: "si-knopf",
-      onclick: () => { try { labor()?.dock?.(ort.dock); } catch (e) { /* Anzeige */ } }}, "Zum " + (DOCK_NAME[ort.dock] || ort.dock)));
+    if (ort && ort.geraet) aktionen.push(h("button", {type: "button", class: "si-knopf klein",
+      onclick: () => { try { labor()?.hervorheben?.([{geraet: ort.geraet}], 2200); labor()?.auswaehlen?.(ort.geraet); } catch (e) { /* Anzeige */ } }}, "Gerät zeigen →"));
+    if (ort && ort.dock) aktionen.push(h("button", {type: "button", class: "si-knopf klein",
+      onclick: () => { try { labor()?.dock?.(ort.dock); } catch (e) { /* Anzeige */ } }}, "Zum " + (DOCK_NAME[ort.dock] || ort.dock) + " →"));
     /* Benötigtes Interaktionselement hervorheben (kein Fokusklau): Dock-Reiter pulsieren lassen. */
     if (ort && ort.dock && typeof document !== "undefined" && document.querySelector) {
       try {
@@ -326,13 +355,14 @@ UI.simpanel = (() => {
     }
     return h("section", {class: "si-hilfe", "aria-label": "Anfänger-Hilfe"},
       h("div", {class: "si-hilfe-kopf"},
-        h("strong", {}, "Anfänger-Hilfe"),
-        h("span", {class: "si-hilfe-meta"}, "Nur Hinweise – keine Lösung")),
+        h("span", {class: "si-kicker"}, "NÄCHSTER SCHRITT"),
+        h("span", {class: "si-hilfe-meta"}, "Hinweise, keine Lösung")),
       schritte.length
-        ? h("ul", {class: "si-hilfe-liste"}, schritte.map(s => h("li", {class: "si-hilfe-schritt", title: s.text},
-            h("b", {class: "si-hilfe-titel"}, s.titel + ": "), h("span", {}, s.text))))
+        ? h("ol", {class: "si-hilfe-liste"}, schritte.map((s, i) => h("li", {class: "si-hilfe-schritt", title: s.text},
+            h("span", {class: "si-hilfe-nr", "aria-hidden": "true"}, String(i + 1)),
+            h("span", {class: "si-hilfe-titel"}, s.titel),
+            h("span", {}, s.text))))
         : h("p", {class: "si-hilfe-leer"}, instanz() ? "Gerade ist alles erledigt – kein offener Schritt." : "Öffne einen Auftrag: Dann zeigt die Hilfe den nächsten Schritt."),
-      ort && ort.text ? h("p", {class: "si-hilfe-ort", title: ort.text}, ort.text) : null,
       aktionen.length ? h("div", {class: "si-hilfe-aktionen"}, aktionen) : null);
   }
 
@@ -364,8 +394,8 @@ UI.simpanel = (() => {
         ? geraetName(meldung.geraet) + " meldet es zurück: " + ICMPTEXT[meldung.frame.icmp.typ]
         : "Still verworfen – niemand schickt eine Fehlermeldung zurück.") : null);
     if (e.geraet) karte.append(h("div", {class: "si-zeile-knoepfe"},
-      h("button", {type: "button", class: "si-knopf", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen"),
-      h("button", {type: "button", class: "si-knopf haupt si-zumfundort", onclick: () => springe(e)}, "Zum Fundort")));
+      h("button", {type: "button", class: "si-knopf klein", onclick: () => labor()?.hervorheben?.([{geraet: e.geraet, port: e.port || null}], 2000)}, "Gerät zeigen →"),
+      h("button", {type: "button", class: "si-knopf klein si-zumfundort", onclick: () => springe(e)}, "Zum Fundort →")));
     return karte;
   }
 
@@ -391,12 +421,12 @@ UI.simpanel = (() => {
     const anzahl = p => z.ereignisse.filter(e => e.proto === p).length;
     const drops = z.ereignisse.filter(e => istProblem(z, e)).length;
     const leiste = h("div", {class: "si-filter", role: "group", "aria-label": "Filter"},
-      h("span", {class: "si-filter-titel"}, "Filter:"),
+      h("span", {class: "si-filter-titel"}, "FILTER"),
       protos.map(p => {
         const an = z.filter.size > 0 && z.filter.has(p);
         const b = h("button", {type: "button", class: "si-filter-knopf" + (an ? " an" : ""), "aria-pressed": String(z.filter.has(p)), title: "Nur " + p + " zeigen (mehrere wählbar)",
           onclick: () => { anhalten(z); if (z.filter.has(p)) z.filter.delete(p); else z.filter.add(p); if (z.filter.size === protos.length) z.filter.clear(); z.pos = -1; bauen(z); }},
-          UI.pdu.chip(p), h("span", {class: "si-anzahl"}, String(anzahl(p))));
+          h("span", {}, p), h("span", {class: "si-anzahl"}, String(anzahl(p))));
         return b;
       }),
       z.filter.size ? h("button", {type: "button", class: "si-filter-knopf", onclick: () => { z.filter.clear(); z.pos = -1; bauen(z); }}, "alle") : null,
@@ -447,7 +477,8 @@ UI.simpanel = (() => {
 
   function posText(z){
     if (!z.posEl) return;
-    z.posEl.textContent = (z.pos < 0 ? "–" : String(z.pos + 1)) + " / " + (z.liste ? z.liste.length : 0);
+    const n = z.liste ? z.liste.length : 0;
+    z.posEl.textContent = (z.spielt ? "läuft · " : "") + (z.pos < 0 ? "–" : String(z.pos + 1)) + " / " + n;
   }
   function markieren(z, i, o = {}){
     const liste = z.liste || [];
@@ -494,7 +525,7 @@ UI.simpanel = (() => {
   function anhalten(z, still){
     if (z.timer) { clearTimeout(z.timer); z.timer = null; }
     if (still) return;
-    z.spielt = false; playKnopf(z);
+    z.spielt = false; playKnopf(z); posText(z);
   }
   function playKnopf(z){
     if (!z.playEl) return;

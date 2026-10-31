@@ -370,7 +370,9 @@ UI.karriere = (() => {
   }
   function miniDialog(){
     const ziel = h("div", {class: "mk-dialog"});
-    const zu = overlay(h("div", {}, h("h2", {}, "Mini-Ticket"), ziel, h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Schließen"))));
+    const zu = overlay(h("div", {}, h("h2", {}, "Mini-Ticket"),
+      h("p", {class: "mk-einordnung sp-leise"}, "Kopfübung · unabhängig vom laufenden Auftrag. Sie prüft Grundwissen; die Lösung des Auftrags entsteht im Labor."),
+      ziel, h("div", {class: "sp-knoepfe"}, h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Schließen"))));
     miniZeichnen(ziel, {gross: true, schliessen: zu});
   }
   /* Der Weg der Leiste: Ticket in UI.leiste.miniBereich, Denkhilfe und Anker in UI.leiste.miniHilfe (§ 5). */
