@@ -113,6 +113,7 @@ Sim._log = function(L, art, geraet, port, frame, text, x){
   const e = {n: L.ev.length + 1, t: L.t - L.t0, art, geraet: geraet || null, port: port == null ? null : port,
              nach: x.nach ? {geraet: x.nach.geraet, port: x.nach.port} : null,
              frame: frame ? tief(frame) : null, proto: x.proto || Sim._proto(frame), grund: x.grund || null, text: text || ""};
+  if (x.warnung) e.warnung = true;   /* Architektur § 5.2: Hinweis, keine Ursache */
   L.ev.push(e);
   return e;
 };
@@ -156,7 +157,8 @@ Sim._ifKurz = function(n){
 };
 Sim._neueIpId = function(L, gid){ const id = L.ipId++; L.herkunft[id] = gid; return id; };
 Sim._ephemeral = function(L, gid){ const z = Sim._z(L, gid); const p = z.naechsterPort || 49152; z.naechsterPort = p >= 65000 ? 49152 : p + 1; return p; };
-Sim._erster = function(L, von){ for (let i = von; i < L.ev.length; i++) if (L.ev[i].grund) return L.ev[i]; return null; };
+/* Erstes Ereignis mit Grund ab `von`; Warnungen (warnung:true) sind keine Ursache (Architektur § 5.2). */
+Sim._erster = function(L, von){ for (let i = von; i < L.ev.length; i++) if (L.ev[i].grund && !L.ev[i].warnung) return L.ev[i]; return null; };
 
 /* ---------- Kabel ---------- */
 /* Nachbarschaft je Gerät (einmal je Lauf) */

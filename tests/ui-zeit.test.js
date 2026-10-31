@@ -137,12 +137,17 @@ gruppe("UI: Zeit-Tokens (U07)", () => {
       }
     }
     erwarte.gleich(treffer, [], "Zeit-Literale außerhalb der Tokens");
-    /* Offene Stellen bei fremden Schreibern ehrlich benennen – nicht als bestanden verkaufen. */
+    /* Offene Altlast in FREMDEN Dateien: am 31.10.2026 gemessen genau ["editor-pakete.js"].
+       Neue Zeit-Literale außerhalb dieser dokumentierten Altlast machen rot; ein Fix verkleinert die
+       Liste und bleibt grün. Bis 2.9 endete der Test mit einem immer wahren "wahr(true)" — gedruckt,
+       aber nie geprüft (Befund Q3). */
+    const ERLAUBT_OFFEN = ["editor-pakete.js"];
     const offen = [];
     for (const f of uiDateien()) if (AUSGENOMMEN[f.name]) {
       if (/setTimeout\([^\n]*?,\s*(180|220|260|700|900)\s*\)/.test(f.text) || /\bms\s*=\s*\d{2,4}\b/.test(f.text)) offen.push(f.name);
     }
-    if (offen.length) console.log("OFFEN (fremde Dateien, nicht meine Schreibzone): " + offen.join(", "));
-    erwarte.wahr(true, "dokumentiert");
+    const neue = offen.filter(n => !ERLAUBT_OFFEN.includes(n));
+    erwarte.gleich(neue, [], "neue Zeit-Literale außerhalb der dokumentierten Altlast");
+    erwarte.wahr(offen.length <= ERLAUBT_OFFEN.length, "offene fremde Dateien: " + offen.length + " (erlaubt höchstens " + ERLAUBT_OFFEN.length + ")");
   });
 });

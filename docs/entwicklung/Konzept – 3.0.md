@@ -1,10 +1,17 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Konzept, 3.0, Planung]
 erstellt: 2026-10-09
-status: Konzept — Plan mit Aufwand, Risiko und messbaren Fertig-Kriterien. Kein Wunschzettel; jede Zahl ist aus dem Bestand belegt oder selbst gemessen.
+aktualisiert: 2026-10-31
+status: Konzept — Plan mit Aufwand, Risiko und messbaren Fertig-Kriterien. Ist-Zahlen in §1 sind Stand 09.10.2026 (Fassung 2.0); der heutige Stand (2.9.0) steht in §1a und in docs/STAND.md. Kein Wunschzettel.
 ---
 
 # Konzept – Netzwerk-Labor 3.0
+
+> **Stand-Banner (31.10.2026).** Dieses Konzept wurde am **09.10.2026** gegen die damals
+> ausgelieferte **Fassung 2.0** geschrieben. Alle Ist-Zahlen in §1 und alle unmarkierten
+> Messwerte in §2–§6 sind **Stand 09.10.2026**; sie stehen hier als Planungsgrundlage und
+> sind **nicht** der heutige Stand. Was am **31.10.2026** in Fassung **2.9.0** gemessen ist,
+> steht in **§1a**; die einzige Zahlenquelle ist [`docs/STAND.md`](../STAND.md).
 
 > **Wie dieses Dokument zu lesen ist.** Es beschreibt **fünf Säulen**, jede mit Ist-Stand (gemessen),
 > Aufwand in Sitzungen, Risiko und einem **messbaren** Fertig-Kriterium — und am Ende, was ausdrücklich
@@ -17,7 +24,7 @@ status: Konzept — Plan mit Aufwand, Risiko und messbaren Fertig-Kriterien. Kei
 verlässlicher im Ablauf:** Inhalte, die nicht ausgehen, eine Lehrkraft, die sieht, *wo* es hakt (ohne
 jemanden zu bewerten), und Server und QR nur dort, wo sie den Ablauf wirklich tragen.
 
-## 1 · Was 2.0 heute ist (gemessen)
+## 1 · Was 2.0 am 09.10.2026 war (gemessen — historisch)
 
 | Größe | Stand | Quelle |
 |---|---|---|
@@ -40,7 +47,38 @@ jemanden zu bewerten), und Server und QR nur dort, wo sie den Ablauf wirklich tr
 20 Geräten**, kein Klassennetz, keine Firewall-Freigabe, keinen Browser-Test des Servers (C § 9). Alles, was
 3.0 über Unterricht behauptet, muss zuerst **messbar** werden.
 
+## 1a · Was 2.9.0 am 31.10.2026 ist (gemessen)
+
+Die einzige Zahlenquelle ist `docs/STAND.md` — dieser Abschnitt zitiert sie nur.
+Selbst nachgezählt wurden hier zusätzlich nur die **21** Git-Tags (`git tag --list`) und das
+Zeilenende von `src/stil/inspektor.css` (`git ls-files --eol`: `i/lf w/lf`).
+
+| Größe | Stand 2.9.0 | Herkunft |
+|---|---|---|
+| Fassung / Android-Bauzählung | **2.9.0** / `VERSION_CODE = 20901` | STAND.md |
+| Tests | **1.049/1.049 grün**, **0** übersprungen, **118** Testdateien, **98** headless Module (Exit 0) | STAND.md |
+| Bau-Module / `src/` | **143** Module (**98** headless) / **142** Dateien, **41.630** Zeilen | STAND.md |
+| Einzeldatei | **4.080.274 B**, SHA256 `49FC…D89E`; `docs/index.html` und `Netzwerk-Labor.html` byte-gleich | STAND.md |
+| Handtickets / klassenraum-adressierbar | **76** (davon **4** Projekte) / **58** — **18** nicht per Code aufrufbar | STAND.md (Ausnahme „Klassenraum-Codec") |
+| Inhalte | **150** Minis · **55** Fehlerinjektoren · **52** Trainings · **37** Wiki-Seiten · **30** Fertigkeiten · **17** Abzeichen · **82** Fehlertexte · **7** Kunden · **6** Karrierestufen | STAND.md |
+| Doku | **66** HTML-Seiten aus **65** Markdown-Quellen, **283** relative Verweise, **0** tot | STAND.md |
+| Git-Tags | **21** (`endversion-1.0` … `v2.9.0`) | eigene Messung |
+
+**Was seit dem 09.10.2026 dazukam** (Differenz der belegten Stände; die **linke** Zahl ist der
+09.10.-Stand aus §1, die **rechte** der 31.10.-Stand aus §1a): **+316** Tests (733 → 1.049),
+**+18** Handtickets (58 → 76), **+58** Minis (92 → 150), **+16** Fehlerinjektoren (39 → 55),
+**+18** Trainings (34 → 52), **+8** Wiki-Seiten (29 → 37). Das ist vor allem
+**Säule 2**; die Säulen 1, 3 und 5 sind davon nur teilweise berührt (Einordnung: der 3.0-Audit
+`berichte/vision.md` der Vorbereitungssitzung, dort § 3.1 „Säulen-Abgleich").
+
+**Nicht in `STAND.md` — und deshalb hier ausdrücklich nicht als Zahl behauptet:** Hilfe-Vorschläge,
+Wiki-Abschnitte, Menüprobe- und Rauchtest-Zahlen. Sie werden bei Bedarf neu gemessen, nicht abgeschrieben.
+
 ## 2 · Die fünf Säulen
+
+> **Lesehilfe:** Der Fließtext je Säule ist der **Plan vom 09.10.2026** (Ist-Stand, Messwerte,
+> „Fertig, wenn"-Zahlen). Unter jeder Säule steht **Stand 2.9.0 (31.10.2026)** — was davon
+> heute erledigt, offen oder anders ist. Die Aufwände bleiben Schätzungen von damals.
 
 ### Säule 1 — Unterricht mit 20 Azubis
 
@@ -80,11 +118,30 @@ Geräten beweist die Software, **nicht** das Klassennetz.
 * Zwei Sitzungen sind gleichzeitig ablegbar; ein Export enthält **beide**, und ein Import stellt **beide** her.
 * `python tools/menueprobe.py --datei web/index.html --lauf` bleibt **45/0**, R12 `klasse` **6/6**.
 
+**Stand 2.9.0 (31.10.2026) — selbst an Code und Test gelesen.**
+* Der **Trockenlauf mit 20 ist da:** `tests/klassen-20.test.js` prüft 20 Geräte aus einem Code,
+  die Ampel **20 von 20** und 20 verschiedene Plätze (`:87–131`).
+* **Doppelplatz:** Der zweite Code wird inzwischen **mit Grund `platz-schon-da` abgewiesen**
+  (`tests/klassen-20.test.js:150–173`) — die Formulierung „verschwindet ohne Meldung" aus dem
+  09.10.-Befund ist damit überholt.
+* **Still geklemmt** wird nur noch im **Codec** (`platz 32 → 31`, `tests/klassen-20.test.js:134–140`);
+  die **API weist Platz 32 ab**, bevor ein Code entsteht (`:141–146`).
+* **Zwei Sitzungen verdrängen sich weiterhin:** `sitzung` ist ein Einzelfeld im Store
+  (`src/spiel/klassenraum.js:125`); der Test dokumentiert die Verdrängung ausdrücklich als
+  Befund für 3.0 (`tests/klassen-20.test.js:176–199`). Der Vertrag für 3.0 (mehrere Sitzungen,
+  eine aktive) steht in `docs/Architektur.md` § 12.1/§ 12.2 — der Code folgt in W1 (KLR-01a).
+* **Platz-/Abgabeübersicht und Stundenbezug:** die Lehrkräfte-Ansicht hat Ampel und anonyme
+  Fortschrittszeile (`src/ui/klassenraum.js:74–118`), aber **keine Platzliste** und **keinen
+  Restzeit-Bezug** (selbst gesucht: 0 Treffer für `Platzliste`/`Restzeit` im Klassenraum-Modul);
+  das bleibt 3.0 (Säule 1).
+
 ### Säule 2 — Inhalte, die nicht ausgehen
 
-**Ist-Stand.** 58 Handaufträge, 27 Fertigkeiten, 39 Injektoren, 34 Trainingskarten, 92 Minis, 44
-Hilfe-Vorschläge, 29 Wiki-Seiten. Die Rotation sorgt dafür, dass sich Minis nicht schnell wiederholen; der
-Mischer hält offene Inhalte aus dem Topf.
+**Ist-Stand (Stand 2.9.0, 31.10.2026).** **76** Handaufträge (**58** davon klassenraum-adressierbar),
+**30** Fertigkeiten, **55** Injektoren, **52** Trainingskarten, **150** Minis, **37** Wiki-Seiten —
+alle Zahlen aus `docs/STAND.md`. Die Rotation sorgt dafür, dass sich Minis nicht schnell
+wiederholen; der Mischer hält offene Inhalte aus dem Topf.
+*(Stand 09.10.2026: die damaligen Zahlen stehen in §1.)*
 
 **Was fehlt.** Nicht „mehr vom Gleichen", sondern **Dichte je Fertigkeit**: die dünnsten Fertigkeiten haben
 wenige Minis und wenige Injektoren; ein Azubi, der zwei Stunden am selben Thema arbeitet, sieht heute
@@ -109,13 +166,26 @@ neue Karte muss ohne Lösungstext auskommen (Wächter `miniOhneLoesung`).
 Wiki-Seite mit **≥ 4** Abschnitten; ein Test zählt das je Fertigkeit auf (`tests/inhaltsdichte.test.js`);
 `tests/tickets-generator.test.js` fährt weiter jeden Injektor × Vorlage × 8 Seeds; Testlauf bleibt grün.
 
+**Stand 2.9.0 (31.10.2026) — selbst an Test und STAND.md geprüft.**
+* Der Ausbau ist **geliefert:** die Differenz der belegten Stände (§1 → §1a) sind **+18**
+  Handtickets, **+58** Minis, **+16** Fehlerinjektoren, **+18** Trainings und **+8** Wiki-Seiten.
+* Das Dichte-Gate prüft je Fertigkeit **acht Zeilen** mit harter Grenze Wiki **≥ 3** Abschnitte,
+  Minis **≥ 3**, Training **≥ 1** (zwei benannte Ausnahmen), Handticket, Hilfe, Senior und
+  Prüfung (`tests/inhaltsdichte.test.js:107–126`); **Wiki ≥ 4** wird nur protokolliert
+  (`:153–154`) und **ein Injektor je Fertigkeit** ist gar keine Zeile der Matrix — beides ist
+  damit noch **nicht** harte Zusage.
+* Die Codec-Schere wächst mit: **18** der **76** Handtickets sind nicht klassenraum-adressierbar
+  (`docs/STAND.md`, Ausnahme „Klassenraum-Codec"; Vertrag: `docs/Architektur.md` § 12.8,
+  Formatwechsel erst **3.1**).
+
 ### Säule 3 — Stufe C und D: ehrlich eingeordnet
 
-**Ist-Stand.** Der **Server (C2)** ist fertig gebaut: eigenständiges Rust-Binary, **322.560 B**, **ohne jede
-Abhängigkeit**, zwei Endpunkte (`GET /liste`, `POST /ergebnis`), Portvorgabe **47112** (Bereich
-47112–47121), Bind **0.0.0.0**, CORS `*` mit Preflight und `Allow-Private-Network`, Datensparsamkeit
-**erzwungen** (der Server transportiert nur Codes, deutet nichts). **In der `.exe` (C1) ist er nicht** —
-dort fehlen drei Änderungen in `main.rs` und eine neue Datei; `shell/` wurde bewusst nicht angefasst.
+**Ist-Stand (Stand 09.10.2026).** Der **Server (C2)** ist fertig gebaut: eigenständiges Rust-Binary
+(damals **322.560 B**, §1), **ohne jede Abhängigkeit**, zwei Endpunkte (`GET /liste`, `POST /ergebnis`),
+Portvorgabe **47112** (Bereich 47112–47121), Bind **0.0.0.0**, CORS `*` mit Preflight und
+`Allow-Private-Network`, Datensparsamkeit **erzwungen** (der Server transportiert nur Codes, deutet
+nichts). **In der `.exe` (C1) ist er nicht** — dort fehlen drei Änderungen in `main.rs` und eine neue
+Datei; `shell/` wurde bewusst nicht angefasst.
 
 **Was er wirklich bringt.** Die Lehrkraft muss 20 Ergebnis-Codes **nicht mehr abtippen**; die Ampel füllt
 sich beim Abgeben. Das ist der einzige echte Gewinn — und er wird erst ab etwa **15–20** Azubis größer als
@@ -132,8 +202,11 @@ der Aufwand des Abtippens (die Block-Eingabe schafft heute viele Codes in einem 
   werden; kein Keep-Alive (C § 8.9).
 * **Nur Desktop:** Browser- und Android-Fassung können weder Server noch QR (C § 4.6, § 5.6).
 
-**QR (D)** ist billiger: der Encoder ist gebaut und getestet (v1–4, Stufe H, SVG). Es fehlt die Einbettung
-in die Lehrkräfte-Ansicht (Knopf, Größe für den Beamer, Ruhezone) — **0,5–1 Sitzung**.
+**QR (D)** ist billiger: der Encoder ist **als Probe** gebaut und getestet (Rust
+`tools/klassenraum-probe/C-qr-rust/`, dazu Python-Vergleichsproben unter `C-qr-python/`).
+Es fehlt die Einbettung in die Lehrkräfte-Ansicht (Knopf, Größe für den Beamer, Ruhezone) —
+**0,5–1 Sitzung (Schätzung 09.10.2026)**. Der 3.0-Vertrag ordnet Server und QR inzwischen **3.1** zu
+(`docs/Architektur.md` § 12.6/§ 12.7).
 
 **Aufwand: 2–4 Sitzungen** (C1 in der `.exe` 1–2 · QR-Oberfläche 0,5–1 · Messungen: Firewall, Browser,
 echtes Klassennetz 1).
@@ -155,11 +228,24 @@ gemessen), niedrig für D (reine Rechnung, bereits differenzgetestet). Der klass
 Auftrag; A sieht B **ohne Zutun** in der Ampel; die Oberfläche zeigt die tatsächliche Portnummer; „Server
 aus" lässt A und B unverändert weiterarbeiten; `cargo test` 10/10 und die 20 HTTP-Proben bleiben grün.
 
+**Stand 2.9.0 (31.10.2026) — selbst im Repo geprüft.**
+* **C2** liegt weiterhin als eigenes Cargo-Projekt vor (`tools/klassenraum/`); das gebaute Binary ist
+  nicht versioniert, lag aber am 31.10.2026 unter `tools/klassenraum/target/release/klassenraum.exe`
+  (**322.560 B**, selbst gemessen — dieselbe Größe wie §1).
+* **C1 fehlt:** `shell/src-tauri/src/` enthält `main.rs`, `fenster.rs`, `speicher.rs`, `tray.rs` —
+  **kein** Server-Modul (selbst gesehen). Der Vertrag sagt es ausdrücklich: § 12.6 ist **3.1**.
+* **QR ist nicht im Produkt:** `src/` enthält **keinen** QR-Encoder (selbst gesucht; der einzige
+  Encoder ist die Probe `tools/klassenraum-probe/C-qr-rust/`). § 12.7 ist **3.1**.
+* Der Schalter „Klassenraum-Server" in den Einstellungen ist im 2.9.0-Stand **wirkungslos**: der Wert
+  `einst.klassenraumServer` wird nur von der Schalter-Zeile selbst gelesen (`src/ui/klassenraum.js:479–499`,
+  selbst gesucht: nur 2 Treffer in `src/`). VIS-04 entscheidet in 3.0, ob der Schalter entfernt oder
+  ehrlich umtextet wird.
+
 ### Säule 4 — Technische Schulden, die 3.0 erben würde
 
-**Ist-Stand (gemessen).** `tests/stil-stand.json` friert ein: **R1 22 · R2 113 · R3 195 · R4 514**
-(Farb-Literale, Radien, Schrift- und Abstandswerte außerhalb der Skalen) — R5–R12 stehen auf **0**.
-Dokumentiert ist außerdem **ein R8-Verlust**: zwei Selektoren (`.ger[class*="jc-"] .gb`,
+**Ist-Stand am 09.10.2026 (gemessen).** `tests/stil-stand.json` fror damals ein: **R1 22 · R2 113 ·
+R3 195 · R4 514** (Farb-Literale, Radien, Schrift- und Abstandswerte außerhalb der Skalen) —
+R5–R12 standen auf **0**. Dokumentiert war außerdem **ein R8-Verlust**: zwei Selektoren (`.ger[class*="jc-"] .gb`,
 `.kabel[class*="jc-"] *`) haben im ganzen `src/stil/` **keine Regel** mehr, obwohl `UI.juice` sie anspricht
 — die Animationen laufen für „Bewegung reduzieren" jetzt in 1 ms statt gar nicht; sichtbar ist das
 **nicht gemessen**. Dazu: **`inspektor.css` ist für git binär** (`i/-text w/-text`, 149 CRLF-Zeilen) — eine
@@ -187,6 +273,20 @@ prüft, dass nichts Wirkung verloren hat (die Output-Runde hat sieben solcher Pr
 binär) · der R8-Fall hat eine Regel und einen Test, der sie prüft · `ethos.py` meldet R1–R4 **unter** dem
 heutigen Stand und die neuen Werte stehen in `stil-stand.json` · `ethos.py --dom` läuft im Prüflauf und
 liefert eine Zahl statt „NICHT GEMESSEN".
+
+**Stand 2.9.0 (31.10.2026) — selbst gemessen.**
+* **`inspektor.css` ist Text, nicht binär:** `git ls-files --eol src/stil/inspektor.css` meldet
+  `i/lf w/lf` — die Falle für Zeilenenden-Prüfungen ist **weg**.
+* **Der R8-Verlust ist behoben:** die zwei Selektoren haben wieder Regeln (`src/stil/juice.css:9–28`),
+  und ein Test hält sie fest (`tests/ui-bewegung-aus.test.js:130`).
+* **Die Messlatte wurde neu eingefroren:** `tests/stil-stand.json` (selbst gelesen am 31.10.2026)
+  nennt jetzt R1 **24** · R2 **20** · R3 **4** · R4 **169** · R6 **7** · R9 **62** · R10 **42**;
+  R5 · R7 · R8 · R11 · R12 = 0. Die Zahlen sind **nicht 1:1** mit dem 09.10.-Stand vergleichbar
+  (die Regeln wurden seither umgestellt); den laufenden Ist-Stand misst `python tools/ethos.py` —
+  hier wird er nicht abgeschrieben.
+* **R12 bleibt ungemessen:** der 2.9.0-Abschnitt im CHANGELOG nennt `--dom` ausdrücklich als
+  „nicht gemessen" (`docs/CHANGELOG.md`, Abschnitt 2.9.0). Der Messweg ist weiter offen.
+* `.kl-lehrer`/`.kl-schueler` `overflow`: **nicht geprüft** (unverändert offen).
 
 ### Säule 5 — Diagnose ohne Bewertung („wer hängt wo")
 
@@ -221,7 +321,20 @@ eindeutig; ein Test muss sie schützen, nicht eine Vereinbarung.
 Rang, Punktzahl) im DOM der Ansicht vorkommt (`tests/klassen-diagnose.test.js`, mit Gegenprobe: ein
 eingeschmuggeltes Namensfeld macht den Test rot).
 
+**Stand 2.9.0 (31.10.2026) — selbst im Code geprüft.**
+* **H-Code und „Ich hänge" sind gebaut:** der Hilfecode (Architektur § 12.5) wird erkannt, bevor er in
+  den Ergebnissatz läuft (`src/ui/klassenraum.js:55–61, 235–245`), und der Knopf „Ich hänge" erzeugt
+  und kopiert ihn (`:398–413`); die Lehrkraft tippt ihn in ihr bestehendes Code-Feld.
+* **Die anonyme Fortschrittszeile ist gebaut:** „offen / in den letzten 5 Minuten / letzte Abgabe"
+  ausschließlich als Zahlen, ohne Namen, Rang oder Sterne je Person (`src/ui/klassenraum.js:66–118`).
+* **Das Ziel-Histogramm fehlt weiterhin:** die Zeile zählt Abgaben und offene Plätze, nicht
+  „Schritt 3 · 7 von 20 offen"; ein `tests/klassen-diagnose.test.js` gibt es **nicht** (selbst geprüft).
+  Die Zusage aus „Fertig, wenn" ist damit offen.
+
 ## 3 · Aufwand in einer Tabelle
+
+> **Schätzungen Stand 09.10.2026** — keine Messungen. Sie bleiben als Planungsgrundlage stehen;
+> die Ist-Seite steht in §1a.
 
 | Säule | Aufwand (Sitzungen) | davon unverzichtbar |
 |---|---|---|
@@ -238,22 +351,35 @@ eingeschmuggeltes Namensfeld macht den Test rot).
 kleinen Säulen mit dem Tempo dieser Sitzung an **einem** Tag zu schaffen, mit Sorgfalt und echten Messungen
 aber nicht. Der größte Unsicherheitsfaktor ist Säule 2 (Handaufträge haben **keinen** Messanker).
 
-## 4 · Reihenfolge (Vorschlag)
+## 4 · Reihenfolge (Vorschlag, Stand 09.10.2026)
 
 1. **Schulden zuerst** (1,5–3 Sitzungen): billig, senkt das Risiko jeder späteren Runde, und
    `inspektor.css` ist eine Falle, die schon heute jede Zeilenenden-Prüfung täuscht.
+   *Stand 2.9.0: `inspektor.css` ist Text, der R8-Fall hat Regel und Test — **offen** bleibt der
+   R12-Messweg (Säule 4).*
 2. **Trockenlauf mit 20** (1 Sitzung): bevor irgendwer von „20 Azubis" redet, muss die Software das
    können — als Test, nicht als Behauptung.
+   *Stand 2.9.0: Test ist da; Doppelplatz und API-Grenze sind eingegrenzt, die Sitzungsverwaltung
+   bleibt offen (Säule 1).*
 3. **Inhalte** (4–7 Sitzungen): der größte Hebel für den Unterricht; hier entscheidet sich, ob das Labor
    nach zwei Stunden noch etwas zu bieten hat.
+   *Stand 2.9.0: teilweise geliefert; die Dichte-Zusage je Fertigkeit (Wiki ≥ 4, ≥ 1 Injektor) ist
+   noch nicht hart geprüft (Säule 2).*
 4. **Diagnose Weg A** (1–2 Sitzungen): der Nutzen im Unterricht ist größer als der des Servers.
+   *Stand 2.9.0: H-Code und anonyme Fortschrittszeile sind gebaut; Ziel-Histogramm und DoD-Test
+   fehlen (Säule 5).*
 5. **Stufe C/D** (2–4 Sitzungen): erst wenn ein Raum mit ≥ 15 Geräten und ein gemessenes Klassennetz
    vorhanden sind. Vorher lohnt nur **QR** (0,5–1 Sitzung) — es macht den Code sichtbar, ohne Prozess,
    Port oder Firewall.
+   *Stand 2.9.0/3.0-Vertrag: C2 ist als Binary gebaut, aber nicht im Produkt; QR nur als Probe.
+   Der 3.0-Vertrag führt Server und QR als **3.1** (`docs/Architektur.md` § 12.6/§ 12.7).*
 6. **Danach**: Fassung ziehen (3.0.0), Erzeugnisse, Veröffentlichung — nach dem Protokoll in
    [`SITZUNGSABSCHLUSS.md`](../SITZUNGSABSCHLUSS.md).
 
 ## 5 · Was ausdrücklich NICHT in 3.0 gehört
+
+> **Gilt unverändert (Stand 2.9.0).** Der 3.0-Vertrag bestätigt die Liste; der Klassenraum-Kern
+> („keine Bewertung") steht ausdrücklich in `docs/Architektur.md` § 12.
 
 * **Keine Bewertung.** Keine Noten, Punkte, Rangfolgen, Bestenlisten, Vergleiche zwischen Azubis — nicht
   einmal „freiwillig". Die Entscheidung des Nutzers vom 09.10.2026 steht.
@@ -287,14 +413,27 @@ aber nicht. Der größte Unsicherheitsfaktor ist Säule 2 (Handaufträge haben *
 * **Ob die R1–R4-Ratsche den Code auf Dauer verbessert oder nur bremst** — eine Annahme, kein Messwert.
 * **Ob „wer hängt wo" didaktisch hilft** — die Anzeige ist messbar (Test), ihr Nutzen im Unterricht nicht.
 
+**Stand 2.9.0 (31.10.2026):** Keine dieser Grenzen ist seither gemessen. Neu dazugekommen sind nur
+der gebaute C2-Server (Säule 3) und der H-Code samt anonymer Fortschrittszeile (Säule 5) — ein
+Klassennetz, eine Firewall-Freigabe, ein Browser-Test des Servers und eine echte Unterrichtsstunde
+bleiben **nicht geprüft**.
+
 ## 7 · Belege
 
-* Zahlen aus dieser Sitzung: [`Übergabe – Stand 2.0-Fundament.md`](<Übergabe – Stand 2.0-Fundament.md>),
+* **Zahlen Stand 2.9.0:** `docs/STAND.md` — die einzige Zahlenquelle; §1a zitiert sie.
+  Am 31.10.2026 selbst nachgezählt: **21** Git-Tags (`git tag --list`) und `i/lf w/lf` für
+  `src/stil/inspektor.css` (`git ls-files --eol`).
+* **Zahlen Stand 09.10.2026 (2.0):** [`Übergabe – Stand 2.0-Fundament.md`](<Übergabe – Stand 2.0-Fundament.md>),
   [`CHANGELOG.md`](../CHANGELOG.md) (drei Abschnitte zu 2.0.0), [`INHALT.md`](../INHALT.md).
-* Verträge: [`Architektur.md`](../Architektur.md) § 12 (Klassenraum), § 12.1 (E1–E8), § 12.2 (L1–L5).
+* Verträge: [`Architektur.md`](../Architektur.md) § 12 (Klassenraum) mit **§ 12.1 Datenform**,
+  **§ 12.2 API**, **§ 12.3 Fehlerformen**, **§ 12.4 Netzkennwert**, **§ 12.5 Hilfecode** und
+  **§ 12.8 Grenzen**; die Leitungsentscheidungen E1 und L1–L7 stehen im einleitenden Text von § 12
+  und in der Abgrenzung am Ende. **Server (§ 12.6) und QR (§ 12.7) sind 3.1** und im Produkt nicht
+  gebaut.
 * Stufe C/D: [`Klassenraum/C – Rust, Live und QR.md`](<Klassenraum/C – Rust, Live und QR.md>) § 0 (Kurzfassung),
   § 3.7 (Datensparsamkeit), § 4.5 (Standard aus), § 8 (offene Punkte), § 9 (nicht geprüft).
 * Altlasten: [`Befund – Output-Runde.md`](<Befund – Output-Runde.md>) § 1–§ 3, § 11–§ 13;
   `tests/stil-stand.json` (eingefrorener Stand).
-* Entscheidung des Nutzers: [`Architektur.md`](../Architektur.md) § 12.1 („Ein Klassenraum-Auftrag wird
-  NICHT bewertet").
+* **Entscheidung des Nutzers (keine Bewertung):** [`Architektur.md`](../Architektur.md) § 12 — die
+  Tabelle im Kern sagt „Bewertung: **keine** — ausdrücklich Nutzerentscheidung 09.10.2026"; § 12.8
+  begrenzt die Auswertung ausdrücklich auf die Ampel („keine Auswertung über die Ampel hinaus").

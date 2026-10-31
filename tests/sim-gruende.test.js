@@ -83,7 +83,7 @@ gruppe("Sim Gründe", () => {
     Modell.setzen(n, "sw1", "ports.Gi0/1.trunkErlaubt", "1,10,20"); Modell.setzen(n, "sw2", "ports.Gi0/1.trunkErlaubt", "all");
     erwarte.wahr(ping(n, "pc1", "192.168.10.20").ok, "nach dem Freigeben");
   });
-  pruefe("NATIVE_MISMATCH: CDP-Hinweis, ungetaggt landet im Native VLAN der Gegenseite", () => {
+  pruefe("NATIVE_MISMATCH: Warnung bleibt in der Trace, ist aber keine Ursache (SIM-02)", () => {
     const t = T(), bau = vlanPc2 => {
       const n = Modell.neu();
       Modell.geraet(n, "switch", {id: "sw1", name: "SW1"}); Modell.geraet(n, "switch", {id: "sw2", name: "SW2"});
@@ -97,7 +97,23 @@ gruppe("Sim Gründe", () => {
     const leck = ping(bau(99), "pc1", "192.168.1.20");
     erwarte.wahr(leck.ok, "VLAN 1 auf SW1 landet in VLAN 99 auf SW2 (wie echt)");
     erwarte.wahr(hatGrund(leck.trace, "NATIVE_MISMATCH"), "Hinweis in der Trace");
-    grund(ping(bau(1), "pc1", "192.168.1.20"), "NATIVE_MISMATCH");
+    /* Warnung ≠ Ursache (Architektur § 5.2): nicht existierendes Ziel ⇒ ARP_NO_REPLY */
+    const keinZiel = ping(bau(1), "pc1", "192.168.1.99");
+    grund(keinZiel, "ARP_NO_REPLY");
+    erwarte.gleich(Sim.erklaere(keinZiel.trace).grund, "ARP_NO_REPLY", "erklaere nennt nicht die CDP-Warnung");
+    const warnung = keinZiel.trace.ereignisse.find(e => e.grund === "NATIVE_MISMATCH");
+    erwarte.gleich([warnung.art, warnung.warnung], ["info", true], "CDP-Hinweis bleibt vollständig in der Trace");
+    /* Ziel existiert, liegt durch den Mismatch aber im falschen VLAN ⇒ entscheidend ist der Verwerfen-Punkt */
+    const falschesVlan = ping(bau(1), "pc1", "192.168.1.20");
+    grund(falschesVlan, "DROP_VLAN");
+    const s = Sim.erklaere(falschesVlan.trace);
+    erwarte.gleich([s.grund, s.geraet, s.port], ["DROP_VLAN", "sw2", "Fa0/1"]);
+    /* Architektur § 5.2 nennt Sim.stelle als Teil der Ursachensuche: Warnungen werden übersprungen */
+    const L = {ev: [{n: 1, art: "info", grund: "NATIVE_MISMATCH", warnung: true, text: "Hinweis"},
+                    {n: 2, art: "verwerfen", grund: "ARP_NO_REPLY", text: "Ursache"}]};
+    erwarte.gleich(typeof Sim.stelle, "function", "Sim.stelle ist laut § 5.2 Teil der Ursachensuche");
+    erwarte.gleich(Sim.stelle(L, 0, "ARP_NO_REPLY").n, 2, "Sim.stelle findet die Ursache");
+    erwarte.gleich(Sim.stelle(L, 0, null).n, 2, "Sim.stelle überspringt die Warnung");
   });
   pruefe("NO_GATEWAY und GW_WRONG_SUBNET beim Absender (Allgemeiner Fehler)", () => {
     const n = T().lan(); Modell.setzen(n, "pc1", "if.eth0.gw", "");
@@ -336,7 +352,9 @@ gruppe("Sim Gründe", () => {
     const PROTOS = ["ARP", "ICMP", "TCP", "UDP", "DHCP", "DNS", "HTTP", null];
     let t = -1;
     tr.ereignisse.forEach((e, i) => {
-      erwarte.gleich(Object.keys(e), ["n", "t", "art", "geraet", "port", "nach", "frame", "proto", "grund", "text"]);
+      const schluessel = Object.keys(e).filter(k => k !== "warnung");
+      erwarte.gleich(schluessel, ["n", "t", "art", "geraet", "port", "nach", "frame", "proto", "grund", "text"]);
+      if ("warnung" in e) erwarte.gleich(e.warnung, true, "warnung ist nur als true dokumentiert (§ 5.2)");
       erwarte.gleich(e.n, i + 1); erwarte.wahr(e.t >= t, "Zeit steigt"); t = e.t;
       erwarte.wahr(ARTEN.includes(e.art) && PROTOS.includes(e.proto), e.art + "/" + e.proto);
       erwarte.wahr(typeof e.text === "string" && e.text.length > 5, "Text");

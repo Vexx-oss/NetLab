@@ -340,6 +340,15 @@ const snUiKarteMit = (el, text) => snUiModulKarten(el).find(k => String(k.textCo
 const snUiAktivesRegister = el => (snUiRegister(el).find(b => b.getAttribute("aria-selected") === "true") || {}).textContent || "";
 /* B2: Fokusstand des DOM-Ersatzes (focus() merkt das Element in SN_UI_FOKUS). */
 const snUiFokus = () => SN_UI_FOKUS.el;
+/* Findet ein Element über die id – der DOM-Ersatz kennt nur Klassen-Selektoren. */
+function snUiById(el, id){
+  for (const k of (el && el.kinder) || []) {
+    if (k && typeof k === "object" && k.attrs && k.attrs.id === id) return k;
+    const t = snUiById(k, id);
+    if (t) return t;
+  }
+  return null;
+}
 /* S3: Anzahl Kartenrahmen (.bn-k) um ein Element, das Element selbst mitgezählt. */
 function snUiRahmen(el){
   let n = 0, p = el;
@@ -589,6 +598,131 @@ gruppe("UI: Abteilung Subnetting", () => {
     erwarte.enthaelt(c.querySelector(".sn-ergebnis").textContent, "Bestanden");
     erwarte.wahr(spiel._rufe.antwort.some(x => x.richtig === true), "richtige Antworten werden als richtig verbucht");
     erwarte.wahr(spiel._rufe.modulSetzen.some(x => x.id === modul.id && x.status === "geuebt"), "nach der Übungsrunde steht das Modul auf geübt");
+  });
+
+  /* UIL-01 (Bericht frontend-lernen): Die visuelle Hilfe in der Runde zeigte die Lösung und buchte
+     keine Hilfe. Vertrag: Architektur § 26:803-804 – Werkzeuge, die die Lösung zeigen, verbuchen
+     {hilfe:true}. Deshalb ist die Hilfe verdeckt; erst „Werte zeigen“ hängt das Werkzeug ein und
+     die Antwort zählt als mit Hilfe geübt. */
+  pruefe("UIL-01: Übungshilfe ist verdeckt – erst „Werte zeigen“ bucht Hilfe (DOM-Test)" + SN_UI_ZUSATZ, () => {
+    if (!SN_UI_KANN_LADEN) return;
+    const plan = snUiLehrplanStub();
+    const spiel = snUiSpielStub({niveau: "E"});
+    const werk = snUiWerkzeugStub();
+    /* r-design P2: Reihenfolge und Wortlaut beobachten – was gilt im Moment des Einbaus? */
+    const echtZeichnen = werk.api.zeichnen;
+    let beimEinbau = null, rundeRef = null, knopfRef = null;
+    werk.api.zeichnen = function(container, id, opts){
+      beimEinbau = {
+        hilfe: rundeRef ? rundeRef.hilfeGezeigt : null,
+        text: knopfRef ? String(knopfRef.textContent) : null,
+        expanded: knopfRef ? knopfRef.getAttribute("aria-expanded") : null,
+      };
+      return echtZeichnen.call(werk.api, container, id, opts);
+    };
+    const p = snUiPruefstand({daten: {subnetzLehrplan: plan}, spiel, werkzeuge: werk.api});
+    p.startHaken[0]();
+    const c = snUiKnoten("div");
+    p.registriert[0].def.zeigen(c);
+    const modul = plan.module[0];
+    snUiKarteMit(c, modul.titel).click();
+    const blockVorher = werk.rufe.zeichnen.filter(x => x.id === "blocklineal").length;   /* Lektion nutzt bitlabor */
+    snUiKnopfPflicht(c, "Übungsrunde starten").click();
+    const runde = p.subnetz.runde;
+    rundeRef = runde;
+    erwarte.wahr(!!runde, "die Runde läuft");
+    const aufgabe = runde.aufgaben[0];
+    const soll = String(aufgabe.loesung && aufgabe.loesung.wert != null ? aufgabe.loesung.wert : "").trim();
+    erwarte.wahr(!!soll, "die Testaufgabe hat einen Sollwert");
+    /* Vor dem Prüfen: kein Werkzeug-DOM und kein Sollwert im Aufgabenblock. */
+    erwarte.gleich(werk.rufe.zeichnen.filter(x => x.id === "blocklineal").length, blockVorher, "die visuelle Hilfe wird vor der Antwort nicht eingebunden");
+    const flaeche = c.querySelector(".sn-aufgabe");
+    erwarte.wahr(!!flaeche, "der Aufgabenblock steht");
+    erwarte.falsch(String(flaeche.textContent).includes(soll), "der Sollwert steht nicht im Aufgabenblock: " + soll);
+    erwarte.gleich(flaeche.querySelectorAll(".stub-werkzeug").length, 0, "kein Werkzeug-DOM vor dem Aufdecken");
+    /* Der Aufdecken-Knopf ist ein echter Knopf, 44 px über die bestehende Subnetting-Regel. */
+    const aufdecken = snUiKnopfPflicht(flaeche, "Werte zeigen");
+    erwarte.gleich(aufdecken.tag, "button", "„Werte zeigen“ ist ein echter Knopf");
+    erwarte.gleich(aufdecken.getAttribute("aria-expanded"), "false", "aria-expanded startet auf false");
+    /* (a) aria-controls muss auf die eingehängte Werte-Fläche zeigen (r-design P2). */
+    const zielId = aufdecken.getAttribute("aria-controls");
+    erwarte.wahr(!!zielId, "aria-controls ist gesetzt");
+    const ziel = snUiById(flaeche, zielId);
+    erwarte.wahr(!!ziel, "das aria-controls-Ziel steht im DOM");
+    erwarte.gleich(ziel && ziel.children.length, 0, "vor dem Aufdecken ist die Werte-Fläche leer");
+    /* (c) Vor der Tat steht kein Buchungsversprechen im Knopf oder Status. */
+    erwarte.falsch(String(aufdecken.textContent).includes("als Hilfe verbucht"), "der Knopf verspricht vor der Tat keine Buchung");
+    const statusVor = flaeche.querySelectorAll(".bn-meta").map(x => String(x.textContent)).join(" | ");
+    erwarte.falsch(statusVor.includes("als Hilfe verbucht"), "auch der Status verspricht vor der Tat keine Buchung");
+    erwarte.passt(snUiCss("src/stil/subnetz.css"), /\.sn-seite \.knopf\{min-height:44px\}/, "44-px-Regel für .knopf in der Subnetting-Ansicht");
+    knopfRef = aufdecken;
+    /* Aufdecken: genau ein Werkzeug mit dem Preset der Aufgabe, Hilfe erst danach gebucht. */
+    aufdecken.click();
+    erwarte.gleich(werk.rufe.zeichnen.filter(x => x.id === "blocklineal").length, blockVorher + 1, "erst der Klick hängt die visuelle Hilfe ein");
+    const montage = werk.rufe.zeichnen.at(-1);
+    erwarte.gleich(montage.id, "blocklineal", "die Hilfe passt zum Aufgabentyp (netzid → Blocklineal)");
+    erwarte.gleich(montage.opts.preset, aufgabe.visual.preset, "das Werkzeug bekommt das Preset der Aufgabe");
+    erwarte.gleich(montage.opts.kompakt, true, "kompakter Einbau");
+    /* (b) Erst der erfolgreiche Einbau bucht die Hilfe – im Moment des Einbaus ist sie noch nicht gesetzt. */
+    erwarte.gleich(beimEinbau && beimEinbau.hilfe, false, "während des Einbaus ist die Hilfe noch nicht gebucht (Reihenfolge)");
+    erwarte.gleich(beimEinbau && beimEinbau.expanded, "false", "während des Einbaus ist aria-expanded noch false");
+    /* (c) Der Wortlaut „als Hilfe verbucht“ erscheint erst nach Einbau und Buchung. */
+    erwarte.gleich(beimEinbau && beimEinbau.text, "Werte zeigen (zählt als Hilfe)", "während des Einbaus verspricht der Knopf keine Buchung");
+    erwarte.wahr(!!ziel && ziel.children.length === 1, "die Werte-Fläche trägt jetzt das Werkzeug");
+    erwarte.enthaelt(String(aufdecken.textContent), "als Hilfe verbucht", "erst nach dem Einbau nennt der Knopf die Buchung");
+    erwarte.gleich(runde.hilfeGezeigt, true, "Aufdecken ist als Hilfe vorgemerkt");
+    erwarte.gleich(flaeche.querySelectorAll(".stub-werkzeug").length, 1, "jetzt steht das Werkzeug im Aufgabenblock");
+    erwarte.gleich(aufdecken.getAttribute("aria-expanded"), "true", "aria-expanded ist nach dem Aufdecken true");
+    aufdecken.click();
+    erwarte.gleich(werk.rufe.zeichnen.filter(x => x.id === "blocklineal").length, blockVorher + 1, "der zweite Klick baut kein zweites Werkzeug");
+    /* Antwort danach: richtige Lösung, aber als Hilfe verbucht. */
+    const feld = c.querySelector(".sn-feld");
+    erwarte.wahr(!!feld, "das Antwortfeld steht");
+    feld.value = soll;
+    snUiKnopfPflicht(c, "Prüfen").click();
+    const antwort = spiel._rufe.antwort.at(-1);
+    erwarte.gleich(antwort && antwort.richtig, true, "die Lösung ist richtig");
+    erwarte.gleich(antwort && antwort.opt && antwort.opt.hilfe, true, "die mit Hilfe gesehene Antwort bucht {hilfe:true}");
+  });
+
+  /* r-design P2 (b): Schlägt der Werkzeug-Einbau fehl, darf keine Hilfe gebucht und nichts versprochen
+     werden. Der Fehlerpfad wird für die Dauer dieses Falls abgefangen, damit der Lauf sauber bleibt. */
+  pruefe("UIL-01: fehlgeschlagener Werkzeug-Einbau bucht KEINE Hilfe" + SN_UI_ZUSATZ, () => {
+    if (!SN_UI_KANN_LADEN) return;
+    const altError = console.error, gemeldet = [];
+    console.error = (...a) => { gemeldet.push(a); };
+    try {
+      const plan = snUiLehrplanStub();
+      const spiel = snUiSpielStub({niveau: "E"});
+      const kaputt = {liste: () => [], zeichnen: () => null};        /* Einbau schlägt fehl */
+      const p = snUiPruefstand({daten: {subnetzLehrplan: plan}, spiel, werkzeuge: kaputt});
+      p.startHaken[0]();
+      const c = snUiKnoten("div");
+      p.registriert[0].def.zeigen(c);
+      snUiKarteMit(c, plan.module[0].titel).click();
+      snUiKnopfPflicht(c, "Übungsrunde starten").click();
+      const runde = p.subnetz.runde;
+      const aufgabe = runde.aufgaben[0];
+      const soll = String(aufgabe.loesung && aufgabe.loesung.wert != null ? aufgabe.loesung.wert : "").trim();
+      const flaeche = c.querySelector(".sn-aufgabe");
+      const aufdecken = snUiKnopfPflicht(flaeche, "Werte zeigen");
+      aufdecken.click();
+      erwarte.gleich(runde.hilfeGezeigt, false, "ohne eingebautes Werkzeug wird keine Hilfe vermerkt");
+      erwarte.gleich(aufdecken.getAttribute("aria-expanded"), "false", "aria-expanded bleibt false");
+      const statusText = flaeche.querySelectorAll(".bn-meta").map(x => String(x.textContent)).join(" | ");
+      erwarte.enthaelt(statusText, "nicht einblenden", "der Status sagt ehrlich, dass es nicht ging");
+      erwarte.falsch(String(aufdecken.textContent).includes("als Hilfe verbucht"), "kein Buchungsversprechen im Knopf");
+      /* Antwortet der Azubi danach richtig, zählt das ohne Hilfe. */
+      const feld = c.querySelector(".sn-feld");
+      feld.value = soll;
+      snUiKnopfPflicht(c, "Prüfen").click();
+      const antwort = spiel._rufe.antwort.at(-1);
+      erwarte.gleich(antwort && antwort.richtig, true, "die Lösung ist richtig");
+      erwarte.gleich(antwort && antwort.opt && antwort.opt.hilfe, false, "ohne Werte keine Hilfe-Buchung");
+      erwarte.wahr(gemeldet.length >= 1, "der Einbaufehler wurde intern gemeldet (nicht verschluckt)");
+    } finally {
+      console.error = altError;
+    }
   });
 
   pruefe("Prüfrunde: bestanden setzt das Modul über Spiel.subnetz.modulSetzen auf „sicher“" + SN_UI_ZUSATZ, () => {
@@ -1045,12 +1179,14 @@ gruppe("UI: Abteilung Subnetting", () => {
     const werteNeu = themaNeu.kinder.map(o => o.getAttribute("value"));
     erwarte.wahr(werteNeu.includes("trunk"), "auf AP2 ist Trunk angeboten");
     erwarte.falsch(werteNeu.includes("hosts"), "hosts ist auf AP2 nicht angeboten");
-    /* Visuelle Hilfe zur Aufgabe: W1s aufgabe.visual wird als Werkzeug eingebaut. */
-    const vorherZeichnen = werk.rufe.zeichnen.length;
+    /* Visuelle Hilfe zur Aufgabe (UIL-01): verdeckt; erst „Werte zeigen“ baut sie ein. */
     snUiRegisterKnopf(c, "Lehrpfad").click();
     snUiKarteMit(c, plan.module[0].titel).click();
+    const vorherBlock = werk.rufe.zeichnen.filter(x => x.id === "blocklineal").length;
     snUiKnopfPflicht(c, "Übungsrunde starten").click();
-    erwarte.wahr(werk.rufe.zeichnen.length > vorherZeichnen, "die Übungsrunde hängt eine visuelle Hilfe ein");
+    erwarte.gleich(werk.rufe.zeichnen.filter(x => x.id === "blocklineal").length, vorherBlock, "beim Rundenstart ist die visuelle Hilfe noch verdeckt");
+    snUiKnopfPflicht(c, "Werte zeigen").click();
+    erwarte.gleich(werk.rufe.zeichnen.filter(x => x.id === "blocklineal").length, vorherBlock + 1, "„Werte zeigen“ hängt die visuelle Hilfe ein");
     erwarte.gleich(werk.rufe.zeichnen.at(-1).id, "blocklineal", "die Hilfe passt zum Aufgabentyp (netzid → Blocklineal)");
     /* Werkzeug meldet gelöst → Verbuchung mit hilfe:true. */
     snUiRegisterKnopf(c, "Werkzeuge").click();

@@ -159,4 +159,22 @@ gruppe("Inhaltsdichte", () => {
     erwarte.gleich(fehler, [], "Tickets, deren skills-Feld nicht baubar ist");
     erwarte.wahr(DATEN.tickets.length >= 58, "Handticket-Bestand (Ist: " + DATEN.tickets.length + ")");
   });
+
+  /* W1 · INH-01 (31.10.2026): Elf Handtickets trugen keine Fertigkeit – alle vier Projekte,
+     praxis-09/10, autohaus-09/10 und buero-sicherheit-3/4/5. Ursache: generator.js:102 leitet
+     `skills` ohne eigenen Eintrag nur aus den Injektoren ab (`spec.skills || …`); ein Projekt
+     ohne Injektor hat dort `injektoren: []` und damit keine Lernverbuchung (lernen.js:79 verbucht
+     nur `def.skills`). Der Test hält die Lücke zu, statt sie im grünen Lauf zu verstecken. */
+  pruefe("Inhaltsdichte: jedes Handticket nennt mindestens eine Fertigkeit (Lernmotor)", () => {
+    const bekannt = new Set((DATEN.skills || []).map(s => s.id));
+    const ohneSkills = [], unbekannt = [];
+    for (const def of DATEN.tickets || []) {
+      const ss = def.skills || [];
+      if (!ss.length) { ohneSkills.push(def.id); continue; }
+      for (const s of ss) if (!bekannt.has(s)) unbekannt.push(def.id + ": " + s);
+    }
+    console.log("Inhaltsdichte · Tickets ohne Fertigkeit: " + ohneSkills.length + "/" + (DATEN.tickets || []).length);
+    erwarte.gleich(ohneSkills, [], "Handtickets ohne Fertigkeit (Lernmotor verbucht dort nichts)");
+    erwarte.gleich(unbekannt, [], "unbekannte Fertigkeiten in Tickets");
+  });
 });

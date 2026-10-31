@@ -15,7 +15,8 @@
 .ko-schirm{flex:1 1 auto; min-height:140px; overflow:auto; padding:8px 12px 12px; background:var(--ko-bg); color:var(--ko-ink);
   font:var(--fs-2)/1.5 var(--mono); cursor:text; overscroll-behavior:contain; scrollbar-color:#2A3649 transparent}
 .ko-schirm ::selection{background:var(--ko-sel)}
-.ko-schirm:focus{outline:none}
+/* CSS-03: .ko-schirm ist nur programmatisch fokussierbar (tabindex="-1", konsole.js); die
+   Unterdrueckung entfaellt, der Tastaturfokus sitzt in .ko-eingabe und zeigt den Cursor. */
 .ko-ausgabe{display:flex; flex-direction:column; gap:3px}
 .ko-block{margin:0; font:inherit; white-space:pre; tab-size:8}
 .ko-host .ko-block{white-space:pre-wrap}   /* Windows-artig: Zeilen brechen am Rand um */

@@ -87,7 +87,8 @@
 .si-haupt{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(250px, 1fr)}
 .si[data-breite="schmal"] .si-haupt{grid-template-columns:minmax(0, 1fr)}
 .si-liste{min-height:0; overflow:auto; padding:0 8px 8px; outline:none; container-type:inline-size}
-.si-liste:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-soft)}
+/* CSS-03: accent-soft war mit 1,0:1 unsichtbar; 2-px-Akzentring wie beim .si-pdu. */
+.si-liste:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .si-pdu{min-height:0; overflow:auto; border-left:1px solid var(--line); background:var(--panel); container-type:inline-size}
 /* C1: der fokussierbare PDU-Inspektor braucht einen sichtbaren Fokusring wie basis.css */
 .si-pdu:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}

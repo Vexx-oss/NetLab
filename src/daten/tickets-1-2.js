@@ -61,7 +61,7 @@
     lohn: {euro: 45, ruf: 1}});
 
   t({id: "salon-projekt", reihe: 7, kunde: "salon", karriere: 1, stufe: "E", art: "projekt", vorlage: "lan", vSeed: 17, minuten: 8,
-    injektoren: [],
+    injektoren: [], skills: ["lab.link", "lab.ip", "lab.gateway"],
     umbau(n){
       const k = Modell.kabelAn(n, "drucker", "eth0"); if (k) Modell.trennen(n, k.kabel.id);
       for (const f of ["ip", "maske", "gw", "dns"]) Modell.setzen(n, "drucker", "if.eth0." + f, "");
@@ -152,7 +152,7 @@
     lohn: {euro: 65, ruf: 1}});
 
   t({id: "buero-06", reihe: 6, kunde: "schreibbuero", karriere: 2, stufe: "E", art: "projekt", vorlage: "buero", vSeed: 36, minuten: 8,
-    injektoren: [],
+    injektoren: [], skills: ["lab.link", "lab.dhcp"],
     umbau(n){ Modell.geraet(n, "pc", {id: "pc3", name: "PC-Neu", x: 240, y: 540}); },
     zieleFn: () => [
       {typ: "dhcp", von: "pc3", text: "Der neue Arbeitsplatz bekommt automatisch eine Adresse"},

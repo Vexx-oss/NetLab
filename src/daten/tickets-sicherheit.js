@@ -42,7 +42,7 @@
     /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
     zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Zeilen fürs Wartungsbuch geschrieben"}], reihe: 5.7, kunde: "schreibbuero", karriere: 2, stufe: "AP1",
     form: "sicherheitsvorfall", vorlage: "buero", vSeed: 43, minuten: 6,
-    injektoren: [],
+    injektoren: [], skills: ["lab.dhcp"],
     umbau(n){
       /* Der neue Dienstleister hat die Reservierung für PC-Albers auf eine Adresse gelegt, die der Drucker fest trägt. */
       const sip = n.geraete.srv.running.if.eth0.ip, C = Modell.lesen(n.geraete.r1.running, "if.Gi0/0.ip").replace(/\d+$/, "");
@@ -72,7 +72,7 @@
   /* ===== 4 · Dieselbe Adresse auf zwei Geräten (DHCP_CONFLICT) ===== */
   t({id: "buero-sicherheit-4", reihe: 6.7, kunde: "schreibbuero", karriere: 2, stufe: "AP2",
     form: "sicherheitsvorfall", vorlage: "buero", vSeed: 44, minuten: 7,
-    injektoren: [],
+    injektoren: [], skills: ["lab.dhcp"],
     umbau(n){
       const sip = n.geraete.srv.running.if.eth0.ip, C = Modell.lesen(n.geraete.r1.running, "if.Gi0/0.ip").replace(/\d+$/, "");
       const doppelt = C + "100";
@@ -106,7 +106,7 @@
   /* ===== 5 · Lease abgelaufen, kein neues Angebot (DHCP_LEASE_EXPIRED) ===== */
   t({id: "buero-sicherheit-5", reihe: 7.7, kunde: "schreibbuero", karriere: 2, stufe: "AP2",
     form: "sicherheitsvorfall", vorlage: "buero", vSeed: 45, minuten: 6,
-    injektoren: [],
+    injektoren: [], skills: ["lab.dhcp"],
     umbau(n){
       const sip = n.geraete.srv.running.if.eth0.ip, C = Modell.lesen(n.geraete.r1.running, "if.Gi0/0.ip").replace(/\d+$/, "");
       /* Kurze Lease, dann läuft die Uhr darüber: die Adresse ist weg, und der Server hat keinen Bereich mehr. */

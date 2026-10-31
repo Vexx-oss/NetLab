@@ -78,7 +78,7 @@ Sim.switch = (() => {
     const pg = gg.running.ports[k.gegen.port];
     if (!pg || pg.modus !== "trunk" || native(pg) === native(pc)) return;
     const key = "native|" + k.kabel.id; if (L.einmal[key]) return; L.einmal[key] = true;
-    Sim._log(L, "info", g.id, port, f, `CDP-Meldung auf ${g.name}: Native VLAN mismatch auf ${port} (${native(pc)}) mit ${gg.name} ${k.gegen.port} (${native(pg)}). Ungetaggte Frames aus VLAN ${native(pg)} landen hier in VLAN ${native(pc)}.`, {grund: "NATIVE_MISMATCH"});
+    Sim._log(L, "info", g.id, port, f, `CDP-Meldung auf ${g.name}: Native VLAN mismatch auf ${port} (${native(pc)}) mit ${gg.name} ${k.gegen.port} (${native(pg)}). Ungetaggte Frames aus VLAN ${native(pg)} landen hier in VLAN ${native(pc)}.`, {grund: "NATIVE_MISMATCH", warnung: true});
   }
 
   function portSec(L, g, port, pc, f){

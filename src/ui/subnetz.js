@@ -59,6 +59,7 @@ UI.subnetz = (() => {
   let fokusZiel = null;        /* Fokus nach dem nächsten Zeichnen: Selektor oder Funktion (B2) */
   let generatorFehler = null;  /* sichtbarer Hinweis, wenn der Motor für die Auswahl keine Aufgabe liefert (S8) */
   let seedZaehler = 1;
+  let visualZaehler = 1;       /* stabile id für die aria-controls-Fläche der Runden-Hilfe (UIL-01) */
   let montagen = [];
   let abraeumer = [];
 
@@ -469,10 +470,48 @@ UI.subnetz = (() => {
     zeichnen();
   }
 
-  /* Kleine visuelle Hilfe zur Aufgabe (W1 liefert aufgabe.visual): dasselbe Werkzeug wie in der Lektion. */
-  function visualAufgabe(aufgabe){
+  /* UIL-01 — Vertrag § 26:803-804: „Werkzeuge, die die Lösung zeigen, verbuchen {hilfe:true}“.
+     In der Runde ist die visuelle Hilfe deshalb verdeckt: vor der Antwort steht weder ein Werkzeug-DOM
+     noch eine Lösung im Aufgabenblock. Erst „Werte zeigen“ hängt das Werkzeug mit dem Aufgaben-Preset
+     ein und merkt die Hilfe für die Verbuchung vor (r.hilfeGezeigt → antwort({hilfe:true})). */
+  function montiereJetzt(container, art, opts){
+    try {
+      const api = werkzeugApi();
+      if (!hatFunktion(api, "zeichnen")) throw new Error("UI.subnetzwerkzeuge.zeichnen fehlt");
+      const griff = api.zeichnen(container, art, opts || {});
+      if (!griff) throw new Error("UI.subnetzwerkzeuge.zeichnen fehlt");
+      if (typeof griff.zerstoeren === "function") abraeumer.push(griff);
+      return true;
+    } catch (e) {
+      console.error("Subnetting: Fläche", e);
+      try { container.append(h("p", {class: "bn-meta"}, "Diese Fläche ist in dieser Fassung noch nicht geladen.")); } catch (ignoriert) { /* egal */ }
+      return false;
+    }
+  }
+  function visualAufgabe(aufgabe, r){
     const box = h("div", {class: "sn-visual"});
-    montageMerken(box, aufgabe.visual.art, {preset: aufgabe.visual.preset, kompakt: true, niveau: stufeJetzt()});
+    const zielId = "sn-werte-" + (visualZaehler++);          /* aria-controls braucht ein benanntes Ziel */
+    const ziel = h("div", {id: zielId});                     /* hier landet das Werkzeug – erst nach „Werte zeigen“ */
+    const status = h("p", {class: "bn-meta", role: "status", "aria-live": "polite"},
+      "Die visuelle Hilfe ist verdeckt. Wer sie zeigt, übt mit Hilfe.");
+    const aufdecken = h("button", {type: "button", class: "knopf", "aria-expanded": "false", "aria-controls": zielId,
+      onclick: () => aufdeckenWerte()}, "Werte zeigen (zählt als Hilfe)");
+    box.append(aufdecken, ziel, status);
+    function aufdeckenWerte(){
+      if (box.getAttribute("data-aufgedeckt") === "true") return;
+      /* r-design P2: erst einbauen, dann buchen. Schlägt der Einbau fehl, zählt keine Hilfe,
+         und Knopf/Status versprechen nichts. */
+      const eingebaut = montiereJetzt(ziel, aufgabe.visual.art, {preset: aufgabe.visual.preset, kompakt: true, niveau: stufeJetzt()});
+      if (!eingebaut){
+        status.textContent = "Die Werte ließen sich gerade nicht einblenden – bitte später erneut versuchen.";
+        return;
+      }
+      box.setAttribute("data-aufgedeckt", "true");
+      if (r) { r.hilfeGezeigt = true; r.hilfeRunde = true; }
+      aufdecken.setAttribute("aria-expanded", "true");
+      aufdecken.textContent = "Werte sind sichtbar – als Hilfe verbucht";
+      status.textContent = "Die Werte sind eingeblendet; die Antwort zählt als mit Hilfe geübt.";
+    }
     return box;
   }
 
@@ -559,7 +598,7 @@ UI.subnetz = (() => {
           h("span", {class: "sn-lage-label"}, text(z && z.label)),
           h("span", {class: "sn-lage-wert"}, text(z && z.wert))))) : null,
         h("p", {class: "sn-frage"}, text(aufgabe.frage)),
-        beantwortet || !aufgabe.visual || !aufgabe.visual.art ? null : visualAufgabe(aufgabe),
+        beantwortet || !aufgabe.visual || !aufgabe.visual.art ? null : visualAufgabe(aufgabe, r),
         feld,
         auswahl.length ? auswahl[0] : null,
         beantwortet ? rueckmeldung(r, aufgabe, beantwortet) : null,

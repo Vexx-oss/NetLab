@@ -79,8 +79,9 @@ neuen Bilder erzeugt — das ist ausdrücklich „nicht geprüft".
 **Ja.** PolyForm Noncommercial 1.0.0 erlaubt Spielen, Üben und Unterricht — auch in Schulen
 und Bildungseinrichtungen. Kein Konto, kein Server, keine Bewertung, kein Netz nötig.
 Der Klassenraum (Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag) ist in
-**Stufen A+B** gebaut; Bewertung, Server und QR stehen aus — Stand in
-[Architektur.md](Architektur.md) § 12 und [CHANGELOG.md](CHANGELOG.md).
+**Stufen A+B** gebaut; eine Bewertung gibt es nicht, Server und QR sind **3.1** und im Produkt
+nicht gebaut — Stand in [Architektur.md](Architektur.md) § 12 (Datenform § 12.1, API § 12.2;
+Server/QR: § 12.6/§ 12.7) und [CHANGELOG.md](CHANGELOG.md).
 
 ### 9. Darf ich es verkaufen oder kommerziell nutzen?
 

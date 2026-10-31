@@ -1,5 +1,5 @@
 "use strict";
-/* ---------- Spiel: Klassenraum (Stufe A, 2.0-Fundament; Architektur § 12, A – Codec und Determinismus § 5-§ 7) ----------
+/* ---------- Spiel: Klassenraum (Stufe A, 2.0-Fundament; Architektur § 12.1/§ 12.2, A – Codec und Determinismus § 5-§ 7) ----------
    Ein Auftrag entsteht aus einem ANGESAGTEN CODE: die Lehrkraft erzeugt ihn hier, jedes Gerät baut denselben
    Fall aus demselben Code. Kein Konto, kein Server, kein Netz (Server = Stufe C, QR = Stufe D – beide später).
 
@@ -39,10 +39,10 @@
    0 = „nicht eingestellt", sonst 1..31 – die Ampel der Lehrkraft rechnet „offen" als plaetze − eingetragen.
 
    Kein Eintrag in store "labor": der Spielstand bleibt unberührt. Eigener Schlüssel Spiel.KLASSENRAUM
-   (zustand.js) mit `fassung: 1`. */
+   (zustand.js): `fassung: 2` = alle Sitzungen dieses Geräts, eine aktiv (§ 12.1). */
 Spiel.klassenraum = (() => {
   const SCHLUESSEL = () => Spiel.KLASSENRAUM || "klassenraum";
-  const FASSUNG = 1;
+  const FASSUNG = 2;
   const KANON_FENSTER = 64;
 
   /* ---------- Der Codec ---------- */
@@ -120,12 +120,39 @@ Spiel.klassenraum = (() => {
     return {fehler: "auftrag", grund: "Aus diesem Code lässt sich hier kein spielbarer Auftrag bauen."};
   }
 
-  /* ---------- Speicher (store "klassenraum", § 7.1) ---------- */
+  /* ---------- Speicher (store "klassenraum", § 12.1: fassung 2 = alle Sitzungen, eine aktiv) ---------- */
   const version = () => (typeof LABOR_VERSION === "string" ? LABOR_VERSION : "");
-  const leer = () => ({fassung: FASSUNG, programm: version(), sitzung: null, platz: null, letzte: null, zuletzt: jetzt(), zaehler: 0});
+  const sitzungOk = s => !!s && typeof s === "object" && !Array.isArray(s);
+  const leer = () => ({fassung: FASSUNG, programm: version(), platz: null, zuletzt: jetzt(), sitzungen: [], aktiv: null,
+    letzte: null, zaehler: 0});
+  /* Ein zu neuer Stand (fassung > 2) wird ABGEWIESEN, nicht umgeschrieben (§ 12.1). */
+  const neuereFassung = k => !!k && typeof k === "object" && !Array.isArray(k)
+    && Number.isInteger(k.fassung) && k.fassung > FASSUNG;
+  /* Fassung 1 → 2 verlustfrei: sitzung → sitzungen[0], aktiv = die Sitzungskennung; unbekannte Felder bleiben. */
+  function migrieren(k){
+    if (!k || typeof k !== "object" || Array.isArray(k)) return null;
+    const f = Number.isInteger(k.fassung) ? k.fassung : 1;
+    if (f > FASSUNG) return null;
+    const sitzungen = f <= 1
+      ? (sitzungOk(k.sitzung) ? [k.sitzung] : [])
+      : (Array.isArray(k.sitzungen) ? k.sitzungen.filter(sitzungOk) : []);
+    const ids = new Set(sitzungen.map(s => s.id));
+    const aktiv = ids.has(k.aktiv) ? k.aktiv : (sitzungen.length
+      ? (sitzungOk(k.sitzung) && ids.has(k.sitzung.id) ? k.sitzung.id : sitzungen[0].id) : null);
+    const aus = Object.assign({}, k, {
+      fassung: FASSUNG,
+      programm: typeof k.programm === "string" ? k.programm : version(),
+      platz: platzzahl(k.platz), zuletzt: Number.isFinite(k.zuletzt) ? k.zuletzt : jetzt(),
+      sitzungen, aktiv, letzte: typeof k.letzte === "string" ? k.letzte : null,
+      zaehler: Number.isInteger(k.zaehler) && k.zaehler >= 0 ? k.zaehler : 0,
+    });
+    if (f <= 1) delete aus.sitzung;                       /* Altfeld ist in sitzungen[] aufgegangen */
+    return aus;
+  }
   function lies(){
-    const k = store.get(SCHLUESSEL(), null);
-    return k && typeof k === "object" && !Array.isArray(k) ? k : null;
+    const roh = store.get(SCHLUESSEL(), null);
+    if (neuereFassung(roh)) return null;
+    return migrieren(roh);
   }
   function schreib(k){
     k.fassung = FASSUNG;
@@ -135,7 +162,10 @@ Spiel.klassenraum = (() => {
     if (typeof Spiel.sofortSpeichern === "function") Spiel.sofortSpeichern();   /* eine Sitzung steht sofort auf der Platte */
     return k;
   }
-  const sitzungVon = k => (k && k.sitzung && typeof k.sitzung === "object" && !Array.isArray(k.sitzung)) ? k.sitzung : null;
+  const aktiveSitzungVon = k => (k && Array.isArray(k.sitzungen)) ? (k.sitzungen.find(s => s.id === k.aktiv) || null) : null;
+  const sitzungMitId = (k, id) => (k && Array.isArray(k.sitzungen)) ? (k.sitzungen.find(s => s.id === id) || null) : null;
+  const sitzungVon = k => aktiveSitzungVon(k);
+  const ZU_NEU = {fehler: "fassung", grund: "Dieser Klassenraum-Stand stammt aus einer neueren Fassung; er wird nicht überschrieben."};
   const platzzahl = x => (Number.isInteger(x) && x >= 0 && x <= 31) ? x : null;
 
   /* ---------- erzeugen (§ 5) ---------- */
@@ -164,9 +194,22 @@ Spiel.klassenraum = (() => {
     const dauerMin = Math.max(1, Math.min(120, typeof o.dauerMin === "number" && isFinite(o.dauerMin) ? Math.round(o.dauerMin) : 10));
     /* Zähler lesen: er speist Sitzungskennung und Wunsch-Variante (kein Math.random, § 5).
        Spiel.neuerSeed liest jetzt() und Spiel.st.naechsteIid – Spiel.st lädt den Stand bei Bedarf selbst. */
+    /* § 12.2 (3.0.0): eine aktive Sitzung mit Ergebnissen wird nur mit `bestaetigen:true` abgelöst. */
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
     const alt = lies() || leer();
+    const bisher = aktiveSitzungVon(alt);
+    if (bisher && bisher.ergebnisse && Object.keys(bisher.ergebnisse).length && o.bestaetigen !== true)
+      return {warnung: "sitzung-hat-ergebnisse"};
     const zaehler = Number.isInteger(alt.zaehler) && alt.zaehler >= 0 ? alt.zaehler : 0;
-    const id = 1 + (Spiel.neuerSeed("klassenraum-id:" + zaehler) % 31);                        /* 1..31 */
+    /* § 12.2 (3.0.0): Sitzungskennung eindeutig 1..31 — bei Kollision die nächste freie im Kreis. */
+    const wunschId = 1 + (Spiel.neuerSeed("klassenraum-id:" + zaehler) % 31);
+    const belegt = new Set((alt.sitzungen || []).map(s => s.id));
+    let id = null;
+    for (let i = 0; i < 31; i++){
+      const kandidat = 1 + ((wunschId - 1 + i) % 31);
+      if (!belegt.has(kandidat)) { id = kandidat; break; }
+    }
+    if (id === null) return {fehler: "sitzung", grund: "Alle 31 Sitzungskennungen sind belegt – in dieser Fassung lässt sich keine Sitzung löschen."};
     const wunsch = typeof o.seed === "number" && isFinite(o.seed) ? (o.seed >>> 0) : Spiel.neuerSeed("klassenraum-variante:" + zaehler);
     const variante = wunsch % 256;                                                            /* 0..255 */
     const kanon = art === "hand" ? kanonHand(basis, variante) : kanonGeneriert(skill, variante);
@@ -181,7 +224,7 @@ Spiel.klassenraum = (() => {
       code, dauerMin, plaetze: platzzahl(o.plaetze) ?? 0, erstellt: jetzt(), ergebnisse: {},
     };
     schreib(Object.assign({}, alt, {
-      sitzung, zaehler: zaehler + 1,
+      sitzungen: (alt.sitzungen || []).concat([sitzung]), aktiv: id, zaehler: zaehler + 1,
       platz: platzzahl(alt.platz),                                 /* eigener Platz dieses Geräts bleibt */
       letzte: typeof alt.letzte === "string" ? alt.letzte : null,
     }));
@@ -227,7 +270,24 @@ Spiel.klassenraum = (() => {
   }
 
   /* ---------- sitzung / ergebnisCode / ergebnisLesen / ergebnisEintragen (§ 5, § 6) ---------- */
-  function sitzung(){ const s = sitzungVon(lies()); return s ? tief(s) : null; }
+  function sitzung(){ const s = aktiveSitzungVon(lies()); return s ? tief(s) : null; }
+  /* § 12.2: Übersicht ALLER Sitzungen als tiefe Kopien, keine Innenreferenzen (ergebnisse vollständig). */
+  function sitzungen(){
+    const k = lies();
+    if (!k) return [];
+    return k.sitzungen.map(s => tief({id: s.id, titel: s.titel, art: s.art, code: s.code,
+      erstellt: s.erstellt, plaetze: s.plaetze, ergebnisse: s.ergebnisse || {}, aktiv: s.id === k.aktiv}));
+  }
+  function sitzungWaehlen(id){
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
+    const k = lies();
+    const s = sitzungMitId(k, id);
+    if (!s) return {fehler: "sitzung", grund: `Diese Sitzung gibt es hier nicht: ${JSON.stringify(id)}.`};
+    k.aktiv = s.id;
+    schreib(k);
+    Spiel.melden("klassenraum", {art: "sitzung", sitzung: s.id});
+    return {ok: true, sitzung: tief(s)};
+  }
 
   function ergebnisCode(inst, abnahme){
     if (!inst || typeof inst !== "object") return {fehler: "auftrag", grund: "Kein Auftrag übergeben."};
@@ -260,7 +320,7 @@ Spiel.klassenraum = (() => {
     return {ok: true, sitzung: r.sitzung, platz: r.platz, sterne: r.sterne, dauerS: r.dauerS, versuche: r.versuche, code: r.code || null};
   }
 
-  /* ---------- Hilfecode (Säule 5, Architektur § 12.4): der Azubi sagt, wo er hängt ----------
+  /* ---------- Hilfecode (Säule 5, Architektur § 12.5): der Azubi sagt, wo er hängt ----------
      Der Code trägt Sitzung, Platz und zwei Zählerstände – sonst nichts: kein Name, keine Bewertung,
      keine Rangfolge. Die Lehrkraft tippt ihn in ihr BESTEHENDES Feld „Ergebnis-Codes" (kein neues
      Bedienelement, R12 bleibt 6).
@@ -309,11 +369,12 @@ Spiel.klassenraum = (() => {
     const gelesen = ergebnisLesen(eingabe);
     if (gelesen === null) return {fehler: "länge", grund: "Es wurde kein Ergebnis-Code eingegeben."};
     if (gelesen.fehler) return {fehler: gelesen.fehler, grund: gelesen.grund};
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
     const k = lies();
-    const s = sitzungVon(k);
-    if (!s) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – erst einen Auftrag erzeugen."};
-    if (gelesen.sitzung !== s.id)
-      return {fehler: "sitzung", grund: `Dieser Ergebnis-Code gehört zu Sitzung ${gelesen.sitzung} – hier läuft Sitzung ${s.id}.`};
+    if (!k || !k.sitzungen.length) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – erst einen Auftrag erzeugen."};
+    /* § 12.2 (3.0.0): der Code adressiert SEINE Sitzung — auch wenn eine andere aktiv ist. */
+    const s = sitzungMitId(k, gelesen.sitzung);
+    if (!s) return {fehler: "sitzung", grund: `Zu diesem Ergebnis-Code gibt es hier keine Sitzung ${gelesen.sitzung}.`};
     if (!s.ergebnisse || typeof s.ergebnisse !== "object" || Array.isArray(s.ergebnisse)) s.ergebnisse = {};
     const schluessel = String(gelesen.platz);
     const alt = s.ergebnisse[schluessel];
@@ -328,11 +389,12 @@ Spiel.klassenraum = (() => {
     return {ok: true, neu: true, platz: gelesen.platz, sterne: gelesen.sterne};
   }
 
-  /* ---------- Export / Import (§ 7.2: verlustfrei, mit Fassungsprüfung, wirft nie) ---------- */
+  /* ---------- Export / Import (§ 12.1: fassung 2, ALLE Sitzungen; verlustfrei, wirft nie) ---------- */
   function exportieren(){
-    const s = sitzungVon(lies());
-    if (!s) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – nichts zu exportieren."};
-    return JSON.stringify({format: "netzwerk-labor/klassenraum", fassung: FASSUNG, programm: version(), zeit: jetzt(), sitzung: tief(s)});
+    const k = lies();
+    if (!k || !k.sitzungen.length) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – nichts zu exportieren."};
+    return JSON.stringify({format: "netzwerk-labor/klassenraum", fassung: FASSUNG, programm: version(), zeit: jetzt(),
+      sitzungen: tief(k.sitzungen), aktiv: k.aktiv});
   }
 
   function importieren(text){
@@ -341,40 +403,62 @@ Spiel.klassenraum = (() => {
     try { roh = JSON.parse(text); } catch (e) { return {fehler: "format", grund: "Das ist keine JSON-Datei."}; }
     if (!roh || typeof roh !== "object" || Array.isArray(roh)) return {fehler: "format", grund: "Das ist keine Klassenraum-Datei."};
     if (roh.format !== "netzwerk-labor/klassenraum") return {fehler: "format", grund: "Das ist keine Klassenraum-Datei (format fehlt)."};
-    const f = Number.isInteger(roh.fassung) ? roh.fassung : FASSUNG;
-    if (f > FASSUNG) return {fehler: "fassung", grund: `Die Datei stammt aus einer neueren Fassung (Stand ${f}); dieses Programm kennt nur ${FASSUNG}.`};
-    if (!("sitzung" in roh)) return {fehler: "format", grund: "In der Datei fehlt die Sitzung."};
-    const s = roh.sitzung;
-    if (!s || typeof s !== "object" || Array.isArray(s)) return {fehler: "format", grund: "Die Sitzung in der Datei ist unbrauchbar."};
-    if (s.ergebnisse != null && (typeof s.ergebnisse !== "object" || Array.isArray(s.ergebnisse)))
-      return {fehler: "format", grund: "Die Ergebnisliste in der Datei ist unbrauchbar (Abbildung Platz → Ergebnis erwartet)."};
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
+    /* § 12.1: fehlende/unbekannte Fassung = 1 (Altstand); fassung 2 = sitzungen[]; zu neu wird abgewiesen. */
+    const f = Number.isInteger(roh.fassung) ? roh.fassung : 1;
+    if (f > FASSUNG) return {fehler: "fassung", grund: "Die Datei stammt aus einer neueren Fassung (Stand " + f + "); dieses Programm kennt nur " + FASSUNG + "."};
+    let rohe = [];
+    if (f <= 1){
+      if (!("sitzung" in roh)) return {fehler: "format", grund: "In der Datei fehlt die Sitzung."};
+      if (!roh.sitzung || typeof roh.sitzung !== "object" || Array.isArray(roh.sitzung))
+        return {fehler: "format", grund: "Die Sitzung in der Datei ist unbrauchbar."};
+      if (roh.sitzung.ergebnisse != null && (typeof roh.sitzung.ergebnisse !== "object" || Array.isArray(roh.sitzung.ergebnisse)))
+        return {fehler: "format", grund: "Die Ergebnisliste in der Datei ist unbrauchbar (Abbildung Platz → Ergebnis erwartet)."};
+      rohe = [roh.sitzung];
+    } else {
+      if (!("sitzungen" in roh)) return {fehler: "format", grund: "In der Datei fehlen die Sitzungen."};
+      if (!Array.isArray(roh.sitzungen)) return {fehler: "format", grund: "Die Sitzungsliste in der Datei ist unbrauchbar (Liste erwartet)."};
+      if (roh.sitzungen.some(s => !s || typeof s !== "object" || Array.isArray(s)))
+        return {fehler: "format", grund: "Die Sitzungsliste enthält Unbrauchbares."};
+      for (const s of roh.sitzungen) if (s.ergebnisse != null && (typeof s.ergebnisse !== "object" || Array.isArray(s.ergebnisse)))
+        return {fehler: "format", grund: "Eine Ergebnisliste in der Datei ist unbrauchbar (Abbildung Platz → Ergebnis erwartet)."};
+      rohe = roh.sitzungen;
+    }
     /* Pflichtfelder bekommen Standardwerte, unbekannte Felder bleiben erhalten (verlustfrei). */
-    const neu = Object.assign({}, s);
-    if (!Number.isInteger(neu.id)) neu.id = 1;
-    if (neu.art !== "hand" && neu.art !== "generiert") neu.art = "hand";
-    if (!Number.isInteger(neu.index)) neu.index = 0;
-    if (!Number.isInteger(neu.variante)) neu.variante = 0;
-    if (!Number.isInteger(neu.seed) || neu.seed < 1) neu.seed = 1;
-    if (typeof neu.eigene !== "boolean") neu.eigene = false;
-    if (!Number.isInteger(neu.schritte)) neu.schritte = 0;
-    if (typeof neu.code !== "string") neu.code = "";
-    if (typeof neu.titel !== "string") neu.titel = "";
-    if (neu.ticketId == null) neu.ticketId = null;
-    if (neu.skill == null) neu.skill = null;
-    if (!Number.isInteger(neu.dauerMin)) neu.dauerMin = 10;
-    if (!Number.isInteger(neu.plaetze)) neu.plaetze = 0;
-    if (!Number.isInteger(neu.erstellt)) neu.erstellt = jetzt();
-    if (!neu.ergebnisse || typeof neu.ergebnisse !== "object") neu.ergebnisse = {};
+    const sitzungen = rohe.map(s => {
+      const neu = Object.assign({}, s);
+      if (!Number.isInteger(neu.id) || neu.id < 1 || neu.id > 31) neu.id = 1;
+      if (neu.art !== "hand" && neu.art !== "generiert") neu.art = "hand";
+      if (!Number.isInteger(neu.index)) neu.index = 0;
+      if (!Number.isInteger(neu.variante)) neu.variante = 0;
+      if (!Number.isInteger(neu.seed) || neu.seed < 1) neu.seed = 1;
+      if (typeof neu.eigene !== "boolean") neu.eigene = false;
+      if (!Number.isInteger(neu.schritte)) neu.schritte = 0;
+      if (typeof neu.code !== "string") neu.code = "";
+      if (typeof neu.titel !== "string") neu.titel = "";
+      if (neu.ticketId == null) neu.ticketId = null;
+      if (neu.skill == null) neu.skill = null;
+      if (!Number.isInteger(neu.dauerMin)) neu.dauerMin = 10;
+      if (!Number.isInteger(neu.plaetze)) neu.plaetze = 0;
+      if (!Number.isInteger(neu.erstellt)) neu.erstellt = jetzt();
+      if (!neu.ergebnisse || typeof neu.ergebnisse !== "object") neu.ergebnisse = {};
+      return neu;
+    });
+    const ids = new Set(), doppelt = new Set();
+    for (const s of sitzungen){ if (ids.has(s.id)) doppelt.add(s.id); ids.add(s.id); }
+    if (doppelt.size) return {fehler: "format", grund: "Die Datei enthält doppelte Sitzungskennungen: " + [...doppelt].join(", ") + "."};
     const alt = lies() || leer();
+    const wunsch = Number.isInteger(roh.aktiv) ? roh.aktiv : null;
+    const aktiv = ids.has(wunsch) ? wunsch : (sitzungen.length ? sitzungen[0].id : null);
     const k = Object.assign({}, alt, {
       fassung: FASSUNG,
       programm: typeof roh.programm === "string" ? roh.programm : version(),   /* abweichendes programm wird angenommen */
-      sitzung: neu, zaehler: Number.isInteger(alt.zaehler) ? alt.zaehler : 0,
+      sitzungen, aktiv, zaehler: Number.isInteger(alt.zaehler) ? alt.zaehler : 0,
       platz: platzzahl(alt.platz),
     });
     schreib(k);
-    Spiel.melden("klassenraum", {art: "import", sitzung: neu.id});
-    return {ok: true, sitzung: tief(neu)};
+    Spiel.melden("klassenraum", {art: "import", sitzung: aktiv});
+    return {ok: true, sitzungen: tief(sitzungen), aktiv};
   }
 
   /* ---------- Zusatzfläche (§ 5): Netzkennwert, taugliche Fertigkeiten, Platz, Plätze ---------- */
@@ -391,6 +475,7 @@ Spiel.klassenraum = (() => {
   function platz(){ const k = lies(); return k ? platzzahl(k.platz) : null; }
   function platzSetzen(zahl){
     if (!Number.isInteger(zahl) || zahl < 0 || zahl > 31) return {fehler: "wahl", grund: "Der Platz muss eine ganze Zahl von 0 bis 31 sein."};
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
     const k = Object.assign(leer(), lies() || {});
     k.platz = zahl;
     schreib(k);
@@ -401,6 +486,7 @@ Spiel.klassenraum = (() => {
   function plaetze(){ const s = sitzungVon(lies()); return s && Number.isInteger(s.plaetze) && s.plaetze >= 1 && s.plaetze <= 31 ? s.plaetze : 0; }
   function plaetzeSetzen(zahl){
     if (!Number.isInteger(zahl) || zahl < 0 || zahl > 31) return {fehler: "wahl", grund: "Die Platzzahl muss eine ganze Zahl von 0 bis 31 sein (0 = nicht eingestellt)."};
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
     const k = lies();
     const s = sitzungVon(k);
     if (!s) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – erst einen Auftrag erzeugen."};
@@ -445,7 +531,7 @@ Spiel.klassenraum = (() => {
     return daten;
   }
 
-  return {erzeugen, ausCode, sitzung, ergebnisCode, ergebnisLesen, ergebnisEintragen, hilfeCode, hilfeLesen,
+  return {erzeugen, ausCode, sitzung, sitzungen, sitzungWaehlen, ergebnisCode, ergebnisLesen, ergebnisEintragen, hilfeCode, hilfeLesen,
     exportieren, importieren, netzkennwert, tauglicheFertigkeiten, platz, platzSetzen, plaetze, plaetzeSetzen,
     abnehmen, tabellen};
 })();

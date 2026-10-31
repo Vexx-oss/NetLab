@@ -339,4 +339,5 @@ Sim.l3 = (() => {
           socket, zustellen, lokalerFehler, icmpFehler, echoAntwort,
           routen, suche, routeText, domaene, segmentMaske, dhcpAnbieter, senden};
 })();
-Sim._letzterGrund = function(L){ for (let i = L.ev.length - 1; i >= 0; i--) if (L.ev[i].grund) return L.ev[i].grund; return null; };
+/* Letzter Grund – Warnungen (warnung:true) sind keine Ursache (Architektur § 5.2). */
+Sim._letzterGrund = function(L){ for (let i = L.ev.length - 1; i >= 0; i--) if (L.ev[i].grund && !L.ev[i].warnung) return L.ev[i].grund; return null; };

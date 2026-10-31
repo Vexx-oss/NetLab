@@ -149,7 +149,10 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .menue.nl-messend { animation: none; visibility: hidden }
 .menue-titel{padding:4px 8px 8px; font:700 var(--fs-2)/1.2 var(--body); color:var(--muted); letter-spacing:.02em; border-bottom:1px solid var(--line); margin-bottom:4px}
 .menue-punkt{display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:0 12px; border:0; border-radius:var(--radius-s); background:none; color:var(--ink); text-align:left; font:500 var(--fs-3)/1.2 var(--body)}
-.menue-punkt:hover:not([disabled]), .menue-punkt:focus-visible{background:var(--panel-3); outline:none}
+/* CSS-03: Tastaturfokus sichtbar - 2-px-Akzentring INNEN (outline-offset:-2px), weil das Menue
+   scrollt und ein aussen liegender Ring abgeschnitten wuerde. Vorher nur Flaeche --panel-3 auf
+   --panel = 1,24:1 dunkel / 1,19:1 hell. */
+.menue-punkt:hover:not([disabled]), .menue-punkt:focus-visible{background:var(--panel-3); outline:2px solid var(--accent); outline-offset:-2px}
 .menue-punkt[disabled]{color:var(--faint); cursor:default}
 .menue-punkt .sym{color:var(--muted); flex:0 0 auto}
 .menue-punkt.gefahr, .menue-punkt.gefahr .sym{color:var(--bad)} 
@@ -163,7 +166,8 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .popover{max-width:none}
 .schnellwahl{display:grid; grid-template-columns:repeat(4, 76px); gap:4px; padding:2px}
 .sw-teil{display:flex; flex-direction:column; align-items:center; gap:0px; min-height:70px; padding:4px 0px; border:1px solid transparent; border-radius:var(--radius); background:none; color:var(--ink); font:600 var(--fs-2)/1.1 var(--body)}
-.sw-teil:hover, .sw-teil:focus-visible{background:var(--panel-3); border-color:var(--line-2); outline:none}
+/* CSS-03: dieselbe Regel wie .menue-punkt - auch die Schnellwahl-Kacheln brauchen den Ring. */
+.sw-teil:hover, .sw-teil:focus-visible{background:var(--panel-3); border-color:var(--line-2); outline:2px solid var(--accent); outline-offset:-2px}
 
 /* ---- Befehlspalette ---- */
 .pal-huelle{position:fixed; inset:0; z-index:50; display:flex; justify-content:center; align-items:flex-start; padding-top:14vh; background:rgba(4,8,14,.45); opacity:0; transition:opacity var(--dauer)}

@@ -42,16 +42,61 @@ on:
         description: "Tag, fuer den ein Release angelegt werden soll (muss schon existieren)"
         required: true
 
+# Least Privilege (3.0): der Ablauf liest standardmaessig nur; Schreibrecht bekommen
+# ausschliesslich die Jobs, die ein Release anlegen oder Anhaenge hochladen.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
-    name: Release bauen und anlegen
+  # 0) Fassungs-Gate: laeuft VOR dem Release. Bricht ab, wenn Tag und VERSION in
+  # bauen.py auseinanderlaufen, eine der 17 Fassungsstellen fehlt oder Zahlen/Doku
+  # nicht zum Commit passen. Dann entstehen weder Release noch Anhaenge.
+  fassung:
+    name: Fassung und Dokumente pruefen
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          # Bei workflow_dispatch baut ein erneuter Lauf den ANGEGEBENEN Tag, nicht
+          # den Zweig, auf dem der Knopf gedrueckt wurde (Luecke bis 2.9.0).
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tag gegen VERSION in bauen.py pruefen
+        run: |
+          set -e
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then TAG="${GITHUB_REF_NAME}"; fi
+          SOLL="${TAG#v}"
+          IST=$(python -c "import pathlib,re; t=pathlib.Path('bauen.py').read_text(encoding='utf-8'); print(re.search(r'^VERSION\s*=\s*\"([^\"]+)\"', t, re.M).group(1))")
+          echo "Tag: $TAG — erwartete Fassung: $SOLL — VERSION in bauen.py: $IST"
+          if [ "$SOLL" != "$IST" ]; then
+            echo "::error::Der Tag verlangt Fassung $SOLL, bauen.py sagt $IST — kein Release."
+            exit 1
+          fi
+
+      - name: Fassungsstellen konsistent (17 Muster, Cargo.lock, VERSION_CODE)
+        run: python tools/fassung-ziehen.py --pruefen
+
+      - name: Zahlen und Doku sind frisch
+        run: |
+          python tools/stand.py --pruefen
+          python tools/seite.py --pruefen
+
+  release:
+    name: Release bauen und anlegen
+    needs: fassung
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -91,6 +136,26 @@ jobs:
             echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Release-Text aus dem CHANGELOG ziehen
+        run: |
+          set -e
+          TAG="${{ steps.tag.outputs.name }}"
+          SOLL="${TAG#v}"
+          mkdir -p dist
+          python - "$SOLL" > dist/release-notes.md <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          version = sys.argv[1]
+          text = pathlib.Path("docs/CHANGELOG.md").read_text(encoding="utf-8")
+          m = re.search(rf"^## {re.escape(version)}(?:[^\n]*)\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+          if not m:
+              raise SystemExit(f"FEHLER: im CHANGELOG fehlt der Abschnitt zu {version}.")
+          print(m.group(0).rstrip())
+          PY
+          head -20 dist/release-notes.md
+
       - name: Release anlegen und Pakete anhaengen
         env:
           GH_TOKEN: ${{ github.token }}
@@ -105,7 +170,10 @@ jobs:
           echo "Anhaenge: $ZIPS $EINZEL"
 
           if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --title "Netzwerk-Labor ${TAG#v}" --generate-notes
+            gh release create "$TAG" --title "Netzwerk-Labor ${TAG#v}" --notes-file dist/release-notes.md
+          else
+            # Erneut ausgeloester Lauf fuer dasselbe Tag: Release-Text auf den CHANGELOG-Stand bringen.
+            gh release edit "$TAG" --notes-file dist/release-notes.md
           fi
 
           # Gleichnamige Anhaenge zuerst ausdruecklich entfernen, dann hochladen.
@@ -140,9 +208,12 @@ jobs:
     name: Windows-Programm bauen und anhaengen
     needs: release
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -218,9 +289,12 @@ jobs:
     name: Android-APK bauen und anhaengen
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -345,3 +419,106 @@ jobs:
             echo "Android-APK: uebersprungen (Secrets ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASSWORT fehlen)"
           fi
           gh release view "$TAG" --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
+
+  # 4) Abschluss-Gate: laeuft erst, wenn alle drei Anhaenge-Jobs durch sind. Es laedt die
+  #    Anhaenge aus dem Release, verlangt alle vier (Browser-ZIP, HTML, EXE, APK), erzeugt
+  #    SHA256SUMS, haengt sie an und rechnet sie gegen die Dateien nach. Fehlt ein Anhang —
+  #    etwa die APK, weil die Keystore-Secrets fehlen — endet dieser Job ROT. Das Release
+  #    ist dann sichtbar unvollstaendig, statt still ohne APK gruen zu bleiben.
+  pruefsummen:
+    name: Anhaenge pruefen und SHA256SUMS anhaengen
+    needs: [release, windows, android]
+    if: always() && needs.release.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Tag bestimmen
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "name=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Anhaenge laden und Vollstaendigkeit pruefen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG="${{ steps.tag.outputs.name }}"
+          SOLL="${TAG#v}"
+          rm -rf sums && mkdir -p sums
+          gh release download "$TAG" --dir sums || true
+          rm -f sums/SHA256SUMS
+          echo "Geladene Anhaenge:"
+          ls -l sums
+          FEHLT=0
+          for NAME in "Netzwerk-Labor-${SOLL}-Browser.zip" \
+                      "Netzwerk-Labor.html" \
+                      "Netzwerk-Labor.exe" \
+                      "Netzwerk-Labor-${SOLL}-Android.apk"; do
+            if [ ! -f "sums/$NAME" ]; then
+              echo "::error::Anhang fehlt im Release: $NAME"
+              FEHLT=1
+            fi
+          done
+          if [ "$FEHLT" != "0" ]; then
+            echo "::error::Release $TAG ist unvollstaendig — SHA256SUMS wird nicht angelegt."
+            exit 1
+          fi
+
+      - name: SHA256SUMS erzeugen und pruefen
+        run: |
+          set -e
+          TAG="${{ steps.tag.outputs.name }}"
+          SOLL="${TAG#v}"
+          cd sums
+          # Feste Reihenfolge und feste Dateinamen: die Summenzeilen sind reproduzierbar.
+          for NAME in "Netzwerk-Labor-${SOLL}-Browser.zip" \
+                      "Netzwerk-Labor.html" \
+                      "Netzwerk-Labor.exe" \
+                      "Netzwerk-Labor-${SOLL}-Android.apk"; do
+            sha256sum "$NAME"
+          done > SHA256SUMS
+          echo "SHA256SUMS:"
+          cat SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: SHA256SUMS an das Release haengen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG="${{ steps.tag.outputs.name }}"
+          # Wie bei allen Anhaengen: gleichen Namen zuerst loeschen, 5 s warten, dann bis
+          # zu drei Upload-Versuche — --clobber scheitert beim Ersetzen mit HTTP 404
+          # (gemessen 07.10.2026, siehe SITZUNGSABSCHLUSS.md).
+          gh release delete-asset "$TAG" SHA256SUMS -y >/dev/null 2>&1 || true
+          sleep 5
+          ok=0
+          for versuch in 1 2 3; do
+            if gh release upload "$TAG" sums/SHA256SUMS; then ok=1; break; fi
+            echo "Versuch $versuch gescheitert — neuer Versuch in 10 s"
+            sleep 10
+          done
+          if [ "$ok" != "1" ]; then
+            echo "::error::SHA256SUMS konnte nicht angehaengt werden."
+            exit 1
+          fi
+          gh release view "$TAG" --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
+
+      - name: Hochgeladene Pruefsummen gegenpruefen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG="${{ steps.tag.outputs.name }}"
+          SOLL="${TAG#v}"
+          rm -rf nachprobe && mkdir -p nachprobe
+          gh release download "$TAG" --dir nachprobe --pattern 'SHA256SUMS'
+          cp "sums/Netzwerk-Labor-${SOLL}-Browser.zip" "sums/Netzwerk-Labor.html" \
+             "sums/Netzwerk-Labor.exe" "sums/Netzwerk-Labor-${SOLL}-Android.apk" nachprobe/
+          cd nachprobe
+          sha256sum -c SHA256SUMS

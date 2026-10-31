@@ -52,7 +52,7 @@ UI.klassenraum = (() => {
     });
     return aus;
   }
-  /* Der HILFECODE (3.0, Säule 5, Weg A; Architektur § 12.4): gedruckt `H-XXXX-XX` — neun Zeichen
+  /* Der HILFECODE (3.0, Säule 5, Weg A; Architektur § 12.5): gedruckt `H-XXXX-XX` — neun Zeichen
      (`H-` + 4 Nutzzeichen + `-` + 2 Prüfzeichen). Er ist KEIN Ergebnis — er sagt, WO jemand hängt.
      Entschieden wird am PRÄFIX, und zwar VOR dem Eintragen: `H…` geht immer den Hilfeweg
      (ein Ergebnis-Code beginnt mit `E`, ein Auftragscode mit `NL`). So bekommt die Lehrkraft auch
@@ -209,10 +209,31 @@ UI.klassenraum = (() => {
   function codeAnzeigen(){
     if (!kann("erzeugen")) return lehrerHinweis("Der Klassenraum ist in dieser Fassung nicht eingebaut.");
     const wahl = String(L.auftrag.value || "");
-    const r = wahl.startsWith("skill:") ? ruf("erzeugen", {skill: wahl.slice(6)}) : ruf("erzeugen", {ticketId: wahl.slice(3)});
+    const quelle = wahl.startsWith("skill:") ? {skill: wahl.slice(6)} : {ticketId: wahl.slice(3)};
+    const r = ruf("erzeugen", quelle);
+    /* § 12.2: die aktive Sitzung mit Ergebnissen wird nicht still ersetzt. */
+    if (r && r.warnung === "sitzung-hat-ergebnisse") return sitzungErsetzenBestaetigen(quelle);
     if (!r || r.fehler) return lehrerHinweis((r && r.grund) || "Der Auftrag ließ sich nicht anlegen.");
     lehrerHinweis("");
     lehrerFuellen();
+  }
+  function sitzungErsetzenBestaetigen(quelle){
+    const s = sitzungJetzt();
+    const anzahl = s && s.ergebnisse ? Object.keys(s.ergebnisse).length : 0;
+    const inhalt = h("div", {class: "kl-spalte"},
+      h("div", {class: "kl-block"}, hinweisZeile("kl-detail",
+        "Die laufende Sitzung hat " + anzahl + " Ergebnis" + (anzahl === 1 ? "" : "se") +
+        ". Eine neue Sitzung ersetzt sie nicht – die alte bleibt in der Sitzungsliste erhalten.")),
+      h("span", {class: "kl-knoepfe"},
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => UI.app.dialogZu()}, "Abbrechen"),
+        h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: () => {
+          UI.app.dialogZu();
+          const r = ruf("erzeugen", Object.assign({}, quelle, {bestaetigen: true}));
+          if (!r || r.fehler) return lehrerHinweis((r && r.grund) || "Der Auftrag ließ sich nicht anlegen.");
+          lehrerHinweis("");
+          lehrerFuellen();
+        }}, "Neue Sitzung anlegen")));
+    UI.app.dialogOeffnen("Sitzung hat Ergebnisse", inhalt);
   }
   function codeKopieren(){
     const s = sitzungJetzt();
@@ -274,8 +295,8 @@ UI.klassenraum = (() => {
   }
 
   /* B § 10: Export UND Import auf EINEM Knopf (R12) – der Dialog bringt Escape und Fokusfalle mit.
-     Die Platzzahl der Klasse steht hier, nicht in der Ansicht: B § 2.1 legt SECHS Bedienelemente
-     fest, B § 9.4 verlangt für sie ein siebtes – Entscheidung der Leitung nötig (O1). */
+     Die Sitzungsauswahl (KLR-01b, § 12.1/§ 12.2) liegt hier im Dialog, nicht in der Ansicht: die
+     Lehrkraft-Ansicht bleibt bei SECHS Bedienelementen (R12, § 12.5, Leitungsentscheidung O1). */
   function dateiDialog(){
     const plaetze = h("select", {class: "kl-feld", "aria-label": "Plätze der Klasse"});
     const jetzt = Number(ruf("plaetze")) || 0;
@@ -283,12 +304,32 @@ UI.klassenraum = (() => {
       ...Array.from({length: 31}, (_, i) => h("option", {value: String(i + 1)}, `${i + 1} Plätze`)));
     plaetze.value = String(jetzt);
     plaetze.onchange = () => { const r = ruf("plaetzeSetzen", Number(plaetze.value) || null); if (r && r.fehler) lehrerHinweis(r.grund); else lehrerFuellen(); };
+    const liste = ruf("sitzungen") || [];
+    const zeilen = liste.map(s => {
+      const anzahl = s && s.ergebnisse ? Object.keys(s.ergebnisse).length : 0;
+      const steuer = s && s.aktiv
+        ? h("span", {class: "kl-detail"}, "Aktive Sitzung")
+        : h("button", {type: "button", class: "knopf kl-knopf", onclick: () => {
+            const r = ruf("sitzungWaehlen", s.id);
+            if (!r || r.fehler) return lehrerHinweis((r && r.grund) || "Die Sitzung ließ sich nicht laden.");
+            UI.app.dialogZu();
+            lehrerFuellen();
+            dateiDialog();                              /* Liste mit neuem Stand zeigen */
+          }}, "Sitzung laden");
+      return h("div", {class: "kl-zeile"},
+        hinweisZeile("kl-code", (s && s.code) || "—"),
+        hinweisZeile("kl-detail", ((s && s.titel) || "Sitzung") + " · " + anzahl + " Ergebnis" + (anzahl === 1 ? "" : "se")),
+        steuer);
+    });
     const inhalt = h("div", {class: "kl-spalte"},
+      h("div", {class: "kl-block"},
+        hinweisZeile("kl-etikett", "Sitzungen auf diesem Gerät: " + liste.length),
+        ...zeilen),
       h("div", {class: "kl-form"}, hinweisZeile("kl-etikett", "Klassenstärke"), plaetze),
-      h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Die Sitzung liegt nur auf diesem Rechner. Die Datei ist die Sicherung – und der Weg auf einen anderen Rechner.")),
+      h("div", {class: "kl-block"}, hinweisZeile("kl-detail", "Die Sitzungen liegen nur auf diesem Rechner. Die Datei ist die Vollsicherung – und der Weg auf einen anderen Rechner.")),
       h("span", {class: "kl-knoepfe"},
         h("button", {type: "button", class: "knopf kl-knopf", onclick: () => { exportieren(); UI.app.dialogZu(); }}, "Exportieren"),
-        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => { importieren(); UI.app.dialogZu(); }}, "Importieren")));
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => importieren()}, "Importieren")));
     UI.app.dialogOeffnen("Klassenraum-Datei", inhalt);
   }
   function exportieren(){
@@ -300,22 +341,46 @@ UI.klassenraum = (() => {
         .catch(() => UI.toast("Die Datei ließ sich nicht sichern.", "warn", {id: "kl-datei", dauer: 6000}));
     } catch (e) { console.error("Klassenraum-Export", e); UI.toast("Die Datei ließ sich nicht sichern.", "warn", {id: "kl-datei", dauer: 6000}); }
   }
+  /* Der Import ist eine VOLLSICHERUNG (§ 12.1): er ersetzt alle Sitzungen des Geräts. Weil das ein
+     Datenverlust sein kann, bestätigt die Lehrkraft vorher; erst danach wird die Datei gewählt. */
   function importieren(){
+    UI.app.dialogZu();
+    const liste = ruf("sitzungen") || [];
+    const mitErgebnissen = liste.filter(s => s && s.ergebnisse && Object.keys(s.ergebnisse).length).length;
+    if (liste.length){
+      const inhalt = h("div", {class: "kl-spalte"},
+        h("div", {class: "kl-block"}, hinweisZeile("kl-detail",
+          "Die Datei ist eine Vollsicherung: Sie ersetzt alle " + liste.length + " Sitzungen auf diesem Gerät" +
+          (mitErgebnissen ? " – " + mitErgebnissen + " davon mit Ergebnissen" : "") + ".")),
+        h("span", {class: "kl-knoepfe"},
+          h("button", {type: "button", class: "knopf kl-knopf", onclick: () => UI.app.dialogZu()}, "Abbrechen"),
+          h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: () => { UI.app.dialogZu(); dateiImportieren(); }}, "Datei wählen und ersetzen")));
+      UI.app.dialogOeffnen("Sitzungen ersetzen?", inhalt);
+      return;
+    }
+    dateiImportieren();
+  }
+  function dateiImportieren(){
     let p;
-    try { p = Promise.resolve(Plattform.datei.importieren()); } catch (e) { console.error("Klassenraum-Import", e); return; }
-    p.then(text => {
-      if (!text) return;                                  /* abgebrochen: keine Meldung (B § 10.3) */
-      const vorher = ruf("exportieren");                  /* verlustfreie Sicherung für „Rückgängig“ */
-      const r = ruf("importieren", text);
-      if (!r || !r.ok){
-        const titel = r && r.fehler === "fassung" ? "Zu neues Format" : "Klassenraum-Datei";
-        UI.toast((r && r.grund) || "Das ist keine Klassenraum-Datei.", "warn", {id: "kl-datei", titel, dauer: r && r.fehler === "fassung" ? 14000 : 6000});
-        return;
-      }
-      const zurueck = typeof vorher === "string" ? {text: "Rückgängig", fn: () => { ruf("importieren", vorher); lehrerFuellen(); }} : null;
-      UI.toast("Datei eingelesen.", "ok", {id: "kl-datei", dauer: 8000, aktion: zurueck});
-      lehrerFuellen();
-    }).catch(() => UI.toast("Die Datei ließ sich nicht lesen.", "warn", {id: "kl-datei", dauer: 6000}));
+    try { p = Plattform.datei.importieren(); } catch (e) { console.error("Klassenraum-Import", e); return; }
+    if (!p || typeof p.then !== "function") return;      /* abgebrochen: keine Meldung (B § 10.3) */
+    try {
+      p.then(text => {
+        if (!text) return;
+        const vorher = ruf("exportieren");                /* verlustfreie Sicherung für „Rückgängig“ */
+        const r = ruf("importieren", text);
+        if (!r || !r.ok){
+          const titel = r && r.fehler === "fassung" ? "Zu neues Format" : "Klassenraum-Datei";
+          UI.toast((r && r.grund) || "Das ist keine Klassenraum-Datei.", "warn", {id: "kl-datei", titel, dauer: r && r.fehler === "fassung" ? 14000 : 6000});
+          return;
+        }
+        const anzahl = Array.isArray(r.sitzungen) ? r.sitzungen.length : (ruf("sitzungen") || []).length;
+        const zurueck = typeof vorher === "string" ? {text: "Rückgängig", fn: () => { ruf("importieren", vorher); lehrerFuellen(); }} : null;
+        UI.toast("Datei eingelesen – " + anzahl + " Sitzung" + (anzahl === 1 ? "" : "en") + ".", "ok", {id: "kl-datei", dauer: 8000, aktion: zurueck});
+        lehrerFuellen();
+        dateiDialog();                                    /* Liste + Anzahl nach dem Import zeigen */
+      }).catch(() => UI.toast("Die Datei ließ sich nicht lesen.", "warn", {id: "kl-datei", dauer: 6000}));
+    } catch (e) { console.error("Klassenraum-Import", e); UI.toast("Die Datei ließ sich nicht lesen.", "warn", {id: "kl-datei", dauer: 6000}); }
   }
 
   /* ================================================================ Azubi */

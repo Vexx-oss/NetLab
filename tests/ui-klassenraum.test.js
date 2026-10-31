@@ -99,9 +99,11 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
   const klKnopf = (el, text) => klFinde(el, "button").find(b => klText(b).includes(text)) || null;
 
   /* ================= Prüfstand ================= */
-  function klPruefstand(){
+  /* opt.importText/opt.importSync erlauben den Import-Weg im Test SYNCHRON zu messen: die echte
+     Plattform liefert ein Promise; für die DOM-Prüfung genügt ein Thenable, das sofort antwortet. */
+  function klPruefstand(opt = {}){
     const fs = require("fs"), path = require("path"), vm = require("vm");
-    const registriert = [], abschnitte = [], busHaken = [], rufe = [], dialoge = [], exporte = [];
+    const registriert = [], abschnitte = [], busHaken = [], rufe = [], dialoge = [], exporte = [], importe = [];
     const seite = klKnoten("div");                          /* der Hub (.hb-seite) für die Startzeile */
     seite.className = "hb-seite";
     const dokument = {
@@ -115,7 +117,12 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     /* Plattform als Attrappe (im Testbereich gibt es sie nicht): „tauri“ zeigt den Server-Schalter. */
     const Plattform = {name: "tauri", datei: {
       exportieren: (name, text) => { exporte.push([name, text]); return Promise.resolve(true); },
-      importieren: () => Promise.resolve(null)}};
+      importieren: () => {
+        importe.push(true);
+        const text = opt.importText == null ? null : String(opt.importText);
+        if (opt.importSync) return {then: fn => { fn(text); return {catch(){}}; }};
+        return Promise.resolve(text);
+      }}};
     const UIstub = {
       startHaken: [],
       app: {
@@ -149,7 +156,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     };
     vm.createContext(bereich);
     vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "src", "ui", "klassenraum.js"), "utf8"), bereich, {filename: "ui/klassenraum.js"});
-    return {UI: bereich.UI, K: bereich.UI.klassenraum, registriert, abschnitte, busHaken, rufe, dialoge, exporte, seite, dokument,
+    return {UI: bereich.UI, K: bereich.UI.klassenraum, registriert, abschnitte, busHaken, rufe, dialoge, exporte, importe, Plattform, seite, dokument,
       zeige: i => { const c = klKnoten("div"); registriert[i].def.zeigen(c); return c; },
       start: () => { for (const fn of UIstub.startHaken) fn(); }};
   }
@@ -650,4 +657,95 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(Object.keys(Spiel.klassenraum.sitzung().ergebnisse).length, 1, "ein E-Code wird weiterhin eingetragen");
     erwarte.enthaelt(klFinde(c, ".kl-hinweis").map(x => klText(x)).join(" | "), "1 eingetragen", "und als eingetragen gemeldet");
   })));
+
+  /* ================= KLR-01b: Sitzungsverwaltung in der Oberfläche (§ 12.1/§ 12.2) =================
+     Eine neue Sitzung ersetzt die alte nicht still (P0 aus berichte/klassenraum.md): mit Ergebnissen
+     fragt die Oberfläche vorher; Abbrechen lässt alles, wie es war. Die Auswahl liegt im bestehenden
+     „Datei…“-Dialog (R12: keine neuen Sicht-Elemente); der Import ist eine VOLLSICHERUNG und ersetzt
+     alle Sitzungen des Geräts erst nach Bestätigung. */
+  pruefe("KLR-01b: neue Sitzung mit Ergebnissen nur nach Bestätigung – Abbrechen erhält die alte (P0)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s1 = klSitzung("salon-terminal");
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(s1.id, 5, 4, 80000, 1));
+    p.K.lehrerWieder();
+    p.K._L.auftrag.value = "id:salon-02";
+    klKnopf(c, "Code anzeigen").click();
+    erwarte.gleich(p.dialoge.length, 1, "die Warnung kommt als Hausdialog");
+    erwarte.enthaelt(p.dialoge[0].titel, "Ergebnisse", "der Titel nennt den Grund");
+    erwarte.gleich(Spiel.klassenraum.sitzung().code, s1.code, "ohne Bestätigung bleibt die alte Sitzung aktiv");
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 1, "und es entsteht keine zweite Sitzung");
+    klKnopf(p.dialoge[0].inhalt, "Abbrechen").click();
+    erwarte.gleich(p.dialoge[0].zu, true, "Abbrechen schließt den Dialog");
+    erwarte.gleich(Spiel.klassenraum.sitzung().code, s1.code, "Abbrechen erhält die alte Sitzung");
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 1, "kein stiller Datenverlust");
+    klKnopf(c, "Code anzeigen").click();
+    erwarte.gleich(p.dialoge.length, 2, "die Warnung erscheint erneut");
+    klKnopf(p.dialoge[1].inhalt, "Neue Sitzung anlegen").click();
+    const jetzt = Spiel.klassenraum.sitzung();
+    erwarte.wahr(!!jetzt && jetzt.code !== s1.code, "bestätigt: eine neue Sitzung ist aktiv");
+    const alle = Spiel.klassenraum.sitzungen();
+    erwarte.gleich(alle.length, 2, "die alte Sitzung bleibt in der Liste");
+    const alt2 = alle.find(x => x.code === s1.code);
+    erwarte.wahr(!!alt2 && Object.keys(alt2.ergebnisse || {}).length === 1, "samt ihrem einen Ergebnis erhalten");
+  }));
+
+  pruefe("KLR-01b: Datei-Dialog listet alle Sitzungen und wechselt über die echte API", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s1 = klSitzung("salon-terminal");
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(s1.id, 3, 2, 30000, 1));
+    Spiel.klassenraum.erzeugen({ticketId: "salon-02", bestaetigen: true});
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 2, "zwei Sitzungen auf dem Gerät");
+    p.K.lehrerWieder();
+    klKnopf(c, "Datei…").click();
+    const inhalt = p.dialoge[0].inhalt;
+    erwarte.enthaelt(klText(inhalt), "Sitzungen auf diesem Gerät: 2", "die Anzahl steht im Dialog");
+    erwarte.enthaelt(klText(inhalt), "1 Ergebnis", "je Sitzung die Zahl der Ergebnisse");
+    const laden = klKnopf(inhalt, "Sitzung laden");
+    erwarte.wahr(!!laden, "für die nicht aktive Sitzung gibt es einen Wechsel");
+    laden.click();
+    erwarte.gleich(Spiel.klassenraum.sitzung().id, s1.id, "gewechselt über sitzungWaehlen (echte API)");
+    erwarte.gleich(p.dialoge.length, 2, "der Dialog zeigt den neuen Stand");
+    erwarte.enthaelt(klText(p.dialoge[1].inhalt), "Sitzungen auf diesem Gerät: 2", "Liste bleibt vollständig");
+    erwarte.gleich(Spiel.klassenraum.sitzungen().filter(x => x.aktiv).length, 1, "genau eine aktive Sitzung");
+  }));
+
+  pruefe("KLR-01b: Import ist Vollsicherung – Bestätigung ersetzt ALLE Sitzungen, danach Liste + Anzahl", () => klKapsel(() => {
+    /* Datei mit genau EINER Sitzung samt Ergebnis bauen (echter Export, keine erfundene Datei). */
+    const sA = klSitzung("salon-terminal");
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(sA.id, 5, 4, 80000, 1));
+    const datei = Spiel.klassenraum.exportieren();
+    erwarte.gleich(typeof datei, "string", "der Export liefert die Datei");
+    Spiel.klassenraum.erzeugen({ticketId: "salon-02", bestaetigen: true});
+    Spiel.klassenraum.erzeugen({ticketId: "salon-03", bestaetigen: true});
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 3, "drei lokale Sitzungen vor dem Import");
+    const p = klPruefstand({importText: datei, importSync: true});
+    p.start();
+    const c = p.zeige(0);
+    p.K.lehrerWieder();
+    klKnopf(c, "Datei…").click();
+    erwarte.enthaelt(klText(p.dialoge[0].inhalt), "Sitzungen auf diesem Gerät: 3", "Liste vor dem Import");
+    klKnopf(p.dialoge[0].inhalt, "Importieren").click();
+    erwarte.gleich(p.dialoge.length, 2, "die Vollsicherung wird vorher bestätigt");
+    erwarte.enthaelt(p.dialoge[1].titel, "ersetzen", "der Titel nennt das Ersetzen");
+    erwarte.enthaelt(klText(p.dialoge[1].inhalt), "3 Sitzungen", "die Warnung nennt die lokale Zahl");
+    klKnopf(p.dialoge[1].inhalt, "Abbrechen").click();
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 3, "Abbrechen ändert nichts");
+    erwarte.gleich(p.importe.length, 0, "Abbrechen liest keine Datei");
+    klKnopf(c, "Datei…").click();
+    klKnopf(p.dialoge.at(-1).inhalt, "Importieren").click();
+    klKnopf(p.dialoge.at(-1).inhalt, "Datei wählen und ersetzen").click();
+    erwarte.gleich(p.importe.length, 1, "genau ein Dateizugriff");
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 1, "der Import ersetzt ALLE lokalen Sitzungen");
+    erwarte.gleich(Spiel.klassenraum.sitzung().code, sA.code, "die aktive Sitzung kommt aus der Datei");
+    const letzte = p.dialoge.at(-1);
+    erwarte.gleich(letzte.titel, "Klassenraum-Datei", "nach dem Import steht die Datei-Ansicht wieder");
+    erwarte.enthaelt(klText(letzte.inhalt), "Sitzungen auf diesem Gerät: 1", "Liste + Anzahl nach dem Import");
+    erwarte.enthaelt(klText(letzte.inhalt), "1 Ergebnis", "auch die Ergebnisse der importierten Sitzung");
+    const toast = p.rufe.filter(r => r[0] === "toast").map(r => String(r[1])).join(" | ");
+    erwarte.enthaelt(toast, "1 Sitzung", "ein Toast nennt die Anzahl");
+  }));
 });

@@ -59,6 +59,27 @@ Tests: `sh tools/test.sh [filter]` (Node 24 portabel; früher WSL). Testdateien 
 - `tief(x)` tiefe Kopie (JSON-sicher), `esc(s)` HTML-Escape.
 - `IP`: `zuZahl(s)`, `zuText(n)`, `gueltig(s)`, `maskeGueltig(s)`, `praefix(maske)`, `maske(praefix)`, `netz(ip, maske)`, `broadcast(ip, maske)`, `gleichesNetz(a, b, maske)`, `imNetz(ip, netz, maske)`, `wildcardPasst(ip, basis, wc)`, `privat(ip)`, `apipa(ip)`, `cidr(ip, maske)` → `"192.168.1.0/24"`, `macCisco(mac)` → `"0060.2f3a.1b01"`, `macWindows(mac)` → `"00-60-2F-3A-1B-01"`.
 
+**Nachtrag 31.10.2026 (KRN-01, aus dem Code gemessen).** Vollständige Kern-Oberfläche:
+
+- `store.get(k, d)`/`set(k, v)` arbeiten mit **tiefen Kopien**; `markieren()`/`standMelden()` setzen
+  „schmutzig" und starten die Entprellung; `sofort()` schreibt sofort und liefert ein immer erfülltes
+  `Promise<boolean>` (Fehler über `stand()`/Bus); `stand()` →
+  `{art:"schreibt"|"gesichert"|"fehler", fehler, zeit}`; `alles()` → tiefe Kopie des ganzen Speichers;
+  `initialisieren(daten, schreiber, meldung)`; `schreiberSetzen(fn)`; `meldung`; `entprellungMs`.
+  **Genau eine Entprellung:** `SPEICHER.entprellung = 1500` ms (`src/kern/basis.js:71-132`).
+- `Bus.an(name, fn)` (Rückgabe = Abmeldefunktion), `Bus.aus(name, fn)`, `Bus.senden(name, daten)`;
+  Hörer-Ausnahmen werden gefangen und geloggt (`src/kern/basis.js:28-39`).
+- `jetzt()` — in Tests über `jetzt.setzen(ms)`/`weiter(ms)`/`frei()` steuerbar (`src/kern/basis.js:8-15`);
+  `heute(d?)`, `plusTage(tag, n)`, `tageZwischen(a, b)`, `datumDe(tag)` (`:18-21`).
+- `Zufall(seed)` → `{zahl(n), wahl(arr), mischen(arr), kommazahl(), zwischen(min, max), seed}`
+  (mulberry32, deterministisch; `src/kern/basis.js:42-56`).
+- `tief(x)`, `esc(s)` (`:24-25`); Anzeige-Helfer `eur(x)`, `zahlDe(x)`, `klemme(x, lo, hi)` (`:150-152`).
+- `IP`: wie oben; zusätzlich `ausCidr(s)` → `{netz, maske, praefix}`, `istNetzadresse(ip,m)`,
+  `istBroadcast(ip,m)`, `hostAdresse(ip,m)`, `wildcard(m)`, `plus(ip,k)`, `vergleich(a,b)`, `loopback(ip)`,
+  `maskeZahl(p)`, `macAus(n)`, `MAC_BROADCAST` (`src/kern/netz.js:47-69`).
+- Frühstart: `window.__LABOR_SPEICHER__` (Tauri, von der Hülle vor allen Seitenskripten gesetzt) hat Vorrang
+  vor `localStorage["netzwerk-labor"]`; ein Lesefehler startet leer mit Meldung (`src/kern/basis.js:134-147`).
+
 ## 4 · Modell (Konfiguration ist Daten)
 
 Ein **Netz** ist reines JSON:
@@ -138,6 +159,27 @@ Ein **Netz** ist reines JSON:
 
 **Rückgängig** (`modell/verlauf.js`): `Modell.verlauf(netz)` → `{aendern(beschreibung, fn), zurueck(), vor(), kannZurueck, kannVor, liste}`. Schnappschuss-basiert (Netz ist klein), höchstens 100 Schritte. **Jede** UI- und Konsolenänderung geht über `aendern`. Danach `Bus.senden("netz-geaendert", {netz, beschreibung})`.
 
+**Nachtrag 31.10.2026 (KRN-01, aus dem Code gemessen).**
+
+- **Geräteform:** `os:"windows"|"linux"` nur bei `pc`/`server`/`nas`, gespeichert nur als Abweichung vom
+  Standard (`OS_STANDARD`: pc windows, server/nas linux; `Modell.osVon`, `src/modell/geraete.js:25-33`);
+  Switch: `snooping:{an, vertraut:[port]}` (`:56-58`); Router: `dhcp:{an, ausgeschlossen:[…], pools:[…]}` —
+  fehlendes `an` gilt als an (`:62-64`).
+- **Modell-API — vollständige exportierte Oberfläche (`src/modell/geraete.js:295-298`):** `TYPEN`, `NAMEN`,
+  `PORTS`, `DIENSTPORTS`, `IOS`, `HOST`, `OS_STANDARD`, `osVon`, `werkszustand`, `subIf`, `switchPort`,
+  `routerIf`, `hostIf`, `neu`, `geraet`, `entfernen`, `ports`, `kabelAn`, `freierPort`, `verbinden`,
+  `trennen`, `portAn`, `linkOben`, `portStatus`, `pfad`, `lesen`, `setzen`, `loeschen`, `geraetSetzen`,
+  `vlan`, `laufzeit`, `macsVergessen`, `speichern`, `neustart`, `startupLoeschen`, `kopie`, `gleich`,
+  `ungespeichert`, `adressen`, `pruefen` → `[{geraet, feld, code, text}]`, `konfig` (= running).
+  Rückgängig: `Modell.verlauf(netz)` → `{aendern, zurueck, vor, kannZurueck, kannVor, liste, leeren}`
+  (`src/modell/verlauf.js:5-42`).
+- **Werkszustand (Ist-Stand):** `pc` hat leeres `dienste` (`src/modell/geraete.js:43-53`); `internet`
+  startet ohne `if`-Adressen und ohne Routen (`:70-76`). Die früheren Abweichungen „pc ohne dienste" und
+  „internet ohne if/routen" sind damit **dokumentierter Ist-Stand**, kein Widerspruch mehr.
+- **Bekannte Abweichungen (nicht Vertrag; gehören zu KRN-06):** `loeschen` prüft das Gerät nicht
+  (`:210-215`); `geraetSetzen` schreibt andere Felder direkt (`:228-236`); `adressen` liefert auch
+  abgeschaltete SVI (`:262`); `gleich` vergleicht per `JSON.stringify` (`:254`).
+
 ## 5 · Simulation (`Sim`)
 
 ### 5.1 Aufrufe (verändern `netz.zustand`, nie die Konfig)
@@ -210,6 +252,68 @@ CLI.vorschlag(sitzung)       → nächster sinnvoller Befehl (Einstieg) | null
 
 Änderungen der Konsole laufen über `Modell.setzen`/Verlauf (eine Quelle der Wahrheit). `ping`/`traceroute`/`tracert`/`nslookup`/`ipconfig /renew` rufen `Sim` und formatieren wie IOS bzw. Windows (`.!!!!`, „Antwort von …“).
 
+### 6.1 running-config — Anzeige und Wiedereinspielen (verbindlich, 31.10.2026)
+
+`CLI.runningConfig(geraet)` liefert den Text von der ersten `!`-Zeile bis einschließlich `end` (ohne die zwei
+Kopfzeilen, die `show running-config` davor setzt). Geltungsbereich: **Router und Switch**. Firewall:
+herstellerneutrale Anzeige, ausdrücklich **nicht** wiedereinspielbar und im Text als Kommentar gekennzeichnet.
+Hosts (`pc`/`server`/`nas`): `null`.
+
+**Wiedereinspiel-Invariante.** Jede Zeile von `CLI.runningConfig` ist über
+`CLI.anwenden(netz, id, "configure terminal\n" + text)` fehlerfrei einlesbar — `ok:true`, `fehler:[]` —
+inklusive `!`-Kommentaren und abschließendem `end`. Die Konsole betritt **keinen** Konfigurationsmodus von
+selbst; der Wiedergabeweg beginnt ausdrücklich mit `configure terminal` (IOS-Weg). Nach dem Einspielen auf ein
+Gerät desselben Typs gilt: (a) `CLI.runningConfig(kopie) === text` (zeichengleich, damit `entspricht:`- und
+Show-Ausgaben stabil bleiben), (b) die Modell-Kernfelder sind tiefgleich: `running.if`, `running.ports`,
+`running.svi`, `running.dhcp` (Pools samt `leaseS`, `domain`, `reservierungen`), `running.acls`,
+`running.routen`, `running.nat`, `running.snooping`, `running.hostname`, `running.lines`, `running.banner`,
+`running.benutzer`.
+
+**VLAN-Datenbank.** `flash.vlans` gehört wie auf IOS **nicht** zur running-config. Sie wird separat angelegt
+(`vlan 20`, `name …`), steht in `show flash:` als `vlan.dat` und überlebt `write erase`; weg ist sie erst mit
+`delete flash:vlan.dat`.
+
+**Anzeigeform (verbindlich).** Die running-config zeigt nur Zeilen, die das Gerät selbst wieder annimmt; reine
+Komfort-Defaults ohne Befehl entfallen: `version …`, `service timestamps …`, `boot-start-marker`,
+`boot-end-marker`, `no aaa new-model`, `system mtu routing 1500`, `spanning-tree mode pvst`,
+`spanning-tree extend system-id`, `vlan internal allocation policy ascending`, `duplex auto`, `speed auto`,
+`ip forward-protocol nd`, `no service pad`, `line aux 0`. `end` bleibt als Blockende zulässig.
+
+**DHCP-Pools vollständig:** je Pool `ip dhcp pool NAME`, `network`, `default-router`, `dns-server`,
+`lease …`, `domain-name …`; je Reservierung `host NAME`, `hardware-address …`, `ip …`, danach `exit`
+(verlässt den Reservierungsmodus; nötig, weil aus `(dhcp-config-host)` sonst kein globales Kommando mehr
+erreichbar ist).
+
+**SSH (D3).** `ip ssh version 2` wird nicht als Befehl ausgegeben (der Parser kennt ihn heute nicht; Nachbau
+CLI-05/3.1). Ist ein RSA-Schlüssel gesetzt, erscheint stattdessen die Kommentarzeile:
+`! SSH aktiv – „ip ssh version 2“ folgt in 3.1 (CLI-05).` Das `crypto key generate rsa` ist wie auf IOS nicht
+Teil der running-config. Folge: der bisherige Assert in `tests/cli-ios-ssh.test.js` („ip ssh version 2“ im
+Text) wird auf diese ehrliche Kennzeichnung umgestellt; der SSH-Zustand bleibt über `running.sshSchluessel`
+geprüft (keine Abschwächung).
+
+### 6.2 Einleseformen und Grenzen (verbindlich, 31.10.2026)
+
+**Geheimnisse.** Typ-Präfixe `0` (Klartext), `5` (MD5-artig), `7` (verschleiert) werden beim Einlesen
+akzeptiert und unverändert wieder angezeigt — für `enable secret`, `username … secret|password` und
+`password` in `line`. Gespeichert wird die eingegebene Form; reine Klartext-Eingaben erscheinen weiterhin in
+der bisherigen Anzeigeform (Typ 5 für `secret`, Typ 0/7 für `password`). Erneutes Einlesen erzeugt dieselbe
+Anzeige.
+
+**`no ip domain lookup`** — Anzeige und Befehl sind deckungsgleich; die running-config schreibt die Tokenform
+des Befehls (`no ip domain-lookup`), nicht die IOS-Kosmetik mit Leerzeichen.
+
+**`CLI.anwenden(netz, id, text, {verlauf?})`** — Vertrag unverändert: beginnt im privilegierten Modus (`#`),
+führt `!`-Kommentarzeilen und Leerzeilen aus, beantwortet nur automatische Rückfragen (Enter/confirm) selbst,
+liefert `{ok, fehler:[{nr, zeile, meldung}]}`. Ein Block, der einen Konfigurationsmodus braucht, beginnt mit
+`configure terminal`.
+
+**Nicht wiedereinspielbar (Grenze, ehrlich):** Firewall-Konfiguration (herstellerneutral) und alles, was nur im
+Inspektor konfigurierbar ist. Hosts haben keine IOS-running-config. Die `show running-config`-Kopfzeilen
+gehören nicht zum Vertragstext.
+
+**Vertrags-Test:** `tests/cli-runningconfig.test.js` (Roundtrip Router/Switch/Startup, Zustandsvergleich,
+Phantomliste, absichtlich verlorenes Feld → rot).
+
 ## 7 · Spiel (`Spiel`)
 
 ### 7.1 Ticket (Daten in `daten/tickets-*.js` → `DATEN.tickets`)
@@ -234,6 +338,8 @@ CLI.vorschlag(sitzung)       → nächster sinnvoller Befehl (Einstieg) | null
 Pflicht (Test): Jede Lösung erfüllt alle Ziele; das Start-Netz verletzt mindestens ein Ziel, und zwar mit dem erwarteten Grund.
 
 ### 7.2 Spielstand (`store "labor"`, `v:3`)
+
+*Der Lebenszyklus der Wiederholungs-Tickets im Postfach steht in § 7.5.*
 
 `{ v, euro, ruf, stufe, kunden:{[id]:{vertrag, ampel, seit, sterne:[]}}, postfach:[TicketInstanz], aktiv:iid|null, erledigt:[{id, sterne, tag, hilfe}], playbooks:{slots, aktiv:[skill]}, tag:{…Arbeitstag…}, zuletzt:ms, einstieg:{…} }`
 (Die Liste ist ein Auszug; weitere Felder u. a. `naechsteIid`, `buch`, `angebot`, `dex`, `tagesraetsel`, `tagebuch`. Die **Einstellungen** liegen NICHT hier, sondern unter dem eigenen Store-Schlüssel `"einst"` — `st.einst` gibt es nicht.)
@@ -274,20 +380,60 @@ Bus-Ereignisse: `netz-geaendert`, `ticket-neu`, `ticket-geloest`, `zustand-geaen
 
 **Gemessen (06.10.2026, Edge headless, Einzeldatei-Fassung, 1366×768):** `Spiel.speichern()` 2010 → **1512 ms** bis zum Schreibvorgang, Netzwechsel 2415 → 1515 ms, Auftragsabschluss 2436 → **6,7 ms** (Gegenprobe des Prüfers: 22 ms), Kauf 3,8 ms (Prüfer: 24 ms), Verstecken der Seite 0 → 1 Schreibvorgang. Spielstand: **26.554 B** beim Start, 27.420 B nach einem Abschluss, 102.799 B bei 30 Postfach-Instanzen. Grenze: ein Prozess-Tod **ohne** `hidden`-Wechsel verliert die letzten ≤ 1500 ms.
 
+### 7.5 Postfach-Lebenszyklus (3.0.0, SPL-01) — verbindlicher Vertrag (31.10.2026)
+
+Tickets mit `quelle:"wiederholung"` entstehen an zwei Stellen: `Spiel.tag.bereitschaftStarten()` (Tages-Bereitschaft)
+und `Spiel.wiederholungAnlegen()` (nach „Lösung vorführen"). Verbindlich:
+
+- **Dedup je Fertigkeit:** je Fertigkeit (`inst.gen.skill` bzw. erste `def.skills`) bleibt höchstens **ein** offenes
+  Wiederholungs-Ticket; ist schon eines offen, legt keiner der beiden Erzeuger ein zweites an.
+- **Verfall:** ein offenes Wiederholungs-Ticket, dessen `start` älter als `Spiel.TAG.WIEDERHOLUNG_VERFALL_TAGE = 7`
+  Kalendertage ist, wird entfernt.
+- **Obergrenze:** höchstens `Spiel.TAG.BEREITSCHAFT_MAX = 3` offene Tickets mit `quelle:"wiederholung"`; darüber
+  werden die ältesten entfernt.
+- **Aufräumorte:** `Spiel.postfachAuffuellen()` (läuft auch in `Spiel.laden()`), `Spiel.tag.bereitschaftStarten()`
+  (vor Neuanlage) und `Spiel.wiederholungAnlegen()`. Beim Entfernen wird `Spiel._lz[iid]` gelöscht, `st.aktiv`
+  geleert, falls betroffen, und `st.tag.bereitschaft` auf lebende iids bereinigt.
+- **Altstände:** ein 2.9.0-Spielstand mit vielen Wiederholungen wird beim nächsten `Spiel.laden()` bereinigt
+  (≤ 3, ≤ 1 je Fertigkeit); sonst ändert das Aufräumen nichts am Stand.
+- **Größe/Latenz (Abnahme):** 10 simulierte Tage ergeben **≤ 3** sichtbare Wiederholungen,
+  `JSON.stringify(Spiel.st).length < 120000` und `store.set("labor", Spiel.st)` im Median **≤ 2 ms**
+  (Zielwert < 1 ms; Lead-Beschluss 31.10.2026, weil CI-Maschinen langsamer sein können).
+
 ## 8 · Plattform
 
 ```js
 Plattform = { name:"tauri"|"browser", version,
-  ladenSync() → { daten:Object|null, meldung:String|null },   // Tauri: window.__LABOR_SPEICHER__ (vom Rust-Initialisierungsskript gesetzt)
-  speichern(daten) → Promise,                                 // Tauri: invoke("speichern", {json}) atomar + Sicherungen
-  fenster:{ modus("leiste"|"voll"|"tray"), immerOben(b), position(ecke) },
-  abzeichen(n, text),  benachrichtigen(text),  autostart(b) → Promise,
+  impl,                                        // beim ersten Zugriff gewählt: Tauri nur bei window.__TAURI__,
+                                               // sonst Browser (src/plattform/plattform.js:6-9)
+  ladenSync() → { daten, meldung },            // Altvertrag, 0 Aufrufer (KRN-02)
+  speichern(daten) → Promise,                  // Tauri: invoke("speichern", {json}), atomar + Sicherungen
+  fenster:{ modus(m), immerOben(b), position(ecke), groesse(b, hoehe), zeigen(), verstecken(),
+            beenden(), zustand() },
+  abzeichen(n, text), benachrichtigen(text),   // benachrichtigen: 0 Aufrufer (KRN-02)
+  autostart(b) → Promise, autostartStatus() → Promise,
   datei:{ exportieren(name, text) → Promise, importieren() → Promise<String|null> },
-  kann(funktion) → { ja, grund },   // "immerOben","tray","autostart","hotkey","leiste","klickdurch","vollbildErkennen","benachrichtigen"
-  an(ereignis, fn) }                 // "tray-klick", "zweiter-start", "hotkey", "ruhe"
+  kann(funktion) → { ja, grund },              // bekannte Funktionen: immerOben, tray, autostart,
+                                               // hotkey, leiste, klickdurch, vollbildErkennen,
+                                               // benachrichtigen; unbekannt → ja:false (KRN-02)
+  an(ereignis, fn),
+  info() → { os, sitzung, kann?, gruende?, selbsttest? } }
 ```
 
-Rust-Befehle (Tauri `invoke`): `speichern{json}`, `fenster_modus{modus}`, `immer_oben{an}`, `abzeichen{n, text}`, `autostart{an}`, `autostart_status`, `exportieren{name, inhalt}`, `importieren`, `plattform_info` → `{os, sitzung:"x11"|"wayland"|"windows", kann:{…}}`.
+**Ereignisse, die die Tauri-Hülle tatsächlich liefert:** `modus-extern`, `zweiter-start`, `ruhe`,
+`labor-beenden` (`src/plattform/plattform-tauri.js:19-24`). Der Vertrag nennt **keine** `tray-klick`- oder
+`hotkey`-Brücke: die Abos in `src/ui/start.js:102-105` feuern nicht (KRN-02).
+
+**Rust-Befehle (invoke):** `speichern{json}`, `fenster_modus{modus}`, `fenster_groesse{b,h}`,
+`fenster_ecke{ecke}`, `fenster_zustand`, `fenster_knopf`, `immer_oben{an}`, `abzeichen{n,text}`,
+`autostart{an}`, `autostart_status`, `exportieren{name,inhalt}`, `importieren`, `plattform_info`,
+`ruhe{an}`, `beenden`, `selbsttest_ergebnis{json}` (`shell/src-tauri/src/main.rs:154-155`).
+
+**Bekannte Abweichungen (nicht Vertrag; KRN-04/KRN-02):** Browser-`importieren` löst bei Abbruch nie auf
+(`src/plattform/plattform-browser.js:52-58`); Browser-`exportieren` meldet `true` ohne Dateinachweis
+(`:44-51`); Browser-`kann` liefert für Unbekanntes `ja:true` (`:60`), Tauri-`kann` ebenfalls (`:76-79`);
+`benachrichtigen` ist in beiden Adaptern wirkungslos.
+
 
 ## 9 · Oberfläche (`UI`)
 
@@ -535,6 +681,103 @@ st.empfehlungen = { [kunde]: {von, tag} }           // durch Empfehlung eine Stu
 st.kundenakte[kunde].empfohlen = true                // dieser Kunde hat seine (einmalige) Empfehlung ausgesprochen
 ```
 
+## 10 · DHCP-Tiefe (D1 aus `Plan – Ausbau 1.2.md`) — verbindlicher Vertrag (05.10.2026, Stand 2.9.0)
+
+*Wiederhergestellt am 31.10.2026 für 3.0.0 (Commit `9716b08` hatte § 10–§ 18 gelöscht). Datenformen zuerst
+hier, dann im Code; Zahlen ausschließlich aus `docs/STAND.md`.*
+
+**Regressionsschutz.** Nach jeder Änderung an `src/sim/` oder `src/modell/`: `node tools/sim-stand.js` —
+„Simulation unverändert" oder die Abweichung ist ausdrücklich als gewollt benannt (mit Begründung). Die
+Testzahl misst `docs/STAND.md`, nicht dieser Abschnitt.
+
+### 10.1 Konfiguration (`geraet.running`, wandert in den Spielstand)
+
+```js
+/* Router/Firewall als DHCP-Server: running.dhcp */
+dhcp = {
+  an: false,                       // Server an/aus
+  pools: [{
+    name, netz, maske, gw, dns,    // vorhanden
+    start: "", anzahl: 50,         // Adressbereich wie host.js
+    domain: "",                    // Option 15
+    leaseS: 86400,                 // Lease-Dauer in Sekunden; 0/fehlend = Sim.T.LEASE
+    reservierungen: [{ mac:"02:00:…", ip:"192.168.10.20", name:"drucker" }],
+  }],
+  ausgeschlossen: [{von, bis}],
+}
+/* Host (pc/server/nas) als DHCP-Server: running.dienste.dhcp – dieselben Pool-Felder
+   (start, anzahl, domain, leaseS, reservierungen); ausgeschlossen gilt auch hier. */
+/* Switch: running.snooping */
+snooping = { an:false, vertraut:["Gi0/1"] }   // vertraute Ports (Richtung Server)
+```
+
+**Einheitlichkeit ist Pflicht:** Router-Pool und Host-Pool haben dieselbe Form; fehlende Felder werden
+**defensiv** gelesen (Standard), damit alte Spielstände laden.
+
+### 10.2 Laufzeit (`netz.zustand[id]`)
+
+```js
+leases:   { [ip]: { mac, bis, t1, t2, hostname, abgelaufen:false } }
+dhcp:     { [port]: { ip, maske, gw, dns, server, bis, t1, t2, domain } }  // Client-Sicht
+snooping: { [port]: { verworfen:0 } }
+```
+
+`t1 = bis - leaseDauer/2` (Erneuerung bei 50 %), `t2 = bis - leaseDauer/8` (Rebind, nur Anzeige). Alte
+Leases ohne `t1/t2` gelten als „kein T1 bekannt", nicht als Fehler.
+
+### 10.3 Verhalten (Simulation)
+
+1. **Ablauf in virtueller Zeit.** Ist `L.t > l.bis`, gilt die Lease als abgelaufen: `Sim.adresse` liefert
+   `quelle:"keine"`, der nächste Zugriff holt neu. **Kein neuer Timer, kein neues Ereignis** — Ablauf wird
+   beim Zugriff festgestellt.
+2. **Erneuerung bei 50 %.** Gültige Lease und `L.t >= t1`: Renew (Unicast Request/Ack); sonst Discover.
+3. **Reservierung.** Passt die Client-MAC, wird diese IP angeboten (auch außerhalb `start..anzahl`), aber nur
+   wenn frei; sonst kein Angebot, Grund `DHCP_RESERVED_BUSY`.
+4. **Optionen.** Der Ack trägt `domain` (Option 15); `leaseS` kommt aus dem Pool.
+5. **Adresskonflikt.** Vor dem Angebot prüft der Server gegen Geräte und fremde Leases; doppelt belegt →
+   nächste Adresse, Konflikt wird vermerkt (`leases[ip].konflikt` mit Zeitpunkt). `show ip dhcp conflict`
+   gibt echte Zeilen aus.
+6. **Rogue-DHCP.** Ein zweiter Server im LAN ist erlaubt; der Client nimmt das erste Angebot und kann falsches
+   Gateway/DNS erhalten. Grund `DHCP_ROGUE_OFFER` (Schicht 7).
+7. **DHCP-Snooping.** Bei `snooping.an` werden Server-Nachrichten (UDP 67 → 68) von nicht vertrauten Ports
+   verworfen; Zähler steigt, Client bekommt kein Angebot. Grund `DHCP_SNOOPING_BLOCKED` (Schicht 2).
+   Client-Nachrichten (68 → 67) sind immer erlaubt.
+
+### 10.4 Neue Gründe (Codes) — genau diese fünf, keine weiteren
+
+| Code | Schicht | Ausgelöst wenn |
+|---|---|---|
+| `DHCP_LEASE_EXPIRED` | 7 | Lease abgelaufen und in diesem Lauf kein neues Angebot |
+| `DHCP_RESERVED_BUSY` | 7 | Reservierung zeigt auf eine nicht freie Adresse — der Server gibt kein Angebot |
+| `DHCP_ROGUE_OFFER` | 7 | Client nimmt ein Angebot eines unerwarteten Servers |
+| `DHCP_SNOOPING_BLOCKED` | 2 | Server-Antwort an einem nicht vertrauten Switch-Port |
+| `DHCP_CONFLICT` | 7 | Eine Adresse liegt auf mehr als einem Gerät; der Server überspringt sie und nennt diesen Grund |
+
+**Vorrang, wenn mehrere zutreffen:** `DHCP_RESERVED_BUSY` → `DHCP_CONFLICT` → `DHCP_POOL_EMPTY` →
+`DHCP_LEASE_EXPIRED` → `DHCP_NO_OFFER`. Der Client wiederholt den Discover bis zu 3×; ein Server-Grund steht
+einmal je Versuch in der Trace, das Ergebnis `grund` des Aufrufs ist genau einer. Jeder Code braucht Eintrag in
+`Sim.GRUENDE`, Lehrtext in drei Tiefen mit Quelle, Injektor, mindestens ein Ticket je Stufe und Aufnahme in die
+Grundcode-Liste der Tests.
+
+### 10.5 Trace — unverändert im Format
+
+Keine neue `art`, kein neues Pflichtfeld im Ereignisobjekt (das optionale Warnfeld `warnung` aus § 5.2 bleibt
+die einzige Ergänzung). Renew nutzt die vorhandenen Typen `request`/`ack`; neue `app.felder` sind erlaubt
+(PDU-Ansicht). `tests/sim-gruende.test.js` prüft die Schlüsselmenge eines Ereignisses exakt.
+
+### 10.6 Oberfläche und Konsole
+
+- **Lease-Tabelle** im Inspektor (Router- und Server-Reiter): Gerät · IP · MAC · Restlaufzeit · Zustand.
+  Quelle ist `Sim.leases(netz, id)`.
+- **Pool-Formular** um `start`, `anzahl`, `domain`, `leaseS`, `reservierungen` erweitern (Router **und** Host).
+- **Switch-Reiter:** Schalter „DHCP-Snooping" und die vertrauten Ports.
+- `show ip dhcp binding|pool|conflict` gilt **auch auf Server-Hosts**; `binding` zeigt Restzeit/Zustand,
+  `conflict` echte Konflikte, `pool` rechnet `start`/`anzahl` und Ausschlüsse korrekt.
+- Windows `ipconfig /all`: Lease erhalten/erstellt/ablauf aus `t1/t2/bis`, plus DHCP-Server. Linux:
+  `dhclient`/`ip a` mit echter Restlaufzeit.
+- IOS-Poolmodus: `lease`, `domain-name`, `network`, `default-router`, `dns-server`,
+  `host`/`hardware-address` (Reservierung).
+
 ## 12 · Klassenraum (Lehrer/Schüler, Hobby-Ebene) — Vertrag
 
 *Stand 2.9.0, fortgeschrieben 31.10.2026 für 3.0.0.* Dieses Kapitel ersetzt den am 30.10.2026 mit
@@ -706,6 +949,312 @@ E1 (unsichtbar im Postfach), keine Bewertung, `plaetze` gehört zur Sitzung, R12
 für die Klassenraum-Ansichten nicht aufgeweicht.
 
 ---
+
+## 13 · Hilfestellung — Stufen und Schnittstellen (07.10.2026) — verbindlicher Vertrag
+
+*Wiederhergestellt 31.10.2026. Vollständiger Vertragstext:
+[`entwicklung/Hilfestellung – Stufen und Schnittstellen.md`](<entwicklung/Hilfestellung – Stufen und Schnittstellen.md>);
+bei Widerspruch gilt der Vertragstext. Dieser Abschnitt hält fest, was für den ganzen Bau gilt.*
+
+**Anlass (Auftrag des Nutzers, 07.10.2026).** Ein Azubi kann die Syntaxen nicht kennen, hat im Spielflow aber
+keinen Zugriff auf eine Lernnotiz. Die Hilfe muss dorthin, wo er steht: ins **Terminal**, in die **Leiste**
+und in einen **Trainingsbereich abseits der Aufträge** — schrittweise mit dem Bildungsstand wachsend.
+
+### 13.1 Die drei Achsen (nicht verwechseln)
+
+| Achse | Feld | Werte | Bedeutung |
+|---|---|---|---|
+| **Bildungsstand** | `Spiel.einst.stufe` | `azubi` \| `azubi-plus` \| `geselle` \| `meister` | Voreinstellung des **Menschen**; wird nie automatisch geändert |
+| Erklärtiefe | `Spiel.einst.niveau` | `E` \| `AP1` \| `AP2` | Wie ausführlich Konsole und Simulation erklären |
+| Prüfungsstrenge | `Spiel.einst.wahl`, `inst.niveau` | `auto` \| `E` \| `AP1` \| `AP2` | Wie streng ein einzelnes Ticket bewertet wird |
+
+`Spiel.stufe.setzen(id)` zieht `einst.niveau` nach, lässt es aber einzeln verstellbar.
+
+### 13.2 Neue und geänderte Datenformen
+
+| Gegenstand | Festlegung |
+|---|---|
+| Rang | `Spiel.stufe.rang(id)` → 1…4; verglichen wird **immer** über den Rang, nie über den Namen; Rückfall `azubi` (kein Wurf) |
+| Hilfekonto je Ticket | `Spiel.HILFE_KONTO = {azubi:6, "azubi-plus":4, geselle:2, meister:0}`; gezählt **je Ticket** über `Spiel.stufe.hilfeZiehen(inst)`; ein leerer Vorrat sperrt nicht — die nächste Sprosse kostet Sterne |
+| Vorschläge | `DATEN.hilfen.VORSCHLAEGE`; `bereich` ist **immer** eine `Spiel.LEITER[].id` (`link`, `vlan`, `ip`, `gateway`, `route`, `dienst`); `art` ∈ {`pruefen`, `aendern`} |
+| Entscheidung | `Spiel.hilfe.passend/geruest/leiter/syntaxBruecke` (nur angefügt); die Oberfläche entscheidet nichts selbst |
+| Fehlertexte | `Spiel.fehlertext({netz, id, modus, art, eingabe, ausgabe, fehler})`, Tiefe aus `Spiel.stufe.text(...)` |
+| Mini-Anker | `Spiel.mini.hilfe(id)` (Denkhilfe, **nie** die Lösung) und `Spiel.mini.anker(id)` → `{titel, text, quelle, wiki}` |
+| Training | `Spiel.st.training = {je: {[szenarioId]: {versucht, bestanden, bestes}}}` — Spielstand `v:3`; Szenarien `DATEN.trainings`, Logik `Spiel.training` |
+
+### 13.3 Verhalten, das vertraglich feststeht
+
+1. **Training zahlt nichts.** Kein Geld, kein Ruf, kein Karrierefortschritt, kein Eintrag in `st.erledigt`, keine
+   Wochenwertung, kein Postfach; es zählt nur für den Lernmotor (`L.ueben`) und den Trainingsstand. Durchgesetzt
+   an **einer** Stelle: erste Zeile von `Spiel.abschliessen` leitet `quelle === "training"` um.
+2. **`quelle: "training"` ist unsichtbar.** `Spiel.postfach()` filtert sie heraus (wie `pruefung`/`raetsel`).
+3. **Die Hilfe ist schrittweise.** Je Stufe 0/1/2 Vorschläge (`meister` 0), Denkhilfe bei jedem Mini
+   (`azubi`/`azubi-plus`), nach falscher Antwort (`geselle`), gar nicht (`meister`).
+4. **Nichts wird ungefragt verraten.** `Spiel.mini.hilfe` liefert **nie** den Lösungstext; ein Test prüft das
+   gegen `Spiel.mini.loesungText`.
+5. **Kein Baustein ohne Aufruf.** Jede Fläche wird aus dem echten Weg gerufen (Terminal-Zeile, Leisten-Knopf,
+   Ansicht) — grüne Tests ohne Aufruf gelten als **nicht fertig**.
+
+## 15 · Nachtrag des Nutzers: Wiederholungssperre, Führung, generierte Fragen (09.10.2026) — Vertrag
+
+*Wiederhergestellt am 31.10.2026 für 3.0.0.*
+
+**Anlass.** Nach dem Fahrplan-Auftrag verlangte der Nutzer vier Dinge: (1) Aufträge dürfen sich in einer Sitzung
+nicht schnell wiederholen, (2) im Labor soll bei Bedarf der nächste nötige Schritt gezeigt werden („pulsiert oder
+ein Pfeil darauf zeigt"), (3) Fragen sollen möglichst immer neu generiert werden, (4) alles bis zum Production
+Release ausarbeiten.
+
+### 15.1 Neue und geänderte Datenformen
+
+| Gegenstand | Festlegung |
+|---|---|
+| Wiederholungssperre | `Spiel.st.mini` trägt `zug` (Zugnummer) und `gespielt` (Mini-id → Zugnummer); `zuletzt` bleibt das Sperrfenster (25). Pro Fertigkeit kommt jedes Mini einmal, danach das am längsten nicht gespielte. Alte/beschädigte Stände werden rekonstruiert, nie geworfen |
+| Mischung | `Spiel.MINI.GENERIERT = 3` — jede dritte Frage darf generiert sein |
+| Generierte Fragen | `DATEN.fragenVorlagen` (11 Vorlagen) und `DATEN.fragenDenkfehler` (20 Arten); `Spiel.fragen.erzeuge/erzeugeVoll/fuerSkill/merken/von/ausId/alle`; Id `gf-<vorlage>-<seed>`, aus sich selbst wiederherstellbar; generierte Fragen stehen **nicht** in `Spiel.mini.alle()` |
+| Nächster Schritt | `Spiel.naechster(inst)` → `{geraet, ziel, text, bereich}` oder ehrlich `null`; dazu `Spiel.naechsterBedarf/-Wartezeit/-Wann/-Stufe`, `FUEHRUNG_NACH_MS` 90 s, `FUEHRUNG_ZEIGEN_MS` 15 s, `NAECHSTER_WANN` (`azubi`/`azubi-plus` „nachzeit", `geselle` „nachfehler", `meister` „nein") |
+| Vierte Quelle | `quelle: "klassenraum"` ist aus Postfach, Offen-Zähler und „Heute"-Kachel ausgenommen (wie `training`) und nimmt am Ereignistakt **nicht** teil |
+
+### 15.2 Verhalten, das vertraglich feststeht
+
+1. **Rotation statt Filter.** Jedes Mini einer Fertigkeit kommt einmal dran, bevor sich eines wiederholt; bei
+   echter Erschöpfung das am längsten nicht gespielte. Alles deterministisch über `Zufall` — kein
+   `Math.random`, kein Datum.
+2. **Die Führung verrät nichts.** Der Statustext der Simulation *ist* die Lösung; bei Netz-Zielen zeigt der
+   Fingerzeig deshalb nur Gerätename und Zieltext, nie die Ursache. Er erscheint **nur auf Bedarf** (Knopfdruck
+   oder 90 s ohne Fortschritt), einmal je Stillstand, und verschwindet, sobald der Schritt getan ist; `meister`
+   bekommt sie nie ungefragt.
+3. **Generierte Fragen sind bewiesen richtig.** Die Vorlage rechnet ihre Lösung selbst, der Generator lässt nur
+   Fragen durch, bei denen genau **eine** Option besteht; der Test rechnet mit eigener Arithmetik nach und prüft
+   jede falsche Option gegen die dokumentierte Denkfehler-Menge.
+4. **§ 13.3.1 gilt auch über den Ereignisweg.** Der 20-Sekunden-Ereignistakt nimmt `training` und
+   `klassenraum` aus — vorher zahlten beide über `weiterempfehlung` Ruf und legten neue Tickets an.
+5. **Die Wiki zeigt nur, was das Spiel kann** — oder kennzeichnet den Befehl ausdrücklich als echtes Gerät
+   („Echtes IOS, nicht das Labor"). Ein Wächter führt jede Rezeptzeile mit Prompt in der echten CLI aus.
+
+## 16 · Welle 1 (2.1 + 3.0-Gerüst) — verbindlicher Vertrag (26.10.2026)
+
+*Wiederhergestellt am 31.10.2026 für 3.0.0.*
+
+**Anlass.** Diese Session baut das Maximal-Programm 3.0 in Wellen. Welle 1 umfasst 2.1 S1/S2 (Wahrheit,
+Korrektheit) sowie parallel UX-P1 und das Werkstatt-Gerüst. Damit Code und Doku nicht auseinanderlaufen, steht
+hier zuerst die Datenform.
+
+### 16.1 Eine Zahlenquelle: `docs/STAND.md` (generiert)
+
+| Gegenstand | Festlegung |
+|---|---|
+| Erzeuger | `tools/stand.py` erzeugt `docs/STAND.md` und einen markierten Block in `README.md`; Quelle sind **Messungen** (Testlauf, Modulliste des Baus, Dateisystem ort), keine getippten Zahlen |
+| Blockmarker | `<!-- STAND:ANFANG -->` … `<!-- STAND:ENDE -->`; Handarbeit in diesem Bereich wird überschrieben |
+| Prüfmodus | `python tools/stand.py --pruefen` vergleicht erzeugten Text mit den Dateien; Abweichung → Exit 1 mit betroffener Zeile |
+| Pflichtfelder | Fassung, Baukennung, Tests (grün/gesamt/übersprungen), Testdateien, headless Module, Bau-Module, `src/`-Dateien und -Zeilen (Methode benannt), Einzeldatei Bytes + SHA256, Inhalte (Tickets, Minis, Injektoren, Trainings, Wiki-Seiten, Fertigkeiten), `docs/doku`-Seiten |
+| Geltung | README, Liesmich, AGENTS, Bauen, SITZUNGSABSCHLUSS und CHANGELOG nennen diese Zahlen nur noch über `STAND.md`; historische Abschnitte bleiben unangetastet |
+
+### 16.2 Skip-Gate (2.1 S1)
+
+`tests/run.js` endet mit Exit 1, wenn `uebersprungen(ergebnisse) > 0`. Ein Test ohne Zusicherung gilt damit als
+**rot**, nicht als grün. `tools/test.sh` reicht den Exit-Code unverändert durch; die Bilanzzeile bleibt im Text.
+Die Definition „übersprungen = 0 Zusicherungen" (`tests/harness.js`) bleibt unverändert.
+
+### 16.3 TTL und Probe-Art je Betriebssystem (2.1 S2)
+
+| Gegenstand | Festlegung |
+|---|---|
+| TTL-Startwerte | `src/sim/l3.js`: Windows-Ziele 128, Linux-Ziele (Server/NAS mit Linux-Betriebssystem) **64**. Genau ein Startwert je **Endgerätetyp** (PC/Server/NAS); Router, Switch und Internet führen ihre eigenen TTL-Konstanten in ihren Modulen |
+| Traceroute | Windows-Endgeräte senden ICMP-Echo; Linux-Endgeräte senden UDP-Proben auf hohe Ports, wie im Wiki gelehrt. Die sichtbare Ausgabe bleibt gleich; nur Sim-Gründe dürfen abweichen |
+| Referenzstand | `tests/sim-stand.json` wird nach der Änderung bewusst neu erzeugt; die Abweichung wird im CHANGELOG begründet. Danach ist `node tools/sim-stand.js` grün |
+
+### 16.4 Design-Tokens und Bewegung (UX-P1)
+
+| Gegenstand | Festlegung |
+|---|---|
+| Dauer-Tokens | `--dauer-kurz:80ms` · `--dauer:160ms` · `--dauer-mittel:240ms` · `--dauer-lang:320ms`; Zähler `--dauer-zaehler:700ms`; Easings `--ease-standard`, `--ease-out`, `--ease-pop` |
+| JS-Zugriff | genau eine Funktion `UI.zeit()` liest Tokens per `getComputedStyle`; Animations-/Wartepfade in `src/ui/` enthalten keine ms-Literale mehr. `SCHRITT_MS` bleibt Datenkonstante, wird aber an das Tempo gekoppelt |
+| Lesbarkeit | alle Text-Tokens ≥ 4,5:1 auf `--bg`/`--panel`/`--panel-2` in beiden Schemata |
+| Press | genau **eine** `.knopf:active`-Transform-Regel; Druck 80 ms |
+| Icons | UI-Chrome (Knöpfe, Überschriften, Chips) nutzt `UI.symbol`; Emoji nur in Klartext-Copy außerhalb der Chrome |
+
+### 16.5 Werkstatt-Gerüst (3.0, Welle 1)
+
+**Wichtig:** Ein freies Labor existiert bereits (`UI.sandbox` in `src/ui/start.js`, Store `"sandbox"`, `v:1`,
+Autosave bei `netz-geaendert`, erreichbar über „Freies Labor"). Die Werkstatt **erweitert** diesen Weg, sie
+erfindet keinen zweiten.
+
+| Gegenstand | Festlegung |
+|---|---|
+| Datenform | Speicher `"sandbox"` bleibt `{v:1, netz}`; neue **optionale** Felder (`name`, `vorlage`) sind erlaubt, alte Stände tolerieren sie (nie werfen). Die Karriere (`"labor"`) wird nie berührt |
+| Netzform | unverändert `{geraete:{id:{…}}, kabel:[…]}` wie `UI.labor.laden(netz, …)`; keine neuen Gerätetypen in Welle 1 |
+| Module | `src/spiel/werkstatt.js` → `Spiel.werkstatt` (reine Logik), `src/ui/werkstatt.js` → `UI.werkstatt` (Gerüst), `src/stil/werkstatt.css`; `bauen.py` lädt `src/spiel/*.js` und `src/ui/*.js` alphabetisch |
+| Editor-Mengen | Auswahl-Erweiterung ausschließlich UI-Zustand: `Z.auswahl` bleibt für Einzelgerät; neu `Z.auswahlSet` + `UI.labor.auswahlMehr()`; Duplizieren erzeugt **einen** Verlaufsschritt, Namen mit Suffix `-2`/`-3`, Kabel werden nicht mitdupliziert |
+| Minimap | reine Ansicht (SVG-Vorschau), keine Datenform, kein Speicher |
+| Wirkung vor Grün | Das Gerüst zählt erst als gebaut, wenn es aus dem echten Weg erreichbar ist (`UI.sandbox.laden()` → Werkstatt-Leiste, Beleg `tests/ui-werkstatt.test.js`) |
+| Nicht in Welle 1 | Vorlagen-Inhalte, Challenge-Karten, PDU/PCAP, Export, neue Gerätetypen, Zonen |
+
+### 16.6 Schreibrechte Welle 1 (historischer Auszug)
+
+Ein Schreiber je Datei; die damalige Aufteilung steht im Git-Stand `9716b08^`. Für 3.0.0 gilt die
+10-Owner-Ordnung aus `AGENTS.md` A1.
+
+## 17 · Welle 2+3 (2.1 S3–S8) — verbindlicher Vertrag (29.10.2026, Stand 2.9.0)
+
+*Wiederhergestellt am 31.10.2026 für 3.0.0 (Commit `9716b08` hatte § 10–§ 18 gelöscht). Der Abschnitt
+beschreibt den Vertrag der Welle 2+3; Zahlen stehen ausschließlich in `docs/STAND.md`, historische
+Sollzahlen sind als solche benannt.*
+
+**Anlass.** Nach Welle 1 (S1 Wahrheit, S2 Korrektheit) wurde 2.1 zu Ende gebaut: S3 Prüfungsnähe/Generator,
+S4 Hilfeleiter/Doku-Ziele, S5 Lehrtexte/Fragen/Dichte, S6a/S6b IPv6/Betrieb/WLAN, S7 Volumen/Terminologie,
+S8 Fassung 2.1.0. Es gilt weiter: ein Schreiber je Datei, keine halbfertigen Beiträge, Wirkung vor Grün.
+
+### 17.1 Drei neue Fertigkeiten (S6a/S6b) — **append-only**
+
+| Index | id | Name | ap | Pflichtinhalte |
+|---:|---|---|---|---|
+| 27 | `lab.ipv6` | IPv6: Adressen, Präfixe, NDP | AP1 | Wiki-Seite (≥4 Abschnitte, Quellen), Lehrtext E/AP1/AP2, 6 Minis, 1 Ticket, 1 Hilfe, Senior-Frage, Prüfungsfrage, ≥1 Injektor; **kein Training** (namentliche Ausnahme, `docs/STAND.md`) |
+| 28 | `lab.betrieb` | Betrieb und Überwachung (Syslog, Schwellwert, Backup, Uptime) | AP2 | wie oben, 6 Minis, 1 Training, 1 Ticket, 1 Hilfe, ≥1 Injektor |
+| 29 | `lab.wlan` | WLAN: SSID, VLAN, Sicherheit, Gastnetz | AP1 | wie oben, 8 Minis, 2 Tickets, 1 Hilfe, ≥2 Injektoren; **kein Training** (namentliche Ausnahme, `docs/STAND.md`) |
+
+- **Anhängeregel:** ausschließlich ans **Ende** von `DATEN.skills`; bestehende Indizes 0–26 bleiben unverändert.
+  `src/spiel/klassenraum-codec.js`: `TABELLE_SKILLS_LAENGE = 30`. Alte Codes bleiben gültig (Index < 27).
+- **Ehrliche Grenze:** IPv6/Betrieb/WLAN werden **inhaltlich** geübt (Adressierung, Planung, Konfiguration,
+  Bewertung), nicht paketweise simuliert. Jeder Lehrtext/Wiki-Abschnitt sagt das ausdrücklich.
+- **Übungsformen ohne Simulation (verbindlich):** Wo die Simulation das Thema nicht ausführen kann, gibt es
+  **kein** Training und **keinen** generierten Prüfungsfall. Stattdessen: Handticket mit Arbeitsziel
+  (`notiz`/`tabelle`/`audit`/`befehl`/`antwort`) auf einem vorhandenen Netz, Minis, Wiki, Lehrtext, Hilfe,
+  Senior-Frage. Fehlende Trainings sind **namentliche Ausnahmen in `docs/STAND.md`**.
+- **Neue Sim-Gründe** sind nur zulässig, wenn sie in § 5.3 dokumentiert werden und `tests/sim-stand.json`
+  bewusst aktualisiert wird; Standard ist: keine neuen Gründe.
+
+### 17.2 Generator, Prüfung, Abnahme (S3)
+
+| Gegenstand | Festlegung |
+|---|---|
+| Generierte Tickets | `symptomText`/`briefingText` liefern vier Bausteine (Anlass mit Zeit · Beobachtung in Kundensprache · Folge · was schon versucht wurde), 180–420 Zeichen, 2–4 Sätze, **0 Ursachenwörter** (`docs/entwicklung/Stilfaden – Auftragstexte.md`), Titel 15–46 Zeichen, deterministisch über `Zufall` (kein `Math.random`, kein Datum) |
+| Stil-Gate | `tools/texte-messen.js --pruefen` prüft 100 Seeds je Form (Prüfung, Tagesrätsel, Postfach) und die Handtickets; Exit 1 bei Verstoß |
+| Prüfung | Alle **30** Fertigkeiten erreichbar (auch Stufe 6 und `lab.portsec`); Blueprint je AP1/AP2 (Fertigkeitssets), 3 Aufgaben/25 min und IHK-Notenschlüssel unverändert |
+| Abnahme-Regression | Basis-Paare zusätzlich zu ICMP: **Dienste** (HTTP, DNS, DHCP, Druckfreigabe/Port 445) und **Drucker-Endgeräte**; mindestens **5** Dienst-/Drucker-Fälle in den Tests; `REGRESSION_MAX` darf dafür angehoben werden; keine neue Datenform |
+
+### 17.3 Hilfeleiter und Doku-Ziele (S4)
+
+| Gegenstand | Festlegung |
+|---|---|
+| SENIOR_FRAGEN | Schlüssel = `DATEN.skills`-id; **30/30** vorhanden |
+| Stufe 5 | Ohne eigenes `hilfen`-Feld **kein Lösungstext-Fallback**: nur Handlungshinweise („Prüfe zuerst, ob …"); Stufe 6 bleibt „Lösung vorführen" |
+| Doku-Ziel | Vorhandene Formen `notiz` (≥ 20 Zeichen) / `tabelle` / `audit` wiederverwenden; die 17 Briefings, die Protokoll/Wartungsbuch fordern, bekommen ein Ziel; **kein neuer Zieltyp**, keine neue Datenform |
+| Stufen 5/6 | ≥ 10 / ≥ 8 Handtickets mit echten Themen (Firewall/Log, NAS-Rechte/Backup, Port-Security in der Halle, …); alle Texte im Stilfaden, Symptom ohne Ursachenwörter |
+
+### 17.4 Lehrtexte, Fragen, Dichte (S5)
+
+- `lehrtexte.js`: 12 neue Texte — 9 fehlende Fertigkeiten (`lab.switch, lab.subnetz, lab.tcp, lab.cli,
+  lab.speichern, lab.rostick, lab.portfwd, lab.dmz, lab.storage`) + 3 neue (`lab.ipv6, lab.betrieb, lab.wlan`)
+  → Texte auf 30/30 Fertigkeiten; Quellen nur Whitelist. **Datenform (append-only):** `DATEN.lehrtexte` bleibt
+  für die Sim-Codes unverändert; die Skill-Texte kommen als zusätzliche Schlüssel mit der Skill-id dazu
+  (`DATEN.lehrtexte["lab.switch"] = {titel, skill, E, AP1, AP2, quelle}`). `DATEN.lehrtextFuer(skill, niveau)`
+  liefert den Text (Skill-Text hat Vorrang, sonst `null`); Consumer ist der Ergebnis-/Erklärdialog („Erklär mir
+  das"). Der Dichte-Test zählt beide Quellen (Code-Text **oder** Skill-Text).
+- `fragen-vorlagen.js`: **20** Vorlagen auf **≥15** Fertigkeiten, je ≥2 Denkfehler-Familien; Lösung und Prüfung
+  rechnen unabhängig (kein Vergleich mit dem Lösungstext), deterministisch.
+- **Zulässige Quellen (Content):** RFC, IEEE, ISO/IEC, BSI, ETSI, ITIL, SNIA, DSGVO/EU-Recht, Cisco-Dokumentation,
+  IHK-Rahmen (FIAusbV, KMK) — und ausdrücklich die **Wi-Fi Alliance** (WPA3-Spezifikation). Der Wächter-Test
+  `tests/wiki-2.0.test.js` akzeptiert „Wi-Fi" bereits.
+- `tests/inhaltsdichte.test.js`: Matrix **30 Fertigkeiten × 8 Zeilen** — Wiki (≥3 Abschnitte, Ziel ≥4),
+  Lehrtext, ≥3 Minis, ≥1 Training, ≥1 Ticket, ≥1 Hilfe, ≥1 Senior-Frage, ≥1 Prüfungsfrage. Ausnahmen nur
+  namentlich mit Begründung im Test; Ziel 30/30.
+
+### 17.5 Volumen, Welle 3 (S7)
+
+Sollzahlen der Welle 3 (Summenprobe): Tickets 76 · Minis 150 · Trainings 52 · Injektoren 55 · jede Fertigkeit
+≥3 Injektor-Zuordnungen · Hilfe-Vorschläge 47 · Wiki 37 · Fragen 20/15 · Lehrtexte 46 · Doku-Ziele 17/17. Der
+**gemessene** Stand steht ausschließlich in `docs/STAND.md`. Dazu: Terminologie (Karriere-Stufe vs. Erklärtiefe
+vs. Niveau; „Broadcast-Domäne" einheitlich) dokumentiert; 5 Wiki-Vertiefungsseiten (VPN/IPsec, TLS/Zertifikate,
+802.1X, Backup, Virtualisierung) mit ≥4 Abschnitten und Quellen; unabhängiger Faktencheck 100 Aussagen = 0 Fehler
+oder benannte Ausnahmen. Jede Einheit mit Lernziel, Quelle, Test.
+
+### 17.6 Fassung 2.1.0 und Auslieferung (S8) — **historisch, überholt**
+
+Welle 3 zog 2.1.0 (Trockenlauf `tools/fassung-ziehen.py --neu 2.1.0`, dann `--setzen`; `VERSION_CODE` von Hand
+über dem abgeleiteten Wert). Seitdem sind 2.2–2.9 erschienen; die Auslieferung ist in § 23–§ 26 und
+`docs/entwicklung/Übergabe – Stand 31.10.2026 – Runde 8.md` dokumentiert. Für 3.0.0 gilt der Fassungszug in
+`docs/SITZUNGSABSCHLUSS.md` (3.0.0, `VERSION_CODE 30001`). **Kein Commit, kein Push, keine Veröffentlichung
+ohne ausdrückliche Nutzerfreigabe** — unverändert.
+
+### 17.7 Zahlenkopplung und Tests
+
+Tests, die Zählungen hart codieren, werden auf die Vertragswerte gezogen — **ohne** Abschwächung. Neue Tests je
+Owner in eigenen Dateien; nichts gelöscht; 0 übersprungen (Skip-Gate). Die **Testzahl und alle Zählungen stehen
+ausschließlich in `docs/STAND.md`** (erzeugt von `tools/stand.py`); `docs/STAND.md` wird am Ende jeder Welle neu
+erzeugt. Handgeschriebene Zahlen in Doku/CHANGELOG sind Befunde.
+
+### 17.8 Schreibrechte Welle 2 (historisch, 29.10.2026)
+
+Ein Schreiber je Datei; die damalige Owner-Tabelle (O1–O5 + Lead) ist im Git-Stand `9716b08^` nachlesbar
+(`git show 9716b08^:docs/Architektur.md`). Für 3.0.0 gilt die 10-Owner-Ordnung aus `AGENTS.md` A1 und dem
+PROMPT-Roster; Kollisionen werden dem Lead gemeldet statt still gelöst.
+
+### 17.9 Klassenraum-Tabellen und Ticketwachstum (Entscheidung 29.10.2026)
+
+**Befund.** Das Auftrags-Codec hat 6 Bit Auftragsindex (0..63, Format § 12). 2.1 wuchs von 58 auf 76 Handtickets.
+Die Tabelle `TABELLE_AUFTRAEGE` in `src/spiel/klassenraum.js` ist ein **Literal** (eingefrorene Bindung); alte
+Codes bleiben dadurch gültig, auch wenn neue Tickets an anderer Stelle der lebenden Reihenfolge stehen.
+
+**Entscheidung.**
+1. **Kein Formatwechsel** in 2.1 (keine 7-Bit-Indizes). Die 6-Bit-Grenze bleibt; das Format wird erst in **3.1**
+   angehoben (dann mit Fassungs-/Migrationsweg, vgl. § 12.8).
+2. `TABELLE_AUFTRAEGE` bleibt **unverändert die 58 IDs in historischer Reihenfolge**;
+   `TABELLE_AUFTRAEGE_LAENGE = 58` bleibt. Die 2.1-Handtickets sind **nicht klassenraum-adressierbar**; das wird
+   im Codec-Kopf und in § 12.8 dokumentiert.
+3. **Keine Umsortierung** bestehender oder neuer Tickets, um eine „lebende Reihenfolge" zu erzwingen.
+4. **Test-Invariante statt Gleichheit:** (a) alle 58 IDs existieren genau einmal in `DATEN.tickets`,
+   (b) die Tabelle ist 58 lang und duplikatfrei, (c) alte Codes bleiben stabil (Beispielcodes für Index 55/56/57
+   → `storage-01/02/03`), (d) Fertigkeitentabelle = 30, (e) die lebende `ticketReihe()` darf wachsen und wird
+   nicht mit der Codec-Tabelle gleichgesetzt.
+5. Ehrliche Grenze: 3.1 muss vor dem Klassenraum-Feldtest das Format anheben — sonst sind nur 58 von 76 Aufträgen
+   per Code aufrufbar.
+
+## 18 · Frontend-Redesign — Gestaltungsvertrag (29.10.2026) — verbindlicher Vertrag
+
+*Wiederhergestellt am 31.10.2026 für 3.0.0. Der vollständige Gestaltungsvertrag mit allen Farbtabellen,
+Komponenten- und Shell-Maßen steht im Git-Stand `9716b08^:docs/Architektur.md` und in
+[`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>); für 3.0.0 gelten die dort
+festgehaltenen Tokens und Regeln, ergänzt durch die Abschnitte 21–26.*
+
+**Anlass.** Der Nutzer hat ein „komplettes Redesign des Frontends" beauftragt: **Optik + Shell neu, Bedienlogik
+und Ansichten bleiben**. Basis ist die Bildvorlage **A · „Matrix-Elegant"** unter
+`Nachweise/Prototypen-Redesign/` (nicht versioniert). Dieser Abschnitt ist die eine Quelle für Farbtokens,
+Typo-Skala, Shell-Maße, Komponenten und die Zuordnung zu den Dateien — „Vertrag zuerst".
+
+### 18.1 Geltung und Nicht-Ziele
+
+| Gegenstand | Festlegung |
+|---|---|
+| Gilt für | alle sichtbaren Flächen des Web-/Windows-/Einzeldatei-Baus: Tokens, Typo, Shell (Kopfzeile, linke Leiste, Statusfuß), Karten, Knöpfe, Dialoge, Toasts, Netzfläche, Werkzeuge, alle Ansichten |
+| Gilt **nicht** für | Bedienlogik, DOM-Verträge, Datenformen, Simulation, Tests mit Verhaltenszusicherung, Inhaltstexte — diese bleiben unangetastet |
+| Basis-Vorlage | **A · Matrix-Elegant**; B (Holo-Suite) und C (Neon-Blueprint) bleiben Stimmungshilfen, kein Vertragsbestandteil |
+| Nicht-Ziele | keine neuen Ansichten, keine neuen Gerätetypen, keine neuen Inhalte/Tickets, kein Umbau der Android-Eigenheiten über die gemeinsamen Tokens hinaus, keine Änderung an `tests/sim-stand.json` |
+| Grundsatz | die Vorlage ist **Stimmungsvorlage**, keine 1:1-Implementierung: Mikrolabels 8–9 px werden auf ≥ 11 px gehoben (§ 18.5) |
+| Veraltet | § 16.4 bleibt in Kraft (Bewegung, Icon-Regel, Press-Regel) und wird durch § 18.5–18.9 ergänzt; bei Widerspruch gilt § 18 |
+
+### 18.5 Typografie
+
+**Schriften** (unverändert, in `basis.css` und im Projektstamm `schriften/`): `--display: Bricolage Grotesque`
+(600/800 — Wortmarke, H1, Kartentitel, Knöpfe), `--body: Atkinson Hyperlegible` (400/700 — Fließtext, Zeilen),
+`--mono: JetBrains Mono` (400/600 — Mikrolabels, IPs, Messwerte, Statuszeile). **Keine neuen Schriftdateien,
+keine Netzschriften.**
+
+| Token | px | Verwendung |
+|---|---|---|
+| `--fs-1` | **11** | Mikrolabels (Mono, Versalien, Sperrung `.08em`), SVG-Beschriftung, Chips, Statuszeile — **Untergrenze für funktionale Beschriftung** |
+| `--fs-2` | **12.5** | dichte Zeilen, Tabellen, Hinweise |
+| `--fs-3` | **14** | Standard-Fließtext in Karten und Formularen |
+| `--fs-4` | **16** | Grundtext (`body`) |
+| `--fs-5` | **20** | Kartentitel, Abschnittsüberschriften |
+| `--fs-6` | **28** | H2/Ansichtstitel |
+| `--fs-7` | **34** | H1 klein / große Zahlen |
+| `--fs-8` | **44** | H1 der Vorlage A (44/46) |
+
+**Regeln:** Funktionale Beschriftung **nie unter 11 px** (Gate `ui-typografie.test.js`). Mono nur für **Daten**
+(IPs, Ports, Messwerte, Status, Mikrolabels), nicht für Fließtext. **13 px und 15 px** sind Altlasten aus
+v2.1.0 — `ethos.py` erlaubt sie bis zur Umstellung, neu entstehen dürfen sie nicht. H1/H2 mit
+`line-height: 1.1–1.15`, `text-wrap: balance`; Satzbreite max. **72 Zeichen** je Spalte, Karten mit Fließtext
+≥ 320 px.
 
 ## 21 · Runde 3b — Audit-Umsetzung, Ambient und lebende Zonen (30.10.2026) — verbindlicher Vertrag
 

@@ -18,6 +18,16 @@ CLI.baeumeBauen = function(){
   const nurRouterIf = s => istRouter(s) && alleArt(s, x => x === "phys" || x === "sub");
   const nurSub = s => alleArt(s, x => x === "sub");
   const bestaetigt = z => /^\s*(y|ye|yes)?\s*$/i.test(z);
+  /* Typ-Präfixe beim Einlesen (§ 6.2): 0 = Klartext, 7 = umkehrbar (dekodieren), 5 = nicht umkehrbar
+     (Typ-5-Form bleibt gespeichert; der Vergleich läuft über C.passwortPasst). */
+  const entTyp = w => {
+    const s = String(w == null ? "" : w);
+    const m = /^([057])\s+(.+)$/.exec(s);
+    if (!m) return s;
+    if (m[1] === "0") return m[2];
+    if (m[1] === "7") { const e = typeof C.ent7 === "function" ? C.ent7(m[2]) : null; return e == null ? s : e; }
+    return s;
+  };
   const fehler = (ausgabe, tipp) => ({ausgabe, fehler: true, tipp: tipp || null});
   const W = (w, hh, d, o) => Object.assign({w, h: hh || "", d: d || ""}, o || {});
   const P = (p, t, n, hh, d, o) => Object.assign({p, t, n, h: hh || "", d: d || ""}, o || {});
@@ -41,7 +51,7 @@ CLI.baeumeBauen = function(){
     const ziel = s.modus === "fwUser" ? "fwPriv" : "priv";
     if (!K(s).enableSecret) { s.modus = ziel; return ""; }
     return {ausgabe: "", rueckfrage: {prompt: "Password: ", verdeckt: true, versuche: 0, weiter(s, z){
-      if (z === K(s).enableSecret) { s.modus = ziel; return ""; }
+      if (C.passwortPasst(K(s).enableSecret, z)) { s.modus = ziel; return ""; }
       this.versuche++;
       if (this.versuche >= 3) return fehler("% Bad secrets", "Das enable-Passwort stimmt nicht. Groß- und Kleinschreibung zählen.");
       return {ausgabe: "", rueckfrage: this};
@@ -239,7 +249,7 @@ CLI.baeumeBauen = function(){
   }
   function secret(s, a){
     if (a.no) { h.setzen(s, "enableSecret", null); return ""; }
-    h.setzen(s, "enableSecret", a.pw); return "";
+    h.setzen(s, "enableSecret", entTyp(a.pw)); return "";
   }
   /* SSH-Zugang (Phase C): ip domain-name, crypto key generate rsa, username, line vty … transport input ssh / login local.
      IOS-ähnlich: Schlüssel werden nur vermerkt (keine echte Kryptografie), Bits 360–4096. */
@@ -271,7 +281,7 @@ CLI.baeumeBauen = function(){
   function username(s, a){
     const b = tief(K(s).benutzer || {});
     if (a.no) { delete b[a.name]; h.setzen(s, "benutzer", b); return ""; }
-    b[a.name] = {pw: a.pw, art: a.art || "secret"};
+    b[a.name] = {pw: entTyp(a.pw), art: a.art || "secret"};
     h.setzen(s, "benutzer", b); return "";
   }
   /* interface X: Subinterfaces und SVIs entstehen beim ersten Aufruf (wie IOS) */
@@ -520,7 +530,7 @@ CLI.baeumeBauen = function(){
     doN,
     W("enable", "Modify enable password parameters", "Passwort für den privilegierten Modus", {k: [
       W("secret", "Assign the privileged level secret", "enable-Passwort (verschlüsselt gespeichert)", {noCr: true, f: secret, k: [
-        P("WORD", "wort", "pw", "The UNENCRYPTED (cleartext) 'enable' secret", "Passwort im Klartext")]})]}),
+        P("LINE", "rest", "pw", "The UNENCRYPTED (cleartext) 'enable' secret", "Klartext oder Typ 5/7 (z. B. „5 $1$…“)")]})]}),
     ende,
     W("exit", "Exit from configure mode", "Konfigurationsmodus verlassen", {nein: false, sim: true, f: s => { s.modus = "priv"; s.kontext = {}; return CONFIG_I; }}),
     W("hostname", "Set system's network name", "Gerätenamen setzen (steht im Prompt)", {noCr: true, f: hostname, k: [
@@ -573,8 +583,8 @@ CLI.baeumeBauen = function(){
         W("modulus", "Provide number of modulus bits on the command line", "Schlüssellänge direkt angeben", {k: [P("<360-4096>", "zahl", "bits", "size of the key modulus", "z. B. 1024", {min: 360, max: 4096, f: crypto})]})]})]}),
       W("zeroize", "Remove keys", "Schlüssel löschen", {k: [W("rsa", "Remove RSA keys", "RSA-Schlüssel löschen – SSH aus", {n: "zeroize", v: true, f: crypto})]})]})]}),
     W("username", "Establish User Name Authentication", "lokaler Benutzer (für „login local“, SSH)", {k: [P("WORD", "wort", "name", "User name", "z. B. admin", {noCr: true, f: username, k: [
-      W("secret", "Specify the secret for the user", "Passwort (verschlüsselt gespeichert)", {n: "art", v: "secret", k: [P("WORD", "wort", "pw", "The UNENCRYPTED (cleartext) user secret", "Passwort im Klartext", {f: username})]}),
-      W("password", "Specify the password for the user", "Passwort (Klartext, Typ 0/7)", {n: "art", v: "password", k: [P("WORD", "wort", "pw", "The UNENCRYPTED (cleartext) user password", "Passwort im Klartext", {f: username})]})]})]}),
+      W("secret", "Specify the secret for the user", "Passwort (verschlüsselt gespeichert)", {n: "art", v: "secret", k: [P("LINE", "rest", "pw", "The UNENCRYPTED (cleartext) user secret", "Klartext oder Typ 5/7 (§ 6.2)", {f: username})]}),
+      W("password", "Specify the password for the user", "Passwort (Klartext, Typ 0/7)", {n: "art", v: "password", k: [P("LINE", "rest", "pw", "The UNENCRYPTED (cleartext) user password", "Klartext oder Typ 0/7 (§ 6.2)", {f: username})]})]})]}),
     W("service", "Modify use of network based services", "Dienste des Geräts", {k: [
       W("password-encryption", "Encrypt system passwords", "Passwörter in der Konfiguration verschleiern (Typ 7)", {f: (s, a) => { h.setzen(s, "pwVerschluesseln", !a.no); return ""; }})]}),
     W("line", "Configure a terminal line", "Zugang konfigurieren (Konsole, Fernzugang)", {k: [
@@ -815,7 +825,7 @@ CLI.baeumeBauen = function(){
       W("all", "All protocols", "SSH und Telnet", {n: "proto", v: "all", f: (s, a) => lineAendern(s, l => { l.transport = a.no ? null : "all"; })}),
       W("none", "No protocols", "kein Fernzugang", {n: "proto", v: "none", f: (s, a) => lineAendern(s, l => { l.transport = a.no ? null : "none"; })})]})]}),
     noN(() => line.k),
-    W("password", "Set a password", "Passwort für diesen Zugang", {noCr: true, f: (s, a) => lineAendern(s, l => { if (a.no) delete l.passwort; else l.passwort = a.pw; }), k: [
+    W("password", "Set a password", "Passwort für diesen Zugang", {noCr: true, f: (s, a) => lineAendern(s, l => { if (a.no) delete l.passwort; else l.passwort = entTyp(a.pw); }), k: [
       P("LINE", "rest", "pw", "The UNENCRYPTED (cleartext) line password", "Passwort im Klartext")]}),
   );
 

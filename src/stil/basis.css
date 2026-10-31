@@ -56,6 +56,19 @@
   --mint:#0B7A52; --iris:#4B3FBF; --amber:#8A5A00; --koralle:#A83A28;
   --ok:#0B7A52; --ok-soft:#DCF2E7; --warn:#8A5A00; --warn-soft:#FBF0D6; --bad:#A83A28; --bad-soft:#FBE4DE; --info:#4B3FBF; --info-soft:#E7E3FB;
   --geld:#8A5A00; --ruf:#4B3FBF;
+  /* Palette fuer Geraete, Pakete, VLANs und Zonen: eigene helle Ableitung (CSS-01, 3.0.0).
+     Vorher aus :root geerbt (dunkel): Icons 2,18:1, Protokoll/VLAN 1,57-2,54:1 auf Weiss;
+     Gate: tests/stil-kontrast.test.js (>= 3,0:1, Textverwendung >= 4,5:1). */
+  --typ-router:#1E6D86; --typ-switch:#157A64; --typ-firewall:#A8402A; --typ-host:#4A515B;
+  --typ-server:#5B4BC4; --typ-nas:#2A5C9E; --typ-internet:#0F6F7F;
+  --p-arp:#8A5A00; --p-icmp:#146B8A; --p-tcp:#4B3FBF; --p-udp:#0B7A52;
+  --p-dhcp:#9B3A6E; --p-dns:#9E4A12; --p-http:#2A5C9E;
+  --vlan-1:#5A6170; --vlan-2:#146B8A; --vlan-3:#0B7A52; --vlan-4:#8A5A00;
+  --vlan-5:#9B3A6E; --vlan-6:#4B3FBF; --vlan-7:#9E4A12; --vlan-8:#0E7A72;
+  --zone-a:rgba(20,107,138,.07); --zone-b:rgba(11,122,82,.07); --zone-c:rgba(138,90,0,.07);
+  --zone-d:rgba(155,58,110,.07); --zone-e:rgba(75,63,191,.07);
+  --zone-a-linie:rgba(20,107,138,.42); --zone-b-linie:rgba(11,122,82,.42); --zone-c-linie:rgba(138,90,0,.42);
+  --zone-d-linie:rgba(155,58,110,.42); --zone-e-linie:rgba(75,63,191,.42);
   --schatten:0 24px 50px -34px rgba(20,21,15,.35);
   --glow:0 0 0 1px rgba(11,122,82,.22), 0 12px 28px -16px rgba(11,122,82,.28);
   --glas:rgba(255,255,255,.86); --leiste-bg:rgba(255,255,255,.95);
@@ -70,6 +83,19 @@
   --mint:#0B7A52; --iris:#4B3FBF; --amber:#8A5A00; --koralle:#A83A28;
   --ok:#0B7A52; --ok-soft:#DCF2E7; --warn:#8A5A00; --warn-soft:#FBF0D6; --bad:#A83A28; --bad-soft:#FBE4DE; --info:#4B3FBF; --info-soft:#E7E3FB;
   --geld:#8A5A00; --ruf:#4B3FBF;
+  /* Palette fuer Geraete, Pakete, VLANs und Zonen: eigene helle Ableitung (CSS-01, 3.0.0).
+     Vorher aus :root geerbt (dunkel): Icons 2,18:1, Protokoll/VLAN 1,57-2,54:1 auf Weiss;
+     Gate: tests/stil-kontrast.test.js (>= 3,0:1, Textverwendung >= 4,5:1). */
+  --typ-router:#1E6D86; --typ-switch:#157A64; --typ-firewall:#A8402A; --typ-host:#4A515B;
+  --typ-server:#5B4BC4; --typ-nas:#2A5C9E; --typ-internet:#0F6F7F;
+  --p-arp:#8A5A00; --p-icmp:#146B8A; --p-tcp:#4B3FBF; --p-udp:#0B7A52;
+  --p-dhcp:#9B3A6E; --p-dns:#9E4A12; --p-http:#2A5C9E;
+  --vlan-1:#5A6170; --vlan-2:#146B8A; --vlan-3:#0B7A52; --vlan-4:#8A5A00;
+  --vlan-5:#9B3A6E; --vlan-6:#4B3FBF; --vlan-7:#9E4A12; --vlan-8:#0E7A72;
+  --zone-a:rgba(20,107,138,.07); --zone-b:rgba(11,122,82,.07); --zone-c:rgba(138,90,0,.07);
+  --zone-d:rgba(155,58,110,.07); --zone-e:rgba(75,63,191,.07);
+  --zone-a-linie:rgba(20,107,138,.42); --zone-b-linie:rgba(11,122,82,.42); --zone-c-linie:rgba(138,90,0,.42);
+  --zone-d-linie:rgba(155,58,110,.42); --zone-e-linie:rgba(75,63,191,.42);
   --schatten:0 24px 50px -34px rgba(20,21,15,.35);
   --glow:0 0 0 1px rgba(11,122,82,.22), 0 12px 28px -16px rgba(11,122,82,.28);
   --glas:rgba(255,255,255,.86); --leiste-bg:rgba(255,255,255,.95);

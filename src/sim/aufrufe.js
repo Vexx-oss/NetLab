@@ -25,11 +25,12 @@
     if ((!s.antwort || zuSpaet) && !L.abbruch && L.t < t0 + o.timeout) L.t = t0 + o.timeout;
     return {antwort: zuSpaet ? null : s.antwort || null, tAnt: s.tAnt, fehler: s.fehlerInfo || null, idx, t0};
   }
-  /* entscheidende Stelle im Fenster ab idx: erstes Ereignis mit diesem Grund, sonst erstes mit irgendeinem */
+  /* entscheidende Stelle im Fenster ab idx: erstes Ereignis mit diesem Grund, sonst erstes mit irgendeinem.
+     Warnungen (warnung:true) sind keine Ursache und werden übersprungen (Architektur § 5.2). */
   function stelle(L, idx, grund){
     let erstes = null;
     for (let i = idx; i < L.ev.length; i++) {
-      const e = L.ev[i]; if (!e.grund) continue;
+      const e = L.ev[i]; if (!e.grund || e.warnung) continue;
       if (e.grund === grund) return e;
       if (!erstes) erstes = e;
     }
@@ -560,9 +561,10 @@
     if (!trace || !Array.isArray(trace.ereignisse)) return null;
     const ev = trace.ereignisse;
     let e = trace.stelle ? ev[trace.stelle - 1] : null;
+    if (e && e.warnung) e = null;   /* Architektur § 5.2: eine Warnung ist keine entscheidende Stelle */
     if (!e && trace.abbruch) e = ev.find(x => x.grund === "STORM");
     if (!e && trace.ok === true) return null;
-    if (!e) e = ev.find(x => x.grund && x.art === "verwerfen") || ev.find(x => x.grund);
+    if (!e) e = ev.find(x => x.grund && !x.warnung && x.art === "verwerfen") || ev.find(x => x.grund && !x.warnung);
     if (!e) return null;
     return {grund: e.grund, geraet: e.geraet, port: e.port, text: e.text, n: e.n};
   };
@@ -623,4 +625,6 @@
   Sim.vergehen = function(netz, ms){ netz.zustand ||= {_uhr: 0}; netz.zustand._uhr = (+netz.zustand._uhr || 0) + Math.max(0, +ms || 0); return netz.zustand._uhr; };
 
   Sim._intern = {anfrage, dhcpHolen, dnsAufloesen, zielAufloesen, tcpVerbinden, urlZerlegen, apipaAdresse};
+  /* Architektur § 5.2 nennt Sim.stelle als Teil der Ursachensuche (SIM-02); überspringt Warnungen. */
+  Sim.stelle = stelle;
 })();

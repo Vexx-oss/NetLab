@@ -72,7 +72,7 @@ gruppe("CLI: IOS-Inventur und SSH", () => {
       "line vty 0 15", "transport input ssh", "login local"]) { const f = vorhanden(sw, b); if (f) fehlt.push("SW1(config) " + f); }
     erwarte.gleich(fehlt, []);
     const run = CLI.runningConfig(n.geraete.r1);
-    for (const z of ["service password-encryption", "ip domain-name labor.local", "username admin secret 5 ", "ip ssh version 2", " login local", " transport input ssh"]) erwarte.enthaelt(run, z, "running-config");
+    for (const z of ["service password-encryption", "ip domain-name labor.local", "username admin secret 5 ", "! SSH aktiv", " login local", " transport input ssh"]) erwarte.enthaelt(run, z, "running-config");
   });
 
   pruefe("crypto key generate rsa braucht hostname und ip domain-name; ohne modulus fragt IOS nach den Bits", () => {

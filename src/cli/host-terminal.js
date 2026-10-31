@@ -109,7 +109,7 @@
     if (!z) { s.ssh = null; return {ausgabe: `Connection to ${v.name} closed.`, fehler: true}; }
     if (v.phase === "passwort") {
       const b = (z.running.benutzer || {})[v.user];
-      if (b && zeile === b.pw) {
+      if (b && C.passwortPasst(b.pw, zeile)) {
         v.phase = "an";
         v.sitzung = C.sitzung(s.netz, z.id, {verlauf: s.verlauf, einstieg: s.einstieg, tipps: s.tipps});
         v.sitzung.rueckfrage = null; v.sitzung.modus = "user"; v.sitzung.ueberSsh = {user: v.user, von: v.von};

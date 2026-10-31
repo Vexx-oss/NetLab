@@ -211,7 +211,11 @@ gruppe("Terminal-Hilfe: Vorschläge", () => {
       erwarte.gleich(zahl("r1"), 0, "meister bekommt keinen Vorschlag");
       erwarte.gleich(zahl("r1", {letzterFehler: {fehler: true}}), 0, "auch nicht nach einem Fehler");
     });
-    mitStufe("azubi", () => mitStufe("meister", () => erwarte.wahr(true, "Stufenwechsel möglich")));
+    /* Stufenwechsel wirklich prüfen (hier stand ein immer wahres "wahr(true)", Befund QUA-03). */
+    mitStufe("azubi", () => {
+      erwarte.gleich(Spiel.stufe.id(), "azubi", "äußere Stufe ist gesetzt");
+      mitStufe("meister", () => erwarte.gleich(Spiel.stufe.id(), "meister", "verschachtelter Stufenwechsel setzt die innere Stufe"));
+    });
     /* azubi sieht mehr als meister – die Kernaussage des Auftrags. */
     let azubi = 0, meister = 0;
     mitStufe("azubi", () => { azubi = zahl("r1"); });

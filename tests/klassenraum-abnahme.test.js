@@ -15,9 +15,9 @@
    Grundlage: `A – Codec und Determinismus.md` § 5 (API-Vertrag), § 6 (Ergebnis-Code), § 7
    (Datenschema `store "klassenraum"`) und § 1.1 (Alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, kein I, O, 0, 1).
 
-   KEIN stilles Grün: jeder Schritt wird nur angemeldet, wenn die API, die er braucht, wirklich da ist
-   (die Bausteine entstehen parallel: task-31 Codec, task-32 API/Store, task-33 Oberfläche). Fehlt sie,
-   läuft der Schritt nicht — das steht dann im Bericht, nicht als grüner Schein.
+   KEIN stilles Grün mehr (QUA-04, 31.10.2026): JEDER Schritt wird IMMER registriert. Fehlt die API,
+   die er braucht, wird der Schritt ROT mit Namensliste — früher verschwand er still (Befund Q5:
+   sieben Abnahmetests fehlten, sobald eine API umbenannt wurde, und der Lauf blieb grün).
 
    Allein lauffähig:  node tests/klassenraum-abnahme.test.js
    (lädt dieselben Schichten wie tests/run.js; Bauart von tests/2.0-abnahme.test.js) */
@@ -85,8 +85,13 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
       jetzt.setzen(alt.uhr); jetzt.frei();
     }
   };
-  /* Ein Schritt läuft nur, wenn seine API wirklich existiert (siehe Kopf: kein stilles Grün). */
-  const nurMit = (namen, name, fn) => { if (namen.every(hat)) pruefe(name, kapsel(fn)); };
+  /* QUA-04 (3.0): JEDER Schritt wird registriert; fehlt eine API, wird der Schritt ROT (Befund Q5).
+     Es gibt keine stille Nichtregistrierung mehr — die Zahl der Abnahmetests ist konstant. */
+  const pruefeApi = namen => {
+    const fehlend = namen.filter(n => !hat(n));
+    erwarte.gleich(fehlend, [], "API für diesen Abnahmeschritt fehlt: " + fehlend.join(", "));
+  };
+  const testMit = (namen, name, fn) => pruefe(name, kapsel(() => { pruefeApi(namen); fn(); }));
 
   /* ---------- Werkzeug ---------- */
   const sitzungJetzt = () => { const s = KA().sitzung ? KA().sitzung() : null; return s && s.sitzung ? s.sitzung : (s && s.code ? s : null); };
@@ -131,7 +136,7 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
   }
 
   /* ================= Schritt 1 · Ansagen ================= */
-  nurMit(["erzeugen", "sitzung"], "1 · Ansagen: erzeugen legt den Auftragscode an, die Sitzung liegt in store „klassenraum“ — nicht im Spielstand", () => {
+  testMit(["erzeugen", "sitzung"], "1 · Ansagen: erzeugen legt den Auftragscode an, die Sitzung liegt in store „klassenraum“ — nicht im Spielstand", () => {
     const laborVorher = JSON.stringify(store.get("labor", null));
     const s = kaSitzung({seed: 7});
     erwarte.wahr(!!s, "erzeugen liefert eine Sitzung (kein {fehler})");
@@ -150,8 +155,9 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
     erwarte.wahr(Number.isInteger(s.plaetze) && s.plaetze >= 0 && s.plaetze <= 31, `sitzung.plaetze ist eine Zahl 0..31 (L6, ist ${s.plaetze})`);
     /* Der Store: eigener Schlüssel, Fassung 1, und der Spielstand bleibt unberührt. */
     const st = store.get("klassenraum", null);
-    erwarte.wahr(!!st && st.fassung === 1, "store „klassenraum“ trägt die Fassung 1");
-    erwarte.gleich(st.sitzung && st.sitzung.code, s.code, "die Sitzung im Store ist dieselbe (Code)");
+    erwarte.wahr(!!st && st.fassung === 2, "store „klassenraum“ trägt die Fassung 2 (KLR-01a)");
+    const stAktiv = st && Array.isArray(st.sitzungen) ? st.sitzungen.find(x => x.id === st.aktiv) : null;
+    erwarte.gleich(stAktiv && stAktiv.code, s.code, "die Sitzung im Store ist dieselbe (Code)");
     erwarte.gleich(JSON.stringify(store.get("labor", null)), laborVorher, "store „labor“ ist unverändert (kein Eintrag im Spielstand)");
     erwarte.gleich(Spiel.st.klassenraum, undefined, "auch der Spielstand selbst kennt keinen Klassenraum");
     /* Und `sitzung()` gibt sie wieder heraus. */
@@ -159,7 +165,7 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
   });
 
   /* ================= Schritt 2 · Öffnen ================= */
-  nurMit(["erzeugen", "ausCode", "platz", "sitzung"], "2 · Öffnen: derselbe Code ergibt auf einem zweiten Gerät denselben Auftrag (def.id, Ziele, Netz)", () => {
+  testMit(["erzeugen", "ausCode", "platz", "sitzung"], "2 · Öffnen: derselbe Code ergibt auf einem zweiten Gerät denselben Auftrag (def.id, Ziele, Netz)", () => {
     const s = kaSitzung({seed: 11});
     erwarte.wahr(!!s, "Sitzung angelegt");
     const a = kaOeffnen(s.code, 0);
@@ -188,7 +194,7 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
   });
 
   /* ================= Schritt 3 · Einsammeln ================= */
-  nurMit(["erzeugen", "ausCode", "platz", "sitzung", "ergebnisCode", "ergebnisEintragen", "ergebnisLesen", "plaetze"],
+  testMit(["erzeugen", "ausCode", "platz", "sitzung", "ergebnisCode", "ergebnisEintragen", "ergebnisLesen", "plaetze"],
     "3 · Einsammeln: lösen → Ergebnis-Code → eintragen; die Liste zeigt genau das Eingetragene (Ampel 1 von 2)", () => {
     const s = kaSitzung({seed: 13, plaetze: 2});
     const a = kaOeffnen(s.code, 0);
@@ -224,7 +230,7 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
   });
 
   /* ================= Schritt 4 · Zweiter Platz ================= */
-  nurMit(["erzeugen", "ausCode", "platz", "platzSetzen", "sitzung", "ergebnisCode", "ergebnisEintragen", "ergebnisLesen", "plaetze"],
+  testMit(["erzeugen", "ausCode", "platz", "platzSetzen", "sitzung", "ergebnisCode", "ergebnisEintragen", "ergebnisLesen", "plaetze"],
     "4 · Zweiter Platz: zwei Plätze, zwei Ergebnisse, Ampel 2 von 2, Median-Dauer berechenbar — Eintragen ist idempotent", () => {
     const s = kaSitzung({seed: 17, plaetze: 2});
     /* Platz 0: erstes Gerät. */
@@ -259,7 +265,7 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
   });
 
   /* ================= Schritt 5 · Neustart überlebt ================= */
-  nurMit(["erzeugen", "ausCode", "platz", "platzSetzen", "sitzung", "ergebnisCode", "ergebnisEintragen", "exportieren", "importieren", "plaetze"],
+  testMit(["erzeugen", "ausCode", "platz", "platzSetzen", "sitzung", "ergebnisCode", "ergebnisEintragen", "exportieren", "importieren", "plaetze"],
     "5 · Neustart: exportieren → Zustand weg → importieren; Ampel 2/2 und Kopfzeile unverändert", () => {
     const s = kaSitzung({seed: 19, plaetze: 2});
     KA().platzSetzen(0);
@@ -294,12 +300,14 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
   });
 
   /* ================= Definition of Done 7 · fremde Sitzung ================= */
-  if (typeof KlassenraumCodec === "object" && KlassenraumCodec && typeof KlassenraumCodec.ergebnisBauen === "function") {
-    nurMit(["erzeugen", "sitzung", "ergebnisLesen", "ergebnisEintragen"],
-      "DoD 7: ein Ergebnis-Code einer FREMDEN Sitzung wird abgewiesen", () => {
+  /* QUA-04 (3.0): immer registriert — fehlt der Codec, wird der Schritt rot, statt zu verschwinden. */
+  testMit(["erzeugen", "sitzung", "ergebnisLesen", "ergebnisEintragen"],
+    "DoD 7: ein Ergebnis-Code einer FREMDEN Sitzung wird abgewiesen", () => {
+      const Codec = typeof KlassenraumCodec === "object" && KlassenraumCodec !== null ? KlassenraumCodec : {};
+      erwarte.gleich(typeof Codec.ergebnisBauen, "function", "KlassenraumCodec.ergebnisBauen fehlt im Lauf (Codec-Baustein)");
       const s = kaSitzung({seed: 23});
       const fremd = (s.id % 31) + 1;                                   /* garantiert eine andere Kennung */
-      const code = KlassenraumCodec.ergebnisBauen({sitzung: fremd, platz: 0, sterne: 5, versuche: 0, dauerS: 70});
+      const code = Codec.ergebnisBauen({sitzung: fremd, platz: 0, sterne: 5, versuche: 0, dauerS: 70});
       erwarte.passt(code, CODE_E, "der fremde Code hat die richtige Form");
       const gelesen = KA().ergebnisLesen(code);
       erwarte.gleich(gelesen.sitzung, fremd, "gelesen wird die fremde Sitzung");
@@ -308,10 +316,9 @@ gruppe("Klassenraum A+B: Abnahme im echten Fluss", () => {
       erwarte.wahr(!!r.fehler, "eintragen wird abgewiesen (kein stilles Übernehmen)");
       erwarte.gleich(JSON.stringify(store.get("klassenraum", null)), vorher, "die Sitzung ist unverändert");
     });
-  }
 
   /* ================= Definition of Done 9 · ungültige Codes ================= */
-  nurMit(["ausCode", "ergebnisLesen"], "DoD 9: ungültige Codes liefern {fehler} — und werfen nie", () => {
+  testMit(["ausCode", "ergebnisLesen"], "DoD 9: ungültige Codes liefern {fehler} — und werfen nie", () => {
     const faelle = [["Auftragscode, bekannt ungültig", () => KA().ausCode("NL-4F7K-2Q")],
                     ["Auftrags-Buchstabensalat", () => KA().ausCode("NL-QQQQ-QQ")],
                     ["Ergebnis-Buchstabensalat", () => KA().ergebnisLesen("E-XXXX-XXX")],

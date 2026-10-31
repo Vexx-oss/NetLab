@@ -22,6 +22,18 @@
 const CLI = (() => {
   const C = {};
 
+  /* Passwort-Vergleich mit IOS-Typ-Präfixen (0 Klartext, 5 MD5-artig, 7 verschleiert) – Architektur § 6.2.
+     Ohne Präfix gilt die alte Regel (Klartext), damit bestehende Spielstände unverändert funktionieren. */
+  C.passwortPasst = (gespeichert, eingabe) => {
+    const s = String(gespeichert == null ? "" : gespeichert), t = String(eingabe == null ? "" : eingabe);
+    const m = /^([057])\s+(\S.*)$/.exec(s);
+    if (!m) return t === s;
+    if (m[1] === "0") return t === m[2];
+    if (m[1] === "5") return typeof C.scheinHash === "function" ? C.scheinHash(t) === m[2] : t === m[2];
+    if (m[1] === "7") return typeof C.typ7 === "function" ? C.typ7(t).toLowerCase() === m[2].toLowerCase() : t === m[2];
+    return t === s;
+  };
+
   /* ---------- Text-Helfer ---------- */
   const h = C.h = {};
   h.links = (s, n) => { s = String(s == null ? "" : s); return s.length >= n ? s : s + " ".repeat(n - s.length); };
@@ -301,7 +313,7 @@ const CLI = (() => {
   };
   function loginPruefen(s, antwort){
     const con = (h.konfig(s).lines || {}).con || {};
-    if (antwort === con.passwort) return "";
+    if (C.passwortPasst(con.passwort, antwort)) return "";
     this.versuche = (this.versuche || 0) + 1;
     if (this.versuche >= 3) { s.modus = "abgemeldet"; return "% Bad passwords"; }
     return {ausgabe: "", rueckfrage: this};

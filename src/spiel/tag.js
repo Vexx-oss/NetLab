@@ -22,14 +22,19 @@ Spiel.tag.heute = function(){
     fertig: erledigtHeute >= Spiel.TAG.ZIEL_TICKETS, abschlussGezeigt: d.abschlussGezeigt};
 };
 Spiel.tag.bereitschaftStarten = function(){
+  Spiel.wiederholungenAufraeumen();                       /* SPL-01: Dedup/Verfall/Cap (§ 7.5) */
   const d = Spiel.tag.daten();
+  d.bereitschaft = d.bereitschaft.filter(iid => Spiel.instanz(iid));   /* nur lebende Tickets zählen */
   const faellig = typeof L !== "undefined" ? L.faelligeIds(id => String(id).startsWith("lab.")) : [];
   const neu = [];
+  const offen = new Set(Spiel.st.postfach.filter(i => i && i.quelle === "wiederholung").map(Spiel.wiederholungSchluessel));
+  const offeneWiederholungen = () => Spiel.st.postfach.filter(i => i && i.quelle === "wiederholung").length;
   for (const skill of faellig) {
-    if (neu.length + d.bereitschaft.length >= Spiel.TAG.BEREITSCHAFT_MAX) break;
+    if (offeneWiederholungen() >= Spiel.TAG.BEREITSCHAFT_MAX) break;
+    if (offen.has(skill)) continue;                       /* je Fertigkeit höchstens EINE offene Wiederholung */
     try {
       const inst = Spiel.instanzErstellen({gen: {skill, seed: Spiel.neuerSeed("bereitschaft:" + skill), opts: {art: "wartung", stufe: Spiel.karriere ? Spiel.karriere.niveau() : "E"}}, quelle: "wiederholung"});
-      d.bereitschaft.push(inst.iid); neu.push(inst);
+      d.bereitschaft.push(inst.iid); neu.push(inst); offen.add(skill);
     } catch (e) { /* für diese Fertigkeit gibt es kein Ticket – weiter */ }
   }
   Spiel.speichern();

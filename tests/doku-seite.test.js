@@ -14,12 +14,17 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
   const WURZEL = path.join(__dirname, "..");
   const PY = (typeof process !== "undefined" && process.env && process.env.PYTHON) || "python";
 
-  /* Ein Aufruf des Konverters. Rueckgabe: {ok, ausgabe, fehler, code}. */
+  /* Ein Aufruf des Konverters. Rueckgabe: {ok, ausgabe, fehler, code}.
+     WICHTIG (QUA-03): im gemeinsamen vm-Kontext von tests/run.js gibt es kein `process` — der
+     ungeschützte Zugriff auf process.env warf einen ReferenceError, `bereit` wurde false und die
+     alten wahr(true)-Fallbacks galten als grün. Genau das war Befund Q4. Jetzt wie in
+     tests/ethos-r12.test.js: env nur mit geschütztem Zugriff setzen. */
   const python = (args, eingabe) => {
+    const umgebung = {...(typeof process !== "undefined" && process.env ? process.env : {}), PYTHONIOENCODING: "utf-8"};
     try {
       const ausgabe = execFileSync(PY, args, {
         cwd: WURZEL, input: eingabe, encoding: "utf8", timeout: 120000,
-        env: {...process.env, PYTHONIOENCODING: "utf-8"},
+        env: umgebung,
         stdio: ["pipe", "pipe", "pipe"],
       });
       return {ok: true, ausgabe, fehler: "", code: 0};
@@ -45,7 +50,10 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
      Zusicherung — auch wenn Python fehlt, wird der Grund BENANNT statt still grün zu bleiben. */
   const fall = (name, markdown, teile) => {
     pruefe(name, () => {
-      if (!bereit) { erwarte.wahr(true, "ohne python nicht prüfbar: Konverter-Aufruf übersprungen"); return; }
+      /* Grenze (QUA-03, Lead-Beschluss 31.10.2026): fehlt Python oder tools/md.py, ist das ein ROTER
+         Lauf. Bis 2.9 stand hier ein immer wahres "wahr(true)" — der Fall zählte grün, ohne den
+         Konverter je aufgerufen zu haben (Befund Q4). */
+      if (!bereit) { erwarte.wahr(false, "ohne python nicht prüfbar: Konverter-Aufruf nicht ausgeführt — ROT (QUA-03)"); return; }
       const r = wandle(markdown);
       erwarte.wahr(r.ok, `Konverter lief nicht durch: ${r.fehler.slice(0, 300)}`);
       for (const t of teile) erwarte.enthaelt(r.ausgabe, t, `„${t}“ fehlt`);
@@ -62,8 +70,12 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
 
   fall("Tabelle mit Ausrichtung — die Doku nutzt sie stark",
     "| Frage | Antwort | Zahl |\n|:---|:---:|---:|\n| a | b | 3 |\n",
-    ['<th style="text-align:left">Frage</th>', '<th style="text-align:center">Antwort</th>',
-     '<th style="text-align:right">Zahl</th>', "<td>a</td>", "<td>b</td>"]);
+    /* QUA-03 (31.10.2026): Erwartung am ECHTEN Konverter gemessen — linksbündige Kopfzellen
+       tragen kein style (HTML-Default ist links), nur center/right werden ausgezeichnet.
+       Bis hierher lief dieser Fall nie: der wahr(true)-Fallback war grün (Befund Q4). */
+    ["<th>Frage</th>", '<th style="text-align:center">Antwort</th>',
+     '<th style="text-align:right">Zahl</th>', "<td>a</td>",
+     '<td style="text-align:center">b</td>', '<td style="text-align:right">3</td>']);
 
   fall("Verschachtelte Listen, geordnet und ungeordnet",
     "- eins\n- zwei\n  - zwei-a\n  - zwei-b\n\n1. erster\n2. zweiter\n   1. zweiter-a\n",
@@ -77,7 +89,10 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
 
   fall("Fluchtzeichen: `<` und `&` werden escapt, vorhandene Entitaeten bleiben",
     "Nackt: 5 < 7 & 9 > 3. Entitaet: &amp; und &lt;tag&gt; und &nbsp; Ende.\n",
-    ["5 &lt; 7 &amp; 9 &gt; 3", "&amp; und &lt;tag&gt; und &nbsp;", "&amp;amp;"]);
+    /* QUA-03 (31.10.2026): gemessen — der Konverter escapt rohe Zeichen und lässt vorhandene
+       Entitäten stehen (kein Doppel-Escaping); die alte Erwartung "&amp;amp;" war falsch und
+       lief nie, weil der wahr(true)-Fallback grün war (Befund Q4). */
+    ["5 &lt; 7 &amp; 9 &gt; 3", "&amp; und &lt;tag&gt; und &nbsp;"]);
 
   fall("Trennlinie und Absaetze",
     "Erster Absatz\nmit zweiter Zeile.\n\n---\n\nZweiter Absatz.\n",
@@ -85,11 +100,12 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
 
   fall("Ein `|` IM Wiki-Link zerlegt die Tabelle nicht (Fundstelle Konzept, Zeile 56)",
     "| Gerät | Wofür |\n|---|---|\n| Storage | passend zu [[20-Bereiche/Storage/Liesmich|Storage und Cloud]] |\n",
-    ["<td>passend zu", "Storage und Cloud</td>", "<td>Wofür</td>"]);
+    /* QUA-03 (31.10.2026): gemessen — „Wofür“ ist die Kopfzelle der Tabelle (th), keine td. */
+    ["<td>passend zu", "Storage und Cloud</td>", "<th>Wofür</th>"]);
 
   /* ---- Die Verweis-Aufloesung: kein toter Verweis ---- */
   pruefe("Wiki-Link auf ein veroeffentlichtes Dokument wird ein echter Verweis; fremdes Ziel wird Text", () => {
-    if (!bereit) { erwarte.wahr(true, "ohne python nicht prüfbar: Aufruf übersprungen"); return; }
+    if (!bereit) { erwarte.wahr(false, "ohne python nicht prüfbar: Aufruf nicht ausgeführt — ROT (QUA-03)"); return; }
     const datei = path.join(WURZEL, "_probe-doku-links.md");
     fs.writeFileSync(datei, "Siehe [[Architektur]] und [[gibt-es-nicht]] und [[Plan – Ausbau 1.2|den Plan]] und `[[Beispiel]]`.\n", "utf8");
     try {
@@ -104,7 +120,7 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
   });
 
   pruefe("Kein toter Verweis im Erzeugnis, und `--pruefen` sagt die Wahrheit", () => {
-    if (!bereit) { erwarte.wahr(true, "ohne python nicht prüfbar: Aufruf übersprungen"); return; }
+    if (!bereit) { erwarte.wahr(false, "ohne python nicht prüfbar: Aufruf nicht ausgeführt — ROT (QUA-03)"); return; }
     const r = python([path.join("tools", "seite.py"), "--pruefen"]);
     erwarte.gleich(r.code, 0, `--pruefen meldete Exit ${r.code}:\n${r.ausgabe.slice(-800)}${r.fehler.slice(-400)}`);
     erwarte.enthaelt(r.ausgabe, "GRUEN", "der Lauf meldet GRUEN");
@@ -158,7 +174,7 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
   });
 
   pruefe("Der Bau ist deterministisch: zweimal bauen ergibt dieselben Bytes", () => {
-    if (!bereit) { erwarte.wahr(true, "ohne python nicht prüfbar: Aufruf übersprungen"); return; }
+    if (!bereit) { erwarte.wahr(false, "ohne python nicht prüfbar: Aufruf nicht ausgeführt — ROT (QUA-03)"); return; }
     const datei = path.join(WURZEL, "docs", "doku", "README.html");
     const vorher = fs.readFileSync(datei, "utf8");
     const r = python([path.join("tools", "seite.py")]);

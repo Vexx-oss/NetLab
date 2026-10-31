@@ -134,7 +134,10 @@
   function hostEntspricht(g, s, wert){
     if (s[0] !== "if" || !s[1] || !s[2]) return null;
     const k = Object.assign({}, g.running.if[s[1]] || {}, {[s[2]]: wert});
-    const name = `name="${s[1] === "eth0" ? "Ethernet" : "Ethernet " + (Number(s[1].replace(/\D/g, "")) + 1)}"`;
+    /* Anzeigeform = einlesbare Form: netsh erwartet den Schnittstellennamen als eigenes, gequotetes Wort
+       („netsh interface ip set address "Ethernet" static …“). Vorher stand hier name="Ethernet", was die
+       eigene Konsole nicht einlesen konnte – der Inspektor zeigte einen Befehl, der beim Einfügen scheiterte. */
+    const name = `"${s[1] === "eth0" ? "Ethernet" : "Ethernet " + (Number(s[1].replace(/\D/g, "")) + 1)}"`;
     switch (s[2]) {
       case "ip": case "maske": case "gw":
         if (!k.ip || !k.maske) return null;

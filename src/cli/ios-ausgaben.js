@@ -595,6 +595,18 @@
   /* Typ-7-Verschleierung (IOS-ähnlich: Form wie echt, Verfahren nur angedeutet – Typ 7 ist ohnehin umkehrbar und kein Schutz) */
   function typ7(pw){ let x = "08"; for (const [i, c] of [...String(pw)].entries()) x += ((c.charCodeAt(0) ^ "dsfd;kfoA,.iyewrkldJKD".charCodeAt((i + 8) % 22)) & 0xff).toString(16).toUpperCase().padStart(2, "0"); return x; }
   C.typ7 = typ7;
+  /* Umkehrung von typ7 (das Verfahren ist eine feste XOR-Maske, kein Schutz) – nötig, damit
+     „password 7 …“ beim Einlesen wieder als Klartext gespeichert wird (§ 6.2, Datenform stabil). */
+  C.ent7 = hex => {
+    const t = String(hex == null ? "" : hex).replace(/^08/i, "").replace(/^0x/i, "");
+    if (!/^[0-9A-Fa-f]+$/.test(t) || t.length % 2) return null;
+    let o = "";
+    for (let i = 0; i < t.length; i += 2) o += String.fromCharCode(parseInt(t.substr(i, 2), 16) ^ "dsfd;kfoA,.iyewrkldJKD".charCodeAt(((i / 2) + 8) % 22));
+    return o;
+  };
+  /* Typ-Präfixe 0 (Klartext), 5 (MD5-artig), 7 (verschleiert) – Anzeige und Einlesen deckungsgleich (§ 6.2) */
+  const istTypisiert = w => /^[057]\s+\S/.test(String(w == null ? "" : w));
+  C.istTypisiert = istTypisiert;
   function psZeilen(k){
     const ps = k.portSecurity || k.psVorgabe; if (!ps) return [];
     const z = [];
@@ -627,18 +639,28 @@
     if (k.aclOut) z.push(` ip access-group ${k.aclOut} out`);
     for (const x of k.helper || []) z.push(` ip helper-address ${x}`);
     if (k.nat) z.push(` ip nat ${k.nat}`);
-    if (k.shutdown) z.push(" shutdown");
-    if (art === "phys") z.push(" duplex auto", " speed auto");
+    /* Router-Ports und SVIs sind ab Werk administrativ aus; der Up-Zustand muss als no shutdown
+       in der Anzeige stehen, sonst verliert der Roundtrip ihn (§ 6.1). Switch-Ports sind ab Werk an. */
+    if (art === "phys" || art === "svi") z.push(k.shutdown ? " shutdown" : " no shutdown");
+    else if (k.shutdown) z.push(" shutdown");
     return z;
   };
   function lineZeilen(g, k){
-    const l = k.lines || {}, con = l.con || {}, vty = l.vty || {login: true}, z = [];
-    const block = (kopf, x) => { z.push(kopf); if (x.passwort) z.push(` password ${k.pwVerschluesseln ? "7 " + typ7(x.passwort) : x.passwort}`); if (x.logsync) z.push(" logging synchronous");
-      if (x.login === "local") z.push(" login local"); else if (x.login) z.push(" login"); if (x.transport) z.push(` transport input ${x.transport}`); };
-    block("line con 0", con);
-    if (g.typ === "router") z.push("line aux 0");
-    block("line vty 0 4", vty);
-    if (g.typ === "switch") block("line vty 5 15", vty);
+    const l = k.lines || {}, z = [];
+    /* Nur konfigurierte Zeilen zeigen: ein Default-Block würde beim Einspielen eine Datenform erzeugen,
+       die es vorher nicht gab (Roundtrip-Verlust, § 6.1). */
+    /* Kopfzeile immer zeigen (Abschnittsfilter „| section line …“ braucht sie), Attribute nur, wenn gesetzt. */
+    const block = (kopf, x) => {
+      z.push(kopf);
+      x = x || {};
+      if (x.passwort) z.push(` password ${istTypisiert(x.passwort) ? x.passwort : (k.pwVerschluesseln ? "7 " + typ7(x.passwort) : x.passwort)}`);
+      if (x.logsync) z.push(" logging synchronous");
+      if (x.login === "local") z.push(" login local"); else if (x.login === false) z.push(" no login"); else if (x.login) z.push(" login");
+      if (x.transport) z.push(` transport input ${x.transport}`);
+    };
+    block("line con 0", l.con);
+    block("line vty 0 4", l.vty);
+    if (g.typ === "switch") block("line vty 5 15", l.vty);
     return z;
   }
   C.aclZeilen = function(name, a){
@@ -655,40 +677,63 @@
     return z;
   };
   C.routeZeile = x => `ip route ${x.netz} ${x.maske}` + (x.aus ? ` ${h.langName(x.aus)}` : "") + (x.nh ? ` ${x.nh}` : "") + ((x.ad || 1) !== 1 ? ` ${x.ad}` : "");
-  C.poolZeilen = p => [`ip dhcp pool ${p.name}`, ...(p.netz ? [` network ${p.netz} ${p.maske}`] : []),
-                       ...(p.gw ? [` default-router ${p.gw}`] : []), ...(p.dns ? [` dns-server ${p.dns}`] : [])];
+  /* Vollständige Pool-Zeilen (CLI-02, Architektur § 6.1): lease, domain-name und Reservierungen gehören
+     dazu, sonst verliert "setzen → show running-config → wieder einspielen" Werte. Die Zeilen sind so
+     formatiert, dass die eigene Konsole sie wieder annimmt (Typ-Präfixe, exit aus dem Host-Modus). */
+  const poolLeaseZeile = sek => {
+    if (sek % 86400 === 0) return String(sek / 86400);
+    if (sek % 3600 === 0) return Math.floor(sek / 86400) + " " + Math.floor((sek % 86400) / 3600);
+    return Math.floor(sek / 86400) + " " + Math.floor((sek % 86400) / 3600) + " " + Math.floor((sek % 3600) / 60);
+  };
+  C.poolZeilen = p => {
+    const z = [`ip dhcp pool ${p.name}`];
+    if (p.netz) z.push(` network ${p.netz} ${p.maske}`);
+    if (p.gw) z.push(` default-router ${p.gw}`);
+    if (p.dns) z.push(` dns-server ${p.dns}`);
+    if (p.leaseS != null && p.leaseS !== "") z.push(Number(p.leaseS) === 0 ? " lease infinite" : ` lease ${poolLeaseZeile(Number(p.leaseS) || 0)}`);
+    if (p.domain) z.push(` domain-name ${p.domain}`);
+    for (const r of p.reservierungen || []) {
+      z.push(` host ${r.name || "reserviert"}`);
+      if (r.mac) z.push(`  hardware-address ${IP.macCisco(r.mac)}`);
+      if (r.ip) z.push(`  ip ${r.ip}`);
+      z.push(" exit");
+    }
+    return z;
+  };
   C.bannerZeile = text => {
     const d = ["^C", "#", "$", "%", "&"].find(x => !String(text).includes(x)) || "^C";
     return `banner motd ${d}${text}${d}`;
   };
   function iosText(g, k){
     const r = g.typ === "router", z = [];
-    z.push("!", `version ${r ? "15.1" : "15.0"}`);
-    if (!r) z.push("no service pad");
-    z.push("service timestamps debug datetime msec", "service timestamps log datetime msec", k.pwVerschluesseln ? "service password-encryption" : "no service password-encryption", "!",
-           `hostname ${k.hostname}`, "!", "boot-start-marker", "boot-end-marker", "!");
-    if (k.enableSecret) z.push(`enable secret 5 ${scheinHash(k.enableSecret)}`, "!");
-    for (const [n, b] of Object.entries(k.benutzer || {})) z.push(b.art === "password" ? `username ${n} password ${k.pwVerschluesseln ? "7 " + typ7(b.pw) : "0 " + b.pw}` : `username ${n} secret 5 ${scheinHash(b.pw)}`);
+    /* Nur Zeilen, die die eigene Konsole wieder annimmt (Phantom-Regel § 6.1): reine Komfort-Defaults
+       wie version/service timestamps/boot-marker entfallen. */
+    z.push("!", k.pwVerschluesseln ? "service password-encryption" : "no service password-encryption", "!",
+           `hostname ${k.hostname}`, "!");
+    if (k.enableSecret) z.push(`enable secret ${istTypisiert(k.enableSecret) ? k.enableSecret : "5 " + scheinHash(k.enableSecret)}`, "!");
+    for (const [n, b] of Object.entries(k.benutzer || {})) {
+      const pw = istTypisiert(b.pw) ? b.pw : (b.art === "password" ? (k.pwVerschluesseln ? "7 " + typ7(b.pw) : "0 " + b.pw) : "5 " + scheinHash(b.pw));
+      z.push(`username ${n} ${b.art === "password" ? "password" : "secret"} ${pw}`);
+    }
     if (Object.keys(k.benutzer || {}).length) z.push("!");
-    z.push("no aaa new-model");
-    if (!r) z.push("system mtu routing 1500");
     z.push("!");
     if (r) {
       const d = k.dhcp || {};
       if ((d.ausgeschlossen || []).length) { for (const x of d.ausgeschlossen) z.push(`ip dhcp excluded-address ${x.von}${x.bis && x.bis !== x.von ? " " + x.bis : ""}`); z.push("!"); }
       for (const p of d.pools || []) z.push(...C.poolZeilen(p), "!");
     }
-    if (k.domainLookup === false) z.push("no ip domain lookup", "!");
+    if (k.domainLookup === false) z.push("no ip domain-lookup", "!");
     if (k.domainName) z.push(`ip domain-name ${k.domainName}`, "!");
-    if (k.sshSchluessel) z.push("ip ssh version 2", "!");
-    if (!r) z.push("spanning-tree mode pvst", "spanning-tree extend system-id", "!", "vlan internal allocation policy ascending", "!");
+    /* D3: ip ssh version 2 kennt der Parser heute nicht – ehrlich als Kommentar statt als Scheinbefehl. */
+    if (k.sshSchluessel) z.push("! SSH aktiv – „ip ssh version 2“ folgt in 3.1 (CLI-05)");
+    if (!r) z.push("!");
     const namen = r ? h.ifSortieren(Object.keys(k.if || {})) : [...Modell.PORTS.switch, ...h.ifSortieren(Object.keys(k.svi || {}).map(v => "Vlan" + v))];
     for (const n of namen) {
       const ik = r ? k.if[n] : /^Vlan/.test(n) ? k.svi[n.slice(4)] : k.ports[n];
       z.push(`interface ${h.langName(n)}`, ...C.ifZeilen(g, n, ik), "!");
     }
     if (r) {
-      z.push("ip forward-protocol nd", "!");
+      z.push("!");
       const nat = C.natZeilen(k.nat), rt = (k.routen || []).map(C.routeZeile);
       if (nat.length || rt.length) z.push(...nat, ...rt, "!");
       const acls = k.acls || {}, reihe = aclReihe(acls);
@@ -705,7 +750,8 @@
   }
   /* Firewall: herstellerneutrale Darstellung (konfiguriert wird im Inspektor) */
   function fwText(g, k){
-    const z = ["! Firewall-Konfiguration (herstellerneutral, IOS-ähnliche Darstellung)", "!", `hostname ${k.hostname}`, "!"];
+    const z = ["! Firewall-Konfiguration (herstellerneutral, IOS-ähnliche Darstellung)",
+               "! nicht wiedereinspielbar – Regeln, Zonen und NAT stellt der Inspektor ein (§ 6.1)", "!", `hostname ${k.hostname}`, "!"];
     for (const [n, i] of Object.entries(k.if || {})) {
       z.push(`interface ${h.langName(n)}`);
       if (i.zone) z.push(` zone ${i.zone}`);

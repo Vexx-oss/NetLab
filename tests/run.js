@@ -54,13 +54,39 @@ code.push(fs.readFileSync(path.join(__dirname, "harness.js"), "utf8"));
    tut wie `node tests/run.js klassenraum`. Die Abnahme in docs/entwicklung/Klassenraum/D nennt die
    Form mit Strichen — vorher lief sie ins Leere und meldete „0/0 grün (Exit 0)": ein grüner Lauf,
    der nichts geprüft hat (Befund K2, Bilanz – Agententeam 2.0). */
+/* QUA-03 (3.0): Quellen-Gate VOR dem Lauf — Tests dürfen keine unfalsifizierbaren Zusicherungen
+   enthalten (Befund Q3/Q4, berichte/qualitaet.md). Werkzeug tools/quellen-gate.js maskiert
+   Kommentare/Strings/Regex und meldet nur echten CODE (r-arch-Befund). Ein Fund bricht den Lauf
+   VOR dem Ausführen mit Datei:Zeile ab (Exit 1); Schnelltest ohne Testlauf:
+   `node tools/quellen-gate.js`. Die 0-Zusicherungen zählt weiterhin tests/harness.js (Skip-Gate). */
+const {pruefeQuellen} = require(path.join(__dirname, "..", "tools", "quellen-gate.js"));
 const filter = (process.argv[2] || "").replace(/^-+/, "");
 const testdateien = fs.readdirSync(__dirname).filter(n => n.endsWith(".test.js")).sort();
-for (const n of testdateien) code.push(`/* tests/${n} */\n` + fs.readFileSync(path.join(__dirname, n), "utf8"));
+const quellen = [];
+for (const n of testdateien) {
+  const text = fs.readFileSync(path.join(__dirname, n), "utf8");
+  quellen.push({datei: "tests/" + n, text});
+  code.push(`/* tests/${n} */\n` + text);
+}
+const quellenGate = pruefeQuellen(quellen);
+if (quellenGate.funde.length) {
+  console.error(`\n${quellenGate.funde.length} unfalsifizierbare Zusicherung(en) im Testbestand — das ist kein grüner Lauf (QUA-03, Architektur § 16.2):`);
+  for (const f of quellenGate.funde) console.error(`  - ${f.datei}:${f.zeile} — ${f.was}\n      ${f.text.slice(0, 160)}`);
+  console.error("Regel: eine Zusicherung muss falsch sein können. Ein Test ohne Zusicherung zählt als übersprungen (harness.js).");
+  process.exit(1);
+}
+
 code.push(`testsAusfuehren();`);
+/* QUA-03 (3.0): console.error aus dem Testbereich zählen. Befund Review – Testqualität § 7.1:
+   ein werfender Bus-Hörer schrieb auf stderr, die Suite blieb grün. Jetzt ist jeder console.error
+   im Testbereich ein roter Lauf — er zeigt einen Fehlerpfad, den niemand sieht. */
+const fehlerAusgaben = [];
+const originalError = console.error;
+console.error = function(...a) { fehlerAusgaben.push(a.map(x => String(x)).join(" ")); return originalError.apply(console, a); };
 let ergebnisse;
 try { ergebnisse = vm.runInContext(code.join("\n;\n"), ctx, {filename: "labor-tests.js"}); }
-catch (e) { console.error("LADEFEHLER:", e && e.stack || e); process.exit(2); }
+catch (e) { console.error = originalError; console.error("LADEFEHLER:", e && e.stack || e); process.exit(2); }
+console.error = originalError;
 const gezeigt = ergebnisse.filter(e => !filter || e.name.toLowerCase().includes(filter.toLowerCase()));
 let fehler = 0;
 for (const e of gezeigt) {
@@ -85,4 +111,10 @@ if (uebersprungene.length) {
   console.error(`\n${uebersprungene.length} Test(s) ohne eine einzige Zusicherung – als übersprungen gewertet. Das ist kein grüner Lauf (Architektur § 16.2):`);
   for (const e of uebersprungene) console.error(`  - ${e.name}`);
 }
-process.exit(fehler || uebersprungene.length ? 1 : 0);
+/* QUA-03 (3.0): console.error-Zähler — in JEDEM Lauf sichtbar (Review – Testqualität § 7.1). */
+console.log("\nconsole.error im Testbereich: " + fehlerAusgaben.length);
+if (fehlerAusgaben.length) {
+  console.error(`\n${fehlerAusgaben.length} console.error-Aufruf(e) im Testbereich — ein Fehlerpfad bleibt sonst unbemerkt (Review – Testqualität § 7.1). Das ist kein grüner Lauf:`);
+  for (const z of fehlerAusgaben.slice(0, 20)) console.error("  - " + z.slice(0, 300).replace(/\n/g, "\n    "));
+}
+process.exit(fehler || uebersprungene.length || fehlerAusgaben.length ? 1 : 0);

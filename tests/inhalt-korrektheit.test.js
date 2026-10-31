@@ -427,12 +427,14 @@
          const baum = baumPfad("if", "switchport nonegotiate");
          erwarte.gleich(baum.getroffen, 1, "der Baum kennt nur switchport, nicht nonegotiate");
        }},
-      {name: "kein spanning-tree-Befehl, nur running-config-Zeile", muster: /Labor kennt keinen\s+spanning-tree\s*-?\s*Befehl|das Labor zeigt STP nur/i,
+      {name: "kein spanning-tree-Befehl; running-config enthält keinen Scheinbefehl", muster: /Labor kennt keinen\s+spanning-tree\s*-?\s*Befehl|das Labor zeigt STP nur/i,
        pruefe: () => {
          const n = netzMitAllen(), s = sitzungIn(n, "sw1", "config");
          const r = CLI.eingabe(s, "spanning-tree vlan 10 root primary");
          erwarte.wahr(UNBEKANNT.test(String(r.ausgabe || "")) || !!r.fehler, "Switch weist spanning-tree ab");
-         erwarte.enthaelt(CLI.runningConfig(n.geraete.sw1), "spanning-tree", "STP steht als Zeile in der running-config (Wiki-Aussage)");
+         /* Scope-Transfer Lead 31.10.2026: § 6.1 Phantom-Regel – die running-config zeigt keine Scheinbefehle mehr,
+            die die eigene Konsole nicht einlesen kann. Die Wiki-Aussage zieht inhalt nach. */
+         erwarte.falsch(/spanning-tree/.test(CLI.runningConfig(n.geraete.sw1)), "STP steht nicht als Scheinbefehl in der running-config");
        }},
       {name: "Sim-Auflösung ohne Cache, Konsole zeigt Cache", muster: /merkt sich die Antwort für die nächste Auflösung nicht/i,
        pruefe: () => {

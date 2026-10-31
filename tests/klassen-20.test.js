@@ -80,6 +80,8 @@ gruppe("Klassenraum: 20 Geräte", () => {
       fertig, plaetze, offen: plaetze > 0 ? Math.max(0, plaetze - fertig) : null, ohne,
       median: dauern.length ? dauern[Math.floor(dauern.length / 2)] : null};
   }
+  /* Ab 3.0.0 (KLR-01a): alle Sitzungen liegen im Speicher, `aktiv` ist die laufende. */
+  const sitzungAus = k => (k && Array.isArray(k.sitzungen)) ? (k.sitzungen.find(s => s.id === k.aktiv) || null) : null;
   const zahlen = n => Array.from({length: n}, (_, i) => i + 1);
   const namen = obj => Object.keys(obj).sort().join("|");
 
@@ -121,7 +123,7 @@ gruppe("Klassenraum: 20 Geräte", () => {
     erwarte.gleich(new Set(plaetze).size, 20, "20 verschiedene Plätze");
     erwarte.gleich(plaetze.slice().sort((a, b) => a - b), zahlen(20), "Plätze 1..20");
 
-    const s = lehrerStand.sitzung;
+    const s = sitzungAus(lehrerStand);
     const a = ampel(s);
     erwarte.gleich([a.farbe, a.fertig, a.plaetze, a.offen, a.ohne], ["kl-gruen", 20, 20, 0, 0], "Ampel 20 von 20 (Regel src/ui/klassenraum.js:58-82)");
     erwarte.gleich(Object.keys(s.ergebnisse).map(Number).sort((x, y) => x - y), zahlen(20), "alle 20 Plätze belegt");
@@ -162,7 +164,7 @@ gruppe("Klassenraum: 20 Geräte", () => {
       ergebnis.push({code, e});
       lehrerStand = store.get("klassenraum", null);
     }
-    const s = lehrerStand.sitzung;
+    const s = sitzungAus(lehrerStand);
     const a = ampel(s);
     erwarte.gleich([ergebnis[0].e.ok, ergebnis[0].e.neu], [true, true], "das erste Gerät trägt ein");
     erwarte.gleich([ergebnis[1].e.ok, ergebnis[1].e.neu, ergebnis[1].e.grund], [true, false, "platz-schon-da"], "das zweite wird abgewiesen, ohne etwas zu ändern");
@@ -172,30 +174,36 @@ gruppe("Klassenraum: 20 Geräte", () => {
     console.log(`MESSUNG Doppelplatz: Gerät A ok/neu=${ergebnis[0].e.neu} · Gerät B ${ergebnis[1].e.grund} · Ampel ${a.fertig}/${a.plaetze}`);
   }));
 
-  /* ---------- 4 · Zwei Sitzungen ---------- */
-  pruefe("Zwei Sitzungen gleichzeitig gehen nicht: die zweite verdrängt die erste (Befund für 3.0)", () => kapsel(() => {
+  /* ---------- 4 · Zwei Sitzungen (3.0.0, KLR-01a: sie verdrängen sich nicht mehr) ---------- */
+  pruefe("Zwei Sitzungen parallel: die zweite verdrängt die erste nicht; Export/Import trägt beide", () => kapsel(() => {
     const eins = K().erzeugen({ticketId: "salon-06", seed: 7});
     const lehrerStand1 = store.get("klassenraum", null);
     const g = geraet(eins.code, 1);
     g.inst.zeitMs = 60000;
     const codeEins = K().ergebnisCode(g.inst, Spiel.abnahme(g.inst));
     store.set("klassenraum", lehrerStand1);                    /* zurück auf das Lehrergerät der ersten Sitzung */
-    const exportEins = K().exportieren();
-    erwarte.wahr(typeof exportEins === "string", "Sitzung 1 lässt sich sichern: " + JSON.stringify(exportEins));
-    const zwei = K().erzeugen({ticketId: "salon-02", seed: 3});
+    erwarte.gleich(K().ergebnisEintragen(codeEins).ok, true, "Sitzung 1 trägt ihr Ergebnis ein");
+    const ohne = K().erzeugen({ticketId: "salon-02", seed: 3});
+    erwarte.gleich(ohne.warnung, "sitzung-hat-ergebnisse", "ohne bestaetigen kommt nur die Warnung: " + JSON.stringify(ohne));
+    const zwei = K().erzeugen({ticketId: "salon-02", seed: 3, bestaetigen: true});
     const laufend = K().sitzung();
-    erwarte.gleich([zwei.id === eins.id, laufend.id, laufend.code], [false, zwei.id, zwei.code], "die zweite Sitzung hat die erste verdrängt");
+    erwarte.gleich([zwei.id === eins.id, laufend.id, laufend.code], [false, zwei.id, zwei.code], "die zweite Sitzung ist aktiv, die erste bleibt gespeichert");
+    erwarte.gleich(K().sitzungen().length, 2, "beide Sitzungen liegen im Speicher");
+    const exportBeide = K().exportieren();
+    /* Lead-Entscheid 2: ein Code der NICHT aktiven Sitzung wird in SEINE Sitzung eingetragen. */
     const eAlt = K().ergebnisEintragen(codeEins);
-    erwarte.gleich([eAlt.fehler, typeof eAlt.grund], ["sitzung", "string"], "ein Code der verdrängten Sitzung wird abgewiesen: " + JSON.stringify(eAlt));
-    erwarte.enthaelt(eAlt.grund, "Sitzung " + eins.id, "und der Grund nennt die Sitzung des Codes");
-    store.set("klassenraum", null);                            /* frischer Rechner: die Sitzung ist weg … */
-    erwarte.gleich(K().sitzung(), null, "ohne Datei ist die Sitzung weg");
-    const imp = K().importieren(exportEins);                   /* … aber die gesicherte Datei bringt sie zurück */
+    erwarte.gleich([eAlt.ok, eAlt.neu], [true, false], "Code aus Sitzung 1 wird weiter angenommen: " + JSON.stringify(eAlt));
+    const roh = JSON.parse(exportBeide);
+    erwarte.gleich([roh.fassung, roh.sitzungen.length, roh.aktiv], [2, 2, zwei.id], "Export: fassung 2, beide Sitzungen, aktive Kennung");
+    store.set("klassenraum", null);                            /* frischer Rechner: die Sitzungen sind weg … */
+    erwarte.gleich(K().sitzung(), null, "ohne Datei ist keine Sitzung da");
+    const imp = K().importieren(exportBeide);                  /* … aber die gesicherte Datei bringt beide zurück */
     const nachImport = K().sitzung();
     erwarte.wahr(imp.ok, "Import: " + JSON.stringify(imp && imp.grund));
-    erwarte.gleich([nachImport.id, nachImport.code], [eins.id, eins.code], "nach dem Import läuft wieder Sitzung 1");
-    erwarte.gleich(K().ergebnisEintragen(codeEins).ok, true, "und ihr Code wird wieder angenommen");
-    console.log(`MESSUNG Sitzungen: S1=${eins.id} (${eins.code}) · S2=${zwei.id} (${zwei.code}) verdrängt S1 · Code aus S1 gegen S2: ${eAlt.fehler} · nach Import läuft S${nachImport.id}`);
+    erwarte.gleich(K().sitzungen().length, 2, "nach dem Import sind beide Sitzungen da");
+    erwarte.gleich([nachImport.id, nachImport.code], [zwei.id, zwei.code], "die zuletzt aktive Sitzung ist nach dem Import aktiv");
+    erwarte.gleich(K().ergebnisEintragen(codeEins).ok, true, "und der alte Code wird wieder angenommen");
+    console.log(`MESSUNG Sitzungen: S1=${eins.id} (${eins.code}) mit Ergebnis · S2=${zwei.id} (${zwei.code}) aktiv · Warnung=${ohne.warnung} · nach Import ${K().sitzungen().length} Sitzungen`);
   }));
 
   /* ---------- 5 · Keine Bewertung, kein Personenbezug, keine Rangfolge ---------- */
@@ -211,7 +219,7 @@ gruppe("Klassenraum: 20 Geräte", () => {
       K().ergebnisEintragen(code);
       lehrerStand = store.get("klassenraum", null);
     }
-    const s = lehrerStand.sitzung;
+    const s = sitzungAus(lehrerStand);
     const eintrag = s.ergebnisse["1"];
     erwarte.gleich(namen(eintrag), "code|dauerS|platz|quelle|sterne|versuche|zeit", "ein Ergebnis trägt genau diese Felder");
     const verboten = /name|schueler|schüler|note|zensur|rang|bewertung|punkte/i;
@@ -221,7 +229,9 @@ gruppe("Klassenraum: 20 Geräte", () => {
     erwarte.gleich(Object.keys(gelesen).filter(k => verboten.test(k)), [], "auch der gelesene Ergebnis-Code trägt nichts davon");
     erwarte.gleich([gelesen.platz, typeof gelesen.sterne], [1, "number"], "nur Platz und Sterne kommen zurück");
     const text = K().exportieren();
-    erwarte.gleich(JSON.parse(text).sitzung.ergebnisse["1"].platz, 1, "der Export trägt Platz-Zahlen");
+    const exportRoh = JSON.parse(text);
+    const exportAktiv = exportRoh.sitzungen.find(x => x.id === exportRoh.aktiv);
+    erwarte.gleich(exportAktiv.ergebnisse["1"].platz, 1, "der Export trägt Platz-Zahlen");
     erwarte.falsch(verboten.test(text), "und keine personenbezogenen Feldnamen: " + (text.match(verboten) || []).join(", "));
     const a = ampel(s);
     erwarte.gleich([a.fertig, a.plaetze, a.offen], [2, 2, 0], "die Ampel zählt nur (2 von 2), sie bewertet nicht");

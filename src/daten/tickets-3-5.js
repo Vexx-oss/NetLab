@@ -70,7 +70,7 @@
 
   /* Arztpraxis-Projekt (Konzept § 11, Phase 2): drei VLANs, Router-on-a-Stick, Gäste per ACL getrennt – per Konsole UND per Panel lösbar */
   t({id: "praxis-projekt", reihe: 8, kunde: "praxis", karriere: 3, stufe: "AP1", art: "projekt", vorlage: "praxis", vSeed: 48, minuten: 20,
-    injektoren: [], alleZiele: true,
+    injektoren: [], alleZiele: true, skills: ["lab.vlan", "lab.trunk", "lab.rostick", "lab.acl"],
     umbau(n){
       const sw = n.geraete.sw1;
       sw.flash.vlans = {"1": {name: "default"}};
@@ -141,7 +141,7 @@
   t({id: "praxis-09",
     /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
     zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 9, kunde: "praxis", karriere: 3, stufe: "AP1", vorlage: "praxis", vSeed: 82, minuten: 7,
-    injektoren: [],
+    injektoren: [], skills: ["lab.dhcp"],
     umbau(n){
       /* Der Dienstleister hat den Gästepool auf die Gateway-Adresse gelegt – dort ist nichts zu vergeben. */
       const gip = n.geraete.gast.running.if.eth0.ip, g3 = +gip.split(".")[2], G = gip.replace(/\d+$/, "");
@@ -171,7 +171,7 @@
   t({id: "praxis-10",
     /* Welle 2 · S4 (Architektur § 17.3): Das Briefing fordert Protokoll/Wartungsbuch – die Abnahme prüft es. */
     zusatzZiele: [{typ: "notiz", min: 20, text: "Zwei Sätze fürs Protokoll geschrieben"}], reihe: 10, kunde: "praxis", karriere: 3, stufe: "AP2", vorlage: "praxis", vSeed: 83, minuten: 8,
-    injektoren: [],
+    injektoren: [], skills: ["lab.netz", "lab.ip", "lab.dhcp"],
     umbau(n){
       /* Ein Kollege hat dem Empfangs-PC die Adresse des Gästepools gegeben; der Pool liegt auf dieser Adresse. */
       const eip = n.geraete.empfang.running.if.eth0.ip, E = eip.replace(/\d+$/, "");
@@ -192,20 +192,23 @@
     loesungFn: (n) => {
       const eip = n.geraete.empfang.running.if.eth0.ip, E = eip.replace(/\d+$/, "");
       const gip = n.geraete.gast.running.if.eth0.ip, G = gip.replace(/\d+$/, "");
-      return [{geraet: "empfang", setzen: {"if.eth0.ip": E + eip.split(".")[3], "if.eth0.gw": E + "1"},
-        text: `PC-Empfang: eigene Adresse ${E}${eip.split(".")[3]} im Verwaltungsnetz statt der doppelten ${eip} eintragen.`},
+      /* Die belegte Pooladresse ist die Adresse, die der Empfangs-PC im Startnetz trägt –
+         sie stammt aus dem Gästenetz und wird im Lösungstext von der Zieladresse getrennt genannt. */
+      const belegt = G + eip.split(".")[3];
+      return [{geraet: "empfang", setzen: {"if.eth0.ip": eip, "if.eth0.gw": E + "1"},
+        text: `PC-Empfang: eigene Adresse ${eip} im Verwaltungsnetz eintragen – die Adresse ${belegt} stammt aus dem Gästenetz und ist dort die eine Pooladresse, die der Empfangs-PC gerade belegt.`},
         {geraet: "r1", setzen: {"dhcp.pools": [{name: "GAESTE", netz: G + "0", maske: "255.255.255.0", gw: G + "1",
           dns: n.geraete.gast.running.if.eth0.dns, start: G + "100", anzahl: 50}]},
          text: `R-Praxis: Gästepool auf freie Adressen legen (${G}100 bis ${G}149).`}];
     },
-    hilfen: {frage: ["Der Gästepool hat genau eine Adresse. Wer trägt die sonst noch – und was macht ein Server mit einer Pooladresse, die er doppelt im Netz sieht?"],
+    hilfen: {frage: ["Der Gästepool hat genau eine Adresse. Wer trägt sie gerade – und was macht der Server mit einer Adresse, die belegt ist? Prüfe außerdem, in welchem Netz der Empfangs-PC steht."],
       bereich: [{geraet: "r1"}, {geraet: "empfang"}, {geraet: "gast"}],
-      konkret: ["Der Empfangs-PC trägt jetzt eine Adresse aus dem Gästenetz – dieselbe, die der Gästepool anbietet. Der Server prüft jede Pooladresse, findet sie belegt und vergibt sie nicht; außerdem antworten auf die doppelte Adresse zwei Geräte."]},
-    titel: "Zwei Rechner, eine Nummer",
-    briefing: "Hallo,\nbei uns wechseln sich die Ausfälle ab, und am Empfang steht die Anmeldung. Bitte heute kommen – zwei Sätze fürs Protokoll.\n\nSabine Krämer",
-    symptom: "Guten Tag, seit gestern spinnt es bei uns: Mal antwortet der Empfangs-PC nicht, mal der im Behandlungsraum. Der Gäste-Laptop bekommt gar keine Adresse mehr, wir hatten gestern einen Rechner umgestellt. Ich habe beide Rechner neu gestartet und den Gast-Rechner getauscht, das Muster bleibt. Am Empfang steht die Anmeldung, wenn die Rechner sich abwechselnd verabschieden.",
-    erklaerung: "Eine IP-Adresse darf im Netz nur einmal vorkommen. Tragen zwei Geräte dieselbe, antwortet mal das eine, mal das andere (ARP-Konflikt), und ein DHCP-Server, der diese Adresse in seinem Pool findet, überspringt sie als belegt. Die Doppelvergabe am Arbeitsplatz ist die Ursache, der leere Gästepool nur die Folge – beides gehört berichtigt.",
-    quelle: "RFC 5227 (IPv4 Address Conflict Detection) · RFC 2131 (DHCP)", lohn: {euro: 110, ruf: 4}});
+      konkret: ["Der Empfangs-PC trägt jetzt eine Adresse aus dem Gästenetz; Pakete zu dieser Adresse laufen ins Gäste-VLAN und erreichen den Empfangs-PC nicht. Dieselbe Adresse ist die einzige des Gästepools – der Server findet sie belegt und vergibt keine."]},
+    titel: "Der Empfang ist nicht mehr erreichbar",
+    briefing: "Hallo,\nseit Montag bekommen die Gäste keine Adresse mehr, und der Empfang ist aus den Behandlungsräumen nicht mehr erreichbar. Bitte kommen Sie heute vorbei – zwei Sätze fürs Protokoll.\n\nSabine Krämer",
+    symptom: "Guten Tag, seit der Umstellung am Montag bekommt der Gäste-Laptop keine Adresse mehr; er zeigt eine Nummer mit 169.254. Gleichzeitig ist der PC am Empfang aus den Behandlungsräumen nicht mehr erreichbar, der Server aber schon. Ich habe beide Rechner neu gestartet und die Kabel gezogen und wieder eingesteckt, es bleibt dabei. Am Empfang stehen die Patientenanmeldungen, das blockiert den ganzen Tag.",
+    erklaerung: "Der Empfangs-PC trägt jetzt eine Adresse aus dem Gästenetz. Pakete aus den Behandlungsräumen laufen deshalb ins Gäste-VLAN, während der Empfangs-PC am Verwaltungs-VLAN hängt – der Switch verwirft sie, der Empfang ist aus den Behandlungsräumen nicht erreichbar. Zugleich umfasst der Gästepool genau eine Adresse, und die ist durch den Empfangs-PC belegt: Der DHCP-Server findet keine freie Adresse und vergibt keine, der Gäste-Laptop fällt nach einigen Versuchen auf eine APIPA-Adresse zurück (169.254.x.x). Die Lösung: Am Empfangs-PC wieder eine Adresse aus dem Verwaltungsnetz eintragen und dem Gästepool einen freien Bereich geben.",
+    quelle: "RFC 2131 (DHCP: Pool und Vergabe) · VLAN – Lernfassung (§ 3: Access-Ports und VLAN-Trennung)", lohn: {euro: 110, ruf: 4}});
 
   /* ===== Stufe 4 · Autohaus Brenner (Timo Brenner) ===== */
   t({id: "autohaus-01", reihe: 1, kunde: "autohaus", karriere: 4, stufe: "AP1", vorlage: "standorte", vSeed: 51, minuten: 6,
@@ -254,7 +257,7 @@
     lohn: {euro: 130, ruf: 2}});
 
   t({id: "autohaus-projekt", reihe: 7, kunde: "autohaus", karriere: 4, stufe: "AP1", art: "projekt", vorlage: "standorte", vSeed: 57, minuten: 20,
-    injektoren: [], alleZiele: true, werkszustand: ["r2"],
+    injektoren: [], alleZiele: true, werkszustand: ["r2"], skills: ["lab.route"],
     umbau(n){
       n.geraete.r2.running = Modell.werkszustand("router", n.geraete.r2.name);
       n.geraete.r1.running.routen = n.geraete.r1.running.routen.filter(r => r.netz === "0.0.0.0");
@@ -319,7 +322,7 @@
 
 
   t({id: "autohaus-09", reihe: 9, kunde: "autohaus", karriere: 4, stufe: "AP1", vorlage: "standorte", vSeed: 60, minuten: 6,
-    injektoren: [],
+    injektoren: [], skills: ["lab.link", "lab.ping"],
     umbau(n){ Modell.geraetSetzen(n, "srv", "an", false); },
     zieleFn: (n) => [
       {typ: "erreichbar", von: "verkauf", nach: "srv", proto: "tcp", port: 445,
@@ -338,7 +341,7 @@
     quelle: "04-AP1-Netzwerk (Schichtenmodell, Fehlersuche von unten)", lohn: {euro: 130, ruf: 4}});
 
   t({id: "autohaus-10", reihe: 10, kunde: "autohaus", karriere: 4, stufe: "AP2", vorlage: "standorte", vSeed: 61, minuten: 7,
-    injektoren: [],
+    injektoren: [], skills: ["lab.dhcp"],
     umbau(n){
       /* Der Werkstatt-PC hat eine feste Adresse, der neue DHCP-Pool beginnt genau dort. */
       const ip = n.geraete.werkstatt.running.if.eth0.ip, B = ip.replace(/\d+$/, "");

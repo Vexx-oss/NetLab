@@ -156,6 +156,7 @@ Spiel.instanzenPruefen = function(){
 /* Postfach auffüllen: die nächsten ungelösten Tickets bis Karriere-Stufe st.stufe, höchstens POSTFACH_ZIEL reguläre.
    Ist alles gelöst: Generator-Variante (fällige Fertigkeit zuerst) oder das schwächste gelöste Ticket erneut. */
 Spiel.postfachAuffuellen = function({still = false} = {}){
+  Spiel.wiederholungenAufraeumen();                       /* SPL-01: Dedup/Verfall/Cap (§ 7.5) */
   const st = Spiel.st, neu = [];
   /* Erste Stunde (§ 20 F3): die nächsten zwei Schritte der gestalteten Folge statt Mischer und Geschichtsreihe */
   if (Spiel.ersteStunde && Spiel.ersteStunde.aktiv()) {
@@ -230,6 +231,40 @@ Spiel.instanzEntfernen = function(iid){
   st.postfach = st.postfach.filter(i => i.iid !== iid);
   if (st.aktiv === iid) st.aktiv = null;
   if (Spiel._lz) delete Spiel._lz[iid];
+};
+
+/* ---------- SPL-01 (3.0.0): Lebenszyklus der Wiederholungs-Tickets (Architektur § 7.5) ----------
+   Wiederholungen entstehen an zwei Stellen (tag.bereitschaftStarten, hilfe.wiederholungAnlegen) und
+   wurden bis 2.9.0 nie wieder aufgeräumt. Verbindlich: höchstens EINE offene Wiederholung je Fertigkeit,
+   höchstens TAG.BEREITSCHAFT_MAX (3) insgesamt, Verfall nach TAG.WIEDERHOLUNG_VERFALL_TAGE (7) Tagen.
+   Aufgeräumt wird vor jeder Neuanlage und beim Laden (postfachAuffuellen läuft in Spiel.laden). */
+Spiel.wiederholungSchluessel = function(inst){
+  if (!inst) return null;
+  if (inst.gen && typeof inst.gen.skill === "string" && inst.gen.skill) return inst.gen.skill;
+  const d = Spiel.defVon(inst);
+  return d && Array.isArray(d.skills) && d.skills.length ? d.skills[0] : (inst.ticketId || null);
+};
+Spiel.wiederholungenAufraeumen = function(){
+  const st = Spiel.st;
+  if (!st || !Array.isArray(st.postfach)) return [];
+  const max = (Spiel.TAG && Spiel.TAG.BEREITSCHAFT_MAX) || 3;
+  const verfallMs = ((Spiel.TAG && Spiel.TAG.WIEDERHOLUNG_VERFALL_TAGE) || 7) * 86400000;
+  const jetztMs = jetzt();
+  const behalten = new Set(), jeFertigkeit = new Set(), weg = [];
+  /* Neueste zuerst behalten: Dedup je Fertigkeit, dann Obergrenze. */
+  for (const i of st.postfach.filter(x => x && x.quelle === "wiederholung").sort((a, b) => (b.start || 0) - (a.start || 0))){
+    if (Number.isFinite(i.start) && jetztMs - i.start > verfallMs) { weg.push(i); continue; }
+    const s = Spiel.wiederholungSchluessel(i);
+    if (jeFertigkeit.has(s) || behalten.size >= max) { weg.push(i); continue; }
+    jeFertigkeit.add(s); behalten.add(i.iid);
+  }
+  if (!weg.length) return [];
+  const wegIids = new Set(weg.map(i => i.iid));
+  st.postfach = st.postfach.filter(i => !wegIids.has(i.iid));
+  if (st.aktiv && wegIids.has(st.aktiv)) st.aktiv = null;
+  if (Spiel._lz) for (const iid of wegIids) delete Spiel._lz[iid];
+  if (st.tag && Array.isArray(st.tag.bereitschaft)) st.tag.bereitschaft = st.tag.bereitschaft.filter(iid => !wegIids.has(iid));
+  return weg;
 };
 
 Spiel.alsGelesen = function(iid){

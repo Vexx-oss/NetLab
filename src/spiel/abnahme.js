@@ -114,7 +114,7 @@ Spiel.kundenSatz = function(kundeId, art, seed){
    Die Umleitung steht bewusst vor jedem Nebeneffekt (Zeitbuchung, Lernen, Abzeichen, Kundenakte), sonst
    wäre die Zusage „Training zahlt nichts" nur halb wahr.
 
-   Klassenraum-Aufträge (quelle "klassenraum", Architektur § 12) werden aus demselben Grund an DERSELBEN
+   Klassenraum-Aufträge (quelle "klassenraum", Architektur § 12.2) werden aus demselben Grund an DERSELBEN
    Stelle umgeleitet: sie zahlen nichts und zählen nicht zur Karriere (Entwurf § 4.5/E2). Der Zweig ruft
    Spiel.lernenNachAbnahme selbst, damit der Lernwert bleibt – die Einzelheiten stehen in
    src/spiel/klassenraum.js. */

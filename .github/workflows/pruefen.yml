@@ -42,6 +42,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      # QUA-01 (3.0): jedes JS unter src/ und tests/ parst — vor den Tests, Sekunden.
+      - name: JS-Syntax-Gate (src und tests)
+        run: node tools/syntax.js
+
       - name: Tests (headless, Node)
         run: sh tools/test.sh
 

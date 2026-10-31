@@ -451,7 +451,21 @@ UI.karriere = (() => {
           const vorher = store.get("labor", null);            /* bisheriger Stand, noch vor dem Ersetzen */
           store.initialisieren(d.speicher, SPEICHER.schreiber, null);
           Spiel.sicherungAnlegen(vorher, true);               /* rollierende Zweitsicherung im NEUEN Speicher ablegen */
-          store.markieren(); store.sofort(); location.reload();
+          store.markieren();
+          /* KRN-05: Im Desktop-Programm ist location.reload() KEIN Neustart des Spielstands — die Rust-Hülle
+             reicht beim Reload ihren Startstand erneut als window.__LABOR_SPEICHER__ hinein (main.rs,
+             Initialisierungsskript). Der importierte Stand würde vom Altstand verdrängt und beim nächsten
+             Autosave überschrieben. Deshalb hier: neuen Stand im laufenden Prozess aufbauen (Spiel.laden
+             migriert und setzt Spiel._st), sofort schreiben, dann die Ansichten ohne Neuladen neu aufbauen.
+             Im Browser bleibt der Reload richtig — dort wird der Speicher neu aus localStorage gelesen. */
+          if (typeof Plattform !== "undefined" && Plattform.name === "tauri" && typeof Spiel.laden === "function") {
+            Spiel.laden();                                    /* neuer Stand: Migration + Spiel._st */
+            store.sofort();                                   /* migrierten Stand sofort auf die Platte */
+            if (UI.uebergabe && typeof UI.uebergabe.neuStarten === "function") UI.uebergabe.neuStarten();
+            else location.reload();
+          } else {
+            store.sofort(); location.reload();
+          }
         }}, "Ersetzen und neu laden"),
           h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Abbrechen"))));
     });

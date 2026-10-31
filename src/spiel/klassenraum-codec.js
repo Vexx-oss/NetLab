@@ -2,7 +2,8 @@
 /* ---------- Klassenraum: der Codec (Stufe A1) ----------
    Vertrag: docs/entwicklung/Klassenraum/A – Codec und Determinismus.md § 1 (Format, Prüfsumme,
    Fehlerklassen), § 2 (Bit-Budget, eingefrorene Tabellen), § 3.1 (Seed-Kanonisierung),
-   § 4.2 (Netzkennwert), § 6 (Ergebnis-Code). Architektur § 12.
+   § 4.2 (Netzkennwert), § 6 (Ergebnis-Code). Architektur § 12.1 (Datenform), § 12.3 (Fehler),
+   § 12.4 (Netzkennwert), § 12.8 (Grenzen).
    Diese Datei ist REIN: kein DOM, kein `Spiel`, kein Store, kein `Date`, keine Uhr, kein
    `Math.random`, keine Ausnahme nach außen und KEINE Seiteneffekte beim Laden. Sie liest die
    eingefrorenen Tabellen NICHT selbst — die ID-Listen übergibt der Aufrufer an `tabellen()`
@@ -357,9 +358,9 @@ const KlassenraumCodec = (() => {
     return {
       auftraege, skills,
       /* § 3.3: nur die Fertigkeiten mit Injektor dürfen angeboten werden. A hat dort „24 von 27"
-         gemessen — das war VOR den Injektoren aus task-5. Heute sind alle 27 adressierbar
-         (gemessen: 27/27 liefern bei Seed 1 einen gültigen Auftrag, 0 Kanonisierungsschritte);
-         die Tabelle trägt deshalb für alle 27 `tauglich: true`. Siehe Architektur § 12.2. */
+         gemessen — das war VOR den Injektoren aus task-5. Heute stehen 30 Fertigkeiten in der
+         Tabelle, 28 davon sind tauglich (lab.ipv6/lab.wlan ehrlich `tauglich: false`);
+         die Tabelle trägt damit die gemessene Wirklichkeit. Siehe Architektur § 12.8 (Grenzen). */
       tauglicheFertigkeiten: () => skills.eintraege.filter(e => e.tauglich && e.id)
         .map(e => ({skill: e.id, index: e.index, ersterSeed: e.ersterSeed})),
     };

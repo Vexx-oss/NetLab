@@ -668,7 +668,7 @@ Object.assign(DATEN.wiki, {
         "<tr><td>Alternate Port</td><td>blockiert und springt bei Ausfall ein</td></tr></table>" +
         "<p>Der Weg wird über die Pfadkosten bewertet, klein gewinnt. Kurzverfahren (IEEE): 100 Mbit/s = 19, 1 Gbit/s = 4, 10 Gbit/s = 2. Cisco rechnet beim Langverfahren mit 20000 für 1 Gbit/s. Damit die Wurzel dort steht, wo du sie haben willst, setzt du die Priorität:</p>" +
         "<pre>SW1(config)# spanning-tree vlan 10 root primary\nSW1# show spanning-tree vlan 10</pre>" +
-        "<p><b>Echtes IOS, nicht das Labor:</b> Beide Zeilen gehören auf echte Hardware. Das Labor kennt keinen <code>spanning-tree</code>-Befehl – es zeigt STP nur als Zeile in der running-config, einstellen lässt es sich dort nicht.</p>"},
+        "<p><b>Echtes IOS, nicht das Labor:</b> Beide Zeilen gehören auf echte Hardware. Das Labor kennt keinen <code>spanning-tree</code>-Befehl – STP ist dort <b>nicht nachgebaut</b>: Es lässt sich weder einstellen noch mit <code>show spanning-tree</code> anzeigen, und in der running-config steht keine STP-Zeile (dort stehen nur Befehle, die das Gerät selbst wieder annimmt).</p>"},
       {titel: "Zustände, Wartezeit und Schutz", html:
         "<p>Ein Port leitet nicht sofort weiter. Klassisches STP (802.1D) kennt fünf Zustände; bis zum Weiterleiten vergehen rund 30 bis 50 s.</p>" +
         "<table><tr><th>802.1D</th><th>RSTP (802.1w)</th><th>Was passiert</th></tr>" +
@@ -677,7 +677,7 @@ Object.assign(DATEN.wiki, {
         "<tr><td>Learning</td><td>Learning</td><td>die MAC-Tabelle füllt sich, weitergeleitet wird noch nicht</td></tr>" +
         "<tr><td>Forwarding</td><td>Forwarding</td><td>der Port arbeitet normal</td></tr>" +
         "<tr><td>Disabled</td><td>Discarding</td><td>der Port ist abgeschaltet, kein STP</td></tr></table>" +
-        "<p><b>RSTP</b> ist in unter einer Sekunde auf Forwarding, weil Nachbarn sich per Proposal und Agreement einigen. Ein Port zu einem Endgerät braucht keine Wartezeit: <code>spanning-tree portfast</code>, bei RSTP Edge-Port. Weil an einem Endgeräteport kein Switch hängen darf, schaltet <b>BPDU Guard</b> den Port ab, sobald dort doch BPDUs ankommen. <b>Root Guard</b> verhindert, dass ein fremder Switch die Wurzel wird. PortFast, BPDU Guard und Root Guard sind echte IOS-Konfiguration – das Labor zeigt STP nur als Ausgabe, einstellen lässt es sich dort nicht.</p>"},
+        "<p><b>RSTP</b> ist in unter einer Sekunde auf Forwarding, weil Nachbarn sich per Proposal und Agreement einigen. Ein Port zu einem Endgerät braucht keine Wartezeit: <code>spanning-tree portfast</code>, bei RSTP Edge-Port. Weil an einem Endgeräteport kein Switch hängen darf, schaltet <b>BPDU Guard</b> den Port ab, sobald dort doch BPDUs ankommen. <b>Root Guard</b> verhindert, dass ein fremder Switch die Wurzel wird. PortFast, BPDU Guard und Root Guard sind echte IOS-Konfiguration. STP ist im Labor <b>nicht nachgebaut</b>: Es gibt weder die Konfigurationsbefehle noch eine eigene <code>show spanning-tree</code>-Ausgabe.</p>"},
     ],
     merksatz: "Redundanz ja, Schleife nein: dafür gibt es Spanning Tree.",
     pruefungstipp: "STP verhindert Schleifen und Broadcast-Stürme; LACP bündelt Leitungen, das ist etwas anderes.",

@@ -484,7 +484,7 @@
       "IPv4 hat 32 Bit, IPv6 hat 128 Bit – daher acht Blöcke zu 16 Bit in Hexadezimal. Die Adresslänge ist der erste Unterschied, den man auswendig können muss.", AP),
     m("ipv6-2", "lab.ipv6", "AP1", "vorhersage", "Welche Schreibweise ist gültig?",
       ["2001:db8:0:0:0:0:0:1", "2001:db8::1::2", "2001:db8:::1", "2001:db8:0:0:0:0:0:1:2"], 0,
-      "Nur die vollständig ausgeschriebene Form ist gültig: 2001:db8:0:0:0:0:0:1 hat acht Blöcke. ::1:: kürzt zweimal, ::: ist keine gültige Form, und die letzte Option hat neun Blöcke.", AP),
+      "Von den vier Optionen ist nur die erste gültig: 2001:db8:0:0:0:0:0:1 hat acht Blöcke. Die Kürzung :: darf ein einziges Mal in einer Adresse vorkommen – die zweite Option kürzt zweimal, bei der dritten steht :::, und die vierte hat neun Blöcke. Vollständig ausschreiben muss man nicht: Auch 2001:db8::1 wäre gültig.", AP),
     m("ipv6-3", "lab.ipv6", "AP1", "zuordnen", "Ordne die Adresse ihrem Typ zu.",
       {links: ["fe80::1", "2001:db8::10", "ff02::1", "::1"], rechts: ["Link-Local", "Global Unicast (Doku)", "Multicast", "Loopback"]}, [[0, 0], [1, 1], [2, 2], [3, 3]],
       "fe80::/10 ist Link-Local, 2001:db8::/32 der Dokumentationsbereich, ff00::/8 Multicast und ::1 Loopback. Den Typ verrät der Präfixbereich, nicht der Hostteil.", AP),

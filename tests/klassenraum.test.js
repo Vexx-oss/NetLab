@@ -197,33 +197,42 @@ gruppe("Spiel: Klassenraum", () => {
     erwarte.gleich(K().ergebnisEintragen(code).grund, "Es läuft keine Sitzung – erst einen Auftrag erzeugen.");
     erwarte.gleich(K().ergebnisEintragen("").fehler, "länge");
     erwarte.gleich(K().ergebnisEintragen("NL-HC3L-CS").fehler, "länge");
-    console.log(`MESSUNG Ergebnis: code=${code} · gelesen(platz=${gelesen.platz}, sterne=${gelesen.sterne}, dauerS=${gelesen.dauerS}) · Einträge=${Object.keys(JSON.parse(nachDoppelt).sitzung.ergebnisse).length}`);
+    const rohDoppelt = JSON.parse(nachDoppelt);
+    const rohAktiv = rohDoppelt.sitzungen.find(x => x.id === rohDoppelt.aktiv) || {ergebnisse: {}};
+    console.log(`MESSUNG Ergebnis: code=${code} · gelesen(platz=${gelesen.platz}, sterne=${gelesen.sterne}, dauerS=${gelesen.dauerS}) · Einträge=${Object.keys(rohAktiv.ergebnisse).length}`);
   }));
 
-  /* ---------- Export / Import ---------- */
+  /* ---------- Export / Import (3.0.0: fassung 2, alle Sitzungen) ---------- */
   pruefe("Export/Import ist verlustfrei, prüft die Fassung und wirft nie", () => wegwerf(() => {
     const s = K().erzeugen({ticketId: "salon-06", seed: 7, plaetze: 24});
     const text = K().exportieren();
     erwarte.wahr(typeof text === "string", "Export ohne Sitzung wäre ein Fehler gewesen");
     const roh = JSON.parse(text);
-    erwarte.gleich([roh.format, roh.fassung, roh.sitzung.code], ["netzwerk-labor/klassenraum", 1, s.code]);
+    erwarte.gleich([roh.format, roh.fassung, roh.sitzungen.length], ["netzwerk-labor/klassenraum", 2, 1]);
+    erwarte.gleich([roh.sitzungen[0].code, roh.aktiv], [s.code, s.id], "Sitzung und aktive Kennung im Export");
     const r = K().importieren(text);
     erwarte.wahr(r.ok, "Import: " + JSON.stringify(r));
-    erwarte.gleich(Object.keys(r.sitzung).sort(), Object.keys(s).sort(), "dieselben Felder");
-    erwarte.gleich([r.sitzung.code, r.sitzung.seed, r.sitzung.plaetze, r.sitzung.index], [s.code, s.seed, 24, s.index]);
-    erwarte.gleich(JSON.parse(K().exportieren()).sitzung, roh.sitzung, "verlustfrei (Sitzung gleich)");
-    const kaputt = JSON.parse(text); kaputt.fassung = 2;
+    erwarte.gleich(r.sitzungen.length, 1, "Import meldet die Sitzung");
+    erwarte.gleich(Object.keys(r.sitzungen[0]).sort(), Object.keys(s).sort(), "dieselben Felder");
+    erwarte.gleich([r.sitzungen[0].code, r.sitzungen[0].seed, r.sitzungen[0].plaetze, r.sitzungen[0].index], [s.code, s.seed, 24, s.index]);
+    erwarte.gleich(JSON.parse(K().exportieren()).sitzungen[0], roh.sitzungen[0], "verlustfrei (Sitzung gleich)");
+    /* fassung 3 ist zu neu; fassung 1 (Altstand) wird angenommen und migriert (§ 12.1). */
+    const kaputt = JSON.parse(text); kaputt.fassung = 3;
     erwarte.gleich(K().importieren(JSON.stringify(kaputt)).fehler, "fassung");
-    erwarte.enthaelt(K().importieren(JSON.stringify(kaputt)).grund, "Stand 2");
-    const ohne = JSON.parse(text); delete ohne.sitzung;
-    erwarte.gleich(K().importieren(JSON.stringify(ohne)).grund, "In der Datei fehlt die Sitzung.");
+    erwarte.enthaelt(K().importieren(JSON.stringify(kaputt)).grund, "Stand 3");
+    const altF1 = {format: "netzwerk-labor/klassenraum", fassung: 1, programm: "2.9.0", zeit: 1, sitzung: JSON.parse(text).sitzungen[0]};
+    const altImport = K().importieren(JSON.stringify(altF1));
+    erwarte.wahr(altImport.ok, "fassung:1 wird angenommen: " + JSON.stringify(altImport && altImport.grund));
+    erwarte.gleich([K().sitzungen().length, K().sitzung().id], [1, s.id], "Altdatei wird auf fassung:2 migriert");
+    const ohne = JSON.parse(text); delete ohne.sitzungen;
+    erwarte.gleich(K().importieren(JSON.stringify(ohne)).grund, "In der Datei fehlen die Sitzungen.");
     erwarte.gleich(K().importieren("").grund, "Die Datei ist leer.");
     erwarte.gleich(K().importieren("{kaputt").grund, "Das ist keine JSON-Datei.");
     erwarte.gleich(K().importieren("[]").grund, "Das ist keine Klassenraum-Datei.");
     erwarte.gleich(K().importieren(JSON.stringify({format: "netzwerk-labor", speicher: {}})).grund, "Das ist keine Klassenraum-Datei (format fehlt).");
     erwarte.gleich(K().importieren(JSON.stringify({format: "netzwerk-labor/klassenraum", fassung: 1, sitzung: []})).grund, "Die Sitzung in der Datei ist unbrauchbar.");
-    const liste = JSON.parse(text); liste.sitzung.ergebnisse = [];
-    erwarte.gleich(K().importieren(JSON.stringify(liste)).grund, "Die Ergebnisliste in der Datei ist unbrauchbar (Abbildung Platz → Ergebnis erwartet).");
+    const liste = JSON.parse(text); liste.sitzungen[0].ergebnisse = [];
+    erwarte.gleich(K().importieren(JSON.stringify(liste)).grund, "Eine Ergebnisliste in der Datei ist unbrauchbar (Abbildung Platz → Ergebnis erwartet).");
     const alt = JSON.parse(text); alt.programm = "1.0.0";
     erwarte.wahr(K().importieren(JSON.stringify(alt)).ok, "abweichendes programm wird angenommen (Schemaversion entscheidet)");
     erwarte.gleich(K().exportieren().length > 0, true);
@@ -259,7 +268,7 @@ gruppe("Spiel: Klassenraum", () => {
     erwarte.gleich([a3.ticketId, a3.seed], [a1.ticketId, a1.seed], "gleicher Wunsch → gleicher Auftrag (nur die Sitzung ist neu)");
     erwarte.gleich(K().ausCode(s1.code).code, s1.code, "der gelesene Code ist die kanonische Druckform");
     erwarte.gleich(JSON.stringify(store.get("labor", null)), vorher, "store labor unverändert");
-    erwarte.gleich(JSON.parse(K().exportieren()).sitzung.id, s2.id);
+    erwarte.gleich(JSON.parse(K().exportieren()).aktiv, s2.id);
   }));
 
   /* ---------- Netzkennwert und taugliche Fertigkeiten ---------- */

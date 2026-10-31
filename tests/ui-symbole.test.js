@@ -78,14 +78,16 @@ gruppe("UI: Symbole statt Emoji (U01)", () => {
     for (const f of faelle) erwarte.enthaelt(lies("src/ui/" + f.datei), f.teil, f.datei + ": Ersatz fehlt");
   });
 
-  pruefe("Offene Emoji in fremden Dateien werden ehrlich gezählt (nicht als bestanden verkauft)", () => {
+  pruefe("Keine Emoji in fremden UI-Dateien — die Ausnahmeliste ist leer (Ziel 0)", () => {
     if (!hatRequire) return;
+    /* Bis 2.9 stand hier AUSGENOMMEN = {} und die Schleife lief nie; die Zusicherung war immer wahr
+       (Befund Q3, berichte/qualitaet.md). Jetzt zählt JEDE UI-Datei, und eine Ausnahmeliste ist verboten. */
     const offen = [];
-    for (const f of uiDateien()) if (AUSGENOMMEN[f.name]) {
+    for (const f of uiDateien()) {
       const n = zaehle(f.text);
       if (n) offen.push(f.name + ": " + n);
     }
-    if (offen.length) console.log("OFFEN (fremde Schreibzone, Namen im Bericht): " + offen.join(", "));
-    erwarte.wahr(true, "dokumentiert");
+    erwarte.gleich(Object.keys(AUSGENOMMEN), [], "Ausnahmen-Liste muss leer sein (Ziel 0)");
+    erwarte.gleich(offen, [], "Emoji in der UI-Chrome (alle UI-Dateien zählen)");
   });
 });

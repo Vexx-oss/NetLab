@@ -142,5 +142,5 @@ UI.uebergabe = (() => {
     });
   });
 
-  return {zeigen, zeigenNeu, ausfuehren};
+  return {zeigen, zeigenNeu, ausfuehren, neuStarten};
 })();

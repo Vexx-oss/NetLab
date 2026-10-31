@@ -14,7 +14,7 @@ Läuft lokal und offline; nichts wird gesendet.
 
 <div class="stand">
 <!-- STAND:ANFANG -->
-<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.9.0</strong> · Baukennung <code>7cb0cfbe</code> · Tests <strong>1.049/1.049 grün</strong> (0 uebersprungen, 118 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 41.630 Zeilen</strong> · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49FC2FA5…E56D89E</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>66</strong> Doku-Seiten · relative Verweise <strong>283 geprueft, 0 tot</strong>.</p>
+<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.9.0</strong> · Baukennung <code>7cb0cfbe</code> · Tests <strong>1.133/1.133 grün</strong> (0 uebersprungen, 131 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 41.961 Zeilen</strong> · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49FC2FA5…E56D89E</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>66</strong> Doku-Seiten · relative Verweise <strong>286 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div>
 
@@ -367,9 +367,10 @@ werden Ergebnis-Codes eingesammelt und als Ampel gezeigt.
 Auftragscode (`src/spiel/klassenraum-codec.js`, `src/spiel/klassenraum.js`) und die zwei
 Ansichten (`src/ui/klassenraum.js`) sind im Repo und werden von `bauen.py` mitgebaut.
 **Ohne Bewertung, ohne Server, ohne QR.** Offen sind die Stufen C/D (Rust-Server, Live-Betrieb,
-QR) und die didaktische Einordnung. Verträge und Belege:
+QR) — beide **3.1**, im Produkt nicht gebaut — und die didaktische Einordnung. Verträge und Belege:
 [`Klassenraum – Umsetzungsreife Spezifikation.md`](<docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>)
-und [`docs/Architektur.md`](docs/Architektur.md) § 12.
+und [`docs/Architektur.md`](docs/Architektur.md) § 12 (Datenform § 12.1, API § 12.2, Grenzen
+§ 12.8; Server und QR: § 12.6/§ 12.7 = **3.1**).
 
 ## Ehrliche Grenzen
 

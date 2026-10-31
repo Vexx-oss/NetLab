@@ -257,6 +257,11 @@ Spiel.wiederholungAnlegen = function(inst){
   }
   const ab = jetzt() + Spiel.WIEDERHOLUNG_NACH_MS;
   const skill = (def.skills || [])[0];
+  /* SPL-01 (§ 7.5): keine zweite offene Wiederholung je Fertigkeit; Obergrenze einhalten. */
+  if (typeof Spiel.wiederholungenAufraeumen === "function") Spiel.wiederholungenAufraeumen();
+  const deckel = (Spiel.TAG && Spiel.TAG.BEREITSCHAFT_MAX) || 3;
+  if (Spiel.st.postfach.some(i => i && i.quelle === "wiederholung" && Spiel.wiederholungSchluessel(i) === skill)) return null;
+  if (Spiel.st.postfach.filter(i => i && i.quelle === "wiederholung").length >= deckel) return null;
   let neu = null;
   if (typeof Spiel.generiere === "function" && skill) {
     try { neu = Spiel.instanzErstellen({gen: {skill, seed: Spiel.neuerSeed("wdh" + inst.iid), opts: {stufe: def.stufe, kunde: def.kunde, art: def.art}}, quelle: "wiederholung", kunde: def.kunde, ab}); }
