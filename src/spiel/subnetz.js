@@ -466,10 +466,14 @@ Spiel.subnetz = (() => {
   function rw(liste){
     return liste.map((s, i) => ({n: i + 1, titel: String(s[0]), text: String(s[1]), ergebnis: String(s[2])}));
   }
+  /* Z-07 (3.0.0): Der Platzhalter nennt nur das FORMAT, nie einen Beispiel-/Lösungswert — sonst
+     ist die Lösung vor „Werte zeigen" ablesbar (UIL-01). Deshalb bewusst ohne Ziffern; die
+     sechs Aufrufstellen (netzid/broadcast/hosts/maske/subnetze/block) übergeben keinen eigenen Text,
+     der UI-Fallback (src/ui/subnetz.js) kann also nicht mehr greifen. */
   function eingabeText(art, platzhalter){
-    return art === "ip" ? {art: "ip", platzhalter: platzhalter || "z. B. 192.168.10.0"}
-      : art === "zahl" ? {art: "zahl", platzhalter: platzhalter || "z. B. 64"}
-      : {art: "maske", platzhalter: platzhalter || "/26 oder 255.255.255.192"};
+    return art === "ip" ? {art: "ip", platzhalter: platzhalter || "Adresse a.b.c.d"}
+      : art === "zahl" ? {art: "zahl", platzhalter: platzhalter || "Zahl eingeben"}
+      : {art: "maske", platzhalter: platzhalter || "Maske als /xx oder a.b.c.d"};
   }
   /* Auswahlaufgabe: genau eine richtige Option, drei typische Denkfehler, zufällige Reihenfolge. */
   function auswahl(richtig, andere, z){

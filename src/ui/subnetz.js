@@ -515,6 +515,24 @@ UI.subnetz = (() => {
     return box;
   }
 
+  /* Z-07 (Hotfix, P1): Der Platzhalter ist ein FORMAT-Hinweis. Früher standen dort Beispielwerte
+     („z. B. 192.168.10.64", „/26 oder 255.255.255.192") — bei passenden Aufgaben war der Sollwert
+     damit vor dem Aufdecken im DOM. Er darf nie einen Lösungswert übernehmen. */
+  function platzhalterFuer(aufgabe, art){
+    const eingabe = (aufgabe && aufgabe.eingabe) || {};
+    const angeboten = text(eingabe.platzhalter);
+    const loesung = (aufgabe && aufgabe.loesung) || {};
+    const werte = [text(loesung.wert), text(loesung.text)].filter(Boolean);
+    const verraet = x => {
+      const t = String(x == null ? "" : x).trim();
+      return !!t && werte.some(w => String(w).includes(t) || t.includes(String(w)));
+    };
+    if (angeboten && !verraet(angeboten)) return angeboten;
+    if (art === "ip") return "Adresse eintippen: vier Zahlen, durch Punkte getrennt";
+    if (art === "maske") return "Präfix (/xx) oder ausgeschriebene Maske (vier Zahlen)";
+    return "Zahl eintippen";
+  }
+
   function rundeInhalt(r, stand){
     if (!r) return null;
     if (r.ergebnis) return ergebnisInhalt(r, stand);
@@ -526,7 +544,7 @@ UI.subnetz = (() => {
     const beantwortet = r.beantwortet;
     let gewaehlt = null;
     const feld = art === "auswahl" ? null : h("input", {type: "text", class: "sn-feld", autocomplete: "off", spellcheck: "false",
-      placeholder: text(eingabe.platzhalter) || (art === "ip" ? "z. B. 192.168.10.64" : art === "maske" ? "z. B. /26 oder 255.255.255.192" : "Zahl"),
+      placeholder: platzhalterFuer(aufgabe, art),
       "aria-label": "Antwort",
       onkeydown: e => { if (e && e.key === "Enter") { if (typeof e.preventDefault === "function") e.preventDefault(); pruefen(); } }});
     const auswahl = [];

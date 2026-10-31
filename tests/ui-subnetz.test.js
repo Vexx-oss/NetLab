@@ -725,6 +725,46 @@ gruppe("UI: Abteilung Subnetting", () => {
     }
   });
 
+  /* Z-07 (Hotfix, P1): Die Antwort-Platzhalter waren Beispielwerte („z. B. 192.168.10.64“,
+     „/26 oder 255.255.255.192“) – bei passenden Aufgaben stand der Sollwert damit vor dem
+     Aufdecken im DOM (gleiche Fehlerklasse wie im Kern). Sie sind jetzt Format-Hinweise ohne Wert. */
+  pruefe("Z-07: der Antwort-Platzhalter verrät den Sollwert nicht" + SN_UI_ZUSATZ, () => {
+    if (!SN_UI_KANN_LADEN) return;
+    const plan = snUiLehrplanStub();
+    const spiel = snUiSpielStub({niveau: "E"});
+    const aufgaben = [
+      {id: "z07-ip", art: "netzid", niveau: "E", skill: "lab.subnetz", titel: "Adresse", frage: "Wie lautet die Adresse?",
+        lage: [], eingabe: {art: "ip"}, loesung: {wert: "192.168.10.64", text: "192.168.10.64"},
+        rechenweg: [], erklaerung: "", hinweis: "", visual: null, quelle: "RFC 4632 · Test"},
+      {id: "z07-maske", art: "maske", niveau: "E", skill: "lab.subnetz", titel: "Maske", frage: "Wie lautet die Maske?",
+        lage: [], eingabe: {art: "maske"}, loesung: {wert: "/26", text: "/26 oder 255.255.255.192"},
+        rechenweg: [], erklaerung: "", hinweis: "", visual: null, quelle: "RFC 4632 · Test"},
+    ];
+    spiel.subnetz.satz = () => aufgaben.map(a => Object.assign({}, a, {eingabe: Object.assign({}, a.eingabe)}));
+    const p = snUiPruefstand({daten: {subnetzLehrplan: plan}, spiel});
+    p.startHaken[0]();
+    const c = snUiKnoten("div");
+    p.registriert[0].def.zeigen(c);
+    snUiKarteMit(c, plan.module[0].titel).click();
+    snUiKnopfPflicht(c, "Übungsrunde starten").click();
+    for (let i = 0; i < aufgaben.length; i++){
+      const a = aufgaben[i];
+      const feld = c.querySelector(".sn-feld");
+      erwarte.wahr(!!feld, "das Antwortfeld steht (Aufgabe " + (i + 1) + ")");
+      const ph = String(feld.getAttribute("placeholder") || "");
+      erwarte.wahr(ph.length > 0, "der Platzhalter nennt weiterhin das Format");
+      erwarte.falsch(ph.includes(String(a.loesung.wert)), "Platzhalter verrät den Sollwert nicht: " + ph);
+      erwarte.falsch(ph.includes(String(a.loesung.text)) && String(a.loesung.text) !== String(a.loesung.wert),
+        "Platzhalter übernimmt den Lösungstext nicht: " + ph);
+      const flaeche = c.querySelector(".sn-aufgabe");
+      erwarte.falsch(String(flaeche.textContent).includes(String(a.loesung.wert)), "kein Sollwert im Aufgabenblock");
+      feld.value = String(a.loesung.wert);
+      snUiKnopfPflicht(c, "Prüfen").click();
+      const weiter = snUiKnopf(c, "Nächste Aufgabe");
+      if (weiter) weiter.click();
+    }
+  });
+
   pruefe("Prüfrunde: bestanden setzt das Modul über Spiel.subnetz.modulSetzen auf „sicher“" + SN_UI_ZUSATZ, () => {
     if (!SN_UI_KANN_LADEN) return;
     const plan = snUiLehrplanStub();
