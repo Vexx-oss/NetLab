@@ -169,6 +169,7 @@ Ereignis = {
   frame: Frame,                     // Kopie, unveränderlich
   proto:"ARP"|"ICMP"|"TCP"|"UDP"|"DHCP"|"DNS"|"HTTP",
   grund:null|"ARP_NO_REPLY"|…,      // bei verwerfen/info
+  warnung:true,                     // optional: nur bei Hinweisen (z. B. CDP NATIVE_MISMATCH) – keine Ursache; _erster/stelle/erklaere werten solche Ereignisse NICHT als entscheidende Stelle
   text:"SW1 kennt MAC 00:1a… noch nicht und flutet in VLAN 10"   // kurzer Klartext
 }
 Frame = {
@@ -181,7 +182,8 @@ Frame = {
 }
 ```
 
-Ereignis-Budget je Lauf 5000; gerissen → `abbruch:"STORM"`, Grund `STORM`. Virtuelle Zeit: 1 ms je Kabel, Timeout Ping 2000 ms (IOS) bzw. 4000 ms (Windows).
+Ereignis-Budget je Lauf 5000; gerissen → `abbruch:"STORM"`, Grund `STORM`.
+Warnungen (`warnung:true`) sind Hinweise und dürfen die Diagnose nicht verfälschen: `Sim._erster`, `Sim.stelle` und `Sim.erklaere` überspringen sie (SIM-02, 31.10.2026); die Warnung bleibt vollständig in der Trace. Virtuelle Zeit: 1 ms je Kabel, Timeout Ping 2000 ms (IOS) bzw. 4000 ms (Windows).
 
 ### 5.3 Gründe (Codes)
 
