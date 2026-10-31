@@ -135,4 +135,37 @@ gruppe("Injektoren: Matrix S7", () => {
       erwarte.gleich(gebaut, f.vorlagen.length * 3, f.name + ": geprüfte Fälle");
     });
   }
+
+  /* ---------- WIS-05 (W3, 31.10.2026): drei Grundcodes ohne Injektor ----------
+     Befund inhalt-wiki F-04 (P1): NATIVE_MISMATCH, DHCP_LEASE_EXPIRED und DHCP_SNOOPING_BLOCKED
+     standen in Wiki/Lehrtext, wurden aber nie als Fehler vorgeführt. Geprüft wird deshalb die
+     Vollständigkeit der Grundcode-Deckung: Jeder Sim-Grund ist entweder über einen Injektor
+     erreichbar ODER hier namentlich begründet. Falsifizierbar in beide Richtungen: ein neuer
+     Sim-Grund ohne Eintrag = rot; ein Injektor, der einen der Ausnahmen-Gründe übernimmt = rot
+     (Ausnahme veraltet); eine Ausnahme ohne echten Sim-Grund = rot. Die 55 Injektoren bleiben. */
+  const AUSNAHME_GRUNDCODE = {
+    "NATIVE_MISMATCH": "SIM-02: Der Grund wird als WARNUNG geloggt (src/sim/switch.js, warnung:true) und ist per Vertrag § 5.2 keine Ursache – er bricht kein Ziel. Ein Injektor darauf wäre ein Schein-Fall.",
+    "DHCP_LEASE_EXPIRED": "Der Lease-Ablauf ist eine Zeitfolge (Sim.vergehen); das Handticket buero-sicherheit-5 zeigt ihn bereits. Ein Injektor müsste Zeit im Injektor steuern und würde die 55-Injektor-Zusage samt W4-Dex/Fehlerdex-Tests verändern – als namentliche Ausnahme geführt.",
+    "DHCP_SNOOPING_BLOCKED": "Der Grund erscheint im Trace der Snooping-Diagnose (src/sim/switch.js als verwerfendes Ereignis), als Zielgrund meldet die Simulation aber DHCP_NO_OFFER – ein Injektor mit diesem Grund als erstem Zielgrund wäre ein Schein-Fall.",
+  };
+
+  pruefe("WIS-05: Grundcodes ohne Injektor sind namentlich begründet – neue Lücke wird rot", () => {
+    const fs = require("fs"), path = require("path");
+    const codes = Object.keys(Sim.GRUENDE || {});
+    const genutzt = new Set(Object.values(Spiel.INJEKTOREN).flatMap(i => i.gruende || []));
+    const ohne = codes.filter(c => !genutzt.has(c)).sort();
+    erwarte.gleich(ohne, Object.keys(AUSNAHME_GRUNDCODE).sort(), "Grundcodes ohne Injektor");
+    const f = [];
+    for (const [code, grund] of Object.entries(AUSNAHME_GRUNDCODE)) {
+      if (!Sim.GRUENDE[code]) f.push(code + ": ist kein Sim-Grund (Eintrag veraltet)");
+      if (String(grund).trim().length < 40) f.push(code + ": Begründung fehlt/zu knapp");
+      if (genutzt.has(code)) f.push(code + ": inzwischen von einem Injektor belegt – Ausnahme entfernen");
+    }
+    erwarte.gleich(f, []);
+    erwarte.gleich(codes.length, 34, "Sim.GRUENDE bleibt bei 34 Gründen (kein neuer Grund in dieser Runde)");
+    /* Der Kern der NATIVE-MISMATCH-Ausnahme wird an der Quelle belegt, nicht behauptet. */
+    const quelleSwitch = fs.readFileSync(path.join(__dirname, "..", "src", "sim", "switch.js"), "utf8");
+    erwarte.passt(quelleSwitch, /NATIVE_MISMATCH[^\n]*warnung:\s*true/, "NATIVE_MISMATCH wird als Warnung geloggt (SIM-02)");
+    erwarte.gleich(Object.keys(Spiel.INJEKTOREN).length, 55, "WIS-05 bläht die Injektoren nicht auf (55)");
+  });
 });

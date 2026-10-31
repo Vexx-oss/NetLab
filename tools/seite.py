@@ -47,6 +47,9 @@ BILDER = "bilder"                                                # docs/bilder/ 
 
 GRUPPEN = [
     ("Einstieg", lambda rel: rel in ("README.md", "docs/Liesmich.md", "docs/INHALT.md")),
+    # QUA-07 (Befund doku/DOK-06): die Unterrichtsseiten sind weder Einstieg noch Entwicklung —
+    # eigene Gruppe zwischen Einstieg und Betrieb, damit Schueler/Lehrkraft im Index auffindbar sind.
+    ("Unterricht", lambda rel: Path(rel).name.startswith(("Lehrkraft – ", "Schueler – "))),
     ("Betrieb", lambda rel: rel in ("AGENTS.md", "docs/Architektur.md", "docs/Bauen.md",
                                     "docs/Mitmachen.md", "docs/SITZUNGSABSCHLUSS.md", "docs/CHANGELOG.md")),
     ("Review", lambda rel: Path(rel).name.startswith("Review – ")),
@@ -61,6 +64,10 @@ BESCHREIBUNG = {
     "docs/INHALT.md": "Die Notizen dieses Projekts — was gilt, was geschehen ist.",
     "docs/Architektur.md": "Der Vertrag zwischen den Bausteinen: Datenformen, Verhalten, Gruende, Trace-Format.",
     "docs/Bauen.md": "Bauen, Testen, Messen, Ausliefern im Detail — samt der gemessenen Fallen.",
+    "docs/Lehrkraft – Erste Stunde.md": "Erste Stunde mit dem Klassenraum: vorbereiten, Code ansagen, "
+                                        "Arbeitsphase, Auswertung, ehrliche Grenzen.",
+    "docs/Schueler – Erste fünf Minuten.md": "Die ersten fünf Minuten im Netzwerk-Labor: öffnen, Auftrag "
+                                             "annehmen, Klassenraum-Code, Hilfe und Abgabe.",
     "docs/Mitmachen.md": "Arbeitsweise und Regeln fuer Beitraege.",
     "docs/SITZUNGSABSCHLUSS.md": "Die acht Schritte am Ende einer Sitzung, mit den Regeln aus Fehlern.",
     "docs/CHANGELOG.md": "Was sich wann geaendert hat — aus der echten Commit-Historie.",

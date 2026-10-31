@@ -177,9 +177,14 @@ UI.karriere = (() => {
       : [h("section", {class: "ka-block bn-s12"},
           UI.bento.kopf("Netz-Atlas", atlas ? "Noch kein Gerät" : "Kein Plan"),
           h("div", {class: "ka-atlas-leer"},
-            h("p", {class: "bn-lead"}, atlas
-              ? `Der Atlas zeigt das dokumentierte Netz von ${k.name}; mit deinem ersten Auftrag leuchtet hier ein Gerät auf.`
-              : "Für diesen Kunden liegt kein dokumentiertes Netz vor."),
+            /* VIS-09 (B): Kein Widerspruch zwischen „Zuletzt N Aufträge“ und leerem Atlas. Gibt es
+               bereits Aufträge, sagt der Text das ehrlich („bisherige Aufträge“) statt „mit deinem
+               ersten Auftrag“ zu versprechen. */
+            h("p", {class: "bn-lead"}, !atlas
+              ? "Für diesen Kunden liegt kein dokumentiertes Netz vor."
+              : verlauf.length
+                ? `Zu deinen bisherigen ${verlauf.length} ${verlauf.length === 1 ? "Auftrag" : "Aufträgen"} ist im Atlas noch kein Gerät hell. Ein Auftrag mit direktem Gerätebezug füllt ihn.`
+                : `Der Atlas zeigt das dokumentierte Netz von ${k.name}; mit deinem ersten Auftrag leuchtet hier ein Gerät auf.`),
             atlas ? h("button", {type: "button", class: "knopf geist klein", onclick: () => UI.app.ansicht("postfach")}, "Zum Postfach") : null)),
         kachelGeschichten("bn-s4"), kachelZuletzt("bn-s4"), kachelBelohnungen("bn-s4")];
     c.replaceChildren(h("div", {class: "kr-seite ka-seite", style: {"--k": `var(${k.farbe || "--accent"})`}},
@@ -485,9 +490,13 @@ UI.karriere = (() => {
       h("button", {type: "button", class: "knopf", onclick: importieren}, "Importieren …"),
     ];
     if (sicherung) knoepfe.push(h("button", {type: "button", class: "knopf", onclick: () => sicherungZurueck(el)}, "Sicherung wiederherstellen"));
-    el.append(h("div", {class: "sp-knoepfe"}, ...knoepfe),
+    /* W2-05: NUR vorhandene Zeilen anhängen — append(null) würde sichtbar „null“ rendern. */
+    const zeilen = [
+      h("div", {class: "sp-knoepfe"}, ...knoepfe),
       h("p", {class: "sp-leise"}, "Export sichert Spielstand und Lernstand in einer Datei (z. B. für einen anderen Rechner)."),
-      sicherung ? h("p", {class: "sp-leise"}, "Sicherung vom " + sicherungDatum(zeit) + ": der Stand von vor dem letzten Import – einmal wiederherstellbar.") : null);
+    ];
+    if (sicherung) zeilen.push(h("p", {class: "sp-leise"}, "Sicherung vom " + sicherungDatum(zeit) + ": der Stand von vor dem letzten Import – einmal wiederherstellbar."));
+    el.append(...zeilen);
   }
   function sicherungZurueck(el){
     const s = (typeof Spiel.sicherung === "function") ? Spiel.sicherung() : null;   /* Datum VOR dem Aufruf */
@@ -573,7 +582,8 @@ UI.karriere = (() => {
 
   /* Rückwärtskompatibel: die ausgelagerten Ansichten bleiben unter UI.karriere erreichbar
      (Tests und lernstand-hilfe.js nutzen diese Namen). Die Helfer teilen sich die neuen Dateien. */
-  return {kundenAnsicht, wikiAnsicht, wikiOeffnen, miniZeichnen, miniDialog, leisteStatus, tagKarte,
+  /* akteAnsicht bleibt intern erreichbar (Tests: VIS-09-Atlas, keine neue Sichtbarkeit im Programm). */
+  return {kundenAnsicht, akteAnsicht, wikiAnsicht, wikiOeffnen, miniZeichnen, miniDialog, leisteStatus, tagKarte,
     _helfer: {overlay},
     shopAnsicht: c => UI.shop.ansicht(c), kaufen: (id, danach) => UI.shop.kaufen(id, danach),
     lernstandAnsicht: c => UI.lernstand.ansicht(c), training: s => UI.lernstand.training(s),

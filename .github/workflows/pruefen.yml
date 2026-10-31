@@ -79,6 +79,14 @@ jobs:
       - name: Stand prüfen — eine Zahlenquelle
         run: python tools/stand.py --pruefen
 
+      # DOK-03 (W5-Vorarbeit BAU-11): Werte-Gate der Doku — VERSION_CODE, Tag-Zahl,
+      # Bildstand, INHALT-Abdeckung und Verweiszahl gegen die echten Quellen (nicht
+      # Musterpräsenz). --gegenprobe beweist, dass das Gate rot werden kann.
+      # Bis der Bildstand in W5 auf 3.0.0 gezogen ist (DOK-04), ist dieser Schritt
+      # absichtlich ROT; der W5-Push darf erst nach DOK-04 + doku-Fixes passieren.
+      - name: Doku-Werte-Gate (DOK-03)
+        run: python tools/doku-claims.py --pruefen --gegenprobe
+
       # docs/doku/ ist versioniert und wird ausgeliefert. Der Neu-Bau muss ihn exakt
       # reproduzieren, sonst wäre die veröffentlichte Doku veraltet (Befund G7).
       - name: Doku-Seite bauen und strukturell prüfen
@@ -88,3 +96,9 @@ jobs:
 
       - name: Doku-Seite ist frisch (kein veraltetes Erzeugnis)
         run: git diff --exit-code docs/doku
+
+      # VIS-01 (W5-Vorarbeit BAU-11): die sieben DoD-Achsen B1–B7 in EINEM Gate, schneller
+      # CI-Modus. Schwere Gates (voller Testlauf, Browser, .exe, Kaltstart) werden als
+      # eigener Zustand "nicht gemessen" ausgewiesen; --schnell braucht keinen Browser.
+      - name: Abnahme 3.0 (sieben DoD-Achsen, schnell)
+        run: python tools/abnahme-3.0.py --schnell

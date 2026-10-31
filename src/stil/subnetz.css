@@ -162,3 +162,11 @@
   /* Ganz schmal: ein Oktett pro Zeile, damit die 22-px-Bits nicht überlaufen. */
   .sn-visual .sw-oktett{flex-basis:100%}
 }
+
+/* VIS-09 (C, W3): Acht Modulkarten füllen das Raster ohne leere Teilzeile. 3 Spalten ließen bei
+   8 Karten eine Restlücke; 4/2 Spalten sind Teiler von 8 — bei 1440/960 keine Lücke unten.
+   ACHTUNG (stil-Review P1): bento.css schaltet das Raster ab ≤900 px auf EINE Spalte — dort muss
+   auch die Karte auf span 1 zurück, sonst entstehen implizite Spalten/Überlauf. */
+.ansicht[data-ansicht="subnetz"] .bn-raster > .sn-modul{grid-column:span 3}
+@media (max-width:1100px){ .ansicht[data-ansicht="subnetz"] .bn-raster > .sn-modul{grid-column:span 6} }
+@media (max-width:900px){ .ansicht[data-ansicht="subnetz"] .bn-raster > .sn-modul{grid-column:span 1} }

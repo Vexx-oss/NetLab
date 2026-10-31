@@ -67,3 +67,8 @@
    und `.knopf.klein` sonst die Schriftgröße gewinnt. */
 .kl-hilfe{margin-left:8px; vertical-align:middle}
 .kl-hilfe.kl-hilfe-code{color:var(--accent); font-size:var(--fs-4); letter-spacing:.08em; white-space:nowrap; user-select:all}
+
+/* VIS-09 (C, G-4): Bei 1440 blieben je Seite ~350 px leer (Messung vision). Ab 1200 px darf die
+   einspaltige Inhaltsspalte breiter werden (1120 px → ~160 px je Seite); darunter bleibt der
+   gemessene 660-px-Deckel gegen den 720er-Überlauf (s. Kopf) unangetastet. */
+@media (min-width:1200px){ .kl-lehrer .kl-spalte{width:min(1120px,100%)} }

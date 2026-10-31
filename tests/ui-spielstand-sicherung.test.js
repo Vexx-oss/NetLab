@@ -16,7 +16,9 @@ function usKnoten(tag){
   const el = {
     nodeType: 1, tag, kinder: [], listeners: {}, attrs: {}, className: "", _text: "", parentNode: null,
     style: {setProperty(){}, removeProperty(){}, getPropertyValue(){ return ""; }},
-    append(...k){ for (const x of k) if (x != null && x !== false) { if (typeof x === "object") x.parentNode = el; el.kinder.push(x); } },
+    /* W2-05: echte DOM-Semantik — append(null) erzeugt sichtbaren Text „null“. Genau dieser Fall
+       (bedingtes Anhängen im Sicherung-Leerzustand) soll im Test auffallen, nicht verdeckt werden. */
+    append(...k){ for (const x of k) { if (x == null) { el.kinder.push({nodeType: 3, textContent: String(x)}); continue; } if (typeof x === "object") x.parentNode = el; el.kinder.push(x); } },
     replaceChildren(...k){ el.kinder = []; el.append(...k); },
     remove(){ if (el.parentNode) el.parentNode.kinder = el.parentNode.kinder.filter(x => x !== el); },
     setAttribute(k, v){ el.attrs[k] = String(v); },
@@ -144,6 +146,20 @@ if (!US_LADEN) {
       erwarte.enthaelt(s.toasts.map(t => String(t[0])).join(" | "), "keine Sicherung", "der zweite Ruf meldet ehrlich „keine Sicherung“");
       erwarte.gleich(Spiel.st.euro, 42, "der zweite Ruf ändert den Stand nicht");
     } finally { Spiel.sicherungWiederherstellen = echt; }
+  }));
+
+  /* W2-05 (vision P2): Der Leerzustand „keine Sicherung“ zeigte sichtbar „null“ (bedingtes
+     append(null)). Der Abschnitt darf nur vorhandene Zeilen anhängen. */
+  pruefe("Spielstand-Leerzustand: ohne Sicherung steht kein „null“ im DOM (W2-05)", () => usKapsel(() => {
+    store.initialisieren({labor: tief(US_B()), einst: {}}, () => Promise.resolve(true), null);
+    Spiel._st = null; Spiel.laden();
+    store.set(Spiel.SICHERUNG, null);
+    const s = usStand();
+    const el = s.abschnitt();
+    const text = String(el.textContent);
+    erwarte.falsch(text.includes("null"), "kein „null“ im Leerzustand: " + text);
+    erwarte.enthaelt(text, "Exportieren", "der Abschnitt bleibt benutzbar");
+    erwarte.wahr(usKnopf(el, "Sicherung wiederherstellen") === null, "kein Wiederherstellen-Knopf ohne Sicherung");
   }));
 
   pruefe("Spielstand: Fehlerfall (zu neue Sicherung) bleibt stehen, Knopf bleibt, Stand unverändert", () => usKapsel(() => {

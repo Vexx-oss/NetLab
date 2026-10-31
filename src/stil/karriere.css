@@ -5,7 +5,8 @@
 .kr-kopf p{margin-top:6px}
 /* Kundenportfolio (Bento 2.5, Vertrag § 3.2): Profilkacheln mit Monogramm statt Regenbogenkarten.
    Die Kundenfarbe (--k) wirkt nur als Monogramm-Tint und 2-px-Rail, nie als Vollfläche. */
-.kr-raster{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
+.kr-raster{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:start}   /* VIS-09 C: keine gestreckten Karten */
+.kr-raster > .kr-kunde{align-self:start}
 @media (max-width:1100px){ .kr-raster{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:720px){ .kr-raster{grid-template-columns:minmax(0,1fr)} }
 .kr-kunde{position:relative; display:flex; flex-direction:column; gap:12px; min-width:0; padding:16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line)}

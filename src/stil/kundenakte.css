@@ -63,3 +63,8 @@
 .ka-optionen .knopf.richtig{border-color:var(--ok); background:var(--ok-soft); color:var(--ink); opacity:1}
 .ka-optionen .knopf.falsch{border-color:var(--warn); background:var(--warn-soft); color:var(--ink); opacity:1}
 .ka-ergebnis p{margin:4px 0}
+
+/* VIS-09 (C, G-6): Kacheln im rechten Stapel und im Aktenraster werden nicht auf Fremdhöhe
+   gestreckt (> Inhalt + 64 px verboten); jede Kachel behält ihre Inhaltshöhe. */
+.ka-seite .bn-raster{align-items:start}
+.ka-rechts > .ka-block{flex:0 0 auto; align-self:start}

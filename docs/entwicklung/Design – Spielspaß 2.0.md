@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D. 06.10.2026 Ruf „Substanz“ gebaut (§ 28): Speichern sichtbar und sofort, Auftragsvielfalt, mehr Inhalt, Minimalismus-Regelwerk, sanftes Onboarding – 251 Tests, Android-Fassung 1.2.1 (versionCode 10202). 07.10.2026 Hilfestellung gebaut (§ 31: Bildungsstand-Stufen, Terminal-Streifen, Lernanker, Trainingsbereich) und mit fünf unabhängigen Prüfern gegengeprüft (§ 32) – **Fassung 1.2.4, 434 Tests, Rauchtest 39/39**
+status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D. 06.10.2026 Ruf „Substanz“ gebaut (§ 28): Speichern sichtbar und sofort, Auftragsvielfalt, mehr Inhalt, Minimalismus-Regelwerk, sanftes Onboarding – 251 Tests, Android-Fassung 1.2.1 (versionCode 10202). 07.10.2026 Hilfestellung gebaut (§ 31: Bildungsstand-Stufen, Terminal-Streifen, Lernanker, Trainingsbereich) und mit fünf unabhängigen Prüfern gegengeprüft (§ 32) – **Fassung 1.2.4, 434 Tests, Rauchtest 39/39** · 31.10.2026: W1/W2 der Fassung 3.0.0 in § 44 nachgetragen — die Regel „Stand nachziehen" war bei den Integrations-Commits nicht erfüllt.
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -714,3 +714,75 @@ Manipulation auf einer dichten Fläche); alle Schaltflächen und Felder der Abte
 **Was diese Runde nicht ist.** Kein zweites Wiki, kein Ersatz für das Training, keine
 Simulationsänderung. Der Bestand bleibt: Training = ganze Fälle, Labor = anwenden, Abteilung
 Subnetting = verstehen, ausprobieren, sichern.
+
+## 44 · Fassung 3.0.0 — W1 und W2, ehrlich nachgetragen (31.10.2026)
+
+> [!warning] Nachtrag, nicht zeitgleich geschrieben
+> Die Regel „Nach jedem Commit den Stand nachziehen" wurde bei den Integrations-Commits der
+> W1 und W2 **nicht** erfüllt: `aa08057` (W1), `d0785d6` (W1-Hotfix) und `ff06834` (W2) änderten
+> den Bestand, diese Design-Notiz blieb stehen. Dieser Abschnitt trägt beides am 31.10.2026 nach —
+> chronologisch, mit Commit-Bezug und **ohne** die Test- und Zahlenstände aus `docs/STAND.md` zu
+> wiederholen; dort und in `docs/CHANGELOG.md` steht die maßgebliche Messung.
+
+### Chronologie (Belege: Commits und `Nachweise/3.0/00-Messbasis.md` § 17–18)
+
+- **W0 `dd42723`** (31.10.2026): Messbasis, die drei Ausnahmen A1–A3 und § 12 des Vertrags
+  (Klassenraum, 12.1–12.8) wiederhergestellt.
+- **W1 `aa08057`** (31.10.2026, 19:58): Klassenbetrieb-Grundlage, Simulation, Inhalte und
+  Oberfläche gehärtet, Gates gehärtet; Testzahl und Stand stehen im Commit-Kopf, Maßstab ist
+  `docs/STAND.md`.
+- **W1-Hotfix `d0785d6`** (31.10.2026, 20:32): Der Antwort-Platzhalter im Subnetting verriet die
+  Lösung, bevor „Werte zeigen" gedrückt wurde (Z-07). Fix an zwei Stellen
+  (`src/spiel/subnetz.js`, `src/ui/subnetz.js`) plus Abnahme-Test; Befund und Entscheidung:
+  `Nachweise/3.0/00-Messbasis.md` § 17.
+- **W2 `ff06834`** (31.10.2026, 23:01): Klassenraum 3.0 (Sitzungen, Korrektur, Diagnose,
+  Übersicht), Spiel- und Lernkern gehärtet, Gates und R12-Messweg gehärtet.
+  Gate-Ablauf und Ratschen-Status: `Nachweise/3.0/00-Messbasis.md` § 18.
+
+### Was sich im Erlebnis ändert
+
+- **Klassenraum-Betrieb:** Mehrere Sitzungen je Gerät (Ablage `fassung: 2` mit Migration und
+  Export/Import), genau eine aktive; Sitzungen wählen, ersetzen und löschen mit Warnung statt
+  stillem Verwerfen. Ergebnisse lassen sich mit **[Abbrechen] [Ersetzen] [Entfernen]** korrigieren.
+- **Diagnose ohne Bewertung:** Hilfecodes (`H-…`) werden gelesen und anonym je Schritt gezählt
+  („Schritt k: n von …"). Kein Name, kein Rang, kein Vergleich.
+- **Abgabe und Übersicht:** „Abgabe: x abgegeben · y offen · noch N min" samt offener Sitzplätze —
+  die alten Ampel- und Tafel-Flächen bleiben unverändert bestehen.
+- **Prüfung und Lernen:** Prüfungs-Hilfe ist zentral gesperrt (LRN-01), die IHK-Note wird exakt
+  ohne Rundung gebildet (LRN-03), eine fehlende Prüfungsaufgabe zählt 0 (LRN-04).
+- **Sicherung:** „Sicherung wiederherstellen" plus Knopf (SPL-02/02b), Spielstand-Migration
+  2.9 → 3.0 (SPL-10).
+- **Ehrlichkeit statt Schalter:** Der wirkungslose „Klassenraum-Server"-Schalter ist durch einen
+  ehrlichen Hinweis ersetzt (VIS-04); Server (Stufe C) und QR (Stufe D) bleiben **3.1** und im
+  Produkt nicht gebaut ([Architektur.md](../Architektur.md) § 12.6/§ 12.7).
+- **W1-Kern im Erlebnis:** Postfach-Lebenszyklus (SPL-01), Warnung ≠ Ursache (SIM-02),
+  Wirkungs-Testgeländer und running-config-Roundtrip der Konsole (CLI-01/02), Tickets ohne
+  Lernverbuchung nachgezogen und Inhaltskorrekturen (INH-01–03), Hell-Palette und sichtbarer
+  Fokus (CSS-01/03), Desktop-Import ohne Stand-Rückschritt (KRN-05).
+- **W2-Tier-2:** DoD-Gate `tools/abnahme-3.0.py` über die Achsen B1–B7 (VIS-01), R12-Ratsche
+  (VIS-05), Dichte-/Prüfungsnähe-Gate (VIS-07) — dazu die Gates selbst (Syntax, Quellen, Zählung,
+  `console.error`) aus W1.
+
+### Bewusste Bestandsentscheidungen
+
+- **Tafel-Sprache bleibt „Platz N".** Die bestehende Ampel-Tafel behält „Platz N · Sterne · Zeit"
+  (Bestandsvertrag); die **neuen** Flächen heißen „Sitzplatz N" und „Abgabe". Kein Doppelvokabular
+  in derselben Fläche, kein Umbau der alten Tafel.
+- **R12-Messweg statt Regeländerung:** W1 maß R12 direkt über `ethos --dom`, W2 über den
+  Rauch-Flow mit geschlossenem Overlay; `postfach.js` blieb in W2 unverändert. Die Erhöhung ist
+  ein Messweg-Effekt, kein Produktregressions-Beleg; die W2-Werte sind als Baseline in
+  `tests/r12-stand.json` eingefroren, die Ratsche macht jeden Zuwachs je Ansicht × Breite rot.
+- **Tafel und Diagnose bleiben getrennt:** die Ampel zeigt Ergebnisse je Platz, die Diagnose
+  anonyme Schritt-Zahlen. Keine Vermischung, keine Rangfolge.
+
+### Offene P2 nach W3 (vom Lead benannt; kein P0/P1 offen)
+
+KLR-10 (task-88: Bezugsgröße, „Ampel/Übersicht"-Konsistenz, Nenner-Label „Hilferufe"), KLR-11,
+KLR-12, W2-02, W2-05 und die 44-px-DOM-Frage. Einzelheiten: `Nachweise/3.0/W2-PRUEFPUNKTE.md`
+und `W3-PRUEFPUNKTE.md`. Die Reviewer der W2 (r-arch, r-design, r-didaktik) meldeten
+**0 P0 und 0 offene P1** (`Nachweise/3.0/00-Messbasis.md` § 18).
+
+**Belege.** Commits `dd42723`, `aa08057`, `d0785d6`, `ff06834`; Messungen und Gate-Ablauf:
+`Nachweise/3.0/00-Messbasis.md` § 17–18; Fassungen: `docs/CHANGELOG.md`; Zahlen: nur
+[STAND.md](../STAND.md). **Nicht geprüft** bleiben: echte Maus im Tauri-Fenster, Android-Gerät,
+Screenreader — unverändert aus den W1/W2-Abnahmen.

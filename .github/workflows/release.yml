@@ -87,6 +87,11 @@ jobs:
           python tools/stand.py --pruefen
           python tools/seite.py --pruefen
 
+      # W5-Release-Gate: Werte der Doku gegen die echten Quellen (DOK-03). Der Bildstand
+      # muss 3.0.0 nennen (DOK-04), sonst kein Release.
+      - name: Doku-Werte-Gate (DOK-03)
+        run: python tools/doku-claims.py --pruefen
+
   release:
     name: Release bauen und anlegen
     needs: fassung
@@ -320,14 +325,13 @@ jobs:
       #   ANDROID_KEYSTORE_B64       — android/signatur/netzwerk-labor.jks, base64-kodiert
       #   ANDROID_KEYSTORE_PASSWORT  — das Passwort aus android/signatur/zugang.txt
       #
-      # DREI ZUSTAENDE statt zwei. Gemessen am 09.10.2026 am Lauf fuer v2.0.1: ohne die Secrets
-      # stand das ganze Release auf rot, obwohl die drei anderen Anhaenge da waren — ein rotes X,
-      # das dauerhaft leuchtet, wird ignoriert, und dann uebersieht man den Fall, in dem wirklich
-      # etwas kaputt ist.
-      #   1. Secrets fehlen          → dieser Job endet GRUEN, gibt eine ::warning:: aus, und die
-      #                                Android-Schritte werden uebersprungen (`if: … == 'ja'`).
-      #   2. Secrets da, Bau laeuft  → APK bauen, Fassung pruefen, anhaengen.
-      #   3. Secrets da, Bau scheitert → ::error:: und failure. Das ist der Fall, der rot sein MUSS.
+      # ZWEI ZUSTAENDE (W5/BAU-02): ein fehlendes Android-Anhang ist fuer 3.0.0 ein MANGEL,
+      # kein Stillstand. Gemessen am 09.10.2026 (v2.0.1) stand ohne Secrets das ganze Release
+      # auf rot — seit 2.9.0 ist der Ausfall dagegen still gruen (Lauf #23: 11 s, keine APK).
+      # Beides ist falsch: das Release-Gate muss ohne APK ROT sein, aber erst NACH dem Bau.
+      #   1. Secrets fehlen            → ::error:: und failure dieses Jobs; der Abschluss-Job
+      #                                  pruefsummen meldet den fehlenden Anhang ebenfalls rot.
+      #   2. Secrets da, Bau scheitert → ::error:: und failure (wie bisher).
       # `secrets.*` ist in einem `if:` auf Job-Ebene nicht erlaubt — daher der Umweg ueber den
       # Job-Output DIESES Schritts (die folgenden Schritte haengen an `steps.schluessel.outputs.da`).
       - name: Secrets pruefen (Android-Schluessel vorhanden?)
@@ -338,8 +342,10 @@ jobs:
         run: |
           if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORT" ]; then
             echo "da=nein" >> "$GITHUB_OUTPUT"
-            echo "::warning::Android-APK uebersprungen: ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASSWORT sind nicht gesetzt. Anleitung: Settings > Secrets and variables > Actions. Ohne den Originalschluessel waere die APK anders signiert und liesse sich nicht ueber eine alte Fassung installieren."
-            exit 0
+            echo "::error::Android-APK nicht lieferbar: ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASSWORT fehlen."
+            echo "::error::Das 3.0.0-Release-Gate verlangt die APK (BAU-02) — ein Release ohne APK bleibt rot."
+            echo "::error::Anleitung: Settings > Secrets and variables > Actions; Originalschluessel aus android/signatur/ (gitignored) base64-kodiert hinterlegen."
+            exit 1
           fi
           echo "da=ja" >> "$GITHUB_OUTPUT"
           echo "Schluessel-Secrets sind gesetzt — die APK wird gebaut."
@@ -416,7 +422,7 @@ jobs:
           if [ "${{ steps.schluessel.outputs.da }}" = "ja" ]; then
             echo "Android-APK: in diesem Lauf gebaut und angehaengt"
           else
-            echo "Android-APK: uebersprungen (Secrets ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASSWORT fehlen)"
+            echo "Android-APK: FEHLT — Keystore-Secrets fehlen; dieses Release bleibt ROT (BAU-02)."
           fi
           gh release view "$TAG" --json assets --jq '.assets[] | "  \(.name) — \(.size) Bytes"'
 
@@ -469,6 +475,23 @@ jobs:
             exit 1
           fi
 
+          # Anhangsnamen exakt (BAU-02): keine fremden oder alten Anhaenge am Release,
+          # etwa ZIPs frueherer Fassungen. SHA256SUMS ist als spaeterer Anhang erlaubt.
+          echo "TAG->ARTEFAKT: $TAG -> Fassung $SOLL (ZIP/APK/HTML tragen $SOLL; EXE-ProductVersion im Windows-Job geprueft)"
+          IST_NAMEN=$(gh release view "$TAG" --json assets --jq '.assets[].name' | sort)
+          SOLL_NAMEN=$(printf '%s\n' \
+            "Netzwerk-Labor-${SOLL}-Browser.zip" \
+            "Netzwerk-Labor.html" \
+            "Netzwerk-Labor.exe" \
+            "Netzwerk-Labor-${SOLL}-Android.apk" \
+            "SHA256SUMS" | sort)
+          FREMD=$(comm -23 <(printf '%s\n' "$IST_NAMEN") <(printf '%s\n' "$SOLL_NAMEN") || true)
+          if [ -n "$FREMD" ]; then
+            echo "::error::Unerwartete Release-Anhaenge (nicht in der Namensliste):"
+            echo "$FREMD"
+            exit 1
+          fi
+
       - name: SHA256SUMS erzeugen und pruefen
         run: |
           set -e
@@ -482,6 +505,22 @@ jobs:
                       "Netzwerk-Labor-${SOLL}-Android.apk"; do
             sha256sum "$NAME"
           done > SHA256SUMS
+          # Genau vier Zeilen mit genau diesen Namen — sonst ist die Summen-Datei wertlos.
+          if [ "$(wc -l < SHA256SUMS)" -ne 4 ]; then
+            echo "::error::SHA256SUMS hat nicht genau 4 Zeilen."
+            cat SHA256SUMS
+            exit 1
+          fi
+          for NAME in "Netzwerk-Labor-${SOLL}-Browser.zip" \
+                      "Netzwerk-Labor.html" \
+                      "Netzwerk-Labor.exe" \
+                      "Netzwerk-Labor-${SOLL}-Android.apk"; do
+            # sha256sum schreibt auf MSYS/Windows "hash *name" statt "hash  name" — beide Formen gelten.
+            if ! grep -qE "^[0-9a-f]{64} [ *]${NAME}$" SHA256SUMS; then
+              echo "::error::SHA256SUMS ohne Eintrag: $NAME"
+              exit 1
+            fi
+          done
           echo "SHA256SUMS:"
           cat SHA256SUMS
           sha256sum -c SHA256SUMS

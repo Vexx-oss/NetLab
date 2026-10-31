@@ -286,8 +286,13 @@ function snUiPruefstand(opt = {}){
     palette: {befehl: befehl => paletten.push(befehl)},
     subnetzwerkzeuge: werkApi,
   };
+  const rafWarteschlange = [];
   const bereich = {
     UI: UIstub, h: snUiH, console, Date, Math, JSON,
+    /* Z-01 (W3): Layout-Sprung testbar machen — opt.rafQueue sammelt, sonst synchron. */
+    requestAnimationFrame: opt.rafQueue
+      ? (fn => { rafWarteschlange.push(fn); return rafWarteschlange.length; })
+      : (fn => { try { fn(0); } catch (e) { /* egal */ } return 0; }),
     setTimeout: () => 0, clearTimeout: () => {},
     document: {createElement: snUiKnoten, createTextNode: t => ({tag: "#text", textContent: String(t)}), querySelector: () => null},
     Bus: {an: (art, fn) => { busHaken.push({art, fn}); return () => {}; }, senden: () => {}},
@@ -295,7 +300,8 @@ function snUiPruefstand(opt = {}){
   };
   vm.createContext(bereich);
   vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "src", "ui", "subnetz.js"), "utf8"), bereich, {filename: "ui/subnetz.js"});
-  return {UI: bereich.UI, subnetz: bereich.UI.subnetz, rufe, registriert, startHaken, busHaken, paletten, werk, werkApi, spiel, daten};
+  return {UI: bereich.UI, subnetz: bereich.UI.subnetz, rufe, registriert, startHaken, busHaken, paletten, werk, werkApi, spiel, daten,
+    rafFlush: () => { let n = 0; while (rafWarteschlange.length){ const fn = rafWarteschlange.shift(); fn(0); n += 1; } return n; }};
 }
 
 /* Kapsel für den echten Motor: trockener Lauf mit eigener Speicher-Zelle, danach alles zurück
@@ -543,6 +549,13 @@ gruppe("UI: Abteilung Subnetting", () => {
     const ergebnis = c.querySelector(".sn-beispiel-ergebnis");
     erwarte.enthaelt(ergebnis.textContent, modul.beispiel[0].ergebnis);
     erwarte.wahr(ergebnis.getAttribute("hidden") == null, "das Beispiel-Ergebnis ist sichtbar");
+    /* UL-09 (task-92): Beim letzten Schritt verschwand der Knopf MIT dem Fokus. Jetzt bleibt er
+       sichtbar und wird nur deaktiviert; der Fokus steht auf der Ergebniszeile. */
+    const knopfJetzt = snUiKnopfPflicht(c, "Schritt zeigen");
+    erwarte.wahr(knopfJetzt.getAttribute("hidden") == null, "der Knopf verschwindet NICHT mehr mit dem Fokus");
+    erwarte.gleich(knopfJetzt.disabled, true, "der Knopf ist deaktiviert");
+    erwarte.gleich(knopfJetzt.getAttribute("aria-disabled"), "true", "aria-disabled sagt es an");
+    erwarte.wahr(snUiFokus() === ergebnis, "der Fokus steht auf der Ergebniszeile (nicht auf <body>)");
     /* Verweise: Wiki, Labor, Training – und das genannte Werkzeug. */
     const verweise = c.querySelector(".sn-verweise");
     erwarte.wahr(!!verweise, "die Verweiszeile steht da");
@@ -768,13 +781,16 @@ gruppe("UI: Abteilung Subnetting", () => {
   /* Z-01 (W2): Nach dem Aufdecken wächst die Aufgabe um das Werkzeug – Antwortfeld und „Prüfen“
      rutschen unter die Falz. Der Blick wird deshalb auf die Antwortfläche geführt; ohne
      scrollIntoView (alte Umgebung) passiert ruhig nichts. */
-  pruefe("Z-01: nach „Werte zeigen“ wird die Antwortfläche ins Bild geholt" + SN_UI_ZUSATZ, () => {
+  /* Z-01 (W2/W3): Nach dem Aufdecken wächst die Aufgabe; Antwortfeld/Auswahl UND „Prüfen“ rutschen
+     unter die Falz. Der Sprung passiert deshalb erst NACH dem Layout (requestAnimationFrame) und
+     zielt auf den Antwortbereich inklusive Knopfzeile — auch für 960/720. */
+  pruefe("Z-01: nach „Werte zeigen“ wird der Antwortbereich (inkl. 960/720) ins Bild geholt" + SN_UI_ZUSATZ, () => {
     if (!SN_UI_KANN_LADEN) return;
     const plan = snUiLehrplanStub();
     const spiel = () => snUiSpielStub({niveau: "E"});
-    const start = s => {
+    const start = (s, opt) => {
       const werk = snUiWerkzeugStub();
-      const p = snUiPruefstand({daten: {subnetzLehrplan: plan}, spiel: s, werkzeuge: werk.api});
+      const p = snUiPruefstand(Object.assign({daten: {subnetzLehrplan: plan}, spiel: s, werkzeuge: werk.api}, opt || {}));
       p.startHaken[0]();
       const c = snUiKnoten("div");
       p.registriert[0].def.zeigen(c);
@@ -782,22 +798,25 @@ gruppe("UI: Abteilung Subnetting", () => {
       snUiKnopfPflicht(c, "Übungsrunde starten").click();
       return {p, c};
     };
-    /* 1 · Text-Aufgabe: Ziel ist der Antwortbereich INKLUSIVE Knopfzeile (nicht nur das Feld,
-       sonst bleibt „Prüfen“ unter der Falz), block/inline nearest, genau einmal. */
+    /* 1 · Text-Aufgabe: Feld (Antwort) UND Knopfzeile werden ins Bild geholt. */
     const eins = start(spiel());
-    const ziel = eins.c.querySelector(".sn-aufgabe").querySelectorAll(".sn-knoepfe")[0];
-    erwarte.wahr(!!ziel, "die Knopfzeile steht");
+    const flaeche = eins.c.querySelector(".sn-aufgabe");
+    const feld = eins.c.querySelector(".sn-feld");
+    erwarte.wahr(!!feld, "das Antwortfeld steht");
+    const feldRufe = [];
+    feld.scrollIntoView = opts => feldRufe.push(opts || {});
+    const ziel = flaeche.querySelectorAll(".sn-knoepfe")[0];
     erwarte.enthaelt(String(ziel.textContent), "Prüfen", "das Ziel enthält den Prüfen-Knopf");
     const gerufen = [];
     ziel.scrollIntoView = opts => gerufen.push(opts || {});
-    const aufdecken = snUiKnopfPflicht(eins.c.querySelector(".sn-aufgabe"), "Werte zeigen");
-    erwarte.gleich(gerufen.length, 0, "ohne Aufdecken kein Sprung");
-    aufdecken.click();
-    erwarte.gleich(gerufen.length, 1, "nach dem Aufdecken genau ein Sprung");
-    erwarte.gleich(gerufen[0].block, "nearest", "block:nearest – kein wildes Scrollen");
+    erwarte.gleich(feldRufe.length + gerufen.length, 0, "ohne Aufdecken kein Sprung");
+    snUiKnopfPflicht(flaeche, "Werte zeigen").click();
+    erwarte.gleich(feldRufe.length, 1, "das Feld/Antwortbereich wird ins Bild geholt");
+    erwarte.gleich(feldRufe[0].block, "nearest", "Feld mit block:nearest");
+    erwarte.gleich(gerufen.length, 1, "die Knopfzeile wird zusätzlich ins Bild geholt");
+    erwarte.gleich(gerufen[0].block, "center", "Knopfzeile mit block:center (hält auch 960/720 sichtbar)");
     erwarte.gleich(gerufen[0].inline, "nearest", "inline:nearest");
-    /* 2 · Auswahl-Aufgabe (der VLAN-Fall): es gibt kein Eingabefeld — trotzdem wird der
-       Antwortbereich inklusive Knopfzeile ins Bild geholt. */
+    /* 2 · Auswahl-Aufgabe (VLAN-Fall): kein Feld — die Auswahl wird ins Bild geholt. */
     const spielWahl = snUiSpielStub({niveau: "E"});
     spielWahl.subnetz.satz = () => [{
       id: "z01-wahl", art: "vlan-port", niveau: "E", skill: "lab.subnetz", titel: "VLAN", frage: "Welcher Port?",
@@ -807,14 +826,28 @@ gruppe("UI: Abteilung Subnetting", () => {
     }];
     const wahl = start(spielWahl);
     erwarte.gleich(wahl.c.querySelector(".sn-feld"), null, "die Auswahl-Aufgabe hat kein Eingabefeld");
-    const wahlZiel = wahl.c.querySelector(".sn-aufgabe").querySelectorAll(".sn-knoepfe")[0];
-    erwarte.wahr(!!wahlZiel, "auch die Auswahl-Aufgabe hat eine Knopfzeile");
+    const wahlFlaeche = wahl.c.querySelector(".sn-aufgabe");
+    const auswahl = wahlFlaeche.querySelectorAll(".sn-auswahl")[0];
+    const auswahlRufe = [];
+    auswahl.scrollIntoView = opts => auswahlRufe.push(opts || {});
+    const wahlZiel = wahlFlaeche.querySelectorAll(".sn-knoepfe")[0];
     const wahlRufe = [];
     wahlZiel.scrollIntoView = opts => wahlRufe.push(opts || {});
-    snUiKnopfPflicht(wahl.c.querySelector(".sn-aufgabe"), "Werte zeigen").click();
-    erwarte.gleich(wahlRufe.length, 1, "auch ohne Feld wird der Antwortbereich ins Bild geholt");
-    erwarte.enthaelt(String(wahlZiel.textContent), "Prüfen", "das Ziel enthält die Knopfzeile (Auswahl)");
-    /* 3 · alte Umgebung ohne scrollIntoView: Aufdecken bleibt trotzdem möglich. */
+    snUiKnopfPflicht(wahlFlaeche, "Werte zeigen").click();
+    erwarte.gleich(auswahlRufe.length, 1, "die Auswahl wird ins Bild geholt");
+    erwarte.gleich(wahlRufe.length, 1, "die Knopfzeile wird auch bei Auswahl geholt");
+    /* 3 · 960/720: der Sprung passiert erst NACH dem Layout (requestAnimationFrame). */
+    const vier = start(spiel(), {rafQueue: true});
+    const f4 = vier.c.querySelector(".sn-feld");
+    const r4a = []; f4.scrollIntoView = o => r4a.push(o || {});
+    const z4 = vier.c.querySelector(".sn-aufgabe").querySelectorAll(".sn-knoepfe")[0];
+    const r4b = []; z4.scrollIntoView = o => r4b.push(o || {});
+    snUiKnopfPflicht(vier.c.querySelector(".sn-aufgabe"), "Werte zeigen").click();
+    erwarte.gleich(r4a.length + r4b.length, 0, "vor dem Layout wird noch nicht gesprungen");
+    erwarte.wahr(vier.p.rafFlush() >= 1, "der Sprung ist fürs nächste Layout eingeplant");
+    erwarte.gleich(r4a.length, 1, "nach dem Layout: Antwortbereich ins Bild (960/720)");
+    erwarte.gleich(r4b.length, 1, "nach dem Layout: Knopfzeile ins Bild (960/720)");
+    /* 4 · alte Umgebung ohne scrollIntoView: Aufdecken bleibt möglich. */
     const drei = start(spiel());
     const ziel3 = drei.c.querySelector(".sn-aufgabe").querySelectorAll(".sn-knoepfe")[0];
     erwarte.gleich(typeof ziel3.scrollIntoView, "undefined", "diese Testumgebung kennt keinen Sprung");
@@ -1162,12 +1195,28 @@ gruppe("UI: Abteilung Subnetting", () => {
     snUiKnopfPflicht(c, "Übungsrunde starten").click();
     const feldVorher = c.querySelector(".sn-feld");
     erwarte.wahr(!!feldVorher, "Eingabefeld steht da");
+    /* UL-05 (task-91): Die Meldung existiert verdeckt am Feld und wird beim Fehler gezeigt + gescrollt. */
+    const hinweisEl = c.querySelectorAll(".sn-hinweis")[0];
+    erwarte.wahr(!!hinweisEl, "die Meldung steht verdeckt im DOM");
+    const springRufe = [];
+    hinweisEl.scrollIntoView = opts => springRufe.push(opts || {});
     SN_UI_FOKUS.el = null;
     snUiKnopfPflicht(c, "Prüfen").click();
     const sichtbar = c.querySelectorAll(".sn-hinweis").filter(h => h.getAttribute("hidden") == null);
     erwarte.gleich(sichtbar.length, 1, "genau eine sichtbare Meldung");
     erwarte.passt(String(sichtbar[0] && sichtbar[0].textContent), /Bitte zuerst eine (Adresse|Maske|Zahl) eintragen/, "die Meldung sagt, was fehlt");
     erwarte.wahr(!!snUiFokus() && /sn-feld/.test(String(snUiFokus().className)), "der Fokus steht im Feld");
+    /* UL-05: Direkt unter dem Feld (VOR der Knopfzeile) statt am unteren Rand — und ins Bild geholt. */
+    const flaeche = c.querySelector(".sn-aufgabe");
+    const kinder = flaeche.kinder;
+    const iHinweis = kinder.indexOf(hinweisEl);
+    const iFeld = kinder.indexOf(feldVorher);
+    const iKnoepfe = kinder.findIndex(k => k && typeof k === "object" && snUiKlassen(k).includes("sn-knoepfe"));
+    erwarte.wahr(iHinweis > iFeld, "die Meldung steht unter dem Eingabefeld");
+    erwarte.wahr(iKnoepfe === -1 || iHinweis < iKnoepfe, "die Meldung steht VOR der Knopfzeile (nicht am unteren Rand)");
+    erwarte.gleich(springRufe.length, 1, "die Meldung wird nach dem Aufdecken ins Bild geholt");
+    erwarte.gleich(springRufe[0].block, "nearest", "block:nearest – kein wilder Sprung");
+    erwarte.gleich(springRufe[0].inline, "nearest", "inline:nearest");
     erwarte.wahr(c.querySelector(".sn-feld") === feldVorher, "die Seite wurde nicht neu gezeichnet (kein Sprung nach oben)");
     /* Falsche Auswahl ohne Klick markiert ebenfalls sichtbar. */
     const p2 = snUiPruefstand({daten: {subnetzLehrplan: snUiLehrplanStub()}, spiel: snUiSpielStub()});

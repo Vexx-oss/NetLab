@@ -28,7 +28,7 @@
    Reine Daten, kein DOM, keine Logik, deterministisch (kein Math.random, kein Date.now). */
 DATEN.trainings = [
   /* ---------- lab.link: Link und Kabel prüfen ---------- */
-  {id: "tr-link-kabel", titel: "Kein Link am Arbeitsplatz-PC", skill: "lab.link", geraet: "alle",
+  {id: "tr-link-kabel", titel: "Kein Link am Arbeitsplatz-PC", skill: "lab.link", injektor: "kabel-fehlt", geraet: "alle",
    art: "basis", minuten: 6, geruest: true, niveau: "E",
    beschreibung: "Ein PC meldet „Netzwerkkabel nicht angeschlossen“, obwohl er am Switch hängt. Du prüfst zuerst Schicht 1: Steckt das Kabel an beiden Enden, leuchtet die Port-LED, ist der Port nicht per shutdown abgeschaltet? Erst wenn der Link steht (up/up), haben IP-Adresse und Gateway überhaupt eine Chance.",
    tipp: "Schicht 1 zuerst: Hängt wirklich eine Leitung dran, und ist der Port eingeschaltet? Ein abgeschalteter Port sieht am PC genauso aus wie ein fehlendes Kabel.",
@@ -39,7 +39,7 @@ DATEN.trainings = [
      "Erneut messen: Status und Protocol müssen up / up sein, danach das Gateway anpingen."],
    quelle: "Fragen – Netzwerke planen (Fehlersuche nach OSI von unten) · Cisco IOS Interface Command Reference (show ip interface brief)"},
 
-  {id: "tr-link-port-down", titel: "Ein einzelner Switchport bleibt down", skill: "lab.link", geraet: "alle",
+  {id: "tr-link-port-down", titel: "Ein einzelner Switchport bleibt down", skill: "lab.link", injektor: "switchport-aus", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Ein Kollege kommt nicht ins Netz: Sein Port Fa0/5 steht auf down/down, alle Nachbarports am selben Switch laufen. Der Fehler sitzt also nicht am Switch insgesamt, sondern an dieser einen Leitung. Du grenzt ein: Kabel, Gegenstelle, Port-Zustand, VLAN.",
    tipp: "Nur ein Port ist betroffen – vergleich ihn mit einem laufenden Nachbarport. Der Unterschied steht in der Konfiguration.",
@@ -51,17 +51,17 @@ DATEN.trainings = [
    quelle: "Fragen – Netzwerke planen (Fehlersuche nach OSI von unten) · Cisco IOS Interface Command Reference (show ip interface brief)"},
 
   /* ---------- lab.ip: IP-Adresse und Maske setzen ---------- */
-  {id: "tr-ip-setzen", titel: "PC fest adressieren", skill: "lab.ip", geraet: "host",
+  {id: "tr-ip-setzen", titel: "PC fest adressieren", skill: "lab.ip", injektor: "ip-tippfehler", geraet: "host",
    art: "basis", minuten: 6, geruest: true, niveau: "E",
-   beschreibung: "Im Netz 192.168.1.0/24 bekommt der PC die feste Adresse 192.168.1.10, Maske 255.255.255.0, Gateway 192.168.1.1 und DNS 198.51.100.53. .0 ist die Netzadresse und .255 der Broadcast – beide darfst du nicht vergeben. Nach dem Eintragen liest du mit ipconfig gegen, ob Adresse, Maske und Gateway wirklich so ankommen.",
-   tipp: "Netzadresse und Broadcast dürfen nicht an einen Host gehen. Rechne mit der Maske nach, welche Adressen in 192.168.1.0/24 überhaupt Hosts sind.",
-   schritte: ["Freie Adresse wählen und mit `ipconfig` prüfen, dass 192.168.1.10 niemand benutzt.",
-     "Adresse 192.168.1.10, Maske 255.255.255.0, Gateway 192.168.1.1 eintragen.",
+   beschreibung: "Der PC soll eine feste Adresse bekommen – Adresse, Maske, Gateway und DNS stehen im Auftrag. Du trägst die Werte im Betriebssystem ein und liest mit ipconfig gegen, ob alles so ankommt. Vorher prüfst du, ob die Adresse im Netz noch frei ist.",
+   tipp: "Übernimm die Werte aus dem Auftrag Zeichen für Zeichen; Netzadresse und Broadcast sind keine Hostadressen.",
+   schritte: ["Werte aus dem Auftrag ablesen: Adresse, Maske, Gateway, DNS.",
+     "Freiheit der Adresse prüfen: `ping` darauf, danach `arp -a` gegenlesen – keine Antwort heißt frei.",
+     "Die Werte beim Adapter eintragen (IPv4, fest statt automatisch).",
      "Mit `ipconfig` gegenlesen: Steht die Adresse auf dem richtigen Adapter?",
      "Das Gateway anpingen – eine Antwort beweist, dass Schicht 1 bis 3 stehen."],
    quelle: "Network – Lernfassung (§ 7 IPv4-Adressen) · Cisco IOS IP Addressing Command Reference (ip address)"},
-
-  {id: "tr-ip-konflikt", titel: "Adresskonflikt im LAN", skill: "lab.ip", geraet: "host",
+  {id: "tr-ip-konflikt", titel: "Adresskonflikt im LAN", skill: "lab.ip", injektor: "doppelte-ip", geraet: "host",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Windows meldet beim Start einen Adresskonflikt für 192.168.1.10: Zwei Geräte antworten auf dieselbe IP, und welches Paket ankommt, ist Zufall. Du findest den Doppelgänger über die MAC-Adresse zur IP und vergibst danach eine freie Adresse.",
    tipp: "Zu einer IP gehört im LAN genau eine MAC-Adresse. Such die zweite MAC – sie gehört nicht zu deinem Adapter.",
@@ -69,22 +69,21 @@ DATEN.trainings = [
      "`arp -a` zeigt die fremde MAC zu 192.168.1.10.",
      "Am Switch die fremde MAC in `show mac address-table` einem Port zuordnen.",
      "Diesen Port bis zum Gerät verfolgen und dem Gerät eine andere Adresse geben.",
-     "`ipconfig /release` und `/renew` – die Konfliktmeldung darf nicht wiederkommen."],
+     "Eigene Adresse auf eine freie ändern und erneut prüfen – bei fester Adresse hilft kein release/renew."],
    quelle: "Network – Lernfassung (§ 9 ARP) · RFC 5227 (IPv4 Address Conflict Detection)"},
 
   /* ---------- lab.netz: Gleiches Netz? (Maske anwenden) ---------- */
-  {id: "tr-netz-maske", titel: "Gleiches Netz? Maske auf beide Adressen anwenden", skill: "lab.netz", geraet: "alle",
+  {id: "tr-netz-maske", titel: "Gleiches Netz? Maske auf beide Adressen anwenden", skill: "lab.netz", injektor: "maske-falsch", geraet: "alle",
    art: "basis", minuten: 5, geruest: true, niveau: "E",
-   beschreibung: "Zwei Rechner sollen sich ohne Router erreichen: 10.1.1.10/16 und 10.1.200.5/16. Du rechnest mit der Maske nach, ob beide in derselben Netz-ID liegen – nicht nach Augenmaß über das dritte Oktett.",
+   beschreibung: "Zwei Rechner sollen sich ohne Router erreichen; ihre Adressen und die gemeinsame Maske stehen im Auftrag. Du rechnest mit der Maske nach, ob beide in derselben Netz-ID liegen – nicht nach Augenmaß über das dritte Oktett.",
    tipp: "Nicht schätzen: mit der Maske für beide Adressen die Netz-ID ausrechnen und vergleichen.",
-   schritte: ["Maske 255.255.0.0 = /16 notieren: Netzanteil sind die ersten zwei Oktette.",
-     "Netz-ID bilden: beide Adressen ergeben 10.1.0.0.",
-     "Weil die Netz-IDs gleich sind, liegt kein Router dazwischen – der Ping geht direkt.",
-     "Gegenprobe mit /24: dort wären es zwei verschiedene Netze und ohne Router nicht erreichbar."],
+   schritte: ["Maske aus dem Auftrag in Präfixlänge übersetzen (z. B. /16 heißt: die ersten zwei Oktette sind Netzanteil).",
+     "Netzanteil bestimmen: So viele Oktette, wie die Maske vorgibt, gehören zum Netz.",
+     "Netz-ID für beide Adressen bilden und vergleichen.",
+     "Gleich → kein Router nötig, der Ping geht direkt. Ungleich → Router dazwischen.",
+     "Gegenprobe mit einer kleineren Maske: Wären es dann zwei Netze?"],
    quelle: "Network – Lernfassung (§ 8 Subnetting) · 04-AP1-Netzwerk (Subnetting-Verfahren)"},
-
-  /* ---------- lab.gateway: Standardgateway ---------- */
-  {id: "tr-gateway-setzen", titel: "Standardgateway eintragen", skill: "lab.gateway", geraet: "alle",
+  {id: "tr-gateway-setzen", titel: "Standardgateway eintragen", skill: "lab.gateway", injektor: "gateway-fehlt", geraet: "alle",
    art: "basis", minuten: 5, geruest: true, niveau: "E",
    beschreibung: "Im eigenen Netz klappt jeder Ping, nach draußen nicht: Beim PC fehlt das Standardgateway. Der Router steht mit 192.168.1.1 im selben Netz und darf als Gateway eingetragen werden – eine Adresse aus einem fremden Netz wäre nicht direkt erreichbar.",
    tipp: "Das Gateway ist die Adresse des Routers im eigenen Netz. Es muss also im Netz aus eigener IP und Maske liegen.",
@@ -94,7 +93,7 @@ DATEN.trainings = [
      "Gateway anpingen – eine Antwort zeigt, dass der Weg nach draußen offen ist."],
    quelle: "Network – Lernfassung (§ 0 Landkarte, § 9) · Netzwerk – Geschichten („Die Straße, in der Lappi wohnt“)"},
 
-  {id: "tr-gateway-falsch", titel: "Gateway im falschen Netz", skill: "lab.gateway", geraet: "alle",
+  {id: "tr-gateway-falsch", titel: "Gateway im falschen Netz", skill: "lab.gateway", injektor: "gateway-falsch", geraet: "alle",
    art: "stoerung", minuten: 7, geruest: true, niveau: "AP1",
    beschreibung: "Ein PC hat 192.168.5.20/24, als Gateway ist aber 192.168.6.1 eingetragen. Ein Gateway muss im eigenen Netz liegen, sonst kann der PC es nicht per ARP erreichen; Windows warnt beim Speichern, und der Ping endet mit „Allgemeiner Fehler“.",
    tipp: "Ping zuerst das eingetragene Gateway. Rechne dann mit der eigenen Maske nach, ob diese Adresse überhaupt im eigenen Netz liegt.",
@@ -105,21 +104,21 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung (§ 8 Subnetting, § 9 Gateway) · 04-AP1-Netzwerk"},
 
   /* ---------- lab.arp: ARP: IP zu MAC auflösen ---------- */
-  {id: "tr-arp-ablauf", titel: "Prüfung: ARP im eigenen Netz", skill: "lab.arp", geraet: "host",
+  {id: "tr-arp-ablauf", titel: "Prüfung: ARP im eigenen Netz", skill: "lab.arp", injektor: "drucker-umgezogen", geraet: "host",
    art: "pruefung", minuten: 7, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Gerüst: Du zeigst am Modell, in welcher Reihenfolge ein erster Ping im eigenen Netz abläuft und warum ein Ziel außerhalb des Netzes nach einer anderen IP per ARP fragt. Bewertet wird die Begründung – Broadcast, Unicast und ARP-Cache müssen sitzen.",
    tipp: "",
    quelle: "Network – Lernfassung (§ 9 ARP Schritt für Schritt) · RFC 826"},
 
   /* ---------- lab.ping: Ping und Fehlermeldungen lesen ---------- */
-  {id: "tr-ping-meldungen", titel: "Prüfung: Ping-Meldungen deuten", skill: "lab.ping", geraet: "alle",
+  {id: "tr-ping-meldungen", titel: "Prüfung: Ping-Meldungen deuten", skill: "lab.ping", injektor: "rueckroute-fehlt", geraet: "alle",
    art: "pruefung", minuten: 6, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Hilfe ordnest du drei Ausgaben zu: „.!!!!“ (erstes Paket verloren, weil ARP lief), „U.U.U“ (ein Router meldet, dass es keinen Weg gibt) und „Zeitüberschreitung“ (niemand hat geantwortet). Bewertet wird die Begründung, nicht der Schnellschuss.",
    tipp: "",
    quelle: "Cisco: Understanding the Ping and Traceroute Commands · Microsoft Learn: ping · Network – Lernfassung (§ 10 Werkzeugkasten)"},
 
   /* ---------- lab.switch: Switch: MAC-Tabelle und Fluten ---------- */
-  {id: "tr-switch-mactabelle", titel: "MAC-Tabelle lesen", skill: "lab.switch", geraet: "switch",
+  {id: "tr-switch-mactabelle", titel: "MAC-Tabelle lesen", skill: "lab.switch", injektor: "portsec-max-falsch", geraet: "switch",
    art: "basis", minuten: 6, geruest: true, niveau: "E",
    beschreibung: "Ein Switch lernt aus der Quell-MAC jedes ankommenden Frames, welcher Port hinter welcher Adresse liegt. Du liest `show mac address-table`, erklärst den Eintragstyp DYNAMIC und untersuchst, was mit einem Frame an eine unbekannte Ziel-MAC passiert: Er wird im VLAN geflutet.",
    tipp: "Gelernt wird aus der Absender-MAC, nicht aus der Ziel-MAC. Was macht der Switch, wenn er das Ziel nicht kennt?",
@@ -130,24 +129,23 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung · Cisco Catalyst Command Reference (show mac address-table)"},
 
   /* ---------- lab.subnetz: Adressplan und Subnetting ---------- */
-  {id: "tr-subnetz-plan", titel: "Adressplan für vier Abteilungen", skill: "lab.subnetz", geraet: "alle",
+  {id: "tr-subnetz-plan", titel: "Adressplan für vier Abteilungen", skill: "lab.subnetz", injektor: "maske-falsch", geraet: "alle",
    art: "basis", minuten: 10, geruest: true, niveau: "E",
-   beschreibung: "Aus 192.168.10.0/24 bekommen vier Abteilungen je ein /26-Netz. Die Teilung ist vorgegeben: .0 bis .63, .64 bis .127, .128 bis .191, .192 bis .255. Du liest zu jedem Block Netzadresse, ersten und letzten Host und Broadcast ab und vergibst die Router-Adresse – ein Schritt je Block, keine eigene Rechnung nötig.",
-   tipp: "Die vier Blöcke stehen schon da. Netzadresse ist die erste Adresse eines Blocks, Broadcast die letzte, dazwischen liegen die Hosts.",
-   schritte: ["Teiltabelle aus der Aufgabe übernehmen: vier Blöcke zu je 64 Adressen.",
+   beschreibung: "Der Auftrag gibt ein Netz und die Zahl der Abteilungen vor; jede Abteilung bekommt ein gleich großes Teilnetz. Du liest zu jedem Block Netzadresse, ersten und letzten Host und Broadcast ab und vergibst die Router-Adresse – ein Schritt je Block.",
+   tipp: "Die Blöcke stehen im Auftrag. Netzadresse ist die erste Adresse eines Blocks, Broadcast die letzte, dazwischen liegen die Hosts.",
+   schritte: ["Netz und Blockzahl aus dem Auftrag übernehmen: gleich große Blöcke.",
      "Pro Block die erste Adresse als Netzadresse und die letzte als Broadcastadresse eintragen.",
      "Erste Hostadresse (Netzadresse plus 1) als Router-Interface je VLAN notieren.",
-     "Gegenprobe: 64 minus 2 ergibt 62 nutzbare Hosts je Block, das reicht für rund 50 Geräte."],
+     "Gegenprobe: nutzbare Hosts = Blockgröße − 2; reicht das für die Gerätezahl der Abteilung?"],
    quelle: "04-AP1-Netzwerk · 07-Uebungen-Subnetting-Szenarien · Fragen – Subnetting"},
-
-  {id: "tr-subnetz-pruefung", titel: "Prüfung: Subnetting ohne Hilfe", skill: "lab.subnetz", geraet: "alle",
+  {id: "tr-subnetz-pruefung", titel: "Prüfung: Subnetting ohne Hilfe", skill: "lab.subnetz", injektor: "dhcp-pool-zu-klein", geraet: "alle",
    art: "pruefung", minuten: 12, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Gerüst: Zu 172.16.5.130/25, 10.0.0.50/27 und 192.168.1.70/26 nennst du Netz-ID, Broadcast und Hostanzahl und trägst die Werte in die Simulation ein. Ein falsches Oktett fällt sofort auf – nachrechnen statt raten.",
    tipp: "",
    quelle: "04-AP1-Netzwerk · 07-Uebungen-Subnetting-Szenarien · Fragen – Subnetting"},
 
   /* ---------- lab.dhcp: DHCP (DORA, Pool, Relay) ---------- */
-  {id: "tr-dhcp-dora", titel: "DHCP-Pool und DORA", skill: "lab.dhcp", geraet: "alle",
+  {id: "tr-dhcp-dora", titel: "DHCP-Pool und DORA", skill: "lab.dhcp", injektor: "dhcp-aus", geraet: "alle",
    art: "basis", minuten: 7, geruest: true, niveau: "E",
    beschreibung: "Ein Server soll im Netz 192.168.1.0/24 Adressen von .100 bis .150 vergeben und Gateway .1 sowie DNS 198.51.100.53 mitliefern. Du legst den Pool an, lässt einen Client per DHCP anfragen und liest die vier Nachrichten Discover, Offer, Request, Ack in der richtigen Reihenfolge mit.",
    tipp: "Vier Nachrichten: zwei vom Client, zwei vom Server. Notier zu jeder, wer sie schickt und was sie anbietet.",
@@ -158,7 +156,7 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung (§ 7 Besondere Adressen, § 9 DORA) · RFC 2131 · RFC 3927"},
 
   /* ---------- lab.dns: DNS-Namensauflösung ---------- */
-  {id: "tr-dns-name", titel: "Ping auf die Adresse klappt, auf den Namen nicht", skill: "lab.dns", geraet: "host",
+  {id: "tr-dns-name", titel: "Ping auf die Adresse klappt, auf den Namen nicht", skill: "lab.dns", injektor: "dns-fehlt", geraet: "host",
    art: "stoerung", minuten: 6, geruest: true, niveau: "AP1",
    beschreibung: "Der Ping auf 192.168.1.5 antwortet, `ping server.praxis.local` nicht, und `nslookup` meldet, der Name wurde nicht gefunden. Kabel, Maske und Gateway sind also in Ordnung – es fehlt der Eintrag im DNS-Server, oder der Client fragt den falschen Server.",
    tipp: "Trenne die zwei Fragen: Kennt der Client überhaupt einen DNS-Server – und kennt der Server den Namen?",
@@ -169,14 +167,14 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung (§ 9 DNS) · RFC 1034 · RFC 1035"},
 
   /* ---------- lab.ports: Ports und Dienste (TCP/UDP) ---------- */
-  {id: "tr-ports-dienst", titel: "Prüfung: Port und Dienst", skill: "lab.ports", geraet: "alle",
+  {id: "tr-ports-dienst", titel: "Prüfung: Port und Dienst", skill: "lab.ports", injektor: "dienst-aus", geraet: "alle",
    art: "pruefung", minuten: 5, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Hilfe: Der Ping zum Server geht, der Browser meldet „Verbindung abgelehnt“. Du benennst den Port (443 beziehungsweise 80), ordnest ihn TCP zu und erklärst, dass ein RST vom Server kommt, wenn dort kein Dienst lauscht – ein filterndes Gerät verwirft dagegen still.",
    tipp: "",
    quelle: "04-AP1-Netzwerk (Ports) · TCP – Lernfassung (§ 5: RST bei geschlossenem Port) · RFC 9293"},
 
   /* ---------- lab.tcp: TCP-Handshake ---------- */
-  {id: "tr-tcp-handshake", titel: "TCP-Handshake beobachten", skill: "lab.tcp", geraet: "alle",
+  {id: "tr-tcp-handshake", titel: "TCP-Handshake beobachten", skill: "lab.tcp", injektor: "portfwd-falsch", geraet: "alle",
    art: "basis", minuten: 5, geruest: true, niveau: "E",
    beschreibung: "Bevor Daten fließen, stimmen Client und Server im Drei-Wege-Handshake die Sequenznummern ab: SYN, SYN/ACK, ACK. Du öffnest eine Verbindung, liest die drei Schritte mit und prüfst den Unterschied zu einem geschlossenen Port, der mit RST antwortet.",
    tipp: "Drei Nachrichten vor den Daten: Wer fragt, wer bestätigt – und was passiert, wenn niemand zuhört?",
@@ -187,7 +185,7 @@ DATEN.trainings = [
    quelle: "TCP – Lernfassung · RFC 9293"},
 
   /* ---------- lab.cli: IOS-Konsole: Modi und Grundbefehle ---------- */
-  {id: "tr-cli-modi", titel: "Die Modi der IOS-Konsole", skill: "lab.cli", geraet: "alle",
+  {id: "tr-cli-modi", titel: "Die Modi der IOS-Konsole", skill: "lab.cli", injektor: "nat-fehlt", geraet: "alle",
    art: "basis", minuten: 7, geruest: true, niveau: "E",
    beschreibung: "Auf einem Router gibst du erst `enable`, dann `configure terminal` ein und landest im Konfigurationsmodus. Dort funktionieren show-Befehle nur mit `do` davor – ohne `do` antwortet IOS „Invalid input“. Du läufst die Modi einmal bewusst durch und prüfst nach jedem Schritt den Prompt.",
    tipp: "Der Prompt verrät den Modus. Wo show nicht erlaubt ist, hilft ein kurzes Wort davor.",
@@ -199,7 +197,7 @@ DATEN.trainings = [
    quelle: "VLAN – Lernfassung · Cisco IOS Configuration Fundamentals Configuration Guide: Using the Command-Line Interface"},
 
   /* ---------- lab.speichern: running- und startup-config ---------- */
-  {id: "tr-config-speichern", titel: "Konfiguration dauerhaft sichern", skill: "lab.speichern", geraet: "alle",
+  {id: "tr-config-speichern", titel: "Konfiguration dauerhaft sichern", skill: "lab.speichern", injektor: "gespeichert-kaputt", geraet: "alle",
    art: "basis", minuten: 4, geruest: true, niveau: "E",
    beschreibung: "Die running-config liegt im RAM und ist nach einem Neustart weg. Du änderst am Router eine Schnittstellen-Adresse, sicherst mit `copy running-config startup-config` ins NVRAM und prüfst nach einem reload, dass die Änderung noch da ist. Auf Switches liegen VLAN-Daten zusätzlich in flash:vlan.dat und überleben dort ein erase startup-config.",
    tipp: "Zwei Konfigurationen, zwei Speicher: die laufende und die gespeicherte. Welche überlebt den Neustart?",
@@ -211,7 +209,7 @@ DATEN.trainings = [
    quelle: "Netzwerk 29.09 · Cisco IOS Configuration Fundamentals Configuration Guide (Managing Configuration Files)"},
 
   /* ---------- lab.vlan: VLANs und Access-Ports ---------- */
-  {id: "tr-vlan-anlegen", titel: "VLANs anlegen und Ports zuordnen", skill: "lab.vlan", geraet: "alle",
+  {id: "tr-vlan-anlegen", titel: "VLANs anlegen und Ports zuordnen", skill: "lab.vlan", injektor: "vlan-fehlt", geraet: "alle",
    art: "basis", minuten: 7, geruest: true, niveau: "E",
    beschreibung: "Am Switch SW1 sollen Verwaltung und Gäste getrennt werden: VLAN 10 „Verwaltung“ für Fa0/1 und Fa0/2, VLAN 20 „Gaeste“ für Fa0/11. Du legst beide VLANs in der VLAN-Datenbank an, setzt die Access-Ports und prüfst mit `show vlan brief`, dass die Ports wirklich zugeordnet sind.",
    tipp: "Erst das VLAN anlegen, dann den Port hineinsetzen – ein Port in einem nicht existierenden VLAN wird inaktiv.",
@@ -221,7 +219,7 @@ DATEN.trainings = [
      "`show vlan brief` prüfen: Stehen beide Ports im richtigen VLAN und sind sie aktiv?"],
    quelle: "VLAN – Lernfassung · VLAN – Visuelle Lernnotiz (§ 7 Zwischen VLANs routen) · IEEE 802.1Q"},
 
-  {id: "tr-vlan-trennung", titel: "Zwei PCs am selben Switch erreichen sich nicht", skill: "lab.vlan", geraet: "alle",
+  {id: "tr-vlan-trennung", titel: "Zwei PCs am selben Switch erreichen sich nicht", skill: "lab.vlan", injektor: "vlan-falsch", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Zwei PCs hängen am selben Switch, haben Adressen aus demselben Netz und erreichen sich trotzdem nicht. Meist ist die VLAN-Zuordnung der Grund: Ports in verschiedenen VLANs sind verschiedene Broadcast-Domänen, auch im selben Gehäuse. Ohne Router gibt es keinen Weg dazwischen.",
    tipp: "Schau nach, in welchem VLAN jeder Port steht. Zwischen zwei VLANs vermittelt niemand von selbst.",
@@ -232,7 +230,7 @@ DATEN.trainings = [
    quelle: "VLAN – Lernfassung · VLAN – Visuelle Lernnotiz (§ 7 Zwischen VLANs routen) · IEEE 802.1Q"},
 
   /* ---------- lab.trunk: Trunk und 802.1Q ---------- */
-  {id: "tr-trunk-erlauben", titel: "VLAN 20 fehlt auf dem Trunk", skill: "lab.trunk", geraet: "alle",
+  {id: "tr-trunk-erlauben", titel: "VLAN 20 fehlt auf dem Trunk", skill: "lab.trunk", injektor: "trunk-vlan-fehlt", geraet: "alle",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Die PCs in VLAN 20 kommen nicht über den Router, VLAN 10 läuft. `show interfaces trunk` zeigt unter „Vlans allowed on trunk“ nur 1 und 10 – das VLAN 20 fehlt in der Erlaubnisliste. Typische Falle: `switchport trunk allowed vlan 20` ersetzt die Liste, statt sie zu ergänzen.",
    tipp: "„allowed vlan“ ist eine Liste. Ersetzen oder ergänzen – das ist der ganze Unterschied.",
@@ -244,7 +242,7 @@ DATEN.trainings = [
    quelle: "VLAN – Lernfassung (§ 2 Befehle) · Cisco Catalyst Software Configuration Guide: Configuring VLAN Trunks · IEEE 802.1Q"},
 
   /* ---------- lab.rostick: Router-on-a-Stick ---------- */
-  {id: "tr-rostick-subif", titel: "Router-on-a-Stick einrichten", skill: "lab.rostick", geraet: "alle",
+  {id: "tr-rostick-subif", titel: "Router-on-a-Stick einrichten", skill: "lab.rostick", injektor: "subif-vlan-falsch", geraet: "alle",
    art: "basis", minuten: 9, geruest: true, niveau: "E",
    beschreibung: "Ein Router soll zwei VLANs verbinden und hängt mit einem einzigen Kabel am Trunk des Switches. Du legst je VLAN ein Subinterface an, ordnest ihm mit `encapsulation dot1Q <VLAN>` das Tag zu und gibst ihm dann die Gateway-Adresse – ohne dot1Q verweigert IOS die IP.",
    tipp: "Je VLAN ein Subinterface: erst das Tag zuordnen, dann die Adresse. Die Nummer hinter dem Punkt ist nur ein Name.",
@@ -256,7 +254,7 @@ DATEN.trainings = [
    quelle: "VLAN – Visuelle Lernnotiz · VLAN – Lernfassung (§ 1 Korrektur 6)"},
 
   /* ---------- lab.acl: Access-Listen (ACL) ---------- */
-  {id: "tr-acl-regeln", titel: "Gäste per ACL trennen", skill: "lab.acl", geraet: "router",
+  {id: "tr-acl-regeln", titel: "Gäste per ACL trennen", skill: "lab.acl", injektor: "acl-zu-streng", geraet: "router",
    art: "basis", minuten: 8, geruest: true, niveau: "E",
    beschreibung: "Das Gästenetz 192.168.30.0/24 darf nicht ins Verwaltungsnetz 192.168.10.0/24, alles andere bleibt erlaubt. Du baust die Regeln in der richtigen Reihenfolge – first match – und denkst an das unsichtbare „deny any“ am Ende jeder Liste.",
    tipp: "Spezielle Regel nach oben, allgemeine nach unten: gelesen wird von oben nach unten, der erste Treffer entscheidet.",
@@ -267,14 +265,14 @@ DATEN.trainings = [
      "Vom Gast-PC ins Internet pingen: muss klappen."],
    quelle: "Cisco IOS Security Configuration Guide: IP Access Lists · Infrastruktur & Sicherheit – Visuelle Lernnotiz (Firewall: Reihenfolge der Regeln)"},
 
-  {id: "tr-acl-reihenfolge", titel: "Prüfung: Reihenfolge in der ACL", skill: "lab.acl", geraet: "router",
+  {id: "tr-acl-reihenfolge", titel: "Prüfung: Reihenfolge in der ACL", skill: "lab.acl", injektor: "acl-reihenfolge", geraet: "router",
    art: "pruefung", minuten: 9, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Hilfe: Zwei Regeln stehen in der Reihenfolge „permit any“ vor „deny 192.168.30.0 0.0.0.255“. Du entscheidest, ob die Sperre greift, begründest es mit first match statt mit „die genauere Regel gewinnt“ und korrigierst die Liste durch Umsortieren.",
    tipp: "",
    quelle: "Cisco IOS Security Configuration Guide: IP Access Lists · Infrastruktur & Sicherheit – Visuelle Lernnotiz (Firewall: Reihenfolge der Regeln)"},
 
   /* ---------- lab.route: Statische Routen und Default-Route ---------- */
-  {id: "tr-route-statisch", titel: "Statische Route und Default-Route", skill: "lab.route", geraet: "router",
+  {id: "tr-route-statisch", titel: "Statische Route und Default-Route", skill: "lab.route", injektor: "default-fehlt", geraet: "router",
    art: "basis", minuten: 8, geruest: true, niveau: "E",
    beschreibung: "Ein Router kennt nur seine direkt angeschlossenen Netze. Du bringst ihm bei, dass 10.2.0.0/16 über 10.255.0.2 erreichbar ist (`ip route 10.2.0.0 255.255.0.0 10.255.0.2`), und schickst alles andere mit der Default-Route 0.0.0.0/0 zum Provider.",
    tipp: "Eine Route besteht aus Zielnetz, Maske und nächstem Router. Die Default-Route ist die mit der kürzesten Maske.",
@@ -285,7 +283,7 @@ DATEN.trainings = [
      "Ein Ziel in 10.2.0.0/16 anpingen – und danach ein Ziel, für das nur die Default-Route greift."],
    quelle: "Cisco IOS IP Routing: Static Routing Configuration Guide · Network – Lernfassung (§ 0: die Antwort braucht ebenfalls einen Weg)"},
 
-  {id: "tr-route-rueckweg", titel: "Hinweg klappt, Rückweg fehlt", skill: "lab.route", geraet: "router",
+  {id: "tr-route-rueckweg", titel: "Hinweg klappt, Rückweg fehlt", skill: "lab.route", injektor: "rueckroute-fehlt", geraet: "router",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Ein Ping von A nach B läuft in die Zeitüberschreitung, obwohl der Zielrouter das Paket bekommt. Meist fehlt die Route zurück: Der Zielrouter weiß nicht, wohin mit der Antwort, und verwirft sie still. Du prüfst beide Richtungen getrennt.",
    tipp: "Ein Ping braucht zwei Wege. Prüf die Routingtabelle auf beiden Seiten einzeln.",
@@ -297,14 +295,14 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung (§ 0: die Antwort braucht ebenfalls einen Weg) · Cisco IOS IP Routing: Static Routing Configuration Guide · RFC 792 (Destination Unreachable) · Fragen – Netzwerke planen (Routing)"},
 
   /* ---------- lab.ttl: TTL und Traceroute ---------- */
-  {id: "tr-ttl-traceroute", titel: "Prüfung: TTL und Wegverfolgung", skill: "lab.ttl", geraet: "router",
+  {id: "tr-ttl-traceroute", titel: "Prüfung: TTL und Wegverfolgung", skill: "lab.ttl", injektor: "schleife", geraet: "router",
    art: "pruefung", minuten: 6, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Hilfe: Du erklärst, warum jeder Router die TTL um 1 senkt, was bei 0 passiert (ICMP Time exceeded) und wie traceroute daraus Hop für Hop den Weg aufbaut. Auf dem Router erkennst du eine Ausgabe mit abwechselnd 10.1.255.1 und 10.1.255.2 als Routing-Schleife.",
    tipp: "",
    quelle: "Network – Lernfassung (§ 5, § 10 tracert) · RFC 791 · RFC 792 (Time Exceeded)"},
 
   /* ---------- lab.nat: NAT und PAT ---------- */
-  {id: "tr-nat-pat", titel: "PAT fürs ganze LAN", skill: "lab.nat", geraet: "router",
+  {id: "tr-nat-pat", titel: "PAT fürs ganze LAN", skill: "lab.nat", injektor: "nat-vertauscht", geraet: "router",
    art: "basis", minuten: 8, geruest: true, niveau: "E",
    beschreibung: "Das LAN nutzt 192.168.1.0/24 (RFC 1918) und soll mit der einen öffentlichen Adresse 203.0.113.2 ins Internet. Du markierst die Schnittstellen mit `ip nat inside` und `ip nat outside` und lässt PAT (Overload) über eine ACL die internen Adressen übersetzen.",
    tipp: "Wo liegen die privaten Adressen, wo die öffentliche? Und wodurch unterscheidet der Router mehrere Verbindungen über dieselbe Adresse?",
@@ -316,14 +314,14 @@ DATEN.trainings = [
    quelle: "Network – Lernfassung (§ 7, Korrektur 14) · RFC 1918 · RFC 3022 · Cisco IOS NAT Configuration Guide"},
 
   /* ---------- lab.portfwd: Port-Weiterleitung ---------- */
-  {id: "tr-portfwd-dmz", titel: "Prüfung: Port-Weiterleitung in die DMZ", skill: "lab.portfwd", geraet: "firewall",
+  {id: "tr-portfwd-dmz", titel: "Prüfung: Port-Weiterleitung in die DMZ", skill: "lab.portfwd", injektor: "portfwd-falsch", geraet: "firewall",
    art: "pruefung", minuten: 7, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Hilfe: Der Webshop in der DMZ (172.16.0.10) soll von außen über TCP 443 erreichbar sein. Du entscheidest, welche zwei Dinge nötig sind – die Weiterleitung auf 172.16.0.10:443 und eine Firewall-Regel außen → DMZ – und begründest, warum NAT allein nicht reicht.",
    tipp: "",
    quelle: "05-AP2-Infrastruktur-Sicherheit · Cisco IOS NAT Configuration Guide (Static NAT with port) · RFC 3022"},
 
   /* ---------- lab.fw: Firewall-Regeln und Zonen ---------- */
-  {id: "tr-fw-regeln", titel: "Firewall-Regeln und Zonen", skill: "lab.fw", geraet: "firewall",
+  {id: "tr-fw-regeln", titel: "Firewall-Regeln und Zonen", skill: "lab.fw", injektor: "fw-reihenfolge", geraet: "firewall",
    art: "basis", minuten: 7, geruest: true, niveau: "E",
    beschreibung: "Eine Firewall arbeitet nach „was nicht erlaubt ist, ist verboten“, und am Ende jedes Regelwerks steht implizit ein Verwerfen. Du baust Regeln für innen → außen und außen → DMZ, prüfst die Reihenfolge (first match) und erklärst, warum Antworten bei einer zustandsbehafteten Firewall keiner eigenen Regel bedürfen.",
    tipp: "Am Ende jedes Regelwerks steht ein Verwerfen. Formuliere zuerst, was erlaubt sein soll, und prüf dann die Reihenfolge.",
@@ -335,7 +333,7 @@ DATEN.trainings = [
    quelle: "05-AP2-Infrastruktur-Sicherheit (Firewall-Grundregeln) · Infrastruktur & Sicherheit – Visuelle Lernnotiz (Firewall)"},
 
   /* ---------- lab.dmz: DMZ ---------- */
-  {id: "tr-dmz-aufbau", titel: "Webshop in die DMZ stellen", skill: "lab.dmz", geraet: "firewall",
+  {id: "tr-dmz-aufbau", titel: "Webshop in die DMZ stellen", skill: "lab.dmz", injektor: "dmz-regel-fehlt", geraet: "firewall",
    art: "basis", minuten: 8, geruest: true, niveau: "E",
    beschreibung: "Ein Webshop muss von außen erreichbar sein – aber er gehört nicht ins interne LAN. Du baust die DMZ als eigene Zone zwischen außen und innen, stellst den Server dort ab und sperrst den Weg DMZ → innen, damit ein übernommener Server nicht bis zum Dateiserver kommt.",
    tipp: "Von außen erreichbar heißt nicht vertrauenswürdig: Der Server gehört in eine eigene Zone mit möglichst wenig Zugang nach innen.",
@@ -347,7 +345,7 @@ DATEN.trainings = [
    quelle: "05-AP2-Infrastruktur-Sicherheit · Infrastruktur & Sicherheit – Visuelle Lernnotiz (Firmennetz mit DMZ und VLANs)"},
 
   /* ---------- lab.portsec: Port-Security ---------- */
-  {id: "tr-portsec-dose", titel: "Fremdes Gerät an der Netzwerkdose", skill: "lab.portsec", geraet: "switch",
+  {id: "tr-portsec-dose", titel: "Fremdes Gerät an der Netzwerkdose", skill: "lab.portsec", injektor: "portsec-fremde-mac", geraet: "switch",
    art: "basis", minuten: 7, geruest: true, niveau: "E",
    beschreibung: "In einem Besprechungsraum hängt ein Switchport, an dem jeder sein Notebook anstecken kann. Mit Port-Security erlaubst du genau eine MAC-Adresse; bei einem Verstoß geht der Port in den Zustand err-disabled. Zurück kommt er nur mit `shutdown` und `no shutdown` – und erst, nachdem die Ursache behoben ist. Im erzeugten Übungsfall ist der Port schon auf die MAC eines anderen Geräts eingestellt: Das angeschlossene Gerät ist damit der Verstoß.",
    tipp: "Port-Security zählt MAC-Adressen. Was passiert bei einem Verstoß – und wie kommt der Port wieder zurück?",
@@ -359,7 +357,7 @@ DATEN.trainings = [
    quelle: "Cisco Catalyst Software Configuration Guide: Configuring Port Security · Network – Lernfassung (§ 9 MAC Flooding, Abwehr Port Security)"},
 
   /* ---------- lab.stp: Schleifen und Spanning Tree ---------- */
-  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", geraet: "switch",
+  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", injektor: "stp-doppelkabel", geraet: "switch",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Zwei Switches sind versehentlich doppelt verbunden, und das Netz wird plötzlich sehr langsam: Broadcasts kreisen zwischen beiden Geräten und vervielfachen sich, bis die Simulation mit „Broadcast-Sturm“ abbricht. Du erkennst das an hoher Last ohne Nutzverkehr und behebst es, indem du die zusätzlichen Leitungen zurückbaust – Spanning Tree würde genau das automatisch tun, ist in dieser Simulation aber nicht nachgebildet.",
    tipp: "Zwei Wege zwischen zwei Switches sind einer zu viel, solange niemand Frames blockiert. Welches Protokoll macht das – und arbeitet es hier?",
@@ -371,7 +369,7 @@ DATEN.trainings = [
    quelle: "Fragen – Netzwerke planen (Wozu STP?) · IEEE 802.1D"},
 
   /* ---------- lab.storage: NAS, SAN und Speichernetze ---------- */
-  {id: "tr-storage-nas-san", titel: "NAS oder SAN?", skill: "lab.storage", geraet: "host",
+  {id: "tr-storage-nas-san", titel: "NAS oder SAN?", skill: "lab.storage", injektor: "nas-ohne-adresse", geraet: "host",
    art: "basis", minuten: 10, geruest: true, niveau: "E",
    beschreibung: "Ein NAS stellt Dateien über das LAN bereit (SMB auf TCP 445, NFS auf 2049), ein SAN stellt Blockspeicher bereit, den ein Server wie eine eigene Platte nutzt (iSCSI auf 3260). Du ordnest beide Aufgaben zu und begründest, warum ein Dateiserver für die Abteilung ein NAS ist und eine Datenbank Blockspeicher braucht.",
    tipp: "Frag zuerst: Wer greift zu – Menschen auf Dateien oder ein Server auf Blöcke?",
@@ -386,7 +384,7 @@ DATEN.trainings = [
      Jede Karte gehört zu einem Injektor, der den Fehler wirklich ins Netz bringt: Startnetz bricht,
      Lösung heilt (gemessen in tests/injektoren-ausbau.test.js). Die Reihenfolge der Liste bleibt –
      angehängt wird nur hinten (Regel 2 der eingefrorenen Tabellen). */
-  {id: "tr-strom-aus", titel: "Kein Link – das Gerät hat keinen Strom", skill: "lab.link", geraet: "alle",
+  {id: "tr-strom-aus", titel: "Kein Link – das Gerät hat keinen Strom", skill: "lab.link", injektor: "geraet-stromlos", geraet: "alle",
    art: "stoerung", minuten: 6, geruest: true, niveau: "AP1",
    beschreibung: "Ein Arbeitsplatz ist nicht erreichbar, und am Switch bleibt der Port dunkel – das Kabel steckt aber. Der Rechner ist ausgeschaltet: Netzschalter, Steckdosenleiste oder Netzteilschalter. Du prüfst von unten nach oben: erst Strom und Link, dann alles Weitere. Ein ausgeschaltetes Gerät sieht am Switch aus wie ein gezogenes Kabel.",
    tipp: "Schicht 1 zuerst: Leuchtet am Gerät überhaupt etwas? Eine abschaltbare Steckdosenleiste ist der klassische Übeltäter – und ein stromloses Gerät ist kein Kabelproblem.",
@@ -397,9 +395,9 @@ DATEN.trainings = [
      "Erneut messen: Port-LED an, Ping geht durch, danach die Anwendung prüfen."],
    quelle: "Fragen – Netzwerke planen (Fehlersuche nach OSI von unten)"},
 
-  {id: "tr-dhcp-pool-leer", titel: "Der Adresspool ist erschöpft", skill: "lab.dhcp", geraet: "alle",
+  {id: "tr-dhcp-pool-leer", titel: "Der Adresspool ist erschöpft", skill: "lab.dhcp", injektor: "dhcp-pool-zu-klein", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
-   beschreibung: "Ein neu gestarteter Rechner bekommt keine Adresse und zeigt „Autokonfiguration IPv4-Adresse: 169.254.…“. Der DHCP-Server läuft, antwortet aber mit keinem Angebot, weil sein Pool keine freie Adresse mehr hat. Du prüfst den Poolbereich: Steht der Start auf einer fest vergebenen Adresse wie dem Gateway, ist für Clients nichts übrig.",
+   beschreibung: "Ein neu gestarteter Rechner bekommt keine Adresse und zeigt „Autokonfiguration IPv4-Adresse: 169.254.…“. Der DHCP-Server läuft, antwortet aber mit keinem Angebot, weil sein Pool keine freie Adresse mehr hat. Du prüfst den Poolbereich aus dem Auftrag: Steht der Start auf einer fest vergebenen Adresse wie dem Gateway, ist für Clients nichts frei.",
    tipp: "Der Server schweigt nicht, er HAT nichts zu vergeben. Vergleiche Start und Anzahl des Pools mit den Adressen, die im Netz schon fest vergeben sind – das Gateway gehört nicht in den Pool.",
    schritte: ["Am Client messen: `ipconfig` – steht dort eine 169.254-Adresse (APIPA)?",
      "Am Server den Pool ansehen: Start, Anzahl und die ausgeschlossenen Bereiche.",
@@ -407,8 +405,7 @@ DATEN.trainings = [
      "Pool auf freie Adressen legen: Start hinter die festen Adressen, Anzahl groß genug.",
      "Client neu starten und messen: Er bekommt eine Adresse aus dem Pool, Gateway und DNS stimmen."],
    quelle: "Network – Lernfassung (§ 9 DHCP) · RFC 2131 · Cisco IOS DHCP Server Configuration Guide"},
-
-  {id: "tr-dhcp-reserviert", titel: "Die reservierte Adresse ist belegt", skill: "lab.dhcp", geraet: "alle",
+  {id: "tr-dhcp-reserviert", titel: "Die reservierte Adresse ist belegt", skill: "lab.dhcp", injektor: "dhcp-adresse-reserviert", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Ein einzelner Rechner bekommt keine Adresse, obwohl der Pool voller freier Adressen ist. Für seine MAC-Adresse ist eine feste Adresse reserviert – und die trägt schon ein anderes Gerät. Der Server vergibt die reservierte Adresse dann nicht einfach anders: Es kommt gar kein Angebot, der Rechner fällt auf APIPA zurück.",
    tipp: "Der Server hat für dieses Gerät eine Zusage. Prüf die Reservierung: Auf welche Adresse zeigt sie, und wem gehört diese Adresse bereits?",
@@ -419,7 +416,7 @@ DATEN.trainings = [
      "Client neu starten und messen: Er bekommt genau die reservierte Adresse."],
    quelle: "RFC 2131 (§ 4.3.1, „manual allocation“) · RFC 2132 (Option 50 Requested IP Address)"},
 
-  {id: "tr-dhcp-konflikt", titel: "Adresskonflikt im Pool", skill: "lab.dhcp", geraet: "alle",
+  {id: "tr-dhcp-konflikt", titel: "Adresskonflikt im Pool", skill: "lab.dhcp", injektor: "dhcp-adresskonflikt", geraet: "alle",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Wieder bekommt ein Client keine Adresse – diesmal, weil eine Adresse im Pool doppelt vergeben ist: Zwei Geräte tragen dieselbe IP. Der DHCP-Server prüft jede Adresse vor der Vergabe, findet den Konflikt und überspringt sie. Betrifft das alle Adressen des Pools, bleibt der Client ohne Angebot.",
    tipp: "Der Server prüft vor der Vergabe, ob eine Adresse schon benutzt wird. Such die Adresse, die zwei Geräte gleichzeitig tragen – und prüf, ob sie im DHCP-Bereich liegt.",
@@ -430,7 +427,7 @@ DATEN.trainings = [
      "Client neu starten und messen: Er bekommt eine freie Adresse, kein Konflikt mehr."],
    quelle: "RFC 5227 (IPv4 Address Conflict Detection) · RFC 2131 · IOS-ähnlich (Anzeige)"},
 
-  {id: "tr-route-maske", titel: "Die Route hat die falsche Maske", skill: "lab.route", geraet: "router",
+  {id: "tr-route-maske", titel: "Die Route hat die falsche Maske", skill: "lab.route", injektor: "route-maske-falsch", geraet: "router",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Die Zentrale erreicht die Filiale nicht mehr, obwohl in der Routingtabelle eine Route in das Filialnetz steht. Die Maske dieser Route ist zu klein: Sie deckt nur einen Teil des Netzes ab, die Adressen der Filialgeräte liegen außerhalb. Die Pakete nehmen deshalb die Default-Route und verschwinden ins Internet – der Anwender sieht nur eine Zeitüberschreitung.",
    tipp: "Eine Route besteht aus Netz UND Maske. Prüf in der Routingtabelle beides zusammen: Wie viele Adressen deckt die eingetragene Maske ab – und wo liegen die Geräte der Filiale wirklich?",
@@ -441,7 +438,7 @@ DATEN.trainings = [
      "Erneut messen: Ping und Dateifreigabe zwischen Zentrale und Filiale gehen wieder."],
    quelle: "RFC 792 (Destination Unreachable) · Cisco: Understanding the Ping and Traceroute Commands · Fragen – Netzwerke planen (Routing)"},
 
-  {id: "tr-dns-falsches-geraet", titel: "Der Name zeigt auf das falsche Gerät", skill: "lab.dns", geraet: "host",
+  {id: "tr-dns-falsches-geraet", titel: "Der Name zeigt auf das falsche Gerät", skill: "lab.dns", injektor: "dns-eintrag-falsch", geraet: "host",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Das Intranet ist über den Namen nicht mehr erreichbar – über die IP-Adresse aber schon. Der DNS-Eintrag des Namens zeigt auf ein anderes Gerät als den Server: Auf dem falschen Rechner läuft der Dienst nicht, die Verbindung wird sofort abgelehnt. Der Name löst also auf, nur eben falsch.",
    tipp: "Der Name funktioniert – nur nicht auf dem richtigen Ziel. Vergleiche die aufgelöste Adresse mit der Adresse des Servers: Wem gehört die Adresse, auf die der Name zeigt?",
@@ -458,29 +455,30 @@ DATEN.trainings = [
      kein neuer Injektor, kein neuer Sim-Grund. Für lab.ipv6 und lab.wlan gibt es bewusst KEIN Training
      (Funk und IPv6 werden nicht paketweise simuliert); die Ausnahmen stehen namentlich in
      tests/inhalte-s6.test.js und tests/daten-trainings.test.js. */
-  {id: "tr-betrieb-startconfig", titel: "Nach dem Stromausfall fehlt eine Änderung", skill: "lab.betrieb", geraet: "alle",
+  /* WIS-03 (31.10.2026): Diese Karte war doppelt zu tr-speichern-neustart (beide „Änderung nach
+     Neustart weg“). Sie zeigt jetzt das andere Betriebsthema: Verfügbarkeit/Uptime nach Stromausfall;
+     das Fehlerbild ist echt (geraet-stromlos) und von der Speicher-Karte getrennt. */
+  {id: "tr-betrieb-startconfig", titel: "Nach dem Stromausfall steht die Uptime auf 0", skill: "lab.betrieb", injektor: "geraet-stromlos", geraet: "alle",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
-   beschreibung: "Ein Router wurde nach einem Stromausfall neu gestartet. Eine vorher eingerichtete Schnittstelle ist danach wieder abgeschaltet, obwohl niemand sie angefasst hat. Der Grund liegt im Unterschied zwischen laufender und gespeicherter Konfiguration: Was nur in der running-config stand, ist beim Neustart verloren. Du erkennst die Störung, misst sie und dokumentierst Maßnahme und Wirkung.",
-   tipp: "Nach einem Neustart gilt die gespeicherte Startkonfiguration. Vergleiche, was im laufenden Betrieb anders war – und was davon vorher gesichert wurde.",
-   schritte: ["Am Router beobachten: Die Schnittstelle ist nach dem Neustart wieder administratively down.",
-     "„show ip interface brief“ zeigt den Zustand; ein Ping vom LAN auf das Gateway scheitert.",
-     "Die Schnittstelle einschalten (no shutdown) und messen, ob das LAN wieder ins Internet kommt.",
-     "„copy running-config startup-config“ ausführen, damit die Änderung den nächsten Neustart übersteht.",
-     "Ins Wartungsbuch schreiben: Symptom, Ursache (nicht gespeichert), Maßnahme und Prüfung nach dem Neustart."],
+   beschreibung: "Ein Gerät war über Nacht aus: Die Überwachung meldet Uptime 0, nach dem Hochfahren fehlt ein Teil der Dienste. Stromausfall ist kein Kabelproblem – du prüfst zuerst den Betriebszustand (an/aus, letzter Start, Uptime), grenzt ab, was nach dem Wiedereinschalten noch fehlt, und hältst den Vorfall im Wartungsbuch fest.",
+   tipp: "Ein Gerät, das aus war, hat eine kleine Uptime. Prüf zuerst den Betriebszustand (Strom, Anzeige, Uptime); erst danach kommen Netz und Dienste.",
+   schritte: ["Uptime und Überwachung ansehen: Steht das Gerät, oder ist es seit dem Vorfall aus?",
+     "Stromversorgung und Anzeige prüfen: Leuchtet das Gerät, läuft der Lüfter, startet es?",
+     "Gerät einschalten und den Hochlauf abwarten; Dienste danach einzeln prüfen (Uptime, Ports).",
+     "Den Vorfall dokumentieren: Symptom, Ursache (Stromausfall), Maßnahme und Prüfung.",
+     "Betriebsmaßnahme notieren: USV oder Autostart, damit derselbe Ausfall nicht wieder unbemerkt bleibt."],
    quelle: "Network – Lernfassung · RFC 5424 (Syslog) · BSI IT-Grundschutz-Kompendium, CON.3 Datensicherungskonzept"},
-
-  /* ---------- S7 Volumen (Architektur § 17.5): 11 Szenarien für simulierbare Fertigkeiten ---------- */
-  {id: "tr-netz-nachbar", titel: "Gleiches Netz? Prüfung an der Blockgrenze", skill: "lab.netz", geraet: "alle",
+  {id: "tr-netz-nachbar", titel: "Gleiches Netz? Prüfung an der Blockgrenze", skill: "lab.netz", injektor: "route-maske-falsch", geraet: "alle",
    art: "basis", minuten: 6, geruest: true, niveau: "E",
-   beschreibung: "Zwei Rechner stehen mit ihren Adressen dicht beieinander: 192.168.10.62/26 und 192.168.10.65/26. Nur drei Zahlen Unterschied – und trotzdem können sie in verschiedenen Netzen liegen. Du rechnest an der Blockgrenze nach und entscheidest, ob ein Gateway dazwischen muss.",
-   tipp: "Rechne mit der Blockgröße 64: Wo endet der Block von .62, wo beginnt der Block von .65?",
-   schritte: ["Adresse und Maske beider Rechner ablesen und den Präfix notieren (/26).",
-     "Blockgröße ausrechnen: 32 minus 26 ergibt 6 Hostbits, also 64 Adressen je Block.",
-     "Netz-IDs bilden: .62 liegt im Block 0 bis 63, .65 im Block 64 bis 127.",
+   beschreibung: "Zwei Rechner stehen mit ihren Adressen dicht beieinander – nur wenige Zahlen Unterschied – und trotzdem können sie in verschiedenen Netzen liegen. Du rechnest an der Blockgrenze nach und entscheidest, ob ein Gateway dazwischen muss.",
+   tipp: "Rechne mit der Blockgröße aus der Maske: Wo endet der Block der ersten Adresse, wo beginnt der Block der zweiten?",
+   schritte: ["Adresse und Maske beider Rechner aus dem Auftrag ablesen und den Präfix notieren.",
+     "Blockgröße ausrechnen: 32 minus Präfix ergibt die Hostbits.",
+     "Netz-IDs bilden und mit den Blockgrenzen vergleichen.",
      "Entscheiden: gleiche Netz-ID heißt direkt erreichbar, sonst braucht es das Gateway.",
      "Ergebnis mit einem Ping prüfen und die Entscheidung notieren."],
    quelle: "Network – Lernfassung · 04-AP1-Netzwerk (Subnetting-Verfahren)"},
-  {id: "tr-arp-gateway", titel: "ARP für das Gateway", skill: "lab.arp", geraet: "host",
+  {id: "tr-arp-gateway", titel: "ARP für das Gateway", skill: "lab.arp", injektor: "ip-tippfehler", geraet: "host",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Ein Rechner erreicht das Internet nicht, Nachbarn im eigenen Netz aber schon. Du untersuchst, nach welcher MAC-Adresse er für ein fremdes Ziel fragt, und findest den Unterschied zwischen Ziel-Adresse und Gateway-Adresse.",
    tipp: "Für ein Ziel außerhalb des eigenen Netzes fragt ARP nicht das Ziel, sondern den nächsten Router. Steht das Gateway im ARP-Eintrag?",
@@ -489,7 +487,7 @@ DATEN.trainings = [
      "Nachrechnen, ob das Gateway wirklich im eigenen Netz liegt.",
      "Das Gateway anpingen und den Eintrag danach erneut prüfen."],
    quelle: "Network – Lernfassung · RFC 826"},
-  {id: "tr-ports-ping-dienst", titel: "Ping geht, Dienst nicht", skill: "lab.ports", geraet: "alle",
+  {id: "tr-ports-ping-dienst", titel: "Ping geht, Dienst nicht", skill: "lab.ports", injektor: "datei-dienst-aus", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Der Server antwortet auf Ping, aber die Anwendung erreicht ihn nicht. Du unterscheidest Host-Erreichbarkeit von Dienst-Erreichbarkeit und prüfst Port, Dienst und Protokoll.",
    tipp: "Ping prüft nur Schicht 3. Für den Dienst zählt der Port: Lauscht dort jemand – und auf TCP oder UDP?",
@@ -498,7 +496,7 @@ DATEN.trainings = [
      "Im Inspektor den Dienst auf dem Server ansehen: eingeschaltet?",
      "Dienst einschalten, Port erneut prüfen und die Verbindung testen."],
    quelle: "TCP – Lernfassung · RFC 9293"},
-  {id: "tr-tcp-abbruch", titel: "Der Handshake bricht ab", skill: "lab.tcp", geraet: "alle",
+  {id: "tr-tcp-abbruch", titel: "Der Handshake bricht ab", skill: "lab.tcp", injektor: "dienst-aus", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Eine Verbindung kommt nicht zustande. Du verfolgst den Handshake in der Simulation: Welches Paket fehlt, und was bedeutet ein RST im Vergleich zu einer Zeitüberschreitung?",
    tipp: "Drei Pakete gehören zum Aufbau: SYN, SYN/ACK, ACK. Schau, welches davon ausbleibt – und wer stattdessen antwortet.",
@@ -507,7 +505,7 @@ DATEN.trainings = [
      "Ein RST bedeutet geschlossener Port; keine Antwort bedeutet Filter oder falsche Adresse.",
      "Ziel und Port korrigieren, erneut verbinden und den Aufbau im Ereignisfenster sehen."],
    quelle: "TCP – Lernfassung (§ 2 Aufbau mit Nummern) · RFC 9293"},
-  {id: "tr-speichern-neustart", titel: "Nach dem Neustart fehlt die Änderung", skill: "lab.speichern", geraet: "alle",
+  {id: "tr-speichern-neustart", titel: "Nach dem Neustart fehlt die Änderung", skill: "lab.speichern", injektor: "gespeichert-kaputt", geraet: "alle",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Ein Router hat eine Änderung verloren, obwohl sie im laufenden Betrieb sichtbar war. Du unterscheidest running-config und startup-config, führst den Neustart im Kopf durch und sicherst die Konfiguration.",
    tipp: "Änderungen gelten sofort, stehen aber nur im RAM. Was passiert mit einer Schnittstelle, die nur in der running-config eingeschaltet wurde?",
@@ -516,7 +514,7 @@ DATEN.trainings = [
      "Mit der Startup-Anzeige vergleichen: Stehen die Zeilen jetzt drin?",
      "Im Wartungsbuch notieren, was gespeichert wurde und warum."],
    quelle: "Cisco IOS Configuration Fundamentals Configuration Guide (Managing Configuration Files)"},
-  {id: "tr-trunk-allowed", titel: "Uplink am Switch ist kein Trunk", skill: "lab.trunk", geraet: "alle",
+  {id: "tr-trunk-allowed", titel: "Uplink am Switch ist kein Trunk", skill: "lab.trunk", injektor: "trunk-access", geraet: "alle",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Zwei Switches sind verbunden, doch kein einziges VLAN kommt über die Strecke. Der Uplink ist als Access-Port konfiguriert, deshalb passen keine getaggten Frames hindurch. Du prüfst die Betriebsart des Ports und machst aus dem Access-Port einen Trunk, ohne die Access-Ports der Endgeräte anzufassen.",
    tipp: "Ein Access-Port versteht keine Tags. Woran erkennst du am Port, ob er trunkend arbeitet – und was fehlt ihm dafür?",
@@ -526,7 +524,7 @@ DATEN.trainings = [
      "Erneut prüfen: `show interfaces trunk` listet den Port und die erlaubten VLANs.",
      "Aus beiden VLANs über die Strecke pingen und die MAC-Tabelle beider Switches vergleichen."],
    quelle: "VLAN – Lernfassung · IEEE 802.1Q"},
-  {id: "tr-rostick-gateway", titel: "Subinterface ohne Verbindung", skill: "lab.rostick", geraet: "alle",
+  {id: "tr-rostick-gateway", titel: "Subinterface ohne Verbindung", skill: "lab.rostick", injektor: "subif-aus", geraet: "alle",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Ein VLAN erreicht das Gateway nicht, obwohl der Trunk steht. Du prüfst Subinterface, 802.1Q-Nummer und IP und findest die fehlende Zuordnung zwischen VLAN und Router-Schnittstelle.",
    tipp: "Jedes Subinterface gehört über encapsulation dot1Q zu genau einem VLAN. Stimmt die Nummer mit dem VLAN der Rechner überein?",
@@ -535,12 +533,12 @@ DATEN.trainings = [
      "Die 802.1Q-Nummer mit dem VLAN am Switch vergleichen und korrigieren.",
      "Erneut messen: Gateway antwortet, Ziel im anderen VLAN erreichbar."],
    quelle: "VLAN – Visuelle Lernnotiz · Cisco IOS: Configuring Routing Between VLANs with IEEE 802.1Q Encapsulation"},
-  {id: "tr-ttl-weglesen", titel: "Prüfung: Weg mit Traceroute lesen", skill: "lab.ttl", geraet: "router",
+  {id: "tr-ttl-weglesen", titel: "Prüfung: Weg mit Traceroute lesen", skill: "lab.ttl", injektor: "route-kreis-ttl", geraet: "router",
    art: "pruefung", minuten: 10, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Gerüst: Ein Traceroute-Ergebnis und eine Fehlermeldung liegen vor. Du entscheidest, wo der Weg bricht, ob es eine Schleife ist und welche Adresse der meldende Router hat.",
    tipp: "",
    quelle: "Network – Lernfassung · RFC 792 (Time Exceeded)"},
-  {id: "tr-portfwd-dienst", titel: "Weiterleitung zeigt ins Leere", skill: "lab.portfwd", geraet: "firewall",
+  {id: "tr-portfwd-dienst", titel: "Weiterleitung zeigt ins Leere", skill: "lab.portfwd", injektor: "fw-regel-fehlt", geraet: "firewall",
    art: "stoerung", minuten: 8, geruest: true, niveau: "AP1",
    beschreibung: "Der Webshop ist von außen nicht erreichbar. Du prüfst die Port-Weiterleitung, den Ziel-Port im LAN und ob der Dienst dort überhaupt lauscht – und unterscheidest das von einem Firewall-Deny.",
    tipp: "Die Weiterleitung öffnet nur den Weg. Zielhost und Zielport müssen stimmen, und der Dienst muss dort wirklich laufen.",
@@ -549,7 +547,7 @@ DATEN.trainings = [
      "Prüfen, ob der Dienst auf diesem Port im LAN lauscht.",
      "Ziel korrigieren, erneut testen und den Unterschied zu einem Deny erklären."],
    quelle: "Cisco IOS NAT Configuration Guide (Static NAT with port) · RFC 3022"},
-  {id: "tr-fw-regel", titel: "Die Firewall lässt zu wenig durch", skill: "lab.fw", geraet: "firewall",
+  {id: "tr-fw-regel", titel: "Die Firewall lässt zu wenig durch", skill: "lab.fw", injektor: "fw-zone-falsch", geraet: "firewall",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Ein erlaubter Weg ist trotzdem gesperrt. Du liest das Regelwerk von oben, prüfst Richtung, Protokoll und Port und findest die fehlende oder falsch sortierte Regel.",
    tipp: "Die erste passende Regel gewinnt. Steht eine allgemeine Sperre über der Erlaubnis?",
@@ -558,7 +556,7 @@ DATEN.trainings = [
      "Richtung (Zone zu Zone), Protokoll und Port mit dem Ziel vergleichen.",
      "Regel ergänzen oder umsortieren, erneut messen und begründen."],
    quelle: "05-AP2-Infrastruktur-Sicherheit (Firewall-Grundregeln)"},
-  {id: "tr-dmz-weg", titel: "Prüfung: DMZ richtig begrenzen", skill: "lab.dmz", geraet: "firewall",
+  {id: "tr-dmz-weg", titel: "Prüfung: DMZ richtig begrenzen", skill: "lab.dmz", injektor: "fw-zone-falsch", geraet: "firewall",
    art: "pruefung", minuten: 10, geruest: false, niveau: "AP2",
    beschreibung: "Ohne Gerüst: Du bekommst Zonen und ein Regelwerk. Du entscheidest, welche Wege erlaubt sein müssen und welcher Weg aus der DMZ ins LAN auf keinen Fall offenstehen darf.",
    tipp: "",

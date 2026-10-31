@@ -80,6 +80,18 @@ UI.subnetzwerkzeuge = (() => {
   function K(text, klasse, onklick, extra){
     return h("button", Object.assign({type: "button", class: "knopf" + (klasse ? " " + klasse : ""), onclick: onklick}, extra || {}), text);
   }
+  /* UIL-06 (W3): Fokus nach dem Neuzeichnen. Ein Klick darf die Tastaturposition nicht auf
+     <body> fallen lassen; nach jedem Neuaufbau wird das semantisch gleiche Ziel fokussiert. */
+  function fokusNachZeichnen(el){
+    try { if (el && typeof el.focus === "function") el.focus(); } catch (e) { /* Fokus ist Beiwerk */ }
+  }
+  function fokusMitLabel(bereich, label){
+    try {
+      const ziel = [...(bereich ? bereich.querySelectorAll("button") : [])]
+        .find(b => b && typeof b.getAttribute === "function" && b.getAttribute("aria-label") === label);
+      fokusNachZeichnen(ziel);
+    } catch (e) { /* Fokus ist Beiwerk */ }
+  }
   function txt(x){ return String(x == null ? "" : x); }
   function ziffer(x, min, max, ersatz){
     const n = Math.round(Number(x));
@@ -703,7 +715,7 @@ UI.subnetzwerkzeuge = (() => {
     }
     function portZeichnen(){
       portFlaeche.replaceChildren(...ports.map((p, i) => {
-        const b = K("", "sw-port", () => { gewaehlt = i; aktualisieren(); },
+        const b = K("", "sw-port", () => { gewaehlt = i; aktualisieren(); fokusNachZeichnen(portFlaeche.querySelectorAll(".sw-port")[i]); },
           {"aria-pressed": i === gewaehlt ? "true" : "false",
            "aria-label": "Port " + (i + 1) + ": " + portText(p),
            style: "--sw-vlan:var(" + vlanKlasse(p.vlan) + ")"});
@@ -715,13 +727,13 @@ UI.subnetzwerkzeuge = (() => {
     }
     function panelZeichnen(){
       const p = ports[gewaehlt];
-      const access = K("Access", "sw-modus", () => { p.modus = "access"; aktualisieren(); },
+      const access = K("Access", "sw-modus", () => { p.modus = "access"; aktualisieren(); fokusMitLabel(panel, "Port " + (gewaehlt + 1) + " als Access setzen"); },
         {"aria-pressed": p.modus === "access" ? "true" : "false", "aria-label": "Port " + (gewaehlt + 1) + " als Access setzen"});
-      const trunk = K("Trunk", "sw-modus", () => { p.modus = "trunk"; p.vlan = 1; aktualisieren(); },
+      const trunk = K("Trunk", "sw-modus", () => { p.modus = "trunk"; p.vlan = 1; aktualisieren(); fokusMitLabel(panel, "Port " + (gewaehlt + 1) + " als Trunk setzen"); },
         {"aria-pressed": p.modus === "trunk" ? "true" : "false", "aria-label": "Port " + (gewaehlt + 1) + " als Trunk setzen"});
       const vlanKnoepfe = E("div", "sw-vlan-knoepfe", Array.from({length: 8}, (_, i) => {
         const n = i + 1;
-        const b = K("VLAN " + n, "sw-vlan-knopf", () => { p.vlan = n; aktualisieren(); },
+        const b = K("VLAN " + n, "sw-vlan-knopf", () => { p.vlan = n; aktualisieren(); fokusMitLabel(panel, "VLAN " + n + " wählen"); },
           {"aria-pressed": p.vlan === n ? "true" : "false", "aria-label": "VLAN " + n + " wählen",
            style: "--sw-vlan:var(" + vlanKlasse(n) + ")"});
         return b;
@@ -1037,6 +1049,8 @@ UI.subnetzwerkzeuge = (() => {
       /* UIL-04: Die Erklärung bleibt stehen, bis „Weiter“ gedrückt wird — kein Auto-Weiter mehr. */
       const weiter = K("Weiter", "sg-weiter", naechsteKarte, {"aria-label": "Nächste Karte"});
       frageFeld.append(weiter);
+      /* UIL-06: Tastaturnutzer landen direkt auf „Weiter“ statt auf <body>. */
+      fokusNachZeichnen(weiter);
     }
     function naechsteKarte(){
       if (beendet) return;
@@ -1044,6 +1058,8 @@ UI.subnetzwerkzeuge = (() => {
       index += 1;
       gesperrt = false;
       frageZeichnen();
+      /* UIL-06: nach „Weiter“ steht der Fokus auf der ersten Antwort der neuen Karte. */
+      fokusNachZeichnen(frageFeld.querySelector(".sg-option"));
     }
     function tick(){
       if (beendet) return;
@@ -1272,7 +1288,7 @@ UI.subnetzwerkzeuge = (() => {
     }
     function portZeichnen(){
       portFlaeche.replaceChildren(...ports.map((p, i) => {
-        const b = K("", "sg-port", () => { gewaehlt = i; zeichnen(); },
+        const b = K("", "sg-port", () => { gewaehlt = i; zeichnen(); fokusNachZeichnen(portFlaeche.querySelectorAll(".sg-port")[i]); },
           {"aria-pressed": i === gewaehlt ? "true" : "false",
            "aria-label": "Port " + (i + 1) + ": " + portText(p),
            style: "--sw-vlan:var(" + vlanKlasse(p.vlan) + ")"});
@@ -1284,13 +1300,13 @@ UI.subnetzwerkzeuge = (() => {
     }
     function panelZeichnen(){
       const p = ports[gewaehlt];
-      const access = K("Access", "sg-modus", () => { p.modus = "access"; zeichnen(); },
+      const access = K("Access", "sg-modus", () => { p.modus = "access"; zeichnen(); fokusMitLabel(panel, "Port " + (gewaehlt + 1) + " als Access setzen"); },
         {"aria-pressed": p.modus === "access" ? "true" : "false", "aria-label": "Port " + (gewaehlt + 1) + " als Access setzen"});
-      const trunk = K("Trunk", "sg-modus", () => { p.modus = "trunk"; p.vlan = 1; zeichnen(); },
+      const trunk = K("Trunk", "sg-modus", () => { p.modus = "trunk"; p.vlan = 1; zeichnen(); fokusMitLabel(panel, "Port " + (gewaehlt + 1) + " als Trunk setzen"); },
         {"aria-pressed": p.modus === "trunk" ? "true" : "false", "aria-label": "Port " + (gewaehlt + 1) + " als Trunk setzen"});
       const vlanKnoepfe = E("div", "sg-vlan-knoepfe", Array.from({length: 8}, (_, i) => {
         const n = i + 1;
-        return K("VLAN " + n, "sg-vlan-knopf", () => { p.vlan = n; zeichnen(); },
+        return K("VLAN " + n, "sg-vlan-knopf", () => { p.vlan = n; zeichnen(); fokusMitLabel(panel, "VLAN " + n + " wählen"); },
           {"aria-pressed": p.vlan === n ? "true" : "false", "aria-label": "VLAN " + n + " wählen",
            style: "--sw-vlan:var(" + vlanKlasse(n) + ")"});
       }));

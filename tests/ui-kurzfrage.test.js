@@ -217,6 +217,29 @@ gruppe("UI: Leisten-Kurzübung mit Kontextfrage und Lage-Block (Runde 6)", () =>
     erwarte.gleich(uebung.querySelector(".lk-kurz-antwort"), null, "ohne Antwort noch keine Erklärung");
   });
 
+  /* VIS-09 (A, task-90): Der Lage-Block ist die Begründung der Frage und muss VOLLSTÄNDIG stehen —
+     kein Ellipsen-Abschneiden und kein stilles Zeilen-Cap. Headless prüfbar: alle Zeilen im DOM,
+     volle Werte, CSS bricht den Wert um (overflow-wrap) statt ihn mit Ellipse zu kürzen. */
+  pruefe("VIS-09: Lage-Block vollständig (alle Zeilen, volle Werte, CSS-Umbruch statt Ellipse)" + KF_ZUSATZ, () => {
+    if (!KF_KANN_LADEN) return;
+    const lang = "Port Fa0/2 · kein shutdown · Kabel gesteckt · VLAN 4 · Access";
+    const viele = Array.from({length: 5}, (_, i) => ({label: "Zeile " + (i + 1), wert: lang + " #" + (i + 1)}));
+    const frage = Object.assign({}, kf2Frage(), {lage: viele});
+    const p = kf2Aufbauen({frage});
+    kf2Oeffnen(p);
+    const uebung = kf2Uebung(p);
+    const lage = uebung.querySelector(".lk-kurz-lage");
+    erwarte.wahr(!!lage, "der Lage-Block steht da");
+    const zeilen = lage.querySelectorAll(".lk-kurz-lage-zeile");
+    erwarte.gleich(zeilen.length, 5, "alle fünf Lage-Zeilen stehen im DOM (kein 4-Zeilen-Cap)");
+    erwarte.gleich(zeilen.map(z => z.querySelector(".lk-kurz-lage-wert").textContent), viele.map(z => z.wert), "jeder Wert steht VOLLSTÄNDIG im DOM (keine Ellipse)");
+    erwarte.falsch(zeilen.some(z => String(z.querySelector(".lk-kurz-lage-wert").textContent).includes("…")), "kein Auslassungszeichen im Lage-Wert");
+    const css = kf2Css();
+    erwarte.passt(css, /\.lk-kurz-lage-wert\{[^}]*overflow-wrap:break-word/, "CSS bricht den Lage-Wert um, statt ihn abzuschneiden");
+    erwarte.passt(css, /\.lk-kurz-lage-wert\{[^}]*text-align:right/, "der Wert bleibt rechtsbündig lesbar");
+    erwarte.falsch(/\.lk-kurz-lage-wert\{[^}]*text-overflow:ellipsis/.test(css), "am Lage-Wert steht KEIN text-overflow:ellipsis");
+  });
+
   pruefe("Die Antwortflächen sind mindestens 32 px hoch – groß genug für zwei Zeilen" + KF_ZUSATZ, () => {
     if (!KF_KANN_LADEN) return;
     const css = kf2Css();

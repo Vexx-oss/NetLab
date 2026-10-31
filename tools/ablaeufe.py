@@ -241,11 +241,20 @@ def pruefe_release(fehler: list[str]) -> None:
         return
     d = lies(pfad)
 
-    # Ohne Schreibrecht darf der Ablauf kein Release anlegen.
+    # Ohne Schreibrecht darf der Ablauf kein Release anlegen. Seit 3.0 gilt Least Privilege:
+    # das Recht darf auf Workflow-EBENE (aeltere Form) oder auf JOB-EBENE stehen — nur die
+    # Jobs, die ein Release anlegen oder Anhaenge hochladen, brauchen contents: write.
     rechte = d.get("permissions")
-    if not isinstance(rechte, dict) or rechte.get("contents") != "write":
-        fehler.append("release.yml: 'permissions: contents: write' fehlt — ohne das darf "
-                      "der Ablauf kein Release anlegen")
+    schreibrecht = isinstance(rechte, dict) and rechte.get("contents") == "write"
+    if not schreibrecht:
+        for job in (d.get("jobs") or {}).values():
+            job_rechte = job.get("permissions") if isinstance(job, dict) else None
+            if isinstance(job_rechte, dict) and job_rechte.get("contents") == "write":
+                schreibrecht = True
+                break
+    if not schreibrecht:
+        fehler.append("release.yml: 'contents: write' fehlt (Workflow- oder Job-Ebene) — "
+                      "ohne das darf der Ablauf kein Release anlegen")
 
     # Der Ausloeser muss Tags enthalten, sonst laeuft er beim Tag-Push nicht an.
     ausloeser = d.get("on") or {}
@@ -263,6 +272,67 @@ def pruefe_release(fehler: list[str]) -> None:
                           "unvollstaendige Ware veroeffentlicht")
 
 
+def pruefe_oberflaeche(fehler: list[str]) -> None:
+    """Zusatzregeln fuer den Browser-Ablauf (BAU-11/W5): die Gates muessen verdrahtet bleiben."""
+    pfad = ORDNER / "browser.yml"
+    if not pfad.is_file():
+        fehler.append("browser.yml fehlt — Browser-/R12-Gates laufen nirgends")
+        return
+    d = lies(pfad)
+    if not d.get("jobs"):
+        fehler.append("browser.yml: kein 'jobs'")
+        return
+    if len(d["jobs"]) != 1:
+        fehler.append("browser.yml: mehr als ein Job — ein wartender Job kann den Lauf "
+                      "nach ~900 s abbrechen (gemessen 05.10.2026)")
+    job = next(iter(d["jobs"].values()))
+    if not isinstance(job, dict):
+        fehler.append("browser.yml: Job ist kein Block")
+        return
+    if str(job.get("runs-on")) != "windows-latest":
+        fehler.append("browser.yml: runs-on ist nicht windows-latest — dort fehlt Edge headless")
+    if job.get("timeout-minutes") is None:
+        fehler.append("browser.yml: timeout-minutes fehlt — ein haengender Edge-Lauf "
+                      "wuerde den Lauf bis zum Plattform-Abbruch blockieren")
+    # Block-Skalare (run: |) sieht der kleine YAML-Leser als leeren Text; darum wird hier
+    # der Dateitext selbst geprueft (Kommentare entfernt, damit kein Kommentar ein Gate vortaeuscht).
+    texte = "\n".join(_ohne_kommentar(z) for z in pfad.read_text(encoding="utf-8").splitlines())
+    pflicht = (
+        ("tools/rauch.py --gegenprobe", "Rauch-Gegenprobe (muss rot werden)"),
+        ("tools/rauch.py --r12", "Rauchtest + R12-Rohmessung"),
+        ("tools/ethos.py --r12", "verbindliche R12-Ratsche"),
+        ("tools/menueprobe.py --lauf", "Menueprobe ueber alle Profile"),
+        ("Gegenprobe: rot wie erwartet", "Pflichtzeile der Rauch-Gegenprobe"),
+        ("R12-ZAHL", "Pflichtzeile: R12-Zahl"),
+        ("R12-RATSCHE", "Pflichtzeile: Ratschen-Status"),
+        ("5 von 5 Profilen gemessen", "Pflichtzeile der Menueprobe"),
+    )
+    for muster, titel in pflicht:
+        if muster not in texte:
+            fehler.append(f"browser.yml: '{muster}' fehlt ({titel})")
+
+
+def pruefe_ci_gates(fehler: list[str]) -> None:
+    """Die W5-Gates muessen in pruefen.yml verdrahtet bleiben (nicht spurlos entfernbar)."""
+    pfad = ORDNER / "pruefen.yml"
+    if not pfad.is_file():
+        fehler.append("pruefen.yml fehlt")
+        return
+    d = lies(pfad)
+    if not d.get("jobs"):
+        fehler.append("pruefen.yml: kein 'jobs'")
+        return
+    # Wie bei browser.yml: den Dateitext pruefen (Block-Skalare sind im Parser leer).
+    texte = "\n".join(_ohne_kommentar(z) for z in pfad.read_text(encoding="utf-8").splitlines())
+    for muster, titel in (
+        ("tools/syntax.js", "QUA-01 JS-Syntax-Gate"),
+        ("tools/doku-claims.py --pruefen", "DOK-03 Werte-Gate der Doku"),
+        ("tools/abnahme-3.0.py --schnell", "VIS-01 DoD-Gate (schneller CI-Modus)"),
+    ):
+        if muster not in texte:
+            fehler.append(f"pruefen.yml: '{muster}' fehlt ({titel})")
+
+
 def main() -> int:
     dateien = sorted(ORDNER.glob("*.yml")) + sorted(ORDNER.glob("*.yaml"))
     if not dateien:
@@ -278,6 +348,8 @@ def main() -> int:
         print()
     pruefe_seite(fehler)
     pruefe_release(fehler)
+    pruefe_oberflaeche(fehler)
+    pruefe_ci_gates(fehler)
 
     if fehler:
         print("ROT:")

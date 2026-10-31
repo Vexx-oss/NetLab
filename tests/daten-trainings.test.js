@@ -16,7 +16,7 @@ gruppe("Daten: Trainings", () => {
   const ARTEN = ["basis", "stoerung", "pruefung"];
   const NIVEAU = {basis: "E", stoerung: "AP1", pruefung: "AP2"};
   /* Feldnamen sind der Vertrag: genau diese Felder liest src/spiel/training.js. */
-  const PFLICHT = ["id", "titel", "beschreibung", "skill", "geraet", "art", "minuten", "geruest", "niveau", "tipp", "quelle"];
+  const PFLICHT = ["id", "titel", "beschreibung", "skill", "geraet", "art", "minuten", "geruest", "niveau", "tipp", "quelle", "injektor"];
   const ERLAUBT = new Set([...PFLICHT, "schritte"]);
 
   pruefe("mindestens 12 Szenarien, eindeutige IDs mit Präfix tr-", () => {
@@ -162,6 +162,212 @@ gruppe("Daten: Trainings", () => {
       if (t.geraet !== soll) abweichung.push(`${t.id} (${t.skill}): geraet „${t.geraet}“, gemessen ${k.size ? [...k].sort().join(",") : "keine Injektoren"}`);
     }
     erwarte.gleich(abweichung, []);
+  });
+
+  /* ---------- WIS-02 (W3, 31.10.2026): Karte an ihren Injektor binden ----------
+     Befund aus W2 (r-didaktik): training.starten baute nur aus Skill+Seed; der Injektor war Zufall.
+     Beschreibung und Schritte der Karte konnten damit einen anderen Fall zeigen als den Übungsfall.
+     Jede Karte trägt deshalb den Namen ihres Fehlerbilds; geprüft wird die WIRKUNG über den echten
+     Bauweg (Spiel.ticketBauen), nicht das Feld allein. */
+  const injektorenVon = skill => Object.values(Spiel.INJEKTOREN || {})
+    .filter(i => (i.skills || []).includes(skill)).map(i => i.name);
+
+  pruefe("WIS-02: jede Karte pinnt genau einen Injektor ihrer Fertigkeit", () => {
+    const f = [];
+    for (const t of alle) {
+      if (typeof t.injektor !== "string" || !t.injektor.trim()) { f.push(`${t.id}: injektor fehlt`); continue; }
+      if (!Spiel.INJEKTOREN[t.injektor]) f.push(`${t.id}: unbekannter Injektor ${t.injektor}`);
+      else if (!(Spiel.INJEKTOREN[t.injektor].skills || []).includes(t.skill))
+        f.push(`${t.id}: ${t.injektor} gehört nicht zu ${t.skill}`);
+    }
+    erwarte.gleich(f, []);
+  });
+
+  pruefe("WIS-02: der gepinnte Injektor ist der ERSTE gebrochene Fall (3 Seeds je Karte)", () => {
+    const f = [];
+    for (const t of alle) {
+      const inj = Spiel.INJEKTOREN[t.injektor];
+      if (!inj) { f.push(`${t.id}: unbekannter Injektor`); continue; }
+      const vorlagen = (inj.vorlagen || []).filter(v => Spiel.vorlagen[v]);
+      if (!vorlagen.length) { f.push(`${t.id}: keine Vorlage`); continue; }
+      let gebaut = 0;
+      for (const seed of [1, 2, 3, 4, 5]) {
+        let def = null;
+        for (const vorlage of vorlagen) {
+          try {
+            def = Spiel.ticketBauen({id: "bind-" + t.id + "-" + seed + "-" + vorlage, vorlage, vSeed: seed * 101,
+              injektoren: [{name: t.injektor, wahl: seed}], stufe: t.niveau});
+          } catch (e) { def = null; }
+          if (def) break;
+        }
+        /* Ein Seed kann für eine Vorlage ohne passende Fehlerstelle leer ausgehen – das ist der
+           normale Rückfall von training.starten (nächster Versuch). Entscheidend ist: JEDER
+           gebaute Fall trägt den gepinnten Injektor, und es gibt bau bare Fälle. */
+        if (!def) continue;
+        gebaut++;
+        const erste = (def.fehlerstellen || [])[0];
+        if (!erste || erste.injektor !== t.injektor)
+          f.push(`${t.id}/${seed}: erster Fall ${erste && erste.injektor}, gepinnt ${t.injektor}`);
+      }
+      if (!gebaut) f.push(`${t.id}: kein Seed baubar`);
+    }
+    erwarte.gleich(f.slice(0, 8), []);
+  });
+
+  /* ---------- WIS-03 (W3, 31.10.2026): Textfehler und Dopplung ---------- */
+  pruefe("WIS-03: ipconfig prüft keine freie Adresse – Schritt technisch korrigiert", () => {
+    const t = alle.find(x => x.id === "tr-ip-setzen");
+    erwarte.wahr(!!t, "tr-ip-setzen fehlt");
+    const text = (t.schritte || []).join(" ");
+    erwarte.falsch(/ipconfig[^.]{0,80}frei/i.test(text), "kein „mit ipconfig prüfen, dass frei“ mehr");
+    erwarte.passt(text, /ping|arp/i, "die Freiheit wird per ping/arp geprüft (oder der Schritt entfällt)");
+  });
+
+  pruefe("WIS-03: bei fester Adresse hilft release/renew nicht – Konflikt löst die Adressänderung", () => {
+    const t = alle.find(x => x.id === "tr-ip-konflikt");
+    erwarte.wahr(!!t, "tr-ip-konflikt fehlt");
+    const text = (t.schritte || []).join(" ");
+    erwarte.falsch(/ipconfig\s*\/release|ipconfig\s*\/renew/i.test(text), "kein release/renew als Konflikt-Fix");
+    erwarte.passt(text, /Adresse[^.]{0,80}(änder|neu|frei)/i, "die Lösung nennt die Adressänderung");
+  });
+
+  pruefe("WIS-03: tr-betrieb-startconfig und tr-speichern-neustart lehren nicht dasselbe Fehlerbild", () => {
+    const a = alle.find(x => x.id === "tr-betrieb-startconfig"), b = alle.find(x => x.id === "tr-speichern-neustart");
+    erwarte.wahr(!!a && !!b, "Karten fehlen");
+    erwarte.wahr(a.injektor !== b.injektor, "beide Karten pinnen denselben Injektor (" + a.injektor + ")");
+  });
+
+  /* Dopplungsregel: innerhalb EINER Fertigkeit pinnt keine zwei Karten denselben Injektor.
+     Fertigkeitsübergreifend ist die Bindung nicht immer injektiv möglich (gemessen: maximales
+     Matching 50/52, weil z. B. lab.ip und lab.arp denselben Kandidatenkreis teilen). Übergreifende
+     Dopplungen sind deshalb nur namentlich begründet erlaubt – mit genau den hier gelisteten IDs. */
+  const AUSNAHME_DOPPELT = {
+    "ip-tippfehler":          {ids: ["tr-arp-gateway", "tr-ip-setzen"], grund: "Beide zeigen eine falsch gesetzte Adresse: einmal beim Einrichten, einmal als Ursache für ein unerreichbares Gateway (ARP sucht den falschen Nachbarn)."},
+    "maske-falsch":           {ids: ["tr-netz-maske", "tr-subnetz-plan"], grund: "Dieselbe Fehlerart für zwei Lernwege: Netzgrenze nachrechnen (lab.netz) und Adressplan bauen (lab.subnetz)."},
+    "route-maske-falsch":     {ids: ["tr-netz-nachbar", "tr-route-maske"], grund: "Falsche Maske einmal am Host (Blockgrenze) und einmal in der Route (lab.route) – gleicher Ursachenbegriff, anderer Ort."},
+    "rueckroute-fehlt":       {ids: ["tr-ping-meldungen", "tr-route-rueckweg"], grund: "„Nur der Rückweg fehlt“ ist das Lehrziel beider Karten: Ping-Deutung (lab.ping) und Routing (lab.route)."},
+    "dhcp-pool-zu-klein":     {ids: ["tr-dhcp-pool-leer", "tr-subnetz-pruefung"], grund: "Ein zu kleiner Adressbereich ist in beiden Fällen das Fehlerbild; lab.dhcp zeigt den Pool, lab.subnetz den Plan."},
+    "dienst-aus":             {ids: ["tr-ports-dienst", "tr-tcp-abbruch"], grund: "Ein ausgeschalteter Dienst erklärt sowohl den geschlossenen Port als auch den abgebrochenen Handshake."},
+    "portfwd-falsch":         {ids: ["tr-portfwd-dmz", "tr-tcp-handshake"], grund: "Die Weiterleitung zeigt ins Leere; die Karte lab.tcp nutzt denselben Bauweg, um den Verbindungsaufbau zu beobachten."},
+    "gespeichert-kaputt":     {ids: ["tr-config-speichern", "tr-speichern-neustart"], grund: "Innerhalb von lab.speichern: die Basis-Karte übt das Sichern als Vorgang, die Störungskarte den Verlust nach dem Neustart – gleicher Injektor, zwei Lernziele."},
+    "geraet-stromlos":        {ids: ["tr-betrieb-startconfig", "tr-strom-aus"], grund: "Stromausfall aus zwei Blickwinkeln: lab.link zeigt Schicht 1 (kein Link), lab.betrieb die Verfügbarkeit/Uptime und die Betriebsdokumentation."},
+    "fw-zone-falsch":         {ids: ["tr-dmz-weg", "tr-fw-regel"], grund: "Eine Schnittstelle in der falschen Zone erklärt sowohl die zu strenge Firewall-Regel als auch den falschen DMZ-Grenzverlauf."},
+  };
+  /* Gemessen: eine vollständig injektive Zuordnung ist nicht möglich (maximales Matching aller
+     Kandidaten 50/52; mit fachlich passenden Kandidaten kleiner). Deshalb gilt: KEINE Dopplung
+     innerhalb einer Fertigkeit, und übergreifend nur die hier namentlich begründeten Paare.
+     Falsifizierbar in beide Richtungen: ein neues Doppel-Paar ohne Eintrag ist rot, ein Eintrag,
+     der nicht mehr doppelt ist, ebenfalls. */
+  pruefe("WIS-03: keine Dopplung innerhalb einer Fertigkeit, übergreifend nur namentlich", () => {
+    const proSkill = new Map(), proInj = new Map();
+    for (const t of alle) {
+      const s = t.skill + "|" + t.injektor;
+      proSkill.set(s, (proSkill.get(s) || []).concat(t.id));
+      proInj.set(t.injektor, (proInj.get(t.injektor) || []).concat(t.id));
+    }
+    const f = [];
+    for (const [schluessel, ids] of proSkill) {
+      if (ids.length <= 1) continue;
+      const inj = schluessel.split("|")[1];
+      if (!AUSNAHME_DOPPELT[inj]) f.push("Dopplung in einer Fertigkeit: " + ids.join(" + "));
+    }
+    for (const [inj, ids] of proInj) {
+      if (ids.length <= 1) continue;
+      const e = AUSNAHME_DOPPELT[inj];
+      if (!e) { f.push(inj + ": " + ids.join(" + ")); continue; }
+      if (JSON.stringify(ids.slice().sort()) !== JSON.stringify(e.ids.slice().sort()))
+        f.push(inj + ": Eintrag " + e.ids.join(" + ") + ", gemessen " + ids.join(" + "));
+      if (String(e.grund || "").trim().length < 40) f.push(inj + ": Begründung zu knapp");
+    }
+    for (const [inj, e] of Object.entries(AUSNAHME_DOPPELT)) {
+      if ((proInj.get(inj) || []).length <= 1) f.push(inj + ": Ausnahme nicht mehr nötig");
+    }
+    erwarte.gleich(f, []);
+  });
+
+  /* Der entscheidende Wirkungsbeweis für WIS-02: Über den ECHTEN Weg (training.starten) muss
+     derselbe Injektor im gebauten Fall stehen – 20 Seeds je Karte, weil der Seed den Fall baut. */
+  pruefe("WIS-02: training.starten baut mit dem gepinnten Injektor (20 Seeds je Karte)", () => {
+    const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken,
+      speicher: store.alles(), gen: Object.assign({}, Spiel.generierte)};
+    const f = [];
+    try {
+      Spiel._trocken = true; Spiel._lz = {};
+      Spiel._st = Spiel.leererStand(); Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD);
+      Spiel._st.stufe = 99;
+      for (const t of alle) {
+        for (let i = 0; i < 20; i++) {
+          const r = Spiel.training.starten(t.id);
+          if (!r || !r.ok) { f.push(t.id + ": starten scheitert (" + (r && r.grund) + ")"); break; }
+          const inst = Spiel.instanz(r.iid);
+          const def = inst && Spiel.defVon(inst);
+          const erste = def && (def.fehlerstellen || [])[0];
+          if (!erste || erste.injektor !== t.injektor)
+            f.push(t.id + "/Seed" + i + ": gebaut " + (erste && erste.injektor) + ", gepinnt " + t.injektor);
+        }
+      }
+    } finally {
+      Spiel._st = alt.st; Spiel._einst = alt.einst; Spiel._lz = alt.lz; Spiel._trocken = alt.trocken;
+      for (const k of Object.keys(SPEICHER.daten)) delete SPEICHER.daten[k];
+      Object.assign(SPEICHER.daten, alt.speicher);
+      for (const k of Object.keys(Spiel.generierte)) if (!(k in alt.gen)) delete Spiel.generierte[k];
+    }
+    erwarte.gleich(f.slice(0, 8), []);
+  });
+
+  /* WIS-02a: Die gemessene Lücke (22 von 1040 direkten Seed-Bauten) entsteht, wenn der gepinnte
+     Injektor für eine Vorlage/Seed-Kombination eine LEERE Zielmenge hat (passt() leer). Der
+     Generator muss dann mit DEMSELBEN gepinnten Injektor weiterbauen (andere Vorlage/anderer
+     Versuch), statt auf einen anderen Injektor der Fertigkeit auszuweichen – sonst zeigt die
+     Trainingskarte einen fremden Fall. Simuliert durch einen Bauweg, der die ersten 20 Versuche
+     ohne Fall zurückgibt (genau die gemessene Lage). */
+  pruefe("WIS-02a: Generator-Fallback hält den gepinnten Injektor bei leerer Zielmenge", () => {
+    const altBau = Spiel.ticketBauen, altGen = Spiel.generierte;
+    try {
+      for (const id of ["tr-netz-maske", "tr-subnetz-plan", "tr-dns-name"]) {
+        const t = alle.find(x => x.id === id);
+        erwarte.wahr(!!t, id + " fehlt");
+        let aufrufe = 0;
+        const gesehen = [];
+        Spiel.ticketBauen = function(spec){
+          aufrufe++;
+          for (const x of (spec && spec.injektoren) || []) gesehen.push(x && x.name);
+          if (aufrufe <= 20) return null;          /* leere Zielmenge: 20 Versuche ohne Fall */
+          return altBau.apply(Spiel, arguments);
+        };
+        Spiel.generierte = {};
+        let def = null, wurf = null;
+        try { def = Spiel.generiere(t.skill, 7, {stufe: t.niveau, injektoren: [{name: t.injektor, wahl: 7}]}); }
+        catch (e) { wurf = e && e.message; }
+        erwarte.falsch(!!wurf, id + ": Generator gab nach 16 Versuchen auf (" + wurf + ")");
+        if (!def) continue;
+        const f0 = (def.fehlerstellen || [])[0];
+        erwarte.gleich(f0 && f0.injektor, t.injektor, id + ": erster Fall nicht gepinnt");
+        erwarte.wahr(gesehen.length > 0 && gesehen.every(n => n === t.injektor), id + ": Generator hat den Injektor gewechselt (" + [...new Set(gesehen)].join(", ") + ")");
+        erwarte.wahr(aufrufe > 16, id + ": kein Fallback über die 16 Standardversuche hinaus (" + aufrufe + " Aufrufe)");
+      }
+    } finally { Spiel.ticketBauen = altBau; Spiel.generierte = altGen; }
+  });
+
+  /* WIS-02b: Die 6 von r-didaktik belegten Karten nannten konkrete Beispielwerte, die der
+     generierte Fall nie zeigt (andere Netze/Vorlagen). Konsequenz: Texte arbeiten mit den Werten
+     aus dem Auftrag; geprüft wird: KEINE konkreten IPv4-Adressen (und bei der Betriebs-Karte kein
+     festes Gerät „Server“, das die lan-Vorlage nicht hat). */
+  const TEXT_FALL_KARTEN = ["tr-netz-maske", "tr-subnetz-plan", "tr-ip-setzen", "tr-dhcp-pool-leer", "tr-betrieb-startconfig", "tr-netz-nachbar"];
+  const IPV4 = /\b\d{1,3}(?:\.\d{1,3}){3}\b/;
+  pruefe("WIS-02b: Text↔Fall – die sechs Karten nennen keine konkreten Adressen/Geräte des Beispiels", () => {
+    const f = [];
+    for (const id of TEXT_FALL_KARTEN) {
+      const t = alle.find(x => x.id === id);
+      if (!t) { f.push(id + ": Karte fehlt"); continue; }
+      const text = [t.titel, t.beschreibung, t.tipp, ...(t.schritte || [])].join(" ");
+      if (IPV4.test(text)) f.push(id + ": konkrete IPv4-Adresse im Text (" + text.match(IPV4)[0] + ")");
+      if (!/Auftrag|Aufgabe|Fall/i.test(text)) f.push(id + ": Text verweist nicht auf die Werte des Falls");
+    }
+    const betrieb = alle.find(x => x.id === "tr-betrieb-startconfig");
+    const betriebText = [betrieb.beschreibung, betrieb.tipp, ...(betrieb.schritte || [])].join(" ");
+    erwarte.falsch(/\bServer\b/i.test(betriebText), "tr-betrieb-startconfig nennt kein festes Gerät „Server“ (die lan-Vorlage hat keinen)");
+    erwarte.gleich(f, []);
   });
 
   pruefe("jedes Szenario mit Injektoren ist über Spiel.instanzErstellen baubar; ohne Injektor ist es Vorrat", () => {

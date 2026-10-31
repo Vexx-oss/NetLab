@@ -51,6 +51,7 @@ function w4AlleinLaden(){
 if (typeof Spiel === "undefined" && typeof document === "undefined" && w4HatRequire()) w4AlleinLaden();
 
 /* ================= DOM-Ersatz (nur für den vm-Bereich) ================= */
+let W4_FOKUS = null;      /* UIL-06: was zuletzt fokussiert wurde (statt document.activeElement) */
 function w4Knoten(tag){
   const el = {
     tag, kinder: [], attrs: {}, className: "", _text: "", eltern: null, listeners: {},
@@ -61,8 +62,10 @@ function w4Knoten(tag){
     getAttribute(k){ return el.attrs[k]; },
     addEventListener(art, fn){ (el.listeners[art] ||= []).push(fn); },
     click(){ for (const fn of (el.listeners.click || []).slice()) fn({currentTarget: el}); },
+    focus(){ W4_FOKUS = el; },
     querySelector(sel){ return w4Finde(el, sel)[0] || null; },
     querySelectorAll(sel){ return w4Finde(el, sel); },
+    get children(){ return el.kinder.filter(x => x && typeof x === "object" && x.tag); },
     set textContent(v){ el._text = String(v); el.kinder = []; },
     get textContent(){ return el.kinder.length ? el.kinder.map(w4Text).join("") : el._text; },
     get hidden(){ return el.attrs.hidden !== undefined; },
@@ -71,8 +74,13 @@ function w4Knoten(tag){
 }
 function w4Klassen(el){ return String(el.className || el.attrs.class || "").split(/\s+/).filter(Boolean); }
 function w4Finde(el, sel){
-  const klasse = String(sel).replace(/^\./, ""), treffer = [];
-  const lauf = k => { for (const x of k.kinder) if (x && typeof x === "object" && x.tag) { if (w4Klassen(x).includes(klasse)) treffer.push(x); lauf(x); } };
+  /* UIL-06: auch Tag-Selektoren ("button"), weil der Fokus-Helfer per Tag sucht. */
+  const istKlasse = String(sel).startsWith("."), name = istKlasse ? String(sel).slice(1) : "";
+  const treffer = [];
+  const lauf = k => { for (const x of k.kinder) if (x && typeof x === "object" && x.tag) {
+    if ((istKlasse && w4Klassen(x).includes(name)) || (!istKlasse && x.tag === sel)) treffer.push(x);
+    lauf(x);
+  } };
   lauf(el);
   return treffer;
 }
@@ -578,5 +586,44 @@ gruppe("UI: Subnetting-Werkzeuge", () => {
     } finally {
       Spiel.subnetz = altar;
     }
+  });
+
+  /* UIL-06 (task-92, UL-06): Nach jedem Neuzeichnen fiel der Fokus auf <body> — Mausklick war die
+     einzige Bedienung. Jetzt setzt jede Fläche ein Fokus-Ziel; der Test prüft es am Stub. */
+  pruefe("UIL-06: Fokus bleibt nach dem Neuzeichnen in Werkzeug und Spiel (Präfix-Blitz/VLAN/Patcher)" + W4_ZUSATZ, () => {
+    if (!W4_KANN_LADEN) return;
+    W4_FOKUS = null;
+    const p = w4Pruefstand();
+    const {root} = w4Werkzeug(p, "vlan", {});
+    /* 1 · VLAN-Werkzeug: Port anklicken → Fokus bleibt auf demselben Port (Liste wird ersetzt). */
+    root.querySelectorAll(".sw-port")[2].click();
+    erwarte.wahr(!!W4_FOKUS, "nach dem Portwechsel ist ein Fokus gesetzt");
+    erwarte.enthaelt(String(W4_FOKUS.getAttribute("aria-label")), "Port 3", "Fokus bleibt auf Port 3 (nicht <body>)");
+    /* 2 · Moduswechsel → Fokus auf demselben Schalter der neu gezeichneten Fläche. */
+    w4Knopf(root.querySelector(".sw-port-panel"), "Trunk").click();
+    erwarte.enthaelt(String(W4_FOKUS && W4_FOKUS.getAttribute("aria-label")), "als Trunk setzen", "nach dem Moduswechsel Fokus auf dem Modus-Schalter");
+    /* 3 · VLAN-Wahl → Fokus auf dem gewählten VLAN-Knopf. */
+    const vlan6 = w4AlleKnoepfe(root.querySelector(".sw-port-panel")).find(b => String(b.textContent).trim() === "VLAN 6");
+    erwarte.wahr(!!vlan6, "VLAN-6-Knopf vorhanden");
+    vlan6.click();
+    erwarte.enthaelt(String(W4_FOKUS && W4_FOKUS.getAttribute("aria-label")), "VLAN 6", "nach der VLAN-Wahl Fokus auf dem VLAN-Knopf");
+    /* 4 · Präfix-Blitz: Antwort → Fokus auf „Weiter“; „Weiter“ → Fokus auf erster Antwort. */
+    const c2 = w4Knoten("div");
+    p.UI.subnetzwerkzeuge.spiele.starten(c2, "praefix-blitz", {seed: 111, niveau: "AP1"});
+    const root2 = c2.kinder[0];
+    const opt = root2.querySelectorAll(".sg-option")[0];
+    erwarte.wahr(!!opt, "Antwortknöpfe stehen");
+    opt.listeners.click[0]({currentTarget: opt, target: opt});
+    const weiter = root2.querySelector(".sg-weiter");
+    erwarte.wahr(!!weiter, "„Weiter“ steht bereit");
+    erwarte.wahr(W4_FOKUS === weiter, "nach der Antwort liegt der Fokus auf „Weiter“");
+    weiter.listeners.click[0]({currentTarget: weiter, target: weiter});
+    erwarte.wahr(!!W4_FOKUS && w4Klassen(W4_FOKUS).includes("sg-option"), "nach „Weiter“ liegt der Fokus auf der ersten Antwort der neuen Karte");
+    /* 5 · VLAN-Patcher: Port anklicken → Fokus bleibt auf demselben Port. */
+    const c3 = w4Knoten("div");
+    p.UI.subnetzwerkzeuge.spiele.starten(c3, "vlan-patcher", {seed: 9137, niveau: "E"});
+    const root3 = c3.kinder[0];
+    root3.querySelectorAll(".sg-port")[4].click();
+    erwarte.enthaelt(String(W4_FOKUS && W4_FOKUS.getAttribute("aria-label")), "Port 5", "im Patcher bleibt der Fokus auf dem angeklickten Port");
   });
 });

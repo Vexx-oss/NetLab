@@ -390,7 +390,9 @@ UI.leiste = (() => {
      Klickziel unter der Maus stabil). Die Optionen sind nur Maus (tabindex -1, kein Fokusklau). */
   function kurzZeichnen(q, antwort){
     if (!el.uebungKurz) return;
-    const lage = Array.isArray(q.lage) ? q.lage.slice(0, 4) : [];
+    /* VIS-09: Die Lage ist die Begründung der Frage und wird VOLLSTÄNDIG gezeigt — kein stilles
+       4-Zeilen-Cap (das war eine zweite, unsichtbare Kürzung neben der CSS-Ellipse). */
+    const lage = Array.isArray(q.lage) ? q.lage : [];
     const optionen = Array.isArray(q.optionen) ? q.optionen.slice(0, 3) : [];
     const schluessel = [q.id || "", q.frage || "", lage.length, optionen.length,
       antwort ? antwort.i + ":" + (antwort.richtig ? "r" : "f") : "-"].join("|");

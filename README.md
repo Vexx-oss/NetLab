@@ -14,7 +14,7 @@ Läuft lokal und offline; nichts wird gesendet.
 
 <div class="stand">
 <!-- STAND:ANFANG -->
-<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.9.0</strong> · Baukennung <code>7cb0cfbe</code> · Tests <strong>1.287/1.287 grün</strong> (0 uebersprungen, 161 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 42.599 Zeilen</strong> · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49FC2FA5…E56D89E</code> · Inhalte <strong>76 Tickets, 151 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>66</strong> Doku-Seiten · relative Verweise <strong>319 geprueft, 0 tot</strong>.</p>
+<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.9.0</strong> · Baukennung <code>7cb0cfbe</code> · Tests <strong>1.317/1.317 grün</strong> (0 uebersprungen, 164 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 42.723 Zeilen</strong> · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49FC2FA5…E56D89E</code> · Inhalte <strong>76 Tickets, 151 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>68</strong> Doku-Seiten · relative Verweise <strong>346 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div>
 
@@ -338,6 +338,8 @@ dieselben Dateien als durchsuchbare Seiten.
 | [`STAND.md`](docs/STAND.md) | **der gemessene Stand** — die einzige Zahlenquelle (erzeugt von `tools/stand.py`) |
 | [`FAQ.md`](docs/FAQ.md) | häufige Fragen und Troubleshooting, mit Belegstellen |
 | [`INHALT.md`](docs/INHALT.md) | alle Notizen des Projekts auf einer Seite |
+| [`Lehrkraft – Erste Stunde.md`](<docs/Lehrkraft – Erste Stunde.md>) | Ablauf der ersten Unterrichtsstunde mit dem Klassenraum — inklusive ehrlicher Grenzen |
+| [`Schueler – Erste fünf Minuten.md`](<docs/Schueler – Erste fünf Minuten.md>) | Kurzblatt für Azubis: öffnen, Auftrag, Klassenraum-Code, Hilfe, Abgabe |
 | [`Konzept – Netzwerk-Labor.md`](<docs/entwicklung/Konzept – Netzwerk-Labor.md>) | Spezifikation |
 | [`Architektur.md`](docs/Architektur.md) | verbindlicher Vertrag zwischen den Bausteinen |
 | [`Klassenraum – Umsetzungsreife Spezifikation.md`](<docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>) | Vertrag für den Klassenraum (Lehrer/Schüler) — Stufen A+B gebaut, C/D offen; vier Teil-Dokumente im Ordner daneben |
@@ -372,7 +374,7 @@ Der **Klassenraum** ist die Lehrkraft-Funktion: Die Lehrkraft sagt einen kurzen 
 jedes Gerät baut denselben Auftrag selbst — ohne Konto, ohne Server, ohne Netz; danach
 werden Ergebnis-Codes eingesammelt und als Ampel gezeigt.
 
-**Stand (an der Quelle gemessen, 26.10.2026):** Die **Stufen A und B** sind gebaut — der
+**Stand (an der Quelle geprüft, 31.10.2026):** Die **Stufen A und B** sind gebaut — der
 Auftragscode (`src/spiel/klassenraum-codec.js`, `src/spiel/klassenraum.js`) und die zwei
 Ansichten (`src/ui/klassenraum.js`) sind im Repo und werden von `bauen.py` mitgebaut.
 **Ohne Bewertung, ohne Server, ohne QR.** Offen sind die Stufen C/D (Rust-Server, Live-Betrieb,
@@ -380,6 +382,10 @@ QR) — beide **3.1**, im Produkt nicht gebaut — und die didaktische Einordnun
 [`Klassenraum – Umsetzungsreife Spezifikation.md`](<docs/entwicklung/Klassenraum – Umsetzungsreife Spezifikation.md>)
 und [`docs/Architektur.md`](docs/Architektur.md) § 12 (Datenform § 12.1, API § 12.2, Grenzen
 § 12.8; Server und QR: § 12.6/§ 12.7 = **3.1**).
+
+**Anleitungen für den Unterricht:** [`Lehrkraft – Erste Stunde`](<docs/Lehrkraft – Erste Stunde.md>)
+(Ablauf, Codes, Auswertung, ehrliche Grenzen) · [`Schueler – Erste fünf Minuten`](<docs/Schueler – Erste fünf Minuten.md>)
+(Kurzblatt für Azubis: öffnen, Auftrag, Klassenraum-Code, Hilfe, Abgabe).
 
 ## Ehrliche Grenzen
 

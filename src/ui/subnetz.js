@@ -371,7 +371,13 @@ UI.subnetz = (() => {
       zaehler.textContent = `${offen.n} / ${schritte.length} Schritte`;
       if (offen.n >= schritte.length) {
         if (typeof ergebnis.removeAttribute === "function") ergebnis.removeAttribute("hidden");
-        knopf.setAttribute("hidden", "");
+        /* UL-09 (W3): Der Knopf verschwand bisher MIT dem Fokus — die Tastaturposition fiel auf
+           <body> und das Ergebnis wurde nicht angesagt. Jetzt bleibt der Knopf sichtbar und wird
+           nur deaktiviert; der Fokus geht auf die Ergebniszeile (tabindex -1). */
+        knopf.disabled = true;
+        if (typeof knopf.setAttribute === "function") knopf.setAttribute("aria-disabled", "true");
+        if (typeof ergebnis.setAttribute === "function") ergebnis.setAttribute("tabindex", "-1");
+        fokussiere(ergebnis);
       }
     };
     return h("section", {class: "bn-k sn-beispiel"},
@@ -488,15 +494,28 @@ UI.subnetz = (() => {
       return false;
     }
   }
-  /* Z-01 (W2): Nach dem Aufdecken der Hilfe wächst die Aufgabe; Antwortfeld/Auswahl und „Prüfen“
-     rutschen unter die Falz. Deshalb den Blick auf den Antwortbereich INKLUSIVE Knopfzeile führen
-     (nicht nur das Feld; Auswahl-Aufgaben haben gar kein Feld) – ohne Fokus zu stehlen
-     (scrollIntoView block/inline „nearest“). Alte Umgebungen ohne die Methode ignorieren es ruhig. */
-  function bringeInsBild(el){
-    try { if (el && typeof el.scrollIntoView === "function") el.scrollIntoView({block: "nearest", inline: "nearest"}); }
+  /* Z-01 (W2/W3): Nach dem Aufdecken der Hilfe wächst die Aufgabe; Antwortfeld/Auswahl und „Prüfen“
+     rutschen unter die Falz. Der Sprung passiert erst NACH dem Layout (requestAnimationFrame) und
+     umfasst den Antwortbereich (Feld/Auswahl, block:nearest) UND die Knopfzeile (block:center –
+     hält die Zeile auch bei 960/720 sichtbar). Kein Fokus-Diebstahl; alte Umgebungen ohne
+     scrollIntoView/requestAnimationFrame bleiben ruhig. */
+  function bringeInsBild(el, optionen){
+    try { if (el && typeof el.scrollIntoView === "function") el.scrollIntoView(optionen || {block: "nearest", inline: "nearest"}); }
     catch (e) { /* kein Sprung möglich – das Aufdecken bleibt gültig */ }
   }
-  function visualAufgabe(aufgabe, r, antwortZiel){
+  function bringeAntwortInsBild(antwort){
+    const feld = antwort && antwort.feld;
+    const auswahl = antwort && antwort.auswahl;
+    const knoepfe = antwort && antwort.knoepfe;
+    const lauf = () => {
+      if (feld) bringeInsBild(feld, {block: "nearest", inline: "nearest"});
+      else if (auswahl) bringeInsBild(auswahl, {block: "nearest", inline: "nearest"});
+      if (knoepfe) bringeInsBild(knoepfe, {block: "center", inline: "nearest"});
+    };
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(lauf);
+    else lauf();
+  }
+  function visualAufgabe(aufgabe, r, antwort){
     const box = h("div", {class: "sn-visual"});
     const zielId = "sn-werte-" + (visualZaehler++);          /* aria-controls braucht ein benanntes Ziel */
     const werkzeugZiel = h("div", {id: zielId});             /* hier landet das Werkzeug – erst nach „Werte zeigen“ */
@@ -519,7 +538,7 @@ UI.subnetz = (() => {
       aufdecken.setAttribute("aria-expanded", "true");
       aufdecken.textContent = "Werte sind sichtbar – als Hilfe verbucht";
       status.textContent = "Die Werte sind eingeblendet; die Antwort zählt als mit Hilfe geübt.";
-      bringeInsBild(antwortZiel);                       /* Z-01: Antwortbereich inkl. Knopfzeile ins Bild */
+      bringeAntwortInsBild(antwort);                    /* Z-01: Antwortbereich inkl. Knopfzeile nach Layout */
     }
     return box;
   }
@@ -576,6 +595,10 @@ UI.subnetz = (() => {
       liveMelden(inhalt);
       if (art === "auswahl") fokussiere(auswahl[0] && auswahl[0].children[0]);
       else fokussiere(feld);
+      /* UL-05 (W3): Die Meldung steht direkt unter dem Feld; nach dem Layout wird sie ins Bild
+         geholt, sonst bliebe sie auf 1440/720 unter der Falz. */
+      const springen = () => bringeInsBild(hinweisBox, {block: "nearest", inline: "nearest"});
+      if (typeof requestAnimationFrame === "function") requestAnimationFrame(springen); else springen();
     }
     function pruefen(){
       if (beantwortet) return;
@@ -625,12 +648,14 @@ UI.subnetz = (() => {
           h("span", {class: "sn-lage-label"}, text(z && z.label)),
           h("span", {class: "sn-lage-wert"}, text(z && z.wert))))) : null,
         h("p", {class: "sn-frage"}, text(aufgabe.frage)),
-        beantwortet || !aufgabe.visual || !aufgabe.visual.art ? null : visualAufgabe(aufgabe, r, knoepfe[0]),
+        beantwortet || !aufgabe.visual || !aufgabe.visual.art ? null : visualAufgabe(aufgabe, r,
+          {feld: art === "auswahl" ? null : feld, auswahl: auswahl[0] || null, knoepfe: knoepfe[0]}),
         feld,
         auswahl.length ? auswahl[0] : null,
+        /* UL-05: Meldung direkt unter dem Feld (vor der Knopfzeile) — nicht am unteren Rand. */
+        hinweisBox,
         beantwortet ? rueckmeldung(r, aufgabe, beantwortet) : null,
-        beantwortet ? null : knoepfe[0],
-        hinweisBox));
+        beantwortet ? null : knoepfe[0]));
   }
 
   function rueckmeldung(r, aufgabe, beantwortet){

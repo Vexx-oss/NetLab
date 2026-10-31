@@ -23,6 +23,13 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 | [`Mitmachen.md`](Mitmachen.md) | Arbeitsweise und Regeln für Beiträge. |
 | [`Liesmich.md`](Liesmich.md) | Übersicht für Leser: was das Spiel ist, wie man es startet, was es kann (Stand 2.9.0). |
 
+## Unterricht: erste Stunde und erster Einstieg
+
+| Datei | Wofür |
+|---|---|
+| [`Lehrkraft – Erste Stunde.md`](<Lehrkraft – Erste Stunde.md>) | Ablauf der ersten Unterrichtsstunde mit dem Klassenraum: vorbereiten, Code ansagen, Arbeitsphase, Auswertung — mit ehrlichen Grenzen (Server/QR 3.1, Schulnetz nicht geprüft). |
+| [`Schueler – Erste fünf Minuten.md`](<Schueler – Erste fünf Minuten.md>) | Kurzblatt für Azubis: öffnen, ersten Auftrag annehmen, Klassenraum-Code, Hilfe und Abgabe. |
+
 ## Was geschehen ist (Verlauf)
 
 | Datei | Wofür |

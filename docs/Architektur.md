@@ -981,6 +981,12 @@ Abnahme: `tests/klassen-diagnose.test.js` — 20 H-Codes (5×Schritt 1, 7×Schri
 
 Abnahme: `tests/klassen-uebersicht.test.js` — plaetze 20, Ergebnisse auf 1/2/5, T+2 min bei dauerMin 10 → fertig 3, offenAnzahl 17, offen 3/4/6..20, restMinuten 8; Grenzfälle plaetze 0, alle 20 abgegeben, abgelaufen, keine Sitzung; Klassenstärke-Erbe getestet.
 
+**Wortwahl im Klassenraum (3.0.0, verbindlich):** Die **Bestands-Tafel der Ampel behält „Platz N“**
+(Platz N · Sterne · Zeit — B-Vertrag/O1); alle **neuen 3.0-Flächen** nutzen **„Sitzplatz N“**, und das Wort
+**„Abgabe“** gilt einheitlich in neuen Flows (Sitzungsliste, Dialoge, Übersicht, Diagnose). Die 20-Übersicht und
+die Ampel nutzen **eine Definition**: „fertig/abgegeben“ zählt nur gültige Plätze 1..plaetze, Ergebnisse mit
+ungültigem Platz werden separat als „Abgaben ohne gültigen Platz“ ausgewiesen (KLR-10).
+
 **Öffnungsweg (verbindlich).** Ein neuer Auftrag entsteht **nur** über
 `Spiel.instanzErstellen({ticketId | gen:{skill, seed}, seed, quelle:"klassenraum", ohneFlow:true})` —
 vorher prüfen, denn der Aufruf wirft bei unbekanntem Ticket. `ohneFlow: true` ist Pflicht, sonst macht

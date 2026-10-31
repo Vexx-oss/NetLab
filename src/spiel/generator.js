@@ -259,14 +259,29 @@ Spiel.briefingText = function(kundeId, symptom, z){
 /* Generator: Fertigkeit → passender Injektor → passende Vorlage (bevorzugt die des Kunden) */
 Spiel.generiere = function(skill, seed, opts = {}){
   const flow = opts.flow === "geruest" || opts.flow === "verwicklung" ? opts.flow : null;
-  const id = `gen-${skill}-${seed}` + (flow ? "-" + flow : "");
+  /* WIS-02 (31.10.2026, Scope-Transfer Leitung): Eine Trainingskarte pinnt ihren Injektor.
+     opts.injektoren = [{name, wahl?}] heißt: NUR diese Kandidaten werden gebaut (sonst Zufallspool).
+     Der Zusatz in der id trennt gepinnte von ungepinnten Fassungen im Zwischenspeicher. */
+  const gepinnt = Array.isArray(opts.injektoren)
+    ? opts.injektoren.map(x => Spiel.INJEKTOREN[typeof x === "string" ? x : (x && x.name)]).filter(Boolean)
+    : null;
+  const pinSuffix = gepinnt && gepinnt.length ? "-p" + gepinnt.map(i => i.name).sort().join("+") : "";
+  const id = `gen-${skill}-${seed}` + (flow ? "-" + flow : "") + pinSuffix;
   if (Spiel.generierte[id]) return Spiel.generierte[id];
   const z = Zufall(`gen:${skill}:${seed}`);
-  const injs = Object.values(Spiel.INJEKTOREN).filter(i => i.skills.includes(skill));
+  const injs = gepinnt && gepinnt.length
+    ? gepinnt
+    : Object.values(Spiel.INJEKTOREN).filter(i => i.skills.includes(skill));
   if (!injs.length) throw new Error("Kein Injektor für " + skill);
   const kundeVorlage = opts.kunde ? Spiel.vorlagen._fuerKunde[opts.kunde] : null;
   const niveau = ["E", "AP1", "AP2"].includes(opts.stufe) ? opts.stufe : null;
-  for (let versuch = 0; versuch < 16; versuch++) {
+  /* WIS-02a (31.10.2026): Ist der Injektor gepinnt (Training), bekommt der Bauweg mehr Versuche.
+     Grund (gemessen): Manche Vorlage/Seed-Kombinationen haben für den gepinnten Injektor eine
+     LEERE Zielmenge (passt() leer). Der Generator baut dann mit DEMSELBEN Injektor weiter
+     (andere Vorlage, anderer vSeed) – er wechselt nie auf einen anderen Injektor der Fertigkeit,
+     sonst zeigte die Trainingskarte einen fremden Fall. Ungepinnt bleibt es bei 16 Versuchen. */
+  const MAXVERSUCHE = gepinnt && gepinnt.length ? 64 : 16;
+  for (let versuch = 0; versuch < MAXVERSUCHE; versuch++) {
     const inj = injs[(z.zahl(injs.length) + versuch) % injs.length];
     const vorlagen = inj.vorlagen.filter(v => Spiel.vorlagen[v]);
     if (!vorlagen.length) continue;

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lehrkraft – Erste Stunde (Klassenraum) · Netzwerk-Labor</title>
+<meta name="description" content="Erste Stunde mit dem Klassenraum: vorbereiten, Code ansagen, Arbeitsphase, Auswertung, ehrliche Grenzen.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Lehrkraft – Erste Stunde (Klassenraum)</span>
+<a href="../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-vorher-vorbereiten-etwa-5-minuten">1 · Vorher vorbereiten (etwa 5 Minuten)</a></li>
+<li><a href="#2-die-ersten-funf-minuten-der-klasse">2 · Die ersten fünf Minuten der Klasse</a></li>
+<li><a href="#3-arbeitsphase-begleiten-etwa-25-35-minuten">3 · Arbeitsphase begleiten (etwa 25–35 Minuten)</a></li>
+<li><a href="#4-auswerten-und-sichern-etwa-10-minuten">4 · Auswerten und sichern (etwa 10 Minuten)</a></li>
+<li><a href="#5-ehrliche-grenzen-dieser-stunde">5 · Ehrliche Grenzen dieser Stunde</a></li>
+<li><a href="#6-belege">6 · Belege</a></li>
+</ul>
+</nav><h1 id="lehrkraft-erste-stunde-klassenraum">Lehrkraft – Erste Stunde (Klassenraum)</h1>
+<blockquote>
+<p><strong>Wofür dieses Blatt ist.</strong> Ein Ablauf für die erste Unterrichtsstunde mit dem Netzwerk-Labor: vorbereiten, den Auftragscode ansagen, die Arbeitsphase begleiten, Ergebnisse einsammeln und auswerten. Es beschreibt die <strong>Stufe A+B</strong> des Klassenraums — ohne Server, ohne QR, ohne Bewertung. <strong>Was es nicht ist:</strong> kein Nachweis einer gemessenen Unterrichtsstunde im Schulnetz; die Grenzen stehen ausdrücklich in § 5.</p>
+</blockquote>
+<h2 id="1-vorher-vorbereiten-etwa-5-minuten">1 · Vorher vorbereiten (etwa 5 Minuten)</h2>
+<ul><li><strong>Gerät der Lehrkraft:</strong> die Live-Seite oder die Einzeldatei öffnen. Das Spiel läuft offline, ohne Konto, ohne Installation und ohne Server.</li><li><strong>Klassenstärke einstellen:</strong> Ansicht <strong>Klasse</strong> → Schaltfläche <strong>Datei…</strong> → Feld <strong>Klassenstärke</strong> (0 = nicht eingestellt). Die Obergrenze ist die Codec-Grenze von 31 Plätzen (<a href="Architektur.html">Architektur.md</a> § 12.8).</li><li><strong>Auftrag wählen:</strong> im Feld <strong>Auftrag</strong> stehen die Handtickets, die der Klassenraum-Code erreicht, und erzeugte Übungen. Nicht jedes Handticket ist per Code adressierbar; die Ansicht zeigt die Formatgrenze an (Grenze und Zahl: <a href="STAND.html">STAND.md</a>, Ausnahme „Klassenraum-Codec").</li><li><strong>Code anzeigen</strong> → der <strong>Auftragscode</strong> (<code>NL-…</code>) erscheint groß; <strong>Code kopieren</strong> gibt ihn an die Klasse weiter (Beamer, Tafel, Chat).</li><li><strong>Vorher üben:</strong> der Trockenlauf-Test <code>tests/klassen-20.test.js</code> fährt den Ablauf mit 20 simulierten Geräten durch. Das ist ein <strong>Software-Test</strong>, kein gemessener Unterricht.</li></ul>
+<h2 id="2-die-ersten-funf-minuten-der-klasse">2 · Die ersten fünf Minuten der Klasse</h2>
+<ol><li>Die Azubis öffnen dieselbe Fassung (Live-Seite oder Einzeldatei).</li><li>Ansicht <strong>Auftrag</strong> → <strong>Auftragscode</strong> und <strong>Platz</strong> eintippen → <strong>Auftrag öffnen</strong>.</li><li>Kontrolle: Die Statuszeile meldet „Auftrag angenommen: &lt;Titel&gt; · Platz N".</li><li><strong>Klassenraum-Abdruck vergleichen:</strong> Alle Geräte mit demselben Code zeigen denselben Abdruck, sofern überall dasselbe Auftragsnetz geladen ist. Der Abdruck beschreibt das <strong>geladene Netz</strong>, nicht den Code (<a href="Architektur.html">Architektur.md</a> § 12.4).</li><li>Wer den Code nicht hat: Ansicht <strong>Klasse</strong> zeigt ihn; der Code ist die Ansage, kein Geheimnis.</li></ol>
+<h2 id="3-arbeitsphase-begleiten-etwa-25-35-minuten">3 · Arbeitsphase begleiten (etwa 25–35 Minuten)</h2>
+<ul><li>Die Klasse arbeitet im <strong>Labor</strong>; jeder Auftrag ist ein echter Netzfall mit Abnahme.</li><li><strong>Hilfe im Spiel:</strong> die Hilfeleiter kostet nichts und führt notfalls bis zur vorgeführten Lösung.</li><li><strong>„Ich hänge":</strong> der Azubi drückt im Labor den Knopf, bekommt einen <strong>Hilfecode</strong> (<code>H-…</code>) und zeigt ihn dir. Du fügst ihn in das Feld <strong>Ergebnis-Codes</strong> ein: die Ansicht liest „Platz N hängt: x von y Zielen erfüllt" — als Klartext, <strong>nicht</strong> als Ergebnis.</li><li><strong>Anonyme Diagnose:</strong> aus den Hilfecodes zählt die Ansicht je Schritt, wie viele hängen („Schritt k: n von &lt;Klassenstärke&gt;"). Kein Name, kein Rang, kein Vergleich (<a href="Architektur.html">Architektur.md</a> § 12.5).</li><li><strong>Ergebnis-Codes</strong> (<code>E-…</code>) ebenfalls einfügen — einzeln oder als Block. Ist ein Platz schon belegt, fragt der Dialog <strong>[Abbrechen] [Ersetzen] [Entfernen]</strong>; nichts wird still verworfen.</li><li>Eine neue Sitzung ersetzt keine Sitzung mit Ergebnissen ohne Rückfrage; alte Sitzungen bleiben in der Liste unter <strong>Datei…</strong> erhalten.</li></ul>
+<h2 id="4-auswerten-und-sichern-etwa-10-minuten">4 · Auswerten und sichern (etwa 10 Minuten)</h2>
+<ul><li><strong>Ampel:</strong> fertig / offen / Median der Dauern; die Fortschrittszeile ergänzt „in den letzten 5 Minuten" und „letzte Abgabe".</li><li><strong>20-Übersicht:</strong> sobald Klassenstärke und Dauer gesetzt sind, zeigt sie „Abgabe: x abgegeben · y offen · noch N min" samt offener Sitzplätze.</li><li><strong>Tafel:</strong> Platz · Sterne · Dauer · Fehlversuche — nur Platznummern. **Keine Namen, keine Noten, kein Ranking** (<a href="Architektur.html">Architektur.md</a> § 12).</li><li><strong>Sichern:</strong> <strong>Datei… → Exportieren</strong> schreibt eine Vollsicherung der Sitzungen (der Weg auf einen anderen Rechner). <strong>Importieren</strong> ersetzt nach Bestätigung alle Sitzungen des Geräts.</li></ul>
+<h2 id="5-ehrliche-grenzen-dieser-stunde">5 · Ehrliche Grenzen dieser Stunde</h2>
+<ul><li><strong>Kein Server, kein QR-Code.</strong> Server (Stufe C) und QR (Stufe D) sind <strong>3.1</strong> und im Produkt nicht gebaut; die Einstellungen zeigen dazu nur einen ehrlichen Hinweis, keinen Schalter (<a href="Architektur.html">Architektur.md</a> § 12.6/§ 12.7).</li><li><strong>Keine Firewall-Freigabe nötig — und nicht geprüft.</strong> Es läuft kein Server, also gibt es nichts freizugeben. Ein Schul-/Klassennetz wurde in dieser Sitzung <strong>nicht</strong> gemessen.</li><li><strong>Kein echter 20-Geräte-Unterricht gemessen.</strong> Der Trockenlauf ist ein Test; Schul-WLAN, Beamer, Gerätevielfalt und ein Raum mit 20 Geräten sind <strong>nicht geprüft</strong>.</li><li><strong>Kein Gerätetest.</strong> Android/Tablet auf einem echten Gerät ist <strong>nicht geprüft</strong>.</li><li><strong>Keine Bewertung und keine Identität.</strong> Codes tragen Sitzung, Platz, Sterne, Fehlversuche und Dauer — keinen Namen, keine Note, keinen Rang; alles bleibt auf dem Gerät.</li><li><strong>Nicht geprüft:</strong> Verhalten auf fremden Schulrechnern, Browser-Richtlinien der Schule, Beamer- Darstellung und ein echter Stundenverlauf.</li></ul>
+<h2 id="6-belege">6 · Belege</h2>
+<ul><li>Vertrag: <a href="Architektur.html">Architektur.md</a> § 12 — Datenform § 12.1, API § 12.2, Fehler § 12.3, Netzkennwert § 12.4, Hilfecode § 12.5, Server/QR (3.1) § 12.6/§ 12.7, Grenzen § 12.8.</li><li>Übersicht und FAQ: <a href="README.html">README</a> · <a href="FAQ.html">FAQ.md</a> Fragen 5, 8 und 16 · <a href="Liesmich.html">Liesmich.md</a>.</li><li>Zahlen: <a href="STAND.html">STAND.md</a> — die einzige Zahlenquelle; dieses Blatt wiederholt keine Produktzahlen.</li><li>Test: <code>tests/klassen-20.test.js</code> (Trockenlauf mit 20 simulierten Geräten).</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="index.html">Übersicht</a>
+<a href="../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

@@ -1,0 +1,101 @@
+name: Oberflaeche (Browser-Gates)
+
+# BAU-11 / W5-Vorarbeit: die Gates, die auf ubuntu-latest NICHT laufen koennen.
+# Ein Job auf windows-latest mit Edge headless (keine Matrix, keine Wartekette).
+# Jede Pflichtzeile wird im Ablauf geprueft: fehlt sie, endet der Schritt rot — das Gate
+# ist damit falsifizierbar und nicht nur "irgendein Log".
+on:
+  push:
+    branches: [ausbau-1.2, master]
+  pull_request:
+  workflow_dispatch:
+
+# Nur lesen; dieser Ablauf laedt nichts hoch ausser dem Protokoll-Artefakt.
+permissions:
+  contents: read
+
+concurrency:
+  group: oberflaeche-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  oberflaeche:
+    name: Browser-Gates (Edge headless)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Edge pruefen (sonst waere jede Messung "nicht gemessen")
+        shell: pwsh
+        run: |
+          $pfade = @()
+          if (${env:ProgramFiles(x86)}) { $pfade += Join-Path ${env:ProgramFiles(x86)} "Microsoft\Edge\Application\msedge.exe" }
+          if ($env:ProgramFiles) { $pfade += Join-Path $env:ProgramFiles "Microsoft\Edge\Application\msedge.exe" }
+          if ($env:ProgramFiles) { $pfade += Join-Path $env:ProgramFiles "Google\Chrome\Application\chrome.exe" }
+          $treffer = $pfade | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $treffer) { throw "Kein Edge/Chrome auf dem Laeufer — Browser-Gates nicht messbar." }
+          "Browser: $treffer"
+
+      # 1) Gegenprobe: genau der Fehler G1 wird eingebaut. Der Rauchtest MUSS rot werden;
+      #    Exit 0 bedeutet "rot erkannt". Exit 1 = das Gate ist blind -> Schritt rot.
+      - name: Rauch-Gegenprobe (muss ROT werden; Exit 0 = Gegenprobe griff)
+        shell: pwsh
+        run: |
+          python tools/rauch.py --gegenprobe 2>&1 | Tee-Object -FilePath rauch-gegenprobe.log
+          if ($LASTEXITCODE -ne 0) { throw "Rauch-Gegenprobe Exit $LASTEXITCODE — der Rauchtest wurde NICHT rot." }
+          $log = Get-Content rauch-gegenprobe.log -Raw
+          if ($log -notmatch 'Gegenprobe: rot wie erwartet') { throw "Pflichtzeile fehlt: 'Gegenprobe: rot wie erwartet'." }
+          "PFLICHTZEILE: Gegenprobe rot wie erwartet."
+
+      # 2) Rauchtest (alle Faelle, 4 Breiten) + R12-Rohmessung in EINEM Lauf. Der Rohstand
+      #    ist die Grundlage fuer die verbindliche R12-Ratsche (tests/r12-stand.json).
+      - name: Rauchtest und R12-Rohmessung
+        shell: pwsh
+        run: |
+          python tools/rauch.py --r12 Nachweise/rauch/r12.json 2>&1 | Tee-Object -FilePath rauch.log
+          if ($LASTEXITCODE -ne 0) { throw "Rauchtest Exit $LASTEXITCODE — mindestens ein Fall rot." }
+          $log = Get-Content rauch.log -Raw
+          if ($log -notmatch '\d+/\d+ gr') { throw "Pflichtzeile fehlt: Summenzeile 'N/N gruen'." }
+          python -c "import json; d=json.load(open('Nachweise/rauch/r12.json',encoding='utf-8')); assert d.get('gemessen'), 'R12-Rohmessung nicht gemessen: ' + str(d.get('grund')); print('R12-VORPRUEFUNG: gemessen=ja, breiten=%d' % len(d.get('messungen') or []))"
+          if ($LASTEXITCODE -ne 0) { throw "R12-Rohmessung fehlt oder ist nicht gemessen — ethos --r12 kann nichts pruefen." }
+
+      # 3) Verbindliche R12-Zahl je Ansicht x Breite + Ratsche gegen die versionierte
+      #    Letztmessung (tests/r12-stand.json). Nicht gemessen oder Zuwachs = rot.
+      - name: R12-Zahl und Ratsche (verbindlich)
+        shell: pwsh
+        run: |
+          python tools/ethos.py --r12 Nachweise/rauch/r12.json --r12-ausgabe Nachweise/3.0/r12.json 2>&1 | Tee-Object -FilePath ethos.log
+          if ($LASTEXITCODE -ne 0) { throw "R12-Ratsche Exit $LASTEXITCODE — Zuwachs gegen die eingefrorene Letztmessung." }
+          python -c "import json; d=json.load(open('Nachweise/3.0/r12.json',encoding='utf-8')); rot=d.get('ratsche_rot') or []; offen=d.get('ratsche_offen') or []; ok=bool(d.get('gemessen')) and not rot and not offen; print('R12-ZAHL: max=%s, messungen=%s, ueber_grenze=%s' % (d.get('max'), d.get('messungen'), len(d.get('ueber_grenze') or []))); print('R12-RATSCHE: ' + ('gehalten' if ok else 'VERLETZT/OFFEN')); [print('  ' + str(x)) for x in (rot + offen)]; raise SystemExit(0 if ok else 1)"
+          if ($LASTEXITCODE -ne 0) { throw "R12-Ratsche nicht gehalten oder nicht gemessen — Pflichtzeilen oben." }
+
+      # 4) Tiefe Menueebenen in 5 Profilen (Telefon/Tablet/Desktop) mit echten Klickpfaden.
+      - name: Tiefe Menueebenen (5 Profile)
+        shell: pwsh
+        run: |
+          python tools/menueprobe.py --lauf --ohne-bild 2>&1 | Tee-Object -FilePath menueprobe.log
+          if ($LASTEXITCODE -ne 0) { throw "Menueprobe Exit $LASTEXITCODE — mindestens ein Profil/Kriterium rot." }
+          $log = Get-Content menueprobe.log -Raw
+          foreach ($pflicht in @('5 von 5 Profilen gemessen', '0 verletzt')) {
+            if ($log -notmatch [regex]::Escape($pflicht)) { throw "Pflichtzeile fehlt: '$pflicht'." }
+          }
+          "PFLICHTZEILE: 5 von 5 Profilen gemessen, 0 verletzt."
+
+      - name: Protokolle als Artefakt (auch bei Rot)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-gates-protokoll
+          path: |
+            rauch-gegenprobe.log
+            rauch.log
+            ethos.log
+            menueprobe.log
+            Nachweise/rauch/r12.json
+            Nachweise/3.0/r12.json
+          if-no-files-found: warn

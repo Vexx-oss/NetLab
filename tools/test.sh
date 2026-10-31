@@ -30,13 +30,13 @@ NODE=$(finde_node) || {
 
 # Die Anfuehrungszeichen-Falle (`„…"` mit ASCII-Ende) hat am 09.10.2026 FUENFMAL zugeschlagen, davon
 # DREIMAL so, dass der ganze Lauf stehenblieb: SyntaxError -> LADEFEHLER -> Exit 2, keine einzige
-# Zahl, jedes Mal mehrere Minuten Stillstand. Die beiden anderen Faelle (Produktivcode und ein
-# erwarte-Text) fand `node --check` sofort - Glueck, kein Verdienst. Das Namenswerkzeug findet die
-# Falle - aber niemand rief es auf. Deshalb laeuft sein TROCKENLAUF jetzt VOR den Tests (es
-# schreibt nichts, kein --setzen): es prueft jede Testdatei ausserdem mit `node --check` und endet
-# ungleich 0, sobald eine nicht laedt.
-# Offen (Befund von uebergabe-ui): das Werkzeug sieht bisher nur `pruefe(...)`-Namen, nicht die
-# Texte in `erwarte(...)` - genau dort hat sie zweimal zugeschlagen. Die Erweiterung ist beauftragt.
+# Zahl, jedes Mal mehrere Minuten Stillstand. Deshalb laeuft das Namenswerkzeug als TROCKENLAUF VOR
+# den Tests (es schreibt nichts, kein --setzen) und endet ungleich 0, sobald eine Datei nicht laedt.
+# QUA-05 (3.0, Lead-Beschluss 31.10.2026): Das Werkzeug parst alle Testdateien in EINEM Node-Prozess
+# (Baustein tools/syntax.js), meldet die Falle als Datei:Zeile und findet sie in `pruefe(...)`
+# UND in `erwarte(...)`-Texten. Fehlalarme sind strukturell ausgeschlossen (gewertet wird nur, was
+# wirklich nicht laedt: vorher 75 Fehlalarme / 30 s, gemessen jetzt 0 / 0,17 s). --setzen repariert
+# nur echte Faelle und meldet Zeilen mit ASCII-Apostroph zur Handpruefung.
 # QUA-01 (3.0, Lead-Beschluss 31.10.2026): das Syntax-Gate parst JEDE JS-Datei unter src/ und alle
 # Testdateien in EINEM Node-Prozess (Millisekunden). Bisher parste nur das Namenstor die Testdateien;
 # ein Syntaxfehler in einer nie geladenen src-Datei passierte die ganze CI (Befund Q2, qualitaet.md).

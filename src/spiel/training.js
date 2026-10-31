@@ -203,7 +203,12 @@ Spiel.training = (() => {
     let letzter = null;
     for (let v = 0; v < 4; v++) {
       try {
-        const inst = Spiel.instanzErstellen({gen: {skill: def.skill, seed: seedFuer(id, versuch + v), opts: {stufe: def.niveau}}, quelle: "training", ohneFlow: true});
+        /* WIS-02 (31.10.2026, Scope-Transfer Leitung): Die Karte pinnt ihr Fehlerbild –
+           ohne diese Bindung zeigte der Übungsfall einen zufälligen Injektor derselben Fertigkeit. */
+        const seed = seedFuer(id, versuch + v);
+        const opts = {stufe: def.niveau};
+        if (def.injektor) opts.injektoren = [{name: def.injektor, wahl: seed}];
+        const inst = Spiel.instanzErstellen({gen: {skill: def.skill, seed, opts}, quelle: "training", ohneFlow: true});
         inst.training = id;                       /* gehört zu diesem Szenario (nicht zur Karriere) */
         Spiel.speichern();
         return {ok: true, iid: inst.iid};

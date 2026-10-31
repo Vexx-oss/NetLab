@@ -71,23 +71,34 @@ UI.klassenraum = (() => {
      steht schon in der Ampel und wird hier NICHT wiederholt. Alles kommt aus der lokalen Sitzung
      (`store "klassenraum"`) — kein Server, kein Netz. Die Uhr kommt als Zahl herein (`jetztMs`),
      damit die Rechnung prüfbar bleibt: ohne Uhr wird keine Zeit behauptet. */
-  function ampel(sitzung, jetztMs){
+  /* KLR-10: EIN Prädikat für „gültiger Platz“ — exakt die Regel der Spiel-Übersicht
+     (Spiel.klassenraum.uebersicht): ganze Zahl 1..31, bei eingestellter Klassenstärke ≤ plaetze.
+     Ampel und 20-Übersicht dürfen bei 0 Plätzen, Platz 32 oder 1.5 nicht auseinanderlaufen. */
+  function istGueltigerPlatz(platz, plaetze){
+    const p = Number(platz);
+    return Number.isInteger(p) && p >= 1 && p <= 31 && (plaetze === 0 || p <= plaetze);
+  }
+  function ampel(sitzung, jetztMs, uebersichtDaten){
     const s = sitzung || {};
     const werte = Object.keys(s.ergebnisse || {}).map(k => s.ergebnisse[k]).filter(x => x && typeof x === "object");
     const plaetze = Math.max(0, Number(s.plaetze) || 0);
-    const fertig = werte.length;
-    const ohne = werte.filter(x => !(Number(x.platz) >= 1) || (plaetze > 0 && Number(x.platz) > plaetze)).length;
-    const dauern = werte.map(x => x.dauerS).filter(d => typeof d === "number" && isFinite(d) && d > 0).sort((a, b) => a - b);
+    const gueltig = werte.filter(x => istGueltigerPlatz(x.platz, plaetze));
+    /* EINE Quelle: Liefert die Spiel-Übersicht Zahlen, gelten DIESE (Ampel zeigt nur an).
+       Nur ohne API (reine Helfer-Tests) wird lokal mit demselben Prädikat gerechnet. */
+    const u = uebersichtDaten && typeof uebersichtDaten === "object" ? uebersichtDaten : null;
+    const ohne = u ? Math.max(0, Number(u.ohnePlatz) || 0) : werte.length - gueltig.length;
+    const fertig = u ? Math.max(0, Number(u.fertig) || 0) : gueltig.length;
+    const dauern = gueltig.map(x => x.dauerS).filter(d => typeof d === "number" && isFinite(d) && d > 0).sort((a, b) => a - b);
     const median = dauern.length ? Math.round(dauern[Math.floor(dauern.length / 2)]) : null;
-    const farbe = !fertig ? "" : (plaetze > 0 && fertig >= plaetze && !ohne) ? "kl-gruen" : "kl-gelb";
+    const farbe = (!fertig && !ohne) ? "" : (plaetze > 0 && fertig >= plaetze && !ohne) ? "kl-gruen" : "kl-gelb";
     const teile = [];
-    if (!fertig) teile.push("noch keine Ergebnisse");
+    if (!fertig && !ohne) teile.push("noch keine Ergebnisse");
     else {
       teile.push(`fertig ${fertig}`);
       teile.push(plaetze > 0 ? `offen ${Math.max(0, plaetze - fertig)}` : "Plätze nicht eingestellt");
       teile.push(`Median ${median == null ? "–" : dauerText(median)}`);
     }
-    if (ohne) teile.push(ohne === 1 ? "1 Ergebnis ohne gültigen Platz" : `${ohne} Ergebnisse ohne gültigen Platz`);
+    if (ohne) teile.push(ohne === 1 ? "1 Abgabe ohne gültigen Platz" : `${ohne} Abgaben ohne gültigen Platz`);
     const zeilen = werte.slice().sort((a, b) => (Number(a.platz) || 0) - (Number(b.platz) || 0)).map(x => ({
       platz: Number(x.platz) || 0,
       sterne: Math.round((Number(x.sterne) || 0) * 2),
@@ -96,7 +107,7 @@ UI.klassenraum = (() => {
     }));
     return Object.assign({farbe, summe: "Ampel: " + teile.join(" · "), fertig, plaetze,
       offen: plaetze > 0 ? Math.max(0, plaetze - fertig) : null, median, zeilen},
-      fortschrittZahlen(werte, plaetze, fertig, jetztMs));
+      fortschrittZahlen(gueltig, plaetze, fertig, jetztMs));
   }
 
   /* Die anonymen Diagnosezahlen — reine Rechnung, keine Namen weit und breit. */
@@ -207,8 +218,11 @@ UI.klassenraum = (() => {
   function diagnoseText(){
     const d = kann("diagnose") ? ruf("diagnose") : null;
     if (!d || !Array.isArray(d.schritte) || !d.schritte.length) return "Diagnose (anonym): noch kein Hilferuf eingegangen.";
-    const nenner = Number(d.plaetze) > 0 ? Number(d.plaetze) : 0;
-    return "Diagnose (anonym): " + d.schritte.map(x => "Schritt " + x.schritt + ": " + x.anzahl + (nenner ? " von " + nenner : "")).join(" · ");
+    /* KLR-10 (3): H-Codes werden je Schritt gezählt, ohne Platz-Dedupe — ein Nenner „von Klassenstärke“
+       wäre deshalb falsch (n > Klasse möglich). Das Label sagt ehrlich „Hilferufe“. */
+    const teil = d.schritte.map(x => "Schritt " + x.schritt + ": " + x.anzahl + (x.anzahl === 1 ? " Hilferuf" : " Hilferufe")).join(" · ");
+    const gesamt = Number(d.gesamt) || 0;
+    return "Diagnose (anonym): " + teil + (gesamt ? " · gesamt " + gesamt + (gesamt === 1 ? " Hilferuf" : " Hilferufe") : "");
   }
   /* KLR-08b (§ 12.2): 20-Übersicht aus der API — „3 abgegeben · 17 offen · noch 8 min“ + offene
      Sitzplätze. Neu in 3.0 heißt es „Sitzplatz N“; die bestehende Ampel-Tafel behält „Platz N · Sterne ·
@@ -225,16 +239,50 @@ UI.klassenraum = (() => {
     }
     return teile.join(", ");
   }
-  function uebersichtText(){
-    const u = kann("uebersicht") ? ruf("uebersicht") : null;
+  function uebersichtText(uebersichtDaten){
+    const u = uebersichtDaten === undefined ? (kann("uebersicht") ? ruf("uebersicht") : null) : uebersichtDaten;
     if (!u) return "Übersicht: keine Sitzung.";
-    if (!u.eingerichtet) return "Übersicht: Klassenstärke nicht eingestellt – keine Platzliste.";
-    const teile = ["Abgabe: " + u.fertig + " abgegeben", u.offenAnzahl + " offen"];
-    teile.push(u.abgelaufen ? "Zeit abgelaufen" : "noch " + u.restMinuten + " min");
-    const offen = sitzplatzListe(u.offen);
-    if (offen) teile.push("offen: Sitzplatz " + offen);
-    if (u.ohnePlatz) teile.push(u.ohnePlatz + " Abgabe ohne gültigen Platz");
+    const teile = [];
+    if (u.eingerichtet){
+      teile.push("Abgabe: " + u.fertig + " abgegeben", u.offenAnzahl + " offen");
+      teile.push(u.abgelaufen ? "Zeit abgelaufen" : "noch " + u.restMinuten + " min");
+      const offen = sitzplatzListe(u.offen);
+      if (offen) teile.push("offen: Sitzplatz " + offen);
+    } else {
+      /* KLR-10: auch ohne Klassenstärke dieselben Zahlen wie die Ampel zeigen (kein Ausblenden). */
+      teile.push("Klassenstärke nicht eingestellt", (Number(u.fertig) || 0) + " gültige Abgabe" + (Number(u.fertig) === 1 ? "" : "n"));
+    }
+    if (u.ohnePlatz) teile.push(u.ohnePlatz + " Abgabe" + (u.ohnePlatz === 1 ? "" : "n") + " ohne gültigen Platz");
     return "Übersicht: " + teile.join(" · ");
+  }
+  /* KLR-12 (W3-Gate): Die Sitzungsverwaltung lebt im bestehenden „Datei…“-Dialog — die
+     Klassenraum-Ansicht bleibt bei sechs Bedienelementen (R12). Löschen ohne Abgaben direkt,
+     mit Abgaben nur nach Quittung; Liste/Ampel/Übersicht werden gemeinsam nachgezogen. */
+  function loescheSitzung(s){
+    if (!s) return;
+    const anzahl = s.ergebnisse ? Object.keys(s.ergebnisse).length : 0;
+    if (!anzahl) return sitzungLoeschenJetzt(s.id);
+    const inhalt = h("div", {class: "kl-spalte"},
+      h("div", {class: "kl-block"}, hinweisZeile("kl-detail",
+        "Sitzung " + s.id + " hat " + anzahl + " Abgabe" + (anzahl === 1 ? "" : "n") + ". Wirklich löschen?")),
+      h("span", {class: "kl-knoepfe"},
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => UI.app.dialogZu()}, "Abbrechen"),
+        h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: () => { UI.app.dialogZu(); sitzungLoeschenJetzt(s.id); }}, "Löschen")));
+    UI.app.dialogOeffnen("Sitzung hat Abgaben", inhalt);
+  }
+  function sitzungLoeschenJetzt(id){
+    const r = ruf("sitzungLoeschen", id, {bestaetigen: true});
+    if (!r || r.fehler) {
+      const grund = (r && r.grund) || "Die Sitzung ließ sich nicht löschen.";
+      lehrerHinweis(grund);
+      UI.toast(grund, "warn", {id: "kl-sitzung", dauer: 6000});
+      return;
+    }
+    lehrerHinweis("");
+    UI.toast("Sitzung gelöscht.", "ok", {id: "kl-sitzung", dauer: 4000});
+    UI.app.dialogZu();
+    lehrerFuellen();
+    dateiDialog();                         /* Liste im geöffneten Datei-Dialog neu zeigen */
   }
   function lehrerFuellen(){
     if (!L.summe) return;
@@ -242,12 +290,13 @@ UI.klassenraum = (() => {
     L.code.textContent = (s && s.code) || ABDRUCK_LEER;
     const ab = abdruck();
     L.abdruck.textContent = ab || ABDRUCK_LEER;
-    const a = ampel(s, jetzt());                    /* die Uhr nur für „letzte 5 Minuten" */
+    const u = kann("uebersicht") ? ruf("uebersicht") : null;   /* EINE Quelle (KLR-10) */
+    const a = ampel(s, jetzt(), u);                 /* die Uhr nur für „letzte 5 Minuten" */
     L.lampe.className = "kl-lampe" + (a.farbe ? " " + a.farbe : "");
     L.summe.textContent = a.summe;
     L.fortschritt.textContent = a.fortschritt;
     if (L.diagnose) L.diagnose.textContent = diagnoseText();
-    if (L.uebersicht) L.uebersicht.textContent = uebersichtText();
+    if (L.uebersicht) L.uebersicht.textContent = uebersichtText(u);
     L.tafel.replaceChildren(...a.zeilen.map(z => h("div", {class: "kl-zeile"},
       hinweisZeile("kl-platz", z.platz >= 1 ? `Platz ${z.platz}` : "ohne Platz"),
       hinweisZeile("kl-sterne", sterneText(z.sterne)),
@@ -271,7 +320,7 @@ UI.klassenraum = (() => {
     const anzahl = s && s.ergebnisse ? Object.keys(s.ergebnisse).length : 0;
     const inhalt = h("div", {class: "kl-spalte"},
       h("div", {class: "kl-block"}, hinweisZeile("kl-detail",
-        "Die laufende Sitzung hat " + anzahl + " Ergebnis" + (anzahl === 1 ? "" : "se") +
+        "Die laufende Sitzung hat " + anzahl + " Abgabe" + (anzahl === 1 ? "" : "n") +
         ". Eine neue Sitzung ersetzt sie nicht – die alte bleibt in der Sitzungsliste erhalten.")),
       h("span", {class: "kl-knoepfe"},
         h("button", {type: "button", class: "knopf kl-knopf", onclick: () => UI.app.dialogZu()}, "Abbrechen"),
@@ -282,7 +331,7 @@ UI.klassenraum = (() => {
           lehrerHinweis("");
           lehrerFuellen();
         }}, "Neue Sitzung anlegen")));
-    UI.app.dialogOeffnen("Sitzung hat Ergebnisse", inhalt);
+    UI.app.dialogOeffnen("Sitzung hat Abgaben", inhalt);
   }
   function codeKopieren(){
     const s = sitzungJetzt();
@@ -340,7 +389,7 @@ UI.klassenraum = (() => {
         doppelt++;
         const wo = gesehen.get(stueck);
         zeilen.push(`Zeile ${zeile} · ${stueck} · ` + (r.grund === "platz-schon-da"
-          ? `Platz ${r.platz} hat schon ein Ergebnis – das zuerst eingetragene gilt.`
+          ? `Platz ${r.platz} hat schon eine Abgabe – die zuerst eingetragene gilt.`
           : `doppelt${wo ? ` – steht schon in Zeile ${wo}` : ""}`));
         continue;
       }
@@ -363,7 +412,7 @@ UI.klassenraum = (() => {
     abschluss();
     const inhalt = h("div", {class: "kl-spalte"},
       h("div", {class: "kl-block"}, hinweisZeile("kl-detail",
-        `Zeile ${k.zeile} · Platz ${k.platz} hat schon ein Ergebnis (${sterneText(k.sterne)}). Ersetzen, entfernen oder nichts ändern?`)),
+        `Zeile ${k.zeile} · Platz ${k.platz} hat schon eine Abgabe (${sterneText(k.sterne)}). Ersetzen, entfernen oder nichts ändern?`)),
       h("span", {class: "kl-knoepfe"},
         h("button", {type: "button", class: "knopf kl-knopf", onclick: () => {
           UI.app.dialogZu();
@@ -384,7 +433,7 @@ UI.klassenraum = (() => {
           else zeilen.push(`Zeile ${k.zeile} · ${(rr && rr.grund) || "Entfernen ging nicht"}`);
           abschluss();
         }}, "Entfernen")));
-    UI.app.dialogOeffnen("Platz " + k.platz + " hat schon ein Ergebnis", inhalt);
+    UI.app.dialogOeffnen("Platz " + k.platz + " hat schon eine Abgabe", inhalt);
   }
 
   /* B § 10: Export UND Import auf EINEM Knopf (R12) – der Dialog bringt Escape und Fokusfalle mit.
@@ -409,10 +458,14 @@ UI.klassenraum = (() => {
             lehrerFuellen();
             dateiDialog();                              /* Liste mit neuem Stand zeigen */
           }}, "Sitzung laden");
+      /* KLR-12: Der Löschweg liegt im Dialog (zählt nicht zur Ansicht; R12 bleibt 6). */
+      const loeschen = h("button", {type: "button", class: "knopf kl-knopf",
+        "aria-label": "Sitzung " + (s && s.id) + " löschen",
+        onclick: () => loescheSitzung(s)}, "Löschen");
       return h("div", {class: "kl-zeile"},
         hinweisZeile("kl-code", (s && s.code) || "—"),
-        hinweisZeile("kl-detail", ((s && s.titel) || "Sitzung") + " · " + anzahl + " Ergebnis" + (anzahl === 1 ? "" : "se")),
-        steuer);
+        hinweisZeile("kl-detail", ((s && s.titel) || "Sitzung") + " · " + anzahl + " Abgabe" + (anzahl === 1 ? "" : "n")),
+        h("span", {class: "kl-knoepfe"}, steuer, loeschen));
     });
     const inhalt = h("div", {class: "kl-spalte"},
       h("div", {class: "kl-block"},
@@ -444,7 +497,7 @@ UI.klassenraum = (() => {
       const inhalt = h("div", {class: "kl-spalte"},
         h("div", {class: "kl-block"}, hinweisZeile("kl-detail",
           "Die Datei ist eine Vollsicherung: Sie ersetzt alle " + liste.length + " Sitzungen auf diesem Gerät" +
-          (mitErgebnissen ? " – " + mitErgebnissen + " davon mit Ergebnissen" : "") + ".")),
+          (mitErgebnissen ? " – " + mitErgebnissen + " davon mit Abgaben" : "") + ".")),
         h("span", {class: "kl-knoepfe"},
           h("button", {type: "button", class: "knopf kl-knopf", onclick: () => UI.app.dialogZu()}, "Abbrechen"),
           h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: () => { UI.app.dialogZu(); dateiImportieren(); }}, "Datei wählen und ersetzen")));

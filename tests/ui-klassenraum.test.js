@@ -97,6 +97,13 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     return el;
   }
   const klKnopf = (el, text) => klFinde(el, "button").find(b => klText(b).includes(text)) || null;
+  /* KLR-12: Die Sitzungsliste ist eine LISTE — ihre Einträge zählen bei R12 separat. Gezählt werden
+     die Dauer-Bedienelemente AUSSERHALB der Liste (der Bestand bleibt bei sechs). */
+  function klSteuerAusserListe(p, c){
+    const liste = p && p.K && p.K._L ? p.K._L.sitzungen : null;
+    const drin = el => { let x = el; while (x) { if (x === liste) return true; x = x.parentNode; } return false; };
+    return klFinde(c, "button").concat(klFinde(c, "select"), klFinde(c, "input"), klFinde(c, "textarea")).filter(el => !drin(el)).length;
+  }
 
   /* ================= Prüfstand ================= */
   /* opt.importText/opt.importSync erlauben den Import-Weg im Test SYNCHRON zu messen: die echte
@@ -319,7 +326,8 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     const K = klPruefstand().K;
     const leer = K.ampel({ergebnisse: {}, plaetze: 4});
     erwarte.gleich([leer.farbe, leer.summe], ["", "Ampel: noch keine Ergebnisse"], "ohne Ergebnis dunkel");
-    const zwei = K.ampel({plaetze: 4, ergebnisse: {5: {platz: 5, sterne: 4, dauerS: 250}, 9: {platz: 9, sterne: 5, dauerS: 260}}});
+    /* KLR-10: gültige Plätze 1..4 — Plätze außerhalb der Klassenstärke zählen nicht als fertig. */
+    const zwei = K.ampel({plaetze: 4, ergebnisse: {1: {platz: 1, sterne: 4, dauerS: 250}, 2: {platz: 2, sterne: 5, dauerS: 260}}});
     erwarte.gleich(zwei.farbe, "kl-gelb", "halb voll ist gelb");
     erwarte.enthaelt(zwei.summe, "fertig 2", "zwei Plätze belegt");
     erwarte.enthaelt(zwei.summe, "offen 2", "zwei fehlen");
@@ -331,7 +339,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(ohne.farbe, "kl-gelb", "ohne Platzzahl bleibt gelb");
     erwarte.enthaelt(ohne.summe, "Plätze nicht eingestellt", "und sagt das, statt zu raten");
     const ausfall = K.ampel({plaetze: 8, ergebnisse: {0: {platz: 0, sterne: 1}, 5: {platz: 5, sterne: 4, dauerS: 110}, 7: {platz: 7, sterne: 4, dauerS: 0}}});
-    erwarte.enthaelt(ausfall.summe, "1 Ergebnis ohne gültigen Platz", "Platz 0 zählt als ausgefallen (Einzahl)");
+    erwarte.enthaelt(ausfall.summe, "1 Abgabe ohne gültigen Platz", "Platz 0 zählt als ausgefallen (Einzahl, neue Fläche: Abgabe)");
     erwarte.enthaelt(ausfall.summe, "Median 1:50", "eine fehlende Dauer (0) zählt nicht für den Median");
     erwarte.gleich(ausfall.farbe, "kl-gelb", "mit Ausfall nicht grün");
   }));
@@ -354,7 +362,8 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.enthaelt(hinweis, "2 eingetragen", "zwei gültige Codes");
     erwarte.enthaelt(hinweis, "doppelt", "derselbe Code zweimal ist doppelt");
     erwarte.enthaelt(hinweis, "1 unlesbar", "der kaputte Code wird als unlesbar gezählt");
-    const zeilen = klFinde(c, ".kl-zeile");
+    /* KLR-12: Sitzungsliste nutzt dieselbe Zeilen-Klasse — die Tafel wird im Tafel-Behälter gezählt. */
+    const zeilen = klFinde(p.K._L.tafel, ".kl-zeile");
     erwarte.gleich(zeilen.length, 2, "die Tafel zeigt zwei Ergebnisse");
     erwarte.enthaelt(klText(zeilen[0]), "Platz 5", "erste Zeile: Platz 5");
     erwarte.enthaelt(klText(zeilen[0]), "1:50", "mit Dauer 1:50 (110 s)");
@@ -510,8 +519,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.enthaelt(hinweis, "eigenes Labor", "und der Hinweis sagt, wessen Abdruck das ist");
     erwarte.enthaelt(hinweis, "dasselbe Auftragsnetz geladen", "mit der Bedingung, wann beide gleich sind");
     /* die Zahl der Bedienelemente bleibt bei sechs — die Ehrlichkeit kostet keinen Knopf (R12) */
-    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
-    erwarte.gleich(steuer, 6, "weiterhin sechs sichtbare Bedienelemente");
+    erwarte.gleich(klSteuerAusserListe(p, c), 6, "weiterhin sechs sichtbare Bedienelemente (ohne Sitzungsliste)");
   }));
 
   pruefe("Auftrag erzeugen meldet KEINEN Ergebnis-Code — auch kein NL-… in `code` (B § 7, Kanal kontrakt)", () => klKapsel(() => {
@@ -577,8 +585,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     Spiel.klassenraum.plaetzeSetzen(20);
     p.K.lehrerWieder();
     erwarte.enthaelt(klText(klFinde(c, ".kl-ampel")[0]), "Fortschritt: 20 von 20 offen", "die Diagnose steht in der Ampel-Region");
-    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
-    erwarte.gleich(steuer, 6, "kein neues Bedienelement — weiterhin sechs");
+    erwarte.gleich(klSteuerAusserListe(p, c), 6, "kein neues Dauer-Bedienelement — außerhalb der Liste sechs");
   }));
 
   pruefe("Wächter: kein personenbezogenes FELD in Sitzung und Ergebnissen (3.0, Säule 5)", () => klKapsel(() => {
@@ -711,7 +718,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     p.K._L.auftrag.value = "id:salon-02";
     klKnopf(c, "Code anzeigen").click();
     erwarte.gleich(p.dialoge.length, 1, "die Warnung kommt als Hausdialog");
-    erwarte.enthaelt(p.dialoge[0].titel, "Ergebnisse", "der Titel nennt den Grund");
+    erwarte.enthaelt(p.dialoge[0].titel, "Abgaben", "der Titel nennt den Grund (neuer Flow: Abgabe)");
     erwarte.gleich(Spiel.klassenraum.sitzung().code, s1.code, "ohne Bestätigung bleibt die alte Sitzung aktiv");
     erwarte.gleich(Spiel.klassenraum.sitzungen().length, 1, "und es entsteht keine zweite Sitzung");
     klKnopf(p.dialoge[0].inhalt, "Abbrechen").click();
@@ -741,7 +748,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     klKnopf(c, "Datei…").click();
     const inhalt = p.dialoge[0].inhalt;
     erwarte.enthaelt(klText(inhalt), "Sitzungen auf diesem Gerät: 2", "die Anzahl steht im Dialog");
-    erwarte.enthaelt(klText(inhalt), "1 Ergebnis", "je Sitzung die Zahl der Ergebnisse");
+    erwarte.enthaelt(klText(inhalt), "1 Abgabe", "je Sitzung die Zahl der Abgaben (neuer Flow: Abgabe)");
     const laden = klKnopf(inhalt, "Sitzung laden");
     erwarte.wahr(!!laden, "für die nicht aktive Sitzung gibt es einen Wechsel");
     laden.click();
@@ -782,7 +789,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     const letzte = p.dialoge.at(-1);
     erwarte.gleich(letzte.titel, "Klassenraum-Datei", "nach dem Import steht die Datei-Ansicht wieder");
     erwarte.enthaelt(klText(letzte.inhalt), "Sitzungen auf diesem Gerät: 1", "Liste + Anzahl nach dem Import");
-    erwarte.enthaelt(klText(letzte.inhalt), "1 Ergebnis", "auch die Ergebnisse der importierten Sitzung");
+    erwarte.enthaelt(klText(letzte.inhalt), "1 Abgabe", "auch die Abgaben der importierten Sitzung");
     const toast = p.rufe.filter(r => r[0] === "toast").map(r => String(r[1])).join(" | ");
     erwarte.enthaelt(toast, "1 Sitzung", "ein Toast nennt die Anzahl");
   }));
@@ -806,6 +813,8 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.enthaelt(p.dialoge[0].titel, "Platz 5", "Titel nennt den Platz");
     const dlg = p.dialoge[0].inhalt;
     erwarte.wahr(!!klKnopf(dlg, "Abbrechen") && !!klKnopf(dlg, "Ersetzen") && !!klKnopf(dlg, "Entfernen"), "drei Wege im Dialog");
+    erwarte.enthaelt(klText(dlg), "Abgabe", "neuer Flow sagt „Abgabe“ statt „Ergebnis“");
+    erwarte.falsch(/Ergebnis/i.test(klText(dlg)), "kein „Ergebnis“ im Konflikt-Dialog");
     /* 1 · Abbrechen ändert nichts */
     klKnopf(dlg, "Abbrechen").click();
     erwarte.gleich(zustand(), vorher, "Abbrechen ändert nichts");
@@ -835,9 +844,8 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     wahl.value = "32";
     wahl.onchange();
     erwarte.enthaelt(klText(c), "0 bis 31", "die Grenze wird ehrlich gemeldet");
-    /* 6 · R12 bleibt: sechs Bedienelemente in der Ansicht */
-    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
-    erwarte.gleich(steuer, 6, "R12: weiterhin sechs Bedienelemente");
+    /* 6 · R12 bleibt: sechs Bedienelemente außerhalb der Sitzungsliste */
+    erwarte.gleich(klSteuerAusserListe(p, c), 6, "R12: außerhalb der Sitzungsliste sechs Bedienelemente");
   }));
 
   /* KLR-05b (W2, § 12.2): Die 20-Übersicht der Diagnose ist ein ANONYMES Histogramm
@@ -863,12 +871,12 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     const ampel = klFinde(c, ".kl-ampel")[0];
     erwarte.wahr(!!ampel, "die Ampel-Region steht");
     const text = klText(ampel);
-    erwarte.enthaelt(text, "Schritt 1: 5 von 20", "Histogramm Schritt 1");
-    erwarte.enthaelt(text, "Schritt 2: 7 von 20", "Histogramm Schritt 2");
-    erwarte.enthaelt(text, "Schritt 3: 8 von 20", "Histogramm Schritt 3");
+    erwarte.enthaelt(text, "Schritt 1: 5 Hilferufe", "Histogramm Schritt 1 (Hilferufe, kein Klassen-Nenner)");
+    erwarte.enthaelt(text, "Schritt 2: 7 Hilferufe", "Histogramm Schritt 2");
+    erwarte.enthaelt(text, "Schritt 3: 8 Hilferufe", "Histogramm Schritt 3");
+    erwarte.falsch(/ von 20/.test(String(p.K._L.diagnose.textContent)), "H-Codes werden NICHT als „n von Klassenstärke“ gelesen (kein Platz-Dedupe in der API)");
     erwarte.gleich(klPersonenWoerter(ampel), [], "kein Name, kein Platz im Histogramm");
-    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
-    erwarte.gleich(steuer, 6, "R12: weiterhin sechs Bedienelemente");
+    erwarte.gleich(klSteuerAusserListe(p, c), 6, "R12: außerhalb der Sitzungsliste sechs Bedienelemente");
     /* Gegenprobe: ein eingeschmuggeltes Personenfeld in der Diagnose macht den Wächter rot. */
     erwarte.gleich(klPersonenFelder({schritt: 1, name: "Anna"}), ["name"], "Gegenprobe: Personenfeld wird erkannt");
   }));
@@ -896,12 +904,159 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.falsch(/rang|bestenliste|mittel|vergleich/i.test(text), "kein Rang, keine Bestenliste, kein Vergleich");
     const ampel = klFinde(c, ".kl-ampel")[0];
     erwarte.enthaelt(klText(ampel), "3 abgegeben", "die Übersicht steht in der Ampel-Region");
-    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
-    erwarte.gleich(steuer, 6, "R12: weiterhin sechs Bedienelemente");
+    erwarte.gleich(klSteuerAusserListe(p, c), 6, "R12: außerhalb der Sitzungsliste sechs Bedienelemente");
     /* Grenzfall: Klassenstärke nicht eingestellt → ehrlicher Text statt leerer Liste. */
     store.set("klassenraum", null);
     klSitzung("salon-terminal");
     p.K.lehrerWieder();
     erwarte.enthaelt(String(p.K._L.uebersicht.textContent), "nicht eingestellt", "ohne Klassenstärke ehrlich");
+  }));
+
+  /* KLR-10 (W3, r-didaktik): Ampel und 20-Übersicht müssen DIESELBE Definition nutzen. Ein Ergebnis
+     mit ungültigem Platz (Codec erlaubt 0..31, Sitzung hat 20) zählte in der Ampel als „fertig“,
+     in der Übersicht aber nicht. Jetzt: gültige Plätze zählen, ungültige werden separat ausgewiesen. */
+  pruefe("KLR-10: Ampel und Übersicht zählen bei ungültigem Platz gleich (gültig zählt, ungültig separat)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s = klSitzung("salon-terminal");
+    Spiel.klassenraum.plaetzeSetzen(20);
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(s.id, 1, 4, 60000, 1));
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(s.id, 2, 3, 50000, 1));
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(s.id, 25, 5, 40000, 1));   /* ungültig: > 20 Plätze */
+    p.K.lehrerWieder();
+    const summe = String(p.K._L.summe.textContent);
+    const uebersicht = String(p.K._L.uebersicht.textContent);
+    /* EINE Definition: zwei gültige Plätze → in BEIDEN Anzeigen 2 abgegeben / 18 offen. */
+    erwarte.enthaelt(summe, "fertig 2", "Ampel zählt nur gültige Plätze");
+    erwarte.enthaelt(summe, "offen 18", "Ampel: 18 offen");
+    erwarte.enthaelt(uebersicht, "2 abgegeben", "Übersicht zählt nur gültige Plätze");
+    erwarte.enthaelt(uebersicht, "18 offen", "Übersicht: 18 offen");
+    erwarte.falsch(/fertig 3/.test(summe), "Ampel zählt den ungültigen Platz NICHT als fertig");
+    erwarte.falsch(/3 abgegeben/.test(uebersicht), "Übersicht zählt den ungültigen Platz NICHT mit");
+    /* Der ungültige Platz wird in BEIDEN Anzeigen ehrlich separat genannt. */
+    erwarte.enthaelt(summe, "1 Abgabe ohne gültigen Platz", "Ampel weist die ungültige Abgabe aus");
+    erwarte.enthaelt(uebersicht, "1 Abgabe ohne gültigen Platz", "Übersicht weist die ungültige Abgabe aus");
+    /* Die Tafel zeigt die Zeile weiterhin als „ohne Platz“ (kein stilles Verschlucken). */
+    erwarte.enthaelt(klText(c), "Platz 25", "Tafel zeigt den ungültigen Platz weiterhin an (kein stilles Verschlucken)");
+    /* R12 bleibt 6/3. */
+    erwarte.gleich(klSteuerAusserListe(p, c), 6, "R12: außerhalb der Sitzungsliste sechs Bedienelemente");
+  }));
+
+  /* KLR-12 (W3): sitzungLoeschen hatte keinen UI-Aufrufer. Die Lehrkraft bekommt eine kompakte
+     Sitzungsliste (Kennung, Plätze, Abgaben) mit ehrlichem Löschen: ohne Abgaben direkt, mit
+     Abgaben nur nach Quittung, aktive Sitzung wird nachgezogen; API-Fehler ehrlich. */
+  pruefe("KLR-12: Sitzungsverwaltung im Datei-Dialog (Löschen/Quittung/aktiv nachgezogen), R12 bleibt 6", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s1 = klSitzung("salon-terminal");
+    Spiel.klassenraum.ergebnisEintragen(klErgebnis(s1.id, 1, 4, 60000, 1));
+    const s2 = Spiel.klassenraum.erzeugen({ticketId: "salon-02", bestaetigen: true});
+    p.K.lehrerWieder();
+    /* R12 (W3-Gate): KEINE neue Sitzungsliste in der Ansicht — die Verwaltung lebt im bestehenden
+       „Datei…“-Dialog (Dialoginhalt zählt nicht als Ansicht). */
+    erwarte.gleich(klFinde(c, "button").concat(klFinde(c, "select"), klFinde(c, "input"), klFinde(c, "textarea")).length, 6, "R12: Ansicht bleibt bei sechs Bedienelementen");
+    erwarte.falsch(!!p.K._L.sitzungen, "keine Sitzungsliste als Dauer-Element in der Ansicht");
+    const oeffneDatei = () => klKnopf(c, "Datei…").click();
+    const letzterDialog = () => p.dialoge.at(-1);
+    const loeschenKnopf = (inhalt, s) => klFinde(inhalt, "button").find(b => String(b.getAttribute("aria-label") || "") === "Sitzung " + s.id + " löschen");
+    oeffneDatei();
+    erwarte.enthaelt(letzterDialog().titel, "Klassenraum-Datei", "der bestehende Datei-Dialog öffnet");
+    erwarte.gleich(klFinde(letzterDialog().inhalt, "button").filter(b => /löschen$/.test(String(b.getAttribute("aria-label") || ""))).length, 2, "je Sitzung ein Löschen-Weg im Dialog");
+    erwarte.enthaelt(klText(letzterDialog().inhalt), "Sitzungen auf diesem Gerät: 2", "die Liste steht im Dialog");
+    /* 1 · Löschen OHNE Abgaben: direkt, ohne Quittung; Dialog zeigt den neuen Stand. */
+    const knopfS2 = loeschenKnopf(letzterDialog().inhalt, s2);
+    erwarte.wahr(!!knopfS2, "Löschen-Knopf der Sitzung ohne Abgaben");
+    knopfS2.click();
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 1, "Sitzung ohne Abgaben gelöscht");
+    erwarte.gleich(Spiel.klassenraum.sitzung().id, s1.id, "aktive Sitzung sauber nachgezogen");
+    erwarte.enthaelt(letzterDialog().titel, "Klassenraum-Datei", "die Liste wird neu gezeigt");
+    erwarte.enthaelt(klText(letzterDialog().inhalt), "Sitzungen auf diesem Gerät: 1", "Dialog zählt eine Sitzung");
+    erwarte.wahr(!p.dialoge.some(d => /Abgaben$/.test(d.titel)), "ohne Abgaben keine Quittung");
+    /* 2 · Löschen MIT Abgaben: erst Quittung; Abbrechen ändert nichts, dann bestätigen. */
+    const knopfS1 = () => loeschenKnopf(letzterDialog().inhalt, s1);
+    knopfS1().click();
+    erwarte.passt(String(letzterDialog().titel), /Abgaben/, "Quittung bei Abgaben");
+    klKnopf(letzterDialog().inhalt, "Abbrechen").click();
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 1, "Abbrechen ändert nichts");
+    oeffneDatei();
+    knopfS1().click();
+    erwarte.passt(String(letzterDialog().titel), /Abgaben/, "zweite Quittung");
+    klKnopf(letzterDialog().inhalt, "Löschen").click();
+    erwarte.gleich(Spiel.klassenraum.sitzungen().length, 0, "Sitzung mit Abgaben nach Quittung gelöscht");
+    erwarte.gleich(Spiel.klassenraum.sitzung(), null, "keine aktive Sitzung mehr");
+    erwarte.enthaelt(klText(letzterDialog().inhalt), "Sitzungen auf diesem Gerät: 0", "Dialog nach dem Löschen ehrlich leer");
+    erwarte.enthaelt(klText(c), "noch keine Ergebnisse", "die Ampel ist nachgezogen");
+    /* 3 · API-Fehler ehrlich: stale Zeile auf eine bereits gelöschte Sitzung. */
+    const s3 = Spiel.klassenraum.erzeugen({ticketId: "salon-02", bestaetigen: true});
+    p.K.lehrerWieder();
+    oeffneDatei();
+    const stale = loeschenKnopf(letzterDialog().inhalt, s3);
+    erwarte.wahr(!!stale, "Löschen-Knopf der neuen Sitzung");
+    Spiel.klassenraum.sitzungLoeschen(s3.id, {bestaetigen: true});
+    stale.click();
+    const toasts = p.rufe.filter(r => r[0] === "toast");
+    erwarte.enthaelt(String(toasts.at(-1) && toasts.at(-1)[1]), "gibt es hier nicht", "API-Fehler kommt als ehrlicher Toast");
+    erwarte.enthaelt(klText(c), "gibt es hier nicht", "und steht auch im Hinweisfeld der Ansicht");
+  }));
+
+
+  /* KLR-11 (P2 Vorprüfung): Auch der Legacy-Zweig „platz-schon-da“ (alte API-Antwort) sagt jetzt
+     „Abgabe“ statt „Ergebnis“. Der Pfad ist per API nicht mehr erreichbar — der Test stellt die
+     alte Antwort gezielt nach, damit die sichtbare Meldung falsifizierbar geprüft ist. */
+  pruefe("KLR-11: Legacy-Antwort „platz-schon-da“ sagt „Abgabe“, nicht „Ergebnis“", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    klSitzung("salon-terminal");
+    const echt = Spiel.klassenraum.ergebnisEintragen;
+    let rufe = 0;
+    Spiel.klassenraum.ergebnisEintragen = () => { rufe += 1; return {ok: true, neu: false, grund: "platz-schon-da", platz: 5, sterne: 8}; };
+    try {
+      p.K._L.codes.value = "E-AAAA-BBB";
+      klKnopf(c, "Eintragen").click();
+    } finally { Spiel.klassenraum.ergebnisEintragen = echt; }
+    const hinweis = klFinde(c, ".kl-hinweis").map(x => klText(x)).join(" | ");
+    erwarte.gleich(rufe, 1, "der Eintragen-Pfad lief genau einmal");
+    erwarte.enthaelt(hinweis, "Platz 5 hat schon eine Abgabe", "der Legacy-Pfad sagt „Abgabe“");
+    erwarte.enthaelt(hinweis, "zuerst eingetragene gilt", "die Regel bleibt verständlich");
+    erwarte.falsch(/Ergebnis/i.test(hinweis), "kein „Ergebnis“ in dieser Meldung");
+  }));
+
+  /* KLR-10 Randfälle (P2 Vorprüfung): Ampel und Übersicht müssen bei 0 Plätzen, Platz 32 und
+     nicht-ganzzahligem Platz DIESELBEN Zahlen zeigen. Der Test schreibt pathologische Rohdaten in
+     den Speicher (der Codec kann 1.5/32 nicht bauen) und vergleicht beide Anzeigen. */
+  pruefe("KLR-10 Randfälle: dieselbe Platz-Definition in Ampel und Übersicht (0 Plätze, 32, 1.5)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    p.zeige(0);
+    const s = klSitzung("salon-terminal");
+    const roh = store.get("klassenraum");
+    const sitz = roh.sitzungen.find(x => x.id === s.id);
+    sitz.plaetze = 20;
+    sitz.ergebnisse = {
+      a: {platz: 1, sterne: 8, dauerS: 60000, versuche: 0, code: "x", zeit: 1},
+      b: {platz: 1.5, sterne: 4, dauerS: 50000, versuche: 0, code: "y", zeit: 1},
+      d: {platz: 32, sterne: 6, dauerS: 40000, versuche: 0, code: "z", zeit: 1},
+      e: {platz: 0, sterne: 2, dauerS: 30000, versuche: 0, code: "w", zeit: 1},
+    };
+    store.set("klassenraum", roh);
+    p.K.lehrerWieder();
+    const summe = String(p.K._L.summe.textContent), ueb = String(p.K._L.uebersicht.textContent);
+    const z = (t, re) => { const m = re.exec(t); return m ? Number(m[1]) : null; };
+    erwarte.gleich(z(summe, /fertig (\d+)/), 1, "nur der ganzzahlige Platz 1 zählt als gültig");
+    erwarte.gleich(z(summe, /fertig (\d+)/), z(ueb, /(\d+) abgegeben/), "Ampel und Übersicht zählen gültig GLEICH");
+    erwarte.gleich(z(summe, /offen (\d+)/), z(ueb, /(\d+) offen/), "Ampel und Übersicht zählen offen GLEICH");
+    erwarte.gleich(z(summe, /(\d+) Abgaben? ohne gültigen Platz/), 3, "1.5, 32 und 0 sind ungültig");
+    erwarte.gleich(z(summe, /(\d+) Abgaben? ohne gültigen Platz/), z(ueb, /(\d+) Abgaben? ohne gültigen Platz/), "Ungültig-Zähler GLEICH");
+    /* 0 Plätze (nicht eingestellt): ehrlich, aber dieselben Zahlen — nichts wird ausgeblendet. */
+    sitz.plaetze = 0;
+    store.set("klassenraum", roh);
+    p.K.lehrerWieder();
+    const summe0 = String(p.K._L.summe.textContent), ueb0 = String(p.K._L.uebersicht.textContent);
+    erwarte.enthaelt(ueb0, "nicht eingestellt", "ohne Klassenstärke ehrlich");
+    erwarte.gleich(z(summe0, /fertig (\d+)/), z(ueb0, /(\d+) gültige Abgabe/), "auch bei 0 Plätzen gleiche gültig-Zahl");
+    erwarte.gleich(z(summe0, /(\d+) Abgaben? ohne gültigen Platz/), z(ueb0, /(\d+) Abgaben? ohne gültigen Platz/), "auch bei 0 Plätzen gleicher Ungültig-Zähler");
   }));
 });

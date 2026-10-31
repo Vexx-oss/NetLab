@@ -167,7 +167,23 @@ gruppe("Doku: Markdown-Konverter und Seitenbau", () => {
     const uebersicht = path.join(WURZEL, "docs", "doku", "index.html");
     erwarte.wahr(fs.existsSync(uebersicht), "docs/doku/index.html existiert");
     const t = fs.readFileSync(uebersicht, "utf8");
-    for (const g of ["Einstieg", "Betrieb", "Entwicklung", "Review"]) erwarte.enthaelt(t, `<h2>${g}</h2>`, `Gruppe ${g}`);
+    for (const g of ["Einstieg", "Unterricht", "Betrieb", "Entwicklung", "Review"]) erwarte.enthaelt(t, `<h2>${g}</h2>`, `Gruppe ${g}`);
+    /* QUA-07 (Befund doku/DO K-06): Die zwei Unterrichtsseiten gehoerten unter "Entwicklung".
+       Falsifizierbar ueber das ERZEUGTE index.html: beide stehen im Abschnitt "Unterricht" und
+       NICHT mehr im Abschnitt "Entwicklung". */
+    const abschnitt = (name) => {
+      const start = t.indexOf("<h2>" + name + "</h2>");
+      if (start < 0) return "";
+      const rest = t.slice(start + 1);
+      const naechste = rest.indexOf("<h2>");
+      return naechste < 0 ? rest : rest.slice(0, naechste);
+    };
+    const unterricht = abschnitt("Unterricht");
+    const entwicklung = abschnitt("Entwicklung");
+    for (const titel of ["Lehrkraft – Erste Stunde", "Schueler – Erste fünf Minuten"]) {
+      erwarte.enthaelt(unterricht, titel, "Unterrichtsseite im Abschnitt Unterricht: " + titel);
+      erwarte.falsch(entwicklung.includes(titel), "Unterrichtsseite nicht mehr unter Entwicklung: " + titel);
+    }
     const soll = quellzahl();
     erwarte.gleich((t.match(/class="dk-karte"/g) || []).length, soll, `${soll} Karten — eine je Dokument`);
     erwarte.enthaelt(t, `${soll} Dokumente`, "die Zahl wird beim Bauen gezählt");

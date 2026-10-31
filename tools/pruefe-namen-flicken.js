@@ -1,100 +1,139 @@
 "use strict";
-/* Reparaturwerkzeug für die typografische Anführungszeichen-Falle (Lead, 07.10.2026).
+/* NAMENS-GATE (QUA-05, 3.0) — findet die Anführungszeichen-Falle OHNE Fehlalarme.
  *
- * WARUM ES DIESES SKRIPT GIBT
- * In diesem Projekt sind Testnamen deutsch und enthalten typografische Anführungszeichen
- * („ “ U+201E/U+201C). Steht ein solcher Name in ASCII-Doppelquotes ("…„Text“…"), endet der
- * JS-String beim ersten inneren `"` und die Datei lädt nicht mehr — `node tests/run.js` bricht
- * dann mit LADEFEHLER (Exit 2) ab, und die GESAMTE Testsuite steht still. Das ist am 07.10.2026
- * dreimal passiert (tests/spiel-stufensystem.test.js, tests/pruefung-hilfestellung.test.js).
+ * WARUM (belegt): In diesem Projekt sind Testnamen deutsch und enthalten typografische
+ * Anführungszeichen („ “ U+201E/U+201C). Steht so ein Name in ASCII-Doppelquotes ("…„Text“…"),
+ * endet der JS-String beim inneren `"` — die Datei lädt nicht mehr, tests/run.js bricht mit
+ * LADEFEHLER (Exit 2) ab, die ganze Suite steht. Am 07.10./09.10.2026 mehrfach passiert.
  *
- * WAS ES TUT
- * Es sucht `pruefe("…")`-Aufrufe, deren String ein typografisches „ oder “ enthält, und setzt
- * diesen String auf einfache Anführungszeichen um ('…'). Einfache Anführungszeichen sind in
- * deutschen Testnamen unproblematisch, weil das Apostroph dort nicht vorkommt. Der Text selbst
- * wird Zeichen für Zeichen übernommen — nichts wird umformuliert.
+ * WAS 3.0 ANDERS IST (Befund Q6, berichte/qualitaet.md):
+ *   · Die alte Heuristik flaggte jede Zeile mit U+201E/U+201C — 75 Fehlalarme in 33 Dateien,
+ *     obwohl harmlose typografische Zeichen in korrekten Strings keinen Lauf brechen.
+ *   · Sie prüfte nur `pruefe(...)`-Namen, nicht die Texte in `erwarte(...)` (dort schlug die
+ *     Falle zweimal zu).
+ *   · Sie startete für JEDE Datei einen eigenen `node --check` (30 s).
+ * Jetzt gilt: EIN Node-Prozess parst alle Testdateien (Baustein tools/syntax.js). Ein Fund ist
+ * nur noch, was die Datei wirklich NICHT laden lässt; die Falle wird an der Bruchstelle als
+ * Datei:Zeile benannt und ist in `pruefe(...)` UND `erwarte(...)` dieselbe Erkennung.
+ * Ein Fehlalarm auf ladbarem Bestand ist damit strukturell ausgeschlossen (0 Treffer).
  *
  * BENUTZUNG (immer erst Trockenlauf, dann --setzen):
- *   node tools/pruefe-namen-flicken.js tests/mein-test.test.js            # zeigt nur, was es täte
- *   node tools/pruefe-namen-flicken.js tests/mein-test.test.js --setzen   # schreibt
- * Ohne Dateiargument prüft es ALLE tests/*.test.js und meldet, welche nicht laden (`node --check`).
+ *   node tools/pruefe-namen-flicken.js                        # alle tests/*.test.js, schreibt nichts
+ *   node tools/pruefe-namen-flicken.js DATEI [DATEI…]         # nur diese Dateien
+ *   node tools/pruefe-namen-flicken.js --setzen [DATEI…]      # echte Fälle reparieren (schreibt)
+ * Für den Fall wird die betroffene Zeile auf einfache Anführungszeichen umgestellt; enthält die
+ * Zeile ein ASCII-Apostroph, wird NICHT geschrieben, sondern „von Hand prüfen“ gemeldet.
  */
 const fs = require("fs");
 const path = require("path");
-const { execFileSync } = require("child_process");
 
 const WURZEL = path.resolve(__dirname, "..");
-const TESTS = path.join(WURZEL, "tests");
+const syntax = require("./syntax.js");
 
-/* Ein pruefe(...)-Aufruf mit ASCII-Doppelquotes, der NUR deswegen hält, weil das typografische „…“
-   innen steht. Enthält der Name ein escaped `\"`, ist der String bewusst zusammengesetzt und in
-   Ordnung — den fassen wir nicht an. Gemessen 07.10.2026: von 46 Testdateien brauchen nur die
-   defekten eine Umsetzung; alle anderen laden, weil sie `\"` verwenden. */
-function faelle(text) {
-  const treffer = [];
-  const re = /pruefe\((\s*)"((?:[^"\\]|\\.)*)"/g;
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    const inhalt = m[2];
-    if (inhalt.includes('\\"')) continue;                       /* bewusst escaped: nicht anfassen */
-    if (!/[\u201E\u201C\u201A\u2018]/.test(inhalt)) continue;    /* ohne typografisches Zeichen: kein Fall */
-    treffer.push({start: m.index, ende: m.index + m[0].length, alt: m[0], inhalt});
-  }
-  return treffer;
+/* Typografische Zeichen, die in einem ASCII-"…"-String die Falle auslösen können. */
+const TYPO = /[\u201E\u201C\u201A\u2018]/;
+
+function zeilen(text) {
+  return String(text).split("\n");        /* behaelt \r am Zeilenende: Zeilenzahl/Zeilenenden bleiben */
 }
 
-/* Ersetzt von HINTEN nach VORN, damit die Positionen gültig bleiben. Ein Apostroph im Namen
-   würde das Ergebnis zerstören — dann lieber melden als kaputt schreiben. */
-function flicken(text) {
-  const liste = faelle(text);
-  const probleme = liste.filter(f => f.inhalt.includes("'"));
-  if (probleme.length) return {text, anzahl: 0, probleme: probleme.map(f => f.inhalt)};
-  let neu = text;
-  for (const f of liste.slice().reverse()) {
-    neu = neu.slice(0, f.start) + "pruefe(" + " '" + f.inhalt + "'" + neu.slice(f.ende);
-  }
-  return {text: neu, anzahl: liste.length, probleme: []};
+/* Repariert EINE Zeile. Die Falle entsteht, wenn nach einem typografischen Öffnen („) das
+   schließende Zeichen als ASCII-" getippt wird: "Titel „Zitat" Ende" bricht den String.
+   Fachlich richtige Reparatur: genau dieses innere ASCII-" wird zum typografischen “ —
+   der Text bleibt Zeichen für Zeichen erhalten, die äußeren ASCII-Quotes bleiben (String heil).
+   Konservativ: ohne erkennbares „…"-Muster wird NICHT geschrieben, sondern gemeldet. */
+function repariereZeile(zeile) {
+  const alt = String(zeile == null ? "" : zeile);
+  if (!TYPO.test(alt)) return {geaendert: false, zeile: alt, grund: "kein typografisches Zeichen"};
+  const neu = alt.replace(/„([^"„“\n]*?)"(?=[\s,.;:)\]])/g, "„$1“");
+  if (neu !== alt) return {geaendert: true, zeile: neu, grund: ""};
+  return {geaendert: false, zeile: alt, grund: "kein Muster „…“ erkannt — von Hand prüfen"};
 }
 
-function ladbar(datei) {
-  try { execFileSync(process.execPath, ["--check", datei], {stdio: "pipe"}); return true; }
-  catch (e) { return String(e.stderr || e.stdout || "").split("\n").filter(z => z.includes(".js:")).slice(0, 2).join(" | "); }
+/* Parst die Dateien in EINEM Prozess (tools/syntax.js) und klassifiziert Ladefehler:
+   art "quotes" = Anführungszeichen-Falle (Zeile mit typografischem Zeichen in der Nähe),
+   art "syntax" = anderer Syntaxfehler (bleibt selbstverständlich rot). */
+function pruefeDateien(dateien) {
+  const r = syntax.pruefeDateien(dateien);
+  const funde = [];
+  for (const f of r.fehler) {
+    let text = "";
+    try { text = fs.readFileSync(f.datei, "utf8"); } catch (e) { /* nicht lesbar → syntax */ }
+    const z = zeilen(text);
+    let kandidat = null;
+    for (let nr = Math.max(1, f.zeile - 2); nr <= f.zeile + 2; nr++) {
+      const inhalt = z[nr - 1];
+      if (inhalt != null && TYPO.test(inhalt)) { kandidat = {zeile: nr, text: inhalt.trim()}; break; }
+    }
+    funde.push({
+      datei: f.datei,
+      zeile: kandidat ? kandidat.zeile : f.zeile,
+      text: kandidat ? kandidat.text : "",
+      art: kandidat ? "quotes" : "syntax",
+      meldung: f.meldung,
+    });
+  }
+  return {geprueft: r.geprueft, funde};
+}
+
+/* Repariert eine Datei mit Anführungszeichen-Fällen (max. 3 Durchgänge, dann neu parsen). */
+function repariereDatei(datei) {
+  const probleme = [], gefixt = new Set();
+  let geschrieben = false;
+  for (let durchgang = 0; durchgang < 3; durchgang++) {
+    const {funde} = pruefeDateien([datei]);
+    const faelle = funde.filter(f => f.art === "quotes");
+    if (!faelle.length) break;
+    let text;
+    try { text = fs.readFileSync(datei, "utf8"); } catch (e) { probleme.push(datei + ": nicht lesbar"); break; }
+    const z = zeilen(text);
+    let geaendert = false;
+    for (const f of faelle) {
+      const r = repariereZeile(z[f.zeile - 1]);
+      if (r.geaendert) { z[f.zeile - 1] = r.zeile; geaendert = true; gefixt.add(f.zeile); }
+      else probleme.push(path.relative(WURZEL, datei) + ":" + f.zeile + " — " + r.grund);
+    }
+    if (!geaendert) break;
+    fs.writeFileSync(datei, z.join("\n"), "utf8");
+    geschrieben = true;
+  }
+  const rest = pruefeDateien([datei]).funde;
+  return {geschrieben, anzahl: gefixt.size, probleme, rest};
 }
 
 function main() {
   const args = process.argv.slice(2);
   const setzen = args.includes("--setzen");
-  const dateien = args.filter(a => !a.startsWith("--"));
-  const liste = dateien.length
-    ? dateien.map(d => path.resolve(d))
-    : fs.readdirSync(TESTS).filter(n => n.endsWith(".test.js")).map(n => path.join(TESTS, n));
-
-  let geflickt = 0, kaputt = [];
+  const dateienArg = args.filter(a => !a.startsWith("--"));
+  const liste = dateienArg.length
+    ? dateienArg.map(d => path.resolve(d))
+    : syntax.sammleStandard().tests;
+  const vorhanden = [];
   for (const datei of liste) {
-    if (!fs.existsSync(datei)) { console.log("FEHLT: " + datei); continue; }
-    const text = fs.readFileSync(datei, "utf8");
-    const {text: neu, anzahl, probleme} = flicken(text);
-    const rel = path.relative(WURZEL, datei);
-    if (probleme.length) {
-      console.log("ACHTUNG " + rel + ": " + probleme.length + " Name(n) enthalten ein Apostroph — von Hand prüfen:");
-      for (const p of probleme) console.log("    " + p);
-    }
-    if (anzahl) {
-      console.log((setzen ? "flicke " : "würde flicken ") + rel + ": " + anzahl + " pruefe()-Name(n)");
-      if (setzen) { fs.writeFileSync(datei, neu, "utf8"); geflickt++; }
-    }
-    /* Die Ladbarkeit wird IMMER geprüft. Vorher stand hier `if (setzen || !anzahl)` — damit
-       wurde genau die Datei übersprungen, die geflickt werden müsste, und der Trockenlauf meldete
-       „0 laden nicht", während `node --check` im selben Moment Exit 1 lieferte (gemessen am
-       09.10.2026 von der Gegenprüfung, Beleg im Review – 2.0-Fundament.md). Ein Namensmuster, das
-       geflickt würde, und eine Datei, die nicht lädt, sind zwei verschiedene Befunde. */
-    {
-      const fehler = ladbar(datei);
-      if (fehler !== true) { kaputt.push(rel + " — " + fehler); console.log("LÄDT NICHT " + rel + ": " + fehler); }
-    }
+    if (!fs.existsSync(datei)) { console.log("FEHLT: " + path.relative(WURZEL, datei)); continue; }
+    vorhanden.push(datei);
   }
-  console.log("\n" + liste.length + " Datei(en) geprüft, " + geflickt + " geschrieben, " + kaputt.length + " laden nicht.");
-  if (kaputt.length) { console.log("Nicht ladbar:\n  " + kaputt.join("\n  ")); process.exit(1); }
+  let {funde} = pruefeDateien(vorhanden);
+  let geschrieben = 0;
+  if (setzen) {
+    for (const datei of Array.from(new Set(funde.map(f => f.datei)))) {
+      const r = repariereDatei(datei);
+      if (r.geschrieben) geschrieben++;
+      for (const p of r.probleme) console.log("ACHTUNG " + p);
+    }
+    funde = pruefeDateien(vorhanden).funde;
+    if (geschrieben) console.log(geschrieben + " Datei(en) geschrieben (nur echte Anführungszeichen-Fälle).");
+  }
+  for (const f of funde) {
+    const rel = path.relative(WURZEL, f.datei) || f.datei;
+    if (f.art === "quotes") console.log("ANFUEHRUNGSZEICHEN " + rel + ":" + f.zeile + " — " + f.text);
+    else console.log("LADEFEHLER " + rel + ":" + f.zeile + " — " + f.meldung + (f.text ? " | " + f.text : ""));
+  }
+  const quotes = funde.filter(f => f.art === "quotes").length;
+  console.log("\n" + vorhanden.length + " Datei(en) geprüft, " + quotes + " Anführungszeichen-Fall/Fälle, "
+    + funde.length + " laden nicht.");
+  if (funde.length) process.exit(1);
 }
 
-main();
+if (require.main === module) main();
+module.exports = {pruefeDateien, repariereZeile, repariereDatei, sammleTestdateien: () => syntax.sammleStandard().tests};

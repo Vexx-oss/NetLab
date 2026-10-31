@@ -98,3 +98,6 @@
   .lern-fehler-zeile{flex-wrap:wrap}
   .lern-abz-liste{grid-template-columns:minmax(0,1fr)}
 }
+
+/* VIS-09 (C, G-4): Kacheln im Lernstand-Raster nicht auf Fremdhöhe strecken. */
+.bn-raster.lern-raster{align-items:start}
