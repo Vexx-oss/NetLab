@@ -71,6 +71,11 @@ dieser Runde).
 - Doku: 65 Dokumente erzeugt, 0 tote Verweise, `--pruefen` GRÜN; `stand.py --pruefen`: 0 Abweichung.
 - Sichtprüfung im Browser: 39 Zustandsmessungen in 1440/960/720: 0 seitlich scrollende Seiten, 0 JS-Fehler, 3 abgeschnittene Textknoten nur in der VLSM-Balkenbeschriftung kleiner Blöcke (die Legende nennt den vollen Namen); Kontrast 14 Textpaare × 7 Theme-Zustände = 0 Verstöße; „Bewegung aus“ = 0 Animationen; 56 Rohziele unter 44 px sind ausschließlich die Bit-Zellen (begründete Ausnahme für ein 32-Bit-Direktmanipulationsraster). Belege: `Nachweise/runde7/abnahme/`.
 - Die ausgelieferte `.exe` baut der Release-Ablauf aus dem Tag; lokal: die ausgelieferte `.exe` baut der Release-Ablauf aus dem Tag (Windows-Läufer); ein lokaler Bau mit ProductVersion 2.9.0 wurde geprüft, konnte aber nicht auf `Programm/Netzwerk-Labor.exe` gelegt werden, weil dort eine fremde, laufende 2.7.0-Instanz lag (Prozess nicht angefasst).
+- **Veröffentlicht am 31.10.2026:** Commit `3eba99f`, Tag `v2.9.0`, Release mit drei Anhängen
+  (`Netzwerk-Labor.html` 4.080.274 B SHA256 `49FC2FA5…`, `Netzwerk-Labor-2.9.0-Browser.zip`
+  2.245.513 B, `Netzwerk-Labor.exe` 9.095.680 B ProductVersion 2.9.0); Live-Seite
+  <https://vexx-oss.github.io/NetLab/index.html> byte-gleich mit der Einzeldatei; Abläufe
+  „Prüfen", „Spiel veröffentlichen" und „Release anlegen" success.
 - **Nicht gemessen:** R12 (`--dom`), Android-APK (kein SDK), Screenreader.
 
 **Nicht gemessen:** R12 (`--dom`), Android-APK (kein SDK), Screenreader, echte Maus im

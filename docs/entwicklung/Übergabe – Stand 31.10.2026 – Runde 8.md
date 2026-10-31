@@ -149,8 +149,26 @@ steht in § 7.
 
 ## 7 · Nachweis (nach dem Deploy gemessen)
 
-Platzhalter — Live-URL, Release-URL, Prüfsummen, Anhänge, CI-Ergebnisse und die ehrliche Liste
-„nicht geprüft" werden hier nach der Veröffentlichung eingetragen.
+- **Live-Seite:** <https://vexx-oss.github.io/NetLab/index.html> — **4.080.274 B**,
+  SHA256 `49FC2FA5746A23334DE6F41FC954D687AB4607D555ACF4B61EE96A9E9E56D89E`, **byte-gleich**
+  mit `docs/index.html`, `Netzwerk-Labor.html` und dem Release-Anhang `Netzwerk-Labor.html`;
+  `LABOR_VERSION` = **2.9.0**.
+- **Release:** <https://github.com/Vexx-oss/NetLab/releases/tag/v2.9.0> — drei Anhänge:
+  `Netzwerk-Labor.html` **4.080.274 B** (SHA256 wie oben) · `Netzwerk-Labor-2.9.0-Browser.zip`
+  **2.245.513 B** · `Netzwerk-Labor.exe` **9.095.680 B**, ProductVersion **2.9.0**, SHA256
+  `362F0359709C30CA599C73346BEFEDBA18F4AFDB52E6CFB06278D41037B1096B`. Eine Android-APK ist
+  **nicht** angehängt (kein SDK, wie in den Vorrunden).
+- **Git:** Commit **`3eba99f`** auf `ausbau-1.2`, Tag **`v2.9.0`** = dieser Commit; die Fassung
+  2.8.0 der Parallel-Sitzung (Commit `91fbb40`, Tag `v2.8.0`) bleibt als eigener Commit davor.
+- **GitHub-Abläufe:** „Prüfen" **success** (Commit `3eba99f`), „Spiel veröffentlichen" **success**
+  (Live-Seite gemessen oben), „Release anlegen" **success** — der Windows-Job hängte die `.exe`
+  an; die Anhänge wurden von der Release-Seite heruntergeladen und gemessen.
+- **Lokal:** `Programm/Netzwerk-Labor.exe` blieb unverändert (dort lag eine fremde, laufende
+  2.7.0-Instanz; Prozess nicht angefasst). Der lokale Bau mit ProductVersion 2.9.0 liegt unter
+  `shell/src-tauri/target/release/netzwerk-labor.exe`.
+- **Nicht geprüft:** die CI-gebaute `.exe` wurde nicht gestartet (nur heruntergeladen, Version und
+  SHA256 gelesen); Android-APK nicht gebaut; Screenreader nicht geprüft; R12 (`--dom`) nicht
+  gemessen.
 
 ## 8 · Für die nächste Sitzung
 
