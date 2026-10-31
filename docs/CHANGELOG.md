@@ -81,7 +81,9 @@ gemessen) · `tools/umlaute.py` **GRÜN** (0 offene Befunde) · `node tools/sim-
 ProductVersion **2.6.0**, SHA256 `831da655…f3505e69`; die Abnahme mit `tools/q-echt.py` (echte
 Maus, erster Auftrag, Kabel-Ziehen, Funktionsprobe) lief auf einem Prüfbau mit eigener
 App-Kennung, weil eine fremde Programm-Instanz lief (Regel 1: kein fremder Prozess wird beendet).
-Live-Seite <https://vexx-oss.github.io/NetLab/index.html> nach dem Deploy gemessen. Einzelheiten:
+Live-Seite <https://vexx-oss.github.io/NetLab/index.html> **byte-gleich** mit `docs/index.html`
+(SHA256 `B3C58EDE…8506D2E`), Release mit drei Anhängen und grünen Abläufen (Prüfen, Seite, Release).
+Einzelheiten:
 [`Übergabe – Stand 31.10.2026 – Runde 4`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 4.md>).
 
 **Nicht geprüft.** R12 (`ethos --dom`, wie in den Vorrunden), Android-APK (kein SDK), echte

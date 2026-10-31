@@ -103,9 +103,27 @@ Belegen unter `Nachweise/runde4/review-design.md` und `Nachweise/runde4/review-t
 4. Nachmessen: Live-Seite gegen `docs/index.html` hashen; Release-Anhänge, Größen, ProductVersion
    und `Content-Disposition` prüfen.
 
-## 7 · Nachweis 2.6.0 (nach dem Deploy gemessen)
+## 7 · Nachweis 2.6.0 (nach dem Deploy gemessen, 31.10.2026)
 
-*(Dieser Abschnitt wird nach Push/Tag/Release mit den echten Messwerten ergänzt.)*
+- **Release:** [`v2.6.0 — Netzwerk-Labor 2.6.0`](https://github.com/Vexx-oss/NetLab/releases/tag/v2.6.0),
+  veröffentlicht **2026-10-31 01:58:13 UTC**, kein Vorab-Release, kein Entwurf.
+- **Anhänge (3):** `Netzwerk-Labor.html` **3.714.938 B** · `Netzwerk-Labor-2.6.0-Browser.zip`
+  **2.069.119 B** (67 Einträge unter `Netzwerk-Labor-2.6.0/`: Spiel, 58 Doku-Seiten, Lizenzen,
+  LIESMICH; entpackt ohne Fehler) · `Netzwerk-Labor.exe`
+  **8.932.352 B**, ProductVersion **2.6.0**, SHA256 `3cd57524…c151eeb5`, Antwort mit
+  `Content-Disposition: attachment`. Eine Android-APK ist **nicht** angehängt (Android-Schlüssel-Secrets
+  fehlen; der CI-Job meldet Erfolg, überspringt aber das Anhängen — der Ablauf `41157719136` ist grün).
+- **Live-Seite:** <https://vexx-oss.github.io/NetLab/index.html> — **3.714.938 B**, SHA256
+  `B3C58EDE2CADD91262D3D8675615F01E528444D43B4E7594BA18322768506D2E`, **byte-gleich** mit
+  `docs/index.html` und dem Release-Anhang `Netzwerk-Labor.html`.
+- **GitHub-Abläufe auf `d090998`:** „Prüfen" **success** (398 s, Lauf `41157716800`) ·
+  „Spiel veröffentlichen" **success** (20 s, `41157716821`) · „Release anlegen" **success**
+  (423 s, `41157719136`; Jobs „Release bauen und anlegen", „Android-APK bauen und anhaengen",
+  „Windows-Programm bauen und anhaengen" alle grün).
+- **Lokal:** `Programm/Netzwerk-Labor-2.6.0.exe` **8.948.224 B**, SHA256 `831da655…f3505e69`
+  (lokaler Bau; die CI-EXE unterscheidet sich erwartungsgemäß in Bytes, gleiche Fassung 2.6.0).
+- **Nicht geprüft:** die CI-gebaute `.exe` wurde nicht gestartet (nur Größe und ProductVersion
+  ausgelesen); die Android-APK wurde nicht gebaut.
 
 ## 8 · Für die nächste Sitzung
 
