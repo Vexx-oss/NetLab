@@ -1,0 +1,27 @@
+{
+  "hinweis": "Ausnahmen zum 44-px-Ziel (CSS-04). Jeder Eintrag nennt Ist-Wert, Begruendung und Beleg; tests/stil-ziele.test.js misst den Ist-Wert gegen die CSS-Kaskade des POLARIS-Standards (Themes ausgenommen, Lead-Entscheid).",
+  "fassung": 1,
+  "ausnahmen": [
+    {
+      "selektor": ".kopf-knopf",
+      "achse": "height",
+      "ist": 40,
+      "grund": "Kopfzeile der Leiste ist bewusst verdichtet (40 x 40); reine Mausbedienung, die 44-px-Fingerregel gilt dort nicht. Das Mindestziel 24 px (WCAG 2.5.8) ist eingehalten.",
+      "beleg": "Audit WP-CSS-04 nennt die Leiste ausdruecklich als Ausnahme (40 x 40); Design § 35"
+    },
+    {
+      "selektor": ".kopf-knopf",
+      "achse": "width",
+      "ist": 40,
+      "grund": "Kopfzeile der Leiste ist bewusst verdichtet (40 x 40); reine Mausbedienung, die 44-px-Fingerregel gilt dort nicht. Das Mindestziel 24 px (WCAG 2.5.8) ist eingehalten.",
+      "beleg": "Audit WP-CSS-04 nennt die Leiste ausdruecklich als Ausnahme (40 x 40); Design § 35"
+    },
+    {
+      "selektor": ".sw-bit",
+      "achse": "width",
+      "ist": "variabel",
+      "grund": "32 Bit-Zellen liegen in EINER Reihe (direkte Manipulation auf einer dichten Flaeche). Die Hoehe ist 44 px, die Breite folgt der verfuegbaren Flaeche (flex 1 1 20px, min-width 20px). Bei 1440 sind die Zellen breiter, bei 960/720 schmaler als 44 px. Ein Umbau auf 2 x 16 Zellen ist 3.1, nicht 3.0.",
+      "beleg": "Design – Spielspass 2.0 § 43 nennt die 32 Bit-Zellen ausdruecklich als Ausnahme; Audit F-04/WP-CSS-04"
+    }
+  ]
+}

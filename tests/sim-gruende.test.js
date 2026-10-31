@@ -352,9 +352,10 @@ gruppe("Sim Gründe", () => {
     const PROTOS = ["ARP", "ICMP", "TCP", "UDP", "DHCP", "DNS", "HTTP", null];
     let t = -1;
     tr.ereignisse.forEach((e, i) => {
-      const schluessel = Object.keys(e).filter(k => k !== "warnung");
+      const schluessel = Object.keys(e).filter(k => k !== "warnung" && k !== "harmlos");
       erwarte.gleich(schluessel, ["n", "t", "art", "geraet", "port", "nach", "frame", "proto", "grund", "text"]);
       if ("warnung" in e) erwarte.gleich(e.warnung, true, "warnung ist nur als true dokumentiert (§ 5.2)");
+      if ("harmlos" in e) erwarte.gleich(e.harmlos, true, "harmlos ist nur als true dokumentiert (§ 5.2)");
       erwarte.gleich(e.n, i + 1); erwarte.wahr(e.t >= t, "Zeit steigt"); t = e.t;
       erwarte.wahr(ARTEN.includes(e.art) && PROTOS.includes(e.proto), e.art + "/" + e.proto);
       erwarte.wahr(typeof e.text === "string" && e.text.length > 5, "Text");

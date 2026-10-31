@@ -49,13 +49,15 @@ Die `.exe` ist **nicht signiert** — Windows zeigt deshalb beim ersten Start de
 SmartScreen-Hinweis („Weitere Informationen" → „Trotzdem ausführen"). Das ist erwartbar und
 kein Fehler des Programms. Eine Signatur kostet Geld und ist nicht Teil des Projekts.
 
-### 5. Warum liegt im Release keine APK für Android?
+### 5. Warum hängt im Release keine Android-APK?
 
-In den Releases liegt **keine** APK (geprüft am 26.10.2026), und im Klon ist keine. Die APK
-baut man selbst: `python android/bauen.py` (Android-SDK mit build-tools ≥ 35 und JDK 17+
-nötig). **Nicht geprüft** ist ein Lauf auf einem echten Telefon oder Emulator — ein Gerät
-stand nicht zur Verfügung. Details: [Bauen.md](Bauen.md), Abschnitt Android, und
-[android/LIESMICH.md](../android/LIESMICH.md) (nicht Teil der Doku-Seite).
+Im Klon liegt keine `.apk`, und auch die 2.9.0-Veröffentlichung kam ohne APK (Beleg:
+[CHANGELOG.md](CHANGELOG.md), Abschnitt 2.9.0). Ob eine künftige Veröffentlichung eine APK
+anhängt, ist **nicht geprüft** — der Release-Ablauf tut es nur, wenn die Keystore-Secrets
+gesetzt sind. Die APK baut man selbst: `python android/bauen.py` (Android-SDK mit
+build-tools ≥ 35 und JDK 17+ nötig). **Nicht geprüft** ist ein Lauf auf einem echten Telefon
+oder Emulator — ein Gerät stand nicht zur Verfügung. Details: [Bauen.md](Bauen.md),
+Abschnitt Android, und [android/LIESMICH.md](../android/LIESMICH.md) (nicht Teil der Doku-Seite).
 
 ### 6. Läuft es auf Linux und macOS?
 
@@ -66,11 +68,11 @@ Tray-Dienst. macOS ist **nicht geprüft**.
 
 ### 7. Die Bilder im README zeigen eine ältere Version. Warum?
 
-Die Screenshots stammen aus den Abnahme-Nachweisen der Fassung **1.1.0**; Oberfläche und
-Aufbau sind gleich geblieben, nur die kleinen Ziffern in der Kopfzeile der Bilder sind
-älter. Herkunft, Quellpfad und SHA256 jeder Aufnahme stehen in
-[bilder/HERKUNFT.md](bilder/HERKUNFT.md). Ohne Browser wurden in der 2.1-Runde **keine**
-neuen Bilder erzeugt — das ist ausdrücklich „nicht geprüft".
+Die Screenshots stammen aus dem Abnahme-Nachweis der Fassung **2.5.0** (aufgenommen am
+30.10.2026); die aktuelle Fassung ist **2.9.0**, und seither sind Ansichten hinzugekommen
+(u. a. die Subnetting-Abteilung). Herkunft, Quellpfad und SHA256 jeder Aufnahme stehen in
+[bilder/HERKUNFT.md](bilder/HERKUNFT.md). Eine Erneuerung aus dem 2.9.0-/3.0.0-Bau steht aus —
+dass die Bilder den heutigen Stand vollständig zeigen, ist **nicht geprüft**.
 
 ## Unterricht, Lizenz, Weitergabe
 
@@ -142,9 +144,55 @@ wirkt** („Wirkung vor Grün") und die Tests grün bleiben. Fehlt eine Zahl, ge
 ### 15. Was fehlt noch (IPv6, OSPF, WLAN, STP)?
 
 Die Simulation deckt IPv4 mit VLAN, Routing, ACL, NAT, DHCP, DNS, TCP/HTTP und Firewall ab.
-**Nicht enthalten** sind derzeit STP, OSPF, IPv6, WLAN und 802.1X — sie stehen im
-3.0-Programm. Ein Wiki-Befehl, den das Labor nicht kann, ist dort ausdrücklich als „echtes
-Gerät" gekennzeichnet (Architektur § 15.2, Punkt 5).
+**Nicht paketweise simuliert** sind IPv6 und WLAN; sie werden inhaltlich über Wiki und
+Trainings geübt (`docs/STAND.md`, bekannte Ausnahmen). **OSPF** und **802.1X** sind nicht
+enthalten. Spanning Tree (`lab.stp`) ist dagegen abgedeckt: Wiki, Minis, Trainings und ein
+eigener Handauftrag („Zwei Kabel, ein Ausfall"). Das ist **kein** 3.0-Kernpunkt — der
+3.0-Plan ([Konzept – 3.0](<entwicklung/Konzept – 3.0.md>)) konzentriert sich auf
+Klassenbetrieb, Diagnose und Messkette. Ein Wiki-Befehl, den das Labor nicht kann, ist dort
+ausdrücklich als „echtes Gerät" gekennzeichnet (Architektur § 15.2, Punkt 5).
+
+### 16. Funktioniert der Klassenraum ohne Server?
+
+**Ja.** Stufe A (Auftragscode) und B (zwei Ansichten, Ampel, Export/Import) tragen den
+Unterricht vollständig: Die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag
+selbst; Ergebnis- und Hilfecodes werden eingetippt. Server (Stufe C) und QR (Stufe D) sind
+**3.1** und im Produkt nicht gebaut — Belege: [Architektur.md](Architektur.md) § 12.6/§ 12.7.
+Ein Aufbau mit Klassennetz und Firewall-Freigabe ist **nicht geprüft**.
+
+### 17. Ist die Oberfläche barrierefrei — und was ist R12?
+
+Automatisch gemessen werden Kontrast, Trefferflächen und abgeschnittene Texte (Werkzeuge
+`tools/rauch.py`, `tools/ethos.py`); im 2.9.0-Lauf ohne Kontrastverstöße und mit
+„Bewegung aus" ohne Animationen. Die Rohziele unter der 44-px-Zielgröße sind ausschließlich
+die Bit-Zellen des 32-Bit-Labors (Beleg: [CHANGELOG.md](CHANGELOG.md), Abschnitt 2.9.0).
+Die Regel **R12** („höchstens sechs sichtbare Bedienelemente je Ansicht") wird nur mit
+`ethos.py --dom` gemessen; dieser Lauf fehlt: **nicht gemessen**. Ein Screenreader-Audit ist
+**nicht geprüft**.
+
+### 18. Wie bekomme ich das Spiel auf ein Android-Gerät?
+
+Im Browser: die Live-Seite oder die Einzeldatei. Als App: APK selbst bauen
+(`python android/bauen.py`, Android-SDK und JDK nötig), aufs Telefon kopieren und dort
+installieren. Ein Lauf auf einem echten Gerät oder Emulator ist **nicht geprüft** (kein Gerät
+vorhanden); geprüft ist die Seite im Browser mit Telefonmaßen. Details:
+[android/LIESMICH.md](../android/LIESMICH.md).
+
+### 19. Welche Daten verlassen das Gerät?
+
+**Keine** — das Labor ist offline, kontofrei und ohne Telemetrie. Die Einzeldatei lädt nichts
+nach (0 Außenverweise, geprüft mit `python tools/einfach.py --pruefen`). Der Klassenraum
+überträgt per Code nur Sitzung, Platz, Sterne, Fehlversuche und Dauer — keinen Namen, keine
+Kennung; der Server (Stufe C) ist **3.1** und nicht gebaut ([Architektur.md](Architektur.md)
+§ 12.6/§ 12.8). Spielstände bleiben lokal (Browser: `localStorage`, Windows:
+`%APPDATA%`), siehe Frage 2.
+
+### 20. Läuft das Spiel ohne Internet?
+
+**Ja.** Die Einzeldatei enthält Programm und Schriften; sie lädt nichts nach (0 Außenverweise,
+geprüft mit `python tools/einfach.py --pruefen`). Die Doku liegt im Browser-ZIP als Ordner
+`doku/` bei und ist offline lesbar; nur die Live-Seite braucht eine Verbindung, um geladen
+zu werden. Details: [Liesmich.md](Liesmich.md) und [README](../README.md).
 
 ---
 

@@ -1,8 +1,8 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk]
 erstellt: 2026-09-30
-aktualisiert: 2026-10-26
-status: Version 2.9.0 (Browser-Einzeldatei; Doku als HTML unter /doku/; Windows-.exe und Android-APK nur selbst gebaut, nicht im Release) – wird ausgebaut
+aktualisiert: 2026-10-31
+status: Version 2.9.0 (Browser-Einzeldatei; Doku als HTML unter /doku/; Windows-.exe und Android-APK nur selbst gebaut)
 ---
 
 # 🖧 Netzwerk-Labor
@@ -15,48 +15,51 @@ Lernspiel im Stil von Packet Tracer plus Karriere- und Idle-Schicht: Als Ein-Man
 - **Die Doku im Browser:** [vexx-oss.github.io/NetLab/doku/](https://vexx-oss.github.io/NetLab/doku/) – alle Verträge, Pläne, Befunde und Review-Berichte als lesbare Seiten. Seit 07.10.2026 ausgeliefert (`python tools/seite.py`); im Browser-ZIP liegt derselbe Stand als Ordner `doku/` bei, damit er auch ohne Netz lesbar ist.
 - **Eine Datei für alles:** `docs/index.html` bzw. `Netzwerk-Labor.html` aus dem Release-ZIP – das ganze Spiel in **einer** HTML-Datei, Schriften eingebettet, läuft per Doppelklick auf Windows, Linux und macOS. Gebaut von `python tools/einfach.py`.
 - **Windows-Programm:** die `.exe` aus dem [Release](https://github.com/Vexx-oss/NetLab/releases/latest) laden und per Doppelklick starten (SmartScreen: „Weitere Informationen → Trotzdem ausführen“). Bringt zusätzlich Leiste, Tray und globales Tastenkürzel. **Im Klon liegt keine `.exe`** (nicht versioniert).
-- **Android:** Die APK wird **selbst gebaut** (`python android/bauen.py`, Android-SDK nötig) und dann aufs Telefon kopiert (einmal „Unbekannte Apps installieren“ erlauben). **In den Releases liegt keine APK** (26.10.2026 geprüft) und im Klon ist keine. Kein Play Store, kein Konto, **keine Berechtigung** — die App darf nicht einmal ins Netz. `versionName` folgt der Spielversion, `versionCode` ist die Bauzählung in `android/bauen.py` (gemessen 26.10.2026: `VERSION_CODE = 20006`) — nur mit größerem Code lässt sich eine neue APK über die alte installieren. Bauen und alle Grenzen: [[android/LIESMICH|Netzwerk-Labor für Android]]. **Nicht geprüft:** ein Lauf auf einem echten Telefon oder Emulator (kein Gerät vorhanden).
-- **Linux:** `Programm/linux/` – `.deb` (Ubuntu/Debian) oder AppImage, **Stand 1.0** (für 1.1/1.2 vorerst keine eigene Linux-Fassung). Details und was auf welchem System geht: [[Programm/PLATTFORM|PLATTFORM]].
+- **Android:** Die APK wird **selbst gebaut** (`python android/bauen.py`, Android-SDK nötig) und dann aufs Telefon kopiert (einmal „Unbekannte Apps installieren“ erlauben). **Im Klon und in der 2.9.0-Veröffentlichung liegt keine APK** (Beleg: `docs/CHANGELOG.md`, Abschnitt 2.9.0); ob eine künftige Veröffentlichung eine anhängt, ist **nicht geprüft**. Kein Play Store, kein Konto, **keine Berechtigung** — die App darf nicht einmal ins Netz. `versionName` folgt der Spielversion, `versionCode` ist die Bauzählung aus `android/bauen.py`; die aktuelle Zahl steht in `docs/STAND.md` (Android-Bauzählung). Nur mit größerem Code lässt sich eine neue APK über die alte installieren. Bauen und alle Grenzen: [[android/LIESMICH|Netzwerk-Labor für Android]]. **Nicht geprüft:** ein Lauf auf einem echten Telefon oder Emulator (kein Gerät vorhanden).
+- **Linux:** `Programm/linux/` – `.deb` (Ubuntu/Debian) oder AppImage, **Stand 1.0** (seither keine neue Linux-Fassung). Details und was auf welchem System geht: [[Programm/PLATTFORM|PLATTFORM]].
 - **Auslieferungspaket bauen:** `python tools/paket.py` → `dist/Netzwerk-Labor-<Version>-Windows.zip` mit Einzeldatei, `.exe`, Anleitung und Lizenztexten.
 - Anleitung für die Klasse: `Vorlagen/LIESMICH.txt` (Quelle) → liegt im Paket als `LIESMICH.txt`.
 
-## Was drin ist (Version 1.0)
-- **Simulation** auf Frame-Ebene: ARP, Switching mit MAC-Lernen, VLAN/802.1Q, Router-on-a-Stick, statische Routen, ICMP (Timeout vs. unreachable, TTL), ACL, NAT/PAT, DHCP mit Relay, DNS, TCP-Handshake, HTTP, Firewall mit Zonen und Port-Weiterleitung, Internet als Kulisse, Broadcast-Sturm. Jede Antwort ist aus Paketen hergeleitet; die Simulation spielt Schritt für Schritt ab (PDU-Ansicht).
-- **Konsole** IOS-ähnlich (Modi, Kurzformen, `?`, Tab, `do`, running/startup, `write erase`/`vlan.dat`) und Windows-Terminal (`ipconfig`, `ping`, `tracert`, `arp -a`, `nslookup`).
-- **Spiel:** handgeschriebene Tickets in 6 Karrierestufen (Azubi, Geselle, Fachkraft, Spezialist, Senior, Storage & Cloud) bei 7 Kunden (Salon Lockenwerk, Bäckerei Kornblume, Schreibbüro Wortgenau, Hausarztpraxis Dr. Müller, Autohaus Brenner, Kessler Feinmechanik GmbH, Planwerk Architekten) inkl. 4 Projekten; unbegrenzt generierte Tickets (5 Netzvorlagen × 45 Fehlerinjektoren, jede Variante automatisch geprüft); Mini-Tickets für die Leiste; Hilfeleiter 0–6; Abnahme mit Regressions- und Neustart-Test; Sterne, Euro, Ruf; Wartungsverträge, Playbooks, Offline-Bericht; Prüfungstag nach IHK-Notenschlüssel; Lernmotor der Spielhalle (Wiederholung nach Plan). **Die genauen Mengen misst `docs/STAND.md`** (erzeugt von `python tools/stand.py`).
-- **Desktop:** ein Fenster, zwei Ansichten (Vollansicht ⇄ Leiste am Bildschirmrand), Tray mit Punkt, Strg+Alt+L, Einzelinstanz, Autostart auf Wunsch, Spielstand atomar mit 5 Sicherungen, Export/Import.
+## Was drin ist (Fassung 2.9.0)
 
-## Neu in 1.1 (aus dem Durchspielen im echten Programm)
-- **Konsole, Simulations-Panel und PDU-Ansicht** sind jetzt richtig gestaltet (die Stylesheets fehlten in 1.0 ganz): dunkles Terminal, Inspektor wird für 80-Zeichen-Tabellen breiter; Ereignisliste mit Abspielsteuerung, Filter und Paketfeldern Schicht für Schicht. Normales Verwerfen (fremde Broadcasts, erstes Paket während ARP) gilt nicht mehr als „Problem“.
-- **Einstieg:** Coach-Hinweis erscheint sofort und wählt das passende Werkzeug vor; Meldungen verdecken die Geräte nicht mehr; Vorhersage-Dialog rechts, damit das Netz sichtbar bleibt.
-- **Motivation mit Lernwert:** 15 Abzeichen für Arbeitsweisen (selbst finden, vorher denken, verteilt üben), Fortschrittsbalken zur nächsten Stufe, Feierabend-Bilanz beim Tagesziel mit den morgen fälligen Themen.
-- **Prüfungstag und generierte Tickets** nennen das Symptom aus Kundensicht statt der Ursache.
-- **Leiste:** aufgeklappt 320 × 300 (Mini-Ticket passt ohne Scrollen), Ecke aus den Einstellungen wirkt jetzt.
-- **Spielstand:** zusätzlich „vorheriger Stand“ (alle 15 min), wird bei beschädigter Datei zuerst geladen.
-- Kleinere Fehler: Strg+C bei Konsolen-Rückfragen, Shop-Texte, Hilfeleiter-Höhe, Einpassen der Ansicht.
+**Simulation auf Frame-Ebene.** ARP, Switching mit MAC-Lernen, VLAN und 802.1Q, Router-on-a-Stick, statische Routen, ICMP (Timeout gegen unreachable, TTL), ACL, NAT/PAT, DHCP mit Relay, Reservierung und Lease-Laufzeit, DNS, TCP-Handshake, HTTP, Firewall mit Zonen und Port-Weiterleitung, Internet als Kulisse, Broadcast-Sturm. Jede Antwort ist aus Paketen hergeleitet; die Simulation spielt Schritt für Schritt ab (PDU-Ansicht).
 
-## Neu in 1.2 (Ausbau, Stand 06.10.2026)
-- **Speichern ist sichtbar.** In der Kopfzeile steht „… sichert“, „✓ gesichert“ oder „⚠ nicht gesichert“; ein gescheiterter Schreibvorgang wird gemeldet statt verschwiegen. Ein abgeschlossener Auftrag und jeder Kauf gehen **sofort** auf die Platte — vorher dauerte es bis zu rund 2,4 s (gemessen: 2.436 ms bis zum Schreibvorgang beim Auftragsabschluss).
-- **Zwei Fenster:** Läuft das Spiel zweimal auf demselben Spielstand, warnt es: „Es gewinnt, wer zuletzt schreibt — bitte nur in einem Fenster spielen.“
-- **Aufträge sind vielfältig.** Derselbe Auftrag sieht bei jedem Durchgang anders aus (Adressen, Fehlerstelle): das Netz entsteht aus dem Seed der Instanz statt aus einem festen. Jede Fassung wird auf Lösbarkeit geprüft, ein laufender Auftrag behält sein Netz, Terminal-Aufträge bleiben bewusst fest.
-- **58 Aufträge statt 37:** zwölf neue, davon neun in den Stufen 3–6 und drei Sicherheits-Aufträge. **Stufe 6 „Storage & Cloud“ ist jetzt erreichbar** — Schwelle 115 Ruf: 114 aus den Stufen 1–5, 13 aus den drei NAS-Aufträgen bei Planwerk Architekten.
-- **Der Shop ist stark reduziert:** zwei Kacheln statt eines Felds von 27–38 (je nach Spielstand), der Rest ist an seinen Ort gewandert. Wartungsverträge stehen in der Kundenakte, die Prüfungsanmeldung im Lernstand, Farben und Leisten in den Einstellungen. **Behoben:** die Prüfungsanmeldung im Shop war wirkungslos und kostete 60/90 €, während die Prüfung selbst 40/80 € abbuchte — es gibt jetzt genau eine Preisquelle (`Spiel.PRUEFUNG.GEBUEHR`).
-- **Begrüßung beim ersten Start:** eine Karte („Willkommen im Netzwerk-Labor! …“) mit zwei Wegen — „Zeig mir den ersten Auftrag“ oder „Erst umsehen“ —, danach **eine** Anweisungszeile am ersten Auftrag, die den Weg nennt statt der Lösung, und ein Schlusssatz nach der Abnahme. Ein Bestandsstand sieht nichts davon.
-- **Für Mitwirkende:** `python tools/ethos.py` prüft 12 Minimalismus-Regeln für die Stylesheets (`src/stil/*.css`) und läuft in `sh tools/test.sh` mit; die Testkette: Zahl und Stand misst `docs/STAND.md`.
-- **1.2.4 (07.10.2026): die Hilfestellung.** Vier Bildungsstufen (Azubi · Azubi+ · Geselle · Meister) mit einem Hilfekonto je Auftrag, ein Vorschlagsstreifen unter dem Konsolenschirm mit 29 belegten Befehlen, ein Lernanker in den Mini-Mails der Leiste und ein Trainingsbereich abseits der Aufträge. Der Vertrag steht in [[Hilfestellung – Stufen und Schnittstellen]], die unabhängige Gegenprüfung mit fünf Prüfern in `docs/entwicklung/Review – *.md`.
-- **1.2.3 (07.10.2026): keine neue Spielfunktion.** Diese Fassung liefert die **umsetzungsreife Spezifikation des Klassenraums** (Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst) samt einem eigenständigen Rust-Server als Probe. Der Vertrag steht in [[Klassenraum – Umsetzungsreife Spezifikation]], die vier Teil-Dokumente liegen im Ordner `docs/entwicklung/Klassenraum/`. **Inzwischen überholt:** seit **2.0.0** sind die Klassenraum-Stufen **A+B** gebaut (Auftragscode und zwei Ansichten, ohne Bewertung/Server/QR); C und D sind **3.1** und im Produkt nicht gebaut — siehe [[Architektur]] § 12 (Datenform § 12.1, API § 12.2; Server/QR: § 12.6/§ 12.7) und `docs/CHANGELOG.md`.
+**Konsole.** IOS-ähnlich (Modi, Kurzformen, `?`, Tab, `do`, running/startup, `write erase`/`vlan.dat`) und Windows-Terminal (`ipconfig`, `ping`, `tracert`, `arp -a`, `nslookup`). Befehle, die nicht belegt sind, werden als solche gekennzeichnet.
+
+**Aufträge und Lernsystem.** Handgeschriebene Tickets in sechs Karrierestufen (Azubi bis Storage & Cloud) bei sieben Kunden inklusive Projekten; dazu unbegrenzt generierte Tickets aus Netzvorlagen und Fehlerinjektoren, jede Variante automatisch geprüft. Mini-Tickets für die Leiste, Hilfeleiter bis zur vorgeführten Lösung, Abnahme mit Regressions- und Neustart-Test, Sterne/Euro/Ruf, Wartungsverträge, Playbooks, Offline-Bericht, Prüfungstag nach IHK-Notenschlüssel und Lernmotor (Wiederholung nach Plan). **Die genauen Mengen misst `docs/STAND.md`** (erzeugt von `python tools/stand.py`); diese Seite wiederholt sie nicht.
+
+**Subnetting-Abteilung (seit 2.9.0).** Eigene Ansicht im Dock: Lehrpfad in Stufen, Werkzeuge (32-Bit-Labor, Masken-Schieber, Blocklineal, Rechenweg-Assistent, Adressplaner, VLAN-Werkzeug), Lernspiele (Präfix-Blitz, Netz-Sortierer, VLAN-Patcher) und Formelsammlung.
+
+**Oberfläche.** Dock-Leiste mit den Ansichten Heute, Postfach, Labor, Subnetting, Training, Wiki, Lernstand, Kunden und Klassenraum (Klasse für Lehrkräfte, Auftrag für Azubis). Im Labor: Inspektor, Konsole, Werkzeuge, Auftragsbogen und das Simulations-Panel **Flugschreiber**; die **Einsatzakte** begleitet den Auftrag, die **Kundenakte** sammelt Atlas, Vertrauen und Kapitel; die **Erste Stunde** beginnt mit einem Anruf auf der Heute-Karte. Auf dem Desktop zusätzlich: Leiste am Bildschirmrand, Tray, globales Tastenkürzel, Einzelinstanz und Autostart.
+
+**Klassenraum (Stufe A+B).** Die Lehrkraft sagt einen Code an, jedes Gerät baut denselben Auftrag selbst; Ergebnis-Codes und Ampel, H-Code und anonyme Fortschrittszeile — **ohne Bewertung**. Server und QR sind **3.1** und im Produkt nicht gebaut ([[Architektur]] § 12.6/§ 12.7).
+
+**Desktop.** Ein Fenster, zwei Ansichten (Vollansicht ⇄ Leiste), Spielstand atomar mit rollierenden Sicherungen, Export/Import.
+
+## Was seit 1.0 dazukam (kurz)
+
+- **2.0:** Klassenraum Stufen A+B, Hilfeleiter-Ausbau, mehr Inhalte.
+- **2.1:** Wahrheit, Korrektheit und Inhalte (S1–S8).
+- **2.2–2.4:** neues Frontend (Matrix-Elegant, POLARIS, ReMASTER mit Lagebild, Piktogrammen und geraden Kabeln).
+- **2.5:** Bento-Oberfläche (Postfach, Kunden, Dashboard, Training, Leiste).
+- **2.6:** Einsatzakte, Ausbildungs-Cockpit, Flugschreiber, eigenes Fenster.
+- **2.7:** Auftragsbogen, entzerrter Inspektor, Leiste als Begleiter.
+- **2.8:** Kurzübung mit Auftragskontext, Flugschreiber mit Aufmerksamkeitsführung.
+- **2.9:** Abteilung Subnetting.
+
+Details, Messwerte und verworfene Versuche: `docs/CHANGELOG.md` · Plan: [[Plan – Ausbau 1.2]].
 
 ## Aufbau
 - [[Konzept – Netzwerk-Labor]] (Spezifikation) · [[Architektur]] (Vertrag zwischen den Bausteinen) · [[Opus-Auftrag – Netzwerk-Labor]] (ursprünglicher Bauauftrag) · [[Befund – Programm startet wieder]] (05.10.2026: WebView2-Ausfall und Reparatur)
-- **Ausbau 1.2 (läuft):** [[Plan – Ausbau 1.2]] (Phasen, Stand) · [[Design – Spielspaß 2.0]] (Befunde, 12 Hebel, Scorecard, Startblöcke für Opus) · [[Klassenraum – Umsetzungsreife Spezifikation]] (Vertrag; Stufen A+B seit 2.0.0 gebaut, C/D offen)
+- **Nächste Fassung:** [[Konzept – 3.0]] (Plan für 3.0: Klassenbetrieb, Diagnose, Messkette) · [[Design – Spielspaß 2.0]] (Befunde, Hebel, Scorecard) · [[Klassenraum – Umsetzungsreife Spezifikation]] (Vertrag; Stufen A+B gebaut, C/D offen)
 - `src/` Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · `shell/src-tauri/` Rust-Hülle · `tests/` (`sh tools/test.sh`; Zahl: `docs/STAND.md`) · `tools/` (bauen, testen, messen, ausliefern) · `Programm/` fertige Programme · `docs/` die Website-Fassung (erzeugt) samt `docs/doku/` (die Doku als durchsuchbare Seite, `python tools/seite.py`) · `fremd/` fremder Bestand (Lernmotor aus der Spielhalle)
-- Versionen: Git im Projektordner, 13 Tags von `endversion-1.0` über `v1.1`, `v1.2.0`–`v1.2.4` bis `v2.0.0`–`v2.9.0` (gemessen 26.10.2026 mit `git tag --list`); die Endversion 1.0 liegt zusätzlich unter `Programm/Endversion-1.0/`.
+- Versionen: Git im Projektordner, Tags von `endversion-1.0` über `v1.1`, `v1.2.0`–`v1.2.4` bis `v2.0.0`–`v2.9.0` (Stand 31.10.2026); der Endstand liegt zusätzlich unter `Programm/Endversion-1.0/`.
 
 ## Ehrliche Grenzen
-- Arbeitsspeicher im Leerlauf rund 0,5 GB (WebView2), CPU praktisch null.
+- Arbeitsspeicher im Leerlauf rund 0,5 GB (WebView2, gemessen 07.10.2026), CPU praktisch null.
 - Linux nur in WSLg getestet, nicht auf echtem GNOME/KDE; dort kein Tray-Dienst.
-- Konsole „IOS-ähnlich“, kein Cisco-Nachbau; OSPF und IPv6 fehlen noch, und Spanning Tree (`lab.stp`) hat bis jetzt keinen eigenen handgeschriebenen Auftrag. Die frühere Lücke „Storage-Kunde (Stufe 6) nicht erreichbar“ ist seit dem Ausbau 1.2 geschlossen.
-- **Die Android-App ist auf keinem echten Gerät gestartet** (kein Telefon, kein Emulator vorhanden — auch am 06.10.2026 nicht, `adb devices` war leer). Geprüft ist die *Seite in der App* in einem echten Browser mit Telefonmaßen — dort funktioniert auch das Kabelziehen mit dem Finger. Dass ein Dreh die Seite nicht neu lädt, ist **nicht am Gerät** gemessen, sondern im gepackten Manifest (`screenOrientation=-1`, `configChanges=0x40007ffc`) und im Java belegt. Was auf Android offen ist, steht in [[android/LIESMICH|Netzwerk-Labor für Android]].
+- Konsole „IOS-ähnlich“, kein Cisco-Nachbau. **OSPF fehlt**; IPv6 und WLAN werden inhaltlich geübt, aber nicht paketweise simuliert (`docs/STAND.md`, bekannte Ausnahmen). Die frühere Lücke „Storage-Kunde (Stufe 6) nicht erreichbar“ ist seit dem Ausbau 1.2 geschlossen.
+- **Nicht geprüft (Stand 31.10.2026):** Lauf der Live-Seite und der Release-Anhänge, echter Browser, Android auf einem Gerät, Screenreader und eine echte Unterrichtsstunde. Was auf Android offen ist, steht in [[android/LIESMICH|Netzwerk-Labor für Android]]; die Klassenraum-Grenzen (Server/QR erst 3.1) in [[Architektur]] § 12.6/§ 12.7.
 
 Verwandt: [[10-Projekte/Lernprojekte/FISI-Spielhalle/Liesmich|FISI-Spielhalle]] (liefert den Lernmotor) · [[20-Bereiche/Karriere – Storage & Cloud/Liesmich|Karriere – Storage & Cloud]] (späteres Ziel Stufe 6)
 

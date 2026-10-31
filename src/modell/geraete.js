@@ -208,7 +208,8 @@ const Modell = (() => {
     return g;
   }
   function loeschen(netz, id, p){
-    const g = netz.geraete[id]; const s = pfad(p); let o = g.running;
+    const g = netz.geraete[id]; if (!g) throw new Error("Gerät nicht gefunden: " + id);
+    const s = pfad(p); let o = g.running;
     for (let i = 0; i < s.length - 1; i++) { o = o?.[s[i]]; if (o == null) return; }
     if (Array.isArray(o)) o.splice(+s[s.length-1], 1); else delete o[s[s.length - 1]];
     aufraeumen(netz, id, s);
@@ -263,6 +264,69 @@ const Modell = (() => {
     return r;
   }
 
+  /* Struktur-Invarianten (KRN-06): MAC-Eindeutigkeit, Adress-Syntax auf ALLEN L3-Typen
+     (Router/Firewall/Internet/SVI — nicht nur Hosts, KRN-B08), Routen (Syntax, Ausgangs-
+     Schnittstelle, Next Hop), VLAN-Verweise (Access/Native/Trunk/SVI) und Kabel (Gerät, Port,
+     Doppelbelegung, Selbstverbindung). Nur harte Widersprüche — saubere Netze melden nichts. */
+  function invarianten(netz){
+    const w = [];
+    const add = (code, geraet, feld, text) => w.push({geraet, feld, code, text});
+    const macs = {};
+    for (const g of Object.values(netz.geraete || {})) {
+      for (const [p, m] of Object.entries((g.hw && g.hw.macs) || {})) {
+        if (!m) continue;
+        const k = String(m).toLowerCase();
+        if (macs[k]) {
+          add("DUP_MAC", g.id, "hw.macs." + p, `MAC ${m} ist doppelt vergeben (auch ${macs[k].geraet} ${macs[k].port}).`);
+          if (!macs[k].gemeldet) { add("DUP_MAC", macs[k].geraet, "hw.macs." + macs[k].port, `MAC ${m} ist doppelt vergeben (auch ${g.id} ${p}).`); macs[k].gemeldet = true; }
+        } else macs[k] = {geraet: g.id, port: p};
+      }
+    }
+    const belegt = {};
+    for (const kabel of netz.kabel || []) {
+      for (const [seite, seiteDaten] of [["a", kabel.a], ["b", kabel.b]]) {
+        if (!seiteDaten) { add("KABEL_GERAET", null, "kabel." + kabel.id + "." + seite, `Kabel ${kabel.id} hat keine Seite ${seite}.`); continue; }
+        const g = netz.geraete[seiteDaten.geraet];
+        if (!g) { add("KABEL_GERAET", null, "kabel." + kabel.id + "." + seite, `Kabel ${kabel.id} zeigt auf unbekanntes Gerät ${seiteDaten.geraet}.`); continue; }
+        if (!PORTS[g.typ].includes(seiteDaten.port)) add("KABEL_PORT", g.id, "kabel." + kabel.id + "." + seite, `${g.name} hat keinen Anschluss ${seiteDaten.port} (Kabel ${kabel.id}).`);
+        const schluessel = seiteDaten.geraet + "/" + seiteDaten.port;
+        if (belegt[schluessel]) add("KABEL_DOPPELT", g.id, "port." + seiteDaten.port, `${g.name} ${seiteDaten.port} ist doppelt verkabelt (Kabel ${belegt[schluessel]} und ${kabel.id}).`);
+        belegt[schluessel] = kabel.id;
+      }
+      if (kabel.a && kabel.b && kabel.a.geraet === kabel.b.geraet) add("KABEL_SELBST", kabel.a.geraet, "kabel." + kabel.id, `Kabel ${kabel.id} verbindet ein Gerät mit sich selbst.`);
+    }
+    const l3 = (g, feld, i) => {
+      if (!i) return;
+      if (i.ip && !IP.gueltig(i.ip)) add("IP_SYNTAX", g.id, feld + ".ip", `„${i.ip}“ ist keine gültige IPv4-Adresse.`);
+      if (i.maske && !IP.maskeGueltig(i.maske)) add("MASK_SYNTAX", g.id, feld + ".maske", `„${i.maske}“ ist keine gültige Subnetzmaske.`);
+      if (i.ip && IP.gueltig(i.ip) && !i.maske) add("MASK_EMPTY", g.id, feld + ".maske", "Ohne Subnetzmaske ist die Adresse unvollständig.");
+    };
+    for (const g of Object.values(netz.geraete || {})) {
+      const k = g.running || {};
+      if (g.typ === "router" || g.typ === "firewall" || g.typ === "internet")
+        for (const [p, i] of Object.entries(k.if || {})) l3(g, "if." + p, i);
+      if (g.typ === "switch")
+        for (const [v, i] of Object.entries(k.svi || {})) l3(g, "svi." + v, i);
+      if (g.typ === "router" || g.typ === "firewall" || g.typ === "internet") {
+        for (const r of k.routen || []) {
+          if (!IP.gueltig(r.netz) || !IP.maskeGueltig(r.maske)) add("ROUTE_SYNTAX", g.id, "routen", `Route ${r.netz || "?"}/${r.maske || "?"} hat Netz oder Maske falsch.`);
+          if (r.aus && !(r.aus in (k.if || {}))) add("ROUTE_AUS", g.id, "routen", `Route ${r.netz || "?"} zeigt auf die fehlende Schnittstelle ${r.aus}.`);
+          if (r.nh != null && r.nh !== "" && !IP.gueltig(r.nh)) add("ROUTE_NH", g.id, "routen", `Route ${r.netz || "?"} hat den ungültigen Next Hop „${r.nh}“.`);
+        }
+      }
+      if (g.typ === "switch") {
+        const vlans = (g.flash && g.flash.vlans) || {};
+        for (const [p, po] of Object.entries(k.ports || {})) {
+          if (po.accessVlan != null && !vlans[String(po.accessVlan)]) add("VLAN_MISSING", g.id, "ports." + p + ".accessVlan", `VLAN ${po.accessVlan} fehlt in der VLAN-Datenbank (${g.name} ${p}).`);
+          if (po.nativeVlan != null && !vlans[String(po.nativeVlan)]) add("VLAN_MISSING", g.id, "ports." + p + ".nativeVlan", `VLAN ${po.nativeVlan} fehlt in der VLAN-Datenbank (${g.name} ${p}).`);
+          if (Array.isArray(po.trunkErlaubt)) for (const v of po.trunkErlaubt) if (!vlans[String(v)]) add("VLAN_MISSING", g.id, "ports." + p + ".trunkErlaubt", `VLAN ${v} fehlt in der VLAN-Datenbank (Trunk ${p}).`);
+        }
+        for (const v of Object.keys(k.svi || {})) if (!vlans[String(v)]) add("VLAN_MISSING", g.id, "svi." + v, `Zum SVI ${v} fehlt das VLAN in der Datenbank.`);
+      }
+    }
+    return w;
+  }
+
   /* Live-Prüfung für den Inspektor. Nur Tippfehler und offensichtliche Widersprüche,
      keine Lösungsverrate: „Gateway liegt nicht im eigenen Netz“ sagt ein echter Windows-Dialog auch. */
   function pruefen(netz){
@@ -288,7 +352,12 @@ const Modell = (() => {
       for (const a of adressen(g)) if (IP.gueltig(a.ip)) (ipsGesehen[a.ip] ||= []).push({g, a});
     }
     for (const [ip, liste] of Object.entries(ipsGesehen)) if (liste.length > 1)
-      for (const {g, a} of liste) add(g.id, HOST[g.typ] ? `if.${a.port}.ip` : `if.${a.port}.ip`, "DUP_IP", `${ip} ist mehrfach vergeben (${liste.map(x => x.g.name).join(", ")}).`);
+      for (const {g, a} of liste) {
+        /* KRN-B08: Das Feld muss zum Gerätetyp passen; beim Switch hieß es früher fälschlich if.Vlan1.ip. */
+        const feld = g.typ === "switch" ? `svi.${String(a.port).replace(/^Vlan/, "")}.ip` : `if.${a.port}.ip`;
+        add(g.id, feld, "DUP_IP", `${ip} ist mehrfach vergeben (${liste.map(x => x.g.name).join(", ")}).`);
+      }
+    w.push(...invarianten(netz));
     return w;
   }
 

@@ -71,6 +71,11 @@ from urllib.parse import unquote
 HIER = Path(__file__).resolve().parents[1]
 STAND = HIER / "docs" / "STAND.md"
 README = HIER / "README.md"
+# VIS-05 / r-arch V02: die verbindliche R12-LETZTMESSUNG wird VERSIONIERT als tests/r12-stand.json
+# (neben sim-stand.json/stil-stand.json). stand.py liest NUR sie — damit ist docs/STAND.md auch im
+# frischen Klon ohne Nachweise/ reproduzierbar. Fehlt die Datei, steht dort ausdruecklich
+# "nicht gemessen" (eigener Zustand), nie eine 0. Die Rohmessung unter Nachweise/ bleibt Beleg.
+R12_STAND = HIER / "tests" / "r12-stand.json"
 ANFANG = "<!-- STAND:ANFANG -->"
 ENDE = "<!-- STAND:ENDE -->"
 NL = chr(10)
@@ -350,6 +355,31 @@ def messe_codec() -> dict:
     return {"auftraege": len(re.findall(r'"([^"]+)"', m.group(1)))}
 
 
+def messe_r12(datei=None) -> dict:
+    """Verbindliche R12-LETZTMESSUNG aus der VERSIONIERTEN Datei tests/r12-stand.json.
+
+    Grund (r-arch V02): Nachweise/ ist gitignoriert; ein frischer Klon haette sonst keine Zahl und
+    --pruefen waere rot. Darum liest stand.py nur die versionierte Letztmessung (Ratsche-Baseline),
+    geschrieben von tools/ethos.py --dom --r12 --festhalten. Fehlt sie: "nicht gemessen" (kein 0)."""
+    ziel = Path(datei) if datei else R12_STAND
+    leer = {"gemessen": False, "grund": "keine versionierte R12-Messung: tests/r12-stand.json fehlt "
+            "(python tools/ethos.py --dom --r12 <roh> --festhalten, im Messfenster)",
+            "verstoesse": [], "messungen": 0, "max": None, "grenzen": {"standard": 6},
+            "zeit": None, "ansichten": {}}
+    if not ziel.is_file():
+        return leer
+    try:
+        daten = json.loads(ziel.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as fehler:                            # noqa: BLE001
+        return {**leer, "grund": f"R12-Stand unlesbar: {fehler}"}
+    if not isinstance(daten, dict) or not isinstance(daten.get("ansichten"), dict):
+        return {**leer, "grund": "R12-Stand ohne Ansichten"}
+    return {"gemessen": True, "grund": None,
+            "verstoesse": daten.get("verstoesse") or [], "messungen": daten.get("messungen") or 0,
+            "max": daten.get("max"), "grenzen": daten.get("grenzen") or {"standard": 6},
+            "zeit": daten.get("zeit"), "ansichten": daten.get("ansichten") or {}}
+
+
 def messe(fassung: str, ohne_tests: bool = False) -> dict:
     print("messe: Fassung, Bau, Quellen …", file=sys.stderr, flush=True)
     bau = messe_bau_module()
@@ -371,7 +401,7 @@ def messe(fassung: str, ohne_tests: bool = False) -> dict:
         "fassung": fassung,
         "android_code": ANDROID_CODE.search(lies(HIER / "android" / "bauen.py")).group(1),
         "bau": bau, "src": src, "einzeldatei": einz, "tests": tests, "inhalte": inhalte,
-        "doku": doku, "verweise": verweise, "codec": messe_codec(),
+        "doku": doku, "verweise": verweise, "codec": messe_codec(), "r12": messe_r12(),
     }
 
 
@@ -471,6 +501,20 @@ def stand_text(z: dict) -> str:
                  f"{code('*.md')} + unversionierte {code('*.md')} |")
     teile.append(f"| Relative Verweise | {de(z['verweise']['geprueft'])} geprueft, "
                  f"**{de(len(z['verweise']['tot']))} tot** | wie {code('tools/repo-verweise-flicken.py')} |")
+    r12 = z.get("r12") or {}
+    if r12.get("gemessen"):
+        maxwert = r12.get("max")
+        stand = ""
+        if isinstance(r12.get("zeit"), str) and len(r12["zeit"]) >= 10:
+            stand = ", Stand " + r12["zeit"][:10]
+        wert = (f"**Letztmessung: max {de(maxwert) if isinstance(maxwert, int) else 'nicht gemessen'} "
+                f"sichtbare Bedienelemente, {de(r12.get('messungen') or 0)} Messungen (Ansicht x Breite), "
+                f"{de(len(r12.get('verstoesse') or []))} ueber der Grenze eingefroren**"
+                f" ({code('tests/r12-stand.json')}{stand}); Gate: Zuwachs je Ansicht×Breite = ROT")
+    else:
+        wert = "**nicht gemessen**" + (f" ({r12['grund']})" if r12.get("grund") else "")
+    teile.append(f"| R12 Bedienelemente | {wert} | {code('tools/ethos.py --dom --r12 <roh> --festhalten')} "
+                 f"-> {code('tests/r12-stand.json')} |")
     teile.append("")
     teile.append("## Bekannte, begruendete Ausnahmen")
     teile.append("")
@@ -509,7 +553,8 @@ def stand_text(z: dict) -> str:
     teile.append("Ein Lauf misst: Fassung, Android-Bauzaehlung, Baukennung, den **echten Testlauf** "
                  "(kein gespeicherter Wert), die Modulliste des Baus, Dateien und Zeilen unter src/, beide "
                  "Einzeldateien samt SHA256, den geladenen Datenbestand (Tickets, Minis, Injektoren, "
-                 "Trainings, Wiki, Fertigkeiten), die Doku-Seiten und alle relativen Verweise. "
+                 "Trainings, Wiki, Fertigkeiten), die Doku-Seiten, alle relativen Verweise und "
+                 "(falls vorhanden) die verbindliche R12-Zahl aus Nachweise/3.0/r12.json. "
                  "**Bewusst ohne Datum und Uhrzeit:** ein Zeitstempel waere bei jedem Lauf anders, dann "
                  "koennte der Pruefmodus nie gruen werden. Wann gemessen wurde, steht im Git-Log dieser "
                  "Datei.")
@@ -719,7 +764,9 @@ def main() -> int:
         return 0
     if "--pruefen" in sys.argv:
         return befehl_pruefen("--ohne-tests" in sys.argv)
-    return befehl_schreiben(messe(fassung.group(1)))
+    # --ohne-tests gilt auch fuer den Schreibpfad (vorher startete er still einen vollen Testlauf —
+    # Befund 31.10.2026 bei der R12-Integration; die Warnung aus messe() bleibt sichtbar).
+    return befehl_schreiben(messe(fassung.group(1), ohne_tests="--ohne-tests" in sys.argv))
 
 
 if __name__ == "__main__":

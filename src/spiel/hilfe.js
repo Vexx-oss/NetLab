@@ -180,7 +180,15 @@ Spiel.hilfeInhalt = function(inst, stufe){
  * (gemessen `Spiel.stufe.konto(inst)` = {frei:6, gesamt:6} auch bei „meister"), sechs Sprossen waren
  * kostenlos und `Spiel.hilfeAbzuege` blieb leer. Quelle der Stufe ist der Bildungsstand des Schülers
  * auf diesem Gerät; steht die Stufe schon am Ticket, bleibt sie (§ 2.1). */
+/* LRN-01 (3.0.0): zentrale Prüfungs-Sperre — dieselbe Bedingung wie Spiel.pruefung.hilfeGesperrt. */
+const hilfePruefungSperre = (inst, optionen) => {
+  try {
+    return !!(typeof Spiel !== "undefined" && Spiel && Spiel.pruefung
+      && typeof Spiel.pruefung.hilfeGesperrt === "function" && Spiel.pruefung.hilfeGesperrt(inst, optionen || {}));
+  } catch (e) { return false; }
+};
 Spiel.hilfe = function(inst, o){
+  if (hilfePruefungSperre(inst, o)) return {fehler: "prüfung", grund: "In der Prüfung gibt es keine Hilfe."};
   try {
     if (inst && typeof inst === "object" && typeof Spiel.stufe !== "undefined" && Spiel.stufe
         && typeof Spiel.stufe.ticketStufeSetzen === "function") Spiel.stufe.ticketStufeSetzen(inst);
@@ -224,6 +232,7 @@ Spiel.leiterHaken = function(inst, id, an){
 
 /* Lösungsschritte für die Vorführung aufbereiten */
 Spiel.vorfuehren = function(inst){
+  if (hilfePruefungSperre(inst)) return [];
   const def = Spiel.defVon(inst);
   return [...(def.loesung || []), ...(inst.ereignisLoesung || [])].map((s, i) => {
     const art = s.cli ? "cli" : s.terminal ? "terminal" : s.setzen ? "setzen" : "aktion";
@@ -275,6 +284,7 @@ Spiel.wiederholungAnlegen = function(inst){
 
 /* Soll der Senior jetzt (einmal je Ticket) Hilfe anbieten? */
 Spiel.seniorFaellig = function(inst){
+  if (hilfePruefungSperre(inst)) return false;
   if (!inst || inst.seniorAngeboten || (inst.hilfeStufe || 0) >= 6 || inst.flow === "verwicklung") return false;   /* Verwicklung: weniger Hinweise */
   return jetzt() - (inst.fortschritt || inst.geoeffnet || jetzt()) >= Spiel.SENIOR_NACH_MS;
 };
@@ -386,6 +396,7 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
 
   /* ---------- § 4.1: der Vorschlagsstreifen ---------- */
   Spiel.hilfe.passend = function(o = {}){
+    if (hilfePruefungSperre(null, o)) return [];
     const anzahl = Math.max(0, Number(kann("vorschlaege")) || 0);
     if (!anzahl || !o.netz || !o.netz.geraete || !o.netz.geraete[o.id]) return [];
     if (!wannPasst("vorschlaege", hatFehler(o.letzterFehler))) return [];   /* geselle: nur nach Fehler */
@@ -410,6 +421,7 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
 
   /* ---------- § 4.1: „Was geht hier?" je Modus ---------- */
   Spiel.hilfe.geruest = function(o = {}){
+    if (hilfePruefungSperre(null, o)) return null;
     const d = daten(); if (!d || !d.GERUEST) return null;
     const r = rang();
     if (r >= 3) return null;                                  /* geselle und meister: kein Gerüst */
@@ -428,6 +440,7 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
      Argumenten abhängt. Wer die Fertigkeit kennt (die Oberfläche aus dem offenen Auftrag), gibt sie mit;
      das tut UI.hilfe.zeichnen (src/ui/hilfe.js). */
   Spiel.hilfe.leiter = function(o = {}){
+    if (hilfePruefungSperre(null, o)) return [];
     if (!wannPasst("leiter", hatFehler(o.letzterFehler))) return [];
     const skill = o.skill ? String(o.skill) : null;
     const alle = kandidaten({netz: o.netz, id: o.id, modus: o.modus, art: o.art});
@@ -447,6 +460,7 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
 
   /* ---------- § 4.1: Syntax-Brücke nach einem Tippfehler oder auf „ich will X" ---------- */
   Spiel.hilfe.syntaxBruecke = function(o = {}){
+    if (hilfePruefungSperre(null, o)) return null;
     const d = daten(); if (!d || !d.SYNTAX) return null;
     const r = rang();
     const fehler = hatFehler(o.fehler);
@@ -478,6 +492,7 @@ Spiel.seniorAngeboten = function(inst){ inst.seniorAngeboten = true; Spiel.speic
    (oben in dieser Datei) und Spiel.LEITER. Kein neuer Zustand, keine Bewertung, keine Lösung –
    bestehende Schwellen und Signaturen bleiben unverändert. */
 Spiel.hilfe.anfaengerSchritte = function(inst){
+  if (hilfePruefungSperre(inst)) return [];
   if (!inst || !inst.netz) return [];
   const schritte = [];
   try {

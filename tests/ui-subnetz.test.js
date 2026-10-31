@@ -765,6 +765,92 @@ gruppe("UI: Abteilung Subnetting", () => {
     }
   });
 
+  /* Z-01 (W2): Nach dem Aufdecken wächst die Aufgabe um das Werkzeug – Antwortfeld und „Prüfen“
+     rutschen unter die Falz. Der Blick wird deshalb auf die Antwortfläche geführt; ohne
+     scrollIntoView (alte Umgebung) passiert ruhig nichts. */
+  pruefe("Z-01: nach „Werte zeigen“ wird die Antwortfläche ins Bild geholt" + SN_UI_ZUSATZ, () => {
+    if (!SN_UI_KANN_LADEN) return;
+    const plan = snUiLehrplanStub();
+    const spiel = () => snUiSpielStub({niveau: "E"});
+    const start = s => {
+      const werk = snUiWerkzeugStub();
+      const p = snUiPruefstand({daten: {subnetzLehrplan: plan}, spiel: s, werkzeuge: werk.api});
+      p.startHaken[0]();
+      const c = snUiKnoten("div");
+      p.registriert[0].def.zeigen(c);
+      snUiKarteMit(c, plan.module[0].titel).click();
+      snUiKnopfPflicht(c, "Übungsrunde starten").click();
+      return {p, c};
+    };
+    /* 1 · Text-Aufgabe: Ziel ist der Antwortbereich INKLUSIVE Knopfzeile (nicht nur das Feld,
+       sonst bleibt „Prüfen“ unter der Falz), block/inline nearest, genau einmal. */
+    const eins = start(spiel());
+    const ziel = eins.c.querySelector(".sn-aufgabe").querySelectorAll(".sn-knoepfe")[0];
+    erwarte.wahr(!!ziel, "die Knopfzeile steht");
+    erwarte.enthaelt(String(ziel.textContent), "Prüfen", "das Ziel enthält den Prüfen-Knopf");
+    const gerufen = [];
+    ziel.scrollIntoView = opts => gerufen.push(opts || {});
+    const aufdecken = snUiKnopfPflicht(eins.c.querySelector(".sn-aufgabe"), "Werte zeigen");
+    erwarte.gleich(gerufen.length, 0, "ohne Aufdecken kein Sprung");
+    aufdecken.click();
+    erwarte.gleich(gerufen.length, 1, "nach dem Aufdecken genau ein Sprung");
+    erwarte.gleich(gerufen[0].block, "nearest", "block:nearest – kein wildes Scrollen");
+    erwarte.gleich(gerufen[0].inline, "nearest", "inline:nearest");
+    /* 2 · Auswahl-Aufgabe (der VLAN-Fall): es gibt kein Eingabefeld — trotzdem wird der
+       Antwortbereich inklusive Knopfzeile ins Bild geholt. */
+    const spielWahl = snUiSpielStub({niveau: "E"});
+    spielWahl.subnetz.satz = () => [{
+      id: "z01-wahl", art: "vlan-port", niveau: "E", skill: "lab.subnetz", titel: "VLAN", frage: "Welcher Port?",
+      lage: [], eingabe: {art: "auswahl", optionen: [{text: "Fa0/1"}, {text: "Fa0/2"}]},
+      loesung: {wert: "Fa0/2", text: "Fa0/2"}, rechenweg: [], erklaerung: "", hinweis: "",
+      visual: {art: "vlan", preset: {niveau: "AP1"}}, quelle: "Test",
+    }];
+    const wahl = start(spielWahl);
+    erwarte.gleich(wahl.c.querySelector(".sn-feld"), null, "die Auswahl-Aufgabe hat kein Eingabefeld");
+    const wahlZiel = wahl.c.querySelector(".sn-aufgabe").querySelectorAll(".sn-knoepfe")[0];
+    erwarte.wahr(!!wahlZiel, "auch die Auswahl-Aufgabe hat eine Knopfzeile");
+    const wahlRufe = [];
+    wahlZiel.scrollIntoView = opts => wahlRufe.push(opts || {});
+    snUiKnopfPflicht(wahl.c.querySelector(".sn-aufgabe"), "Werte zeigen").click();
+    erwarte.gleich(wahlRufe.length, 1, "auch ohne Feld wird der Antwortbereich ins Bild geholt");
+    erwarte.enthaelt(String(wahlZiel.textContent), "Prüfen", "das Ziel enthält die Knopfzeile (Auswahl)");
+    /* 3 · alte Umgebung ohne scrollIntoView: Aufdecken bleibt trotzdem möglich. */
+    const drei = start(spiel());
+    const ziel3 = drei.c.querySelector(".sn-aufgabe").querySelectorAll(".sn-knoepfe")[0];
+    erwarte.gleich(typeof ziel3.scrollIntoView, "undefined", "diese Testumgebung kennt keinen Sprung");
+    snUiKnopfPflicht(drei.c.querySelector(".sn-aufgabe"), "Werte zeigen").click();
+    const status3 = drei.c.querySelectorAll(".bn-meta").map(x => String(x.textContent)).join(" | ");
+    erwarte.enthaelt(status3, "eingeblendet", "ohne scrollIntoView wird trotzdem aufgedeckt");
+  });
+
+  /* UIL-03 (berichte/frontend-lernen.md): Die drei Lernspiele starteten ohne Seed — jede Runde war
+     identisch. Jetzt gibt die Abteilung einen Seed aus der Oberfläche mit (seed()), sodass zwei
+     Starts verschiedene Karten liefern; ein fester Seed bleibt deterministisch (Werkzeugtest). */
+  pruefe("UIL-03: Lernspiele starten mit wechselndem Seed (zwei Starts verschieden, kein Math.random)" + SN_UI_ZUSATZ, () => {
+    if (!SN_UI_KANN_LADEN) return;
+    const plan = snUiLehrplanStub();
+    const spiel = snUiSpielStub({niveau: "E"});
+    const werk = snUiWerkzeugStub();
+    const p = snUiPruefstand({daten: {subnetzLehrplan: plan}, spiel, werkzeuge: werk.api});
+    p.startHaken[0]();
+    const c = snUiKnoten("div");
+    p.registriert[0].def.zeigen(c);
+    snUiRegisterKnopf(c, "Üben & Spielen").click();
+    const karten = c.querySelectorAll(".sn-spiel");
+    erwarte.wahr(karten.length >= 3, "drei Lernspiele sind angeboten");
+    karten[0].click();
+    snUiKnopfPflicht(c, "Zurück zu den Spielen").click();
+    c.querySelectorAll(".sn-spiel")[0].click();
+    erwarte.gleich(werk.rufe.starten.length, 2, "zwei Starts");
+    const seed1 = werk.rufe.starten[0].opts && werk.rufe.starten[0].opts.seed;
+    const seed2 = werk.rufe.starten[1].opts && werk.rufe.starten[1].opts.seed;
+    erwarte.gleich(typeof seed1, "number", "Start 1 bekommt einen Seed aus der Oberfläche");
+    erwarte.gleich(typeof seed2, "number", "Start 2 bekommt einen Seed aus der Oberfläche");
+    erwarte.falsch(seed1 === seed2, "zwei Starts sind verschieden (keine identische Runde)");
+    erwarte.falsch(/Math\.random/.test(snUiCss("src/ui/subnetz.js")), "subnetz.js nutzt kein Math.random");
+    erwarte.falsch(/Math\.random/.test(snUiCss("src/ui/subnetz-werkzeuge.js")), "Spiele/Werkzeuge nutzen kein Math.random");
+  });
+
   pruefe("Prüfrunde: bestanden setzt das Modul über Spiel.subnetz.modulSetzen auf „sicher“" + SN_UI_ZUSATZ, () => {
     if (!SN_UI_KANN_LADEN) return;
     const plan = snUiLehrplanStub();

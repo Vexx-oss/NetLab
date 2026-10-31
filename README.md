@@ -14,7 +14,7 @@ Läuft lokal und offline; nichts wird gesendet.
 
 <div class="stand">
 <!-- STAND:ANFANG -->
-<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.9.0</strong> · Baukennung <code>7cb0cfbe</code> · Tests <strong>1.136/1.136 grün</strong> (0 uebersprungen, 132 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 41.983 Zeilen</strong> · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49FC2FA5…E56D89E</code> · Inhalte <strong>76 Tickets, 150 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>66</strong> Doku-Seiten · relative Verweise <strong>286 geprueft, 0 tot</strong>.</p>
+<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>2.9.0</strong> · Baukennung <code>7cb0cfbe</code> · Tests <strong>1.287/1.287 grün</strong> (0 uebersprungen, 161 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 42.599 Zeilen</strong> · Einzeldatei <strong>4.080.274 B</strong>, SHA256 <code>49FC2FA5…E56D89E</code> · Inhalte <strong>76 Tickets, 151 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>66</strong> Doku-Seiten · relative Verweise <strong>319 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div>
 
@@ -59,10 +59,11 @@ in `docs/index.html` und `VERSION` in `bauen.py`).
 > liegt unter `Nachweise/1.2-Q/` — **nicht im Repo**. Rust-Bauten sind nicht bit-gleich; ein
 > SHA256 gilt deshalb nur für genau den Bau, den er beschreibt.
 
-> **Zur Android-APK:** In den Releases v2.0.1–v2.0.5 liegt **keine** APK (laut
-> GitHub-API-Abfrage vom 26.10.2026; in dieser Sitzung nicht erneut abgerufen), und im Klon
-> liegt ebenfalls keine. Die APK wird lokal mit `python android/bauen.py` gebaut, wenn das
-> Android-SDK vorhanden ist; **ob der Bau auf diesem Rechner läuft, ist nicht geprüft.**
+> **Zur Android-APK:** Im Klon liegt keine `.apk`; auch die 2.9.0-Veröffentlichung kam
+> ohne APK (Beleg: `docs/CHANGELOG.md`, Abschnitt 2.9.0). Ob eine künftige Veröffentlichung
+> eine APK anhängt, ist **nicht geprüft** — der Release-Ablauf tut es nur, wenn die
+> Keystore-Secrets gesetzt sind. Die APK wird lokal mit `python android/bauen.py` gebaut, wenn
+> das Android-SDK vorhanden ist; **ob der Bau auf diesem Rechner läuft, ist nicht geprüft.**
 
 `Netzwerk-Labor.html` liegt direkt im Repositorium, damit der Download **einen Klick**
 braucht und nicht erst ein Release. Es ist dieselbe Datei, die auf GitHub Pages läuft:
@@ -113,7 +114,8 @@ geteilt: Browser im `localStorage`, Windows unter
 1. **Postfach** öffnen und die erste Kundenmail lesen.
 2. **„Auftrag annehmen"** — das Netz erscheint im Labor.
 3. Ein Gerät **anklicken**: rechts zeigt der **Inspektor** Adressen, Ports, VLAN, Routen,
-   ACL, NAT; der Reiter **Konsole** ist das IOS-ähnliche Terminal.
+   ACL, NAT; das IOS-ähnliche Terminal ist ein **Knopf im Inspektor-Kopf** (seit 1.2 kein
+   eigener Reiter).
 4. **Werkzeuge** oben links in der Laborfläche, Kurztaste in Klammern:
    **V** auswählen und verschieben · **K** Kabel verlegen · **P** Ping-Werkzeug
    (jeweils von Gerät zu Gerät ziehen). Gerät **doppelklicken** oder **T** öffnet sein
@@ -162,6 +164,13 @@ automatisch geprüft. Dazu Mini-Tickets für die Leiste. **Die genauen Mengen** 
 Minis, Injektoren, Trainings, Wiki-Seiten, Fertigkeiten) stehen im Stand-Block oben und in
 [`docs/STAND.md`](docs/STAND.md) — sie werden bei jedem Lauf nachgezählt.
 
+**Subnetting und Oberfläche (seit 2.1–2.9).** Eine eigene Abteilung **Subnetting** im
+Dock: Lehrpfad, Werkzeuge (32-Bit-Labor, Masken-Schieber, Blocklineal, Rechenweg-Assistent,
+Adressplaner, VLAN-Werkzeug), Lernspiele (Präfix-Blitz, Netz-Sortierer, VLAN-Patcher) und
+Formelsammlung. Dazu die **Erste Stunde** (Anruf auf der Heute-Karte führt in den ersten
+Auftrag), der **Auftragsbogen**, die **Einsatzakte**, die **Kundenakte**, das Simulations-Panel
+**Flugschreiber** und die Leiste am Bildschirmrand.
+
 **Spielschichten.** Hilfeleiter 0–6, Abnahme mit Regressions- und Neustart-Test (nur
 Gespeichertes überlebt), Sterne, Euro und Ruf, Wartungsverträge, Playbooks,
 Offline-Bericht, Prüfungstag nach IHK-Notenschlüssel.
@@ -187,7 +196,7 @@ automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: L
 | Das Windows-Programm öffnet kein Fenster. | `Programm/Integritaet-reparieren.cmd` doppelklicken — gemessener Grund ist ein Integritätslabel „Niedrig" (WebView2/`%LOCALAPPDATA%`). Details im Abschnitt oben. |
 | SmartScreen warnt beim Start. | Die `.exe` ist **nicht signiert**; „Weitere Informationen" → „Trotzdem ausführen". Erwartbar, kein Fehler. |
 | Mein Spielstand fehlt. | Browser (`localStorage`) und Windows-Programm (`%APPDATA%\de.fisi.netzwerklabor\spielstand.json`) speichern **getrennt** und tauschen sich nicht aus. |
-| Warum ist keine APK im Release? | In den Releases liegt keine APK; sie wird lokal mit `python android/bauen.py` gebaut (Android-SDK nötig). Ein Gerätetest ist **nicht geprüft**. |
+| Warum ist keine APK im Release? | Im Klon und in der 2.9.0-Veröffentlichung ist keine APK; sie wird lokal mit `python android/bauen.py` gebaut (Android-SDK nötig). Ob künftige Veröffentlichungen eine anhängen, ist **nicht geprüft**; ein Gerätetest ebenfalls **nicht geprüft**. |
 | Läuft es auf Linux und macOS? | Im Browser ja. Die Linux-Pakete sind **Stand 1.0**; getestet nur in **WSLg** (kein Tray). macOS ist **nicht geprüft**. |
 | Darf ich es im Unterricht einsetzen? | **Ja** — PolyForm Noncommercial 1.0.0 erlaubt Spielen, Üben und Unterricht, auch in Schulen. Kein Konto, kein Server, kein Netz nötig. |
 | Darf ich es verkaufen? | **Nein**, nicht ohne gesonderte Erlaubnis. Verbindlich: [`LICENSE`](LICENSE); deutsche Erklärung mit Ausnahmen: [`LIZENZ.md`](LIZENZ.md). |
@@ -237,14 +246,14 @@ Windows-Hülle Rust (`cargo tauri build`, Minuten). Genaueres steht in
 |---|---|
 | einen Klon | `git pull` — danach `python bauen.py` und `python tools/einfach.py`, wenn du die Seite selbst baust |
 | die Browser-Einzeldatei | neue aus dem [Release](https://github.com/Vexx-oss/NetLab/releases/latest) laden — oder einfach die Seite im Netz benutzen, die ist immer aktuell |
-| die App auf dem Telefon | eine **selbst gebaute** `.apk` (**über** die alte installieren; der `versionCode` steigt mit jeder Fassung, deshalb geht das ohne Deinstallieren). Im Release liegt keine APK — siehe Hinweis oben. |
+| die App auf dem Telefon | eine **selbst gebaute** `.apk` (**über** die alte installieren; der `versionCode` steigt mit jeder Fassung, deshalb geht das ohne Deinstallieren). Eine APK ist nicht angehängt — siehe Hinweis oben. |
 | das Windows-Programm | `git pull`, dann `pwsh -File shell/entwickeln.ps1` (Debug, Sekunden) oder `cargo tauri build` in `shell/src-tauri` (Auslieferung) |
 
 **Wenn du selbst etwas änderst:** arbeite auf `ausbau-1.2`, halte dich an
 [`AGENTS.md`](AGENTS.md) (kurz: keine Prozesse nach Namen beenden, kein Push ohne Absprache,
 nichts behaupten, was nicht gemessen ist) — und am Ende die acht Schritte aus
 [`docs/SITZUNGSABSCHLUSS.md`](docs/SITZUNGSABSCHLUSS.md) durchgehen. Dort steht auch, wie die
-Fassungsnummer gezogen wird (`python tools/fassung-ziehen.py --neu 2.0.6 --setzen`) und wie man
+Fassungsnummer gezogen wird (`python tools/fassung-ziehen.py --neu 3.0.0 --setzen`) und wie man
 nachmisst, dass die Veröffentlichung wirklich den neuen Stand liefert.
 
 Ein Beitrag ist willkommen, wenn er **spielbar** bleibt: nach jedem Schritt muss das Spiel
@@ -325,7 +334,7 @@ dieselben Dateien als durchsuchbare Seiten.
 
 | Datei | Inhalt |
 |---|---|
-| [`Liesmich.md`](docs/Liesmich.md) | Übersicht, Startanleitung, was in 1.2 neu ist |
+| [`Liesmich.md`](docs/Liesmich.md) | Übersicht, Startanleitung und Stand 2.9.0 |
 | [`STAND.md`](docs/STAND.md) | **der gemessene Stand** — die einzige Zahlenquelle (erzeugt von `tools/stand.py`) |
 | [`FAQ.md`](docs/FAQ.md) | häufige Fragen und Troubleshooting, mit Belegstellen |
 | [`INHALT.md`](docs/INHALT.md) | alle Notizen des Projekts auf einer Seite |
@@ -345,7 +354,7 @@ dieselben Dateien als durchsuchbare Seiten.
 
 | Zweig / Tag | Inhalt |
 |---|---|
-| `ausbau-1.2` ← **Standardzweig** | Version 2.9.0: Auftragstexte als Störungsberichte; davor 2.0.0–2.0.4 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte, Überlappung) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
+| `ausbau-1.2` ← **Standardzweig** | Version 2.9.0: Abteilung Subnetting; davor 2.1–2.8 (Inhalte, Frontend-Redesign, Bento, Auftragsbogen, Flugschreiber) und 2.0.0–2.0.5 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 

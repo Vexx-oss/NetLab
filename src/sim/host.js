@@ -71,8 +71,8 @@ Sim.host = (() => {
   function empfangen(L, g, port, f){
     const ifc = L3().schnittstellen(L, g).find(i => i.port === port);
     if (!ifc || !f.eth) return;
-    if (f.eth.vlan != null) { Sim._log(L, "verwerfen", g.id, port, f, `${g.name} erwartet ungetaggte Frames und verwirft den Frame mit 802.1Q-Tag (VLAN ${f.eth.vlan}).`); return; }
-    if (f.eth.dst !== ifc.mac && f.eth.dst !== IP.MAC_BROADCAST) { Sim._log(L, "verwerfen", g.id, port, f, `Der Frame ist an ${f.eth.dst} adressiert, nicht an ${g.name}. Die Netzwerkkarte verwirft ihn.`); return; }
+    if (f.eth.vlan != null) { Sim._log(L, "verwerfen", g.id, port, f, `${g.name} erwartet ungetaggte Frames und verwirft den Frame mit 802.1Q-Tag (VLAN ${f.eth.vlan}).`, {grund: "DROP_VLAN"}); return; }
+    if (f.eth.dst !== ifc.mac && f.eth.dst !== IP.MAC_BROADCAST) { Sim._log(L, "verwerfen", g.id, port, f, `Der Frame ist an ${f.eth.dst} adressiert, nicht an ${g.name}. Die Netzwerkkarte verwirft ihn.`, {harmlos: true}); return; }
     if (f.arp) return L3().arpEmpfangen(L, g, ifc, f);
     if (!f.ip) return;
     const ip = f.ip;
@@ -82,7 +82,7 @@ Sim.host = (() => {
     if (!anMich && !bc && !dhcpAnMich) {
       if (f.eth.dst === ifc.mac)
         Sim._log(L, "verwerfen", g.id, port, f, `${g.name} ist kein Router: Das Paket für ${ip.dst} kam an seine MAC-Adresse, wird aber nicht weitergeleitet. Beim Absender ist wohl ${g.name} als Gateway eingetragen.`, {grund: "GW_UNREACHABLE"});
-      else Sim._log(L, "verwerfen", g.id, port, f, `Das Paket ist für ${ip.dst}, nicht für ${g.name}.`);
+      else Sim._log(L, "verwerfen", g.id, port, f, `Das Paket ist für ${ip.dst}, nicht für ${g.name}.`, {harmlos: true});
       return;
     }
     lokal(L, g, ifc, f, bc);
@@ -92,7 +92,7 @@ Sim.host = (() => {
     if (L3().zustellen(L, g, ifc, f)) return;
     if (f.icmp) {
       if (f.icmp.typ === "echo-request") {
-        if (bc) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} beantwortet keine Pings an eine Broadcast-Adresse.`); return; }
+        if (bc) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} beantwortet keine Pings an eine Broadcast-Adresse.`, {harmlos: true}); return; }
         return L3().echoAntwort(L, g, ifc, f);
       }
       Sim._log(L, "empfangen", g.id, ifc.port, f, `${g.name} erhält ${Sim._kurz(f)} von ${f.ip.src}, erwartet aber nichts dergleichen.`);
@@ -123,11 +123,11 @@ Sim.host = (() => {
     const u = f.udp, d = g.running.dienste || {};
     if (u.dst === 67) {
       if (d.dhcp && d.dhcp.an) return dhcpServer(L, g, ifc, f, poolsVonHost(g));
-      if (bc) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} ist kein DHCP-Server und ignoriert den ${f.app ? f.app.info : "DHCP-Broadcast"}.`); return; }
+      if (bc) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} ist kein DHCP-Server und ignoriert den ${f.app ? f.app.info : "DHCP-Broadcast"}.`, {harmlos: true}); return; }
     }
     if (u.dst === 53 && d.dns && d.dns.an && !bc) return dnsAntwort(L, g, ifc, f, d.dns.eintraege || []);
-    if (u.dst === 68) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} erwartet gerade keine DHCP-Antwort.`); return; }
-    if (bc) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} ignoriert den UDP-Broadcast an Port ${u.dst}.`); return; }
+    if (u.dst === 68) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} erwartet gerade keine DHCP-Antwort.`, {harmlos: true}); return; }
+    if (bc) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} ignoriert den UDP-Broadcast an Port ${u.dst}.`, {harmlos: true}); return; }
     if (u.dst >= 33434 && u.dst < 33700) {
       Sim._log(L, "antworten", g.id, ifc.port, f, `${g.name} ist das Ziel der Traceroute-Probe und antwortet mit „Port unreachable“ – so erkennt traceroute das Ende.`);
       L3().icmpFehler(L, g, ifc, f, "unreachable", "port", null);
@@ -162,7 +162,7 @@ Sim.host = (() => {
       L3().senden(L, g, segment(L, g, f, ["SYN", "ACK"], 5000, (t.seq || 0) + 1));
       return;
     }
-    if (!s) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} kennt keine Verbindung dazu und antwortet mit RST.`); rst(L, g, f, null); return; }
+    if (!s) { Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} kennt keine Verbindung dazu und antwortet mit RST.`, {harmlos: true}); rst(L, g, f, null); return; }
     if (fl.includes("FIN")) {
       delete L.tcpSrv[key];
       Sim._log(L, "antworten", g.id, ifc.port, f, `${g.name} bestätigt den Verbindungsabbau (FIN/ACK).`);
@@ -292,7 +292,7 @@ Sim.host = (() => {
     const relay = a.relay && a.relay !== "0.0.0.0" ? a.relay : null;
     const bezug = relay || ifc.ip;
     const pool = bezug && pools.find(p => IP.imNetz(bezug, p.netz, p.maske));
-    if (!pool) { Sim._log(L, "verwerfen", g.id, wo, f, `${g.name} hat keinen DHCP-Pool für das Netz von ${bezug || "?"} und antwortet nicht.`); return; }
+    if (!pool) { Sim._log(L, "verwerfen", g.id, wo, f, `${g.name} hat keinen DHCP-Pool für das Netz von ${bezug || "?"} und antwortet nicht.`, {harmlos: true}); return; }
     const serverId = ifc.ip;
     const z = Sim._z(L, g.id), leases = (z.leases ||= {});
     let typ, ip;
@@ -321,7 +321,7 @@ Sim.host = (() => {
       L.dhcpAngebot[g.id + "|" + a.clientMac] = ip; typ = "offer";
       Sim._log(L, "antworten", g.id, wo, f, `${g.name} bietet ${a.clientMac} die Adresse ${ip} aus dem Pool „${pool.name}“ an (DHCP Offer).`);
     } else if (a.typ === "request") {
-      if (a.server && a.server !== serverId) { delete L.dhcpAngebot[g.id + "|" + a.clientMac]; Sim._log(L, "verwerfen", g.id, wo, f, `Der Client hat sich für einen anderen DHCP-Server entschieden.`); return; }
+      if (a.server && a.server !== serverId) { delete L.dhcpAngebot[g.id + "|" + a.clientMac]; Sim._log(L, "verwerfen", g.id, wo, f, `Der Client hat sich für einen anderen DHCP-Server entschieden.`, {harmlos: true}); return; }
       ip = a.gewuenscht;
       const l = leases[ip];
       const ok = ip && IP.imNetz(ip, pool.netz, pool.maske) && (!l || l.mac === a.clientMac || l.bis <= L.t);

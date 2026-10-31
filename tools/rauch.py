@@ -1,4 +1,4 @@
-"""Rauchtest der Oberfläche (Design – Spielspaß 2.0, § 20 F8 und § 22 G2): jede Ansicht in 1366, 960 und 720 px Breite.
+"""Rauchtest der Oberfläche (Design – Spielspaß 2.0, § 20 F8 und § 22 G2): jede Ansicht in 1440, 1366, 960 und 720 px Breite.
 
   python tools/rauch.py              baut web/index.html und prüft es in Edge (headless, frischer Spielstand) – ohne Rust-Build
   python tools/rauch.py --exe        prüft stattdessen das echte Programm (Programm/Netzwerk-Labor.exe, über tools/cdp.py)
@@ -20,6 +20,11 @@ Danach je Ansicht:
   4. keine leere sichtbare Fläche (Pille/Block mit Hintergrund, Rahmen oder Schatten, ohne Text und ohne Kind, ab 24 × 12 px)
      und kein Element mit hidden, das trotzdem angezeigt wird
   5. keine JS-Fehler
+Zusätzlich je Breite die R12-Vorprüfung (CSS-02): sichtbare Bedienelemente je Ansicht, gemessen mit
+dem Messprogramm aus tools/ethos.py (EINE Quelle — Wähler, Grenzen und Auswertung stehen dort).
+Die Zahlen stehen in Nachweise/rauch/r12.json (--r12 PFAD ändert das Ziel); ohne Browser steht dort
+ausdrücklich "gemessen": false mit Grund — nie eine 0. Die verbindliche R12-Zahl liefert weiter
+`ethos.py --dom`; r12.json ist die Vorprüfung für VIS-05.
 Ausgabe: eine Zeile je Fall, am Ende die Summe. Exit-Code 0 = alles grün.
 Nur Python-Standardbibliothek; der WebSocket-Client kommt aus tools/cdp.py.
 """
@@ -41,8 +46,11 @@ sys.stdout.reconfigure(encoding="utf-8")
 HIER = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HIER / "tools"))
 import cdp  # noqa: E402  (WebSocket-Client, start/stop des echten Programms)
+import ethos  # noqa: E402  (R12: Wähler, Grenzen und Auswertung sind EINE Quelle)
 
-BREITEN = [(1366, 768), (960, 700), (720, 640)]
+# 1440 ist die vierte Breite (F-14: sie fehlte in jedem Gate; Design § 38-43 prüft 1440/960/720).
+BREITEN = [(1440, 900), (1366, 768), (960, 700), (720, 640)]
+R12_STANDARD = HIER / "Nachweise" / "rauch" / "r12.json"
 EDGE = [Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Microsoft/Edge/Application/msedge.exe",
         Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Microsoft/Edge/Application/msedge.exe",
         Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Google/Chrome/Application/chrome.exe"]
@@ -231,6 +239,87 @@ FAELLE = [
      "   throw new Error('Die Mitarbeit-Ansicht zeigt den angenommenen Auftrag nicht');",
      [".kl-schueler form.kl-form .knopf-haupt", ".kl-schueler .kl-kopf h2"], None),
 ]
+
+
+# ---------------------------------------------------------------- R12-Vorprüfung (CSS-02)
+# EINE QUELLE: Messprogramm, Wähler und Grenzen kommen aus tools/ethos.py (dort ist --dom die
+# verbindliche Messung). rauch.py schreibt je Breite ab, was es im Browser sieht — eine Vorprüfung
+# für VIS-05, keine zweite Norm. NICHTS wird stillschweigend zu 0.
+
+
+def r12_js():
+    """Das R12-Messprogramm aus tools/ethos.py (gleiche Ansichten, gleicher Wähler, gleiche Grenzen)."""
+    return ethos.r12_js()
+
+
+def r12_grenzen():
+    """R12-Grenzen aus tools/ethos.py: 6 allgemein, 3 für die Azubi-Ansicht (harte Verträge)."""
+    return {"grenze": ethos.R12_GRENZE, "grenzen": dict(ethos.R12_GRENZEN)}
+
+
+def r12_aus_antwort(antwort):
+    """Aus der Browser-Antwort eine Messzeile machen: {messbar, grund, ansichten}.
+
+    Eine fehlende Zahl wird NIE zu 0: sie bleibt null, die Zeile ist nicht messbar, und der Grund
+    steht da (dieselbe Bauart wie ethos.r12_auswerten)."""
+    if not isinstance(antwort, dict):
+        return {"messbar": False, "grund": "nicht gemessen: keine Antwort aus dem Browser", "ansichten": []}
+    if antwort.get("fehler"):
+        return {"messbar": False, "grund": "nicht gemessen: " + str(antwort["fehler"]), "ansichten": []}
+    roh = antwort.get("ansichten")
+    if not isinstance(roh, list) or not roh:
+        return {"messbar": False, "grund": "nicht gemessen: das Programm meldet keine Ansicht", "ansichten": []}
+    ansichten, offen = [], []
+    for a in roh:
+        if not isinstance(a, dict):
+            offen.append("nicht gemessen: unerwartete Ansicht")
+            continue
+        name = a.get("name") or "?"
+        titel = a.get("titel") or name
+        zahl = a.get("zahl")
+        if isinstance(zahl, bool) or not isinstance(zahl, int):
+            offen.append("nicht gemessen: Ansicht " + str(titel) + " (" + str(name) + ") - " + str(a.get("fehler") or "keine Zahl"))
+            zahl = None
+        ansichten.append({"name": name, "titel": titel, "zahl": zahl, "fehler": a.get("fehler")})
+    return {"messbar": not offen, "grund": "; ".join(offen) or None, "ansichten": ansichten}
+
+
+def r12_zeile(breite, antwort):
+    """Eine Messzeile je Breite (für r12.json und die Ausgabe)."""
+    zeile = r12_aus_antwort(antwort)
+    return {"breite": breite, **zeile}
+
+
+def r12_ziel(args):
+    """Ziel für r12.json: Nachweise/rauch/r12.json; mit --r12 PFAD (oder --r12=PFAD) überschreibbar."""
+    for i, a in enumerate(args):
+        if a == "--r12" and i + 1 < len(args):
+            return Path(args[i + 1])
+        if a.startswith("--r12="):
+            return Path(a.split("=", 1)[1])
+    return R12_STANDARD
+
+
+def r12_json_schreiben(ziel, messungen, grund=None, quelle="tools/rauch.py"):
+    """Schreibt die R12-Vorprüfung je Ansicht und Breite.
+
+    "gemessen" ist nur true, wenn JEDE Zeile messbar war — eine fehlende Messung bleibt
+    "nicht gemessen", nie eine 0."""
+    zeilen = list(messungen or [])
+    gemessen = bool(zeilen) and all(z.get("messbar") for z in zeilen)
+    if not gemessen and not grund:
+        gruende = [str(z.get("grund")) for z in zeilen if not z.get("messbar") and z.get("grund")]
+        grund = "; ".join(gruende) or "nicht gemessen: keine Breite gemessen"
+    daten = {"fassung": 1, "quelle": quelle, "gemessen": gemessen,
+             "grund": None if gemessen else grund,
+             "breiten": [z.get("breite") for z in zeilen],
+             **r12_grenzen(),
+             "messungen": [{"breite": z.get("breite"), "messbar": bool(z.get("messbar")),
+                            "grund": z.get("grund"), "ansichten": z.get("ansichten") or []} for z in zeilen]}
+    ziel = Path(ziel)
+    ziel.parent.mkdir(parents=True, exist_ok=True)
+    ziel.write_text(json.dumps(daten, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return daten
 
 
 class Leise(http.server.SimpleHTTPRequestHandler):
@@ -435,6 +524,8 @@ def main():
     exe = "--exe" in a
     sichtbar = "--sichtbar" in a
     gegenprobe = "--gegenprobe" in a
+    r12_pfad = r12_ziel(a)
+    r12_messungen, r12_geschrieben = [], False
     if not exe and "--ohne-bau" not in a:
         r = subprocess.run([sys.executable, str(HIER / "bauen.py")], cwd=HIER, capture_output=True, text=True, encoding="utf-8", errors="replace")
         if r.returncode:
@@ -451,6 +542,8 @@ def main():
             threading.Thread(target=server.serve_forever, daemon=True).start()
             edge = next((p for p in EDGE if p.exists()), None)
             if not edge:
+                r12_geschrieben = True
+                r12_json_schreiben(r12_pfad, [], grund="ohne Browser nicht gemessen: Edge/Chrome nicht gefunden")
                 raise SystemExit("Edge/Chrome nicht gefunden – oder mit --exe gegen das echte Programm prüfen.")
             profil = Path(tempfile.mkdtemp(prefix="labor-rauch-"))
             dport = freier_port()
@@ -487,6 +580,33 @@ def main():
                 if akt.get("geraete"):
                     text += f" · {akt['geraete']} Geräte frei"
                 print(f"{'✓' if not fehler else '✗'} {b:>4} px  {name:<22} {text}{'  ← ' + ' · '.join(fehler) if fehler else ''}")
+            # R12-Vorprüfung (CSS-02): je Breite die sichtbaren Bedienelemente je Ansicht. Gemessen
+            # wird mit dem Programm aus ethos.py, bewertet wird dort (r12_auswerten) — hier nur messen
+            # und ablegen. Der Exit-Code bleibt unverändert: die verbindliche Zahl liefert ethos --dom
+            # (VIS-05), das die harten Verträge klasse 6 / mitarbeit 3 durchsetzt.
+            try:
+                antwort = s.js(r12_js())
+            except Exception as e:                                      # noqa: BLE001
+                antwort = {"fehler": "JS: " + str(e)}
+            zeile = r12_zeile(b, antwort)
+            r12_messungen.append(zeile)
+            if zeile["messbar"]:
+                zahlen = [z for z in zeile["ansichten"] if z["zahl"] is not None]
+                hoechste = max(zahlen, key=lambda z: z["zahl"])
+                hart = [z for z in zahlen if z["name"] in ethos.R12_GRENZEN and z["zahl"] > ethos.R12_GRENZEN[z["name"]]]
+                text = f"{len(zahlen)} Ansichten gemessen · höchste Zahl {hoechste['zahl']} ({hoechste['titel']})"
+                if hart:
+                    text += " · R12 VERSTOSS harter Vertrag: " + ", ".join(
+                        f"{z['titel']} {z['zahl']} > {ethos.R12_GRENZEN[z['name']]}" for z in hart)
+                else:
+                    text += " · harte Verträge (klasse 6 / mitarbeit 3) eingehalten"
+                print(f"  {'✗' if hart else '·'} R12 {b:>4} px  {text}")
+            else:
+                print(f"  ✗ R12 {b:>4} px  {zeile['grund']}")
+        r12_daten = r12_json_schreiben(r12_pfad, r12_messungen)
+        r12_geschrieben = True
+        print(f"  R12-Vorprüfung {'gemessen' if r12_daten['gemessen'] else 'NICHT GEMESSEN'}"
+              f" · {len(r12_daten['messungen'])} Breiten · {os.path.relpath(r12_pfad, HIER)}")
         js_fehler = [f for f in s.ws.fehler if "Tauri" not in f and "__TAURI" not in f]
         if js_fehler:
             rot += 1
@@ -497,6 +617,12 @@ def main():
             return 0 if rot else 1
         return 1 if rot else 0
     finally:
+        if not r12_geschrieben:
+            try:
+                r12_json_schreiben(r12_pfad, r12_messungen,
+                                   grund="nicht gemessen: Lauf ohne vollständige R12-Messung beendet")
+            except Exception:                                          # noqa: BLE001
+                pass
         if exe:
             cdp.stop()
         if browser:

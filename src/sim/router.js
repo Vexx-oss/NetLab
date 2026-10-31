@@ -30,10 +30,10 @@ Sim.router = (() => {
       return;
     }
     if (!ifc.oben) { Sim._log(L, "verwerfen", g.id, port, f, `${g.name} ${ifc.name} ist abgeschaltet (shutdown) und nimmt nichts an.`, {grund: "PORT_SHUTDOWN"}); return; }
-    if (f.eth.dst !== ifc.mac && f.eth.dst !== IP.MAC_BROADCAST) { Sim._log(L, "verwerfen", g.id, port, f, `Der Frame ist an ${f.eth.dst} adressiert, nicht an ${g.name}.`); return; }
+    if (f.eth.dst !== ifc.mac && f.eth.dst !== IP.MAC_BROADCAST) { Sim._log(L, "verwerfen", g.id, port, f, `Der Frame ist an ${f.eth.dst} adressiert, nicht an ${g.name}.`, {harmlos: true}); return; }
     if (f.arp) return L3().arpEmpfangen(L, g, ifc, f);
     if (!f.ip) return;
-    if (!ifc.ip) { Sim._log(L, "verwerfen", g.id, port, f, `${g.name} ${ifc.name} hat keine IP-Adresse und verarbeitet keine IP-Pakete.`); return; }
+    if (!ifc.ip) { Sim._log(L, "verwerfen", g.id, port, f, `${g.name} ${ifc.name} hat keine IP-Adresse und verarbeitet keine IP-Pakete.`, {harmlos: true}); return; }
     ip(L, g, ifc, f);
   }
 
@@ -44,7 +44,7 @@ Sim.router = (() => {
     const bc = dst === "255.255.255.255" || (IP.istBroadcast(dst, ifc.maske) && IP.gleichesNetz(dst, ifc.ip, ifc.maske));
     if (bc) {
       if (h.broadcast && h.broadcast(L, g, ifc, f)) return;
-      Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} leitet Broadcasts nicht in andere Netze weiter.`);
+      Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} leitet Broadcasts nicht in andere Netze weiter.`, {harmlos: true});
       return;
     }
     const eigene = L3().eigeneIfc(L, g, dst);
@@ -54,7 +54,7 @@ Sim.router = (() => {
       const tr = L.info.art === "traceroute" && L.herkunft[f.ip.id] === L.info.von;
       Sim._log(L, "verwerfen", g.id, ifc.port, f, tr
         ? `${g.name}: TTL erreicht 0. ${g.name} verwirft die Probe und meldet „Time exceeded“ – so verrät es sich als Station auf dem Weg (traceroute).`
-        : `${g.name}: Die TTL ist abgelaufen (TTL ${f.ip.ttl}). Das Paket wird verworfen, ${f.ip.src} bekommt „Time exceeded“. Kreist es in einer Routing-Schleife?`, {grund: tr ? null : "TTL_EXPIRED"});
+        : `${g.name}: Die TTL ist abgelaufen (TTL ${f.ip.ttl}). Das Paket wird verworfen, ${f.ip.src} bekommt „Time exceeded“. Kreist es in einer Routing-Schleife?`, {grund: tr ? null : "TTL_EXPIRED", harmlos: tr});
       L3().icmpFehler(L, g, ifc, f, "time-exceeded", null, tr ? null : "TTL_EXPIRED");
       return;
     }
@@ -79,7 +79,7 @@ Sim.router = (() => {
 
   function lokal(L, g, ifcIn, eigene, f){
     const h = haken(g), wo = ifcIn.port || ifcIn.name;
-    if (!eigene.oben) { Sim._log(L, "verwerfen", g.id, wo, f, `Die Adresse ${eigene.ip} gehört zu ${g.name} ${eigene.name}, die Schnittstelle ist aber nicht aktiv.`); return; }
+    if (!eigene.oben) { Sim._log(L, "verwerfen", g.id, wo, f, `Die Adresse ${eigene.ip} gehört zu ${g.name} ${eigene.name}, die Schnittstelle ist aber nicht aktiv.`, {harmlos: true}); return; }
     if (L3().zustellen(L, g, eigene, f)) return;
     if (h.lokal && h.lokal(L, g, ifcIn, eigene, f)) return;
     if (f.icmp) {
@@ -301,7 +301,7 @@ Sim.router = (() => {
       const pools = Sim.host.dhcpAn(g) ? routerPools(g) : [];
       if (pools.some(p => IP.imNetz(ifc.ip, p.netz, p.maske))) { Sim.host.dhcpServer(L, g, ifc, f, pools); return true; }
       if (ifc.helper.length) { relay(L, g, ifc, f); return true; }
-      Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} ist hier kein DHCP-Server und hat an ${ifc.name} keine „ip helper-address“ – der Broadcast endet am Router.`);
+      Sim._log(L, "verwerfen", g.id, ifc.port, f, `${g.name} ist hier kein DHCP-Server und hat an ${ifc.name} keine „ip helper-address“ – der Broadcast endet am Router.`, {harmlos: true});
       return true;
     },
     udp(L, g, ifcIn, f){

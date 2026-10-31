@@ -594,5 +594,43 @@
       erwarte.gleich(skills.length, 30, "30 Fertigkeiten (S6a/S6b)");
       erwarte.wahr(Object.keys(DATEN.lehrtexte).length >= 46, "mindestens 46 Lehrtexte");
     });
+
+    /* ================= f) /31-/32-Vorbehalt deckungsgleich (WIS-06, 31.10.2026) =================
+       Befund inhalt-wiki F-06: Wiki und Lehrtext behaupteten absolut „Netz-ID/Broadcast nie vergebbar“
+       und „Hosts = 2^h − 2“; der eigene Subnetz-Lehrplan und die Formelsammlung nennen dagegen die
+       RFC-3021-Ausnahme (/31: zwei nutzbare Endpunkte, /32: genau eine Adresse). Ein Lernangebot,
+       das sich selbst widerspricht, ist ein Fachfehler – die Aussage muss überall dieselbe sein. */
+    pruefe("f: /31-Vorbehalt in Wiki und Lehrtext deckungsgleich (RFC 3021) – kein absolutes „nie“", () => {
+      const wikiText = id => {
+        const w = DATEN.wiki[id] || {};
+        return [w.kurz, w.merksatz, w.pruefungstipp, ...(w.abschnitte || []).map(a => (a.titel || "") + " " + (a.html || ""))].join(" ");
+      };
+      const ip = wikiText("lab.ip"), sub = wikiText("lab.subnetz");
+      const lt = DATEN.lehrtexte["lab.subnetz"] || {};
+      const quellen = [["Wiki lab.ip", ip], ["Wiki lab.subnetz", sub],
+        ["Lehrtext lab.subnetz E", String(lt.E || "")], ["Lehrtext lab.subnetz AP1", String(lt.AP1 || "")]];
+      for (const [was, text] of quellen) {
+        erwarte.passt(text, /RFC 3021/, was + ": nennt die Quelle RFC 3021");
+        erwarte.passt(text, /\/31/, was + ": nennt das /31-Netz");
+      }
+      erwarte.passt(quellen.map(q => q[1]).join(" "), /\/32/, "die /32-Einzeladresse kommt vor");
+      /* Die alte absolute Gegenregel darf nirgends mehr stehen. */
+      erwarte.falsch(/nicht vergebbar/.test(ip), "Wiki lab.ip behauptet nicht mehr absolut „nicht vergebbar“");
+      const merksatz = String((DATEN.wiki["lab.ip"] || {}).merksatz || "");
+      erwarte.falsch(merksatz === "Jede Adresse nur einmal vergeben, nie die Netz-ID und nie den Broadcast.",
+        "der alte absolute Merkkasten (wörtlich) ist ersetzt");
+      erwarte.passt(merksatz, /RFC 3021/, "der Merkkasten nennt die /31-Ausnahme (RFC 3021)");
+      erwarte.falsch(/2<sup>Hostbits<\/sup> − 2/.test(sub) && !/RFC 3021/.test(sub),
+        "Rechenweg lab.subnetz nennt die Formel nur mit Ausnahme (RFC 3021)");
+      /* Tabellenzeilen für /31 und /32 mit den nachgerechneten Werten (Blockgröße · nutzbare Adressen):
+         /31 = 2 Adressen im Block, beide nutzbar; /32 = 1 Adresse, nutzbar. */
+      erwarte.passt(sub, /<tr><td>\/31<\/td><td>254<\/td><td>2<\/td><td>2<\/td><\/tr>/, "Masken-Tabelle: /31 mit 2 nutzbaren Adressen");
+      erwarte.passt(sub, /<tr><td>\/32<\/td><td>255<\/td><td>1<\/td><td>1<\/td><\/tr>/, "Masken-Tabelle: /32 mit 1 nutzbaren Adresse");
+      /* Auch die dritte Quelle (Subnetz-Lehrplan/Formelsammlung) sagt dasselbe – sonst wäre der
+         Widerspruch nur verlagert. Geprüft wird der ganze Datenbestand als Text. */
+      const lehrplan = JSON.stringify(DATEN.subnetzLehrplan || {});
+      erwarte.passt(lehrplan, /RFC 3021/, "Lehrplan/Formelsammlung nennt dieselbe /31-Ausnahme (RFC 3021)");
+      erwarte.passt(lehrplan, /\/31/, "Lehrplan/Formelsammlung nennt /31");
+    });
   });
 })();

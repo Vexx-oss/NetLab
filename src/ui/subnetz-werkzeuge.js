@@ -512,6 +512,17 @@ UI.subnetzwerkzeuge = (() => {
       {name: "Technik", hosts: 26},
       {name: "Gäste", hosts: 10},
     ];
+    /* UIL-02: Lektion/Formelsammlung/Aufgabe liefert das Szenario als Preset ({basis, bedarf}).
+       Ohne Lesen zeigte die „Hilfe" eine fremde Lage statt der Aufgabe. */
+    const presetBasis = txt(opts && opts.basis).trim();
+    if (/^\d{1,3}(?:\.\d{1,3}){3}\/\d{1,2}$/.test(presetBasis)) basisFeld.value = presetBasis;
+    const presetBedarf = (opts && Array.isArray(opts.bedarf)) ? opts.bedarf : null;
+    if (presetBedarf && presetBedarf.length){
+      zeilen = presetBedarf.map((e, i) => ({
+        name: (e && typeof e.name === "string" && e.name.trim()) ? e.name.trim() : "Abteilung " + (i + 1),
+        hosts: ziffer(e && e.hosts, 1, 65000, 10),
+      }));
+    }
     const bedarf = E("div", "sw-bedarf");
     const ergebnis = ergebnisKasten();
     const rueck = E("p", "sw-rueckmeldung", "");
@@ -659,6 +670,19 @@ UI.subnetzwerkzeuge = (() => {
       {modus: "trunk", vlan: 1}, {modus: "access", vlan: 2}, {modus: "access", vlan: 3},
       {modus: "access", vlan: 3}, {modus: "trunk", vlan: 1},
     ];
+    /* UIL-02: Preset der Aufgabe/Lektion ({ports:[{port:"Fa0/2",modus,vlan}], trunk:{native}}).
+       Das Werkzeug kennt keine Allowed-Liste; trunk.native wird abgebildet, allowed nicht. */
+    const presetPorts = (opts && Array.isArray(opts.ports)) ? opts.ports : [];
+    for (const e of presetPorts){
+      const m = /^Fa0\/(\d{1,2})$/.exec(txt(e && e.port));
+      const idx = m ? Number(m[1]) - 1 : -1;
+      if (idx < 0 || idx >= ports.length) continue;
+      const modus = e && e.modus === "trunk" ? "trunk" : "access";
+      ports[idx] = {modus, vlan: ziffer(e && e.vlan, 1, 8, 1)};
+    }
+    if (opts && opts.trunk && typeof opts.trunk === "object"){
+      ports[ports.length - 1] = {modus: "trunk", vlan: ziffer(opts.trunk.native, 1, 8, 1)};
+    }
     let gewaehlt = 0;
     const portFlaeche = E("div", "sw-ports");
     const panel = E("div", "sw-port-panel");
@@ -959,12 +983,14 @@ UI.subnetzwerkzeuge = (() => {
       return {zerstoeren(){}};
     }
     let rest = 60, index = 0, richtig = 0, falsch = 0, serie = 0, serieBest = 0;
-    let gesperrt = false, beendet = false, timer = null, weiterTimer = null;
+    let gesperrt = false, beendet = false, timer = null;
     const protokoll = [];
     const zeit = E("span", "sg-zeit", "60 s");
     const stand = E("span", "sg-punkte", "Richtig 0 · Serie 0");
     const best = E("span", "sg-bestwert", "Bestwert " + bestwertText(meta.id));
-    const status = E("div", "sg-status", zeit, stand, best);
+    /* UIL-04: ehrlicher Zähler „x beantwortet“ statt „Karte x von 30“ (30 Karten in 60 s waren unerreichbar). */
+    const fortschritt = E("span", "sg-fortschritt", "0 beantwortet");
+    const status = E("div", "sg-status", zeit, stand, best, fortschritt);
     const frageFeld = E("div", "sg-fragebereich");
     buehne.append(status, frageFeld,
       E("p", "sg-hinweis", "Antworte mit einem Klick auf die passende Karte. Richtig gibt Pluspunkte, ein Fehler setzt die Serie auf null."));
@@ -977,7 +1003,6 @@ UI.subnetzwerkzeuge = (() => {
       const rueck = h("p", {class: "sg-rueckmeldung", "aria-live": "polite"});
       const rechenweg = E("div", "sg-rechenweg-liste", "");
       frageFeld.replaceChildren(
-        E("p", "sg-fortschritt", "Karte " + (index + 1) + " von " + fragen.length),
         E("h4", "sg-frage", f.frage),
         E("div", "sg-lage", f.lage.map(z => E("div", "sg-lage-zeile",
           E("span", "sg-lage-label", z.label), E("span", "sg-lage-wert", z.wert)))),
@@ -1007,17 +1032,14 @@ UI.subnetzwerkzeuge = (() => {
           E("p", "sg-rechenweg", "Schritt " + s.n + ": " + s.titel + " – " + s.text + " → " + s.ergebnis)));
       }
       stand.textContent = "Richtig " + richtig + " · Falsch " + falsch + " · Serie " + serie;
+      fortschritt.textContent = (index + 1) + " beantwortet";
       if (index + 1 >= fragen.length) { beenden(); return; }
-      /* „Weiter“ ist immer da. Bei richtiger Antwort geht es zusätzlich nach 1,8 s automatisch
-         weiter; bei falscher Antwort bleibt Rückmeldung samt Rechenweg stehen, bis „Weiter“
-         gedrückt wird (S11). */
+      /* UIL-04: Die Erklärung bleibt stehen, bis „Weiter“ gedrückt wird — kein Auto-Weiter mehr. */
       const weiter = K("Weiter", "sg-weiter", naechsteKarte, {"aria-label": "Nächste Karte"});
       frageFeld.append(weiter);
-      if (ok) weiterTimer = setTimeout(naechsteKarte, 1800);
     }
     function naechsteKarte(){
       if (beendet) return;
-      if (weiterTimer) { clearTimeout(weiterTimer); weiterTimer = null; }
       if (index + 1 >= fragen.length) { beenden(); return; }
       index += 1;
       gesperrt = false;
@@ -1034,7 +1056,6 @@ UI.subnetzwerkzeuge = (() => {
       if (beendet) return;
       beendet = true;
       if (timer) { clearTimeout(timer); timer = null; }
-      if (weiterTimer) { clearTimeout(weiterTimer); weiterTimer = null; }
       const punkte = richtig * 10 + serieBest * 2;
       rundeVerbuchen(protokoll, meta.id, punkte);
       const ergebnis = {
@@ -1068,7 +1089,6 @@ UI.subnetzwerkzeuge = (() => {
     return {zerstoeren(){
       beendet = true;
       if (timer) { clearTimeout(timer); timer = null; }
-      if (weiterTimer) { clearTimeout(weiterTimer); weiterTimer = null; }
     }};
   }
 
@@ -1209,16 +1229,18 @@ UI.subnetzwerkzeuge = (() => {
   }
 
   /* ---------------- Spiel 3 · VLAN-Patcher ---------------- */
+  /* UIL-04: Die Anforderung steht NUR als Szenario im Text — keine per-Port-Soll-Liste im DOM.
+     Die Daten in `anforderung` dienen der Bewertung; sie werden vor „Abgeben“ nicht gerendert. */
   const PATCHER_SZENARIEN = [
-    {titel: "Schulnetz", text: "Zwei Räume sollen je ein eigenes Broadcast-Netz bekommen; zwei uplink-Ports tragen alle VLANs.",
+    {titel: "Schulnetz", text: "Zwei Räume brauchen je ein eigenes Broadcast-Netz: Raum A an den Ports 1–2 (VLAN 2), Raum B an Port 3 und 5 (VLAN 4), die Gäste an den Ports 6–7 (VLAN 6). Die Uplinks liegen auf Port 4 und Port 8 (Trunk, alle VLANs).",
      anforderung: [{modus: "access", vlan: 2}, {modus: "access", vlan: 2}, {modus: "access", vlan: 4},
                    {modus: "trunk", vlan: 1}, {modus: "access", vlan: 4}, {modus: "access", vlan: 6},
                    {modus: "access", vlan: 6}, {modus: "trunk", vlan: 1}]},
-    {titel: "Werkstatt", text: "Drei Teams arbeiten getrennt; der Router hängt an einem Trunk-Port, ein weiterer Trunk führt zum Lager.",
+    {titel: "Werkstatt", text: "Drei Teams arbeiten getrennt: Team 1 an den Ports 1–2 (VLAN 3), Team 2 an den Ports 3–4 (VLAN 5), Team 3 an Port 5 und 7 (VLAN 7). Die Ports 6 und 8 sind Trunks (Router und Lager).",
      anforderung: [{modus: "access", vlan: 3}, {modus: "access", vlan: 3}, {modus: "access", vlan: 5},
                    {modus: "access", vlan: 5}, {modus: "access", vlan: 7}, {modus: "trunk", vlan: 1},
                    {modus: "access", vlan: 7}, {modus: "trunk", vlan: 1}]},
-    {titel: "Praxis", text: "Empfang und Labor sind getrennt; zwei Trunks verbinden die Etagen, ein Port bleibt für Gäste.",
+    {titel: "Praxis", text: "Empfang und Labor sind getrennt: Empfang an den Ports 1–2 (VLAN 2), Labor an Port 4 und 8 (VLAN 5), Gäste an Port 5 und 7 (VLAN 8). Die Ports 3 und 6 sind Trunks zu den Etagen.",
      anforderung: [{modus: "access", vlan: 2}, {modus: "access", vlan: 2}, {modus: "trunk", vlan: 1},
                    {modus: "access", vlan: 5}, {modus: "access", vlan: 8}, {modus: "trunk", vlan: 1},
                    {modus: "access", vlan: 8}, {modus: "access", vlan: 5}]},
@@ -1233,20 +1255,14 @@ UI.subnetzwerkzeuge = (() => {
     const auftrag = E("div", "sg-auftrag",
       E("p", "sg-auftrag-titel", sz.titel),
       E("p", "sg-auftrag-text", sz.text));
-    const anforderung = E("div", "sg-anforderung", sz.anforderung.map((a, i) => {
-      return E("p", "sg-anforderung-zeile", "Port " + (i + 1) + ": " +
-        (a.modus === "trunk" ? "Trunk (alle VLANs mit Tag)" : "Access in VLAN " + a.vlan));
-    }));
     const portFlaeche = E("div", "sg-ports");
     const panel = E("div", "sg-port-panel");
-    const diff = E("div", "sg-diff", "");
-    const rueck = E("p", "sg-rueckmeldung", "Stelle die Ports nach der Anforderung ein und prüfe dann.");
+    const rueck = E("p", "sg-rueckmeldung", "Stelle die acht Ports passend zum Szenario ein und gib dann ab.");
     rueck.setAttribute("aria-live", "polite");
-    const pruefen = K("Prüfen", "sg-pruefen", () => patcherPruefen(false));
-    const abgeben = K("Abgeben", "sg-abgeben", () => patcherPruefen(true));
+    const abgeben = K("Abgeben", "sg-abgeben", () => patcherPruefen());
     const feld = E("div", "sg-fragebereich");
-    buehne.append(auftrag, anforderung, E("p", "sg-feld-label", "Switch-Ports"), portFlaeche, panel,
-      E("div", "sg-fuss", pruefen, abgeben), rueck, diff, feld);
+    buehne.append(auftrag, E("p", "sg-feld-label", "Switch-Ports"), portFlaeche, panel,
+      E("div", "sg-fuss", abgeben), rueck, feld);
     function portText(p){
       return p.modus === "trunk" ? "Trunk · alle VLANs" : "Access · VLAN " + p.vlan;
     }
@@ -1287,64 +1303,48 @@ UI.subnetzwerkzeuge = (() => {
       portZeichnen();
       panelZeichnen();
     }
-    function patcherPruefen(abschluss){
+    /* UIL-04: „Abgeben“ ist die EINZIGE Bewertung. Früher verriet „Prüfen“ die Abweichungen vorab
+       (Prüfen → korrigieren → Abgeben ergab immer volle Punkte). Eine Vorab-Rückmeldung gibt es nicht
+       mehr; die Abweichungen stehen erst nach der Abgabe in der Auswertung. */
+    function patcherPruefen(){
       if (abgegeben) return;
-      const abweichungen = [];
-      for (let i = 0; i < 8; i++) if (!stimmt(i)) {
-        abweichungen.push({i, soll: sz.anforderung[i], ist: ports[i]});
+      abgegeben = true;
+      let rich = 0, fal = 0;
+      const protokoll = [];
+      for (let i = 0; i < 8; i++) {
+        const ok = stimmt(i);
+        if (ok) rich += 1; else fal += 1;
+        const a = sz.anforderung[i];
+        const sollText = a.modus === "trunk" ? "Trunk" : "Access in VLAN " + a.vlan;
+        const aufgabe = spielAufgabe({
+          id: "vlan-patcher-" + seed + "-" + i, art: "vlan-port", niveau: "E", titel: "VLAN-Patcher",
+          frage: "Wie muss Port " + (i + 1) + " konfiguriert sein?",
+          lage: [{label: "Anforderung", wert: sollText}], soll: sollText,
+          optionen: [sollText], rechenweg: [{n: 1, titel: "Anforderung lesen", text: "Port " + (i + 1) + " braucht " + sollText + ".", ergebnis: sollText}],
+        });
+        protokoll.push({aufgabe, richtig: ok});
       }
-      if (abschluss) {
-        abgegeben = true;
-        let rich = 0, fal = 0;
-        const protokoll = [];
-        for (let i = 0; i < 8; i++) {
-          const ok = stimmt(i);
-          if (ok) rich += 1; else fal += 1;
-          const a = sz.anforderung[i];
-          const sollText = a.modus === "trunk" ? "Trunk" : "Access in VLAN " + a.vlan;
-          const aufgabe = spielAufgabe({
-            id: "vlan-patcher-" + seed + "-" + i, art: "vlan-port", niveau: "E", titel: "VLAN-Patcher",
-            frage: "Wie muss Port " + (i + 1) + " konfiguriert sein?",
-            lage: [{label: "Anforderung", wert: sollText}], soll: sollText,
-            optionen: [sollText], rechenweg: [{n: 1, titel: "Anforderung lesen", text: "Port " + (i + 1) + " soll " + sollText + " sein.", ergebnis: sollText}],
-          });
-          protokoll.push({aufgabe, richtig: ok});
-        }
-        const punkte = rich * 10;
-        rundeVerbuchen(protokoll, meta.id, punkte);
-        const ergebnis = {
-          id: meta.id, punkte, richtig: rich, falsch: fal, serie: 0,
-          dauerSek: Math.max(0, Math.round((Date.now() - startZeit) / 1000)),
-          aufgaben: protokoll.map(e => ({frage: e.aufgabe.frage, richtig: e.richtig, soll: e.aufgabe.loesung.wert})),
-        };
-        const auswertung = E("div", "sg-auswertung", E("p", "sg-auswertung-titel", "Abweichungen je Port"));
-        for (let i = 0; i < 8; i++) {
-          const a = sz.anforderung[i];
-          const sollText = a.modus === "trunk" ? "Trunk" : "Access in VLAN " + a.vlan;
-          auswertung.append(E("div", "sg-auswertung-zeile",
-            E("p", "sg-auswertung-frage", "Port " + (i + 1) + ": " + (stimmt(i) ? "richtig" : "falsch")),
-            E("p", "sg-auswertung-soll", "Soll: " + sollText),
-            stimmt(i) ? null : E("p", "sg-auswertung-weg", "Ist: " + portText(ports[i]))));
-        }
-        const karte = ergebnisKarte("Ergebnis: VLAN-Patcher", [
-          ["Richtige Ports", rich], ["Falsche Ports", fal], ["Punkte", punkte],
-          ["Dauer", ergebnis.dauerSek + " s"], ["Bestwert", bestwertText(meta.id)],
-        ], auswertung);
-        spielAbschluss(ergebnis, meta, opts, feld, karte);
-        return;
+      const punkte = rich * 10;
+      rundeVerbuchen(protokoll, meta.id, punkte);
+      const ergebnis = {
+        id: meta.id, punkte, richtig: rich, falsch: fal, serie: 0,
+        dauerSek: Math.max(0, Math.round((Date.now() - startZeit) / 1000)),
+        aufgaben: protokoll.map(e => ({frage: e.aufgabe.frage, richtig: e.richtig, soll: e.aufgabe.loesung.wert})),
+      };
+      const auswertung = E("div", "sg-auswertung", E("p", "sg-auswertung-titel", "Abweichungen je Port"));
+      for (let i = 0; i < 8; i++) {
+        const a = sz.anforderung[i];
+        const sollText = a.modus === "trunk" ? "Trunk" : "Access in VLAN " + a.vlan;
+        auswertung.append(E("div", "sg-auswertung-zeile",
+          E("p", "sg-auswertung-frage", "Port " + (i + 1) + ": " + (stimmt(i) ? "richtig" : "falsch")),
+          E("p", "sg-auswertung-soll", "Soll: " + sollText),
+          stimmt(i) ? null : E("p", "sg-auswertung-weg", "Ist: " + portText(ports[i]))));
       }
-      diff.replaceChildren();
-      if (!abweichungen.length) {
-        rueck.className = "sg-rueckmeldung sg-ok";
-        rueck.textContent = "Keine Abweichung – alle acht Ports stimmen mit der Anforderung überein.";
-      } else {
-        rueck.className = "sg-rueckmeldung sg-bad";
-        rueck.textContent = abweichungen.length + " Port(s) weichen noch ab.";
-        for (const a of abweichungen) {
-          const sollText = a.soll.modus === "trunk" ? "Trunk" : "Access in VLAN " + a.soll.vlan;
-          diff.append(E("p", "sg-diff-zeile", "Port " + (a.i + 1) + ": soll " + sollText + " – jetzt " + portText(a.ist)));
-        }
-      }
+      const karte = ergebnisKarte("Ergebnis: VLAN-Patcher", [
+        ["Richtige Ports", rich], ["Falsche Ports", fal], ["Punkte", punkte],
+        ["Dauer", ergebnis.dauerSek + " s"], ["Bestwert", bestwertText(meta.id)],
+      ], auswertung);
+      spielAbschluss(ergebnis, meta, opts, feld, karte);
     }
     zeichnen();
     return {zerstoeren(){ abgegeben = true; }};

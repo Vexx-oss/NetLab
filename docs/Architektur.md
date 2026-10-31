@@ -79,6 +79,8 @@ Tests: `sh tools/test.sh [filter]` (Node 24 portabel; früher WSL). Testdateien 
   `maskeZahl(p)`, `macAus(n)`, `MAC_BROADCAST` (`src/kern/netz.js:47-69`).
 - Frühstart: `window.__LABOR_SPEICHER__` (Tauri, von der Hülle vor allen Seitenskripten gesetzt) hat Vorrang
   vor `localStorage["netzwerk-labor"]`; ein Lesefehler startet leer mit Meldung (`src/kern/basis.js:134-147`).
+  Ein kaputter oder zu neuer Browser-Stand wird **vor** dem ersten Schreiben unter `netzwerk-labor-beschaedigt`
+  aufbewahrt; die Meldung nennt die Sicherung (`SPEICHER_SCHEMA_MAX = 3`, Spielstand v:3) (KRN-03).
 
 ## 4 · Modell (Konfiguration ist Daten)
 
@@ -212,6 +214,7 @@ Ereignis = {
   proto:"ARP"|"ICMP"|"TCP"|"UDP"|"DHCP"|"DNS"|"HTTP",
   grund:null|"ARP_NO_REPLY"|…,      // bei verwerfen/info
   warnung:true,                     // optional: nur bei Hinweisen (z. B. CDP NATIVE_MISMATCH) – keine Ursache; _erster/stelle/erklaere werten solche Ereignisse NICHT als entscheidende Stelle
+  harmlos:true,                     // optional: normales/gewolltes Verwerfen ohne Grund (z. B. IOS verwirft Paket während ARP, NIC verwirft fremde MAC) – kein Fehler; _erster/stelle/erklaere werten es nicht als Ursache
   text:"SW1 kennt MAC 00:1a… noch nicht und flutet in VLAN 10"   // kurzer Klartext
 }
 Frame = {
@@ -226,6 +229,7 @@ Frame = {
 
 Ereignis-Budget je Lauf 5000; gerissen → `abbruch:"STORM"`, Grund `STORM`.
 Warnungen (`warnung:true`) sind Hinweise und dürfen die Diagnose nicht verfälschen: `Sim._erster`, `Sim.stelle` und `Sim.erklaere` überspringen sie (SIM-02, 31.10.2026); die Warnung bleibt vollständig in der Trace. Virtuelle Zeit: 1 ms je Kabel, Timeout Ping 2000 ms (IOS) bzw. 4000 ms (Windows).
+Verwerfen ohne Fehlergrund trägt `harmlos:true` (normal/gewollt). Jedes Verwerfen hat damit `grund` oder `harmlos` (SIM-05/06); die 21 bisher unbegründeten Stellen sind so klassifiziert.
 
 ### 5.3 Gründe (Codes)
 
@@ -290,6 +294,23 @@ CLI-05/3.1). Ist ein RSA-Schlüssel gesetzt, erscheint stattdessen die Kommentar
 Teil der running-config. Folge: der bisherige Assert in `tests/cli-ios-ssh.test.js` („ip ssh version 2“ im
 Text) wird auf diese ehrliche Kennzeichnung umgestellt; der SSH-Zustand bleibt über `running.sshSchluessel`
 geprüft (keine Abschwächung).
+
+**DHCP-Snooping am Switch (CLI-03, 31.10.2026).** `running.snooping = {an: bool, vertraut: [Port, …]}` ist Teil
+der laufenden Konfiguration. Die running-config zeigt `ip dhcp snooping` genau dann, wenn `an` gilt, und je
+vertrautem Port ` ip dhcp snooping trust` im interface-Block. Beide Zeilen sind über `configure terminal`
+wieder einlesbar; die trust-Zeile ändert ausschließlich `vertraut`, nie den globalen Schalter. `ip dhcp snooping
+trust` ist nur in `(config-if)` und `(config-if-range)` zulässig; im globalen Konfigurationsmodus antwortet die
+Konsole mit Fehler und Hinweis auf den Schnittstellenmodus. `no ip dhcp snooping trust` entfernt den Port,
+`no ip dhcp snooping` schaltet global aus und lässt die Portliste stehen.
+
+`show ip dhcp snooping` (nur Switch) zeigt „Switch DHCP snooping is enabled|disabled", „DHCP snooping is
+configured on following VLANs: 1", die Tabelle der vertrauten Ports („Interface"/„Trusted") und die Zeile
+„DHCP snooping verworfen (seit dem letzten Neustart)" je Port. Die Zähler stammen aus dem Laufzeitspeicher
+`netz.zustand[id].snooping[port].verworfen` (`src/sim/switch.js:64-69`, § 5.4) und sind ausdrücklich
+Laufzeitdaten, kein Konfigurationszustand — deshalb stehen sie nicht in der running-config. Bei ausgeschaltetem
+Snooping nennt die Ausgabe den Befehl zum Einschalten. **Ehrliche Grenze:** Das Modell bildet Snooping nur über
+das Port-Vertrauen ab, nicht über eine VLAN-Zuordnung; echte Cisco-Hardware wurde nicht geprüft. Die
+Roundtrip-Invariante aus § 6.1 gilt unverändert.
 
 ### 6.2 Einleseformen und Grenzen (verbindlich, 31.10.2026)
 
@@ -380,6 +401,35 @@ Bus-Ereignisse: `netz-geaendert`, `ticket-neu`, `ticket-geloest`, `zustand-geaen
 
 **Gemessen (06.10.2026, Edge headless, Einzeldatei-Fassung, 1366×768):** `Spiel.speichern()` 2010 → **1512 ms** bis zum Schreibvorgang, Netzwechsel 2415 → 1515 ms, Auftragsabschluss 2436 → **6,7 ms** (Gegenprobe des Prüfers: 22 ms), Kauf 3,8 ms (Prüfer: 24 ms), Verstecken der Seite 0 → 1 Schreibvorgang. Spielstand: **26.554 B** beim Start, 27.420 B nach einem Abschluss, 102.799 B bei 30 Postfach-Instanzen. Grenze: ein Prozess-Tod **ohne** `hidden`-Wechsel verliert die letzten ≤ 1500 ms.
 
+**Sicherung wiederherstellen (3.0.0, SPL-02).** `Spiel.sicherung()` liefert `{v, zeit, stand}` aus dem Schlüssel
+`labor-sicherung` oder `null`. Neu ist der Rückweg:
+
+- `Spiel.sicherungWiederherstellen()` prüft die Sicherung: fehlt sie → `{fehler:"keine-sicherung", grund}`;
+  `stand` fehlt/unbrauchbar → `{fehler:"stand", grund}`; `v > Spiel.VERSION` → `{fehler:"fassung", grund}`.
+  In allen Fehlerfällen bleibt der laufende Stand unverändert und die Sicherung erhalten.
+- Bei Erfolg: `store.set("labor", stand)` → `Spiel.laden()` (migriert alte Stände) → `Spiel.sofortSpeichern()`
+  → Sicherung **verbrauchen** (`store.set(Spiel.SICHERUNG, null)`); Rückgabe `{ok:true, v, zeit}`. Der laufende
+  Spielstand wird ersetzt; die Einstellungen unter `einst` bleiben.
+- **Einmal-Verbrauch:** eine zweite Wiederherstellung meldet „keine Sicherung" (sonst spielte ein späterer Start
+  erneut einen Altstand ein).
+- Anzeige/Aufrufer: Knopf im Import-/Spielstand-Abschnitt (`src/ui/karriere.js`, SPL-02b) mit Datum aus
+  `Spiel.sicherung().zeit`; Test in `tests/spiel-sicherung.test.js` (Stand A → Stand B importieren → Sicherung
+  liefert A → Wiederherstellen setzt Euro/Ruf/erledigt/postfach auf A und schreibt `labor`; zweiter Ruf
+  „keine Sicherung").
+
+**Spielstand-Migration 2.9.0 → 3.0.0 (neu 3.0.0, SPL-10).** Die Schemaversion des Spielstands bleibt `labor.v = 3`:
+ein echter 2.9.0-Stand trägt v:3 und wird unverändert übernommen (unbekannte Felder bleiben erhalten). Ältere
+Stände (v < 3 oder ohne v) migriert `Spiel.laden()`; **vor** der Migration legt `laden` die Sicherung
+`labor-sicherung` an (bestehendes Verhalten, siehe oben), fehlende Pflichtfelder ergänzen `migrieren` und die
+`Spiel.ergaenzer`-Kette, unbrauchbare Einträge (z. B. `postfach`/`kunden`) werden verworfen statt zu werfen.
+Ein ganzer 2.9.0-Export (`format:"netzwerk-labor"`, `speicher`) wird über `store.initialisieren` + `Spiel.laden()`
+übernommen; ein darin enthaltener `klassenraum`-Altstand (fassung 1) wird beim Lesen nach fassung 2 migriert
+(KLR-01a). Eine im Export enthaltene `labor-sicherung` bleibt Sicherung und wird nicht der laufende Stand.
+**Fehlerfälle:** `labor.v > Spiel.VERSION` weist `Spiel.importPruefen` ab; ein Stand ganz ohne v gilt als v:0 und
+wird migriert (kein stiller Verlust). **Abnahme:** `tests/spielstand-migration.test.js` mit ≥ 8 Zusicherungen
+(v:3 unverändert, v:1→v:3 mit Sicherung, kaputte Felder repariert, unbekannte Felder bleiben, Klassenraum
+fassung 1→2, zu neuer Stand abgewiesen) + Gegenprobe: fehlt in einer Kopie ein Pflichtfeld, wird die Prüfung rot.
+
 ### 7.5 Postfach-Lebenszyklus (3.0.0, SPL-01) — verbindlicher Vertrag (31.10.2026)
 
 Tickets mit `quelle:"wiederholung"` entstehen an zwei Stellen: `Spiel.tag.bereitschaftStarten()` (Tages-Bereitschaft)
@@ -406,34 +456,46 @@ und `Spiel.wiederholungAnlegen()` (nach „Lösung vorführen"). Verbindlich:
 Plattform = { name:"tauri"|"browser", version,
   impl,                                        // beim ersten Zugriff gewählt: Tauri nur bei window.__TAURI__,
                                                // sonst Browser (src/plattform/plattform.js:6-9)
-  ladenSync() → { daten, meldung },            // Altvertrag, 0 Aufrufer (KRN-02)
   speichern(daten) → Promise,                  // Tauri: invoke("speichern", {json}), atomar + Sicherungen
   fenster:{ modus(m), immerOben(b), position(ecke), groesse(b, hoehe), zeigen(), verstecken(),
             beenden(), zustand() },
-  abzeichen(n, text), benachrichtigen(text),   // benachrichtigen: 0 Aufrufer (KRN-02)
+  abzeichen(n, text),
   autostart(b) → Promise, autostartStatus() → Promise,
   datei:{ exportieren(name, text) → Promise, importieren() → Promise<String|null> },
-  kann(funktion) → { ja, grund },              // bekannte Funktionen: immerOben, tray, autostart,
-                                               // hotkey, leiste, klickdurch, vollbildErkennen,
-                                               // benachrichtigen; unbekannt → ja:false (KRN-02)
+  kann(funktion) → { ja, grund },              // Fähigkeitsmatrix, siehe unten
   an(ereignis, fn),
   info() → { os, sitzung, kann?, gruende?, selbsttest? } }
 ```
 
-**Ereignisse, die die Tauri-Hülle tatsächlich liefert:** `modus-extern`, `zweiter-start`, `ruhe`,
-`labor-beenden` (`src/plattform/plattform-tauri.js:19-24`). Der Vertrag nennt **keine** `tray-klick`- oder
-`hotkey`-Brücke: die Abos in `src/ui/start.js:102-105` feuern nicht (KRN-02).
+**Fähigkeitsmatrix (KRN-02, verbindlich).** Die acht Fähigkeiten sind `immerOben`, `tray`, `autostart`,
+`hotkey`, `leiste`, `klickdurch`, `vollbildErkennen`, `benachrichtigen`. `kann(f)` liefert immer
+`{ja:boolean, grund:string|null}`:
+
+- **Tauri:** ausschließlich aus `window.__LABOR_PLATTFORM__.kann`/`gruende` (Rust `fenster::info`,
+  `shell/src-tauri/src/fenster.rs:489-519`); fehlt die Ermittlung, ist die Antwort `ja:false` mit Grund;
+  eine unbekannte Funktion ist `ja:false` („Diese Funktion kennt das Labor nicht.").
+- **Browser:** alle acht `ja:false` mit je einem Satz Grund; unbekannt ebenfalls `ja:false`.
+- Kein Adapter antwortet „im Zweifel ja" (Befund KRN-B07). `benachrichtigen` ist als Fähigkeit geführt, die
+  Funktion ist nicht gebaut: beide Adapter melden `ja:false` mit Grund; der Einstellungs-Schalter ist dadurch
+  deaktiviert und nicht wirkungslos.
+
+**Ereignisse (Tauri):** `modus-extern`, `zweiter-start`, `ruhe`, `labor-beenden` sowie `tray-klick`,
+`hotkey`, `oeffnen` — die Hülle emittiert die drei letzteren selbst mit der Quelle als Ereignisnamen
+(`emit(quelle)` in `fenster::umschalten`, `shell/src-tauri/src/fenster.rs:327`);
+`src/plattform/plattform-tauri.js` reicht sie an die Seite. Die Abos in `src/ui/start.js:102-105` sind damit
+**keine toten Abos** mehr (KRN-02, vorher Befund KRN-B06).
 
 **Rust-Befehle (invoke):** `speichern{json}`, `fenster_modus{modus}`, `fenster_groesse{b,h}`,
 `fenster_ecke{ecke}`, `fenster_zustand`, `fenster_knopf`, `immer_oben{an}`, `abzeichen{n,text}`,
 `autostart{an}`, `autostart_status`, `exportieren{name,inhalt}`, `importieren`, `plattform_info`,
 `ruhe{an}`, `beenden`, `selbsttest_ergebnis{json}` (`shell/src-tauri/src/main.rs:154-155`).
 
-**Bekannte Abweichungen (nicht Vertrag; KRN-04/KRN-02):** Browser-`importieren` löst bei Abbruch nie auf
-(`src/plattform/plattform-browser.js:52-58`); Browser-`exportieren` meldet `true` ohne Dateinachweis
-(`:44-51`); Browser-`kann` liefert für Unbekanntes `ja:true` (`:60`), Tauri-`kann` ebenfalls (`:76-79`);
-`benachrichtigen` ist in beiden Adaptern wirkungslos.
-
+**Datei-API (KRN-04, verbindlich).** `importieren()` löst in beiden Adaptern **immer** auf (`String|null`);
+Abbruch = `null` (Browser: `cancel` des Dateifelds; Tauri: Dialog-Abbruch). `exportieren()` ist nur `true`, wenn
+der Weg erfolgreich war (Tauri: `Ok(true)`; Browser: Blob/URL/Klick ohne Fehler — ein echter Download ist dort
+nicht belegbar); Fehler/Abbruch = `false`, Tauri meldet zusätzlich `datei-fehler` `{art, fehler}` auf dem Bus.
+Die früheren toten Exporte Synchron-Laden und Systembenachrichtigung sind mit KRN-02 entfernt (0 Aufrufer,
+0 Exporte).
 
 ## 9 · Oberfläche (`UI`)
 
@@ -821,7 +883,7 @@ Speicher = {
   letzte: null,                   // zuletzt gelesener Code/Ergebnis (Anzeige)
   zaehler: 3                      // monoton, speist Sitzungskennung und Wunsch-Variante
 }
-/* Jede Sitzung hat genau diese 15 Felder: */
+/* Jede Sitzung hat genau diese 16 Felder (3.0.0: diagnose neu): */
 Sitzung = {
   id: 7,                          // Sitzungskennung 1..31 (5 Bit im Auftragscode)
   titel: "Klassenraum-Auftrag",
@@ -837,7 +899,8 @@ Sitzung = {
   dauerMin: 10,                   // geschätzte Dauer in Minuten
   plaetze: 20,                    // Klassengröße, 0 = nicht eingestellt, sonst 1..31
   erstellt: 1759706400000,        // ms, jetzt()
-  ergebnisse: {}                  // Abbildung platz → {platz, sterne, dauerS, versuche, code, zeit, quelle}
+  ergebnisse: {},                 // Abbildung platz → {platz, sterne, dauerS, versuche, code, zeit, quelle}
+  diagnose: {}                    // 16. Feld (3.0.0, KLR-05a): {[schritt]: anzahl} — anonyme H-Code-Zähler je Schritt; fehlt = {}
 }
 ```
 
@@ -853,7 +916,7 @@ Beide Richtungen **werfen nie** — fremdes/beschädigtes JSON ergibt `{fehler:"
 
 ### 12.2 API — `Spiel.klassenraum`
 
-**18 Namen (Stand 2.9.0, gemessen an der Rückgabe von `src/spiel/klassenraum.js:448-450`):**
+**18 Namen (Stand 2.9.0, gemessen an der Rückgabe von `src/spiel/klassenraum.js:448-450`; 3.0.0 kommt auf 22 öffentliche Namen):**
 `erzeugen` · `ausCode` · `sitzung` · `ergebnisCode` · `ergebnisLesen` · `ergebnisEintragen` ·
 `hilfeCode` · `hilfeLesen` · `exportieren` · `importieren` · `netzkennwert` · `tauglicheFertigkeiten` ·
 `platz` · `platzSetzen` · `plaetze` · `plaetzeSetzen` · `abnehmen` · `tabellen`.
@@ -875,6 +938,48 @@ Beide Richtungen **werfen nie** — fremdes/beschädigtes JSON ergibt `{fehler:"
 | `platz()` · `platzSetzen(z)` · `plaetze()` · `plaetzeSetzen(z)` | `0..31` · `{ok}` \| `{fehler:"wahl"}` | eigener Platz · Klassengröße der aktiven Sitzung (0 = nicht eingestellt) |
 | `abnehmen(inst)` | `{ok, klassenraum, bestanden, sterne, abnahme, lernen, def, inst, …}` | Spiel erhält kein Geld/keinen Ruf; `lernen` läuft über den normalen Lernmotor |
 | `tabellen()` | `{auftraege, skills, …}` | Prüffläche; eingefrorene Tabellen (§ 12.8) |
+
+**3.0-Erweiterung KLR-04a (Sitzungen löschen/ersetzen, keine stille Kappung).** Verbindlich:
+
+| Aufruf | Rückgabe | Verhalten |
+|---|---|---|
+| `erzeugen({…, bestaetigen:true})` | `sitzung` \| `{warnung:"sitzung-hat-ergebnisse"}` | ersetzt die **aktive** Sitzung mit Ergebnissen nur mit `bestaetigen:true`; die alte Sitzung bleibt in `sitzungen[]` erhalten (KLR-01a). **32. Sitzung** (alle Kennungen 1..31 belegt) → `{fehler:"sitzung", grund}` ohne Änderung. |
+| `sitzungLoeschen(id, {bestaetigen?})` | `{ok:true, geloescht, aktiv}` \| `{warnung:"sitzung-hat-ergebnisse"}` \| `{fehler:"sitzung", grund}` | **neu 3.0.0 (KLR-04a):** löscht eine gespeicherte Sitzung samt Ergebnissen. Unbekannte id → Fehler, kein stilles Nichts. Hat die Sitzung Ergebnisse, nur mit `bestaetigen:true` (sonst Warnung ohne Änderung). War sie aktiv, wird `aktiv` auf die zuletzt angelegte verbleibende Sitzung gesetzt oder auf `null`; frei gewordene Kennung darf wieder vergeben werden; `zaehler` bleibt monoton. |
+| `erzeugen({…, plaetze})` | … | **kein stilles Klemmen mehr:** `plaetze > 31` oder negativ → `{fehler:"wahl", grund}` ohne Anlegen (vorher still 0); `0` bleibt „nicht eingestellt". |
+
+Abnahme: `tests/klassenraum-sitzungen.test.js` (oder neue Datei) — 31 Sitzungen anlegen → 32. ergibt `{fehler:"sitzung"}` und Speicher unverändert; `sitzungLoeschen` ohne `bestaetigen` bei Ergebnissen → Warnung ohne Änderung; mit `bestaetigen:true` → Sitzung weg, `aktiv` sauber, freie Kennung wieder vergebbar; Gegenprobe rot bei eingeschmuggeltem Fehlverhalten.
+
+**Ergebnis-Korrektur (KLR-04a, 31.10.2026) — ergänzt die Tabelle:**
+
+| Aufruf | Rückgabe | Verhalten |
+|---|---|---|
+| `ergebnisEintragen(code, {ersetzen?, bestaetigen?})` | `{ok, neu, platz, sterne}` \| `{ok:true, neu:false, ersetzt:true}` \| `{warnung:"platz-hat-ergebnis"}` | derselbe Code bleibt idempotent (`neu:false`, Grund „doppelt"); ein **anderer** Code am selben Platz ersetzt nur mit `ersetzen:true` **und** `bestaetigen:true`, sonst `{warnung:"platz-hat-ergebnis"}` ohne Änderung. |
+| `ergebnisEntfernen(platz, {bestaetigen?})` | `{ok:true, entfernt:platz}` \| `{fehler:"platz", grund}` \| `{fehler:"wahl", grund}` | **neu 3.0.0 (KLR-04a):** entfernt den Eintrag am Platz aus der **aktiven** Sitzung; kein Eintrag dort → `{fehler:"platz"}` (kein stilles Nichts); Platz außerhalb 0..31 → `{fehler:"wahl"}`. Die Rückfrage [Abbrechen][Ersetzen][Entfernen] führt die Oberfläche (task-41). |
+
+Grenz-Signale: `ergebnisEntfernen` meldet unzulässige Plätze als `wahl`; `ergebnisEintragen` behält für
+kaputte Codes die Vertragsklassen aus § 12.3 (`länge`/`zeichen`/`prüfziffer`), damit bestehende Tests und
+UI-Texte gültig bleiben. `erzeugen({plaetze > 31})` → `{fehler:"wahl"}` (siehe voriger Absatz).
+
+**API-Umfang 3.0.0:** öffentlich sind **25 Namen** — die 18 oben plus `sitzungen`, `sitzungWaehlen`, `sitzungLoeschen`, `ergebnisEntfernen`. `migrierenStand` (SPL-10) ist **interner Helfer** und wird nur von `Spiel.laden()` aufgerufen, nicht von der Oberfläche; ihn führen Doku/Test als „intern“.
+
+**Diagnose-Aggregat (KLR-05a, 31.10.2026).** Anonyme Zähler der gelesenen Hilfecodes je „Schritt" (= erfüllte Ziele):
+
+| Aufruf | Rückgabe | Verhalten |
+|---|---|---|
+| `diagnoseZaehlen(code)` | `{ok:true, schritt, anzahl}` \| `{fehler, grund}` | liest einen H-Code über `hilfeLesen` und zählt ihn in der **Sitzung des Codes** (auch wenn eine andere aktiv ist, analog `ergebnisEintragen`). Unbekannte Sitzung → `{fehler:"sitzung"}`; unlesbarer Code → bestehende Codec-Fehlerklassen. Wiederholtes Einlesen zählt erneut (bewusste Grenze, kein Personenbezug, keine Dedup-Daten). |
+| `diagnose()` | `{plaetze, gesamt, schritte:[{schritt, anzahl}]}` | anonymes Ziel-Histogramm der **aktiven** Sitzung; `plaetze` ist der Nenner für „Schritt k: n von 20“, `schritte` aufsteigend, nur beobachtete Schritte. Keine Einzelzuordnung, kein Personenbezug. |
+
+Abnahme: `tests/klassen-diagnose.test.js` — 20 H-Codes (5×Schritt 1, 7×Schritt 2, 8×Schritt 3) → Zählung 5/7/8, gesamt 20; Gegenprobe: ein eingeschmuggeltes Personenfeld (`name`/`platz`) macht rot; keine Einzelzuordnung im Speicher. Kein neues Bedienelement (R12 bleibt 6; Anzeige = KLR-05b).
+
+**20-Übersicht (KLR-08a, 31.10.2026) — ergänzt die Tabelle:**
+
+| Aufruf | Rückgabe | Verhalten |
+|---|---|---|
+| `uebersicht()` | `null` \| `{plaetze, eingerichtet, dauerMin, erstellt, abgegeben:[platz], offen:[platz], fertig, offenAnzahl, ohnePlatz, restMinuten, abgelaufen}` | **neu 3.0.0 (KLR-08a):** reine Daten der **aktiven** Sitzung, keine Namen. `abgegeben` = Plätze mit Ergebnis (aufsteigend); `offen` = Plätze 1..plaetze ohne Ergebnis (aufsteigend); `fertig`/`offenAnzahl` = Längen; `ohnePlatz` = Einträge mit Platz 0 oder > plaetze; `restMinuten` = max(0, ceil((erstellt + dauerMin·60000 − jetzt())/60000)), `abgelaufen` = restMinuten 0. `plaetze:0` → `eingerichtet:false`, `offen:[]`, `offenAnzahl:0` (kein erfundener Nenner); ohne aktive Sitzung `null`. |
+
+`erzeugen({…})` **erbt die Klassenstärke:** fehlt `plaetze` beim Anlegen, übernimmt die neue Sitzung die Klassengröße der bisher aktiven Sitzung (sichtbar statt still 0); ein ausdrückliches `plaetze` (auch 0) gewinnt.
+
+Abnahme: `tests/klassen-uebersicht.test.js` — plaetze 20, Ergebnisse auf 1/2/5, T+2 min bei dauerMin 10 → fertig 3, offenAnzahl 17, offen 3/4/6..20, restMinuten 8; Grenzfälle plaetze 0, alle 20 abgegeben, abgelaufen, keine Sitzung; Klassenstärke-Erbe getestet.
 
 **Öffnungsweg (verbindlich).** Ein neuer Auftrag entsteht **nur** über
 `Spiel.instanzErstellen({ticketId | gen:{skill, seed}, seed, quelle:"klassenraum", ohneFlow:true})` —
@@ -1048,6 +1153,7 @@ hier zuerst die Datenform.
 | Prüfmodus | `python tools/stand.py --pruefen` vergleicht erzeugten Text mit den Dateien; Abweichung → Exit 1 mit betroffener Zeile |
 | Pflichtfelder | Fassung, Baukennung, Tests (grün/gesamt/übersprungen), Testdateien, headless Module, Bau-Module, `src/`-Dateien und -Zeilen (Methode benannt), Einzeldatei Bytes + SHA256, Inhalte (Tickets, Minis, Injektoren, Trainings, Wiki-Seiten, Fertigkeiten), `docs/doku`-Seiten |
 | Geltung | README, Liesmich, AGENTS, Bauen, SITZUNGSABSCHLUSS und CHANGELOG nennen diese Zahlen nur noch über `STAND.md`; historische Abschnitte bleiben unangetastet |
+| R12-Messung | Rohmessung `Nachweise/rauch/r12.json` (`rauch.py --r12`, je Breite × Ansicht, `gemessen:false` + Grund statt 0); verbindliche Datei `Nachweise/3.0/r12.json` (`ethos.py --dom --r12`); eine Zahlenquelle ist die Zeile „R12 Bedienelemente“ in `docs/STAND.md`; Norm = **gemessene Ratsche**: Anzahl Verstöße über der Grenze aus `tests/stil-stand.json`, Zuwachs = ROT |
 
 ### 16.2 Skip-Gate (2.1 S1)
 
@@ -1132,6 +1238,27 @@ S8 Fassung 2.1.0. Es gilt weiter: ein Schreiber je Datei, keine halbfertigen Bei
 | Prüfung | Alle **30** Fertigkeiten erreichbar (auch Stufe 6 und `lab.portsec`); Blueprint je AP1/AP2 (Fertigkeitssets), 3 Aufgaben/25 min und IHK-Notenschlüssel unverändert |
 | Abnahme-Regression | Basis-Paare zusätzlich zu ICMP: **Dienste** (HTTP, DNS, DHCP, Druckfreigabe/Port 445) und **Drucker-Endgeräte**; mindestens **5** Dienst-/Drucker-Fälle in den Tests; `REGRESSION_MAX` darf dafür angehoben werden; keine neue Datenform |
 
+**Prüfung ist hilfefrei (LRN-01, 3.0.0).** `Spiel.pruefung.hilfeGesperrt(inst, optionen)` ist wahr, wenn
+`optionen.pruefung === true`, wenn `inst.quelle === "pruefung"`, oder wenn `Spiel.pruefung.aktiv()` einen laufenden
+Prüfungstag liefert. Dann liefern die vier Hilfe-Flächen leere/null-Werte: `Spiel.hilfe.passend → []`,
+`Spiel.hilfe.leiter → []`, `Spiel.hilfe.geruest → null`, `Spiel.hilfe.syntaxBruecke → null`; die Umwege ebenfalls:
+`Spiel.hilfe(inst) → {fehler:"prüfung", grund}`, `Spiel.vorfuehren(inst) → []`, `Spiel.vorfuehrenSchritt → null`,
+`Spiel.seniorFaellig → false`, `Spiel.hilfe.anfaengerSchritte → []`. Außerhalb der Prüfung bleibt alles unverändert;
+die Oberfläche darf zusätzlich `{pruefung:true}` mitgeben (Konsole/UI setzen das Flag aus `Spiel.pruefung.aktiv()`).
+Abnahme: `tests/spiel-pruefung-hilfe.test.js` — Gegenprobe: Hilfe-Aufrufe in der Prüfung → leer/Fehler; dieselben
+Aufrufe ohne Prüfungszustand unverändert (nicht leer); Flag `pruefung:true` sperrt auch ohne laufende Prüfung.
+**IHK-Note exakt, ohne Rundung (LRN-03, 3.0.0).** Der Notenschlüssel vergleicht **exakt**: `note(p)` = 1 ab p≥92,
+2 ab 81, 3 ab 67, 4 ab 50, 5 ab 30, sonst 6 — `note(91.99)=2`, `note(92)=1`, `note(80.5)=3`, `note(66.9)=4`.
+`Spiel.pruefung.abgeben()` speichert den **exakten** Prozentwert (kein `Math.round`); gerundet wird nur für die
+Anzeige. Neu: `Spiel.pruefung.bestanden(p)` = `p >= PRUEFUNG.BESTANDEN_AB` (exakt: 49,99 % ist nicht bestanden).
+Kombinationstest 3 Aufgaben × 1–6 Ziele: 0 Fälle unter 92 % mit Note 1. Abnahme: `tests/pruefung-note.test.js`
+(Grenzfälle exakt, Kombinationstest, bestanden-Grenze) + bestehende `tests/pruefung.test.js` bleibt grün.
+**Fehlende Prüfungsaufgabe zählt 0 (LRN-04, 3.0.0).** Verschwindet eine Prüfungsinstanz vor der Abgabe (z. B. beim
+Laden bereinigt), wird sie **nicht** übersprungen: `Spiel.pruefung.abgeben()` legt einen Teil mit
+`{fehlt:true, anteil:0, bestanden:false}` an; der Nenner bleibt fest `Spiel.PRUEFUNG.AUFGABEN` (3), nicht
+`teile.length`. Folge: 2 von 3 gelöst → 66,67 Punkte (Note 4), nicht 100/Note 1; voll gelöst bleibt 100/Note 1.
+Abnahme: `tests/pruefung-abgeben.test.js` — voll gelöst 3 Teile/100/Note 1; eine Instanz entfernt →
+`teile.length` 3, `fehlt:true`, punkte ≤ 67, Note 4 (Gegenprobe: altes Überspringen wäre 100/Note 1).
 ### 17.3 Hilfeleiter und Doku-Ziele (S4)
 
 | Gegenstand | Festlegung |

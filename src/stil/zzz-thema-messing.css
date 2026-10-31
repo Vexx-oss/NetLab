@@ -113,6 +113,12 @@
   --lage-mini-rand:rgba(214,178,106,.28);
   --lage-radius:4px;
   --lage-glow:0 0 0 1px rgba(210,168,95,.30), 0 24px 56px -28px rgba(210,168,95,.28);
+  /* Lagebild-Dauern: standen frueher im zweiten :root-Block (F-11) — 3.0.0: EIN Tokenblock je Theme. */
+  --lage-atmen:9s;
+  --lage-nebel:14s;
+  --lage-puls:5s;
+  --lage-schein:7s;
+  --lage-lauf:4s;
 }
 
 /* ============================================================================
@@ -1658,14 +1664,6 @@ html[data-theme="messing"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before
    Ambient sichtbar (Runde 3, 19:12): Atmendes Licht + ruhige UI-Impulse.
    Dauern ausschließlich über Theme-Token; "Bewegung aus" schaltet basis.css zentral ab.
    ============================================================================ */
-:root[data-theme="messing"]{
-  --lage-atmen:9s;
-  --lage-nebel:14s;
-  --lage-puls:5s;
-  --lage-schein:7s;
-  --lage-lauf:4s;
-}
-
 /* 1 · Atmendes Hintergrund-Licht */
 html[data-theme="messing"] .labor .lb-leinwand::after{
   content:"";

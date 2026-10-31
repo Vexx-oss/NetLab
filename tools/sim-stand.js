@@ -10,6 +10,11 @@
  *
  * Ausgabe beim Vergleich: je Szenario Zahl der Ereignisse, neue/verschwundene Gründe und Protokolle, und die
  * erste abweichende Stelle im Klartext. Rückgabewert 1, wenn sich etwas geändert hat.
+ *
+ * Umfang (SIM-03, 3.0): 43 Szenarien über VLAN/Trunk, Adressierung/Routing, NAT/PAT, ACL/Firewall, Dienste,
+ * DHCP (auch Relay und Pool), DNS, /31 und Broadcast-Sturm; 28 der 34 Grundcodes kommen darin vor, dazu die
+ * Protokolle TCP und HTTP. Die Abweichung zum Stand 2.9.0 (12 Szenarien, 4/34 Codes) ist bewusst: der
+ * Referenzstand wird neu erzeugt und im CHANGELOG begründet (Architektur § 16.3).
  */
 const fs = require("fs");
 const path = require("path");
@@ -65,7 +70,7 @@ function laden() {
     ...moduleListe().map((f) => `/* ${path.relative(HIER, f)} */\n` + inhalt(f)),
     "return Object.fromEntries([['Modell', typeof Modell !== 'undefined' ? Modell : null]," +
       "['Sim', typeof Sim !== 'undefined' ? Sim : null], ['IP', typeof IP !== 'undefined' ? IP : null]," +
-      "['CLI', typeof CLI !== 'undefined' ? CLI : null], ['Daten', typeof Daten !== 'undefined' ? Daten : null]," +
+      "['CLI', typeof CLI !== 'undefined' ? CLI : null], ['DATEN', typeof DATEN !== 'undefined' ? DATEN : null]," +
       "['Spiel', typeof Spiel !== 'undefined' ? Spiel : null], ['Kern', typeof Kern !== 'undefined' ? Kern : null]]);",
     "})",
   ];
@@ -73,9 +78,9 @@ function laden() {
 }
 
 const K = laden();
-const Modell = K.Modell, Sim = K.Sim;
-if (!Modell || !Sim) {
-  console.error("Module nicht greifbar – Modell:", !!Modell, "Sim:", !!Sim, "| Schlüssel:", Object.keys(K).join(", "));
+const Modell = K.Modell, Sim = K.Sim, Daten = K.DATEN;
+if (!Modell || !Sim || !Daten) {
+  console.error("Module nicht greifbar – Modell:", !!Modell, "Sim:", !!Sim, "Daten:", !!Daten, "| Schlüssel:", Object.keys(K).join(", "));
   process.exit(2);
 }
 
@@ -218,10 +223,106 @@ function relayLAN() {
   return n;
 }
 
+
+/* ---------- Netze aus den Beispieldaten (Daten) ----------
+   Dieselben Netze benutzen die Tests (DATEN.beispiele.praxis/salon): Router-on-a-Stick mit VLAN 10/20/30,
+   ACL und NAT (praxis) sowie NAT/PAT ins Internet (salon). Jeder Aufruf baut ein frisches Netz. */
+function praxis() { return Daten.beispiele.praxis(); }
+function salon() { return Daten.beispiele.salon(); }
+
+/* VLAN-Trennung: PC1 und PC3 in VLAN 10, PC2 in VLAN 20 (wie tests/sim-golden.test.js) */
+function lanVlan() {
+  const n = lan();
+  Modell.vlan(n, "sw1", 10, "A"); Modell.vlan(n, "sw1", 20, "B");
+  Modell.setzen(n, "sw1", "ports.Fa0/1.accessVlan", 10);
+  Modell.setzen(n, "sw1", "ports.Fa0/2.accessVlan", 20);
+  Modell.setzen(n, "sw1", "ports.Fa0/3.accessVlan", 10);
+  return n;
+}
+
+/* Trunk zwischen zwei Switches, VLAN 10 getaggt (wie tests/sim-golden.test.js) */
+function trunkLAN() {
+  const n = Modell.neu();
+  Modell.geraet(n, "switch", {id: "sw1", name: "SW1"}); Modell.geraet(n, "switch", {id: "sw2", name: "SW2"});
+  for (const s of ["sw1", "sw2"]) { Modell.vlan(n, s, 10, "Buero"); Modell.setzen(n, s, "ports.Gi0/1.modus", "trunk"); Modell.setzen(n, s, "ports.Fa0/1.accessVlan", 10); }
+  host(n, "pc1", "192.168.10.10"); host(n, "pc2", "192.168.10.20");
+  kabel(n, "pc1", "eth0", "sw1", "Fa0/1"); kabel(n, "pc2", "eth0", "sw2", "Fa0/1"); kabel(n, "sw1", "Gi0/1", "sw2", "Gi0/1");
+  return n;
+}
+
+/* Trunk, der VLAN 10 nicht erlaubt (wie tests/sim-gruende.test.js) → TRUNK_NOT_ALLOWED */
+function trunkVerboten() {
+  const n = Modell.neu();
+  Modell.geraet(n, "switch", {id: "sw1", name: "SW1"}); Modell.geraet(n, "switch", {id: "sw2", name: "SW2"});
+  for (const s of ["sw1", "sw2"]) { Modell.vlan(n, s, 10, "A"); Modell.setzen(n, s, "ports.Gi0/1.modus", "trunk"); Modell.setzen(n, s, "ports.Gi0/1.trunkErlaubt", [1, 20]); Modell.setzen(n, s, "ports.Fa0/1.accessVlan", 10); }
+  host(n, "pc1", "192.168.10.10"); host(n, "pc2", "192.168.10.20");
+  kabel(n, "pc1", "eth0", "sw1", "Fa0/1"); kabel(n, "pc2", "eth0", "sw2", "Fa0/1"); kabel(n, "sw1", "Gi0/1", "sw2", "Gi0/1");
+  return n;
+}
+
+/* Native-VLAN-Mismatch auf dem Trunk (wie tests/sim-gruende.test.js, bau(1)): CDP-Warnung + ARP_NO_REPLY */
+function nativeMismatch() {
+  const n = Modell.neu();
+  Modell.geraet(n, "switch", {id: "sw1", name: "SW1"}); Modell.geraet(n, "switch", {id: "sw2", name: "SW2"});
+  Modell.vlan(n, "sw2", 99, "Native");
+  for (const s of ["sw1", "sw2"]) Modell.setzen(n, s, "ports.Gi0/1.modus", "trunk");
+  Modell.setzen(n, "sw2", "ports.Gi0/1.nativeVlan", 99);
+  host(n, "pc1", "192.168.1.10"); host(n, "pc2", "192.168.1.20");
+  kabel(n, "pc1", "eth0", "sw1", "Fa0/1"); kabel(n, "pc2", "eth0", "sw2", "Fa0/1"); kabel(n, "sw1", "Gi0/1", "sw2", "Gi0/1");
+  return n;
+}
+
+/* /31 als Punkt-zu-Punkt-Strecke zwischen zwei Routern (10.0.12.2/31 – 10.0.12.3/31) */
+function netz31() {
+  const n = Modell.neu();
+  Modell.geraet(n, "router", {id: "r1", name: "R1"}); Modell.geraet(n, "router", {id: "r2", name: "R2"});
+  Modell.geraet(n, "switch", {id: "sw1", name: "SW1"}); Modell.geraet(n, "switch", {id: "sw2", name: "SW2"});
+  host(n, "pca", "10.0.1.10", "10.0.1.1"); host(n, "pcb", "10.0.2.10", "10.0.2.1");
+  kabel(n, "pca", "eth0", "sw1", "Fa0/1"); kabel(n, "sw1", "Gi0/1", "r1", "Gi0/0");
+  kabel(n, "r1", "Gi0/1", "r2", "Gi0/1");
+  kabel(n, "r2", "Gi0/0", "sw2", "Gi0/1"); kabel(n, "pcb", "eth0", "sw2", "Fa0/1");
+  rif(n, "r1", "Gi0/0", "10.0.1.1"); rif(n, "r1", "Gi0/1", "10.0.12.2", "255.255.255.254");
+  rif(n, "r2", "Gi0/0", "10.0.2.1"); rif(n, "r2", "Gi0/1", "10.0.12.3", "255.255.255.254");
+  Modell.setzen(n, "r1", "routen", [{netz: "10.0.2.0", maske: "255.255.255.0", nh: "10.0.12.3", aus: null, ad: 1}]);
+  Modell.setzen(n, "r2", "routen", [{netz: "10.0.1.0", maske: "255.255.255.0", nh: "10.0.12.2", aus: null, ad: 1}]);
+  return n;
+}
+
+/* Schleife zwischen zwei Switches (wie tests/sim-golden.test.js) → Broadcast-Sturm */
+function sturmLAN() {
+  const n = lan();
+  Modell.geraet(n, "switch", {id: "sw2", name: "SW2"});
+  kabel(n, "sw1", "Gi0/1", "sw2", "Gi0/1"); kabel(n, "sw1", "Gi0/2", "sw2", "Gi0/2");
+  return n;
+}
+
+/* Firewall-Netz (wie tests/sim-gruende.test.js): PCI – FW(innen) · FW(aussen) – Internet · FW(dmz) – WEB */
+function fwNetz() {
+  const n = Modell.neu();
+  Modell.geraet(n, "firewall", {id: "fw", name: "FW1"}); Modell.geraet(n, "internet", {id: "inet"});
+  host(n, "pci", "192.168.1.10", "192.168.1.1");
+  Modell.setzen(n, "pci", "if.eth0.dns", "198.51.100.53");
+  Modell.geraet(n, "server", {id: "web", name: "WEB"});
+  Modell.setzen(n, "web", "if.eth0.ip", "172.16.0.10"); Modell.setzen(n, "web", "if.eth0.maske", "255.255.255.0"); Modell.setzen(n, "web", "if.eth0.gw", "172.16.0.1");
+  kabel(n, "pci", "eth0", "fw", "Gi0/0"); kabel(n, "fw", "Gi0/1", "inet", "wan0"); kabel(n, "web", "eth0", "fw", "Gi0/2");
+  const fi = (p, ip, m, zone) => { Modell.setzen(n, "fw", `if.${p}.ip`, ip); Modell.setzen(n, "fw", `if.${p}.maske`, m); Modell.setzen(n, "fw", `if.${p}.zone`, zone); };
+  fi("Gi0/0", "192.168.1.1", "255.255.255.0", "innen"); fi("Gi0/1", "203.0.113.2", "255.255.255.252", "aussen"); fi("Gi0/2", "172.16.0.1", "255.255.255.0", "dmz");
+  Modell.setzen(n, "fw", "routen", [{netz: "0.0.0.0", maske: "0.0.0.0", nh: "203.0.113.1", aus: null, ad: 1}]);
+  Modell.setzen(n, "fw", "regeln", [
+    {id: "r1", von: "innen", nach: "aussen", proto: "ip", quelle: "any", ziel: "any", port: null, aktion: "erlauben", aktiv: true, text: "Surfen"},
+    {id: "r2", von: "aussen", nach: "dmz", proto: "tcp", quelle: "any", ziel: "172.16.0.10/32", port: 80, aktion: "erlauben", aktiv: true, text: "Webserver"}]);
+  Modell.setzen(n, "fw", "nat", {quellNat: [{von: "innen", nach: "aussen"}], weiterleitung: [{proto: "tcp", aussenPort: 80, ziel: "172.16.0.10", zielPort: 80}]});
+  Modell.setzen(n, "inet", "if.wan0.ip", "203.0.113.1"); Modell.setzen(n, "inet", "if.wan0.maske", "255.255.255.252");
+  return n;
+}
+
 /* ---------- Szenarien ----------
    Die Netze werden in jedem Szenario neu gebaut – kein Zustand wandert zwischen den Läufen.
-   Aufgenommen wird jeweils das letzte Ergebnis (bei dhcp-* also der DHCP-Lauf selbst). */
+   Aufgenommen wird jeweils das letzte Ergebnis (bei dhcp-* also der DHCP-Lauf selbst).
+   SIM-03 (3.0): erweitert von 12 auf über 20 Szenarien; Abdeckung aller Flächen, an denen 3.0 baut.
+   Die Abweichung zum Stand 2.9.0 ist bewusst und im CHANGELOG begründet (Architektur § 16.3). */
 const SZENARIEN = {
+  /* --- Grundlagen (Bestand seit 2.1) --- */
   "ping-lan": () => Sim.ping(lan(), "pc1", "192.168.1.11", { anzahl: 1 }),
   "ping-zwei-netze": () => Sim.ping(zweiNetze(), "pca", "10.0.2.10", { anzahl: 2 }),
   /* drei Pakete: R1 und R2 verwerfen je eines, solange sie die MAC des nächsten Hops per ARP suchen */
@@ -248,6 +349,98 @@ const SZENARIEN = {
   "dns-name": () => Sim.dns(dnsLAN(), "pca", "pcb.labor.local"),
   "dns-kein-server": () => Sim.dns(lan(), "pc1", "server.local"),
   "traceroute": () => Sim.traceroute(zweiRouter(), "pca", "10.0.2.10"),
+
+  /* --- VLAN und Trunk --- */
+  "vlan-trennt": () => Sim.ping(lanVlan(), "pc1", "192.168.1.11", { anzahl: 1 }),
+  "vlan-gleiches-vlan": () => Sim.ping(lanVlan(), "pc1", "192.168.1.12", { anzahl: 1 }),
+  "trunk-getaggt": () => Sim.ping(trunkLAN(), "pc1", "192.168.10.20", { anzahl: 1 }),
+  "trunk-verboten": () => Sim.ping(trunkVerboten(), "pc1", "192.168.10.20", { anzahl: 1 }),
+  "nativ-mismatch": () => Sim.ping(nativeMismatch(), "pc1", "192.168.1.99", { anzahl: 1 }),
+  "portsec": () => {
+    const n = lan();
+    Modell.setzen(n, "sw1", "ports.Fa0/1.portSecurity", {max: 1, verstoss: "shutdown", macs: ["02:00:00:00:00:99"]});
+    return Sim.ping(n, "pc1", "192.168.1.11", { anzahl: 1 });
+  },
+  "sturm": () => Sim.ping(sturmLAN(), "pc1", "192.168.1.11", { anzahl: 1 }),
+
+  /* --- Adressierung, Link und Routing --- */
+  "link-down": () => {
+    const n = lan();
+    Modell.trennen(n, Modell.kabelAn(n, "pc1", "eth0").kabel.id);
+    return Sim.ping(n, "pc1", "192.168.1.11", { anzahl: 1 });
+  },
+  "port-down": () => {
+    const n = lan();
+    Modell.setzen(n, "sw1", "ports.Fa0/2.shutdown", true);
+    return Sim.ping(n, "pc1", "192.168.1.11", { anzahl: 1 });
+  },
+  "device-off": () => {
+    const n = lan();
+    Modell.geraetSetzen(n, "pc2", "an", false);
+    return Sim.ping(n, "pc1", "192.168.1.11", { anzahl: 1 });
+  },
+  "no-ip": () => {
+    const n = lan();
+    Modell.setzen(n, "pc1", "if.eth0.ip", "");
+    return Sim.ping(n, "pc1", "192.168.1.11", { anzahl: 1 });
+  },
+  "no-gateway": () => {
+    const n = lan();
+    Modell.setzen(n, "pc1", "if.eth0.gw", "");
+    return Sim.ping(n, "pc1", "10.9.9.9", { anzahl: 1 });
+  },
+  "gw-wrong-subnet": () => {
+    const n = lan();
+    Modell.setzen(n, "pc1", "if.eth0.gw", "10.0.0.1");
+    return Sim.ping(n, "pc1", "10.9.9.9", { anzahl: 1 });
+  },
+  "gw-unreachable": () => Sim.ping(lan(), "pc1", "10.9.9.9", { anzahl: 1 }),
+  "wrong-mask": () => {
+    const n = zweiNetze();
+    Modell.setzen(n, "pca", "if.eth0.maske", "255.255.0.0");
+    return Sim.ping(n, "pca", "10.0.2.10", { anzahl: 1 });
+  },
+  "no-route": () => Sim.ping(zweiNetze(), "pca", "10.9.9.9", { anzahl: 2 }),
+  "no-return-route": () => {
+    const n = zweiRouter();
+    Modell.setzen(n, "r2", "routen", []);
+    return Sim.ping(n, "pca", "10.0.2.10", { anzahl: 4 });
+  },
+  "ttl-expired": () => {
+    const n = zweiRouter();
+    Modell.setzen(n, "r1", "routen", [{netz: "0.0.0.0", maske: "0.0.0.0", nh: "10.0.12.2", aus: null, ad: 1}]);
+    Modell.setzen(n, "r2", "routen", [{netz: "0.0.0.0", maske: "0.0.0.0", nh: "10.0.12.1", aus: null, ad: 1}]);
+    return Sim.ping(n, "pca", "10.9.9.9", { anzahl: 2 });
+  },
+  "netz-31": () => Sim.ping(netz31(), "pca", "10.0.2.10", { anzahl: 3 }),
+  "dup-ip": () => {
+    const n = lan();
+    Modell.setzen(n, "pc3", "if.eth0.ip", "192.168.1.11");
+    return Sim.ping(n, "pc1", "pc2", { anzahl: 2 });
+  },
+
+  /* --- NAT/PAT und Internet --- */
+  "nat-pat": () => Sim.ping(salon(), "kasse", "198.51.100.10", { anzahl: 2 }),
+  "http-internet": () => Sim.http(salon(), "kasse", "http://www.beispiel.de"),
+  "nat-fehlt": () => {
+    const n = salon();
+    Modell.setzen(n, "r1", "if.Gi0/0.nat", null);
+    return Sim.ping(n, "kasse", "198.51.100.10", { anzahl: 4 });
+  },
+  "host-unreachable": () => Sim.ping(salon(), "kasse", "198.51.100.99", { anzahl: 4 }),
+
+  /* --- ACL, Firewall, Dienste, DNS --- */
+  "acl-deny": () => Sim.ping(praxis(), "gast", "srv"),
+  "acl-deny-tcp": () => Sim.tcp(praxis(), "gast", "srv", 445),
+  "fw-deny": () => Sim.ping(fwNetz(), "pci", "172.16.0.10", { anzahl: 1 }),
+  "fw-portweiterleitung": () => Sim.tcp(fwNetz(), "inet", "203.0.113.2", 80),
+  "port-closed": () => Sim.tcp(lan(), "pc1", "192.168.1.11", 80),
+  "service-off": () => {
+    const n = praxis();
+    Modell.setzen(n, "srv", "dienste.http.an", false);
+    return Sim.tcp(n, "empfang", "srv", 80);
+  },
+  "dns-fail": () => Sim.dns(praxis(), "behandlung", "gibtsnicht.praxis.local"),
 };
 
 /* ---------- Ereignisse auf das Prüfbare eindampfen ---------- */
@@ -267,6 +460,8 @@ function eindampfen(ereignisse) {
        ein neuer Schlüssel dagegen ist eine Formatänderung und soll auffallen. */
     appFelder: e.frame && e.frame.app && e.frame.app.felder ? Object.keys(e.frame.app.felder).sort() : [],
     text: e.text ?? null,
+    /* Architektur § 5.2: normales Verwerfen ohne Fehlergrund (SIM-06) – den Wert mittragen, nicht nur den Schlüssel. */
+    ...(e.harmlos ? {harmlos: true} : {}),
     /* alle Schlüssel des Ereignisses selbst – neue Felder sollen auffallen */
     schluessel: Object.keys(e).sort(),
   }));

@@ -17,22 +17,35 @@ darum ein ZIP, das man an eine Release haengt:
         SIZES.txt                      was drin ist, wie gross, welche Pruefsumme
 
 Vor dem Packen wird die Einzeldatei frisch gebaut (`tools/einfach.py`) und geprueft
-(keine Aussenverweise). Danach wird das ZIP zurueckgelesen und jedes Element mit CRC32
-gegen das Original geprueft — ein Paket, das sich nicht oeffnen laesst, faellt hier auf
-und nicht beim Nutzer.
+(keine Aussenverweise). Enthaelt das Paket die .exe, wird zuerst ihre ProductVersion
+gegen `VERSION` aus `bauen.py` geprueft (`tools/pruefe-paket.py`): eine veraltete .exe
+bricht das Packen ab, statt als Paket der neuen Fassung zu erscheinen (Audit B12).
+Danach wird das ZIP zurueckgelesen und jedes Element mit CRC32 gegen das Original
+geprueft — ein Paket, das sich nicht oeffnen laesst, faellt hier auf und nicht beim Nutzer.
+
+Das ZIP ist reproduzierbar (BAU-07): Eintraege sortiert, ein fester Zeitstempel
+(ohne `SOURCE_DATE_EPOCH`: 1980-01-01, sonst dessen UTC-Zeit) und keine OS-Metadaten.
+Zwei Laeufe mit gleichem Inhalt und gleichem `SOURCE_DATE_EPOCH` ergeben byte-gleiche
+Dateien. Der Anhangsname ist `Netzwerk-Labor-<version>-Browser.zip` (mit .exe:
+`-Windows.zip`) und wird vom Release-Gate erwartet.
 
 Aufruf:
     python tools/paket.py                    -> dist/Netzwerk-Labor-<version>-Windows.zip
     python tools/paket.py --ohne-exe         -> nur die Browser-Fassung (klein, ueberall lauffaehig)
     python tools/paket.py --nur-ordner       -> Ordner bauen, kein ZIP
+    python tools/paket.py --gegenprobe       -> Determinismus-/Namens-Selbsttest (Attrappen)
     python tools/paket.py --ziel X.zip
 """
 import argparse
+import datetime
 import hashlib
+import importlib.util
+import os
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -49,6 +62,14 @@ SCHRIFTEN = HIER / "schriften"
 DIST = HIER / "dist"
 ORDNERNAME = "Netzwerk-Labor"
 
+# BAU-09: Die Fassungs-Pruefung der .exe liegt in `tools/pruefe-paket.py` — dasselbe
+# Werkzeug ist eigenstaendig aufrufbar (Release-Gate/Abnahme). Der Dateiname enthaelt einen
+# Bindestrich, deshalb wird das Modul ueber den Pfad geladen statt mit `import`.
+_PRUEFE_PFAD = HIER / "tools" / "pruefe-paket.py"
+_spec = importlib.util.spec_from_file_location("pruefe_paket", _PRUEFE_PFAD)
+pruefe_paket = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(pruefe_paket)
+
 
 def version() -> str:
     """Version aus bauen.py lesen — eine Quelle, kein zweiter Ort zum Pflegen."""
@@ -56,6 +77,66 @@ def version() -> str:
     if not m:
         raise SystemExit("FEHLER: VERSION in bauen.py nicht gefunden.")
     return m.group(1)
+
+
+def zip_dateiname(ver: str, mit_exe: bool) -> str:
+    """Anhangsname des Release: Netzwerk-Labor-<VERSION>-Browser.zip bzw. -Windows.zip.
+
+    Das Release-Gate (pruefsummen in .github/workflows/release.yml) erwartet genau diese
+    Namen; darum stehen sie an EINER Stelle und werden mit --gegenprobe geprueft.
+    """
+    endung = "Windows" if mit_exe else "Browser"
+    return f"Netzwerk-Labor-{ver}-{endung}.zip"
+
+
+def zip_zeit() -> tuple[int, int, int, int, int, int]:
+    """Zeitstempel aller ZIP-Eintraege: fest, oder aus SOURCE_DATE_EPOCH.
+
+    Ohne SOURCE_DATE_EPOCH gilt 1980-01-01 00:00 (ZIP-Minimum): das ZIP haengt dann nicht
+    an Datei-mtimes oder der Systemzeit. Ist SOURCE_DATE_EPOCH gesetzt, wird der
+    UTC-Zeitpunkt benutzt (Standard fuer reproduzierbare Pakete).
+    """
+    roh = os.environ.get("SOURCE_DATE_EPOCH")
+    if not roh:
+        return (1980, 1, 1, 0, 0, 0)
+    try:
+        sekunden = int(roh)
+    except ValueError:
+        raise SystemExit(f"FEHLER: SOURCE_DATE_EPOCH ist keine ganze Zahl: {roh!r}")
+    try:
+        zeit = datetime.datetime.fromtimestamp(sekunden, tz=datetime.timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        raise SystemExit(
+            f"FEHLER: SOURCE_DATE_EPOCH liegt ausserhalb des darstellbaren Bereichs: {roh}")
+    if zeit.year < 1980:
+        raise SystemExit("FEHLER: SOURCE_DATE_EPOCH liegt vor 1980 — ZIP kann das nicht speichern.")
+    return (zeit.year, zeit.month, zeit.day, zeit.hour, zeit.minute, zeit.second)
+
+
+def zip_schreiben(ordner: Path, ver: str, zip_pfad: Path) -> None:
+    """Deterministisches ZIP: sortierte Eintraege, feste Zeit, keine OS-Metadaten.
+
+    Warum: Fuer ein reproduzierbares Release-Paket darf derselbe Inhalt nicht durch
+    Datei-mtimes, Betriebssystem oder Eintrags-Reihenfolge zu anderen Bytes fuehren.
+    Deshalb bekommt jeder Eintrag denselben Zeitstempel (zip_zeit()), denselben
+    Unix-Modus 0644 (create_system=3, external_attr=0o100644<<16) und die Eintraege
+    entstehen sortiert. Gleiche Quelldaten + gleiche Fassung + gleicher
+    SOURCE_DATE_EPOCH ergeben byte-gleiche Dateien.
+    """
+    zeit = zip_zeit()
+    zip_pfad.parent.mkdir(parents=True, exist_ok=True)
+    if zip_pfad.exists():
+        zip_pfad.unlink()
+    with zipfile.ZipFile(zip_pfad, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in sorted(ordner.rglob("*")):
+            if not f.is_file():
+                continue
+            rel = f.relative_to(ordner).as_posix()
+            info = zipfile.ZipInfo(f"{ORDNERNAME}-{ver}/{rel}", date_time=zeit)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3
+            info.external_attr = 0o100644 << 16
+            z.writestr(info, f.read_bytes(), compresslevel=9)
 
 
 def einzeldatei_bauen(ziel: Path) -> None:
@@ -77,6 +158,25 @@ def lizenz_texte() -> list[str]:
 
 def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
     ver = version()
+
+    # BAU-09-Gate: Eine .exe mit fremder ProductVersion darf nicht in einem Paket dieser
+    # Fassung landen. Der Audit (berichte/bau-release.md, B12) fand den Fall, dass eine
+    # lokale 2.8.0-.exe als `Netzwerk-Labor-2.9.0-Windows.zip` erschienen waere. Das Gate
+    # laeuft VOR Aufraeumen/Bauen: bei Abweichung bleibt der Baum unberuehrt.
+    if mit_exe and EXE.is_file():
+        try:
+            exe_ver = pruefe_paket.exe_product_version(EXE)
+        except pruefe_paket.NichtPruefbar as e:
+            raise SystemExit(f"FEHLER: ProductVersion der .exe nicht pruefbar: {e}")
+        if exe_ver != ver:
+            raise SystemExit(
+                f"FEHLER: {EXE.relative_to(HIER)} hat ProductVersion {exe_ver}, "
+                f"bauen.py VERSION ist {ver}.\n"
+                f"  Ein Paket der Fassung {ver} darf keine .exe mit {exe_ver} enthalten.\n"
+                "  Die .exe aus DIESEM Stand neu bauen (docs/Bauen.md) oder --ohne-exe verwenden.\n"
+                "  Pruefung: python tools/pruefe-paket.py --nur-pruefen")
+        print(f"  Fassung der .exe: ProductVersion {exe_ver} = VERSION {ver}")
+
     ordner = DIST / f"{ORDNERNAME}-{ver}"
 
     # 1 · Reste frueherer Fassungen wegraeumen.
@@ -231,17 +331,10 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
         print("\n--nur-ordner: kein ZIP geschrieben.")
         return 0
 
-    # 5 · ZIP schreiben und zuruecklesen (CRC32 gegen das Original).
-    endung = "Windows" if mitgelieferte_exe else "Browser"
-    zip_pfad = ziel or (DIST / f"Netzwerk-Labor-{ver}-{endung}.zip")
-    zip_pfad.parent.mkdir(parents=True, exist_ok=True)
-    if zip_pfad.exists():
-        zip_pfad.unlink()
-
-    with zipfile.ZipFile(zip_pfad, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-        for f in sorted(ordner.rglob("*")):
-            if f.is_file():
-                z.write(f, f"{ORDNERNAME}-{ver}/{f.relative_to(ordner).as_posix()}")
+    # 5 · ZIP schreiben und zuruecklesen (CRC32 gegen das Original). Der Schreiber ist
+    #     deterministisch (feste Zeit, keine OS-Metadaten); siehe zip_schreiben().
+    zip_pfad = ziel or (DIST / zip_dateiname(ver, mitgelieferte_exe))
+    zip_schreiben(ordner, ver, zip_pfad)
 
     fehler = []
     with zipfile.ZipFile(zip_pfad) as z:
@@ -274,6 +367,91 @@ def paket_bauen(mit_exe: bool, nur_ordner: bool, ziel: Path | None) -> int:
     return 0
 
 
+def _attrappe_bauen(basis: Path, mtime: float) -> Path:
+    """Kleiner Attrappen-Ordner mit gleichem Inhalt, aber vorgegebener Dateizeit."""
+    ordner = basis / "Netzwerk-Labor-2.9.0"
+    ordner.mkdir(parents=True)
+    for name, inhalt in (("eins.txt", b"eins"), ("zwei.html", b"zwei"),
+                         ("unter/drei.bin", b"\x00\x01\x02")):
+        p = ordner / name
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(inhalt)
+        os.utime(p, (mtime, mtime))
+    return ordner
+
+
+def gegenprobe() -> int:
+    """Attrappen-Selbsttest fuer ZIP-Determinismus und Anhangsnamen (4 Faelle).
+
+    Schreibt nur unter %TEMP%, nichts ins Repo. Exit 0 nur bei 4/4."""
+    ergebnisse: list[tuple[str, bool]] = []
+
+    def fall(titel: str, pruefung) -> None:
+        try:
+            ok = bool(pruefung())
+        except Exception as e:
+            ok = False
+            print(f"      {type(e).__name__}: {e}")
+        ergebnisse.append((titel, ok))
+        print(("  OK  " if ok else "  ROT ") + titel)
+
+    with tempfile.TemporaryDirectory(prefix="netlab-paket-") as tmpstr:
+        tmp = Path(tmpstr)
+        vorher = os.environ.get("SOURCE_DATE_EPOCH")
+        try:
+            # Fall 1: gleicher Inhalt, verschiedene Datei-mtimes -> byte-gleich (ohne SOURCE_DATE_EPOCH)
+            os.environ.pop("SOURCE_DATE_EPOCH", None)
+            a = _attrappe_bauen(tmp / "a", 1_600_000_000)
+            b = _attrappe_bauen(tmp / "b", 1_700_000_000)
+            za, zb = tmp / "a.zip", tmp / "b.zip"
+            zip_schreiben(a, "2.9.0", za)
+            zip_schreiben(b, "2.9.0", zb)
+            fall("zwei Laeufe mit verschiedenen mtimes byte-gleich",
+                 lambda: hashlib.sha256(za.read_bytes()).digest() == hashlib.sha256(zb.read_bytes()).digest())
+
+            # Fall 2: SOURCE_DATE_EPOCH steuert die Zeit: gleicher Wert -> gleich, anderer -> anders
+            c = _attrappe_bauen(tmp / "c", 1_650_000_000)
+            s1, s2, s3 = tmp / "c1.zip", tmp / "c2.zip", tmp / "c3.zip"
+            os.environ["SOURCE_DATE_EPOCH"] = "1700000000"
+            zip_schreiben(c, "2.9.0", s1)
+            zip_schreiben(c, "2.9.0", s2)
+            os.environ["SOURCE_DATE_EPOCH"] = "1700000100"
+            zip_schreiben(c, "2.9.0", s3)
+            fall("SOURCE_DATE_EPOCH: gleicher Wert gleich, anderer anders",
+                 lambda: s1.read_bytes() == s2.read_bytes() and s1.read_bytes() != s3.read_bytes())
+
+            # Fall 3: Anhangsnamen exakt (Release-Gate erwartet diese Namen)
+            fall("Anhangsnamen exakt", lambda: (
+                zip_dateiname("3.0.0", False) == "Netzwerk-Labor-3.0.0-Browser.zip"
+                and zip_dateiname("3.0.0", True) == "Netzwerk-Labor-3.0.0-Windows.zip"))
+
+            # Fall 4: ZIP-Metadaten fix: Zeit 1980-01-01, Unix-Modus 0644, Eintraege sortiert
+            def metadaten() -> bool:
+                with zipfile.ZipFile(za) as z:
+                    infos = z.infolist()
+                    fest = all(i.date_time == (1980, 1, 1, 0, 0, 0)
+                               and i.create_system == 3
+                               and i.external_attr == (0o100644 << 16)
+                               and i.compress_type == zipfile.ZIP_DEFLATED
+                               and not i.extra for i in infos)
+                    namen = [i.filename for i in infos]
+                    return fest and len(infos) == 3 and namen == sorted(namen)
+            fall("ZIP-Metadaten fix und Eintraege sortiert", metadaten)
+        finally:
+            if vorher is None:
+                os.environ.pop("SOURCE_DATE_EPOCH", None)
+            else:
+                os.environ["SOURCE_DATE_EPOCH"] = vorher
+
+    gut = sum(1 for _, ok in ergebnisse if ok)
+    print()
+    if gut == len(ergebnisse):
+        print(f"GRUEN: Gegenprobe {gut}/{len(ergebnisse)} — ZIP ist deterministisch, Namen exakt.")
+        return 0
+    print(f"ROT: Gegenprobe {gut}/{len(ergebnisse)} — ZIP/Namen nicht deterministisch.")
+    return 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Auslieferungspaket des Netzwerk-Labors bauen")
     ap.add_argument("--ohne-exe", action="store_true", help="nur die Browser-Fassung (klein, ueberall lauffaehig)")
@@ -281,7 +459,11 @@ def main() -> int:
                     help="Windows-Fassung anstreben; fehlt die .exe, entsteht die Browser-Fassung (kein Abbruch)")
     ap.add_argument("--nur-ordner", action="store_true", help="Ordner bauen, kein ZIP")
     ap.add_argument("--ziel", type=Path, help="Pfad des ZIPs")
+    ap.add_argument("--gegenprobe", action="store_true",
+                    help="Determinismus-/Namens-Selbsttest mit Attrappen (4 Faelle)")
     a = ap.parse_args()
+    if a.gegenprobe:
+        return gegenprobe()
     if a.ohne_exe and a.mit_exe:
         raise SystemExit("FEHLER: --ohne-exe und --mit-exe zusammen ergeben keinen Sinn.")
     # Standard ist die Windows-Fassung; auf einem frischen Klon wird daraus die

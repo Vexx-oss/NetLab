@@ -94,7 +94,6 @@
   background:var(--panel);box-shadow:0 24px 48px -44px color-mix(in srgb,var(--bg) 90%,transparent);
   transition:transform var(--dauer-mittel) var(--ease-standard),border-color var(--dauer-mittel) var(--ease-standard),background var(--dauer-mittel) var(--ease-standard)}
 .hb-kachel:hover{transform:translateY(-2px);border-color:var(--line-2);background:var(--panel-2)}
-.hb-kachel-sym{width:44px;height:44px;border-radius:var(--radius-s);background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
 .hb-kachel b{font:700 var(--fs-3)/1.2 var(--body)}
 .hb-feierabend{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:24px}
 .hb-woche-knopf{border:1px solid var(--line);border-radius:999px;background:var(--panel-2);padding:8px 16px;font:600 var(--fs-1)/1 var(--mono);letter-spacing:.06em}
@@ -231,7 +230,6 @@
 .hb-auftrag{padding:24px;border-radius:var(--radius);border-left:2px solid var(--k,var(--accent))}
 .hb-auftrag h3{font:800 var(--fs-6)/1.15 var(--display);letter-spacing:-.03em;margin:0}
 .hb-kachel{padding:16px;gap:16px;border-radius:var(--radius);background:var(--panel)}
-.hb-kachel-sym{width:44px;height:44px;border-radius:var(--radius-s)}
 .hb-kacheln{gap:16px}
 
 

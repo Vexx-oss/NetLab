@@ -245,7 +245,8 @@ Spiel.INJEKTOREN = (() => {
       bereich: [{geraet: k.geraet}], konkret: [`Der Filial-Router hat keine Route zurück: „ip route 0.0.0.0 0.0.0.0 ${k.route.nh}“.`]}),
     erklaerung: "Routing ist keine Einbahnstraße: Jedes Paket braucht einen Hinweg UND die Antwort einen Rückweg. Fehlt die Rückroute, kommt die Anfrage an, die Antwort aber nie – der Absender sieht nur „Zeitüberschreitung“, keine Fehlermeldung."});
 
-  neu({name: "schleife", titel: "Routing-Schleife", skills: ["lab.ttl", "lab.route", "lab.stp"], gruende: ["TTL_EXPIRED", "PORT_SHUTDOWN", "GW_UNREACHABLE", "ARP_NO_REPLY"], vorlagen: ["standorte"],
+  /* WIS-04: Eine Routing-Schleife ist kein STP-Fall – lab.stp gehörte hier nie hin (entfernt). */
+  neu({name: "schleife", titel: "Routing-Schleife", skills: ["lab.ttl", "lab.route"], gruende: ["TTL_EXPIRED", "PORT_SHUTDOWN", "GW_UNREACHABLE", "ARP_NO_REPLY"], vorlagen: ["standorte"],
     passt: (n, r) => r.router2 ? [{key: r.router2, geraet: r.router2, port: "Gi0/0"}] : [],
     anwenden(n, k){ Modell.setzen(n, k.geraet || k.key, "if.Gi0/0.shutdown", true); },
     loesung: (n, k) => [{geraet: k.geraet, cli: cli("interface GigabitEthernet0/0", "no shutdown"), text: "Filial-Router: LAN-Schnittstelle Gi0/0 wieder einschalten."}],
@@ -761,7 +762,8 @@ Spiel.INJEKTOREN = (() => {
       konkret: ["Auf " + name(n, k.geraet) + " steht am Port " + k.port + " „Port-Security“ mit einer festen MAC-Adresse. " + name(n, k.host) + " hat eine andere – der Switch hat den Port deshalb abgeschaltet (err-disabled)."]}),
     erklaerung: "Port-Security merkt sich, welche MAC-Adressen an einem Switchport erlaubt sind. Eine fremde MAC ist ein Verstoß; bei „violation shutdown“ schaltet der Switch den Port ab (err-disabled). Aus diesem Zustand kommt er nur mit „shutdown“ und „no shutdown“ zurück – und nur, wenn die Ursache behoben ist: entweder die erlaubte Adresse berichtigen oder das fremde Gerät entfernen. Sonst sperrt der nächste Rahmen den Port sofort wieder.",
     quelle: "Cisco Catalyst Software Configuration Guide: Configuring Port Security · Network – Lernfassung (§ 9 MAC Flooding, Abwehr Port Security)"});
-  neu({name: "route-kreis-ttl", titel: "Zwei Router schicken sich Pakete im Kreis", skills: ["lab.ttl", "lab.route", "lab.gateway", "lab.stp"],
+  /* WIS-04: Diese Schleife entsteht im Routing (Default-Routen), nicht durch Spanning Tree – lab.stp entfernt. */
+  neu({name: "route-kreis-ttl", titel: "Zwei Router schicken sich Pakete im Kreis", skills: ["lab.ttl", "lab.route", "lab.gateway"],
     gruende: ["TTL_EXPIRED", "ARP_NO_REPLY", "TIMEOUT"], vorlagen: ["standorte"],
     passt: (n, r) => (r.router && r.router2 && n.geraete[r.router].running.routen) ? [{key: r.router, geraet: r.router, routen: JSON.parse(JSON.stringify(n.geraete[r.router].running.routen)), peer: r.router2, transfer: r.transfer}] : [],
     anwenden(n, k){ Modell.setzen(n, k.geraet, "routen",
@@ -800,36 +802,32 @@ Spiel.INJEKTOREN = (() => {
     erklaerung: "Eine Freigabe auf einem NAS oder Dateiserver läuft über SMB auf TCP 445. Ist der Dienst aus, bleibt der Host erreichbar, aber jede Verbindung wird sofort abgelehnt (TCP-RST). Rechte und Freigaben spielen erst danach eine Rolle.",
     quelle: "TCP – Lernfassung · IANA Port Number Registry (445) · Storage-Konzeptatlas"});
 
-  neu({name: "stp-rootfalsch", titel: "STP-Wurzel falsch gedacht – zwei Wege", skills: ["lab.stp", "lab.switch"],
-    gruende: ["STORM", "TIMEOUT"], vorlagen: ["standorte"],
+  /* WIS-04 (31.10.2026): stp-rootfalsch war die zweite Doppelverkabelung – im Wirkungs-Diff
+     nachgewiesen identisch mit stp-doppelkabel. Einen eigenen „Wurzel"-Fall kann das Modell nicht
+     zeigen: Es kennt kein STP und keine BPDUs (src/sim/switch.js:5). Ehrlich bleibt der Endzustand,
+     den BPDU Guard auf echtem IOS erzeugt: der Access-Port ist abgeschaltet. Der Injektor schaltet
+     deshalb den Port administrativ ab (PORT_SHUTDOWN) und sagt in der Erklärung ausdrücklich, dass
+     STP/BPDU Guard hier nicht nachgebaut sind; gemessen: Ziel bricht, „no shutdown" heilt, und die
+     Wirkung (Port-Diff) ist von stp-doppelkabel (Kabel-Diff) verschieden. */
+  neu({name: "stp-rootfalsch", titel: "BPDU Guard: Port nach Fremdgerät abgeschaltet (nicht nachgebaut)",
+    skills: ["lab.stp", "lab.switch"], gruende: ["PORT_SHUTDOWN", "ARP_NO_REPLY", "TIMEOUT"], vorlagen: ["standorte"],
     passt: (n, r) => {
-      const von = (r.clients || [])[0], nach = (r.clients || [])[1];
-      if (!von || !nach || von === nach || !n.geraete[von] || !n.geraete[nach]) return [];
-      const sws = Object.values(n.geraete).filter(g => g.typ === "switch");
-      for (let i = 0; i < sws.length; i++) for (let j = i + 1; j < sws.length; j++) {
-        const a = freieSwitchPorts(n, sws[i].id, 2), b = freieSwitchPorts(n, sws[j].id, 2);
-        if (a.length === 2 && b.length === 2) return [{key: sws[i].id + "|" + sws[j].id, geraet: sws[i].id, gegen: sws[j].id,
-          a1: a[0], a2: a[1], b1: b[0], b2: b[1], von: von, nach: nach}];
-      }
-      return [];
+      /* Ein Client hängt an einem Switchport; ein zweiter erreichbarer Host ist das Messziel. */
+      const mitSwitch = (r.hosts || []).map(id => ({id, s: amSwitch(n, id)})).filter(x => x.s);
+      const krank = mitSwitch[0], ziel = mitSwitch.find(x => x.id !== krank.id);
+      if (!krank || !ziel) return [];
+      return [{key: krank.s.geraet + ":" + krank.s.port, geraet: krank.s.geraet, port: krank.s.port, host: krank.id, ziel: ziel.id}];
     },
-    anwenden(n, k){
-      for (const paare of [[k.a1, k.b1], [k.a2, k.b2]]) {
-        const v = Modell.verbinden(n, {geraet: k.geraet, port: paare[0]}, {geraet: k.gegen, port: paare[1]});
-        if (v && v.fehler) throw new Error("stp-rootfalsch: " + v.fehler);
-      }
-    },
-    ziele: (n, k) => (k.von && n.geraete[k.von] && n.geraete[k.nach])
-      ? [{typ: "erreichbar", von: k.von, nach: k.nach, proto: "icmp", text: name(n, k.von) + " und " + name(n, k.nach) + " erreichen sich"}] : [],
-    loesung: (n, k) => [
-      {aktion: "trennen", geraet: k.gegen, a: {geraet: k.gegen, port: k.b2},
-       text: "Die zusätzliche Leitung zwischen " + name(n, k.geraet) + " und " + name(n, k.gegen) + " entfernen – sie bildet den Kreis."},
-      {aktion: "trennen", geraet: k.geraet, a: {geraet: k.geraet, port: k.a1},
-       text: "Auch die zweite Zusatzleitung (" + name(n, k.geraet) + " " + k.a1 + ") abziehen: Der Plan kennt keine direkte Leitung zwischen den Switches."}],
-    hilfen: (n, k) => ({frage: ["Zwei Wege zwischen zwei Switches – welches Protokoll wählt normalerweise eine Wurzel und blockiert den zweiten Weg?"],
-      bereich: [{geraet: k.geraet}, {geraet: k.gegen}],
-      konkret: [name(n, k.geraet) + " und " + name(n, k.gegen) + " sind doppelt verbunden (zwei Leitungen). Ohne STP kreisen Broadcasts; der Lauf bricht mit „Broadcast-Sturm“ ab."]}),
-    erklaerung: "Spanning Tree (IEEE 802.1D) wählt genau eine Wurzel und blockiert redundante Ports. Ist die Wurzel falsch gedacht oder fehlt die Blockierung, entsteht aus zwei Leitungen ein Kreis: Broadcasts laufen im Kreis, bis das Netz steht. In diesem Modell ist STP nicht nachgebildet – der Fehler endet erst, wenn die zweite Leitung gezogen wird. Erkennbar am Abbruch „Broadcast-Sturm“.",
-    quelle: "Fragen – Netzwerke planen (Wozu STP?) · IEEE 802.1D"});
+    anwenden(n, k){ Modell.setzen(n, k.geraet, "ports." + k.port + ".shutdown", true); },
+    ziele: (n, k) => (k.host && k.ziel && n.geraete[k.host] && n.geraete[k.ziel])
+      ? [{typ: "erreichbar", von: k.host, nach: k.ziel, proto: "icmp", text: name(n, k.host) + " erreicht " + name(n, k.ziel) + " wieder"}] : [],
+    loesung: (n, k) => [{geraet: k.geraet, cli: cli("interface " + lang(k.port), "no shutdown"),
+      text: name(n, k.geraet) + " " + k.port + ": Fremdgerät (kleiner Switch) abziehen und den Port wieder freigeben (no shutdown)."}],
+    hilfen: (n, k) => ({frage: ["Der Platz ist plötzlich tot, obwohl das Kabel steckt. Was hat der Kollege an die Dose gesteckt – und was macht ein Switch-Port mit einem zweiten Switch daran?"],
+      bereich: [{geraet: k.geraet, port: k.port}],
+      konkret: ["Am Port " + k.port + " von " + name(n, k.geraet) + " hängt ein fremdes Gerät. Auf echtem IOS schaltet BPDU Guard den Port ab (err-disabled); das Modell kennt kein STP – es zeigt den abgeschalteten Port. Gerät abziehen, Port wieder einschalten."]}),
+    erklaerung: "BPDU Guard schützt Access-Ports: Sobald dort ein Switch BPDUs schickt (weil jemand einen kleinen Switch an die Dose steckt), schaltet IOS den Port ab (err-disabled). Das Labor bildet Spanning Tree und BPDUs nicht nach – BPDU Guard ist hier nicht nachgebaut. Gezeigt wird der Endzustand: Der Port ist administratively down; erkennbar an „show ip interface brief“ und den fehlenden Antworten. Die Aufgabe ist, das Fremdgerät zu entfernen und den Port wieder einzuschalten.",
+    quelle: "Cisco Catalyst Software Configuration Guide: Configuring Spanning Tree Protocol (BPDU Guard, PortFast) · IEEE 802.1D"});
+
   return I;
 })();

@@ -37,7 +37,12 @@ CLI.baeumeBauen = function(){
 
   /* ---------- gemeinsame Knoten der Konfigurationsmodi ---------- */
   const exitSub = W("exit", "Exit from this submode", "diesen Modus verlassen (eine Ebene zurück)",
-    {nein: false, sim: true, f: s => { const m = C.MODI[s.modus]; s.modus = (m && m.eltern) || "config"; s.kontext = {}; return ""; }});
+    {nein: false, sim: true, f: s => {
+      /* Aus (dhcp-config-host) zurück in den Pool, OHNE den Pool-Kontext zu verlieren (CLI-12):
+         sonst melden alle weiteren Pool-Befehle „Diesen Pool gibt es nicht mehr“. */
+      if (s.modus === "dhcpHost") { s.modus = "dhcp"; s.kontext = {pool: (s.kontext && s.kontext.pool) || null}; return ""; }
+      const m = C.MODI[s.modus]; s.modus = (m && m.eltern) || "config"; s.kontext = {}; return "";
+    }});
   const ende = W("end", "Exit from configure mode", "Konfiguration ganz verlassen, zurück zu #",
     {nein: false, sim: true, f: s => { s.modus = "priv"; s.kontext = {}; return CONFIG_I; }});
   const doN = W("do", "To run exec commands in config mode", "Exec-Befehl im Konfigurationsmodus ausführen, z. B. do show ip interface brief",
@@ -173,13 +178,15 @@ CLI.baeumeBauen = function(){
     S("interfaces", "Interface status and configuration", "Schnittstellen im Detail", (s, a) => Z().interfaces(s, a.if), {cr: true, k: [
       P("IF", "if", "if", "", "", {arten: ["phys", "sub", "svi"]}),
       S("status", "Show interface line status", "Ports: verbunden?, VLAN, Tempo", s => Z().status(s), {nur: istSwitch}),
+      S("switchport", "Show interface switchport information", "Port-Modus, Zugriffs-VLAN, Trunk-Native-VLAN", s => Z().switchport(s), {nur: istSwitch}),
       S("trunk", "Show interface trunk information", "Trunk-Ports und ihre VLANs", s => Z().trunk(s), {nur: istSwitch})]}),
     W("ip", "IP information", "IP-Informationen", {k: [
       S("arp", "IP ARP table", "ARP-Tabelle", s => Z().arp(s)),
-      W("dhcp", "Show items in the DHCP database", "DHCP-Server", {nur: istRouter, k: [
-        S("binding", "DHCP address bindings", "vergebene Adressen (Leases)", s => Z().dhcpBinding(s)),
-        S("conflict", "DHCP address conflicts", "Adresskonflikte (vor der Vergabe per Ping erkannt)", s => Z().dhcpKonflikt(s)),
-        S("pool", "DHCP pools information", "Pools und Auslastung", s => Z().dhcpPool(s))]}),
+      W("dhcp", "Show items in the DHCP database", "DHCP-Server (Router) · DHCP-Snooping (Switch)", {k: [
+        S("binding", "DHCP address bindings", "vergebene Adressen (Leases)", s => Z().dhcpBinding(s), {nur: istRouter}),
+        S("conflict", "DHCP address conflicts", "Adresskonflikte (vor der Vergabe per Ping erkannt)", s => Z().dhcpKonflikt(s), {nur: istRouter}),
+        S("pool", "DHCP pools information", "Pools und Auslastung", s => Z().dhcpPool(s), {nur: istRouter}),
+        S("snooping", "DHCP Snooping", "Snooping-Zustand, vertraute Ports und verworfene Server-Antworten", s => Z().dhcpSnooping(s), {nur: istSwitch})]}),
       W("interface", "IP interface status and configuration", "Schnittstellen auf Schicht 3", {k: [
         S("brief", "Brief summary of IP status and configuration", "Kurzübersicht: Adresse und Status jeder Schnittstelle", s => Z().ipIntBrief(s))]}),
       W("nat", "IP NAT information", "NAT", {nur: istRouter, k: [
@@ -189,7 +196,9 @@ CLI.baeumeBauen = function(){
     ]}),
     W("mac", "MAC configuration", "MAC-Adressen", {nur: istSwitch, k: [
       S("address-table", "MAC forwarding table", "MAC-Tabelle: welche MAC an welchem Port", s => Z().macTabelle(s), {cr: true, k: [
-        S("dynamic", "dynamic entry type", "nur gelernte Einträge", s => Z().macTabelle(s, true))]})]}),
+        S("dynamic", "dynamic entry type", "nur gelernte Einträge", s => Z().macTabelle(s, true)),
+        S("interface", "Show MAC address table for an interface", "nur ein Port", (s, a) => Z().macTabelle(s, false, {interface: a.if}), {k: [P("IF", "if", "if", "", "", {arten: ["phys"]})]}),
+        S("vlan", "Show MAC address table for a VLAN", "nur ein VLAN", (s, a) => Z().macTabelle(s, false, {vlan: a.vlan}), {k: [P("<1-4094>", "zahl", "vlan", "VLAN ID", "z. B. 20", {min: 1, max: 4094})]})]})]}),
     S("port-security", "Show secure port information", "Port-Security je Port", (s, a) => Z().portSecurity(s, a.if), {nur: istSwitch, cr: true, k: [
       W("interface", "Show secure interface", "nur ein Port", {k: [P("IF", "if", "if", "", "", {arten: ["phys"]})]})]}),
     S("running-config", "Current operating configuration", "aktuelle Konfiguration im RAM", (s, a) => Z().showRun(s, a.if), {nur: priv, privOnly: true, cr: true, k: [
@@ -198,7 +207,8 @@ CLI.baeumeBauen = function(){
     S("users", "Display information about terminal lines", "wer ist angemeldet (Konsole, SSH)", s => Z().benutzer(s)),
     S("version", "System hardware and software status", "Software, Laufzeit, Speicher, Config-Register", s => Z().version(s)),
     S("vlan", "VTP VLAN status", "VLANs und ihre Ports", s => Z().vlan(s, false), {nur: istSwitch, cr: true, k: [
-      S("brief", "VTP all VLAN status in brief", "Kurzübersicht", s => Z().vlan(s, true))]}),
+      S("brief", "VTP all VLAN status in brief", "Kurzübersicht", s => Z().vlan(s, true)),
+      S("id", "Show VLAN by ID", "ein VLAN mit Name, Status und Ports", (s, a) => Z().vlanId(s, a.vlan), {k: [P("<1-4094>", "zahl", "vlan", "VLAN ID", "z. B. 20", {min: 1, max: 4094})]})]}),
   ]});
 
   const exec = {k: [
@@ -231,7 +241,11 @@ CLI.baeumeBauen = function(){
     show,
     W("terminal", "Set terminal line parameters", "Einstellungen dieser Sitzung", {sim: true, k: [
       W("length", "Set number of lines on a screen", "Zeilen pro Seite (0 = ohne Pause)", {k: [
-        P("<0-512>", "zahl", "laenge", "Number of lines on screen (0 for no pausing)", "", {min: 0, max: 512, f: () => ""})]})]}),
+        P("<0-512>", "zahl", "laenge", "Number of lines on screen (0 for no pausing)", "", {min: 0, max: 512, f: (s, a) => {
+          s.paging = +a.laenge;
+          /* Ehrlich statt wirkungslos (CLI-10): die Konsole hat keinen Bildschirmpuffer, also keine Pause. */
+          return {ausgabe: `Hinweis: Seitenlänge ${a.laenge} gemerkt – diese Konsole hat keine Bildschirmpause (Attrappe, keine Terminalwirkung).`};
+        }})]})]}),
     traceroute,
     W("write", "Write running configuration to memory, network, or terminal", "Konfiguration sichern (wie copy run start)", {nur: priv, privOnly: true, cr: true, f: writeMem, k: [
       W("erase", "Erase NV memory", "startup-config löschen", {f: erase}),
@@ -513,11 +527,15 @@ CLI.baeumeBauen = function(){
     return jedeIf(s, (n) => {
       const j = snooping(s), liste = new Set(j.vertraut || []);
       if (a.no) liste.delete(n); else liste.add(n);
-      h.setzen(s, "snooping", {an: a.no ? j.an : true, vertraut: [...liste]});
+      /* trust ändert nur die Portliste – der globale Schalter bleibt, wie er ist (CLI-03/CLI-08). */
+      h.setzen(s, "snooping", {an: j.an, vertraut: [...liste]});
       return "";
     });
   }
-  const snoopingTrust = (s, a) => snoopingAn(s, a);
+  /* „ip dhcp snooping trust“ gilt nur im Schnittstellen-/Range-Modus (Bericht CLI-08). Vorher schaltete
+     der Befehl im globalen Konfigurationsmodus still das ganze Snooping ein – eine falsche Lehre. */
+  const snoopingTrust = (s, a) => imIfModus(s) ? snoopingAn(s, a) : fehler("% „ip dhcp snooping trust“ gilt nur im Schnittstellenmodus.",
+    "Erst „interface Fa0/1“ wählen, dann „ip dhcp snooping trust“ – so vertraust du den Uplink zum DHCP-Server.");
 
   const config = {k: []};
   config.k.push(
@@ -814,7 +832,7 @@ CLI.baeumeBauen = function(){
   const line = {k: []};
   line.k.push(doN, ende, exitSub,
     W("logging", "Modify message logging facilities", "Meldungen", {k: [
-      W("synchronous", "Synchronized message output", "Meldungen unterbrechen die Eingabe nicht", {f: (s, a) => lineAendern(s, l => { if (a.no) delete l.logsync; else l.logsync = true; })})]}),
+      W("synchronous", "Synchronized message output", "Meldungen unterbrechen die Eingabe nicht (im Labor Attrappe: es gibt keine asynchronen Logmeldungen)", {f: (s, a) => lineAendern(s, l => { if (a.no) delete l.logsync; else l.logsync = true; })})]}),
     W("login", "Enable password checking", "beim Anmelden nach dem Passwort fragen", {cr: true, f: (s, a) => lineAendern(s, (l, art) => {
       l.login = !a.no;
       if (!a.no && !l.passwort && art === "con") return {ausgabe: "% Login disabled on line 0, until 'password' is set", hinweis: "Erst „password …“ setzen, sonst fragt die Konsole nicht."};

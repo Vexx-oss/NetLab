@@ -172,6 +172,9 @@ Spiel.klassenraum = (() => {
   function erzeugen(o){
     if (o === null || o === undefined || typeof o !== "object" || Array.isArray(o))
       return {fehler: "wahl", grund: "erzeugen erwartet ein Objekt mit genau einer Quelle: {ticketId} oder {skill}."};
+    /* KLR-04a (3.0.0): kein stilles Klemmen — eine unzulässige Klassengröße ist ein Fehler, nicht 0. */
+    if (o.plaetze !== undefined && o.plaetze !== null && (!Number.isInteger(o.plaetze) || o.plaetze < 0 || o.plaetze > 31))
+      return {fehler: "wahl", grund: "Die Klassengröße muss eine ganze Zahl von 0 bis 31 sein (0 = nicht eingestellt)."};
     const c = C(), tab = tabellen();
     if (!c || !tab) return OHNE_CODEC;
     const hatTicket = typeof o.ticketId === "string" && o.ticketId.length > 0;
@@ -221,7 +224,11 @@ Spiel.klassenraum = (() => {
     const sitzung = {
       id, titel, art, ticketId: art === "hand" ? ticketId : kanon.def.id, skill: art === "generiert" ? skill : null,
       index, variante, seed: kanon.seed, eigene: art === "hand" ? !!kanon.eigene : false, schritte: kanon.schritte,
-      code, dauerMin, plaetze: platzzahl(o.plaetze) ?? 0, erstellt: jetzt(), ergebnisse: {},
+      code, dauerMin,
+      plaetze: (o.plaetze !== undefined && o.plaetze !== null) ? o.plaetze
+        : (bisher && platzzahl(bisher.plaetze) ? bisher.plaetze : 0),   /* KLR-08a: Stärke erben, nicht still 0 */
+      erstellt: jetzt(), ergebnisse: {},
+      diagnose: {},                                              /* KLR-05a: anonyme Zähler je Schritt, § 12.1 */
     };
     schreib(Object.assign({}, alt, {
       sitzungen: (alt.sitzungen || []).concat([sitzung]), aktiv: id, zaehler: zaehler + 1,
@@ -277,6 +284,35 @@ Spiel.klassenraum = (() => {
     if (!k) return [];
     return k.sitzungen.map(s => tief({id: s.id, titel: s.titel, art: s.art, code: s.code,
       erstellt: s.erstellt, plaetze: s.plaetze, ergebnisse: s.ergebnisse || {}, aktiv: s.id === k.aktiv}));
+  }
+  /* SPL-10 (3.0.0): Der 2.9.0-Schlüssel stand auf fassung:1; beim Laden einmalig auf fassung:2 heben
+     und schreiben. Werte bleiben (Migration verlustfrei, § 12.1) — nur das Altfeld sitzung löst sich auf. */
+  function migrierenStand(){
+    const roh = store.get(SCHLUESSEL(), null);
+    if (!roh || typeof roh !== "object" || Array.isArray(roh)) return {ok: false, grund: "kein Stand"};
+    if (neuereFassung(roh)) return {ok: false, fehler: "fassung"};
+    const f = Number.isInteger(roh.fassung) ? roh.fassung : 1;
+    if (f >= FASSUNG) return {ok: false, grund: "aktuell"};
+    const k = migrieren(roh);
+    if (!k) return {ok: false, grund: "unbrauchbar"};
+    schreib(k);
+    return {ok: true, von: f};
+  }
+  /* KLR-04a (3.0.0, § 12.2): eine gespeicherte Sitzung samt Ergebnissen löschen — mit Quittung. */
+  function sitzungLoeschen(id, optionen){
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
+    const k = lies();
+    const s = sitzungMitId(k, id);
+    if (!s) return {fehler: "sitzung", grund: "Diese Sitzung gibt es hier nicht: " + JSON.stringify(id) + "."};
+    const hatErgebnisse = s.ergebnisse && typeof s.ergebnisse === "object" && Object.keys(s.ergebnisse).length > 0;
+    if (hatErgebnisse && (!optionen || optionen.bestaetigen !== true))
+      return {warnung: "sitzung-hat-ergebnisse"};
+    const warAktiv = k.aktiv === s.id;
+    k.sitzungen = k.sitzungen.filter(x => x.id !== s.id);
+    if (warAktiv) k.aktiv = k.sitzungen.length ? k.sitzungen[k.sitzungen.length - 1].id : null;
+    schreib(k);
+    Spiel.melden("klassenraum", {art: "sitzung-geloescht", sitzung: s.id});
+    return {ok: true, geloescht: s.id, aktiv: k.aktiv};
   }
   function sitzungWaehlen(id){
     if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
@@ -365,7 +401,7 @@ Spiel.klassenraum = (() => {
   }
 
   /* Idempotent: Schlüssel ist der PLATZ, der erste Eintrag gewinnt (§ 5.1, § 6.2). */
-  function ergebnisEintragen(eingabe){
+  function ergebnisEintragen(eingabe, optionen){
     const gelesen = ergebnisLesen(eingabe);
     if (gelesen === null) return {fehler: "länge", grund: "Es wurde kein Ergebnis-Code eingegeben."};
     if (gelesen.fehler) return {fehler: gelesen.fehler, grund: gelesen.grund};
@@ -378,15 +414,94 @@ Spiel.klassenraum = (() => {
     if (!s.ergebnisse || typeof s.ergebnisse !== "object" || Array.isArray(s.ergebnisse)) s.ergebnisse = {};
     const schluessel = String(gelesen.platz);
     const alt = s.ergebnisse[schluessel];
-    if (alt) return alt.code === gelesen.code
-      ? {ok: true, neu: false, grund: "doppelt", platz: gelesen.platz, sterne: gelesen.sterne}
-      : {ok: true, neu: false, grund: "platz-schon-da", platz: gelesen.platz, sterne: alt.sterne};
+    if (alt){
+      if (alt.code === gelesen.code)
+        return {ok: true, neu: false, grund: "doppelt", platz: gelesen.platz, sterne: gelesen.sterne};
+      /* KLR-04a (3.0.0): ein anderer Code am selben Platz ersetzt nur mit ausdrücklicher Quittung. */
+      if (!optionen || optionen.ersetzen !== true || optionen.bestaetigen !== true)
+        return {warnung: "platz-hat-ergebnis"};
+      s.ergebnisse[schluessel] = {platz: gelesen.platz, sterne: gelesen.sterne, dauerS: gelesen.dauerS, versuche: gelesen.versuche,
+        code: gelesen.code, zeit: jetzt(), quelle: "eingabe"};
+      k.letzte = gelesen.code;
+      schreib(k);
+      Spiel.melden("klassenraum", {art: "ergebnis-ersetzt", platz: gelesen.platz});
+      return {ok: true, neu: false, ersetzt: true, platz: gelesen.platz, sterne: gelesen.sterne};
+    }
     s.ergebnisse[schluessel] = {platz: gelesen.platz, sterne: gelesen.sterne, dauerS: gelesen.dauerS, versuche: gelesen.versuche,
       code: gelesen.code, zeit: jetzt(), quelle: "eingabe"};
     k.letzte = gelesen.code;
     schreib(k);
     Spiel.melden("klassenraum", {art: "ergebnis", platz: gelesen.platz});
     return {ok: true, neu: true, platz: gelesen.platz, sterne: gelesen.sterne};
+  }
+
+  /* KLR-04a (3.0.0, § 12.2): einen Ergebniseintrag der AKTIVEN Sitzung entfernen (Tippfehler-Korrektur). */
+  function ergebnisEntfernen(platz, optionen){
+    if (!Number.isInteger(platz) || platz < 0 || platz > 31)
+      return {fehler: "wahl", grund: "Der Platz muss eine ganze Zahl von 0 bis 31 sein."};
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
+    const k = lies();
+    const s = aktiveSitzungVon(k);
+    if (!s) return {fehler: "sitzung", grund: "Es läuft keine Sitzung – erst einen Auftrag erzeugen."};
+    if (!s.ergebnisse || !(String(platz) in s.ergebnisse))
+      return {fehler: "platz", grund: "Platz " + platz + " hat kein Ergebnis."};
+    delete s.ergebnisse[String(platz)];
+    schreib(k);
+    Spiel.melden("klassenraum", {art: "ergebnis-entfernt", platz});
+    return {ok: true, entfernt: platz};
+  }
+
+  /* ---------- Diagnose-Aggregat (KLR-05a, § 12.2) — anonym, nur Zähler je Schritt ----------
+     Ein H-Code sagt, WIE VIELE Ziele jemand erfüllt hat; gespeichert wird ausschließlich die Anzahl
+     je Schritt. Kein Platz, kein Name, keine Platz→Schritt-Zuordnung, keine Historie. */
+  const diagnoseVon = s => (s && s.diagnose && typeof s.diagnose === "object" && !Array.isArray(s.diagnose)) ? s.diagnose : {};
+  function diagnoseZaehlen(eingabe){
+    const gelesen = hilfeLesen(eingabe);
+    if (gelesen === null) return {fehler: "länge", grund: "Es wurde kein Hilfecode eingegeben."};
+    if (gelesen.fehler) return {fehler: gelesen.fehler, grund: gelesen.grund};
+    if (neuereFassung(store.get(SCHLUESSEL(), null))) return ZU_NEU;
+    const k = lies();
+    const s = sitzungMitId(k, gelesen.sitzung);
+    if (!s) return {fehler: "sitzung", grund: "Zu diesem Hilfecode gibt es hier keine Sitzung " + gelesen.sitzung + "."};
+    if (!s.diagnose || typeof s.diagnose !== "object" || Array.isArray(s.diagnose)) s.diagnose = {};
+    const schritt = Number(gelesen.schritt) || 0;
+    s.diagnose[String(schritt)] = (Number(s.diagnose[String(schritt)]) || 0) + 1;
+    schreib(k);
+    Spiel.melden("klassenraum", {art: "diagnose", schritt, anzahl: s.diagnose[String(schritt)]});
+    return {ok: true, schritt, anzahl: s.diagnose[String(schritt)]};
+  }
+  function diagnose(){
+    const k = lies();
+    const s = aktiveSitzungVon(k);
+    if (!s) return {plaetze: 0, gesamt: 0, schritte: []};
+    const zaehler = diagnoseVon(s);
+    const schritte = Object.keys(zaehler).map(n => ({schritt: Number(n), anzahl: Math.max(0, Math.floor(Number(zaehler[n]) || 0))}))
+      .filter(x => Number.isInteger(x.schritt) && x.anzahl > 0).sort((a, b) => a.schritt - b.schritt);
+    return {plaetze: Number.isInteger(s.plaetze) && s.plaetze > 0 ? s.plaetze : 0,
+      gesamt: schritte.reduce((sum, x) => sum + x.anzahl, 0), schritte};
+  }
+
+  /* KLR-08a (3.0.0, § 12.2): 20-Übersicht der AKTIVEN Sitzung als reine Daten (Anzeige = ui). */
+  function uebersicht(){
+    const k = lies();
+    const s = aktiveSitzungVon(k);
+    if (!s) return null;
+    const plaetze = Number.isInteger(s.plaetze) && s.plaetze > 0 && s.plaetze <= 31 ? s.plaetze : 0;
+    const roh = (s.ergebnisse && typeof s.ergebnisse === "object" && !Array.isArray(s.ergebnisse)) ? s.ergebnisse : {};
+    const belegt = new Set(), ohnePlatz = [];
+    for (const [schluessel, e] of Object.entries(roh)){
+      const p = e && Number.isInteger(e.platz) ? e.platz : Number(schluessel);
+      if (!Number.isInteger(p) || p < 1 || p > 31 || (plaetze > 0 && p > plaetze)) { ohnePlatz.push(schluessel); continue; }
+      belegt.add(p);
+    }
+    const abgegeben = [...belegt].sort((a, b) => a - b);
+    const offen = plaetze > 0 ? Array.from({length: plaetze}, (_, i) => i + 1).filter(p => !belegt.has(p)) : [];
+    const dauerMin = Number.isInteger(s.dauerMin) && s.dauerMin > 0 ? s.dauerMin : 0;
+    const erstellt = Number.isFinite(s.erstellt) ? s.erstellt : jetzt();
+    const restMs = erstellt + dauerMin * 60000 - jetzt();
+    return {plaetze, eingerichtet: plaetze > 0, dauerMin, erstellt,
+      abgegeben, offen, fertig: abgegeben.length, offenAnzahl: offen.length, ohnePlatz: ohnePlatz.length,
+      restMinuten: Math.max(0, Math.ceil(restMs / 60000)), abgelaufen: restMs <= 0};
   }
 
   /* ---------- Export / Import (§ 12.1: fassung 2, ALLE Sitzungen; verlustfrei, wirft nie) ---------- */
@@ -442,6 +557,7 @@ Spiel.klassenraum = (() => {
       if (!Number.isInteger(neu.plaetze)) neu.plaetze = 0;
       if (!Number.isInteger(neu.erstellt)) neu.erstellt = jetzt();
       if (!neu.ergebnisse || typeof neu.ergebnisse !== "object") neu.ergebnisse = {};
+      if (!neu.diagnose || typeof neu.diagnose !== "object" || Array.isArray(neu.diagnose)) neu.diagnose = {};
       return neu;
     });
     const ids = new Set(), doppelt = new Set();
@@ -531,7 +647,7 @@ Spiel.klassenraum = (() => {
     return daten;
   }
 
-  return {erzeugen, ausCode, sitzung, sitzungen, sitzungWaehlen, ergebnisCode, ergebnisLesen, ergebnisEintragen, hilfeCode, hilfeLesen,
+  return {erzeugen, ausCode, sitzung, sitzungen, sitzungWaehlen, sitzungLoeschen, migrierenStand, ergebnisCode, ergebnisLesen, ergebnisEintragen, ergebnisEntfernen, diagnoseZaehlen, diagnose, uebersicht, hilfeCode, hilfeLesen,
     exportieren, importieren, netzkennwert, tauglicheFertigkeiten, platz, platzSetzen, plaetze, plaetzeSetzen,
     abnehmen, tabellen};
 })();

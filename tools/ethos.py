@@ -11,6 +11,11 @@ Aufruf:
   python tools/ethos.py --gegenprobe         baut absichtlich Verstöße ein — der Lauf MUSS rot werden;
                                              Rückgabewert 0 = er wurde rot (Vorbild tools/rauch.py --gegenprobe)
   python tools/ethos.py --dom                zusätzlich Regel 12 im laufenden Programm messen (tools/cdp.py)
+  python tools/ethos.py --r12 PFAD           verbindliche R12-Zahl je Ansicht+Breite aus der Rohmessung
+                                             (tools/rauch.py --r12) bewerten; schreibt Nachweise/3.0/r12.json;
+                                             vergleicht je Ansicht×Breite gegen tests/r12-stand.json (Ratsche)
+  python tools/ethos.py --r12 PFAD --festhalten   friert die Letztmessung als tests/r12-stand.json ein
+                                             (nur bei vollstaendiger Messung ohne harte Verletzung)
   python tools/ethos.py --lang               alle Fundstellen statt der ersten fünf
 
 Aufgenommen in tools/test.sh hinter tools/klassen.py.
@@ -32,6 +37,7 @@ import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
+from datetime import datetime
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -340,6 +346,15 @@ R12_GRENZEN = {"mitarbeit": 3}    # Spez. B § 2.1/§ 2.2: die Azubi-Ansicht „
 R12_WAEHLER = "button,[role=button],input,select,textarea,a[href]"
 # Der letzte Messbericht — für die Zeile in `zeige()` und die Zusammenfassung in `main()`.
 R12_BERICHT = {"gemessen": False, "grund": None, "zahlen": []}
+# VIS-05: Rohmessung je Ansicht UND Breite (tools/rauch.py) und die verbindliche Zahl (eine Quelle
+# für tools/stand.py). Beides liegt unter Nachweise/ (nicht versioniert) — fehlt sie, ist R12
+# ausdrücklich "nicht gemessen", nie eine 0.
+R12_ROHDATEN = HIER / "Nachweise" / "rauch" / "r12.json"
+R12_VERBINDLICH = HIER / "Nachweise" / "3.0" / "r12.json"
+# r-arch V02: die verbindliche LETZTMESSUNG wird versioniert (neben sim-stand/stil-stand), damit ein
+# frischer Klon ohne Nachweise/ reproduzierbar pruefen kann. Nur sie ist die Ratsche; Nachweise/
+# bleibt Beleg der Rohmessung.
+R12_STAND = HIER / "tests" / "r12-stand.json"
 
 
 def r12_js():
@@ -412,7 +427,167 @@ def r12_auswerten(ausgabe):
     return befunde, zahlen
 
 
-def r12_bedienelemente(bloecke, texte, messen):
+def r12_auswerten_breiten(daten):
+    """Rohmessung (tools/rauch.py --r12) je Ansicht UND Breite auswerten.
+
+    Liefert (befunde, zahlen, verstoesse, gemessen). zahlen ist [(label, name, zahl|None, soll)]
+    mit label "Titel (name) @Breite px". Eine fehlende Messung wird BENANNT, nie zu 0."""
+    if not isinstance(daten, dict):
+        return ["nicht gemessen: Rohmessung unlesbar"], [], [], False
+    if not daten.get("gemessen"):
+        return ["nicht gemessen: " + str(daten.get("grund") or "Rohmessung meldet nicht gemessen")], [], [], False
+    grenze = daten.get("grenze") or R12_GRENZE
+    grenzen = daten.get("grenzen") or R12_GRENZEN
+    befunde, zahlen, verstoesse, offen = [], [], [], []
+    for m in daten.get("messungen") or []:
+        breite = m.get("breite")
+        for a in m.get("ansichten") or []:
+            name = (a or {}).get("name") or "?"
+            titel = (a or {}).get("titel") or name
+            soll = grenzen.get(name, grenze)
+            label = f"{titel} ({name}) @{breite}px"
+            zahl = (a or {}).get("zahl")
+            if m.get("messbar") is False or isinstance(zahl, bool) or not isinstance(zahl, int):
+                grund = (a or {}).get("fehler") or m.get("grund") or "keine Zahl"
+                offen.append(f"nicht gemessen: {label} - {grund}")
+                zahlen.append((label, name, None, soll, breite))
+                continue
+            zahlen.append((label, name, zahl, soll, breite))
+            if zahl > soll:
+                verstoesse.append(f"{label}: {zahl} sichtbare Bedienelemente - erlaubt {soll}")
+    gemessen = bool(zahlen) and not offen
+    return offen, zahlen, verstoesse, gemessen
+
+
+def r12_stand_lesen(pfad):
+    """Versionierte letzte R12-Messung (tests/r12-stand.json) lesen. None + Grund statt 0."""
+    p = Path(pfad)
+    if not p.is_file():
+        return None, f"keine verbindliche R12-Messung: {p} fehlt (mit --festhalten einfrieren)"
+    try:
+        daten = json.loads(p.read_text(encoding="utf-8-sig"))
+    except Exception as fehler:                                    # noqa: BLE001
+        return None, f"R12-Stand unlesbar: {fehler}"
+    if not isinstance(daten, dict) or not isinstance(daten.get("ansichten"), dict) or not daten.get("ansichten"):
+        return None, "R12-Stand ohne Ansichten"
+    return daten, None
+
+
+def r12_ratsche(zahlen, stand, grund):
+    """Ratsche je Ansicht×Breite: aktuell > Baseline = ROT, ≤ Baseline = grün, fehlende Evidenz = nicht gemessen."""
+    if stand is None:
+        return ["nicht gemessen: " + (grund or "kein R12-Stand")], False
+    basis = stand.get("ansichten") or {}
+    regress, offen, gesehen = [], [], set()
+    for label, name, zahl, soll, breite in zahlen:
+        if zahl is None:
+            continue
+        schluessel = str(breite)
+        gesehen.add((name, schluessel))
+        wert = (basis.get(name) or {}).get(schluessel)
+        if wert is None:
+            offen.append(f"nicht gemessen: keine Baseline fuer {label} (tests/r12-stand.json)")
+        elif zahl > wert:
+            regress.append(f"R12 Ratsche {label}: {zahl} > Baseline {wert}")
+    for name, breiten in (basis or {}).items():
+        for breite in (breiten or {}):
+            if (name, str(breite)) not in gesehen:
+                offen.append(f"nicht gemessen: Baseline {name}@{breite}px ohne aktuelle Messung")
+    return regress + offen, not offen
+
+
+def r12_stand_schreiben(ziel, zahlen, verstoesse):
+    """Friert die Letztmessung als versionierte tests/r12-stand.json ein (r-arch V02)."""
+    ansichten, werte = {}, []
+    for label, name, zahl, soll, breite in zahlen:
+        if zahl is None:
+            continue
+        ansichten.setdefault(name, {})[str(breite)] = zahl
+        werte.append(zahl)
+    daten = {
+        "fassung": 1, "quelle": "tools/ethos.py --dom --r12 --festhalten",
+        "zeit": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "grenzen": {"standard": R12_GRENZE, **dict(R12_GRENZEN)},
+        "ansichten": ansichten, "messungen": len(werte),
+        "max": max(werte) if werte else None, "verstoesse": sorted(verstoesse),
+    }
+    z = Path(ziel)
+    z.parent.mkdir(parents=True, exist_ok=True)
+    z.write_text(json.dumps(daten, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"       R12 festgehalten: {z} ({daten['messungen']} Messungen, max {daten['max']}, "
+          f"{len(verstoesse)} ueber Grenze eingefroren)")
+    return daten
+
+
+def r12_breiten(rohdatei, ausgabedatei, festhalten=False, standdatei=None):
+    """R12 je Ansicht+Breite aus der Rohmessung; Gate = Ratsche gegen die versionierte Letztmessung.
+
+    Rohbefund (Zahlen ueber der Grenze) wird BENANNT, aber eingefrorene Werte gelten als Baseline —
+    die Ratsche verbietet nur den Zuwachs. Ohne verbindliche Letztmessung: "nicht gemessen" (kein 0)."""
+    roh = Path(rohdatei)
+    stand_pfad = Path(standdatei or R12_STAND)
+    grund, befund, zahlen, verstoesse, gemessen = None, [], [], [], False
+    if not roh.is_file():
+        grund = f"Rohmessung fehlt: {roh} — erzeugen mit python tools/rauch.py --r12"
+        befund = ["nicht gemessen: " + grund]
+    else:
+        try:
+            daten = json.loads(roh.read_text(encoding="utf-8-sig"))
+        except Exception as fehler:                                    # noqa: BLE001
+            daten = None
+            grund = f"Rohmessung unlesbar: {fehler}"
+            befund = ["nicht gemessen: " + grund]
+        if isinstance(daten, dict):
+            befund, zahlen, verstoesse, gemessen = r12_auswerten_breiten(daten)
+            grund = None if gemessen else "; ".join(befund)
+    for b in befund:
+        print(f"       R12 {b}")
+    for label, name, zahl, soll, breite in zahlen:
+        stand = "nicht gemessen" if zahl is None else f"{zahl} sichtbar, Grenze {soll}"
+        print(f"       R12 {label}: {stand}")
+    for v in verstoesse:
+        print(f"       R12 UEBER GRENZE (eingefroren erlaubt): {v}")
+    werte = [z[2] for z in zahlen if z[2] is not None]
+    stand, stand_grund = r12_stand_lesen(stand_pfad)
+    regress, ratsche_gemessen = (r12_ratsche(zahlen, stand, stand_grund) if gemessen else ([], False))
+    ratsche_rot = [b for b in regress if not b.startswith("nicht gemessen")]
+    ratsche_offen = [b for b in regress if b.startswith("nicht gemessen")]
+    for b in regress:
+        print(f"       R12 {b}")
+    if festhalten:
+        if not gemessen:
+            print("       R12 nicht festgehalten: Messung nicht vollstaendig")
+        else:
+            r12_stand_schreiben(stand_pfad, zahlen, verstoesse)
+    aus = {
+        "fassung": 1, "quelle": "tools/ethos.py --dom --r12", "rohdaten": str(roh),
+        "stand": str(stand_pfad), "gemessen": gemessen,
+        "grund": None if gemessen else (grund or "nicht gemessen"),
+        "zeit": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "grenze": R12_GRENZE, "grenzen": R12_GRENZEN, "messungen": len(zahlen),
+        "max": max(werte) if werte else None,
+        "zahlen": [{"label": l, "name": n, "zahl": z, "soll": s, "breite": b} for l, n, z, s, b in zahlen],
+        "ueber_grenze": verstoesse, "ratsche_rot": ratsche_rot, "ratsche_offen": ratsche_offen,
+    }
+    ziel = Path(ausgabedatei)
+    ziel.parent.mkdir(parents=True, exist_ok=True)
+    ziel.write_text(json.dumps(aus, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"       R12 verbindlich: {len(zahlen)} Messungen, max {aus['max']}, "
+          f"{len(verstoesse)} ueber Grenze, {len(ratsche_rot)} Ratsche-Verstoss/Verstoesse — {ziel}")
+    R12_BERICHT["gemessen"] = gemessen and ratsche_gemessen
+    R12_BERICHT["grund"] = (None if (gemessen and ratsche_gemessen)
+                            else (grund or "; ".join(ratsche_offen) or "nicht gemessen"))
+    R12_BERICHT["zahlen"] = [(lbl, nm, z, s) for lbl, nm, z, s, _b in zahlen]
+    if ratsche_rot:
+        return ratsche_rot      # Zuwachs gegenueber der eingefrorenen Letztmessung = ROT
+    if not gemessen or not ratsche_gemessen:
+        return None             # eigener Zustand: nicht gemessen (kein 0, kein Verlust)
+    return []                   # gehalten: aktuell <= Baseline je Ansicht×Breite
+def r12_bedienelemente(bloecke, texte, messen, r12_datei=None, r12_ausgabe=None,
+                       festhalten=False, r12_stand=None):
+    if r12_datei:
+        return r12_breiten(r12_datei, r12_ausgabe or R12_VERBINDLICH,
+                           festhalten=festhalten, standdatei=r12_stand)
     """Höchstens 6 sichtbare Bedienelemente je Ansicht (DOM-Messung im laufenden Programm).
 
     DREI AUSGÄNGE, und keiner davon ist still:
@@ -463,7 +638,7 @@ def r12_bedienelemente(bloecke, texte, messen):
     return []
 
 
-def messen(texte=None, dom=False):
+def messen(texte=None, dom=False, r12_datei=None, r12_ausgabe=None, festhalten=False, r12_stand=None):
     """Alle Regeln messen. Liefert (liste, kennzahlen); liste: (nummer, name, treffer, einheit)."""
     bloecke, kenn = lies(texte)
     roh = texte if texte is not None else [(p.name, p.read_text(encoding="utf-8")) for p in sorted(STIL.glob("*.css"))]
@@ -479,7 +654,9 @@ def messen(texte=None, dom=False):
         ("R9", "Ein Selektor einmal definiert", r9_selektor_einmal(bloecke), "Wiederholungen"),
         ("R10", "Keine identische Blockdopplung", r10_blockdopplung(bloecke), "doppelte Blöcke"),
         ("R11", "Längenzahl nur mit Einheit", r11_einheit(bloecke), "Zahlen ohne Einheit"),
-        ("R12", "Höchstens 6 Bedienelemente je Ansicht", r12_bedienelemente(bloecke, roh, dom), "Befunde je Ansicht"),
+        ("R12", "Höchstens 6 Bedienelemente je Ansicht",
+         r12_bedienelemente(bloecke, roh, dom, r12_datei, r12_ausgabe, festhalten, r12_stand),
+         "Befunde je Ansicht"),
     ]
     return regeln, kenn
 
@@ -580,13 +757,26 @@ def main():
     ap.add_argument("--neu", action="store_true", help="Stand-Datei aus dem Ist-Stand schreiben")
     ap.add_argument("--gegenprobe", action="store_true", help="absichtliche Verstöße einbauen; muss rot werden")
     ap.add_argument("--dom", action="store_true", help="Regel 12 im laufenden Programm messen (tools/cdp.py)")
+    ap.add_argument("--r12", nargs="?", const=str(R12_ROHDATEN), default=None,
+                    help="verbindliche R12-Zahl je Ansicht+Breite aus der Rohmessung (tools/rauch.py --r12)")
+    ap.add_argument("--r12-ausgabe", default=None,
+                    help="Ziel der verbindlichen R12-Datei (Standard: Nachweise/3.0/r12.json)")
+    ap.add_argument("--festhalten", action="store_true",
+                    help="Letztmessung als versionierte Baseline tests/r12-stand.json einfrieren")
+    ap.add_argument("--festhalten-ziel", default=None,
+                    help="Ziel der versionierten Baseline (Standard: tests/r12-stand.json)")
+    ap.add_argument("--r12-baseline", default=None,
+                    help="Baseline der Ratsche (Standard: tests/r12-stand.json)")
     ap.add_argument("--lang", action="store_true", help="alle Fundstellen ausgeben")
     args = ap.parse_args()
 
     if args.gegenprobe:
         return gegenprobe()
 
-    regeln, kenn = messen(dom=args.dom)
+    if args.festhalten_ziel and not args.r12_baseline:
+        args.r12_baseline = args.festhalten_ziel
+    regeln, kenn = messen(dom=args.dom, r12_datei=args.r12, r12_ausgabe=args.r12_ausgabe,
+                          festhalten=args.festhalten, r12_stand=args.r12_baseline)
     zeige(regeln, kenn, args.lang)
 
     nicht_gemessen = [nr for nr, _, t, _ in regeln if t is None]

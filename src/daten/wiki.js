@@ -43,7 +43,8 @@ Object.assign(DATEN.wiki, {
     abschnitte: [
       {titel: "Aufbau", html:
         "<p>Vier Oktette zu je 8 Bit, jedes 0 bis 255, getrennt durch Punkte: <code>192.168.1.10</code>. Die <b>Subnetzmaske</b> besteht aus lauter Einsen (Netzanteil), gefolgt von lauter Nullen (Hostanteil): <code>255.255.255.0</code> = <code>/24</code>.</p>" +
-        "<ul><li><b>Netz-ID</b>: alle Hostbits 0, nicht vergebbar</li><li><b>Broadcast</b>: alle Hostbits 1, nicht vergebbar</li><li>Jede Adresse darf im Netz nur <b>einmal</b> vorkommen, sonst gibt es einen Adresskonflikt.</li></ul>"},
+        "<ul><li><b>Netz-ID</b>: alle Hostbits 0 – im Regelfall keine Hostadresse</li><li><b>Broadcast</b>: alle Hostbits 1 – im Regelfall keine Hostadresse</li><li>Jede Adresse darf im Netz nur <b>einmal</b> vorkommen, sonst gibt es einen Adresskonflikt.</li></ul>" +
+        "<p><b>Ausnahme /31 (RFC 3021):</b> Bei Punkt-zu-Punkt-Verbindungen gibt es keine Netz- und keine Broadcastadresse – beide Adressen sind nutzbar. Ein <b>/32</b> bezeichnet genau einen Host (eine Adresse).</p>"},
       {titel: "Besondere Bereiche", html:
         "<table><tr><th>Bereich</th><th>Bedeutung</th></tr>" +
         "<tr><td>10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16</td><td>privat (RFC 1918), im Internet nicht geroutet</td></tr>" +
@@ -68,10 +69,10 @@ Object.assign(DATEN.wiki, {
         "<p>Eine Subnetzmaske gibt es nicht mehr: Die Präfixlänge steht direkt an der Adresse, zum Beispiel <code>2001:db8:aa00:1::1/64</code>. Einen <b>Broadcast</b> kennt IPv6 nicht, Multicast übernimmt seine Rolle. Für Dokumentation und Beispiele ist 2001:db8::/32 reserviert – diese Adressen gehören niemandem und gehören in kein echtes Netz.</p>" +
         "<p>Ein Gerät hat meist mehrere Adressen gleichzeitig: eine Link-Local und mindestens eine globale. Kommt kein Router Advertisement an, bleibt nur die Link-Local übrig – das IPv6-Gegenstück zur APIPA-Adresse. Dieses Labor rechnet mit IPv4; IPv6 steht hier zum Nachschlagen.</p>"},
     ],
-    merksatz: "Jede Adresse nur einmal vergeben, nie die Netz-ID und nie den Broadcast.",
+    merksatz: "Jede Adresse nur einmal vergeben; im Regelfall nie die Netz-ID und nie den Broadcast – Ausnahme /31 nach RFC 3021 (zwei nutzbare Adressen), /32 ist eine Einzeladresse.",
     pruefungstipp: "Private Bereiche sicher können; 172.16.0.0/12 ist die häufigste Falle (nur 172.16 bis 172.31). In IPv6 gibt es keine Maske, nur die Präfixlänge.",
     quelle: "Network – Lernfassung",
-    belege: "RFC 1918 · RFC 3927 (169.254.0.0/16) · RFC 5227 (Adresskonflikte) · Fragen – Netzwerk-Grundlagen · RFC 4291 (IPv6-Adressarchitektur) · RFC 3849 (2001:db8::/32) · RFC 4193 (Unique Local) · RFC 5952 (Schreibweise)",
+    belege: "RFC 1918 · RFC 3927 (169.254.0.0/16) · RFC 5227 (Adresskonflikte) · RFC 3021 (/31 bei Punkt-zu-Punkt-Netzen) · Fragen – Netzwerk-Grundlagen · RFC 4291 (IPv6-Adressarchitektur) · RFC 3849 (2001:db8::/32) · RFC 4193 (Unique Local) · RFC 5952 (Schreibweise)",
     siehe: ["lab.netz", "lab.subnetz", "lab.gateway", "lab.dhcp", "lab.arp"],
   },
   "lab.netz": {
@@ -88,6 +89,8 @@ Object.assign(DATEN.wiki, {
         "<p>Die beiden liegen in verschiedenen Netzen und brauchen einen Router, auch wenn sie am selben Switch hängen.</p>"},
       {titel: "Was eine falsche Maske anrichtet", html:
         "<ul><li><b>Zu groß</b> (z. B. /16 statt /24): Der Rechner hält Geräte hinter dem Router für Nachbarn, fragt per ARP ins Leere.</li><li><b>Zu klein</b> (z. B. /28 statt /24): Nachbarn wirken fremd, der Verkehr geht unnötig über das Gateway oder scheitert.</li></ul>"},
+      {titel: "Drei Fragen vor dem Senden", html:
+        "<p>Drei Fragen beantworten die Rechnung im Kopf: Welche Maske trägt der Absender? Welche Netz-ID ergibt die Zieladresse mit dieser Maske? Liegt sie im eigenen Netz? Erst wenn die dritte Antwort „nein“ lautet, geht das Paket an das Gateway – sonst direkt per ARP an das Ziel.</p>"},
     ],
     merksatz: "Gleiche Netz-ID mit derselben Maske: direkt. Sonst: ab zum Gateway.",
     pruefungstipp: "Rechne immer mit der Maske des Absenders, denn er entscheidet, wohin er sendet.",
@@ -109,6 +112,8 @@ Object.assign(DATEN.wiki, {
       {titel: "Auch ein Switch braucht eins", html:
         "<p>Ein Layer-2-Switch verhält sich bei seiner Verwaltungsadresse wie ein PC. Soll er aus anderen Netzen erreichbar sein, braucht er ein Gateway:</p>" +
         "<pre>SW1(config)# ip default-gateway 192.168.1.1</pre>"},
+      {titel: "Ohne Gateway: was noch geht", html:
+        "<p>Ohne Standardgateway bleibt das eigene Netz erreichbar: Drucker, Dateiserver und Nachbarn im selben IP-Bereich funktionieren weiter. Fremde Netze und das Internet fallen aus, weil der Rechner kein Gerät kennt, dem er Pakete für unbekannte Ziele geben kann. Windows meldet dann „Allgemeiner Fehler“ oder gar keine Antwort.</p>"},
     ],
     merksatz: "Fremdes Netz? Dann geht der Frame an die MAC des Gateways, die IP bleibt die des Ziels.",
     pruefungstipp: "Frage „Welche Ziel-MAC hat der Frame an einen Internet-Server?“: die des Default Gateways.",
@@ -167,6 +172,8 @@ Object.assign(DATEN.wiki, {
       {titel: "Timeout oder Unreachable?", html:
         "<p><b>Unreachable</b> ist die freundlichere Nachricht: Die Adresse hinter „Antwort von“ zeigt, wer aufgegeben hat. Kommt sie von der eigenen Adresse, blieb ARP im eigenen Netz ohne Antwort. Ein <b>Timeout</b> sagt nur, dass nichts zurückkam: Firewall, fehlende Rückroute, fehlendes NAT.</p>" +
         "<p><code>.!!!!</code> beim ersten Ping über einen Router ist normal: Das erste Paket geht verloren, während ARP noch auflöst.</p>"},
+      {titel: "Was ein Ping nicht beweist", html:
+        "<p>Ein erfolgreicher Ping zeigt nur, dass ICMP-Echo beantwortet wird – nicht, dass ein Dienst läuft. Umgekehrt kann ein Rechner erreichbar sein und Ping trotzdem schweigen, weil eine Firewall ICMP verwirft. Dienste prüft man deshalb am Port: Ein geschlossener TCP-Port antwortet mit RST („Verbindung abgelehnt“), ein verworfener Port schweigt.</p>"},
     ],
     merksatz: "Timeout = still verworfen, Unreachable = jemand meldet sich.",
     pruefungstipp: "Ping hat keinen Port: ICMP liegt direkt auf Schicht 3.",
@@ -188,6 +195,8 @@ Object.assign(DATEN.wiki, {
         "<tr><td>Hub</td><td>eine für alle Ports</td><td>eine</td></tr>" +
         "<tr><td>Switch</td><td>eine je Port</td><td>eine (je VLAN eine)</td></tr>" +
         "<tr><td>Router</td><td>eine je Schnittstelle</td><td>eine je Schnittstelle</td></tr></table>"},
+      {titel: "Lernen, Altern, Fluten", html:
+        "<p>Ein Eintrag der MAC-Tabelle bleibt nicht ewig: Ohne neue Frames altert er (Cisco-Standard 300 s) und wird gelöscht, damit umgesteckte Geräte wieder gefunden werden. Solange eine Ziel-MAC unbekannt ist, flutet der Switch den Frame an alle Ports seines VLANs – normal, aber es kostet Bandbreite. Wandert dieselbe MAC ständig zwischen zwei Ports, deutet das auf eine Schleife hin.</p>"},
     ],
     merksatz: "Lernen über die Quelle, entscheiden über das Ziel.",
     pruefungstipp: "Domänen zählen: Jede Switch-Leitung ist eine eigene Kollisionsdomäne, Broadcasts stoppt nur der Router (oder die VLAN-Grenze).",
@@ -200,7 +209,7 @@ Object.assign(DATEN.wiki, {
     kurz: "Subnetting teilt einen Adressbereich in passende Netze; gerechnet wird mit Blockgröße, Netz-ID und Broadcast.",
     abschnitte: [
       {titel: "Der Rechenweg in fünf Schritten", html:
-        "<ul><li>Oktett finden, in dem die Maske nicht 255 ist.</li><li>Blockgröße = 256 − Maskenwert in diesem Oktett.</li><li>Netz-ID = größtes Vielfaches der Blockgröße, das nicht über dem Wert liegt.</li><li>Broadcast = nächste Netz-ID − 1.</li><li>Nutzbare Hosts = 2<sup>Hostbits</sup> − 2.</li></ul>"},
+        "<ul><li>Oktett finden, in dem die Maske nicht 255 ist.</li><li>Blockgröße = 256 − Maskenwert in diesem Oktett.</li><li>Netz-ID = größtes Vielfaches der Blockgröße, das nicht über dem Wert liegt.</li><li>Broadcast = nächste Netz-ID − 1.</li><li>Nutzbare Hosts = 2<sup>Hostbits</sup> − 2 – Ausnahme /31 nach RFC 3021: zwei nutzbare Adressen, /32: eine Adresse.</li></ul>"},
       {titel: "Masken-Tabelle", html:
         "<table><tr><th>Präfix</th><th>Maske (letztes Oktett)</th><th>Block</th><th>Hosts</th></tr>" +
         "<tr><td>/24</td><td>0</td><td>256</td><td>254</td></tr>" +
@@ -209,9 +218,13 @@ Object.assign(DATEN.wiki, {
         "<tr><td>/27</td><td>224</td><td>32</td><td>30</td></tr>" +
         "<tr><td>/28</td><td>240</td><td>16</td><td>14</td></tr>" +
         "<tr><td>/29</td><td>248</td><td>8</td><td>6</td></tr>" +
-        "<tr><td>/30</td><td>252</td><td>4</td><td>2</td></tr></table>"},
+        "<tr><td>/30</td><td>252</td><td>4</td><td>2</td></tr>" +
+        "<tr><td>/31</td><td>254</td><td>2</td><td>2</td></tr>" +
+        "<tr><td>/32</td><td>255</td><td>1</td><td>1</td></tr></table>" +
+        "<p>Die Zeilen /31 und /32 folgen RFC 3021: Bei /31 sind beide Adressen im Block nutzbare Endpunkte (direkte Leitung zwischen zwei Routern), bei /32 ist die eine Adresse für genau einen Host nutzbar. Die Formel „2<sup>Hostbits</sup> − 2“ gilt für /24 bis /30.</p>"},
       {titel: "Präfix zur Hostzahl und VLSM", html:
         "<p>Gesucht ist das kleinste h mit 2<sup>h</sup> − 2 ≥ Hosts, Präfix = 32 − h. 50 Hosts: h = 6, also /26. 63 Hosts passen <b>nicht</b> in /26 (nur 62), also /25.</p>" +
+        "<p>Für eine direkte Leitung zwischen zwei Routern ist <b>/31</b> die kleinste sinnvolle Maske (RFC 3021): zwei Adressen im Block, beide nutzbar – eine Netz-ID und ein Broadcast werden dafür nicht reserviert.</p>" +
         "<p><b>VLSM</b>: größtes Netz zuerst vergeben, dann absteigend. Beispiel 10.0.0.0/22: Verwaltung 500 Hosts = 10.0.0.0/23, Produktion 250 = 10.0.2.0/24, Gäste 100 = 10.0.3.0/25, Server 50 = 10.0.3.128/26.</p>"},
       {titel: "IPv6: Präfixe planen und rechnen (Nachschlagen)", html:
         "<p>In IPv6 plant man mit Präfixlängen statt mit Masken. Übliche Vorgaben: <b>/48</b> je Standort, <b>/56</b> für kleine Standorte, <b>/64</b> je LAN. Aus einem /48 werden 65536 /64-Netze – genug für jedes VLAN und jedes Gästenetz.</p>" +
@@ -228,7 +241,7 @@ Object.assign(DATEN.wiki, {
     merksatz: "Blockgröße = 256 − Maske; Netz-ID auf dem Pfahl davor, Broadcast kurz vor dem nächsten.",
     pruefungstipp: "Rechenweg hinschreiben (Präfix, Maske, Block, Netz, Broadcast, Hosts). Bei VLSM den Restbereich nennen, das gibt Zusatzpunkte. In IPv6: /48 je Standort, /64 je LAN.",
     quelle: "04-AP1-Netzwerk",
-    belege: "07-Uebungen-Subnetting-Szenarien · Fragen – Subnetting · Network – Lernfassung (§ 8) · RFC 4291 (IPv6-Adressarchitektur) · RFC 4862 (SLAAC braucht /64) · RFC 4193 (Unique Local)",
+    belege: "07-Uebungen-Subnetting-Szenarien · Fragen – Subnetting · Network – Lernfassung (§ 8) · RFC 3021 (/31 bei Punkt-zu-Punkt-Netzen) · RFC 4291 (IPv6-Adressarchitektur) · RFC 4862 (SLAAC braucht /64) · RFC 4193 (Unique Local)",
     siehe: ["lab.netz", "lab.ip", "lab.vlan"],
   },
   "lab.dhcp": {
@@ -314,11 +327,13 @@ Object.assign(DATEN.wiki, {
         "<tr><td>80</td><td>HTTP</td><td>9100</td><td>Druck (RAW)</td></tr></table>"},
       {titel: "Erreichbar, aber der Dienst nicht", html:
         "<p>Ping klappt, die Verbindung nicht? Dann antwortet der Server auf einen geschlossenen TCP-Port mit <b>RST</b> (Verbindung abgelehnt). Prüf die Portnummer und ob der Dienst unter „Dienste“ eingeschaltet ist. Kommt gar keine Antwort, filtert eher eine Firewall.</p>"},
+      {titel: "Drei Bereiche für Portnummern", html:
+        "<p>Ports sind 16 Bit lang, also 0 bis 65535, und in drei Bereiche geteilt: 0–1023 sind die bekannten Systemports (HTTP 80, SSH 22), 1024–49151 die registrierten Ports für Anwendungen, 49152–65535 die dynamischen Ports, die ein Client für seine Verbindung wählt. Ein Serverdienst lauscht auf einem festen Port; der Client braucht nur einen freien Port auf seiner Seite.</p>"},
     ],
     merksatz: "Die IP-Adresse findet den Rechner, der Port findet den Dienst.",
     pruefungstipp: "Portliste auswendig, mit Richtung: SMTP sendet (25/587), POP3 und IMAP holen ab.",
     quelle: "04-AP1-Netzwerk",
-    belege: "Fragen – Netzwerk-Grundlagen (net-22 bis net-34) · VLAN – Visuelle Lernnotiz (§ 1) · IANA Service Name and Port Number Registry",
+    belege: "Fragen – Netzwerk-Grundlagen (net-22 bis net-34) · VLAN – Visuelle Lernnotiz (§ 1) · IANA Service Name and Port Number Registry · RFC 6335 (Portnummern-Bereiche)",
     siehe: ["lab.tcp", "lab.fw", "lab.portfwd"],
   },
   "lab.tcp": {
@@ -335,6 +350,8 @@ Object.assign(DATEN.wiki, {
         "<ul><li><b>Seq</b> = Nummer des ersten Bytes im Segment.</li><li><b>Ack</b> = nächstes erwartetes Byte, kumulativ: Ack 6001 heißt „bis 6000 alles lückenlos da“.</li><li>Fehlt ein Segment, bleibt das Ack an der Lücke stehen; nach drei doppelten Acks sendet der Sender sofort neu.</li></ul>"},
       {titel: "Ende und Abbruch", html:
         "<p><b>FIN</b> setzt der Sender einer Richtung, wenn er nichts mehr senden will; Abbau mit FIN, ACK, FIN, ACK. <b>RST</b> ist kein geordneter Abbau, sondern ein Abbruch, zum Beispiel als Antwort auf einen geschlossenen Port.</p>"},
+      {titel: "Das Fenster: Flusskontrolle", html:
+        "<p>TCP nummeriert nicht nur Bytes, es bremst auch: Der Empfänger meldet im Feld <b>Window</b>, wie viele Bytes er noch aufnehmen kann. Der Sender darf höchstens so viel Ungesichertes schicken; geht das Fenster auf 0, pausiert er. So überrollt ein schneller Sender keinen langsamen Empfänger – fehlende Segmente werden per Fast Retransmit wiederholt.</p>"},
     ],
     merksatz: "SYN, SYN/ACK, ACK: erst anklopfen, dann reden.",
     pruefungstipp: "Ack ist das nächste erwartete Byte, nicht das zuletzt empfangene.",
@@ -362,6 +379,8 @@ Object.assign(DATEN.wiki, {
         "<tr><td>% Invalid input detected at '^' marker.</td><td>Tippfehler oder falscher Modus; das ^ zeigt die Stelle</td></tr>" +
         "<tr><td>% Incomplete command.</td><td>Es fehlt noch etwas, zum Beispiel die Maske</td></tr>" +
         "<tr><td>% Ambiguous command: \"…\"</td><td>Abkürzung passt auf mehrere Befehle</td></tr></table>"},
+      {titel: "Der Kontext entscheidet", html:
+        "<p>Derselbe Befehl bedeutet je Modus etwas anderes: <code>show ip interface brief</code> gehört in den privilegierten Modus, <code>interface Gi0/0</code> in die globale Konfiguration, <code>shutdown</code> in den Schnittstellenmodus. Der Prompt verrät den Kontext. Mit <code>end</code> springt man aus jeder Konfiguration zurück in den privilegierten Modus, mit <code>exit</code> eine Ebene nach oben.</p>"},
     ],
     merksatz: "Erst den Prompt lesen, dann tippen.",
     pruefungstipp: "Befehle in der Prüfung mit Modus angeben, zum Beispiel „im Schnittstellenmodus: ip address …“.",
@@ -384,7 +403,15 @@ Object.assign(DATEN.wiki, {
       {titel: "Zurücksetzen und die VLAN-Falle", html:
         "<p><code>erase startup-config</code> (oder <code>write erase</code>) löscht nur die startup-config. Die VLANs eines Switches stehen aber in <code>flash:vlan.dat</code> und überleben das. Vollständig zurücksetzen:</p>" +
         "<pre>SW1# erase startup-config\nSW1# delete flash:vlan.dat\nSW1# reload</pre>" +
+        "<p><b>Rückfragen beantworten:</b> „Erasing the nvram filesystem … Continue? [confirm]“ → <b>Enter</b> · " +
+        "bei <code>delete flash:vlan.dat</code> zweimal <b>Enter</b> (Dateiname und Bestätigung) · " +
+        "<code>reload</code> fragt „System configuration has been modified. Save? [yes/no]:“ → <b>no</b> · " +
+        "„Proceed with reload? [confirm]“ → <b>Enter</b>. Wichtig: Auf „Save? [yes/no]“ mit Enter zu antworten sichert die " +
+        "laufende Konfiguration und macht das Zurücksetzen zunichte – die VLANs wären dann zwar weg, die alte Konfiguration käme " +
+        "beim Neustart aber zurück.</p>" +
         "<p>Bei gebrauchten Geräten deshalb immer auch vlan.dat prüfen (<code>show flash:</code>).</p>"},
+      {titel: "Speichern ist keine Sicherung", html:
+        "<p>Die startup-config ist eine Arbeitskopie im Gerät, keine Sicherung: Sie liegt im selben Gerät und ist nach einem Defekt oder einem <code>erase</code> weg. Eine echte Sicherung kopiert die Konfiguration heraus (etwa per TFTP), hält mehrere Stände und liegt getrennt vom Gerät. Nach jeder Änderung: speichern, Stand sichern, Änderung notieren.</p>"},
     ],
     merksatz: "Nicht gespeichert heißt: beim nächsten Neustart vergessen.",
     pruefungstipp: "RAM, NVRAM und Flash sauber zuordnen können; running = RAM, startup = NVRAM.",
@@ -427,6 +454,8 @@ Object.assign(DATEN.wiki, {
         "<p><code>show interfaces trunk</code> zeigt Trunks, Native VLAN und erlaubte VLANs. Auf echter Hardware schaltet zusätzlich <code>switchport nonegotiate</code> das Aushandeln ab – das Labor kennt dieses Kommando nicht und weist es ab.</p>"},
       {titel: "Die drei Fallen", html:
         "<ul><li><code>switchport trunk allowed vlan 40</code> <b>ersetzt</b> die Liste. Ergänzen geht mit <code>switchport trunk allowed vlan add 40</code>.</li><li>Das <b>Native VLAN</b> läuft ohne Tag und muss auf beiden Seiten gleich sein, sonst laufen zwei VLANs ineinander.</li><li>Endgeräte gehören an Access-Ports: Am Trunk könnten sie selbst Tags setzen und in fremde VLANs senden.</li></ul>"},
+      {titel: "Trunk oder Access: wer entscheidet", html:
+        "<p>Ob ein Port Trunk oder Access wird, entscheidet die Gegenstelle: Endgeräte wie PCs, Drucker und Server hängen fast immer an Access-Ports und kennen keine Tags; Switches und Router verbinden sich über Trunks, wenn mehrere VLANs über eine Leitung sollen. Ein Access-Port am Uplink schneidet alle VLANs bis auf eines ab – ein häufiger Grund, warum ein Raum kein Netz hat.</p>"},
     ],
     merksatz: "Native = nackt: das VLAN ohne Tag auf dem Trunk.",
     pruefungstipp: "Tag 4 Byte, VLAN-ID 12 Bit: zwei verschiedene Fragen, zwei verschiedene Antworten.",
@@ -449,6 +478,8 @@ Object.assign(DATEN.wiki, {
         "<tr><td>falsche Zahl bei encapsulation dot1Q</td><td>dieses VLAN erreicht sein Gateway nicht</td></tr>" +
         "<tr><td>physische Schnittstelle shutdown</td><td>alle Unterschnittstellen sind mit aus</td></tr>" +
         "<tr><td>VLAN auf dem Trunk nicht erlaubt</td><td>nur dieses VLAN bleibt stumm</td></tr></table>"},
+      {titel: "Warum die physische Schnittstelle leer bleibt", html:
+        "<p>Die physische Schnittstelle ist nur das Transportrohr zum Trunk und trägt keine eigene IP. Jede Unterschnittstelle bekommt die Gateway-Adresse ihres VLANs; anhand des 802.1Q-Tags entscheidet der Router, welche Unterschnittstelle den Frame bearbeitet. Eine Adresse auf der physischen Schnittstelle würde die Zuordnung ungetaggter Frames unklar machen – deshalb bleibt sie leer.</p>"},
     ],
     merksatz: "Eine Leitung, viele VLANs: Trunk am Switch, Unterschnittstellen am Router.",
     pruefungstipp: "Als Alternative immer den Layer-3-Switch nennen können.",
@@ -471,6 +502,8 @@ Object.assign(DATEN.wiki, {
       {titel: "Beispiel: Gäste vom Praxisnetz trennen", html:
         "<pre>R1(config)# ip access-list extended GAST\nR1(config-ext-nacl)# deny ip 192.168.30.0 0.0.0.255 192.168.10.0 0.0.0.255\nR1(config-ext-nacl)# permit ip any any\nR1(config)# interface g0/0.30\nR1(config-subif)# ip access-group GAST in</pre>" +
         "<p><code>show access-lists</code> zeigt jede Regel mit ihren Treffern („matches“).</p>"},
+      {titel: "Was eine ACL nicht kann", html:
+        "<p>Eine ACL ist zustandslos: Sie prüft jedes Paket für sich, ohne Verbindungen zu kennen. Der Rückverkehr einer erlaubten Verbindung braucht deshalb eine eigene Regel – oder man überlässt das einer zustandsbehafteten Firewall. Zwischen zwei Ports desselben Switches filtert eine Router-ACL nicht; dort helfen VLANs oder Port-Security.</p>"},
     ],
     merksatz: "Erste passende Regel gewinnt, am Ende ist alles verboten.",
     pruefungstipp: "Eine zu allgemeine Regel oben verdeckt alle darunter; die Reihenfolge ist fast immer der Kern der Aufgabe.",
@@ -494,6 +527,8 @@ Object.assign(DATEN.wiki, {
         "<p>Die erste Zeile: Netz 10.0.2.0/24 liegt hinter dem Nachbarn 10.0.1.2. Die zweite: alles andere zum Provider (Default-Route, „Gateway of last resort“).</p>"},
       {titel: "Die Rückroute nicht vergessen", html:
         "<p>Routen gelten nur in eine Richtung. Kommt der Ping an, die Antwort aber nicht zurück, fehlt auf einem Router des Rückwegs die Route zum Netz des Absenders. Symptom: Zeitüberschreitung statt „nicht erreichbar“.</p>"},
+      {titel: "Der längste Treffer gewinnt", html:
+        "<p>Passen mehrere Routen zu einer Zieladresse, gewinnt die mit dem längsten Präfix – nicht die mit der kleinsten Metrik. Ein /24 schlägt also eine /16, und beide schlagen die Default-Route 0.0.0.0/0, die nur als letzter Ausweg dient. Deshalb ist die Default-Route kein Internet-Befehl, sondern die allgemeinste Regel der Tabelle.</p>"},
     ],
     merksatz: "Hin braucht eine Route, zurück auch.",
     pruefungstipp: "Default-Route = 0.0.0.0/0. Statisch: einfach, aber passt sich nicht an Ausfälle an; dynamisch: Router tauschen Routen per Protokoll.",
@@ -543,6 +578,8 @@ Object.assign(DATEN.wiki, {
         "<p><b>inside</b> = LAN-Seite, <b>outside</b> = Internet-Seite. Kontrolle: <code>show ip nat translations</code>.</p>"},
       {titel: "Fehlerbilder", html:
         "<ul><li>inside und outside vertauscht: keine Übersetzung, Timeout.</li><li>Die Access-Liste erfasst das LAN nicht: nur manche Rechner kommen raus.</li><li>Keine Default-Route zum Provider: Das Paket kommt gar nicht bis zur Übersetzung.</li></ul>"},
+      {titel: "Was die NAT-Tabelle hält", html:
+        "<p>Für jede übersetzte Verbindung merkt sich der Router die Zuordnung von privater Adresse und Port zu öffentlicher Adresse und Port samt Zeitstempel. Antworten von außen findet er über diesen Eintrag zurück. Bleibt lange kein Paket einer Verbindung, verfällt der Eintrag; PAT kann dieselbe öffentliche Adresse deshalb für viele Clients gleichzeitig nutzen – unterschieden werden sie über den Port.</p>"},
     ],
     merksatz: "inside = drinnen (LAN), outside = draußen (Internet).",
     pruefungstipp: "NAT gegen PAT: NAT übersetzt Adressen, PAT bildet viele Adressen über Ports auf eine ab, wie am DSL-Router.",
@@ -561,6 +598,8 @@ Object.assign(DATEN.wiki, {
         "<p>Anfragen an 203.0.113.2, TCP-Port 443, landen bei 192.168.1.50, Port 443. Außen- und Innenport dürfen verschieden sein, zum Beispiel außen 2222 auf innen 22.</p>"},
       {titel: "Mit Bedacht", html:
         "<ul><li>Nur weiterleiten, was wirklich gebraucht wird (Least Privilege).</li><li>Öffentliche Dienste gehören besser in eine <b>DMZ</b>, dann steht ein übernommener Server nicht mitten im LAN.</li><li>Für Fernzugriff auf Arbeitsplätze ist ein <b>VPN</b> die bessere Wahl als offene Ports.</li></ul>"},
+      {titel: "Ein Port, ein Ziel", html:
+        "<p>Eine Port-Weiterleitung bildet einen öffentlichen Port auf genau einen Rechner und Port im LAN ab – zwei Server können sich denselben Außenport nicht teilen. Braucht man mehrere Dienste, wählt man unterschiedliche Außenports oder setzt einen Reverse-Proxy davor. Grundsatz: nur die Ports weiterleiten, die wirklich von außen erreichbar sein müssen.</p>"},
     ],
     merksatz: "Von außen findet nur, wer einen festen Eintrag hat.",
     pruefungstipp: "Begründung für DMZ statt Weiterleitung ins LAN: Wird der Server übernommen, schützt die zweite Grenze das interne Netz.",
@@ -614,6 +653,8 @@ Object.assign(DATEN.wiki, {
         "<tr><td>außen</td><td>innen</td><td>verboten</td></tr></table>"},
       {titel: "Warum", html:
         "<p>Ein Server, der aus dem Internet erreichbar ist, ist angreifbar. Wird er übernommen, schützt die Grenze zwischen DMZ und LAN das interne Netz.</p>"},
+      {titel: "DMZ betreiben: patchen, überwachen, begrenzen", html:
+        "<p>Eine DMZ ist kein Selbstläufer: Die Server darin brauchen Updates, und der Update-Weg darf nicht am Regelwerk scheitern. Protokolle der Firewall zeigen, was aus der DMZ nach innen versucht wird – ein Alarmzeichen. Je mehr Dienste in derselben DMZ stehen, desto größer der Schaden, wenn ein Angreifer einen davon kontrolliert; getrennte Zonen begrenzen ihn.</p>"},
     ],
     merksatz: "Aus der DMZ führt kein Weg ins LAN.",
     pruefungstipp: "In Situationsaufgaben: öffentlicher Dienst → DMZ, mit Begründung „Schutz des internen Netzes bei Kompromittierung“.",
@@ -895,7 +936,7 @@ Object.assign(DATEN.wiki, {
         "<tr><td>1 bis 31, sonst „ohne Platz“</td><td>halbe Sterne als ★</td><td>Zeit des Durchgangs</td><td>0, 1, 2 oder „3+“</td></tr></table>" +
         "<p>Unter <b>Datei…</b> liegen Export und Import: Die Sitzung liegt nur auf dem Rechner der Lehrkraft, die Datei ist die Sicherung und der Weg auf ein anderes Gerät. Nach einem Import lässt er sich mit „Rückgängig“ zurücknehmen.</p>"},
       {titel: "Grenzen und was nicht passiert", html:
-        "<ul><li><b>Der Code ist kein Geheimnis.</b> Er schützt nichts – er sagt nur, welcher Auftrag gemeint ist.</li><li><b>Der Klassenraum-Abdruck beweist nicht, dass alle denselben Auftrag haben.</b> Er wird aus dem geladenen Netz gebildet (Geräte, Kabel) – verschiedene Aufträge können dasselbe Netz zeigen. Verglichen wird der Auftrag über seine Kennung <code>def.id</code>, nicht über den Abdruck.</li><li><b>Kein Server, kein QR-Code.</b> Beides gehört zu späteren Stufen. Den Schalter „Klassenraum-Server“ gibt es in den Einstellungen schon – er merkt sich nur die Absicht und ändert heute nichts.</li><li><b>Grenzen des Codes:</b> Sitzung 1 bis 31, Platz 0 bis 31, dazu Auftrags- oder Fertigkeitsindex und Variante. Ein Code aus einer anderen Fassung wird abgewiesen, statt einen falschen Auftrag zu bauen.</li><li><b>Keine Bewertung:</b> kein Geld, kein Ruf, kein erledigter Auftrag, keine Note – auch nicht im Ergebnis-Code.</li></ul>"},
+        "<ul><li><b>Der Code ist kein Geheimnis.</b> Er schützt nichts – er sagt nur, welcher Auftrag gemeint ist.</li><li><b>Der Klassenraum-Abdruck beweist nicht, dass alle denselben Auftrag haben.</b> Er wird aus dem geladenen Netz gebildet (Geräte, Kabel) – verschiedene Aufträge können dasselbe Netz zeigen. Verglichen wird der Auftrag über seine Kennung <code>def.id</code>, nicht über den Abdruck.</li><li><b>Kein Server, kein QR-Code.</b> In dieser Fassung (3.0.0) ist der lokale Klassenraum-Server <b>nicht gebaut</b> – er ist für 3.1 vorgesehen. Deshalb gibt es auch keinen Schalter dafür: Ein Schalter ohne gebauten Server wäre eine Wirkung, die es nicht gibt. Die Klasse gibt die Ergebnis-Codes wie oben beschrieben zurück (abtippen oder einfügen); QR-Codes erzeugt die Fassung 3.0.0 nicht.</li><li><b>Grenzen des Codes:</b> Sitzung 1 bis 31, Platz 0 bis 31, dazu Auftrags- oder Fertigkeitsindex und Variante. Ein Code aus einer anderen Fassung wird abgewiesen, statt einen falschen Auftrag zu bauen.</li><li><b>Keine Bewertung:</b> kein Geld, kein Ruf, kein erledigter Auftrag, keine Note – auch nicht im Ergebnis-Code.</li></ul>"},
     ],
     merksatz: "Gleicher Code, gleicher Auftrag – auf jedem Gerät, ohne Konto und ohne Note.",
     pruefungstipp: "Der Klassenraum ist kein Prüfungsstoff, sondern der Weg, wie eine Klasse denselben Auftrag bekommt. Zeigt dein Gerät etwas anderes als das deines Nachbarn, vergleicht den Auftrag (seine Kennung), nicht den Netzkennwert.",

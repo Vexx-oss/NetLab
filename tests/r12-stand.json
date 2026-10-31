@@ -1,0 +1,113 @@
+{
+  "fassung": 1,
+  "quelle": "tools/ethos.py --dom --r12 --festhalten",
+  "zeit": "2026-10-31T22:52:09+01:00",
+  "grenzen": {
+    "standard": 6,
+    "mitarbeit": 3
+  },
+  "ansichten": {
+    "heute": {
+      "1440": 16,
+      "1366": 16,
+      "960": 16,
+      "720": 16
+    },
+    "postfach": {
+      "1440": 10,
+      "1366": 10,
+      "960": 10,
+      "720": 9
+    },
+    "labor": {
+      "1440": 17,
+      "1366": 17,
+      "960": 11,
+      "720": 7
+    },
+    "subnetz": {
+      "1440": 13,
+      "1366": 13,
+      "960": 13,
+      "720": 13
+    },
+    "training": {
+      "1440": 59,
+      "1366": 59,
+      "960": 59,
+      "720": 59
+    },
+    "kunden": {
+      "1440": 4,
+      "1366": 4,
+      "960": 4,
+      "720": 4
+    },
+    "wiki": {
+      "1440": 42,
+      "1366": 42,
+      "960": 42,
+      "720": 42
+    },
+    "lernstand": {
+      "1440": 39,
+      "1366": 39,
+      "960": 39,
+      "720": 39
+    },
+    "shop": {
+      "1440": 12,
+      "1366": 12,
+      "960": 12,
+      "720": 12
+    },
+    "klassenraum": {
+      "1440": 6,
+      "1366": 6,
+      "960": 6,
+      "720": 6
+    },
+    "mitarbeit": {
+      "1440": 3,
+      "1366": 3,
+      "960": 3,
+      "720": 3
+    }
+  },
+  "messungen": 44,
+  "max": 59,
+  "verstoesse": [
+    "Heute (heute) @1366px: 16 sichtbare Bedienelemente - erlaubt 6",
+    "Heute (heute) @1440px: 16 sichtbare Bedienelemente - erlaubt 6",
+    "Heute (heute) @720px: 16 sichtbare Bedienelemente - erlaubt 6",
+    "Heute (heute) @960px: 16 sichtbare Bedienelemente - erlaubt 6",
+    "Labor (labor) @1366px: 17 sichtbare Bedienelemente - erlaubt 6",
+    "Labor (labor) @1440px: 17 sichtbare Bedienelemente - erlaubt 6",
+    "Labor (labor) @720px: 7 sichtbare Bedienelemente - erlaubt 6",
+    "Labor (labor) @960px: 11 sichtbare Bedienelemente - erlaubt 6",
+    "Lernstand (lernstand) @1366px: 39 sichtbare Bedienelemente - erlaubt 6",
+    "Lernstand (lernstand) @1440px: 39 sichtbare Bedienelemente - erlaubt 6",
+    "Lernstand (lernstand) @720px: 39 sichtbare Bedienelemente - erlaubt 6",
+    "Lernstand (lernstand) @960px: 39 sichtbare Bedienelemente - erlaubt 6",
+    "Postfach (postfach) @1366px: 10 sichtbare Bedienelemente - erlaubt 6",
+    "Postfach (postfach) @1440px: 10 sichtbare Bedienelemente - erlaubt 6",
+    "Postfach (postfach) @720px: 9 sichtbare Bedienelemente - erlaubt 6",
+    "Postfach (postfach) @960px: 10 sichtbare Bedienelemente - erlaubt 6",
+    "Shop (shop) @1366px: 12 sichtbare Bedienelemente - erlaubt 6",
+    "Shop (shop) @1440px: 12 sichtbare Bedienelemente - erlaubt 6",
+    "Shop (shop) @720px: 12 sichtbare Bedienelemente - erlaubt 6",
+    "Shop (shop) @960px: 12 sichtbare Bedienelemente - erlaubt 6",
+    "Subnetting (subnetz) @1366px: 13 sichtbare Bedienelemente - erlaubt 6",
+    "Subnetting (subnetz) @1440px: 13 sichtbare Bedienelemente - erlaubt 6",
+    "Subnetting (subnetz) @720px: 13 sichtbare Bedienelemente - erlaubt 6",
+    "Subnetting (subnetz) @960px: 13 sichtbare Bedienelemente - erlaubt 6",
+    "Training (training) @1366px: 59 sichtbare Bedienelemente - erlaubt 6",
+    "Training (training) @1440px: 59 sichtbare Bedienelemente - erlaubt 6",
+    "Training (training) @720px: 59 sichtbare Bedienelemente - erlaubt 6",
+    "Training (training) @960px: 59 sichtbare Bedienelemente - erlaubt 6",
+    "Wiki (wiki) @1366px: 42 sichtbare Bedienelemente - erlaubt 6",
+    "Wiki (wiki) @1440px: 42 sichtbare Bedienelemente - erlaubt 6",
+    "Wiki (wiki) @720px: 42 sichtbare Bedienelemente - erlaubt 6",
+    "Wiki (wiki) @960px: 42 sichtbare Bedienelemente - erlaubt 6"
+  ]
+}

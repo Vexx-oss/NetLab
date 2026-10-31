@@ -114,6 +114,12 @@
   --lage-mini-rand:rgba(126,224,255,.22);
   --lage-radius:2px;
   --lage-glow:0 0 0 1px rgba(59,225,255,.28), 0 20px 52px -30px rgba(59,225,255,.36);
+  /* Lagebild-Dauern: standen frueher im zweiten :root-Block (F-11) — 3.0.0: EIN Tokenblock je Theme. */
+  --lage-atmen:7s;
+  --lage-nebel:9s;
+  --lage-puls:4.5s;
+  --lage-schein:6s;
+  --lage-lauf:3.2s;
 }
 
 /* ============================================================================
@@ -431,13 +437,6 @@ html[data-theme="pulsar"] .hb-kachel{
 html[data-theme="pulsar"] .hb-kachel:hover{
   border-color:color-mix(in srgb, var(--accent) 34%, var(--line));
   background:color-mix(in srgb, var(--panel-2) 70%, var(--panel));
-}
-
-html[data-theme="pulsar"] .hb-kachel-sym{
-  border-radius:var(--radius-xs);
-  background:color-mix(in srgb, var(--accent) 10%, transparent);
-  color:var(--accent);
-  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent);
 }
 
 html[data-theme="pulsar"] .hb-pill{
@@ -1799,14 +1798,6 @@ html[data-theme="pulsar"] .sp-postfach :is(.sp-pf-kopf h2,.sp-brief h3)::before{
    Ambient sichtbar (Runde 3, 19:12): Atmendes Licht + ruhige UI-Impulse.
    Dauern ausschließlich über Theme-Token; "Bewegung aus" schaltet basis.css zentral ab.
    ============================================================================ */
-:root[data-theme="pulsar"]{
-  --lage-atmen:7s;
-  --lage-nebel:9s;
-  --lage-puls:4.5s;
-  --lage-schein:6s;
-  --lage-lauf:3.2s;
-}
-
 /* 1 · Atmendes Hintergrund-Licht */
 html[data-theme="pulsar"] .labor .lb-leinwand::after{
   content:"";

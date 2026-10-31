@@ -4,7 +4,8 @@
    Arten: wahl/vorhersage (richtig = Index), reihenfolge (richtig = Indexliste), zuordnen (richtig = Paare [links, rechts]).
    pruef: Gegenrechnung im Test (tests/daten-mini.test.js) mit den IP-Helfern. Quellen: Vault-Notizen in
    20-Bereiche/Umschulung/Netzwerk/ (Network – Lernfassung, VLAN – Lernfassung, TCP – Lernfassung, 04-AP1-Netzwerk,
-   Fragen – Netzwerk-Grundlagen, Fragen – Subnetting, Fragen – Netzwerke planen) und RFC 1918/792/2131. */
+   Fragen – Netzwerk-Grundlagen, Fragen – Subnetting, Fragen – Netzwerke planen), der Storage-Konzeptatlas
+   (20-Bereiche/Karriere – Storage & Cloud) und RFC 1918/792/2131. */
 (() => {
   const NW = "Network – Lernfassung", VL = "VLAN – Lernfassung", TC = "TCP – Lernfassung", AP = "04-AP1-Netzwerk", SU = "Fragen – Subnetting", PL = "Fragen – Netzwerke planen";
   const m = (id, skill, stufe, art, frage, optionen, richtig, erklaerung, quelle, schnappschuss, pruef) =>
@@ -587,5 +588,10 @@
     m("sto-5", "lab.storage", "AP2", "wahl", "Was fordert die 3-2-1-Regel für Sicherungen?",
       ["Drei Kopien, zwei verschiedene Medien, eine Kopie außer Haus", "Drei Server, zwei Netze, ein Backup", "Drei Platten, zwei Controller, ein Gehäuse"], 0,
       "3-2-1: drei Kopien der Daten, auf zwei unterschiedlichen Medien, davon eine räumlich getrennt. Nur so übersteht die Sicherung auch Brand, Diebstahl oder Ransomware im LAN.", NW),
+    /* VIS-07 (31.10.2026): das AP1-Mini schließt die letzte Prüfungsnähe-Lücke (lab.storage hatte
+       nur E- und AP2-Aufgaben). Angehängt, damit die eingefrorenen Reihenfolgen davor unberührt bleiben. */
+    m("sto-6", "lab.storage", "AP1", "wahl", "Bei RAID 5 mit drei Platten fällt eine aus. Was gilt?",
+      ["Der Verbund läuft weiter, aber ohne Schutz", "Alle Daten sind verloren", "Nur die ausgefallene Platte ist defekt"], 0,
+      "RAID 5 verteilt Daten und eine Parität auf mindestens drei Platten. Fällt eine aus, rechnet der Verbund sie aus den übrigen nach – der Betrieb läuft weiter, bis Ersatz da ist. Danach ist der Schutz weg: Ein zweiter Ausfall kostet die Daten.", "Storage-Konzeptatlas"),
   );
 })();

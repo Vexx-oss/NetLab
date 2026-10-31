@@ -98,6 +98,29 @@
     }
     return z.join("\n");
   };
+  /* show interfaces switchport – Modellwerte je Switch-Port (CLI-07/CLI-15). */
+  Z.switchport = s => {
+    const g = G(s), vl = (g.flash && g.flash.vlans) || {}, z = [];
+    for (const p of Modell.PORTS.switch) {
+      const k = g.running.ports[p], access = Number(k.accessVlan) || 1, nativ = Number(k.nativeVlan) || 1;
+      const name = v => (vl[v] && vl[v].name) || (v === 1 ? "default" : "VLAN" + String(v).padStart(4, "0"));
+      z.push(`Name: ${p}`, "Switchport: Enabled", "",
+        `Administrative Mode: ${k.modus === "trunk" ? "trunk" : "static access"}`,
+        `Operational Mode: ${k.modus === "trunk" ? "trunk" : "static access"}`,
+        `Access Mode VLAN: ${access} (${name(access)})`,
+        `Trunking Native Mode VLAN: ${nativ} (${name(nativ)})`, "");
+    }
+    return z.join("\n");
+  };
+  /* show vlan id <nr> – ein VLAN mit Name, Status und Ports (CLI-15). */
+  Z.vlanId = (s, nr) => {
+    const g = G(s), vl = (g.flash && g.flash.vlans) || {}, v = Number(nr);
+    if (!vl[v]) return {ausgabe: `% VLAN ${nr} does not exist.`, fehler: true};
+    const ports = Modell.PORTS.switch.filter(p => g.running.ports[p].modus !== "trunk" && Number(g.running.ports[p].accessVlan) === v);
+    const name = vl[v].name || ("VLAN" + String(v).padStart(4, "0"));
+    return ["", "VLAN Name                             Status    Ports", "---- -------------------------------- --------- -------------------------------",
+      links(v, 4) + " " + links(name, 32) + " " + links("active", 9) + " " + ports.join(", ")].join("\n");
+  };
   Z.trunk = s => {
     const g = G(s), vl = (g.flash && g.flash.vlans) || {};
     const trunks = Modell.PORTS.switch.filter(p => g.running.ports[p].modus === "trunk" && C.ifStatus(s.netz, g, p).kurz === "connected");
@@ -132,13 +155,20 @@
     }
     return z.join("\n");
   };
-  Z.macTabelle = (s, nurDynamisch) => {
-    const g = G(s), z = zustand(s.netz, s.id), jetztUhr = uhr(s.netz), zeilen = [];
-    for (const [vlan, tab] of Object.entries(z.mac || {})) for (const [mac, e] of Object.entries(tab || {}))
-      if (e && (e.bis == null || e.bis > jetztUhr)) zeilen.push({vlan: +vlan, mac, typ: "DYNAMIC", port: e.port});
+  /* MAC-Tabelle aus der Sim (CLI-07), optional gefiltert (show mac address-table interface/vlan). */
+  Z.macTabelle = (s, nurDynamisch, filter) => {
+    const g = G(s), sim = h.sim && h.sim(), f = filter || {}, zeilen = [];
+    const passt = m => (!f.interface || m.port === f.interface) && (!f.vlan || +m.vlan === +f.vlan);
+    if (sim && typeof sim.macTabelle === "function") {
+      for (const m of sim.macTabelle(s.netz, s.id)) if (passt(m)) zeilen.push({vlan: +m.vlan, mac: m.mac, typ: "DYNAMIC", port: m.port});
+    } else {
+      const z = zustand(s.netz, s.id), jetztUhr = uhr(s.netz);
+      for (const [vlan, tab] of Object.entries(z.mac || {})) for (const [mac, e] of Object.entries(tab || {}))
+        if (e && (e.bis == null || e.bis > jetztUhr) && passt({vlan: +vlan, port: e.port})) zeilen.push({vlan: +vlan, mac, typ: "DYNAMIC", port: e.port});
+    }
     if (!nurDynamisch) for (const p of Modell.PORTS.switch) {
       const ps = g.running.ports[p].portSecurity;
-      if (ps) for (const mac of ps.macs || []) zeilen.push({vlan: +g.running.ports[p].accessVlan, mac, typ: "STATIC", port: p});
+      if (ps) for (const mac of ps.macs || []) if (passt({vlan: +g.running.ports[p].accessVlan, port: p})) zeilen.push({vlan: +g.running.ports[p].accessVlan, mac, typ: "STATIC", port: p});
     }
     zeilen.sort((a, b) => a.vlan - b.vlan || String(a.mac).localeCompare(String(b.mac)));
     return ["          Mac Address Table", "-------------------------------------------", "",
@@ -150,7 +180,19 @@
   /* ---------- Routing ---------- */
   const klasse = ip => { const a = IP.zuZahl(ip) >>> 24; return a < 128 ? 8 : a < 192 ? 16 : a < 224 ? 24 : 32; };
   /* Routen wie die Routingtabelle sie zeigt: C/L für aktive Schnittstellen, S nur mit erreichbarem Next Hop */
+  /* Eine Wahrheit (CLI-07): aktive Routen kommen aus Sim.routingTabelle (src/sim/aufrufe.js:578).
+     Der frühere Eigenbau zeigte Routen über Schnittstellen ohne IP als aktiv, obwohl die Sim sie nicht nutzt. */
+  function simRouten(netz, g, sim){
+    const tab = sim.routingTabelle(netz, g.id) || [];
+    const r = tab.map(x => ({code: x.typ === "S" ? (x.netz === "0.0.0.0" && x.maske === "0.0.0.0" ? "S*" : "S") : (x.typ || "C"),
+      netz: x.netz, p: x.praefix, aus: x.aus || null, nh: x.nh || null, ad: x.ad == null ? 0 : x.ad}));
+    const ifs = typeof sim.schnittstellen === "function" ? sim.schnittstellen(netz, g.id) : [];
+    for (const i of ifs) if (i.oben && i.ip && tab.some(x => x.aus === i.name)) r.push({code: "L", netz: i.ip, p: 32, aus: i.name});
+    return r.sort((a, b) => IP.zuZahl(a.netz) - IP.zuZahl(b.netz) || b.p - a.p);
+  }
   C.routen = function(netz, g){
+    const sim = h.sim && h.sim();
+    if (sim && typeof sim.routingTabelle === "function") return simRouten(netz, g, sim);
     const k = g.running, r = [], conn = [];
     for (const [n, i] of Object.entries(k.if || {})) {
       if (!i.ip || !IP.maskeGueltig(i.maske)) continue;
@@ -223,7 +265,14 @@
       if (C.ifStatus(s.netz, g, a.port).protokoll !== "up") continue;
       zeilen.push({ip: a.ip, alter: "-", mac: h.macVon(g, a.port), port: a.port});
     }
-    for (const [ip, e] of Object.entries(z.arp || {})) {
+    const sim = h.sim && h.sim();
+    if (sim && typeof sim.arpTabelle === "function") {
+      for (const e of sim.arpTabelle(s.netz, s.id)) {
+        if (zeilen.some(x => x.ip === e.ip)) continue;
+        const alter = e.restS != null ? Math.max(0, Math.floor((14400 - e.restS) / 60)) : 0;
+        zeilen.push({ip: e.ip, alter: String(alter), mac: e.mac, port: e.if || ifVon(e.ip) || ""});
+      }
+    } else for (const [ip, e] of Object.entries(z.arp || {})) {
       if (!e || (e.bis != null && e.bis <= jetztUhr) || zeilen.some(x => x.ip === ip)) continue;
       const alter = e.bis != null ? Math.max(0, Math.floor((jetztUhr - (e.bis - 14400000)) / 60000)) : 0;
       zeilen.push({ip, alter: String(alter), mac: e.mac, port: e.port || ifVon(ip) || ""});
@@ -470,6 +519,29 @@
     }
     return out.join("\n");
   };
+  /* DHCP-Snooping anzeigen (CLI-03): Zustand, vertraute Ports und die Laufzeit-Zähler aus
+     netz.zustand[id].snooping[port].verworfen (geschrieben in src/sim/switch.js:64-69, Architektur § 5.4). */
+  Z.dhcpSnooping = s => {
+    const g = G(s), sn = g.running.snooping || {an: false, vertraut: []};
+    const z = (s.netz.zustand && s.netz.zustand[g.id]) || {}, zaehler = z.snooping || {};
+    const out = [`Switch DHCP snooping is ${sn.an ? "enabled" : "disabled"}`];
+    if (!sn.an) {
+      out.push("", "DHCP-Snooping ist aus. Einschalten mit „ip dhcp snooping“ im Konfigurationsmodus,",
+               "vertraute Ports mit „interface …“ und „ip dhcp snooping trust“.");
+    } else {
+      out.push("DHCP snooping is configured on following VLANs:", " 1", "",
+               "DHCP snooping trust is configured on following interfaces:", "Interface              Trusted", "---------              -------");
+      const vertraut = sn.vertraut || [];
+      for (const p of vertraut) out.push(h.links(p, 23) + "yes");
+      if (!vertraut.length) out.push("  (kein Port vertraut – DHCP-Server-Antworten werden überall verworfen)");
+    }
+    const eintraege = Object.entries(zaehler).sort();
+    if (eintraege.length) {
+      out.push("", "DHCP snooping verworfen (seit dem letzten Neustart):");
+      for (const [p, e] of eintraege) out.push(`  ${h.links(p, 12)}verworfen: ${e.verworfen || 0}`);
+    } else out.push("", "verworfen: 0 (seit dem letzten Neustart)");
+    return out.join("\n");
+  };
   /* Bereich eines Pools: start (Standard: erste Hostadresse) + anzahl Adressen, begrenzt auf das Subnetz */
   function poolBereich(p){
     const n = Math.max(0, Math.round(Number(p.anzahl == null || p.anzahl === "" ? 50 : p.anzahl)) || 0);
@@ -629,6 +701,7 @@
       if (k.modus === "trunk") z.push(" switchport mode trunk");
       else if (Number(k.accessVlan) !== 1 || k.portSecurity || k.psVorgabe) z.push(" switchport mode access");
       z.push(...psZeilen(k));
+      if (((g.running.snooping || {}).vertraut || []).includes(name)) z.push(" ip dhcp snooping trust");
       if (k.shutdown) z.push(" shutdown");
       return z;
     }
@@ -726,7 +799,10 @@
     if (k.domainName) z.push(`ip domain-name ${k.domainName}`, "!");
     /* D3: ip ssh version 2 kennt der Parser heute nicht – ehrlich als Kommentar statt als Scheinbefehl. */
     if (k.sshSchluessel) z.push("! SSH aktiv – „ip ssh version 2“ folgt in 3.1 (CLI-05)");
-    if (!r) z.push("!");
+    if (!r) {
+      if (k.snooping && k.snooping.an) z.push("ip dhcp snooping");
+      z.push("!");
+    }
     const namen = r ? h.ifSortieren(Object.keys(k.if || {})) : [...Modell.PORTS.switch, ...h.ifSortieren(Object.keys(k.svi || {}).map(v => "Vlan" + v))];
     for (const n of namen) {
       const ik = r ? k.if[n] : /^Vlan/.test(n) ? k.svi[n.slice(4)] : k.ports[n];

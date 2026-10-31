@@ -158,7 +158,15 @@
     const sim = h.sim(); if (!sim || typeof sim.dns !== "function") return null;
     return Object.assign({server: a.dns}, sim.dns(s.netz, s.id, name) || {});
   }
+  /* Ehrliche Grenze (CLI-06): dig fragt im Labor immer den eingetragenen DNS; @server ist nicht nachgebaut. */
   function dig(s, args){
+    const r = digKern(s, args);
+    const at = (args || []).find(a => a[0] === "@");
+    if (at && r && typeof r === "object" && typeof r.ausgabe === "string" && !r.ausgabe.includes("nicht nachgebaut"))
+      r.ausgabe += "\n\n;; Hinweis: Im Labor fragt dig immer den eingetragenen DNS-Server; der Parameter \u201E@server\u201C ist nicht nachgebaut (Grenze).";
+    return r;
+  }
+  function digKern(s, args){
     const name = args.find(a => a[0] !== "-" && a[0] !== "+" && a[0] !== "@");
     if (!name) return ";; Usage: dig [@server] name [type]";
     const d = dnsFragen(s, name);

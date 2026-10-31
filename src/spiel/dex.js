@@ -77,7 +77,7 @@ Spiel.DEX_SYMPTOM = {
   "route-kreis-ttl":    "„Der Weg ins Internet läuft, aber die Seite lädt nie fertig.“",
   "helper-falsch":      "„In der Abteilung bekommt seit heute keiner mehr eine Adresse.“",
   "nas-rechte-falsch":  "„Die Ablage ist erreichbar, aber die Freigabe will nicht aufgehen.“",
-  "stp-rootfalsch":     "„Seit das zweite Kabel liegt, stottert das ganze Netz.“",
+  "stp-rootfalsch":     "„Seit am Empfang ein kleiner Switch steckt, ist der Platz tot – kein Licht an der Dose.“",
 };
 
 Spiel.dex.daten = function(){

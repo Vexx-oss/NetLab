@@ -227,9 +227,14 @@ gruppe("Wiki 2.0: Pflichtfelder, Verweise, IPv6 und WLAN", () => {
             if (!sitzung || typ !== art) { art = typ; sitzung = CLI.sitzung(netzBauen(), ARTEN[typ]); }
             const modus = modusAus(token, t[2]);
             if (!windows && !inModus(sitzung, typ, modus)) { fehler.push(`${id} / ${a.titel}: Modus „${modus}“ nicht erreichbar (${roh.trim()})`); continue; }
-            /* Offene Rückfrage zuerst mit Enter beantworten – so, wie es das Rezept sagt („← Enter").
-               Sonst schluckt die Rückfrage die nächste Zeile und der Fehler läge beim Prüfstand. */
-            if (sitzung.rueckfrage) CLI.eingabe(sitzung, "");
+            /* ALLE offenen Rückfragen einer Zeile beantworten – delete flash:vlan.dat fragt ZWEIMAL, sonst
+               schluckt die zweite Rückfrage die nächste Rezeptzeile (CLI-05). Save?-Fragen (Config geändert)
+               werden mit „no“ beantwortet, sonst macht Enter das Zurücksetzen zunichte; alles andere mit Enter. */
+            let rueckfrageSchutz = 0;
+            while (sitzung.rueckfrage && rueckfrageSchutz++ < 3) {
+              const frage = String(sitzung.rueckfrage.prompt || "");
+              CLI.eingabe(sitzung, /\[yes\/no\]/i.test(frage) ? "no" : "");
+            }
             const r = CLI.eingabe(sitzung, befehl);
             zeilen++;
             const aus = String((r && r.ausgabe) || "");

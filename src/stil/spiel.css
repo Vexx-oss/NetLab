@@ -313,9 +313,9 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 /* Chips: eine Form, vier Bedeutungen – auch Kunden- und Lernstandansicht nutzen sie (karriere.js). */
 .sp-chips{display:flex; gap:4px; flex-wrap:wrap; margin-top:4px}
 .sp-chip{padding:0 8px; border-radius:999px; background:var(--panel-3); color:color-mix(in srgb, var(--ink) 78%, var(--muted)); font:600 var(--fs-1)/1.6 var(--body)}
-.sp-chip.niv-AP2, .sp-chip.wartung, .sp-chip.flow-geruest{background:var(--info-soft); color:var(--info)}
+.sp-chip.niv-AP2, .sp-chip.wartung{background:var(--info-soft); color:var(--info)}
 .sp-chip.geld{color:var(--geld)}
-.sp-chip.frist, .sp-chip.flow-verwicklung, .sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
+.sp-chip.frist, .sp-chip.folge{background:var(--warn-soft); color:var(--warn)}
 .sp-weg-chips li.nicht{border-color:var(--warn)}
 /* Flow-Regler (§ 20 F6): Gerüst-Tipp in der Auftragsmappe */
 .am-geruest{margin:0; padding:8px 12px; border-radius:var(--radius); background:var(--info-soft); color:var(--ink); font-size:var(--fs-3); line-height:1.45}

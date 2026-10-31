@@ -9,7 +9,7 @@
 .ko-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 8px 8px 12px; border-bottom:1px solid var(--line)}
 .ko-titel{display:flex; align-items:center; gap:8px; min-width:0; font:700 var(--fs-3)/1.2 var(--body); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .ko-art{flex:0 0 auto; font:600 var(--fs-1)/1 var(--body); color:var(--muted); padding:4px 8px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line)}
-.ko-knopf{flex:0 0 auto; min-height:28px; padding:0 8px; border-radius:var(--radius-s); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body); cursor:pointer}
+.ko-knopf{flex:0 0 auto; min-height:44px; padding:0 8px; border-radius:var(--radius-s); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink); font:600 var(--fs-2)/1 var(--body); cursor:pointer}
 .ko-knopf:hover{border-color:var(--accent); color:var(--accent)}
 
 .ko-schirm{flex:1 1 auto; min-height:140px; overflow:auto; padding:8px 12px 12px; background:var(--ko-bg); color:var(--ko-ink);

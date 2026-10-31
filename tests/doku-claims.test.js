@@ -45,7 +45,7 @@
       const r = rufe(["--gegenprobe"]);
       erwarte.gleich(r.code, 0, "Gegenprobe muss alle vier erkennen: " + r.text.slice(-600));
       for (const regel of ["R1", "R2", "R3", "R4"]) erwarte.enthaelt(r.text, regel, "Regel in der Gegenprobe");
-      erwarte.passt(r.text, /GRUEN|erkannt/i, "die Gegenprobe meldet ihr Ergebnis");
+      erwarte.enthaelt(r.text, "Gegenprobe 4/4", "die Gegenprobe meldet ausdruecklich 4/4");
     });
 
     pruefe("Gegenprobe ist falsifizierbar: blinde Regel macht rot (Exit 1)", () => {

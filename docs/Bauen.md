@@ -67,11 +67,12 @@ den Dateien — fehlt eine, bricht der Bau ab. Prüfen: `python tools/einfach.py
 > Größe und SHA256 der versionierten `docs/index.html`.
 
 > **Zeilenenden.** Der Bau liefert **LF**, auf jeder Plattform. Die Quellen sind gemischt
-> (61 Dateien CRLF, 101 LF, so gewachsen und bewusst nicht angefasst), im Repositorium gilt
-> laut `.gitattributes` aber LF. Ohne Normalisierung erbte `docs/index.html` 23.838 CRLF:
-> Git führte die Datei als „ständig geändert", und der Bau auf Linux wäre nicht byte-gleich
-> zum Bau auf Windows. Deshalb lesen `bauen.py`, `tools/einfach.py` und `tools/bilder.py`
-> mit Normalisierung und schreiben mit `newline="\n"`.
+> (teils CRLF, teils LF, so gewachsen und bewusst nicht angefasst — die aktuelle Verteilung
+> nennt `git ls-files --eol`), im Repositorium gilt laut `.gitattributes` aber LF. Ohne
+> Normalisierung erbte `docs/index.html` die CRLF-Zeilen der Quellen: Git führte die Datei
+> als „ständig geändert", und der Bau auf Linux wäre nicht byte-gleich zum Bau auf Windows.
+> Deshalb lesen `bauen.py`, `tools/einfach.py` und `tools/bilder.py` mit Normalisierung und
+> schreiben mit `newline="\n"`.
 
 ### Beweisen, dass sie läuft
 
@@ -229,7 +230,7 @@ Dokumente, Android-Bauzählung, Screenshot-Hinweis):
 
 ```bash
 python tools/fassung-ziehen.py --pruefen      # muss GRUEN sein, schreibt nichts
-python tools/fassung-ziehen.py --neu 2.1.0    # Trockenlauf: zeigt jede Stelle
+python tools/fassung-ziehen.py --neu 3.0.0    # Trockenlauf: zeigt jede Stelle
 ```
 
 Danach (nur mit Freigabe) `--setzen`, `VERSION_CODE` in `android/bauen.py` von Hand über den
@@ -256,16 +257,17 @@ Windows-`.exe` folgt aus dem zweiten Job (Windows-Läufer, einige Minuten späte
 > mit 401, gemessen 06.10.2026). Ein Ablauf bekommt von GitHub ein `GITHUB_TOKEN` und darf
 > mit `permissions: contents: write` Releases anlegen.
 
-> **Die `.exe` ist nicht im Release**, weil sie nicht im Git liegt (8 MB). Im Paket steht
-> dann der Browser-Hinweis. Wer die Windows-Fassung anhängen will: `.exe` bauen
-> (siehe unten), `python tools/paket.py` laufen lassen und das entstandene
-> `dist/Netzwerk-Labor-<Version>-Windows.zip` im Release-Bildschirm von Hand hineinziehen.
+> **Die `.exe` liegt nicht im Git** — **im Release hängt sie trotzdem**: Der Windows-Job in
+> `.github/workflows/release.yml` baut sie aus dem Tag und lädt sie als eigenen Anhang hoch
+> (siehe „Die Windows-`.exe`"). Das ZIP aus dem Linux-Job enthält sie bewusst nicht
+> (`--ohne-exe`). Der manuelle Weg über `python tools/paket.py` + Release-Bildschirm ist nur
+> ein Rückfall für Sonderfälle.
 
 Ein Tag allein ist noch kein Release: **GitHub legt Releases nie von selbst an.** Der
 Reiter „Releases" bleibt leer, bis ein Ablauf oder ein Mensch einen anlegt. Die älteren
 Tags `endversion-1.0` und `v1.1` haben aus demselben Grund bis heute kein Release.
 
-> **Warum `Netzwerk-Labor.html` zusätzlich im Repositorium liegt** (2,2 MB, gegen die
+> **Warum `Netzwerk-Labor.html` zusätzlich im Repositorium liegt** (Größe und SHA256 stehen in [STAND.md](STAND.md); gegen die
 > Regel „keine gebauten Dateien im Git"): Ein Download-Weg muss **einen** Klick brauchen,
 > und ein Release-Anhang braucht eine Person, die ihn anlegt. Die Datei ist textbasiert
 > und damit diffbar, wird bei inhaltlichen Änderungen mitgebaut und ist mit
@@ -316,13 +318,13 @@ Größe der aktuellen APK **nicht geprüft**, weil keine gebaut wurde).
 Nötig sind ein Android-SDK mit **build-tools ≥ 35** und ein JDK 17+.
 
 **Zwei Versionszahlen, zwei Bedeutungen:** `versionName` ist die Spielversion aus
-`bauen.py` (`VERSION`, derzeit **2.9.0**). `versionCode` ist die Bauzählung und steht als
-eigene Zahl in `android/bauen.py` (`VERSION_CODE = 20006`, gemessen 26.10.2026). Aus 2.0.5
-abgeleitet ergäbe sie 20005, also genau einen Code unter der schon gebauten APK. Android
-verweigert die Installation über eine alte Fassung, wenn der Code
-nicht größer ist („App nicht installiert“). Deshalb ist er vom Namen entkoppelt und
-steigt mit jeder APK, die das Haus verlässt; `version_lesen()` bricht ab, wenn
-`VERSION_CODE` unter dem aus `versionName` ableitbaren Wert liegt.
+`bauen.py` (`VERSION`, derzeit **2.9.0**). `versionCode` ist die Bauzählung und steht als eigene Zahl in
+`android/bauen.py`; die **aktuelle Bauzählung** nennt [STAND.md](STAND.md) (Android-Bauzählung).
+Aus der Spielversion abgeleitet ergäbe sie einen kleineren Wert — Android verweigert die
+Installation über eine alte Fassung, wenn der Code nicht größer ist („App nicht
+installiert“). Deshalb ist er vom Namen entkoppelt und steigt mit jeder APK, die das Haus
+verlässt; `version_lesen()` bricht ab, wenn `VERSION_CODE` unter dem aus `versionName`
+ableitbaren Wert liegt.
 
 **Die App dreht frei.** Bis 06.10.2026 stand im Manifest
 `android:screenOrientation="sensorLandscape"` — Querformat festgenagelt. Jetzt steht dort
@@ -355,8 +357,8 @@ ist:
 
 **Historische Momentaufnahme:** gemessen an der eingefrorenen APK vom 06.10.2026 (980.508 Bytes,
 SHA256 `46c90213…`, Seite darin `a2bba5cf…`). Die Zeilen unten sind der damals abgelesene
-`aapt`-Ausschnitt und **nicht** der heutige Stand — heute gilt `VERSION` = 2.9.0 und
-`VERSION_CODE = 20006` (siehe [STAND.md](STAND.md), gemessen 29.10.2026):
+`aapt`-Ausschnitt und **nicht** der heutige Stand — heute gilt `VERSION` = 2.9.0 und die
+Android-Bauzählung steht in [STAND.md](STAND.md):
 
 ```
 package: name='oss.vexx.netlab' versionCode='10202' versionName='1.2.1' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
@@ -422,8 +424,8 @@ Berechtigung **Administration: Read and write** (GitHub → Settings → Develop
 Personal access tokens). Das Token wird nur an `api.github.com` gesendet und nirgends
 gespeichert. Die Homepage ist bereits gesetzt; Beschreibung und Themen fehlen noch.
 
-Dasselbe Werkzeug kann die **Windows-Fassung an ein Release hängen** — die 8-MB-`.exe`
-liegt nicht im Git und kann deshalb vom Release-Ablauf nicht mitgebaut werden:
+Dasselbe Werkzeug kann die **Windows-Fassung an ein Release hängen** — für Sonderfälle:
+Die `.exe` liegt nicht im Git; der Release-Ablauf baut sie aus dem Tag selbst (siehe oben):
 
 ```bash
 python tools/paket.py                                        # erzeugt dist/*-Windows.zip

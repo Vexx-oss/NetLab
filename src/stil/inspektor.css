@@ -70,14 +70,13 @@
 .in-feld{display:flex; flex-direction:column; gap:4px; min-width:0}
 .in-feld.breit{grid-column:1 / -1}
 .in-feld-titel{font:600 var(--fs-2)/1.2 var(--body); color:var(--muted)}
-.in-eingabe, .in-auswahl{width:100%; min-width:0; height:34px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-xs); background:var(--panel-2); color:var(--ink); font:500 var(--fs-3) var(--body);
+.in-eingabe, .in-auswahl{width:100%; min-width:0; min-height:44px; padding:0 8px; border:1px solid var(--line-2); border-radius:var(--radius-xs); background:var(--panel-2); color:var(--ink); font:500 var(--fs-3) var(--body);
   transition:border-color var(--dauer), background var(--dauer)}
 .in-eingabe.mono, .in-eingabe:focus, .in-auswahl:focus{border-color:var(--accent); background:var(--panel)}
 .in-eingabe.bad{border-color:var(--bad); background:var(--bad-soft)}
 .in-eingabe.warn{border-color:var(--warn)}
 .in-eingabe::placeholder, .in-code-L{color:var(--faint)}
 .in-auswahl{padding-right:4px; cursor:pointer}
-.in-feld.klein .in-eingabe, .in-feld.klein .in-auswahl{height:30px}
 .in-meldung{font-size:var(--fs-2); line-height:1.35; color:var(--muted)}
 @keyframes in-wackeln{0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}}
 .in-eingabe.wackeln{animation:in-wackeln var(--dauer-lang) 2}

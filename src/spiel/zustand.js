@@ -135,6 +135,26 @@ Spiel.sicherung = function(){
   const s = store.get(Spiel.SICHERUNG, null);
   return s && s.stand ? s : null;
 };
+/* Sicherung wiederherstellen (SPL-02, 3.0.0; Architektur § 7.4): den vor einem Import oder einer
+   Migration weggelegten Stand zurückholen. Reihenfolge verbindlich: store.set("labor") → Spiel.laden()
+   (migriert alte Stände) → sofortSpeichern → Sicherung VERBRAUCHEN (Einmal-Rückweg, sonst spielte ein
+   späterer Start erneut einen Altstand ein). Fehler lassen Stand UND Sicherung unangetastet. */
+Spiel.sicherungWiederherstellen = function(){
+  const s = store.get(Spiel.SICHERUNG, null);
+  if (!s || typeof s !== "object" || Array.isArray(s))
+    return {fehler: "keine-sicherung", grund: "Es liegt keine Sicherung vor."};
+  if (!s.stand || typeof s.stand !== "object" || Array.isArray(s.stand))
+    return {fehler: "stand", grund: "Die Sicherung enthält keinen brauchbaren Spielstand."};
+  const v = typeof s.v === "number" && isFinite(s.v) ? s.v : 0;
+  if (v > Spiel.VERSION)
+    return {fehler: "fassung", grund: "Die Sicherung stammt aus einer neueren Fassung (Stand v" + v + "); dieses Programm kennt nur v" + Spiel.VERSION + "."};
+  store.set("labor", tief(s.stand));
+  Spiel._st = null;
+  Spiel.laden();                                  /* migriert (z. B. v:2) und füllt das Postfach neu */
+  store.set(Spiel.SICHERUNG, null);               /* Einmal-Verbrauch: danach „keine Sicherung" */
+  Spiel.sofortSpeichern();
+  return {ok: true, v, zeit: typeof s.zeit === "number" ? s.zeit : null};
+};
 /* Einen eingelesenen Spielstand prüfen, BEVOR er den laufenden ersetzt.
    Abgewiesen werden FREMDES (falsches Format) und ZU NEUES (Standversion über der des Programms).
    Ein ALTER Stand ist ausdrücklich erlaubt — auch ohne v-Feld (Stände vor v:2): die Migration holt
@@ -158,6 +178,11 @@ Spiel.laden = function({neu = false} = {}){
   Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD, store.get("einst", {}) || {});
   for (const [name, fn] of Object.entries(Spiel.ergaenzer)) {
     try { fn(Spiel._st); } catch (e) { typeof console !== "undefined" && console.error("Spiel.ergaenzer." + name, e); }
+  }
+  /* SPL-10 (3.0.0): Ein 2.9.0-Klassenraum-Stand (fassung:1) wird beim Laden einmalig auf fassung:2
+     gehoben und geschrieben — sonst bliebe der alte Schlüssel bis zum ersten Klick auf der Platte. */
+  if (Spiel.klassenraum && typeof Spiel.klassenraum.migrierenStand === "function") {
+    try { Spiel.klassenraum.migrierenStand(); } catch (e) { typeof console !== "undefined" && console.error("klassenraum.migrierenStand", e); }
   }
   Spiel._lz = {};
   if (typeof Spiel.hoererAnmelden === "function") Spiel.hoererAnmelden();

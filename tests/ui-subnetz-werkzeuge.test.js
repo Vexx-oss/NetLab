@@ -357,6 +357,45 @@ gruppe("UI: Subnetting-Werkzeuge", () => {
     erwarte.enthaelt(root.querySelector(".sw-rueckmeldung").textContent, "Kein Plan möglich", "Fehler wird erklärt");
   });
 
+  /* UIL-02 (berichte/frontend-lernen.md): Adressplaner und VLAN-Werkzeug bekamen das Aufgaben-Preset,
+     lasen es aber nie (fremde Lage in der Hilfe). Jetzt kommen Basis/Bedarf bzw. Ports im Werkzeug an. */
+  pruefe("UIL-02: Adressplaner übernimmt Basisnetz und Bedarf aus dem Preset" + W4_ZUSATZ, () => {
+    if (!W4_KANN_LADEN) return;
+    const p = w4Pruefstand();
+    const preset = {basis: "192.168.100.0/24", bedarf: [{name: "Lager", hosts: 60}, {name: "Kasse", hosts: 20}]};
+    const eins = w4Werkzeug(p, "vlsm", {preset});
+    const root = eins.root;
+    erwarte.gleich(root.querySelector(".sw-ip-feld").value, "192.168.100.0/24", "Basisnetz kommt aus dem Preset");
+    erwarte.gleich(root.querySelectorAll(".sw-name-feld").map(f => f.value), ["Lager", "Kasse"], "Bedarfszeilen kommen aus dem Preset");
+    erwarte.gleich(root.querySelectorAll(".sw-hosts-feld").map(f => Number(f.value)), [60, 20], "Hostbedarf kommt aus dem Preset");
+    w4Knopf(root, "Plan erzeugen").click();
+    const zeilen = w4Alle(root.querySelector(".sw-plan-tabelle"), "tr").filter(tr => tr.attrs && tr.attrs["data-netz"]);
+    erwarte.gleich(zeilen.length, 2, "zwei Planzeilen");
+    erwarte.wahr(zeilen.every(tr => String(tr.attrs["data-netz"]).startsWith("192.168.100.")), "Plan liegt im Preset-Basisnetz: " + zeilen.map(tr => tr.attrs["data-netz"]).join(", "));
+    erwarte.enthaelt(root.querySelector(".sw-plan").textContent, "Lager", "der Balken nennt die Abteilung aus dem Preset");
+    /* Gegenprobe: ein anderes Preset ergibt einen anderen Werkzeugzustand (kein ignoriertes opts). */
+    const zwei = w4Werkzeug(p, "vlsm", {preset: {basis: "10.0.0.0/24", bedarf: [{name: "Werk", hosts: 100}]}});
+    erwarte.gleich(zwei.root.querySelector(".sw-ip-feld").value, "10.0.0.0/24", "zweites Preset: anderes Basisnetz");
+    w4Knopf(zwei.root, "Plan erzeugen").click();
+    const zeilen2 = w4Alle(zwei.root.querySelector(".sw-plan-tabelle"), "tr").filter(tr => tr.attrs && tr.attrs["data-netz"]);
+    erwarte.wahr(!!zeilen2[0] && String(zeilen2[0].attrs["data-netz"]).startsWith("10.0.0."), "zweites Preset plant im 10.0.0.0-Netz");
+  });
+
+  pruefe("UIL-02: VLAN-Werkzeug übernimmt die Ports aus dem Preset" + W4_ZUSATZ, () => {
+    if (!W4_KANN_LADEN) return;
+    const p = w4Pruefstand();
+    const preset = {ports: [{port: "Fa0/2", modus: "access", vlan: 4}, {port: "Fa0/5", modus: "trunk", vlan: 1}]};
+    const {root} = w4Werkzeug(p, "vlan", {preset});
+    const ports = root.querySelectorAll(".sw-port");
+    erwarte.gleich(ports.length, 8, "acht Ports bleiben");
+    erwarte.gleich(ports[1].getAttribute("aria-label"), "Port 2: Access · VLAN 4", "Port 2 kommt aus dem Preset (Access/VLAN 4)");
+    erwarte.gleich(ports[4].getAttribute("aria-label"), "Port 5: Trunk · Native 1", "Port 5 ist Trunk aus dem Preset");
+    erwarte.gleich(ports[0].getAttribute("aria-label"), "Port 1: Access · VLAN 1", "nicht genannte Ports behalten den Standard");
+    /* Gegenprobe: anderes Preset → anderer Portzustand. */
+    const zwei = w4Werkzeug(p, "vlan", {preset: {ports: [{port: "Fa0/1", modus: "access", vlan: 7}]}});
+    erwarte.gleich(zwei.root.querySelectorAll(".sw-port")[0].getAttribute("aria-label"), "Port 1: Access · VLAN 7", "zweites Preset setzt Port 1 anders");
+  });
+
   pruefe("VLAN-Werkzeug: acht Ports klickbar, Moduswechsel ändert Zustand, Matrix und Frames folgen" + W4_ZUSATZ, () => {
     if (!W4_KANN_LADEN) return;
     const p = w4Pruefstand();
@@ -462,6 +501,67 @@ gruppe("UI: Subnetting-Werkzeuge", () => {
     erwarte.enthaelt(rechner.root.querySelector(".sw-ergebnis").textContent, "192.168.100.0", "Rechenweg nutzt das Preset");
     const bit = w4Werkzeug(p, "bitlabor", {preset: {ip: "192.168.100.0", praefix: 24}, kompakt: true});
     erwarte.gleich(bit.root.querySelectorAll(".sw-oktett-wert").map(w => w.textContent), ["192", "168", "100", "0"], "Preset-IP im Bitlabor");
+  });
+
+  /* UIL-03: Fester Seed → gleiche Karten; anderer Seed → andere Karten (deterministisch, ohne Uhr). */
+  pruefe("UIL-03: Lernspiel ist mit festem Seed deterministisch, anderer Seed liefert andere Karten" + W4_ZUSATZ, () => {
+    if (!W4_KANN_LADEN) return;
+    const p = w4Pruefstand();
+    const start = (id, seed) => {
+      const c = w4Knoten("div");
+      p.UI.subnetzwerkzeuge.spiele.starten(c, id, {seed, niveau: "AP1"});
+      const root = c.kinder[0] || null;
+      const frage = root ? root.querySelector(".sg-frage") : null;
+      return frage ? String(frage.textContent) : "";
+    };
+    const a = start("praefix-blitz", 111);
+    const b = start("praefix-blitz", 111);
+    const d = start("praefix-blitz", 222);
+    erwarte.wahr(a.length > 0, "die erste Frage ist sichtbar");
+    erwarte.gleich(b, a, "gleicher Seed → gleiche erste Karte");
+    erwarte.falsch(d === a, "anderer Seed → andere erste Karte: " + a + " vs " + d);
+  });
+
+  /* UIL-04 (berichte/frontend-lernen.md): Der VLAN-Patcher nannte je Port das Soll und „Prüfen“
+     verriet die Abweichungen vor der Bewertung (Prüfen→korrigieren→Abgeben ergab immer volle Punkte).
+     Jetzt steht die Anforderung nur als Szenario im Text; es gibt NUR „Abgeben“ (Bewertung).
+     Der Präfix-Blitz zählt „beantwortet“ statt „Karte x von 30“ und lässt die Erklärung bis „Weiter“ stehen. */
+  pruefe("UIL-04: VLAN-Patcher verrät die Soll-Liste vor der Abgabe nicht; Abgeben verbucht 8 Aufgaben" + W4_ZUSATZ, () => {
+    if (!W4_KANN_LADEN) return;
+    const p = w4Pruefstand();
+    const c = w4Knoten("div");
+    p.UI.subnetzwerkzeuge.spiele.starten(c, "vlan-patcher", {seed: 9137, niveau: "E"});
+    const root = c.kinder[0];
+    erwarte.wahr(!!root, "der VLAN-Patcher ist gestartet");
+    erwarte.wahr(root.querySelector(".sg-anforderung") === null, "keine per-Port-Soll-Liste vor der Abgabe");
+    erwarte.falsch(/Port\s+\d+\s*:/.test(String(root.textContent)), "kein „Port n:“-Solltext vor der Abgabe");
+    erwarte.falsch(/\bsoll\b/i.test(String(root.textContent)), "kein „soll“ im Vorab-Text");
+    erwarte.wahr(!!w4Knopf(root, "Abgeben"), "Abgeben ist da");
+    erwarte.wahr(w4Knopf(root, "Prüfen") === null, "kein Prüfen, das Abweichungen vorab verrät");
+    /* Abgeben bewertet und verbucht acht Port-Aufgaben über die echte API. */
+    const antworten = [];
+    const echt = Spiel.subnetz.antwort;
+    Spiel.subnetz.antwort = (...a) => { antworten.push(a); return echt.apply(Spiel.subnetz, a); };
+    try { w4Knopf(root, "Abgeben").title = ""; w4Knopf(root, "Abgeben").listeners.click[0]({currentTarget: root, target: root}); } finally { Spiel.subnetz.antwort = echt; }
+    erwarte.gleich(antworten.length, 8, "Abgeben verbucht acht Aufgaben");
+    erwarte.enthaelt(String(root.textContent), "Richtige Ports", "die Bewertung erscheint erst nach der Abgabe");
+  });
+
+  pruefe("UIL-04: Präfix-Blitz zählt „beantwortet“ und hält die Erklärung bis „Weiter“" + W4_ZUSATZ, () => {
+    if (!W4_KANN_LADEN) return;
+    const p = w4Pruefstand();
+    const c = w4Knoten("div");
+    p.UI.subnetzwerkzeuge.spiele.starten(c, "praefix-blitz", {seed: 111, niveau: "AP1"});
+    const root = c.kinder[0];
+    erwarte.falsch(/Karte\s+1\s+von\s+30/.test(String(root.textContent)), "kein „Karte 1 von 30“ mehr");
+    erwarte.enthaelt(String(root.textContent), "0 beantwortet", "der Zähler startet bei 0 beantwortet");
+    const option = root.querySelectorAll(".sg-option")[0];
+    erwarte.wahr(!!option, "Antwortknöpfe stehen");
+    option.listeners.click[0]({currentTarget: option, target: option});
+    erwarte.enthaelt(String(root.textContent), "1 beantwortet", "nach der Antwort: 1 beantwortet");
+    erwarte.wahr(!!root.querySelector(".sg-weiter"), "„Weiter“ steht bereit");
+    erwarte.enthaelt(String(root.textContent), "Schritt 1", "die Erklärung steht sichtbar");
+    erwarte.gleich(p.uhren.filter(u => u.ms === 1800).length, 0, "kein Auto-Weiter – die Erklärung bleibt stehen");
   });
 
   pruefe("Unbekannte Werkzeug-ID und fehlender Rechenkern: ruhiger Hinweis statt Ausnahme" + W4_ZUSATZ, () => {

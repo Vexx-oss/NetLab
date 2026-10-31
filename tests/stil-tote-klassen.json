@@ -1,0 +1,202 @@
+{
+  "hinweis": "Statische Gegenrichtung CSS -> JS (CSS-09). Erzeuger = Klassenname woertlich in src (JS/HTML) oder dynamisches Muster aus Template-Literalen/Konkatenationen (z.B. \"typ-\" + a.typ, \" toast-\" + art). Alles ohne Nachweis steht hier als Pruefbedarf: nicht sicher tot, Loeschung erst 3.1 mit Sichtpruefung. Methode und Grenzen: tests/stil-tote-klassen.test.js. Richtung JS -> CSS bleibt tools/klassen.py (0).",
+  "fassung": 1,
+  "entfernt": [
+    {
+      "klasse": "flow-geruest",
+      "datei": "spiel.css",
+      "beleg": "Audit F-10: kein Erzeuger in src; Selektor aus der Chip-Regel spiel.css entfernt."
+    },
+    {
+      "klasse": "flow-verwicklung",
+      "datei": "spiel.css",
+      "beleg": "Audit F-10: kein Erzeuger in src; Selektor aus der Chip-Regel spiel.css entfernt."
+    },
+    {
+      "klasse": "hb-auftrag-text",
+      "datei": "hub.css",
+      "beleg": "Audit F-10: Hub-Redesign (Bento 2.5) erzeugt die Klasse nicht mehr; zwei Selektoren entfernt."
+    },
+    {
+      "klasse": "hb-feier-knoepfe",
+      "datei": "hub.css",
+      "beleg": "Audit F-10: Hub-Redesign erzeugt die Klasse nicht mehr; Regel entfernt."
+    },
+    {
+      "klasse": "hb-kachel-sym",
+      "datei": "hub.css",
+      "beleg": "Audit F-10: Hub-Redesign erzeugt die Klasse nicht mehr; 4 Regeln (hub.css, zz-polaris.css, pulsar) entfernt."
+    },
+    {
+      "klasse": "hb-kachel-text",
+      "datei": "hub.css",
+      "beleg": "Audit F-10: Hub-Redesign erzeugt die Klasse nicht mehr; zwei Selektoren entfernt."
+    },
+    {
+      "klasse": "kr-skill-name",
+      "datei": "karriere.css",
+      "beleg": "Audit F-10: Karriere-/Lernstand-Umbau erzeugt die Klasse nicht mehr; Regel entfernt."
+    },
+    {
+      "klasse": "lb-sim-titel-text",
+      "datei": "editor.css",
+      "beleg": "Audit F-10: Labor-Redesign erzeugt die Klasse nicht mehr; Regel entfernt."
+    }
+  ],
+  "pruefbedarf": [
+    {
+      "datei": "aussehen.css",
+      "klassen": [
+        "kr-tupfer"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "bento.css",
+      "klassen": [
+        "bn-trenner",
+        "bn-zeile"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "editor.css",
+      "klassen": [
+        "am-name",
+        "band-ping",
+        "gb-internet",
+        "gb-kachel",
+        "insp-wartet",
+        "insp-zu",
+        "lb-insp-huelle",
+        "lb-knopf-text",
+        "lb-lasche",
+        "lb-sim-griff",
+        "lb-sim-kopf",
+        "lb-sim-pfeil",
+        "sim-wartet",
+        "sim-zieht",
+        "st-oben",
+        "st-unten"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "hub.css",
+      "klassen": [
+        "hb-auftrag",
+        "hb-ausblick",
+        "hb-feierabend",
+        "hb-kopf",
+        "hb-serie"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "juice.css",
+      "klassen": [
+        "ps-oben"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "karriere.css",
+      "klassen": [
+        "kr-abzeichen",
+        "kr-balken",
+        "kr-bar",
+        "kr-behalten",
+        "kr-fehlerheft",
+        "kr-fehlt",
+        "kr-fuss",
+        "kr-karriere",
+        "kr-pruefung",
+        "kr-ringe",
+        "kr-skill",
+        "kr-stufe",
+        "kr-zwei"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "klassenraum.css",
+      "klassen": [
+        "kl-rot"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "leiste.css",
+      "klassen": [
+        "f-bad",
+        "f-ok",
+        "f-warn",
+        "lk-beantwortet"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "lernstand.css",
+      "klassen": [
+        "lern-reife-fuss"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "netzplan.css",
+      "klassen": [
+        "np-skizze"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "spiel.css",
+      "klassen": [
+        "form-forensik",
+        "form-projekt",
+        "form-terminal"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "subnetz-werkzeuge.css",
+      "klassen": [
+        "sg-anforderung",
+        "sg-anforderung-zeile",
+        "sg-diff",
+        "sg-diff-zeile"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "zz-lagebild.css",
+      "klassen": [
+        "zone-a",
+        "zone-b",
+        "zone-c",
+        "zone-d",
+        "zone-e"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "zz-polaris.css",
+      "klassen": [
+        "hb-knoten",
+        "hb-pill",
+        "hb-signal-svg",
+        "hb-spark",
+        "in-panel",
+        "lb-kachel"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    },
+    {
+      "datei": "zzz-thema-keramik.css",
+      "klassen": [
+        "hb-karte"
+      ],
+      "grund": "Kein Erzeuger in src (JS/HTML) und kein dynamisches Muster nachweisbar; Altreste aus Redesigns — Pruefbedarf 3.1 mit Sichtpruefung, nicht sicher tot."
+    }
+  ]
+}

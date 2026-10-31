@@ -6,7 +6,7 @@
 
    Aufbau der Schicht (bauen.py lädt parser.js zuerst, dann alphabetisch):
      parser.js        CLI, Zerlegen, Befehlsbaum-Maschine (Kurzformen, ?, Tab, Fehler), Sitzung, eingabe()
-     entspricht.js    CLI.entspricht (GUI → Befehl), CLI.anwenden, CLI.vorschlag, CLI.erklaere
+     entspricht.js    CLI.entspricht (GUI → Befehl), CLI.anwenden, CLI.vorschlag
      host-terminal.js Windows-artiges Terminal für pc/server/nas
      ios-ausgaben.js  show-Ausgaben, running-config, ping/traceroute
      ios-befehle.js   Befehlsbäume (CLI.baeumeBauen) und Konfigurationsbefehle

@@ -80,5 +80,9 @@
       "ungetaggtes Frame-Ziel", "Ein Frame kommt ungetaggt am Trunk-Port an"),
     "mini-rostick-4": D("Jedes VLAN braucht am Router eine eigene logische Schnittstelle mit eigener IP-Adresse. Zähl die VLANs aus der Frage und ordne jedem genau eine zu.",
       "logische Schnittstelle", "Wie viele Subinterfaces braucht der Router"),
+
+    /* VIS-07 (31.10.2026): Denkanstoß zum neuen AP1-Mini mini-sto-6 (lab.storage). */
+    "mini-sto-6": D("Zähl die Platten im Verbund: Welche Aufgabe übernimmt bei dieser RAID-Stufe eine zusätzliche Platte – und was rettet sie bei einem Ausfall?",
+      "Plattenzahl"),
   });
 })();

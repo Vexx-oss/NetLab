@@ -113,6 +113,7 @@ Sim._log = function(L, art, geraet, port, frame, text, x){
   const e = {n: L.ev.length + 1, t: L.t - L.t0, art, geraet: geraet || null, port: port == null ? null : port,
              nach: x.nach ? {geraet: x.nach.geraet, port: x.nach.port} : null,
              frame: frame ? tief(frame) : null, proto: x.proto || Sim._proto(frame), grund: x.grund || null, text: text || ""};
+  if (x.harmlos) e.harmlos = true;   /* Architektur § 5.2: normales Verwerfen, kein Fehlergrund (SIM-06) */
   if (x.warnung) e.warnung = true;   /* Architektur § 5.2: Hinweis, keine Ursache */
   L.ev.push(e);
   return e;

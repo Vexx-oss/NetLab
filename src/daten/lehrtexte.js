@@ -295,8 +295,8 @@ Object.assign(DATEN.lehrtexte, {
   "lab.subnetz": {
     titel: "Adressplan: Blockgröße und Netz-ID",
     skill: "lab.subnetz",
-    E: "Subnetting rechnet mit der Blockgröße: 2 hoch (32 minus Präfixlänge). Die Netz-ID ist die erste Adresse eines Blocks, der Broadcast die letzte, Hosts liegen dazwischen. Plane vom größten Netz zum kleinsten (VLSM), sonst passen die kleinen nicht mehr. Prüf jede Zuordnung mit Netz-ID, Maske und Gateway.",
-    AP1: "Ein /p-Netz hat 2^(32−p) Adressen, davon 2^(32−p)−2 nutzbare Hosts. VLSM vergibt die größten Blöcke zuerst; jedes Netz braucht Netz-ID, Maske und Gateway.",
+    E: "Subnetting rechnet mit der Blockgröße: 2 hoch (32 minus Präfixlänge). Die Netz-ID ist die erste Adresse eines Blocks, der Broadcast die letzte, Hosts liegen dazwischen. Ausnahme /31 (RFC 3021): Bei Punkt-zu-Punkt-Leitungen sind beide Adressen nutzbar; /32 ist eine Einzeladresse. Plane vom größten Netz zum kleinsten (VLSM), sonst passen die kleinen nicht mehr. Prüf jede Zuordnung mit Netz-ID, Maske und Gateway.",
+    AP1: "Ein /p-Netz hat 2^(32−p) Adressen, davon 2^(32−p)−2 nutzbare Hosts. Ausnahme /31 (RFC 3021): zwei nutzbare Adressen, bei /32 eine Adresse. VLSM vergibt die größten Blöcke zuerst; jedes Netz braucht Netz-ID, Maske und Gateway.",
     AP2: "ipconfig: IPv4-Adresse 192.168.1.10 · Subnetzmaske 255.255.255.192 · show ip interface brief: 192.168.1.1 255.255.255.192",
     quelle: "04-AP1-Netzwerk (Subnetting-Verfahren) · Fragen – Subnetting · Network – Lernfassung (§ 8)",
   },

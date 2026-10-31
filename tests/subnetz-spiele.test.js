@@ -185,13 +185,12 @@ function praefixAntwort(frage){
   }
   return null;
 }
-/* Weiter-Weg nach einer Antwort (S11): der Knopf „Weiter“ ist immer da; die Auto-Zeit (1,8 s)
-   greift nur bei richtiger Antwort. Beides wird hier gemessen statt angenommen. */
+/* Weiter-Weg nach einer Antwort (S11, UIL-04): der Knopf „Weiter“ ist IMMER da; ein Auto-Weiter
+   gibt es nicht mehr — die Erklärung bleibt stehen, bis der Lernende weiterklickt. */
 function praefixWeiter(p, root){
   const weiter = root.querySelector(".sg-weiter");
   if (weiter) { weiter.click(); return "knopf"; }
-  p.uhrLauf(1800);
-  return "uhr";
+  return "keiner";
 }
 function praefixAntworten(p, root, richtig, anzahl){
   for (let i = 0; i < anzahl; i++) {
@@ -237,23 +236,35 @@ function netzSortieren(p, root, richtig){
     wahl.click();
   }
 }
+/* UIL-04: Das Soll steht NICHT mehr als Liste im DOM — es ist die Szenario-Beschreibung. Diese
+   Tabelle hält die erwartete Konfiguration der drei Szenarien als Verhaltens-Spezifikation fest
+   (der Test konfiguriert danach über die echten Knöpfe). */
+const PATCHER_SOLL = {
+  "Schulnetz": [{m: "access", v: 2}, {m: "access", v: 2}, {m: "access", v: 4}, {m: "trunk", v: 1},
+                {m: "access", v: 4}, {m: "access", v: 6}, {m: "access", v: 6}, {m: "trunk", v: 1}],
+  "Werkstatt": [{m: "access", v: 3}, {m: "access", v: 3}, {m: "access", v: 5}, {m: "access", v: 5},
+                {m: "access", v: 7}, {m: "trunk", v: 1}, {m: "access", v: 7}, {m: "trunk", v: 1}],
+  "Praxis": [{m: "access", v: 2}, {m: "access", v: 2}, {m: "trunk", v: 1}, {m: "access", v: 5},
+             {m: "access", v: 8}, {m: "trunk", v: 1}, {m: "access", v: 8}, {m: "access", v: 5}],
+};
 function patcherKonfigurieren(p, root){
-  const zeilen = root.querySelectorAll(".sg-anforderung-zeile").map(z => z.textContent);
-  erwarte.gleich(zeilen.length, 8, "acht Anforderungen");
-  zeilen.forEach((text, i) => {
+  const titel = root.querySelector(".sg-auftrag-titel").textContent.trim();
+  const soll = PATCHER_SOLL[titel];
+  erwarte.wahr(!!soll, "bekanntes Szenario: " + titel);
+  erwarte.gleich(soll.length, 8, "acht Port-Vorgaben im Szenario");
+  soll.forEach((vorgabe, i) => {
     const port = root.querySelectorAll(".sg-port").find(b => {
       const name = b.querySelector(".sg-port-name");
       return name && name.textContent === "P" + (i + 1);
     });
     erwarte.wahr(!!port, "Port " + (i + 1) + " vorhanden");
     port.click();
-    if (/Trunk/.test(text)) {
+    if (vorgabe.m === "trunk") {
       sgKnopf(root.querySelector(".sg-port-panel"), "Trunk").click();
     } else {
       sgKnopf(root.querySelector(".sg-port-panel"), "Access").click();
-      const vlan = Number((/VLAN (\d+)/.exec(text) || [])[1]);
-      const knopf = sgAlleKnoepfe(root.querySelector(".sg-port-panel")).find(b => String(b.textContent).trim() === "VLAN " + vlan);
-      erwarte.wahr(!!knopf, "VLAN-" + vlan + "-Knopf vorhanden");
+      const knopf = sgAlleKnoepfe(root.querySelector(".sg-port-panel")).find(b => String(b.textContent).trim() === "VLAN " + vorgabe.v);
+      erwarte.wahr(!!knopf, "VLAN-" + vorgabe.v + "-Knopf vorhanden");
       knopf.click();
     }
   });
@@ -415,19 +426,22 @@ gruppe("UI: Subnetting-Lernspiele", () => {
     });
   });
 
-  pruefe("VLAN-Patcher: Anforderung konfigurieren, Prüfen zeigt keine Abweichung, Abgeben verbucht acht Ports" + SG_ZUSATZ, () => {
+  pruefe("VLAN-Patcher: Szenario statt Soll-Liste, nur Abgeben bewertet, acht Verbuchungen" + SG_ZUSATZ, () => {
     if (!SG_KANN_LADEN) return;
     sgKapsel(buchungen => {
       const p = sgPruefstand();
       let ergebnis = null, ereignis = null;
       const {root} = sgSpiel(p, "vlan-patcher", {onEnde: e => { ergebnis = e; }, onErgebnis: e => { ereignis = e; }});
       erwarte.gleich(root.querySelectorAll(".sg-port").length, 8, "acht Ports");
-      erwarte.gleich(root.querySelectorAll(".sg-anforderung-zeile").length, 8, "acht Anforderungen");
+      /* UIL-04: keine per-Port-Soll-Liste und kein Vorab-„Prüfen“ mehr — Abgeben ist die Bewertung. */
+      erwarte.wahr(root.querySelector(".sg-anforderung") === null, "keine Soll-Liste im DOM");
+      erwarte.gleich(root.querySelectorAll(".sg-anforderung-zeile").length, 0, "keine Soll-Zeilen");
+      erwarte.falsch(/Port\s+\d+\s*:/.test(root.textContent), "kein „Port n:“-Solltext vor der Abgabe");
+      erwarte.falsch(/\bsoll\b/i.test(root.textContent), "kein „soll“ vor der Abgabe");
+      erwarte.wahr(!!root.querySelector(".sg-auftrag-text"), "die Anforderung steht als Szenario");
+      erwarte.wahr(!!sgKnopf(root, "Abgeben"), "Abgeben ist da");
+      erwarte.wahr(sgKnopf(root, "Prüfen") === null, "kein Prüfen (verriete Abweichungen vorab)");
       patcherKonfigurieren(p, root);
-      sgKnopf(root, "Prüfen").click();
-      const rueck = root.querySelector(".sg-rueckmeldung");
-      erwarte.enthaelt(rueck.textContent, "Keine Abweichung", "Prüfen bestätigt die richtige Konfiguration");
-      erwarte.wahr(sgKlassen(rueck).includes("sg-ok"), "Rückmeldung ist als Erfolg markiert");
       sgKnopf(root, "Abgeben").click();
       erwarte.wahr(!!ergebnis, "onEnde wurde gerufen");
       pruefeErgebnisForm(ergebnis, "vlan-patcher");
@@ -441,31 +455,32 @@ gruppe("UI: Subnetting-Lernspiele", () => {
     });
   });
 
-  pruefe("VLAN-Patcher: unveränderte Ports ergeben null Punkte und eine benannte Differenz" + SG_ZUSATZ, () => {
+  pruefe("VLAN-Patcher: unveränderte Ports ergeben null Punkte; das Soll erscheint erst in der Abgabe" + SG_ZUSATZ, () => {
     if (!SG_KANN_LADEN) return;
     sgKapsel(() => {
       const p = sgPruefstand();
       let ergebnis = null;
       const {root} = sgSpiel(p, "vlan-patcher", {onEnde: e => { ergebnis = e; }});
-      sgKnopf(root, "Prüfen").click();
-      erwarte.enthaelt(root.querySelector(".sg-rueckmeldung").textContent, "weichen", "Prüfen nennt die Abweichungen");
-      erwarte.wahr(root.querySelectorAll(".sg-diff-zeile").length > 0, "Differenzliste ist gefüllt");
+      erwarte.wahr(root.querySelector(".sg-diff") === null, "keine Vorab-Differenzliste im DOM");
+      erwarte.falsch(/\bsoll\b/i.test(root.textContent), "kein Soll vor der Abgabe");
       sgKnopf(root, "Abgeben").click();
       erwarte.wahr(!!ergebnis, "onEnde wurde gerufen");
       pruefeErgebnisForm(ergebnis, "vlan-patcher");
       erwarte.gleich([ergebnis.richtig, ergebnis.punkte], [0, 0], "unveränderte Ports geben keine Punkte");
       erwarte.gleich(ergebnis.falsch, 8, "acht Abweichungen gezählt");
+      erwarte.gleich(root.querySelectorAll(".sg-auswertung-zeile").length, 8, "acht Abweichungszeilen erst in der Abgabe");
+      erwarte.enthaelt(root.querySelector(".sg-auswertung").textContent, "Soll:", "erst die Abgabe nennt das Soll");
     });
   });
 
-  pruefe("VLAN-Patcher: Szenario und Anforderungen sind aus dem Seed deterministisch" + SG_ZUSATZ, () => {
+  pruefe("VLAN-Patcher: Szenario ist aus dem Seed deterministisch (ohne Soll-Liste im DOM)" + SG_ZUSATZ, () => {
     if (!SG_KANN_LADEN) return;
     sgKapsel(() => {
       const p = sgPruefstand();
       const a = sgSpiel(p, "vlan-patcher", {});
       const b = sgSpiel(p, "vlan-patcher", {});
-      erwarte.gleich(a.root.querySelector(".sg-auftrag-text").textContent, b.root.querySelector(".sg-auftrag-text").textContent, "gleiches Szenario");
-      erwarte.gleich(a.root.querySelector(".sg-anforderung").textContent, b.root.querySelector(".sg-anforderung").textContent, "gleiche Anforderung");
+      erwarte.gleich(a.root.querySelector(".sg-auftrag").textContent, b.root.querySelector(".sg-auftrag").textContent, "gleiches Szenario");
+      erwarte.wahr(a.root.querySelector(".sg-anforderung") === null && b.root.querySelector(".sg-anforderung") === null, "keine Soll-Liste im DOM");
       const n = sgSpiel(p, "netz-sortierer", {});
       const m = sgSpiel(p, "netz-sortierer", {});
       erwarte.gleich(n.root.querySelector(".sg-regel").textContent, m.root.querySelector(".sg-regel").textContent, "gleiches Sortier-Szenario");
@@ -534,9 +549,11 @@ gruppe("UI: Subnetting-Lernspiele", () => {
       richtig.click();
       erwarte.wahr(!!root.querySelector(".sg-rechenweg"), "Rechenweg steht nach der Antwort");
       erwarte.wahr(!!root.querySelector(".sg-weiter"), "Weiter-Knopf ist da");
-      erwarte.gleich(p.uhren.filter(u => u.ms === 1800).length, 1, "Auto-Weiter nach 1,8 s statt 900 ms");
-      erwarte.gleich(p.uhren.filter(u => u.ms === 900).length, 0, "kein 900-ms-Timer mehr");
+      erwarte.gleich(p.uhren.filter(u => u.ms === 1800).length, 0, "KEIN Auto-Weiter mehr (UIL-04)");
+      erwarte.gleich(p.uhren.filter(u => u.ms === 900).length, 0, "kein 900-ms-Timer");
       const ersteFrage = root.querySelector(".sg-frage").textContent;
+      erwarte.gleich(p.uhrLauf(1800), 0, "kein 1800-ms-Timer blättert von selbst weiter");
+      erwarte.gleich(root.querySelector(".sg-frage").textContent, ersteFrage, "die Karte bleibt stehen, bis „Weiter“ gedrückt wird");
       root.querySelector(".sg-weiter").click();
       erwarte.wahr(root.querySelector(".sg-frage").textContent !== ersteFrage, "Weiter führt zur nächsten Karte");
       /* Falsche Antwort: kein Auto-Weiter; Rückmeldung samt Rechenweg bleibt bis zum Klick. */

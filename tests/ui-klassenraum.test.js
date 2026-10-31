@@ -275,6 +275,38 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(p.rufe.filter(r => r[0] === "kopieren").map(r => r[1]), [s.code], "kopiert wird derselbe Code");
   }));
 
+  /* KLR-03 (W2): Die Lehrkraft-Auswahl bot 76 Aufträge an, der 6-Bit-Codec adressiert nur 58 –
+     18 Optionen scheiterten erst nach dem Klick. Jetzt kommen die Optionen aus der Codec-Tabelle,
+     mit sichtbarem Hinweis auf die Formatgrenze (3.1). */
+  pruefe("KLR-03: die Lehrkraft sieht nur die 58 per Code adressierbaren Aufträge (Formatgrenze 3.1)", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const tab = Spiel.klassenraum.tabellen();
+    const ids = tab.auftraege.ids.slice();
+    erwarte.gleich(ids.length, 58, "die Codec-Tabelle bleibt bei 58 Aufträgen (STAND-Ausnahme)");
+    const optionen = klFinde(c, "option").filter(o => String(o.value || "").startsWith("id:"));
+    erwarte.gleich(optionen.length, ids.length, "die Auswahl bietet genau die adressierbaren Aufträge an");
+    erwarte.gleich(optionen.map(o => String(o.value).slice(3)), ids, "in Codec-Reihenfolge, keine Fremden");
+    /* Gegenprobe: ein nicht adressierbarer Auftrag steht NICHT in der Auswahl. */
+    const fremd = (DATEN.tickets || []).map(t => t.id).find(id => !ids.includes(id));
+    erwarte.wahr(!!fremd, "es gibt nicht adressierbare Aufträge (Gegenprobe möglich)");
+    erwarte.falsch(optionen.some(o => String(o.value) === "id:" + fremd), "nicht adressierbarer Auftrag fehlt in der Auswahl: " + fremd);
+    /* Jede angebotene Option liefert wirklich einen Auftrag (frischer Speicher je Code). */
+    const kaputt = [];
+    for (const id of ids){
+      store.set("klassenraum", null);
+      const r = Spiel.klassenraum.erzeugen({ticketId: id});
+      if (!r || r.fehler) kaputt.push(id + ": " + ((r && r.grund) || "?"));
+    }
+    erwarte.gleich(kaputt, [], "jede angebotene Option erzeugt einen Auftrag ohne Fehler");
+    /* Der Hinweis auf die Formatgrenze steht sichtbar in der Ansicht. */
+    const text = klText(c);
+    erwarte.enthaelt(text, "Formatgrenze", "der Hinweis nennt die Formatgrenze");
+    erwarte.enthaelt(text, "3.1", "und den Formatwechsel 3.1");
+    erwarte.enthaelt(text, String(ids.length), "mit der Zahl der adressierbaren Aufträge");
+  }));
+
   pruefe("Lehrkraft: sechs sichtbare Bedienelemente, Azubi: drei — mehr gibt es nicht (B § 2.1/2.2, R12)", () => klKapsel(() => {
     const p = klPruefstand();
     p.start();
@@ -450,19 +482,22 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(p.rufe.filter(r => r[0] === "toast").length, 1, "ohne Code bleibt es still");
   }));
 
-  pruefe('Einstellungsabschnitt „Klassenraum“ baut Haus-DOM und schreibt die Einstellung (B § 11)', () => klKapsel(() => {
+  /* VIS-04 (§ 12.6): Der Schalter „Klassenraum-Server“ war wirkungslos — er schrieb nur die
+     Einstellung klassenraumServer, niemand las sie; Server und QR sind in 3.0 nicht gebaut. Statt
+     eines Schalters ohne Wirkung steht jetzt ein ehrlicher Hinweis auf 3.1. */
+  pruefe("VIS-04: kein wirkungsloser Klassenraum-Server-Schalter – ehrlicher 3.1-Hinweis (§ 12.6)", () => klKapsel(() => {
     const p = klPruefstand();
     p.start();
     const el = klKnoten("div");
     p.abschnitte[0].fn(el);
-    erwarte.gleich(klFinde(el, ".einst-zeile").length, 1, "eine Haus-Zeile");
-    erwarte.enthaelt(klText(el), "Klassenraum-Server (nur Desktop)", "mit dem Titel aus § 3.5");
-    erwarte.enthaelt(klText(el), "Firewall", "und dem Firewall-Hinweis");
-    const schalter = klFinde(el, ".schalter")[0];
-    erwarte.gleich(schalter.getAttribute("aria-checked"), "false", "Standard ist aus");
-    schalter.click();
-    erwarte.gleich(store.get("einst", {}).klassenraumServer, true, "eingeschaltet wird gespeichert");
-    erwarte.gleich(schalter.getAttribute("aria-checked"), "true", "und der Schalter zeigt es");
+    erwarte.gleich(klFinde(el, ".einst-zeile").length, 1, "eine Haus-Zeile bleibt");
+    erwarte.gleich(klFinde(el, ".schalter").length, 0, "kein Schalter ohne Wirkung");
+    erwarte.gleich(klFinde(el, "button").length + klFinde(el, "input").length, 0, "gar kein Bedienelement in diesem Abschnitt");
+    erwarte.enthaelt(klText(el), "Klassenraum-Server", "der Gegenstand wird weiter benannt");
+    erwarte.enthaelt(klText(el), "nicht gebaut", "der Text sagt ehrlich, dass der Server fehlt");
+    erwarte.enthaelt(klText(el), "3.1", "und nennt die Fassung, in der er kommt");
+    erwarte.enthaelt(klText(el), "Ergebnis-Codes", "der Weg ohne Server (Codes abtippen) bleibt erklärt");
+    erwarte.gleich(store.get("einst", {}).klassenraumServer, undefined, "die tote Einstellung wird nicht mehr geschrieben");
   }));
 
   pruefe("Der Abdruck der Lehrkraft sagt, WESSEN Netz er zeigt (Vorführlauf-Befund 10.10.2026)", () => klKapsel(() => {
@@ -550,10 +585,13 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     const p = klPruefstand();
     p.start();
     const s = klSitzung("salon-terminal");
-    erwarte.gleich(Object.keys(s).length, 15, "die Sitzung führt fünfzehn Felder");
+    erwarte.gleich(Object.keys(s).length, 16, "die Sitzung führt sechzehn Felder (3.0.0: diagnose neu, KLR-05a)");
     erwarte.gleich(Object.keys(s).sort().join(","),
-      "art,code,dauerMin,eigene,ergebnisse,erstellt,id,index,plaetze,schritte,seed,skill,ticketId,titel,variante",
-      "genau diese fünfzehn — kein Namens-, Noten- oder Rangfeld");
+      "art,code,dauerMin,diagnose,eigene,ergebnisse,erstellt,id,index,plaetze,schritte,seed,skill,ticketId,titel,variante",
+      "genau diese sechzehn — kein Namens-, Noten- oder Rangfeld");
+    /* KLR-05a (§ 12.2): diagnose ist ein anonymes Histogramm {schritt: anzahl} — kein Platz, kein Name. */
+    erwarte.gleich(Object.keys(s.diagnose || {}).every(k => /^\d+$/.test(k)), true, "diagnose trägt nur Schritt-Zähler");
+    erwarte.gleich(klPersonenFelder(s.diagnose || {}), [], "auch diagnose ist nicht personenbezogen");
     erwarte.gleich(klPersonenFelder(s), [], "kein Feld der Sitzung ist personenbezogen");
     /* Einen ECHTEN Ergebnissatz erzeugen und seine Felder prüfen. */
     const r = Spiel.klassenraum.ergebnisEintragen(klErgebnis(s.id, 5, 4, 80000, 1));
@@ -747,5 +785,123 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.enthaelt(klText(letzte.inhalt), "1 Ergebnis", "auch die Ergebnisse der importierten Sitzung");
     const toast = p.rufe.filter(r => r[0] === "toast").map(r => String(r[1])).join(" | ");
     erwarte.enthaelt(toast, "1 Sitzung", "ein Toast nennt die Anzahl");
+  }));
+
+  /* KLR-04b (W2, § 12.2): Ein Doppelplatz wurde still verworfen („das zuerst eingetragene gilt“).
+     Jetzt fragt ein Dialog [Abbrechen][Ersetzen][Entfernen]; Esc/Abbrechen ändert nichts.
+     Alles im bestehenden Hausdialog — keine neuen Sicht-Elemente (R12 bleibt 6). */
+  pruefe("KLR-04b: Doppelplatz-Dialog [Abbrechen][Ersetzen][Entfernen], Grenzen ehrlich, R12 bleibt", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s = klSitzung("salon-terminal");
+    const e5 = klErgebnis(s.id, 5, 4, 80000, 1);
+    Spiel.klassenraum.ergebnisEintragen(e5);
+    const e5b = klErgebnis(s.id, 5, 2, 40000, 2);
+    const zustand = () => JSON.stringify(Spiel.klassenraum.sitzung().ergebnisse);
+    const vorher = zustand();
+    p.K._L.codes.value = e5b;
+    klKnopf(c, "Eintragen").click();
+    erwarte.gleich(p.dialoge.length, 1, "Konflikt-Dialog statt stillem Verwerfen");
+    erwarte.enthaelt(p.dialoge[0].titel, "Platz 5", "Titel nennt den Platz");
+    const dlg = p.dialoge[0].inhalt;
+    erwarte.wahr(!!klKnopf(dlg, "Abbrechen") && !!klKnopf(dlg, "Ersetzen") && !!klKnopf(dlg, "Entfernen"), "drei Wege im Dialog");
+    /* 1 · Abbrechen ändert nichts */
+    klKnopf(dlg, "Abbrechen").click();
+    erwarte.gleich(zustand(), vorher, "Abbrechen ändert nichts");
+    erwarte.enthaelt(klText(c), "nichts geändert", "die Zeile sagt: nichts geändert");
+    /* 2 · Escape ändert nichts */
+    p.K._L.codes.value = e5b;
+    klKnopf(c, "Eintragen").click();
+    p.dokument.listeners.keydown.at(-1)({key: "Escape"});
+    erwarte.gleich(p.dialoge.at(-1).zu, true, "Escape schließt den Dialog");
+    erwarte.gleich(zustand(), vorher, "Escape ändert nichts");
+    /* 3 · Ersetzen schreibt den neuen Code — nach Quittung */
+    p.K._L.codes.value = e5b;
+    klKnopf(c, "Eintragen").click();
+    klKnopf(p.dialoge.at(-1).inhalt, "Ersetzen").click();
+    erwarte.gleich((Spiel.klassenraum.sitzung().ergebnisse["5"] || {}).code, e5b, "Ersetzen schreibt den neuen Code");
+    erwarte.enthaelt(klText(c), "ersetzt", "Zeilenmeldung: ersetzt");
+    /* 4 · Entfernen löscht den Eintrag (Tippfehler-Korrektur) */
+    const e5c = klErgebnis(s.id, 5, 5, 20000, 3);
+    p.K._L.codes.value = e5c;
+    klKnopf(c, "Eintragen").click();
+    klKnopf(p.dialoge.at(-1).inhalt, "Entfernen").click();
+    erwarte.gleich(Spiel.klassenraum.sitzung().ergebnisse["5"], undefined, "Entfernen entfernt den Eintrag");
+    erwarte.enthaelt(klText(c), "entfernt", "Zeilenmeldung: entfernt");
+    /* 5 · Grenze: Platzzahl außerhalb 0..31 → Meldung im bestehenden Hinweisfeld */
+    klKnopf(c, "Datei…").click();
+    const wahl = klFinde(p.dialoge.at(-1).inhalt, "select")[0];
+    wahl.value = "32";
+    wahl.onchange();
+    erwarte.enthaelt(klText(c), "0 bis 31", "die Grenze wird ehrlich gemeldet");
+    /* 6 · R12 bleibt: sechs Bedienelemente in der Ansicht */
+    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
+    erwarte.gleich(steuer, 6, "R12: weiterhin sechs Bedienelemente");
+  }));
+
+  /* KLR-05b (W2, § 12.2): Die 20-Übersicht der Diagnose ist ein ANONYMES Histogramm
+     (Schritt 1: 5 von 20 …) — keine Sterne, kein Rang, keine Platz→Schritt-Zuordnung, kein
+     neues Bedienelement (R12 bleibt 6). H-Codes werden über den echten UI-Weg gelesen und gezählt. */
+  pruefe("KLR-05b: Diagnose-Histogramm 5/7/8 anonym in der Ampel-Region, R12 bleibt", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s = klSitzung("salon-06");
+    Spiel.klassenraum.plaetzeSetzen(20);
+    const hilfe = (platz, schritt) => KlassenraumCodec.hilfeBauen({sitzung: s.id, platz, schritt, offen: Math.max(0, 5 - schritt)});
+    const codes = [];
+    for (let i = 0; i < 5; i++) codes.push(hilfe(i + 1, 1));
+    for (let i = 0; i < 7; i++) codes.push(hilfe(6 + i, 2));
+    for (let i = 0; i < 8; i++) codes.push(hilfe(13 + i, 3));
+    p.K._L.codes.value = codes.join("\n");
+    klKnopf(c, "Eintragen").click();
+    const d = Spiel.klassenraum.diagnose();
+    erwarte.gleich(d.schritte, [{schritt: 1, anzahl: 5}, {schritt: 2, anzahl: 7}, {schritt: 3, anzahl: 8}], "20 H-Codes anonym gezählt 5/7/8: " + JSON.stringify(d.schritte));
+    erwarte.gleich([d.gesamt, d.plaetze], [20, 20], "gesamt 20, Nenner 20");
+    erwarte.gleich(Object.keys(Spiel.klassenraum.sitzung().ergebnisse).length, 0, "H-Codes bleiben KEINE Ergebnisse");
+    const ampel = klFinde(c, ".kl-ampel")[0];
+    erwarte.wahr(!!ampel, "die Ampel-Region steht");
+    const text = klText(ampel);
+    erwarte.enthaelt(text, "Schritt 1: 5 von 20", "Histogramm Schritt 1");
+    erwarte.enthaelt(text, "Schritt 2: 7 von 20", "Histogramm Schritt 2");
+    erwarte.enthaelt(text, "Schritt 3: 8 von 20", "Histogramm Schritt 3");
+    erwarte.gleich(klPersonenWoerter(ampel), [], "kein Name, kein Platz im Histogramm");
+    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
+    erwarte.gleich(steuer, 6, "R12: weiterhin sechs Bedienelemente");
+    /* Gegenprobe: ein eingeschmuggeltes Personenfeld in der Diagnose macht den Wächter rot. */
+    erwarte.gleich(klPersonenFelder({schritt: 1, name: "Anna"}), ["name"], "Gegenprobe: Personenfeld wird erkannt");
+  }));
+
+  /* KLR-08b (W2, § 12.2): 20-Übersicht in der bestehenden Ampel-Region — nur Text, kein neues
+     Bedienelement. „3 abgegeben · 17 offen · noch 8 min“ + offene Sitzplätze; keine Sterne,
+     kein Rang, keine Bestenliste (didaktische Entscheidung W2). */
+  pruefe("KLR-08b: 20-Übersicht „3 abgegeben · 17 offen · noch 8 min“ in der Ampel-Region, R12 bleibt", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    const s = klSitzung("salon-terminal");
+    Spiel.klassenraum.plaetzeSetzen(20);
+    for (const platz of [1, 2, 5]) Spiel.klassenraum.ergebnisEintragen(klErgebnis(s.id, platz, 4, 60000, 1));
+    jetzt.setzen(KL_T0 + 2 * 60000);                  /* 2 Minuten nach dem Anlegen */
+    p.K.lehrerWieder();
+    const u = p.K._L.uebersicht;
+    erwarte.wahr(!!u, "die Übersichtszeile existiert");
+    const text = String(u.textContent);
+    erwarte.enthaelt(text, "3 abgegeben", "drei Abgaben");
+    erwarte.enthaelt(text, "17 offen", "17 offen (20 Plätze)");
+    erwarte.enthaelt(text, "noch 8 min", "Restzeit: dauerMin 10 minus 2 Minuten");
+    erwarte.enthaelt(text, "Sitzplatz 3", "offene Sitzplätze werden genannt");
+    erwarte.falsch(text.includes("★"), "keine Sterne in der neuen Übersicht");
+    erwarte.falsch(/rang|bestenliste|mittel|vergleich/i.test(text), "kein Rang, keine Bestenliste, kein Vergleich");
+    const ampel = klFinde(c, ".kl-ampel")[0];
+    erwarte.enthaelt(klText(ampel), "3 abgegeben", "die Übersicht steht in der Ampel-Region");
+    const steuer = klFinde(c, "button").length + klFinde(c, "select").length + klFinde(c, "input").length + klFinde(c, "textarea").length;
+    erwarte.gleich(steuer, 6, "R12: weiterhin sechs Bedienelemente");
+    /* Grenzfall: Klassenstärke nicht eingestellt → ehrlicher Text statt leerer Liste. */
+    store.set("klassenraum", null);
+    klSitzung("salon-terminal");
+    p.K.lehrerWieder();
+    erwarte.enthaelt(String(p.K._L.uebersicht.textContent), "nicht eingestellt", "ohne Klassenstärke ehrlich");
   }));
 });

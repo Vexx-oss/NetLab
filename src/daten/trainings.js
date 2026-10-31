@@ -359,7 +359,7 @@ DATEN.trainings = [
    quelle: "Cisco Catalyst Software Configuration Guide: Configuring Port Security · Network – Lernfassung (§ 9 MAC Flooding, Abwehr Port Security)"},
 
   /* ---------- lab.stp: Schleifen und Spanning Tree ---------- */
-  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", geraet: "alle",
+  {id: "tr-stp-schleife", titel: "Broadcast-Sturm durch Doppelverbindung", skill: "lab.stp", geraet: "switch",
    art: "stoerung", minuten: 9, geruest: true, niveau: "AP1",
    beschreibung: "Zwei Switches sind versehentlich doppelt verbunden, und das Netz wird plötzlich sehr langsam: Broadcasts kreisen zwischen beiden Geräten und vervielfachen sich, bis die Simulation mit „Broadcast-Sturm“ abbricht. Du erkennst das an hoher Last ohne Nutzverkehr und behebst es, indem du die zusätzlichen Leitungen zurückbaust – Spanning Tree würde genau das automatisch tun, ist in dieser Simulation aber nicht nachgebildet.",
    tipp: "Zwei Wege zwischen zwei Switches sind einer zu viel, solange niemand Frames blockiert. Welches Protokoll macht das – und arbeitet es hier?",

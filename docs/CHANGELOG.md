@@ -5,7 +5,7 @@ ausführlichen Begründungen, Messwerte und verworfenen Versuche stehen in
 [`Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) und
 [`Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>).
 
-Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`, `v1.2.1`, `v1.2.2`, `v1.2.3`, `v1.2.4`, `v2.0.0`, `v2.0.1`, `v2.0.2`, `v2.0.3`, `v2.0.4`, **`v2.0.5`** — **13 Tags**, am 26.10.2026 mit `git tag --list` nachgezählt.
+Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`–`v1.2.4`, `v2.0.0`–`v2.9.0` — die vollständige Liste und Anzahl nennt `git tag --list`; die Zahl steht bewusst in keiner Prosa (eine Zahlenquelle).
 
 ---
 

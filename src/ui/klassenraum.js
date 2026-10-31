@@ -6,7 +6,7 @@
      § 6.1 Öffnungsweg des Auftrags             § 6.5 Klassenraum-Abdruck (geladenes Netz!)
      § 7   Ergebnis-Code als Toast              § 8   ein textarea, Block oder einzelne Codes
      § 9   Ampel (oberer Median)                § 10  Export/Import über einen Knopf „Datei…“
-     § 11  Einstellungen: Schalter „Klassenraum-Server“ (nur Desktop)
+     § 11  Einstellungen: ehrlicher Hinweis zum Klassenraum-Server (3.1, VIS-04; kein Schalter)
 
    DREI FESTLEGUNGEN DER LEITUNG, DIE HIER GELTEN (sie weichen von Entwurf D ab):
      · Wo B und D sich widersprechen, gilt B (Knopf „Code anzeigen“, EIN textarea, „Datei…“).
@@ -135,8 +135,16 @@ UI.klassenraum = (() => {
   const L = {};       /* die veränderlichen Behälter der Ansicht */
 
   function lehrerZeigen(c){
-    const auftraege = (typeof Spiel.ticketReihe === "function" ? Spiel.ticketReihe() : [])
+    /* KLR-03 (§ 12.8): Der 6-Bit-Codec adressiert 58 der 76 Handtickets. Nur diese sind anwählbar –
+       sonst scheitert eine von vier Optionen erst nach dem Klick. Quelle ist die Codec-Tabelle selbst. */
+    const alle = (typeof Spiel.ticketReihe === "function" ? Spiel.ticketReihe() : []);
+    const tab = kann("tabellen") ? ruf("tabellen") : null;
+    const ids = tab && tab.auftraege && Array.isArray(tab.auftraege.ids) ? tab.auftraege.ids : null;
+    const auftraege = (ids ? ids.map(id => alle.find(t => t.id === id)).filter(Boolean) : alle)
       .map(t => h("option", {value: "id:" + t.id}, t.titel || t.id));
+    const formatgrenze = ids
+      ? "Formatgrenze: " + ids.length + " von " + alle.length + " Aufträgen sind per Klassenraum-Code adressierbar (6 Bit); der Formatwechsel kommt erst mit 3.1."
+      : "";
     const fertigkeiten = (kann("tauglicheFertigkeiten") ? ruf("tauglicheFertigkeiten") : []) || [];
     L.auftrag = h("select", {class: "kl-feld", "aria-label": "Auftrag"});
     L.auftrag.append(...auftraege, ...(fertigkeiten.length
@@ -147,6 +155,8 @@ UI.klassenraum = (() => {
     L.lampe = h("span", {class: "kl-lampe"});
     L.summe = hinweisZeile("kl-detail", "");
     L.fortschritt = hinweisZeile("kl-detail", "");
+    L.diagnose = hinweisZeile("kl-detail", "");
+    L.uebersicht = hinweisZeile("kl-detail", "");
     L.tafel = h("div", {class: "kl-tafel"});
     L.codes = h("textarea", {class: "kl-feld kl-breit", rows: "6", "aria-label": "Ergebnis-Codes",
       placeholder: "Einen Code je Zeile oder alles auf einmal einfügen.",
@@ -158,6 +168,7 @@ UI.klassenraum = (() => {
         h("div", {class: "kl-werkzeug"},
           hinweisZeile("kl-etikett", "Auftrag"), L.auftrag,
           h("button", {type: "button", class: "knopf knopf-haupt kl-knopf", onclick: codeAnzeigen}, "Code anzeigen")),
+        formatgrenze ? h("div", {class: "kl-block"}, hinweisZeile("kl-detail", formatgrenze)) : null,
         h("div", {class: "kl-karte"},
           hinweisZeile("kl-etikett", "Auftragscode für die Klasse"),
           h("div", {class: "kl-gross"}, L.code),
@@ -177,6 +188,8 @@ UI.klassenraum = (() => {
              bleibt bei sechs (R12). Sie ergänzt die Ampel um „wie viele offen / wie viele gerade
              abgegeben / wie frisch die letzte ist" und wiederholt den Median nicht. */
           L.fortschritt,
+          L.diagnose,
+          L.uebersicht,
           L.tafel),
         h("div", {class: "kl-form"},
           hinweisZeile("kl-etikett", "Ergebnis-Codes"), L.codes,
@@ -189,6 +202,40 @@ UI.klassenraum = (() => {
   function lehrerWieder(){ if (L.summe) lehrerFuellen(); }
 
   function lehrerHinweis(text){ if (L.hinweis) L.hinweis.replaceChildren(hinweisZeile("kl-hinweis", text || "")); }
+  /* KLR-05b (§ 12.2): anonymes Histogramm aus der echten API. Kein Platz, kein Name, keine Sterne —
+     deshalb steht hier nur „Schritt k: n von <Klassenstärke>". */
+  function diagnoseText(){
+    const d = kann("diagnose") ? ruf("diagnose") : null;
+    if (!d || !Array.isArray(d.schritte) || !d.schritte.length) return "Diagnose (anonym): noch kein Hilferuf eingegangen.";
+    const nenner = Number(d.plaetze) > 0 ? Number(d.plaetze) : 0;
+    return "Diagnose (anonym): " + d.schritte.map(x => "Schritt " + x.schritt + ": " + x.anzahl + (nenner ? " von " + nenner : "")).join(" · ");
+  }
+  /* KLR-08b (§ 12.2): 20-Übersicht aus der API — „3 abgegeben · 17 offen · noch 8 min“ + offene
+     Sitzplätze. Neu in 3.0 heißt es „Sitzplatz N“; die bestehende Ampel-Tafel behält „Platz N · Sterne ·
+     Zeit“ (Bestandsvertrag). KEINE Sterne, kein Rang, keine Bestenliste, kein Vergleich — nur
+     Anwesenheit und Zeit. */
+  function sitzplatzListe(plaetze){
+    const liste = (Array.isArray(plaetze) ? plaetze : []).map(Number).filter(n => Number.isInteger(n) && n > 0).sort((a, b) => a - b);
+    const teile = [];
+    for (let i = 0; i < liste.length; i++){
+      let j = i;
+      while (j + 1 < liste.length && liste[j + 1] === liste[j] + 1) j++;
+      teile.push(i === j ? String(liste[i]) : liste[i] + "–" + liste[j]);
+      i = j;
+    }
+    return teile.join(", ");
+  }
+  function uebersichtText(){
+    const u = kann("uebersicht") ? ruf("uebersicht") : null;
+    if (!u) return "Übersicht: keine Sitzung.";
+    if (!u.eingerichtet) return "Übersicht: Klassenstärke nicht eingestellt – keine Platzliste.";
+    const teile = ["Abgabe: " + u.fertig + " abgegeben", u.offenAnzahl + " offen"];
+    teile.push(u.abgelaufen ? "Zeit abgelaufen" : "noch " + u.restMinuten + " min");
+    const offen = sitzplatzListe(u.offen);
+    if (offen) teile.push("offen: Sitzplatz " + offen);
+    if (u.ohnePlatz) teile.push(u.ohnePlatz + " Abgabe ohne gültigen Platz");
+    return "Übersicht: " + teile.join(" · ");
+  }
   function lehrerFuellen(){
     if (!L.summe) return;
     const s = sitzungJetzt();
@@ -199,6 +246,8 @@ UI.klassenraum = (() => {
     L.lampe.className = "kl-lampe" + (a.farbe ? " " + a.farbe : "");
     L.summe.textContent = a.summe;
     L.fortschritt.textContent = a.fortschritt;
+    if (L.diagnose) L.diagnose.textContent = diagnoseText();
+    if (L.uebersicht) L.uebersicht.textContent = uebersichtText();
     L.tafel.replaceChildren(...a.zeilen.map(z => h("div", {class: "kl-zeile"},
       hinweisZeile("kl-platz", z.platz >= 1 ? `Platz ${z.platz}` : "ohne Platz"),
       hinweisZeile("kl-sterne", sterneText(z.sterne)),
@@ -244,13 +293,15 @@ UI.klassenraum = (() => {
   }
 
   /* B § 8: EIN Feld, Block oder einzeln; je Zeile eine Rückmeldung; Doppelte werden erkannt.
-     Der Schlüssel ist der PLATZ, der erste Eintrag gewinnt – das entscheidet A, nicht diese Datei. */
+     KLR-04b (§ 12.2): Ist der Platz schon belegt, wird NICHTS still verworfen — der Hausdialog
+     fragt [Abbrechen][Ersetzen][Entfernen]; Esc/Abbrechen ändert nichts. Keine neuen Sicht-
+     Elemente (R12 bleibt 6). */
   function ergebnisseEintragen(){
     if (!kann("ergebnisEintragen")) return lehrerHinweis("Der Klassenraum ist in dieser Fassung nicht eingebaut.");
     if (!sitzungJetzt()) return lehrerHinweis("Es läuft keine Sitzung – erst einen Auftrag erzeugen.");
     const stuecke = zerlegen(L.codes.value);
     if (!stuecke.length) return;
-    const zeilen = [], gesehen = new Map();
+    const zeilen = [], gesehen = new Map(), konflikte = [], gesehenH = new Set();
     let neu = 0, doppelt = 0, fremd = 0, unlesbar = 0, hilfen = 0;
     for (const {zeile, stueck} of stuecke){
       /* Ein H-Code ist KEIN Ergebnis (3.0, Säule 5): er sagt, WO jemand hängt, und wird als
@@ -267,12 +318,23 @@ UI.klassenraum = (() => {
           zeilen.push(`Zeile ${zeile} · ${grund}${h && h.hinweis ? " " + h.hinweis : ""}`);
           continue;
         }
+        /* KLR-05a/b: den H-Code anonym je Schritt zählen (auch wenn eine andere Sitzung aktiv ist —
+           die API zählt in die Sitzung des Codes). Doppelte im selben Block zählen einmal. */
+        if (!gesehenH.has(stueck)){
+          gesehenH.add(stueck);
+          if (kann("diagnoseZaehlen")) ruf("diagnoseZaehlen", stueck);
+        }
         const ziele = (Number(h.schritt) || 0) + (Number(h.offen) || 0);
         hilfen++;
         zeilen.push(`Zeile ${zeile} · Platz ${h.platz} hängt: ${Number(h.schritt) || 0} von ${ziele} Zielen erfüllt`);
         continue;
       }
       const r = ruf("ergebnisEintragen", stueck);
+      if (r && r.warnung === "platz-hat-ergebnis"){
+        const gelesen = kann("ergebnisLesen") ? ruf("ergebnisLesen", stueck) : null;
+        konflikte.push({zeile, stueck, platz: gelesen && gelesen.platz, sterne: gelesen && gelesen.sterne});
+        continue;
+      }
       if (!r || r.fehler){ if (r && r.fehler === "sitzung") fremd++; else unlesbar++; zeilen.push(`Zeile ${zeile} · ${(r && r.grund) || "unlesbar"}`); continue; }
       if (r.neu === false){
         doppelt++;
@@ -286,12 +348,43 @@ UI.klassenraum = (() => {
       neu++;
       zeilen.push(`Zeile ${zeile} · Platz ${r.platz} · ${sterneText(Math.round((Number(r.sterne) || 0) * 2))} · eingetragen`);
     }
-    const summe = [`${neu} eingetragen`, doppelt ? `${doppelt} doppelt` : null, fremd ? `${fremd} fremde Sitzung` : null,
+    L.codes.value = "";
+    const summeBauen = () => [`${neu} eingetragen`, doppelt ? `${doppelt} doppelt` : null, fremd ? `${fremd} fremde Sitzung` : null,
       hilfen ? `${hilfen} Hilferuf${hilfen === 1 ? "" : "e"} gelesen` : null,
       unlesbar ? `${unlesbar} unlesbar` : null].filter(Boolean).join(" · ");
-    L.codes.value = "";
-    L.hinweis.replaceChildren(hinweisZeile("kl-hinweis", summe), ...zeilen.map(z => hinweisZeile("kl-hinweis", z)));
-    lehrerFuellen();
+    const abschluss = () => {
+      L.hinweis.replaceChildren(hinweisZeile("kl-hinweis", summeBauen()), ...zeilen.map(z => hinweisZeile("kl-hinweis", z)));
+      lehrerFuellen();
+    };
+    if (!konflikte.length){ abschluss(); return; }
+    /* KLR-04b: der ERSTE Doppelplatz wird quittiert; weitere bleiben ehrlich offen. */
+    const k = konflikte[0];
+    if (konflikte.length > 1) zeilen.push(`${konflikte.length - 1} weiterer Doppelplatz offen – bitte einzeln eintragen.`);
+    abschluss();
+    const inhalt = h("div", {class: "kl-spalte"},
+      h("div", {class: "kl-block"}, hinweisZeile("kl-detail",
+        `Zeile ${k.zeile} · Platz ${k.platz} hat schon ein Ergebnis (${sterneText(k.sterne)}). Ersetzen, entfernen oder nichts ändern?`)),
+      h("span", {class: "kl-knoepfe"},
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => {
+          UI.app.dialogZu();
+          zeilen.push(`Zeile ${k.zeile} · Platz ${k.platz} · nichts geändert`);
+          abschluss();
+        }}, "Abbrechen"),
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => {
+          UI.app.dialogZu();
+          const rr = ruf("ergebnisEintragen", k.stueck, {ersetzen: true, bestaetigen: true});
+          if (rr && rr.ok && rr.ersetzt) zeilen.push(`Zeile ${k.zeile} · Platz ${k.platz} · ersetzt`);
+          else zeilen.push(`Zeile ${k.zeile} · ${(rr && rr.grund) || "Ersetzen ging nicht"}`);
+          abschluss();
+        }}, "Ersetzen"),
+        h("button", {type: "button", class: "knopf kl-knopf", onclick: () => {
+          UI.app.dialogZu();
+          const rr = ruf("ergebnisEntfernen", k.platz, {bestaetigen: true});
+          if (rr && rr.ok) zeilen.push(`Zeile ${k.zeile} · Platz ${k.platz} · entfernt`);
+          else zeilen.push(`Zeile ${k.zeile} · ${(rr && rr.grund) || "Entfernen ging nicht"}`);
+          abschluss();
+        }}, "Entfernen")));
+    UI.app.dialogOeffnen("Platz " + k.platz + " hat schon ein Ergebnis", inhalt);
   }
 
   /* B § 10: Export UND Import auf EINEM Knopf (R12) – der Dialog bringt Escape und Fokusfalle mit.
@@ -539,28 +632,16 @@ UI.klassenraum = (() => {
   }
 
   /* ---------------- Einstellungen (B § 11) ----------------
-     Baut seine Zeile mit denselben Klassen wie app.js (einst-zeile/einst-text/einst-steuer/schalter) –
-     die Haus-Helfer `zeile`/`schalter` sind nicht exportiert (app.js:401-403). */
+     VIS-04 (§ 12.6): Server (Stufe C) und QR (Stufe D) sind in 3.0 NICHT gebaut. Der frühere
+     Schalter war wirkungslos — er schrieb nur eine Einstellung, die niemand las. Statt eines
+     Schalters ohne Wirkung steht hier ein ehrlicher Hinweis auf 3.1; kein Bedienelement. */
   function abschnitt(el){
     if (!el) return;
-    const e = store.get("einst", {}) || {};
-    const nurDesktop = typeof Plattform !== "undefined" && Plattform.name === "tauri";
-    let an = !!e.klassenraumServer;
-    const knopf = h("button", {type: "button", role: "switch", class: "schalter" + (an ? " an" : ""), "aria-checked": String(an),
-      "aria-label": "Klassenraum-Server", onclick: () => {
-        an = !an;
-        knopf.setAttribute("aria-checked", String(an));
-        knopf.classList.toggle("an", an);
-        const frisch = store.get("einst", {}) || {};
-        frisch.klassenraumServer = an;
-        store.set("einst", frisch);
-      }}, h("span", {}));
-    el.append(h("div", {class: "einst-zeile" + (nurDesktop ? "" : " gesperrt")},
+    el.append(h("div", {class: "einst-zeile"},
       h("div", {class: "einst-text"},
         h("strong", {}, "Klassenraum-Server (nur Desktop)"),
-        h("span", {}, "Nur das Desktop-Programm kann das. Beim ersten Einschalten fragt Windows, ob das Programm in Netzwerken erreichbar sein darf – das ist die Firewall-Abfrage. Erlaube sie nur für private Netzwerke, nicht für öffentliche. Lehnt die Firewall ab, geht nichts kaputt: die Klasse tippt die Ergebnis-Codes dann einfach ab, und alles andere bleibt gleich.")),
-      h("div", {class: "einst-steuer", inert: nurDesktop ? null : ""},
-        nurDesktop ? knopf : h("span", {class: "kl-detail"}, "Nur das Desktop-Programm kann das."))));
+        h("span", {}, "In dieser Fassung nicht gebaut (3.1): Es gibt keinen Serverbetrieb, keine Portanzeige und keinen QR-Code. Die Klasse tippt die Ergebnis-Codes ab – alles andere läuft ohne Server und ohne Netz.")),
+      h("div", {class: "einst-steuer"}, h("span", {class: "kl-detail"}, "nicht in dieser Fassung"))));
   }
 
   /* ---------------- Anmeldung: EIN Start-Haken (B § 1.2) ---------------- */

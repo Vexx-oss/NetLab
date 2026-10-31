@@ -425,12 +425,7 @@ UI.karriere = (() => {
         zeile("Mit dem System starten (still im Tray)", "autostart", d.autostart, v => { const x = store.get("einst", {}) || {}; x.autostart = v; store.set("einst", x); Plattform.autostart(v); }),
         zeile("Systembenachrichtigung bei neuen Tickets (höchstens alle 30 min)", "benachrichtigen", d.benachrichtigen, v => { const x = store.get("einst", {}) || {}; x.benachrichtigen = v; store.set("einst", x); }));
     });
-    UI.app.einstellungAbschnitt("Spielstand", el => {
-      el.append(h("div", {class: "sp-knoepfe"},
-        h("button", {type: "button", class: "knopf", onclick: exportieren}, "Exportieren"),
-        h("button", {type: "button", class: "knopf", onclick: importieren}, "Importieren …")),
-        h("p", {class: "sp-leise"}, "Export sichert Spielstand und Lernstand in einer Datei (z. B. für einen anderen Rechner)."));
-    });
+    UI.app.einstellungAbschnitt("Spielstand", el => spielstandAbschnitt(el));
   }
   function exportieren(){
     store.sofort();
@@ -469,6 +464,43 @@ UI.karriere = (() => {
         }}, "Ersetzen und neu laden"),
           h("button", {type: "button", class: "knopf geist", onclick: () => zu()}, "Abbrechen"))));
     });
+  }
+
+  /* ---------- Spielstand: Sicherung wiederherstellen (SPL-02b, Architektur § 7.4) ----------
+     Die Sicherung wird VOR einem Import oder einer Migration geschrieben; bis 2.9.0 gab es keinen
+     Weg zurück. Der Knopf erscheint nur, wenn eine Sicherung vorliegt (ehrlich), und jeder Klick
+     geht über die API. Das Datum wird VOR dem Aufruf gelesen – die Wiederherstellung verbraucht
+     die Sicherung. Fehler lassen Stand und Sicherung unangetastet. */
+  function sicherungDatum(ms){
+    if (typeof ms !== "number" || !isFinite(ms)) return "unbekanntem Datum";
+    try { return datumDe(new Date(ms).toISOString().slice(0, 10)); } catch (e) { return "unbekanntem Datum"; }
+  }
+  function spielstandAbschnitt(el){
+    if (!el) return;
+    el.replaceChildren();
+    const sicherung = (typeof Spiel.sicherung === "function") ? Spiel.sicherung() : null;
+    const zeit = sicherung && typeof sicherung.zeit === "number" ? sicherung.zeit : null;
+    const knoepfe = [
+      h("button", {type: "button", class: "knopf", onclick: exportieren}, "Exportieren"),
+      h("button", {type: "button", class: "knopf", onclick: importieren}, "Importieren …"),
+    ];
+    if (sicherung) knoepfe.push(h("button", {type: "button", class: "knopf", onclick: () => sicherungZurueck(el)}, "Sicherung wiederherstellen"));
+    el.append(h("div", {class: "sp-knoepfe"}, ...knoepfe),
+      h("p", {class: "sp-leise"}, "Export sichert Spielstand und Lernstand in einer Datei (z. B. für einen anderen Rechner)."),
+      sicherung ? h("p", {class: "sp-leise"}, "Sicherung vom " + sicherungDatum(zeit) + ": der Stand von vor dem letzten Import – einmal wiederherstellbar.") : null);
+  }
+  function sicherungZurueck(el){
+    const s = (typeof Spiel.sicherung === "function") ? Spiel.sicherung() : null;   /* Datum VOR dem Aufruf */
+    const zeit = s && typeof s.zeit === "number" ? s.zeit : null;
+    const r = (typeof Spiel.sicherungWiederherstellen === "function") ? Spiel.sicherungWiederherstellen() : null;
+    if (!r || !r.ok){
+      const grund = (r && r.grund) || "Die Sicherung ließ sich nicht wiederherstellen.";
+      UI.toast(grund, "fehler", r && r.fehler === "keine-sicherung" ? {titel: "Keine Sicherung"} : undefined);
+      return r;
+    }
+    UI.toast("Sicherung vom " + sicherungDatum(zeit) + " wiederhergestellt.", "ok", {titel: "Wiederhergestellt"});
+    spielstandAbschnitt(el);                            /* Knopf verschwindet: Sicherung verbraucht */
+    return r;
   }
 
   /* ---------- Offline-Bericht, Aufstieg, Takt ---------- */

@@ -124,7 +124,7 @@ Sim.l3 = (() => {
     let w = L.arpWarte[key];
     if (arpVerwirft(g)) {
       Sim._log(L, "verwerfen", g.id, ifc.port || ifc.name, f,
-        `${g.name} kennt die MAC-Adresse von ${nh} noch nicht. Es fragt per ARP und verwirft dieses Paket (IOS-Verhalten – deshalb geht beim ersten Ping oft das erste Paket verloren: „.!!!!“).`);
+        `${g.name} kennt die MAC-Adresse von ${nh} noch nicht. Es fragt per ARP und verwirft dieses Paket (IOS-Verhalten – deshalb geht beim ersten Ping oft das erste Paket verloren: „.!!!!“).`, {harmlos: true});
       if (!w || L.t - w.seit >= Sim.T.ARP_WIEDERHOLEN) {
         w = L.arpWarte[key] = {seit: L.t, pakete: [], ifc, nh, opt};
         anfragen(L, g, ifc, nh);
@@ -158,7 +158,7 @@ Sim.l3 = (() => {
   }
   function arpEmpfangen(L, g, ifc, f){
     const a = f.arp, wo = ifc.port || ifc.name;
-    if (!ifc.ip) { Sim._log(L, "verwerfen", g.id, wo, f, `${g.name} hat an ${ifc.name} keine IP-Adresse und beachtet die ARP-Nachricht nicht.`); return; }
+    if (!ifc.ip) { Sim._log(L, "verwerfen", g.id, wo, f, `${g.name} hat an ${ifc.name} keine IP-Adresse und beachtet die ARP-Nachricht nicht.`, {harmlos: true}); return; }
     if (a.senderIp === ifc.ip && a.senderMac !== ifc.mac) {
       L.dup = true;
       Sim._log(L, "info", g.id, wo, f, `${g.name} sieht eine ARP-Nachricht von ${a.senderMac}, die seine eigene Adresse ${ifc.ip} benutzt – zwei Geräte haben dieselbe IP (Adresskonflikt).`, {grund: "DUP_IP"});
@@ -174,11 +174,11 @@ Sim.l3 = (() => {
       } else {
         const t = arpTab(L, g);
         if (t[a.senderIp] && a.senderIp !== "0.0.0.0") t[a.senderIp] = Object.assign(t[a.senderIp], {mac: a.senderMac});
-        Sim._log(L, "verwerfen", g.id, wo, f, `${g.name} ist nicht gemeint (gesucht: ${a.targetIp}) und verwirft die ARP-Anfrage.`);
+        Sim._log(L, "verwerfen", g.id, wo, f, `${g.name} ist nicht gemeint (gesucht: ${a.targetIp}) und verwirft die ARP-Anfrage.`, {harmlos: true});
       }
       return;
     }
-    if (a.targetIp !== ifc.ip && a.targetMac !== ifc.mac) { Sim._log(L, "verwerfen", g.id, wo, f, `Die ARP-Antwort ist nicht für ${g.name}.`); return; }
+    if (a.targetIp !== ifc.ip && a.targetMac !== ifc.mac) { Sim._log(L, "verwerfen", g.id, wo, f, `Die ARP-Antwort ist nicht für ${g.name}.`, {harmlos: true}); return; }
     const key = g.id + "|" + a.senderIp, vorher = L.arpAntwort[key];
     if (vorher && vorher !== a.senderMac) {
       L.dup = true;

@@ -217,7 +217,16 @@
       return {ausgabe: [`Standardserver:  ${a.dns ? dnsServerName(s, a.dns) : "UnKnown"}`, `Address:  ${a.dns || "127.0.0.1"}`, "",
         "(Interaktiver Modus: Name eingeben · „server IP“ wechselt den Server · „exit“ beendet)"].join("\n"), modus: "nslookup"};
     }
-    return nslookupAntwort(s, name, args[1] && IP.gueltig(args[1]) ? args[1] : null);
+    const server = args[1] && IP.gueltig(args[1]) ? args[1] : null;
+    const r = nslookupAntwort(s, name, server);
+    /* Ehrliche Grenze (CLI-06): Die Sim kennt keinen Server-Parameter. Statt einer falschen Auskunft
+       „Antwort von 203.0.113.9“ sagt die Konsole, dass immer der eingetragene DNS gefragt wird. */
+    const eigener = adresse(s, "eth0").dns;
+    if (server && server !== eigener && r && typeof r.ausgabe === "string") {
+      r.ausgabe += `\n\n*** Hinweis: Im Labor fragt nslookup immer den eingetragenen DNS-Server (${eigener || "keiner"}); der Server-Parameter ist nicht nachgebaut (Grenze).`;
+      r.tipp = r.tipp || "Der Server-Parameter wirkt im Labor nicht – die Simulation kennt nur den eingetragenen DNS-Server.";
+    }
+    return r;
   }
   function nslookupInteraktiv(s, t){
     const w = H().woerter(t), c = (w[0] || "").toLowerCase();
@@ -243,6 +252,8 @@
     return {ausgabe: z.join("\n"), befund: a.gw ? `Standardroute über ${a.gw}` : "keine Standardroute (kein Gateway)", ok: !!a.gw};
   }
   function route(s, args){
+    /* Windows-Ticketmuster: route -p add …; -p ist im Labor wirkungsgleich zu add (CLI-06/CLI-16). */
+    args = args.filter(x => String(x).toLowerCase() !== "-p");
     const w = args.map(x => x.toLowerCase());
     if (w[0] === "print" || !w.length) return routePrint(s);
     if (w[0] === "add" || w[0] === "delete") {

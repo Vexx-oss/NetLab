@@ -488,20 +488,28 @@ UI.subnetz = (() => {
       return false;
     }
   }
-  function visualAufgabe(aufgabe, r){
+  /* Z-01 (W2): Nach dem Aufdecken der Hilfe wächst die Aufgabe; Antwortfeld/Auswahl und „Prüfen“
+     rutschen unter die Falz. Deshalb den Blick auf den Antwortbereich INKLUSIVE Knopfzeile führen
+     (nicht nur das Feld; Auswahl-Aufgaben haben gar kein Feld) – ohne Fokus zu stehlen
+     (scrollIntoView block/inline „nearest“). Alte Umgebungen ohne die Methode ignorieren es ruhig. */
+  function bringeInsBild(el){
+    try { if (el && typeof el.scrollIntoView === "function") el.scrollIntoView({block: "nearest", inline: "nearest"}); }
+    catch (e) { /* kein Sprung möglich – das Aufdecken bleibt gültig */ }
+  }
+  function visualAufgabe(aufgabe, r, antwortZiel){
     const box = h("div", {class: "sn-visual"});
     const zielId = "sn-werte-" + (visualZaehler++);          /* aria-controls braucht ein benanntes Ziel */
-    const ziel = h("div", {id: zielId});                     /* hier landet das Werkzeug – erst nach „Werte zeigen“ */
+    const werkzeugZiel = h("div", {id: zielId});             /* hier landet das Werkzeug – erst nach „Werte zeigen“ */
     const status = h("p", {class: "bn-meta", role: "status", "aria-live": "polite"},
       "Die visuelle Hilfe ist verdeckt. Wer sie zeigt, übt mit Hilfe.");
     const aufdecken = h("button", {type: "button", class: "knopf", "aria-expanded": "false", "aria-controls": zielId,
       onclick: () => aufdeckenWerte()}, "Werte zeigen (zählt als Hilfe)");
-    box.append(aufdecken, ziel, status);
+    box.append(aufdecken, werkzeugZiel, status);
     function aufdeckenWerte(){
       if (box.getAttribute("data-aufgedeckt") === "true") return;
       /* r-design P2: erst einbauen, dann buchen. Schlägt der Einbau fehl, zählt keine Hilfe,
          und Knopf/Status versprechen nichts. */
-      const eingebaut = montiereJetzt(ziel, aufgabe.visual.art, {preset: aufgabe.visual.preset, kompakt: true, niveau: stufeJetzt()});
+      const eingebaut = montiereJetzt(werkzeugZiel, aufgabe.visual.art, {preset: aufgabe.visual.preset, kompakt: true, niveau: stufeJetzt()});
       if (!eingebaut){
         status.textContent = "Die Werte ließen sich gerade nicht einblenden – bitte später erneut versuchen.";
         return;
@@ -511,6 +519,7 @@ UI.subnetz = (() => {
       aufdecken.setAttribute("aria-expanded", "true");
       aufdecken.textContent = "Werte sind sichtbar – als Hilfe verbucht";
       status.textContent = "Die Werte sind eingeblendet; die Antwort zählt als mit Hilfe geübt.";
+      bringeInsBild(antwortZiel);                       /* Z-01: Antwortbereich inkl. Knopfzeile ins Bild */
     }
     return box;
   }
@@ -616,7 +625,7 @@ UI.subnetz = (() => {
           h("span", {class: "sn-lage-label"}, text(z && z.label)),
           h("span", {class: "sn-lage-wert"}, text(z && z.wert))))) : null,
         h("p", {class: "sn-frage"}, text(aufgabe.frage)),
-        beantwortet || !aufgabe.visual || !aufgabe.visual.art ? null : visualAufgabe(aufgabe, r),
+        beantwortet || !aufgabe.visual || !aufgabe.visual.art ? null : visualAufgabe(aufgabe, r, knoepfe[0]),
         feld,
         auswahl.length ? auswahl[0] : null,
         beantwortet ? rueckmeldung(r, aufgabe, beantwortet) : null,
@@ -869,7 +878,9 @@ UI.subnetz = (() => {
   function spielSeite(spiel){
     const flaecheEl = h("div", {class: "sn-flaeche", "data-spiel": text(spiel.id)});
     const ergebnis = h("div", {class: "sn-spiel-ergebnis"});
-    spielMerken(flaecheEl, spiel.id, {niveau: stufeJetzt(),
+    /* UIL-03: Seed aus der Oberfläche mitgeben — sonst startete jedes Spiel mit demselben
+       Standard-Seed und jede Runde war identisch. Ein fester Seed bleibt deterministisch. */
+    spielMerken(flaecheEl, spiel.id, {niveau: stufeJetzt(), seed: seed(),
       onEnde: e => spielEnde(spiel, e, ergebnis),
       onErgebnis: e => liveMelden(e && e.geloest ? `Spiel „${text(spiel.titel)}": Aufgabe gelöst.` : `Spiel „${text(spiel.titel)}": Aufgabe noch nicht gelöst.`)});
     return h("div", {class: "sn-werkzeug-seite"},

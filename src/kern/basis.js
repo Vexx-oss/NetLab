@@ -56,7 +56,7 @@ function Zufall(seed){
 }
 
 /* Speicher: Cache mit Durchschreiben. SPEICHER hält alles, was gespeichert wird:
-   {lern:{…Lernmotor…}, labor:{…Spielstand…}, einst:{…}}. Plattform.ladenSync() füllt ihn beim Start.
+   {lern:{…Lernmotor…}, labor:{…Spielstand…}, einst:{…}}. Der Frühstart unten füllt ihn beim Start.
 
    EINE Entprellung: 1500 ms nach der letzten Änderung wird geschrieben (SPEICHER.entprellung).
    Vorher lagen ZWEI Schichten übereinander — 400 ms im Spiel (Spiel.autospeichern) und 2000 ms
@@ -98,7 +98,7 @@ const store = {
     let p;
     try { p = Promise.resolve(SPEICHER.schreiber(SPEICHER.daten)); }
     catch (e) { return Promise.reject(scheitern(e)); }
-    return p.then(() => { SPEICHER.letzterErfolg = Date.now(); SPEICHER.fehler = null; store.standMelden(); return true; },
+    return p.then(() => { SPEICHER.letzterErfolg = jetzt(); SPEICHER.fehler = null; store.standMelden(); return true; },
                   e => { throw scheitern(e); });
   },
   /* Zustand des Speicherns: art = "schreibt" | "gesichert" | "fehler" (+ Fehlertext, Zeitpunkt) */
@@ -133,14 +133,52 @@ const store = {
 
 /* Frühstart: Der Lernmotor liest store schon beim Laden seines Skripts. Deshalb füllt dieser Block den
    Speicher sofort – im Programm aus window.__LABOR_SPEICHER__ (setzt die Rust-Seite per Initialisierungsskript
-   vor allen Seitenskripten), im Browser aus localStorage. Den Schreiber setzt ui/start.js (Plattform.speichern). */
+   vor allen Seitenskripten), im Browser aus localStorage. Den Schreiber setzt ui/start.js (Plattform.speichern).
+
+   KRN-03: Ein kaputter oder zu neuer Browser-Stand wird NICHT still als Neustart behandelt. Vor dem
+   ersten Schreiben (das ihn sonst endgültig überschriebe) wird der Rohwert unter dem eigenen Schlüssel
+   "netzwerk-labor-beschaedigt" aufbewahrt; die Meldung nennt diese Sicherung, der Speicher startet leer.
+   Geprüft werden JSON, Struktur (jeder Schlüssel ein Objekt, kein Array, kein "labor":42) und die
+   Schemaversion des Spielstands (labor.v > 3 = zu neu; v:3 ist der Stand aus §7.2, die Migration alter
+   Stände macht spiel/zustand.js). */
+const SPEICHER_SICHERUNG = "netzwerk-labor-beschaedigt";
+const SPEICHER_SCHEMA_MAX = 3;      /* Spielstand-Schemaversion §7.2; NICHT die Programmfassung */
+function speicherStrukturOK(daten){
+  if (!daten || typeof daten !== "object" || Array.isArray(daten)) return false;
+  for (const wert of Object.values(daten)) {
+    if (wert == null) continue;
+    if (typeof wert !== "object" || Array.isArray(wert)) return false;
+  }
+  return true;
+}
+function speicherZuNeu(daten){
+  const labor = daten && typeof daten === "object" ? daten.labor : null;
+  const v = labor && typeof labor === "object" && !Array.isArray(labor) ? labor.v : null;
+  return typeof v === "number" && isFinite(v) && v > SPEICHER_SCHEMA_MAX;
+}
+function speicherRettung(lager, roh){
+  if (!lager || !roh) return false;
+  try { lager.setItem(SPEICHER_SICHERUNG, roh); return true; } catch (e) { return false; }
+}
 (function fruehstart(){
   if (typeof window === "undefined") return;
   try {
     const s = window.__LABOR_SPEICHER__;
     if (s) { store.initialisieren(s.daten, null, s.meldung || null); return; }
-    const roh = window.localStorage ? window.localStorage.getItem("netzwerk-labor") : null;
-    store.initialisieren(roh ? JSON.parse(roh) : {}, null, null);
+    const lager = window.localStorage;
+    const roh = lager ? lager.getItem("netzwerk-labor") : null;
+    if (!roh) { store.initialisieren({}, null, null); return; }
+    let daten = null, grund = null;
+    try { daten = JSON.parse(roh); } catch (e) { grund = "Der gespeicherte Stand war kein lesbares JSON."; }
+    if (!grund && !speicherStrukturOK(daten)) grund = "Der gespeicherte Stand hatte keine gültige Struktur.";
+    if (!grund && speicherZuNeu(daten)) grund = "Der gespeicherte Stand stammt aus einer neueren Fassung.";
+    if (!grund) { store.initialisieren(daten, null, null); return; }
+    const gesichert = speicherRettung(lager, roh);
+    const meldung = grund + (gesichert
+      ? " Der Rohstand wurde als Sicherung „" + SPEICHER_SICHERUNG + "“ aufbewahrt."
+      : " Eine Sicherung konnte nicht angelegt werden (Speicher voll?).");
+    store.initialisieren({}, null, meldung);
+    Bus.senden("speicher-meldung", {meldung, sicherung: gesichert});
   } catch (e) {
     store.initialisieren({}, null, "Der gespeicherte Stand war nicht lesbar. Das Labor startet leer.");
   }

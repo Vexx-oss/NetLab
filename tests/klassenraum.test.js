@@ -153,7 +153,7 @@ gruppe("Spiel: Klassenraum", () => {
     erwarte.gleich(K().erzeugen({ticketId: "salon-06", seed: 7}).dauerMin, 10, "Standard 10");
     /* die Sitzung liegt im eigenen Store und trägt die 14 Felder + plaetze */
     const felder = Object.keys(K().sitzung()).sort();
-    erwarte.gleich(felder, ["art", "code", "dauerMin", "eigene", "ergebnisse", "erstellt", "id", "index", "plaetze", "schritte", "seed", "skill", "ticketId", "titel", "variante"]);
+    erwarte.gleich(felder, ["art", "code", "dauerMin", "diagnose", "eigene", "ergebnisse", "erstellt", "id", "index", "plaetze", "schritte", "seed", "skill", "ticketId", "titel", "variante"], "15 Felder + diagnose (KLR-05a)");
     erwarte.gleich(K().sitzung().skill, null, "ein Handauftrag hat keine Fertigkeit");
   }));
 
@@ -187,7 +187,7 @@ gruppe("Spiel: Klassenraum", () => {
     const nachDoppelt = JSON.stringify(store.get("klassenraum"));
     const anderer = KlassenraumCodec.ergebnisBauen({sitzung: c.sitzung, platz: 5, sterne: 2, versuche: 1, dauerS: 20});
     const drei = K().ergebnisEintragen(anderer);
-    erwarte.gleich([drei.ok, drei.neu, drei.grund], [true, false, "platz-schon-da"], "anderer Code auf demselben Platz ändert nichts");
+    erwarte.gleich(drei.warnung, "platz-hat-ergebnis", "anderer Code am selben Platz: Warnung ohne Änderung (KLR-04a)");
     erwarte.gleich(nachDoppelt === JSON.stringify(store.get("klassenraum")), true, "Speicher nach den Doppel-Einträgen unverändert");
     erwarte.wahr(nachDoppelt !== vorher, "der erste Eintrag hat wirklich geschrieben");
     /* fremde Sitzung, keine Sitzung, Unsinn */

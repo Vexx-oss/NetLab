@@ -278,10 +278,13 @@ def _verstelle_r3(daten: dict, mess: dict) -> None:
 
 
 def _verstelle_r4(daten: dict, mess: dict) -> None:
+    # W2-Gate-Befund: docs/INHALT.md nennt den Dateinamen ZWEIMAL (Anzeigetext UND Linkziel,
+    # z. B. [`entwicklung/A.md`](<entwicklung/A.md>)). Ein replace(..., 1) entfernte nur das erste
+    # Vorkommen — R4 blieb dadurch blind (Gegenprobe 3/4). Jetzt ALLE Vorkommen ersetzen.
     inhalt = daten.get("docs/INHALT.md", "")
     for p in entwicklung_dateien():
         if p.name in inhalt:
-            daten["docs/INHALT.md"] = inhalt.replace(p.name, "___GEGENPROBE___", 1)
+            daten["docs/INHALT.md"] = inhalt.replace(p.name, "___GEGENPROBE___")
             return
     daten["docs/INHALT.md"] = inhalt
 

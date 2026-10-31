@@ -167,7 +167,7 @@ gruppe("Klassenraum: 20 Geräte", () => {
     const s = sitzungAus(lehrerStand);
     const a = ampel(s);
     erwarte.gleich([ergebnis[0].e.ok, ergebnis[0].e.neu], [true, true], "das erste Gerät trägt ein");
-    erwarte.gleich([ergebnis[1].e.ok, ergebnis[1].e.neu, ergebnis[1].e.grund], [true, false, "platz-schon-da"], "das zweite wird abgewiesen, ohne etwas zu ändern");
+    erwarte.gleich(ergebnis[1].e.warnung, "platz-hat-ergebnis", "das zweite wird ohne Quittung abgewiesen (KLR-04a)");
     erwarte.gleich([Object.keys(s.ergebnisse).length, a.fertig, a.offen, a.farbe], [1, 1, 1, "kl-gelb"], "die Ampel bleibt bei 1 von 2");
     erwarte.gleich(s.ergebnisse["1"].code, ergebnis[0].code, "es gilt der ZUERST eingetragene Code");
     erwarte.gleich(s.ergebnisse["1"].dauerS, 60, "und seine Dauer");

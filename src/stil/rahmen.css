@@ -102,7 +102,7 @@ button.wert:hover{background:var(--panel-3); border-color:var(--line-2)}
 .ph-mehr{color:var(--muted); margin-bottom:22px}
 
 /* ---- Knöpfe (allgemein) ---- */
-.knopf{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 16px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink);
+.knopf{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 16px; border-radius:var(--radius); border:1px solid var(--line-2); background:var(--panel-2); color:var(--ink);
   font:600 var(--fs-3)/1 var(--body); transition:background var(--dauer), border-color var(--dauer), transform var(--dauer)}
 .knopf:hover{background:var(--panel-3); border-color:var(--accent)}
 /* U06 (Audit): genau EINE Press-Regel. Druck 80 ms (--dauer-kurz), Lösen 160 ms (--dauer aus der

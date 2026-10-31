@@ -5,12 +5,25 @@
    100–92 = 1, 91–81 = 2, 80–67 = 3, 66–50 = 4, 49–30 = 5, 29–0 = 6 (Notenschlüssel der IHK-Abschlussprüfungen). */
 Spiel.pruefung = {};
 Spiel.PRUEFUNG = {MINUTEN: 25, AUFGABEN: 3, GEBUEHR: {AP1: 40, AP2: 80}, BESTANDEN_AB: 50};
+/* LRN-03 (3.0.0): IHK-Note EXAKT, ohne Rundung (§ 17.2). Gerundet wird nur für die Anzeige. */
 Spiel.pruefung.note = function(punkte){
-  const p = Math.round(punkte);
+  const p = typeof punkte === "number" && isFinite(punkte) ? punkte : 0;
   return p >= 92 ? 1 : p >= 81 ? 2 : p >= 67 ? 3 : p >= 50 ? 4 : p >= 30 ? 5 : 6;
+};
+Spiel.pruefung.bestanden = function(punkte){
+  const p = typeof punkte === "number" && isFinite(punkte) ? punkte : 0;
+  return p >= Spiel.PRUEFUNG.BESTANDEN_AB;
 };
 Spiel.pruefung.NOTEN = {1: "sehr gut", 2: "gut", 3: "befriedigend", 4: "ausreichend", 5: "mangelhaft", 6: "ungenügend"};
 Spiel.pruefung.aktiv = () => Spiel.st.pruefung && !Spiel.st.pruefung.ende ? Spiel.st.pruefung : null;
+/* LRN-01 (3.0.0): Prüfung ist hilfefrei — die EINE zentrale Bedingung für alle Hilfe-Flächen.
+   wahr bei Option pruefung:true, bei einer Prüfungsinstanz (quelle "pruefung") und solange ein
+   Prüfungstag läuft (Spiel.pruefung.aktiv()). Kein Hilfe-Aufruf darf sie umgehen. */
+Spiel.pruefung.hilfeGesperrt = function(inst, optionen){
+  if (optionen && optionen.pruefung === true) return true;
+  if (inst && typeof inst === "object" && inst.quelle === "pruefung") return true;
+  try { return !!Spiel.pruefung.aktiv(); } catch (e) { return false; }
+};
 
 /* ---------- Blueprint, Kandidaten und Aufgabenbau (Architektur § 17.2) ----------
    Früher verengte ein Filter die Prüfung: `(s.stufe || 1) <= Math.min(5, stufe)` und `s.id !== "lab.portsec"`
@@ -151,7 +164,12 @@ Spiel.pruefung.abgeben = function(){
   const teile = [];
   for (const iid of p.aufgaben) {
     const inst = Spiel.instanz(iid);
-    if (!inst) continue;
+    if (!inst){
+      /* LRN-04 (3.0.0): eine verschwundene Aufgabe zählt 0 — sie darf das Ergebnis nicht verbessern.
+         Der Nenner bleibt PRUEFUNG.AUFGABEN (unten), nicht die Zahl der vorhandenen Teile. */
+      teile.push({titel: "Fehlende Aufgabe", skills: [], anteil: 0, bestanden: false, gruende: [], fehlt: true});
+      continue;
+    }
     const def = Spiel.defVon(inst);
     const ab = Spiel.abnahme(inst, {neustartTest: p.art === "AP2"});
     const ziele = ab.ergebnisse.length || 1;
@@ -162,9 +180,12 @@ Spiel.pruefung.abgeben = function(){
     if (typeof L !== "undefined") for (const s of def.skills || []) L.ueben(s, ab.bestanden);
     Spiel.instanzEntfernen(iid);
   }
-  const punkte = teile.length ? Math.round(100 * teile.reduce((a, t) => a + t.anteil, 0) / teile.length) : 0;
+  /* LRN-03: KEIN Math.round — der gespeicherte Prozentwert bleibt exakt; die Anzeige rundet.
+     LRN-04: der Nenner ist fest PRUEFUNG.AUFGABEN (3) — eine fehlende Aufgabe zählt als 0. */
+  const nenner = Math.max(1, Spiel.PRUEFUNG.AUFGABEN);
+  const punkte = 100 * teile.reduce((a, t) => a + t.anteil, 0) / nenner;
   const note = Spiel.pruefung.note(punkte);
-  const bestanden = punkte >= Spiel.PRUEFUNG.BESTANDEN_AB;
+  const bestanden = Spiel.pruefung.bestanden(punkte);
   const schwach = [...new Set(teile.filter(t => t.anteil < 1).flatMap(t => t.skills))];
   p.ende = jetzt(); p.ergebnis = {punkte, note, bestanden, teile, schwach};
   (Spiel.st.pruefungen ||= []).push({art: p.art, tag: heute(), punkte, note});

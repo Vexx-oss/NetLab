@@ -38,6 +38,9 @@ veröffentlichen nur mit Freigabe). Erst diese Reihenfolge, dann die Tabelle unt
 | Bauen (Browser-Fassung) | `python bauen.py` | immer **vor** `cargo tauri build` |
 | Doku-Seite erzeugen und prüfen | `python tools/seite.py` · `--pruefen` | **Pflicht ist `docs/doku/`** (versioniert, 66 HTML-Dateien inkl. Übersicht; Quellen: 65 Markdown-Dokumente). `_site/` ist nur Auslieferung und gitignoriert; existiert es nicht, meldet `--pruefen` einen Hinweis und bleibt grün. Frische beweist die CI: `python tools/seite.py` + `git diff --exit-code docs/doku` |
 | Einzeldatei (auch die Wurzel-Datei) | `python tools/einfach.py` · `--ziel Netzwerk-Labor.html` | beide byte-gleich (**beweist `python tools/stand.py`** über den SHA256), `0 Außenverweise` |
+| R12-Messung (Rauch) | `python tools/rauch.py --r12 [datei]` | schreibt `Nachweise/rauch/r12.json` (je Ansicht × Breite); ohne Browser ausdrücklich `gemessen:false` + Grund, nie 0 |
+| R12 verbindlich | `python tools/ethos.py --dom --r12 <rohdatei>` · `--festhalten` | `--festhalten` schreibt die versionierte Letztmessung `tests/r12-stand.json`; `stand.py` liest nur diese. Ratsche: je Ansicht × Breite größer als Baseline = ROT, fehlende Evidenz = „nicht gemessen“; die eingefrorenen Werte über der Grenze werden benannt |
+| DoD-Gate 3.0 | `python tools/abnahme-3.0.py --schnell` · `--gegenprobe` | 7 Achsen B1–B7, `abnahme.json`; `nicht gemessen` zählt im End-Gate wie ROT; CI-Einbau erst W5 |
 | Android-APK | `python android/bauen.py` | 7 Schritte, ~5 s, endet mit `GRUEN` |
 | PC-Hülle für die Entwicklungsrunde | `pwsh -File shell/entwickeln.ps1 -NurBauen` | Debug-Profil, ~4 s je Runde (Auslieferung bleibt `cargo tauri build`) |
 | Fassung ziehen (2.0.3 → 2.0.4) | `python tools/fassung-ziehen.py --neu 2.0.4` · `--setzen` | Trockenlauf zuerst; im `Cargo.lock` bleibt nur der eigene Block; **`VERSION_CODE` in `android/bauen.py` von Hand nachziehen** (muss über dem aus `versionName` abgeleiteten Wert liegen) |

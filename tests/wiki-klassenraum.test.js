@@ -116,6 +116,28 @@ gruppe("Wiki: Klassenraum", () => {
       erwarte.wahr(sicht.includes(wort), `„${wort}“ fehlt auf der Seite`);
   });
 
+  /* VIS-04b (31.10.2026): Der UI-Schalter „Klassenraum-Server“ ist entfernt (VIS-04); die Wiki-Seite
+     behauptete aber weiter, es gebe ihn in den Einstellungen. Das ist eine Zusage ohne Wirkung –
+     genau das Anti-Muster „grün ohne Wirkung“. Geprüft wird die EINHEITLICHE, ehrliche Aussage:
+     In 3.0.0 ist der lokale Server nicht gebaut (3.1), es gibt keinen Schalter, und die Klasse
+     arbeitet über die abgetippten Ergebnis-Codes. Ein eingeschmuggeltes „Server vorhanden“ ist rot. */
+  pruefe('Klassenraum-Server: ehrlich als „in 3.0.0 nicht gebaut (3.1)“ markiert – kein Schalter ohne Wirkung', () => {
+    const w = seite();
+    if (!w) { erwarte.wahr(false, "ohne Seite nicht prüfbar"); return; }
+    const sicht = klein(sichtbar(w));
+    /* Pflichtaussagen der Ehrlichkeit. */
+    erwarte.wahr(/3\.0\.0/.test(sicht), "die Seite nennt die Fassung 3.0.0");
+    erwarte.wahr(/3\.1/.test(sicht), "sie nennt 3.1 als Ziel des Servers");
+    erwarte.wahr(/nicht gebaut/.test(sicht), "sie sagt ausdrücklich, dass der Server nicht gebaut ist");
+    erwarte.wahr(/kein(?:en)? schalter/.test(sicht), "sie sagt, dass es keinen Schalter gibt");
+    erwarte.wahr(/ergebnis-codes/.test(sicht), "sie beschreibt den tatsächlichen Weg über die Ergebnis-Codes");
+    /* Verbot: Behauptung, Server oder Schalter seien vorhanden/aktiv – als Gegenprobe eingeschmuggelt rot. */
+    erwarte.falsch(/(server|schalter)[^.]{0,80}\b(ist|sind)\s+(gebaut|vorhanden|verfügbar|eingerichtet|aktiv)\b/.test(sicht),
+      "die Seite behauptet nicht, Server oder Schalter seien vorhanden");
+    erwarte.falsch(/gibt es in den einstellungen schon/.test(sicht), "der alte Schalter-Satz („gibt es … schon“) ist weg");
+    erwarte.falsch(/qr[^.]{0,40}\b(funktioniert|verfügbar|gebaut|vorhanden)\b/.test(sicht), "keine QR-Behauptung (»erzeugt … nicht« ist erlaubt)");
+  });
+
   pruefe('Die Wiki-Ansicht listet alle Seiten – Zusatzseiten dabei, ohne Stufenkopf' + wkZusatz(), () => {
     if (!wkHatRequire()) return;
     const st = wkPruefstand();

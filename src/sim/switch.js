@@ -113,10 +113,11 @@ Sim.switch = (() => {
   function weiter(L, g, v, inPort, f){
     const dst = f.eth.dst, svi = sviIfc(L, g, v);
     if (svi && dst === svi.mac) return anSvi(L, g, svi, f);
-    if (istGruppe(dst)) { fluten(L, g, v, inPort, f, false); if (svi) anSvi(L, g, svi, Sim._kopie(f)); return; }
+    /* Eigenen Broadcast nicht an die eigene SVI zurückspiegeln (SIM-05): ausSvi reicht inPort = SVI-Name. */
+    if (istGruppe(dst)) { fluten(L, g, v, inPort, f, false); if (svi && inPort !== svi.name) anSvi(L, g, svi, Sim._kopie(f)); return; }
     const e = tab(L, g, v)[dst];
     if (e && e.bis > L.t) {
-      if (e.port === inPort) { Sim._log(L, "verwerfen", g.id, inPort, f, `${g.name}: Das Ziel ${dst} liegt am selben Port ${inPort}. Nichts weiterzuleiten.`); return; }
+      if (e.port === inPort) { Sim._log(L, "verwerfen", g.id, inPort, f, `${g.name}: Das Ziel ${dst} liegt am selben Port ${inPort}. Nichts weiterzuleiten.`, {harmlos: true}); return; }
       Sim._log(L, "weiterleiten", g.id, e.port, f, `${g.name} kennt ${dst} an ${e.port} (VLAN ${v}) und leitet den Frame gezielt dorthin.`);
       aus(L, g, e.port, v, f);
       return;
@@ -166,7 +167,7 @@ Sim.switch = (() => {
     if (!f.ip) return;
     const bc = f.ip.dst === "255.255.255.255" || (IP.istBroadcast(f.ip.dst, ifc.maske) && IP.gleichesNetz(f.ip.dst, ifc.ip, ifc.maske));
     if (f.ip.dst !== ifc.ip) {
-      if (!bc) Sim._log(L, "verwerfen", g.id, ifc.name, f, `${g.name} routet nicht (Layer-2-Switch) und verwirft das Paket für ${f.ip.dst}.`);
+      if (!bc) Sim._log(L, "verwerfen", g.id, ifc.name, f, `${g.name} routet nicht (Layer-2-Switch) und verwirft das Paket für ${f.ip.dst}.`, {harmlos: true});
       return;
     }
     if (L3().zustellen(L, g, ifc, f)) return;
