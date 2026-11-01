@@ -7,7 +7,7 @@
      1. WIKI — die Zusatzseite `DATEN.wiki.klassenraum` (src/daten/wiki.js:734-772) ist da und deckt
         BEIDE Ansichten und die Startseiten-Zeile ab: „Ansagen: die Lehrkraft“ (Ansicht Klasse),
         „Öffnen: der Azubi“ (Startseiten-Zeile UND Ansicht Auftrag, „Enter genügt“), „Der Ergebnis-Code“,
-        „Die Ampel der Lehrkraft“ (woher die Ergebnis-Codes kommen: blockweise ins Feld „Ergebnis-Codes“),
+        „Die Ampel der Lehrkraft“ (woher die Ergebnis-Codes kommen: blockweise ins Feld „Abgabe-Codes“),
         „Grenzen und was nicht passiert“. Die Ansicht führt sie als Zusatzseite ohne Stufenkopf.
         NACHTRAG 10.10.2026 (selbst nachgemessen): Es gibt inzwischen ZWEI Zusatzseiten —
         `DATEN.wikiZusatz = ["klassenraum", "uebergabe"]` (src/daten/wiki.js:820), also 27 Fertigkeiten
@@ -17,7 +17,7 @@
         Label „Klassenraum-Code“; Azubi-Ansicht mit „Auftragscode eintippen – der Auftrag öffnet sich wie
         aus dem Postfach.“ und „Kein Auftrag offen – tippe den Code ein, den deine Lehrkraft ansagt.“;
         Lehrkraft-Ansicht mit „Der Code ist die Ansage: jedes Gerät baut denselben Fall.“ und dem Feld
-        „Ergebnis-Codes“ samt Platzhalter „Einen Code je Zeile oder alles auf einmal einfügen.“
+        „Abgabe-Codes“ samt Platzhalter „Einen Code je Zeile oder alles auf einmal einfügen.“
      3. FÜHRUNG — `Spiel.naechster` (src/spiel/naechster.js:127-138) arbeitet über `inst.netz` und
         `Spiel.zieleStatus(inst)`; es gibt KEINEN Ausschluss der Quelle „klassenraum“. Die Führung steht
         einem Klassenraum-Auftrag also genauso zur Verfügung wie jedem anderen (Testfall 7 misst das).
@@ -110,7 +110,7 @@
     pruefe("3 · Die Seite erklärt Herkunft und Rückweg des Codes (Lehrkraft → Azubi → Ergebnis)" + ZUSATZ, () => {
       if (!KANN_LADEN) return;
       const t = wikiText(DATEN.wiki.klassenraum);
-      for (const wort of ["Lehrkraft", "Beamer", "Code anzeigen", "Code kopieren", "Ergebnis-Code", "Für die Lehrkraft", "Ergebnis-Codes", "Eintragen", "Ampel", "Median", "Klassenraum-Abdruck"])
+      for (const wort of ["Lehrkraft", "Beamer", "Code anzeigen", "Code kopieren", "Ergebnis-Code", "Für die Lehrkraft", "Abgabe-Codes", "Eintragen", "Ampel", "Median", "Klassenraum-Abdruck"])
         erwarte.enthaelt(t, wort, "die Seite nennt „" + wort + "“");
       erwarte.passt(t, /NL-XXXX-XX/, "das Muster des Auftragscodes steht da");
       erwarte.passt(t, /E-XXXX-XXX/, "das Muster des Ergebnis-Codes steht da");
@@ -167,7 +167,7 @@
         "Einen Code je Zeile oder alles auf einmal einfügen.",
       ]) erwarte.enthaelt(quelle, satz, "Hinweis im Quelltext: „" + satz.slice(0, 40) + "…“");
       erwarte.enthaelt(quelle, '"Klassenraum-Code"', "die Startseiten-Zeile ist beschriftet");
-      erwarte.enthaelt(quelle, '"Ergebnis-Codes"', "das Feld der Lehrkraft ist beschriftet");
+      erwarte.enthaelt(quelle, '"Abgabe-Codes"', "das Feld der Lehrkraft ist beschriftet (task-115: neue Fläche sagt „Abgabe“)");
       erwarte.enthaelt(quelle, "Auftrag öffnen", "und der Knopf der Azubi-Ansicht heißt wie in der Wiki-Seite");
       /* Die Ansichten melden sich beim Rahmen an – sonst wären sie nicht erreichbar. */
       erwarte.enthaelt(quelle, 'UI.app.registrieren("klassenraum"', "die Ansicht „Klasse“ ist angemeldet");

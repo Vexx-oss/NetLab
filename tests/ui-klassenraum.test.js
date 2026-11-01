@@ -325,7 +325,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
   pruefe("Ampel: 0 Ergebnisse dunkel, halb voll gelb, alles grün — Median ist der OBERERE (B § 9)", () => klKapsel(() => {
     const K = klPruefstand().K;
     const leer = K.ampel({ergebnisse: {}, plaetze: 4});
-    erwarte.gleich([leer.farbe, leer.summe], ["", "Ampel: noch keine Ergebnisse"], "ohne Ergebnis dunkel");
+    erwarte.gleich([leer.farbe, leer.summe], ["", "Ampel: noch keine Abgaben"], "ohne Abgabe dunkel (task-115: Abgabe-Wort)");
     /* KLR-10: gültige Plätze 1..4 — Plätze außerhalb der Klassenstärke zählen nicht als fertig. */
     const zwei = K.ampel({plaetze: 4, ergebnisse: {1: {platz: 1, sterne: 4, dauerS: 250}, 2: {platz: 2, sterne: 5, dauerS: 260}}});
     erwarte.gleich(zwei.farbe, "kl-gelb", "halb voll ist gelb");
@@ -987,7 +987,7 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.gleich(Spiel.klassenraum.sitzungen().length, 0, "Sitzung mit Abgaben nach Quittung gelöscht");
     erwarte.gleich(Spiel.klassenraum.sitzung(), null, "keine aktive Sitzung mehr");
     erwarte.enthaelt(klText(letzterDialog().inhalt), "Sitzungen auf diesem Gerät: 0", "Dialog nach dem Löschen ehrlich leer");
-    erwarte.enthaelt(klText(c), "noch keine Ergebnisse", "die Ampel ist nachgezogen");
+    erwarte.enthaelt(klText(c), "noch keine Abgaben", "die Ampel ist nachgezogen (Abgabe-Wort)");
     /* 3 · API-Fehler ehrlich: stale Zeile auf eine bereits gelöschte Sitzung. */
     const s3 = Spiel.klassenraum.erzeugen({ticketId: "salon-02", bestaetigen: true});
     p.K.lehrerWieder();
@@ -1058,5 +1058,23 @@ gruppe("UI: Klassenraum" + KL_KLAR.zusatz, () => {
     erwarte.enthaelt(ueb0, "nicht eingestellt", "ohne Klassenstärke ehrlich");
     erwarte.gleich(z(summe0, /fertig (\d+)/), z(ueb0, /(\d+) gültige Abgabe/), "auch bei 0 Plätzen gleiche gültig-Zahl");
     erwarte.gleich(z(summe0, /(\d+) Abgaben? ohne gültigen Platz/), z(ueb0, /(\d+) Abgaben? ohne gültigen Platz/), "auch bei 0 Plätzen gleicher Ungültig-Zähler");
+  }));
+
+  /* task-115 D1 (r-didaktik W4): Neue 3.0-Flächen sagen einheitlich „Abgabe“; „Ergebnis-Code“
+     bleibt nur für den Code selbst. Sichtbarer Test an der Ansicht. */
+  pruefe("D1: Ampel/Flächen sagen „Abgabe“ — kein „noch keine Ergebnisse“, Feld heißt „Abgabe-Codes“", () => klKapsel(() => {
+    const p = klPruefstand();
+    p.start();
+    const c = p.zeige(0);
+    klSitzung("salon-terminal");
+    p.K.lehrerWieder();
+    const text = klText(c);
+    erwarte.falsch(text.includes("noch keine Ergebnisse"), "kein „noch keine Ergebnisse“ in der Ansicht");
+    erwarte.enthaelt(text, "noch keine Abgaben", "die leere Ampel sagt „noch keine Abgaben“");
+    const etiketten = klFinde(c, ".kl-etikett").map(e => klText(e));
+    erwarte.wahr(etiketten.includes("Abgabe-Codes"), "das Code-Feld heißt „Abgabe-Codes“");
+    const feld = klFinde(c, "textarea")[0];
+    erwarte.gleich(feld.getAttribute("aria-label"), "Abgabe-Codes", "aria-label nennt dieselbe Bezeichnung");
+    /* Der erzeugte Code selbst bleibt „Ergebnis-Code“ (bestehender Code-Test prüft den Toast). */
   }));
 });

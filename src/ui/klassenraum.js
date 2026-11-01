@@ -92,7 +92,7 @@ UI.klassenraum = (() => {
     const median = dauern.length ? Math.round(dauern[Math.floor(dauern.length / 2)]) : null;
     const farbe = (!fertig && !ohne) ? "" : (plaetze > 0 && fertig >= plaetze && !ohne) ? "kl-gruen" : "kl-gelb";
     const teile = [];
-    if (!fertig && !ohne) teile.push("noch keine Ergebnisse");
+    if (!fertig && !ohne) teile.push("noch keine Abgaben");
     else {
       teile.push(`fertig ${fertig}`);
       teile.push(plaetze > 0 ? `offen ${Math.max(0, plaetze - fertig)}` : "Plätze nicht eingestellt");
@@ -169,7 +169,7 @@ UI.klassenraum = (() => {
     L.diagnose = hinweisZeile("kl-detail", "");
     L.uebersicht = hinweisZeile("kl-detail", "");
     L.tafel = h("div", {class: "kl-tafel"});
-    L.codes = h("textarea", {class: "kl-feld kl-breit", rows: "6", "aria-label": "Ergebnis-Codes",
+    L.codes = h("textarea", {class: "kl-feld kl-breit", rows: "6", "aria-label": "Abgabe-Codes",
       placeholder: "Einen Code je Zeile oder alles auf einmal einfügen.",
       onkeydown: e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); ergebnisseEintragen(); } }});
     c.replaceChildren(h("div", {class: "kl-lehrer"},
@@ -203,7 +203,7 @@ UI.klassenraum = (() => {
           L.uebersicht,
           L.tafel),
         h("div", {class: "kl-form"},
-          hinweisZeile("kl-etikett", "Ergebnis-Codes"), L.codes,
+          hinweisZeile("kl-etikett", "Abgabe-Codes"), L.codes,
           h("span", {class: "kl-knoepfe"},
             h("button", {type: "button", class: "knopf kl-knopf", onclick: ergebnisseEintragen}, "Eintragen"),
             h("button", {type: "button", class: "knopf kl-knopf", onclick: dateiDialog}, "Datei…"))))));

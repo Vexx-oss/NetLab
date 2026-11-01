@@ -40,6 +40,17 @@
                 text: String(e.stdout || "") + String(e.stderr || e.message || "")};
       }
     };
+    /* Python-Code direkt ausfuehren (Modul-Tests der Regeln ohne CLI). */
+    const pyCode = (code, extra = []) => {
+      try {
+        const aus = execFileSync(PY, ["-c", code, ...extra], {cwd: WURZEL, encoding: "utf8", timeout: 120000,
+          env: umgebung, stdio: ["ignore", "pipe", "pipe"]});
+        return {code: 0, text: String(aus)};
+      } catch (e) {
+        return {code: e.status == null ? -1 : e.status,
+                text: String(e.stdout || "") + String(e.stderr || e.message || "")};
+      }
+    };
 
     pruefe("Gegenprobe: alle vier Abweichungen werden erkannt (4/4, Exit 0)", () => {
       const r = rufe(["--gegenprobe"]);
@@ -52,6 +63,22 @@
       const r = rufe(["--gegenprobe", "--blind", "R2"]);
       erwarte.gleich(r.code, 1, "eine blinde Regel muss die Gegenprobe rot machen: " + r.text.slice(-400));
       erwarte.passt(r.text, /ROT|BLIND/i, "der Grund steht da");
+    });
+
+    pruefe("R3-Gegenprobe: manipulierter Bildstand im Prüfsatz wird erkannt (auch bei real 3.0.0)", () => {
+      const p = pyCode([
+        "import importlib.util, json, sys",
+        "spec = importlib.util.spec_from_file_location('dc', " + JSON.stringify(path.join(WURZEL, "tools", "doku-claims.py")) + ")",
+        "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)",
+        "daten = {'docs/bilder/HERKUNFT.md': 'Die Bilder zeigen die Fassung 9.9.9.'}",
+        "mess = {'fassung': '3.0.0', 'bild': '3.0.0'}",
+        "treffer = m.regel_r3(daten, mess)",
+        "print(json.dumps({'n': len(treffer), 'text': ' | '.join(treffer)}))",
+      ].join("\n"));
+      erwarte.gleich(p.code, 0, p.text.slice(0, 400));
+      const r = JSON.parse(p.text);
+      erwarte.wahr(r.n >= 1, "R3 muss die Injektion im Pruefsatz sehen: " + r.text);
+      erwarte.enthaelt(r.text, "9.9.9", "injizierter Bildstand benannt");
     });
 
     pruefe("Prüfmodus liefert R1–R5 und nur Exit 0 oder 1 (nie still grün)", () => {

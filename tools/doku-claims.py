@@ -121,8 +121,14 @@ def regel_r2(daten: dict, mess: dict) -> list:
 
 
 def regel_r3(daten: dict, mess: dict) -> list:
+    # W5-Gate-Befund (doku): den Bildstand aus dem PRUEFSATZ (daten) ableiten, nicht nur aus
+    # messwerte(). Sonst sieht die Gegenprobe ihre eigene Injektion in daten nicht — R3 war blind,
+    # sobald der reale Bildstand gruen war. mess bleibt Rueckfall, wenn im Pruefsatz keine
+    # HERKUNFT-Datei liegt.
     fassung = mess.get("fassung")
-    bild = mess.get("bild")
+    herkunft = daten.get("docs/bilder/HERKUNFT.md", "")
+    treffer_h = re.search(r"Die Bilder zeigen die Fassung (\d+\.\d+\.\d+)", herkunft)
+    bild = treffer_h.group(1) if treffer_h else mess.get("bild")
     if fassung is None:
         return ["R3 nicht messbar: VERSION in bauen.py fehlt oder ist unlesbar"]
     befund = []

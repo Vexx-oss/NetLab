@@ -9,7 +9,112 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`–
 
 ---
 
-## 2.9.0 — Runde 8: Abteilung „Subnetting" mit visuellen Werkzeugen, Übungen und Lernspielen (31.10.2026)
+## 3.0.0 — Klassenbetrieb, Qualitätsgates und die letzte Meile zur Freigabe (31.10.2026)
+
+**Was diese Fassung ist.** 3.0.0 macht aus dem Labor ein **Unterrichts-Werkzeug für eine ganze Klasse**
+und schließt die Qualitätslücke: Jede der drei Wellen (W1–W3) wurde von einem eigenen Prüf-Gate
+abgenommen, die Oberfläche gegen R12-Bedienelemente, 44-px-Ziele, Fokus und Kontrast gemessen, und die
+Sicht wurde mit Screenshot-Matrizen (7 Themes × 3 Breiten) belegt. Die Fassung ist **lokal fertig**;
+Push, Tag `v3.0.0` und Release brauchen die ausdrückliche Freigabe des Nutzers.
+
+**Klassenraum 3.0 (`src/spiel/klassenraum.js`, `src/ui/klassenraum.js`, Vertrag [`Architektur`](Architektur.md) § 12).**
+Mehrere **Sitzungen** mit Schema `fassung:2` (Migration aus 2.9.0 verlustfrei, Spielstand v:3 bleibt),
+Sitzungsverwaltung mit Löschen nur auf Quittung (Verwaltung im bestehenden „Datei…“-Dialog, damit die
+R12-Zahl der Ansicht bei 6 bleibt), Ergebnis-Korrektur mit dem Dialog [Abbrechen][Ersetzen][Entfernen]
+statt stillem Verwerfen, **anonymes Diagnose-Histogramm** je Schritt (nur Zähler, kein Platz/Name,
+kein Personenbezug; Nenner sind Hilferufe, nicht Köpfe), **20-Plätze-Übersicht** mit Restzeit und
+offenen Sitzplätzen, **eine Definition** für „abgegeben/offen“ in Ampel und Übersicht (ungültige Plätze
+separat ausgewiesen). Wortwahl: die Bestands-Tafel behält „Platz N · Sterne“, alle neuen Flächen sagen
+„Sitzplatz N“ und „Abgabe“. Tafel und Übersicht sind rangfrei (keine Bestenliste, kein Vergleich).
+
+**Spiel und Lernen (`src/spiel/{zustand,hilfe,pruefung,training,generator}.js`).** **Sicherung
+wiederherstellen** mit Knopf und Datum (SPL-02/02b), **Spielstand-Migration 2.9→3.0** (SPL-10),
+**Prüfungs-Hilfe zentral gesperrt** (LRN-01: Hilfeleiter, Gerüst, Vorführen, Senior-Fälligkeit liefern
+in der Prüfung leer/Fehler; Flag `pruefung:true` sperrt auch ohne laufenden Prüfungstag), **IHK-Note
+exakt ohne Rundung** (LRN-03: `note(91.99)=2`, `note(92)=1`; `bestanden` exakt gegen 50 %), **fehlende
+Prüfungsaufgabe zählt 0** (LRN-04: Nenner bleibt fest 3; 2 von 3 gelöst = 66,67 Punkte, nicht 100).
+Trainingskarten **pinnen ihren Injektor** (52/52; Generator respektiert `opts.injektoren`, Fallback bis
+64 Versuche, Texte ohne falsche Beispieladressen — WIS-02), Textfehler und Dopplungen bereinigt (WIS-03),
+drei nicht injizierbare Grundcodes als **namentlich begründete Ausnahmen** im Matrix-Gate (WIS-05).
+
+**Inhalte (`src/daten/*`, `docs/wiki`).** Dichte-Gate 30×8 (WIS-07): 30 Matrixzeilen, Wiki ≥ 4 Abschnitte
+je Zelle, mindestens ein Injektor je Fertigkeit mit benannten Ausnahmen, AP1+AP2 über Mini/Training/
+Handticket; 15 neue Wiki-Abschnitte (u. a. Portbereiche RFC 6335, TCP-Fenster RFC 9293, Cisco-Reset)
+und `mini-sto-6` (RAID 5, AP1 lab.storage). **/31 und /32** in Wiki, Lehrtext und Subnetz-Lehrplan nach
+RFC 3021 nachgerechnet; **STP-Injektoren ehrlich** (nur `stp-doppelkabel` + `stp-rootfalsch` als
+BPDU-Guard-Endzustand mit ausdrücklichem „BPDU Guard ist hier nicht nachgebaut“); Klassenraum-Server/QR
+ausdrücklich als **3.1** benannt statt als wirkungsloser Schalter (VIS-04).
+
+**Oberfläche und Barrierefreiheit (`src/ui/*`, `src/stil/*`).** Nur die 58 codec-adressierbaren Aufträge
+werden angeboten (KLR-03), Antwortfeld und „Prüfen“ kommen nach „Werte zeigen“ selbst ins Bild — auch
+bei 960/720 px (Container-Scroll, rAF, Z-01), Konflikt-Dialog mit Esc-Rückweg, **Meldungen stehen unter
+dem Feld statt hinter der Knopfzeile** (UIL-05), **Fokus bleibt nach dem Neuzeichnen am semantisch
+gleichen Ziel** (UIL-06: Präfix-Blitz „Weiter“, VLAN-Portwahl, letzter Beispielschritt deaktiviert den
+Knopf und fokussiert das Ergebnis), Presets für Adressplaner/VLAN (UIL-02), **Seed-Determinismus** der
+Lernspiele (UIL-03, zwei Starts = verschiedene Seeds, fester Seed = gleiche Frage), fairer VLAN-Patcher
+ohne Vorab-Soll-Liste (UIL-04), Einsatzakte-UI-Test (UIL-07). **Sichturteile VIS-09:** Leiste 340 px zeigt
+die Lage vollständig (kein Ellipsen-Cap), Kundenakte-Atlas ehrlich (kein Zähler-/Leerzustands-Widerspruch),
+Leerräume strukturell reduziert (Raster, Breakpoints, keine gestreckten Kacheln; Rest-Leerraum als
+W4-Thema dokumentiert, Postfach bewusst offen). 44-px-Ziele (CSS-04) systemisch, drei belegte Ausnahmen;
+Theme-Parität/Kontrast (CSS-08) und Altlast-Regeln (CSS-09) mit Inventar für 3.1; Fokusring und
+Ersatz-Kontrast (CSS-03) getestet.
+
+**Simulation, Konsole, Kern, Plattform.** SVI empfängt den eigenen Broadcast nicht mehr; jedes Verwerfen
+trägt `grund` oder `harmlos` (231 in der Referenz: 42 mit Grund, 189 harmlos — SIM-05/06), Referenzstand
+bewusst neu erzeugt (43 Szenarien, 28/34 Codes, 6.408 Ereignisse). Konsole: DHCP-Snooping (CLI-03),
+Rezepte mit echten Rückfragen (CLI-05), Fehlpfade (CLI-06), Anzeigen aus der Simulation als eine Wahrheit
+(CLI-07), Aufräum-/Vertragsprüfung (CLI-08). Kern: Plattform-Fähigkeitsmatrix statt stiller Ja/Nein-Antworten
+(KRN-02), Browser-Persistenz sichert kaputte/zu neue Stände vor dem ersten Schreiben (KRN-03), Datei-API
+löst immer auf und meldet Export nur bei belegtem Weg (KRN-04), Modell-Invarianten (MAC/IP/Maske/Routen/
+VLAN/Kabel) und Determinismus-Wache (KRN-06/07).
+
+**Tests, Gates, Werkzeuge.** Jede Welle mit eigenem Gate: W1 `aa08057`, Hotfix `d0785d6` (Z-07),
+W2 `ff06834`, W3 `1a177b4`. Neu: `tools/pruefe-namen-flicken.js` als **ein** Node-Prozess (164 Testdateien,
+0 Fehlalarme, ~0,4 s statt 30 s; QUA-05), `tools/abnahme-3.0.py` mit 7 DoD-Achsen und `--gegenprobe`
+(VIS-01), `tools/quellen-gate.js`/`zaehl-gate.js`/`syntax.js`, Doku-Werte-Gate `doku-claims.py` (DOK-03),
+**R12-Messweg** `rauch.py --r12` → `ethos.py --dom --r12` → versionierte `tests/r12-stand.json` → STAND
+mit **Ratsche je Ansicht×Breite** (Zuwachs = ROT; Baseline 32 eingefrorene Werte über der Grenze, 0
+Zuwachs; Messwegwechsel W1→W2 dokumentiert), 44-px-Gate mit Ausnahmen-Register, Theme-Kontrast.
+
+**Dokumentation (`docs/*`).** Neu: [`Lehrkraft – Erste Stunde`](<Lehrkraft – Erste Stunde.md>) und
+[`Schueler – Erste fünf Minuten`](<Schueler – Erste fünf Minuten.md>) samt Doku-Index-Gruppe „Unterricht“,
+erweiterte FAQ (5 neue Fragen), ehrliche Bauen-Doku (Release/APK), README auf 2.9.0/3.0.0-Stand,
+INHALT vollständig (53/53 Entwicklungsnotizen), Design-Notiz § 44 (W1/W2) und § 45 (W3), Architektur-
+Verträge § 6.1 Snooping, § 7.4 Sicherung/Migration, § 7.5 Postfach, § 8 Fähigkeitsmatrix, § 12 Klassenraum-
+API (22 öffentliche Namen, 16 Sitzungsfelder, Wortwahl/Konsistenz), § 16.1 R12-Messweg, § 17.2 hilfefreie
+Prüfung/Note/fehlende Aufgabe.
+
+**Bauen und CI (`.github/*`).** `browser.yml`: Edge-Rauchprüfung mit Gegenprobe, R12-Zahl/Ratsche,
+Menüprobe; `pruefen.yml` mit DOK-03 und VIS-01 als eigene Schritte; `release.yml` mit Pflicht-Keystore
+(ohne Secrets rot), exakten Anhangsnamen und SHA256SUMS-Prüfung; `tools/ablaeufe.py`-Latentfehler behoben
+(CI wäre beim ersten Push rot geworden). Die CI selbst ist **nicht gemessen** (kein GitHub-Lauf in dieser
+Sitzung).
+
+**Zahlen.** Die maßgeblichen Zahlen (Tests, Testdateien, src-Zeilen, Doku-Seiten, relative Verweise,
+R12-Messungen) stehen in [`STAND.md`](STAND.md) — sie werden bei jedem Lauf gemessen und nicht in diesem
+Verlauf gepflegt (Eine-Quellen-Regel).
+0 übersprungen; `src` 142 Dateien/42.723 Zeilen; Mini-Tickets 151; Doku 67 Quellen/68 HTML; 346 relative
+Verweise, 0 tot; R12-Ratsche grün (44 Messungen, max 59, 32 über Grenze **eingefroren erlaubt**, 0 Zuwachs).
+
+**Migration und Verträglichkeit.** Spielstand v:3 unverändert; Klassenraum 2.9.0 (`fassung:1`) wird beim
+Laden einmalig auf `fassung:2` gehoben (Sicherung vorher, verlustfrei); 2.9.0-Exportdateien werden
+übernommen (Sicherung bleibt Sicherung, Euro unverändert); zu neue Stände werden ehrlich abgewiesen;
+R12-Baseline/`tests/r12-stand.json` ist ab 3.0.0 versioniert und darf nur per `--festhalten` mit Freigabe
+fortgeschrieben werden.
+
+**Bewusst nicht in 3.0.0 (geplant 3.1).** R12-Reduktion der Ansichten über der 6er-Grenze (Bestand
+eingefroren, kein Zuwachs), 44-px-DOM-Messung als Gate, Lernreise/Stationen (kein Entwurf vorhanden),
+Klassenraum-Server/QR samt KLR-06/07 (braucht gemessene 2-Rechner-Umgebung), Feinschliff der Leerräume
+(W4-Kriterium), Rest-WIS-Punkte (Trainingsduplikate-Bindung an Injektoren ist umgesetzt; Textpolitur offen),
+Release/CI-Lauf auf GitHub (Push/Tag/Release erst mit Freigabe).
+
+**Ehrliche Grenzen.** Kein Push, kein Tag, kein Release in dieser Sitzung; CI-Workflows sind geschrieben,
+aber nicht gelaufen; Android-APK/EXE wurden lokal gebaut und geprüft, nicht auf Gerät/anderen Rechnern;
+die 7 R12-Ansichten über der Grenze sind Bestand und als solcher eingefroren (kein „grün“ im Sinne der
+starren 6er-Norm); Screenshot-Matrix W4 belegt die Sicht, ersetzt aber keinen Geräte-/Browser-Test auf
+fremder Hardware (im Bericht benannt).
+
+---## 2.9.0 — Runde 8: Abteilung „Subnetting" mit visuellen Werkzeugen, Übungen und Lernspielen (31.10.2026)
 
 **Was diese Fassung ist.** Die in der Vorrunde begonnene Linie „Lernen braucht einen eigenen Ort"
 führt zu einer neuen Abteilung: **Subnetting und VLAN intensiv lernen** — mit visuellen Hilfen,

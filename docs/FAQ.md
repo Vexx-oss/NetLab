@@ -68,11 +68,10 @@ Tray-Dienst. macOS ist **nicht geprüft**.
 
 ### 7. Die Bilder im README zeigen eine ältere Version. Warum?
 
-Die Screenshots stammen aus dem Abnahme-Nachweis der Fassung **2.5.0** (aufgenommen am
-30.10.2026); die aktuelle Fassung ist **2.9.0**, und seither sind Ansichten hinzugekommen
-(u. a. die Subnetting-Abteilung). Herkunft, Quellpfad und SHA256 jeder Aufnahme stehen in
-[bilder/HERKUNFT.md](bilder/HERKUNFT.md). Eine Erneuerung aus dem 2.9.0-/3.0.0-Bau steht aus —
-dass die Bilder den heutigen Stand vollständig zeigen, ist **nicht geprüft**.
+Die Screenshots stammen aus dem Abnahme-Nachweis der Fassung **3.0.0** (aufgenommen am
+01.11.2026, Theme hell); die aktuelle Fassung ist **3.0.0**. Herkunft, Quellpfad und SHA256
+jeder Aufnahme stehen in [bilder/HERKUNFT.md](bilder/HERKUNFT.md). Es sind **Schlüsselbilder** —
+dass sie jeden Zustand des Spiels zeigen, ist **nicht geprüft**.
 
 ## Unterricht, Lizenz, Weitergabe
 

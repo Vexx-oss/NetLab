@@ -351,7 +351,7 @@
       erwarte.gleich(folge[0], "select:Auftrag", "zuerst die Auftragsauswahl (klassenraum.js:105)");
       erwarte.gleich(folge[1], "button:Code anzeigen", "dann „Code anzeigen“ (:123)");
       erwarte.gleich(folge[2], "button:Code kopieren", "dann „Code kopieren“ (:128)");
-      erwarte.enthaelt(folge.slice(3).join(" | "), "textarea:Ergebnis-Codes", "danach das Codefeld (:114)");
+      erwarte.enthaelt(folge.slice(3).join(" | "), "textarea:Abgabe-Codes", "danach das Codefeld (:114, task-115: Abgabe-Codes)");
       erwarte.enthaelt(folge.join(" | "), "button:Eintragen", "und „Eintragen“ (:137)");
       erwarte.enthaelt(folge.join(" | "), "button:Datei…", "und „Datei…“ (:138)");
       /* Nichts ist gesperrt oder versteckt – sonst wäre es per Tab nicht erreichbar */

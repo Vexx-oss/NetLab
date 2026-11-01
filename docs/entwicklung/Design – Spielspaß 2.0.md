@@ -1,7 +1,7 @@
 ---
 tags: [FISI, Lernspiel, Netzwerk, Spieldesign]
 erstellt: 2026-10-04
-status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D. 06.10.2026 Ruf „Substanz“ gebaut (§ 28): Speichern sichtbar und sofort, Auftragsvielfalt, mehr Inhalt, Minimalismus-Regelwerk, sanftes Onboarding – 251 Tests, Android-Fassung 1.2.1 (versionCode 10202). 07.10.2026 Hilfestellung gebaut (§ 31: Bildungsstand-Stufen, Terminal-Streifen, Lernanker, Trainingsbereich) und mit fünf unabhängigen Prüfern gegengeprüft (§ 32) – **Fassung 1.2.4, 434 Tests, Rauchtest 39/39** · 31.10.2026: W1/W2 der Fassung 3.0.0 in § 44 nachgetragen — die Regel „Stand nachziehen" war bei den Integrations-Commits nicht erfüllt.
+status: Welle 1 (S1 + S2), Welle 2 (B + C), E1, E2 und Auftrag P gebaut 04./05.10.2026, Zweig ausbau-1.2; Scorecard auf der strengeren Grundlage aus § 20: 35,9 → 38,0 nach P – HALTEPUNKT nach P, danach D. 06.10.2026 Ruf „Substanz“ gebaut (§ 28): Speichern sichtbar und sofort, Auftragsvielfalt, mehr Inhalt, Minimalismus-Regelwerk, sanftes Onboarding – 251 Tests, Android-Fassung 1.2.1 (versionCode 10202). 07.10.2026 Hilfestellung gebaut (§ 31: Bildungsstand-Stufen, Terminal-Streifen, Lernanker, Trainingsbereich) und mit fünf unabhängigen Prüfern gegengeprüft (§ 32) – **Fassung 1.2.4, 434 Tests, Rauchtest 39/39** · 31.10.2026: W1/W2 der Fassung 3.0.0 in § 44 nachgetragen — die Regel „Stand nachziehen" war bei den Integrations-Commits nicht erfüllt. · 01.11.2026: W3 der Fassung 3.0.0 in § 45 nachgetragen.
 ---
 
 # 🎮 Design – Spielspaß 2.0
@@ -786,3 +786,65 @@ und `W3-PRUEFPUNKTE.md`. Die Reviewer der W2 (r-arch, r-design, r-didaktik) meld
 `Nachweise/3.0/00-Messbasis.md` § 17–18; Fassungen: `docs/CHANGELOG.md`; Zahlen: nur
 [STAND.md](../STAND.md). **Nicht geprüft** bleiben: echte Maus im Tauri-Fenster, Android-Gerät,
 Screenreader — unverändert aus den W1/W2-Abnahmen.
+
+## 45 · Fassung 3.0.0 — W3, ehrlich nachgetragen (2026-11-01)
+
+> [!warning] Nachtrag, nicht zeitgleich geschrieben
+> Der Integrations-Commit der W3 (`1a177b4`) änderte den Bestand, diese Design-Notiz blieb stehen.
+> Dieser Abschnitt wird am 2026-11-01 nachgetragen — chronologisch, mit Commit-Bezug und **ohne**
+> die Test-/Zahlenstände aus `docs/STAND.md` zu wiederholen; dort und in `docs/CHANGELOG.md`
+> steht die maßgebliche Messung.
+
+### Chronologie (Belege: Commit und `Nachweise/3.0/00-Messbasis.md` § 19)
+
+- **W3 `1a177b4`** (2026-11-01, 00:02): Klassenraum-Betrieb rund, Sichturteile behoben, Gates/CI
+  gehärtet; Testzahl und Stand stehen im Commit-Kopf, Maßstab ist `docs/STAND.md`.
+- **R12-Blocker im Gate:** Der erste A11-Lauf war rot (Klassenraum bei 8/10/12/14 Bedienelementen
+  über der Grenze 6, vier Ratschen-Verstöße). Der Fix verlegte die Sitzungsverwaltung in den
+  bestehenden Dialog, statt neue Dauer-Bedienelemente einzuführen; danach 6/6/6/6 und
+  0 Ratschen-Verstöße (`Nachweise/3.0/00-Messbasis.md` § 19).
+- **Reviews:** r-design 0 P0/0 P1 (Sichtbilder), r-arch 0 P0/0 offene P1 (Scanner 250/0),
+  r-didaktik Vorab-PASS.
+
+### Was sich im Erlebnis ändert
+
+- **KLR-10 — eine Wahrheit für die Zahlen:** Ampel und 20-Übersicht zählen dieselben gültigen
+  Plätze; ungültige Plätze stehen separat als „Abgaben ohne gültigen Platz". Das Diagnose-Label
+  heißt „Hilferufe" und nennt keinen Klassen-Nenner mehr.
+- **KLR-11 — Wording und Sprung:** neue Abläufe sagen „Abgabe"; bei 960/720 springt die Antwort
+  (bzw. „Prüfen") erst **nach** dem Layout ins Bild (Container-Scroll, `requestAnimationFrame`) —
+  keine Fokusübernahme; der Leerzustand zeigt kein „null" mehr.
+- **KLR-12 — Sitzungen verwalten:** Löschen mit Quittung, im **bestehenden** Dialog — keine neuen
+  Dauer-Bedienelemente (R12 bleibt hart bei 6 je Ansicht).
+- **VIS-09 A/B/C:** Die Leiste zeigt bei 340 px die Lage vollständig; der Kundenakte-Atlas ist
+  ehrlich (kein leerer Atlas bei vorhandenen Aufträgen); der Leerraum ist über Grid/Breakpoints
+  und ohne gestreckte Kacheln strukturell behoben — der verbleibende Rest-Leerraum ist bewusst als
+  P2/W4 dokumentiert.
+- **UIL-05/06 (und UL-09):** Validierungsmeldung unter dem Feld, vor der Knopfzeile und im Bild;
+  Fokus wird nach dem Neuzeichnen gesetzt; der letzte Beispielschritt ist deaktiviert statt
+  versteckt.
+- **WIS-02/03/05:** Trainingskarten pinnen ihren Injektor (der Generator respektiert
+  `opts.injektoren`, Fallback bis 64 Versuche); Textfehler und Dopplungen bereinigt; drei
+  Grundcodes sind als namentlich begründete Ausnahmen im Matrix-Gate freigegeben.
+- **Doku:** Lehrkraft- und Schüler-Seite neu, Doku-Index-Gruppe „Unterricht" (QUA-07),
+  Design-Abschnitt 44, Vertrags-Wortwahl in `docs/Architektur.md`.
+- **Gates/CI:** Namens-Gate neu (QUA-05: ein Node-Prozess, echte Ladefehler inklusive
+  `erwarte`-Texten, 165 ms statt 30 s, 75 Fehlalarme weg); `browser.yml` mit Rauch-Gegenprobe,
+  R12-Zahl, Ratsche und Menüprobe; `pruefen.yml` mit DOK-03/VIS-01; `release.yml` mit
+  Pflicht-Keystore und SHA256SUMS; `ablaeufe.py` repariert (BAU-11).
+
+### Bewusste Bestandsentscheidungen
+
+- **Tafel-Sprache bleibt „Platz N"** (Bestandsvertrag); nur die neuen Flows sagen „Abgabe".
+- **Sitzungsverwaltung im bestehenden Dialog** statt neuer Fläche — R12 hart 6.
+- **Rest-Leerraum bleibt offen** (P2/W4) statt Flächen künstlich zu füllen.
+
+### Offene P2 nach W4 (vom Lead benannt; kein P0/P1 offen)
+
+VIS-09-C-Messformel (task-105), 44-px-DOM, Sicht-Matrix (12 × 3 × 7) samt Nachlieferungen;
+für 3.1: R12-Reduktion. Belege: `Nachweise/3.0/00-Messbasis.md` § 19, `sicht/W3-SICHT.md`,
+`w3-pruefungen/BEFUNDE-W3.md`.
+
+**Belege.** Commit `1a177b4`; Messungen und Gate-Ablauf: `Nachweise/3.0/00-Messbasis.md` § 19;
+Fassungen: `docs/CHANGELOG.md`; Zahlen: nur [STAND.md](../STAND.md). **Nicht geprüft** bleiben:
+echte Maus im Tauri-Fenster, Android-Gerät, Screenreader.

@@ -287,23 +287,49 @@ gruppe("Daten: Trainings", () => {
 
   /* Der entscheidende Wirkungsbeweis für WIS-02: Über den ECHTEN Weg (training.starten) muss
      derselbe Injektor im gebauten Fall stehen – 20 Seeds je Karte, weil der Seed den Fall baut. */
-  pruefe("WIS-02: training.starten baut mit dem gepinnten Injektor (20 Seeds je Karte)", () => {
+  /* WIS-02a (task-110): Der Abnahmetest startet jede Karte 20×. Die Seeds müssen dabei WIRKLICH
+     verschieden sein (20 verschiedene Seeds je Karte), und jede gebaute Instanz muss den gepinnten
+     Injektor als ersten Fall tragen – 52 × 20 = 1040/1040. Zusätzlich werden 20 explizite Seeds
+     direkt über den Generator gebaut (Seed ist dort der Eingabewert, keine Ableitung). */
+  pruefe("WIS-02a: 20 verschiedene Seeds je Karte, 1040/1040 gepinnt", () => {
     const alt = {st: Spiel._st, einst: Spiel._einst, lz: Spiel._lz, trocken: Spiel._trocken,
       speicher: store.alles(), gen: Object.assign({}, Spiel.generierte)};
     const f = [];
+    let geprueft = 0, verschieden = 0;
     try {
       Spiel._trocken = true; Spiel._lz = {};
       Spiel._st = Spiel.leererStand(); Spiel._einst = Object.assign({}, Spiel.EINST_STANDARD);
       Spiel._st.stufe = 99;
+      /* (1) echter Startweg: 20 Starts je Karte, Seeds müssen 20 verschiedene sein */
       for (const t of alle) {
+        const seeds = new Set();
         for (let i = 0; i < 20; i++) {
           const r = Spiel.training.starten(t.id);
           if (!r || !r.ok) { f.push(t.id + ": starten scheitert (" + (r && r.grund) + ")"); break; }
           const inst = Spiel.instanz(r.iid);
-          const def = inst && Spiel.defVon(inst);
+          const seed = inst && inst.gen ? inst.gen.seed : null;
+          if (seed == null) { f.push(t.id + "/" + i + ": Seed nicht sichtbar"); break; }
+          seeds.add(String(seed));
+          const def = Spiel.defVon(inst);
           const erste = def && (def.fehlerstellen || [])[0];
           if (!erste || erste.injektor !== t.injektor)
-            f.push(t.id + "/Seed" + i + ": gebaut " + (erste && erste.injektor) + ", gepinnt " + t.injektor);
+            f.push(t.id + "/Seed" + seed + ": gebaut " + (erste && erste.injektor) + ", gepinnt " + t.injektor);
+          geprueft++;
+        }
+        if (seeds.size !== 20) f.push(t.id + ": nur " + seeds.size + " verschiedene Seeds (soll 20)");
+        verschieden += seeds.size;
+      }
+      /* (2) 20 explizite Seeds direkt über den Generator (Eingabewert, keine Ableitung) */
+      Spiel._st = Spiel.leererStand(); Spiel._st.stufe = 99;
+      Spiel.generierte = {};
+      for (const t of alle) {
+        for (let seed = 1; seed <= 20; seed++) {
+          let def = null;
+          try { def = Spiel.generiere(t.skill, seed, {stufe: t.niveau, injektoren: [{name: t.injektor, wahl: seed}]}); }
+          catch (e) { f.push(t.id + "/explizit " + seed + ": wirft " + (e && e.message)); continue; }
+          const erste = def && (def.fehlerstellen || [])[0];
+          if (!erste || erste.injektor !== t.injektor)
+            f.push(t.id + "/explizit " + seed + ": " + (erste && erste.injektor));
         }
       }
     } finally {
@@ -312,7 +338,9 @@ gruppe("Daten: Trainings", () => {
       Object.assign(SPEICHER.daten, alt.speicher);
       for (const k of Object.keys(Spiel.generierte)) if (!(k in alt.gen)) delete Spiel.generierte[k];
     }
-    erwarte.gleich(f.slice(0, 8), []);
+    erwarte.gleich(f.slice(0, 10), []);
+    erwarte.gleich(geprueft, 52 * 20, "geprüfte Start-Bauten (52 Karten × 20 Seeds)");
+    erwarte.gleich(verschieden, 52 * 20, "verschiedene Seeds über alle Karten");
   });
 
   /* WIS-02a: Die gemessene Lücke (22 von 1040 direkten Seed-Bauten) entsteht, wenn der gepinnte
@@ -353,21 +381,33 @@ gruppe("Daten: Trainings", () => {
      generierte Fall nie zeigt (andere Netze/Vorlagen). Konsequenz: Texte arbeiten mit den Werten
      aus dem Auftrag; geprüft wird: KEINE konkreten IPv4-Adressen (und bei der Betriebs-Karte kein
      festes Gerät „Server“, das die lan-Vorlage nicht hat). */
-  const TEXT_FALL_KARTEN = ["tr-netz-maske", "tr-subnetz-plan", "tr-ip-setzen", "tr-dhcp-pool-leer", "tr-betrieb-startconfig", "tr-netz-nachbar"];
-  const IPV4 = /\b\d{1,3}(?:\.\d{1,3}){3}\b/;
-  pruefe("WIS-02b: Text↔Fall – die sechs Karten nennen keine konkreten Adressen/Geräte des Beispiels", () => {
+  /* WIS-02b-Rest (task-110): Die sechs W3-Karten waren nur die Stichprobe. Geprüft wird jetzt
+     GLOBAL über alle 52 Karten: kein konkretes IPv4- oder VLAN-Literal im sichtbaren Text (die
+     gepinnten Fälle zeigen andere Netze/VLANs), dafür ein Bezug auf die Werte des Auftrags.
+     Falsifizierbar: die Gegenprobe schiebt ein Literal ein und erwartet rot; ein neues Literal in
+     einer Karte macht den Lauf rot. */
+  const LITERAL_IPV4 = /\b\d{1,3}(?:\.\d{1,3}){3}\b/;
+  const LITERAL_VLAN = /\bVLAN\s*\d+|\bVLAN\s*\d+\s*(?:\/|,|und)\s*\d+/i;
+  const textVerstoesse = (titel, beschreibung, tipp, schritte) => {
+    const text = [titel, beschreibung, tipp, ...(schritte || [])].join(" ");
     const f = [];
-    for (const id of TEXT_FALL_KARTEN) {
-      const t = alle.find(x => x.id === id);
-      if (!t) { f.push(id + ": Karte fehlt"); continue; }
-      const text = [t.titel, t.beschreibung, t.tipp, ...(t.schritte || [])].join(" ");
-      if (IPV4.test(text)) f.push(id + ": konkrete IPv4-Adresse im Text (" + text.match(IPV4)[0] + ")");
-      if (!/Auftrag|Aufgabe|Fall/i.test(text)) f.push(id + ": Text verweist nicht auf die Werte des Falls");
+    const ip = text.match(LITERAL_IPV4);
+    if (ip) f.push("IPv4-Literal „" + ip[0] + "“");
+    const vlan = text.match(LITERAL_VLAN);
+    if (vlan) f.push("VLAN-Literal „" + vlan[0] + "“");
+    if (!/Auftrag|Aufgabe|\\bFall\\b|Szenario/i.test(text)) f.push("kein Bezug auf die Werte des Auftrags");
+    return f;
+  };
+  pruefe("WIS-02b global: alle 52 Karten ohne konkrete IPv4-/VLAN-Literale, mit Auftragsbezug", () => {
+    const f = [];
+    for (const t of alle) {
+      for (const grund of textVerstoesse(t.titel, t.beschreibung, t.tipp, t.schritte)) f.push(t.id + ": " + grund);
     }
-    const betrieb = alle.find(x => x.id === "tr-betrieb-startconfig");
-    const betriebText = [betrieb.beschreibung, betrieb.tipp, ...(betrieb.schritte || [])].join(" ");
-    erwarte.falsch(/\bServer\b/i.test(betriebText), "tr-betrieb-startconfig nennt kein festes Gerät „Server“ (die lan-Vorlage hat keinen)");
-    erwarte.gleich(f, []);
+    erwarte.gleich(f.slice(0, 12), []);
+    /* Gegenprobe: der Prüfer erkennt ein eingeschmuggeltes Literal wirklich. */
+    const probe = textVerstoesse("Probe", "Im Netz 192.168.7.0/24 liegt VLAN 10 im Auftrag.", "Tipp", []);
+    erwarte.gleich(probe.length >= 2, true, "Gegenprobe erkennt IPv4 und VLAN");
+    erwarte.gleich(textVerstoesse("Probe", "Die Werte stehen im Auftrag.", "Tipp", []), []);
   });
 
   pruefe("jedes Szenario mit Injektoren ist über Spiel.instanzErstellen baubar; ohne Injektor ist es Vorrat", () => {

@@ -159,7 +159,7 @@ UI.lernstand = (() => {
         h("div", {},
           h("span", {class: "bn-kicker"}, "Kompetenzfelder"),
           h("h3", {class: "bn-titel"}, "Kompetenzkarte")),
-        h("p", {class: "bn-meta kk-stand"}, k.sichtbar + " von " + k.gesamt + " Feldern sichtbar – der Nebel lichtet sich durch Üben und neue Stufen. Bildungsstand: Stufe " + stufeJetzt + ".")),
+        h("p", {class: "bn-meta kk-stand"}, k.sichtbar + " von " + k.gesamt + " Feldern sichtbar – der Nebel lichtet sich durch Üben und neue Stufen. Karriere-Stufe: Stufe " + stufeJetzt + ".")),
       h("div", {class: "kk-regionen"}, regionen),
       h("div", {class: "kk-legende"},
         h("span", {class: "kk-legende-titel"}, "Zustand"),

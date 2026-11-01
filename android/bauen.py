@@ -1,4 +1,4 @@
-﻿"""Android-App (APK) aus dem Netzwerk-Labor bauen.
+"""Android-App (APK) aus dem Netzwerk-Labor bauen.
 
 Warum ohne Gradle: Das Projekt hat keinen Paketmanager, keinen Bundler und keine
 Abhängigkeiten — die Web-Fassung ist eine einzige HTML-Datei. Gradle würde dafür
@@ -76,7 +76,9 @@ PAKET = "oss.vexx.netlab"
 # Wert DARÜBER → 20101.
 # Angehoben am 29.10.2026 mit dem Fassungszug 2.1.0 → 2.2.0 (Frontend-Redesign): abgeleitet
 # wird 2*10000 + 2*100 + 0 = 20200; die Hausregel verlangt einen Wert DARÜBER → 20201.
-VERSION_CODE = 20901
+# Angehoben am 01.11.2026 mit dem Fassungszug 2.9.0 → 3.0.0: abgeleitet wird
+# 3*10000 + 0*100 + 0 = 30000; die Hausregel verlangt einen Wert DARÜBER → 30001.
+VERSION_CODE = 30001
 
 SDK_ORTE = [
     Path(r"C:\Users\Student\android-sdk"),

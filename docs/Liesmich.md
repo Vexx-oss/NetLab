@@ -2,7 +2,7 @@
 tags: [FISI, Lernspiel, Netzwerk]
 erstellt: 2026-09-30
 aktualisiert: 2026-10-31
-status: Version 2.9.0 (Browser-Einzeldatei; Doku als HTML unter /doku/; Windows-.exe und Android-APK nur selbst gebaut)
+status: Version 3.0.0 (Browser-Einzeldatei; Doku als HTML unter /doku/; Windows-.exe und Android-APK nur selbst gebaut)
 ---
 
 # 🖧 Netzwerk-Labor
@@ -53,7 +53,7 @@ Details, Messwerte und verworfene Versuche: `docs/CHANGELOG.md` · Plan: [[Plan 
 - [[Konzept – Netzwerk-Labor]] (Spezifikation) · [[Architektur]] (Vertrag zwischen den Bausteinen) · [[Opus-Auftrag – Netzwerk-Labor]] (ursprünglicher Bauauftrag) · [[Befund – Programm startet wieder]] (05.10.2026: WebView2-Ausfall und Reparatur)
 - **Nächste Fassung:** [[Konzept – 3.0]] (Plan für 3.0: Klassenbetrieb, Diagnose, Messkette) · [[Design – Spielspaß 2.0]] (Befunde, Hebel, Scorecard) · [[Klassenraum – Umsetzungsreife Spezifikation]] (Vertrag; Stufen A+B gebaut, C/D offen)
 - `src/` Code (kern, modell, sim, cli, daten, spiel, plattform, ui, stil) · `shell/src-tauri/` Rust-Hülle · `tests/` (`sh tools/test.sh`; Zahl: `docs/STAND.md`) · `tools/` (bauen, testen, messen, ausliefern) · `Programm/` fertige Programme · `docs/` die Website-Fassung (erzeugt) samt `docs/doku/` (die Doku als durchsuchbare Seite, `python tools/seite.py`) · `fremd/` fremder Bestand (Lernmotor aus der Spielhalle)
-- Versionen: Git im Projektordner, Tags von `endversion-1.0` über `v1.1`, `v1.2.0`–`v1.2.4` bis `v2.0.0`–`v2.9.0` (Stand 31.10.2026); der Endstand liegt zusätzlich unter `Programm/Endversion-1.0/`.
+- Versionen: Git im Projektordner, Tags von `endversion-1.0` über `v1.1`, `v1.2.0`–`v1.2.4` bis `v2.0.0`–`v3.0.0` (Stand 31.10.2026); der Endstand liegt zusätzlich unter `Programm/Endversion-1.0/`.
 
 ## Ehrliche Grenzen
 - Arbeitsspeicher im Leerlauf rund 0,5 GB (WebView2, gemessen 07.10.2026), CPU praktisch null.

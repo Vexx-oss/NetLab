@@ -842,7 +842,7 @@ die einzige Ergänzung). Renew nutzt die vorhandenen Typen `request`/`ack`; neue
 
 ## 12 · Klassenraum (Lehrer/Schüler, Hobby-Ebene) — Vertrag
 
-*Stand 2.9.0, fortgeschrieben 31.10.2026 für 3.0.0.* Dieses Kapitel ersetzt den am 30.10.2026 mit
+*Stand 3.0.0 (31.10.2026/01.11.2026).* Dieses Kapitel ersetzt den am 30.10.2026 mit
 Commit `9716b08` gelöschten Abschnitt § 12 und führt ihn auf den gemessenen Code-Stand fort. Quellen:
 `docs/entwicklung/Klassenraum/` A–D, historischer Stand `32cf209`, `src/spiel/klassenraum.js`,
 `src/spiel/klassenraum-codec.js`, `src/ui/klassenraum.js`, `src/spiel/abnahme.js`,
