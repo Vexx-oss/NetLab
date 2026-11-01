@@ -146,7 +146,13 @@ Fassungen, die Entwürfe die Begründungen und verworfenen Versuche.
 | [`entwicklung/Übergabe – Stand 31.10.2026 – Runde 6 und 7.md`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 6 und 7.md>) | Übergabe Runden 6 und 7 (31.10.2026): Kurzübung mit Kontext und Flugschreiber-Aufmerksamkeitsführung. |
 | [`entwicklung/Übergabe – Stand 31.10.2026 – Runde 8.md`](<entwicklung/Übergabe – Stand 31.10.2026 – Runde 8.md>) | Übergabe Runde 8 (31.10.2026): Auftrag, Umsetzung, Abnahme — enthält den Veröffentlichungs-Nachweis der 2.9.0. |
 
-## Ausblick: 3.0 und der Betrieb (09.10.2026)
+## Die Fassung 3.0.0 — Release (31.10.–01.11.2026)
+
+| Datei | Wofür |
+|---|---|
+| [`entwicklung/Übergabe – Stand 3.0.0.md`](<entwicklung/Übergabe – Stand 3.0.0.md>) | Übergabe und Release-Notes der Fassung 3.0.0: was neu ist, Artefakte und SHA256 (lokal gemessen), Installationswege, bekannte Grenzen, offene Freigaben — Commit-Kette W0 bis W5 und die Protokolle unter `Nachweise/3.0/`. |
+
+## Ausblick: 3.0 und der Betrieb — der Plan vom 09.10.2026 (3.0.0 gebaut)
 
 Was nach der ausgelieferten 2.0 kommt — als Plan, nicht als Wunschzettel.
 

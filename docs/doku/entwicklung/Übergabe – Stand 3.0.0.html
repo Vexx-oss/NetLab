@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übergabe — Fassung 3.0.0 (Stand 01.11.2026) · Netzwerk-Labor</title>
+<meta name="description" content="Was diese Fassung ist.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Übergabe — Fassung 3.0.0 (Stand 01.11.2026)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-was-neu-ist-kurzfassung">1 · Was neu ist (Kurzfassung)</a></li>
+<li><a href="#2-artefakte-und-sha256-lokal-in-dieser-sitzung-gemessen">2 · Artefakte und SHA256 (lokal, in dieser Sitzung gemessen)</a></li>
+<li><a href="#3-installationswege">3 · Installationswege</a></li>
+<li><a href="#4-bekannte-grenzen-ehrlich">4 · Bekannte Grenzen (ehrlich)</a></li>
+<li><a href="#5-offene-freigaben-je-einzeln-vom-nutzer-zu-erteilen">5 · Offene Freigaben (je einzeln vom Nutzer zu erteilen)</a></li>
+<li><a href="#6-abnahme-und-prufbelege">6 · Abnahme- und Prüfbelege</a></li>
+</ul>
+</nav><h1 id="ubergabe-fassung-3-0-0-stand-01-11-2026">Übergabe — Fassung 3.0.0 (Stand 01.11.2026)</h1>
+<p><strong>Was diese Fassung ist.</strong> 3.0.0 macht aus dem Labor ein <strong>Unterrichts-Werkzeug für eine ganze Klasse</strong> und schließt die Qualitätslücke: Jede der drei Bau-Wellen (W1–W3) wurde von einem eigenen Prüf-Gate abgenommen, die Oberfläche gegen R12-Bedienelemente, 44-px-Ziele, Fokus und Kontrast gemessen, die Sicht mit Screenshot-Matrizen belegt. Die Fassung ist <strong>lokal fertig und committet</strong>; Push, Tag <code>v3.0.0</code> und Release stehen aus. Der ausführliche Änderungsverlauf steht in <a href="../CHANGELOG.html"><code>CHANGELOG.md</code></a> § 3.0.0; alle Zahlen in <a href="../STAND.html"><code>STAND.md</code></a>.</p>
+<h2 id="1-was-neu-ist-kurzfassung">1 · Was neu ist (Kurzfassung)</h2>
+<ul><li><strong>Klassenraum 3.0:</strong> mehrere Sitzungen je Gerät (Schema <code>fassung:2</code>, Migration verlustfrei), Sitzungsverwaltung mit Löschen nur auf Quittung, Ergebnis-Korrektur mit [Abbrechen][Ersetzen][Entfernen], <strong>anonymes Diagnose-Histogramm</strong> je Schritt, <strong>20-Plätze-Übersicht</strong> mit Restzeit und offenen Sitzplätzen, eine Definition für „abgegeben/offen"; rangfrei, ohne Namen.</li><li><strong>Spiel und Lernen:</strong> Sicherung wiederherstellen mit Knopf und Datum, Spielstand-Migration 2.9 → 3.0, Prüfungs-Hilfe zentral gesperrt, IHK-Note exakt ohne Rundung, fehlende Prüfungsaufgabe zählt 0, Trainingskarten pinnen ihren Injektor.</li><li><strong>Inhalte:</strong> Dichte-Gate (30 Matrixzeilen, Wiki ≥ 4 Abschnitte je Zelle, mindestens ein Injektor je Fertigkeit), 15 neue Wiki-Abschnitte, /31 und /32 nach RFC 3021 nachgerechnet, STP-Injektoren ehrlich, Klassenraum-Server/QR ausdrücklich als <strong>3.1</strong> benannt.</li><li><strong>Oberfläche und Barrierefreiheit:</strong> nur adressierbare Aufträge, Antwort und „Prüfen“ im Sichtfeld (auch 960/720 px), Meldungen unter dem Feld, Fokus nach dem Neuzeichnen, Presets, Seed-Determinismus der Lernspiele, Sichturteile VIS-09, 44-px-Ziele mit belegten Ausnahmen, Theme-Parität/Kontrast.</li><li><strong>Simulation, Konsole, Kern:</strong> eigener Broadcast wird nicht mehr empfangen, jedes Verwerfen mit <code>grund</code> oder <code>harmlos</code>, Konsolen-Roundtrip/Fehlpfade, Plattform-Fähigkeitsmatrix, Persistenz-Schutz, Modell-Invarianten und Determinismus-Wache.</li><li><strong>Doku:</strong> Lehrkraft-Erste-Stunde und Schüler-Erste-fünf-Minuten neu, FAQ erweitert, Bauen/README/INHALT auf 3.0.0, Design § 44/§ 45, Architektur-Verträge § 6.1/§ 7.4/§ 7.5/§ 8/§ 12/§ 16.1/§ 17.2.</li><li><strong>Gates/CI:</strong> Namens-Gate, Werte-Gate <code>doku-claims.py</code> mit Gegenprobe, DoD-Gate <code>abnahme-3.0.py</code>, R12-Messweg mit versionierter Ratsche, <code>browser.yml</code>, <code>pruefen.yml</code> mit DOK-03/VIS-01, <code>release.yml</code> mit Pflicht-Keystore und SHA256SUMS.</li></ul>
+<p><strong>Commits der Sitzung (in dieser Reihenfolge):</strong></p>
+<div class="dk-tabelle"><table><thead><tr><th>Commit</th><th>Inhalt</th></tr></thead><tbody><tr><td><code>dd42723</code></td><td>W0: Messbasis, Ausnahmen A1–A3, § 12 des Vertrags wiederhergestellt</td></tr><tr><td><code>aa08057</code></td><td>W1: Klassenbetrieb-Grundlage, Simulation, Inhalte, Oberfläche, Gates</td></tr><tr><td><code>d0785d6</code></td><td>W1-Hotfix: Antwort-Platzhalter verrät die Lösung nicht mehr (Z-07)</td></tr><tr><td><code>ff06834</code></td><td>W2: Klassenraum 3.0 (Sitzungen, Korrektur, Diagnose, Übersicht), Spiel/Lernkern, R12 messbar</td></tr><tr><td><code>1a177b4</code></td><td>W3: Klassenraum-Betrieb rund, Sichturteile, Gates/CI gehärtet</td></tr><tr><td>(W4)</td><td>Sicht-Matrix 12 × 3 × 7 Themes in <code>Nachweise/3.0/sicht/w4/matrix</code> — <strong>kein Commit</strong> (Messung)</td></tr><tr><td><code>b23c4a4</code></td><td>W5: Fassungszug 3.0.0, Bildstand 3.0.0, Doku und Stand nachgezogen</td></tr></tbody></table></div>
+<h2 id="2-artefakte-und-sha256-lokal-in-dieser-sitzung-gemessen">2 · Artefakte und SHA256 (lokal, in dieser Sitzung gemessen)</h2>
+<div class="dk-tabelle"><table><thead><tr><th>Artefakt</th><th>SHA256</th><th>Anmerkung</th></tr></thead><tbody><tr><td><code>Netzwerk-Labor.html</code></td><td><code>D86B905F0CE8A53571758E6D3D13C3434C6691BB2590CC89636B1609E98D9583</code></td><td>byte-gleich mit <code>docs/index.html</code>; Größe und Prüfsumme stehen in <a href="../STAND.html"><code>STAND.md</code></a></td></tr><tr><td><code>docs/index.html</code></td><td><code>D86B905F0CE8A53571758E6D3D13C3434C6691BB2590CC89636B1609E98D9583</code></td><td>dasselbe Erzeugnis (GitHub-Pages-Datei)</td></tr><tr><td><code>dist/Netzwerk-Labor-3.0.0-Browser.zip</code></td><td><code>0606CC5027ABD81A9524A1BCF517E35503298ED95921EC6FA11EBEB2A5D9A70C</code></td><td>Browser-Paket für das Release</td></tr><tr><td><code>Programm/Netzwerk-Labor.exe</code></td><td><code>A53BA7708602F3971B881AE02D541E71B7D4F7CDA3EAAEE5CEF94DDF111AD73A</code></td><td>ProductVersion <strong>3.0.0</strong></td></tr><tr><td><code>Programm/Netzwerk-Labor-3.0.0-Android.apk</code></td><td><code>0A35E2C40A9741B671F46237A079C78881E99B124E1756E84FFA292B79E57C30</code></td><td><code>versionCode 30001</code>, signiert (laut W5-Commit)</td></tr><tr><td><code>dist/Netzwerk-Labor-3.0.0-Windows.zip</code></td><td><code>80A7931E…</code> (laut W5-Commit)</td><td>lag beim Prüfen <strong>nicht mehr</strong> im Arbeitsbaum — <strong>nicht geprüft</strong>; entsteht beim Release neu</td></tr></tbody></table></div>
+<p>Die SHA256 der lokalen Artefakte wurden am 01.11.2026 mit <code>Get-FileHash</code> gemessen; die in <code>docs/STAND.md</code> geführte Einzeldatei nennt Größe und Prüfsumme dort (eine Zahlenquelle, hier nicht wiederholt).</p>
+<h2 id="3-installationswege">3 · Installationswege</h2>
+<ul><li><strong>Im Browser:</strong> <a href="https://vexx-oss.github.io/NetLab/">vexx-oss.github.io/NetLab</a> — ein Klick, keine Installation. <strong>Achtung:</strong> Die Live-Seite zeigt erst nach Push/Tag den 3.0.0-Stand (Freigabe offen).</li><li><strong>Eine Datei:</strong> <code>Netzwerk-Labor.html</code> herunterladen, Doppelklick; Schriften eingebettet, kein Nachladen, kein Internet nötig.</li><li><strong>Browser-ZIP:</strong> <code>Netzwerk-Labor-3.0.0-Browser.zip</code> entpacken — Einzeldatei, die Doku als Ordner <code>doku/</code>, Anleitungen, Lizenztexte.</li><li><strong>Windows:</strong> <code>Netzwerk-Labor.exe</code> (Release-Anhang, stabiler Link <a href="https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe">/releases/latest/download/Netzwerk-Labor.exe</a>); SmartScreen ggf. „Weitere Informationen → Trotzdem ausführen“. Erscheint kein Fenster: <code>Programm/Integritaet-reparieren.cmd</code> (Integritätslabel „Niedrig“).</li><li><strong>Android:</strong> APK selbst bauen (<code>python android/bauen.py</code>, Android-SDK + JDK nötig), aufs Telefon kopieren, „Unbekannte Apps installieren“ erlauben; kein Play Store, kein Konto, keine Berechtigung. <strong>Nicht geprüft:</strong> Lauf auf einem echten Gerät/Emulator.</li></ul>
+<h2 id="4-bekannte-grenzen-ehrlich">4 · Bekannte Grenzen (ehrlich)</h2>
+<ul><li><strong>Kein Push, kein Tag, kein Release:</strong> In dieser Sitzung nicht geschehen; die Live-Seite, die Release-Anhänge und die GitHub-Abläufe sind <strong>nicht gemessen</strong>.</li><li><strong>CI nicht gelaufen:</strong> Die Workflows sind geschrieben und geprüft (<code>tools/ablaeufe.py</code>), aber in dieser Sitzung nicht auf GitHub ausgeführt.</li><li><strong>R12:</strong> Die starre 6er-Norm ist nicht erreicht; die Bestandswerte über der Grenze sind als <code>tests/r12-stand.json</code> eingefroren (kein Zuwachs erlaubt). Das ist „eingefrorener Bestand“, nicht „grün“ im Sinne der Norm.</li><li><strong>Nicht geprüft:</strong> echter Klassennetz-/Firewall-Aufbau mit 20 Geräten, echte Unterrichtsstunde, Server/QR (sind <strong>3.1</strong>), Geräteinstallation Android, Tauri-Fenster auf fremder Hardware, Screenreader, 44-px-DOM-Messung als Gate.</li><li><strong>Sicht:</strong> Die W4-Matrix (12 Ansichten × 3 Breiten × 7 Themes) und die 11 Schlüsselbilder belegen die Optik; sie ersetzen keinen Browser-/Gerätetest auf fremder Hardware.</li><li><strong>Keystore-Secrets:</strong> Der Release-Ablauf verlangt sie; ob sie im Repository gesetzt sind, ist <strong>nicht geprüft</strong> (die Android-APK wurde lokal gebaut und signiert).</li></ul>
+<h2 id="5-offene-freigaben-je-einzeln-vom-nutzer-zu-erteilen">5 · Offene Freigaben (je einzeln vom Nutzer zu erteilen)</h2>
+<ol><li><strong>Push</strong> von <code>ausbau-1.2</code> (lokal ahead, kein Push).</li><li><strong>Tag</strong> <code>v3.0.0</code> anlegen und pushen.</li><li><strong>Release anlegen/prüfen</strong> — Anhänge: <code>Netzwerk-Labor.html</code>, <code>…-Browser.zip</code>, <code>.exe</code>, <code>SHA256SUMS</code>; APK nur anhängen, wenn gebaut und geprüft (Entscheid des Nutzers).</li><li><strong>Nachmessen</strong> von Live-Seite und Release-Anhängen (SHA256, <code>Content-Disposition</code>).</li></ol>
+<h2 id="6-abnahme-und-prufbelege">6 · Abnahme- und Prüfbelege</h2>
+<ul><li>Vertrag und Stand: <a href="../Architektur.html"><code>Architektur.md</code></a> (Stand-Zeile 3.0.0), <a href="../STAND.html"><code>STAND.md</code></a> (einzige Zahlenquelle), <a href="../CHANGELOG.html"><code>CHANGELOG.md</code></a> § 3.0.0.</li><li>Protokolle: <code>Nachweise/3.0/00-Messbasis.md</code> § 17–19, <code>Nachweise/3.0/gates/</code> (W0–W3), <code>Nachweise/3.0/W2-PRUEFPUNKTE.md</code>, <code>W3-PRUEFPUNKTE.md</code>, <code>Nachweise/3.0/w3-pruefungen/BEFUNDE-W3.md</code>.</li><li>Sicht: <code>Nachweise/3.0/sicht/w4/matrix</code> (252 Aufnahmen) und <code>Nachweise/3.0/sicht/w5/doku</code> (11 Schlüsselbilder, <code>matrix.json</code> mit Quelle/Prüfsummen).</li><li>Arbeitsregeln: <a href="../SITZUNGSABSCHLUSS.html"><code>SITZUNGSABSCHLUSS.md</code></a> — die acht Schritte, auf 3.0.0 fortgeschrieben.</li></ul>
+<p>Verwandt: <a href="../INHALT.html"><code>INHALT.md</code></a> · <a href="../README.html"><code>README.md</code></a> · <a href="../Liesmich.html"><code>Liesmich.md</code></a></p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

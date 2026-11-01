@@ -7,7 +7,9 @@ wann: Am Ende jeder Arbeitssitzung im Netzwerk-Labor — vor allem, wenn etwas a
 
 Diese Reihenfolge ist am 06.10.2026 (Fassung 1.2.2) und erneut am 07.10.2026 (Fassung 1.2.3) **ganz**
 durchlaufen worden und hat beim ersten Mal drei Fehler aufgedeckt, die sonst erst nach dem Push
-aufgefallen wären. Sie gilt für jede Sitzung, die den Zweig `ausbau-1.2` verändert.
+aufgefallen wären. In der 3.0.0-Sitzung (31.10.–01.11.2026) lief sie über sechs Integrations-Commits
+(W0–W3 und W5) und drei getrennte Prüf-Gates; der Abschnitt „Fassung 3.0.0 — Sitzungskette“ hält
+fest, was dabei anders war. Sie gilt für jede Sitzung, die den Zweig `ausbau-1.2` verändert.
 
 ## Voraussetzungen
 
@@ -197,43 +199,79 @@ Zum Prüfen der Ladelinks `System.Net.Http.HttpClient` benutzen, nicht `Invoke-W
 Head`: das fragt in dieser Umgebung nach Eingaben und bricht ab. Erwartet wird
 `Content-Disposition: attachment` — sonst ist der „Ein-Klick-Download" keiner.
 
-## Release 2.1.0 — Checkliste (S8, nur mit Freigabe)
+## Fassung 3.0.0 — Sitzungskette (31.10.–01.11.2026)
 
-Diese Liste ist der Ablauf für den Fassungszug auf 2.1.0. **Nichts davon passiert
-automatisch**, und Punkt 8 ist eine harte Sperre: ohne ausdrückliche Freigabe des Nutzers
-kein Commit, kein Tag, kein Push, kein Release.
+Die 3.0.0-Sitzung hat die Fassung in **Wellen mit eigenem Prüf-Gate** gebaut; jeder Wellen-Commit
+war vor seinem Commit durch das Gate gegangen, der nächste baute darauf auf. Commits in Reihenfolge:
 
-1. **Gates grün, vollständig.** `sh tools/test.sh` („N/N grün", **0 übersprungen**,
-   Exit 0) · `python tools/klassen.py` · `node tools/sim-stand.js` · `python tools/ethos.py` ·
+| Commit | Inhalt |
+|---|---|
+| `dd42723` | W0: Messbasis, Ausnahmen A1–A3, § 12 des Vertrags wiederhergestellt |
+| `aa08057` | W1: Klassenbetrieb-Grundlage, Simulation, Inhalte, Oberfläche, Gates gehärtet |
+| `d0785d6` | W1-Hotfix: Antwort-Platzhalter verrät die Lösung nicht mehr (Z-07) |
+| `ff06834` | W2: Klassenraum 3.0 (Sitzungen, Korrektur, Diagnose, Übersicht), Spiel/Lernkern, R12 messbar |
+| `1a177b4` | W3: Klassenraum-Betrieb rund, Sichturteile behoben, Gates/CI gehärtet |
+| (W4) | Sicht-Matrix (12 Ansichten × 3 Breiten × 7 Themes) und Prüfprotokolle — **kein Commit** |
+| `b23c4a4` | W5: Fassungszug 3.0.0, Bildstand 3.0.0, Doku und Stand nachgezogen |
+
+**Was in dieser Sitzung zusätzlich zum Acht-Schritte-Ablauf galt.**
+
+- **Drei Eingangs-Gates** (W1, W2, W3) mit voller Abnahmekette, danach W5 mit Fassungszug und
+  Bildstand. Die Gate-Protokolle liegen unter `Nachweise/3.0/gates/`, die Messbasis in
+  `Nachweise/3.0/00-Messbasis.md` (§ 17–19).
+- **R12-Ratsche:** `tools/rauch.py --r12` → `tools/ethos.py --dom --r12` → versionierte
+  `tests/r12-stand.json` → `docs/STAND.md`; Zuwachs je Ansicht × Breite ist ROT, der Bestand ist
+  eingefroren. Ein Wechsel des Messwegs (W1 direkt, W2 über den Rauch-Flow) ist als Messweg-Effekt
+  dokumentiert, nicht als Produktänderung.
+- **Werte-Gate der Doku:** `python tools/doku-claims.py --pruefen` und `--gegenprobe`; das Gate
+  prüft Werte (Versionsnummern, Tag-Zahl, Bildstand, INHALT-Abdeckung) statt Musterpräsenz.
+- **DoD-Gate:** `python tools/abnahme-3.0.py --schnell` mit sieben Achsen; `nicht gemessen` zählt
+  dort wie ROT.
+- **Artefakte lokal gebaut und gemessen** (Einzeldatei, Browser-ZIP, `.exe`, APK); Veröffentlichung
+  erst nach Freigabe. Werte und Prüfsummen: [`Übergabe – Stand 3.0.0`](<entwicklung/Übergabe – Stand 3.0.0.md>).
+- **Nicht gemessen:** GitHub-CI-Läufe, Live-Seite, Release-API, Keystore-Secrets,
+  Geräteinstallation, Tauri-Fenster und Screenreader.
+
+## Release 3.0.0 — Checkliste (nur mit Freigabe)
+
+Diese Liste ist der Ablauf für die Auslieferung der Fassung 3.0.0. **Nichts davon passiert
+automatisch**, und Punkt 8 ist eine harte Sperre: ohne ausdrückliche Freigabe des Nutzers kein
+Commit, kein Tag, kein Push, kein Release.
+
+1. **Gates grün, vollständig.** `sh tools/test.sh` („N/N grün", **0 übersprungen**, Exit 0) ·
+   `python tools/klassen.py` · `node tools/sim-stand.js` · `python tools/ethos.py` ·
    `python tools/stand.py --pruefen` (Exit 0) · `python tools/seite.py --pruefen` (Exit 0) ·
-   `git diff --exit-code docs/doku` nach `python tools/seite.py` (**leer**).
+   `git diff --exit-code docs/doku` nach `python tools/seite.py` (**leer**) ·
+   `python tools/doku-claims.py --pruefen` und `--gegenprobe` (Exit 0) ·
+   `python tools/bilder.py --pruefen` (Exit 0) · `python tools/abnahme-3.0.py --schnell`
+   (Exit 0; `nicht gemessen` zählt wie ROT).
 2. **Fassung prüfen, dann ziehen** (Trockenlauf zuerst):
-   `python tools/fassung-ziehen.py --pruefen` → muss **GRÜN** sein · `python tools/fassung-ziehen.py --neu 2.1.0`
-   → Trockenlauf, **0 Fehler** · dann `--setzen`.
-3. **Android-Bauzählung von Hand:** `VERSION_CODE` in `android/bauen.py` muss **über** dem
-   aus 2.1.0 abgeleiteten Wert liegen — abgeleitet ist **20100**, also z. B. **20101**
-   (der Fassungszug ändert sie nicht).
+   `python tools/fassung-ziehen.py --pruefen` → muss **GRÜN** sein. Für 3.0.0 ist der Zug gelaufen
+   (Commit `b23c4a4`); ein weiterer Zug beginnt mit `--neu <fassung>` und endet erst nach
+   Freigabe mit `--setzen`.
+3. **Android-Bauzählung von Hand:** `VERSION_CODE` in `android/bauen.py` muss **über** dem aus
+   `versionName` abgeleiteten Wert liegen (für 3.0.0: über 30000; gesetzt ist 30001, der
+   Fassungszug ändert sie nicht).
 4. **Bauen:** `python bauen.py` · `python tools/einfach.py` (schreibt `docs/index.html` **und**
-   `Netzwerk-Labor.html`) · beide **byte-gleich**, **0 Außenverweise**, **Lizenzblock
-   enthalten** (PolyForm Noncommercial 1.0.0 + die drei OFL-Texte, eingebettet von
-   `tools/einfach.py`).
-5. **Zahlen und Doku nachziehen:** `python tools/stand.py` (schreibt `docs/STAND.md` + den
-   Block in `README.md`) · `python tools/stand.py --pruefen` (Exit 0) · `python tools/seite.py` ·
+   `Netzwerk-Labor.html`) · beide **byte-gleich**, **0 Außenverweise**, **Lizenzblock enthalten**.
+   Die Fassung in den Erzeugnissen gegenprüfen: `LABOR_VERSION`/`LABOR_BAU` in `docs/index.html`,
+   `(Get-Item Programm\Netzwerk-Labor.exe).VersionInfo.ProductVersion`.
+5. **Zahlen und Doku nachziehen:** `python tools/stand.py` (schreibt `docs/STAND.md` + den Block in
+   `README.md`) · `python tools/stand.py --pruefen` (Exit 0) · `python tools/seite.py` ·
    `python tools/seite.py --pruefen` (Exit 0) · `git diff --exit-code docs/doku` (leer).
-6. **Abnahme:** `python tools/abnahme.py` — vollständige Kette. Der Browseranteil
-   (`starttest.py`, Rauchtest) läuft **nur mit Browser**; ohne Browser ist er ausdrücklich
-   „nicht geprüft". Screenshots **nur mit Browser** neu erzeugen; sonst bleibt der
-   1.1.0-Hinweis in README und `docs/bilder/HERKUNFT.md` stehen.
-7. **2.1.0-Abschnitt im CHANGELOG füllen:** Die Platzhalter der Tabelle (S3–S8) durch die
-   gemessenen Endzahlen ersetzen; Quelle ist ausschließlich `docs/STAND.md`. Keine
-   geschätzten Zahlen, keine alten Fassungszahlen.
-8. **Freigabe abwarten** (harte Sperre): Commit, Tag `v2.1.0`, `git push` und Release
-   **nur** nach ausdrücklicher Zustimmung des Nutzers. Der Owner schreibt nicht selbst.
-9. **Release-Inhalt:** CHANGELOG-Abschnitt als Release-Text, drei Anhänge
-   (`…-Browser.zip`, `Netzwerk-Labor.html`, `…exe`), dazu eine `SHA256SUMS`-Datei mit den
-   Prüfsummen der Anhänge. Android-APK nur anhängen, wenn sie wirklich gebaut und geprüft ist.
-10. **Nachmessen** wie in Schritt 8 oben: Live-Seite hashen, Anhänge und
-    `Content-Disposition` prüfen, `SHA256SUMS` gegen die heruntergeladenen Dateien rechnen.
+6. **Abnahme:** `python tools/abnahme-3.0.py --schnell`; der Browseranteil (Rauchtest, Sichtmatrix)
+   läuft **nur mit Browser** — ohne Browser ist er ausdrücklich „nicht geprüft". Die Schlüsselbilder
+   in `docs/bilder/` stehen auf der Fassung 3.0.0 (Herkunft: `docs/bilder/HERKUNFT.md`); die
+   W4-Matrix unter `Nachweise/3.0/sicht/w4/matrix` belegt die Sicht.
+7. **CHANGELOG-Abschnitt 3.0.0 prüfen:** Er ist geschrieben (Commit `b23c4a4`, Abschnitt „3.0.0“);
+   keine Platzhalter, Zahlen nur über `docs/STAND.md`. Ein Nachtrag braucht einen neuen Commit.
+8. **Freigabe abwarten** (harte Sperre): Commit, Tag `v3.0.0`, `git push` und Release **nur** nach
+   ausdrücklicher Zustimmung des Nutzers. Der Owner schreibt nicht selbst.
+9. **Release-Inhalt:** CHANGELOG-Abschnitt als Release-Text, Anhänge `…-Browser.zip`,
+   `Netzwerk-Labor.html`, `…exe`, dazu eine `SHA256SUMS`-Datei mit den Prüfsummen. Android-APK nur
+   anhängen, wenn gebaut und geprüft (für 3.0.0 lokal gebaut und signiert — Entscheid des Nutzers).
+10. **Nachmessen** wie in Schritt 8 oben: Live-Seite hashen, Anhänge und `Content-Disposition`
+    prüfen, `SHA256SUMS` gegen die heruntergeladenen Dateien rechnen.
 
 ## Harte Regeln, die aus Fehlern stammen
 
@@ -268,6 +306,10 @@ kein Commit, kein Tag, kein Push, kein Release.
 Ein Satz je Punkt, mit Zahl:
 
 - Fassung in allen Erzeugnissen (Browser-Einzeldatei, `.exe`, `.apk`) — mit SHA256 bzw. Versionsangabe.
-- Testergebnis (`N/N grün`), `ethos`, `klassen`, `sim-stand`, `seite-pruefen`.
+- Testergebnis (`N/N grün`), `ethos`, `klassen`, `sim-stand`, `seite.py --pruefen`,
+  `doku-claims.py --pruefen`/`--gegenprobe`, `bilder.py --pruefen`, `abnahme-3.0.py --schnell`.
+  Die Zahlen dieser Läufe stehen in `docs/STAND.md` und in den Gate-Protokollen unter
+  `Nachweise/3.0/gates/` — nicht doppelt in Prosa.
 - Was **nicht** geprüft werden konnte, ausdrücklich.
 - Die Adressen, an denen es steht: Seite, Release, Anhänge.
+- Der Stand in [`Übergabe – Stand 3.0.0`](<entwicklung/Übergabe – Stand 3.0.0.md>) als Übergabetext.
