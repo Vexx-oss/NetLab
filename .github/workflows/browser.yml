@@ -75,10 +75,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "R12-Ratsche nicht gehalten oder nicht gemessen — Pflichtzeilen oben." }
 
       # 4) Tiefe Menueebenen in 5 Profilen (Telefon/Tablet/Desktop) mit echten Klickpfaden.
+      #    Geprueft wird die committete 3.0.0-Einzeldatei docs/index.html (byte-gleich zu
+      #    Netzwerk-Labor.html). Kein eigener Bau-Schritt: rauch.py hat web/index.html davor
+      #    bereits gebaut. Der Dateipfad wird trotzdem explizit gesetzt (kein Default).
       - name: Tiefe Menueebenen (5 Profile)
         shell: pwsh
         run: |
-          python tools/menueprobe.py --lauf --ohne-bild 2>&1 | Tee-Object -FilePath menueprobe.log
+          python tools/menueprobe.py --lauf --ohne-bild --datei docs/index.html 2>&1 | Tee-Object -FilePath menueprobe.log
           if ($LASTEXITCODE -ne 0) { throw "Menueprobe Exit $LASTEXITCODE — mindestens ein Profil/Kriterium rot." }
           $log = Get-Content menueprobe.log -Raw
           foreach ($pflicht in @('5 von 5 Profilen gemessen', '0 verletzt')) {

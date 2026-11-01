@@ -14,7 +14,7 @@ Läuft lokal und offline; nichts wird gesendet.
 
 <div class="stand">
 <!-- STAND:ANFANG -->
-<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>3.0.0</strong> · Baukennung <code>5752600c</code> · Tests <strong>1.321/1.321 grün</strong> (0 uebersprungen, 165 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 42.692 Zeilen</strong> · Einzeldatei <strong>4.169.775 B</strong>, SHA256 <code>D86B905F…98D9583</code> · Inhalte <strong>76 Tickets, 151 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>69</strong> Doku-Seiten · relative Verweise <strong>364 geprueft, 0 tot</strong>.</p>
+<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>3.0.0</strong> · Baukennung <code>6f324dc9</code> · Tests <strong>1.321/1.321 grün</strong> (0 uebersprungen, 165 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 42.692 Zeilen</strong> · Einzeldatei <strong>4.169.775 B</strong>, SHA256 <code>D7EAD51D…2F2757D</code> · Inhalte <strong>76 Tickets, 151 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>69</strong> Doku-Seiten · relative Verweise <strong>364 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div>
 

@@ -4,7 +4,7 @@
    Werkstatt hängt oben in der Mitte und unten rechts auf der Fläche, sie ändert kein Layout. */
 
 /* ---- Werkstatt-Leiste (sichtbar nur im Sandbox-Kontext, editor.js schaltet sie über laden(…, {sandbox:true})) ---- */
-.wk-leiste{position:relative; z-index:10; display:flex; align-items:center; gap:8px; min-height:48px; padding:0 12px; border-bottom:1px solid var(--line); background:var(--panel)}
+.wk-leiste{position:relative; z-index:20; display:flex; align-items:center; gap:8px; min-height:48px; padding:0 12px; border-bottom:1px solid var(--line); background:var(--panel)}
 .wk-leiste[hidden], .wk-treffer[hidden]{display:none}
 .wk-titel, .wk-mini-titel{color:var(--faint); font:700 var(--fs-1)/1 var(--body); text-transform:uppercase}
 .wk-suche{display:flex; align-items:center; gap:8px; min-width:0; padding:0 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel-2); color:var(--muted)}

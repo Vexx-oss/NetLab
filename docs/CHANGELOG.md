@@ -114,7 +114,9 @@ die 7 R12-Ansichten über der Grenze sind Bestand und als solcher eingefroren (k
 starren 6er-Norm); Screenshot-Matrix W4 belegt die Sicht, ersetzt aber keinen Geräte-/Browser-Test auf
 fremder Hardware (im Bericht benannt).
 
----## 2.9.0 — Runde 8: Abteilung „Subnetting" mit visuellen Werkzeugen, Übungen und Lernspielen (31.10.2026)
+---
+
+## 2.9.0 — Runde 8: Abteilung „Subnetting" mit visuellen Werkzeugen, Übungen und Lernspielen (31.10.2026)
 
 **Was diese Fassung ist.** Die in der Vorrunde begonnene Linie „Lernen braucht einen eigenen Ort"
 führt zu einer neuen Abteilung: **Subnetting und VLAN intensiv lernen** — mit visuellen Hilfen,

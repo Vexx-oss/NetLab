@@ -19,6 +19,15 @@ Behälter eingesperrt (also sichtbar abgeschnitten), Trefferflächen unter 44 px
 Überdeckung durch eine spätere Ebene, und der Zustandsapparat (Escape, Klick daneben,
 nacheinander öffnen). Rückgabewert 1, sobald ein Kriterium verletzt ist.
 
+3.0-Layout (gemessen 01.11.2026, release-fest): Die Geräteleiste .lb-geraete ist ab 1100 px
+ausgeblendet (src/stil/zz-polaris.css:255-261); dort misst die Probe den 3.0-Weg über die
+Werkstatt-Kopfzeile (.wk-leiste, .wk-suche-feld „Gerät suchen …", .wk-knopf „Vorlagen";
+src/ui/werkstatt.js:59-76). Die Werkzeugleiste .lb-leiste-oben ist unter 900 px designbedingt aus
+(zz-polaris.css:180-182); dort entfallen Ebenen 8/9 ausdrücklich als „nicht vorhanden (Quelle:
+Datei:Zeile)" und zählen weder als erfüllt noch als verletzt — so wie die Geräteleiste in
+schmalen Profilen der vorhandene Weg bleibt. Die Kriterien der vorhandenen Ebenen bleiben
+unverändert — keine Abschwächung.
+
 Es wird ausschließlich der Browser beendet, den dieses Werkzeug selbst gestartet hat
 (AGENTS.md Regel 1). Alles nutzt die vorhandenen Bausteine aus tools/starttest.py.
 """
@@ -159,6 +168,11 @@ MESSUNG = r"""
 
   try {
     if (typeof UI === 'undefined' || !UI.app) { aus.fehler.push('kein UI'); return aus; }
+    /* 3.0: Ein Ansichtswechsel baut nur im Modus "voll" etwas (UI.modus, app.js:145).
+       Der Probenlauf kann in "leiste"/"tray" starten (gespeicherter Zustand) — ohne
+       erzwungenen Vollmodus fehlen Geräteleiste/Werkzeugleiste (.lb-ansicht, .pa-kat). */
+    try { UI.modus && UI.modus("voll"); } catch (e) { aus.notizen.push('modus voll: ' + e); }
+    await warte(400);
     /* Freies Labor über die Spiel-APIs: ohne Ticket, aber mit Geräteleiste und Werkzeugen. */
     UI.app.ansicht('labor'); await warte(500);
     try { UI.sandbox && UI.sandbox.laden && UI.sandbox.laden(); } catch (e) { aus.notizen.push('sandbox.laden: ' + e); }
@@ -167,9 +181,49 @@ MESSUNG = r"""
     aus.netz = (() => { try { return {geraete: Object.keys(UI.labor.netz.geraete).length, kabel: UI.labor.netz.kabel.length}; }
                         catch (e) { return null; } })();
 
-    /* --- 1. Geräteblatt --- */
-    let oeffnerG = [...document.querySelectorAll('.nl-fab-geraete')].filter(sichtbar)[0] || null;
+    /* 3.0-Design (gemessen 01.11.2026): Die Geräteleiste .lb-geraete ist ab 1100 px ausgeblendet
+       (src/stil/zz-polaris.css:255-261, Mockup-Shell) — dort gibt es die Ebenen 1–3 nicht mehr.
+       Das wird BENANNT, nicht still übersprungen; die Kriterien der vorhandenen Ebenen bleiben
+       unverändert. .nl-fab-geraete existiert in 3.0 nicht mehr und wird nicht erwartet. */
+    aus.layout = {geraeteleiste: sichtbar(document.querySelector('.lb-geraete')),
+                  werkzeugleiste: sichtbar(document.querySelector('.lb-leiste-oben'))};
     let standalone = false;
+    if (!aus.layout.geraeteleiste) {
+      /* 3.0-Werkstatt (Architektur §16.5): Die Geräteaufnahme läuft über die Werkstatt-Kopfzeile
+         (.wk-suche-feld „Gerät suchen …" + .wk-knopf „Vorlagen"), nicht über die 2.0-Geräteleiste
+         (Quelle: src/ui/werkstatt.js:59–76; Leiste ab 1100 px designbedingt ausgeblendet:
+         src/stil/zz-polaris.css:255-261). Dieselben drei Ebenen werden am 3.0-Weg gemessen. */
+      const wk = document.querySelector('.wk-leiste');
+      if (!sichtbar(wk)) {
+        aus.notizen.push('3.0: weder Geräteleiste (.lb-geraete) noch Werkstatt-Leiste (.wk-leiste) '
+          + 'sichtbar — Ebenen 1–3 in diesem Profil nicht vorhanden');
+      } else {
+        aus.weg = 'werkstatt';
+        aus.ebenen.push(Object.assign(ebene(1, 'Werkstatt-Leiste', '.wk-leiste'), {weg: 'werkstatt'}));
+        const suchFeld = document.querySelector('.wk-suche-feld');
+        if (suchFeld) {
+          suchFeld.focus();
+          suchFeld.value = 'router';
+          suchFeld.dispatchEvent(new Event('input', {bubbles: true}));
+          await warte(320);
+          aus.ebenen.push(Object.assign(ebene(2, 'Werkstatt-Gerätesuche (Trefferliste)', '.wk-treffer'),
+            {treffer: [...document.querySelectorAll('.wk-treffer .wk-punkt')].filter(sichtbar).map(txt)}));
+          await esc();
+          suchFeld.value = '';
+          suchFeld.dispatchEvent(new Event('input', {bubbles: true}));
+          suchFeld.blur();
+        } else aus.fehler.push('kein .wk-suche-feld sichtbar');
+        const vorlagen = [...document.querySelectorAll('.wk-knopf')].filter(sichtbar)[0];
+        if (vorlagen) {
+          vorlagen.click(); await warte(380);
+          aus.ebenen.push(Object.assign(ebene(3, 'Werkstatt-Vorlagen-Menü', '.menue:not(.popover)'),
+            {ziele: [...document.querySelectorAll('.menue:not(.popover) .menue-punkt')].filter(sichtbar).map(txt)}));
+          await esc();
+        } else aus.fehler.push('kein .wk-knopf (Vorlagen) sichtbar');
+      }
+    } else {
+    aus.weg = 'geraeteleiste';
+    let oeffnerG = [...document.querySelectorAll('.nl-fab-geraete')].filter(sichtbar)[0] || null;
     if (oeffnerG) { oeffnerG.click(); await warte(420); }
     else { standalone = [...document.querySelectorAll('.pa-kat')].filter(sichtbar).length > 0; }
     aus.geraeteOeffner = oeffnerG ? {klasse: kl(oeffnerG), masse: kb(oeffnerG)} : null;
@@ -224,6 +278,7 @@ MESSUNG = r"""
       const zu = [...document.querySelectorAll('.pa-zu')].filter(sichtbar)[0];
       if (zu) { zu.click(); await warte(280); }
     }
+    }
     await esc();
     aus.nachFach = stand();
 
@@ -250,6 +305,10 @@ MESSUNG = r"""
     } else aus.notizen.push('kein .nl-mehr sichtbar (Querformat blendet es aus — gewollt)');
 
     /* --- 8. Ansicht- und Zoom-Menü --- */
+    if (!aus.layout.werkzeugleiste) {
+      aus.notizen.push('3.0-Schmal-Layout: Werkzeugleiste .lb-leiste-oben unter 900 px ausgeblendet '
+        + '(src/stil/zz-polaris.css:180-182) — Ebenen 8/9 in diesem Profil nicht vorhanden');
+    } else {
     const ansicht = [...document.querySelectorAll('.lb-ansicht')].filter(sichtbar)[0];
     if (ansicht) {
       ansicht.click(); await warte(340);
@@ -266,6 +325,7 @@ MESSUNG = r"""
       zoom.click(); await warte(340);
       aus.ebenen.push(ebene(9, 'Zoom-Menü', '.menue:not(.popover)'));
       await esc();
+    }
     }
 
     /* --- 10. Dock-Blatt und Reiter ---
@@ -463,13 +523,26 @@ def pruefe(aus: dict) -> tuple[list, list, list]:
         rot.append(("Am Ende ist noch ein Dialog offen", aus["endstand"]["dialoge"]))
     for r in aus.get("reiter", []):
         satz(f"Dock-Reiter „{r['name']}“: Inhalt da", bool(r.get("inhalt")), r.get("masse"))
-        if r.get("abgeschnitten"):
-            if r["abgeschnitten"].get("rollbar"):
-                rot.append((f"Dock-Reiter „{r['name']}“: Inhalt ragt aus {r['abgeschnitten']['behaelter']}",
-                            r["abgeschnitten"]))
+        a = r.get("abgeschnitten")
+        if a:
+            # Dieselbe dokumentierte 4-px-Schwelle wie in beschnitten(): 1-4 px sind Rundung am
+            # Rand (gemessen 01.11.2026 bei 360/412 px: 3 px), kein Befund. Vorher fehlte die
+            # Schwelle HIER - dieselbe Rundung wurde als Rot gemeldet, obwohl die Ebenenpruefung
+            # sie korrekt als "unter der Messschwelle" fuehrte.
+            ueber = max(a.get("ueberstandRechts", 0), a.get("ueberstandUnten", 0))
+            if not ueber:
+                for wert in (a.get("kanten") or {}).values():
+                    if wert:
+                        ueber = 3
+                        break
+            if a.get("rollbar") and ueber > 4:
+                rot.append((f"Dock-Reiter „{r['name']}“: Inhalt ragt aus {a['behaelter']}", a))
+            elif ueber > 4:
+                hinweise.append((f"Dock-Reiter „{r['name']}“: von {a['behaelter']} beschnitten "
+                                 f"(overflow hidden — mutmaßlich gewollt)", a.get("kanten")))
             else:
-                hinweise.append((f"Dock-Reiter „{r['name']}“: von {r['abgeschnitten']['behaelter']} beschnitten "
-                                 f"(overflow hidden)", r["abgeschnitten"].get("kanten")))
+                hinweise.append((f"Dock-Reiter „{r['name']}“: {ueber} px über die Kante von "
+                                 f"{a['behaelter']} — unter der Messschwelle, kein Befund", a.get("kanten")))
         if r.get("zuKlein") and grob:
             rot.append((f"Dock-Reiter „{r['name']}“: {r['zuKlein']} Knöpfe unter 44 px", "-"))
     mappe = aus.get("mappe") or {}
@@ -568,14 +641,22 @@ def messe_profil(ws, datei: Path, name: str, breite: int, hoehe: int, dpr: float
     # auch beim zweiten Mal dabei, gilt das Profil als NICHT GEMESSEN (kein Verstoß, s. pruefe()) —
     # und der Hinweis sagt offen, dass neu geladen wurde (Befund 09.10.2026, s. o.).
     if "kein UI" in (wert.get("fehler") or []):
-        ws.rufen("Page.reload", {"ignoreCache": True})
-        warten_auf_seite(ws)
-        zweiter, fehler2 = js(ws, MESSUNG, warten=True)
-        if zweiter is not None:
+        # Zwei weitere Versuche mit wachsender Wartezeit: unter Last (parallele Browser-Läufe,
+        # gemessen 01.11.2026) war ein Profil gelegentlich noch nicht bereit; die Probe soll
+        # dann erneut messen statt das Profil als „nicht gemessen“ zu führen.
+        for versuch in range(2):
+            ws.rufen("Page.reload", {"ignoreCache": True})
+            time.sleep(0.8 * (versuch + 1))
+            warten_auf_seite(ws)
+            zweiter, fehler2 = js(ws, MESSUNG, warten=True)
+            if zweiter is None:
+                continue
             zweiter.setdefault("notizen", []).append(
-                "Seite war beim ersten Versuch nicht bereit (kein UI) – einmal neu geladen; "
-                "das ist ein Werkzeug-Neuladen, kein Befund der Oberfläche")
+                "Seite war nicht bereit (kein UI) – Werkzeug hat neu geladen (Versuch "
+                + str(versuch + 2) + "); das ist ein Werkzeug-Neuladen, kein Befund der Oberfläche")
             wert = zweiter
+            if "kein UI" not in (wert.get("fehler") or []):
+                break
     wert["profil"] = name
     wert["soll"] = {"breite": breite, "hoehe": hoehe, "dpr": dpr}
     wert["beruehrung"] = beruehrung
