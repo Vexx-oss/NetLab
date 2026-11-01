@@ -1,7 +1,7 @@
 {
   "fassung": 1,
   "quelle": "tools/ethos.py --dom --r12 --festhalten",
-  "zeit": "2026-10-31T22:52:09+01:00",
+  "zeit": "2026-11-01T10:50:46+01:00",
   "grenzen": {
     "standard": 6,
     "mitarbeit": 3
@@ -22,8 +22,8 @@
     "labor": {
       "1440": 17,
       "1366": 17,
-      "960": 11,
-      "720": 7
+      "960": 12,
+      "720": 8
     },
     "subnetz": {
       "1440": 13,
@@ -83,8 +83,8 @@
     "Heute (heute) @960px: 16 sichtbare Bedienelemente - erlaubt 6",
     "Labor (labor) @1366px: 17 sichtbare Bedienelemente - erlaubt 6",
     "Labor (labor) @1440px: 17 sichtbare Bedienelemente - erlaubt 6",
-    "Labor (labor) @720px: 7 sichtbare Bedienelemente - erlaubt 6",
-    "Labor (labor) @960px: 11 sichtbare Bedienelemente - erlaubt 6",
+    "Labor (labor) @720px: 8 sichtbare Bedienelemente - erlaubt 6",
+    "Labor (labor) @960px: 12 sichtbare Bedienelemente - erlaubt 6",
     "Lernstand (lernstand) @1366px: 39 sichtbare Bedienelemente - erlaubt 6",
     "Lernstand (lernstand) @1440px: 39 sichtbare Bedienelemente - erlaubt 6",
     "Lernstand (lernstand) @720px: 39 sichtbare Bedienelemente - erlaubt 6",

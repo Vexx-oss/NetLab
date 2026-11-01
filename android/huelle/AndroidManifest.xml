@@ -5,7 +5,7 @@
   Assets der App beantwortet (siehe MainActivity.shouldInterceptRequest). Damit kann
   die App nichts nachladen, auch nicht versehentlich.
 
-  DREHUNG (geändert 06.10.2026; Fassung 3.0.0 / versionCode 30001, Stand 01.11.2026)
+  DREHUNG (geändert 06.10.2026; Fassung 3.1.0 / versionCode 30101, Stand 01.11.2026)
   Bis hierher stand android:screenOrientation="sensorLandscape" — die App war auf
   Querformat festgenagelt. Jetzt steht dort ausdrücklich "unspecified", also die
   Voreinstellung des Systems. Die Wahl ist begründet:

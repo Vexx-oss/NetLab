@@ -168,6 +168,17 @@ MESSUNG = r"""
 
   try {
     if (typeof UI === 'undefined' || !UI.app) { aus.fehler.push('kein UI'); return aus; }
+    /* Messhygiene Erststart (3.1.0, gates-Befund 01.11.2026): Die Onboarding-Tour ist beim
+       ersten Start ein modales Overlay und verdeckt die Ebenen 1-4 (Profil klein-hoch: P.onb-text/
+       SECTION.onb-karte/DIV.onb-huelle). Wie ein Nutzer schließen (UI.onboarding.schliessen()
+       merkt einst.tour.gesehen=true) statt die Probe als Produktfehler rot zu messen — dieselbe
+       Hygieneregel wie tools/rauch.py; die Tour selbst prüfen tests/onboarding-tour-a11y.test.js
+       und der rauch-Onboarding-Fall. */
+    try {
+      if (UI.onboarding && typeof UI.onboarding.schliessen === 'function') UI.onboarding.schliessen();
+    } catch (e) { aus.notizen.push('onboarding.schliessen: ' + e); }
+    try { document.querySelectorAll('.onb-huelle').forEach(el => el.remove()); } catch (e) { /* egal */ }
+    await warte(200);
     /* 3.0: Ein Ansichtswechsel baut nur im Modus "voll" etwas (UI.modus, app.js:145).
        Der Probenlauf kann in "leiste"/"tray" starten (gespeicherter Zustand) — ohne
        erzwungenen Vollmodus fehlen Geräteleiste/Werkzeugleiste (.lb-ansicht, .pa-kat). */

@@ -286,6 +286,92 @@ gruppe("UI: Ergebnis kopieren" + UES_ZUSATZ, () => {
     erwarte.wahr(knoepfe.includes("Übersicht"), "die anderen Wege bleiben");
   }));
 
+  /* task-119 (Nutzer): Der „Gelöst!“-Dialog ist ein Bento-Raster wie Dashboard/Hub. Der Vertrag ist
+     Struktur-only: gleiche Texte/Anker/Buttons, keine neuen Bedienelemente, keine Info-Verluste. */
+  pruefe("task-119: „Gelöst“-Dialog ist ein Bento-Raster (Karten, Fußzeile, alte Anker, keine Info-Verluste)", () => uesFenster(({welt, fenster, inst, def, ab, erg}) => {
+    const klassen = uesKlassen;
+    const gibt = (el, sel) => uesFinde(el, sel)[0] || null;
+    const hat = (el, ...ks) => !!el && ks.every(k => klassen(el).includes(k));
+    const overlay = uesFinde(welt.dokument.body, ".sp-overlay")[0];
+    erwarte.wahr(!!overlay, "das Overlay steht");
+    erwarte.wahr(hat(overlay, "sp-overlay", "erg-bento"), "Overlay trägt erg-bento (CSS-Hook)");
+    erwarte.wahr(hat(fenster, "sp-ergebnis", "erg-bento"), "Wurzel trägt sp-ergebnis erg-bento");
+    const raster = gibt(fenster, ".erg-raster");
+    erwarte.wahr(hat(raster, "bn-raster", "erg-raster"), "Bento-Raster .bn-raster.erg-raster");
+    erwarte.gleich(uesFinde(fenster, ".erg-raster").length, 1, "genau ein Raster");
+    /* HERO: Titel/Lead/Meta/Kurztext an den bisherigen Stellen, Sterne + Abzug rechts. */
+    const hero = gibt(raster, ".erg-hero");
+    erwarte.wahr(hat(hero, "bn-k", "akzent"), "HERO ist eine Bento-Karte (bn-k akzent)");
+    const kopf = gibt(hero, ".sp-erg-kopf");
+    erwarte.wahr(hat(kopf, "erg-hero-text"), "Hero-Textblock behält den alten .sp-erg-kopf-Anker");
+    const k = Spiel.kundenDaten(inst.kunde || def.kunde);
+    erwarte.enthaelt(uesText(gibt(kopf, ".bn-kicker")), "ABNAHME · KUNDE", "Kicker nennt die Abnahme");
+    const titelErwartet = erg.sterne >= 4.5 ? "Hervorragend gelöst!" : erg.sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe";
+    erwarte.gleich(uesText(gibt(hero, "h2")), titelErwartet, "derselbe Titel wie bisher");
+    erwarte.gleich(uesText(gibt(kopf, ".bn-lead")), def.titel, "Lead = Ticket-Titel (bisheriger Text)");
+    const kurz = Spiel.ergebnisKurz(erg.inst, erg);
+    erwarte.wahr(uesFinde(kopf, "p").some(p => uesText(p).trim() === kurz.trim()), "die Kurzfassung steht unverändert im Kopf");
+    erwarte.enthaelt(uesText(kopf), k.name, "die Meta-Zeile nennt den Kunden");
+    /* P2-Dedup (ERG-BENTO Runde 2): Dauer/Hilfe/Abnahme stehen ausschließlich in der Kennzahlen-Karte. */
+    /* Die Meta-ZEILE (Kunde) wiederholt sie nicht; die unveränderte kurz-Zeile enthält sie als Text. */
+    const metaZeile = uesFinde(kopf, "p").find(p => uesText(p).trim() === k.name);
+    erwarte.wahr(!!metaZeile, "die Meta-Zeile besteht nur aus dem Kunden");
+    erwarte.falsch(/Dauer|Hilfe|Abnahme/.test(uesText(metaZeile)), "die Hero-Meta-Zeile wiederholt Dauer/Hilfe/Abnahme NICHT");
+    const seite = gibt(hero, ".erg-hero-seite");
+    const sternEl = gibt(seite, ".sp-sterne");
+    erwarte.wahr(!!sternEl, "die Sterne stehen rechts im Hero");
+    erwarte.gleich(sternEl.getAttribute("aria-label"), erg.sterne + " von 5 Sternen", "Sterne-aria-label unverändert");
+    const sternSpans = uesFinde(sternEl, "span");
+    erwarte.gleich(sternSpans.length, 5, "fünf Sternspans");
+    erwarte.gleich(sternSpans.filter(s => klassen(s).includes("voll")).length, Math.floor(erg.sterne), "volle Sterne zählen");
+    const abzuege = ab.abzuege || [];
+    if (abzuege.length) {
+      const abzugText = abzuege.map(a => "−" + (a.sterne === 0.5 ? "½" : a.sterne) + " ★ " + a.text).join(" · ");
+      const treffer = uesFinde(hero, "p").filter(p => uesText(p).trim() === abzugText);
+      erwarte.gleich(treffer.length, 1, "die Abzugs-Zeile steht genau einmal, im Hero");
+      erwarte.wahr(hat(treffer[0], "sp-zeile", "leise"), "Abzugs-Zeile behält sp-zeile.leise");
+    }
+    /* LOHN / RUF / KENNZAHLEN: alte Anker (sp-geld, sp-ruf) in den neuen Karten. */
+    const lohn = gibt(raster, ".erg-lohn");
+    erwarte.wahr(hat(lohn, "bn-k", "geld"), "LOHN-Karte (bn-k geld)");
+    erwarte.wahr(!!gibt(lohn, ".sp-geld"), "b.sp-geld bleibt Zählziel");
+    erwarte.wahr(!!gibt(lohn, ".bn-wert"), "Wert steht in .bn-wert");
+    erwarte.wahr(!!gibt(lohn, ".bn-meta"), "Aufschlüsselung in .bn-meta");
+    const ruf = gibt(raster, ".erg-ruf");
+    erwarte.wahr(hat(ruf, "bn-k", "iris"), "RUF-Karte (bn-k iris)");
+    erwarte.gleich(uesText(gibt(ruf, ".bn-wert")).trim(), "+" + erg.ruf + " Ruf", "Ruf-Wert unverändert");
+    const kenn = gibt(raster, ".erg-kenn");
+    erwarte.wahr(hat(kenn, "bn-k", "flach"), "KENNZAHLEN-Karte (bn-k flach)");
+    const kpis = uesFinde(kenn, ".erg-kpi");
+    erwarte.gleich(kpis.length, 3, "drei KPI-Reihen");
+    erwarte.enthaelt(uesText(kenn), "Dauer", "Kennzahlen nennt die Dauer");
+    erwarte.enthaelt(uesText(kenn), "Hilfe", "Kennzahlen nennt die Hilfe-Stufe");
+    erwarte.enthaelt(uesText(kenn), "Abnahme", "Kennzahlen nennt die Abnahmeart");
+    for (const e of kpis) {
+      erwarte.wahr((e.kinder || []).some(x => x.tag === "b"), "KPI trägt einen Wert");
+      erwarte.wahr(uesFinde(e, ".bn-kicker").length === 1, "KPI trägt ein Mikro-Label");
+    }
+    /* WEG / MERKE: Überschriften und Anker unverändert, Notizen im eigenen Block. */
+    const weg = gibt(raster, ".erg-weg");
+    erwarte.wahr(!!weg, "WEG-Karte steht");
+    erwarte.gleich(uesText(gibt(weg, "h3")), "Dein Weg", "Überschrift unverändert");
+    if (erg.weg && erg.weg.length) erwarte.gleich(uesFinde(weg, ".sp-weg-chips").length, 1, "sp-weg-chips bleibt");
+    erwarte.wahr(!!gibt(weg, ".erg-weg-notizen"), "Notizen stehen im erg-weg-notizen-Block");
+    const merke = gibt(raster, ".erg-merke");
+    erwarte.wahr(!!merke, "MERKE-Karte steht");
+    erwarte.gleich(uesText(gibt(merke, "h3")), "Merke", "Überschrift unverändert");
+    erwarte.wahr(!!gibt(merke, ".sp-merke-fuss"), "Quelle/Nachlesen bleibt .sp-merke-fuss");
+    const mehr = gibt(raster, ".erg-mehr");
+    erwarte.wahr(mehr === null || hat(mehr, "bn-k", "flach"), "MEHR-Karte (falls Inhalt) ist eine flache Bento-Karte");
+    /* FUSS: unveränderte Knöpfe, genau eine Fußzeile, keine Karten mit sp-block-Doppelfläche. */
+    const fuss = uesFinde(fenster, ".sp-knoepfe.erg-fuss")[0];
+    erwarte.wahr(!!fuss, "Fußzeile .sp-knoepfe.erg-fuss");
+    const knoepfe = uesFinde(fuss, "button").map(b => uesText(b).trim());
+    erwarte.wahr(knoepfe.includes("Ergebnis kopieren") && knoepfe.includes("Übersicht"), "Knöpfe unverändert");
+    erwarte.gleich(uesFinde(fenster, ".sp-knoepfe").length, 1, "genau EINE Fußzeile (keine Knöpfe in den Karten)");
+    for (const karte of [hero, lohn, ruf, kenn, weg, merke, mehr]) if (karte) erwarte.falsch(klassen(karte).includes("sp-block"), "keine sp-block-Klasse auf Bentokarten");
+  }));
+
   /* Wirkung vor Grün (task-27): `Spiel.ergebnisKurz` hatte KEINEN Aufrufer im Programm — nur Tests
      (Befund der Gegenprüfung task-14). Geprüft wird die Zeile deshalb im ECHTEN Weg: das Fenster wird
      über `abnahmeAnfordern` aufgeschlagen, die Zeile muss darin stehen und genau den Text der echten

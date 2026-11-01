@@ -1,0 +1,63 @@
+"use strict";
+/* ---------- Daten: Analyse-Leitfaden und Onboarding (3.1.0, Variante B) ----------
+   VERTRAG: verbindliche Didaktik-Spec = Nachweise/3.0/3.1/DIAGNOSTIK.md (r-didaktik, task-122),
+   Datenform §5. Phasen-ids/Titel/Impulse/Fehlannahmen sind WÖRTLICH von dort übernommen; die Engine
+   (src/spiel/leitfaden.js) liest ausschließlich diese Texte und erfindet keinen eigenen.
+   Impulse sind prozessleitend und nennen NIE eine Lösung: keine Ziffern, Adressen,
+   Konfigurationswerte, Codes oder Geräte-IDs. Kein Sternabzug, keine Lern-/Fehlerheft-Buchung.
+   "onboarding[].text" ist ein additiver Anzeigetext für UI task-124 (Spec §4 liefert Ziel/Kriterium;
+   Text noch von r-didaktik/UI gegenzulesen). */
+DATEN.leitfaden = {
+  version: 1,
+  phasen: [
+    {id: "auftrag-klaeren", titel: "Auftrag klären",
+      ziel: "Verstehen, was beobachtbar kaputt ist und was danach gehen soll",
+      impulse: ["Lies den Auftrag einmal ganz: Was ist beobachtbar kaputt, was soll danach wieder gehen?",
+        "Wer meldet was – und was hat der Kunde schon versucht?"],
+      fehlannahme: "Das Symptom ist die Ursache."},
+    {id: "lage-schichten", titel: "Lage + Schichten",
+      ziel: "Netzbild und Schichtlage erfassen, bevor geändert wird",
+      impulse: ["Verschaff dir ein Bild vom Netz: Welche Geräte hängen zusammen, wo verläuft der Weg?",
+        "Geh die Schichten von unten nach oben durch: Wo bricht es zuerst?"],
+      fehlannahme: "Nur das eine Gerät ansehen und das Netz vergessen."},
+    {id: "hypothese", titel: "Hypothese",
+      ziel: "Eine prüfbare Vermutung bilden, bevor eingegriffen wird",
+      impulse: ["Formuliere eine Vermutung, die ALLE Beobachtungen erklärt – und eine, die sie widerlegen würde.",
+        "Ordne deine Vermutung einer Schicht zu: Passt sie zu dem, was du gesehen hast?"],
+      fehlannahme: "Erst raten und ändern, dann prüfen."},
+    {id: "messen", titel: "Messen",
+      ziel: "Beobachtung mit Werkzeug belegen statt behaupten",
+      impulse: ["Wähle eine Messung, die deine Vermutung auch widerlegen könnte.",
+        "Vergleiche zwei Messpunkte oder Geräte: Wo ist der Unterschied?"],
+      fehlannahme: "Eine Messung reicht als Beweis."},
+    {id: "eingreifen-pruefen", titel: "Eingreifen + Prüfen",
+      ziel: "Gezielt ändern und die Wirkung sofort prüfen",
+      impulse: ["Ändere eine Sache, dann prüfe sofort: Ist das Ziel jetzt erreichbar?",
+        "Bleibt die Prüfung rot: zurück zur Vermutung – nicht weiter raten."],
+      fehlannahme: "Ändern ohne zu prüfen."},
+    {id: "dokumentieren-lernen", titel: "Dokumentieren + Lernen",
+      ziel: "Ergebnis sichern und für den nächsten Fall lernen",
+      impulse: ["Schreib in einem Satz: Symptom, Ursache, Maßnahme, Prüfung.",
+        "Was nimmst du für den nächsten Fall mit?"],
+      fehlannahme: "Beheben ist genug; Doku und Lernen sind Beiwerk."},
+  ],
+  pruefung: {impulse: false, naechster: null},
+  onboarding: [
+    {id: "onboarding-auftrag", titel: "Was ist ein Auftrag?",
+      lernziel: "Kundenmeldung, Symptom und Ziel unterscheiden; Symptom ist nicht Ursache",
+      abnahme: "höchstens zwei Sätze; nennt Briefing/Symptom/Ziel; keine Lösung, keine Adresse",
+      text: "Im Auftrag stehen Briefing und Symptom; dein Netz siehst du im Labor. Erst verstehen, dann ändern."},
+    {id: "onboarding-lage", titel: "Karte/Lage lesen",
+      lernziel: "Geräte, Kabel, Legende und Adressen im Lagebild finden",
+      abnahme: "verweist auf Symbole/Legende; keine konkreten Werte",
+      text: "Die Karte zeigt Geräte, Kabel und Legende; die Symbole erklären, wie alles zusammenhängt. Verschaff dir erst ein Bild, bevor du etwas anfasst."},
+    {id: "onboarding-leitfaden", titel: "Leitfaden nutzen",
+      lernziel: "Phasen als Fragen verstehen; Umwege erlaubt",
+      abnahme: "nennt die Phasen in höchstens zwei Sätzen; keine Lösungen",
+      text: "Der Analyse-Leitfaden begleitet dich vom Auftrag bis zum Lernen. Du darfst vor- und zurückspringen — er führt, er sperrt nicht."},
+    {id: "onboarding-abnahme", titel: "Abnahme und Lernen",
+      lernziel: "Ziele prüfen, Abnahme ablegen, Lernstand nutzen",
+      abnahme: "erklärt Abnahme und Lernstand; keine Noten, Ränge oder Vergleiche",
+      text: "Die Abnahme zeigt dir, was noch fehlt, und der Lernstand merkt sich, was du geübt hast. Hier zählt dein eigener Fortschritt, kein Vergleich."},
+  ],
+};

@@ -119,7 +119,17 @@ UI.spiel = (() => {
         h("button", {type: "button", class: "knopf am-lesen" + (S.mappe.offen ? " an" : ""), "aria-expanded": String(S.mappe.offen), title: "Auftragsmappe: Brief und Ziele",
           onclick: () => S.mappe.offen ? mappeZu() : mappeAuf("brief")}, UI.symbol("mappe", 17), "Auftrag lesen"),
         abnahme,
-        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfeleiter, Wiki, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
+        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfeleiter, Wiki, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯"),
+        /* 3.1.0 (B3/3): Bei 960/720 ist die Werkzeugleiste ausgeblendet — dieser Knopf in der (dort
+           sichtbaren) Auftragszeile öffnet die Kernaktionen als body-level Menü „Aktionen“.
+           K_net +1 nur auf diesen Breiten (Lead-Freigabe); 1440/1366 unverändert. */
+        (typeof innerWidth === "number" && innerWidth < 1100 && typeof UI !== "undefined" && UI.laborAktionen && typeof UI.menue === "function")
+          ? h("button", {type: "button", class: "knopf geist am-aktionen", "data-aktionen": "1", "aria-haspopup": "menu",
+              title: "Aktionen: Konsole, Messen, Konfigurieren, Akte, Abnahme", onclick: e => {
+                const r = e.currentTarget.getBoundingClientRect();
+                UI.menue(r.left, r.bottom + 4, UI.laborAktionen.menueEintraege(), {titel: "Aktionen"});
+              }}, "Aktionen")
+          : null));
     const ungespeichert = Spiel.speichernErwartet(def, niveau) ? Spiel.ungespeicherteGeraete(inst) : [];
     el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, zeile,
       S.einstiegStart ? einstiegKarte() : null,
@@ -350,6 +360,9 @@ UI.spiel = (() => {
   }
   function menue(e, inst, def){
     const r = e.currentTarget.getBoundingClientRect(), stufe = inst.hilfeStufe || 0;
+    /* 3.1.0 (B3/3): Kernaktionen oben im BESTEHENDEN ⋯-Menü (Kopf „Aktionen“); body-level, zählt nicht. */
+    const kern = (typeof UI !== "undefined" && UI.laborAktionen && typeof UI.laborAktionen.menueEintraege === "function")
+      ? UI.laborAktionen.menueEintraege() : [];
     const eintraege = [
       /* „Hilfe 3/6" statt „Stufe 3/6": das Wort „Stufe" bedeutet im Programm schon vier andere Dinge
          (Karriere, Bildungsstand, Erklärtiefe, Prüfungsstrenge) — hier ist die Sprosse der Hilfeleiter
@@ -368,7 +381,7 @@ UI.spiel = (() => {
     eintraege.push("-",
       {text: "Ticket zurücksetzen", sym: "neustart", fn: () => { Spiel.zuruecksetzen(inst); S.live = null; liveJetzt(); UI.labor.einpassen(); UI.toast("Das Ticket steht wieder auf Anfang (Strg+Z holt deinen Stand zurück).", "info"); }},
       {text: "Zum Postfach", sym: "postfach", fn: () => UI.app.ansicht("postfach")});
-    return UI.menue(r.right - 250, r.bottom + 4, eintraege, {titel: "Ticket"});
+    return UI.menue(r.right - 250, r.bottom + 4, [...kern, ...(kern.length ? ["-"] : []), ...eintraege], {titel: "Aktionen"});
   }
 
   /* ---------- Live-Prüfung (Einstieg und AP1) ---------- */
@@ -608,8 +621,10 @@ UI.spiel = (() => {
     Spiel.abzeichen.pruefen();
     const abz = Spiel.abzeichen.abholen();
     const besser = (erg.lernen || []).find(l => l.nachher > l.vorher);
+    /* task-119: Die Abzugs-Zeile zieht in den Hero (Sterne-Bereich); alles andere bleibt Inhalt. */
+    const abzuege = erg.abnahme.abzuege || [];
+    const abzugZeile = abzuege.length ? h("p", {class: "sp-zeile leise"}, abzuege.map(a => `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`).join(" · ")) : null;
     const zeilen = [
-      erg.abnahme.abzuege.length ? h("p", {class: "sp-zeile leise"}, erg.abnahme.abzuege.map(a => `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`).join(" · ")) : null,
       abz.length ? h("p", {class: "sp-zeile"}, UI.symbol("medaille", 16), " ", h("b", {}, abz.length === 1 ? "Neues Abzeichen: " : "Neue Abzeichen: "), abz.map(a => `${a.sym} ${a.titel}`).join(" · ")) : null,
       besser ? h("p", {class: "sp-zeile"}, UI.symbol("tendenz", 16), " ", h("b", {}, besser.name + ": "), `Stufe ${besser.vorher} → ${besser.nachher}`) : null,
       feierabend ? feierabendZeile() : null,
@@ -629,39 +644,73 @@ UI.spiel = (() => {
     const weiterKnopf = erg.wahl
       ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Nächsten Auftrag wählen ▸")
       : erg.naechstes ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); oeffnen(erg.naechstes); }}, "Nächstes Ticket ▸") : null;
-    const zu = overlay(h("div", {class: "sp-ergebnis"},
-      h("section", {class: "sp-block sp-block-lohn"},
-        h("div", {class: "sp-erg-kopf"}, marke(k.name, k.farbe, {gross: true}),
-          h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"),
-            kurz ? h("p", {class: "sp-leise"}, kurz) : null)),
-        h("div", {class: "sp-lohn-reihe"}, sternEl,
-          h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`),
-            erg.lohn.tempo || erg.lohn.verdacht || erg.lohn.variante ? h("small", {}, "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "", erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : "",
-              erg.lohn.variante ? `${erg.lohn.variante.id === "sauber" ? "Aufschlag für saubere Arbeit" : "Abschlag fürs Provisorium"} (× ${String(erg.lohn.variante.faktor).replace(".", ",")})` : ""].filter(Boolean).join(" und ")) : null)),
-        ...zeilen),
-      erg.weg && erg.weg.length ? h("section", {class: "sp-block sp-weg"}, h("h3", {}, "Dein Weg"),
-        h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
-          h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])),
-        erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
-          UI.symbol({voll: "ziel", ursache: "suche", schicht: "suche"}[erg.verdacht.treffer] || "idee", 15), " ", erg.verdacht.text) : null,
-        erg.hotline ? h("p", {class: "sp-hotline"}, UI.symbol("telefon", 15), " " + erg.hotline.text) : null,
-        akteZeile(erg),
-        erg.schuld ? h("p", {class: "sp-schuld"}, UI.symbol("provisorium", 15), ` Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null) : null,
-      merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
-        h("div", {class: "sp-merke-fuss"},
-          def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
-          typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, UI.symbol("dex", 16), " Nachlesen") : null)) : null,
-      lehrtextKnoepfe(def, niveau).length ? h("section", {class: "sp-block sp-lehrtexte"},
-        h("h3", {}, "Zum Nachlesen"), h("div", {class: "sp-merke-fuss"}, lehrtextKnoepfe(def, niveau))) : null,
-      einstiegSchluss ? h("section", {class: "sp-block sp-einstieg sp-einstieg-schluss"},
-        h("h3", {}, "Willkommen angekommen"),
-        h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_LERNEN),
-        h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_WEG)) : null,
-      h("div", {class: "sp-knoepfe"},
+    /* Bento-Raster (task-119): gleiche Texte, Anker und Knöpfe — nur als Karten wie im Dashboard. */
+    const lohnZusatz = erg.lohn.tempo || erg.lohn.verdacht || erg.lohn.variante
+      ? "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "",
+        erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : "",
+        erg.lohn.variante ? `${erg.lohn.variante.id === "sauber" ? "Aufschlag für saubere Arbeit" : "Abschlag fürs Provisorium"} (× ${String(erg.lohn.variante.faktor).replace(".", ",")})` : ""].filter(Boolean).join(" und ")
+      : null;
+    const hilfen = Array.isArray(erg.inst.hilfen) ? erg.inst.hilfen : [];
+    const hilfeStufe = Math.max(0, +erg.inst.hilfeStufe || 0, ...hilfen.map(x => +x?.stufe || 0));
+    const dauerKpi = typeof Spiel.ergebnis?.dauer === "function" && Number(erg.inst.zeitMs) > 0 ? Spiel.ergebnis.dauer(erg.inst.zeitMs) : "–";
+    const niveauName = (Spiel.NIVEAU_NAME && Spiel.NIVEAU_NAME[niveau]) || niveau;
+    const kpi = (wert, label) => h("div", {class: "erg-kpi"}, h("b", {}, wert), h("span", {class: "bn-kicker"}, label));
+    const ergTitel = sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe";
+    /* P2-Dedup (ERG-BENTO Runde 2): Der Hero nennt nur den Kunden; Dauer/Hilfe/Abnahme stehen
+       ausschließlich in der Kennzahlen-Karte (die kurz-Zeile bleibt als eigene Zeile darunter). */
+    const metaHero = k.name;
+    const lehrtexte = lehrtextKnoepfe(def, niveau);
+    const merkeKarte = (merke || lehrtexte.length) ? h("section", {class: "bn-k sp-merke erg-merke"},
+      merke ? h("h3", {}, "Merke") : null,
+      merke ? h("p", {}, merke) : null,
+      merke ? h("div", {class: "sp-merke-fuss"},
+        def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
+        typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, UI.symbol("dex", 16), " Nachlesen") : null) : null,
+      lehrtexte.length ? h("div", {class: "sp-lehrtexte"}, h("h3", {}, "Zum Nachlesen"), h("div", {class: "sp-merke-fuss"}, lehrtexte)) : null) : null;
+    const zu = overlay(h("div", {class: "sp-ergebnis erg-bento"},
+      h("div", {class: "bn-raster erg-raster"},
+        h("section", {class: "bn-k akzent erg-hero"},
+          h("div", {class: "sp-erg-kopf erg-hero-text"},
+            marke(k.name, k.farbe, {gross: true}),
+            h("div", {},
+              h("span", {class: "bn-kicker"}, "ABNAHME · KUNDE"),
+              h("h2", {}, ergTitel),
+              h("p", {class: "bn-lead"}, def.titel),
+              h("p", {class: "bn-meta"}, metaHero),
+              kurz ? h("p", {class: "bn-meta"}, kurz) : null)),
+          h("div", {class: "erg-hero-seite"}, sternEl, abzugZeile)),
+        h("section", {class: "bn-k geld erg-lohn"},
+          h("div", {class: "sp-lohn"},
+            h("div", {class: "bn-wert"}, euroEl),
+            lohnZusatz ? h("p", {class: "bn-meta"}, lohnZusatz) : null)),
+        h("section", {class: "bn-k iris erg-ruf"},
+          h("div", {class: "bn-wert"}, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`)),
+          h("p", {class: "bn-meta"}, "Ansehen")),
+        h("section", {class: "bn-k flach erg-kenn"},
+          h("div", {class: "erg-kpis"},
+            kpi(dauerKpi, "Dauer"), kpi(hilfeStufe ? "Stufe " + hilfeStufe : "keine", "Hilfe"), kpi(niveauName, "Abnahme"))),
+        h("section", {class: "bn-k sp-weg erg-weg"},
+          h("h3", {}, "Dein Weg"),
+          erg.weg && erg.weg.length ? h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
+            h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])) : null,
+          h("div", {class: "erg-weg-notizen"},
+            erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
+              UI.symbol({voll: "ziel", ursache: "suche", schicht: "suche"}[erg.verdacht.treffer] || "idee", 15), " ", erg.verdacht.text) : null,
+            erg.hotline ? h("p", {class: "sp-hotline"}, UI.symbol("telefon", 15), " " + erg.hotline.text) : null,
+            akteZeile(erg),
+            erg.schuld ? h("p", {class: "sp-schuld"}, UI.symbol("provisorium", 15), ` Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null)),
+        merkeKarte,
+        zeilen.length ? h("section", {class: "bn-k flach erg-mehr"}, h("div", {}, zeilen)) : null,
+        einstiegSchluss ? h("section", {class: "bn-k flach sp-einstieg sp-einstieg-schluss erg-einstieg"},
+          h("h3", {}, "Willkommen angekommen"),
+          h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_LERNEN),
+          h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_WEG)) : null),
+      h("div", {class: "sp-knoepfe erg-fuss"},
         weiterKnopf,
         h("button", {type: "button", class: "knopf geist", onclick: () => ergebnisKopieren(erg.inst, erg)}, "Ergebnis kopieren"),
         h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("heute"); }}, "Übersicht"),
-        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, UI.symbol("feierabend", 16), " Feierabend: zur Leiste") : null)), "erfolg");
+        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, UI.symbol("feierabend", 16), " Feierabend: zur Leiste") : null)),
+      "erfolg erg-bento");
     zaehlen(euroEl, erg.euro);
     UI.klang?.spielen("sterne");
   }

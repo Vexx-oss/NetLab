@@ -12,6 +12,14 @@
    geprüft (rot = so nicht möglich, gelb = möglich, aber vermutlich falsch) und bei Enter oder beim Verlassen des
    Feldes übernommen. Unter jeder Änderung zeigt „entspricht:“ den passenden Konsolenbefehl (CLI.entspricht). */
 UI.inspektor = (() => {
+  /* 3.1.0 (B3/2): Analyse-Leitfaden (nur Text, keine Knöpfe) oben im Inspektor bei laufendem Auftrag.
+     Kein Toggle, keine R12-Zunahme: das Panel bringt ausschließlich Text/ol/li mit. */
+  function mitLeitfaden(...kinder){
+    let panel = null;
+    try { panel = (UI.leitfaden && typeof UI.leitfaden.panel === "function") ? UI.leitfaden.panel() : null; }
+    catch (e) { console.error("Leitfaden: Panel", e); }
+    return panel ? [panel, ...kinder] : kinder;
+  }
   const ST = new WeakMap();          /* container → Zustand */
   const OFFEN = new Set();           /* sichtbare Container */
   const LETZTER_REITER = {};         /* Gerätetyp → zuletzt benutzter Reiter */
@@ -79,7 +87,7 @@ UI.inspektor = (() => {
     if (!container) return;
     ST.delete(container); OFFEN.delete(container);
     container.classList.remove("in", "in-geraet", "in-kabel", "in-zone");
-    container.replaceChildren(h("div", {class: "lb-insp-leer"},
+    container.replaceChildren(...mitLeitfaden(h("div", {class: "lb-insp-leer"},
       h("div", {class: "lb-insp-leer-sym"}, UI.symbol("inspektor", 28)),
       h("strong", {}, "Nichts ausgewählt"),
       h("p", {}, "Klick ein Gerät an, um es hier einzustellen."),
@@ -87,7 +95,7 @@ UI.inspektor = (() => {
         h("li", {}, h("kbd", {}, "P"), " Ping: von Gerät A auf Gerät B ziehen"),
         h("li", {}, h("kbd", {}, "K"), " Kabel verlegen"),
         h("li", {}, h("kbd", {}, "Strg"), "+", h("kbd", {}, "K"), " Befehlspalette"),
-        h("li", {}, h("kbd", {}, "?"), " alle Tastenkürzel"))));
+        h("li", {}, h("kbd", {}, "?"), " alle Tastenkürzel")))));
   }
   function reiter(container, name, o = {}){
     const K = ST.get(container);
@@ -154,7 +162,7 @@ UI.inspektor = (() => {
           h("span", {class: "in-kopf-rolle"}, "Schicht 1 · Verbindung")),
         h("div", {class: "in-chips"}, h("span", {class: "in-chip " + (l.oben ? "ok" : "bad")}, l.oben ? "● Link oben" : "○ kein Link"))));
     const inhalt = h("div", {class: "in-inhalt"});
-    c.replaceChildren(K.kopfEl, inhalt);
+    c.replaceChildren(...mitLeitfaden(K.kopfEl, inhalt));
     inhalt.append(abschnitt("Enden",
       h("div", {class: "in-kabel-enden"}, [k.a, k.b].map(e => {
         const ger = g(e.geraet) || {id: e.geraet, name: e.geraet};
@@ -186,7 +194,7 @@ UI.inspektor = (() => {
           h("span", {class: "in-kopf-rolle"}, "IP-Netz · " + geraete.length + " Geräte")),
         h("div", {class: "in-chips"}, geraete.length <= 1 ? h("span", {class: "in-chip warn"}, "▲ kleines Netz") : h("span", {class: "in-chip ok"}, "● " + geraete.length + " Mitglieder"))));
     const inhalt = h("div", {class: "in-inhalt"});
-    c.replaceChildren(K.kopfEl, inhalt);
+    c.replaceChildren(...mitLeitfaden(K.kopfEl, inhalt));
     inhalt.append(abschnitt("Mitglieder",
       geraete.length ? h("table", {class: "in-tabelle"}, h("tbody", {}, geraete.map(ger => h("tr", {class: "klickbar", onclick: () => { try { UI.labor?.auswaehlen?.(ger.id); } catch (x) { /* Anzeige */ } }},
         h("td", {}, ger.name || ger.id),
@@ -245,7 +253,7 @@ UI.inspektor = (() => {
     /* Ports-Reiter: der Reiter-Körper scrollt nicht, die Portliste scrollt in sich
        (Vertrag Runde 5 § 2 B: "Ab 4 Ports scrollt die Liste mit unterem Rand"). */
     const inhalt = h("div", {class: "in-inhalt" + (K.reiter === "ports" ? " in-ports" : "")});
-    c.replaceChildren(K.kopfEl, reiterEl, inhalt);
+    c.replaceChildren(...mitLeitfaden(K.kopfEl, reiterEl, inhalt));
     kopfNeu(K);
     if (K.reiter === "konsole") {
       const ziel = h("div", {class: "in-konsole"});

@@ -1,0 +1,27 @@
+/* ---------- Onboarding 3.1 (ui/onboarding.js): Overlay-Karte mit vier Schritten ----------
+   Gestaltung wie die 3.0-Bento-Flächen: Haarlinie, Panel/2, Radius- und Schrift-Tokens.
+   Regeln: nur Tokens aus basis.css, keine Farb-Literale; Abstände aus {0,4,8,12,16,24,32};
+   KEIN eigener prefers-reduced-motion-Block — der zentrale Block in basis.css (R8) deckt alles.
+   44-px-Ziele kommen aus .knopf; die Schritt-Punkte sind reine Anzeige (aria-hidden, nicht fokussierbar). */
+.onb-huelle{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:24px;
+  background:color-mix(in srgb, var(--bg) 55%, transparent); opacity:0; transition:opacity var(--dauer) ease}
+.onb-huelle.da{opacity:1}
+.onb-karte{width:min(560px, 100%); max-height:calc(100vh - 48px); overflow:auto; display:flex; flex-direction:column; gap:16px;
+  padding:24px 24px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
+  transform:translateY(12px) scale(.98); transition:transform var(--dauer-lang) cubic-bezier(.2,.9,.3,1.2)}
+.onb-huelle.da .onb-karte{transform:none}
+.onb-kopf{display:flex; flex-direction:column; gap:4px}
+.onb-kicker{margin:0; color:var(--accent); font:700 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.onb-titel{margin:0; font:800 var(--fs-6)/1.1 var(--display); letter-spacing:-.01em}
+.onb-text{margin:0; color:var(--muted); font-size:var(--fs-3); line-height:1.45}
+.onb-punkte{display:flex; gap:4px; align-items:center; justify-content:flex-end}
+.onb-punkt{width:8px; height:8px; border-radius:50%; background:var(--panel-3)}
+.onb-punkt.an{background:var(--accent)}
+.onb-fuss{display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--line)}
+.onb-fuss .onb-ueberspringen{margin-right:auto}
+.onb-fuss .onb-weiter{flex:0 0 auto}
+@media (max-width:720px){
+  .onb-huelle{padding:12px}
+  .onb-karte{padding:16px}
+  .onb-titel{font-size:var(--fs-5)}
+}

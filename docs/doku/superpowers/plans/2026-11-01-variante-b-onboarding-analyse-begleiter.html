@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan 3.1.0 — Variante B: Onboarding, Analyse-Begleiter, Labor-UX, Layout, Quality Control · Netzwerk-Labor</title>
+<meta name="description" content="Status: freigegeben durch Nutzer („entwickle B bis zum deploy&quot;, 2026-11-01).">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Plan 3.1.0 — Variante B: Onboarding, Analyse-Begleiter, Labor-UX, Layout, Quality Control</span>
+<a href="../../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#entscheidungen">Entscheidungen</a></li>
+<li><a href="#dateien">Dateien</a></li>
+<li><a href="#aufgaben-tdd-je-task-roter-test-zuerst">Aufgaben (TDD, je Task roter Test zuerst)</a></li>
+<li><a href="#abnahmekriterien">Abnahmekriterien</a></li>
+</ul>
+</nav><h1 id="plan-3-1-0-variante-b-onboarding-analyse-begleiter-labor-ux-layout-quality-control">Plan 3.1.0 — Variante B: Onboarding, Analyse-Begleiter, Labor-UX, Layout, Quality Control</h1>
+<p>Status: freigegeben durch Nutzer („entwickle B bis zum deploy", 2026-11-01). Ziel: implementieren, testen, dokumentieren, fassungsziehen 3.1.0, committen, taggen, deployen (Release). Ohne Android-Keystore-Secrets bleibt der APK-Anhang/SHA256SUMS wie bei 3.0.0 rot — ehrlich ausweisen.</p>
+<h2 id="entscheidungen">Entscheidungen</h2>
+<ul><li>Prozessmodell = vollständige Handlung (IHK): klären → Lage/Schichten → Hypothese → Messen → Eingreifen → Verifizieren → Dokumentieren → Reflektieren, verdichtet auf 6 Leitfaden-Schritte.</li><li>Engine erkennt Fortschritt NUR aus echten Spielzuständen (keine Zeit/Klick-Zählung), liefert Impulse, keine Lösungen; Prüfungsmodus reduziert auf neutralen Status; Prozesshilfe kostet keine Sterne.</li><li>Onboarding: 4 Schritte, überspringbar, einmalig, wiederholbar über Einstellungen; kein R12-Einfluss (Overlay).</li><li>Labor: rechte Leiste bekommt sichtbare Kernaktionen (Prüfen/Messen/Konfigurieren/Dokumentieren/Abnahme), ⋯-Menü behält Selten-Aktionen. Keine neuen Dauer-Bedienelemente in R12-Ansichten (Messung prüfen!).</li><li>Layout: Inspektorbreite per Ziehen änderbar, persistiert, Doppelklick = Standard, Tastatur über Alt+←/→ (kein fokussierbares Handle → R12-Zahl bleibt), Min/Max/Reset.</li></ul>
+<h2 id="dateien">Dateien</h2>
+<p>Neu: src/daten/leitfaden.js (Phasen + Onboarding-Texte) · src/spiel/leitfaden.js (Erkennung) · src/ui/leitfaden.js (Panel) · src/ui/onboarding.js (Tour) · src/stil/leitfaden.css (Panel/Onboarding/Trenner). Geändert: src/ui/inspektor.js (Aktionsleiste, Trenner) · src/ui/app.js (Shortcuts, Einstellungen: Tour wiederholen, Breite zurücksetzen) · src/ui/dom.js (Panel-Mount) · src/stil/inspektor.css/editor.css (Layout) · src/kern/basis.js (Defaults einst.layout/tour) · Tests: tests/leitfaden-engine.test.js, tests/onboarding-tour.test.js, tests/labor-aktionen.test.js, tests/layout-breite.test.js; Anpassungen an ui-/kern-Tests.</p>
+<h2 id="aufgaben-tdd-je-task-roter-test-zuerst">Aufgaben (TDD, je Task roter Test zuerst)</h2>
+<ol><li>Daten + Texte: LEITFADEN (6 Schritte, je 2–3 Impulse, kein Lösungsleck), TOUR (4 Schritte, je Ziel+Text).</li><li>Engine: Spiel.leitfaden.{stand,phase,fortschritt,naechsterSchritt,pruefungAktiv,zuruecksetzen}. Erkennung: ticket geladen · Gerät/Lage angesehen · Hypothese gesetzt · min. 1 Messung · Eingriff gemacht · Verifikation nach Eingriff · Dokumentation/Abnahme. Nur lesend, keine neuen Spielstände.</li><li>Panel: UI.leitfaden zeichnet im Inspektor (oben) Status je Schritt, aktueller Schritt + „nächster Schritt", Fortschrittsring; in Prüfung nur neutraler Hinweis; Toggle über bestehende Kopfzeile (kein 7. Knopf in R12-Ansicht).</li><li>Onboarding: UI.onboarding.tour() beim ersten Start nach Spiel.laden (nur wenn kein Ticket offen), 4 Schritte, Buttons [Überspringen][Weiter][Los geht’s]; store einst.tour.gesehen; Einstellungen: „Einführung wiederholen".</li><li>Aktionsleiste: Inspektor-Kopf/Kontextzeile mit sichtbaren Kernaktionen (aus vorhandenen UI.labor-/Akte-Funktionen); ⋯ nur Seltenes; Discoverability-Test: Kernaktionen ohne ⋯ sichtbar und klickbar.</li><li>Layout: ziehbarer Trenner Fläche↔Inspektor (pointer), Breite 280–560, Default 360/320, store einst.layout.inspBreite, Doppelklick Reset, Alt+←/→ global; R12-Messung vor/nach unverändert.</li><li>Tests/Gates: Engine-Erkennung (echte Aktionen), Kein-Leck-Gate (keine Adressen/Lösungen in Impulsen), Tour einmalig/replay/skip, Prüfungsmodus, Aktionssichtbarkeit, Breiten-Persistenz/Reset, R12/44px, volle Suite.</li><li>Sicht: vision vorher/nachher (Onboarding, Panel mit Fortschritt/Prüfungsmodus, Aktionsleiste, Resizer; 1440/960/720, hell+dunkel + 2 Themes), r-design-Abnahme, r-didaktik-Abnahme (Phasenmodell, kein Leck, Prüfungsnähe).</li><li>Doku/Fassung: CHANGELOG 3.1.0, Design §46, Übergabe 3.1.0, README/FAQ, INHALT; fassung-ziehen --neu 3.1.0</li></ol>
+<ul><li>VERSION_CODE 30101; Builds (HTML/EXE/ZIP/APK lokal); Stand/Seite; Gate-Kette; Commit; Tag v3.1.0; Push;</li></ul>
+<p>Release prüfen; ehrlicher Bericht APK/SHA256SUMS-Lücke.</p>
+<h2 id="abnahmekriterien">Abnahmekriterien</h2>
+<ul><li>Frischer Spielstand: Tour erscheint einmal, überspringbar; zweiter Start ohne Tour; Wiederholen über Einstellungen.</li><li>Leitfaden zeigt Phasen aus echten Aktionen, aktualisiert live, kein Lösungsleck, in Prüfung gesperrt; kein Sternabzug.</li><li>Kernaktionen im Labor sichtbar (≤1 Klick), ⋯ nur selten; Nutzer muss Bedienpfad nicht raten.</li><li>Inspektorbreite ziehbar/persistiert/Reset; Tastatur; keine R12-Zunahme (gemessen).</li><li>Volle Suite grün, rauch 64/64, menueprobe 5/5/0, R12-Ratsche 0 Verstöße, stand/seite/doku-claims/fassung grün, abnahme-3.0 --schnell grün, vision/R-design/R-didaktik 0 P0/P1.</li><li>Release v3.1.0 veröffentlicht (HTML/EXE/Browser-ZIP); APK/SHA256SUMS-Lücke benannt.</li></ul>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../../index.html">Übersicht</a>
+<a href="../../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>

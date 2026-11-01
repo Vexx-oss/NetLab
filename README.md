@@ -14,16 +14,16 @@ Läuft lokal und offline; nichts wird gesendet.
 
 <div class="stand">
 <!-- STAND:ANFANG -->
-<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>3.0.0</strong> · Baukennung <code>6f324dc9</code> · Tests <strong>1.321/1.321 grün</strong> (0 uebersprungen, 165 Testdateien, 98 headless Module) · Bau <strong>143 Module</strong> · src/ <strong>142 Dateien / 42.692 Zeilen</strong> · Einzeldatei <strong>4.169.775 B</strong>, SHA256 <code>D7EAD51D…2F2757D</code> · Inhalte <strong>76 Tickets, 151 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>69</strong> Doku-Seiten · relative Verweise <strong>364 geprueft, 0 tot</strong>.</p>
+<p><strong>Gemessener Stand</strong> (einzige Zahlenquelle: <a href="docs/STAND.md">docs/STAND.md</a>): Fassung <strong>3.1.0</strong> · Baukennung <code>df418002</code> · Tests <strong>1.384/1.384 grün</strong> (0 uebersprungen, 174 Testdateien, 100 headless Module) · Bau <strong>149 Module</strong> · src/ <strong>148 Dateien / 43.278 Zeilen</strong> · Einzeldatei <strong>4.219.830 B</strong>, SHA256 <code>D50ED3A1…461F713</code> · Inhalte <strong>76 Tickets, 151 Minis, 55 Injektoren, 52 Trainings, 37 Wiki-Seiten, 30 Fertigkeiten</strong> · <strong>71</strong> Doku-Seiten · relative Verweise <strong>383 geprueft, 0 tot</strong>.</p>
 <!-- STAND:ENDE -->
 </div>
 
-![Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern](docs/bilder/topologie-3.0.0.jpg)
+![Lagebild der Arztpraxis: Geräte, gerade Kabel und VLAN-Zonen mit Adressschildern](docs/bilder/topologie-3.1.0.jpg)
 
-> **Alle Bilder in diesem README stammen aus dem 3.0.0-Bau** — aufgenommen am 01.11.2026 in
+> **Alle Bilder in diesem README stammen aus dem 3.1.0-Bau** — aufgenommen am 01.11.2026 in
 > Edge headless (1440 × 950, Theme hell), danach nur skaliert. Herkunft, Quellpfade und
 > Prüfsummen jeder Aufnahme: [`docs/bilder/HERKUNFT.md`](docs/bilder/HERKUNFT.md). Neu bauen
-> mit `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/3.0/sicht/w5/doku/`).
+> mit `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/3.1/sicht/doku/`).
 
 ---
 
@@ -33,15 +33,15 @@ Läuft lokal und offline; nichts wird gesendet.
 |---|---|---|
 | **Im Browser** | **[vexx-oss.github.io/NetLab](https://vexx-oss.github.io/NetLab/)** öffnen | nur einen Browser |
 | **Eine Datei** | **[Netzwerk-Labor.html herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.html)**, Doppelklick | nur einen Browser |
-| **Zum Entpacken** | [Netzwerk-Labor-3.0.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner `doku/`**, Anleitungen, Lizenztexte | nur einen Browser |
+| **Zum Entpacken** | [Netzwerk-Labor-3.1.0-Browser.zip](https://github.com/Vexx-oss/NetLab/releases/latest): Spiel, **die ganze Doku als Ordner `doku/`**, Anleitungen, Lizenztexte | nur einen Browser |
 | **Windows-Programm** | **[Netzwerk-Labor.exe herunterladen](https://github.com/Vexx-oss/NetLab/releases/latest/download/Netzwerk-Labor.exe)** — mit Leiste am Bildschirmrand, Tray-Symbol und globalem Tastenkürzel | Windows 10/11 |
 
 Größe und Prüfsumme der Einzeldatei stehen **gemessen** im Stand-Block oben und in
 [`docs/STAND.md`](docs/STAND.md); dieses README wiederholt sie nicht von Hand, damit sie
-nicht wieder veralten. Alle Wege liefern dieselbe Fassung **3.0.0** (gemessen: `LABOR_VERSION`
+nicht wieder veralten. Alle Wege liefern dieselbe Fassung **3.1.0** (gemessen: `LABOR_VERSION`
 in `docs/index.html` und `VERSION` in `bauen.py`).
 
-> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-3.0.0-Browser.zip` — das Spiel
+> **Die drei Anhänge einer Veröffentlichung.** (1) `Netzwerk-Labor-3.1.0-Browser.zip` — das Spiel
 > als Einzeldatei, **die ganze Doku im Ordner `doku/`**, Anleitungen und Lizenztexte; kommt aus dem
 > Linux-Job und ist deshalb **ohne** `.exe` (`tools/paket.py --ohne-exe`). (2) `Netzwerk-Labor.html`
 > — dieselbe Einzeldatei einzeln, für den stabilen Download-Link. (3) `Netzwerk-Labor.exe` — das
@@ -130,17 +130,17 @@ am Anfang gratis und führt notfalls bis zur vorgeführten Lösung.
 
 <table>
 <tr>
-<td width="50%"><img src="docs/bilder/einstieg-3.0.0.jpg" alt="Heute-Karte mit dem ersten Auftrag"><br><em>Der Einstieg: die Heute-Karte mit dem ersten Auftrag.</em></td>
-<td width="50%"><img src="docs/bilder/konsole-3.0.0.jpg" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole: Schnittstellen und VLANs prüfen.</em></td>
+<td width="50%"><img src="docs/bilder/einstieg-3.1.0.jpg" alt="Heute-Karte mit dem ersten Auftrag"><br><em>Der Einstieg: die Heute-Karte mit dem ersten Auftrag.</em></td>
+<td width="50%"><img src="docs/bilder/konsole-3.1.0.jpg" alt="IOS-Konsole mit Schnittstellen- und VLAN-Ausgabe"><br><em>IOS-Konsole: Schnittstellen und VLANs prüfen.</em></td>
 </tr>
 <tr>
-<td width="50%"><img src="docs/bilder/simulation-3.0.0.jpg" alt="Flugschreiber mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Der Flugschreiber: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
-<td width="50%"><img src="docs/bilder/hilfe-3.0.0.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
+<td width="50%"><img src="docs/bilder/simulation-3.1.0.jpg" alt="Flugschreiber mit Ereignisliste und Schritt-für-Schritt-Ansicht"><br><em>Der Flugschreiber: Ereignisse mit Grund, Filter, Schritt für Schritt.</em></td>
+<td width="50%"><img src="docs/bilder/hilfe-3.1.0.jpg" alt="Hilfeleiter mit sechs Stufen"><br><em>Die Hilfeleiter — Stufe 2 von 6, Senior fragen gratis.</em></td>
 </tr>
 </table>
 
 Weitere Bilder und die Herkunft jeder Aufnahme: [`docs/bilder/HERKUNFT.md`](docs/bilder/HERKUNFT.md).
-**Die Aufnahmen zeigen die Fassung 3.0.0** (siehe Hinweis oben).
+**Die Aufnahmen zeigen die Fassung 3.1.0** (siehe Hinweis oben).
 
 ---
 
@@ -181,8 +181,8 @@ automatisieren. Wiederholungen kommen im richtigen Abstand zurück (Lernmotor: L
 
 <table>
 <tr>
-<td width="50%"><img src="docs/bilder/postfach-3.0.0.jpg" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
-<td width="50%"><img src="docs/bilder/kompetenzkarte-3.0.0.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
+<td width="50%"><img src="docs/bilder/postfach-3.1.0.jpg" alt="Postfach als Datentafel mit Aufträgen und Kundenbrief"><br><em>Postfach als Datentafel: Auftrag, Kunde, Form, Dauer, Lohn — Symptom aus Kundensicht.</em></td>
+<td width="50%"><img src="docs/bilder/kompetenzkarte-3.1.0.jpg" alt="Kompetenzkarte mit Stufen und Fehlerheft"><br><em>Lernstand: Kompetenzkarte und Fehlerheft.</em></td>
 </tr>
 </table>
 
@@ -253,7 +253,7 @@ Windows-Hülle Rust (`cargo tauri build`, Minuten). Genaueres steht in
 [`AGENTS.md`](AGENTS.md) (kurz: keine Prozesse nach Namen beenden, kein Push ohne Absprache,
 nichts behaupten, was nicht gemessen ist) — und am Ende die acht Schritte aus
 [`docs/SITZUNGSABSCHLUSS.md`](docs/SITZUNGSABSCHLUSS.md) durchgehen. Dort steht auch, wie die
-Fassungsnummer gezogen wird (`python tools/fassung-ziehen.py --neu 3.0.0 --setzen`) und wie man
+Fassungsnummer gezogen wird (`python tools/fassung-ziehen.py --neu 3.1.0 --setzen`) und wie man
 nachmisst, dass die Veröffentlichung wirklich den neuen Stand liefert.
 
 Ein Beitrag ist willkommen, wenn er **spielbar** bleibt: nach jedem Schritt muss das Spiel
@@ -334,7 +334,7 @@ dieselben Dateien als durchsuchbare Seiten.
 
 | Datei | Inhalt |
 |---|---|
-| [`Liesmich.md`](docs/Liesmich.md) | Übersicht, Startanleitung und Stand 3.0.0 |
+| [`Liesmich.md`](docs/Liesmich.md) | Übersicht, Startanleitung und Stand 3.1.0 |
 | [`STAND.md`](docs/STAND.md) | **der gemessene Stand** — die einzige Zahlenquelle (erzeugt von `tools/stand.py`) |
 | [`FAQ.md`](docs/FAQ.md) | häufige Fragen und Troubleshooting, mit Belegstellen |
 | [`INHALT.md`](docs/INHALT.md) | alle Notizen des Projekts auf einer Seite |
@@ -356,7 +356,7 @@ dieselben Dateien als durchsuchbare Seiten.
 
 | Zweig / Tag | Inhalt |
 |---|---|
-| `ausbau-1.2` ← **Standardzweig** | Version 3.0.0: Abteilung Subnetting; davor 2.1–2.8 (Inhalte, Frontend-Redesign, Bento, Auftragsbogen, Flugschreiber) und 2.0.0–2.0.5 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
+| `ausbau-1.2` ← **Standardzweig** | Version 3.1.0: Abteilung Subnetting; davor 2.1–2.8 (Inhalte, Frontend-Redesign, Bento, Auftragsbogen, Flugschreiber) und 2.0.0–2.0.5 (2.0-Fundament, Klassenraum Stufen A+B, Output-Runde, Hilfecode, Inhalte) — Einzelheiten im [CHANGELOG](docs/CHANGELOG.md). **Hier spielt die Browser-Fassung.** |
 | `master`, Tag `v1.1` | Version 1.1 |
 | Tag `endversion-1.0` | Rückfallstand 1.0 |
 

@@ -49,6 +49,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .lb-auftrag .am-lesen.an,
 .am-lesen.an{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
 .am-mehr{min-width:40px; padding:0 8px; font-size:var(--fs-5); letter-spacing:.05em}
+/* 3.1-B5: Kernaktionen-Knopf in der Auftragszeile (nur unter 1100 px erzeugt, s. spiel.js) */
+.am-aktionen{min-width:40px; padding:0 8px; font-size:var(--fs-2); white-space:nowrap}
+/* Ab 901 px zeigt die Werkzeugleiste den Aktionen-Knopf (editor.js) — in der Auftragszeile wäre er doppelt. */
+@media (min-width:901px){ .am-aktionen{display:none} }
 .lb-auftrag{container-type:inline-size}
 @container (max-width:700px){ .am-kunde{display:none} .am-lesen{font-size:0; gap:0; padding:0 11px} .am-lesen .sym{margin:0} }
 @container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .bn-marke{width:32px; height:32px; font-size:var(--fs-2)} }
@@ -127,7 +131,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-ziele li{display:flex; align-items:baseline; gap:8px; font-size:var(--fs-3); line-height:1.35}
 .sp-haken{display:inline-flex; width:20px; height:20px; flex:0 0 auto; align-items:center; justify-content:center; border-radius:var(--radius-s); font-weight:800; font-size:var(--fs-2);
   border:1.5px solid var(--line-2); color:var(--faint); transform:translateY(3px)}
-.sp-ziele li.ok, .sp-zeile.leise{color:var(--muted)}
+.sp-ziele li.ok, .sp-zeile.leise, .sp-ergebnis.erg-bento .erg-lohn .bn-meta{color:var(--muted)}
 .sp-ziele li.ok .sp-haken{background:var(--ok); border-color:var(--ok); color:var(--bg)}
 @keyframes sp-hop{0%{transform:translateY(3px) scale(.4)} 100%{transform:translateY(3px) scale(1)}}
 .sp-ziele li.neutral .sp-haken{border-style:dotted}
@@ -156,7 +160,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
    `.lb-auftrag .sp-leise` auf 28 px/800 (belegter Befund „44-px-Grünslogan", gemessen 30.10.2026). */
 .sp-hilfe{display:flex; flex-direction:column; gap:12px; padding:12px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); max-height:min(32vh, 320px); overflow:auto; animation:sp-rein var(--dauer) ease-out}
 .sp-hilfe-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px 16px; flex-wrap:wrap; padding-bottom:8px; border-bottom:1px solid var(--line)}
-.sp-hilfe-titel, .sp-pf-titel, .sp-senior-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.sp-hilfe-titel, .sp-pf-titel, .sp-senior-text, .sp-ergebnis.erg-bento .erg-mehr > div{display:flex; flex-direction:column; gap:4px; min-width:0}
 .sp-hilfe-name{font:700 var(--fs-4)/1.2 var(--display); color:var(--ink)}
 .sp-leiter{list-style:none; margin:0; padding:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
 .sp-leiter li{display:flex; align-items:center; gap:4px; color:var(--faint); font-size:var(--fs-2)}
@@ -179,7 +183,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-hilfe-werkzeuge span, .sp-hilfe-hinweise span{min-width:0}
 .sp-hilfe-fuss{display:flex; align-items:center; gap:8px; flex-wrap:wrap; position:sticky; bottom:-12px; margin:0 -16px -12px; padding:8px 16px 12px; border-top:1px solid var(--line); background:var(--panel)}
 .sp-hilfe-block > .knopf{align-self:flex-start; min-height:44px}
-.sp-hilfe-fuss .knopf, .sp-leer .knopf{min-height:44px}
+.sp-hilfe-fuss .knopf, .sp-leer .knopf, .sp-ergebnis.erg-bento .knopf{min-height:44px}
 .sp-hilfe-preis{font:500 var(--fs-2)/1 var(--body); opacity:.85}
 .sp-check li{padding-top:4px; border-top:1px solid var(--line)}
 .sp-check li:first-child{padding-top:0; border-top:0}
@@ -226,15 +230,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 @keyframes sp-stern{to{transform:none; opacity:1}}
 .sp-dank{margin:0; padding:12px 16px; border-radius:var(--radius); background:var(--panel-2); border-left:3px solid var(--accent); font-size:var(--fs-4); line-height:1.5}
 .sp-dank cite{display:block; margin-top:4px; color:var(--muted); font-size:var(--fs-2); font-style:normal}
-.sp-lohn{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
+.sp-lohn, .sp-ergebnis.erg-bento .erg-lohn .bn-wert{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
 .sp-geld{font:800 var(--fs-6)/1 var(--display); color:var(--geld)}
 .sp-ruf{font:800 var(--fs-5)/1 var(--display); color:var(--ruf)}
 .sp-abzuege{margin:0; padding-left:16px; color:var(--muted); font-size:var(--fs-2)}
-/* Nachbesprechung in höchstens drei Blöcken: ① Sterne + Lohn · ② Dein Weg · ③ Merke */
-.sp-block{display:flex; flex-direction:column; gap:8px; padding:12px 16px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line)}
-.sp-block-lohn{padding:0; background:none; border:0}
-.sp-block h3{margin:0; color:var(--muted); font:800 var(--fs-2)/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
-.sp-lohn-reihe{display:flex; align-items:center; gap:8px 24px; flex-wrap:wrap}
 .sp-zeile{margin:0; font-size:var(--fs-3); line-height:1.45}
 .sp-weg{gap:8px}
 .sp-weg-chips{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; align-items:center; gap:6px 4px}
@@ -263,6 +262,68 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-vorhersage h3{font:800 var(--fs-5)/1.2 var(--display)}
 .sp-vorhersage .sp-knoepfe{justify-content:center}
 
+/* ---- Ergebnis/Abnahme 3.0: Bento-Dialog (ERG-BENTO, task-120) ----
+   Ersetzt die alte „drei Blöcke"-Nachbesprechung durch das Bento-Raster aus bento.css
+   (12 Spalten, .bn-k/.bn-kopf/.bn-kicker/.bn-titel/.bn-lead/.bn-meta/.bn-wert/.bn-fuss).
+   Keine Text-/Verhaltensänderung, keine neuen Bedienelemente; Anker für Tests/JS bleiben:
+   .sp-ergebnis, .sp-sterne + span.voll/.halb, b.sp-geld, .sp-weg-chips, .sp-merke-fuss,
+   .sp-zeile, .sp-knoepfe, .sp-einstieg-schluss. Der nicht bestandene Dialog (.sp-ergebnis.nicht,
+   ohne .erg-bento) bleibt im alten Stil. 20 px steht nicht in der Abstands-Skala von ethos R4,
+   deshalb lokale Maße als Tokens (werden von den R-Regeln übersprungen). */
+.sp-overlay.erg-bento{--erg-pad:20px; --erg-pad-s:16px; --erg-fuss-h:72px}
+.sp-overlay.erg-bento .sp-karte{width:min(1080px,100%); padding:var(--erg-pad) 24px}
+.sp-ergebnis.erg-bento{gap:12px}
+.sp-ergebnis.erg-bento .erg-raster{align-items:start; padding-bottom:calc(var(--erg-fuss-h) + 8px)}
+/* Spalten im 12er-Raster; unter 900 px bricht bento.css auf EINE Spalte um → auch die Karten. */
+.sp-ergebnis.erg-bento :is(.erg-hero,.erg-mehr,.erg-einstieg){grid-column:span 12}
+.sp-ergebnis.erg-bento .erg-lohn{grid-column:span 6}
+.sp-ergebnis.erg-bento :is(.erg-ruf,.erg-kenn){grid-column:span 3}
+.sp-ergebnis.erg-bento .erg-weg{grid-column:span 7}
+.sp-ergebnis.erg-bento .erg-merke{grid-column:span 5}
+/* Hero: links Marke/Text, rechts Sterne + Abzugszeile (Fallback ohne Wrapper: eine Spalte). */
+.sp-ergebnis.erg-bento .erg-hero{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 24px; align-items:start}
+.sp-ergebnis.erg-bento .erg-hero-text{display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:16px; row-gap:4px; align-items:start}
+.sp-ergebnis.erg-bento .erg-hero-text > .bn-marke{grid-column:1; grid-row:1 / -1; align-self:start}
+.sp-ergebnis.erg-bento .erg-hero-text > :not(.bn-marke){grid-column:2; min-width:0}
+.sp-ergebnis.erg-bento .erg-hero-seite{display:flex; flex-direction:column; align-items:flex-end; gap:4px; text-align:right}
+.sp-ergebnis.erg-bento .erg-hero h2{font:800 var(--fs-7)/1.08 var(--display); letter-spacing:-.02em; margin:0}
+.sp-ergebnis.erg-bento .erg-hero .bn-lead{font-size:var(--fs-4)}
+.sp-ergebnis.erg-bento .sp-sterne{font-size:calc(var(--fs-6) * 1.5)}
+.sp-ergebnis.erg-bento .erg-hero-seite .sp-zeile{color:var(--muted); font-size:var(--fs-2); max-width:36ch}
+/* Lohn/Ruf: große Werte (Farbe kommt aus .sp-geld/.sp-ruf), Aufschlüsselung ruhig darunter. */
+.sp-ergebnis.erg-bento .erg-lohn .sp-lohn{display:flex; flex-direction:column; align-items:flex-start; gap:4px}
+.sp-ergebnis.erg-bento .erg-ruf .bn-wert{display:flex; align-items:baseline; gap:8px}
+/* Kennzahlen: drei Mikro-Werte nebeneinander (Werte in .erg-kpi, Label als .bn-kicker). */
+.sp-ergebnis.erg-bento .erg-kenn{display:flex; flex-direction:column; gap:8px; align-items:start}
+.sp-ergebnis.erg-bento .erg-kpis{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+.sp-ergebnis.erg-bento :is(.erg-hero-text > div, .erg-kpi){display:flex; flex-direction:column; gap:4px; min-width:0; align-items:flex-start}
+.sp-ergebnis.erg-bento .erg-kpi b{font:700 var(--fs-5)/1.1 var(--display); color:var(--ink); font-variant-numeric:tabular-nums}
+/* Dein Weg: Chips unverändert, Notizen ruhig darunter. */
+.sp-ergebnis.erg-bento :is(.erg-weg .sp-weg-chips, .erg-merke .sp-lehrtexte){margin-top:4px}
+.sp-ergebnis.erg-bento .erg-weg-notizen{display:flex; flex-direction:column; gap:4px; margin-top:8px; padding-top:8px; border-top:1px solid var(--line)}
+/* Merke: Text, Quelle/Nachlesen als Fuß; alte Blockflächen werden in Karten neutralisiert. */
+.sp-ergebnis.erg-bento .erg-merke .sp-merke-fuss{margin-top:auto; gap:8px}
+.sp-ergebnis.erg-bento .erg-mehr{display:flex; flex-direction:column; gap:4px}
+.sp-ergebnis.erg-bento .erg-einstieg{padding:var(--bn-pad); gap:8px}
+/* Fußzeile: sticky wie bisher, Maße am 20/24-px-Kartenpolster. */
+.sp-ergebnis.erg-bento > .erg-fuss{position:sticky; bottom:calc(-1 * var(--erg-pad)); margin:4px -24px calc(-1 * var(--erg-pad)); padding:12px 24px 16px; background:var(--panel); border-top:1px solid var(--line); z-index:10}
+@media (max-width:900px){
+  .sp-ergebnis.erg-bento :is(.erg-hero,.erg-lohn,.erg-ruf,.erg-kenn,.erg-weg,.erg-merke,.erg-mehr,.erg-einstieg){grid-column:span 1}
+}
+@media (max-width:720px){
+  .sp-overlay.erg-bento{padding:12px}
+  .sp-overlay.erg-bento .sp-karte{padding:var(--erg-pad-s)}
+  .sp-ergebnis.erg-bento :is(.erg-hero, .erg-hero-text){grid-template-columns:minmax(0,1fr)}
+  .sp-ergebnis.erg-bento .erg-hero-seite{align-items:flex-start; text-align:left}
+  .sp-ergebnis.erg-bento .erg-hero-text > .bn-marke{grid-row:auto}
+  .sp-ergebnis.erg-bento .erg-hero-text > :not(.bn-marke){grid-column:1}
+  .sp-ergebnis.erg-bento .sp-sterne{font-size:calc(var(--fs-6) * 1.2)}
+  .sp-ergebnis.erg-bento > .erg-fuss{margin:4px calc(-1 * var(--erg-pad-s)) calc(-1 * var(--erg-pad-s)); padding:12px var(--erg-pad-s) 16px}
+  .sp-ergebnis.erg-bento{gap:8px}
+  .sp-ergebnis.erg-bento .erg-hero h2{font-size:var(--fs-6)}
+  .sp-ergebnis.erg-bento .erg-hero-text{gap:4px}
+}
+
 /* ---- Postfach (Bento 2.5 § 3.1: Posteingang eines IT-Dienstleisters) ----
    Kopf aus Mikrolabel, Titel, Kontextsatz, Kennzahlen und ruhiger Aktionszeile; Hauptbento mit
    Liste (400–440 px) und Leser. Unter 900 px bleibt der Leser das Blatt von unten. Kundenfarbe
@@ -276,7 +337,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-kennzahl{display:inline-flex; flex-direction:column; align-items:flex-start; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
 .sp-kennzahl b{color:var(--ink); font:700 var(--fs-5)/1 var(--display); font-variant-numeric:tabular-nums}
 .sp-kennzahl span{color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase}
-.sp-kennzahl.neu b{color:var(--accent)}
+.sp-kennzahl.neu b, .sp-ergebnis.erg-bento .erg-hero .bn-kicker{color:var(--accent)}
 .sp-pf-aktionen{grid-column:1 / -1; display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px}
 .sp-pf-aktionen .kr-tag{display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; color:var(--muted); font:400 var(--fs-2)/1.35 var(--body)}
 .sp-pf-aktionen .kr-tag > span{display:inline-flex; align-items:center; gap:4px}

@@ -9,6 +9,77 @@ Zweig: `ausbau-1.2` (Standardzweig). Tags: `endversion-1.0`, `v1.1`, `v1.2.0`–
 
 ---
 
+## 3.1.0 — Onboarding, Analyse-Begleiter, sichtbare Labor-Aktionen, Resizer und QC-Gates (2026-11-01)
+
+**Was diese Fassung ist.** 3.1.0 macht den Einstieg und das Arbeiten im Labor selbsterklärend:
+Eine kurze **Einführung** führt beim ersten Start in vier Schritten durch das Programm; ein
+**Analyse-Begleiter** (Leitfaden) benennt aus echten Spielzuständen den nächsten sinnvollen Schritt,
+ohne Lösungen zu verraten; die rechte Labor-Leiste zeigt die **Kernaktionen sichtbar**; die Breite des
+Inspektors ist per Ziehen und Tastatur einstellbar; der **Abnahme-Dialog** erscheint im Bento-Stil; die
+Abnahme-Gates sind um Kein-Leck-, R12- und Layout-Prüfungen erweitert. Kein Server, kein Konto, keine
+Bewertung; alle Zahlen in `docs/STAND.md`.
+
+**Onboarding (neu: `src/ui/onboarding.js`, `src/daten/leitfaden.js` TOUR, `src/stil/leitfaden.css`).**
+Vier Schritte mit [Überspringen][Weiter][Los geht's], einmalig beim ersten Start (nur wenn kein Ticket
+offen), wiederholbar über die Einstellungen („Einführung wiederholen"); Merker `einst.tour.gesehen`.
+Die Tour ist ein Overlay und verändert die R12-Zahl der Ansichten nicht.
+
+**Analyse-Begleiter (neu: `src/daten/leitfaden.js`, `src/spiel/leitfaden.js`, `src/ui/leitfaden.js`).**
+Prozessmodell = **vollständige Handlung (IHK)**, verdichtet auf sechs Leitfaden-Schritte: klären →
+Lage/Schichten → Hypothese → Messen → Eingreifen → Verifizieren/Dokumentieren. Die Engine erkennt
+Fortschritt **nur aus echten Spielzuständen** (keine Zeit-/Klick-Zählung), liefert Impulse statt
+Lösungen (Kein-Leck-Gate), ist im Prüfungsmodus auf einen neutralen Status reduziert und kostet keine
+Sterne. Anzeige: Status je Schritt, „nächster Schritt" und Fortschrittsring im Inspektor; Toggle über
+die bestehende Kopfzeile (kein zusätzlicher Dauer-Knopf).
+
+**Sichtbare Labor-Aktionen (geändert: `src/ui/inspektor.js`, `src/stil/inspektor.css`).**
+Die rechte Leiste zeigt Prüfen/Messen/Konfigurieren/Dokumentieren/Abnahme direkt; das ⋯-Menü behält
+die Selten-Aktionen. Keine neuen Dauer-Bedienelemente in R12-Ansichten (R12 vor/nach gemessen,
+unverändert); ein Discoverability-Test prüft Kernaktionen ohne ⋯-Öffnen.
+
+**Layout/Resizer (geändert: `src/ui/app.js`, `src/kern/basis.js`, `src/ui/dom.js`, `src/stil/editor.css`).**
+Inspektorbreite per Zeiger ziehbar (280–560 px, Default 360/320), bleibt über
+`einst.layout.inspBreite` erhalten; Doppelklick = Standard, Alt+←/→ als Tastaturweg, Reset in den
+Einstellungen. Kein fokussierbares Griffelement — die R12-Zahl bleibt unverändert.
+
+**Abnahme-Dialog im Bento-Stil (geändert: `src/ui/spiel.js`, `src/stil/spiel.css`,
+`tests/ui-spiel-ergebnis.test.js`).** Der „Gelöst"-Dialog ist jetzt ein Bento-Raster (12 Spalten,
+Karten/Meta/Fußzeile) statt „drei Blöcken": Hero mit Titel nach Sternen („Hervorragend gelöst!" /
+„Gelöst!" / „Gelöst – mit Hilfe"), Sterne und **sichtbarer Abzugszeile** (−½★-Zeilen); Karten für
+Lohn (inkl. Tempo-Bonus, Verdacht, Variante), Ruf, Kennzahlen (Dauer, Hilfe-Stufe), Weg-Chips sowie
+Merke- und „Zum Nachlesen"-Karten mit Wiki-Knopf. Keine Informationsverluste; der nicht bestandene
+Dialog bleibt im alten Stil; 44-px-Ziele bleiben (Test task-119 prüft das Raster).
+
+**QC-Gates/Tests.** Neu: Leitfaden-Engine, Onboarding-Tour, Labor-Aktionen, Layout-Breite,
+Bento-Abnahme; Kein-Leck-Gate (keine Adressen/Lösungen in Impulsen), R12-/44-px-Prüfung. Dazu volle
+Suite, Rauchtest, Menüprobe, R12-Ratsche, `stand`/`seite`/`doku-claims`/`fassung`/`abnahme-3.0` grün.
+Die maßgeblichen Zahlen stehen in `docs/STAND.md`.
+
+**Migration und Verträglichkeit.** Spielstand `v:3` unverändert; neue Einstellungsfelder
+(`einst.tour.gesehen`, `einst.layout.inspBreite`) mit Defaults; Klassenraum und Lernlogik unverändert.
+
+**Bewusst nicht in 3.1.0.** Server/QR (weiterhin 3.1-Stufe, nicht gebaut); R12-Reduktion der
+Bestandsansichten; 44-px-DOM als Gate; Geräte-/Screenreader-Test.
+
+**Veröffentlichung und ehrliche Grenzen.** Nutzerfreigabe „entwickle B bis zum deploy" gilt für Push,
+Tag `v3.1.0` und Release; die Schritte werden einzeln nachgewiesen (Push, Tag+Push, Release prüfen,
+Nachmessen). **Ohne Keystore-Secrets bleiben Android-APK-Anhang und `SHA256SUMS` im Release-Ablauf
+rot** — das wird ausdrücklich benannt. Belege dieser Sitzung: veröffentlicht mit Tag `v3.1.0`
+(Commit siehe Git-Historie); Einzeldatei-SHA256
+`D50ED3A1A8D5A0EAECCBFB939D6BB7F0955C3B4FD3CE47D41ED9642A9461F713`; Live-Nachweis:
+Live-Prüfsumme nach Veröffentlichung in `Nachweise/3.1` und Release-Notizen; Gate-Läufe:
+`Nachweise/3.1/gates/`; Feature-/Review-Belege (nicht HERKUNFT): `Nachweise/3.0/sicht/31b/nachher/`
+(26 PNG + matrix.json), Vorprüfungen unter `Nachweise/3.1/`. Artefakte des Release-Builds 11:32:
+EXE `0100025A…` (13.267.968 B; **Hash nicht reproduzierbar, B5**), APK `8D71F6C3…` (1.529.372 B,
+`versionCode 30101`); **ZIP-Prüfsummen transient** (endgültig im Release): Windows `E87FC8BF…`
+(10.727.192 B), Browser `E90F9883…` (2.376.304 B). CI-/Live-Messung: nach Veröffentlichung in
+`Nachweise/3.1` und Release-Notizen. Sicht nur über Matrizen; kein Fremd-Hardware-/Gerätetest.
+
+**Zahlen.** Tests, Testdateien, src-Zeilen, Doku-Seiten, Verweise und R12-Messungen stehen in
+[`STAND.md`](STAND.md) — hier nicht wiederholt (Eine-Quellen-Regel).
+
+---
+
 ## 3.0.0 — Klassenbetrieb, Qualitätsgates und die letzte Meile zur Freigabe (31.10.2026)
 
 **Was diese Fassung ist.** 3.0.0 macht aus dem Labor ein **Unterrichts-Werkzeug für eine ganze Klasse**

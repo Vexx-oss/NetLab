@@ -537,7 +537,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .gb-internet .gb-kachel{stroke:var(--g); stroke-opacity:.6}
 .gb-glyph path{fill:none; stroke:var(--g); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
 
-.labor{display:grid; grid-template-columns:auto minmax(0,1fr) var(--dock-b, 0px); height:100%; min-height:0; background:var(--bg)}
+.labor{display:grid; grid-template-columns:auto minmax(0,1fr) min(var(--dock-b, 0px), 560px); height:100%; min-height:0; background:var(--bg)}
 
 /* ---- Geräteleiste ---- */
 /* z-index:30 (Leiter 10/20/30): über der Zeichenfläche und über den schwebenden Werkzeugleisten
@@ -558,7 +558,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
   padding:8px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein var(--dauer) ease-out}
 /* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
    deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt, .labor.dock-zu .ins-resizer{display:none}
 /* Welche Textzeilen die Zoom-Stufen ausblenden, steht in zz-lagebild.css (Lagebild 2.0, Vertrag 3.4) —
    dort bei den Knoten, damit tests/ui-typografie.test.js hier die erste .ger-name{…}-Regel als Font-Regel liest. */
 .pa-fach.zieht{opacity:.35; pointer-events:none}
@@ -639,6 +639,12 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-wz:hover .lb-wz-taste, .lb-fern-schild.fertig .lb-fern-status{color:var(--muted)}
 .lb-knopf[disabled]{opacity:.35; cursor:default}
 .lb-knopf-text span{font:600 var(--fs-2)/1 var(--body)}
+/* 3.1-B5 (R12-Entscheid): Aktionen-Kopfknopf nur 901–1100 px. Ab 1101 blendet die Regel die
+   Gruppe aus (1440/1366 bleiben bei 17); ≤900 übernimmt der Knopf in der Auftragszeile. */
+@media (min-width:1101px){
+  .lb-leiste-oben .lb-gruppe:has([data-aktionen]){visibility:hidden}
+}
+
 .lb-zoomtext{min-width:64px; height:40px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--mono); font-variant-numeric:tabular-nums}
 /* Ansicht-Menü (ein Knopf statt fünf Ebenen-Reitern) */
 .lb-ansicht{display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 8px 0 12px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); white-space:nowrap}
@@ -681,7 +687,14 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 /* Fernwartung (F2): Geräteleiste weg, Terminal bekommt mehr als die Hälfte der Arbeitsfläche */
 .labor.lb-fern{grid-template-columns:0 minmax(0,1fr) var(--dock-b, 0px)}
 .labor.lb-fern > .lb-geraete{width:0; padding:0; border:0; overflow:hidden}
-.labor.lb-fern.dock-da:not(.dock-zu){--dock-b:clamp(300px, 58%, 980px)}
+.labor.lb-fern.dock-da:not(.dock-zu){--dock-b:clamp(300px, 58%, 980px);
+  /* 3.1-B5: die per Ziehkante gespeicherte Breite (inline --dock-b) schlägt sonst die clamp-Regel
+     und würde das Terminal schrumpfen lassen — Fernwartung nimmt 58 % als Untergrenze. */
+  --dock-b-fern:max(var(--dock-b, 0px), clamp(300px, 58%, 980px));
+  grid-template-columns:minmax(0,1fr) var(--dock-b-fern)}
+@media (max-width:1100px){
+  .labor.lb-fern.dock-da:not(.dock-zu){grid-template-columns:auto minmax(0,1fr) var(--dock-b-fern)}
+}
 .lb-leer{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); text-align:center; color:var(--muted); pointer-events:none; max-width:360px}
 .lb-leer strong{display:block; font:800 var(--fs-5)/1.2 var(--display); color:var(--ink); margin-bottom:8px}
 
@@ -831,7 +844,7 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
    Prozentwert (40 % − 88 px); an den anderen Profilen ändert sich nur das Tablet (800: 250 → 202). */
 .labor.dock-da{--dock-b:clamp(280px, 34%, 380px)}  /* A: fester Inspektor rechts */
 .labor.dock-da.dock-zu{--dock-b:48px}
-.lb-dock{display:none; min-width:0; min-height:0; flex-direction:column; background:var(--panel); border-left:1px solid var(--line); container-type:inline-size}
+.lb-dock{position:relative; display:none; min-width:0; min-height:0; flex-direction:column; background:var(--panel); border-left:1px solid var(--line); container-type:inline-size}
 .labor.dock-da .lb-dock{display:flex}
 .lb-dock-reiter{display:flex; align-items:flex-end; gap:0px; padding:4px 4px 0; border-bottom:1px solid var(--line); flex:0 0 auto; overflow-x:auto; scrollbar-width:none}
 /* 44 px hoch: die Fingerregel der Trefferflächen (menueprobe: der Reiter war 36 px hoch) */
@@ -842,6 +855,14 @@ html[data-leiste="raster"] .leiste-karte{background-image:radial-gradient(color-
 .lb-dock-einklappen{margin-left:auto; align-self:center; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:var(--radius-s); background:none; color:var(--muted)}
 .lb-dock-inhalt{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .lb-dock-inhalt > *{flex:1 1 auto; min-height:0}
+/* 3.1-B5: Ziehkante Fläche ↔ Dock — 6 px Trefferfläche, cursor:col-resize, KEIN Fokussierziel
+   (div ohne tabindex/role). Breite setzt ui/leitfaden.js als Inline- --dock-b (280–560 px); die
+   Rasterspalte ist bei 560 px geklammert, die Untergrenze hält das JS. */
+.ins-resizer{position:absolute; top:0; bottom:0; left:calc(-1 * 3px); width:6px; z-index:20; cursor:col-resize; touch-action:none; user-select:none}
+.ins-resizer::after{content:""; position:absolute; inset:0 2px; border-radius:var(--radius-xs); background:transparent; transition:background var(--dauer)}
+.ins-resizer:hover::after, .ins-resizer.zieht::after{background:color-mix(in srgb, var(--accent) 60%, transparent)}
+/* Tastaturfokus (role=separator, tabindex=0): sichtbarer 2-px-Akzentring wie basis.css, innen. */
+.ins-resizer:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:var(--radius-xs)}
 .lb-plan, .lb-akte{overflow:auto}
 /* Reiterleiste des Docks: alle Reiter und der Einklapp-Knopf müssen sichtbar bleiben.
    Gemessen von „menu-auditor“ am 06.10.2026 (1280 × 800, fünf Reiter): die Leiste war
@@ -2224,6 +2245,50 @@ html[data-bewegung="reduziert"] .lk-auf > .lk-modul, html[data-bewegung="reduzie
 .lk-kurz-fuss .lk-knopf{flex:1 1 auto; justify-content:center}
 .lk-uebung-weg{display:none; margin-top:4px}
 .lk-uebung.lk-leerstand .lk-uebung-weg{display:flex}
+/* ---- leitfaden.css ---- */
+/* ---------- Leitfaden 3.1 (ui/leitfaden.js): Panel im Inspektor ----------
+   Bento-Anmutung wie .bn-k: Haarlinie, ruhige Flächen (Panel/Panel-2), Radius-Token, Mikro-Labels.
+   Statusfarben NUR über die semantischen Tokens --ok/--warn/--bad/--accent/--faint.
+   Breite kommt von außen: das Dock setzt --dock-b (280–560 px per Ziehkante .ins-resizer); das
+   Panel füllt sie (width:100%, min-width:0). Keine eigenen Animationen (R8: ein zentraler Block). */
+.lf-panel{display:flex; flex-direction:column; gap:12px; min-width:0; min-height:100%; padding:12px 12px 16px; background:var(--panel)}
+.lf-kopf{display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2)}
+.lf-ring{position:relative; flex:0 0 auto; width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--p, 0) * 360deg), var(--line) 0)}
+.lf-ring::before{content:""; position:absolute; inset:3px; border-radius:50%; background:var(--panel-2)}
+.lf-ring-wert{position:relative; color:var(--ink); font:700 var(--fs-1)/1 var(--mono)}
+.lf-kicker{margin:0; color:var(--faint); font:700 var(--fs-1)/1 var(--mono); letter-spacing:.06em; text-transform:uppercase}
+.lf-titel{margin:4px 0 0; font:800 var(--fs-4)/1.2 var(--display); letter-spacing:-.01em}
+.lf-schritte{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.lf-schritt{display:flex; align-items:flex-start; gap:8px; min-height:44px; padding:8px 12px; border:1px solid var(--line);
+  border-radius:var(--radius-s); background:var(--panel); transition:border-color var(--dauer), background var(--dauer)}
+.lf-schritt.jetzt{border-color:var(--accent); background:var(--accent-soft)}
+.lf-schritt.ok{border-color:color-mix(in srgb, var(--ok) 45%, var(--line))}
+.lf-schritt.warn{border-color:color-mix(in srgb, var(--warn) 50%, var(--line))}
+.lf-schritt.offen{opacity:.85}
+.lf-status{flex:0 0 auto; width:12px; height:12px; margin-top:4px; border-radius:50%; background:var(--faint)}
+.lf-schritt.ok .lf-status{background:var(--ok)}
+.lf-schritt.jetzt .lf-status{background:var(--accent)}
+.lf-schritt.warn .lf-status{background:var(--warn)}
+.lf-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.lf-text b{color:var(--ink); font:700 var(--fs-3)/1.3 var(--body); overflow-wrap:anywhere}
+.lf-text small{color:var(--muted); font-size:var(--fs-2); line-height:1.45}
+.lf-impuls{margin:0; padding:12px 16px; border-left:3px solid var(--accent); border-radius:var(--radius-s); background:var(--panel-2);
+  color:var(--ink); font-size:var(--fs-2); line-height:1.5}
+/* Nächster Schritt: ruhige Textzeile im Akzent-Tint (kein Wähler — R12 bleibt unberührt). */
+.lf-naechster{margin:0; padding:8px 12px; border-radius:var(--radius-s); background:var(--accent-soft); color:var(--ink);
+  font-size:var(--fs-2); line-height:1.5; overflow-wrap:anywhere}
+/* Kernaktionsliste (R12-Entscheid 01.11.2026): NUR Text + Tastenkürzel, keine Wähler im .ansicht-Kasten.
+   Ausgeführt wird über das Kopf-Menü „Aktionen“ (body-level, zählt nicht). Hooks: */
+.lf-aktionen{display:flex; flex-direction:column; gap:4px; margin-top:auto; padding-top:12px; border-top:1px solid var(--line)}
+.lf-aktion{display:flex; align-items:baseline; justify-content:space-between; gap:8px; min-width:0; color:var(--muted); font-size:var(--fs-2); line-height:1.4}
+.lf-aktion b{color:var(--ink); font-weight:600; min-width:0; overflow-wrap:anywhere}
+.lf-aktion kbd{flex:0 0 auto; color:var(--faint); font:600 var(--fs-1)/1 var(--mono); letter-spacing:.04em}
+@media (max-width:1100px){
+  .lf-panel{padding:8px 8px 12px}
+  .lf-kopf{padding:8px 12px}
+}
+
 /* ---- lernstand-hilfe.css ---- */
 /* ---------- Lernstand: Abschnitt „Hilfe und Übung" (Baustein H) ----------
    Vertrag: docs/entwicklung/Hilfestellung – Stufen und Schnittstellen.md § 2, § 8.
@@ -2452,6 +2517,35 @@ html[data-bewegung="reduziert"] .lk-auf > .lk-modul, html[data-bewegung="reduzie
 .np-wert{all:unset; cursor:pointer; padding:0px 4px; border-radius:var(--radius-xs); font:inherit}
 .np-wert:hover, .np-wert:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 .np-pruef.markiert .np-wert{background:var(--warn-soft); color:var(--warn); font-weight:700; text-decoration:line-through}
+
+/* ---- onboarding.css ---- */
+/* ---------- Onboarding 3.1 (ui/onboarding.js): Overlay-Karte mit vier Schritten ----------
+   Gestaltung wie die 3.0-Bento-Flächen: Haarlinie, Panel/2, Radius- und Schrift-Tokens.
+   Regeln: nur Tokens aus basis.css, keine Farb-Literale; Abstände aus {0,4,8,12,16,24,32};
+   KEIN eigener prefers-reduced-motion-Block — der zentrale Block in basis.css (R8) deckt alles.
+   44-px-Ziele kommen aus .knopf; die Schritt-Punkte sind reine Anzeige (aria-hidden, nicht fokussierbar). */
+.onb-huelle{position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:24px;
+  background:color-mix(in srgb, var(--bg) 55%, transparent); opacity:0; transition:opacity var(--dauer) ease}
+.onb-huelle.da{opacity:1}
+.onb-karte{width:min(560px, 100%); max-height:calc(100vh - 48px); overflow:auto; display:flex; flex-direction:column; gap:16px;
+  padding:24px 24px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten);
+  transform:translateY(12px) scale(.98); transition:transform var(--dauer-lang) cubic-bezier(.2,.9,.3,1.2)}
+.onb-huelle.da .onb-karte{transform:none}
+.onb-kopf{display:flex; flex-direction:column; gap:4px}
+.onb-kicker{margin:0; color:var(--accent); font:700 var(--fs-1)/1 var(--mono); letter-spacing:.08em; text-transform:uppercase}
+.onb-titel{margin:0; font:800 var(--fs-6)/1.1 var(--display); letter-spacing:-.01em}
+.onb-text{margin:0; color:var(--muted); font-size:var(--fs-3); line-height:1.45}
+.onb-punkte{display:flex; gap:4px; align-items:center; justify-content:flex-end}
+.onb-punkt{width:8px; height:8px; border-radius:50%; background:var(--panel-3)}
+.onb-punkt.an{background:var(--accent)}
+.onb-fuss{display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--line)}
+.onb-fuss .onb-ueberspringen{margin-right:auto}
+.onb-fuss .onb-weiter{flex:0 0 auto}
+@media (max-width:720px){
+  .onb-huelle{padding:12px}
+  .onb-karte{padding:16px}
+  .onb-titel{font-size:var(--fs-5)}
+}
 
 /* ---- rahmen.css ---- */
 /* ---------- App-Rahmen: Kopfzeile, Andock-Leiste, Ansichten, Toasts, Menüs, Palette, Dialoge ----------
@@ -3045,6 +3139,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .lb-auftrag .am-lesen.an,
 .am-lesen.an{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
 .am-mehr{min-width:40px; padding:0 8px; font-size:var(--fs-5); letter-spacing:.05em}
+/* 3.1-B5: Kernaktionen-Knopf in der Auftragszeile (nur unter 1100 px erzeugt, s. spiel.js) */
+.am-aktionen{min-width:40px; padding:0 8px; font-size:var(--fs-2); white-space:nowrap}
+/* Ab 901 px zeigt die Werkzeugleiste den Aktionen-Knopf (editor.js) — in der Auftragszeile wäre er doppelt. */
+@media (min-width:901px){ .am-aktionen{display:none} }
 .lb-auftrag{container-type:inline-size}
 @container (max-width:700px){ .am-kunde{display:none} .am-lesen{font-size:0; gap:0; padding:0 11px} .am-lesen .sym{margin:0} }
 @container (max-width:520px){ .am-zeile{gap:6px} .am-zeile .bn-marke{width:32px; height:32px; font-size:var(--fs-2)} }
@@ -3123,7 +3221,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-ziele li{display:flex; align-items:baseline; gap:8px; font-size:var(--fs-3); line-height:1.35}
 .sp-haken{display:inline-flex; width:20px; height:20px; flex:0 0 auto; align-items:center; justify-content:center; border-radius:var(--radius-s); font-weight:800; font-size:var(--fs-2);
   border:1.5px solid var(--line-2); color:var(--faint); transform:translateY(3px)}
-.sp-ziele li.ok, .sp-zeile.leise{color:var(--muted)}
+.sp-ziele li.ok, .sp-zeile.leise, .sp-ergebnis.erg-bento .erg-lohn .bn-meta{color:var(--muted)}
 .sp-ziele li.ok .sp-haken{background:var(--ok); border-color:var(--ok); color:var(--bg)}
 @keyframes sp-hop{0%{transform:translateY(3px) scale(.4)} 100%{transform:translateY(3px) scale(1)}}
 .sp-ziele li.neutral .sp-haken{border-style:dotted}
@@ -3152,7 +3250,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
    `.lb-auftrag .sp-leise` auf 28 px/800 (belegter Befund „44-px-Grünslogan", gemessen 30.10.2026). */
 .sp-hilfe{display:flex; flex-direction:column; gap:12px; padding:12px 16px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line); max-height:min(32vh, 320px); overflow:auto; animation:sp-rein var(--dauer) ease-out}
 .sp-hilfe-kopf{display:flex; align-items:center; justify-content:space-between; gap:8px 16px; flex-wrap:wrap; padding-bottom:8px; border-bottom:1px solid var(--line)}
-.sp-hilfe-titel, .sp-pf-titel, .sp-senior-text{display:flex; flex-direction:column; gap:4px; min-width:0}
+.sp-hilfe-titel, .sp-pf-titel, .sp-senior-text, .sp-ergebnis.erg-bento .erg-mehr > div{display:flex; flex-direction:column; gap:4px; min-width:0}
 .sp-hilfe-name{font:700 var(--fs-4)/1.2 var(--display); color:var(--ink)}
 .sp-leiter{list-style:none; margin:0; padding:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
 .sp-leiter li{display:flex; align-items:center; gap:4px; color:var(--faint); font-size:var(--fs-2)}
@@ -3175,7 +3273,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-hilfe-werkzeuge span, .sp-hilfe-hinweise span{min-width:0}
 .sp-hilfe-fuss{display:flex; align-items:center; gap:8px; flex-wrap:wrap; position:sticky; bottom:-12px; margin:0 -16px -12px; padding:8px 16px 12px; border-top:1px solid var(--line); background:var(--panel)}
 .sp-hilfe-block > .knopf{align-self:flex-start; min-height:44px}
-.sp-hilfe-fuss .knopf, .sp-leer .knopf{min-height:44px}
+.sp-hilfe-fuss .knopf, .sp-leer .knopf, .sp-ergebnis.erg-bento .knopf{min-height:44px}
 .sp-hilfe-preis{font:500 var(--fs-2)/1 var(--body); opacity:.85}
 .sp-check li{padding-top:4px; border-top:1px solid var(--line)}
 .sp-check li:first-child{padding-top:0; border-top:0}
@@ -3222,15 +3320,10 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 @keyframes sp-stern{to{transform:none; opacity:1}}
 .sp-dank{margin:0; padding:12px 16px; border-radius:var(--radius); background:var(--panel-2); border-left:3px solid var(--accent); font-size:var(--fs-4); line-height:1.5}
 .sp-dank cite{display:block; margin-top:4px; color:var(--muted); font-size:var(--fs-2); font-style:normal}
-.sp-lohn{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
+.sp-lohn, .sp-ergebnis.erg-bento .erg-lohn .bn-wert{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
 .sp-geld{font:800 var(--fs-6)/1 var(--display); color:var(--geld)}
 .sp-ruf{font:800 var(--fs-5)/1 var(--display); color:var(--ruf)}
 .sp-abzuege{margin:0; padding-left:16px; color:var(--muted); font-size:var(--fs-2)}
-/* Nachbesprechung in höchstens drei Blöcken: ① Sterne + Lohn · ② Dein Weg · ③ Merke */
-.sp-block{display:flex; flex-direction:column; gap:8px; padding:12px 16px; border-radius:var(--radius); background:var(--panel-2); border:1px solid var(--line)}
-.sp-block-lohn{padding:0; background:none; border:0}
-.sp-block h3{margin:0; color:var(--muted); font:800 var(--fs-2)/1 var(--body); letter-spacing:.08em; text-transform:uppercase}
-.sp-lohn-reihe{display:flex; align-items:center; gap:8px 24px; flex-wrap:wrap}
 .sp-zeile{margin:0; font-size:var(--fs-3); line-height:1.45}
 .sp-weg{gap:8px}
 .sp-weg-chips{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; align-items:center; gap:6px 4px}
@@ -3259,6 +3352,68 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-vorhersage h3{font:800 var(--fs-5)/1.2 var(--display)}
 .sp-vorhersage .sp-knoepfe{justify-content:center}
 
+/* ---- Ergebnis/Abnahme 3.0: Bento-Dialog (ERG-BENTO, task-120) ----
+   Ersetzt die alte „drei Blöcke"-Nachbesprechung durch das Bento-Raster aus bento.css
+   (12 Spalten, .bn-k/.bn-kopf/.bn-kicker/.bn-titel/.bn-lead/.bn-meta/.bn-wert/.bn-fuss).
+   Keine Text-/Verhaltensänderung, keine neuen Bedienelemente; Anker für Tests/JS bleiben:
+   .sp-ergebnis, .sp-sterne + span.voll/.halb, b.sp-geld, .sp-weg-chips, .sp-merke-fuss,
+   .sp-zeile, .sp-knoepfe, .sp-einstieg-schluss. Der nicht bestandene Dialog (.sp-ergebnis.nicht,
+   ohne .erg-bento) bleibt im alten Stil. 20 px steht nicht in der Abstands-Skala von ethos R4,
+   deshalb lokale Maße als Tokens (werden von den R-Regeln übersprungen). */
+.sp-overlay.erg-bento{--erg-pad:20px; --erg-pad-s:16px; --erg-fuss-h:72px}
+.sp-overlay.erg-bento .sp-karte{width:min(1080px,100%); padding:var(--erg-pad) 24px}
+.sp-ergebnis.erg-bento{gap:12px}
+.sp-ergebnis.erg-bento .erg-raster{align-items:start; padding-bottom:calc(var(--erg-fuss-h) + 8px)}
+/* Spalten im 12er-Raster; unter 900 px bricht bento.css auf EINE Spalte um → auch die Karten. */
+.sp-ergebnis.erg-bento :is(.erg-hero,.erg-mehr,.erg-einstieg){grid-column:span 12}
+.sp-ergebnis.erg-bento .erg-lohn{grid-column:span 6}
+.sp-ergebnis.erg-bento :is(.erg-ruf,.erg-kenn){grid-column:span 3}
+.sp-ergebnis.erg-bento .erg-weg{grid-column:span 7}
+.sp-ergebnis.erg-bento .erg-merke{grid-column:span 5}
+/* Hero: links Marke/Text, rechts Sterne + Abzugszeile (Fallback ohne Wrapper: eine Spalte). */
+.sp-ergebnis.erg-bento .erg-hero{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 24px; align-items:start}
+.sp-ergebnis.erg-bento .erg-hero-text{display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:16px; row-gap:4px; align-items:start}
+.sp-ergebnis.erg-bento .erg-hero-text > .bn-marke{grid-column:1; grid-row:1 / -1; align-self:start}
+.sp-ergebnis.erg-bento .erg-hero-text > :not(.bn-marke){grid-column:2; min-width:0}
+.sp-ergebnis.erg-bento .erg-hero-seite{display:flex; flex-direction:column; align-items:flex-end; gap:4px; text-align:right}
+.sp-ergebnis.erg-bento .erg-hero h2{font:800 var(--fs-7)/1.08 var(--display); letter-spacing:-.02em; margin:0}
+.sp-ergebnis.erg-bento .erg-hero .bn-lead{font-size:var(--fs-4)}
+.sp-ergebnis.erg-bento .sp-sterne{font-size:calc(var(--fs-6) * 1.5)}
+.sp-ergebnis.erg-bento .erg-hero-seite .sp-zeile{color:var(--muted); font-size:var(--fs-2); max-width:36ch}
+/* Lohn/Ruf: große Werte (Farbe kommt aus .sp-geld/.sp-ruf), Aufschlüsselung ruhig darunter. */
+.sp-ergebnis.erg-bento .erg-lohn .sp-lohn{display:flex; flex-direction:column; align-items:flex-start; gap:4px}
+.sp-ergebnis.erg-bento .erg-ruf .bn-wert{display:flex; align-items:baseline; gap:8px}
+/* Kennzahlen: drei Mikro-Werte nebeneinander (Werte in .erg-kpi, Label als .bn-kicker). */
+.sp-ergebnis.erg-bento .erg-kenn{display:flex; flex-direction:column; gap:8px; align-items:start}
+.sp-ergebnis.erg-bento .erg-kpis{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+.sp-ergebnis.erg-bento :is(.erg-hero-text > div, .erg-kpi){display:flex; flex-direction:column; gap:4px; min-width:0; align-items:flex-start}
+.sp-ergebnis.erg-bento .erg-kpi b{font:700 var(--fs-5)/1.1 var(--display); color:var(--ink); font-variant-numeric:tabular-nums}
+/* Dein Weg: Chips unverändert, Notizen ruhig darunter. */
+.sp-ergebnis.erg-bento :is(.erg-weg .sp-weg-chips, .erg-merke .sp-lehrtexte){margin-top:4px}
+.sp-ergebnis.erg-bento .erg-weg-notizen{display:flex; flex-direction:column; gap:4px; margin-top:8px; padding-top:8px; border-top:1px solid var(--line)}
+/* Merke: Text, Quelle/Nachlesen als Fuß; alte Blockflächen werden in Karten neutralisiert. */
+.sp-ergebnis.erg-bento .erg-merke .sp-merke-fuss{margin-top:auto; gap:8px}
+.sp-ergebnis.erg-bento .erg-mehr{display:flex; flex-direction:column; gap:4px}
+.sp-ergebnis.erg-bento .erg-einstieg{padding:var(--bn-pad); gap:8px}
+/* Fußzeile: sticky wie bisher, Maße am 20/24-px-Kartenpolster. */
+.sp-ergebnis.erg-bento > .erg-fuss{position:sticky; bottom:calc(-1 * var(--erg-pad)); margin:4px -24px calc(-1 * var(--erg-pad)); padding:12px 24px 16px; background:var(--panel); border-top:1px solid var(--line); z-index:10}
+@media (max-width:900px){
+  .sp-ergebnis.erg-bento :is(.erg-hero,.erg-lohn,.erg-ruf,.erg-kenn,.erg-weg,.erg-merke,.erg-mehr,.erg-einstieg){grid-column:span 1}
+}
+@media (max-width:720px){
+  .sp-overlay.erg-bento{padding:12px}
+  .sp-overlay.erg-bento .sp-karte{padding:var(--erg-pad-s)}
+  .sp-ergebnis.erg-bento :is(.erg-hero, .erg-hero-text){grid-template-columns:minmax(0,1fr)}
+  .sp-ergebnis.erg-bento .erg-hero-seite{align-items:flex-start; text-align:left}
+  .sp-ergebnis.erg-bento .erg-hero-text > .bn-marke{grid-row:auto}
+  .sp-ergebnis.erg-bento .erg-hero-text > :not(.bn-marke){grid-column:1}
+  .sp-ergebnis.erg-bento .sp-sterne{font-size:calc(var(--fs-6) * 1.2)}
+  .sp-ergebnis.erg-bento > .erg-fuss{margin:4px calc(-1 * var(--erg-pad-s)) calc(-1 * var(--erg-pad-s)); padding:12px var(--erg-pad-s) 16px}
+  .sp-ergebnis.erg-bento{gap:8px}
+  .sp-ergebnis.erg-bento .erg-hero h2{font-size:var(--fs-6)}
+  .sp-ergebnis.erg-bento .erg-hero-text{gap:4px}
+}
+
 /* ---- Postfach (Bento 2.5 § 3.1: Posteingang eines IT-Dienstleisters) ----
    Kopf aus Mikrolabel, Titel, Kontextsatz, Kennzahlen und ruhiger Aktionszeile; Hauptbento mit
    Liste (400–440 px) und Leser. Unter 900 px bleibt der Leser das Blatt von unten. Kundenfarbe
@@ -3272,7 +3427,7 @@ html[data-bewegung="reduziert"] .knopf.primaer:hover:not(:active){transition:non
 .sp-kennzahl{display:inline-flex; flex-direction:column; align-items:flex-start; padding:4px 8px; border:1px solid var(--line); border-radius:var(--radius-s); background:var(--panel)}
 .sp-kennzahl b{color:var(--ink); font:700 var(--fs-5)/1 var(--display); font-variant-numeric:tabular-nums}
 .sp-kennzahl span{color:var(--faint); font:600 var(--fs-1)/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase}
-.sp-kennzahl.neu b{color:var(--accent)}
+.sp-kennzahl.neu b, .sp-ergebnis.erg-bento .erg-hero .bn-kicker{color:var(--accent)}
 .sp-pf-aktionen{grid-column:1 / -1; display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px}
 .sp-pf-aktionen .kr-tag{display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; color:var(--muted); font:400 var(--fs-2)/1.35 var(--body)}
 .sp-pf-aktionen .kr-tag > span{display:inline-flex; align-items:center; gap:4px}
@@ -11289,8 +11444,8 @@ html[data-theme="pulsar"] .ansicht .hb-seite :is(.hb-aktionen, .hb-klasse-zeile)
 <div id="app" aria-live="off"><div class="lade-huelle" role="status" aria-label="Netzwerk-Labor lädt"><span class="lade-marke">Netzwerk-Labor</span><span class="lade-text">lädt</span><span class="lade-balken" aria-hidden="true"><i></i></span></div></div>
 <script>
 "use strict";
-const LABOR_VERSION = "3.0.0";
-const LABOR_BAU = "6f324dc9";
+const LABOR_VERSION = "3.1.0";
+const LABOR_BAU = "df418002";
 /* ---- kern/basis.js ---- */
 "use strict";
 /* ---------- Kern: Speicher, Zeit, Ereignisse, Zufall ----------
@@ -21093,6 +21248,71 @@ DATEN.lehrtextFuer = function(skill, niveau){
   if (!t || !t.skill || !t.E) return null;
   const n = niveau === "AP1" || niveau === "AP2" ? niveau : "E";
   return t[n] || t.E;
+};
+
+/* ---- daten/leitfaden.js ---- */
+"use strict";
+/* ---------- Daten: Analyse-Leitfaden und Onboarding (3.1.0, Variante B) ----------
+   VERTRAG: verbindliche Didaktik-Spec = Nachweise/3.0/3.1/DIAGNOSTIK.md (r-didaktik, task-122),
+   Datenform §5. Phasen-ids/Titel/Impulse/Fehlannahmen sind WÖRTLICH von dort übernommen; die Engine
+   (src/spiel/leitfaden.js) liest ausschließlich diese Texte und erfindet keinen eigenen.
+   Impulse sind prozessleitend und nennen NIE eine Lösung: keine Ziffern, Adressen,
+   Konfigurationswerte, Codes oder Geräte-IDs. Kein Sternabzug, keine Lern-/Fehlerheft-Buchung.
+   "onboarding[].text" ist ein additiver Anzeigetext für UI task-124 (Spec §4 liefert Ziel/Kriterium;
+   Text noch von r-didaktik/UI gegenzulesen). */
+DATEN.leitfaden = {
+  version: 1,
+  phasen: [
+    {id: "auftrag-klaeren", titel: "Auftrag klären",
+      ziel: "Verstehen, was beobachtbar kaputt ist und was danach gehen soll",
+      impulse: ["Lies den Auftrag einmal ganz: Was ist beobachtbar kaputt, was soll danach wieder gehen?",
+        "Wer meldet was – und was hat der Kunde schon versucht?"],
+      fehlannahme: "Das Symptom ist die Ursache."},
+    {id: "lage-schichten", titel: "Lage + Schichten",
+      ziel: "Netzbild und Schichtlage erfassen, bevor geändert wird",
+      impulse: ["Verschaff dir ein Bild vom Netz: Welche Geräte hängen zusammen, wo verläuft der Weg?",
+        "Geh die Schichten von unten nach oben durch: Wo bricht es zuerst?"],
+      fehlannahme: "Nur das eine Gerät ansehen und das Netz vergessen."},
+    {id: "hypothese", titel: "Hypothese",
+      ziel: "Eine prüfbare Vermutung bilden, bevor eingegriffen wird",
+      impulse: ["Formuliere eine Vermutung, die ALLE Beobachtungen erklärt – und eine, die sie widerlegen würde.",
+        "Ordne deine Vermutung einer Schicht zu: Passt sie zu dem, was du gesehen hast?"],
+      fehlannahme: "Erst raten und ändern, dann prüfen."},
+    {id: "messen", titel: "Messen",
+      ziel: "Beobachtung mit Werkzeug belegen statt behaupten",
+      impulse: ["Wähle eine Messung, die deine Vermutung auch widerlegen könnte.",
+        "Vergleiche zwei Messpunkte oder Geräte: Wo ist der Unterschied?"],
+      fehlannahme: "Eine Messung reicht als Beweis."},
+    {id: "eingreifen-pruefen", titel: "Eingreifen + Prüfen",
+      ziel: "Gezielt ändern und die Wirkung sofort prüfen",
+      impulse: ["Ändere eine Sache, dann prüfe sofort: Ist das Ziel jetzt erreichbar?",
+        "Bleibt die Prüfung rot: zurück zur Vermutung – nicht weiter raten."],
+      fehlannahme: "Ändern ohne zu prüfen."},
+    {id: "dokumentieren-lernen", titel: "Dokumentieren + Lernen",
+      ziel: "Ergebnis sichern und für den nächsten Fall lernen",
+      impulse: ["Schreib in einem Satz: Symptom, Ursache, Maßnahme, Prüfung.",
+        "Was nimmst du für den nächsten Fall mit?"],
+      fehlannahme: "Beheben ist genug; Doku und Lernen sind Beiwerk."},
+  ],
+  pruefung: {impulse: false, naechster: null},
+  onboarding: [
+    {id: "onboarding-auftrag", titel: "Was ist ein Auftrag?",
+      lernziel: "Kundenmeldung, Symptom und Ziel unterscheiden; Symptom ist nicht Ursache",
+      abnahme: "höchstens zwei Sätze; nennt Briefing/Symptom/Ziel; keine Lösung, keine Adresse",
+      text: "Im Auftrag stehen Briefing und Symptom; dein Netz siehst du im Labor. Erst verstehen, dann ändern."},
+    {id: "onboarding-lage", titel: "Karte/Lage lesen",
+      lernziel: "Geräte, Kabel, Legende und Adressen im Lagebild finden",
+      abnahme: "verweist auf Symbole/Legende; keine konkreten Werte",
+      text: "Die Karte zeigt Geräte, Kabel und Legende; die Symbole erklären, wie alles zusammenhängt. Verschaff dir erst ein Bild, bevor du etwas anfasst."},
+    {id: "onboarding-leitfaden", titel: "Leitfaden nutzen",
+      lernziel: "Phasen als Fragen verstehen; Umwege erlaubt",
+      abnahme: "nennt die Phasen in höchstens zwei Sätzen; keine Lösungen",
+      text: "Der Analyse-Leitfaden begleitet dich vom Auftrag bis zum Lernen. Du darfst vor- und zurückspringen — er führt, er sperrt nicht."},
+    {id: "onboarding-abnahme", titel: "Abnahme und Lernen",
+      lernziel: "Ziele prüfen, Abnahme ablegen, Lernstand nutzen",
+      abnahme: "erklärt Abnahme und Lernstand; keine Noten, Ränge oder Vergleiche",
+      text: "Die Abnahme zeigt dir, was noch fehlt, und der Lernstand merkt sich, was du geübt hast. Hier zählt dein eigener Fortschritt, kein Vergleich."},
+  ],
 };
 
 /* ---- daten/mini-denkhilfen.js ---- */
@@ -31691,6 +31911,103 @@ Spiel.kurzfrage = (() => {
   return K;
 })();
 
+/* ---- spiel/leitfaden.js ---- */
+"use strict";
+/* ---------- Spiel: Analyse-Leitfaden (3.1.0, Variante B; task-123, Spec task-122) ----------
+   Prozessmodell der vollständigen Handlung, verdichtet auf sechs Phasen. Diese Datei erkennt
+   Fortschritt AUSSCHLIESSLICH aus echten Spielzuständen — keine Klick-/Zeitzählung, kein neuer
+   Spielstand, keine Lösungen. Die Texte stehen ausschließlich in src/daten/leitfaden.js
+   (verbindlich: Nachweise/3.0/3.1/DIAGNOSTIK.md, r-didaktik).
+
+   VERTRAG (Lead trägt Architektur § 17/§ 21 nach):
+     stand(inst) -> {pruefung:bool, fortschritt:0..1, aktuell:id|null,
+                     schritte:[{id,titel,status:"erledigt"|"aktuell"|"offen",impuls:str|null}]}
+     phase(inst) -> id|null · fortschritt(inst) -> 0..1 · naechsterSchritt(inst) -> {id,titel,text}|null
+     pruefungAktiv() -> bool · zuruecksetzen(inst) -> {ok:true} · LUECKEN (dokumentierte Lücken)
+
+   ERKENNUNG (Didaktik-Spec §1; Datei:Zeile in dieser Sitzung geprüft):
+   1 auftrag-klaeren:        !!inst.geoeffnet                     (persistiert, ticket.js:48; st.aktiv ist nur Laufzeit :46)
+   2 lage-schichten:         (inst.befehle||[]).length > 0        (PROXY laut Spec §6; Befehlslog akte.js:57-67)
+   3 hypothese:              !!inst.verdacht                      (verdacht.js:52-58); ohne Injektor (verdacht.noetig false,
+                                                                  :18-21) gilt der Schritt als erledigt (kein Zwang)
+   4 messen:                 (inst.akte||[]).length > 0           (Beweiskarten akte.js:9-20, :29-54)
+   5 eingreifen-pruefen:     Spiel.geaenderteGeraete(inst)>0      (Diff gegen Startnetz, szene.js:158-169) UND
+                             Spiel.zieleStatus(inst).some(ok)     (ticket.js:106-111); ohne Injektor genügt ein erfülltes Ziel
+                             (zusätzlich nach Abnahme: inst.zielErst, abnahme.js:41-43)
+   6 dokumentieren-lernen:   inst.abnahmen>0 ODER inst.notiz ODER inst.antworten  (abnahme.js:41; arbeitsziele.js:51-54,68-78)
+   Prüfungsmodus: Spiel.pruefung.aktiv() (pruefung.js:18) oder inst.quelle==="pruefung" → neutraler Status,
+   impuls:null, naechsterSchritt null. Kein Sternabzug, keine Hilfe-/Lernbuchung, keine Rangfolge. */
+Spiel.leitfaden = (() => {
+  const daten = () => (typeof DATEN !== "undefined" && DATEN && DATEN.leitfaden) || {};
+  const phasen = () => { const p = daten().phasen; return Array.isArray(p) ? p : []; };
+  const pruefungAktiv = () => {
+    try { return !!(Spiel.pruefung && typeof Spiel.pruefung.aktiv === "function" && Spiel.pruefung.aktiv()); }
+    catch (e) { return false; }
+  };
+  const imPruefung = inst => !!(pruefungAktiv() || (inst && typeof inst === "object" && inst.quelle === "pruefung"));
+  const laenge = x => Array.isArray(x) ? x.length : 0;
+  const akten = inst => laenge(inst && inst.akte);
+  const befehle = inst => laenge(inst && inst.befehle);
+  const geaendert = inst => { try { return typeof Spiel.geaenderteGeraete === "function" ? (Spiel.geaenderteGeraete(inst) || []) : []; } catch (e) { return []; } };
+  /* Verifikation: ein Ziel ist jetzt erfüllt — live geprüft oder in der letzten Abnahme belegt (inst.zielErst). */
+  const verifiziert = inst => {
+    try { const s = typeof Spiel.zieleStatus === "function" ? Spiel.zieleStatus(inst) : []; if (Array.isArray(s) && s.some(x => x && x.ok === true)) return true; } catch (e) { /* weiter */ }
+    return !!(inst && Array.isArray(inst.zielErst) && inst.zielErst.some(x => typeof x === "number"));
+  };
+  const ohneInjektor = inst => { try { return !!(Spiel.verdacht && typeof Spiel.verdacht.noetig === "function" && !Spiel.verdacht.noetig(inst)); } catch (e) { return false; } };
+  const dokumentiert = inst => !!(inst && ((Number(inst.abnahmen) || 0) > 0
+    || (inst.notiz && String(inst.notiz).trim().length > 0)
+    || Object.keys(inst.antworten || {}).length > 0));
+  const erledigt = {
+    "auftrag-klaeren": inst => !!(inst && inst.geoeffnet),
+    "lage-schichten": inst => befehle(inst) > 0,
+    "hypothese": inst => !!(inst && inst.verdacht) || ohneInjektor(inst),
+    "messen": inst => akten(inst) > 0,
+    "eingreifen-pruefen": inst => ohneInjektor(inst) ? verifiziert(inst) : (geaendert(inst).length > 0 && verifiziert(inst)),
+    "dokumentieren-lernen": dokumentiert,
+  };
+  /* Dokumentierte Lücken (Spec §6) — ehrlich sichtbar für Panel/Review. */
+  const LUECKEN = [{
+    schritt: "lage-schichten",
+    spec: "DIAGNOSTIK.md §6",
+    quelle: "kein persistiertes 'Gerät angesehen'/'Inspektor geöffnet' (Suche gesehen|besichtigt|angesehen|besucht + Inspektor-Events = 0)",
+    proxy: "(inst.befehle||[]).length > 0 — Befehlslog src/spiel/akte.js:57-67",
+    zukunft: "optionales inst.gesehen aus dem UI-Bus ist 3.2-Idee; Lead-Entscheid 3.1.0: keine neuen Fortschrittsspeicher",
+  }];
+  const impulseVon = p => Array.isArray(p && p.impulse) ? p.impulse.filter(x => typeof x === "string" && x.trim()) : [];
+  const impulsText = (p, i) => { const l = impulseVon(p); return l[i] || l[0] || ""; };
+  function stand(inst){
+    const ps = phasen();
+    const im = imPruefung(inst);
+    const getan = ps.map(p => { try { return !!(erledigt[p.id] && erledigt[p.id](inst)); } catch (e) { return false; } });
+    const ersterOffen = getan.indexOf(false);
+    const fertig = getan.filter(Boolean).length;
+    const fortschritt = ps.length ? Math.max(0, Math.min(1, fertig / ps.length)) : 0;
+    const schritte = ps.map((p, i) => ({
+      id: p.id, titel: p.titel,
+      status: getan[i] ? "erledigt" : (i === ersterOffen ? "aktuell" : "offen"),
+      /* Prüfung: nur neutraler Status, keine Impulse (Spec §3). Sonst trägt NUR der aktuelle
+         Schritt den Panel-Impuls (impulse[0]); alle anderen null (Spec-Form str|null, P3). */
+      impuls: (!im && !getan[i] && i === ersterOffen) ? impulsText(p, 0) : null,
+    }));
+    /* In der Prüfung nur neutraler Status: kein aktueller Schritt (Spec §3). */
+    return {pruefung: im, fortschritt, aktuell: (!im && ersterOffen >= 0) ? ps[ersterOffen].id : null, schritte};
+  }
+  function naechsterSchritt(inst){
+    if (imPruefung(inst)) return null;
+    const st = stand(inst);
+    if (!st.aktuell) return null;
+    const p = phasen().find(x => x.id === st.aktuell) || {};
+    /* Der zweite Spec-Impuls ist kein toter Inhalt: der „nächste Schritt" nutzt impulse[1] (P2). */
+    return {id: p.id || st.aktuell, titel: p.titel || st.aktuell, text: impulsText(p, 1)};
+  }
+  const phase = inst => stand(inst).aktuell;
+  const fortschritt = inst => stand(inst).fortschritt;
+  /* Kein eigener Fortschritt gespeichert: zuruecksetzen ist ein No-op (entfernt höchstens eine Altlast). */
+  function zuruecksetzen(inst){ if (inst && typeof inst === "object" && "leitfaden" in inst) delete inst.leitfaden; return {ok: true}; }
+  return {stand, phase, fortschritt, naechsterSchritt, pruefungAktiv, zuruecksetzen, LUECKEN};
+})();
+
 /* ---- spiel/lernen.js ---- */
 "use strict";
 /* ---------- Spiel: Anbindung an den Lernmotor und Niveau ----------
@@ -39818,11 +40135,25 @@ UI.labor = (() => {
       onclick: e => zoomMenue(e.currentTarget)}, "100 %");
     Z.el.ansichtGruppe = h("div", {class: "lb-gruppe"}, Z.el.ansicht);
     Z.el.verlaufGruppe = h("div", {class: "lb-gruppe", hidden: true}, Z.el.zurueck, Z.el.vor);   /* erst sichtbar, wenn es etwas rückgängig zu machen gibt */
+    /* 3.1.0 (B3/3, stil-CSS editor.css:115-120): Aktionen-Knopf im Kopf, sichtbar 901–1100 px;
+       ab 1101 blendet die CSS-Regel die Gruppe aus (1440/1366 unverändert). Bei ≤900 übernimmt
+       der Knopf in der Auftragszeile (spiel.js, .am-aktionen). */
+    let aktionenGruppe = null;
+    try {
+      if (UI.laborAktionen && typeof UI.menue === "function") {
+        aktionenGruppe = h("div", {class: "lb-gruppe"},
+          h("button", {type: "button", class: "lb-knopf lb-knopf-text", "data-aktionen": "1", "aria-haspopup": "menu",
+            title: "Aktionen: Konsole, Messen, Konfigurieren, Akte, Abnahme",
+            onclick: e => { const r = e.currentTarget.getBoundingClientRect(); UI.menue(r.left, r.bottom + 4, UI.laborAktionen.menueEintraege(), {titel: "Aktionen"}); }},
+            h("span", {}, "Aktionen")));
+      }
+    } catch (fehler) { console.error("Aktionen-Knopf", fehler); }
     const oben = h("div", {class: "lb-leiste-oben"},
       h("div", {class: "lb-gruppe lb-werkzeuge", role: "toolbar", "aria-label": "Werkzeuge"},
         wz("auswahl", "zeiger", "Auswählen (V): Klick wählt, Ziehen auf freier Fläche verschiebt die Ansicht, Shift+Ziehen zieht einen Auswahlrahmen", "V"),
         wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen", "K"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen", "P")),
       Z.el.ansichtGruppe,
+      aktionenGruppe,
       h("div", {class: "lb-luecke"}),
       Z.el.verlaufGruppe);
     const unten = h("div", {class: "lb-leiste-unten"}, Z.el.zoomGruppe = h("div", {class: "lb-gruppe"}, Z.el.zoomText));
@@ -39845,11 +40176,17 @@ UI.labor = (() => {
        und ≥ 60 % der Breite (CSS: clamp(250px, 40 % − 88px, 440px)). Die Simulation liegt nicht mehr unten. */
     Z.el.dockReiter = h("div", {class: "lb-dock-reiter", role: "tablist", "aria-label": "Dock"});
     Z.el.dockInhalt = h("div", {class: "lb-dock-inhalt"}, Z.el.inspektor, Z.el.sim, Z.el.terminal, Z.el.plan, Z.el.akte);
-    Z.el.dock = h("aside", {class: "lb-dock", "aria-label": "Dock"}, Z.el.dockReiter, Z.el.dockInhalt);
+    /* 3.1.0 (B3/4): Breitenkante als reiner div role=separator (kein input[type=range], kein fokussierbares
+       Handle im R12-Sinne) — Pointer-Drag, Doppelklick-Reset, Alt+←/→; Zustand persistiert UI.layoutBreite. */
+    Z.el.resizer = h("div", {class: "ins-resizer", role: "separator", tabindex: "0", "aria-orientation": "vertical",
+      "aria-label": "Breite der rechten Leiste", "aria-valuemin": "280", "aria-valuemax": "560", "aria-valuenow": "360"});
+    Z.el.dock = h("aside", {class: "lb-dock", "aria-label": "Dock"}, Z.el.resizer, Z.el.dockReiter, Z.el.dockInhalt);
 
     const mitte = h("div", {class: "lb-mitte"}, Z.el.auftrag, leinwand);
     Z.root.append(leiste, mitte, Z.el.dock);
     container.replaceChildren(Z.root);
+    /* 3.1.0 (B3/4): Ziehkante einrichten (persistiert; Resizer ist kein Wähler → R12 unverändert). */
+    try { if (typeof UI !== "undefined" && UI.layoutBreite && typeof UI.layoutBreite.installieren === "function") UI.layoutBreite.installieren(Z.root, Z.el.resizer); } catch (fehler) { console.error("Layout: Ziehkante", fehler); }
 
     /* Runde 5: Seit die Auftragsmappe ein eigenes Blatt mit Kopf ist, ruhen Werkzeugleiste und
        Flächentitel, solange sie offen ist (Klasse .mappe-an am .labor, CSS in editor.css bei den
@@ -41120,6 +41457,12 @@ UI.labor = (() => {
   function fernwartung(id){
     Z.fern = id || null;
     Z.root?.classList.toggle("lb-fern", !!Z.fern);
+    /* Fernwartung nutzt die CSS-Breite 58 % — eine zuvor gesetzte Inline-Breite (--dock-b) muss weg,
+       sonst bliebe der Terminalbereich zu schmal (rauch: „Terminal nur 26–41 % breit"). */
+    try {
+      if (Z.root && Z.fern) Z.root.style.removeProperty("--dock-b");
+      else if (Z.root && UI.layoutBreite && typeof UI.layoutBreite.anwenden === "function") UI.layoutBreite.anwenden(Z.root);
+    } catch (e) { /* egal */ }
     const el = Z.el.fern; if (!el) return;
     el.hidden = !Z.fern;
     el.classList.remove("fertig");                          /* „getrennt“ aus der Probe der vorigen Sitzung nicht mitnehmen */
@@ -42320,6 +42663,14 @@ UI.hub = (() => {
    geprüft (rot = so nicht möglich, gelb = möglich, aber vermutlich falsch) und bei Enter oder beim Verlassen des
    Feldes übernommen. Unter jeder Änderung zeigt „entspricht:“ den passenden Konsolenbefehl (CLI.entspricht). */
 UI.inspektor = (() => {
+  /* 3.1.0 (B3/2): Analyse-Leitfaden (nur Text, keine Knöpfe) oben im Inspektor bei laufendem Auftrag.
+     Kein Toggle, keine R12-Zunahme: das Panel bringt ausschließlich Text/ol/li mit. */
+  function mitLeitfaden(...kinder){
+    let panel = null;
+    try { panel = (UI.leitfaden && typeof UI.leitfaden.panel === "function") ? UI.leitfaden.panel() : null; }
+    catch (e) { console.error("Leitfaden: Panel", e); }
+    return panel ? [panel, ...kinder] : kinder;
+  }
   const ST = new WeakMap();          /* container → Zustand */
   const OFFEN = new Set();           /* sichtbare Container */
   const LETZTER_REITER = {};         /* Gerätetyp → zuletzt benutzter Reiter */
@@ -42387,7 +42738,7 @@ UI.inspektor = (() => {
     if (!container) return;
     ST.delete(container); OFFEN.delete(container);
     container.classList.remove("in", "in-geraet", "in-kabel", "in-zone");
-    container.replaceChildren(h("div", {class: "lb-insp-leer"},
+    container.replaceChildren(...mitLeitfaden(h("div", {class: "lb-insp-leer"},
       h("div", {class: "lb-insp-leer-sym"}, UI.symbol("inspektor", 28)),
       h("strong", {}, "Nichts ausgewählt"),
       h("p", {}, "Klick ein Gerät an, um es hier einzustellen."),
@@ -42395,7 +42746,7 @@ UI.inspektor = (() => {
         h("li", {}, h("kbd", {}, "P"), " Ping: von Gerät A auf Gerät B ziehen"),
         h("li", {}, h("kbd", {}, "K"), " Kabel verlegen"),
         h("li", {}, h("kbd", {}, "Strg"), "+", h("kbd", {}, "K"), " Befehlspalette"),
-        h("li", {}, h("kbd", {}, "?"), " alle Tastenkürzel"))));
+        h("li", {}, h("kbd", {}, "?"), " alle Tastenkürzel")))));
   }
   function reiter(container, name, o = {}){
     const K = ST.get(container);
@@ -42462,7 +42813,7 @@ UI.inspektor = (() => {
           h("span", {class: "in-kopf-rolle"}, "Schicht 1 · Verbindung")),
         h("div", {class: "in-chips"}, h("span", {class: "in-chip " + (l.oben ? "ok" : "bad")}, l.oben ? "● Link oben" : "○ kein Link"))));
     const inhalt = h("div", {class: "in-inhalt"});
-    c.replaceChildren(K.kopfEl, inhalt);
+    c.replaceChildren(...mitLeitfaden(K.kopfEl, inhalt));
     inhalt.append(abschnitt("Enden",
       h("div", {class: "in-kabel-enden"}, [k.a, k.b].map(e => {
         const ger = g(e.geraet) || {id: e.geraet, name: e.geraet};
@@ -42494,7 +42845,7 @@ UI.inspektor = (() => {
           h("span", {class: "in-kopf-rolle"}, "IP-Netz · " + geraete.length + " Geräte")),
         h("div", {class: "in-chips"}, geraete.length <= 1 ? h("span", {class: "in-chip warn"}, "▲ kleines Netz") : h("span", {class: "in-chip ok"}, "● " + geraete.length + " Mitglieder"))));
     const inhalt = h("div", {class: "in-inhalt"});
-    c.replaceChildren(K.kopfEl, inhalt);
+    c.replaceChildren(...mitLeitfaden(K.kopfEl, inhalt));
     inhalt.append(abschnitt("Mitglieder",
       geraete.length ? h("table", {class: "in-tabelle"}, h("tbody", {}, geraete.map(ger => h("tr", {class: "klickbar", onclick: () => { try { UI.labor?.auswaehlen?.(ger.id); } catch (x) { /* Anzeige */ } }},
         h("td", {}, ger.name || ger.id),
@@ -42553,7 +42904,7 @@ UI.inspektor = (() => {
     /* Ports-Reiter: der Reiter-Körper scrollt nicht, die Portliste scrollt in sich
        (Vertrag Runde 5 § 2 B: "Ab 4 Ports scrollt die Liste mit unterem Rand"). */
     const inhalt = h("div", {class: "in-inhalt" + (K.reiter === "ports" ? " in-ports" : "")});
-    c.replaceChildren(K.kopfEl, reiterEl, inhalt);
+    c.replaceChildren(...mitLeitfaden(K.kopfEl, reiterEl, inhalt));
     kopfNeu(K);
     if (K.reiter === "konsole") {
       const ziel = h("div", {class: "in-konsole"});
@@ -45112,6 +45463,152 @@ UI.konsole = (() => {
   return {oeffnen, zuruecksetzen};
 })();
 
+/* ---- ui/labor-aktionen.js ---- */
+"use strict";
+/* ---------- Kernaktionen der Labor-Ansicht (3.1.0, Aufgabe B3/3) ----------
+   R12-Entscheid: Die Aktionen stehen in der rechten Leiste NUR ALS TEXT (Name + Tastenkürzel,
+   keine buttons/links/inputs im .ansicht-Kasten); ausgeführt werden sie über das bestehende,
+   bereits gezählte ⋯-Menü der Auftragszeile (Kopf „Aktionen", body-level, zählt nicht).
+   Diese Datei ist die EINE Quelle für beide Darstellungen. */
+UI.laborAktionen = (() => {
+  function labor(){ try { return (typeof UI !== "undefined" && UI.labor) || null; } catch (e) { return null; } }
+  /* Aktionen nutzen ausschließlich vorhandene Wege; fehlt ein Baustein, erklärt das eine Meldung. */
+  const AKTIONEN = [
+    {id: "konsole", name: "Konsole", taste: "C", hinweis: "Gerät wählen, dann Konsole öffnen",
+      ausfuehren: () => { const l = labor(); const id = l && l.auswahl && l.auswahl.geraet; if (!id) { UI.toast("Wähle zuerst ein Gerät aus.", "info"); return; } l.konsole(id); }},
+    {id: "messen", name: "Messen (Ping)", taste: "P", hinweis: "Erreichbarkeit von A nach B prüfen",
+      ausfuehren: () => { const l = labor(); if (l && typeof l.werkzeug === "function") l.werkzeug("ping"); }},
+    {id: "konfigurieren", name: "Konfigurieren", taste: "I", hinweis: "Inspektor am gewählten Gerät",
+      ausfuehren: () => { const l = labor(); if (!l) return; if (typeof l.dock === "function") l.dock("inspektor"); if (typeof l.inspektor === "function") l.inspektor(true); }},
+    {id: "akte", name: "Akte", taste: null, hinweis: "Dokumentieren und Verdacht festhalten (kein eigenes Tastenkürzel)",
+      ausfuehren: () => { try { UI.akte && typeof UI.akte.freigeben === "function" ? UI.akte.freigeben(true) : UI.toast("Die Akte gehört zu einem laufenden Auftrag.", "info"); } catch (e) { console.error("Aktionen: Akte", e); } }},
+    {id: "abnahme", name: "Abnahme", taste: null, hinweis: "Der Kunde prüft die Arbeit (Knopf in der Auftragszeile)",
+      ausfuehren: () => { try { UI.spiel && typeof UI.spiel.abnahmeAnfordern === "function" ? UI.spiel.abnahmeAnfordern() : UI.toast("Die Abnahme gibt es nur bei laufendem Auftrag.", "info"); } catch (e) { console.error("Aktionen: Abnahme", e); } }},
+  ];
+  function liste(){ return AKTIONEN.map(a => ({id: a.id, name: a.name, taste: a.taste, hinweis: a.hinweis})); }
+  function ausfuehren(id){
+    const a = AKTIONEN.find(x => x.id === id);
+    if (!a) return false;
+    try { a.ausfuehren(); } catch (e) { console.error("Aktion " + id, e); return false; }
+    return true;
+  }
+  /* Einträge für UI.menue (body-level Menü; kein neues Bedienelement in der Ansicht). */
+  function menueEintraege(){
+    return AKTIONEN.map(a => ({text: a.name + "…", sym: null, taste: a.taste || undefined, titel: a.hinweis, fn: () => ausfuehren(a.id)}));
+  }
+  return {liste, ausfuehren, menueEintraege};
+})();
+
+/* ---- ui/layout-breite.js ---- */
+"use strict";
+/* ---------- Inspektorbreite per Kante (3.1.0, Aufgabe B3/4) ----------
+   KEIN input[type=range], KEIN fokussierbares Handle: ein reiner div.ins-resizer mit
+   role="separator" tabindex="0" (zählt laut R12-Entscheid nicht). Pointer-Drag auf der Kante,
+   persistiert store einst.layout.inspBreite (280–560, Default 360), Doppelklick = Reset,
+   Tastatur Alt+←/→ (global) bzw. Pfeile am Separator. */
+UI.layoutBreite = (() => {
+  const MIN = 280, MAX = 560, STANDARD = 360;
+  function einst(){ try { return store.get("einst", {}) || {}; } catch (e) { return {}; } }
+  function klemme(px){
+    const n = Math.round(Number(px));
+    if (!Number.isFinite(n)) return STANDARD;
+    return Math.min(MAX, Math.max(MIN, n));
+  }
+  function gespeichert(){
+    const l = einst().layout;
+    const n = l && Number(l.inspBreite);
+    return Number.isFinite(n) ? klemme(n) : null;
+  }
+  function lesen(){
+    const n = gespeichert();
+    return n == null ? STANDARD : n;
+  }
+  function schreiben(px){
+    const breite = klemme(px);
+    const e = einst();
+    try { store.set("einst", Object.assign({}, e, {layout: Object.assign({}, e.layout || {}, {inspBreite: breite})})); }
+    catch (fehler) { console.error("Layout: speichern", fehler); }
+    return breite;
+  }
+  function anwenden(root, px){
+    /* Nur ein vom Nutzer gesetzter Wert wird als Inline-Breite aufgedrückt — sonst bleibt der
+       CSS-Clamp (editor.css .labor.dock-da) maßgeblich. px != null = Nutzeraktion (Drag/Reset/Tastatur). */
+    const breite = px == null ? lesen() : schreiben(px);
+    const nutzerWert = px != null || gespeichert() != null;
+    if (root && root.style && typeof root.style.setProperty === "function") {
+      /* Fernwartung setzt per CSS 58 % (editor.css .labor.lb-fern) — dort keine Inline-Breite erzwingen. */
+      if (!nutzerWert || (root.classList && root.classList.contains && root.classList.contains("lb-fern"))) root.style.removeProperty("--dock-b");
+      else root.style.setProperty("--dock-b", breite + "px");
+    }
+    return breite;
+  }
+  function reset(root){ return anwenden(root, STANDARD); }
+  function arbeitsflaeche(){ try { return document.querySelector(".labor"); } catch (e) { return null; } }
+  let zustand = null;      /* {root, separator, drag} – eine Installation pro Bereich */
+  let tastenHorer = null;
+  function ariaSetzen(){
+    if (!zustand || !zustand.separator) return;
+    try { zustand.separator.setAttribute("aria-valuenow", String(lesen())); } catch (e) { /* egal */ }
+  }
+  function tastatur(e){
+    if (!e || !zustand) return false;
+    const amSeparator = e.target === zustand.separator || (typeof document !== "undefined" && document.activeElement === zustand.separator);
+    if (!(e.altKey || amSeparator)) return false;
+    let richtung = 0;
+    if (e.key === "ArrowLeft") richtung = -1;
+    else if (e.key === "ArrowRight") richtung = 1;
+    else return false;
+    if (typeof e.preventDefault === "function") e.preventDefault();
+    const schritt = e.altKey ? 16 : 8;
+    anwenden(zustand.root, lesen() + richtung * schritt);
+    ariaSetzen();
+    return true;
+  }
+  function dragStarten(e){
+    if (!zustand || !zustand.separator) return;
+    zustand.drag = {x: e.clientX == null ? 0 : e.clientX, breite: lesen()};
+    if (typeof zustand.separator.setPointerCapture === "function" && e.pointerId != null) { try { zustand.separator.setPointerCapture(e.pointerId); } catch (x) { /* egal */ } }
+    zustand.separator.classList.add("zieht");
+    if (typeof e.preventDefault === "function") e.preventDefault();
+  }
+  function dragBewegen(e){
+    if (!zustand || !zustand.drag) return;
+    const dx = (e.clientX == null ? 0 : e.clientX) - zustand.drag.x;
+    /* rechte Leiste: nach links ziehen vergrößert die Breite */
+    anwenden(zustand.root, zustand.drag.breite - dx);
+  }
+  function dragEnde(){
+    if (!zustand || !zustand.drag) return;
+    const breite = lesen();
+    zustand.drag = null;
+    if (zustand.separator) zustand.separator.classList.remove("zieht");
+    schreiben(breite);
+    ariaSetzen();
+  }
+  function installieren(root, separator){
+    if (!root || !separator) return false;
+    zustand = {root, separator, drag: null};
+    if (typeof separator.addEventListener === "function") {
+      separator.addEventListener("pointerdown", dragStarten);
+      separator.addEventListener("pointermove", e => { if (zustand && zustand.drag) dragBewegen(e); });
+      separator.addEventListener("pointerup", dragEnde);
+      separator.addEventListener("pointercancel", dragEnde);
+      separator.addEventListener("dblclick", () => { reset(root); ariaSetzen(); });
+      separator.addEventListener("keydown", tastatur);
+    }
+    if (!tastenHorer && typeof document !== "undefined" && typeof document.addEventListener === "function") {
+      tastenHorer = e => tastatur(e);
+      document.addEventListener("keydown", tastenHorer);
+      document.addEventListener("pointerup", () => dragEnde());
+    }
+    anwenden(root);
+    ariaSetzen();
+    return true;
+  }
+  function werkzeug(){ return zustand; }
+  return {MIN, MAX, STANDARD, lesen, schreiben, anwenden, reset, installieren, tastatur, _intern: {klemme, arbeitsflaeche}, get _zustand(){ return zustand; }};
+})();
+
 /* ---- ui/leiste.js ---- */
 "use strict";
 /* ---------- Die Leiste: ruhiger Begleiter am Bildschirmrand (Runde 5, Entwurf § 2 C) ----------
@@ -45996,6 +46493,94 @@ UI.leiste = (() => {
           get miniHilfe(){ return typeof document !== "undefined" ? hilfeEl() : null; },
           get aufgebaut(){ return !!root; }, get offenAuf(){ return auf; },
           get zustand(){ return {...zustand}; }};
+})();
+
+/* ---- ui/leitfaden.js ---- */
+"use strict";
+/* ---------- Analyse-Leitfaden (3.1.0, Aufgabe B3/2) ----------
+   Panel im rechten Inspektor, NUR TEXT (keine Knöpfe → R12 bleibt), sichtbar bei laufendem Auftrag.
+   Daten: Spiel.leitfaden.stand(inst) → {pruefung, fortschritt, aktuell, schritte:[{id,titel,status,impuls}]};
+   naechsterSchritt(inst) → {id,titel,text}|null. Status: "erledigt"|"aktuell"|"offen".
+   Prüfungsmodus: neutraler Hinweis, keine Impulse, kein Leck. Fehlende Engine/Ticket: kein Panel.
+   CSS: stil (leitfaden.css: .lf-panel/.lf-kopf/.lf-ring/.lf-kicker/.lf-titel/.lf-schritte/
+   .lf-schritt+ok/jetzt/offen/.lf-status/.lf-text/.lf-impuls/.lf-naechster). */
+UI.leitfaden = (() => {
+  const alsText = x => String(x == null ? "" : x);
+  function instanz(){
+    try { return typeof Spiel !== "undefined" && Spiel && typeof Spiel.aktiveInstanz === "function" ? Spiel.aktiveInstanz() : null; }
+    catch (e) { return null; }
+  }
+  function engine(){
+    try { return (typeof Spiel !== "undefined" && Spiel && Spiel.leitfaden) || null; } catch (e) { return null; }
+  }
+  function daten(){
+    const e = engine(), i = instanz();
+    if (!e || !i || typeof e.stand !== "function") return null;
+    try {
+      const stand = e.stand(i);
+      if (!stand || typeof stand !== "object") return null;
+      const naechster = typeof e.naechsterSchritt === "function" ? e.naechsterSchritt(i) : null;
+      return {stand, naechster};
+    } catch (fehler) { console.error("Leitfaden: stand", fehler); return null; }
+  }
+  const anteil = wert => Math.max(0, Math.min(1, Number(wert) || 0));
+  function prozent(wert){ return Math.round(anteil(wert) * 100) + " %"; }
+  function statusKlasse(status){
+    return status === "erledigt" ? "ok" : status === "aktuell" ? "jetzt" : "offen";
+  }
+  function panel(){
+    const d = daten();
+    if (!d) return null;
+    const stand = d.stand, naechster = d.naechster;
+    const pruefung = !!stand.pruefung;
+    const kopf = h("header", {class: "lf-kopf"},
+      h("div", {class: "lf-ring", style: {"--p": String(anteil(stand.fortschritt))}, "aria-hidden": "true"},
+        h("span", {class: "lf-ring-wert"}, prozent(stand.fortschritt))),
+      h("div", {},
+        h("p", {class: "lf-kicker"}, "Analyse-Leitfaden"),
+        h("h3", {class: "lf-titel"}, pruefung ? "Prüfung läuft" : "Deine Analyse")));
+    const kinder = [kopf];
+    if (pruefung){
+      kinder.push(h("p", {class: "lf-impuls"}, "Im Prüfungsmodus gibt es keine Impulse – nur den Status deiner Arbeit."));
+    } else {
+      const schritte = Array.isArray(stand.schritte) ? stand.schritte : [];
+      if (schritte.length) {
+        kinder.push(h("ol", {class: "lf-schritte", "aria-label": "Leitfaden: sechs Schritte"},
+          schritte.map(s => h("li", {class: "lf-schritt " + statusKlasse(s && s.status), "data-schritt": alsText(s && s.id)},
+            h("span", {class: "lf-status", "aria-hidden": "true"}),
+            h("div", {class: "lf-text"}, h("b", {}, alsText(s && s.titel)))))));
+        const aktuell = schritte.find(s => s && s.status === "aktuell");
+        if (aktuell && aktuell.impuls) kinder.push(h("p", {class: "lf-impuls"}, alsText(aktuell.impuls)));
+      }
+      if (naechster && naechster.text) kinder.push(h("p", {class: "lf-naechster"}, "Nächster Schritt: " + alsText(naechster.text)));
+    }
+    /* Kernaktionen NUR als Text (Name + Kürzel) — ausgeführt über das bestehende ⋯-Menü „Aktionen“. */
+    const aktionen = (typeof UI !== "undefined" && UI.laborAktionen && typeof UI.laborAktionen.liste === "function") ? UI.laborAktionen.liste() : [];
+    if (aktionen.length) {
+      kinder.push(h("div", {class: "lf-aktionen", role: "list", "aria-label": "Kernaktionen (über das Menü Aktionen ausführbar)"},
+        aktionen.map(a => h("div", {class: "lf-aktion", role: "listitem"},
+          h("b", {}, alsText(a.name)), a.taste ? h("kbd", {}, alsText(a.taste)) : null))));
+    }
+    return h("aside", {class: "lf-panel", "aria-label": "Analyse-Leitfaden"}, kinder);
+  }
+  /* Live-Aktualisierung ohne Neuzeichnen der ganzen Ansicht: vorhandene Panels neu füllen. */
+  function aktualisieren(){
+    let ziele = [];
+    try { ziele = [...document.querySelectorAll(".lf-panel")]; } catch (e) { ziele = []; }
+    for (const el of ziele) {
+      const neu = panel();
+      /* echtes DOM: kein .kinder – Stub-Tests haben .kinder. Beides unterstützen. */
+      if (neu && el.replaceChildren) {
+        const kopie = Array.isArray(neu.kinder) ? [...neu.kinder] : [...(neu.childNodes || [])];
+        el.replaceChildren(...kopie);
+      }
+    }
+  }
+  try {
+    Bus.an("zustand-geaendert", aktualisieren);
+    Bus.an("netz-geaendert", aktualisieren);
+  } catch (e) { /* ohne Bus bleibt das Panel beim nächsten Inspektor-Zeichnen aktuell */ }
+  return {panel, aktualisieren, _intern: {daten, anteil, prozent, statusKlasse}};
 })();
 
 /* ---- ui/lernstand-hilfe.js ---- */
@@ -47255,6 +47840,125 @@ UI.netzplan = (() => {
   Bus.an("befehl", o => { S.fehler = !!(o && o.ergebnis && o.ergebnis.fehler); requestAnimationFrame(neu); });
 
   return {zeichnen, anheften, markieren, neu, zeichnung, naechsterZeigen: inst => anfordern(inst || UI.spiel?.inst), verstecken, _S: S};
+})();
+
+/* ---- ui/onboarding.js ---- */
+"use strict";
+/* ---------- Onboarding-Tour (3.1.0, Aufgabe B3/1) ----------
+   Einmalige Einführung beim ersten Start: 4 Schritte aus DATEN.leitfaden.tour (inhalt), Overlay statt
+   Ansicht (kein R12-Einfluss), Esc = überspringen, store einst.tour = {gesehen:true}; die Einstellungen
+   bieten „Einführung wiederholen“. Fehlende/kaputte Tour-Daten: gar keine Tour statt leerem Overlay.
+   CSS: stil, Hooks onb-* (onb-huelle/onb-karte/onb-kopf/onb-kicker/onb-titel/onb-text/onb-punkte/
+   onb-punkt/onb-fuss + onb-weiter/onb-ueberspringen). Keine fokussierbaren Punkte, keine neuen
+   Dauer-Bedienelemente in R12-Ansichten. */
+UI.onboarding = (() => {
+  const alsText = x => String(x == null ? "" : x);
+  function einst(){ return store.get("einst", {}) || {}; }
+  function gesehen(){ const t = einst().tour; return !!(t && t.gesehen === true); }
+  function merken(){
+    const e = einst();
+    store.set("einst", Object.assign({}, e, {tour: Object.assign({}, e.tour || {}, {gesehen: true})}));
+  }
+  /* Form von inhalt (task-125): tour: [{id, titel, text}]. Defensiv: fehlt/falsch → [] (keine Tour). */
+  function schritte(){
+    try {
+      /* inhalt task-125 (final): onboarding[4] {id,titel,lernziel,abnahme,text}; ältere Form tour[…] als Fallback. */
+      const lf = DATEN && DATEN.leitfaden;
+      const tourDaten = lf && (lf.onboarding || lf.tour);
+      if (!Array.isArray(tourDaten)) return [];
+      return tourDaten.map(s => ({titel: alsText(s && s.titel), text: alsText(s && s.text)}))
+        .filter(s => s.titel || s.text);
+    } catch (e) { return []; }
+  }
+  function offenesTicket(){
+    try {
+      return !!(typeof Spiel !== "undefined" && Spiel && typeof Spiel.aktiveInstanz === "function" && Spiel.aktiveInstanz());
+    } catch (e) { return false; }
+  }
+  let huelle = null, escHorer = null, vorherFokus = null;
+  function schliessen(){
+    const zurueck = vorherFokus;
+    vorherFokus = null;
+    try { if (huelle && document.activeElement && huelle.contains && huelle.contains(document.activeElement) && typeof document.activeElement.blur === "function") document.activeElement.blur(); } catch (e) { /* egal */ }
+    if (huelle) { try { huelle.remove(); } catch (e) { /* schon weg */ } huelle = null; }
+    if (escHorer) { try { document.removeEventListener("keydown", escHorer); } catch (e) { /* egal */ } escHorer = null; }
+    /* Tour-A11y: Fokus nicht im entfernten Overlay lassen — zurück zum Auslöser, wenn er noch lebt. */
+    try { if (zurueck && zurueck.isConnected !== false && typeof zurueck.focus === "function") zurueck.focus(); } catch (e) { /* egal */ }
+    merken();
+  }
+  function tour(){
+    const liste = schritte();
+    if (!liste.length) return false;
+    if (huelle) schliessen();
+    try { vorherFokus = (typeof document !== "undefined" && document.activeElement) || null; } catch (e) { vorherFokus = null; }
+    const kicker = h("span", {class: "onb-kicker"}, "");
+    const punkte = h("span", {class: "onb-punkte", "aria-hidden": "true"});
+    const titel = h("h2", {class: "onb-titel", id: "onb-titel"});
+    const absatz = h("p", {class: "onb-text"});
+    const ueberspringen = h("button", {type: "button", class: "knopf geist onb-ueberspringen", onclick: () => schliessen()}, "Überspringen");
+    const weiter = h("button", {type: "button", class: "knopf primaer onb-weiter"});
+    let index = 0;
+    function zeichnen(){
+      const s = liste[index] || {titel: "", text: ""};
+      kicker.textContent = "Einführung · " + (index + 1) + " / " + liste.length;
+      titel.textContent = s.titel;
+      absatz.textContent = s.text;
+      weiter.textContent = index + 1 >= liste.length ? "Los geht's" : "Weiter";
+      punkte.replaceChildren(...liste.map((_, i) => h("i", {class: "onb-punkt" + (i === index ? " an" : "")})));
+      try { if (typeof weiter.focus === "function") weiter.focus(); } catch (e) { /* Fokus ist Beiwerk */ }
+    }
+    const weiterKlick = () => {
+      if (index + 1 >= liste.length) { schliessen(); return; }
+      index += 1;
+      zeichnen();
+    };
+    /* dom.js h() registriert on*-Attribute als Hörer; hier programmatisch, deshalb explizit. */
+    if (typeof weiter.addEventListener === "function") weiter.addEventListener("click", weiterKlick);
+    else weiter.onclick = weiterKlick;
+    const karte = h("section", {class: "onb-karte", role: "dialog", "aria-modal": "true", "aria-labelledby": "onb-titel"},
+      h("div", {class: "onb-kopf"}, kicker, punkte),
+      titel, absatz,
+      h("div", {class: "onb-fuss"}, ueberspringen, weiter));
+    huelle = h("div", {class: "onb-huelle"}, karte);
+    escHorer = ereignis => {
+      if (!ereignis || ereignis.key !== "Escape") return;
+      if (typeof ereignis.preventDefault === "function") ereignis.preventDefault();
+      schliessen();
+    };
+    try { document.addEventListener("keydown", escHorer); } catch (e) { /* ohne Hörer bleibt der Überspringen-Knopf */ }
+    document.body.append(huelle);
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(() => { if (huelle) huelle.classList.add("da"); });
+    else huelle.classList.add("da");
+    zeichnen();
+    return true;
+  }
+  function beimStart(){
+    if (gesehen() || offenesTicket()) return false;
+    /* Automatisierte Browser (Rauch/Abnahme, navigator.webdriver) bekommen die Tour nicht automatisch –
+       sie würde die gemessenen Hauptaktionen verdecken. Manuell bleibt sie über die Einstellungen da. */
+    try { if (typeof navigator !== "undefined" && navigator && navigator.webdriver === true) return false; } catch (e) { /* egal */ }
+    /* KEINE Hostnamen-/UA-Erkennung: echte Nutzer auf localhost/EXE/file sehen die Tour.
+       Nur das explizite Automationsmerkmal (navigator.webdriver, Playwright/CDP) schaltet sie ab. */
+    return tour();
+  }
+  function zuruecksetzen(){
+    const e = einst();
+    store.set("einst", Object.assign({}, e, {tour: Object.assign({}, e.tour || {}, {gesehen: false})}));
+    return true;
+  }
+  function einstellungen(){
+    const c = h("div", {class: "einst-zeile"},
+      h("div", {class: "einst-text"}, h("strong", {}, "Einführung"),
+        h("span", {}, "Die vier Schritte vom ersten Start noch einmal ansehen – jederzeit überspringbar.")),
+      h("div", {class: "einst-steuer"},
+        h("button", {type: "button", class: "knopf", onclick: () => { tour(); }}, "Einführung wiederholen")));
+    return c;
+  }
+  (UI.startHaken ||= []).push(() => {
+    try { UI.app.einstellungAbschnitt("Einführung", c => c.append(einstellungen())); } catch (e) { console.error("Onboarding: Einstellungen", e); }
+    try { UI.onboarding.beimStart(); } catch (e) { console.error("Onboarding: Start", e); }
+  });
+  return {tour, gesehen, zuruecksetzen, beimStart, schliessen: () => schliessen(), merken};
 })();
 
 /* ---- ui/palette.js ---- */
@@ -48685,7 +49389,17 @@ UI.spiel = (() => {
         h("button", {type: "button", class: "knopf am-lesen" + (S.mappe.offen ? " an" : ""), "aria-expanded": String(S.mappe.offen), title: "Auftragsmappe: Brief und Ziele",
           onclick: () => S.mappe.offen ? mappeZu() : mappeAuf("brief")}, UI.symbol("mappe", 17), "Auftrag lesen"),
         abnahme,
-        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfeleiter, Wiki, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯")));
+        h("button", {type: "button", class: "knopf geist am-mehr", title: "Mehr: Hilfeleiter, Wiki, Zurücksetzen", "aria-label": "Mehr", onclick: e => menue(e, inst, def)}, "⋯"),
+        /* 3.1.0 (B3/3): Bei 960/720 ist die Werkzeugleiste ausgeblendet — dieser Knopf in der (dort
+           sichtbaren) Auftragszeile öffnet die Kernaktionen als body-level Menü „Aktionen“.
+           K_net +1 nur auf diesen Breiten (Lead-Freigabe); 1440/1366 unverändert. */
+        (typeof innerWidth === "number" && innerWidth < 1100 && typeof UI !== "undefined" && UI.laborAktionen && typeof UI.menue === "function")
+          ? h("button", {type: "button", class: "knopf geist am-aktionen", "data-aktionen": "1", "aria-haspopup": "menu",
+              title: "Aktionen: Konsole, Messen, Konfigurieren, Akte, Abnahme", onclick: e => {
+                const r = e.currentTarget.getBoundingClientRect();
+                UI.menue(r.left, r.bottom + 4, UI.laborAktionen.menueEintraege(), {titel: "Aktionen"});
+              }}, "Aktionen")
+          : null));
     const ungespeichert = Spiel.speichernErwartet(def, niveau) ? Spiel.ungespeicherteGeraete(inst) : [];
     el.append(h("div", {class: "sp-auftrag", style: {"--k": `var(${k.farbe || "--accent"})`}}, zeile,
       S.einstiegStart ? einstiegKarte() : null,
@@ -48916,6 +49630,9 @@ UI.spiel = (() => {
   }
   function menue(e, inst, def){
     const r = e.currentTarget.getBoundingClientRect(), stufe = inst.hilfeStufe || 0;
+    /* 3.1.0 (B3/3): Kernaktionen oben im BESTEHENDEN ⋯-Menü (Kopf „Aktionen“); body-level, zählt nicht. */
+    const kern = (typeof UI !== "undefined" && UI.laborAktionen && typeof UI.laborAktionen.menueEintraege === "function")
+      ? UI.laborAktionen.menueEintraege() : [];
     const eintraege = [
       /* „Hilfe 3/6" statt „Stufe 3/6": das Wort „Stufe" bedeutet im Programm schon vier andere Dinge
          (Karriere, Bildungsstand, Erklärtiefe, Prüfungsstrenge) — hier ist die Sprosse der Hilfeleiter
@@ -48934,7 +49651,7 @@ UI.spiel = (() => {
     eintraege.push("-",
       {text: "Ticket zurücksetzen", sym: "neustart", fn: () => { Spiel.zuruecksetzen(inst); S.live = null; liveJetzt(); UI.labor.einpassen(); UI.toast("Das Ticket steht wieder auf Anfang (Strg+Z holt deinen Stand zurück).", "info"); }},
       {text: "Zum Postfach", sym: "postfach", fn: () => UI.app.ansicht("postfach")});
-    return UI.menue(r.right - 250, r.bottom + 4, eintraege, {titel: "Ticket"});
+    return UI.menue(r.right - 250, r.bottom + 4, [...kern, ...(kern.length ? ["-"] : []), ...eintraege], {titel: "Aktionen"});
   }
 
   /* ---------- Live-Prüfung (Einstieg und AP1) ---------- */
@@ -49174,8 +49891,10 @@ UI.spiel = (() => {
     Spiel.abzeichen.pruefen();
     const abz = Spiel.abzeichen.abholen();
     const besser = (erg.lernen || []).find(l => l.nachher > l.vorher);
+    /* task-119: Die Abzugs-Zeile zieht in den Hero (Sterne-Bereich); alles andere bleibt Inhalt. */
+    const abzuege = erg.abnahme.abzuege || [];
+    const abzugZeile = abzuege.length ? h("p", {class: "sp-zeile leise"}, abzuege.map(a => `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`).join(" · ")) : null;
     const zeilen = [
-      erg.abnahme.abzuege.length ? h("p", {class: "sp-zeile leise"}, erg.abnahme.abzuege.map(a => `−${a.sterne === 0.5 ? "½" : a.sterne} ★ ${a.text}`).join(" · ")) : null,
       abz.length ? h("p", {class: "sp-zeile"}, UI.symbol("medaille", 16), " ", h("b", {}, abz.length === 1 ? "Neues Abzeichen: " : "Neue Abzeichen: "), abz.map(a => `${a.sym} ${a.titel}`).join(" · ")) : null,
       besser ? h("p", {class: "sp-zeile"}, UI.symbol("tendenz", 16), " ", h("b", {}, besser.name + ": "), `Stufe ${besser.vorher} → ${besser.nachher}`) : null,
       feierabend ? feierabendZeile() : null,
@@ -49195,39 +49914,73 @@ UI.spiel = (() => {
     const weiterKnopf = erg.wahl
       ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("postfach"); }}, "Nächsten Auftrag wählen ▸")
       : erg.naechstes ? h("button", {type: "button", class: "knopf primaer", onclick: () => { zu(); oeffnen(erg.naechstes); }}, "Nächstes Ticket ▸") : null;
-    const zu = overlay(h("div", {class: "sp-ergebnis"},
-      h("section", {class: "sp-block sp-block-lohn"},
-        h("div", {class: "sp-erg-kopf"}, marke(k.name, k.farbe, {gross: true}),
-          h("div", {}, h("span", {class: "sp-leise"}, `${k.name} · ${def.titel}`), h("h2", {}, sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe"),
-            kurz ? h("p", {class: "sp-leise"}, kurz) : null)),
-        h("div", {class: "sp-lohn-reihe"}, sternEl,
-          h("div", {class: "sp-lohn"}, euroEl, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`),
-            erg.lohn.tempo || erg.lohn.verdacht || erg.lohn.variante ? h("small", {}, "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "", erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : "",
-              erg.lohn.variante ? `${erg.lohn.variante.id === "sauber" ? "Aufschlag für saubere Arbeit" : "Abschlag fürs Provisorium"} (× ${String(erg.lohn.variante.faktor).replace(".", ",")})` : ""].filter(Boolean).join(" und ")) : null)),
-        ...zeilen),
-      erg.weg && erg.weg.length ? h("section", {class: "sp-block sp-weg"}, h("h3", {}, "Dein Weg"),
-        h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
-          h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])),
-        erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
-          UI.symbol({voll: "ziel", ursache: "suche", schicht: "suche"}[erg.verdacht.treffer] || "idee", 15), " ", erg.verdacht.text) : null,
-        erg.hotline ? h("p", {class: "sp-hotline"}, UI.symbol("telefon", 15), " " + erg.hotline.text) : null,
-        akteZeile(erg),
-        erg.schuld ? h("p", {class: "sp-schuld"}, UI.symbol("provisorium", 15), ` Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null) : null,
-      merke ? h("section", {class: "sp-block sp-merke"}, h("h3", {}, "Merke"), h("p", {}, merke),
-        h("div", {class: "sp-merke-fuss"},
-          def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
-          typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, UI.symbol("dex", 16), " Nachlesen") : null)) : null,
-      lehrtextKnoepfe(def, niveau).length ? h("section", {class: "sp-block sp-lehrtexte"},
-        h("h3", {}, "Zum Nachlesen"), h("div", {class: "sp-merke-fuss"}, lehrtextKnoepfe(def, niveau))) : null,
-      einstiegSchluss ? h("section", {class: "sp-block sp-einstieg sp-einstieg-schluss"},
-        h("h3", {}, "Willkommen angekommen"),
-        h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_LERNEN),
-        h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_WEG)) : null,
-      h("div", {class: "sp-knoepfe"},
+    /* Bento-Raster (task-119): gleiche Texte, Anker und Knöpfe — nur als Karten wie im Dashboard. */
+    const lohnZusatz = erg.lohn.tempo || erg.lohn.verdacht || erg.lohn.variante
+      ? "inkl. " + [erg.lohn.tempo ? `${fmtEuro(erg.lohn.tempo)} Tempo-Bonus` : "",
+        erg.lohn.verdacht ? `${fmtEuro(erg.lohn.verdacht)} für den Verdacht` : "",
+        erg.lohn.variante ? `${erg.lohn.variante.id === "sauber" ? "Aufschlag für saubere Arbeit" : "Abschlag fürs Provisorium"} (× ${String(erg.lohn.variante.faktor).replace(".", ",")})` : ""].filter(Boolean).join(" und ")
+      : null;
+    const hilfen = Array.isArray(erg.inst.hilfen) ? erg.inst.hilfen : [];
+    const hilfeStufe = Math.max(0, +erg.inst.hilfeStufe || 0, ...hilfen.map(x => +x?.stufe || 0));
+    const dauerKpi = typeof Spiel.ergebnis?.dauer === "function" && Number(erg.inst.zeitMs) > 0 ? Spiel.ergebnis.dauer(erg.inst.zeitMs) : "–";
+    const niveauName = (Spiel.NIVEAU_NAME && Spiel.NIVEAU_NAME[niveau]) || niveau;
+    const kpi = (wert, label) => h("div", {class: "erg-kpi"}, h("b", {}, wert), h("span", {class: "bn-kicker"}, label));
+    const ergTitel = sterne >= 4.5 ? "Hervorragend gelöst!" : sterne >= 3 ? "Gelöst!" : "Gelöst – mit Hilfe";
+    /* P2-Dedup (ERG-BENTO Runde 2): Der Hero nennt nur den Kunden; Dauer/Hilfe/Abnahme stehen
+       ausschließlich in der Kennzahlen-Karte (die kurz-Zeile bleibt als eigene Zeile darunter). */
+    const metaHero = k.name;
+    const lehrtexte = lehrtextKnoepfe(def, niveau);
+    const merkeKarte = (merke || lehrtexte.length) ? h("section", {class: "bn-k sp-merke erg-merke"},
+      merke ? h("h3", {}, "Merke") : null,
+      merke ? h("p", {}, merke) : null,
+      merke ? h("div", {class: "sp-merke-fuss"},
+        def.quelle ? h("small", {class: "sp-leise"}, "Quelle: " + def.quelle) : null,
+        typeof UI.wiki?.oeffnen === "function" && skill ? h("button", {type: "button", class: "knopf geist klein", onclick: () => { zu(); UI.wiki.oeffnen(skill); }}, UI.symbol("dex", 16), " Nachlesen") : null) : null,
+      lehrtexte.length ? h("div", {class: "sp-lehrtexte"}, h("h3", {}, "Zum Nachlesen"), h("div", {class: "sp-merke-fuss"}, lehrtexte)) : null) : null;
+    const zu = overlay(h("div", {class: "sp-ergebnis erg-bento"},
+      h("div", {class: "bn-raster erg-raster"},
+        h("section", {class: "bn-k akzent erg-hero"},
+          h("div", {class: "sp-erg-kopf erg-hero-text"},
+            marke(k.name, k.farbe, {gross: true}),
+            h("div", {},
+              h("span", {class: "bn-kicker"}, "ABNAHME · KUNDE"),
+              h("h2", {}, ergTitel),
+              h("p", {class: "bn-lead"}, def.titel),
+              h("p", {class: "bn-meta"}, metaHero),
+              kurz ? h("p", {class: "bn-meta"}, kurz) : null)),
+          h("div", {class: "erg-hero-seite"}, sternEl, abzugZeile)),
+        h("section", {class: "bn-k geld erg-lohn"},
+          h("div", {class: "sp-lohn"},
+            h("div", {class: "bn-wert"}, euroEl),
+            lohnZusatz ? h("p", {class: "bn-meta"}, lohnZusatz) : null)),
+        h("section", {class: "bn-k iris erg-ruf"},
+          h("div", {class: "bn-wert"}, h("b", {class: "sp-ruf"}, `+${erg.ruf} Ruf`)),
+          h("p", {class: "bn-meta"}, "Ansehen")),
+        h("section", {class: "bn-k flach erg-kenn"},
+          h("div", {class: "erg-kpis"},
+            kpi(dauerKpi, "Dauer"), kpi(hilfeStufe ? "Stufe " + hilfeStufe : "keine", "Hilfe"), kpi(niveauName, "Abnahme"))),
+        h("section", {class: "bn-k sp-weg erg-weg"},
+          h("h3", {}, "Dein Weg"),
+          erg.weg && erg.weg.length ? h("ol", {class: "sp-weg-chips"}, erg.weg.map((c, i) => [i ? h("li", {class: "sp-pfeil", "aria-hidden": "true"}, "→") : null,
+            h("li", {class: c.ok === true ? "ok" : c.ok === false ? "nicht" : ""}, c.text)])) : null,
+          h("div", {class: "erg-weg-notizen"},
+            erg.verdacht && erg.verdacht.gesetzt ? h("p", {class: "sp-verdacht " + (erg.verdacht.treffer || "daneben")},
+              UI.symbol({voll: "ziel", ursache: "suche", schicht: "suche"}[erg.verdacht.treffer] || "idee", 15), " ", erg.verdacht.text) : null,
+            erg.hotline ? h("p", {class: "sp-hotline"}, UI.symbol("telefon", 15), " " + erg.hotline.text) : null,
+            akteZeile(erg),
+            erg.schuld ? h("p", {class: "sp-schuld"}, UI.symbol("provisorium", 15), ` Provisorium: In etwa drei Aufträgen meldet sich ${kunde(erg.inst.kunde || def.kunde).ansprechpartner?.name || "der Kunde"} wieder – die Änderung ist nicht gesichert.`) : null)),
+        merkeKarte,
+        zeilen.length ? h("section", {class: "bn-k flach erg-mehr"}, h("div", {}, zeilen)) : null,
+        einstiegSchluss ? h("section", {class: "bn-k flach sp-einstieg sp-einstieg-schluss erg-einstieg"},
+          h("h3", {}, "Willkommen angekommen"),
+          h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_LERNEN),
+          h("p", {}, Spiel.EINSTIEG_TEXTE.SCHLUSS_WEG)) : null),
+      h("div", {class: "sp-knoepfe erg-fuss"},
         weiterKnopf,
         h("button", {type: "button", class: "knopf geist", onclick: () => ergebnisKopieren(erg.inst, erg)}, "Ergebnis kopieren"),
         h("button", {type: "button", class: "knopf" + (weiterKnopf ? "" : " primaer"), onclick: () => { zu(); UI.sandbox?.laden?.(); UI.app.ansicht("heute"); }}, "Übersicht"),
-        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, UI.symbol("feierabend", 16), " Feierabend: zur Leiste") : null)), "erfolg");
+        feierabend ? h("button", {type: "button", class: "knopf", title: "Das Programm wird zur kleinen Leiste am Bildschirmrand", onclick: () => { zu(); UI.modus("leiste"); }}, UI.symbol("feierabend", 16), " Feierabend: zur Leiste") : null)),
+      "erfolg erg-bento");
     zaehlen(euroEl, erg.euro);
     UI.klang?.spielen("sterne");
   }

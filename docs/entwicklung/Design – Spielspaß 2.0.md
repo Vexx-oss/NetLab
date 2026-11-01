@@ -848,3 +848,70 @@ für 3.1: R12-Reduktion. Belege: `Nachweise/3.0/00-Messbasis.md` § 19, `sicht/W
 **Belege.** Commit `1a177b4`; Messungen und Gate-Ablauf: `Nachweise/3.0/00-Messbasis.md` § 19;
 Fassungen: `docs/CHANGELOG.md`; Zahlen: nur [STAND.md](../STAND.md). **Nicht geprüft** bleiben:
 echte Maus im Tauri-Fenster, Android-Gerät, Screenreader.
+
+## 46 · Fassung 3.1.0 — Einstieg, Analyse-Begleiter, Labor-UX, Layout, Bento-Abnahme, QC (2026-11-01)
+
+> [!info] Ein Commit, ein Fenster
+> 3.1.0 ist als **ein** Release-Commit umgesetzt (Implementierung, Tests/Gates, Fassungszug, Bildstand,
+> Doku und versionierter Plan in einem Commit). Plan und Quellen:
+> [`Plan 3.1.0 — Variante B`](<../superpowers/plans/2026-11-01-variante-b-onboarding-analyse-begleiter.md>),
+> `Nachweise/3.1/` und die Gate-Protokolle; Zahlen nur in `docs/STAND.md`.
+
+### Chronologie
+
+| Commit | Inhalt |
+|---|---|
+| Tag `v3.1.0` (Commit siehe Git-Historie) | 3.1.0 in einem Commit: Onboarding, Leitfaden-Engine/-Panel, sichtbare Labor-Aktionen, Resizer, Abnahme-Dialog im Bento-Stil, Tests/Gates, Fassungszug, Bildstand/README/FAQ, Stand, Doku, Plan versioniert |
+
+Der Deploy-Nachweis (Live-Seite, Release-Anhänge, `SHA256SUMS`) ist kein Commit und wird nach dem
+Deploy in `Nachweise/3.1/` protokolliert; Commit und Prüfsummen werden nach Build/Gate eingetragen.
+
+### Was sich im Erlebnis ändert
+
+- **Einstieg:** Vier Schritte beim ersten Start, überspringbar und einmalig; wiederholbar über die
+  Einstellungen. Kein Zwang, keine Wiederholung beim zweiten Start.
+- **Analyse-Begleiter:** Das Labor benennt den nächsten sinnvollen Schritt aus echten Spielzuständen
+  (sechs Leitfaden-Schritte), ohne Lösungen/Adressen zu verraten; im Prüfungsmodus nur neutraler
+  Status, keine Sterne-Kosten.
+- **Labor-Aktionen:** Prüfen/Messen/Konfigurieren/Dokumentieren/Abnahme sind sichtbar; das ⋯-Menü
+  enthält nur noch Seltenes — der Bedienpfad muss nicht geraten werden.
+- **Layout:** Inspektorbreite ziehbar (280–560 px, Default 360/320), bleibt erhalten, Doppelklick und
+  Einstellungen setzen zurück, Alt+←/→ als Tastaturweg.
+- **Bento-Abnahme:** Der „Gelöst"-Dialog ist ein Bento-Raster mit Hero (Titel + Sterne + sichtbare
+  Abzüge), Lohn/Ruf/Kennzahlen/Weg/Merke-Karten; nicht bestandene Dialoge bleiben im alten Stil.
+- **QC:** Kein-Leck-Gate, R12-/44-px-Prüfungen und die bestehenden Gates sichern die Zusagen; die
+  R12-Ratsche bleibt unverändert (kein Zuwachs).
+
+### Bewusste Entscheidungen
+
+- **Prozessmodell statt Quiz:** vollständige Handlung (IHK) auf sechs Schritte verdichtet; die Engine
+  liest nur echte Zustände — die Anzeige kann nicht durch Klicks/Zeit „grün geredet" werden.
+- **Overlay statt neuer Ansicht:** Onboarding und Leitfaden-Panel hängen an bestehenden Flächen
+  (Overlay bzw. Kopfzeilen-Toggle), damit die R12-Zahl der Ansichten nicht steigt.
+- **Kein fokussierbares Resize-Handle:** Tastaturweg (Alt+←/→) und Doppelklick-Reset statt Griff im
+  Tab-Fokus; die R12-/44-px-Zusage bleibt messbar.
+- **Bento statt drei Blöcke:** Der Ergebnisdialog nutzt das bestehende Bento-Raster (12 Spalten) —
+  dieselbe Gestaltungssprache wie Postfach/Kunden; keine Informationsverluste, alter Stil bleibt für
+  „nicht bestanden".
+- **Prüfung bleibt tabu:** Prüfungsmodus reduziert den Leitfaden auf einen neutralen Hinweis.
+- **Ehrliche Release-Grenze:** fehlende Keystore-Secrets werden nicht verschwiegen — APK/SHA256SUMS
+  bleiben dann rot und werden im Bericht benannt.
+
+### Offene Punkte nach 3.1.0
+
+- **Vorläufig offen (Stand 10:52, Abschluss nach gates `--festhalten`):** 720-px-Sichtbarkeit des
+  Aktionen-Triggers bei geöffnetem Inspektor (P1-Kandidat, `31B-SICHT-FINAL` § 5); Leitfaden-Panel unter
+  1100 px standardmäßig nicht sichtbar (P2, `R-ARCH-3.1B-VORPRUEFUNG`); 280/560-px-Extrembreiten des
+  Resizers noch nicht separat belegt. Dauerhaft nach 3.1.0: R12-Reduktion/44-px-DOM, Server/QR,
+  Geräte-/Screenreader-Test, CI-/Live-Messung, APK/SHA256SUMS-Lücke.
+- Belege: [`Plan 3.1.0 — Variante B`](<../superpowers/plans/2026-11-01-variante-b-onboarding-analyse-begleiter.md>),
+  `Nachweise/3.1/`, [STAND.md](../STAND.md), [CHANGELOG.md](../CHANGELOG.md) § 3.1.0.
+
+**Belege.** Veröffentlicht mit Tag `v3.1.0` (Commit siehe Git-Historie); R12-Vorcheck/Festhalten: `Nachweise/3.1/gates/`;
+R-ARCH-Vorprüfung und 31B-Sicht (Vorprüfung/Zwischenstand): `Nachweise/3.1/`; Feature-/Review-Belege:
+`Nachweise/3.0/sicht/31b/nachher/` (26 PNG, nicht HERKUNFT); Fassungen: `docs/CHANGELOG.md`;
+Artefakte: [Übergabe – Stand 3.1.0](<Übergabe – Stand 3.1.0.md>) § 2 (Bau `df418002`, Release-Rebuild
+11:32: Einzeldatei `D50ED3A1…`, EXE `0100025A…` — nicht reproduzierbar, B5; APK `8D71F6C3…`;
+ZIP-SHAs transient); Zahlen: nur [STAND.md](../STAND.md). **Nicht geprüft:** Gerätelauf Android,
+Tauri-Fenster, Screenreader, Fremd-Hardware-Test (unverändert aus 3.0.0); **EXE-Hash nicht
+reproduzierbar (B5)**.

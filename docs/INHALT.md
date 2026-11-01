@@ -42,6 +42,7 @@ Betriebsregeln für Mitarbeit und Modelle in [`../AGENTS.md`](../AGENTS.md).
 |---|---|
 | [`entwicklung/Design – Spielspaß 2.0.md`](<entwicklung/Design – Spielspaß 2.0.md>) | Die große Design-Notiz: Befunde, Hebel, Messwerte, verworfene Versuche — je Runde ein Abschnitt. |
 | [`entwicklung/Plan – Ausbau 1.2.md`](<entwicklung/Plan – Ausbau 1.2.md>) | Phasen, Stand und Messwerte des Ausbaus 1.2. |
+| [`superpowers/plans/2026-11-01-variante-b-onboarding-analyse-begleiter.md`](<superpowers/plans/2026-11-01-variante-b-onboarding-analyse-begleiter.md>) | Der freigegebene Plan für 3.1.0 „Variante B“: Onboarding, Analyse-Begleiter, Labor-UX, Layout, QC-Gates — Entscheidungen, Dateien, Aufgaben, Abnahmekriterien. |
 | [`entwicklung/Konzept – Netzwerk-Labor.md`](<entwicklung/Konzept – Netzwerk-Labor.md>) | Die Spezifikation des Spiels. |
 | [`entwicklung/Konzept – Lernplattform für Betriebe und Schulen.md`](<entwicklung/Konzept – Lernplattform für Betriebe und Schulen.md>) | Konzept für den Einsatz im Unterricht und in der Ausbildung. |
 | [`entwicklung/Befund – Programm startet wieder.md`](<entwicklung/Befund – Programm startet wieder.md>) | Der Befund zum Integritätslabel, das die `.exe` blockierte — samt Reparaturweg. |
@@ -151,6 +152,12 @@ Fassungen, die Entwürfe die Begründungen und verworfenen Versuche.
 | Datei | Wofür |
 |---|---|
 | [`entwicklung/Übergabe – Stand 3.0.0.md`](<entwicklung/Übergabe – Stand 3.0.0.md>) | Übergabe und Release-Notes der Fassung 3.0.0: was neu ist, Artefakte und SHA256 (lokal gemessen), Installationswege, bekannte Grenzen, offene Freigaben — Commit-Kette W0 bis W5 und die Protokolle unter `Nachweise/3.0/`. |
+
+## Die Fassung 3.1.0 — Release (2026-11-01)
+
+| Datei | Wofür |
+|---|---|
+| [`entwicklung/Übergabe – Stand 3.1.0.md`](<entwicklung/Übergabe – Stand 3.1.0.md>) | Übergabe und Release-Notes der Fassung 3.1.0: Onboarding, Analyse-Begleiter, sichtbare Labor-Aktionen, Resizer, Bento-Abnahme, QC-Gates; Artefakte und SHA256 (nach Build), Installationswege, Grenzen, veröffentlichte Schritte. |
 
 ## Ausblick: 3.0 und der Betrieb — der Plan vom 09.10.2026 (3.0.0 gebaut)
 

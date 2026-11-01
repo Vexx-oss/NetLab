@@ -1706,3 +1706,46 @@ Einzelheiten: [`docs/STAND.md`](STAND.md), [`CHANGELOG`](CHANGELOG.md),
 und [`Subnetting – Lernstufen-Matrix`](<entwicklung/Subnetting – Lernstufen-Matrix.md>).
 **Nicht gemessen:** R12 (`--dom`), Android-APK, Screenreader, echte Maus im ausgelieferten
 Tauri-Fenster.
+
+## 27 · Fassung 3.1.0 — Onboarding, Analyse-Leitfaden, Labor-Aktionen, Layout (01.11.2026)
+
+**Analyse-Leitfaden (Variante B).** Prozessmodell ist die vollständige Handlung: klären → Lage/Schichten →
+Hypothese → messen → eingreifen/prüfen → dokumentieren/lernen. Neue Dateien: `src/daten/leitfaden.js`
+(Texte), `src/spiel/leitfaden.js` (Erkennung), `src/ui/leitfaden.js` (Panel). Schnittstelle:
+`Spiel.leitfaden.stand(inst) → {pruefung, fortschritt, aktuell, schritte:[{id, titel, status, impuls}]}`,
+`naechsterSchritt(inst) → {id, titel, text} | null`, `zuruecksetzen(inst)`. Die Erkennung nutzt
+**ausschließlich vorhandene echte Spielzustände** (Auftrag, angesehene Lage/Geräte, Hypothese/Verdacht,
+Messungen, Eingriffe, Verifikation, Abnahme) und führt **keine neuen Fortschrittsspeicher** ein, soweit
+ableitbar. In der Prüfung (`Spiel.pruefung.aktiv()`) liefert die Engine nur einen neutralen Status ohne
+Impulse; Prozesshilfe kostet **keine Sterne**. Das Panel ist **Text** (keine neuen Bedienelemente in der
+Labor-Ansicht).
+
+**Onboarding.** `src/ui/onboarding.js` zeigt beim ersten Start ohne offenen Auftrag vier Schritte aus
+`DATEN.leitfaden.tour`; Zustand `einst.tour = {gesehen: true}`; überspringbar (Esc), wiederholbar über
+Einstellungen. Die Tour rendert als body-level Overlay (außerhalb `.ansicht`) und verändert die
+R12-Zählung nicht.
+
+**Labor-Aktionen.** Die rechte Leiste macht die Kernaktionen sichtbar: Auftrag/Abnahme, Messen (Ping),
+Konsole, Gerät/Inspektor, Akte/Dokumentieren, Hilfe/Leitfaden. Umsetzung durch **Umgruppieren vorhandener
+Funktionen** und body-level Menüs (keine Doppelung): die rechte Leiste zeigt die Kernaktionen als
+**Textliste** (Name + Tastenkürzel), ausführbar über das bestehende, bereits gezählte Menü (Kopf
+„Aktionen", body-level, zählt nicht). Bei 960/720, wo Auftragszeile/⋯ nicht sichtbar sind, öffnet ein
+**einzelner sichtbarer Kopfknopf** dasselbe Menü; das erhöht die R12-Zahl der Labor-Ansicht bei diesen
+beiden Breiten **um genau +1** (11→12, 7→8). Diese Ausnahme ist **Lead-freigegeben** und wird über das
+dokumentierte Baseline-Update-Verfahren (`Nachweise/3.1/gates/02-…`) mit Begründung „Kernaktionen
+sichtbar/erreichbar", alt→neu-Protokoll und Reviewer-Sätzen (r-design, r-arch) eingefroren; alle übrigen
+R12-Werte bleiben unverändert, `klassenraum` bleibt 6/6/6/6. Das Leitfaden-Panel ist Text und immer
+sichtbar, solange ein Auftrag läuft — kein neuer Toggle.
+
+**Layout.** Inspektorbreite per Pointer-Drag auf der Trennlinie, persistiert in
+`einst.layout.inspBreite` (Grenzen 280–560, Default 360, Doppelklick = Default); Tastatur über Alt+←/→.
+Der Griff ist `role="separator"` (kein `[role=button]`, kein `input`) und damit kein R12-Bedienelement;
+er bleibt per Tastatur bedienbar.
+
+**Qualität.** Neue Gates: `tests/leitfaden*.test.js` (Erkennung, Prüfungsmodus, Determinismus),
+`tests/onboarding-tour.test.js`, `tests/labor-aktionen.test.js`, `tests/layout-breite.test.js`,
+`tests/kein-leck.test.js` (keine Lösungen in Texten/Zuständen vor der Aktion). Alle neuen Tests sind
+auto-Teil der Suite; R12/44-px-Grenzen und der Detektor bleiben unverändert.
+
+**Nicht gemessen (3.1.0, ehrlich).** R12-Neumessung und Sicht erst im 3.1-Gate; APK/SHA256SUMS bleiben
+ohne Android-Keystore-Secrets rot (BAU-02). Geräte-/Screenreader-Test weiterhin offen.

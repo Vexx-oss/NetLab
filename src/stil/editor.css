@@ -10,7 +10,7 @@
 .gb-internet .gb-kachel{stroke:var(--g); stroke-opacity:.6}
 .gb-glyph path{fill:none; stroke:var(--g); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
 
-.labor{display:grid; grid-template-columns:auto minmax(0,1fr) var(--dock-b, 0px); height:100%; min-height:0; background:var(--bg)}
+.labor{display:grid; grid-template-columns:auto minmax(0,1fr) min(var(--dock-b, 0px), 560px); height:100%; min-height:0; background:var(--bg)}
 
 /* ---- Geräteleiste ---- */
 /* z-index:30 (Leiter 10/20/30): über der Zeichenfläche und über den schwebenden Werkzeugleisten
@@ -31,7 +31,7 @@
   padding:8px; border-radius:var(--radius); background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--schatten); animation:pa-rein var(--dauer) ease-out}
 /* `.pa-fach` wird von editor-fach.js gegen den beschneidenden Vorfahren geklemmt (Breite und Höhe) –
    deshalb steht hier keine feste Breite gegen einen möglichen Überlauf. */
-.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt{display:none}
+.pa-fach[hidden], .lb-auftrag:empty, .lb-gruppe[hidden], .lb-hinweis:empty, .labor.sim-zu .lb-sim-griff, .labor.sim-zu .lb-sim-inhalt, .labor.insp-zu .lb-inspektor, .labor.insp-wartet .lb-insp-huelle, .labor.sim-wartet .lb-sim, .labor.dock-zu .lb-dock-titel, .labor.dock-zu .lb-dock-inhalt, .labor.dock-zu .ins-resizer{display:none}
 /* Welche Textzeilen die Zoom-Stufen ausblenden, steht in zz-lagebild.css (Lagebild 2.0, Vertrag 3.4) —
    dort bei den Knoten, damit tests/ui-typografie.test.js hier die erste .ger-name{…}-Regel als Font-Regel liest. */
 .pa-fach.zieht{opacity:.35; pointer-events:none}
@@ -112,6 +112,12 @@
 .lb-wz:hover .lb-wz-taste, .lb-fern-schild.fertig .lb-fern-status{color:var(--muted)}
 .lb-knopf[disabled]{opacity:.35; cursor:default}
 .lb-knopf-text span{font:600 var(--fs-2)/1 var(--body)}
+/* 3.1-B5 (R12-Entscheid): Aktionen-Kopfknopf nur 901–1100 px. Ab 1101 blendet die Regel die
+   Gruppe aus (1440/1366 bleiben bei 17); ≤900 übernimmt der Knopf in der Auftragszeile. */
+@media (min-width:1101px){
+  .lb-leiste-oben .lb-gruppe:has([data-aktionen]){visibility:hidden}
+}
+
 .lb-zoomtext{min-width:64px; height:40px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--mono); font-variant-numeric:tabular-nums}
 /* Ansicht-Menü (ein Knopf statt fünf Ebenen-Reitern) */
 .lb-ansicht{display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 8px 0 12px; border:0; border-radius:var(--radius-s); background:none; color:var(--muted); font:600 var(--fs-2)/1 var(--body); white-space:nowrap}
@@ -154,7 +160,14 @@
 /* Fernwartung (F2): Geräteleiste weg, Terminal bekommt mehr als die Hälfte der Arbeitsfläche */
 .labor.lb-fern{grid-template-columns:0 minmax(0,1fr) var(--dock-b, 0px)}
 .labor.lb-fern > .lb-geraete{width:0; padding:0; border:0; overflow:hidden}
-.labor.lb-fern.dock-da:not(.dock-zu){--dock-b:clamp(300px, 58%, 980px)}
+.labor.lb-fern.dock-da:not(.dock-zu){--dock-b:clamp(300px, 58%, 980px);
+  /* 3.1-B5: die per Ziehkante gespeicherte Breite (inline --dock-b) schlägt sonst die clamp-Regel
+     und würde das Terminal schrumpfen lassen — Fernwartung nimmt 58 % als Untergrenze. */
+  --dock-b-fern:max(var(--dock-b, 0px), clamp(300px, 58%, 980px));
+  grid-template-columns:minmax(0,1fr) var(--dock-b-fern)}
+@media (max-width:1100px){
+  .labor.lb-fern.dock-da:not(.dock-zu){grid-template-columns:auto minmax(0,1fr) var(--dock-b-fern)}
+}
 .lb-leer{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); text-align:center; color:var(--muted); pointer-events:none; max-width:360px}
 .lb-leer strong{display:block; font:800 var(--fs-5)/1.2 var(--display); color:var(--ink); margin-bottom:8px}
 
@@ -304,7 +317,7 @@
    Prozentwert (40 % − 88 px); an den anderen Profilen ändert sich nur das Tablet (800: 250 → 202). */
 .labor.dock-da{--dock-b:clamp(280px, 34%, 380px)}  /* A: fester Inspektor rechts */
 .labor.dock-da.dock-zu{--dock-b:48px}
-.lb-dock{display:none; min-width:0; min-height:0; flex-direction:column; background:var(--panel); border-left:1px solid var(--line); container-type:inline-size}
+.lb-dock{position:relative; display:none; min-width:0; min-height:0; flex-direction:column; background:var(--panel); border-left:1px solid var(--line); container-type:inline-size}
 .labor.dock-da .lb-dock{display:flex}
 .lb-dock-reiter{display:flex; align-items:flex-end; gap:0px; padding:4px 4px 0; border-bottom:1px solid var(--line); flex:0 0 auto; overflow-x:auto; scrollbar-width:none}
 /* 44 px hoch: die Fingerregel der Trefferflächen (menueprobe: der Reiter war 36 px hoch) */
@@ -315,6 +328,14 @@
 .lb-dock-einklappen{margin-left:auto; align-self:center; display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border:0; border-radius:var(--radius-s); background:none; color:var(--muted)}
 .lb-dock-inhalt{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
 .lb-dock-inhalt > *{flex:1 1 auto; min-height:0}
+/* 3.1-B5: Ziehkante Fläche ↔ Dock — 6 px Trefferfläche, cursor:col-resize, KEIN Fokussierziel
+   (div ohne tabindex/role). Breite setzt ui/leitfaden.js als Inline- --dock-b (280–560 px); die
+   Rasterspalte ist bei 560 px geklammert, die Untergrenze hält das JS. */
+.ins-resizer{position:absolute; top:0; bottom:0; left:calc(-1 * 3px); width:6px; z-index:20; cursor:col-resize; touch-action:none; user-select:none}
+.ins-resizer::after{content:""; position:absolute; inset:0 2px; border-radius:var(--radius-xs); background:transparent; transition:background var(--dauer)}
+.ins-resizer:hover::after, .ins-resizer.zieht::after{background:color-mix(in srgb, var(--accent) 60%, transparent)}
+/* Tastaturfokus (role=separator, tabindex=0): sichtbarer 2-px-Akzentring wie basis.css, innen. */
+.ins-resizer:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:var(--radius-xs)}
 .lb-plan, .lb-akte{overflow:auto}
 /* Reiterleiste des Docks: alle Reiter und der Einklapp-Knopf müssen sichtbar bleiben.
    Gemessen von „menu-auditor“ am 06.10.2026 (1280 × 800, fünf Reiter): die Leiste war

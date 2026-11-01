@@ -61,7 +61,7 @@ GEGENPROBE_CSS = ".lb-fern-schild[hidden]{display:flex !important}"
 HELFER = r"""
 window.__rauch = {
   warte: ms => new Promise(r => setTimeout(r, ms)),
-  zu(){ document.querySelectorAll(".sp-overlay").forEach(o => o.remove()); },
+  zu(){ document.querySelectorAll(".sp-overlay, .onb-huelle").forEach(o => o.remove()); },
   basis(){
     this.zu();
     const st = Spiel.st; st.einstieg = st.einstieg || {}; st.einstieg.fertig = true;
@@ -327,6 +327,13 @@ class Leise(http.server.SimpleHTTPRequestHandler):
         pass
 
 
+class LeiserServer(http.server.ThreadingHTTPServer):
+    """Lokaler Dateiserver ohne Traceback-Rauschen: Windows schliesst beim Neuladen/Origin-Wechsel
+    die Verbindung abrupt (WinError 10054) - das ist kein Befund und gehoert nicht in den Gate-Log."""
+    def handle_error(self, request, client_address):
+        pass
+
+
 class Seite:
     """Eine CDP-Sitzung mit Fehlerprotokoll (Runtime.exceptionThrown, console.error)."""
 
@@ -356,6 +363,12 @@ class Seite:
         self.maus("mouseMoved", x, y)
         self.maus("mousePressed", x, y, 1, 1)
         self.maus("mouseReleased", x, y, 0, 1)
+
+    def taste(self, key="Escape", code="Escape", vk=27):
+        """Echte Tastatur ueber CDP (z. B. Esc schliesst die Onboarding-Tour)."""
+        for art in ("keyDown", "keyUp"):
+            self.ws.rufen("Input.dispatchKeyEvent", {"type": art, "key": key, "code": code,
+                                                     "windowsVirtualKeyCode": vk, "nativeVirtualKeyCode": vk})
 
     def ziehen(self, a, b, schritte=14):
         """Wie eine Hand: hinfahren, drücken, in Schritten zum Ziel, loslassen."""
@@ -408,7 +421,13 @@ def seite_auf(port):
 def erster_auftrag(s):
     """§ 22 G2b: frischer Spielstand → Einstieg „Kasse ohne Netz“. Kabel Kasse → Switch und Abnahme nur mit echten
     Mausereignissen über Koordinaten. Gibt (Fehlerliste, Text) zurück."""
-    s.js("(() => { Spiel.neu(); store.sofort(); return true; })()")
+    # 3.1.0: Die bestehenden Faelle sollen nicht von der Onboarding-Tour verdeckt werden. Der frische
+    # Spielstand wird deshalb deterministisch als "Tour gesehen" abgelegt, BEVOR die Seite neu laedt.
+    # Die Tour selbst prueft onboarding_pruefen() getrennt (eigener Origin 127.0.0.2).
+    s.js("(() => { Spiel.neu();"
+         " const e = store.get('einst', {}) || {};"
+         " store.set('einst', Object.assign({}, e, {tour: Object.assign({}, e.tour || {}, {gesehen: true})}));"
+         " store.sofort(); return true; })()")
     s.neu_laden()
     lage = s.js(r"""(async () => {
       for (let i = 0; i < 40 && !(UI.spiel.inst && document.querySelector('.lb-svg g.ger[data-id="kasse"]')); i++) await __rauch.warte(150);
@@ -519,6 +538,81 @@ def fall_pruefen(s, name, vorbereitung, haupt, sonder, breite):
     return fehler, a
 
 
+def onboarding_pruefen(s):
+    """Onboarding-Tour 3.1.0 getrennt von den 16x4-Faellen pruefen (echter Start, Skip, Esc, 2. Start).
+
+    Die bestehenden Faelle setzen die Tour im frischen Spielstand auf "gesehen" (erster_auftrag),
+    damit sie die Hauptaktionen nicht verdecken. Hier wird sie gezielt gemessen - auf einem ZWEITEN
+    Loopback-Origin (127.0.0.2): der Automationsschutz der Tour greift nur bei 127.0.0.1/localhost,
+    dort ist der Erststart wie beim echten Spieler. Gibt (Fehlerliste, Text) zurueck.
+    """
+    server = None
+    try:
+        port = freier_port()
+        server = LeiserServer(("127.0.0.2", port),
+                                             partial(Leise, directory=str(HIER / "web")))
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        url = f"http://127.0.0.2:{port}/index.html"
+    except OSError as e:
+        return [f"kein zweiter Loopback-Server (127.0.0.2): {e}"], ""
+    fehler = []
+    try:
+        s.groesse(1440, 900)
+        s.neu_laden(url)                       # frischer Origin: localStorage leer -> Tour muss kommen
+        zustand = s.js("""(async () => {
+          for (let i = 0; i < 40 && !document.querySelector('.onb-huelle.da .onb-karte'); i++) await __rauch.warte(100);
+          const kicker = (document.querySelector('.onb-kicker') || {}).textContent || '';
+          return {da: !!document.querySelector('.onb-huelle'), karte: !!document.querySelector('.onb-karte'),
+                  schritte: document.querySelectorAll('.onb-punkt').length, kicker: kicker,
+                  webdriver: (typeof navigator !== 'undefined' ? navigator.webdriver : null)};
+        })()""")
+        if not zustand.get("da") or not zustand.get("karte"):
+            fehler.append("Tour erscheint beim ersten Start nicht")
+        if zustand.get("schritte") != 4:
+            fehler.append(f"Tour zeigt {zustand.get('schritte')} Punkte statt 4")
+        if "1 / 4" not in (zustand.get("kicker") or ""):
+            fehler.append(f"Tour-Kicker unerwartet: {zustand.get('kicker')!r}")
+        # Skip-Knopf mit echter Maus
+        p = s.js("__rauch.mitte('.onb-ueberspringen')")
+        if not p:
+            fehler.append("Ueberspringen-Knopf nicht sichtbar")
+        else:
+            s.klick(*p)
+            time.sleep(0.35)
+            weg = s.js("""(() => ({weg: !document.querySelector('.onb-huelle'),
+                          gesehen: (() => { try { return !!(store.get('einst', {}).tour || {}).gesehen; } catch (e) { return null; } })()}))()""")
+            if weg.get("weg") is not True:
+                fehler.append("Ueberspringen schliesst die Tour nicht")
+            if weg.get("gesehen") is not True:
+                fehler.append("Ueberspringen merkt die Tour nicht als gesehen")
+        # Zweiter Start: gleiche Origin neu laden -> keine Tour
+        s.neu_laden(url)
+        zweiter = s.js("""(() => ({da: !!document.querySelector('.onb-huelle'),
+                          gesehen: (() => { try { return !!(store.get('einst', {}).tour || {}).gesehen; } catch (e) { return null; } })()}))()""")
+        if zweiter.get("da"):
+            fehler.append("Zweiter Start zeigt die Tour erneut")
+        if zweiter.get("gesehen") is not True:
+            fehler.append("Zweiter Start: Tour nicht als gesehen gespeichert")
+        # Esc: Wiederholen-Pfad (Einstellungen -> Einfuehrung wiederholen = UI.onboarding.tour())
+        s.js("(() => { UI.onboarding.zuruecksetzen(); UI.onboarding.tour(); return true; })()")
+        time.sleep(0.35)
+        if not s.js("(() => !!document.querySelector('.onb-huelle'))()"):
+            fehler.append("Einfuehrung wiederholen zeigt die Tour nicht")
+        s.taste("Escape")
+        time.sleep(0.35)
+        nach = s.js("""(() => ({weg: !document.querySelector('.onb-huelle'),
+                       gesehen: (() => { try { return !!(store.get('einst', {}).tour || {}).gesehen; } catch (e) { return null; } })()}))()""")
+        if nach.get("weg") is not True:
+            fehler.append("Esc schliesst die Tour nicht")
+        if nach.get("gesehen") is not True:
+            fehler.append("Esc merkt die Tour nicht als gesehen")
+        return fehler, ("Tour 4 Schritte - Skip und Esc schliessen - 2. Start ohne Tour"
+                        f" (Test-Browser webdriver={zustand.get('webdriver')})")
+    finally:
+        if server:
+            server.shutdown()
+
+
 def main():
     a = sys.argv[1:]
     exe = "--exe" in a
@@ -538,7 +632,7 @@ def main():
             url = None
         else:
             port = freier_port()
-            server = http.server.ThreadingHTTPServer(("127.0.0.1", port), partial(Leise, directory=str(HIER / "web")))
+            server = LeiserServer(("127.0.0.1", port), partial(Leise, directory=str(HIER / "web")))
             threading.Thread(target=server.serve_forever, daemon=True).start()
             edge = next((p for p in EDGE if p.exists()), None)
             if not edge:
@@ -612,6 +706,16 @@ def main():
             rot += 1
             print("✗ JS-Fehler:", *js_fehler[:5], sep="\n  ")
         print(f"\n{gesamt - min(rot, gesamt)}/{gesamt} grün" + ("" if not rot else f" – {rot} rot"))
+        # Onboarding-Tour 3.1.0: getrennter Fall (nicht in den 16x4 der Rauchpruefung enthalten).
+        if not gegenprobe and not exe:
+            try:
+                onb_fehler, onb_text = onboarding_pruefen(s)
+            except RuntimeError as e:
+                onb_fehler, onb_text = ["JS: " + str(e)], ""
+            print(f"{'OK ' if not onb_fehler else 'ROT'} Onboarding-Tour          {onb_text}"
+                  + ("  <- " + " | ".join(onb_fehler) if onb_fehler else ""))
+            if onb_fehler:
+                rot += 1
         if gegenprobe:
             print("Gegenprobe: " + ("rot wie erwartet – der Rauchtest erkennt den Fehler" if rot else "GRÜN – der Rauchtest erkennt den Fehler NICHT"))
             return 0 if rot else 1

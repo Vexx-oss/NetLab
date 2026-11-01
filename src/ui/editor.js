@@ -155,11 +155,25 @@ UI.labor = (() => {
       onclick: e => zoomMenue(e.currentTarget)}, "100 %");
     Z.el.ansichtGruppe = h("div", {class: "lb-gruppe"}, Z.el.ansicht);
     Z.el.verlaufGruppe = h("div", {class: "lb-gruppe", hidden: true}, Z.el.zurueck, Z.el.vor);   /* erst sichtbar, wenn es etwas rückgängig zu machen gibt */
+    /* 3.1.0 (B3/3, stil-CSS editor.css:115-120): Aktionen-Knopf im Kopf, sichtbar 901–1100 px;
+       ab 1101 blendet die CSS-Regel die Gruppe aus (1440/1366 unverändert). Bei ≤900 übernimmt
+       der Knopf in der Auftragszeile (spiel.js, .am-aktionen). */
+    let aktionenGruppe = null;
+    try {
+      if (UI.laborAktionen && typeof UI.menue === "function") {
+        aktionenGruppe = h("div", {class: "lb-gruppe"},
+          h("button", {type: "button", class: "lb-knopf lb-knopf-text", "data-aktionen": "1", "aria-haspopup": "menu",
+            title: "Aktionen: Konsole, Messen, Konfigurieren, Akte, Abnahme",
+            onclick: e => { const r = e.currentTarget.getBoundingClientRect(); UI.menue(r.left, r.bottom + 4, UI.laborAktionen.menueEintraege(), {titel: "Aktionen"}); }},
+            h("span", {}, "Aktionen")));
+      }
+    } catch (fehler) { console.error("Aktionen-Knopf", fehler); }
     const oben = h("div", {class: "lb-leiste-oben"},
       h("div", {class: "lb-gruppe lb-werkzeuge", role: "toolbar", "aria-label": "Werkzeuge"},
         wz("auswahl", "zeiger", "Auswählen (V): Klick wählt, Ziehen auf freier Fläche verschiebt die Ansicht, Shift+Ziehen zieht einen Auswahlrahmen", "V"),
         wz("kabel", "kabel", "Kabel verlegen (K): vom Gerät zum Gerät ziehen", "K"), wz("ping", "ping", "Ping-Werkzeug (P): von Gerät A auf Gerät B ziehen", "P")),
       Z.el.ansichtGruppe,
+      aktionenGruppe,
       h("div", {class: "lb-luecke"}),
       Z.el.verlaufGruppe);
     const unten = h("div", {class: "lb-leiste-unten"}, Z.el.zoomGruppe = h("div", {class: "lb-gruppe"}, Z.el.zoomText));
@@ -182,11 +196,17 @@ UI.labor = (() => {
        und ≥ 60 % der Breite (CSS: clamp(250px, 40 % − 88px, 440px)). Die Simulation liegt nicht mehr unten. */
     Z.el.dockReiter = h("div", {class: "lb-dock-reiter", role: "tablist", "aria-label": "Dock"});
     Z.el.dockInhalt = h("div", {class: "lb-dock-inhalt"}, Z.el.inspektor, Z.el.sim, Z.el.terminal, Z.el.plan, Z.el.akte);
-    Z.el.dock = h("aside", {class: "lb-dock", "aria-label": "Dock"}, Z.el.dockReiter, Z.el.dockInhalt);
+    /* 3.1.0 (B3/4): Breitenkante als reiner div role=separator (kein input[type=range], kein fokussierbares
+       Handle im R12-Sinne) — Pointer-Drag, Doppelklick-Reset, Alt+←/→; Zustand persistiert UI.layoutBreite. */
+    Z.el.resizer = h("div", {class: "ins-resizer", role: "separator", tabindex: "0", "aria-orientation": "vertical",
+      "aria-label": "Breite der rechten Leiste", "aria-valuemin": "280", "aria-valuemax": "560", "aria-valuenow": "360"});
+    Z.el.dock = h("aside", {class: "lb-dock", "aria-label": "Dock"}, Z.el.resizer, Z.el.dockReiter, Z.el.dockInhalt);
 
     const mitte = h("div", {class: "lb-mitte"}, Z.el.auftrag, leinwand);
     Z.root.append(leiste, mitte, Z.el.dock);
     container.replaceChildren(Z.root);
+    /* 3.1.0 (B3/4): Ziehkante einrichten (persistiert; Resizer ist kein Wähler → R12 unverändert). */
+    try { if (typeof UI !== "undefined" && UI.layoutBreite && typeof UI.layoutBreite.installieren === "function") UI.layoutBreite.installieren(Z.root, Z.el.resizer); } catch (fehler) { console.error("Layout: Ziehkante", fehler); }
 
     /* Runde 5: Seit die Auftragsmappe ein eigenes Blatt mit Kopf ist, ruhen Werkzeugleiste und
        Flächentitel, solange sie offen ist (Klasse .mappe-an am .labor, CSS in editor.css bei den
@@ -1457,6 +1477,12 @@ UI.labor = (() => {
   function fernwartung(id){
     Z.fern = id || null;
     Z.root?.classList.toggle("lb-fern", !!Z.fern);
+    /* Fernwartung nutzt die CSS-Breite 58 % — eine zuvor gesetzte Inline-Breite (--dock-b) muss weg,
+       sonst bliebe der Terminalbereich zu schmal (rauch: „Terminal nur 26–41 % breit"). */
+    try {
+      if (Z.root && Z.fern) Z.root.style.removeProperty("--dock-b");
+      else if (Z.root && UI.layoutBreite && typeof UI.layoutBreite.anwenden === "function") UI.layoutBreite.anwenden(Z.root);
+    } catch (e) { /* egal */ }
     const el = Z.el.fern; if (!el) return;
     el.hidden = !Z.fern;
     el.classList.remove("fertig");                          /* „getrennt“ aus der Probe der vorigen Sitzung nicht mitnehmen */

@@ -9,7 +9,7 @@ keine Angabe steht ohne Beleg da.
 
 Bilder werden NICHT beschnitten oder retuschiert, nur auf Breite skaliert und als JPEG
 gespeichert (deutlich kleiner als PNG bei Fotos von Oberflaechen). Die Bilder zeigen
-Version 3.0.0 — das steht auch so in der HERKUNFT.md.
+Version 3.1.0 — das steht auch so in der HERKUNFT.md.
 
 Aufruf: python tools/bilder.py            (baut docs/bilder/ neu)
         python tools/bilder.py --pruefen  (nur pruefen, ob alles da und unveraendert ist)
@@ -28,45 +28,45 @@ ZIEL = HIER / "docs" / "bilder"
 
 # (Zieldatei, Quelle in Nachweise/, Breite, Bildunterschrift)
 AUSWAHL = [
-    ("topologie-3.0.0.jpg", "3.0/sicht/w5/doku/topologie.png", 1440,
-     "Lagebild im 3.0.0-Bau (Theme hell): Geraete, gerade Kabel und VLAN-Zonen mit Adressschildern"),
-    ("einstieg-3.0.0.jpg", "3.0/sicht/w5/doku/einstieg.png", 1440,
+    ("topologie-3.1.0.jpg", "3.1/sicht/doku/topologie.png", 1440,
+     "Lagebild im offiziellen 3.1.0-Bau (Theme hell): Geraete, gerade Kabel und VLAN-Zonen mit Adressschildern"),
+    ("einstieg-3.1.0.jpg", "3.1/sicht/doku/einstieg.png", 1440,
      "Der Einstieg: die Heute-Karte mit dem ersten Auftrag „Kasse ohne Netz“"),
-    ("konsole-3.0.0.jpg", "3.0/sicht/w5/doku/konsole.png", 1440,
+    ("konsole-3.1.0.jpg", "3.1/sicht/doku/konsole.png", 1440,
      "IOS-Konsole im Labor: Schnittstellen und VLANs pruefen"),
-    ("simulation-3.0.0.jpg", "3.0/sicht/w5/doku/simulation.png", 1440,
+    ("simulation-3.1.0.jpg", "3.1/sicht/doku/simulation.png", 1440,
      "Der Flugschreiber: Ereignisse mit Grund, Filter und Schritt fuer Schritt"),
-    ("kompetenzkarte-3.0.0.jpg", "3.0/sicht/w5/doku/kompetenzkarte.png", 1440,
+    ("kompetenzkarte-3.1.0.jpg", "3.1/sicht/doku/kompetenzkarte.png", 1440,
      "Lernstand: Kompetenzkarte, Fehlerheft und Stufen"),
-    ("ergebnis-3.0.0.jpg", "3.0/sicht/w5/doku/ergebnis.png", 1440,
+    ("ergebnis-3.1.0.jpg", "3.1/sicht/doku/ergebnis.png", 1440,
      "Abnahme bestanden: Sterne, Lohn, Abzeichen und Merke-Kasten"),
-    ("postfach-3.0.0.jpg", "3.0/sicht/w5/doku/postfach.png", 1440,
+    ("postfach-3.1.0.jpg", "3.1/sicht/doku/postfach.png", 1440,
      "Postfach als Datentafel: Auftraege, Kunde, Form/Dauer/Lohn und Brief"),
-    ("hilfe-3.0.0.jpg", "3.0/sicht/w5/doku/hilfe.png", 1440,
+    ("hilfe-3.1.0.jpg", "3.1/sicht/doku/hilfe.png", 1440,
      "Die Hilfeleiter: naechste Diagnose vorschlagen, Fehler kostet nichts"),
-    ("klassenraum-3.0.0.jpg", "3.0/sicht/w5/doku/klassenraum.png", 1440,
+    ("klassenraum-3.1.0.jpg", "3.1/sicht/doku/klassenraum.png", 1440,
      "Klassenraum-Lehrersicht: Code ansagen, Ampel, anonyme Diagnose und Abgabe"),
-    ("subnetting-3.0.0.jpg", "3.0/sicht/w5/doku/subnetting.png", 1440,
+    ("subnetting-3.1.0.jpg", "3.1/sicht/doku/subnetting.png", 1440,
      "Abteilung Subnetting: Lehrpfad, Werkzeuge und Uebungsrunde"),
-    ("auftragsbogen-3.0.0.jpg", "3.0/sicht/w5/doku/auftragsbogen.png", 1440,
+    ("auftragsbogen-3.1.0.jpg", "3.1/sicht/doku/auftragsbogen.png", 1440,
      "Der Auftragsbogen begleitet den Auftrag (Runde 5)"),
 ]
 
 # Der Kopf sagt „Fassung 1.1.0". Kommt eine neue Nachweis-Runde mit anderer Fassung,
 # hier eintragen — sonst behauptet die Doku eine Herkunft, die nicht mehr stimmt.
-FASSUNG_DER_BILDER = "3.0.0"
+FASSUNG_DER_BILDER = "3.1.0"
 
 QUELLTEXT_KOPF = """# Herkunft der Bilder
 
-Diese Bilder sind **Aufnahmen aus dem gebauten Programm** — gebaut aus dem Stand {spiel},
-aufgenommen am 01.11.2026 mit `Nachweise/3.0/sicht/w5/doku/` in Edge headless (1440 × 950,
-Theme hell), danach **nur auf Breite skaliert und als JPEG gespeichert**. Nicht beschnitten,
-nicht retuschiert. Quelldatei, Pruefsumme und Groesse stehen unten; die Originale liegen unter
-`Nachweise/` (nicht im Git).
+Diese Bilder sind **Aufnahmen aus dem gebauten Programm** — gebaut aus dem offiziellen Stand {spiel}
+(`docs/index.html`, Baukennung und SHA256 stehen in `docs/STAND.md`), aufgenommen am 01.11.2026 mit
+`Nachweise/3.1/sicht/doku/` in Edge headless (1440 × 950, Theme hell), danach **nur auf Breite
+skaliert und als JPEG gespeichert**. Nicht beschnitten, nicht retuschiert. Quelldatei, Pruefsumme und
+Groesse stehen unten; die Originale liegen unter `Nachweise/` (nicht im Git).
 
 **Die Bilder zeigen die Fassung {fassung}.**
 
-Neu bauen: `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/3.0/sicht/w5/doku/`)
+Neu bauen: `python tools/bilder.py` (braucht die Aufnahmen unter `Nachweise/3.1/sicht/doku/`)
 · Pruefen: `python tools/bilder.py --pruefen`
 """
 

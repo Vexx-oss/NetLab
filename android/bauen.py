@@ -78,7 +78,9 @@ PAKET = "oss.vexx.netlab"
 # wird 2*10000 + 2*100 + 0 = 20200; die Hausregel verlangt einen Wert DARÜBER → 20201.
 # Angehoben am 01.11.2026 mit dem Fassungszug 2.9.0 → 3.0.0: abgeleitet wird
 # 3*10000 + 0*100 + 0 = 30000; die Hausregel verlangt einen Wert DARÜBER → 30001.
-VERSION_CODE = 30001
+# Angehoben am 01.11.2026 mit dem Fassungszug 3.0.0 → 3.1.0: abgeleitet wird
+# 3*10000 + 1*100 + 0 = 30100; die Hausregel verlangt einen Wert DARÜBER → 30101.
+VERSION_CODE = 30101
 
 SDK_ORTE = [
     Path(r"C:\Users\Student\android-sdk"),

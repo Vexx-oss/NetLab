@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übergabe — Fassung 3.1.0 (2026-11-01) · Netzwerk-Labor</title>
+<meta name="description" content="Was diese Fassung ist.">
+<style>
+:root{--bg:#ffffff;--panel:#f5f7fa;--linie:#d7dde5;--text:#16202c;--leise:#5b6b7d;--akzent:#0b6ea8;--code:#eef2f7}
+@media (prefers-color-scheme:dark){:root{--bg:#111823;--panel:#18212e;--linie:#2b3949;--text:#e6ecf5;--leise:#9fb0c4;--akzent:#63b8e8;--code:#1d2735}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--akzent)}
+.dk-kopf,.dk-fuss{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--linie)}
+.dk-fuss{border-bottom:0;border-top:1px solid var(--linie);color:var(--leise);font-size:14px;margin-top:32px}
+.dk-marke{font-weight:700;text-decoration:none;color:var(--text)}
+.dk-kopf a,.dk-fuss a{text-decoration:none}
+.dk-kopf a:hover,.dk-fuss a:hover{text-decoration:underline}
+.dk-innen{max-width:60rem;margin:0 auto;padding:24px 20px 0}
+.dk-toc{background:var(--panel);border:1px solid var(--linie);border-radius:10px;padding:12px 16px;margin:0 0 24px}
+.dk-toc p{margin:0 0 8px;font-weight:700;font-size:14px;color:var(--leise)}
+.dk-toc ul{margin:0;padding-left:20px}
+.dk-toc li{margin:2px 0}
+.dk-toc a{text-decoration:none}
+.dk-toc a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6{line-height:1.25;margin:24px 0 8px}
+h1{margin-top:0;font-size:30px}
+h2{font-size:24px;border-bottom:1px solid var(--linie);padding-bottom:6px}
+h3{font-size:19px}
+h4,h5,h6{font-size:16px}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:24px}
+li{margin:4px 0}
+code{background:var(--code);border-radius:4px;padding:1px 5px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code);border:1px solid var(--linie);border-radius:10px;padding:12px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:14px}
+blockquote{margin:0 0 12px;padding:4px 16px;border-left:4px solid var(--akzent);background:var(--panel);border-radius:0 10px 10px 0}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--linie);margin:24px 0}
+.dk-tabelle{overflow-x:auto;margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--linie);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+img{max-width:100%;height:auto}
+.dk-tot{border-bottom:1px dotted var(--leise);color:var(--leise);cursor:help}
+.dk-liste{display:grid;gap:12px;margin:16px 0 24px;padding:0;list-style:none}
+.dk-liste li{margin:0}
+.dk-karte{display:block;border:1px solid var(--linie);border-radius:10px;padding:12px 16px;background:var(--panel);text-decoration:none;color:var(--text)}
+.dk-karte:hover{border-color:var(--akzent)}
+.dk-karte b{display:block;margin-bottom:4px}
+.dk-karte span{color:var(--leise);font-size:14px}
+.dk-hinweis{color:var(--leise);font-size:14px}
+</style>
+</head>
+<body>
+<header class="dk-kopf">
+<a class="dk-marke" href="../index.html">Netzwerk-Labor · Doku</a>
+<span class="dk-hinweis">Übergabe — Fassung 3.1.0 (2026-11-01)</span>
+<a href="../../index.html">Zum Spiel</a>
+<a href="https://vexx-oss.github.io/NetLab/">Online</a>
+</header>
+<main class="dk-innen">
+<nav class="dk-toc" aria-label="Inhalt">
+<p>Inhalt</p>
+<ul>
+<li><a href="#1-was-neu-ist-kurzfassung">1 · Was neu ist (Kurzfassung)</a></li>
+<li><a href="#2-artefakte-und-sha256-release-rebuild-11-32-eingefrorener-baum">2 · Artefakte und SHA256 (Release-Rebuild 11:32, eingefrorener Baum)</a></li>
+<li><a href="#3-installationswege">3 · Installationswege</a></li>
+<li><a href="#4-bekannte-grenzen-ehrlich">4 · Bekannte Grenzen (ehrlich)</a></li>
+<li><a href="#5-veroffentlichungsschritte-einzeln">5 · Veröffentlichungsschritte (einzeln)</a></li>
+<li><a href="#6-prufbelege">6 · Prüfbelege</a></li>
+</ul>
+</nav><h1 id="ubergabe-fassung-3-1-0-2026-11-01">Übergabe — Fassung 3.1.0 (2026-11-01)</h1>
+<p><strong>Was diese Fassung ist.</strong> 3.1.0 macht den Einstieg und das Arbeiten im Labor selbsterklärend: vier Onboarding-Schritte beim ersten Start, ein <strong>Analyse-Begleiter</strong> (Leitfaden), der aus echten Spielzuständen den nächsten sinnvollen Schritt benennt (ohne Lösungen zu verraten), <strong>sichtbare Kernaktionen</strong> in der rechten Labor-Leiste, eine <strong>ziehbare Inspektorbreite</strong> und der <strong>Abnahme-Dialog im Bento-Stil</strong>. Dazu QC-Gates (Kein-Leck, R12, 44 px, Layout). Die Fassung ist <strong>in einem Commit</strong> umgesetzt; die Veröffentlichung ist gemäß Nutzerfreigabe „entwickle B bis zum deploy“ vorgesehen. Alle Zahlen in <a href="../STAND.html"><code>STAND.md</code></a>, der Verlauf in <a href="../CHANGELOG.html"><code>CHANGELOG.md</code></a> § 3.1.0.</p>
+<h2 id="1-was-neu-ist-kurzfassung">1 · Was neu ist (Kurzfassung)</h2>
+<ul><li><strong>Onboarding:</strong> vier Schritte mit [Überspringen][Weiter][Los geht's], einmalig beim ersten Start, wiederholbar über die Einstellungen; Overlay ohne Einfluss auf die R12-Zahl.</li><li><strong>Analyse-Begleiter:</strong> sechs Leitfaden-Schritte der vollständigen Handlung (IHK); Fortschritt nur aus echten Spielzuständen, Impulse statt Lösungen, im Prüfungsmodus neutral, keine Sternkosten.</li><li><strong>Sichtbare Labor-Aktionen:</strong> Prüfen/Messen/Konfigurieren/Dokumentieren/Abnahme direkt in der rechten Leiste; das ⋯-Menü behält Selten-Aktionen (Discoverability-Test).</li><li><strong>Layout:</strong> Inspektorbreite 280–560 px, ziehbar und persistent, Doppelklick/Einstellungen = Reset, Alt+←/→ als Tastaturweg; kein fokussierbares Handle (R12 unverändert).</li><li><strong>Abnahme-Dialog im Bento-Stil:</strong> Bento-Raster mit Hero (Titel nach Sternen, sichtbare Abzüge), Lohn-/Ruf-/Kennzahlen-/Weg-/Merke-Karten; nicht bestandene Dialoge bleiben im alten Stil.</li><li><strong>QC-Gates:</strong> Kein-Leck-Gate, R12-/44-px-Prüfungen, Rauchtest, Menüprobe, R12-Ratsche, volle Suite, <code>stand</code>/<code>seite</code>/<code>doku-claims</code>/<code>fassung</code>/<code>abnahme-3.0</code> grün — Gate-Protokolle unter <code>Nachweise/3.1/gates/</code> (R12-Vorcheck/Festhalten 10:22–10:50), finale Kette nach Build.</li></ul>
+<h2 id="2-artefakte-und-sha256-release-rebuild-11-32-eingefrorener-baum">2 · Artefakte und SHA256 (Release-Rebuild 11:32, eingefrorener Baum)</h2>
+<p>Maßgeblich ist der <strong>Release-Build 11:32</strong>. <strong>ZIP-Prüfsummen sind transient</strong> (der Bau packt nach Doku-Änderungen neu) — die endgültigen ZIP-SHA256 stehen im Release; die versionierte Doku nennt den Stand dieses Builds.</p>
+<div class="dk-tabelle"><table><thead><tr><th>Artefakt</th><th>SHA256</th><th>Anmerkung</th></tr></thead><tbody><tr><td><code>Netzwerk-Labor.html</code></td><td><code>D50ED3A1A8D5A0EAECCBFB939D6BB7F0955C3B4FD3CE47D41ED9642A9461F713</code></td><td>4.219.830 B; byte-gleich mit <code>docs/index.html</code>; Größe/Prüfsumme auch in <a href="../STAND.html"><code>STAND.md</code></a></td></tr><tr><td><code>docs/index.html</code></td><td><code>D50ED3A1A8D5A0EAECCBFB939D6BB7F0955C3B4FD3CE47D41ED9642A9461F713</code></td><td>4.219.830 B; dasselbe Erzeugnis (GitHub-Pages-Datei), 0 Außenverweise</td></tr><tr><td><code>Netzwerk-Labor-3.1.0-Browser.zip</code></td><td><code>E90F9883074D273ED050504FD81AA4DC0A0ADDF1DE27FBCEF2A4A24805C92B64</code></td><td>2.376.304 B; SHA256 des Release-Builds 11:32 (<strong>transient</strong> — siehe Release)</td></tr><tr><td><code>Programm/Netzwerk-Labor.exe</code></td><td><code>0100025AA212FC820D850EA3E9839C71CF085A4E94F3006D537DE8B999B43356</code></td><td>13.267.968 B; ProductVersion/FileVersion <strong>3.1.0</strong>; Hash nicht reproduzierbar (B5)</td></tr><tr><td><code>Programm/Netzwerk-Labor-3.1.0-Android.apk</code></td><td><code>8D71F6C315219FEE6E42E55D95012CB2013F41A70CE5831FF32395A7F28BAB1D</code></td><td>1.529.372 B; <code>versionName 3.1.0</code> / <code>versionCode 30101</code>, signiert</td></tr><tr><td><code>Netzwerk-Labor-3.1.0-Windows.zip</code></td><td><code>E87FC8BF79B513DF8FCBE8DD2ACA5C0DB5F42A219565C27B84754039F9A4CCC4</code></td><td>10.727.192 B; SHA256 des Release-Builds 11:32 (<strong>transient</strong> — siehe Release)</td></tr></tbody></table></div>
+<p>Baueingang: <code>web/index.html</code> 3.680.326 B, SHA256 <code>4D2EAD764E442B4B93C25D004C954720C4FD18E84B79C505FEB3FE82C46484EC</code> (<code>LABOR_VERSION 3.1.0</code>, <code>LABOR_BAU df418002</code>) — nicht ausgeliefert. Die SHA256 der lokalen Artefakte wurden mit <code>Get-FileHash</code> gemessen; die in <code>docs/STAND.md</code> geführte Einzeldatei nennt Größe und Prüfsumme dort (eine Zahlenquelle, hier nicht wiederholt).</p>
+<h2 id="3-installationswege">3 · Installationswege</h2>
+<ul><li><strong>Im Browser:</strong> <a href="https://vexx-oss.github.io/NetLab/">vexx-oss.github.io/NetLab</a> — ein Klick, keine Installation; zeigt den 3.1.0-Stand nach der Veröffentlichung.</li><li><strong>Eine Datei:</strong> <code>Netzwerk-Labor.html</code> herunterladen, Doppelklick; Schriften eingebettet, offline.</li><li><strong>Browser-ZIP:</strong> entpacken — Einzeldatei, Doku als Ordner <code>doku/</code>, Anleitungen, Lizenztexte.</li><li><strong>Windows:</strong> <code>Netzwerk-Labor.exe</code> aus dem Release; SmartScreen ggf. „Weitere Informationen → Trotzdem ausführen“; erscheint kein Fenster: <code>Programm/Integritaet-reparieren.cmd</code>.</li><li><strong>Android:</strong> APK selbst bauen (<code>python android/bauen.py</code>, Android-SDK + JDK), aufs Telefon kopieren; kein Play Store, kein Konto, keine Berechtigung.</li></ul>
+<h2 id="4-bekannte-grenzen-ehrlich">4 · Bekannte Grenzen (ehrlich)</h2>
+<ul><li><strong>APK/SHA256SUMS-Lücke:</strong> Ohne die Keystore-Secrets bleibt der Android-APK-Anhang und damit die <code>SHA256SUMS</code>-Prüfung im Release-Ablauf rot — wie bei 3.0.0; das wird im Release-Bericht benannt.</li><li><strong>EXE nicht reproduzierbar (B5, bekannt):</strong> Der Release-Rebuild 11:32 hat einen anderen SHA256 als der Vorlauf 11:04 (<code>0100025A…</code> statt <code>DC84A956…</code>) — gleiche Größe und Version, aber kein reproduzierbarer Hash; das ist im Release-Bericht benannt.</li><li><strong>CI/Live:</strong> CI-Läufe und Live-Prüfsumme nach Veröffentlichung in <code>Nachweise/3.1</code> und den Release-Notizen; was nicht gemessen wurde, steht dort ausdrücklich.</li><li><strong>Nicht geprüft:</strong> echter Gerätelauf Android, Tauri-Fenster auf fremder Hardware, Screenreader, Fremd-Hardware-/Browser-Test; Sicht nur über Matrizen.</li><li><strong>Nicht in 3.1.0:</strong> Server/QR (weiterhin 3.1-Stufe, nicht gebaut), R12-Reduktion der Bestandsansichten, 44-px-DOM als Gate.</li></ul>
+<h2 id="5-veroffentlichungsschritte-einzeln">5 · Veröffentlichungsschritte (einzeln)</h2>
+<ol><li>Push von <code>ausbau-1.2</code> — mit der Veröffentlichung erfolgt (Zeit siehe Git-Historie).</li><li>Tag <code>v3.1.0</code> anlegen und pushen — Zeit siehe Release.</li><li>Release prüfen — Anhänge: <code>Netzwerk-Labor.html</code>, <code>…-Browser.zip</code>, <code>…exe</code>, <code>SHA256SUMS</code>; <code>Content-Disposition</code>; APK-Lücke benannt — Prüfung nach der Veröffentlichung.</li><li>Nachmessen — Live-Seite SHA256 gegen <code>docs/index.html</code> — Live-Prüfsumme nach Veröffentlichung in <code>Nachweise/3.1</code> und Release-Notizen.</li><li>Ehrlicher Abschluss — offene Punkte und APK/SHA256SUMS-Lücke im Endbericht nach der Veröffentlichung.</li></ol>
+<h2 id="6-prufbelege">6 · Prüfbelege</h2>
+<ul><li>Gate-Protokolle: <code>Nachweise/3.1/gates/</code> (R12-Vorcheck 03–11, Baseline-Diff/Festhalten 13–17); Prüfungen: <code>Nachweise/3.1/pruefungen/R-ARCH-3.1B-VORPRUEFUNG.md</code>; Sicht: <code>Nachweise/3.1/sicht/31B-SICHT-FINAL.md</code> (Vorprüfung/Zwischenstand, Abschluss nach gates) + Feature-/Review-Belege <code>Nachweise/3.0/sicht/31b/nachher/</code> (26 PNG + matrix.json, <strong>nicht</strong> HERKUNFT).</li><li>Plan: <a href="../superpowers/plans/2026-11-01-variante-b-onboarding-analyse-begleiter.html"><code>Plan 3.1.0 — Variante B</code></a>.</li><li>Stand: <a href="../STAND.html"><code>STAND.md</code></a> · Verlauf: <a href="../CHANGELOG.html"><code>CHANGELOG.md</code></a> § 3.1.0 · Arbeitsregeln: <a href="../SITZUNGSABSCHLUSS.html"><code>SITZUNGSABSCHLUSS.md</code></a>.</li></ul>
+<p>Verwandt: <a href="../INHALT.html"><code>INHALT.md</code></a> · <a href="../README.html"><code>README.md</code></a> · <a href="../Liesmich.html"><code>Liesmich.md</code></a></p>
+</main>
+<footer class="dk-fuss">
+<span>Netzwerk-Labor · Doku aus dem Repositorium erzeugt (<code>tools/seite.py</code>)</span>
+<a href="../index.html">Übersicht</a>
+<a href="../../index.html">Zum Spiel</a>
+</footer>
+</body>
+</html>
